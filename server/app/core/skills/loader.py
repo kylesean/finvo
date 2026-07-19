@@ -81,8 +81,7 @@ class SkillLoader:
                     rel_path = os.path.relpath(file_path)
 
                     # Parse allowed-tools (AgentSkills.io specification)
-                    # Format: space-delimited string of tool names
-                    # Example: "Bash(git:*) Bash(jq:*) Read"
+                    # Format: space-delimited string of tool names (e.g. bash or search)
                     # Reference: https://agentskills.io/specification#allowed-tools-field
                     allowed_tools_raw = data.get("allowed-tools")
                     allowed_tools = None
