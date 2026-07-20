@@ -1,6 +1,6 @@
 name: augo
 description: "Augo, a AI assistant for the financial management"
-version: 0.1.0-alpha
+version: 0.1.1-alpha
 
 
 environment:

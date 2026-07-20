@@ -80,7 +80,6 @@ jobs:
 
       - name: Run Mypy (Type Checking)
         run: uv run mypy app/ --explicit-package-bases --show-error-codes
-        continue-on-error: true # Allow type errors for now, report only
 
   # ============================================================================
   # Security Scanning
