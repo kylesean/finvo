@@ -13,6 +13,7 @@ logs/*.log
 storage/*
 !storage/.gitkeep
 evals/reports/
+artifacts/
 
 # 3. Database
 *.db
