@@ -55,7 +55,7 @@ class AccountList extends StatelessWidget {
             children: [
               Text(
                 title!,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   fontWeight: FontWeight.w500,
                   color: colors.foreground,
                 ),
@@ -64,7 +64,7 @@ class AccountList extends StatelessWidget {
                 t.chat.genui.transactionGroupReceipt.count(
                   count: accounts.length.toString(),
                 ),
-                style: theme.typography.xs.copyWith(
+                style: theme.typography.body.xs.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
@@ -98,11 +98,11 @@ class AccountList extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(FIcons.wallet, size: 48, color: colors.mutedForeground),
+            Icon(FLucideIcons.wallet, size: 48, color: colors.mutedForeground),
             const SizedBox(height: 16),
             Text(
               t.financial.noAccounts,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
             ),

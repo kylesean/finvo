@@ -118,10 +118,9 @@ class CustomContentGenerator implements genui.ContentGenerator {
 
   CustomContentGenerator(
     this._storageService, {
-    Dio? dio,
-    required String sseBaseUrl,
-  }) : _dio = dio,
-       _sseBaseUrl = sseBaseUrl;
+    this._dio,
+    required this._sseBaseUrl,
+  });
 
   /// Get current session ID
   String? get currentSessionId => _currentSessionId;

@@ -65,15 +65,15 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text('Created Successfully', style: theme.typography.lg),
+        title: Text('Created Successfully', style: theme.typography.body.lg),
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         elevation: 0,
         centerTitle: true,
         leading: FButton.icon(
-          style: FButtonStyle.ghost(),
+          variant: .ghost,
           onPress: () => context.pop(),
-          child: const Icon(FIcons.x, size: 20),
+          child: const Icon(FLucideIcons.x, size: 20),
         ),
       ),
       body: SafeArea(
@@ -91,7 +91,11 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                       color: colors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    child: Icon(FIcons.check, size: 24, color: colors.primary),
+                    child: Icon(
+                      FLucideIcons.check,
+                      size: 24,
+                      color: colors.primary,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -100,13 +104,13 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                       children: [
                         Text(
                           'Space Created Successfully',
-                          style: theme.typography.lg.copyWith(
+                          style: theme.typography.body.lg.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           widget.space.name,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: colors.mutedForeground,
                           ),
                         ),
@@ -127,7 +131,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                 children: [
                   Expanded(
                     child: FButton(
-                      style: FButtonStyle.outline(),
+                      variant: .outline,
                       onPress: () {
                         context.pop();
                         context.pop();
@@ -171,7 +175,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
             const SizedBox(height: 16),
             Text(
               'Generating invite code...',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -185,17 +189,21 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(FIcons.circleAlert, size: 48, color: colors.mutedForeground),
+            Icon(
+              FLucideIcons.circleAlert,
+              size: 48,
+              color: colors.mutedForeground,
+            ),
             const SizedBox(height: 16),
             Text(
               'Failed to generate invite code',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
             const SizedBox(height: 16),
             FButton(
-              style: FButtonStyle.outline(),
+              variant: .outline,
               onPress: () {
                 setState(() {
                   _isLoading = true;
@@ -251,7 +259,9 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
           // Invite Code
           Text(
             'Invite Code',
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 8),
           GestureDetector(
@@ -267,13 +277,17 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                 children: [
                   Text(
                     _inviteCode!.code,
-                    style: theme.typography.xl2.copyWith(
+                    style: theme.typography.body.xl2.copyWith(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 3,
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Icon(FIcons.copy, size: 18, color: colors.mutedForeground),
+                  Icon(
+                    FLucideIcons.copy,
+                    size: 18,
+                    color: colors.mutedForeground,
+                  ),
                 ],
               ),
             ),
@@ -282,7 +296,9 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
           const SizedBox(height: 8),
           Text(
             'Valid for 24 hours · Tap to copy',
-            style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.xs.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
         ],
       ),

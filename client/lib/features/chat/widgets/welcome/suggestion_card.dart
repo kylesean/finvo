@@ -61,7 +61,7 @@ class SuggestionCard extends StatelessWidget {
                     // 标题
                     Text(
                       title,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 1,
@@ -71,7 +71,7 @@ class SuggestionCard extends StatelessWidget {
                     // 描述
                     Text(
                       description,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: theme.colors.mutedForeground,
                       ),
                       maxLines: 1,
@@ -83,7 +83,7 @@ class SuggestionCard extends StatelessWidget {
               const SizedBox(width: 8),
               // 箭头指示
               Icon(
-                FIcons.chevronRight,
+                FLucideIcons.chevronRight,
                 size: 16,
                 color: theme.colors.mutedForeground.withValues(alpha: 0.6),
               ),

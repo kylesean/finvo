@@ -44,7 +44,7 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FButton(
-      style: _getButtonStyle(context),
+      variant: _getButtonVariant(),
       onPress: loading ? null : onPressed,
       child: loading
           ? const SizedBox.square(
@@ -68,20 +68,18 @@ class ActionButton extends StatelessWidget {
     );
   }
 
-  FBaseButtonStyle Function(FButtonStyle) _getButtonStyle(
-    BuildContext context,
-  ) {
+  FButtonVariant _getButtonVariant() {
     switch (style) {
       case ActionButtonStyle.primary:
-        return FButtonStyle.primary();
+        return .primary;
       case ActionButtonStyle.secondary:
-        return FButtonStyle.secondary();
+        return .secondary;
       case ActionButtonStyle.outline:
-        return FButtonStyle.outline();
+        return .outline;
       case ActionButtonStyle.ghost:
-        return FButtonStyle.ghost();
+        return .ghost;
       case ActionButtonStyle.destructive:
-        return FButtonStyle.destructive();
+        return .destructive;
     }
   }
 }
@@ -106,7 +104,7 @@ class IconActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget button = FButton.icon(
-      style: FButtonStyle.ghost(),
+      variant: .ghost,
       onPress: onPressed,
       child: Icon(icon, color: color, size: size * 0.55),
     );

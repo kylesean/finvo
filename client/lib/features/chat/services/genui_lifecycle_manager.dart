@@ -54,28 +54,18 @@ class GenUiLifecycleManager {
   int _totalSurfacesDeleted = 0;
 
   GenUiLifecycleManager({
-    required SecureStorageService secureStorageService,
-    required MessageRepository messageRepository,
-    required String Function() getCurrentStreamingMessageId,
-    required void Function(double, String, String) onTransactionCreated,
-    required void Function(String, String?) onSessionInit,
-    required void Function(String) onTextResponse,
-    required void Function() onStreamComplete,
-    required void Function() markFirstChunkReceived,
-    required void Function(String) onTitleUpdate,
-    void Function(ToolCallInfo)? onToolCallStart,
-    void Function(ToolCallInfo)? onToolCallEnd,
-  }) : _secureStorageService = secureStorageService,
-       _messageRepository = messageRepository,
-       _getCurrentStreamingMessageId = getCurrentStreamingMessageId,
-       _onTransactionCreated = onTransactionCreated,
-       _onSessionInit = onSessionInit,
-       _onTextResponse = onTextResponse,
-       _onStreamComplete = onStreamComplete,
-       _markFirstChunkReceived = markFirstChunkReceived,
-       _onTitleUpdate = onTitleUpdate,
-       _onToolCallStart = onToolCallStart,
-       _onToolCallEnd = onToolCallEnd;
+    required this._secureStorageService,
+    required this._messageRepository,
+    required this._getCurrentStreamingMessageId,
+    required this._onTransactionCreated,
+    required this._onSessionInit,
+    required this._onTextResponse,
+    required this._onStreamComplete,
+    required this._markFirstChunkReceived,
+    required this._onTitleUpdate,
+    this._onToolCallStart,
+    this._onToolCallEnd,
+  });
 
   bool get isInitialized => _genUiService?.isInitialized ?? false;
   GenUiService? get service => _genUiService;

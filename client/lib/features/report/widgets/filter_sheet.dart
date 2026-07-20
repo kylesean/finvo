@@ -40,12 +40,20 @@ class _FilterSheetState extends State<FilterSheet> {
   // Account type options
   // Account type options
   List<({String key, String label, IconData icon})> get _accountTypes => [
-    (key: 'CASH', label: t.account.cash, icon: FIcons.banknote),
-    (key: 'DEPOSIT', label: t.account.deposit, icon: FIcons.creditCard),
-    (key: 'CREDIT_CARD', label: t.account.creditCard, icon: FIcons.wallet),
-    (key: 'INVESTMENT', label: t.account.investment, icon: FIcons.trendingUp),
-    (key: 'E_WALLET', label: t.account.eWallet, icon: FIcons.smartphone),
-    (key: 'LOAN', label: t.account.loan, icon: FIcons.landmark),
+    (key: 'CASH', label: t.account.cash, icon: FLucideIcons.banknote),
+    (key: 'DEPOSIT', label: t.account.deposit, icon: FLucideIcons.creditCard),
+    (
+      key: 'CREDIT_CARD',
+      label: t.account.creditCard,
+      icon: FLucideIcons.wallet,
+    ),
+    (
+      key: 'INVESTMENT',
+      label: t.account.investment,
+      icon: FLucideIcons.trendingUp,
+    ),
+    (key: 'E_WALLET', label: t.account.eWallet, icon: FLucideIcons.smartphone),
+    (key: 'LOAN', label: t.account.loan, icon: FLucideIcons.landmark),
   ];
 
   @override
@@ -102,14 +110,14 @@ class _FilterSheetState extends State<FilterSheet> {
                 children: [
                   Text(
                     t.common.filter,
-                    style: theme.typography.lg.copyWith(
+                    style: theme.typography.body.lg.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Icon(
-                      FIcons.x,
+                      FLucideIcons.x,
                       size: 20,
                       color: colors.mutedForeground,
                     ),
@@ -126,7 +134,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 children: [
                   Text(
                     t.statistics.filter.accountType,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                   ),

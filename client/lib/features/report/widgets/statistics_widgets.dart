@@ -57,7 +57,7 @@ class OverviewCard extends ConsumerWidget {
             right: -30,
             bottom: -30,
             child: Icon(
-              FIcons.trendingUp,
+              FLucideIcons.trendingUp,
               size: 160,
               color: Colors.white.withValues(alpha: 0.04),
             ),
@@ -70,7 +70,7 @@ class OverviewCard extends ConsumerWidget {
               children: [
                 Text(
                   t.statistics.overview.balance,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: Colors.white.withValues(alpha: 0.6),
                     fontWeight: FontWeight.w500,
                   ),
@@ -89,7 +89,7 @@ class OverviewCard extends ConsumerWidget {
                       semantic: AmountSemantic.status,
                       currency: currencyCode,
                       shrinkCurrency: true,
-                      style: theme.typography.xl4.copyWith(
+                      style: theme.typography.body.xl4.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -1.2,
@@ -108,7 +108,7 @@ class OverviewCard extends ConsumerWidget {
                         t.statistics.overview.income,
                         overview.totalIncome,
                         overview.incomeChangePercent,
-                        FIcons.arrowUpRight,
+                        FLucideIcons.arrowUpRight,
                         amountTheme.incomeColor,
                         currencySymbol,
                       ),
@@ -122,7 +122,7 @@ class OverviewCard extends ConsumerWidget {
                         t.statistics.overview.expense,
                         overview.totalExpense,
                         overview.expenseChangePercent,
-                        FIcons.arrowDownRight,
+                        FLucideIcons.arrowDownRight,
                         amountTheme.expenseColor,
                         currencySymbol,
                       ),
@@ -157,7 +157,7 @@ class OverviewCard extends ConsumerWidget {
             const SizedBox(width: 4),
             Text(
               label,
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: Colors.white.withValues(alpha: 0.5),
               ),
             ),
@@ -180,7 +180,7 @@ class OverviewCard extends ConsumerWidget {
                     currencySymbol, // AmountText handles symbol via currency code
                 showSign: false,
                 shrinkCurrency: true,
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   color: Colors.white, // 确保在大卡片上始终为白色
                   fontWeight: FontWeight.bold,
                 ),
@@ -191,7 +191,7 @@ class OverviewCard extends ConsumerWidget {
               changePercent: change,
               inverseColor: label == t.statistics.overview.expense,
               theme: ref.watch(currentAmountThemeValueProvider),
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
               ),
@@ -240,7 +240,9 @@ class MetricComparisonCard extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.xs.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -253,7 +255,7 @@ class MetricComparisonCard extends ConsumerWidget {
                   children: [
                     Text(
                       currencySymbol,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                         fontWeight: FontWeight.w400,
                       ),
@@ -267,7 +269,7 @@ class MetricComparisonCard extends ConsumerWidget {
                             : TransactionType.income,
                         semantic: AmountSemantic.transaction,
                         currency: currencyCode,
-                        style: theme.typography.lg.copyWith(
+                        style: theme.typography.body.lg.copyWith(
                           fontWeight: FontWeight.bold,
                           letterSpacing: -0.5,
                         ),
@@ -297,14 +299,14 @@ class MetricComparisonCard extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              isPositive ? FIcons.trendingUp : FIcons.trendingDown,
+              isPositive ? FLucideIcons.trendingUp : FLucideIcons.trendingDown,
               size: 12,
               color: displayColor,
             ),
             const SizedBox(width: 2),
             Text(
               '${isPositive ? '+' : ''}${changePercent.abs().toStringAsFixed(1)}%',
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: displayColor,
                 fontWeight: FontWeight.bold,
               ),
@@ -313,7 +315,7 @@ class MetricComparisonCard extends ConsumerWidget {
         ),
         Text(
           compareLabel,
-          style: theme.typography.xs.copyWith(
+          style: theme.typography.body.xs.copyWith(
             color: theme.colors.mutedForeground,
             fontSize: 8,
           ),
@@ -357,7 +359,7 @@ class TrendChart extends ConsumerWidget {
             children: [
               Text(
                 t.statistics.trend.title,
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -418,7 +420,7 @@ class TrendChart extends ConsumerWidget {
                               trendData.dataPoints[index].label,
                               trendData.timeRange,
                             ),
-                            style: theme.typography.xs.copyWith(
+                            style: theme.typography.body.xs.copyWith(
                               color: colors.mutedForeground,
                               fontSize: 10,
                             ),
@@ -457,7 +459,7 @@ class TrendChart extends ConsumerWidget {
                             : t.statistics.trend.income;
                         return LineTooltipItem(
                           '$label: $currencySymbol${NumberFormat("#,##0", "en_US").format(spot.y)}',
-                          theme.typography.xs.copyWith(
+                          theme.typography.body.xs.copyWith(
                             color: colors.primaryForeground,
                             fontWeight: FontWeight.bold,
                           ),
@@ -611,33 +613,35 @@ class _CategoryAnalysisSectionState
           children: [
             Text(
               t.statistics.analysis.title,
-              style: theme.typography.lg.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             // Custom icon toggle (FTabs needs bounded width)
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 AppFilterChip(
-                  icon: FIcons.chartColumn,
+                  icon: FLucideIcons.chartColumn,
                   isSelected: _viewMode == CategoryViewMode.bar,
                   onTap: () => setState(() => _viewMode = CategoryViewMode.bar),
                 ),
                 const SizedBox(width: 4),
                 AppFilterChip(
-                  icon: FIcons.chartPie,
+                  icon: FLucideIcons.chartPie,
                   isSelected: _viewMode == CategoryViewMode.pie,
                   onTap: () => setState(() => _viewMode = CategoryViewMode.pie),
                 ),
                 const SizedBox(width: 4),
                 AppFilterChip(
-                  icon: FIcons.hexagon,
+                  icon: FLucideIcons.hexagon,
                   isSelected: _viewMode == CategoryViewMode.radar,
                   onTap: () =>
                       setState(() => _viewMode = CategoryViewMode.radar),
                 ),
                 const SizedBox(width: 4),
                 AppFilterChip(
-                  icon: FIcons.list,
+                  icon: FLucideIcons.list,
                   isSelected: _viewMode == CategoryViewMode.list,
                   onTap: () =>
                       setState(() => _viewMode = CategoryViewMode.list),
@@ -698,7 +702,7 @@ class _CategoryAnalysisSectionState
                     Currency.fromCode(currencyCode)?.symbol ?? currencyCode;
                 return BarTooltipItem(
                   '${category.displayText}\n$currencySymbol${_formatAmount(item.amount)}',
-                  theme.typography.xs.copyWith(
+                  theme.typography.body.xs.copyWith(
                     color: colors.primaryForeground,
                     fontWeight: FontWeight.bold,
                   ),
@@ -813,7 +817,7 @@ class _CategoryAnalysisSectionState
                       children: [
                         Text(
                           t.statistics.analysis.total,
-                          style: theme.typography.xs.copyWith(
+                          style: theme.typography.body.xs.copyWith(
                             color: colors.mutedForeground,
                             fontSize: 10,
                           ),
@@ -821,7 +825,7 @@ class _CategoryAnalysisSectionState
                         const SizedBox(height: 2),
                         Text(
                           '${Currency.fromCode(ref.read(financialSettingsProvider).primaryCurrency)?.symbol ?? ""}${_formatAmount(total.toStringAsFixed(0))}',
-                          style: theme.typography.base.copyWith(
+                          style: theme.typography.body.md.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.5,
                           ),
@@ -863,7 +867,7 @@ class _CategoryAnalysisSectionState
                           Expanded(
                             child: Text(
                               category.displayText,
-                              style: theme.typography.xs.copyWith(
+                              style: theme.typography.body.xs.copyWith(
                                 color: colors.foreground,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -871,7 +875,7 @@ class _CategoryAnalysisSectionState
                           ),
                           Text(
                             '${item.percentage.toStringAsFixed(0)}%',
-                            style: theme.typography.xs.copyWith(
+                            style: theme.typography.body.xs.copyWith(
                               color: colors.mutedForeground,
                               fontWeight: FontWeight.w500,
                             ),
@@ -898,7 +902,9 @@ class _CategoryAnalysisSectionState
         child: Center(
           child: Text(
             '雷达图需要至少3个分类数据',
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
         ),
       );
@@ -911,7 +917,7 @@ class _CategoryAnalysisSectionState
         RadarChartData(
           radarShape: RadarShape.polygon,
           tickCount: 4,
-          ticksTextStyle: theme.typography.xs.copyWith(
+          ticksTextStyle: theme.typography.body.xs.copyWith(
             color: colors.mutedForeground,
             fontSize: 8,
           ),
@@ -924,7 +930,7 @@ class _CategoryAnalysisSectionState
           radarBorderData: BorderSide(
             color: colors.primary.withValues(alpha: 0.5),
           ),
-          titleTextStyle: theme.typography.xs.copyWith(
+          titleTextStyle: theme.typography.body.xs.copyWith(
             color: colors.mutedForeground,
             fontSize: 9,
           ),
@@ -978,7 +984,7 @@ class _CategoryAnalysisSectionState
                       children: [
                         Text(
                           category.displayText,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -1007,13 +1013,13 @@ class _CategoryAnalysisSectionState
                             .read(financialSettingsProvider)
                             .primaryCurrency,
                         showSign: false,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
                         '${item.percentage.toStringAsFixed(1)}%',
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                           fontSize: 9,
                         ),
@@ -1064,7 +1070,7 @@ class TopTransactionCard extends ConsumerWidget {
                 children: [
                   Text(
                     category.displayText,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
@@ -1075,7 +1081,7 @@ class TopTransactionCard extends ConsumerWidget {
                     children: [
                       Text(
                         DateFormat('MM-dd').format(transaction.transactionAt),
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                           fontSize: 10,
                         ),
@@ -1092,7 +1098,7 @@ class TopTransactionCard extends ConsumerWidget {
               semantic: AmountSemantic.status,
               currency: currencyCode,
               showSign: false,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colors.foreground, // 统计卡片使用中性颜色
                 letterSpacing: -0.5,
@@ -1142,7 +1148,7 @@ class PremiumEmptyState extends StatelessWidget {
                 right: -20,
                 bottom: -20,
                 child: Icon(
-                  FIcons.activity,
+                  FLucideIcons.activity,
                   size: 120,
                   color: colors.primary.withValues(alpha: 0.05),
                 ),
@@ -1200,12 +1206,16 @@ class PremiumEmptyState extends StatelessWidget {
                   color: colors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(FIcons.sparkles, size: 32, color: colors.primary),
+                child: Icon(
+                  FLucideIcons.sparkles,
+                  size: 32,
+                  color: colors.primary,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
                 t.statistics.emptyState.title,
-                style: theme.typography.xl.copyWith(
+                style: theme.typography.body.xl.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colors.foreground,
                 ),
@@ -1214,7 +1224,7 @@ class PremiumEmptyState extends StatelessWidget {
               Text(
                 t.statistics.emptyState.description,
                 textAlign: TextAlign.center,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                   height: 1.6,
                 ),
@@ -1228,7 +1238,7 @@ class PremiumEmptyState extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(FIcons.plus, size: 18),
+                      const Icon(FLucideIcons.plus, size: 18),
                       const SizedBox(width: 8),
                       Text(t.statistics.emptyState.action),
                     ],
@@ -1259,7 +1269,7 @@ class PremiumEmptyState extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      FIcons.chartPie,
+                      FLucideIcons.chartPie,
                       color: colors.mutedForeground.withValues(alpha: 0.2),
                     ),
                   ),
@@ -1278,7 +1288,7 @@ class PremiumEmptyState extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      FIcons.chartColumn,
+                      FLucideIcons.chartColumn,
                       color: colors.mutedForeground.withValues(alpha: 0.2),
                     ),
                   ),

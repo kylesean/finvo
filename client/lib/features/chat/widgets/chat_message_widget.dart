@@ -334,11 +334,15 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(FIcons.image, color: theme.colors.primaryForeground, size: 24),
+          Icon(
+            FLucideIcons.image,
+            color: theme.colors.primaryForeground,
+            size: 24,
+          ),
           const SizedBox(height: 4),
           Text(
             filename,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: theme.colors.mutedForeground,
               fontSize: 10,
             ),
@@ -365,7 +369,11 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
             builder: (context, child) {
               return Transform.rotate(
                 angle: _controller.value * 2 * 3.14159,
-                child: Icon(FIcons.loader, size: 14, color: colors.primary),
+                child: Icon(
+                  FLucideIcons.loader,
+                  size: 14,
+                  color: colors.primary,
+                ),
               );
             },
           ),
@@ -396,7 +404,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
                 },
                 child: Text(
                   Translations.of(context).chat.aiThinking,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                   ),

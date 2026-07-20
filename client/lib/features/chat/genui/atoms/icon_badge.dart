@@ -9,8 +9,8 @@ import 'package:augo/shared/widgets/themed_icon.dart';
 ///
 /// Example:
 /// ```dart
-/// IconBadge(icon: FIcons.wallet)
-/// IconBadge(icon: FIcons.wallet, size: 44)
+/// IconBadge(icon: FLucideIcons.wallet)
+/// IconBadge(icon: FLucideIcons.wallet, size: 44)
 /// ```
 class IconBadge extends StatelessWidget {
   /// The icon to display
@@ -36,15 +36,15 @@ class IconBadge extends StatelessWidget {
     switch (type?.toLowerCase()) {
       case 'bank':
       case 'bank_card':
-        return FIcons.landmark;
+        return FLucideIcons.landmark;
       case 'cash':
-        return FIcons.wallet;
+        return FLucideIcons.wallet;
       case 'investment':
-        return FIcons.trendingUp;
+        return FLucideIcons.trendingUp;
       case 'credit_card':
-        return FIcons.creditCard;
+        return FLucideIcons.creditCard;
       default:
-        return FIcons.wallet;
+        return FLucideIcons.wallet;
     }
   }
 

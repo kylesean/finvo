@@ -97,12 +97,16 @@ class BudgetReceipt extends StatelessWidget {
               color: colors.primary,
               shape: BoxShape.circle,
             ),
-            child: const Icon(FIcons.check, color: Colors.white, size: 14),
+            child: const Icon(
+              FLucideIcons.check,
+              color: Colors.white,
+              size: 14,
+            ),
           ),
           const SizedBox(width: 8),
           Text(
             t.chat.genui.budgetReceipt.budgetCreated,
-            style: theme.typography.base.copyWith(
+            style: theme.typography.body.md.copyWith(
               color: colors.primary,
               fontWeight: FontWeight.w600,
             ),
@@ -110,7 +114,7 @@ class BudgetReceipt extends StatelessWidget {
           const Spacer(),
           Text(
             _formatCurrentTime(),
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: colors.primary.withValues(alpha: 0.7),
             ),
           ),
@@ -129,7 +133,7 @@ class BudgetReceipt extends StatelessWidget {
     String? categoryKey,
   ) {
     final isTotal = scope.toUpperCase() == 'TOTAL';
-    final iconData = isTotal ? FIcons.wallet : FIcons.layoutGrid;
+    final iconData = isTotal ? FLucideIcons.wallet : FLucideIcons.layoutGrid;
     final iconColor = colors.primary;
 
     return Container(
@@ -164,7 +168,9 @@ class BudgetReceipt extends StatelessWidget {
           // 预算名称
           Text(
             name,
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
             textAlign: TextAlign.center,
           ),
 
@@ -179,7 +185,7 @@ class BudgetReceipt extends StatelessWidget {
               ),
               child: Text(
                 categoryKey,
-                style: theme.typography.xs.copyWith(
+                style: theme.typography.body.xs.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.w500,
                 ),
@@ -207,12 +213,12 @@ class BudgetReceipt extends StatelessWidget {
       decoration: BoxDecoration(color: colors.muted.withValues(alpha: 0.3)),
       child: Row(
         children: [
-          Icon(FIcons.calendar, size: 14, color: colors.mutedForeground),
+          Icon(FLucideIcons.calendar, size: 14, color: colors.mutedForeground),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               periodText,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -227,11 +233,15 @@ class BudgetReceipt extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(FIcons.refreshCcw, size: 12, color: colors.primary),
+                  Icon(
+                    FLucideIcons.refreshCcw,
+                    size: 12,
+                    color: colors.primary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     t.chat.genui.budgetReceipt.rolloverBudget,
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.primary,
                       fontWeight: FontWeight.w500,
                     ),
@@ -261,12 +271,14 @@ class BudgetReceipt extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(FIcons.circleAlert, color: colors.destructive, size: 24),
+          Icon(FLucideIcons.circleAlert, color: colors.destructive, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               message,
-              style: theme.typography.sm.copyWith(color: colors.destructive),
+              style: theme.typography.body.sm.copyWith(
+                color: colors.destructive,
+              ),
             ),
           ),
         ],

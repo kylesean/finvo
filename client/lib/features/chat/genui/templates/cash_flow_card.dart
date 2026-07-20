@@ -86,7 +86,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
-                            FIcons.trendingUp,
+                            FLucideIcons.trendingUp,
                             size: 20,
                             color: colors.primary,
                           ),
@@ -99,7 +99,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               Text(
                                 widget.data['title'] as String? ??
                                     t.chat.genui.cashFlowCard.title,
-                                style: theme.typography.base.copyWith(
+                                style: theme.typography.body.md.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: colors.foreground,
                                 ),
@@ -109,7 +109,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                                 children: [
                                   Text(
                                     '¥${_formatAmount(netCashFlow)}',
-                                    style: theme.typography.lg.copyWith(
+                                    style: theme.typography.body.lg.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: isPositive
                                           ? amountTheme.incomeColor
@@ -135,7 +135,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                                       t.chat.genui.cashFlowCard.savingsRate(
                                         rate: savingsRate.toStringAsFixed(0),
                                       ),
-                                      style: theme.typography.xs.copyWith(
+                                      style: theme.typography.body.xs.copyWith(
                                         color: isPositive
                                             ? amountTheme.incomeColor
                                             : amountTheme.expenseColor,
@@ -149,7 +149,9 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                           ),
                         ),
                         Icon(
-                          _isExpanded ? FIcons.chevronUp : FIcons.chevronDown,
+                          _isExpanded
+                              ? FLucideIcons.chevronUp
+                              : FLucideIcons.chevronDown,
                           size: 16,
                           color: colors.mutedForeground,
                         ),
@@ -243,14 +245,14 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               Row(
                                 children: [
                                   Icon(
-                                    FIcons.sparkles,
+                                    FLucideIcons.sparkles,
                                     size: 14,
                                     color: colors.primary,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     t.chat.genui.cashFlowCard.aiInsight,
-                                    style: theme.typography.xs.copyWith(
+                                    style: theme.typography.body.xs.copyWith(
                                       color: colors.primary,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -260,7 +262,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               const SizedBox(height: 8),
                               GptMarkdown(
                                 aiInsight,
-                                style: theme.typography.sm.copyWith(
+                                style: theme.typography.body.sm.copyWith(
                                   color: colors.foreground.withValues(
                                     alpha: 0.9,
                                   ),
@@ -306,7 +308,9 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
         children: [
           Text(
             label,
-            style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.xs.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 4),
           Row(
@@ -314,7 +318,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
               Flexible(
                 child: Text(
                   value,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: valueColor ?? colors.foreground,
                     fontWeight: FontWeight.w600,
                   ),
@@ -326,7 +330,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                 const SizedBox(width: 4),
                 Text(
                   _formatPercent(change),
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: (inverseColor ? change <= 0 : change >= 0)
                         ? amountTheme.incomeColor
                         : amountTheme.expenseColor,

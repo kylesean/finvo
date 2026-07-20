@@ -87,7 +87,7 @@ class TransactionItem extends ConsumerWidget {
                 children: [
                   Text(
                     description,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: FontWeight.w500,
                       color: colors.foreground,
                     ),
@@ -97,7 +97,7 @@ class TransactionItem extends ConsumerWidget {
                   if (showTime && timestamp != null)
                     Text(
                       formatRelativeTime(timestamp),
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -110,7 +110,7 @@ class TransactionItem extends ConsumerWidget {
               amount: amountNum,
               currency: currency,
               showSign: true,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: isExpense ? colors.destructive : colors.primary,
               ),

@@ -29,12 +29,12 @@ class _NotificationIconState extends ConsumerState<NotificationIcon> {
     final unreadCount = ref.watch(unreadCountProvider);
 
     return FButton.icon(
-      style: FButtonStyle.ghost(),
+      variant: .ghost,
       onPress: () => _navigateToNotifications(context),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Icon(FIcons.bell, color: colors.foreground, size: 20),
+          Icon(FLucideIcons.bell, color: colors.foreground, size: 20),
           if (unreadCount > 0)
             Positioned(
               right: -2,
@@ -50,7 +50,7 @@ class _NotificationIconState extends ConsumerState<NotificationIcon> {
                 child: Center(
                   child: Text(
                     unreadCount > 99 ? '99+' : unreadCount.toString(),
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.destructiveForeground,
                       fontWeight: FontWeight.bold,
                     ),

@@ -24,12 +24,12 @@ class CurrencySettingsPage extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.chevronLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
           onPressed: () => context.pop(),
         ),
         title: Text(
           t.settings.currency,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -41,7 +41,7 @@ class CurrencySettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 8.0),
               child: Center(
                 child: FButton(
-                  style: FButtonStyle.ghost(),
+                  variant: .ghost,
                   onPress: state.isLoading
                       ? null
                       : () async {
@@ -82,7 +82,7 @@ class CurrencySettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
               child: Text(
                 t.settings.currencyDescription,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                   fontWeight: FontWeight.w500,
                 ),
@@ -107,7 +107,7 @@ class CurrencySettingsPage extends ConsumerWidget {
                   ),
                   title: Text(
                     '${currency.code} - ${currency.localizedName}',
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: isSelected
                           ? FontWeight.w600
                           : FontWeight.w400,
@@ -115,7 +115,11 @@ class CurrencySettingsPage extends ConsumerWidget {
                     ),
                   ),
                   suffix: isSelected
-                      ? Icon(FIcons.check, size: 20, color: colors.primary)
+                      ? Icon(
+                          FLucideIcons.check,
+                          size: 20,
+                          color: colors.primary,
+                        )
                       : null,
                   onPress: () {
                     notifier.updatePrimaryCurrency(currency.code);

@@ -66,7 +66,7 @@ class _MediaSelectionSheet extends StatelessWidget {
                     theme,
                     colors,
                     t.media.camera,
-                    FIcons.camera,
+                    FLucideIcons.camera,
                     () => _handleTakePhoto(context),
                   ),
                 ),
@@ -78,7 +78,7 @@ class _MediaSelectionSheet extends StatelessWidget {
                     theme,
                     colors,
                     t.media.photos,
-                    FIcons.image,
+                    FLucideIcons.image,
                     () => _handleSelectPhotos(context),
                   ),
                 ),
@@ -90,7 +90,7 @@ class _MediaSelectionSheet extends StatelessWidget {
                     theme,
                     colors,
                     t.media.files,
-                    FIcons.paperclip,
+                    FLucideIcons.paperclip,
                     () => _handleSelectFiles(context),
                   ),
                 ),
@@ -131,7 +131,7 @@ class _MediaSelectionSheet extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   color: colors.foreground,
                   fontWeight: FontWeight.w500,
                 ),

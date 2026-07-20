@@ -21,14 +21,14 @@ class ForecastToolbar extends ConsumerWidget {
           children: [
             Text(
               t.forecast.title,
-              style: theme.typography.xl2.copyWith(
+              style: theme.typography.body.xl2.copyWith(
                 color: colorScheme.foreground,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               t.forecast.subtitle,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colorScheme.mutedForeground,
               ),
             ),

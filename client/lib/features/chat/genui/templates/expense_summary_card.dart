@@ -83,7 +83,9 @@ class ExpenseSummaryCard extends ConsumerWidget {
         children: [
           Text(
             t.chat.genui.expenseSummary.totalExpense,
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 4),
           // 使用统一的 AmountText.large 组件
@@ -162,7 +164,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
                   const SizedBox(width: 4),
                   Text(
                     '${category.displayText} ${(percentage * 100).toStringAsFixed(0)}%',
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -191,7 +193,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               t.chat.genui.expenseSummary.mainExpenses,
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
                 fontWeight: FontWeight.w600,
               ),
@@ -222,7 +224,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
                 ),
                 title: Text(
                   tags.isNotEmpty ? tags : category.displayText,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -231,7 +233,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
                 trailing: AmountText(
                   amount: amount,
                   type: TransactionType.expense,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -266,13 +268,13 @@ class ExpenseSummaryCard extends ConsumerWidget {
           children: [
             Text(
               t.chat.genui.expenseSummary.viewAll(count: totalCount),
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(width: 4),
-            Icon(FIcons.chevronRight, size: 14, color: colors.primary),
+            Icon(FLucideIcons.chevronRight, size: 14, color: colors.primary),
           ],
         ),
       ),

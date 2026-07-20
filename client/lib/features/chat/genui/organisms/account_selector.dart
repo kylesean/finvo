@@ -63,13 +63,12 @@ class AccountSelector extends ConsumerStatefulWidget {
       }
     }
 
-    final controller = FPickerController(initialIndexes: [currentIndex]);
+    final controller = FPickerController(indexes: [currentIndex]);
     AccountPickerResult? result;
 
     await showFDialog<void>(
       context: context,
-      builder: (context, style, animation) => FDialog.raw(
-        style: style.call,
+      builder: (context, style, animation) => FDialog(
         animation: animation,
         builder: (context, style) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -79,7 +78,7 @@ class AccountSelector extends ConsumerStatefulWidget {
               padding: const EdgeInsets.all(16),
               child: Text(
                 displayTitle,
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colors.foreground,
                 ),
@@ -89,7 +88,7 @@ class AccountSelector extends ConsumerStatefulWidget {
             SizedBox(
               height: 160,
               child: FPicker(
-                controller: controller,
+                control: .managed(controller: controller),
                 children: [
                   FPickerWheel(
                     loop: false,
@@ -100,7 +99,7 @@ class AccountSelector extends ConsumerStatefulWidget {
                       return Center(
                         child: Text(
                           accType.isNotEmpty ? '$accName ($accType)' : accName,
-                          style: theme.typography.base.copyWith(
+                          style: theme.typography.body.md.copyWith(
                             color: colors.foreground,
                           ),
                         ),
@@ -118,7 +117,7 @@ class AccountSelector extends ConsumerStatefulWidget {
                   if (clearText != null) ...[
                     Expanded(
                       child: FButton(
-                        style: FButtonStyle.outline(),
+                        variant: .outline,
                         onPress: () {
                           result = AccountPickerResult.cleared();
                           Navigator.pop(context);
@@ -130,7 +129,7 @@ class AccountSelector extends ConsumerStatefulWidget {
                   ] else ...[
                     Expanded(
                       child: FButton(
-                        style: FButtonStyle.outline(),
+                        variant: .outline,
                         onPress: () => Navigator.pop(context),
                         child: Text(displayCancel),
                       ),
@@ -242,7 +241,9 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
             // Title
             Text(
               title,
-              style: theme.typography.lg.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -279,19 +280,27 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
 
   Widget _buildSearchBox(FThemeData theme, FColors colors) {
     return FTextField(
-      controller: _searchController,
+      control: .managed(controller: _searchController),
       hint: t.common.search,
       prefixBuilder: (context, style, child) => Padding(
         padding: const EdgeInsets.only(left: 12),
-        child: Icon(FIcons.search, color: colors.mutedForeground, size: 18),
+        child: Icon(
+          FLucideIcons.search,
+          color: colors.mutedForeground,
+          size: 18,
+        ),
       ),
       suffixBuilder: (context, style, child) => _searchQuery.isNotEmpty
           ? Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FButton.icon(
-                style: FButtonStyle.ghost(),
+                variant: .ghost,
                 onPress: () => _searchController.clear(),
-                child: Icon(FIcons.x, color: colors.mutedForeground, size: 18),
+                child: Icon(
+                  FLucideIcons.x,
+                  color: colors.mutedForeground,
+                  size: 18,
+                ),
               ),
             )
           : const SizedBox.shrink(),
@@ -304,11 +313,11 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
         padding: const EdgeInsets.all(32),
         child: Column(
           children: [
-            Icon(FIcons.search, size: 48, color: colors.mutedForeground),
+            Icon(FLucideIcons.search, size: 48, color: colors.mutedForeground),
             const SizedBox(height: 16),
             Text(
               t.common.noData,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
             ),

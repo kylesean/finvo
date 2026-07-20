@@ -66,7 +66,7 @@ class AppFilterChip extends StatelessWidget {
                   Flexible(
                     child: Text(
                       label!,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: isSelected
                             ? FontWeight.w600
                             : FontWeight.w500,

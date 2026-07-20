@@ -30,7 +30,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
         Currency.fromCode(widget.initialCurrency) ?? Currency.cny;
     final initialIndex = Currency.values.indexOf(initialCurrency);
     _controller = FPickerController(
-      initialIndexes: [initialIndex >= 0 ? initialIndex : 0],
+      indexes: [initialIndex >= 0 ? initialIndex : 0],
     );
   }
 
@@ -45,7 +45,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
     final theme = context.theme;
     final colors = theme.colors;
 
-    return FDialog.raw(
+    return FDialog(
       builder: (context, style) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -54,7 +54,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
             padding: const EdgeInsets.all(16),
             child: Text(
               t.financial.selectCurrency,
-              style: theme.typography.lg.copyWith(
+              style: theme.typography.body.lg.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -65,7 +65,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
           SizedBox(
             height: 200,
             child: FPicker(
-              controller: _controller,
+              control: .managed(controller: _controller),
               children: [
                 FPickerWheel(
                   loop: true,
@@ -73,7 +73,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
                     return Center(
                       child: Text(
                         '${currency.code}  ${currency.localizedName}',
-                        style: theme.typography.base.copyWith(
+                        style: theme.typography.body.md.copyWith(
                           color: colors.foreground,
                           fontWeight: FontWeight.w500,
                         ),
@@ -92,7 +92,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
               children: [
                 Expanded(
                   child: FButton(
-                    style: FButtonStyle.outline(),
+                    variant: .outline,
                     onPress: () => Navigator.pop(context),
                     child: Text(t.financial.cancel),
                   ),

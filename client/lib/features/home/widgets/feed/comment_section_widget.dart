@@ -33,7 +33,9 @@ class CommentSectionWidget extends ConsumerWidget {
           ),
           child: Text(
             t.comment.note,
-            style: theme.typography.xl.copyWith(fontWeight: FontWeight.w600),
+            style: theme.typography.body.xl.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         commentsAsyncValue.when(
@@ -45,7 +47,7 @@ class CommentSectionWidget extends ConsumerWidget {
                 child: Center(
                   child: Text(
                     t.comment.noNote,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       color: colorScheme.mutedForeground,
                     ),
                   ),
@@ -139,7 +141,7 @@ class CommentSectionWidget extends ConsumerWidget {
             child: Center(
               child: Text(
                 '${t.comment.loadFailed}: ${err.toString()}',
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   color: colorScheme.destructive,
                 ),
               ),

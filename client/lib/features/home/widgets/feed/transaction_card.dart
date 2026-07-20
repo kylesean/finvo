@@ -77,21 +77,38 @@ class TransactionCard extends ConsumerWidget {
     return await showAdaptiveDialog<bool>(
           context: context,
           builder: (context) => FDialog(
-            direction: Axis.horizontal,
-            title: Text(t.transaction.confirmDelete),
-            body: Text(t.transaction.deleteTransactionConfirm),
-            actions: [
-              FButton(
-                style: FButtonStyle.outline(),
-                onPress: () => Navigator.of(context).pop(false),
-                child: Text(t.common.cancel),
-              ),
-              FButton(
-                style: FButtonStyle.destructive(),
-                onPress: () => Navigator.of(context).pop(true),
-                child: Text(t.common.delete),
-              ),
-            ],
+            builder: (context, dialogStyle) => Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.transaction.confirmDelete,
+                  style: dialogStyle.titleTextStyle,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  t.transaction.deleteTransactionConfirm,
+                  style: dialogStyle.bodyTextStyle,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FButton(
+                      variant: .outline,
+                      onPress: () => Navigator.of(context).pop(false),
+                      child: Text(t.common.cancel),
+                    ),
+                    const SizedBox(width: 8),
+                    FButton(
+                      variant: .destructive,
+                      onPress: () => Navigator.of(context).pop(true),
+                      child: Text(t.common.delete),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ) ??
         false;
@@ -153,7 +170,7 @@ class TransactionCard extends ConsumerWidget {
             ],
           ),
           child: Icon(
-            FIcons.trash2,
+            FLucideIcons.trash2,
             color: colors.destructiveForeground,
             size: 22,
           ),
@@ -194,7 +211,7 @@ class TransactionCard extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           _getCategoryDisplayName(transaction),
-                          style: theme.typography.base.copyWith(
+                          style: theme.typography.body.md.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -203,7 +220,7 @@ class TransactionCard extends ConsumerWidget {
                       const SizedBox(width: 12),
                       Text(
                         _getAmountDisplayText(transaction),
-                        style: theme.typography.lg.copyWith(
+                        style: theme.typography.body.lg.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AmountFormatter.getAmountColor(
                             transaction.type,
@@ -226,7 +243,7 @@ class TransactionCard extends ConsumerWidget {
                             : Text(
                                 transaction.paymentMethod ??
                                     t.transaction.expense,
-                                style: theme.typography.sm.copyWith(
+                                style: theme.typography.body.sm.copyWith(
                                   color: colors.mutedForeground,
                                 ),
                               ),
@@ -234,7 +251,7 @@ class TransactionCard extends ConsumerWidget {
                       // Time display
                       Text(
                         _getTimeDisplay(transaction.timestamp),
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -268,7 +285,7 @@ class TransactionCard extends ConsumerWidget {
               ),
               child: Text(
                 tag,
-                style: theme.typography.xs.copyWith(
+                style: theme.typography.body.xs.copyWith(
                   color: colors.foreground,
                   fontWeight: FontWeight.w500,
                 ),
@@ -279,7 +296,9 @@ class TransactionCard extends ConsumerWidget {
         if (extraCount > 0)
           Text(
             '+$extraCount',
-            style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.xs.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
       ],
     );

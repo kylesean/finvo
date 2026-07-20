@@ -75,9 +75,7 @@ class BudgetItemCard extends ConsumerWidget {
   Widget _buildCompactView(FThemeData theme, FColors colors) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(
-        theme.style.borderRadius.bottomLeft.x,
-      ),
+      borderRadius: theme.style.borderRadius.md,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
@@ -87,7 +85,9 @@ class BudgetItemCard extends ConsumerWidget {
               width: 72,
               child: Text(
                 name,
-                style: theme.typography.sm.copyWith(color: colors.foreground),
+                style: theme.typography.body.sm.copyWith(
+                  color: colors.foreground,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -105,7 +105,7 @@ class BudgetItemCard extends ConsumerWidget {
             if (onTap != null) ...[
               const SizedBox(width: 4),
               Icon(
-                FIcons.chevronRight,
+                FLucideIcons.chevronRight,
                 size: 14,
                 color: colors.mutedForeground,
               ),
@@ -128,9 +128,7 @@ class BudgetItemCard extends ConsumerWidget {
     return FCard(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(
-          theme.style.borderRadius.bottomLeft.x,
-        ),
+        borderRadius: theme.style.borderRadius.md,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -142,7 +140,7 @@ class BudgetItemCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       name,
-                      style: theme.typography.base.copyWith(
+                      style: theme.typography.body.md.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.foreground,
                       ),
@@ -159,7 +157,7 @@ class BudgetItemCard extends ConsumerWidget {
                     ),
                     child: Text(
                       _getStatusText(status),
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: statusColor,
                         fontWeight: FontWeight.w600,
                       ),
@@ -183,14 +181,14 @@ class BudgetItemCard extends ConsumerWidget {
                 children: [
                   Text(
                     '${percentage.toStringAsFixed(0)}%',
-                    style: theme.typography.lg.copyWith(
+                    style: theme.typography.body.lg.copyWith(
                       fontWeight: FontWeight.w700,
                       color: statusColor,
                     ),
                   ),
                   Text(
                     '$currencySymbol${_formatAmount(spent)} / $currencySymbol${_formatAmount(amount)}',
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),

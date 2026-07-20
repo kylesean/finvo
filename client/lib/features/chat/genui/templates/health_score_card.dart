@@ -112,18 +112,18 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                 children: [
                   Row(
                     children: [
-                      Icon(FIcons.heart, size: 18, color: gradeColor),
+                      Icon(FLucideIcons.heart, size: 18, color: gradeColor),
                       const SizedBox(width: 8),
                       Text(
                         t.chat.genui.healthScore.title,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         _getGradeSummary(grade),
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -146,7 +146,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                           children: [
                             Text(
                               grade,
-                              style: theme.typography.sm.copyWith(
+                              style: theme.typography.body.sm.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -154,7 +154,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                             const SizedBox(width: 2),
                             Text(
                               '$totalScore',
-                              style: theme.typography.xs.copyWith(
+                              style: theme.typography.body.xs.copyWith(
                                 color: Colors.white.withValues(alpha: 0.9),
                               ),
                             ),
@@ -163,7 +163,9 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                       ),
                       const SizedBox(width: 4),
                       Icon(
-                        _isExpanded ? FIcons.chevronUp : FIcons.chevronDown,
+                        _isExpanded
+                            ? FLucideIcons.chevronUp
+                            : FLucideIcons.chevronDown,
                         size: 16,
                         color: colors.mutedForeground,
                       ),
@@ -188,7 +190,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                   const SizedBox(height: 8),
                   Text(
                     t.chat.genui.healthScore.suggestions,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -200,7 +202,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
-                            FIcons.info,
+                            FLucideIcons.info,
                             size: 14,
                             color: theme.semantic.warningAccent,
                           ),
@@ -208,7 +210,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                           Expanded(
                             child: Text(
                               suggestion.toString(),
-                              style: theme.typography.xs.copyWith(
+                              style: theme.typography.body.xs.copyWith(
                                 color: colors.mutedForeground,
                               ),
                             ),
@@ -246,10 +248,10 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(name, style: theme.typography.sm),
+            Text(name, style: theme.typography.body.sm),
             Text(
               t.chat.genui.healthScore.scorePoint(score: score),
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: statusColor,
               ),
@@ -281,7 +283,9 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
         const SizedBox(height: 2),
         Text(
           description,
-          style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+          style: theme.typography.body.xs.copyWith(
+            color: colors.mutedForeground,
+          ),
         ),
       ],
     );

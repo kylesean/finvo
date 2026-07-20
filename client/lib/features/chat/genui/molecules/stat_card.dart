@@ -72,14 +72,16 @@ class StatCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
               ),
               if (trendUp != null)
                 Icon(
-                  trendUp! ? FIcons.trendingUp : FIcons.trendingDown,
+                  trendUp!
+                      ? FLucideIcons.trendingUp
+                      : FLucideIcons.trendingDown,
                   color: trendUp! ? colors.primary : colors.destructive,
                   size: 20,
                 ),
@@ -92,7 +94,7 @@ class StatCard extends ConsumerWidget {
             AmountDisplay(
               amount: value,
               currency: displayCurrency,
-              style: theme.typography.xl2.copyWith(
+              style: theme.typography.body.xl2.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colors.foreground,
               ),
@@ -100,7 +102,7 @@ class StatCard extends ConsumerWidget {
           else
             Text(
               value.toString(),
-              style: theme.typography.xl2.copyWith(
+              style: theme.typography.body.xl2.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colors.foreground,
               ),
@@ -111,7 +113,7 @@ class StatCard extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               subtitle!,
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: trendUp != null
                     ? (trendUp! ? colors.primary : colors.destructive)
                     : colors.mutedForeground,

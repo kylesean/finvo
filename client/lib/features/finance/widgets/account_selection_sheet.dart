@@ -122,7 +122,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
             onTap: () => Navigator.of(context).pop(),
             child: Text(
               t.common.cancel,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -131,7 +131,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
             child: Text(
               widget.title,
               textAlign: TextAlign.center,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -159,13 +159,13 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ThemedIcon.large(
-              icon: FIcons.wallet,
+              icon: FLucideIcons.wallet,
               backgroundColor: colors.secondary,
             ),
             const SizedBox(height: 12),
             Text(
               isZh ? '暂无资产账户' : 'No asset accounts',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -174,7 +174,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
               isZh
                   ? '请前往财务页面添加账户'
                   : 'Please go to the financial page to add accounts',
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground.withValues(alpha: 0.7),
               ),
             ),
@@ -200,7 +200,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
       padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         title,
-        style: theme.typography.sm.copyWith(
+        style: theme.typography.body.sm.copyWith(
           color: colors.mutedForeground,
           fontWeight: FontWeight.w500,
         ),
@@ -257,8 +257,8 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                           ? definition.iconBuilder(colors.foreground)
                           : Icon(
                               isLiabilityAccount
-                                  ? FIcons.creditCard
-                                  : FIcons.wallet,
+                                  ? FLucideIcons.creditCard
+                                  : FLucideIcons.wallet,
                               color: colors.foreground,
                               size: 18,
                             ),
@@ -274,7 +274,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                       children: [
                         Text(
                           account.name,
-                          style: theme.typography.base.copyWith(
+                          style: theme.typography.body.md.copyWith(
                             fontWeight: FontWeight.w600,
                             color: colors.foreground,
                           ),
@@ -285,7 +285,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                               : (isLiabilityAccount
                                     ? (isZh ? '负债账户' : 'Liability Account')
                                     : (isZh ? '资产账户' : 'Asset Account')),
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: colors.mutedForeground,
                           ),
                         ),
@@ -299,7 +299,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                     children: [
                       Text(
                         '${isLiabilityAccount ? '-' : ''}${_formatAmount(account.currentBalance ?? account.initialBalance)}',
-                        style: theme.typography.base.copyWith(
+                        style: theme.typography.body.md.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colors.foreground,
                           fontFeatures: [const FontFeature.tabularFigures()],
@@ -307,7 +307,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                       ),
                       Text(
                         account.currencyCode,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -317,7 +317,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                   // 选中标记
                   if (isSelected) ...[
                     const SizedBox(width: 8),
-                    Icon(FIcons.check, color: colors.primary, size: 20),
+                    Icon(FLucideIcons.check, color: colors.primary, size: 20),
                   ],
                 ],
               ),

@@ -90,7 +90,7 @@ class _FinancialAccountInputSheetState
                   children: [
                     Text(
                       _getLocalizedTitle(definition),
-                      style: theme.typography.xl2.copyWith(
+                      style: theme.typography.body.xl2.copyWith(
                         fontWeight: FontWeight.w700,
                         color: colors.foreground,
                       ),
@@ -98,7 +98,7 @@ class _FinancialAccountInputSheetState
                     const SizedBox(height: 6),
                     Text(
                       _getLocalizedSubtitle(definition),
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -115,7 +115,7 @@ class _FinancialAccountInputSheetState
                         ),
                         child: Text(
                           _getLocalizedHelper(definition),
-                          style: theme.typography.xs.copyWith(
+                          style: theme.typography.body.xs.copyWith(
                             fontWeight: FontWeight.w600,
                             color: colors.primary,
                           ),
@@ -141,7 +141,7 @@ class _FinancialAccountInputSheetState
                     if (showNameField) ...[
                       Text(
                         'Account Name',
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -167,7 +167,7 @@ class _FinancialAccountInputSheetState
                     ],
                     Text(
                       'Current Balance',
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -183,7 +183,7 @@ class _FinancialAccountInputSheetState
                           ),
                           child: Text(
                             '¥',
-                            style: theme.typography.sm.copyWith(
+                            style: theme.typography.body.sm.copyWith(
                               color: colors.mutedForeground,
                             ),
                           ),

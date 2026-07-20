@@ -195,7 +195,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
             const GenUiCompactErrorWidget(errorMessage: 'GenUI 服务未初始化'),
             const SizedBox(height: 8),
             if (message.content.isNotEmpty)
-              Text(message.content, style: theme.typography.base),
+              Text(message.content, style: theme.typography.body.md),
           ],
         ),
       );
@@ -259,7 +259,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
       children: [
         // 复制按钮 - 第一个，左侧无 padding
         buildIconButton(
-          icon: FIcons.copy,
+          icon: FLucideIcons.copy,
           isFirst: true,
           onTap: () async {
             // 智能复制逻辑：
@@ -295,7 +295,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         ),
         // 点赞按钮
         buildIconButton(
-          icon: FIcons.thumbsUp,
+          icon: FLucideIcons.thumbsUp,
           onTap: () =>
               notifier.updateAIFeedback(message.id, app.AIFeedbackStatus.liked),
           color: message.feedbackStatus == app.AIFeedbackStatus.liked
@@ -304,7 +304,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         ),
         // 点踩按钮
         buildIconButton(
-          icon: FIcons.thumbsDown,
+          icon: FLucideIcons.thumbsDown,
           onTap: () => notifier.updateAIFeedback(
             message.id,
             app.AIFeedbackStatus.disliked,
@@ -315,7 +315,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         ),
         // 分享按钮
         buildIconButton(
-          icon: FIcons.share2,
+          icon: FLucideIcons.share2,
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -349,9 +349,9 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         leading: FButton.icon(
-          style: FButtonStyle.ghost(),
+          variant: .ghost,
           onPress: _showSidebar,
-          child: const Icon(FIcons.menu),
+          child: const Icon(FLucideIcons.menu),
         ),
         // [REFACTORED] 使用今日消费统计替代动态对话标题
         // 财务 Agent 不需要 chatbot 风格的标题
@@ -363,7 +363,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
               Flexible(
                 child: Text(
                   ref.watch(conversationExpenseTitleProvider),
-                  style: theme.typography.xl.copyWith(
+                  style: theme.typography.body.xl.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -376,14 +376,14 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         centerTitle: true,
         actions: [
           FButton.icon(
-            style: FButtonStyle.ghost(),
+            variant: .ghost,
             onPress: () {
               unawaited(
                 ref.read(chatHistoryProvider.notifier).createNewConversation(),
               );
               context.go('/ai');
             },
-            child: const Icon(FIcons.plus),
+            child: const Icon(FLucideIcons.plus),
           ),
         ],
       ),
@@ -411,7 +411,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                       ? Center(
                           child: Text(
                             '${t.chat.loadingFailed}: ${chatHistoryState.historyError}',
-                            style: theme.typography.base,
+                            style: theme.typography.body.md,
                           ),
                         )
                       : WelcomeGuideWidget(

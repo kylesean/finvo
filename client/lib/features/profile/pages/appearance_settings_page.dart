@@ -25,12 +25,12 @@ class AppearanceSettingsPage extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.chevronLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           t.appearance.title,
-          style: theme.typography.xl.copyWith(
+          style: theme.typography.body.xl.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -43,7 +43,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
           children: [
             Text(
               t.appearance.themeMode,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -99,7 +99,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               t.appearance.colorScheme,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -200,7 +200,7 @@ class _PaletteOption extends StatelessWidget {
                 Expanded(
                   child: Text(
                     palette.label,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.foreground,
                     ),
@@ -228,7 +228,7 @@ class _PaletteOption extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               'Light / Dark',
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
               ),
             ),

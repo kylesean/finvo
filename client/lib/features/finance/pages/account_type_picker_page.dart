@@ -22,7 +22,7 @@ class AccountTypePickerPage extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.chevronLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
           onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
@@ -30,7 +30,7 @@ class AccountTypePickerPage extends ConsumerWidget {
         centerTitle: true,
         title: Text(
           t.account.selectTypeTitle,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -45,7 +45,7 @@ class AccountTypePickerPage extends ConsumerWidget {
               padding: const EdgeInsets.only(top: 16, bottom: 12),
               child: Text(
                 entry.key.displayName,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   fontWeight: FontWeight.w500,
                   color: colors.mutedForeground,
                 ),
@@ -167,7 +167,7 @@ class _AccountTypeCard extends StatelessWidget {
             // 标题 - 使用 Flexible 防止溢出
             Text(
               title,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -179,7 +179,7 @@ class _AccountTypeCard extends StatelessWidget {
             Expanded(
               child: Text(
                 subtitle,
-                style: theme.typography.xs.copyWith(
+                style: theme.typography.body.xs.copyWith(
                   color: colors.mutedForeground,
                   height: 1.3,
                 ),

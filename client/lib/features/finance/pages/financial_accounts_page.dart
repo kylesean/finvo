@@ -70,7 +70,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
         ),
         title: Text(
           t.financial.title,
-          style: theme.typography.xl.copyWith(fontWeight: FontWeight.w600),
+          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
       body: SafeArea(
@@ -135,7 +135,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
               Text(
                 state.error!,
                 textAlign: TextAlign.center,
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
@@ -238,14 +238,14 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
               const SizedBox(height: 16),
               Text(
                 t.financial.noAccounts,
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 t.financial.addFirstAccount,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground.withValues(alpha: 0.7),
                 ),
               ),
@@ -290,7 +290,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             children: [
               Text(
                 t.financial.netWorth.toUpperCase(),
-                style: theme.typography.xs.copyWith(
+                style: theme.typography.body.xs.copyWith(
                   color: colors.primaryForeground.withValues(alpha: 0.6),
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w600,
@@ -307,7 +307,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        _hideAmounts ? FIcons.eyeOff : FIcons.eye,
+                        _hideAmounts ? FLucideIcons.eyeOff : FLucideIcons.eye,
                         size: 16,
                         color: colors.primaryForeground.withValues(alpha: 0.7),
                       ),
@@ -335,14 +335,14 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                         children: [
                           Text(
                             viewCurrency,
-                            style: theme.typography.xs.copyWith(
+                            style: theme.typography.body.xs.copyWith(
                               color: colors.primaryForeground,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(width: 4),
                           Icon(
-                            FIcons.repeat,
+                            FLucideIcons.repeat,
                             size: 11,
                             color: colors.primaryForeground.withValues(
                               alpha: 0.8,
@@ -441,7 +441,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
       children: [
         Text(
           label.toUpperCase(),
-          style: theme.typography.xs.copyWith(
+          style: theme.typography.body.xs.copyWith(
             color: colors.primaryForeground.withValues(alpha: 0.5),
             letterSpacing: 1,
             fontWeight: FontWeight.w500,
@@ -453,7 +453,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
           child: hidden
               ? Text(
                   '****',
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     color: colors.primaryForeground.withValues(alpha: 0.8),
                     fontWeight: FontWeight.w600,
                   ),
@@ -464,7 +464,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                   semantic: AmountSemantic.status, // 改为 status
                   currency: currency,
                   shrinkCurrency: true,
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.w700,
                     color: Colors.white, // 显式强制白色
                   ),
@@ -479,7 +479,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
       padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         title,
-        style: theme.typography.sm.copyWith(
+        style: theme.typography.body.sm.copyWith(
           color: colors.mutedForeground,
           fontWeight: FontWeight.w500,
         ),
@@ -527,7 +527,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                       children: [
                         Text(
                           account.name,
-                          style: theme.typography.base.copyWith(
+                          style: theme.typography.body.md.copyWith(
                             // Revert to base
                             fontWeight: FontWeight.w600,
                             color: colors.foreground,
@@ -539,7 +539,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                               : (isLiabilityAccount
                                     ? t.financial.liabilityAccounts
                                     : t.financial.assetAccounts),
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             // Revert to sm
                             color: colors.mutedForeground,
                           ),
@@ -564,14 +564,14 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                                   : TransactionType.income,
                               semantic: AmountSemantic.status,
                               currency: account.currencyCode,
-                              style: theme.typography.base.copyWith(
+                              style: theme.typography.body.md.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: colors.foreground,
                               ),
                             ),
                       Text(
                         account.currencyCode,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -579,7 +579,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                   ),
                   // const SizedBox(width: 8),
                   // Icon(
-                  //   FIcons.chevronRight,
+                  //   FLucideIcons.chevronRight,
                   //   size: 16,
                   //   color: colors.mutedForeground.withValues(alpha: 0.5),
                   // ),
@@ -628,23 +628,23 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   IconData _getAccountTypeIcon(String? typeId, bool isLiability) {
     switch (typeId) {
       case 'cash':
-        return FIcons.wallet;
+        return FLucideIcons.wallet;
       case 'deposit':
-        return FIcons.landmark;
+        return FLucideIcons.landmark;
       case 'e_money':
-        return FIcons.smartphone;
+        return FLucideIcons.smartphone;
       case 'investment':
-        return FIcons.trendingUp;
+        return FLucideIcons.trendingUp;
       case 'receivable':
-        return FIcons.arrowRight;
+        return FLucideIcons.arrowRight;
       case 'credit_card':
-        return FIcons.creditCard;
+        return FLucideIcons.creditCard;
       case 'loan':
-        return FIcons.building;
+        return FLucideIcons.building;
       case 'payable':
-        return FIcons.arrowLeft;
+        return FLucideIcons.arrowLeft;
       default:
-        return isLiability ? FIcons.creditCard : FIcons.wallet;
+        return isLiability ? FLucideIcons.creditCard : FLucideIcons.wallet;
     }
   }
 
@@ -705,12 +705,16 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(FIcons.wallet, size: 24, color: colorScheme.primary),
+                  Icon(
+                    FLucideIcons.wallet,
+                    size: 24,
+                    color: colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       t.financial.management,
-                      style: theme.typography.lg.copyWith(
+                      style: theme.typography.body.lg.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colorScheme.foreground,
                       ),
@@ -730,7 +734,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                     // 财务设置分组
                     Text(
                       t.financial.settings,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colorScheme.mutedForeground,
                       ),
@@ -739,9 +743,11 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                     FItemGroup(
                       children: [
                         FItem(
-                          prefix: const ThemedIcon(icon: FIcons.dollarSign),
+                          prefix: const ThemedIcon(
+                            icon: FLucideIcons.dollarSign,
+                          ),
                           title: Text(t.financial.budgetManagement),
-                          suffix: const Icon(FIcons.chevronRight),
+                          suffix: const Icon(FLucideIcons.chevronRight),
                           onPress: () {
                             Navigator.of(context).pop(); // 关闭抽屉栏
                             // 延迟导航，等待抽屉栏关闭动画完成
@@ -760,9 +766,9 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           },
                         ),
                         FItem(
-                          prefix: const ThemedIcon(icon: FIcons.repeat),
+                          prefix: const ThemedIcon(icon: FLucideIcons.repeat),
                           title: Text(t.financial.recurringTransactions),
-                          suffix: const Icon(FIcons.chevronRight),
+                          suffix: const Icon(FLucideIcons.chevronRight),
                           onPress: () {
                             Navigator.of(context).pop(); // 关闭抽屉栏
                             // 延迟导航，等待抽屉栏关闭动画完成
@@ -783,18 +789,20 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           },
                         ),
                         FItem(
-                          prefix: const ThemedIcon(icon: FIcons.shield),
+                          prefix: const ThemedIcon(icon: FLucideIcons.shield),
                           title: Text(t.financial.safetyThreshold),
-                          suffix: const Icon(FIcons.chevronRight),
+                          suffix: const Icon(FLucideIcons.chevronRight),
                           onPress: () {
                             Navigator.of(context).pop(); // 关闭抽屉栏
                             _showSafetyThresholdSettings(context);
                           },
                         ),
                         FItem(
-                          prefix: const ThemedIcon(icon: FIcons.calculator),
+                          prefix: const ThemedIcon(
+                            icon: FLucideIcons.calculator,
+                          ),
                           title: Text(t.financial.dailyBurnRate),
-                          suffix: const Icon(FIcons.chevronRight),
+                          suffix: const Icon(FLucideIcons.chevronRight),
                           onPress: () {
                             Navigator.of(context).pop(); // 关闭抽屉栏
                             _showDailySpendingSettings(context);
@@ -831,7 +839,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Icon(
-                            FIcons.user,
+                            FLucideIcons.user,
                             size: 16,
                             color: colorScheme.primaryForeground,
                           ),
@@ -844,13 +852,13 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                             children: [
                               Text(
                                 t.financial.financialAssistant,
-                                style: theme.typography.sm.copyWith(
+                                style: theme.typography.body.sm.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                               Text(
                                 t.financial.manageFinancialSettings,
-                                style: theme.typography.xs.copyWith(
+                                style: theme.typography.body.xs.copyWith(
                                   color: colorScheme.mutedForeground,
                                 ),
                               ),
@@ -858,7 +866,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           ),
                         ),
                         Icon(
-                          FIcons.chevronRight,
+                          FLucideIcons.chevronRight,
                           size: 16,
                           color: colorScheme.mutedForeground,
                         ),
@@ -956,7 +964,7 @@ class _SafetyThresholdBottomSheetState
                 children: [
                   Text(
                     t.financial.safetyThresholdSettings,
-                    style: theme.typography.lg.copyWith(
+                    style: theme.typography.body.lg.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colorScheme.foreground,
                     ),
@@ -964,7 +972,7 @@ class _SafetyThresholdBottomSheetState
                   const SizedBox(height: 8),
                   Text(
                     t.financial.setSafetyThreshold,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colorScheme.mutedForeground,
                     ),
                   ),
@@ -981,7 +989,7 @@ class _SafetyThresholdBottomSheetState
                 children: [
                   Text(
                     '¥${_currentValue.toStringAsFixed(0)}',
-                    style: theme.typography.xl2.copyWith(
+                    style: theme.typography.body.xl2.copyWith(
                       color: theme.colors.primary,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1008,7 +1016,7 @@ class _SafetyThresholdBottomSheetState
                     children: [
                       Expanded(
                         child: FButton(
-                          style: FButtonStyle.outline(),
+                          variant: .outline,
                           onPress: () => Navigator.of(context).pop(),
                           child: Text(t.common.cancel),
                         ),
@@ -1114,7 +1122,7 @@ class _DailySpendingBottomSheetState
                 children: [
                   Text(
                     t.financial.dailyBurnRateSettings,
-                    style: theme.typography.lg.copyWith(
+                    style: theme.typography.body.lg.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.foreground,
                     ),
@@ -1122,7 +1130,7 @@ class _DailySpendingBottomSheetState
                   const SizedBox(height: 8),
                   Text(
                     t.financial.setDailyBurnRate,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -1139,7 +1147,7 @@ class _DailySpendingBottomSheetState
                 children: [
                   Text(
                     '¥${_currentValue.toStringAsFixed(0)} / 天',
-                    style: theme.typography.xl2.copyWith(
+                    style: theme.typography.body.xl2.copyWith(
                       color: theme.colors.primary,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1166,7 +1174,7 @@ class _DailySpendingBottomSheetState
                     children: [
                       Expanded(
                         child: FButton(
-                          style: FButtonStyle.outline(),
+                          variant: .outline,
                           onPress: () => Navigator.of(context).pop(),
                           child: Text(t.common.cancel),
                         ),

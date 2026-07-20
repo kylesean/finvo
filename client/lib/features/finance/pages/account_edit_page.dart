@@ -76,21 +76,21 @@ class _FinancialAccountEditPageState
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.chevronLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
           onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
         centerTitle: true,
         title: Text(
           t.account.editTitle,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(FIcons.trash, color: colors.destructive),
+            icon: Icon(FLucideIcons.trash, color: colors.destructive),
             onPressed: _handleDelete,
           ),
         ],
@@ -138,13 +138,13 @@ class _FinancialAccountEditPageState
             label: t.account.nameLabel,
             child: TextField(
               controller: _nameController,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 hintText: t.account.nameHint,
-                hintStyle: theme.typography.base.copyWith(
+                hintStyle: theme.typography.body.md.copyWith(
                   color: colors.mutedForeground,
                 ),
                 border: InputBorder.none,
@@ -170,7 +170,7 @@ class _FinancialAccountEditPageState
             colors: colors,
             icon: Text(
               _selectedCurrency.symbol,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.primary,
               ),
@@ -184,14 +184,14 @@ class _FinancialAccountEditPageState
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
               ],
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
                 fontWeight: FontWeight.w600,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
               decoration: InputDecoration(
                 hintText: t.account.amountHint,
-                hintStyle: theme.typography.base.copyWith(
+                hintStyle: theme.typography.body.md.copyWith(
                   color: colors.mutedForeground,
                 ),
                 border: InputBorder.none,
@@ -207,7 +207,7 @@ class _FinancialAccountEditPageState
           _buildTapRow(
             theme: theme,
             colors: colors,
-            icon: Icon(FIcons.globe, size: 20, color: colors.primary),
+            icon: Icon(FLucideIcons.globe, size: 20, color: colors.primary),
             label: t.account.currencyLabel,
             value:
                 '${_selectedCurrency.code} - ${_selectedCurrency.localizedName}',
@@ -274,7 +274,7 @@ class _FinancialAccountEditPageState
               children: [
                 Text(
                   label,
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
@@ -313,14 +313,14 @@ class _FinancialAccountEditPageState
                 children: [
                   Text(
                     label,
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       color: colors.foreground,
                       fontWeight: FontWeight.w500,
                     ),
@@ -330,7 +330,7 @@ class _FinancialAccountEditPageState
             ),
             if (showArrow)
               Icon(
-                FIcons.chevronRight,
+                FLucideIcons.chevronRight,
                 size: 16,
                 color: colors.mutedForeground,
               ),
@@ -366,14 +366,14 @@ class _FinancialAccountEditPageState
                 children: [
                   Text(
                     title,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: FontWeight.w500,
                       color: colors.foreground,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -427,24 +427,35 @@ class _FinancialAccountEditPageState
       showFDialog<void>(
         context: context,
         builder: (context, style, animation) => FDialog(
-          style: style.call,
           animation: animation,
-          title: Text(t.account.deleteAccount),
-          body: Text(t.account.deleteConfirm),
-          actions: [
-            FButton(
-              onPress: () {
-                Navigator.pop(context);
-                unawaited(_performDelete());
-              },
-              child: Text(t.common.delete),
-            ),
-            FButton(
-              style: FButtonStyle.outline(),
-              onPress: () => Navigator.pop(context),
-              child: Text(t.common.cancel),
-            ),
-          ],
+          builder: (context, dialogStyle) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(t.account.deleteAccount, style: dialogStyle.titleTextStyle),
+              const SizedBox(height: 8),
+              Text(t.account.deleteConfirm, style: dialogStyle.bodyTextStyle),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FButton(
+                    onPress: () {
+                      Navigator.pop(context);
+                      unawaited(_performDelete());
+                    },
+                    child: Text(t.common.delete),
+                  ),
+                  const SizedBox(width: 8),
+                  FButton(
+                    variant: .outline,
+                    onPress: () => Navigator.pop(context),
+                    child: Text(t.common.cancel),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

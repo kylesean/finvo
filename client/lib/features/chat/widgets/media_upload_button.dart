@@ -42,7 +42,7 @@ class MediaUploadButton extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           child: Center(
             child: Icon(
-              FIcons.plus,
+              FLucideIcons.plus,
               size: 20,
               color: enabled ? colors.foreground : colors.mutedForeground,
             ),

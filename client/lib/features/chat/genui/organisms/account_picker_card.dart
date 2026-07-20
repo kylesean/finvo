@@ -41,7 +41,7 @@ class AccountPickerCard extends StatelessWidget {
       children: [
         Text(
           displayTitle,
-          style: theme.typography.base.copyWith(
+          style: theme.typography.body.md.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -51,7 +51,7 @@ class AccountPickerCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             subtitle!,
-            style: theme.typography.xs.copyWith(color: colors.primary),
+            style: theme.typography.body.xs.copyWith(color: colors.primary),
           ),
         ],
 
@@ -91,11 +91,11 @@ class AccountPickerCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(FIcons.check, size: 16, color: colors.primary),
+              Icon(FLucideIcons.check, size: 16, color: colors.primary),
               const SizedBox(width: 8),
               Text(
                 displayConfirm,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colors.primary,
                 ),

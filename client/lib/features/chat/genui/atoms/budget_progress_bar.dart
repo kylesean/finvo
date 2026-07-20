@@ -67,7 +67,7 @@ class BudgetProgressBar extends StatelessWidget {
             width: 40,
             child: Text(
               '${percentage.toStringAsFixed(0)}%',
-              style: context.theme.typography.xs.copyWith(
+              style: context.theme.typography.body.xs.copyWith(
                 color: barColor,
                 fontWeight: FontWeight.w600,
               ),

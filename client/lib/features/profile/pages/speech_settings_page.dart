@@ -69,12 +69,12 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.chevronLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
           onPressed: () => context.pop(),
         ),
         title: Text(
           t.speech.title,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -98,7 +98,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                     padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
                     child: Text(
                       t.speech.service,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.mutedForeground,
                         fontWeight: FontWeight.w500,
                       ),
@@ -111,7 +111,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                         SpeechServiceType.system,
                         t.speech.systemVoice,
                         t.speech.systemVoiceSubtitle,
-                        FIcons.smartphone,
+                        FLucideIcons.smartphone,
                         state,
                       ),
                       _buildServiceTile(
@@ -119,7 +119,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                         SpeechServiceType.websocket,
                         t.speech.selfHostedASR,
                         t.speech.selfHostedASRSubtitle,
-                        FIcons.network,
+                        FLucideIcons.network,
                         state,
                       ),
                     ],
@@ -133,7 +133,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                       padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
                       child: Text(
                         t.speech.serverConfig,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.mutedForeground,
                           fontWeight: FontWeight.w500,
                         ),
@@ -143,27 +143,25 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: colors.muted.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(
-                          theme.style.borderRadius.bottomLeft.x,
-                        ),
+                        borderRadius: theme.style.borderRadius.md,
                         border: Border.all(color: colors.border),
                       ),
                       child: Column(
                         children: [
                           FTextField(
-                            controller: _hostController,
+                            control: .managed(controller: _hostController),
                             label: Text(t.speech.serverAddress),
                             hint: '192.168.1.100',
                           ),
                           const SizedBox(height: 16),
                           FTextField(
-                            controller: _portController,
+                            control: .managed(controller: _portController),
                             label: Text(t.speech.port),
                             hint: '8080',
                           ),
                           const SizedBox(height: 16),
                           FTextField(
-                            controller: _pathController,
+                            control: .managed(controller: _pathController),
                             label: Text(t.speech.path),
                             hint: '/ws',
                           ),
@@ -195,14 +193,14 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                     child: Row(
                       children: [
                         Icon(
-                          FIcons.info,
+                          FLucideIcons.info,
                           size: 14,
                           color: colors.mutedForeground,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           t.speech.info,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: colors.mutedForeground,
                             fontWeight: FontWeight.w500,
                           ),
@@ -214,7 +212,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: Text(
                       t.speech.infoContent,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.mutedForeground,
                         height: 1.5,
                       ),
@@ -247,14 +245,14 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
       ),
       title: Text(
         title,
-        style: theme.typography.base.copyWith(
+        style: theme.typography.body.md.copyWith(
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           color: isSelected ? colors.primary : colors.foreground,
         ),
       ),
       subtitle: Text(subtitle),
       suffix: isSelected
-          ? Icon(FIcons.check, size: 20, color: colors.primary)
+          ? Icon(FLucideIcons.check, size: 20, color: colors.primary)
           : null,
       onPress: state.isSaving
           ? null

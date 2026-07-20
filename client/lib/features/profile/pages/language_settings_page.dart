@@ -23,12 +23,12 @@ class LanguageSettingsPage extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.chevronLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
           onPressed: () => context.pop(),
         ),
         title: Text(
           t.settings.languageSettings,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -47,7 +47,7 @@ class LanguageSettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
               child: Text(
                 t.settings.selectLanguage,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                   fontWeight: FontWeight.w500,
                 ),
@@ -63,7 +63,7 @@ class LanguageSettingsPage extends ConsumerWidget {
                 return FTile(
                   title: Text(
                     displayName,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: isSelected
                           ? FontWeight.w600
                           : FontWeight.w400,
@@ -71,7 +71,11 @@ class LanguageSettingsPage extends ConsumerWidget {
                     ),
                   ),
                   suffix: isSelected
-                      ? Icon(FIcons.check, size: 20, color: colors.primary)
+                      ? Icon(
+                          FLucideIcons.check,
+                          size: 20,
+                          color: colors.primary,
+                        )
                       : null,
                   onPress: () => _changeLanguage(context, ref, locale),
                 );

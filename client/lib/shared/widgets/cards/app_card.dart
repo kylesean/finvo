@@ -38,7 +38,7 @@ class AppCard extends StatelessWidget {
         color: effectiveColor,
         borderRadius: borderRadius != null
             ? BorderRadius.circular(borderRadius!)
-            : theme.style.borderRadius,
+            : theme.style.borderRadius.md,
         border: border,
         // Typically Forui cards might have a subtle border instead of shadow,
         // or be flat. Let's keep it simple and flat by default unless border is passed.

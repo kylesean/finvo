@@ -24,12 +24,12 @@ class AmountSettingsPage extends ConsumerWidget {
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.chevronLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
           onPressed: () => context.pop(),
         ),
         title: Text(
           t.settings.amountDisplayStyle,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -48,7 +48,7 @@ class AmountSettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
               child: Text(
                 t.settings.selectAmountStyle,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                   fontWeight: FontWeight.w500,
                 ),
@@ -81,7 +81,7 @@ class AmountSettingsPage extends ConsumerWidget {
                 return FTile(
                   title: Text(
                     title,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: isSelected
                           ? FontWeight.w600
                           : FontWeight.w400,
@@ -90,12 +90,16 @@ class AmountSettingsPage extends ConsumerWidget {
                   ),
                   subtitle: Text(
                     subtitle,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
                   suffix: isSelected
-                      ? Icon(FIcons.check, size: 20, color: colors.primary)
+                      ? Icon(
+                          FLucideIcons.check,
+                          size: 20,
+                          color: colors.primary,
+                        )
                       : null,
                   onPress: () {
                     unawaited(
@@ -123,12 +127,16 @@ class AmountSettingsPage extends ConsumerWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(FIcons.info, size: 16, color: colors.mutedForeground),
+                  Icon(
+                    FLucideIcons.info,
+                    size: 16,
+                    color: colors.mutedForeground,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       t.settings.amountStyleNotice,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                         height: 1.5,
                       ),

@@ -111,7 +111,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: Icon(
-            isSuccess ? FIcons.check : FIcons.triangleAlert,
+            isSuccess ? FLucideIcons.check : FLucideIcons.triangleAlert,
             color: isSuccess ? semantic.successAccent : semantic.warningAccent,
             size: 24,
           ),
@@ -123,7 +123,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
             children: [
               Text(
                 '关联成功',
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colors.foreground,
                 ),
@@ -131,7 +131,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 '已关联到「${model.spaceName}」',
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
@@ -205,7 +205,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
       children: [
         Text(
           value,
-          style: theme.typography.xl.copyWith(
+          style: theme.typography.body.xl.copyWith(
             fontWeight: FontWeight.bold,
             color: valueColor ?? colors.foreground,
           ),
@@ -213,7 +213,9 @@ class SpaceAssociationReceipt extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+          style: theme.typography.body.xs.copyWith(
+            color: colors.mutedForeground,
+          ),
         ),
       ],
     );
@@ -230,12 +232,12 @@ class SpaceAssociationReceipt extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(FIcons.check, size: 16, color: semantic.successAccent),
+          Icon(FLucideIcons.check, size: 16, color: semantic.successAccent),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: semantic.successAccent,
               ),
             ),

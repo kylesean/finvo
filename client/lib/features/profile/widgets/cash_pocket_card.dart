@@ -156,7 +156,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                       const SizedBox(width: 12),
                       Text(
                         'My Cash Pockets',
-                        style: theme.typography.xl.copyWith(
+                        style: theme.typography.body.xl.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                         ),
@@ -188,7 +188,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                     const SizedBox(width: 12),
                     Text(
                       'Loading...',
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
@@ -200,7 +200,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                   children: [
                     Text(
                       'Load Failed',
-                      style: theme.typography.xl.copyWith(
+                      style: theme.typography.body.xl.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -208,7 +208,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                     const SizedBox(height: 4),
                     Text(
                       state.error!,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
@@ -224,7 +224,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                       builder: (context, child) {
                         return Text(
                           _formatCurrency(_balanceAnimation.value),
-                          style: theme.typography.xl.copyWith(
+                          style: theme.typography.body.xl.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 32,
@@ -240,7 +240,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                       children: [
                         Text(
                           'Last updated: ${_formatLastUpdated(state.lastUpdatedAt)}',
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
@@ -257,7 +257,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                             ),
                             child: Text(
                               '${state.accounts.length} Sources',
-                              style: theme.typography.sm.copyWith(
+                              style: theme.typography.body.sm.copyWith(
                                 color: Colors.white,
                                 fontSize: 10,
                               ),
@@ -273,7 +273,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
 
               // Update Now button
               FButton(
-                style: FButtonStyle.outline(),
+                variant: .outline,
                 onPress: () => unawaited(context.push('/forecast', extra: 1)),
                 child: Text(
                   'Update Now',

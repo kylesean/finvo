@@ -57,7 +57,7 @@ class ActionBottomSheet extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.title,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       color: isDestructive
                           ? destructiveItemColor
                           : (item.color ?? itemTextColor),
@@ -87,7 +87,7 @@ class ActionBottomSheet extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16.0),
         decoration: BoxDecoration(
           color: sectionBackgroundColor,
-          borderRadius: theme.style.borderRadius,
+          borderRadius: theme.style.borderRadius.md,
           border: Border.all(color: dividerColor, width: 1),
         ),
         child: Column(

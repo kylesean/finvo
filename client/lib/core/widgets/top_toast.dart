@@ -33,14 +33,22 @@ class TopToast {
 
     // Select color and icon based on type
     final (backgroundColor, iconData, iconColor) = switch (type) {
-      ToastType.success => (Colors.green.shade800, FIcons.check, Colors.green),
-      ToastType.error => (colors.destructive, FIcons.x, colors.destructive),
+      ToastType.success => (
+        Colors.green.shade800,
+        FLucideIcons.check,
+        Colors.green,
+      ),
+      ToastType.error => (
+        colors.destructive,
+        FLucideIcons.x,
+        colors.destructive,
+      ),
       ToastType.warning => (
         Colors.orange.shade800,
-        FIcons.circleAlert,
+        FLucideIcons.circleAlert,
         Colors.orange,
       ),
-      ToastType.info => (colors.primary, FIcons.info, colors.primary),
+      ToastType.info => (colors.primary, FLucideIcons.info, colors.primary),
     };
 
     _currentEntry = OverlayEntry(
@@ -250,13 +258,17 @@ class _TopToastWidgetState extends State<_TopToastWidget>
                     Expanded(
                       child: Text(
                         widget.message,
-                        style: widget.theme.typography.sm.copyWith(
+                        style: widget.theme.typography.body.sm.copyWith(
                           color: colors.foreground,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    Icon(FIcons.x, size: 16, color: colors.mutedForeground),
+                    Icon(
+                      FLucideIcons.x,
+                      size: 16,
+                      color: colors.mutedForeground,
+                    ),
                   ],
                 ),
               ),
