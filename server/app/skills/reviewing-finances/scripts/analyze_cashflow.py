@@ -36,7 +36,7 @@ from uuid import UUID
 
 def json_serializer(obj: Any) -> Any:
     """JSON serializer for objects not serializable by default."""
-    if isinstance(obj, (datetime, date)):
+    if isinstance(obj, datetime | date):
         return obj.isoformat()
     raise TypeError(f"Type {type(obj)} not serializable")
 
@@ -75,7 +75,19 @@ async def main() -> None:
     """Execution entry point for the skill script."""
     parser = argparse.ArgumentParser(description="Analyze financial health")
     parser.add_argument("--days", type=int, default=90, help="Analysis period in days")
+    parser.add_argument("--start-date", type=str, default=None, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", type=str, default=None, help="End date (YYYY-MM-DD)")
     args = parser.parse_args()
+
+    # If start_date and end_date are specified, compute effective days
+    effective_days = args.days
+    if args.start_date and args.end_date:
+        try:
+            s_date = datetime.fromisoformat(args.start_date).date()
+            e_date = datetime.fromisoformat(args.end_date).date()
+            effective_days = max((e_date - s_date).days, 1)
+        except ValueError:
+            pass
 
     # Get user ID from environment
     user_id = os.environ.get("USER_ID")
@@ -85,7 +97,7 @@ async def main() -> None:
 
     try:
         user_uuid = UUID(user_id)
-        time_range = days_to_time_range(args.days)
+        time_range = days_to_time_range(effective_days)
 
         async with db_manager.session_factory() as session:
             service = StatisticsService(session)

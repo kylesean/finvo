@@ -42,21 +42,19 @@ This skill answers two fundamental questions:
 ### analyze_spending.py - Spending Breakdown
 
 ```bash
-uv run python app/skills/reviewing-finances/scripts/analyze_spending.py
+uv run python app/skills/reviewing-finances/scripts/analyze_spending.py --start-date YYYY-MM-01 --end-date YYYY-MM-DD
 ```
 
 Analyzes spending patterns and provides category breakdown.
 
-**Optional Parameters** (via stdin JSON):
-- `days`: Analysis period, default 90 days
-- `category`: Focus on specific category (e.g., "FOOD_DINING")
+**Parameters**:
+- `--start-date`: Start date YYYY-MM-DD (e.g. 1st day of current month)
+- `--end-date`: End date YYYY-MM-DD (e.g. today)
+- `--days`: Analysis period in days, default 90 (used if start_date/end_date omitted)
+- `--category`: Focus on specific category (e.g., "FOOD_DINING")
 
-**Output**:
-- `by_category`: Spending by category with percentages
-- `top_spenders`: Highest individual expenses
-- `trends`: Month-over-month changes
-
-**GenUI Component**: `SpendingBreakdownCard`
+Note for LLM: When user asks for "本月消费" (current month spending), calculate start_date as 1st day of current month and end_date as today, then run with CLI arguments directly.
+CRITICAL: Execute scripts directly without `cd`, `&&`, or `echo |` pipelines to satisfy security policies.
 
 ### analyze_cashflow.py - Income/Expense + Health Score
 
@@ -67,6 +65,8 @@ uv run python app/skills/reviewing-finances/scripts/analyze_cashflow.py --days 9
 Analyzes income vs expense balance and calculates financial health.
 
 **Parameters**:
+- `--start-date`: Start date YYYY-MM-DD
+- `--end-date`: End date YYYY-MM-DD
 - `--days`: Analysis period (default: 90)
 
 **Output**:

@@ -34,7 +34,7 @@ def load_skill(
     for handling the task.
 
     Args:
-        skill_name: Name of the skill to load (shown in Available Skills section)
+        skill_name: The EXACT ID string of the skill (e.g. 'reviewing-finances', 'planning-budgets', 'forecasting-finances', 'managing-shared-ledgers'). MUST match an ID from Available Skills. Do NOT pass script names or Chinese text.
         tool_call_id: Injected by LangGraph runtime, do not provide manually
 
     Returns:
@@ -43,9 +43,9 @@ def load_skill(
     skill = _skill_loader.get_skill(skill_name)
 
     if not skill:
-        # Skill not found - provide helpful error
+        # Provide clean guidance notice to LLM for self-correction
         available_skills = _skill_loader.load_skills()
-        available_names = ", ".join(s.name for s in available_skills)
+        available_names = [s.name for s in available_skills]
 
         logger.warning(
             "skill_not_found",

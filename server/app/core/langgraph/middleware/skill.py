@@ -52,7 +52,7 @@ class SkillMiddleware(BaseMiddleware):
         # Build skill list for system prompt
         skills_list = []
         for skill in skills:
-            skills_list.append(f"- **{skill.name}**: {skill.description}")
+            skills_list.append(f"- ID: `{skill.name}` | Description: {skill.description}")
 
             # Cache allowed tools for each skill
             if skill.allowed_tools:
@@ -76,12 +76,7 @@ class SkillMiddleware(BaseMiddleware):
         messages: list[BaseMessage],
         config: dict[str, Any],
     ) -> tuple[list[BaseMessage], dict[str, Any]]:
-        """Inject skill catalog into system prompt.
-
-        This implements "progressive disclosure" - only skill names and
-        descriptions are shown upfront. Full content is loaded on-demand
-        via the load_skill tool.
-        """
+        """Inject skill catalog into system prompt."""
         if not self._skills_prompt:
             return messages, config
 
@@ -92,7 +87,8 @@ class SkillMiddleware(BaseMiddleware):
 
 {self._skills_prompt}
 
-Use the `load_skill` tool when you need detailed instructions for a specific task."""
+IMPORTANT RULE FOR `load_skill`:
+When calling `load_skill`, you MUST set `skill_name` EXACTLY to one of the ID strings listed above (e.g., `reviewing-finances`). Do NOT pass script names (like `analyze_spending.py`) or Chinese translated text."""
 
         # Find and update system message, or insert new one
         updated_messages = list(messages)

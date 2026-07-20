@@ -190,7 +190,16 @@ async def main() -> None:
         print(json.dumps({"success": False, "error": "USER_ID environment variable not set"}))
         sys.exit(1)
 
-    # Parse options from stdin
+    # Parse options from CLI arguments and stdin
+    import argparse
+
+    cli_parser = argparse.ArgumentParser()
+    cli_parser.add_argument("--start-date", dest="start_date", help="Start date YYYY-MM-DD")
+    cli_parser.add_argument("--end-date", dest="end_date", help="End date YYYY-MM-DD")
+    cli_parser.add_argument("--days", type=int, help="Days")
+    cli_parser.add_argument("--category", help="Category filter")
+    cli_args, _ = cli_parser.parse_known_args()
+
     options = {}
     if not sys.stdin.isatty():
         try:
@@ -200,14 +209,25 @@ async def main() -> None:
         except (json.JSONDecodeError, ValueError):
             pass
 
-    days = options.get("days", 90)
-    category = options.get("category")
+    start_date_str = cli_args.start_date or options.get("start_date")
+    end_date_str = cli_args.end_date or options.get("end_date")
+    days = cli_args.days or options.get("days", 90)
+    category = cli_args.category or options.get("category")
 
     try:
         user_uuid = UUID(user_uuid_str)
 
-        end_date = datetime.now().date()
-        start_date = end_date - timedelta(days=days)
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.fromisoformat(start_date_str).date()
+                end_date = datetime.fromisoformat(end_date_str).date()
+                days = max((end_date - start_date).days, 1)
+            except ValueError:
+                end_date = datetime.now().date()
+                start_date = end_date - timedelta(days=days)
+        else:
+            end_date = datetime.now().date()
+            start_date = end_date - timedelta(days=days)
 
         async with db_manager.session_factory() as session:
             service = TransactionQueryService(session)
