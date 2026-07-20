@@ -132,11 +132,16 @@ class SkillLoader:
         return "\n".join(xml_parts)
 
     def get_skill(self, skill_name: str) -> SkillMetadata | None:
-        """Get a skill by name."""
+        """Get a skill by exact name."""
         skills = self.load_skills()
+        if not skills or not skill_name:
+            return None
+
+        clean_name = skill_name.strip()
         for skill in skills:
-            if skill.name == skill_name:
+            if skill.name == clean_name:
                 return skill
+
         return None
 
     def activate_skill_prompt(self, skill_name: str) -> str | None:

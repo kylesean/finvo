@@ -393,9 +393,9 @@ def inject_system_message(
 
     # Check if first message is a system message
     if messages and isinstance(messages[0], SystemMessage):
-        # Prepend to existing system message
+        # Append dynamic context to existing system message to maintain stable prefix for caching
         existing_content = messages[0].content
-        messages[0] = SystemMessage(content=f"{system_content}\n\n{existing_content}")
+        messages[0] = SystemMessage(content=f"{existing_content}\n\n{system_content}")
         return messages
     else:
         # Insert new system message at beginning

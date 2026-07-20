@@ -115,11 +115,11 @@ class DynamicContextMiddleware(BaseMiddleware):
         # Get user timezone from config or default to Asia/Shanghai
         user_timezone = config.get("configurable", {}).get("user_timezone", "Asia/Shanghai")
 
-        # Get current time in user's timezone (ISO 8601 format)
+        # Get current date in user's timezone (YYYY-MM-DD + Day of week + Timezone)
         current_time = datetime.now(ZoneInfo(user_timezone))
-        time_str = current_time.isoformat()  # e.g., "2024-12-04T14:30:00+08:00"
+        time_str = f"{current_time.strftime('%Y-%m-%d (%A)')} [{user_timezone}]"
 
-        context_parts.append(f"Current time: {time_str}")
+        context_parts.append(f"Current date: {time_str}")
 
         # Add user ID if available
         if user_uuid:

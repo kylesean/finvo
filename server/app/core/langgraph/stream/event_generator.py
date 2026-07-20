@@ -248,6 +248,16 @@ class EventGenerator:
 
             # 发送 tool_call_end 事件
             is_success = ComponentDetector.is_successful_result(tool_result)
+            logger.info(
+                "langgraph_tool_execution_trace",
+                tool_name=tool_name,
+                tool_call_id=tool_call_id,
+                duration_ms=duration_ms,
+                is_success=is_success,
+                tool_result_preview=json.dumps(tool_result, ensure_ascii=False)[:300]
+                if isinstance(tool_result, dict)
+                else str(tool_result)[:300],
+            )
             yield GenUIEvent(
                 type="tool_call_end",
                 data={
