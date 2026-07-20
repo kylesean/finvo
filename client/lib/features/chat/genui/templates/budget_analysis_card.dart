@@ -106,7 +106,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
           Expanded(
             child: Text(
               data['title'] as String? ?? t.chat.genui.budgetAnalysis.title,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.primary,
                 fontWeight: FontWeight.w700,
               ),
@@ -120,7 +120,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             ),
             child: Text(
               t.chat.genui.budgetAnalysis.periodDays(days: periodDays),
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.primary,
                 fontWeight: FontWeight.w500,
               ),
@@ -155,7 +155,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
               children: [
                 Text(
                   t.chat.genui.budgetAnalysis.totalExpense,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
@@ -169,7 +169,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                       type: TransactionType.expense,
                       semantic: AmountSemantic.trend,
                       currency: currency,
-                      style: theme.typography.xl.copyWith(
+                      style: theme.typography.body.xl.copyWith(
                         fontSize: 32,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -1,
@@ -204,8 +204,8 @@ class BudgetAnalysisCard extends ConsumerWidget {
         ? colors.mutedForeground
         : (isUp ? colors.destructive : semantic.successAccent);
     final icon = isFlat
-        ? FIcons.minus
-        : (isUp ? FIcons.trendingUp : FIcons.trendingDown);
+        ? FLucideIcons.minus
+        : (isUp ? FLucideIcons.trendingUp : FLucideIcons.trendingDown);
     final prefix = isUp ? '+' : '';
 
     return Container(
@@ -223,7 +223,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             t.chat.genui.budgetAnalysis.momChange(
               change: '$prefix${changePercent.toStringAsFixed(1)}',
             ),
-            style: theme.typography.xs.copyWith(
+            style: theme.typography.body.xs.copyWith(
               color: trendColor,
               fontWeight: FontWeight.w600,
             ),
@@ -255,7 +255,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
         children: [
           Text(
             t.chat.genui.budgetAnalysis.categoryDistribution,
-            style: theme.typography.xs.copyWith(
+            style: theme.typography.body.xs.copyWith(
               color: colors.mutedForeground,
               fontWeight: FontWeight.w600,
             ),
@@ -312,14 +312,14 @@ class BudgetAnalysisCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       category.displayText,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.foreground,
                       ),
                     ),
                   ),
                   Text(
                     '$currencySymbol${_formatAmount(total)}',
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -329,7 +329,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                     child: Text(
                       '${percentage.toStringAsFixed(0)}%',
                       textAlign: TextAlign.right,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.foreground,
                         fontWeight: FontWeight.w600,
                       ),
@@ -360,7 +360,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
           const SizedBox(height: 12),
           Text(
             t.chat.genui.budgetAnalysis.topSpenders,
-            style: theme.typography.xs.copyWith(
+            style: theme.typography.body.xs.copyWith(
               color: colors.mutedForeground,
               fontWeight: FontWeight.w600,
             ),
@@ -397,7 +397,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                           description.isNotEmpty
                               ? description
                               : category.displayText,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
@@ -406,7 +406,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                         if (date.isNotEmpty)
                           Text(
                             date,
-                            style: theme.typography.xs.copyWith(
+                            style: theme.typography.body.xs.copyWith(
                               color: colors.mutedForeground,
                             ),
                           ),
@@ -417,7 +417,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                     amount: amount,
                     type: TransactionType.expense,
                     currency: currency,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -455,11 +455,11 @@ class BudgetAnalysisCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(FIcons.lightbulb, size: 18, color: accentColor),
+              Icon(FLucideIcons.lightbulb, size: 18, color: accentColor),
               const SizedBox(width: 8),
               Text(
                 t.budgetSuggestion.financialInsights,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: accentColor,
                   fontWeight: FontWeight.w700,
                 ),
@@ -477,7 +477,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                 children: [
                   Text(
                     '•',
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: accentColor,
                       fontWeight: FontWeight.w700,
                     ),
@@ -486,7 +486,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       text,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.foreground,
                         height: 1.4,
                       ),

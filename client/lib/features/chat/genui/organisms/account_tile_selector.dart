@@ -44,7 +44,7 @@ class AccountTileSelector extends StatefulWidget {
 }
 
 class _AccountTileSelectorState extends State<AccountTileSelector> {
-  late FSelectTileGroupController<String> _controller;
+  late FMultiValueNotifier<String> _controller;
 
   @override
   void initState() {
@@ -82,9 +82,11 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
         FSelectTile<String>(
           title: Text(
             widget.noAccountText ?? t.chat.genui.transactionCard.noAccount,
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
-          suffix: Icon(FIcons.x, size: 14, color: colors.mutedForeground),
+          suffix: Icon(FLucideIcons.x, size: 14, color: colors.mutedForeground),
           value: '',
           enabled: widget.enabled,
         ),
@@ -101,7 +103,7 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
         FSelectTile<String>(
           title: Text(
             name,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: colors.foreground,
               fontWeight: FontWeight.w500,
             ),
@@ -109,7 +111,7 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
           subtitle: type != null
               ? Text(
                   _getAccountTypeDisplay(type),
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.mutedForeground,
                   ),
                 )
@@ -122,15 +124,14 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
     }
 
     return FSelectTileGroup<String>(
-      selectController: _controller,
+      control: .managed(
+        controller: _controller,
+        onChange: (values) {
+          widget.onChanged?.call(values.isEmpty ? null : values.first);
+        },
+      ),
       maxHeight: widget.maxHeight ?? 240,
       divider: FItemDivider.full,
-      onSelect: (record) {
-        final (value, selected) = record;
-        if (selected) {
-          widget.onChanged?.call(value.isEmpty ? null : value);
-        }
-      },
       children: tiles,
     );
   }
@@ -150,24 +151,24 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
   IconData _getAccountIcon(String? type) {
     switch (type?.toUpperCase()) {
       case 'CASH':
-        return FIcons.banknote;
+        return FLucideIcons.banknote;
       case 'BANK':
       case 'DEPOSIT':
-        return FIcons.building;
+        return FLucideIcons.building;
       case 'CREDIT_CARD':
-        return FIcons.creditCard;
+        return FLucideIcons.creditCard;
       case 'ALIPAY':
       case 'WECHAT':
       case 'EWALLET':
-        return FIcons.smartphone;
+        return FLucideIcons.smartphone;
       case 'INVESTMENT':
-        return FIcons.trendingUp;
+        return FLucideIcons.trendingUp;
       case 'RECEIVABLE':
-        return FIcons.arrowRightLeft;
+        return FLucideIcons.arrowRightLeft;
       case 'LOAN':
-        return FIcons.landmark;
+        return FLucideIcons.landmark;
       default:
-        return FIcons.wallet;
+        return FLucideIcons.wallet;
     }
   }
 

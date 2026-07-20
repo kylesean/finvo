@@ -64,13 +64,13 @@ class _ChatConversationDrawerState
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ThemedIcon.large(
-              icon: FIcons.messageCircle,
+              icon: FLucideIcons.messageCircle,
               backgroundColor: theme.colors.secondary,
             ),
             const SizedBox(height: 16),
             Text(
               t.chat.noHistory,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w500,
                 color: theme.colors.foreground,
               ),
@@ -78,7 +78,7 @@ class _ChatConversationDrawerState
             const SizedBox(height: 8),
             Text(
               t.chat.startNewChat,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: theme.colors.mutedForeground,
               ),
               textAlign: TextAlign.center,
@@ -99,14 +99,14 @@ class _ChatConversationDrawerState
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ThemedIcon.large(
-              icon: FIcons.x,
+              icon: FLucideIcons.x,
               backgroundColor: theme.colors.destructive.withValues(alpha: 0.1),
               iconColor: theme.colors.destructive,
             ),
             const SizedBox(height: 16),
             Text(
               t.common.loadFailed,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w500,
                 color: theme.colors.destructive,
               ),
@@ -114,7 +114,7 @@ class _ChatConversationDrawerState
             const SizedBox(height: 8),
             Text(
               error.toString(),
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: theme.colors.mutedForeground,
               ),
               textAlign: TextAlign.center,
@@ -141,7 +141,7 @@ class _ChatConversationDrawerState
                     ),
                     child: Text(
                       t.common.retry,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: theme.colors.foreground,
                         fontWeight: FontWeight.w500,
                       ),
@@ -205,7 +205,7 @@ class _ChatConversationDrawerState
                   children: [
                     // Session icon - using ThemedIcon for design consistency
                     ThemedIcon(
-                      icon: FIcons.messageCircle,
+                      icon: FLucideIcons.messageCircle,
                       backgroundColor: isSelected
                           ? theme.colors.primary.withValues(alpha: 0.15)
                           : theme.colors.secondary,
@@ -221,7 +221,7 @@ class _ChatConversationDrawerState
                         children: [
                           Text(
                             (conversation as dynamic).title as String,
-                            style: theme.typography.sm.copyWith(
+                            style: theme.typography.body.sm.copyWith(
                               fontWeight: FontWeight.w500,
                               color: isSelected
                                   ? theme.colors.primary
@@ -240,7 +240,7 @@ class _ChatConversationDrawerState
                             ).format(
                               (conversation as dynamic).updatedAt as DateTime,
                             ),
-                            style: theme.typography.xs.copyWith(
+                            style: theme.typography.body.xs.copyWith(
                               color: theme.colors.mutedForeground,
                             ),
                           ),
@@ -357,7 +357,7 @@ class _ChatConversationDrawerState
                       child: Row(
                         children: [
                           Icon(
-                            FIcons.search,
+                            FLucideIcons.search,
                             size: 16,
                             color: theme.colors.mutedForeground,
                           ),
@@ -365,7 +365,7 @@ class _ChatConversationDrawerState
                           Expanded(
                             child: Text(
                               t.chat.searchHint,
-                              style: theme.typography.sm.copyWith(
+                              style: theme.typography.body.sm.copyWith(
                                 color: theme.colors.mutedForeground,
                               ),
                             ),
@@ -383,11 +383,14 @@ class _ChatConversationDrawerState
                 children: [
                   FItem(
                     prefix: Icon(
-                      FIcons.database,
+                      FLucideIcons.database,
                       size: 16,
                       color: theme.colors.mutedForeground,
                     ),
-                    title: Text(t.chat.library, style: theme.typography.sm),
+                    title: Text(
+                      t.chat.library,
+                      style: theme.typography.body.sm,
+                    ),
                     onPress: () {
                       // TODO: Open library
                     },
@@ -456,7 +459,7 @@ class _ChatConversationDrawerState
                     children: [
                       Text(
                         user?.username ?? '...',
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -464,7 +467,7 @@ class _ChatConversationDrawerState
                       ),
                       Text(
                         t.chat.viewProfile,
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: theme.colors.mutedForeground,
                         ),
                       ),
@@ -472,7 +475,7 @@ class _ChatConversationDrawerState
                   ),
                 ),
                 Icon(
-                  FIcons.chevronRight,
+                  FLucideIcons.chevronRight,
                   size: 16,
                   color: theme.colors.mutedForeground,
                 ),
@@ -502,7 +505,11 @@ class _ChatConversationDrawerState
             attachmentId: attachmentId,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              return Icon(FIcons.user, size: 16, color: colors.mutedForeground);
+              return Icon(
+                FLucideIcons.user,
+                size: 16,
+                color: colors.mutedForeground,
+              );
             },
           );
         }
@@ -511,7 +518,7 @@ class _ChatConversationDrawerState
       }
     }
 
-    return Icon(FIcons.user, size: 16, color: colors.mutedForeground);
+    return Icon(FLucideIcons.user, size: 16, color: colors.mutedForeground);
   }
 
   // Build category column
@@ -538,7 +545,7 @@ class _ChatConversationDrawerState
             Expanded(
               child: Text(
                 title,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   fontWeight: FontWeight.w500,
                   color: theme.colors.foreground,
                 ),
@@ -668,7 +675,7 @@ class _ChatConversationDrawerState
                     children: [
                       Text(
                         conversation.title,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           fontWeight: FontWeight.w500,
                           color: isSelected
                               ? theme.colors.primary
@@ -683,7 +690,7 @@ class _ChatConversationDrawerState
                           'M/d HH:mm',
                           TranslationProvider.of(context).locale.languageCode,
                         ).format(conversation.updatedAt),
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: theme.colors.mutedForeground,
                         ),
                       ),
@@ -714,21 +721,35 @@ class _ChatConversationDrawerState
     final confirmed = await showAdaptiveDialog<bool>(
       context: context,
       builder: (dialogContext) => FDialog(
-        direction: Axis.horizontal,
-        title: Text(t.chat.deleteConversation),
-        body: Text(t.chat.deleteConversationConfirm),
-        actions: [
-          FButton(
-            style: FButtonStyle.outline(),
-            onPress: () => Navigator.of(dialogContext).pop(false),
-            child: Text(t.common.cancel),
-          ),
-          FButton(
-            style: FButtonStyle.destructive(),
-            onPress: () => Navigator.of(dialogContext).pop(true),
-            child: Text(t.common.delete),
-          ),
-        ],
+        builder: (context, dialogStyle) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.chat.deleteConversation, style: dialogStyle.titleTextStyle),
+            const SizedBox(height: 8),
+            Text(
+              t.chat.deleteConversationConfirm,
+              style: dialogStyle.bodyTextStyle,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.of(dialogContext).pop(false),
+                  child: Text(t.common.cancel),
+                ),
+                const SizedBox(width: 8),
+                FButton(
+                  variant: .destructive,
+                  onPress: () => Navigator.of(dialogContext).pop(true),
+                  child: Text(t.common.delete),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
 
@@ -828,7 +849,7 @@ class _ChatConversationDrawerState
                 },
                 child: Text(
                   t.common.cancel,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: theme.colors.primary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -873,7 +894,7 @@ class _ChatConversationDrawerState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ThemedIcon.large(
-                icon: FIcons.triangleAlert,
+                icon: FLucideIcons.triangleAlert,
                 backgroundColor: theme.colors.destructive.withValues(
                   alpha: 0.1,
                 ),
@@ -882,7 +903,7 @@ class _ChatConversationDrawerState
               const SizedBox(height: 16),
               Text(
                 t.chat.searchFailed,
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   fontWeight: FontWeight.w500,
                   color: theme.colors.destructive,
                 ),
@@ -890,7 +911,7 @@ class _ChatConversationDrawerState
               const SizedBox(height: 8),
               Text(
                 searchState.error!,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: theme.colors.mutedForeground,
                 ),
                 textAlign: TextAlign.center,
@@ -913,20 +934,20 @@ class _ChatConversationDrawerState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ThemedIcon.large(
-                icon: FIcons.search,
+                icon: FLucideIcons.search,
                 backgroundColor: theme.colors.secondary,
               ),
               const SizedBox(height: 16),
               Text(
                 t.chat.noRelatedFound,
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   color: theme.colors.mutedForeground,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 t.chat.tryOtherKeywords,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: theme.colors.mutedForeground.withValues(alpha: 0.7),
                 ),
               ),
@@ -957,10 +978,10 @@ class _ChatConversationDrawerState
   // ignore: unused_element - reserved for future search suggestions feature
   Widget _buildSearchSuggestions(BuildContext context, FThemeData theme) {
     final suggestions = [
-      {'icon': FIcons.hash, 'title': 'First Principles Engine Breakdown'},
-      {'icon': FIcons.terminal, 'title': 'Linux Ubuntu Command Master'},
-      {'icon': FIcons.circle, 'title': 'Laravel GPT'},
-      {'icon': FIcons.code, 'title': 'Technical Guidance Master'},
+      {'icon': FLucideIcons.hash, 'title': 'First Principles Engine Breakdown'},
+      {'icon': FLucideIcons.terminal, 'title': 'Linux Ubuntu Command Master'},
+      {'icon': FLucideIcons.circle, 'title': 'Laravel GPT'},
+      {'icon': FLucideIcons.code, 'title': 'Technical Guidance Master'},
     ];
 
     return ListView.separated(
@@ -983,7 +1004,7 @@ class _ChatConversationDrawerState
               Expanded(
                 child: Text(
                   suggestion['title'] as String,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: theme.colors.foreground,
                   ),
                 ),
@@ -1052,7 +1073,7 @@ class _ChatConversationDrawerState
                 result.title,
                 query,
                 result.highlights.where((h) => h.field == 'title').toList(),
-                theme.typography.sm.copyWith(
+                theme.typography.body.sm.copyWith(
                   fontWeight: FontWeight.w500,
                   color: theme.colors.foreground,
                   height: 1.3,
@@ -1066,7 +1087,7 @@ class _ChatConversationDrawerState
               result.snippet,
               query,
               result.highlights.where((h) => h.field == 'snippet').toList(),
-              theme.typography.xs.copyWith(
+              theme.typography.body.xs.copyWith(
                 color: theme.colors.mutedForeground,
                 height: 1.4,
               ),
@@ -1081,7 +1102,7 @@ class _ChatConversationDrawerState
                   : result.createdAt != null
                   ? 'Created ${_formatDate(result.createdAt!)}'
                   : '',
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: theme.colors.mutedForeground.withValues(alpha: 0.7),
               ),
             ),
@@ -1188,7 +1209,7 @@ class _ChatConversationDrawerState
                       child: Row(
                         children: [
                           Icon(
-                            FIcons.search,
+                            FLucideIcons.search,
                             size: 16,
                             color: theme.colors.mutedForeground,
                           ),
@@ -1212,7 +1233,7 @@ class _ChatConversationDrawerState
                 },
                 child: Text(
                   t.common.cancel,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: theme.colors.primary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1292,7 +1313,7 @@ class _ChatConversationDrawerState
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   conversation.title,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected
                         ? theme.colors.primary
@@ -1406,7 +1427,7 @@ class _SearchTextFieldState extends State<_SearchTextField> {
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: Icon(
-              FIcons.search,
+              FLucideIcons.search,
               size: 16,
               color: theme.colors.mutedForeground,
             ),
@@ -1417,12 +1438,12 @@ class _SearchTextFieldState extends State<_SearchTextField> {
               controller: _controller,
               focusNode: _focusNode,
               autofocus: true,
-              style: theme.typography.sm,
+              style: theme.typography.body.sm,
               textAlignVertical: TextAlignVertical.center,
               decoration: InputDecoration(
                 isCollapsed: true,
                 hintText: t.common.search,
-                hintStyle: theme.typography.sm.copyWith(
+                hintStyle: theme.typography.body.sm.copyWith(
                   color: theme.colors.mutedForeground,
                 ),
                 border: InputBorder.none,
@@ -1441,7 +1462,7 @@ class _SearchTextFieldState extends State<_SearchTextField> {
               child: Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: Icon(
-                  FIcons.x,
+                  FLucideIcons.x,
                   size: 16,
                   color: theme.colors.mutedForeground,
                 ),
@@ -1515,12 +1536,12 @@ class _FullscreenSearchTextFieldState
             controller: _controller,
             focusNode: _focusNode,
             autofocus: true,
-            style: theme.typography.sm,
+            style: theme.typography.body.sm,
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               isCollapsed: true,
               hintText: t.common.search,
-              hintStyle: theme.typography.sm.copyWith(
+              hintStyle: theme.typography.body.sm.copyWith(
                 color: theme.colors.mutedForeground,
               ),
               border: InputBorder.none,
@@ -1549,7 +1570,11 @@ class _FullscreenSearchTextFieldState
                 color: theme.colors.mutedForeground.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
               ),
-              child: Icon(FIcons.x, size: 10, color: theme.colors.background),
+              child: Icon(
+                FLucideIcons.x,
+                size: 10,
+                color: theme.colors.background,
+              ),
             ),
           ),
       ],

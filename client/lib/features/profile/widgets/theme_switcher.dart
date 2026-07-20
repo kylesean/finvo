@@ -32,7 +32,7 @@ class ThemeSwitcher extends ConsumerWidget {
                   color: colorScheme.foreground,
                 ),
                 const SizedBox(width: 8),
-                Text(t.appearance.title, style: theme.typography.lg),
+                Text(t.appearance.title, style: theme.typography.body.lg),
               ],
             ),
             const SizedBox(height: 16),
@@ -91,7 +91,7 @@ class ThemeSwitcher extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Text(
                     'Current Theme: ${_getCurrentThemeName(currentTheme)}',
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colorScheme.mutedForeground,
                     ),
                   ),
@@ -101,7 +101,7 @@ class ThemeSwitcher extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               t.appearance.colorScheme,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.foreground,
               ),
@@ -218,7 +218,7 @@ class _PaletteOption extends StatelessWidget {
                 Expanded(
                   child: Text(
                     palette.label,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.foreground,
                     ),
@@ -246,7 +246,7 @@ class _PaletteOption extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               'Light / Dark',
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
               ),
             ),

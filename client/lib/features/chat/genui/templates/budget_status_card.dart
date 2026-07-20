@@ -209,7 +209,7 @@ class BudgetStatusCard extends StatelessWidget {
                   children: [
                     Text(
                       t.chat.genui.budgetStatusCard.totalBudget,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.foreground,
                         fontWeight: FontWeight.w600,
                       ),
@@ -217,7 +217,7 @@ class BudgetStatusCard extends StatelessWidget {
                     if (budgetId != null) ...[
                       const SizedBox(width: 4),
                       Icon(
-                        FIcons.chevronRight,
+                        FLucideIcons.chevronRight,
                         size: 14,
                         color: colors.mutedForeground,
                       ),
@@ -226,7 +226,7 @@ class BudgetStatusCard extends StatelessWidget {
                 ),
                 Text(
                   '${percentage.toStringAsFixed(0)}%',
-                  style: theme.typography.lg.copyWith(
+                  style: theme.typography.body.lg.copyWith(
                     fontWeight: FontWeight.w700,
                     color: statusColor,
                   ),
@@ -251,7 +251,7 @@ class BudgetStatusCard extends StatelessWidget {
                   t.chat.genui.budgetStatusCard.spent(
                     amount: _formatAmount(spent),
                   ),
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
@@ -259,7 +259,7 @@ class BudgetStatusCard extends StatelessWidget {
                   t.chat.genui.budgetStatusCard.remaining(
                     amount: _formatAmount(remaining),
                   ),
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: remaining >= 0 ? colors.primary : colors.destructive,
                     fontWeight: FontWeight.w600,
                   ),
@@ -328,12 +328,12 @@ class BudgetStatusCard extends StatelessWidget {
       decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1)),
       child: Row(
         children: [
-          Icon(FIcons.chartPie, color: statusColor, size: 20),
+          Icon(FLucideIcons.chartPie, color: statusColor, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               title,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: statusColor,
                 fontWeight: FontWeight.w600,
               ),
@@ -341,7 +341,7 @@ class BudgetStatusCard extends StatelessWidget {
           ),
           Text(
             _getStatusText(status),
-            style: theme.typography.xs.copyWith(
+            style: theme.typography.body.xs.copyWith(
               color: statusColor,
               fontWeight: FontWeight.w500,
             ),
@@ -364,8 +364,8 @@ class BudgetStatusCard extends StatelessWidget {
         ? colors.destructive
         : semantic.warningAccent;
     final icon = alertType == 'exceeded'
-        ? FIcons.circleAlert
-        : FIcons.triangleAlert;
+        ? FLucideIcons.circleAlert
+        : FLucideIcons.triangleAlert;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -381,7 +381,7 @@ class BudgetStatusCard extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: theme.typography.xs.copyWith(color: iconColor),
+              style: theme.typography.body.xs.copyWith(color: iconColor),
             ),
           ),
         ],

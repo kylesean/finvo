@@ -25,7 +25,9 @@ class ChartCard extends StatelessWidget {
         children: [
           Text(
             data['title'] as String,
-            style: theme.typography.base.copyWith(fontWeight: FontWeight.w600),
+            style: theme.typography.body.md.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 16),
           Container(
@@ -34,7 +36,7 @@ class ChartCard extends StatelessWidget {
             child: Text(
               '图表类型: ${data['chartType']}\n(需要 fl_chart 库完整实现)',
               textAlign: TextAlign.center,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),

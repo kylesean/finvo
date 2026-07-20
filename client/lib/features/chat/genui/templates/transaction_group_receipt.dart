@@ -204,7 +204,7 @@ class _TransactionGroupReceiptState
               // Category Name
               Text(
                 category.displayText,
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   fontWeight: FontWeight.bold,
                   height: 1.2,
                 ),
@@ -217,7 +217,7 @@ class _TransactionGroupReceiptState
                   ? _atomTagsRow(theme, colors, tags)
                   : Text(
                       isExpense ? t.transaction.expense : t.transaction.income,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.mutedForeground,
                         height: 1.2,
                       ),
@@ -234,7 +234,7 @@ class _TransactionGroupReceiptState
           amount,
           isExpense,
           currency: currency,
-          style: theme.typography.xl.copyWith(
+          style: theme.typography.body.xl.copyWith(
             fontWeight: FontWeight.bold,
             height: 1.2,
             letterSpacing: -0.5,
@@ -261,7 +261,7 @@ class _TransactionGroupReceiptState
             ),
             child: Text(
               tag,
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
               ),
               maxLines: 1,
@@ -286,7 +286,7 @@ class _TransactionGroupReceiptState
       currency: currency,
       style:
           style ??
-          theme.typography.sm.copyWith(
+          theme.typography.body.sm.copyWith(
             fontWeight: FontWeight.w700,
           ), // 提升默认权重和大小
     );
@@ -315,7 +315,7 @@ class _TransactionGroupReceiptState
             child: _atomActionPill(
               theme,
               colors,
-              icon: account != null ? FIcons.wallet : FIcons.link,
+              icon: account != null ? FLucideIcons.wallet : FLucideIcons.link,
               label:
                   account?.name ??
                   t.chat.genui.transactionGroupReceipt.accountAssociation,
@@ -331,7 +331,9 @@ class _TransactionGroupReceiptState
             child: _atomActionPill(
               theme,
               colors,
-              icon: associatedIds.isNotEmpty ? FIcons.users : FIcons.plus,
+              icon: associatedIds.isNotEmpty
+                  ? FLucideIcons.users
+                  : FLucideIcons.plus,
               label: associatedIds.isNotEmpty
                   ? t.chat.genui.transactionGroupReceipt.spaceCount(
                       count: associatedIds.length,
@@ -375,7 +377,7 @@ class _TransactionGroupReceiptState
           Flexible(
             child: Text(
               label,
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: isActive ? activeColor : colors.mutedForeground,
                 fontWeight: isActive ? FontWeight.w600 : null,
               ),
@@ -452,7 +454,7 @@ class _TransactionGroupReceiptState
       decoration: BoxDecoration(color: colors.primary.withValues(alpha: 0.05)),
       child: Row(
         children: [
-          Icon(FIcons.layers, size: 18, color: colors.primary),
+          Icon(FLucideIcons.layers, size: 18, color: colors.primary),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -460,7 +462,7 @@ class _TransactionGroupReceiptState
               children: [
                 Text(
                   '${t.chat.genui.transactionGroupReceipt.title} ${t.chat.genui.transactionGroupReceipt.count(count: count)}',
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colors.primary,
                   ),
@@ -469,7 +471,7 @@ class _TransactionGroupReceiptState
                   children: [
                     Text(
                       '${t.chat.genui.transactionGroupReceipt.total} ',
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -478,7 +480,7 @@ class _TransactionGroupReceiptState
                       type: TransactionType.expense,
                       semantic: AmountSemantic.status,
                       showSign: false,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                         fontWeight: FontWeight.w500,
                       ),
@@ -506,13 +508,13 @@ class _TransactionGroupReceiptState
       child: Row(
         children: [
           _buildToggleButton(
-            icon: FIcons.layoutPanelLeft,
+            icon: FLucideIcons.layoutPanelLeft,
             isSelected: !_isListView,
             onTap: () => setState(() => _isListView = false),
             colors: colors,
           ),
           _buildToggleButton(
-            icon: FIcons.list,
+            icon: FLucideIcons.list,
             isSelected: _isListView,
             onTap: () => setState(() => _isListView = true),
             colors: colors,
@@ -859,86 +861,102 @@ class _TransactionGroupReceiptState
     await showFDialog<void>(
       context: context,
       builder: (dialogContext, style, animation) => FDialog(
-        style: style.call,
         animation: animation,
-        title: Row(
-          children: [
-            Icon(
-              FIcons.triangleAlert,
-              color: theme.semantic.warningAccent,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(t.chat.genui.transactionGroupReceipt.currencyMismatchTitle),
-          ],
-        ),
-        body: Column(
+        builder: (context, dialogStyle) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              t.chat.genui.transactionGroupReceipt.currencyMismatchDesc,
-              style: theme.typography.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+            Row(
+              children: [
+                Icon(
+                  FLucideIcons.triangleAlert,
+                  color: theme.semantic.warningAccent,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  t.chat.genui.transactionGroupReceipt.currencyMismatchTitle,
+                  style: dialogStyle.titleTextStyle,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.chat.genui.transactionGroupReceipt.currencyMismatchDesc,
+                  style: theme.typography.body.sm.copyWith(
+                    color: colors.mutedForeground,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.muted.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoRow(
+                        theme,
+                        colors,
+                        t.chat.genui.transactionGroupReceipt.transactionAmount,
+                        '${amount.toStringAsFixed(2)} $fromCurrency',
+                      ),
+                      const SizedBox(height: 8),
+                      _buildInfoRow(
+                        theme,
+                        colors,
+                        t.chat.genui.transactionGroupReceipt.accountCurrency,
+                        toCurrency,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildInfoRow(
+                        theme,
+                        colors,
+                        t.chat.genui.transactionGroupReceipt.targetAccount,
+                        accountName,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  t.chat.genui.transactionGroupReceipt.currencyMismatchNote,
+                  style: theme.typography.body.xs.copyWith(
+                    color: theme.semantic.warningAccent,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colors.muted.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildInfoRow(
-                    theme,
-                    colors,
-                    t.chat.genui.transactionGroupReceipt.transactionAmount,
-                    '${amount.toStringAsFixed(2)} $fromCurrency',
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FButton(
+                  onPress: () {
+                    confirmed = true;
+                    Navigator.pop(dialogContext);
+                  },
+                  child: Text(
+                    t.chat.genui.transactionGroupReceipt.confirmAssociate,
                   ),
-                  const SizedBox(height: 8),
-                  _buildInfoRow(
-                    theme,
-                    colors,
-                    t.chat.genui.transactionGroupReceipt.accountCurrency,
-                    toCurrency,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildInfoRow(
-                    theme,
-                    colors,
-                    t.chat.genui.transactionGroupReceipt.targetAccount,
-                    accountName,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              t.chat.genui.transactionGroupReceipt.currencyMismatchNote,
-              style: theme.typography.xs.copyWith(
-                color: theme.semantic.warningAccent,
-                fontStyle: FontStyle.italic,
-              ),
+                ),
+                const SizedBox(width: 8),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.pop(dialogContext),
+                  child: Text(t.common.cancel),
+                ),
+              ],
             ),
           ],
         ),
-        actions: [
-          FButton(
-            onPress: () {
-              confirmed = true;
-              Navigator.pop(dialogContext);
-            },
-            child: Text(t.chat.genui.transactionGroupReceipt.confirmAssociate),
-          ),
-          FButton(
-            style: FButtonStyle.outline(),
-            onPress: () => Navigator.pop(dialogContext),
-            child: Text(t.common.cancel),
-          ),
-        ],
       ),
     );
 
@@ -956,11 +974,13 @@ class _TransactionGroupReceiptState
       children: [
         Text(
           label,
-          style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+          style: theme.typography.body.sm.copyWith(
+            color: colors.mutedForeground,
+          ),
         ),
         Text(
           value,
-          style: theme.typography.sm.copyWith(fontWeight: FontWeight.w600),
+          style: theme.typography.body.sm.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -1088,7 +1108,7 @@ class _TransactionGroupReceiptState
             children: [
               Text(
                 t.chat.genui.transactionGroupReceipt.selectSpace,
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1118,7 +1138,7 @@ class _TransactionGroupReceiptState
                     child: Row(
                       children: [
                         Icon(
-                          FIcons.users,
+                          FLucideIcons.users,
                           size: 18,
                           color: isSelected
                               ? context.theme.semantic.sharedSpaceAccent
@@ -1128,7 +1148,7 @@ class _TransactionGroupReceiptState
                         Expanded(
                           child: Text(
                             name,
-                            style: theme.typography.sm.copyWith(
+                            style: theme.typography.body.sm.copyWith(
                               fontWeight: isSelected ? FontWeight.bold : null,
                               color: isSelected
                                   ? context.theme.semantic.sharedSpaceAccent

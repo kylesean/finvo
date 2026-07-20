@@ -153,17 +153,17 @@ class SystemSpeechService implements SpeechRecognitionService {
 
       await _speech.listen(
         onResult: _onResult,
-        localeId: localeId,
-        listenFor: const Duration(
-          seconds: 30,
-        ), // Maximum listening time 30 seconds
-        pauseFor: const Duration(
-          seconds: 3,
-        ), // Automatically end after 3 seconds of pause
         listenOptions: SpeechListenOptions(
           listenMode: ListenMode.dictation,
           cancelOnError: false,
           partialResults: true,
+          localeId: localeId,
+          listenFor: const Duration(
+            seconds: 30,
+          ), // Maximum listening time 30 seconds
+          pauseFor: const Duration(
+            seconds: 3,
+          ), // Automatically end after 3 seconds of pause
         ),
       );
 

@@ -85,7 +85,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
               padding: const EdgeInsets.only(left: 6),
               child: Text(
                 '(${widget.toolCall.durationMs}ms)',
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: theme.colors.mutedForeground.withValues(alpha: 0.5),
                   fontSize: 12,
                 ),
@@ -103,7 +103,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
         widget.toolCall.status != ToolExecutionStatus.pending) {
       return Text(
         label,
-        style: theme.typography.sm.copyWith(
+        style: theme.typography.body.sm.copyWith(
           color: widget.toolCall.status == ToolExecutionStatus.error
               ? colors.destructive
               : colors.mutedForeground,
@@ -135,7 +135,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
           },
           child: Text(
             label,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w500,
             ),
@@ -279,20 +279,28 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
           builder: (context, child) {
             return Transform.rotate(
               angle: _controller.value * 2 * 3.14159,
-              child: Icon(FIcons.loader, size: 14, color: theme.colors.primary),
+              child: Icon(
+                FLucideIcons.loader,
+                size: 14,
+                color: theme.colors.primary,
+              ),
             );
           },
         );
       case ToolExecutionStatus.success:
-        return const Icon(FIcons.check, size: 14, color: Colors.green);
+        return const Icon(FLucideIcons.check, size: 14, color: Colors.green);
       case ToolExecutionStatus.error:
         return Icon(
-          FIcons.triangleAlert,
+          FLucideIcons.triangleAlert,
           size: 14,
           color: theme.colors.destructive,
         );
       case ToolExecutionStatus.cancelled:
-        return Icon(FIcons.x, size: 14, color: theme.colors.mutedForeground);
+        return Icon(
+          FLucideIcons.x,
+          size: 14,
+          color: theme.colors.mutedForeground,
+        );
     }
   }
 }

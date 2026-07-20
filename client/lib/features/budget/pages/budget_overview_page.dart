@@ -48,7 +48,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
       appBar: AppBar(
         title: Text(
           t.budget.title,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -57,7 +57,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.arrowLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.arrowLeft, color: colors.foreground),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -71,7 +71,11 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                       color: colors.foreground,
                     ),
                   )
-                : Icon(FIcons.refreshCw, color: colors.foreground, size: 20),
+                : Icon(
+                    FLucideIcons.refreshCw,
+                    color: colors.foreground,
+                    size: 20,
+                  ),
             onPressed: state.isLoading
                 ? null
                 : () => ref.read(budgetSummaryProvider.notifier).refresh(),
@@ -84,7 +88,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         backgroundColor: colors.primary,
         foregroundColor: colors.primaryForeground,
         shape: const CircleBorder(),
-        child: const Icon(FIcons.plus, size: 28),
+        child: const Icon(FLucideIcons.plus, size: 28),
       ),
     );
   }
@@ -202,11 +206,15 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(FIcons.triangleAlert, size: 48, color: colors.destructive),
+            Icon(
+              FLucideIcons.triangleAlert,
+              size: 48,
+              color: colors.destructive,
+            ),
             const SizedBox(height: 16),
             Text(
               t.budget.loadFailed,
-              style: theme.typography.lg.copyWith(
+              style: theme.typography.body.lg.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -215,7 +223,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
             Text(
               error,
               textAlign: TextAlign.center,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -241,19 +249,21 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            FIcons.wallet,
+            FLucideIcons.wallet,
             size: 64,
             color: colors.mutedForeground.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             t.budget.noBudget,
-            style: theme.typography.lg.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.lg.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             t.budget.createHint,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground.withValues(alpha: 0.7),
             ),
           ),
@@ -301,7 +311,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
             children: [
               Text(
                 budget.displayName,
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colors.primaryForeground,
                 ),
@@ -314,7 +324,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                 ),
                 child: Text(
                   budget.periodType.label,
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.primaryForeground,
                   ),
                 ),
@@ -334,14 +344,14 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   children: [
                     Text(
                       t.budget.used,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.primaryForeground.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
-                      style: theme.typography.xl2.copyWith(
+                      style: theme.typography.body.xl2.copyWith(
                         fontWeight: FontWeight.bold,
                         color: colors.primaryForeground,
                       ),
@@ -354,14 +364,14 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                 children: [
                   Text(
                     t.budget.remaining,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.primaryForeground.withValues(alpha: 0.8),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount)}',
-                    style: theme.typography.lg.copyWith(
+                    style: theme.typography.body.lg.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.primaryForeground,
                     ),
@@ -394,7 +404,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
             children: [
               Text(
                 t.budget.usedPercent(percent: usagePercent.toStringAsFixed(1)),
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.primaryForeground.withValues(alpha: 0.8),
                 ),
               ),
@@ -402,7 +412,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                 t.budget.budgetAmount(
                   amount: '$_currencySymbol${_formatAmount(budget.amount)}',
                 ),
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.primaryForeground.withValues(alpha: 0.8),
                 ),
               ),
@@ -433,7 +443,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
               children: [
                 Text(
                   t.budget.monthlySummary,
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colors.foreground,
                   ),
@@ -451,7 +461,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   ),
                   child: Text(
                     '${usagePercent.toStringAsFixed(0)}%',
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: isExceeded ? colors.destructive : colors.primary,
                       fontWeight: FontWeight.w600,
                     ),
@@ -511,12 +521,14 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
       children: [
         Text(
           label,
-          style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+          style: theme.typography.body.xs.copyWith(
+            color: colors.mutedForeground,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: theme.typography.base.copyWith(
+          style: theme.typography.body.md.copyWith(
             fontWeight: FontWeight.w600,
             color: valueColor,
           ),
@@ -529,7 +541,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
   Widget _buildSectionHeader(FThemeData theme, FColors colors, String title) {
     return Text(
       title,
-      style: theme.typography.sm.copyWith(
+      style: theme.typography.body.sm.copyWith(
         fontWeight: FontWeight.w500,
         color: colors.mutedForeground,
       ),
@@ -594,7 +606,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                             Flexible(
                               child: Text(
                                 budget.displayName,
-                                style: theme.typography.base.copyWith(
+                                style: theme.typography.body.md.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: isPaused
                                       ? colors.mutedForeground
@@ -616,7 +628,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                                 ),
                                 child: Text(
                                   t.budget.paused,
-                                  style: theme.typography.xs.copyWith(
+                                  style: theme.typography.body.xs.copyWith(
                                     color: colors.mutedForeground,
                                     fontSize: 10,
                                   ),
@@ -627,7 +639,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                         ),
                         Text(
                           _getCategoryDisplayName(budget.categoryKey),
-                          style: theme.typography.xs.copyWith(
+                          style: theme.typography.body.xs.copyWith(
                             color: colors.mutedForeground,
                           ),
                         ),
@@ -640,14 +652,14 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                     children: [
                       Text(
                         '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
-                        style: theme.typography.base.copyWith(
+                        style: theme.typography.body.md.copyWith(
                           fontWeight: FontWeight.w600,
                           color: statusColor,
                         ),
                       ),
                       Text(
                         '$_currencySymbol${_formatAmount(budget.amount)}',
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -679,7 +691,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                     t.budget.usedPercent(
                       percent: usagePercent.toStringAsFixed(0),
                     ),
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -693,7 +705,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                             amount:
                                 '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount.abs())}',
                           ),
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: statusColor,
                       fontWeight: FontWeight.w500,
                     ),
@@ -739,35 +751,35 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
 
   /// get category icon
   IconData _getCategoryIcon(String? categoryKey) {
-    if (categoryKey == null) return FIcons.wallet;
+    if (categoryKey == null) return FLucideIcons.wallet;
 
     switch (categoryKey) {
       case 'FOOD_DINING':
-        return FIcons.coffee;
+        return FLucideIcons.coffee;
       case 'TRANSPORT':
-        return FIcons.navigation;
+        return FLucideIcons.navigation;
       case 'SHOPPING':
-        return FIcons.shoppingBag;
+        return FLucideIcons.shoppingBag;
       case 'ENTERTAINMENT':
-        return FIcons.film;
+        return FLucideIcons.film;
       case 'HOME_UTILITIES':
-        return FIcons.housePlus;
+        return FLucideIcons.housePlus;
       case 'HEALTHCARE':
-        return FIcons.heart;
+        return FLucideIcons.heart;
       case 'EDUCATION':
-        return FIcons.book;
+        return FLucideIcons.book;
       case 'PERSONAL':
-        return FIcons.user;
+        return FLucideIcons.user;
       case 'TRAVEL':
-        return FIcons.mapPin;
+        return FLucideIcons.mapPin;
       case 'GIFTS_CHARITY':
-        return FIcons.gift;
+        return FLucideIcons.gift;
       case 'FINANCIAL':
-        return FIcons.dollarSign;
+        return FLucideIcons.dollarSign;
       case 'OTHER':
-        return FIcons.ellipsis;
+        return FLucideIcons.ellipsis;
       default:
-        return FIcons.wallet;
+        return FLucideIcons.wallet;
     }
   }
 

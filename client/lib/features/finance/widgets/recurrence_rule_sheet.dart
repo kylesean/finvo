@@ -403,7 +403,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
             onTap: () => Navigator.of(context).pop(),
             child: Text(
               t.common.cancel,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -412,7 +412,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
             child: Text(
               t.budget.period,
               textAlign: TextAlign.center,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -422,7 +422,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
             onTap: _handleConfirm,
             child: Text(
               t.common.ok,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.primary,
                 fontWeight: FontWeight.w600,
               ),
@@ -436,7 +436,9 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   /// 周期类型切换 - 使用 FTabs 组件
   Widget _buildFrequencySelector(FThemeData theme, FColors colors) {
     return FTabs(
-      initialIndex: RecurrenceFrequency.values.indexOf(_frequency),
+      control: .managed(
+        initial: RecurrenceFrequency.values.indexOf(_frequency),
+      ),
       onPress: (index) {
         setState(() => _frequency = RecurrenceFrequency.values[index]);
       },
@@ -458,7 +460,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           // 左侧标签
           Text(
             isZh ? '重复间隔' : 'Interval',
-            style: theme.typography.sm.copyWith(color: colors.foreground),
+            style: theme.typography.body.sm.copyWith(color: colors.foreground),
           ),
           const Spacer(),
           // 右侧：- 数字 周期 +
@@ -491,7 +493,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           // 数字 + 周期单位
           Text(
             '$_interval ${isZh ? _frequency.label : (_frequency.label + (_interval > 1 ? 's' : ''))}',
-            style: theme.typography.base.copyWith(
+            style: theme.typography.body.md.copyWith(
               fontWeight: FontWeight.w600,
               color: colors.foreground,
             ),
@@ -536,7 +538,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
       children: [
         Text(
           isZh ? '选择星期' : 'Select Days',
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
             fontWeight: FontWeight.w600,
           ),
@@ -566,7 +568,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 child: Center(
                   child: Text(
                     weekday.label,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: isSelected
                           ? colors.primaryForeground
                           : colors.foreground,
@@ -592,14 +594,16 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
       ),
       child: Row(
         children: [
-          Icon(FIcons.calendarDays, size: 20, color: colors.primary),
+          Icon(FLucideIcons.calendarDays, size: 20, color: colors.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               isZh
                   ? '将在每月 ${_startDate.day} 号执行（基于开始日期）'
                   : 'Will execute on the ${_startDate.day}${_getDaySuffix(_startDate.day)} of each month (based on start date)',
-              style: theme.typography.sm.copyWith(color: colors.foreground),
+              style: theme.typography.body.sm.copyWith(
+                color: colors.foreground,
+              ),
             ),
           ),
         ],
@@ -614,7 +618,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
       children: [
         Text(
           t.dateRange.endDate,
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
             fontWeight: FontWeight.w600,
           ),
@@ -634,7 +638,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                   Expanded(
                     child: Text(
                       isZh ? '设置结束日期' : 'Set End Date',
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.foreground,
                         fontWeight: FontWeight.w500,
                       ),
@@ -671,7 +675,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                     child: Row(
                       children: [
                         Icon(
-                          FIcons.calendar,
+                          FLucideIcons.calendar,
                           size: 20,
                           color: colors.mutedForeground,
                         ),
@@ -681,7 +685,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                             _endDate != null
                                 ? '${_endDate!.year}/${_endDate!.month}/${_endDate!.day}'
                                 : (isZh ? '选择结束日期' : 'Select End Date'),
-                            style: theme.typography.sm.copyWith(
+                            style: theme.typography.body.sm.copyWith(
                               color: _endDate != null
                                   ? colors.foreground
                                   : colors.mutedForeground,
@@ -689,7 +693,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                           ),
                         ),
                         Icon(
-                          FIcons.chevronRight,
+                          FLucideIcons.chevronRight,
                           size: 16,
                           color: colors.mutedForeground,
                         ),
@@ -719,11 +723,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         children: [
           Row(
             children: [
-              Icon(FIcons.repeat, size: 18, color: colors.primary),
+              Icon(FLucideIcons.repeat, size: 18, color: colors.primary),
               const SizedBox(width: 8),
               Text(
                 isZh ? '规则预览' : 'Preview',
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.w600,
                 ),
@@ -733,7 +737,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           const SizedBox(height: 8),
           Text(
             _buildDescription(),
-            style: theme.typography.base.copyWith(
+            style: theme.typography.body.md.copyWith(
               color: colors.foreground,
               fontWeight: FontWeight.w500,
             ),
@@ -746,9 +750,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   /// 显示结束日期选择器（使用 FCalendar）
   void _showEndDatePicker(FThemeData theme, FColors colors) {
     final now = DateTime.now();
-    final controller = FCalendarController.date(
-      initialSelection: _endDate ?? _startDate.add(const Duration(days: 365)),
-    );
+    final selectedDate = _endDate ?? _startDate.add(const Duration(days: 365));
 
     unawaited(
       showModalBottomSheet<void>(
@@ -784,7 +786,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                     children: [
                       Text(
                         t.dateRange.endDate,
-                        style: theme.typography.base.copyWith(
+                        style: theme.typography.body.md.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colors.foreground,
                         ),
@@ -793,7 +795,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Icon(
-                          FIcons.x,
+                          FLucideIcons.x,
                           size: 20,
                           color: colors.mutedForeground,
                         ),
@@ -806,15 +808,22 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: FCalendar(
-                      controller: controller,
-                      start: now,
-                      end: now.add(const Duration(days: 365 * 10)),
-                      today: now,
-                      onPress: (date) {
-                        setState(() => _endDate = date);
-                        Navigator.pop(context);
-                      },
+                    child: FCalendar.grid(
+                      selectionControl: .liftedSingle(
+                        value: selectedDate,
+                        onChange: (date) {
+                          if (date != null) {
+                            setState(() => _endDate = date);
+                            Navigator.pop(context);
+                          }
+                        },
+                        toggleable: false,
+                      ),
+                      control: FGridCalendarControl(
+                        start: now,
+                        end: now.add(const Duration(days: 365 * 10)),
+                        initial: selectedDate,
+                      ),
                     ),
                   ),
                 ),

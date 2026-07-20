@@ -22,8 +22,8 @@ enum ThemedIconSize {
 ///
 /// Example:
 /// ```dart
-/// ThemedIcon(icon: FIcons.settings)
-/// ThemedIcon(icon: FIcons.users, size: ThemedIconSize.large)
+/// ThemedIcon(icon: FLucideIcons.settings)
+/// ThemedIcon(icon: FLucideIcons.users, size: ThemedIconSize.large)
 /// ```
 class ThemedIcon extends StatelessWidget {
   /// The icon to display.

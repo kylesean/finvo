@@ -80,7 +80,7 @@ class SharedSpaceCard extends ConsumerWidget {
                             ],
                           ),
                           child: Icon(
-                            FIcons.users,
+                            FLucideIcons.users,
                             size: 26,
                             color: colorScheme.primaryForeground,
                           ),
@@ -94,7 +94,7 @@ class SharedSpaceCard extends ConsumerWidget {
                             children: [
                               Text(
                                 space.name,
-                                style: theme.typography.lg.copyWith(
+                                style: theme.typography.body.lg.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.foreground,
                                 ),
@@ -104,7 +104,7 @@ class SharedSpaceCard extends ConsumerWidget {
                               const SizedBox(height: 4),
                               Text(
                                 space.description ?? '暂无描述',
-                                style: theme.typography.sm.copyWith(
+                                style: theme.typography.body.sm.copyWith(
                                   color: colorScheme.mutedForeground,
                                 ),
                                 maxLines: 1,
@@ -116,7 +116,7 @@ class SharedSpaceCard extends ConsumerWidget {
 
                         // arrow icon
                         Icon(
-                          FIcons.chevronRight,
+                          FLucideIcons.chevronRight,
                           size: 18,
                           color: colorScheme.mutedForeground.withValues(
                             alpha: 0.5,
@@ -133,7 +133,7 @@ class SharedSpaceCard extends ConsumerWidget {
                         // member count
                         _buildInfoChip(
                           context,
-                          icon: FIcons.users,
+                          icon: FLucideIcons.users,
                           label: '${space.members?.length ?? 1}位成员',
                         ),
                         const SizedBox(width: 12),
@@ -141,7 +141,7 @@ class SharedSpaceCard extends ConsumerWidget {
                         // transaction count
                         _buildInfoChip(
                           context,
-                          icon: FIcons.receipt,
+                          icon: FLucideIcons.receipt,
                           label: '${space.transactionCount}笔明细',
                         ),
 
@@ -176,7 +176,7 @@ class SharedSpaceCard extends ConsumerWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: theme.typography.xs.copyWith(
+          style: theme.typography.body.xs.copyWith(
             color: colorScheme.mutedForeground,
             fontWeight: FontWeight.w500,
           ),
@@ -205,13 +205,13 @@ class SharedSpaceCard extends ConsumerWidget {
       Color fgColor,
     ) = isCreator
         ? (
-            FIcons.crown,
+            FLucideIcons.crown,
             '创建者',
             colorScheme.primary.withValues(alpha: 0.1),
             colorScheme.primary,
           )
         : (
-            FIcons.user,
+            FLucideIcons.user,
             '成员',
             colorScheme.secondary.withValues(alpha: 0.1),
             colorScheme.secondaryForeground,
@@ -230,7 +230,7 @@ class SharedSpaceCard extends ConsumerWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: fgColor,
               fontWeight: FontWeight.w500,
             ),

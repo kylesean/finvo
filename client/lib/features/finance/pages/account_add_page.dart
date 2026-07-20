@@ -77,14 +77,14 @@ class _FinancialAccountAddPageState
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.chevronLeft, color: colors.foreground),
+          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
           onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
         centerTitle: true,
         title: Text(
           t.account.addTitle,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -133,13 +133,13 @@ class _FinancialAccountAddPageState
             label: t.account.nameLabel,
             child: TextField(
               controller: _nameController,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 hintText: _getDefaultName(definition),
-                hintStyle: theme.typography.base.copyWith(
+                hintStyle: theme.typography.body.md.copyWith(
                   color: colors.mutedForeground,
                 ),
                 border: InputBorder.none,
@@ -165,7 +165,7 @@ class _FinancialAccountAddPageState
             colors: colors,
             icon: Text(
               _selectedCurrency.symbol,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.primary, // 使用主题色
               ),
@@ -179,14 +179,14 @@ class _FinancialAccountAddPageState
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
               ],
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
                 fontWeight: FontWeight.w600,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
               decoration: InputDecoration(
                 hintText: '0.00',
-                hintStyle: theme.typography.base.copyWith(
+                hintStyle: theme.typography.body.md.copyWith(
                   color: colors.mutedForeground,
                 ),
                 border: InputBorder.none,
@@ -202,7 +202,11 @@ class _FinancialAccountAddPageState
           _buildTapRow(
             theme: theme,
             colors: colors,
-            icon: Icon(FIcons.globe, size: 20, color: colors.primary), // 使用主题色
+            icon: Icon(
+              FLucideIcons.globe,
+              size: 20,
+              color: colors.primary,
+            ), // 使用主题色
             label: t.account.currencyLabel,
             value:
                 '${_selectedCurrency.code} - ${_selectedCurrency.localizedName}',
@@ -269,7 +273,7 @@ class _FinancialAccountAddPageState
               children: [
                 Text(
                   label,
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
@@ -308,14 +312,14 @@ class _FinancialAccountAddPageState
                 children: [
                   Text(
                     label,
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       color: colors.foreground,
                       fontWeight: FontWeight.w500,
                     ),
@@ -325,7 +329,7 @@ class _FinancialAccountAddPageState
             ),
             if (showArrow)
               Icon(
-                FIcons.chevronRight,
+                FLucideIcons.chevronRight,
                 size: 16,
                 color: colors.mutedForeground,
               ),
@@ -361,14 +365,14 @@ class _FinancialAccountAddPageState
                 children: [
                   Text(
                     title,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: FontWeight.w500,
                       color: colors.foreground,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),

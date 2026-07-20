@@ -136,15 +136,17 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           Expanded(
             child: Text(
               t.statistics.title,
-              style: theme.typography.lg.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
           // Filter button
           FButton.icon(
-            style: FButtonStyle.ghost(),
+            variant: .ghost,
             onPress: _showFilterSheet,
-            child: Icon(FIcons.settings, color: colors.foreground),
+            child: Icon(FLucideIcons.settings, color: colors.foreground),
           ),
         ],
       ),
@@ -193,19 +195,21 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              FIcons.triangleAlert,
+              FLucideIcons.triangleAlert,
               size: 48,
               color: theme.colors.mutedForeground,
             ),
             const SizedBox(height: 16),
             Text(
               t.common.loadFailed,
-              style: theme.typography.lg.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               error,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: theme.colors.mutedForeground,
               ),
               textAlign: TextAlign.center,
@@ -270,11 +274,15 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(FIcons.calendar, size: 14, color: colors.primary),
+                      Icon(
+                        FLucideIcons.calendar,
+                        size: 14,
+                        color: colors.primary,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         state.dateRangeDisplayText!,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.primary,
                           fontWeight: FontWeight.w500,
                         ),
@@ -377,13 +385,15 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           children: [
             Text(
               t.statistics.ranking,
-              style: theme.typography.lg.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 AppFilterChip(
-                  icon: FIcons.arrowDownWideNarrow,
+                  icon: FLucideIcons.arrowDownWideNarrow,
                   isSelected: state.sortType == SortType.amount,
                   onTap: () => ref
                       .read(statisticsProvider.notifier)
@@ -391,7 +401,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                 ),
                 const SizedBox(width: 4),
                 AppFilterChip(
-                  icon: FIcons.calendarRange,
+                  icon: FLucideIcons.calendarRange,
                   isSelected: state.sortType == SortType.date,
                   onTap: () => ref
                       .read(statisticsProvider.notifier)
@@ -452,7 +462,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
             child: Center(
               child: Text(
                 t.statistics.noMoreData,
-                style: theme.typography.xs.copyWith(
+                style: theme.typography.body.xs.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),

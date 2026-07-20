@@ -51,8 +51,8 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
   @override
   void initState() {
     super.initState();
-    _periodPickerController = FPickerController(initialIndexes: [2]);
-    _anchorDayPickerController = FPickerController(initialIndexes: [0]);
+    _periodPickerController = FPickerController(indexes: [2]);
+    _anchorDayPickerController = FPickerController(indexes: [0]);
 
     if (widget.editId != null) {
       unawaited(_loadEditData());
@@ -80,7 +80,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           final periodIndex = BudgetPeriodType.values.indexOf(_periodType);
           _periodPickerController.dispose();
           _periodPickerController = FPickerController(
-            initialIndexes: [periodIndex >= 0 ? periodIndex : 2],
+            indexes: [periodIndex >= 0 ? periodIndex : 2],
           );
 
           _isLoadingEdit = false;
@@ -154,12 +154,16 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       backgroundColor: colors.background,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(FIcons.arrowBigLeft, color: colors.foreground, size: 20),
+        icon: Icon(
+          FLucideIcons.arrowBigLeft,
+          color: colors.foreground,
+          size: 20,
+        ),
         onPressed: () => context.pop(),
       ),
       title: Text(
         widget.editId != null ? t.budget.editBudget : t.budget.newBudget,
-        style: theme.typography.lg.copyWith(
+        style: theme.typography.body.lg.copyWith(
           fontWeight: FontWeight.w600,
           color: colors.foreground,
         ),
@@ -180,7 +184,9 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
         child: Row(
           children: [
             Icon(
-              _scope == BudgetScope.total ? FIcons.wallet : FIcons.layers,
+              _scope == BudgetScope.total
+                  ? FLucideIcons.wallet
+                  : FLucideIcons.layers,
               color: colors.primary,
               size: 20,
             ),
@@ -189,7 +195,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
               _scope == BudgetScope.total
                   ? t.budget.totalBudget
                   : t.budget.categoryBudget,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -229,14 +235,14 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
   }
 
   Widget _buildAmountSection(FThemeData theme, FColors colors) {
-    final amountFontSize = theme.typography.xl2.fontSize ?? 24.0;
+    final amountFontSize = theme.typography.body.xl2.fontSize ?? 24.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           t.budget.budgetAmountLabel,
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
             fontWeight: FontWeight.w600,
           ),
@@ -305,7 +311,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       children: [
         Text(
           t.budget.budgetCategory,
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
             fontWeight: FontWeight.w600,
           ),
@@ -339,13 +345,13 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                 Expanded(
                   child: Text(
                     _category.displayText,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: FontWeight.w500,
                       color: colors.foreground,
                     ),
                   ),
                 ),
-                Icon(FIcons.chevronRight, color: colors.mutedForeground),
+                Icon(FLucideIcons.chevronRight, color: colors.mutedForeground),
               ],
             ),
           ),
@@ -360,7 +366,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       children: [
         Text(
           t.budget.periodSettings,
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
             fontWeight: FontWeight.w600,
           ),
@@ -384,7 +390,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                   child: Row(
                     children: [
                       Icon(
-                        FIcons.calendarClock,
+                        FLucideIcons.calendarClock,
                         size: 22,
                         color: colors.mutedForeground,
                       ),
@@ -395,14 +401,14 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                           children: [
                             Text(
                               t.budget.periodType,
-                              style: theme.typography.xs.copyWith(
+                              style: theme.typography.body.xs.copyWith(
                                 color: colors.mutedForeground,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               _periodType.label,
-                              style: theme.typography.sm.copyWith(
+                              style: theme.typography.body.sm.copyWith(
                                 color: colors.foreground,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -411,7 +417,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                         ),
                       ),
                       Icon(
-                        FIcons.chevronRight,
+                        FLucideIcons.chevronRight,
                         size: 20,
                         color: colors.mutedForeground,
                       ),
@@ -431,7 +437,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                     child: Row(
                       children: [
                         Icon(
-                          FIcons.calendar,
+                          FLucideIcons.calendar,
                           size: 22,
                           color: colors.mutedForeground,
                         ),
@@ -442,7 +448,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                             children: [
                               Text(
                                 t.budget.anchorDay,
-                                style: theme.typography.xs.copyWith(
+                                style: theme.typography.body.xs.copyWith(
                                   color: colors.mutedForeground,
                                 ),
                               ),
@@ -451,7 +457,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                                 t.budget.everyMonthDay(
                                   day: _periodAnchorDay.toString(),
                                 ),
-                                style: theme.typography.sm.copyWith(
+                                style: theme.typography.body.sm.copyWith(
                                   color: colors.foreground,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -460,7 +466,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                           ),
                         ),
                         Icon(
-                          FIcons.chevronRight,
+                          FLucideIcons.chevronRight,
                           size: 20,
                           color: colors.mutedForeground,
                         ),
@@ -482,7 +488,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       children: [
         Text(
           t.budget.advancedOptions,
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
             fontWeight: FontWeight.w600,
           ),
@@ -497,7 +503,11 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                Icon(FIcons.repeat, size: 22, color: colors.mutedForeground),
+                Icon(
+                  FLucideIcons.repeat,
+                  size: 22,
+                  color: colors.mutedForeground,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -505,14 +515,14 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                     children: [
                       Text(
                         t.budget.rollover,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.foreground,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       Text(
                         t.budget.rolloverDescription,
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -697,7 +707,7 @@ class _PeriodTypePicker extends StatelessWidget {
             ),
             Text(
               t.budget.selectPeriodType,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -707,12 +717,12 @@ class _PeriodTypePicker extends StatelessWidget {
               final isSelected = type == selectedType;
               return ListTile(
                 leading: Icon(
-                  isSelected ? FIcons.check : FIcons.calendarDays,
+                  isSelected ? FLucideIcons.check : FLucideIcons.calendarDays,
                   color: isSelected ? colors.primary : colors.mutedForeground,
                 ),
                 title: Text(
                   type.label,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: colors.foreground,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
@@ -744,7 +754,7 @@ class _AnchorDayPickerState extends State<_AnchorDayPicker> {
   @override
   void initState() {
     super.initState();
-    _controller = FPickerController(initialIndexes: [widget.selectedDay - 1]);
+    _controller = FPickerController(indexes: [widget.selectedDay - 1]);
   }
 
   @override
@@ -778,7 +788,7 @@ class _AnchorDayPickerState extends State<_AnchorDayPicker> {
             ),
             Text(
               t.budget.selectAnchorDay,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -786,7 +796,7 @@ class _AnchorDayPickerState extends State<_AnchorDayPicker> {
             const SizedBox(height: 16),
             Expanded(
               child: FPicker(
-                controller: _controller,
+                control: .managed(controller: _controller),
                 children: [
                   FPickerWheel(
                     loop: false,
@@ -795,7 +805,7 @@ class _AnchorDayPickerState extends State<_AnchorDayPicker> {
                       return Center(
                         child: Text(
                           t.budget.dayOfMonth(day: day.toString()),
-                          style: theme.typography.base.copyWith(
+                          style: theme.typography.body.md.copyWith(
                             color: colors.foreground,
                             fontWeight: FontWeight.w500,
                           ),
@@ -812,7 +822,7 @@ class _AnchorDayPickerState extends State<_AnchorDayPicker> {
                 children: [
                   Expanded(
                     child: FButton(
-                      style: FButtonStyle.outline(),
+                      variant: .outline,
                       onPress: () => Navigator.pop(context),
                       child: Text(t.common.cancel),
                     ),

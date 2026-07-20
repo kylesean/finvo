@@ -255,19 +255,19 @@ abstract class TransactionModel with _$TransactionModel {
 }
 
 const Map<String, IconData> lucideIconMap = {
-  'shoppingBag': FIcons.shoppingCart,
-  'carTaxiFront': FIcons.carTaxiFront,
-  'briefcaseMedical': FIcons.briefcaseMedical,
-  'housePlus': FIcons.housePlus,
-  'libraryBig': FIcons.libraryBig,
-  'walletCards': FIcons.walletCards,
-  'gift': FIcons.gift,
-  'folderSync': FIcons.folderSync,
+  'shoppingBag': FLucideIcons.shoppingCart,
+  'carTaxiFront': FLucideIcons.carTaxiFront,
+  'briefcaseMedical': FLucideIcons.briefcaseMedical,
+  'housePlus': FLucideIcons.housePlus,
+  'libraryBig': FLucideIcons.libraryBig,
+  'walletCards': FLucideIcons.walletCards,
+  'gift': FLucideIcons.gift,
+  'folderSync': FLucideIcons.folderSync,
 };
 IconData lucideIconFromString(String raw) {
   // Allow "LucideIcons.shoppingCart" or "shoppingCart"
   final key = raw.replaceAll('LucideIcons.', '');
-  return lucideIconMap[key] ?? FIcons.shoppingBag;
+  return lucideIconMap[key] ?? FLucideIcons.shoppingBag;
 }
 
 // Parse amount field, support string and number format

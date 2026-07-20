@@ -34,14 +34,14 @@ class CommentItemWidget extends ConsumerWidget {
           content: Text(t.comment.confirmDeleteContent),
           actions: <Widget>[
             FButton(
-              style: FButtonStyle.outline(),
+              variant: .outline,
               onPress: () {
                 Navigator.of(dialogContext).pop();
               },
               child: Text(t.common.cancel),
             ),
             FButton(
-              style: FButtonStyle.destructive(),
+              variant: .destructive,
               onPress: () async {
                 Navigator.of(dialogContext).pop();
                 try {
@@ -58,7 +58,7 @@ class CommentItemWidget extends ConsumerWidget {
                   if (!context.mounted) return;
                   showFToast(
                     context: context,
-                    icon: const Icon(FIcons.triangleAlert),
+                    icon: const Icon(FLucideIcons.triangleAlert),
                     title: Text(t.comment.error),
                     description: Text(
                       '${t.comment.deleteFailed}: ${e.toString()}',
@@ -85,7 +85,7 @@ class CommentItemWidget extends ConsumerWidget {
     if (canDelete) {
       actions.add(
         FButton(
-          style: FButtonStyle.ghost(),
+          variant: .ghost,
           onPress: () {
             Navigator.of(context).pop();
             unawaited(_showDeleteConfirmDialog(context, ref));
@@ -93,7 +93,11 @@ class CommentItemWidget extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(FIcons.trash2, size: 16, color: colorScheme.destructive),
+              Icon(
+                FLucideIcons.trash2,
+                size: 16,
+                color: colorScheme.destructive,
+              ),
               const SizedBox(width: 8),
               Text(
                 t.comment.deleteComment,
@@ -147,7 +151,7 @@ class CommentItemWidget extends ConsumerWidget {
       final List<Widget> nameParts = [
         Text(
           comment.userName, // Current commenter
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             fontWeight: FontWeight.w600,
             color: colorScheme.foreground,
           ),
@@ -162,7 +166,7 @@ class CommentItemWidget extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Icon(
-              FIcons.chevronRight,
+              FLucideIcons.chevronRight,
               size: 12,
               color: colorScheme.mutedForeground,
             ),
@@ -171,7 +175,7 @@ class CommentItemWidget extends ConsumerWidget {
             // Use Flexible to avoid overflow for long usernames
             child: Text(
               comment.repliedToUserName!, // Person being replied to
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme
                     .primary, // Highlight reply target with primary color
@@ -201,7 +205,7 @@ class CommentItemWidget extends ConsumerWidget {
               FAvatar(
                 image: NetworkImage(comment.userAvatarUrl),
                 fallback: Icon(
-                  FIcons.circleUserRound,
+                  FLucideIcons.circleUserRound,
                   size: avatarIconSize,
                   color: colorScheme.mutedForeground,
                 ),
@@ -218,7 +222,7 @@ class CommentItemWidget extends ConsumerWidget {
                         const SizedBox(width: 6),
                         Text(
                           timeago.format(comment.createdAt, locale: 'zh_CN'),
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             fontSize: 11,
                             color: colorScheme.mutedForeground,
                           ),
@@ -229,7 +233,7 @@ class CommentItemWidget extends ConsumerWidget {
                             child: Padding(
                               padding: const EdgeInsets.all(4),
                               child: Icon(
-                                FIcons.ellipsis,
+                                FLucideIcons.ellipsis,
                                 color: colorScheme.mutedForeground,
                                 size: 16,
                               ),
@@ -240,7 +244,7 @@ class CommentItemWidget extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       comment.commentText,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colorScheme.foreground,
                         height: 1.4,
                       ),
@@ -254,7 +258,7 @@ class CommentItemWidget extends ConsumerWidget {
                             .end, // Align reply button to the right
                         children: [
                           FButton(
-                            style: FButtonStyle.ghost(),
+                            variant: .ghost,
                             onPress: () {
                               final currentReplyingTo = ref.read(
                                 replyingToCommentIdProvider,
@@ -287,7 +291,7 @@ class CommentItemWidget extends ConsumerWidget {
                                     24, // Give the link button a clear height
                                 child: Text(
                                   t.comment.reply,
-                                  style: theme.typography.sm.copyWith(
+                                  style: theme.typography.body.sm.copyWith(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                     color: colorScheme.mutedForeground,

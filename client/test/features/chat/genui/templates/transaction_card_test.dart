@@ -25,11 +25,14 @@ void main() {
         ],
         child: MaterialApp(
           builder: (context, child) {
-            final theme = FThemes.zinc.light;
+            final theme = FThemeData(
+              colors: FColors.neutralLight,
+              touch: false,
+            );
             final extendedTheme = FThemeData(
               colors: theme.colors,
+              touch: false,
               typography: theme.typography,
-              style: theme.style,
               extensions: [AppSemanticColors.light],
             );
             return FTheme(data: extendedTheme, child: child!);

@@ -175,7 +175,7 @@ class _StreamingToastState extends State<_StreamingToastWidget>
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
-                          FIcons.sparkles,
+                          FLucideIcons.sparkles,
                           size: 16,
                           color: colors.primary,
                         ),
@@ -192,14 +192,14 @@ class _StreamingToastState extends State<_StreamingToastWidget>
                               ),
                               child: Text(
                                 'Analyzing...',
-                                style: widget.theme.typography.sm.copyWith(
+                                style: widget.theme.typography.body.sm.copyWith(
                                   color: colors.mutedForeground,
                                 ),
                               ),
                             )
                           : Text(
                               _displayText,
-                              style: widget.theme.typography.sm.copyWith(
+                              style: widget.theme.typography.body.sm.copyWith(
                                 color: colors.foreground,
                                 height: 1.4,
                               ),

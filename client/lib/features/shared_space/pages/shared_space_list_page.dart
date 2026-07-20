@@ -80,17 +80,17 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
         centerTitle: true,
         title: Text(
           'Shared Space',
-          style: theme.typography.xl.copyWith(fontWeight: FontWeight.bold),
+          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.bold),
         ),
         backgroundColor: colorScheme.background,
         foregroundColor: colorScheme.foreground,
         elevation: 0,
         actions: [
           FButton.icon(
-            style: FButtonStyle.ghost(),
+            variant: .ghost,
             onPress: _showJoinSpaceSheet,
             child: Icon(
-              FIcons.userPlus,
+              FLucideIcons.userPlus,
               size: 20,
               color: colorScheme.foreground,
             ),
@@ -115,7 +115,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
         foregroundColor: colorScheme.primaryForeground,
         shape: const CircleBorder(),
         elevation: 2,
-        child: const Icon(FIcons.plus, size: 24),
+        child: const Icon(FLucideIcons.plus, size: 24),
       ),
     );
   }
@@ -140,7 +140,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
               ),
               child: Center(
                 child: Icon(
-                  FIcons.users,
+                  FLucideIcons.users,
                   size: 60,
                   color: colorScheme.primary.withValues(alpha: 0.4),
                 ),
@@ -149,7 +149,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
             const SizedBox(height: 32),
             Text(
               'Managing joint expenses never been easier',
-              style: theme.typography.xl.copyWith(
+              style: theme.typography.body.xl.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.foreground,
               ),
@@ -158,7 +158,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
             const SizedBox(height: 12),
             Text(
               'Create a shared space and easily sync joint\ndebts and expenses with partners or friends',
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colorScheme.mutedForeground,
                 height: 1.5,
               ),
@@ -174,7 +174,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
             ),
             const SizedBox(height: 16),
             FButton(
-              style: FButtonStyle.ghost(),
+              variant: .ghost,
               onPress: _showJoinSpaceSheet,
               child: Text(
                 'Have an invite code? Tap to join',

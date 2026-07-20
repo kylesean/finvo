@@ -357,7 +357,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
                 if (attachment.hasSignedUrl) ...[
                   const SizedBox(width: 8),
                   Icon(
-                    FIcons.externalLink,
+                    FLucideIcons.externalLink,
                     size: 18,
                     color: theme.colorScheme.primary,
                   ),
@@ -408,7 +408,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              FIcons.refreshCcw,
+              FLucideIcons.refreshCcw,
               color: theme.colorScheme.onErrorContainer,
               size: 18,
             ),
@@ -683,15 +683,15 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   IconData _getFileTypeIcon(String fileCategory) {
     switch (fileCategory) {
       case 'image':
-        return FIcons.image;
+        return FLucideIcons.image;
       case 'document':
-        return FIcons.fileText;
+        return FLucideIcons.fileText;
       case 'video':
-        return FIcons.video;
+        return FLucideIcons.video;
       case 'audio':
-        return FIcons.volume2;
+        return FLucideIcons.volume2;
       default:
-        return FIcons.file;
+        return FLucideIcons.file;
     }
   }
 }

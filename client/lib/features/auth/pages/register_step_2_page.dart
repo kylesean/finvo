@@ -97,20 +97,20 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
                       children: [
                         Text(
                           t.auth.setAccountPassword,
-                          style: theme.typography.xl2,
+                          style: theme.typography.body.xl2,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           t.auth.loginSubtitle,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: theme.colors.mutedForeground,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
                         FTextFormField.password(
-                          controller: _passwordController,
+                          control: .managed(controller: _passwordController),
                           label: Text(t.auth.password.label),
                           hint: t.auth.password.placeholder,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -133,7 +133,9 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
                         ),
                         const SizedBox(height: 20),
                         FTextFormField.password(
-                          controller: _confirmPasswordController,
+                          control: .managed(
+                            controller: _confirmPasswordController,
+                          ),
                           label: Text(t.auth.password.confirm),
                           hint: t.auth.password.confirmPlaceholder,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -183,9 +185,9 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
             top: MediaQuery.paddingOf(context).top + 8,
             left: 8,
             child: FButton.icon(
-              style: FButtonStyle.ghost(),
+              variant: .ghost,
               onPress: () => context.pop(),
-              child: const Icon(FIcons.chevronLeft),
+              child: const Icon(FLucideIcons.chevronLeft),
             ),
           ),
         ],

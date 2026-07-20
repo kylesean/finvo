@@ -23,7 +23,7 @@ class MonthlyCalendarView extends ConsumerWidget {
         margin: const EdgeInsets.all(1.0),
         decoration: BoxDecoration(
           color: Colors.grey.shade200, // Use theme color
-          borderRadius: theme.style.borderRadius, // Use theme border radius
+          borderRadius: theme.style.borderRadius.md, // Use theme border radius
         ),
       ),
     );
@@ -119,7 +119,7 @@ class MonthlyCalendarView extends ConsumerWidget {
               children: [
                 Text(
                   t.calendar.title,
-                  style: theme.typography.xl.copyWith(
+                  style: theme.typography.body.xl.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colors.foreground,
                   ),
@@ -127,7 +127,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                 Row(
                   children: [
                     FButton.icon(
-                      style: FButtonStyle.ghost(),
+                      variant: .ghost,
                       onPress: () {
                         ref
                             .read(currentDisplayMonthProvider.notifier)
@@ -136,7 +136,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                             );
                       },
                       child: Icon(
-                        FIcons.chevronLeft,
+                        FLucideIcons.chevronLeft,
                         color: colors.primary,
                         size: 18,
                       ),
@@ -157,14 +157,14 @@ class MonthlyCalendarView extends ConsumerWidget {
                           dateFormatLocale,
                         ).format(displayMonth);
                       }(),
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w500,
                         color: colors.foreground,
                       ),
                     ),
                     const SizedBox(width: 4),
                     FButton.icon(
-                      style: FButtonStyle.ghost(),
+                      variant: .ghost,
                       onPress: canNavigateToNextMonth
                           ? () {
                               ref
@@ -176,7 +176,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                             }
                           : null,
                       child: Icon(
-                        FIcons.chevronRight,
+                        FLucideIcons.chevronRight,
                         color: canNavigateToNextMonth
                             ? colors.primary
                             : colors.mutedForeground,
@@ -206,7 +206,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                       .map(
                         (day) => Text(
                           day,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: colors.mutedForeground,
                           ),
                         ),
@@ -322,7 +322,7 @@ class MonthlyCalendarView extends ConsumerWidget {
               child: Center(
                 child: Text(
                   t.calendar.loadFailed,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
@@ -396,7 +396,7 @@ class MonthlyCalendarView extends ConsumerWidget {
 
                       return Text(
                         '$dateLabel: ${currencyFormat.format(selectedSummary.totalExpense)}',
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.mutedForeground,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -404,13 +404,13 @@ class MonthlyCalendarView extends ConsumerWidget {
                     },
                     loading: () => Text(
                       t.calendar.counting,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
                     error: (error, stacktrace) => Text(
                       t.calendar.unableToCount,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -422,7 +422,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                   children: [
                     Text(
                       t.calendar.trend,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -446,7 +446,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                             margin: const EdgeInsets.only(left: 1.5),
                             decoration: BoxDecoration(
                               color: color,
-                              borderRadius: theme.style.borderRadius / 2,
+                              borderRadius: theme.style.borderRadius.xs,
                             ), // Use theme border radius
                           );
                         } catch (e) {
@@ -467,9 +467,10 @@ class MonthlyCalendarView extends ConsumerWidget {
                                   level,
                                 ),
                                 // Adjust based on theme
-                                borderRadius:
-                                    theme.style.borderRadius /
-                                    2, // Use theme border radius
+                                borderRadius: theme
+                                    .style
+                                    .borderRadius
+                                    .xs, // Use theme border radius
                               ),
                             ),
                           ),

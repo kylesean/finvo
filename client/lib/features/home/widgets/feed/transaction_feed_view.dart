@@ -162,7 +162,9 @@ class _TransactionFeedViewState extends ConsumerState<TransactionFeedView> {
           children: [
             Text(
               '${t.home.loadFailed}: ${feedState.errorMessage}',
-              style: theme.typography.base.copyWith(color: colors.destructive),
+              style: theme.typography.body.md.copyWith(
+                color: colors.destructive,
+              ),
             ),
             const SizedBox(height: 16),
             FButton(
@@ -186,7 +188,7 @@ class _TransactionFeedViewState extends ConsumerState<TransactionFeedView> {
           children: [
             Text(
               t.home.noTransactions,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -241,7 +243,7 @@ class _TransactionFeedViewState extends ConsumerState<TransactionFeedView> {
               child: Center(
                 child: Text(
                   t.home.noMoreData,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),

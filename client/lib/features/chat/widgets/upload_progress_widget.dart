@@ -101,7 +101,7 @@ class UploadProgressWidget extends StatelessWidget {
                 // 文件名
                 Text(
                   uploadData.file.name,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     fontWeight: FontWeight.w500,
                     color: colors.foreground,
                   ),
@@ -193,7 +193,7 @@ class UploadProgressWidget extends StatelessWidget {
   /// 构建文件图标
   Widget _buildFileIcon(FColors colors) {
     return Center(
-      child: Icon(FIcons.file, size: 24, color: colors.mutedForeground),
+      child: Icon(FLucideIcons.file, size: 24, color: colors.mutedForeground),
     );
   }
 
@@ -218,7 +218,7 @@ class UploadProgressWidget extends StatelessWidget {
             // 进度文本
             Text(
               '上传中... ${(uploadData.progress * 100).toInt()}%',
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -228,11 +228,11 @@ class UploadProgressWidget extends StatelessWidget {
       case UploadStatus.success:
         return Row(
           children: [
-            const Icon(FIcons.check, size: 16, color: Colors.green),
+            const Icon(FLucideIcons.check, size: 16, color: Colors.green),
             const SizedBox(width: 4),
             Text(
               '上传成功',
-              style: theme.typography.xs.copyWith(color: Colors.green),
+              style: theme.typography.body.xs.copyWith(color: Colors.green),
             ),
           ],
         );
@@ -243,11 +243,11 @@ class UploadProgressWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(FIcons.x, size: 16, color: colors.destructive),
+                Icon(FLucideIcons.x, size: 16, color: colors.destructive),
                 const SizedBox(width: 4),
                 Text(
                   '上传失败',
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.destructive,
                   ),
                 ),
@@ -257,7 +257,7 @@ class UploadProgressWidget extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 uploadData.errorMessage!,
-                style: theme.typography.xs.copyWith(
+                style: theme.typography.body.xs.copyWith(
                   color: colors.destructive.withValues(alpha: 0.8),
                 ),
                 maxLines: 2,
@@ -270,11 +270,11 @@ class UploadProgressWidget extends StatelessWidget {
       case UploadStatus.cancelled:
         return Row(
           children: [
-            Icon(FIcons.ban, size: 16, color: colors.mutedForeground),
+            Icon(FLucideIcons.ban, size: 16, color: colors.mutedForeground),
             const SizedBox(width: 4),
             Text(
               '已取消',
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -288,39 +288,47 @@ class UploadProgressWidget extends StatelessWidget {
     switch (uploadData.status) {
       case UploadStatus.uploading:
         return FButton.icon(
-          style: FButtonStyle.ghost(),
+          variant: .ghost,
           onPress: onCancel,
-          child: Icon(FIcons.x, size: 16, color: colors.mutedForeground),
+          child: Icon(FLucideIcons.x, size: 16, color: colors.mutedForeground),
         );
 
       case UploadStatus.success:
         return FButton.icon(
-          style: FButtonStyle.ghost(),
+          variant: .ghost,
           onPress: onRemove,
-          child: Icon(FIcons.x, size: 16, color: colors.mutedForeground),
+          child: Icon(FLucideIcons.x, size: 16, color: colors.mutedForeground),
         );
 
       case UploadStatus.failed:
         return Row(
           children: [
             FButton.icon(
-              style: FButtonStyle.ghost(),
+              variant: .ghost,
               onPress: onRetry,
-              child: Icon(FIcons.refreshCcw, size: 16, color: colors.primary),
+              child: Icon(
+                FLucideIcons.refreshCcw,
+                size: 16,
+                color: colors.primary,
+              ),
             ),
             FButton.icon(
-              style: FButtonStyle.ghost(),
+              variant: .ghost,
               onPress: onRemove,
-              child: Icon(FIcons.x, size: 16, color: colors.mutedForeground),
+              child: Icon(
+                FLucideIcons.x,
+                size: 16,
+                color: colors.mutedForeground,
+              ),
             ),
           ],
         );
 
       case UploadStatus.cancelled:
         return FButton.icon(
-          style: FButtonStyle.ghost(),
+          variant: .ghost,
           onPress: onRemove,
-          child: Icon(FIcons.x, size: 16, color: colors.mutedForeground),
+          child: Icon(FLucideIcons.x, size: 16, color: colors.mutedForeground),
         );
     }
   }
@@ -367,7 +375,7 @@ class BatchUploadProgressWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Text(
               '上传进度 (${_getCompletedCount()}/${uploadList.length})',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),

@@ -97,20 +97,20 @@ List<ContextualSuggestion> _getSuggestionsForSlot(TimeSlot slot) {
     case TimeSlot.morning:
       return [
         ContextualSuggestion(
-          icon: FIcons.coffee,
+          icon: FLucideIcons.coffee,
           titleGetter: () => t.chat.welcome.morning.breakfast.title,
           promptGetter: () => t.chat.welcome.morning.breakfast.prompt,
           descriptionGetter: () => t.chat.welcome.morning.breakfast.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.chartBarBig,
+          icon: FLucideIcons.chartBarBig,
           titleGetter: () => t.chat.welcome.morning.yesterdayReview.title,
           promptGetter: () => t.chat.welcome.morning.yesterdayReview.prompt,
           descriptionGetter: () =>
               t.chat.welcome.morning.yesterdayReview.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.lightbulb,
+          icon: FLucideIcons.lightbulb,
           titleGetter: () => t.chat.welcome.morning.todayBudget.title,
           promptGetter: () => t.chat.welcome.morning.todayBudget.prompt,
           descriptionGetter: () =>
@@ -121,20 +121,20 @@ List<ContextualSuggestion> _getSuggestionsForSlot(TimeSlot slot) {
     case TimeSlot.midday:
       return [
         ContextualSuggestion(
-          icon: FIcons.utensils,
+          icon: FLucideIcons.utensils,
           titleGetter: () => t.chat.welcome.midday.lunch.title,
           promptGetter: () => t.chat.welcome.midday.lunch.prompt,
           descriptionGetter: () => t.chat.welcome.midday.lunch.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.trendingUp,
+          icon: FLucideIcons.trendingUp,
           titleGetter: () => t.chat.welcome.midday.weeklyExpense.title,
           promptGetter: () => t.chat.welcome.midday.weeklyExpense.prompt,
           descriptionGetter: () =>
               t.chat.welcome.midday.weeklyExpense.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.wallet,
+          icon: FLucideIcons.wallet,
           titleGetter: () => t.chat.welcome.midday.checkBalance.title,
           promptGetter: () => t.chat.welcome.midday.checkBalance.prompt,
           descriptionGetter: () =>
@@ -145,21 +145,21 @@ List<ContextualSuggestion> _getSuggestionsForSlot(TimeSlot slot) {
     case TimeSlot.afternoon:
       return [
         ContextualSuggestion(
-          icon: FIcons.clock,
+          icon: FLucideIcons.clock,
           titleGetter: () => t.chat.welcome.afternoon.quickRecord.title,
           promptGetter: () => t.chat.welcome.afternoon.quickRecord.prompt,
           descriptionGetter: () =>
               t.chat.welcome.afternoon.quickRecord.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.chartSpline,
+          icon: FLucideIcons.chartSpline,
           titleGetter: () => t.chat.welcome.afternoon.analyzeSpending.title,
           promptGetter: () => t.chat.welcome.afternoon.analyzeSpending.prompt,
           descriptionGetter: () =>
               t.chat.welcome.afternoon.analyzeSpending.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.target,
+          icon: FLucideIcons.target,
           titleGetter: () => t.chat.welcome.afternoon.budgetProgress.title,
           promptGetter: () => t.chat.welcome.afternoon.budgetProgress.prompt,
           descriptionGetter: () =>
@@ -170,20 +170,20 @@ List<ContextualSuggestion> _getSuggestionsForSlot(TimeSlot slot) {
     case TimeSlot.evening:
       return [
         ContextualSuggestion(
-          icon: FIcons.utensils,
+          icon: FLucideIcons.utensils,
           titleGetter: () => t.chat.welcome.evening.dinner.title,
           promptGetter: () => t.chat.welcome.evening.dinner.prompt,
           descriptionGetter: () => t.chat.welcome.evening.dinner.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.clipboardList,
+          icon: FLucideIcons.clipboardList,
           titleGetter: () => t.chat.welcome.evening.todaySummary.title,
           promptGetter: () => t.chat.welcome.evening.todaySummary.prompt,
           descriptionGetter: () =>
               t.chat.welcome.evening.todaySummary.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.calendar,
+          icon: FLucideIcons.calendar,
           titleGetter: () => t.chat.welcome.evening.tomorrowPlan.title,
           promptGetter: () => t.chat.welcome.evening.tomorrowPlan.prompt,
           descriptionGetter: () =>
@@ -194,21 +194,21 @@ List<ContextualSuggestion> _getSuggestionsForSlot(TimeSlot slot) {
     case TimeSlot.night:
       return [
         ContextualSuggestion(
-          icon: FIcons.fileText,
+          icon: FLucideIcons.fileText,
           titleGetter: () => t.chat.welcome.night.makeupRecord.title,
           promptGetter: () => t.chat.welcome.night.makeupRecord.prompt,
           descriptionGetter: () =>
               t.chat.welcome.night.makeupRecord.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.chartBarBig,
+          icon: FLucideIcons.chartBarBig,
           titleGetter: () => t.chat.welcome.night.monthlyReview.title,
           promptGetter: () => t.chat.welcome.night.monthlyReview.prompt,
           descriptionGetter: () =>
               t.chat.welcome.night.monthlyReview.description,
         ),
         ContextualSuggestion(
-          icon: FIcons.moon,
+          icon: FLucideIcons.moon,
           titleGetter: () => t.chat.welcome.night.financialThinking.title,
           promptGetter: () => t.chat.welcome.night.financialThinking.prompt,
           descriptionGetter: () =>

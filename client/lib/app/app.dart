@@ -73,7 +73,7 @@ class MyApp extends ConsumerWidget {
             ? foruiDarkTheme
             : foruiLightTheme;
 
-        return FAnimatedTheme(
+        return FTheme(
           data: activeForuiTheme,
           child: FToaster(child: _buildAppContent(ref, navigator!)),
         );

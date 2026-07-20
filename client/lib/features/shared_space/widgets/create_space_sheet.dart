@@ -74,7 +74,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
               // Title area
               Text(
                 'Create Shared Space',
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colors.foreground,
                 ),
@@ -83,7 +83,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
               Text(
                 'Create a new shared space to track expenses with friends',
                 textAlign: TextAlign.center,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
@@ -91,14 +91,16 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
 
               // Space name input
               FTextField(
-                controller: _nameController,
+                control: .managed(
+                  controller: _nameController,
+                  onChange: (_) {
+                    if (_nameError != null) {
+                      setState(() => _nameError = null);
+                    }
+                  },
+                ),
                 label: const Text('Space Name'),
                 hint: 'e.g., Graduation Trip',
-                onChange: (_) {
-                  if (_nameError != null) {
-                    setState(() => _nameError = null);
-                  }
-                },
               ),
               if (_nameError != null)
                 Align(
@@ -107,7 +109,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
                     padding: const EdgeInsets.only(top: 4, left: 4),
                     child: Text(
                       _nameError!,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.destructive,
                       ),
                     ),
@@ -117,7 +119,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
 
               // Space description input
               FTextField(
-                controller: _descriptionController,
+                control: .managed(controller: _descriptionController),
                 label: const Text('Description (Optional)'),
                 hint: 'Track our joint travel expenses',
                 maxLines: 2,
@@ -130,7 +132,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
                 children: [
                   Expanded(
                     child: FButton(
-                      style: FButtonStyle.outline(),
+                      variant: .outline,
                       onPress: () => Navigator.of(context).pop(),
                       child: const Text('Cancel'),
                     ),

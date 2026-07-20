@@ -32,10 +32,9 @@ class AIService {
   AIService(
     this._storageService,
     this._dio, {
-    required String sseBaseUrl,
-    required String baseUrl,
-  }) : _sseBaseUrl = sseBaseUrl,
-       _baseUrl = baseUrl;
+    required this._sseBaseUrl,
+    required this._baseUrl,
+  });
 
   /// Stream AI response for a chat message.
   ///

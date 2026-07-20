@@ -24,7 +24,7 @@ class GreetingHeader extends StatelessWidget {
         // 问候语 - 更大更醒目
         Text(
           greeting,
-          style: theme.typography.xl2.copyWith(
+          style: theme.typography.body.xl2.copyWith(
             fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
           ),
@@ -34,7 +34,7 @@ class GreetingHeader extends StatelessWidget {
         // 副标题 - 简洁提示
         Text(
           subtitle,
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: theme.colors.mutedForeground,
           ),
           textAlign: TextAlign.center,

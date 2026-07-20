@@ -64,7 +64,7 @@ class NotificationCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 notification.title,
-                                style: theme.typography.base.copyWith(
+                                style: theme.typography.body.md.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: notification.isRead
                                       ? colors.mutedForeground
@@ -88,7 +88,7 @@ class NotificationCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           notification.message,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: notification.isRead
                                 ? colors.mutedForeground
                                 : colors.foreground,
@@ -103,10 +103,10 @@ class NotificationCard extends StatelessWidget {
                   // 删除按钮
                   if (onDelete != null)
                     FButton(
-                      style: FButtonStyle.ghost(),
+                      variant: .ghost,
                       onPress: onDelete,
                       child: Icon(
-                        FIcons.x,
+                        FLucideIcons.x,
                         size: 16,
                         color: colors.mutedForeground,
                       ),
@@ -119,11 +119,15 @@ class NotificationCard extends StatelessWidget {
               // 时间
               Row(
                 children: [
-                  Icon(FIcons.clock, size: 14, color: colors.mutedForeground),
+                  Icon(
+                    FLucideIcons.clock,
+                    size: 14,
+                    color: colors.mutedForeground,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     _formatDateTime(notification.createdAt),
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -139,7 +143,7 @@ class NotificationCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: FButton(
-                        style: FButtonStyle.outline(),
+                        variant: .outline,
                         onPress: onReject,
                         child: const Text('拒绝'),
                       ),
@@ -164,15 +168,15 @@ class NotificationCard extends StatelessWidget {
   IconData _getNotificationIcon(NotificationType type) {
     switch (type) {
       case NotificationType.spaceInvite:
-        return FIcons.userPlus;
+        return FLucideIcons.userPlus;
       case NotificationType.newTransaction:
-        return FIcons.receipt;
+        return FLucideIcons.receipt;
       case NotificationType.settlementUpdate:
-        return FIcons.calculator;
+        return FLucideIcons.calculator;
       case NotificationType.memberJoined:
-        return FIcons.userCheck;
+        return FLucideIcons.userCheck;
       case NotificationType.memberLeft:
-        return FIcons.userMinus;
+        return FLucideIcons.userMinus;
     }
   }
 

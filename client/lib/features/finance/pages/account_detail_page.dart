@@ -49,7 +49,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
           children: [
             Text(
               '账户名称',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -57,7 +57,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
             Text(
               // 使用 name 字段
               args.account.name,
-              style: theme.typography.lg.copyWith(
+              style: theme.typography.body.lg.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -65,14 +65,14 @@ class FinancialAccountDetailPage extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               '当前余额',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               formattedAmount,
-              style: theme.typography.xl.copyWith(
+              style: theme.typography.body.xl.copyWith(
                 fontWeight: FontWeight.w700,
                 color: colors.foreground,
               ),
@@ -90,14 +90,14 @@ class FinancialAccountDetailPage extends ConsumerWidget {
                 children: [
                   Text(
                     '账户类型',
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     args.definition.title,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.foreground,
                     ),
@@ -106,7 +106,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text(
                       args.definition.subtitle,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -119,7 +119,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
               child: Center(
                 child: Text(
                   '账户详情功能正在建设中',
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),

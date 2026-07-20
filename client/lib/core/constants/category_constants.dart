@@ -7,36 +7,40 @@ import 'package:augo/i18n/strings.g.dart';
 /// Corresponds to the backend TransactionCategory enum.
 enum TransactionCategory {
   // --- 1. Expense Type (Type: EXPENSE) - 12 items ---
-  foodDining('FOOD_DINING', 'Food & Dining', FIcons.utensils),
-  shoppingRetail('SHOPPING_RETAIL', 'Shopping', FIcons.shoppingBag),
-  transportation('TRANSPORTATION', 'Transportation', FIcons.car),
-  housingUtilities('HOUSING_UTILITIES', 'Housing & Utilities', FIcons.house),
-  personalCare('PERSONAL_CARE', 'Personal Care', FIcons.scissors),
-  entertainment('ENTERTAINMENT', 'Entertainment', FIcons.gamepad2),
-  education('EDUCATION', 'Education', FIcons.graduationCap),
-  medicalHealth('MEDICAL_HEALTH', 'Medical & Health', FIcons.activity),
-  insurance('INSURANCE', 'Insurance', FIcons.shield),
-  socialGifting('SOCIAL_GIFTING', 'Social & Gifting', FIcons.gift),
-  financialTax('FINANCIAL_TAX', 'Financial & Tax', FIcons.percent),
-  others('OTHERS', 'Others', FIcons.receipt),
+  foodDining('FOOD_DINING', 'Food & Dining', FLucideIcons.utensils),
+  shoppingRetail('SHOPPING_RETAIL', 'Shopping', FLucideIcons.shoppingBag),
+  transportation('TRANSPORTATION', 'Transportation', FLucideIcons.car),
+  housingUtilities(
+    'HOUSING_UTILITIES',
+    'Housing & Utilities',
+    FLucideIcons.house,
+  ),
+  personalCare('PERSONAL_CARE', 'Personal Care', FLucideIcons.scissors),
+  entertainment('ENTERTAINMENT', 'Entertainment', FLucideIcons.gamepad2),
+  education('EDUCATION', 'Education', FLucideIcons.graduationCap),
+  medicalHealth('MEDICAL_HEALTH', 'Medical & Health', FLucideIcons.activity),
+  insurance('INSURANCE', 'Insurance', FLucideIcons.shield),
+  socialGifting('SOCIAL_GIFTING', 'Social & Gifting', FLucideIcons.gift),
+  financialTax('FINANCIAL_TAX', 'Financial & Tax', FLucideIcons.percent),
+  others('OTHERS', 'Others', FLucideIcons.receipt),
 
   // --- 2. Income Type (Type: INCOME) - 5 items ---
-  salaryWage('SALARY_WAGE', 'Salary', FIcons.briefcase),
-  businessTrade('BUSINESS_TRADE', 'Business', FIcons.store),
+  salaryWage('SALARY_WAGE', 'Salary', FLucideIcons.briefcase),
+  businessTrade('BUSINESS_TRADE', 'Business', FLucideIcons.store),
   investmentReturns(
     'INVESTMENT_RETURNS',
     'Investment Returns',
-    FIcons.trendingUp,
+    FLucideIcons.trendingUp,
   ),
-  giftBonus('GIFT_BONUS', 'Gift & Bonus', FIcons.gift),
-  refundRebate('REFUND_REBATE', 'Refund', FIcons.undo2),
+  giftBonus('GIFT_BONUS', 'Gift & Bonus', FLucideIcons.gift),
+  refundRebate('REFUND_REBATE', 'Refund', FLucideIcons.undo2),
 
   // --- 3. Transfer Type (Type: TRANSFER) - 2 items ---
-  generalTransfer('GENERAL_TRANSFER', 'Transfer', FIcons.arrowRightLeft),
-  debtRepayment('DEBT_REPAYMENT', 'Debt Repayment', FIcons.creditCard),
+  generalTransfer('GENERAL_TRANSFER', 'Transfer', FLucideIcons.arrowRightLeft),
+  debtRepayment('DEBT_REPAYMENT', 'Debt Repayment', FLucideIcons.creditCard),
 
   // --- 4. Compatibility ---
-  incomeLegacy('INCOME', 'Income', FIcons.wallet);
+  incomeLegacy('INCOME', 'Income', FLucideIcons.wallet);
 
   final String key;
   final String label;

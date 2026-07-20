@@ -206,7 +206,7 @@ class AmountText extends ConsumerWidget {
     }
 
     // Build effective style
-    final baseStyle = style ?? foruiTheme.typography.base;
+    final baseStyle = style ?? foruiTheme.typography.body.md;
     var effectiveStyle = baseStyle.copyWith(color: color);
 
     // Add tabular figures feature
@@ -303,7 +303,7 @@ class AmountChangeIndicator extends StatelessWidget {
     final sign = isPositive ? '+' : '';
     final text = '$sign${changePercent.toStringAsFixed(1)}%';
 
-    final effectiveStyle = (style ?? foruiTheme.typography.sm).copyWith(
+    final effectiveStyle = (style ?? foruiTheme.typography.body.sm).copyWith(
       color: color,
     );
 
@@ -354,7 +354,7 @@ class _AmountTextFromDisplay extends ConsumerWidget {
       text = display['fullString'] as String? ?? '';
     }
 
-    var effectiveStyle = (style ?? foruiTheme.typography.base).copyWith(
+    var effectiveStyle = (style ?? foruiTheme.typography.body.md).copyWith(
       color: color,
     );
 

@@ -77,7 +77,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('共享空间', style: theme.typography.xl),
+        title: Text('共享空间', style: theme.typography.body.xl),
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         elevation: 0,
@@ -93,7 +93,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('共享空间', style: theme.typography.xl),
+        title: Text('共享空间', style: theme.typography.body.xl),
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         elevation: 0,
@@ -105,11 +105,15 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(FIcons.circleAlert, size: 48, color: colors.mutedForeground),
+              Icon(
+                FLucideIcons.circleAlert,
+                size: 48,
+                color: colors.mutedForeground,
+              ),
               const SizedBox(height: 16),
               Text(
                 'Failed to load',
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   color: colors.foreground,
                   fontWeight: FontWeight.w500,
                 ),
@@ -117,14 +121,14 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
               const SizedBox(height: 8),
               Text(
                 error,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               FButton(
-                style: FButtonStyle.outline(),
+                variant: .outline,
                 onPress: () {
                   ref.invalidate(spaceDetailProvider(widget.spaceId));
                   ref.invalidate(spaceSettlementProvider(widget.spaceId));
@@ -161,7 +165,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
             titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             title: Text(
               space.name,
-              style: theme.typography.xl.copyWith(
+              style: theme.typography.body.xl.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colors.foreground,
               ),
@@ -183,20 +187,20 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
           foregroundColor: colors.foreground,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(FIcons.chevronLeft),
+            icon: const Icon(FLucideIcons.chevronLeft),
             onPressed: () => context.pop(),
           ),
           actions: [
             // Invite member button
             FButton.icon(
-              style: FButtonStyle.ghost(),
+              variant: .ghost,
               onPress: () => _showInviteSheet(space),
-              child: const Icon(FIcons.userPlus, size: 20),
+              child: const Icon(FLucideIcons.userPlus, size: 20),
             ),
             FButton.icon(
-              style: FButtonStyle.ghost(),
+              variant: .ghost,
               onPress: () => _navigateToSettings(space),
-              child: const Icon(FIcons.settings, size: 20),
+              child: const Icon(FLucideIcons.settings, size: 20),
             ),
             const SizedBox(width: 8),
           ],
@@ -213,14 +217,14 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                 child: Row(
                   children: [
                     Icon(
-                      FIcons.layoutDashboard,
+                      FLucideIcons.layoutDashboard,
                       size: 16,
                       color: colors.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Dashboard',
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.primary,
                         letterSpacing: 1.2,
@@ -245,11 +249,15 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                 padding: const EdgeInsets.only(left: 4, bottom: 16),
                 child: Row(
                   children: [
-                    Icon(FIcons.receipt, size: 16, color: colors.foreground),
+                    Icon(
+                      FLucideIcons.receipt,
+                      size: 16,
+                      color: colors.foreground,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Transactions',
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.foreground,
                         letterSpacing: 1.2,
@@ -267,7 +275,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                       ),
                       child: Text(
                         '${space.transactionCount} records',
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                           fontWeight: FontWeight.w500,
                         ),
@@ -408,15 +416,21 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
       ),
       child: Column(
         children: [
-          Icon(FIcons.circleAlert, size: 24, color: colors.mutedForeground),
+          Icon(
+            FLucideIcons.circleAlert,
+            size: 24,
+            color: colors.mutedForeground,
+          ),
           const SizedBox(height: 12),
           Text(
             'Dashboard unavailable',
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 16),
           FButton(
-            style: FButtonStyle.outline(),
+            variant: .outline,
             onPress: () =>
                 ref.invalidate(spaceSettlementProvider(widget.spaceId)),
             child: const Text('Retry'),
@@ -513,15 +527,21 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
       ),
       child: Column(
         children: [
-          Icon(FIcons.circleAlert, size: 24, color: colors.mutedForeground),
+          Icon(
+            FLucideIcons.circleAlert,
+            size: 24,
+            color: colors.mutedForeground,
+          ),
           const SizedBox(height: 12),
           Text(
             'Failed to load transactions',
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 16),
           FButton(
-            style: FButtonStyle.outline(),
+            variant: .outline,
             onPress: () =>
                 ref.invalidate(spaceTransactionsProvider(widget.spaceId)),
             child: const Text('Retry'),
@@ -550,14 +570,14 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
         child: Column(
           children: [
             Icon(
-              FIcons.receipt,
+              FLucideIcons.receipt,
               size: 40,
               color: colors.mutedForeground.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
               'No transactions yet',
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
                 fontWeight: FontWeight.w500,
               ),
@@ -565,7 +585,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
             const SizedBox(height: 4),
             Text(
               'Add your first transaction to start collaborating',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground.withValues(alpha: 0.6),
               ),
             ),
@@ -635,7 +655,9 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
             child: Icon(
               tx.categoryKey != null
                   ? CategoryConfig.getCategoryIcon(tx.categoryKey)
-                  : (isExpense ? FIcons.trendingDown : FIcons.trendingUp),
+                  : (isExpense
+                        ? FLucideIcons.trendingDown
+                        : FLucideIcons.trendingUp),
               size: 18,
               color: amountColor,
             ),
@@ -654,7 +676,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                                 tx.categoryKey,
                               ).displayText
                             : t.category.other),
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -663,7 +685,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                 const SizedBox(height: 2),
                 Text(
                   '${tx.addedByUsername ?? "Unknown"} · $timeDisplay',
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
@@ -675,7 +697,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
               ? AmountText.fromDisplay(
                   display: tx.display!,
                   type: transactionType,
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 )
@@ -683,7 +705,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                   amount: double.tryParse(tx.amount) ?? 0.0,
                   type: transactionType,
                   currency: tx.currency,
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -782,12 +804,16 @@ class _InviteCodeSheetState extends ConsumerState<_InviteCodeSheet> {
           // Title
           Text(
             'Invite Members',
-            style: theme.typography.xl.copyWith(fontWeight: FontWeight.bold),
+            style: theme.typography.body.xl.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Share the invite code with friends to collaborate',
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 24),
           // Content
@@ -800,20 +826,20 @@ class _InviteCodeSheetState extends ConsumerState<_InviteCodeSheet> {
             Column(
               children: [
                 Icon(
-                  FIcons.circleAlert,
+                  FLucideIcons.circleAlert,
                   size: 48,
                   color: colors.mutedForeground,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'Failed to generate invite code',
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
                 const SizedBox(height: 16),
                 FButton(
-                  style: FButtonStyle.outline(),
+                  variant: .outline,
                   onPress: () {
                     setState(() {
                       _isLoading = true;
@@ -843,14 +869,14 @@ class _InviteCodeSheetState extends ConsumerState<_InviteCodeSheet> {
                     children: [
                       Text(
                         'Invite Code',
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         _inviteCode!.code,
-                        style: theme.typography.xl3.copyWith(
+                        style: theme.typography.body.xl3.copyWith(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 4,
                           color: colors.primary,
@@ -859,7 +885,7 @@ class _InviteCodeSheetState extends ConsumerState<_InviteCodeSheet> {
                       const SizedBox(height: 8),
                       Text(
                         'Valid for 24 hours',
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -869,7 +895,7 @@ class _InviteCodeSheetState extends ConsumerState<_InviteCodeSheet> {
                 const SizedBox(height: 16),
                 // Copy button
                 FButton(
-                  style: FButtonStyle.primary(),
+                  variant: .primary,
                   onPress: () {
                     unawaited(
                       Clipboard.setData(ClipboardData(text: _inviteCode!.code)),
@@ -883,7 +909,7 @@ class _InviteCodeSheetState extends ConsumerState<_InviteCodeSheet> {
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(FIcons.copy, size: 16),
+                      Icon(FLucideIcons.copy, size: 16),
                       SizedBox(width: 8),
                       Text('Copy Invite Code'),
                     ],

@@ -45,19 +45,11 @@ class DatePickerSheet extends StatefulWidget {
 class _DatePickerSheetState extends State<DatePickerSheet> {
   bool get isZh => LocaleSettings.currentLocale == AppLocale.zh;
   late DateTime _selectedDate;
-  late FCalendarController<DateTime?> _controller;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = widget.initialDate;
-    _controller = FCalendarController.date(initialSelection: _selectedDate);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -91,15 +83,19 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: FCalendar(
-                  controller: _controller,
-                  start: widget.firstDate ?? DateTime(2020),
-                  end: widget.lastDate ?? DateTime(2030),
-                  today: DateTime.now(),
-                  initialMonth: _selectedDate,
-                  onPress: (date) {
-                    setState(() => _selectedDate = date);
-                  },
+                child: FCalendar.grid(
+                  selectionControl: .liftedSingle(
+                    value: _selectedDate,
+                    onChange: (date) {
+                      if (date != null) setState(() => _selectedDate = date);
+                    },
+                    toggleable: false,
+                  ),
+                  control: FGridCalendarControl(
+                    start: widget.firstDate ?? DateTime(2020),
+                    end: widget.lastDate ?? DateTime(2030),
+                    initial: _selectedDate,
+                  ),
                 ),
               ),
             ),
@@ -120,7 +116,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
             onTap: () => Navigator.of(context).pop(),
             child: Text(
               t.common.cancel,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -129,7 +125,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
             child: Text(
               widget.title.isNotEmpty ? widget.title : t.time.selectDate,
               textAlign: TextAlign.center,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -139,7 +135,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
             onTap: () => Navigator.of(context).pop(_selectedDate),
             child: Text(
               t.common.ok,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.primary,
                 fontWeight: FontWeight.w600,
               ),

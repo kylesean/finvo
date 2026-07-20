@@ -198,12 +198,16 @@ class _TransferWizardState extends State<TransferWizard> {
             color: colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(FIcons.arrowRightLeft, color: colors.primary, size: 20),
+          child: Icon(
+            FLucideIcons.arrowRightLeft,
+            color: colors.primary,
+            size: 20,
+          ),
         ),
         const SizedBox(width: 12),
         Text(
           t.chat.transferWizard.title,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
           ),
@@ -220,14 +224,14 @@ class _TransferWizardState extends State<TransferWizard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  FIcons.check,
+                  FLucideIcons.check,
                   color: theme.semantic.successAccent,
                   size: 12,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   t.chat.transferWizard.confirmed,
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: theme.semantic.successAccent,
                     fontWeight: FontWeight.bold,
                   ),
@@ -252,7 +256,9 @@ class _TransferWizardState extends State<TransferWizard> {
         children: [
           Text(
             t.chat.transferWizard.amount,
-            style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.xs.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 4),
           Row(
@@ -261,7 +267,7 @@ class _TransferWizardState extends State<TransferWizard> {
             children: [
               Text(
                 AmountFormatter.getCurrencySymbol(_model.currency),
-                style: theme.typography.xl.copyWith(
+                style: theme.typography.body.xl.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.bold,
                 ),
@@ -275,7 +281,7 @@ class _TransferWizardState extends State<TransferWizard> {
                           _amountController.text.isEmpty
                               ? '0.00'
                               : _amountController.text,
-                          style: theme.typography.xl.copyWith(
+                          style: theme.typography.body.xl.copyWith(
                             fontWeight: FontWeight.bold,
                             color: colors.foreground,
                             letterSpacing: -1,
@@ -290,7 +296,7 @@ class _TransferWizardState extends State<TransferWizard> {
                         ),
                         decoration: InputDecoration(
                           hintText: '0.00',
-                          hintStyle: theme.typography.xl.copyWith(
+                          hintStyle: theme.typography.body.xl.copyWith(
                             color: colors.mutedForeground.withValues(
                               alpha: 0.5,
                             ),
@@ -299,7 +305,7 @@ class _TransferWizardState extends State<TransferWizard> {
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
                         ),
-                        style: theme.typography.xl.copyWith(
+                        style: theme.typography.body.xl.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colors.foreground,
                           letterSpacing: -1,
@@ -363,7 +369,7 @@ class _TransferWizardState extends State<TransferWizard> {
             ],
           ),
           child: Icon(
-            _isConfirmed ? FIcons.check : FIcons.arrowDown,
+            _isConfirmed ? FLucideIcons.check : FLucideIcons.arrowDown,
             size: 16,
             color: _isConfirmed ? colors.primaryForeground : colors.background,
           ),
@@ -415,7 +421,7 @@ class _TransferWizardState extends State<TransferWizard> {
               ),
             ),
             child: Icon(
-              isSource ? FIcons.logOut : FIcons.logIn,
+              isSource ? FLucideIcons.logOut : FLucideIcons.logIn,
               size: 18,
               color: isSource ? colors.primary : colors.mutedForeground,
             ),
@@ -443,7 +449,7 @@ class _TransferWizardState extends State<TransferWizard> {
                       children: [
                         Text(
                           label,
-                          style: theme.typography.xs.copyWith(
+                          style: theme.typography.body.xs.copyWith(
                             color: colors.mutedForeground,
                           ),
                         ),
@@ -451,7 +457,7 @@ class _TransferWizardState extends State<TransferWizard> {
                         Text(
                           account?['name'] as String? ??
                               t.chat.transferWizard.selectAccount,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             fontWeight: FontWeight.bold,
                             color: accountId == null
                                 ? colors.mutedForeground
@@ -463,7 +469,7 @@ class _TransferWizardState extends State<TransferWizard> {
                   ),
                   if (!_isConfirmed)
                     Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground.withValues(alpha: 0.5),
                     ),
@@ -482,12 +488,12 @@ class _TransferWizardState extends State<TransferWizard> {
       width: double.infinity,
       child: FButton(
         onPress: _isValid && !_isConfirmed ? _onConfirm : null,
-        style: _isConfirmed ? FButtonStyle.outline() : FButtonStyle.primary(),
+        variant: _isConfirmed ? .outline : .primary,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (!_isConfirmed) ...[
-              const Icon(FIcons.send, size: 16),
+              const Icon(FLucideIcons.send, size: 16),
               const SizedBox(width: 8),
             ],
             Text(

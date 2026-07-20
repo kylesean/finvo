@@ -33,20 +33,18 @@ class Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var badgeStyle = FBadgeStyle.secondary();
+    FBadgeVariant variant;
 
-    if (style != null) {
-      badgeStyle = style!.call;
-    } else if (isPrimary) {
-      badgeStyle = FBadgeStyle.primary();
+    if (isPrimary) {
+      variant = .primary;
     } else if (isOutline) {
-      badgeStyle = FBadgeStyle.outline();
+      variant = .outline;
     } else if (isDestructive) {
-      badgeStyle = FBadgeStyle.destructive();
+      variant = .destructive;
     } else {
-      badgeStyle = FBadgeStyle.secondary();
+      variant = .secondary;
     }
 
-    return FBadge(style: badgeStyle, child: Text(label));
+    return FBadge(variant: variant, child: Text(label));
   }
 }

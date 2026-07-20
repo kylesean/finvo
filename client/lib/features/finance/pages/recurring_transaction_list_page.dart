@@ -73,7 +73,11 @@ class _RecurringTransactionListPageState
         backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(FIcons.arrowLeft, color: colors.foreground, size: 20),
+          icon: Icon(
+            FLucideIcons.arrowLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -85,7 +89,7 @@ class _RecurringTransactionListPageState
         ),
         title: Text(
           t.forecast.recurringTransaction.title,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.foreground,
           ),
@@ -159,17 +163,21 @@ class _RecurringTransactionListPageState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(FIcons.circleAlert, size: 48, color: colors.mutedForeground),
+            Icon(
+              FLucideIcons.circleAlert,
+              size: 48,
+              color: colors.mutedForeground,
+            ),
             const SizedBox(height: 16),
             Text(
               t.common.loadFailed,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
             const SizedBox(height: 8),
             FButton(
-              style: FButtonStyle.outline(),
+              variant: .outline,
               onPress: () => ref
                   .read(recurringTransactionProvider.notifier)
                   .loadList(type: _filterType),
@@ -215,7 +223,9 @@ class _RecurringTransactionListPageState
             type: typeLabel,
             count: count.toString(),
           ),
-          style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+          style: theme.typography.body.sm.copyWith(
+            color: colors.mutedForeground,
+          ),
         ),
         const Spacer(),
         GestureDetector(
@@ -224,14 +234,14 @@ class _RecurringTransactionListPageState
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                _sortAscending ? FIcons.arrowUp : FIcons.arrowDown,
+                _sortAscending ? FLucideIcons.arrowUp : FLucideIcons.arrowDown,
                 size: 14,
                 color: colors.primary,
               ),
               const SizedBox(width: 4),
               Text(
                 t.forecast.recurringTransaction.sortByTime,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.w500,
                 ),
@@ -250,11 +260,11 @@ class _RecurringTransactionListPageState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(FIcons.repeat, size: 64, color: colors.mutedForeground),
+            Icon(FLucideIcons.repeat, size: 64, color: colors.mutedForeground),
             const SizedBox(height: 16),
             Text(
               t.forecast.recurringTransaction.noRecurring,
-              style: theme.typography.lg.copyWith(
+              style: theme.typography.body.lg.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -262,7 +272,7 @@ class _RecurringTransactionListPageState
             const SizedBox(height: 8),
             Text(
               t.forecast.recurringTransaction.createHint,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
               textAlign: TextAlign.center,
@@ -329,7 +339,7 @@ class _RecurringTransactionListPageState
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              transaction.isActive ? FIcons.pause : FIcons.play,
+              transaction.isActive ? FLucideIcons.pause : FLucideIcons.play,
               color: Colors.white,
               size: 24,
             ),
@@ -338,7 +348,7 @@ class _RecurringTransactionListPageState
               transaction.isActive
                   ? t.forecast.recurringTransaction.paused
                   : t.forecast.recurringTransaction.activated,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
@@ -355,7 +365,7 @@ class _RecurringTransactionListPageState
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 24),
-        child: const Icon(FIcons.trash2, color: Colors.white, size: 24),
+        child: const Icon(FLucideIcons.trash2, color: Colors.white, size: 24),
       ),
       child: GestureDetector(
         onTap: () => context.push(
@@ -382,7 +392,7 @@ class _RecurringTransactionListPageState
                     children: [
                       Text(
                         _getDisplayName(transaction),
-                        style: theme.typography.base.copyWith(
+                        style: theme.typography.body.md.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colors.foreground,
                         ),
@@ -408,7 +418,7 @@ class _RecurringTransactionListPageState
                               _getShortFrequencyLabel(
                                 transaction.recurrenceRule,
                               ),
-                              style: theme.typography.xs.copyWith(
+                              style: theme.typography.body.xs.copyWith(
                                 color: colors.mutedForeground,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -429,7 +439,7 @@ class _RecurringTransactionListPageState
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    FIcons.circleAlert,
+                                    FLucideIcons.circleAlert,
                                     size: 12,
                                     color: colors.primary,
                                   ),
@@ -439,7 +449,7 @@ class _RecurringTransactionListPageState
                                         .forecast
                                         .recurringTransaction
                                         .dynamicAmount,
-                                    style: theme.typography.xs.copyWith(
+                                    style: theme.typography.body.xs.copyWith(
                                       color: colors.primary,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -458,7 +468,7 @@ class _RecurringTransactionListPageState
                   children: [
                     Text(
                       '$amountSign${Currency.fromCode(ref.watch(financialSettingsProvider).primaryCurrency)?.symbol ?? '¥'}${transaction.amount}',
-                      style: theme.typography.base.copyWith(
+                      style: theme.typography.body.md.copyWith(
                         color: typeColor,
                         fontWeight: FontWeight.w600,
                       ),
@@ -466,7 +476,7 @@ class _RecurringTransactionListPageState
                     const SizedBox(height: 4),
                     Text(
                       '${t.forecast.recurringTransaction.nextTime}: ${_formatShortDate(nextDate)}',
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.primary,
                       ),
                     ),
@@ -489,29 +499,44 @@ class _RecurringTransactionListPageState
     await showFDialog<void>(
       context: context,
       builder: (dialogContext, style, animation) => FDialog(
-        style: style.call,
         animation: animation,
-        title: Text(t.forecast.recurringTransaction.confirmDelete),
-        body: Text(
-          t.forecast.recurringTransaction.deleteConfirm(
-            name: _getDisplayName(transaction),
-          ),
+        builder: (context, dialogStyle) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t.forecast.recurringTransaction.confirmDelete,
+              style: dialogStyle.titleTextStyle,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              t.forecast.recurringTransaction.deleteConfirm(
+                name: _getDisplayName(transaction),
+              ),
+              style: dialogStyle.bodyTextStyle,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FButton(
+                  variant: .destructive,
+                  onPress: () {
+                    confirmed = true;
+                    Navigator.pop(dialogContext);
+                  },
+                  child: Text(t.common.delete),
+                ),
+                const SizedBox(width: 8),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.pop(dialogContext),
+                  child: Text(t.common.cancel),
+                ),
+              ],
+            ),
+          ],
         ),
-        actions: [
-          FButton(
-            style: FButtonStyle.destructive(),
-            onPress: () {
-              confirmed = true;
-              Navigator.pop(dialogContext);
-            },
-            child: Text(t.common.delete),
-          ),
-          FButton(
-            style: FButtonStyle.outline(),
-            onPress: () => Navigator.pop(dialogContext),
-            child: Text(t.common.cancel),
-          ),
-        ],
       ),
     );
 
@@ -541,41 +566,54 @@ class _RecurringTransactionListPageState
     await showFDialog<void>(
       context: context,
       builder: (dialogContext, style, animation) => FDialog(
-        style: style.call,
         animation: animation,
-        title: Text(
-          newState
-              ? t.forecast.recurringTransaction.confirmActivate
-              : t.forecast.recurringTransaction.confirmPause,
-        ),
-        body: Text(
-          newState
-              ? t.forecast.recurringTransaction.activateConfirm(
-                  name: _getDisplayName(transaction),
-                )
-              : t.forecast.recurringTransaction.pauseConfirm(
-                  name: _getDisplayName(transaction),
-                ),
-        ),
-        actions: [
-          FButton(
-            style: newState ? FButtonStyle.primary() : FButtonStyle.outline(),
-            onPress: () {
-              confirmed = true;
-              Navigator.pop(dialogContext);
-            },
-            child: Text(
+        builder: (context, dialogStyle) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
               newState
-                  ? t.forecast.recurringTransaction.activated
-                  : t.forecast.recurringTransaction.paused,
+                  ? t.forecast.recurringTransaction.confirmActivate
+                  : t.forecast.recurringTransaction.confirmPause,
+              style: dialogStyle.titleTextStyle,
             ),
-          ),
-          FButton(
-            style: FButtonStyle.outline(),
-            onPress: () => Navigator.pop(dialogContext),
-            child: Text(t.common.cancel),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              newState
+                  ? t.forecast.recurringTransaction.activateConfirm(
+                      name: _getDisplayName(transaction),
+                    )
+                  : t.forecast.recurringTransaction.pauseConfirm(
+                      name: _getDisplayName(transaction),
+                    ),
+              style: dialogStyle.bodyTextStyle,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FButton(
+                  variant: newState ? .primary : .outline,
+                  onPress: () {
+                    confirmed = true;
+                    Navigator.pop(dialogContext);
+                  },
+                  child: Text(
+                    newState
+                        ? t.forecast.recurringTransaction.activated
+                        : t.forecast.recurringTransaction.paused,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.pop(dialogContext),
+                  child: Text(t.common.cancel),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
 
@@ -612,11 +650,11 @@ class _RecurringTransactionListPageState
   IconData _getTypeIcon(RecurringTransactionType type) {
     switch (type) {
       case RecurringTransactionType.expense:
-        return FIcons.arrowUpRight;
+        return FLucideIcons.arrowUpRight;
       case RecurringTransactionType.income:
-        return FIcons.arrowDownLeft;
+        return FLucideIcons.arrowDownLeft;
       case RecurringTransactionType.transfer:
-        return FIcons.arrowRightLeft;
+        return FLucideIcons.arrowRightLeft;
     }
   }
 

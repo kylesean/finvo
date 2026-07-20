@@ -149,11 +149,11 @@ class _TransactionListState extends ConsumerState<TransactionList> {
       decoration: BoxDecoration(color: colors.muted.withValues(alpha: 0.2)),
       child: Row(
         children: [
-          Icon(FIcons.list, color: colors.primary, size: 18),
+          Icon(FLucideIcons.list, color: colors.primary, size: 18),
           const SizedBox(width: 8),
           Text(
             t.chat.genui.transactionList.searchResults(count: _total),
-            style: theme.typography.base.copyWith(
+            style: theme.typography.body.md.copyWith(
               color: colors.primary,
               fontWeight: FontWeight.w600,
             ),
@@ -162,7 +162,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
           if (_items.length < _total)
             Text(
               t.chat.genui.transactionList.loaded(count: _items.length),
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.primary.withValues(alpha: 0.7),
               ),
             ),
@@ -181,11 +181,11 @@ class _TransactionListState extends ConsumerState<TransactionList> {
       ),
       child: Column(
         children: [
-          Icon(FIcons.search, size: 48, color: colors.mutedForeground),
+          Icon(FLucideIcons.search, size: 48, color: colors.mutedForeground),
           const SizedBox(height: 16),
           Text(
             t.chat.genui.transactionList.noResults,
-            style: theme.typography.base.copyWith(
+            style: theme.typography.body.md.copyWith(
               color: colors.mutedForeground,
             ),
           ),
@@ -211,7 +211,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
               _hasMore
                   ? t.chat.genui.transactionList.loadMore
                   : t.chat.genui.transactionList.allLoaded,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -262,7 +262,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                     children: [
                       Text(
                         categoryEnum.displayText,
-                        style: theme.typography.base.copyWith(
+                        style: theme.typography.body.md.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -296,7 +296,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                           tags.isNotEmpty
                               ? tags.join(' · ')
                               : (item['description'] as String? ?? ''),
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: colors.mutedForeground,
                           ),
                           maxLines: 1,
@@ -305,7 +305,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                       ),
                       Text(
                         _formatDate(time),
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),

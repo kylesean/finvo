@@ -64,10 +64,13 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
       header: FHeader(
         title: Text(
           '账户管理',
-          style: theme.typography.xl.copyWith(fontWeight: FontWeight.w600),
+          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w600),
         ),
         suffixes: [
-          FHeaderAction(icon: const Icon(FIcons.plus), onPress: _addAccount),
+          FHeaderAction(
+            icon: const Icon(FLucideIcons.plus),
+            onPress: _addAccount,
+          ),
         ],
       ),
       child: _buildBody(
@@ -109,18 +112,22 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(FIcons.circleAlert, size: 48, color: colors.mutedForeground),
+              Icon(
+                FLucideIcons.circleAlert,
+                size: 48,
+                color: colors.mutedForeground,
+              ),
               const SizedBox(height: 16),
               Text(
                 state.error!,
                 textAlign: TextAlign.center,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
               const SizedBox(height: 24),
               FButton(
-                style: FButtonStyle.outline(),
+                variant: .outline,
                 onPress: () {
                   unawaited(
                     ref
@@ -202,21 +209,21 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                FIcons.wallet,
+                FLucideIcons.wallet,
                 size: 64,
                 color: colors.mutedForeground.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
                 '暂无账户',
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 '点击下方按钮添加您的第一个账户',
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground.withValues(alpha: 0.7),
                 ),
               ),
@@ -260,7 +267,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
             children: [
               Text(
                 'TOTAL NET WORTH',
-                style: theme.typography.xs.copyWith(
+                style: theme.typography.body.xs.copyWith(
                   color: colors.primaryForeground.withValues(alpha: 0.6),
                   letterSpacing: 1.2,
                 ),
@@ -276,7 +283,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    FIcons.settings,
+                    FLucideIcons.settings,
                     size: 18,
                     color: colors.primaryForeground.withValues(alpha: 0.6),
                   ),
@@ -305,7 +312,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
               GestureDetector(
                 onTap: () => setState(() => _hideAmounts = !_hideAmounts),
                 child: Icon(
-                  _hideAmounts ? FIcons.eyeOff : FIcons.eye,
+                  _hideAmounts ? FLucideIcons.eyeOff : FLucideIcons.eye,
                   size: 20,
                   color: colors.primaryForeground.withValues(alpha: 0.5),
                 ),
@@ -324,7 +331,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                   children: [
                     Text(
                       'ASSETS',
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.primaryForeground.withValues(alpha: 0.5),
                         letterSpacing: 1,
                       ),
@@ -332,7 +339,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                     const SizedBox(height: 4),
                     Text(
                       _hideAmounts ? '****' : '+${_formatAmount(assets)}',
-                      style: theme.typography.base.copyWith(
+                      style: theme.typography.body.md.copyWith(
                         color: const Color(0xFF4CAF50), // Keep semantic green
                         fontWeight: FontWeight.w600,
                       ),
@@ -346,7 +353,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                   children: [
                     Text(
                       'LIABILITIES',
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.primaryForeground.withValues(alpha: 0.5),
                         letterSpacing: 1,
                       ),
@@ -354,7 +361,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                     const SizedBox(height: 4),
                     Text(
                       _hideAmounts ? '****' : '-${_formatAmount(liabilities)}',
-                      style: theme.typography.base.copyWith(
+                      style: theme.typography.body.md.copyWith(
                         color: colors
                             .destructive, // Use destructive for liability (red)
                         fontWeight: FontWeight.w600,
@@ -383,14 +390,14 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                     children: [
                       Text(
                         '${Currency.fromCode(_viewCurrency)?.localizedName ?? _viewCurrency} $currencySymbol',
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.primaryForeground,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(width: 4),
                       Icon(
-                        FIcons.repeat,
+                        FLucideIcons.repeat,
                         size: 14,
                         color: colors.primaryForeground,
                       ),
@@ -410,7 +417,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
       padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         title,
-        style: theme.typography.sm.copyWith(
+        style: theme.typography.body.sm.copyWith(
           color: colors.mutedForeground,
           fontWeight: FontWeight.w500,
         ),
@@ -443,8 +450,8 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                 children: [
                   ThemedIcon.large(
                     icon: isLiabilityAccount
-                        ? FIcons.creditCard
-                        : FIcons.wallet,
+                        ? FLucideIcons.creditCard
+                        : FLucideIcons.wallet,
                   ),
                   const SizedBox(width: 16),
                   // Name and type
@@ -454,7 +461,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                       children: [
                         Text(
                           account.name,
-                          style: theme.typography.base.copyWith(
+                          style: theme.typography.body.md.copyWith(
                             fontWeight: FontWeight.w600,
                             color: colors.foreground,
                           ),
@@ -464,7 +471,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                           definition != null
                               ? _getTypeDisplayName(definition)
                               : (isLiabilityAccount ? '负债账户' : '资产账户'),
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: colors.mutedForeground,
                           ),
                         ),
@@ -480,7 +487,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                         _hideAmounts
                             ? '****'
                             : '${isLiabilityAccount ? '-' : ''}${_formatAmount(account.initialBalance)}',
-                        style: theme.typography.base.copyWith(
+                        style: theme.typography.body.md.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colors.foreground,
                           fontFeatures: [const FontFeature.tabularFigures()],
@@ -489,7 +496,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                       const SizedBox(height: 2),
                       Text(
                         account.currencyCode,
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -497,7 +504,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                   ),
                   const SizedBox(width: 12),
                   Icon(
-                    FIcons.chevronRight,
+                    FLucideIcons.chevronRight,
                     size: 16,
                     color: colors.mutedForeground.withValues(alpha: 0.5),
                   ),

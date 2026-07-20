@@ -67,7 +67,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
         : 0;
 
     _controller = FPickerController(
-      initialIndexes: [initialIndex >= 0 ? initialIndex : 0],
+      indexes: [initialIndex >= 0 ? initialIndex : 0],
     );
   }
 
@@ -141,7 +141,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
             child: Text(
               t.transaction.category,
               textAlign: TextAlign.center,
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.foreground,
               ),
@@ -155,7 +155,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
 
   Widget _buildCategoryPicker(FThemeData theme, FColors colors) {
     return FPicker(
-      controller: _controller,
+      control: .managed(controller: _controller),
       children: [
         FPickerWheel(
           loop: true, // 开启循环（禁用会导致 Web 平台 bug）
@@ -173,7 +173,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
                   const SizedBox(width: 12),
                   Text(
                     category.displayText,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       color: colors.foreground,
                       fontWeight: FontWeight.w500,
                     ),
@@ -194,7 +194,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
         children: [
           Expanded(
             child: FButton(
-              style: FButtonStyle.outline(),
+              variant: .outline,
               onPress: () => Navigator.pop(context),
               child: Text(t.common.cancel),
             ),

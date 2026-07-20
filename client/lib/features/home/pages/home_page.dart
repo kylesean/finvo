@@ -74,10 +74,10 @@ class HomePage extends ConsumerWidget {
                           color: theme.colors.background, // 内部内容设为白色
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(
-                              theme.style.borderRadius.topLeft.x + 4,
+                              theme.style.borderRadius.xl.topLeft.x + 4,
                             ),
                             topRight: Radius.circular(
-                              theme.style.borderRadius.topRight.x + 4,
+                              theme.style.borderRadius.xl.topRight.x + 4,
                             ),
                           ),
                         ),
@@ -176,7 +176,7 @@ class _FixedTabBar extends ConsumerWidget {
                   onPress: () {}, // 空函数，保持按钮启用状态
                   child: Text(
                     tabInfo.label,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.primaryForeground,
                     ),
@@ -189,7 +189,7 @@ class _FixedTabBar extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: FButton(
-                  style: FButtonStyle.outline(),
+                  variant: .outline,
                   mainAxisSize: MainAxisSize.min,
                   onPress: () {
                     ref
@@ -198,7 +198,7 @@ class _FixedTabBar extends ConsumerWidget {
                   },
                   child: Text(
                     tabInfo.label,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w500,
                       color: colors.mutedForeground,
                     ),
@@ -277,7 +277,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                           children: [
                             Text(
                               t.home.totalExpense,
-                              style: theme.typography.sm.copyWith(
+                              style: theme.typography.body.sm.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: colors.primaryForeground.withValues(
                                   alpha: 0.9,
@@ -286,14 +286,16 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                             ),
                             const SizedBox(width: 8),
                             FButton.icon(
-                              style: FButtonStyle.ghost(),
+                              variant: .ghost,
                               onPress: () {
                                 setState(() {
                                   _isAmountVisible = !_isAmountVisible;
                                 });
                               },
                               child: Icon(
-                                _isAmountVisible ? FIcons.eye : FIcons.eyeOff,
+                                _isAmountVisible
+                                    ? FLucideIcons.eye
+                                    : FLucideIcons.eyeOff,
                                 color: colors.primaryForeground.withValues(
                                   alpha: 0.8,
                                 ),
@@ -314,7 +316,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                                 _isAmountVisible
                                     ? _formatAmount(data)
                                     : t.home.amountHidden,
-                                style: theme.typography.xl2.copyWith(
+                                style: theme.typography.body.xl2.copyWith(
                                   color: colors.primaryForeground,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -341,7 +343,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                           ),
                           loading: () => Text(
                             t.common.loading,
-                            style: theme.typography.xl2.copyWith(
+                            style: theme.typography.body.xl2.copyWith(
                               color: colors.primaryForeground.withValues(
                                 alpha: 0.6,
                               ),
@@ -350,7 +352,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                           ),
                           error: (error, _) => Text(
                             _isAmountVisible ? '¥0.00' : t.home.amountHidden,
-                            style: theme.typography.xl2.copyWith(
+                            style: theme.typography.body.xl2.copyWith(
                               color: colors.primaryForeground,
                               fontWeight: FontWeight.bold,
                             ),
@@ -363,7 +365,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                           children: [
                             Text(
                               t.home.yearProgress(year: now.year),
-                              style: theme.typography.xs.copyWith(
+                              style: theme.typography.body.xs.copyWith(
                                 color: colors.primaryForeground.withValues(
                                   alpha: 0.8,
                                 ),
@@ -399,7 +401,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                             const SizedBox(width: 8),
                             Text(
                               '$progressPercentage%',
-                              style: theme.typography.xs.copyWith(
+                              style: theme.typography.body.xs.copyWith(
                                 color: colors.primaryForeground.withValues(
                                   alpha: 0.7,
                                 ),
@@ -450,7 +452,7 @@ class _QuickStatItem extends StatelessWidget {
       children: [
         Text(
           label,
-          style: theme.typography.xs.copyWith(
+          style: theme.typography.body.xs.copyWith(
             color: colors.primaryForeground.withValues(alpha: 0.7),
             fontWeight: FontWeight.w500,
           ),
@@ -458,7 +460,7 @@ class _QuickStatItem extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           isVisible ? displayString : '••••',
-          style: theme.typography.base.copyWith(
+          style: theme.typography.body.md.copyWith(
             color: colors.primaryForeground,
             fontWeight: FontWeight.w600,
           ),

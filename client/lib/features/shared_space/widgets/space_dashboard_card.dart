@@ -51,14 +51,14 @@ class SpaceDashboardCard extends StatelessWidget {
                   children: [
                     Text(
                       t.sharedSpace.dashboard.cumulativeTotalExpense,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.primaryForeground.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1,
                       ),
                     ),
                     Icon(
-                      FIcons.info,
+                      FLucideIcons.info,
                       size: 14,
                       color: colors.primaryForeground.withValues(alpha: 0.5),
                     ),
@@ -67,7 +67,7 @@ class SpaceDashboardCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   '¥${_formatAmount(space.totalExpense)}',
-                  style: theme.typography.xl3.copyWith(
+                  style: theme.typography.body.xl3.copyWith(
                     color: colors.primaryForeground,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -1,
@@ -104,7 +104,7 @@ class SpaceDashboardCard extends StatelessWidget {
                   children: [
                     Text(
                       t.sharedSpace.dashboard.spendingDistribution,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.foreground,
                       ),
@@ -112,7 +112,7 @@ class SpaceDashboardCard extends StatelessWidget {
                     const Spacer(),
                     Text(
                       t.sharedSpace.dashboard.realtimeUpdates,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -138,14 +138,14 @@ class SpaceDashboardCard extends StatelessWidget {
       children: [
         Text(
           label,
-          style: theme.typography.xs.copyWith(
+          style: theme.typography.body.xs.copyWith(
             color: colors.primaryForeground.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: colors.primaryForeground,
             fontWeight: FontWeight.w600,
           ),
@@ -197,7 +197,7 @@ class SpaceDashboardCard extends StatelessWidget {
                 children: [
                   Text(
                     member.username,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -205,7 +205,7 @@ class SpaceDashboardCard extends StatelessWidget {
                     member.role == MemberRole.owner
                         ? t.sharedSpace.roles.owner
                         : t.sharedSpace.roles.member,
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -217,14 +217,14 @@ class SpaceDashboardCard extends StatelessWidget {
               children: [
                 Text(
                   '¥${_formatAmount(member.contributionAmount)}',
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colors.foreground,
                   ),
                 ),
                 Text(
                   t.sharedSpace.dashboard.paid,
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),

@@ -126,14 +126,14 @@ class _FallbackWidget extends StatelessWidget {
                   children: [
                     Text(
                       '组件加载失败',
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.destructive,
                       ),
                     ),
                     Text(
                       componentName,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -152,7 +152,7 @@ class _FallbackWidget extends StatelessWidget {
             ),
             child: Text(
               error,
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
                 fontFamily: 'monospace',
               ),

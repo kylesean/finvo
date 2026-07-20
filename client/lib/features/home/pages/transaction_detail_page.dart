@@ -70,16 +70,16 @@ class TransactionDetailPage extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        FIcons.ellipsis,
+                        FLucideIcons.ellipsis,
                         size: 48,
                         color: colors.destructive,
                       ),
                       const SizedBox(height: 16),
-                      Text(t.home.loadFailed, style: theme.typography.xl2),
+                      Text(t.home.loadFailed, style: theme.typography.body.xl2),
                       const SizedBox(height: 8),
                       Text(
                         detailState.errorMessage!,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.mutedForeground,
                         ),
                         textAlign: TextAlign.center,
@@ -139,7 +139,7 @@ class TransactionDetailPage extends ConsumerWidget {
                         vertical: 12.0,
                       ),
                       // 4. 使用 ShadCard 包裹主要详情区域
-                      child: FCard.raw(
+                      child: FCard(
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
@@ -165,9 +165,10 @@ class TransactionDetailPage extends ConsumerWidget {
                                       children: [
                                         Text(
                                           _getCategoryDisplayName(transaction),
-                                          style: theme.typography.lg.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: theme.typography.body.lg
+                                              .copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -175,23 +176,24 @@ class TransactionDetailPage extends ConsumerWidget {
                                             transaction.timestamp,
                                             locale: 'zh_CN',
                                           ),
-                                          style: theme.typography.sm.copyWith(
-                                            color: colors.mutedForeground,
-                                          ),
+                                          style: theme.typography.body.sm
+                                              .copyWith(
+                                                color: colors.mutedForeground,
+                                              ),
                                         ),
                                       ],
                                     ),
                                   ),
                                   FButton.icon(
                                     // 6. 更多操作按钮
-                                    style: FButtonStyle.ghost(),
+                                    variant: .ghost,
                                     onPress: () => _showTransactionActions(
                                       context,
                                       ref,
                                       transaction,
                                     ),
                                     child: Icon(
-                                      FIcons.ellipsis,
+                                      FLucideIcons.ellipsis,
                                       color: colors.mutedForeground,
                                       size: 20,
                                     ),
@@ -224,7 +226,7 @@ class TransactionDetailPage extends ConsumerWidget {
                               // 详细信息行 - 记账原文（用户原始输入）
                               _buildDetailRow(
                                 context,
-                                icon: FIcons.messageSquareText,
+                                icon: FLucideIcons.messageSquareText,
                                 label: t.transaction.rawInput,
                                 valueWidget: GestureDetector(
                                   onTap: transaction.sourceThreadId != null
@@ -243,10 +245,11 @@ class TransactionDetailPage extends ConsumerWidget {
                                         child: Text(
                                           transaction.rawInput ??
                                               t.transaction.noRawInput,
-                                          style: theme.typography.sm.copyWith(
-                                            color: colors.foreground,
-                                            fontWeight: FontWeight.normal,
-                                          ),
+                                          style: theme.typography.body.sm
+                                              .copyWith(
+                                                color: colors.foreground,
+                                                fontWeight: FontWeight.normal,
+                                              ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -255,7 +258,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                           null) ...[
                                         const SizedBox(width: 4),
                                         Icon(
-                                          FIcons.externalLink,
+                                          FLucideIcons.externalLink,
                                           size: 14,
                                           color: colors.primary,
                                         ),
@@ -267,14 +270,14 @@ class TransactionDetailPage extends ConsumerWidget {
 
                               _buildDetailRow(
                                 context,
-                                icon: FIcons.calendarClock, // 替换图标
+                                icon: FLucideIcons.calendarClock, // 替换图标
                                 label: t.transaction.time,
                                 valueWidget: Text(
                                   DateFormat(
                                     'yyyy年M月d日 HH:mm:ss',
                                     'zh_CN',
                                   ).format(transaction.timestamp),
-                                  style: theme.typography.sm.copyWith(
+                                  style: theme.typography.body.sm.copyWith(
                                     color: colors.foreground, // 值颜色
                                     fontWeight: FontWeight.normal,
                                   ),
@@ -284,11 +287,11 @@ class TransactionDetailPage extends ConsumerWidget {
                                   transaction.location!.isNotEmpty)
                                 _buildDetailRow(
                                   context,
-                                  icon: FIcons.mapPin, // 替换图标
+                                  icon: FLucideIcons.mapPin, // 替换图标
                                   label: t.transaction.location,
                                   valueWidget: Text(
                                     transaction.location!,
-                                    style: theme.typography.sm.copyWith(
+                                    style: theme.typography.body.sm.copyWith(
                                       color: colors.foreground, // 值颜色
                                       fontWeight: FontWeight.normal,
                                     ),
@@ -299,7 +302,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                 const SizedBox(height: 6),
                                 _buildDetailRow(
                                   context,
-                                  icon: FIcons.tags, // 替换图标
+                                  icon: FLucideIcons.tags, // 替换图标
                                   label: t.transaction.tags,
                                   valueWidget: Wrap(
                                     spacing: 8.0,
@@ -308,10 +311,10 @@ class TransactionDetailPage extends ConsumerWidget {
                                         .map(
                                           (tag) => FBadge(
                                             // 9. 使用 FBadge
-                                            style: FBadgeStyle.secondary(),
+                                            variant: .secondary,
                                             child: Text(
                                               tag,
-                                              style: theme.typography.sm
+                                              style: theme.typography.body.sm
                                                   .copyWith(fontSize: 11),
                                             ),
                                             // FBadge 默认有合适的 padding 和圆角
@@ -328,7 +331,7 @@ class TransactionDetailPage extends ConsumerWidget {
                               //     child: Row(
                               //       mainAxisAlignment: MainAxisAlignment.end,
                               //       children: [
-                              //         Icon(FIcons.sparkles, size: 16, color: colorScheme.primary), // 使用主题色
+                              //         Icon(FLucideIcons.sparkles, size: 16, color: colorScheme.primary), // 使用主题色
                               //         const SizedBox(width: 4),
                               //         Text(
                               //           '由 AI 智能记录',
@@ -376,15 +379,21 @@ class TransactionDetailPage extends ConsumerWidget {
       child: Row(
         children: [
           FButton.icon(
-            style: FButtonStyle.ghost(),
+            variant: .ghost,
             onPress: () => GoRouter.of(context).pop(),
-            child: Icon(FIcons.arrowLeft, size: 20, color: colors.foreground),
+            child: Icon(
+              FLucideIcons.arrowLeft,
+              size: 20,
+              color: colors.foreground,
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               t.transaction.transactionDetail,
-              style: theme.typography.xl2.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.xl2.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.center, // 标题居中
             ),
           ),
@@ -421,7 +430,7 @@ class TransactionDetailPage extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                       fontWeight: FontWeight.w500,
                     ),
@@ -471,7 +480,9 @@ class TransactionDetailPage extends ConsumerWidget {
             context: context,
             theme: theme,
             colors: colors,
-            icon: linkedAccount != null ? FIcons.wallet : FIcons.link,
+            icon: linkedAccount != null
+                ? FLucideIcons.wallet
+                : FLucideIcons.link,
             label: linkedAccount?.name ?? t.transaction.linkedAccount,
             isActive: linkedAccount != null,
             activeColor: colors.primary,
@@ -485,7 +496,7 @@ class TransactionDetailPage extends ConsumerWidget {
             context: context,
             theme: theme,
             colors: colors,
-            icon: hasSpaces ? FIcons.users : FIcons.plus,
+            icon: hasSpaces ? FLucideIcons.users : FLucideIcons.plus,
             label: hasSpaces
                 ? t.transaction.nSpaces(count: spaces.length.toString())
                 : t.transaction.linkedSpace,
@@ -534,7 +545,7 @@ class TransactionDetailPage extends ConsumerWidget {
             Flexible(
               child: Text(
                 label,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: isActive ? activeColor : colors.mutedForeground,
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                 ),
@@ -710,7 +721,7 @@ class TransactionDetailPage extends ConsumerWidget {
             children: [
               Text(
                 t.transaction.selectLinkedSpace,
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -725,14 +736,14 @@ class TransactionDetailPage extends ConsumerWidget {
                     final isSelected = currentSpaceIds.contains(spaceId);
                     return ListTile(
                       leading: Icon(
-                        FIcons.users,
+                        FLucideIcons.users,
                         color: isSelected
                             ? colors.primary
                             : colors.mutedForeground,
                       ),
                       title: Text((space['name'] as String?) ?? ''),
                       trailing: isSelected
-                          ? Icon(FIcons.check, color: colors.primary)
+                          ? Icon(FLucideIcons.check, color: colors.primary)
                           : null,
                       onTap: () => Navigator.pop(context, spaceId),
                     );
@@ -803,7 +814,7 @@ class TransactionDetailPage extends ConsumerWidget {
     primaryActions.add(
       ActionItem(
         title: t.transaction.favorite,
-        icon: FIcons.bookmark,
+        icon: FLucideIcons.bookmark,
         onTap: () {
           // TODO: 实现收藏功能
         },
@@ -813,7 +824,7 @@ class TransactionDetailPage extends ConsumerWidget {
     destructiveActions.add(
       ActionItem(
         title: t.common.delete,
-        icon: FIcons.trash2,
+        icon: FLucideIcons.trash2,
         onTap: () {
           // 获取 rootContext 用于后续对话框（此时 BottomSheet 已被 ActionBottomSheet 自动关闭）
           final rootContext = GoRouter.of(
@@ -829,47 +840,66 @@ class TransactionDetailPage extends ConsumerWidget {
                 showFDialog<void>(
                   context: rootContext,
                   builder: (dialogContext, style, animation) => FDialog(
-                    style: style.call,
                     animation: animation,
-                    title: Text(t.transaction.confirmDelete),
-                    body: Text(t.transaction.deleteTransactionConfirm),
-                    actions: [
-                      FButton(
-                        style: FButtonStyle.outline(),
-                        onPress: () => Navigator.of(dialogContext).pop(),
-                        child: Text(t.common.cancel),
-                      ),
-                      FButton(
-                        onPress: () async {
-                          Navigator.of(dialogContext).pop();
-                          // 执行删除操作
-                          try {
-                            final networkClient = ref.read(
-                              networkClientProvider,
-                            );
-                            final result = await networkClient.requestMap(
-                              '/transactions/${transaction.id}',
-                              method: HttpMethod.delete,
-                            );
+                    builder: (context, dialogStyle) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t.transaction.confirmDelete,
+                          style: dialogStyle.titleTextStyle,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          t.transaction.deleteTransactionConfirm,
+                          style: dialogStyle.bodyTextStyle,
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FButton(
+                              variant: .outline,
+                              onPress: () => Navigator.of(dialogContext).pop(),
+                              child: Text(t.common.cancel),
+                            ),
+                            const SizedBox(width: 8),
+                            FButton(
+                              onPress: () async {
+                                Navigator.of(dialogContext).pop();
+                                // 执行删除操作
+                                try {
+                                  final networkClient = ref.read(
+                                    networkClientProvider,
+                                  );
+                                  final result = await networkClient.requestMap(
+                                    '/transactions/${transaction.id}',
+                                    method: HttpMethod.delete,
+                                  );
 
-                            if (result['code'] == 0) {
-                              ToastService.success(
-                                description: Text(t.transaction.deleted),
-                              );
-                              // 返回上一页
-                              if (rootContext.mounted) {
-                                GoRouter.of(rootContext).pop();
-                              }
-                            }
-                          } catch (e) {
-                            ToastService.showDestructive(
-                              description: Text(t.transaction.deleteFailed),
-                            );
-                          }
-                        },
-                        child: Text(t.common.delete),
-                      ),
-                    ],
+                                  if (result['code'] == 0) {
+                                    ToastService.success(
+                                      description: Text(t.transaction.deleted),
+                                    );
+                                    // 返回上一页
+                                    if (rootContext.mounted) {
+                                      GoRouter.of(rootContext).pop();
+                                    }
+                                  }
+                                } catch (e) {
+                                  ToastService.showDestructive(
+                                    description: Text(
+                                      t.transaction.deleteFailed,
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Text(t.common.delete),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

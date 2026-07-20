@@ -110,7 +110,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
       if (mounted) {
         showFToast(
           context: context,
-          icon: const Icon(FIcons.triangleAlert),
+          icon: const Icon(FLucideIcons.triangleAlert),
           title: Text(t.comment.error),
           description: Text('${t.comment.commentFailed}: ${e.toString()}'),
         );
@@ -161,7 +161,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                     t.comment.replyToPrefix(
                       name: replyingToName,
                     ), // Displays the author name of the comment being replied to
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -174,7 +174,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                       _commentController.clear();
                     },
                     child: Icon(
-                      FIcons.x,
+                      FLucideIcons.x,
                       color: colors.mutedForeground,
                       size: 16,
                     ),
@@ -187,7 +187,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
             children: [
               Expanded(
                 child: FTextField(
-                  controller: _commentController,
+                  control: .managed(controller: _commentController),
                   focusNode: _commentFocusNode,
                   hint: t.comment.addNote,
                   onTap: () {
@@ -224,7 +224,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                     )
                   : FButton.icon(
                       onPress: _submitComment,
-                      child: const Icon(FIcons.send),
+                      child: const Icon(FLucideIcons.send),
                     ),
             ],
           ),
