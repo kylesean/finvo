@@ -12,7 +12,7 @@ import '../utils/formatters.dart';
 /// AmountDisplay(
 ///   amount: 1234.56,
 ///   currency: 'CNY',
-///   style: theme.typography.lg,
+///   style: theme.typography.body.lg,
 /// )
 /// ```
 class AmountDisplay extends StatelessWidget {
@@ -55,7 +55,7 @@ class AmountDisplay extends StatelessWidget {
       compact: compact,
     );
 
-    final effectiveStyle = (style ?? theme.typography.base).copyWith(
+    final effectiveStyle = (style ?? theme.typography.body.md).copyWith(
       color: color,
     );
 
@@ -89,7 +89,7 @@ class LargeAmountDisplay extends StatelessWidget {
       amount: amount,
       currency: currency,
       showSign: showSign,
-      style: theme.typography.xl2.copyWith(
+      style: theme.typography.body.xl2.copyWith(
         fontWeight: FontWeight.bold,
         color: color ?? colors.foreground,
       ),

@@ -85,7 +85,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
               padding: const EdgeInsets.only(left: 6),
               child: Text(
                 '(${widget.toolCall.durationMs}ms)',
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: theme.colors.mutedForeground.withValues(alpha: 0.5),
                   fontSize: 12,
                 ),
@@ -103,7 +103,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
         widget.toolCall.status != ToolExecutionStatus.pending) {
       return Text(
         label,
-        style: theme.typography.sm.copyWith(
+        style: theme.typography.body.sm.copyWith(
           color: widget.toolCall.status == ToolExecutionStatus.error
               ? colors.destructive
               : colors.mutedForeground,
@@ -135,7 +135,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
           },
           child: Text(
             label,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w500,
             ),
@@ -177,17 +177,21 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
 
     final command = args['command']?.toString() ?? '';
 
-    // 脚本名到语义名的映射（精简后的 5 个脚本）
+    // Script to semantic name mapping (updated for redesigned skills)
     const scriptMappings = {
-      // finance-analyst
-      'analyze_finance.py': 'analyze_finance',
-      'forecast_finance.py': 'forecast_finance',
-      // budget-expert
-      'analyze_budget.py': 'analyze_budget',
-      // shared-space
+      // reviewing-finances
+      'analyze_spending.py': 'analyze_spending',
+      'analyze_cashflow.py': 'analyze_cashflow',
+      // forecasting-finances
+      'forecast_balance.py': 'forecast_balance',
+      // planning-budgets
+      'suggest_budget.py': 'suggest_budget',
+      'prepare_budget_simulation.py': 'prepare_budget_simulation',
+      'simulate_budget.py': 'simulate_budget',
+      // managing-shared-ledgers
       'list_spaces.py': 'list_spaces',
       'query_space_summary.py': 'query_space_summary',
-      // transfer-expert
+      // executing-transfers
       'prepare_transfer.py': 'prepare_transfer',
     };
 
@@ -208,13 +212,12 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
       'search_transactions' => tools.searchTransactions,
       'query_budget_status' => tools.queryBudgetStatus,
       'create_budget' => tools.createBudget,
-      // 脚本语义映射
-      'analyze_finance' => tools.analyzeFinance,
-      'forecast_finance' => tools.forecastFinance,
-      'analyze_budget' => tools.analyzeBudget,
-      'audit_analysis' => tools.auditAnalysis,
-      'budget_ops' => tools.budgetOps,
-      'create_shared_transaction' => tools.createSharedTransaction,
+      'analyze_spending' => tools.analyzeSpending,
+      'analyze_cashflow' => tools.analyzeCashflow,
+      'forecast_balance' => tools.forecastBalance,
+      'suggest_budget' => tools.suggestBudget,
+      'prepare_budget_simulation' => tools.prepareBudgetSimulation,
+      'simulate_budget' => tools.simulateBudget,
       'list_spaces' => tools.listSpaces,
       'query_space_summary' => tools.querySpaceSummary,
       'prepare_transfer' => tools.prepareTransfer,
@@ -223,7 +226,6 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
       'get_financial_health_score' => tools.getFinancialHealthScore,
       'get_financial_summary' => tools.getFinancialSummary,
       'evaluate_financial_health' => tools.evaluateFinancialHealth,
-      'forecast_balance' => tools.forecastBalance,
       'simulate_expense_impact' => tools.simulateExpenseImpact,
       'record_transactions' => tools.recordTransactions,
       'create_transaction' => tools.createTransaction,
@@ -243,13 +245,12 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
       'search_transactions' => done.searchTransactions,
       'query_budget_status' => done.queryBudgetStatus,
       'create_budget' => done.createBudget,
-      // 脚本语义映射
-      'analyze_finance' => done.analyzeFinance,
-      'forecast_finance' => done.forecastFinance,
-      'analyze_budget' => done.analyzeBudget,
-      'audit_analysis' => done.auditAnalysis,
-      'budget_ops' => done.budgetOps,
-      'create_shared_transaction' => done.createSharedTransaction,
+      'analyze_spending' => done.analyzeSpending,
+      'analyze_cashflow' => done.analyzeCashflow,
+      'forecast_balance' => done.forecastBalance,
+      'suggest_budget' => done.suggestBudget,
+      'prepare_budget_simulation' => done.prepareBudgetSimulation,
+      'simulate_budget' => done.simulateBudget,
       'list_spaces' => done.listSpaces,
       'query_space_summary' => done.querySpaceSummary,
       'prepare_transfer' => done.prepareTransfer,
@@ -258,7 +259,6 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
       'get_financial_health_score' => done.getFinancialHealthScore,
       'get_financial_summary' => done.getFinancialSummary,
       'evaluate_financial_health' => done.evaluateFinancialHealth,
-      'forecast_balance' => done.forecastBalance,
       'simulate_expense_impact' => done.simulateExpenseImpact,
       'record_transactions' => done.recordTransactions,
       'create_transaction' => done.createTransaction,
@@ -279,20 +279,28 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
           builder: (context, child) {
             return Transform.rotate(
               angle: _controller.value * 2 * 3.14159,
-              child: Icon(FIcons.loader, size: 14, color: theme.colors.primary),
+              child: Icon(
+                FLucideIcons.loader,
+                size: 14,
+                color: theme.colors.primary,
+              ),
             );
           },
         );
       case ToolExecutionStatus.success:
-        return const Icon(FIcons.check, size: 14, color: Colors.green);
+        return const Icon(FLucideIcons.check, size: 14, color: Colors.green);
       case ToolExecutionStatus.error:
         return Icon(
-          FIcons.triangleAlert,
+          FLucideIcons.triangleAlert,
           size: 14,
           color: theme.colors.destructive,
         );
       case ToolExecutionStatus.cancelled:
-        return Icon(FIcons.x, size: 14, color: theme.colors.mutedForeground);
+        return Icon(
+          FLucideIcons.x,
+          size: 14,
+          color: theme.colors.mutedForeground,
+        );
     }
   }
 }

@@ -6,13 +6,13 @@ import 'package:forui/forui.dart';
 /// Corresponds to backend TransactionSubject enum
 /// Answers "Who is this money spent for?"
 enum TransactionSubject {
-  self('SELF', 'Self', FIcons.user),
-  spouse('SPOUSE', 'Spouse', FIcons.heart),
-  kids('KIDS', 'Kids', FIcons.baby),
-  parents('PARENTS', 'Parents', FIcons.users),
-  pets('PETS', 'Pets', FIcons.pawPrint),
-  family('FAMILY', 'Family Shared', FIcons.house),
-  social('SOCIAL', 'Social', FIcons.userPlus);
+  self('SELF', 'Self', FLucideIcons.user),
+  spouse('SPOUSE', 'Spouse', FLucideIcons.heart),
+  kids('KIDS', 'Kids', FLucideIcons.baby),
+  parents('PARENTS', 'Parents', FLucideIcons.users),
+  pets('PETS', 'Pets', FLucideIcons.pawPrint),
+  family('FAMILY', 'Family Shared', FLucideIcons.house),
+  social('SOCIAL', 'Social', FLucideIcons.userPlus);
 
   final String key;
   final String label;
@@ -44,10 +44,10 @@ enum TransactionSubject {
 /// Corresponds to backend TransactionIntent enum
 /// Answers "Why is this money spent?" - Financial health analysis
 enum TransactionIntent {
-  survival('SURVIVAL', 'Survival', FIcons.shieldCheck),
-  enjoyment('ENJOYMENT', 'Enjoyment', FIcons.smile),
-  development('DEVELOPMENT', 'Development', FIcons.trendingUp),
-  obligation('OBLIGATION', 'Obligation', FIcons.fileCheck);
+  survival('SURVIVAL', 'Survival', FLucideIcons.shieldCheck),
+  enjoyment('ENJOYMENT', 'Enjoyment', FLucideIcons.smile),
+  development('DEVELOPMENT', 'Development', FLucideIcons.trendingUp),
+  obligation('OBLIGATION', 'Obligation', FLucideIcons.fileCheck);
 
   final String key;
   final String label;

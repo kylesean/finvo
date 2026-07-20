@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Budget Analysis Script - Spending Pattern Analysis
+"""Spending Analysis Script - Category Breakdown and Patterns
 
-Directly queries the database to analyze spending patterns and suggest budgets.
+Directly queries the database to analyze spending patterns by category.
 Follows AgentSkills.io best practice: scripts access data directly via DB.
 
 Usage:
-    python app/skills/budget-expert/scripts/analyze_budget.py
+    uv run python app/skills/reviewing-finances/scripts/analyze_spending.py
 
     Or with options via stdin JSON:
-    echo '{"days": 90, "category": "FOOD_DINING"}' | python analyze_budget.py
+    echo '{"days": 90, "category": "FOOD_DINING"}' | uv run python analyze_spending.py
 
 Environment:
     USER_ID: Required. User UUID (injected by bash tool).
@@ -41,7 +41,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
@@ -52,6 +52,7 @@ from app.core.database import db_manager  # noqa: E402
 from app.services.transaction_query_service import (  # noqa: E402
     TransactionQueryParams,
     TransactionQueryService,
+    TransactionType,
 )
 
 
@@ -130,8 +131,6 @@ def analyze_spending(transactions: list[dict[str, Any]], days: int = 90) -> dict
     # Trend calculation
     trends = {}
     if len(months) >= 2:
-        from typing import cast
-
         last_month = cast(Decimal, by_month[months[-1]]["total"])
         prev_month = cast(Decimal, by_month[months[-2]]["total"])
         change = last_month - prev_month
@@ -191,7 +190,16 @@ async def main() -> None:
         print(json.dumps({"success": False, "error": "USER_ID environment variable not set"}))
         sys.exit(1)
 
-    # Parse options from stdin
+    # Parse options from CLI arguments and stdin
+    import argparse
+
+    cli_parser = argparse.ArgumentParser()
+    cli_parser.add_argument("--start-date", dest="start_date", help="Start date YYYY-MM-DD")
+    cli_parser.add_argument("--end-date", dest="end_date", help="End date YYYY-MM-DD")
+    cli_parser.add_argument("--days", type=int, help="Days")
+    cli_parser.add_argument("--category", help="Category filter")
+    cli_args, _ = cli_parser.parse_known_args()
+
     options = {}
     if not sys.stdin.isatty():
         try:
@@ -201,14 +209,25 @@ async def main() -> None:
         except (json.JSONDecodeError, ValueError):
             pass
 
-    days = options.get("days", 90)
-    category = options.get("category")
+    start_date_str = cli_args.start_date or options.get("start_date")
+    end_date_str = cli_args.end_date or options.get("end_date")
+    days = cli_args.days or options.get("days", 90)
+    category = cli_args.category or options.get("category")
 
     try:
         user_uuid = UUID(user_uuid_str)
 
-        end_date = datetime.now().date()
-        start_date = end_date - timedelta(days=days)
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.fromisoformat(start_date_str).date()
+                end_date = datetime.fromisoformat(end_date_str).date()
+                days = max((end_date - start_date).days, 1)
+            except ValueError:
+                end_date = datetime.now().date()
+                start_date = end_date - timedelta(days=days)
+        else:
+            end_date = datetime.now().date()
+            start_date = end_date - timedelta(days=days)
 
         async with db_manager.session_factory() as session:
             service = TransactionQueryService(session)
@@ -216,7 +235,7 @@ async def main() -> None:
             params = TransactionQueryParams(
                 start_date=start_date.isoformat(),
                 end_date=end_date.isoformat(),
-                transaction_types=["EXPENSE"],
+                transaction_types=[TransactionType.EXPENSE],
                 per_page=100,
             )
 
@@ -244,7 +263,7 @@ async def main() -> None:
             output = {
                 "success": True,
                 "componentType": "BudgetAnalysisCard",
-                "title": "预算规划方案",  # 显式指定标题
+                "title": "消费支出分析",  # 显式指定标题，解决职责正交化后的语意对齐
                 **analysis,
             }
 

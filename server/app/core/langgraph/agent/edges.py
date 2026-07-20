@@ -7,7 +7,7 @@ Routing is now declarative based on tool metadata's `continuation` property,
 with minimal override rules for special modes like `direct_execute`.
 """
 
-from typing import Literal, cast
+from typing import Literal, assert_never, cast
 
 from langchain_core.messages import AIMessage
 from langgraph.graph import END
@@ -127,35 +127,31 @@ def route_after_tools(state: AgentState) -> Literal["agent", "__end__"]:
             )
             return override
 
-    # Normal mode: use declared continuation
-    if continuation == Continuation.AGENT:
-        logger.debug(
-            "route_after_tools_to_agent",
-            tool_name=tool_name,
-            continuation=continuation.value,
-        )
-        return "agent"
+    # Normal mode: use declared continuation (exhaustive match)
+    match continuation:
+        case Continuation.AGENT:
+            logger.debug(
+                "route_after_tools_to_agent",
+                tool_name=tool_name,
+                continuation=continuation.value,
+            )
+            return "agent"
 
-    elif continuation == Continuation.END:
-        logger.info(
-            "route_after_tools_end",
-            tool_name=tool_name,
-            continuation=continuation.value,
-        )
-        return cast(Literal["agent", "__end__"], END)
+        case Continuation.END:
+            logger.info(
+                "route_after_tools_end",
+                tool_name=tool_name,
+                continuation=continuation.value,
+            )
+            return cast(Literal["agent", "__end__"], END)
 
-    elif continuation == Continuation.WAIT_USER:
-        logger.info(
-            "route_after_tools_wait_user",
-            tool_name=tool_name,
-            continuation=continuation.value,
-        )
-        return cast(Literal["agent", "__end__"], END)
+        case Continuation.WAIT_USER:
+            logger.info(
+                "route_after_tools_wait_user",
+                tool_name=tool_name,
+                continuation=continuation.value,
+            )
+            return cast(Literal["agent", "__end__"], END)
 
-    # Fallback: should not reach here
-    logger.warning(
-        "route_after_tools_fallback",
-        tool_name=tool_name,
-        continuation=continuation.value,
-    )
-    return cast(Literal["agent", "__end__"], END)
+        case _:
+            assert_never(continuation)

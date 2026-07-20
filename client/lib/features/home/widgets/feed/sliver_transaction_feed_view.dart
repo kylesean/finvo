@@ -157,14 +157,14 @@ class SliverTransactionFeedView extends ConsumerWidget {
             children: [
               Text(
                 'Failed to load: ${feedState.errorMessage}',
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               FButton(
-                style: FButtonStyle.outline(),
+                variant: .outline,
                 onPress: () =>
                     ref.read(transactionFeedProvider.notifier).refreshFeed(),
                 child: const Text('Retry'),
@@ -188,7 +188,7 @@ class SliverTransactionFeedView extends ConsumerWidget {
             children: [
               Text(
                 t.home.noTransactions,
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
@@ -231,7 +231,7 @@ class SliverTransactionFeedView extends ConsumerWidget {
                 child: Center(
                   child: Text(
                     t.home.noMoreData,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),

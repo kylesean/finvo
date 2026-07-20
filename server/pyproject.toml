@@ -1,17 +1,16 @@
 [project]
 name = "augo-api"
-version = "0.1.0"
+version = "0.1.1-alpha"
 description = "Augo: Self-Hosted & Privacy-First AI Financial Assistant"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.121.0",
-    "langchain>=1.0.5",
     "langchain-core>=1.2.5",
     "langchain-openai>=1.0.2",
     "langfuse==3.9.1",
-    "langgraph>=1.0.2",
-    "langgraph-checkpoint-postgres>=3.0.1",
+    "langgraph>=1.1.0,<2.0.0",
+    "langgraph-checkpoint-postgres>=3.0.1,<4.0.0",
     "passlib[bcrypt]>=1.7.4",
     "psycopg2-binary>=2.9.10",
     "pydantic[email]>=2.11.1",
@@ -57,7 +56,6 @@ dependencies = [
     "jieba>=0.42.1",
     "pandas>=2.3.3",
     "scipy>=1.16.3",
-    "deepagents>=0.3.0",
     "qrcode>=8.2",
 ]
 

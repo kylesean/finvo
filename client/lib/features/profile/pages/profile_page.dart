@@ -74,10 +74,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               FTileGroup(
                 children: [
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.users),
+                    prefix: _buildSettingIcon(context, FLucideIcons.users),
                     title: Text(t.settings.sharedSpace),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -93,7 +93,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               FTileGroup(
                 children: [
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.globe),
+                    prefix: _buildSettingIcon(context, FLucideIcons.globe),
                     title: Text(t.settings.language),
                     subtitle: Text(
                       ref
@@ -101,7 +101,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           .currentLocaleDisplayName,
                     ),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -109,11 +109,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         context.goNamed(AppRouteNames.languageSettings),
                   ),
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.mic),
+                    prefix: _buildSettingIcon(context, FLucideIcons.mic),
                     title: Text(t.settings.speechRecognition),
                     subtitle: Text(t.settings.speechRecognitionSubtitle),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -121,11 +121,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         context.goNamed(AppRouteNames.speechSettings),
                   ),
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.palette),
+                    prefix: _buildSettingIcon(context, FLucideIcons.palette),
                     title: Text(t.settings.amountDisplayStyle),
                     subtitle: Text(_getAmountThemeDisplayName(ref)),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -133,11 +133,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         context.goNamed(AppRouteNames.amountStyleSettings),
                   ),
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.dollarSign),
+                    prefix: _buildSettingIcon(context, FLucideIcons.dollarSign),
                     title: Text(t.settings.currency),
                     subtitle: Text(_getCurrencyDisplayName(ref)),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -153,11 +153,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               FTileGroup(
                 children: [
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.sun),
+                    prefix: _buildSettingIcon(context, FLucideIcons.sun),
                     title: Text(t.settings.appearance),
                     subtitle: Text(t.settings.appearanceSubtitle),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -173,11 +173,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               FTileGroup(
                 children: [
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.server),
+                    prefix: _buildSettingIcon(context, FLucideIcons.server),
                     title: Text(t.server.serverSettings),
                     subtitle: _buildServerSubtitle(ref),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -195,7 +195,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     title: Text(t.settings.helpAndFeedback),
                     subtitle: Text(t.settings.helpAndFeedbackSubtitle),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -204,11 +204,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     },
                   ),
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.info),
+                    prefix: _buildSettingIcon(context, FLucideIcons.info),
                     title: Text(t.settings.aboutApp),
                     subtitle: Text(t.settings.aboutAppSubtitle),
                     suffix: Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -224,7 +224,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               FTileGroup(
                 children: [
                   FTile(
-                    prefix: _buildSettingIcon(context, FIcons.logOut),
+                    prefix: _buildSettingIcon(context, FLucideIcons.logOut),
                     title: Text(t.auth.logout),
                     onPress: () => _handleLogout(context),
                   ),
@@ -291,7 +291,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     border: Border.all(color: colors.background, width: 2),
                   ),
                   child: Icon(
-                    FIcons.camera,
+                    FLucideIcons.camera,
                     size: 14,
                     color: colors.primaryForeground,
                   ),
@@ -341,14 +341,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       key: const ValueKey('editing'),
       width: 250,
       child: FTextField(
-        controller: _usernameController,
+        control: .managed(controller: _usernameController),
         focusNode: _usernameFocusNode,
         autofocus: true,
         hint: t.user.username,
         suffixBuilder: (context, style, child) => Padding(
           padding: const EdgeInsets.only(right: 8),
           child: FButton.icon(
-            style: FButtonStyle.ghost(),
+            variant: .ghost,
             onPress: isSaving ? null : _submitUsername,
             child: isSaving
                 ? SizedBox(
@@ -359,7 +359,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       color: colors.primary,
                     ),
                   )
-                : Icon(FIcons.check, size: 20, color: colors.primary),
+                : Icon(FLucideIcons.check, size: 20, color: colors.primary),
           ),
         ),
       ),
@@ -391,10 +391,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           else
             Text(
               user?.username ?? t.user.username,
-              style: theme.typography.lg.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           const SizedBox(width: 6),
-          Icon(FIcons.squarePen, size: 16, color: colors.mutedForeground),
+          Icon(FLucideIcons.squarePen, size: 16, color: colors.mutedForeground),
         ],
       ),
     );
@@ -482,7 +484,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             debugPrint('❌ Avatar load error: $error');
             return Container(
               color: colors.muted,
-              child: Icon(FIcons.user, size: 40, color: colors.mutedForeground),
+              child: Icon(
+                FLucideIcons.user,
+                size: 40,
+                color: colors.mutedForeground,
+              ),
             );
           },
         );
@@ -491,7 +497,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return Container(
       color: colors.muted,
-      child: Icon(FIcons.user, size: 40, color: colors.mutedForeground),
+      child: Icon(FLucideIcons.user, size: 40, color: colors.mutedForeground),
     );
   }
 
@@ -556,27 +562,47 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       showDialog(
         context: context,
         builder: (context) => FDialog(
-          title: Text(t.auth.confirmLogoutTitle),
-          body: Text(t.auth.confirmLogoutContent),
-          actions: [
-            FButton(
-              style: FButtonStyle.destructive(),
-              onPress: () async {
-                Navigator.of(context).pop();
+          builder: (context, dialogStyle) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                t.auth.confirmLogoutTitle,
+                style: dialogStyle.titleTextStyle,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                t.auth.confirmLogoutContent,
+                style: dialogStyle.bodyTextStyle,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FButton(
+                    variant: .outline,
+                    onPress: () => Navigator.of(context).pop(),
+                    child: Text(t.common.cancel),
+                  ),
+                  const SizedBox(width: 8),
+                  FButton(
+                    variant: .destructive,
+                    onPress: () async {
+                      Navigator.of(context).pop();
 
-                // Send toast message first to avoid context failure after redirection
-                ToastService.success(description: Text(t.auth.logoutSuccess));
+                      // Send toast message first to avoid context failure after redirection
+                      ToastService.success(
+                        description: Text(t.auth.logoutSuccess),
+                      );
 
-                await ref.read(authProvider.notifier).logout();
-              },
-              child: Text(t.auth.logout),
-            ),
-            FButton(
-              style: FButtonStyle.outline(),
-              onPress: () => Navigator.of(context).pop(),
-              child: Text(t.common.cancel),
-            ),
-          ],
+                      await ref.read(authProvider.notifier).logout();
+                    },
+                    child: Text(t.auth.logout),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

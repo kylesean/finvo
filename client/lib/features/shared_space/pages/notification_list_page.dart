@@ -67,12 +67,12 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
       header: FHeader(
         title: Text(
           'Notifications',
-          style: theme.typography.xl.copyWith(color: colors.foreground),
+          style: theme.typography.body.xl.copyWith(color: colors.foreground),
         ),
         suffixes: [
           if (state.unreadCount > 0)
             FHeaderAction(
-              icon: const Icon(FIcons.checkCheck),
+              icon: const Icon(FLucideIcons.checkCheck),
               onPress: _markAllAsRead,
             ),
         ],
@@ -107,17 +107,23 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
                 color: colors.muted,
                 borderRadius: BorderRadius.circular(40),
               ),
-              child: Icon(FIcons.bell, size: 40, color: colors.mutedForeground),
+              child: Icon(
+                FLucideIcons.bell,
+                size: 40,
+                color: colors.mutedForeground,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
               'No notifications',
-              style: theme.typography.xl.copyWith(color: colors.foreground),
+              style: theme.typography.body.xl.copyWith(
+                color: colors.foreground,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'When you have new invites or activities,\nyou will receive notifications here',
-              style: theme.typography.base.copyWith(
+              style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
               textAlign: TextAlign.center,

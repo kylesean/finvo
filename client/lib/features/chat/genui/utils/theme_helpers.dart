@@ -29,43 +29,43 @@ AccountTypeStyle getAccountTypeStyle(String? type, FColors colors) {
     case 'bank':
     case 'bank_card':
       return AccountTypeStyle(
-        icon: FIcons.landmark,
+        icon: FLucideIcons.landmark,
         iconColor: colors.primary,
         backgroundColor: colors.primary.withValues(alpha: 0.1),
       );
     case 'cash':
       return AccountTypeStyle(
-        icon: FIcons.wallet,
+        icon: FLucideIcons.wallet,
         iconColor: colors.primary.withValues(alpha: 0.85),
         backgroundColor: colors.primary.withValues(alpha: 0.08),
       );
     case 'investment':
       return AccountTypeStyle(
-        icon: FIcons.trendingUp,
+        icon: FLucideIcons.trendingUp,
         iconColor: colors.primary.withValues(alpha: 0.7),
         backgroundColor: colors.primary.withValues(alpha: 0.06),
       );
     case 'credit_card':
       return AccountTypeStyle(
-        icon: FIcons.creditCard,
+        icon: FLucideIcons.creditCard,
         iconColor: colors.primary.withValues(alpha: 0.55),
         backgroundColor: colors.primary.withValues(alpha: 0.05),
       );
     case 'alipay':
       return AccountTypeStyle(
-        icon: FIcons.smartphone,
+        icon: FLucideIcons.smartphone,
         iconColor: colors.primary,
         backgroundColor: colors.primary.withValues(alpha: 0.1),
       );
     case 'wechat':
       return AccountTypeStyle(
-        icon: FIcons.messageCircle,
+        icon: FLucideIcons.messageCircle,
         iconColor: colors.primary.withValues(alpha: 0.8),
         backgroundColor: colors.primary.withValues(alpha: 0.08),
       );
     default:
       return AccountTypeStyle(
-        icon: FIcons.wallet,
+        icon: FLucideIcons.wallet,
         iconColor: colors.mutedForeground,
         backgroundColor: colors.muted,
       );
@@ -190,28 +190,32 @@ StatusStyle getStatusStyle(
       return StatusStyle(
         label: '已完成',
         color: colors.primary,
-        icon: FIcons.check,
+        icon: FLucideIcons.check,
       );
     case 'pending':
-      return StatusStyle(label: '待处理', color: warningColor, icon: FIcons.clock);
+      return StatusStyle(
+        label: '待处理',
+        color: warningColor,
+        icon: FLucideIcons.clock,
+      );
     case 'failed':
     case 'error':
       return StatusStyle(
         label: '失败',
         color: colors.destructive,
-        icon: FIcons.x,
+        icon: FLucideIcons.x,
       );
     case 'cancelled':
       return StatusStyle(
         label: '已取消',
         color: colors.mutedForeground,
-        icon: FIcons.x,
+        icon: FLucideIcons.x,
       );
     default:
       return StatusStyle(
         label: status ?? '未知',
         color: colors.mutedForeground,
-        icon: FIcons.info,
+        icon: FLucideIcons.info,
       );
   }
 }

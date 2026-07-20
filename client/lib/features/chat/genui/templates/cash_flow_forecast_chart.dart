@@ -146,7 +146,9 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Icon(
-                      _isExpanded ? FIcons.chevronUp : FIcons.chevronDown,
+                      _isExpanded
+                          ? FLucideIcons.chevronUp
+                          : FLucideIcons.chevronDown,
                       size: 16,
                       color: colors.mutedForeground,
                     ),
@@ -185,7 +187,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  hasWarnings ? FIcons.info : FIcons.trendingUp,
+                  hasWarnings ? FLucideIcons.info : FLucideIcons.trendingUp,
                   size: 16,
                   color: hasWarnings
                       ? amountTheme.expenseColor
@@ -199,7 +201,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                   Text(
                     widget.data['title'] as String? ??
                         t.chat.genui.cashFlowForecast.title,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -207,7 +209,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                     t.chat.genui.cashFlowForecast.nextDays(
                       days: days as Object,
                     ),
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                     ),
                   ),
@@ -224,7 +226,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
             ),
             child: Text(
               '¥${_formatAmount(_currentBalance)}',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.secondaryForeground,
               ),
@@ -243,7 +245,9 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
       return Center(
         child: Text(
           t.chat.genui.cashFlowForecast.noData,
-          style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+          style: theme.typography.body.sm.copyWith(
+            color: colors.mutedForeground,
+          ),
         ),
       );
     }
@@ -291,7 +295,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                   padding: const EdgeInsets.only(right: 4),
                   child: Text(
                     _formatAmount(value),
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                       fontSize: 10,
                     ),
@@ -313,7 +317,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
                       DateFormat('M/d').format(date),
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                         fontSize: 10,
                       ),
@@ -419,12 +423,16 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
             padding: const EdgeInsets.symmetric(vertical: 2),
             child: Row(
               children: [
-                Icon(FIcons.info, size: 14, color: amountTheme.expenseColor),
+                Icon(
+                  FLucideIcons.info,
+                  size: 14,
+                  color: amountTheme.expenseColor,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     warning.message,
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: amountTheme.expenseColor,
                     ),
                   ),
@@ -452,7 +460,9 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
           const SizedBox(height: 8),
           Text(
             t.chat.genui.cashFlowForecast.summary,
-            style: theme.typography.sm.copyWith(fontWeight: FontWeight.w600),
+            style: theme.typography.body.sm.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -508,7 +518,9 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
             const SizedBox(height: 16),
             Text(
               t.chat.genui.cashFlowForecast.keyEvents,
-              style: theme.typography.sm.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.sm.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             ..._buildKeyEvents(context, amountTheme),
@@ -539,12 +551,14 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
         children: [
           Text(
             label,
-            style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.xs.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             '¥${_formatAmount(value)}',
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               fontWeight: FontWeight.w600,
               color: isPositive
                   ? amountTheme.incomeColor
@@ -591,7 +605,9 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
       return [
         Text(
           t.chat.genui.cashFlowForecast.noSignificantEvents,
-          style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+          style: theme.typography.body.xs.copyWith(
+            color: colors.mutedForeground,
+          ),
         ),
       ];
     }
@@ -624,7 +640,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                 children: [
                   Text(
                     description,
-                    style: theme.typography.xs,
+                    style: theme.typography.body.xs,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -632,7 +648,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                     DateFormat(
                       t.chat.genui.cashFlowForecast.dateFormat,
                     ).format(date),
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: colors.mutedForeground,
                       fontSize: 10,
                     ),
@@ -642,7 +658,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
             ),
             Text(
               '${isIncome ? '+' : ''}¥${_formatAmount(amount)}',
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 fontWeight: FontWeight.w600,
                 color: isIncome
                     ? amountTheme.incomeColor

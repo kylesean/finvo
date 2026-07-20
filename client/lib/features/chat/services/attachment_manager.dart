@@ -28,10 +28,9 @@ class AttachmentManager {
   final Set<String> _messagesWithAttachmentFetchInFlight = {};
 
   AttachmentManager({
-    required FileAttachmentService fileAttachmentService,
-    required MessageRepository messageRepository,
-  }) : _fileAttachmentService = fileAttachmentService,
-       _messageRepository = messageRepository;
+    required this._fileAttachmentService,
+    required this._messageRepository,
+  });
 
   // ============================================================
   // Public Methods

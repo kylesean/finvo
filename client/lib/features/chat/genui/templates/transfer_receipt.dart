@@ -100,12 +100,16 @@ class TransferReceipt extends StatelessWidget {
               color: colors.primary,
               shape: BoxShape.circle,
             ),
-            child: const Icon(FIcons.check, color: Colors.white, size: 14),
+            child: const Icon(
+              FLucideIcons.check,
+              color: Colors.white,
+              size: 14,
+            ),
           ),
           const SizedBox(width: 8),
           Text(
             t.chat.transferWizard.transferSuccess,
-            style: theme.typography.base.copyWith(
+            style: theme.typography.body.md.copyWith(
               color: colors.primary,
               fontWeight: FontWeight.w600,
             ),
@@ -113,7 +117,7 @@ class TransferReceipt extends StatelessWidget {
           const Spacer(),
           Text(
             _formatTimeOnly(time),
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: colors.primary.withValues(alpha: 0.7),
             ),
           ),
@@ -143,7 +147,11 @@ class TransferReceipt extends StatelessWidget {
               color: colors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(FIcons.arrowRightLeft, color: colors.primary, size: 24),
+            child: Icon(
+              FLucideIcons.arrowRightLeft,
+              color: colors.primary,
+              size: 24,
+            ),
           ),
           const SizedBox(height: 12),
 
@@ -292,7 +300,7 @@ class _TransferAnimationState extends State<_TransferAnimation>
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.typography.xs.copyWith(
+            style: theme.typography.body.xs.copyWith(
               color: colors.foreground,
               fontWeight: FontWeight.w600,
               height: 1.2,
@@ -310,28 +318,28 @@ class _TransferAnimationState extends State<_TransferAnimation>
 
     switch (type?.toUpperCase()) {
       case 'CASH':
-        icon = FIcons.banknote;
+        icon = FLucideIcons.banknote;
         bgColor = semantic.successAccent;
         break;
       case 'BANK':
       case 'DEPOSIT':
-        icon = FIcons.building;
+        icon = FLucideIcons.building;
         bgColor = colors.primary;
         break;
       case 'CREDIT_CARD':
-        icon = FIcons.creditCard;
+        icon = FLucideIcons.creditCard;
         bgColor = semantic.warningAccent;
         break;
       case 'ALIPAY':
-        icon = FIcons.smartphone;
+        icon = FLucideIcons.smartphone;
         bgColor = const Color(0xFF1677FF); // 支付宝品牌色
         break;
       case 'WECHAT':
-        icon = FIcons.smartphone;
+        icon = FLucideIcons.smartphone;
         bgColor = const Color(0xFF07C160); // 微信品牌色
         break;
       default:
-        icon = FIcons.wallet;
+        icon = FLucideIcons.wallet;
         bgColor = colors.mutedForeground;
     }
 

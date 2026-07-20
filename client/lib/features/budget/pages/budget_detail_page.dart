@@ -115,12 +115,12 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
       backgroundColor: colors.background,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(FIcons.arrowLeft, color: colors.foreground),
+        icon: Icon(FLucideIcons.arrowLeft, color: colors.foreground),
         onPressed: () => context.pop(),
       ),
       title: Text(
         t.budget.detail,
-        style: theme.typography.lg.copyWith(
+        style: theme.typography.body.lg.copyWith(
           fontWeight: FontWeight.w600,
           color: colors.foreground,
         ),
@@ -130,7 +130,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
         if (_budgetWithUsage != null) ...[
           IconButton(
             icon: Icon(
-              isPaused ? FIcons.play : FIcons.pause,
+              isPaused ? FLucideIcons.play : FLucideIcons.pause,
               color: colors.foreground,
               size: 20,
             ),
@@ -139,7 +139,11 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           ),
 
           IconButton(
-            icon: Icon(FIcons.squarePen, color: colors.foreground, size: 20),
+            icon: Icon(
+              FLucideIcons.squarePen,
+              color: colors.foreground,
+              size: 20,
+            ),
             tooltip: t.common.edit,
             onPressed: () => context.pushNamed(
               'budgetEdit',
@@ -163,11 +167,15 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(FIcons.triangleAlert, size: 48, color: colors.destructive),
+              Icon(
+                FLucideIcons.triangleAlert,
+                size: 48,
+                color: colors.destructive,
+              ),
               const SizedBox(height: 16),
               Text(
                 _error!,
-                style: theme.typography.base.copyWith(
+                style: theme.typography.body.md.copyWith(
                   color: colors.mutedForeground,
                 ),
                 textAlign: TextAlign.center,
@@ -250,7 +258,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           // Budget name
           Text(
             budgetWithUsage.budget.displayName,
-            style: theme.typography.lg.copyWith(
+            style: theme.typography.body.lg.copyWith(
               fontWeight: FontWeight.w600,
               color: colors.primaryForeground,
             ),
@@ -283,14 +291,14 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
                   children: [
                     Text(
                       '${usagePercent.toStringAsFixed(0)}%',
-                      style: theme.typography.xl2.copyWith(
+                      style: theme.typography.body.xl2.copyWith(
                         fontWeight: FontWeight.bold,
                         color: colors.primaryForeground,
                       ),
                     ),
                     Text(
                       t.budget.used,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.primaryForeground.withValues(alpha: 0.8),
                       ),
                     ),
@@ -349,14 +357,14 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
       children: [
         Text(
           label,
-          style: theme.typography.xs.copyWith(
+          style: theme.typography.body.xs.copyWith(
             color: colors.primaryForeground.withValues(alpha: 0.8),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           '$_currencySymbol${_formatAmount(amount)}',
-          style: theme.typography.base.copyWith(
+          style: theme.typography.body.md.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.primaryForeground,
           ),
@@ -371,7 +379,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
       children: [
         Text(
           t.budget.info,
-          style: theme.typography.sm.copyWith(
+          style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
             fontWeight: FontWeight.w600,
           ),
@@ -387,7 +395,9 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
                 budget.isTotalBudget
                     ? t.budget.totalBudget
                     : t.budget.categoryBudget,
-                icon: budget.isTotalBudget ? FIcons.wallet : FIcons.layers,
+                icon: budget.isTotalBudget
+                    ? FLucideIcons.wallet
+                    : FLucideIcons.layers,
               ),
               Divider(height: 1, color: colors.border),
               if (budget.categoryKey != null) ...[
@@ -408,7 +418,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
                 colors,
                 t.budget.period,
                 budget.periodType.label,
-                icon: FIcons.calendarClock,
+                icon: FLucideIcons.calendarClock,
               ),
               Divider(height: 1, color: colors.border),
               _buildInfoRow(
@@ -416,7 +426,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
                 colors,
                 t.budget.rollover,
                 budget.rolloverEnabled ? t.budget.enabled : t.budget.disabled,
-                icon: FIcons.repeat,
+                icon: FLucideIcons.repeat,
               ),
               if (budget.rolloverBalance != Decimal.zero) ...[
                 Divider(height: 1, color: colors.border),
@@ -425,7 +435,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
                   colors,
                   t.budget.rolloverBalance,
                   '$_currencySymbol${_formatAmount(budget.rolloverBalance)}',
-                  icon: FIcons.arrowRightLeft,
+                  icon: FLucideIcons.arrowRightLeft,
                 ),
               ],
             ],
@@ -453,12 +463,14 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           ],
           Text(
             label,
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const Spacer(),
           Text(
             value,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: colors.foreground,
               fontWeight: FontWeight.w500,
             ),
@@ -482,22 +494,22 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
       case BudgetPeriodStatus.onTrack:
         statusColor = colors.primary;
         statusText = t.budget.statusNormal;
-        statusIcon = FIcons.circleCheck;
+        statusIcon = FLucideIcons.circleCheck;
         break;
       case BudgetPeriodStatus.warning:
         statusColor = theme.semantic.warningAccent;
         statusText = t.budget.statusWarning;
-        statusIcon = FIcons.circleAlert;
+        statusIcon = FLucideIcons.circleAlert;
         break;
       case BudgetPeriodStatus.exceeded:
         statusColor = colors.destructive;
         statusText = t.budget.statusOverspent;
-        statusIcon = FIcons.circleX;
+        statusIcon = FLucideIcons.circleX;
         break;
       case BudgetPeriodStatus.achieved:
         statusColor = theme.semantic.successAccent;
         statusText = t.budget.statusAchieved;
-        statusIcon = FIcons.trophy;
+        statusIcon = FLucideIcons.trophy;
         break;
     }
 
@@ -518,14 +530,14 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
               children: [
                 Text(
                   statusText,
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.w600,
                     color: statusColor,
                   ),
                 ),
                 Text(
                   _getStatusDescription(periodStatus, budgetWithUsage),
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),
@@ -590,7 +602,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
 
   Widget _buildDeleteButton(FThemeData theme, FColors colors) {
     return FButton(
-      style: FButtonStyle.destructive(),
+      variant: .destructive,
       onPress: _isDeleting ? null : _showDeleteConfirmation,
       child: _isDeleting
           ? const SizedBox(
@@ -610,25 +622,36 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
       showFDialog(
         context: context,
         builder: (context, style, animation) => FDialog(
-          style: style.call,
           animation: animation,
-          title: Text(t.budget.deleteBudget),
-          body: Text(t.budget.deleteConfirm),
-          actions: [
-            FButton(
-              style: FButtonStyle.destructive(),
-              onPress: () async {
-                await Navigator.maybePop(context);
-                unawaited(_handleDelete());
-              },
-              child: Text(t.common.delete),
-            ),
-            FButton(
-              style: FButtonStyle.outline(),
-              onPress: () => Navigator.pop(context),
-              child: Text(t.common.cancel),
-            ),
-          ],
+          builder: (context, dialogStyle) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(t.budget.deleteBudget, style: dialogStyle.titleTextStyle),
+              const SizedBox(height: 8),
+              Text(t.budget.deleteConfirm, style: dialogStyle.bodyTextStyle),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FButton(
+                    variant: .destructive,
+                    onPress: () async {
+                      await Navigator.maybePop(context);
+                      unawaited(_handleDelete());
+                    },
+                    child: Text(t.common.delete),
+                  ),
+                  const SizedBox(width: 8),
+                  FButton(
+                    variant: .outline,
+                    onPress: () => Navigator.pop(context),
+                    child: Text(t.common.cancel),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

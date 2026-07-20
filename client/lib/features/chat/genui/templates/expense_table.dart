@@ -27,7 +27,9 @@ class ExpenseTable extends StatelessWidget {
         children: [
           Text(
             data['title'] as String,
-            style: theme.typography.base.copyWith(fontWeight: FontWeight.w600),
+            style: theme.typography.body.md.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 12),
           SingleChildScrollView(
@@ -38,7 +40,7 @@ class ExpenseTable extends StatelessWidget {
                     (h) => DataColumn(
                       label: Text(
                         h as String,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -51,7 +53,7 @@ class ExpenseTable extends StatelessWidget {
                   cells: cells
                       .map(
                         (cell) => DataCell(
-                          Text(cell as String, style: theme.typography.sm),
+                          Text(cell as String, style: theme.typography.body.sm),
                         ),
                       )
                       .toList(),

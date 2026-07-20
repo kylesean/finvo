@@ -56,7 +56,7 @@ class ProgressIndicatorBar extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: context.theme.typography.xs.copyWith(
+            style: context.theme.typography.body.xs.copyWith(
               color: colors.mutedForeground,
             ),
           ),

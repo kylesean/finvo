@@ -118,10 +118,9 @@ class CustomContentGenerator implements genui.ContentGenerator {
 
   CustomContentGenerator(
     this._storageService, {
-    Dio? dio,
-    required String sseBaseUrl,
-  }) : _dio = dio,
-       _sseBaseUrl = sseBaseUrl;
+    this._dio,
+    required this._sseBaseUrl,
+  });
 
   /// Get current session ID
   String? get currentSessionId => _currentSessionId;
@@ -201,6 +200,7 @@ class CustomContentGenerator implements genui.ContentGenerator {
 
     // GenUI event registry processing
     Map<String, dynamic>? clientStateJson;
+    Map<String, dynamic>? payloadExtensions;
     String? userMessageContent;
 
     try {
@@ -213,20 +213,33 @@ class CustomContentGenerator implements genui.ContentGenerator {
         final eventType = metadata['event_type'] as String?;
 
         if (eventType != null) {
-          final clientState = GenUiEventRegistry.dispatch(eventType, metadata);
+          final result = GenUiEventRegistry.dispatch(eventType, metadata);
 
-          if (clientState != null && !clientState.isEmpty) {
+          if (result != null && !result.isEmpty) {
             _logger.info('Event $eventType dispatched via registry');
-            clientStateJson = clientState.toJson();
+            if (result.mutation != null) {
+              clientStateJson = result.mutation!.toJson();
+            }
+            if (result.payloadExtensions != null) {
+              payloadExtensions = result.payloadExtensions;
+            }
           }
-        } else if (currentMessage['content'] != null) {
-          userMessageContent = currentMessage['content'].toString();
         }
       }
     } catch (e) {
       _logger.info(
         'CustomContentGenerator: Error parsing message for events: $e',
       );
+    }
+
+    // Prepare message for backend
+    var finalPayload = <Map<String, dynamic>>[currentMessage];
+    if (payloadExtensions != null) {
+      // If the registry provided a specialized payload for this event
+      finalPayload = [payloadExtensions];
+      if (payloadExtensions['content'] is String) {
+        userMessageContent = payloadExtensions['content'] as String;
+      }
     }
 
     // 2. Optimistic UI update
@@ -240,7 +253,7 @@ class CustomContentGenerator implements genui.ContentGenerator {
 
     // 3. Execute unified request logic
     await _sendRequestInternal(
-      messages: messages,
+      messages: finalPayload,
       sessionId: _currentSessionId,
       clientState: clientStateJson,
     );
@@ -511,16 +524,53 @@ class CustomContentGenerator implements genui.ContentGenerator {
         return;
       }
 
+      // =====================================================================
+      // NEW: Enhanced message type detection for DataModelUpdate support
+      // GenUI's A2uiMessage.fromJson uses the outer key as discriminator
+      // =====================================================================
+
+      // Check for dataModelUpdate message type
+      if (a2uiMessageData.containsKey('dataModelUpdate')) {
+        final payload =
+            a2uiMessageData['dataModelUpdate'] as Map<String, dynamic>;
+        final surfaceId = payload['surfaceId'] as String?;
+        final path = payload['path'] as String?;
+        final value = payload['value'];
+
+        _logger.info(
+          '[A2UI] DataModelUpdate received: surfaceId=$surfaceId, path=$path, value=$value',
+        );
+
+        // Parse and emit the message - GenUI will handle the reactive update
+        final a2uiMessage = genui.A2uiMessage.fromJson(a2uiMessageData);
+        _a2uiMessageController.add(a2uiMessage);
+
+        // Yield to event loop for UI update
+        await Future<void>.delayed(Duration.zero);
+        return;
+      }
+
+      // Check for deleteSurface message type
+      if (a2uiMessageData.containsKey('deleteSurface')) {
+        final payload =
+            a2uiMessageData['deleteSurface'] as Map<String, dynamic>;
+        final surfaceId = payload['surfaceId'] as String?;
+
+        _logger.info('[A2UI] DeleteSurface received: surfaceId=$surfaceId');
+
+        final a2uiMessage = genui.A2uiMessage.fromJson(a2uiMessageData);
+        _a2uiMessageController.add(a2uiMessage);
+        return;
+      }
+
+      // Standard message handling (surfaceUpdate, beginRendering, etc.)
       final a2uiMessage = genui.A2uiMessage.fromJson(a2uiMessageData);
 
-      // 立即发送到 controller，不再缓冲到流结束
-      // 这样 GenUI 组件会立即渲染，不会等待流式文本完成
+      // Send immediately - GenUI components render without waiting for stream end
       _a2uiMessageController.add(a2uiMessage);
-      _logger.info(
-        '[A2UI] ✓ Message sent immediately: ${a2uiMessage.runtimeType}',
-      );
+      _logger.info('[A2UI] Message sent: ${a2uiMessage.runtimeType}');
 
-      // 处理 surface 相关回调
+      // Handle surface lifecycle callbacks
       if (a2uiMessage is genui.SurfaceUpdate) {
         final surfaceId = a2uiMessage.surfaceId;
         onSurfaceCreated?.call(surfaceId);
@@ -688,6 +738,7 @@ class CustomContentGenerator implements genui.ContentGenerator {
   }
 
   /// Handle UserActionEvent and convert to human-readable message
+  /// (Now only used as a parser, logic moved to registry)
   Future<Map<String, dynamic>> _handleUserActionEvent(
     Map<String, dynamic> rawEventData,
     String rawContent,
@@ -700,64 +751,20 @@ class CustomContentGenerator implements genui.ContentGenerator {
     final eventName = eventData['name'] as String?;
     final context = eventData['context'] as Map<String, dynamic>?;
 
-    _logger.info('CustomContentGenerator: Handling event: $eventName');
-    _logger.info('CustomContentGenerator: Event context: $context');
+    _logger.info(
+      'CustomContentGenerator: Parsing interaction event: $eventName',
+    );
 
-    if (eventName == 'transfer_path_confirmed') {
-      return {
-        'role': 'user',
-        'content': '按照我的选择执行', // 用户友好的消息，无论后续验证是否通过
-        'metadata': {'event_type': 'transfer_path_confirmed', ...context ?? {}},
-      };
-    }
-
-    if (eventName == 'send_chat_message') {
-      final message = context?['message'] as String? ?? '';
-      return {'role': 'user', 'content': message};
-    }
-
-    if (eventName == 'account_selected' && context != null) {
-      final selectedAccountId = context['selected_account_id'] as String?;
-      final selectionType = context['selection_type'] as String?;
-      final amount = context['amount'];
-
-      final humanReadable =
-          'I selected account ID: $selectedAccountId '
-          '(${selectionType == "source" ? "source" : "destination"} account).'
-          'Please continue to complete the transfer${amount != null ? " with amount $amount" : ""}.';
-
-      _logger.info(
-        'CustomContentGenerator: Converted account_selected event to: $humanReadable',
-      );
-
-      return {
-        'role': 'user',
-        'content': humanReadable,
-        'metadata': {
-          'event_type': 'account_selected',
-          'selected_account_id': selectedAccountId,
-          'selection_type': selectionType,
-          ...context,
-        },
-      };
-    } else if (eventName == 'account_selection_cancelled') {
-      _logger.info('CustomContentGenerator: Account selection cancelled');
-      return {
-        'role': 'user',
-        'content':
-            'I cancelled account selection, please do not execute this transfer.',
-      };
-    }
-
-    if (eventName == 'transaction_confirmed') {
-      return {
-        'role': 'user',
-        'content': 'confirm',
-        'metadata': {'event_type': 'transaction_confirmed', ...context ?? {}},
-      };
-    }
-
-    return {'role': 'user', 'content': rawContent};
+    // Return the specific event data in metadata for the registry to handle later in sendRequest
+    return {
+      'role': 'user',
+      'content': 'Action: $eventName',
+      'metadata': {
+        'event_type': eventName,
+        'surface_id': context?['surface_id'],
+        ...?context,
+      },
+    };
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 import '../services/genui_logger.dart';
+import 'genui_event_registry.dart';
 import 'templates/templates.dart';
 
 /// 应用特定的组件目录
@@ -17,6 +18,9 @@ class AppCatalog {
     // 从核心组件开始
     final catalog = CoreCatalogItems.asCatalog();
 
+    // 初始化事件注册表
+    GenUiEventRegistry.initialize();
+
     // 添加自定义组件
     return catalog.copyWith([
       _buildTransactionCard(),
@@ -24,7 +28,6 @@ class AppCatalog {
       _buildExpenseTable(),
       _buildChartCard(),
       _buildSummaryCard(),
-      _buildTransferPathBuilder(),
       _buildTransferWizard(),
       _buildBudgetStatusCard(),
       _buildBudgetReceipt(),
@@ -272,53 +275,6 @@ class AppCatalog {
     );
   }
 
-  /// 转账链路构建器组件
-  ///
-  /// 用于在转账时让用户同时选择转出和转入账户（多轮对话交互）
-  static CatalogItem _buildTransferPathBuilder() {
-    return CatalogItem(
-      name: 'TransferPathBuilder',
-      dataSchema: ObjectSchema(
-        properties: {
-          'amount': NumberSchema(description: '转账金额'),
-          'currency': StringSchema(description: '货币代码'),
-          'sourceAccounts': ListSchema(
-            description: '可选转出账户列表',
-            items: ObjectSchema(
-              properties: {
-                'id': StringSchema(description: '账户ID'),
-                'name': StringSchema(description: '账户名称'),
-                'type': StringSchema(description: '账户类型'),
-                'balance': NumberSchema(description: '账户余额'),
-                'currency': StringSchema(description: '货币代码'),
-                'subtitle': StringSchema(description: '账户副标题'),
-              },
-              required: ['id', 'name'],
-            ),
-          ),
-          'targetAccounts': ListSchema(
-            description: '可选转入账户列表',
-            items: ObjectSchema(
-              properties: {
-                'id': StringSchema(description: '账户ID'),
-                'name': StringSchema(description: '账户名称'),
-                'type': StringSchema(description: '账户类型'),
-                'balance': NumberSchema(description: '账户余额'),
-                'currency': StringSchema(description: '货币代码'),
-                'subtitle': StringSchema(description: '账户副标题'),
-              },
-              required: ['id', 'name'],
-            ),
-          ),
-          'preselectedSourceId': StringSchema(description: '预选的转出账户ID'),
-          'preselectedTargetId': StringSchema(description: '预选的转入账户ID'),
-        },
-        required: ['amount', 'sourceAccounts', 'targetAccounts'],
-      ),
-      widgetBuilder: _buildTransferPathBuilderWidget,
-    );
-  }
-
   /// 转账向导组件
   static CatalogItem _buildTransferWizard() {
     return CatalogItem(
@@ -393,7 +349,7 @@ class AppCatalog {
         return _buildErrorWidget(context.buildContext, '交易记录加载失败，请重试');
       }
 
-      // 使用三段式设计 TransactionCard
+      // Use standard TransactionCard (no reactive binding needed for one-shot receipts)
       final widget = TransactionCard(data: data);
       final duration = DateTime.now().difference(startTime).inMilliseconds;
       GenUiLogger.logBuilderInvocation(
@@ -600,61 +556,6 @@ class AppCatalog {
     }
   }
 
-  /// 构建账户选择器 Widget
-  static Widget _buildTransferPathBuilderWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'TransferPathBuilder';
-
-    try {
-      final data = context.data as Map<String, dynamic>;
-
-      // 验证必需字段 (使用 camelCase 与后端一致)
-      if (!_validateRequiredFields(data, [
-        'amount',
-        'sourceAccounts',
-        'targetAccounts',
-      ])) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        return _buildErrorWidget(context.buildContext, '转账功能加载失败，请重试');
-      }
-
-      // 统一使用 TransferPathBuilder
-      // 传递 surfaceId 以便跟踪提交状态
-      final widgetData = Map<String, dynamic>.from(data);
-      widgetData['_surfaceId'] = context.surfaceId;
-
-      final widget = TransferPathBuilder(
-        data: widgetData,
-        dispatchEvent: context.dispatchEvent,
-      );
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(context.buildContext, '渲染失败: $e');
-    }
-  }
-
   /// 构建转账向导 Widget
   static Widget _buildTransferWizardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
@@ -676,12 +577,8 @@ class AppCatalog {
         );
         return _buildErrorWidget(context.buildContext, '转账向导加载失败，请重试');
       }
-
-      final widgetData = Map<String, dynamic>.from(data);
-      widgetData['_surfaceId'] = context.surfaceId;
-
       final widget = TransferWizard(
-        data: widgetData,
+        data: data,
         dispatchEvent: context.dispatchEvent,
       );
       final duration = DateTime.now().difference(startTime).inMilliseconds;
@@ -724,19 +621,55 @@ class AppCatalog {
   static Widget _buildErrorWidget(BuildContext context, String message) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8.0),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.red.shade50.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Colors.red),
-          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.red.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.error_outline_rounded,
+              color: Colors.red.shade800,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              '组件加载失败: $message',
-              style: TextStyle(color: Colors.red.shade900),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '组件渲染遇到问题',
+                  style: TextStyle(
+                    color: Colors.red.shade900,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  message,
+                  style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],

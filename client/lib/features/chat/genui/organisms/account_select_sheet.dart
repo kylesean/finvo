@@ -72,7 +72,7 @@ class AccountSelectSheet extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: theme.typography.lg.copyWith(
+                    style: theme.typography.body.lg.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.foreground,
                     ),
@@ -81,7 +81,7 @@ class AccountSelectSheet extends StatelessWidget {
                 FFancyButton.icon(
                   onPress: () => Navigator.pop(context),
                   child: Icon(
-                    FIcons.x,
+                    FLucideIcons.x,
                     size: 20,
                     color: colors.mutedForeground,
                   ),

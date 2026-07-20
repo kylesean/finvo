@@ -26,12 +26,14 @@ class SummaryCard extends StatelessWidget {
         children: [
           Text(
             data['title'] as String,
-            style: theme.typography.base.copyWith(fontWeight: FontWeight.w600),
+            style: theme.typography.body.md.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             data['summary'] as String,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
               height: 1.5,
             ),
@@ -48,7 +50,7 @@ class SummaryCard extends StatelessWidget {
                       width: 100,
                       child: Text(
                         i['label'] as String,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
@@ -57,7 +59,7 @@ class SummaryCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         i['value'] as String,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),

@@ -81,7 +81,7 @@ class AccountCard extends ConsumerWidget {
                 children: [
                   Text(
                     name,
-                    style: theme.typography.base.copyWith(
+                    style: theme.typography.body.md.copyWith(
                       fontWeight: FontWeight.w600,
                       color: selected ? colors.primary : colors.foreground,
                     ),
@@ -89,7 +89,7 @@ class AccountCard extends ConsumerWidget {
                   if (subtitle != null && subtitle.isNotEmpty)
                     Text(
                       subtitle,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                       ),
                     ),
@@ -107,7 +107,7 @@ class AccountCard extends ConsumerWidget {
                         ? balance
                         : num.tryParse(balance.toString()) ?? 0,
                     currency: currency,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       fontWeight: FontWeight.w600,
                       color: selected ? colors.primary : colors.foreground,
                     ),
@@ -125,7 +125,7 @@ class AccountCard extends ConsumerWidget {
                       ),
                       child: Text(
                         currency,
-                        style: theme.typography.xs.copyWith(
+                        style: theme.typography.body.xs.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colors.primary,
                         ),
@@ -137,7 +137,7 @@ class AccountCard extends ConsumerWidget {
             // Selection indicator
             if (showSelectionIndicator && selected) ...[
               const SizedBox(width: 8),
-              Icon(FIcons.check, color: colors.primary, size: 22),
+              Icon(FLucideIcons.check, color: colors.primary, size: 22),
             ],
           ],
         ),
@@ -192,7 +192,7 @@ class CompactAccountCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               name,
-              style: theme.typography.xs.copyWith(
+              style: theme.typography.body.xs.copyWith(
                 fontWeight: FontWeight.w600,
                 color: selected ? colors.primary : colors.foreground,
               ),

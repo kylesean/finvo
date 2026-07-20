@@ -86,20 +86,20 @@ class _RegisterStep1PageState extends ConsumerState<RegisterStep1Page> {
                       children: [
                         Text(
                           t.auth.createAccount,
-                          style: theme.typography.xl2,
+                          style: theme.typography.body.xl2,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           t.auth.loginSubtitle,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: theme.colors.mutedForeground,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
                         FTextFormField.email(
-                          controller: _contactController,
+                          control: .managed(controller: _contactController),
                           label: Text(t.auth.email.label),
                           hint: t.auth.email.placeholder,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -121,7 +121,7 @@ class _RegisterStep1PageState extends ConsumerState<RegisterStep1Page> {
                         ),
                         const SizedBox(height: 20),
                         FTextFormField(
-                          controller: _codeController,
+                          control: .managed(controller: _codeController),
                           label: Text(t.auth.verificationCode.label),
                           hint: t.auth.verificationCode.placeholder,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -181,9 +181,9 @@ class _RegisterStep1PageState extends ConsumerState<RegisterStep1Page> {
             top: MediaQuery.paddingOf(context).top + 8,
             left: 8,
             child: FButton.icon(
-              style: FButtonStyle.ghost(),
+              variant: .ghost,
               onPress: () => context.pop(),
-              child: const Icon(FIcons.chevronLeft),
+              child: const Icon(FLucideIcons.chevronLeft),
             ),
           ),
         ],

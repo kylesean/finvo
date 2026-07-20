@@ -81,17 +81,17 @@ class GenUIBottomSheet extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: theme.typography.lg.copyWith(
+                    style: theme.typography.body.lg.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
                 FButton.icon(
-                  style: FButtonStyle.ghost(),
+                  variant: .ghost,
                   onPress: () => Navigator.pop(context),
                   child: Icon(
-                    FIcons.x,
+                    FLucideIcons.x,
                     size: 20,
                     color: colors.mutedForeground,
                   ),

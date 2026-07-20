@@ -87,7 +87,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
               // 标题区域
               Text(
                 '加入共享空间',
-                style: theme.typography.lg.copyWith(
+                style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colors.foreground,
                 ),
@@ -96,7 +96,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
               Text(
                 '输入朋友分享的邀请码，立即开启协同记账',
                 textAlign: TextAlign.center,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
@@ -104,26 +104,28 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
 
               // 邀请码输入
               FTextField(
-                controller: _codeController,
+                control: .managed(
+                  controller: _codeController,
+                  onChange: (value) {
+                    if (_codeError != null || _errorMessage != null) {
+                      setState(() {
+                        _codeError = null;
+                        _errorMessage = null;
+                      });
+                    }
+                    final upperValue = value.text.toUpperCase();
+                    if (upperValue != value.text) {
+                      _codeController.value = _codeController.value.copyWith(
+                        text: upperValue,
+                        selection: TextSelection.collapsed(
+                          offset: upperValue.length,
+                        ),
+                      );
+                    }
+                  },
+                ),
                 label: const Text('邀请码'),
                 hint: '请输入邀请码，例如：A8K2F9G7',
-                onChange: (value) {
-                  if (_codeError != null || _errorMessage != null) {
-                    setState(() {
-                      _codeError = null;
-                      _errorMessage = null;
-                    });
-                  }
-                  final upperValue = value.toUpperCase();
-                  if (upperValue != value) {
-                    _codeController.value = _codeController.value.copyWith(
-                      text: upperValue,
-                      selection: TextSelection.collapsed(
-                        offset: upperValue.length,
-                      ),
-                    );
-                  }
-                },
               ),
               if (_codeError != null)
                 Align(
@@ -132,7 +134,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                     padding: const EdgeInsets.only(top: 4, left: 4),
                     child: Text(
                       _codeError!,
-                      style: theme.typography.sm.copyWith(
+                      style: theme.typography.body.sm.copyWith(
                         color: colors.destructive,
                       ),
                     ),
@@ -143,8 +145,8 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
               if (_errorMessage != null) ...[
                 const SizedBox(height: 12),
                 FAlert(
-                  style: FAlertStyle.destructive(),
-                  icon: const Icon(FIcons.circleAlert, size: 16),
+                  variant: .destructive,
+                  icon: const Icon(FLucideIcons.circleAlert, size: 16),
                   title: Text(_errorMessage!),
                 ),
               ],
@@ -156,7 +158,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                 children: [
                   Expanded(
                     child: FButton(
-                      style: FButtonStyle.outline(),
+                      variant: .outline,
                       onPress: () => Navigator.of(context).pop(),
                       child: const Text('取消'),
                     ),

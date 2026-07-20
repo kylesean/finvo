@@ -35,7 +35,7 @@ class GenUiErrorWidget extends StatelessWidget {
           Row(
             children: [
               Icon(
-                FIcons.triangleAlert,
+                FLucideIcons.triangleAlert,
                 color: theme.colors.destructive,
                 size: 20,
               ),
@@ -43,7 +43,7 @@ class GenUiErrorWidget extends StatelessWidget {
               Expanded(
                 child: Text(
                   t.error.genui.loadingFailed,
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     color: theme.colors.destructive,
                     fontWeight: FontWeight.w600,
                   ),
@@ -54,19 +54,23 @@ class GenUiErrorWidget extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             errorMessage,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: theme.colors.mutedForeground,
             ),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 12),
             FButton(
-              style: FButtonStyle.outline(),
+              variant: .outline,
               onPress: onRetry,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(FIcons.refreshCw, size: 14, color: theme.colors.primary),
+                  Icon(
+                    FLucideIcons.refreshCw,
+                    size: 14,
+                    color: theme.colors.primary,
+                  ),
                   const SizedBox(width: 6),
                   Text(t.common.retry),
                 ],
@@ -114,7 +118,7 @@ class GenUiLoadingWidget extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             message ?? t.chat.loadingComponent,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: theme.colors.mutedForeground,
             ),
           ),
@@ -148,12 +152,16 @@ class GenUiCompactErrorWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(FIcons.circleAlert, color: theme.colors.destructive, size: 14),
+          Icon(
+            FLucideIcons.circleAlert,
+            color: theme.colors.destructive,
+            size: 14,
+          ),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               errorMessage,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: theme.colors.destructive,
                 fontSize: 12,
               ),
@@ -204,7 +212,7 @@ class GenUiSchemaErrorWidget extends StatelessWidget {
           Row(
             children: [
               Icon(
-                FIcons.fileWarning,
+                FLucideIcons.triangleAlert,
                 color: theme.colors.destructive,
                 size: 20,
               ),
@@ -212,7 +220,7 @@ class GenUiSchemaErrorWidget extends StatelessWidget {
               Expanded(
                 child: Text(
                   t.error.genui.schemaFailed,
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     color: theme.colors.destructive,
                     fontWeight: FontWeight.w600,
                   ),
@@ -223,7 +231,7 @@ class GenUiSchemaErrorWidget extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             t.error.genui.schemaDescription,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: theme.colors.mutedForeground,
             ),
           ),
@@ -237,7 +245,7 @@ class GenUiSchemaErrorWidget extends StatelessWidget {
               ),
               child: Text(
                 schemaError,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: theme.colors.mutedForeground,
                   fontFamily: 'monospace',
                   fontSize: 11,
@@ -291,12 +299,16 @@ class GenUiNetworkErrorWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(FIcons.wifiOff, color: theme.colors.destructive, size: 20),
+              Icon(
+                FLucideIcons.wifiOff,
+                color: theme.colors.destructive,
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   t.error.genui.networkError,
-                  style: theme.typography.base.copyWith(
+                  style: theme.typography.body.md.copyWith(
                     color: theme.colors.destructive,
                     fontWeight: FontWeight.w600,
                   ),
@@ -307,7 +319,7 @@ class GenUiNetworkErrorWidget extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             errorMessage,
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: theme.colors.mutedForeground,
             ),
           ),
@@ -318,7 +330,7 @@ class GenUiNetworkErrorWidget extends StatelessWidget {
                 retryCount: retryCount,
                 maxRetries: maxRetries,
               ),
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: theme.colors.mutedForeground,
                 fontSize: 11,
               ),
@@ -327,12 +339,16 @@ class GenUiNetworkErrorWidget extends StatelessWidget {
           if (canRetry) ...[
             const SizedBox(height: 12),
             FButton(
-              style: FButtonStyle.outline(),
+              variant: .outline,
               onPress: onRetry,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(FIcons.refreshCw, size: 14, color: theme.colors.primary),
+                  Icon(
+                    FLucideIcons.refreshCw,
+                    size: 14,
+                    color: theme.colors.primary,
+                  ),
                   const SizedBox(width: 6),
                   Text(t.common.retry),
                 ],
@@ -342,7 +358,7 @@ class GenUiNetworkErrorWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               t.error.genui.maxRetriesReached,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: theme.colors.destructive,
                 fontStyle: FontStyle.italic,
               ),

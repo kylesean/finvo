@@ -103,7 +103,7 @@ class DailyCellWidget extends StatelessWidget {
     Border? cellEffectiveBorder;
 
     final cellRadius =
-        theme.style.borderRadius.topLeft.x / 1.5; // Cell border radius
+        theme.style.borderRadius.md.topLeft.x / 1.5; // Cell border radius
 
     if (isOutOfMonth) {
       cellTextColor = colors.mutedForeground.withValues(alpha: 0.4);
@@ -161,7 +161,7 @@ class DailyCellWidget extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1.0,
       child: FButton.raw(
-        style: FButtonStyle.ghost(),
+        variant: .ghost,
         onPress: (!isOutOfMonth && onTap != null) ? onTap : null,
         child: Container(
           decoration: BoxDecoration(
@@ -172,7 +172,7 @@ class DailyCellWidget extends StatelessWidget {
           child: Center(
             child: Text(
               '${day.day}',
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: cellTextColor, // Apply calculated text color
                 fontWeight: cellFontWeight,
                 fontSize: 13,

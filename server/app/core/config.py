@@ -79,6 +79,20 @@ def load_env_file() -> str | None:
 ENV_FILE = load_env_file()
 
 
+def _read_version() -> str:
+    """Read version from the root VERSION file (single source of truth).
+
+    Falls back to '0.0.0-dev' if the file is not found (e.g., in Docker builds
+    where only the server/ directory is available).
+    """
+    # server/app/core/config.py -> project root is 4 levels up
+    version_file = Path(__file__).resolve().parent.parent.parent.parent / "VERSION"
+    try:
+        return version_file.read_text(encoding="utf-8").strip()
+    except (FileNotFoundError, OSError):
+        return "0.0.0-dev"
+
+
 class Settings(BaseSettings):
     """Application settings using Pydantic Settings.
 
@@ -100,7 +114,7 @@ class Settings(BaseSettings):
 
     # Application Settings
     PROJECT_NAME: str = "Augo"
-    VERSION: str = "0.1.0"
+    VERSION: str = _read_version()
     DESCRIPTION: str = "AI-powered expense tracking and financial management system"
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = False

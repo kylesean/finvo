@@ -97,27 +97,27 @@ class TransactionCardWidget extends ConsumerWidget {
 
     switch (iconPath) {
       case 'assets/icons/grocery.svg':
-        iconData = FIcons.shoppingCart;
+        iconData = FLucideIcons.shoppingCart;
         iconColor = const Color(0xFF10B981);
         break;
       case 'assets/icons/salary.svg':
-        iconData = FIcons.dollarSign;
+        iconData = FLucideIcons.dollarSign;
         iconColor = const Color(0xFF3B82F6);
         break;
       case 'assets/icons/coffee.svg':
-        iconData = FIcons.coffee;
+        iconData = FLucideIcons.coffee;
         iconColor = const Color(0xFFF59E0B);
         break;
       case 'assets/icons/gas.svg':
-        iconData = FIcons.fuel;
+        iconData = FLucideIcons.fuel;
         iconColor = const Color(0xFFEF4444);
         break;
       case 'assets/icons/transfer.svg':
-        iconData = FIcons.arrowRightLeft;
+        iconData = FLucideIcons.arrowRightLeft;
         iconColor = const Color(0xFF8B5CF6);
         break;
       default:
-        iconData = FIcons.receipt;
+        iconData = FLucideIcons.receipt;
         iconColor = const Color(0xFF6B7280);
     }
 

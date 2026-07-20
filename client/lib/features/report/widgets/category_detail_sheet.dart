@@ -71,14 +71,14 @@ class CategoryDetailSheet extends StatelessWidget {
                   children: [
                     Text(
                       t.statistics.analysis.breakdown,
-                      style: theme.typography.lg.copyWith(
+                      style: theme.typography.body.lg.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(
-                        FIcons.x,
+                        FLucideIcons.x,
                         size: 20,
                         color: colors.mutedForeground,
                       ),
@@ -93,7 +93,7 @@ class CategoryDetailSheet extends StatelessWidget {
                     ? Center(
                         child: Text(
                           t.statistics.noData,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: colors.mutedForeground,
                           ),
                         ),
@@ -162,7 +162,7 @@ class _CategoryDetailItem extends StatelessWidget {
             Expanded(
               child: Text(
                 item.categoryName,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -173,13 +173,13 @@ class _CategoryDetailItem extends StatelessWidget {
               children: [
                 Text(
                   '¥${formatAmount(item.amount)}',
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   '${item.percentage.toStringAsFixed(1)}%',
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: colors.mutedForeground,
                   ),
                 ),

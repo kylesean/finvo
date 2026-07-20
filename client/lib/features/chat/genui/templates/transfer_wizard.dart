@@ -5,6 +5,7 @@ import 'package:genui/genui.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
 import '../organisms/organisms.dart';
 import 'package:augo/i18n/strings.g.dart';
+import '../../services/genui_cache_service.dart';
 import 'package:augo/shared/utils/amount_formatter.dart';
 
 /// 转账向导数据模型 (Data Layer)
@@ -81,9 +82,7 @@ class _ConfirmedState {
 }
 
 class _TransferWizardState extends State<TransferWizard> {
-  // 静态缓存：保存用户确认时的选择状态
-  // 当组件重建时，可以从缓存恢复状态
-  static final Map<String, _ConfirmedState> _confirmedStateCache = {};
+  static const String _cacheCategory = 'transfer_wizard';
 
   late TransferWizardData _model;
   late TextEditingController _amountController;
@@ -97,7 +96,10 @@ class _TransferWizardState extends State<TransferWizard> {
     _model = TransferWizardData.fromJson(widget.data);
 
     // 优先从缓存恢复确认状态（解决组件重建后状态丢失问题）
-    final cachedState = _confirmedStateCache[_model.surfaceId];
+    final cachedState = GenUiCacheService().get<_ConfirmedState>(
+      _cacheCategory,
+      _model.surfaceId,
+    );
     if (cachedState != null) {
       _sourceId = cachedState.sourceId;
       _targetId = cachedState.targetId;
@@ -196,12 +198,16 @@ class _TransferWizardState extends State<TransferWizard> {
             color: colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(FIcons.arrowRightLeft, color: colors.primary, size: 20),
+          child: Icon(
+            FLucideIcons.arrowRightLeft,
+            color: colors.primary,
+            size: 20,
+          ),
         ),
         const SizedBox(width: 12),
         Text(
           t.chat.transferWizard.title,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
           ),
@@ -218,14 +224,14 @@ class _TransferWizardState extends State<TransferWizard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  FIcons.check,
+                  FLucideIcons.check,
                   color: theme.semantic.successAccent,
                   size: 12,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   t.chat.transferWizard.confirmed,
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: theme.semantic.successAccent,
                     fontWeight: FontWeight.bold,
                   ),
@@ -250,7 +256,9 @@ class _TransferWizardState extends State<TransferWizard> {
         children: [
           Text(
             t.chat.transferWizard.amount,
-            style: theme.typography.xs.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.xs.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
           const SizedBox(height: 4),
           Row(
@@ -259,7 +267,7 @@ class _TransferWizardState extends State<TransferWizard> {
             children: [
               Text(
                 AmountFormatter.getCurrencySymbol(_model.currency),
-                style: theme.typography.xl.copyWith(
+                style: theme.typography.body.xl.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.bold,
                 ),
@@ -273,7 +281,7 @@ class _TransferWizardState extends State<TransferWizard> {
                           _amountController.text.isEmpty
                               ? '0.00'
                               : _amountController.text,
-                          style: theme.typography.xl.copyWith(
+                          style: theme.typography.body.xl.copyWith(
                             fontWeight: FontWeight.bold,
                             color: colors.foreground,
                             letterSpacing: -1,
@@ -288,7 +296,7 @@ class _TransferWizardState extends State<TransferWizard> {
                         ),
                         decoration: InputDecoration(
                           hintText: '0.00',
-                          hintStyle: theme.typography.xl.copyWith(
+                          hintStyle: theme.typography.body.xl.copyWith(
                             color: colors.mutedForeground.withValues(
                               alpha: 0.5,
                             ),
@@ -297,7 +305,7 @@ class _TransferWizardState extends State<TransferWizard> {
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
                         ),
-                        style: theme.typography.xl.copyWith(
+                        style: theme.typography.body.xl.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colors.foreground,
                           letterSpacing: -1,
@@ -361,7 +369,7 @@ class _TransferWizardState extends State<TransferWizard> {
             ],
           ),
           child: Icon(
-            _isConfirmed ? FIcons.check : FIcons.arrowDown,
+            _isConfirmed ? FLucideIcons.check : FLucideIcons.arrowDown,
             size: 16,
             color: _isConfirmed ? colors.primaryForeground : colors.background,
           ),
@@ -413,7 +421,7 @@ class _TransferWizardState extends State<TransferWizard> {
               ),
             ),
             child: Icon(
-              isSource ? FIcons.logOut : FIcons.logIn,
+              isSource ? FLucideIcons.logOut : FLucideIcons.logIn,
               size: 18,
               color: isSource ? colors.primary : colors.mutedForeground,
             ),
@@ -441,7 +449,7 @@ class _TransferWizardState extends State<TransferWizard> {
                       children: [
                         Text(
                           label,
-                          style: theme.typography.xs.copyWith(
+                          style: theme.typography.body.xs.copyWith(
                             color: colors.mutedForeground,
                           ),
                         ),
@@ -449,7 +457,7 @@ class _TransferWizardState extends State<TransferWizard> {
                         Text(
                           account?['name'] as String? ??
                               t.chat.transferWizard.selectAccount,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             fontWeight: FontWeight.bold,
                             color: accountId == null
                                 ? colors.mutedForeground
@@ -461,7 +469,7 @@ class _TransferWizardState extends State<TransferWizard> {
                   ),
                   if (!_isConfirmed)
                     Icon(
-                      FIcons.chevronRight,
+                      FLucideIcons.chevronRight,
                       size: 16,
                       color: colors.mutedForeground.withValues(alpha: 0.5),
                     ),
@@ -480,12 +488,12 @@ class _TransferWizardState extends State<TransferWizard> {
       width: double.infinity,
       child: FButton(
         onPress: _isValid && !_isConfirmed ? _onConfirm : null,
-        style: _isConfirmed ? FButtonStyle.outline() : FButtonStyle.primary(),
+        variant: _isConfirmed ? .outline : .primary,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (!_isConfirmed) ...[
-              const Icon(FIcons.send, size: 16),
+              const Icon(FLucideIcons.send, size: 16),
               const SizedBox(width: 8),
             ],
             Text(
@@ -516,10 +524,14 @@ class _TransferWizardState extends State<TransferWizard> {
     final finalAmount = double.tryParse(_amountController.text) ?? 0;
 
     // 将用户选择保存到缓存，防止组件重建时状态丢失
-    _confirmedStateCache[_model.surfaceId] = _ConfirmedState(
-      sourceId: _sourceId,
-      targetId: _targetId,
-      amount: _amountController.text,
+    GenUiCacheService().put(
+      _cacheCategory,
+      _model.surfaceId,
+      _ConfirmedState(
+        sourceId: _sourceId,
+        targetId: _targetId,
+        amount: _amountController.text,
+      ),
     );
 
     // 获取账户名称用于后端 TransferReceipt 组件显示

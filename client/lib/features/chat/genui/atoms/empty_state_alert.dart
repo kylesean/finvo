@@ -40,7 +40,7 @@ class EmptyStateAlert extends StatelessWidget {
     VoidCallback? onAction,
   }) {
     return EmptyStateAlert(
-      icon: FIcons.chartPie,
+      icon: FLucideIcons.chartPie,
       title: title,
       actionText: actionText,
       onAction: onAction,
@@ -53,7 +53,7 @@ class EmptyStateAlert extends StatelessWidget {
     VoidCallback? onAction,
   }) {
     return EmptyStateAlert(
-      icon: FIcons.receiptText,
+      icon: FLucideIcons.receiptText,
       title: title,
       actionText: actionText,
       onAction: onAction,
@@ -66,7 +66,7 @@ class EmptyStateAlert extends StatelessWidget {
     VoidCallback? onAction,
   }) {
     return EmptyStateAlert(
-      icon: FIcons.wallet,
+      icon: FLucideIcons.wallet,
       title: title,
       actionText: actionText,
       onAction: onAction,
@@ -78,7 +78,7 @@ class EmptyStateAlert extends StatelessWidget {
     return FAlert(
       icon: Icon(icon),
       title: Text(title),
-      style: isDestructive ? FAlertStyle.destructive() : FAlertStyle.primary(),
+      variant: isDestructive ? .destructive : .primary,
       subtitle: actionText != null && onAction != null
           ? Padding(
               padding: const EdgeInsets.only(top: 4),

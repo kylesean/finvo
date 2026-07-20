@@ -33,20 +33,16 @@ class ChatInteractionManager {
   final String Function() _getCurrentConversationId;
 
   ChatInteractionManager({
-    required MessageRepository messageRepository,
-    required GenUiLifecycleManager genUiLifecycleManager,
-    required StreamingController streamingController,
+    required this._messageRepository,
+    required this._genUiLifecycleManager,
+    required this._streamingController,
     required DataUriService
     dataUriService, // kept for DI but unused (static methods)
-    required void Function(bool) setStreamingStatus,
-    required String Function() getCurrentConversationId,
+    required this._setStreamingStatus,
+    required this._getCurrentConversationId,
     required String Function()
     getCurrentConversationTitle, // kept for DI but unused
-  }) : _messageRepository = messageRepository,
-       _genUiLifecycleManager = genUiLifecycleManager,
-       _streamingController = streamingController,
-       _setStreamingStatus = setStreamingStatus,
-       _getCurrentConversationId = getCurrentConversationId;
+  });
 
   // Note: DataUriService methods are static in the file seen previously.
   // But usage in Notifier was ref.read(dataUriServiceProvider).

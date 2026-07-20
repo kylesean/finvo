@@ -118,7 +118,7 @@ class ThemePreview extends StatelessWidget {
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected
                         ? colorScheme.primary

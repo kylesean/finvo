@@ -37,7 +37,7 @@ class InviteCodeCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
-                    FIcons.qrCode,
+                    FLucideIcons.qrCode,
                     size: 20,
                     color: colorScheme.primary,
                   ),
@@ -49,13 +49,13 @@ class InviteCodeCard extends StatelessWidget {
                     children: [
                       Text(
                         '邀请码',
-                        style: theme.typography.lg.copyWith(
+                        style: theme.typography.body.lg.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
                         '分享给朋友加入空间',
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colorScheme.mutedForeground,
                         ),
                       ),
@@ -81,7 +81,7 @@ class InviteCodeCard extends StatelessWidget {
                   // 邀请码
                   Text(
                     inviteCode.code,
-                    style: theme.typography.xl2.copyWith(
+                    style: theme.typography.body.xl2.copyWith(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
                       fontFamily: 'monospace',
@@ -94,14 +94,14 @@ class InviteCodeCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        FIcons.clock,
+                        FLucideIcons.clock,
                         size: 14,
                         color: colorScheme.mutedForeground,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         _formatExpiryTime(inviteCode.expiresAt),
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           color: colorScheme.mutedForeground,
                         ),
                       ),
@@ -118,12 +118,12 @@ class InviteCodeCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: FButton(
-                    style: FButtonStyle.outline(),
+                    variant: .outline,
                     onPress: () => _copyInviteCode(context),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(FIcons.copy, size: 16),
+                        Icon(FLucideIcons.copy, size: 16),
                         SizedBox(width: 8),
                         Text('复制邀请码'),
                       ],
@@ -137,7 +137,7 @@ class InviteCodeCard extends StatelessWidget {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(FIcons.share, size: 16),
+                        Icon(FLucideIcons.share, size: 16),
                         SizedBox(width: 8),
                         Text('分享邀请链接'),
                       ],

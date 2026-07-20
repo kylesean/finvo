@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
 import 'package:augo/i18n/strings.g.dart';
+import '../../services/genui_cache_service.dart';
 
 /// SpaceSelectorCard Data Layer
 class SpaceSelectorData {
@@ -70,8 +71,7 @@ class SpaceSelectorCard extends StatefulWidget {
 }
 
 class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
-  // Static cache for confirmed state persistence across rebuilds
-  static final Map<String, int?> _confirmedSpaceCache = {};
+  static const String _cacheCategory = 'space_selector';
 
   late SpaceSelectorData _model;
   int? _selectedSpaceId;
@@ -83,7 +83,10 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
     _model = SpaceSelectorData.fromJson(widget.data);
 
     // Restore from cache if available
-    final cachedSpaceId = _confirmedSpaceCache[_model.surfaceId];
+    final cachedSpaceId = GenUiCacheService().get<int>(
+      _cacheCategory,
+      _model.surfaceId,
+    );
     if (cachedSpaceId != null) {
       _selectedSpaceId = cachedSpaceId;
       _isConfirmed = true;
@@ -158,12 +161,12 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
             color: colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(FIcons.users, color: colors.primary, size: 20),
+          child: Icon(FLucideIcons.users, color: colors.primary, size: 20),
         ),
         const SizedBox(width: 12),
         Text(
           t.chat.genui.transactionGroupReceipt.selectSpace,
-          style: theme.typography.lg.copyWith(
+          style: theme.typography.body.lg.copyWith(
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
           ),
@@ -180,14 +183,14 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  FIcons.check,
+                  FLucideIcons.check,
                   color: theme.semantic.successAccent,
                   size: 12,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   t.chat.genui.spaceSelector.selected,
-                  style: theme.typography.xs.copyWith(
+                  style: theme.typography.body.xs.copyWith(
                     color: theme.semantic.successAccent,
                     fontWeight: FontWeight.bold,
                   ),
@@ -208,12 +211,12 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
       ),
       child: Row(
         children: [
-          Icon(FIcons.info, size: 16, color: colors.mutedForeground),
+          Icon(FLucideIcons.info, size: 16, color: colors.mutedForeground),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               _model.message!,
-              style: theme.typography.sm.copyWith(
+              style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
@@ -236,7 +239,9 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
         child: Center(
           child: Text(
             t.chat.genui.transactionCard.noSpace,
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
           ),
         ),
       );
@@ -331,7 +336,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
                     children: [
                       Text(
                         name,
-                        style: theme.typography.sm.copyWith(
+                        style: theme.typography.body.sm.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isSelected
                               ? colors.primary
@@ -355,7 +360,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
                           ),
                           child: Text(
                             _getRoleLabel(role),
-                            style: theme.typography.xs.copyWith(
+                            style: theme.typography.body.xs.copyWith(
                               color: _getRoleColor(
                                 role,
                                 colors,
@@ -372,7 +377,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: theme.typography.xs.copyWith(
+                      style: theme.typography.body.xs.copyWith(
                         color: colors.mutedForeground,
                       ),
                       maxLines: 1,
@@ -384,7 +389,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
             ),
             // Check icon for selected
             if (isSelected && !_isConfirmed)
-              Icon(FIcons.check, size: 18, color: colors.primary),
+              Icon(FLucideIcons.check, size: 18, color: colors.primary),
           ],
         ),
       ),
@@ -397,12 +402,12 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
       width: double.infinity,
       child: FButton(
         onPress: _isValid && !_isConfirmed ? _onConfirm : null,
-        style: _isConfirmed ? FButtonStyle.outline() : FButtonStyle.primary(),
+        variant: _isConfirmed ? .outline : .primary,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (!_isConfirmed) ...[
-              const Icon(FIcons.link, size: 16),
+              const Icon(FLucideIcons.link, size: 16),
               const SizedBox(width: 8),
             ],
             Text(
@@ -446,7 +451,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
     setState(() => _isConfirmed = true);
 
     // Cache the selection
-    _confirmedSpaceCache[_model.surfaceId] = _selectedSpaceId;
+    GenUiCacheService().put(_cacheCategory, _model.surfaceId, _selectedSpaceId);
 
     final selectedSpace = _selectedSpace;
 

@@ -12,7 +12,7 @@
 /// import 'package:augo/features/chat/genui/genui_widgets.dart';
 ///
 /// // Use atoms
-/// IconBadge(icon: FIcons.wallet, ...);
+/// IconBadge(icon: FLucideIcons.wallet, ...);
 /// AmountDisplay(amount: 1234.56, currency: 'CNY');
 ///
 /// // Use molecules
@@ -35,3 +35,4 @@ export 'organisms/organisms.dart';
 // Utilities
 export 'utils/formatters.dart';
 export 'utils/theme_helpers.dart';
+export 'utils/genui_data_paths.dart';

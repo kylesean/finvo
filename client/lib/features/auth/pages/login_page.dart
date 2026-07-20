@@ -97,20 +97,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       children: [
                         Text(
                           t.auth.welcomeBack,
-                          style: theme.typography.xl2,
+                          style: theme.typography.body.xl2,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           t.auth.loginSubtitle,
-                          style: theme.typography.sm.copyWith(
+                          style: theme.typography.body.sm.copyWith(
                             color: theme.colors.mutedForeground,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
                         FTextFormField.email(
-                          controller: _emailController,
+                          control: .managed(controller: _emailController),
                           label: Text(t.auth.email.label),
                           hint: t.auth.email.placeholder,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -128,7 +128,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         const SizedBox(height: 20),
                         FTextFormField.password(
-                          controller: _passwordController,
+                          control: .managed(controller: _passwordController),
                           label: Text(t.auth.password.label),
                           hint: t.auth.password.placeholder,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -166,7 +166,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         const SizedBox(height: 20),
                         FButton(
-                          style: FButtonStyle.ghost(),
+                          variant: .ghost,
                           onPress: () {
                             // Reset verification code state to avoid state residue when entering registration process next time
                             ref.read(verificationProvider.notifier).reset();

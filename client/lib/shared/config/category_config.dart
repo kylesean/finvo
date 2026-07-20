@@ -8,14 +8,14 @@ import 'package:augo/i18n/strings.g.dart';
 class CategoryConfig {
   // Direct mapping from category ID to icon
   static const Map<String, IconData> _categoryIdToIcon = {
-    '1': FIcons.shoppingBag,
-    '2': FIcons.carTaxiFront,
-    '3': FIcons.briefcaseMedical,
-    '4': FIcons.housePlus,
-    '5': FIcons.libraryBig,
-    '6': FIcons.walletCards,
-    '7': FIcons.gift,
-    '8': FIcons.folderSync,
+    '1': FLucideIcons.shoppingBag,
+    '2': FLucideIcons.carTaxiFront,
+    '3': FLucideIcons.briefcaseMedical,
+    '4': FLucideIcons.housePlus,
+    '5': FLucideIcons.libraryBig,
+    '6': FLucideIcons.walletCards,
+    '7': FLucideIcons.gift,
+    '8': FLucideIcons.folderSync,
   };
 
   /// Get category name based on category ID (using slang internationalization)
@@ -45,24 +45,24 @@ class CategoryConfig {
 
   /// Get category icon based on category ID
   static IconData getCategoryIcon(String? categoryId) {
-    if (categoryId == null) return FIcons.shoppingBag;
-    return _categoryIdToIcon[categoryId] ?? FIcons.shoppingBag;
+    if (categoryId == null) return FLucideIcons.shoppingBag;
+    return _categoryIdToIcon[categoryId] ?? FLucideIcons.shoppingBag;
   }
 
   /// Get category icon based on category name (backward compatibility)
   static IconData getCategoryIconByName(String categoryName) {
     // Reverse mapping from name to ID
     const Map<String, IconData> nameToIcon = {
-      'Daily Expenses': FIcons.shoppingBag,
-      'Transportation': FIcons.carTaxiFront,
-      'Healthcare': FIcons.briefcaseMedical,
-      'Housing': FIcons.housePlus,
-      'Education': FIcons.libraryBig,
-      'Income': FIcons.walletCards,
-      'Social Gifts': FIcons.gift,
-      'Money Transfer': FIcons.folderSync,
+      'Daily Expenses': FLucideIcons.shoppingBag,
+      'Transportation': FLucideIcons.carTaxiFront,
+      'Healthcare': FLucideIcons.briefcaseMedical,
+      'Housing': FLucideIcons.housePlus,
+      'Education': FLucideIcons.libraryBig,
+      'Income': FLucideIcons.walletCards,
+      'Social Gifts': FLucideIcons.gift,
+      'Money Transfer': FLucideIcons.folderSync,
     };
-    return nameToIcon[categoryName] ?? FIcons.shoppingBag;
+    return nameToIcon[categoryName] ?? FLucideIcons.shoppingBag;
   }
 
   /// Get all categories list

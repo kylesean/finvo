@@ -2,7 +2,6 @@ export 'transaction_card.dart';
 export 'expense_table.dart';
 export 'chart_card.dart';
 export 'summary_card.dart';
-export 'transfer_path_builder.dart';
 export 'transfer_wizard.dart';
 export 'budget_status_card.dart';
 export 'budget_receipt.dart';

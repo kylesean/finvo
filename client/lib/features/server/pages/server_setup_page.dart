@@ -136,13 +136,16 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
               backgroundColor: theme.colors.background,
               elevation: 0,
               leading: IconButton(
-                icon: Icon(FIcons.chevronLeft, color: theme.colors.foreground),
+                icon: Icon(
+                  FLucideIcons.chevronLeft,
+                  color: theme.colors.foreground,
+                ),
                 onPressed: () => context.pop(),
               ),
               centerTitle: true,
               title: Text(
                 t.server.title,
-                style: theme.typography.xl.copyWith(
+                style: theme.typography.body.xl.copyWith(
                   fontWeight: FontWeight.w600,
                   color: theme.colors.foreground,
                 ),
@@ -174,7 +177,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
                   // Title
                   Text(
                     t.server.title,
-                    style: theme.typography.xl2.copyWith(
+                    style: theme.typography.body.xl2.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -184,7 +187,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
                   // Subtitle
                   Text(
                     t.server.subtitle,
-                    style: theme.typography.sm.copyWith(
+                    style: theme.typography.body.sm.copyWith(
                       color: theme.colors.mutedForeground,
                     ),
                     textAlign: TextAlign.center,
@@ -194,7 +197,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
 
                 // URL Input
                 FTextFormField(
-                  controller: _urlController,
+                  control: .managed(controller: _urlController),
                   label: Text(t.server.urlLabel),
                   hint: t.server.urlPlaceholder,
                   keyboardType: TextInputType.url,
@@ -213,7 +216,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
 
                 // QR Scan Button
                 FButton(
-                  style: FButtonStyle.outline(),
+                  variant: .outline,
                   onPress: _startQrScan,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -255,7 +258,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
 
                 // Test Connection Button
                 FButton(
-                  style: FButtonStyle.secondary(),
+                  variant: .secondary,
                   onPress: _isConnecting ? null : _testConnection,
                   child: Text(t.server.testConnection),
                 ),
@@ -328,14 +331,14 @@ class _ConnectionStatusCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: theme.typography.sm.copyWith(
+                  style: theme.typography.body.sm.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 if (subtitle != null)
                   Text(
                     subtitle!,
-                    style: theme.typography.xs.copyWith(
+                    style: theme.typography.body.xs.copyWith(
                       color: theme.colors.mutedForeground,
                     ),
                   ),

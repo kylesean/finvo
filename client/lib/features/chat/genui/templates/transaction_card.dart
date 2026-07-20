@@ -159,12 +159,16 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
               color: colors.primary,
               shape: BoxShape.circle,
             ),
-            child: const Icon(FIcons.check, color: Colors.white, size: 14),
+            child: const Icon(
+              FLucideIcons.check,
+              color: Colors.white,
+              size: 14,
+            ),
           ),
           const SizedBox(width: 8),
           Text(
             t.chat.genui.transactionCard.title,
-            style: theme.typography.base.copyWith(
+            style: theme.typography.body.md.copyWith(
               color: colors.primary,
               fontWeight: FontWeight.w600,
             ),
@@ -172,7 +176,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           const Spacer(),
           Text(
             _formatTimeOnly(time),
-            style: theme.typography.sm.copyWith(
+            style: theme.typography.body.sm.copyWith(
               color: colors.primary.withValues(alpha: 0.7),
             ),
           ),
@@ -206,7 +210,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           const SizedBox(height: 8),
           Text(
             category,
-            style: theme.typography.sm.copyWith(color: colors.mutedForeground),
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
             textAlign: TextAlign.center,
           ),
 
@@ -242,7 +248,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             child: _buildActionPill(
               theme: theme,
               colors: colors,
-              icon: hasAccount ? FIcons.wallet : FIcons.link,
+              icon: hasAccount ? FLucideIcons.wallet : FLucideIcons.link,
               label: hasAccount
                   ? _selectedAccountName ??
                         t.chat.genui.transactionCard.associatedAccount
@@ -258,7 +264,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             child: _buildActionPill(
               theme: theme,
               colors: colors,
-              icon: hasSpaces ? FIcons.users : FIcons.plus,
+              icon: hasSpaces ? FLucideIcons.users : FLucideIcons.plus,
               label: hasSpaces
                   ? '${_linkedSpaceIds.length} ${t.chat.genui.transactionCard.sharedSpace}'
                   : t.chat.genui.transactionCard.sharedSpace,
@@ -321,7 +327,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             Flexible(
               child: Text(
                 label,
-                style: theme.typography.sm.copyWith(
+                style: theme.typography.body.sm.copyWith(
                   color: isActive ? activeColor : colors.mutedForeground,
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                 ),
@@ -519,7 +525,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           children: [
             Text(
               t.chat.genui.transactionCard.selectSpace,
-              style: theme.typography.lg.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 16),
             Flexible(
@@ -532,14 +540,14 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                   final isSelected = _linkedSpaceIds.contains(spaceId);
                   return ListTile(
                     leading: Icon(
-                      FIcons.users,
+                      FLucideIcons.users,
                       color: isSelected
                           ? colors.primary
                           : colors.mutedForeground,
                     ),
                     title: Text((space['name'] as String?) ?? ''),
                     trailing: isSelected
-                        ? Icon(FIcons.check, color: colors.primary)
+                        ? Icon(FLucideIcons.check, color: colors.primary)
                         : null,
                     onTap: () => Navigator.pop(context, spaceId),
                   );
