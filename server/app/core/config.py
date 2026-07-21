@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from dotenv import load_dotenv
 from pydantic import Field, field_validator
@@ -165,8 +165,21 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "augo"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
-    POSTGRES_POOL_SIZE: int = 20
-    POSTGRES_MAX_OVERFLOW: int = 10
+
+    # ORM (SQLAlchemy) connection pool
+    POSTGRES_POOL_SIZE: int = 10  # Warm connections kept open per process
+    POSTGRES_MAX_OVERFLOW: int = 5  # Extra connections allowed under burst
+    POSTGRES_POOL_TIMEOUT: int = 30  # Seconds to wait for a free connection before failing
+    POSTGRES_POOL_RECYCLE: int = 1800  # Recycle connections older than this (survives DB restarts)
+    POSTGRES_POOL_PRE_PING: bool = True  # Verify connection liveness before checkout
+    # Pool mode: "queue" (default) reuses connections in-process.
+    # Use "null" ONLY when a transaction-level external pooler sits in front of
+    # PostgreSQL (e.g. PgBouncer or Supabase Supavisor in transaction mode).
+    DB_POOL_MODE: Literal["queue", "null"] = "queue"
+
+    # LangGraph checkpointer (psycopg3) connection pool, independent from the ORM pool
+    CHECKPOINTER_POOL_SIZE: int = 10
+
     CHECKPOINT_TABLES: list[str] = ["checkpoint_blobs", "checkpoint_writes", "checkpoints"]
 
     # Redis Configuration

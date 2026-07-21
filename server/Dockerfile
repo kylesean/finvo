@@ -81,4 +81,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Entrypoint and default command
 ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Keep workers=1: the in-process scheduler, rate limiter and metrics assume a
+# single process. Multiple workers cause duplicate scheduled job execution.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

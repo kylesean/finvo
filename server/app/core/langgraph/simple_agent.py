@@ -13,15 +13,11 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator, Sequence
 from typing import Any, cast
-from urllib.parse import quote_plus
 from uuid import UUID
 
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.errors import GraphRecursionError
-from psycopg import AsyncConnection
-from psycopg.rows import dict_row
-from psycopg_pool import AsyncConnectionPool
 
 from app.core.config import settings
 from app.core.langgraph.agent import build_agent_graph
@@ -54,13 +50,19 @@ class SimpleLangChainAgent:
     - 使用 StreamProcessor 处理流式输出
     """
 
-    def __init__(self) -> None:
-        """初始化 Agent"""
+    def __init__(self, checkpointer: AsyncPostgresSaver | None = None) -> None:
+        """Initialize the agent.
+
+        Args:
+            checkpointer: Optional LangGraph checkpointer. When not provided,
+                it is lazily obtained from app.core.checkpointer.checkpointer_manager
+                on first use (the pool is eagerly warmed up in the app lifespan).
+        """
         self.llm_service = llm_service
         self.llm_service.bind_tools(tools)
 
         self._agent: MiddlewareAgent | None = None
-        self._conn_pool: AsyncConnectionPool[AsyncConnection[dict[str, Any]]] | None = None
+        self._checkpointer: AsyncPostgresSaver | None = checkpointer
         self._memory_service: MemoryService | None = None
         self._middlewares: list[Any] | None = None
         self._stream_processor = StreamProcessor()
@@ -82,32 +84,13 @@ class SimpleLangChainAgent:
         return self._memory_service
 
     async def _get_checkpointer(self) -> AsyncPostgresSaver:
-        """获取 LangGraph checkpointer"""
-        if self._conn_pool is None:
-            connection_url = (
-                "postgresql://"
-                f"{quote_plus(settings.POSTGRES_USER)}:{quote_plus(settings.POSTGRES_PASSWORD)}"
-                f"@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
-            )
+        """获取 LangGraph checkpointer（由 checkpointer_manager 统一管理连接池）"""
+        if self._checkpointer is None:
+            from app.core.checkpointer import checkpointer_manager
 
-            self._conn_pool = AsyncConnectionPool(
-                connection_url,
-                open=False,
-                max_size=settings.POSTGRES_POOL_SIZE,
-                kwargs={
-                    "autocommit": True,
-                    "connect_timeout": 5,
-                    "prepare_threshold": None,
-                    "row_factory": dict_row,
-                },
-            )
-            await self._conn_pool.open()
-
-        checkpointer = AsyncPostgresSaver(self._conn_pool)
-        # Note: We skip checkpointer.setup() here to avoid runtime deadlocks
-        # during concurrent app initialization. Database tables and indexes
-        # are managed by scripts/bootstrap.py.
-        return checkpointer
+            await checkpointer_manager.ensure_initialized()
+            self._checkpointer = checkpointer_manager.saver()
+        return self._checkpointer
 
     async def _initialize_middlewares(self) -> list[Any]:
         """初始化 middleware 栈"""

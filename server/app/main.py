@@ -68,6 +68,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     await init_db()
 
+    # Initialize LangGraph checkpointer pool (psycopg3)
+    from app.core.checkpointer import close_checkpointer, init_checkpointer
+
+    await init_checkpointer()
+
     # Initialize Redis cache
     from app.core.cache import close_cache, init_cache
 
@@ -83,6 +88,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Cleanup connections
     await shutdown_scheduler()
     await close_cache()
+    await close_checkpointer()
     await close_db()
     logger.info("application_shutdown")
 
@@ -416,6 +422,11 @@ async def health_check(request: Request) -> JSONResponse:
     # Check database connectivity
     db_healthy = await db_manager.health_check()
 
+    # Check LangGraph checkpointer pool (psycopg3)
+    from app.core.checkpointer import checkpointer_manager
+
+    checkpointer_healthy = await checkpointer_manager.health_check()
+
     # Check Redis connectivity
     from app.core.cache import cache_manager
 
@@ -426,7 +437,8 @@ async def health_check(request: Request) -> JSONResponse:
 
     scheduler_running = app_scheduler.is_running()
 
-    all_healthy = db_healthy  # Redis is optional, don't block health check
+    # Redis is optional; database and checkpointer are required for core features
+    all_healthy = db_healthy and checkpointer_healthy
 
     health_data = {
         "status": "healthy" if all_healthy else "degraded",
@@ -435,6 +447,7 @@ async def health_check(request: Request) -> JSONResponse:
         "components": {
             "api": "healthy",
             "database": "healthy" if db_healthy else "unhealthy",
+            "checkpointer": "healthy" if checkpointer_healthy else "unhealthy",
             "cache": "healthy" if redis_healthy else "unhealthy",
             "scheduler": "running" if scheduler_running else "stopped",
         },

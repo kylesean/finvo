@@ -41,22 +41,35 @@ class DatabaseManager:
     def init_engine(self) -> AsyncEngine:
         """Initialize async SQLAlchemy engine with connection pooling.
 
+        Pool strategy is selected via settings.DB_POOL_MODE:
+        - "queue" (default): AsyncAdaptedQueuePool, SQLAlchemy 2.0's default pool
+          for async engines. Connections are reused in-process, avoiding a
+          TCP+auth handshake per request. pool_size/max_overflow apply.
+        - "null": NullPool, no client-side pooling. Only use this when a
+          transaction-level external pooler (PgBouncer / Supabase Supavisor)
+          sits in front of PostgreSQL.
+
         Returns:
             AsyncEngine: Configured async database engine
         """
         if self._engine is not None:
             return self._engine
 
-        # Configure connection pool based on environment
-        # For async engines, SQLAlchemy 2.0+ uses NullPool by default with asyncpg
-        # This is the recommended approach for async operations
-        pool_kwargs = {
-            "poolclass": NullPool,  # Use NullPool for async engines
-            "echo": False,  # Disable SQL query logging
-        }
+        pool_kwargs: dict[str, Any]
+        if settings.DB_POOL_MODE == "null":
+            pool_kwargs = {"poolclass": NullPool}
+        else:
+            pool_kwargs = {
+                "pool_size": settings.POSTGRES_POOL_SIZE,
+                "max_overflow": settings.POSTGRES_MAX_OVERFLOW,
+                "pool_timeout": settings.POSTGRES_POOL_TIMEOUT,
+                "pool_recycle": settings.POSTGRES_POOL_RECYCLE,
+                "pool_pre_ping": settings.POSTGRES_POOL_PRE_PING,
+            }
 
         self._engine = create_async_engine(
             settings.database_url,
+            echo=False,  # Disable SQL query logging
             **pool_kwargs,
         )
 
@@ -64,10 +77,51 @@ class DatabaseManager:
             "database_engine_initialized",
             host=settings.POSTGRES_HOST,
             database=settings.POSTGRES_DB,
-            pool_size=settings.POSTGRES_POOL_SIZE,
+            pool_mode=settings.DB_POOL_MODE,
+            pool_size=settings.POSTGRES_POOL_SIZE if settings.DB_POOL_MODE == "queue" else None,
+            max_overflow=settings.POSTGRES_MAX_OVERFLOW if settings.DB_POOL_MODE == "queue" else None,
         )
 
         return self._engine
+
+    async def log_connection_budget(self) -> None:
+        """Compute and log the per-process database connection budget.
+
+        Total server-side usage = per-process budget x number of uvicorn workers.
+        Warns when the per-process budget alone exceeds 80% of the server's
+        max_connections, leaving headroom for migrations/scripts/admin access.
+        """
+        # In "null" mode the ORM side is unbounded (grows with concurrency)
+        orm_budget = (
+            settings.POSTGRES_POOL_SIZE + settings.POSTGRES_MAX_OVERFLOW if settings.DB_POOL_MODE == "queue" else None
+        )
+        per_process = (orm_budget or 0) + settings.CHECKPOINTER_POOL_SIZE
+
+        max_connections: int | None = None
+        try:
+            async with self.session_factory() as session:
+                result = await session.execute(text("SHOW max_connections"))
+                max_connections = int(result.scalar_one())
+        except Exception as e:
+            logger.warning("db_max_connections_query_failed", error=str(e))
+
+        logger.info(
+            "db_connection_budget",
+            pool_mode=settings.DB_POOL_MODE,
+            orm_pool_budget=orm_budget,
+            checkpointer_pool_budget=settings.CHECKPOINTER_POOL_SIZE,
+            per_process_total=per_process,
+            pg_max_connections=max_connections,
+            note="total usage = per_process_total x uvicorn workers",
+        )
+
+        if max_connections is not None and orm_budget is not None and per_process > int(max_connections * 0.8):
+            logger.warning(
+                "db_connection_budget_exceeds_limit",
+                per_process_total=per_process,
+                pg_max_connections=max_connections,
+                hint="lower POSTGRES_POOL_SIZE/MAX_OVERFLOW/CHECKPOINTER_POOL_SIZE or raise max_connections",
+            )
 
     def init_session_factory(self) -> async_sessionmaker[AsyncSession]:
         """Initialize session factory for creating database sessions.
@@ -211,6 +265,9 @@ async def init_db() -> None:
         raise RuntimeError("Failed to connect to database")
 
     logger.info("database_initialized_successfully")
+
+    # Report the per-process connection budget (and warn if it risks exhaustion)
+    await db_manager.log_connection_budget()
 
 
 async def close_db() -> None:
