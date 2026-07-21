@@ -11,6 +11,7 @@ import os
 from enum import Enum
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from pydantic import Field, field_validator
@@ -160,6 +161,7 @@ class Settings(BaseSettings):
     LOG_FORMAT: str = "json"  # "json" or "console"
 
     # PostgresSQL Configuration
+    DATABASE_URL: str | None = None
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "augo"
@@ -287,14 +289,44 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         """Get PostgresSQL database URL for SQLAlchemy."""
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            if url.startswith("postgresql://"):
+                return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgres://"):
+                return url.replace("postgres://", "postgresql+asyncpg://", 1)
+            return url
         return (
             f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
 
     @property
+    def checkpointer_database_url(self) -> str:
+        """Get PostgresSQL database URL for psycopg3 (LangGraph checkpointer)."""
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            if "+asyncpg" in url:
+                url = url.replace("+asyncpg", "", 1)
+            elif "+psycopg" in url:
+                url = url.replace("+psycopg", "", 1)
+            return url
+        return (
+            "postgresql://"
+            f"{quote_plus(self.POSTGRES_USER)}:{quote_plus(self.POSTGRES_PASSWORD)}"
+            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        )
+
+    @property
     def database_url_sync(self) -> str:
         """Get PostgresSQL database URL for synchronous operations (Alembic)."""
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            if "+asyncpg" in url:
+                url = url.replace("+asyncpg", "", 1)
+            elif "+psycopg" in url:
+                url = url.replace("+psycopg", "", 1)
+            return url
         return (
             f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
