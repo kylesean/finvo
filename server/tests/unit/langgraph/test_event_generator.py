@@ -68,7 +68,9 @@ class TestNewSurfaceEmission:
         assert root["netCashFlow"] == "+1,234.56"
         assert root["savingsRate"] == 32.5
         assert root["totalIncome"] == "5,000.00"
-        assert root["_surfaceId"] == surface_id
+        # internal '_'-prefixed keys are stripped before reaching the client
+        # (_surfaceId lives only in the server-side SurfaceTracker)
+        assert "_surfaceId" not in root
 
     async def test_no_legacy_message_keys(self) -> None:
         """The old nested format (surfaceUpdate/beginRendering) must be gone."""
@@ -88,6 +90,17 @@ class TestNewSurfaceEmission:
         root = events[1].data["updateComponents"]["components"][0]
         assert root["id"] == "root"
         assert root["component"] == "CashFlowCard"
+
+    async def test_internal_keys_stripped_from_wire_component(self) -> None:
+        """'_'-prefixed tool data keys must never reach the client wire format."""
+        gen = EventGenerator()
+        result = _cashflow_result(_internal="secret", _debug=True)
+        events = await _collect(gen, result)
+        root = events[1].data["updateComponents"]["components"][0]
+        assert "_internal" not in root
+        assert "_debug" not in root
+        # public props are preserved
+        assert root["netCashFlow"] == "+1,234.56"
 
 
 class TestIncrementalUpdate:
