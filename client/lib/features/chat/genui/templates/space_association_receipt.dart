@@ -28,7 +28,8 @@ class SpaceAssociationReceiptData {
   }
 
   String get spaceName => space['name'] as String? ?? '共享空间';
-  int get spaceId => space['id'] as int? ?? 0;
+  // 后端返回的 space.id 是 UUID 字符串
+  String get spaceId => space['id']?.toString() ?? '';
   int get totalCount => association['total_count'] as int? ?? 0;
   int get successCount => association['success_count'] as int? ?? 0;
   int get failedCount => association['failed_count'] as int? ?? 0;

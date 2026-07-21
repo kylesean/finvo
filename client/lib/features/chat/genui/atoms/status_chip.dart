@@ -108,7 +108,7 @@ class StatusChip extends StatelessWidget {
             style: TextStyle(
               fontSize: fontSize,
               color: fgColor,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

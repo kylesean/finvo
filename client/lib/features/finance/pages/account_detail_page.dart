@@ -58,7 +58,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
               // 使用 name 字段
               args.account.name,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -98,7 +98,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
                   Text(
                     args.definition.title,
                     style: theme.typography.body.md.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: colors.foreground,
                     ),
                   ),

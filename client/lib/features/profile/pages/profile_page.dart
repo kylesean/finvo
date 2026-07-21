@@ -392,7 +392,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Text(
               user?.username ?? t.user.username,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           const SizedBox(width: 6),

@@ -111,7 +111,7 @@ class _FilterSheetState extends State<FilterSheet> {
                   Text(
                     t.common.filter,
                     style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   GestureDetector(

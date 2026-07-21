@@ -126,7 +126,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
               widget.title.isNotEmpty ? widget.title : t.time.selectDate,
               textAlign: TextAlign.center,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -137,7 +137,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
               t.common.ok,
               style: theme.typography.body.md.copyWith(
                 color: colors.primary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

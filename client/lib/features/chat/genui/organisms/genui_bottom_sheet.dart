@@ -82,7 +82,7 @@ class GenUIBottomSheet extends StatelessWidget {
                   child: Text(
                     title,
                     style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),

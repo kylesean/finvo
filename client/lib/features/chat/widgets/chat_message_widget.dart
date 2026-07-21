@@ -28,7 +28,7 @@ final _logger = Logger('ChatMessageWidget');
 /// Requirements: 10.1, 10.3
 class ChatMessageWidget extends ConsumerStatefulWidget {
   final app.ChatMessage message;
-  final genui.GenUiHost genUiHost;
+  final genui.SurfaceHost genUiHost;
 
   const ChatMessageWidget({
     super.key,
@@ -149,9 +149,8 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
           return Container(
             key: ValueKey('live_${component.surfaceId}'),
             margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
-            child: genui.GenUiSurface(
-              host: widget.genUiHost,
-              surfaceId: component.surfaceId,
+            child: genui.Surface(
+              surfaceContext: widget.genUiHost.contextFor(component.surfaceId),
             ),
           );
         } else {

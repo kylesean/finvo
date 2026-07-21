@@ -331,7 +331,7 @@ class _RecurringTransactionPageState
             ? t.forecast.recurringTransaction.edit
             : (isZh ? '新建周期交易' : 'New Recurring Transaction'),
         style: theme.typography.body.lg.copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: colors.foreground,
         ),
       ),
@@ -525,7 +525,7 @@ class _RecurringTransactionPageState
           t.budget.periodSettings,
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -578,7 +578,7 @@ class _RecurringTransactionPageState
           '${t.transaction.account} & ${t.transaction.category}',
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -900,7 +900,7 @@ class _RecurringTransactionPageState
           t.budget.advancedOptions,
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),

@@ -117,7 +117,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                       Text(
                         t.chat.genui.healthScore.title,
                         style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -191,7 +191,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                   Text(
                     t.chat.genui.healthScore.suggestions,
                     style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -252,7 +252,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
             Text(
               t.chat.genui.healthScore.scorePoint(score: score),
               style: theme.typography.body.sm.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: statusColor,
               ),
             ),

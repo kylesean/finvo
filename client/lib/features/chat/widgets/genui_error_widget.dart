@@ -45,7 +45,7 @@ class GenUiErrorWidget extends StatelessWidget {
                   t.error.genui.loadingFailed,
                   style: theme.typography.body.md.copyWith(
                     color: theme.colors.destructive,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -222,7 +222,7 @@ class GenUiSchemaErrorWidget extends StatelessWidget {
                   t.error.genui.schemaFailed,
                   style: theme.typography.body.md.copyWith(
                     color: theme.colors.destructive,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -310,7 +310,7 @@ class GenUiNetworkErrorWidget extends StatelessWidget {
                   t.error.genui.networkError,
                   style: theme.typography.body.md.copyWith(
                     color: theme.colors.destructive,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

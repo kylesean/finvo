@@ -173,7 +173,7 @@ class _TransactionListViewState extends ConsumerState<TransactionListView> {
             ),
             style: theme.typography.body.md.copyWith(
               color: colors.primary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const Spacer(),
@@ -284,7 +284,7 @@ class _TransactionListItem extends StatelessWidget {
                       Text(
                         categoryEnum.displayText,
                         style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       // 优先使用后端 display，否则 fallback 到客户端计算

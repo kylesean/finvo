@@ -152,7 +152,7 @@ class CommentItemWidget extends ConsumerWidget {
         Text(
           comment.userName, // Current commenter
           style: theme.typography.body.sm.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colorScheme.foreground,
           ),
         ),
@@ -176,7 +176,7 @@ class CommentItemWidget extends ConsumerWidget {
             child: Text(
               comment.repliedToUserName!, // Person being replied to
               style: theme.typography.body.sm.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colorScheme
                     .primary, // Highlight reply target with primary color
               ),

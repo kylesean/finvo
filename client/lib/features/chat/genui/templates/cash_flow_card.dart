@@ -100,7 +100,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                                 widget.data['title'] as String? ??
                                     t.chat.genui.cashFlowCard.title,
                                 style: theme.typography.body.md.copyWith(
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: colors.foreground,
                                 ),
                               ),
@@ -254,7 +254,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                                     t.chat.genui.cashFlowCard.aiInsight,
                                     style: theme.typography.body.xs.copyWith(
                                       color: colors.primary,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
@@ -320,7 +320,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                   value,
                   style: theme.typography.body.sm.copyWith(
                     color: valueColor ?? colors.foreground,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,

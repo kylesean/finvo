@@ -75,7 +75,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
         title: Text(
           t.speech.title,
           style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.foreground,
           ),
         ),

@@ -164,7 +164,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       title: Text(
         widget.editId != null ? t.budget.editBudget : t.budget.newBudget,
         style: theme.typography.body.lg.copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: colors.foreground,
         ),
       ),
@@ -196,7 +196,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                   ? t.budget.totalBudget
                   : t.budget.categoryBudget,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -244,7 +244,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           t.budget.budgetAmountLabel,
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -313,7 +313,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           t.budget.budgetCategory,
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -368,7 +368,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           t.budget.periodSettings,
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -490,7 +490,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           t.budget.advancedOptions,
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -708,7 +708,7 @@ class _PeriodTypePicker extends StatelessWidget {
             Text(
               t.budget.selectPeriodType,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -789,7 +789,7 @@ class _AnchorDayPickerState extends State<_AnchorDayPicker> {
             Text(
               t.budget.selectAnchorDay,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),

@@ -28,7 +28,7 @@ class ExpenseTable extends StatelessWidget {
           Text(
             data['title'] as String,
             style: theme.typography.body.md.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 12),
@@ -41,7 +41,7 @@ class ExpenseTable extends StatelessWidget {
                       label: Text(
                         h as String,
                         style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),

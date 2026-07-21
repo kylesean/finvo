@@ -141,7 +141,7 @@ class BudgetItemCard extends ConsumerWidget {
                     child: Text(
                       name,
                       style: theme.typography.body.md.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: colors.foreground,
                       ),
                     ),
@@ -159,7 +159,7 @@ class BudgetItemCard extends ConsumerWidget {
                       _getStatusText(status),
                       style: theme.typography.body.xs.copyWith(
                         color: statusColor,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),

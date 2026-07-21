@@ -127,7 +127,7 @@ class _FallbackWidget extends StatelessWidget {
                     Text(
                       '组件加载失败',
                       style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: colors.destructive,
                       ),
                     ),

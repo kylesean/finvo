@@ -10,7 +10,7 @@
 // - 提高代码的可测试性和可维护性
 
 import 'package:logging/logging.dart';
-import 'package:genui/genui.dart' as genui;
+import 'package:a2ui_core/a2ui_core.dart' as a2ui;
 import '../models/sse_event_models.dart';
 
 final _logger = Logger('SseEventHandlerRegistry');
@@ -19,7 +19,7 @@ final _logger = Logger('SseEventHandlerRegistry');
 class SseEventContext {
   final void Function(String?) setSessionId;
   final String? Function() getCurrentSessionId;
-  final void Function(genui.A2uiMessage) addA2uiMessage;
+  final void Function(a2ui.A2uiMessage) addA2uiMessage;
   final void Function(String) addTextResponse;
   final SseEventCallbacks callbacks;
   final StringBuffer textBuffer;
@@ -107,7 +107,7 @@ class A2uiMessageHandler implements SseEventHandler {
     }
 
     try {
-      final a2uiMessage = genui.A2uiMessage.fromJson(a2uiMessageData);
+      final a2uiMessage = a2ui.A2uiMessage.fromJson(a2uiMessageData);
       context.addA2uiMessage(a2uiMessage);
 
       if (a2uiMessageData.containsKey('surfaceUpdate')) {

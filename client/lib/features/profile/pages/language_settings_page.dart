@@ -29,7 +29,7 @@ class LanguageSettingsPage extends ConsumerWidget {
         title: Text(
           t.settings.languageSettings,
           style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.foreground,
           ),
         ),

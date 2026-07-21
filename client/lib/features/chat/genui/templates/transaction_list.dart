@@ -155,7 +155,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
             t.chat.genui.transactionList.searchResults(count: _total),
             style: theme.typography.body.md.copyWith(
               color: colors.primary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const Spacer(),
@@ -263,7 +263,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                       Text(
                         categoryEnum.displayText,
                         style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       // 使用统一的 AmountText 组件

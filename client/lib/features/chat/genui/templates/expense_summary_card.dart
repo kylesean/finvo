@@ -195,7 +195,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
               t.chat.genui.expenseSummary.mainExpenses,
               style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -270,7 +270,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
               t.chat.genui.expenseSummary.viewAll(count: totalCount),
               style: theme.typography.body.sm.copyWith(
                 color: colors.primary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(width: 4),

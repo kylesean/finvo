@@ -31,7 +31,7 @@ class AccountTypePickerPage extends ConsumerWidget {
         title: Text(
           t.account.selectTypeTitle,
           style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.foreground,
           ),
         ),
@@ -168,7 +168,7 @@ class _AccountTypeCard extends StatelessWidget {
             Text(
               title,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
               maxLines: 1,

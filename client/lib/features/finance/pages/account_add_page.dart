@@ -85,7 +85,7 @@ class _FinancialAccountAddPageState
         title: Text(
           t.account.addTitle,
           style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.foreground,
           ),
         ),
@@ -166,7 +166,7 @@ class _FinancialAccountAddPageState
             icon: Text(
               _selectedCurrency.symbol,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.primary, // 使用主题色
               ),
             ),
@@ -181,7 +181,7 @@ class _FinancialAccountAddPageState
               ],
               style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
               decoration: InputDecoration(

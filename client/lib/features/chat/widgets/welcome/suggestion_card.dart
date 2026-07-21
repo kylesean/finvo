@@ -62,7 +62,8 @@ class SuggestionCard extends StatelessWidget {
                     Text(
                       title,
                       style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w600,
+                        // 3.44 起 Skia 回退选中 NotoSansCJK（笔画更重），字重下调一档。
+                        fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

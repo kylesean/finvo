@@ -1154,7 +1154,7 @@ class _ChatConversationDrawerState
           text: text.substring(highlight.start, highlight.end),
           style: baseStyle.copyWith(
             backgroundColor: highlightColor,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       );

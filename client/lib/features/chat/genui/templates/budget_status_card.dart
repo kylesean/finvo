@@ -211,7 +211,7 @@ class BudgetStatusCard extends StatelessWidget {
                       t.chat.genui.budgetStatusCard.totalBudget,
                       style: theme.typography.body.sm.copyWith(
                         color: colors.foreground,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     if (budgetId != null) ...[
@@ -261,7 +261,7 @@ class BudgetStatusCard extends StatelessWidget {
                   ),
                   style: theme.typography.body.xs.copyWith(
                     color: remaining >= 0 ? colors.primary : colors.destructive,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -335,7 +335,7 @@ class BudgetStatusCard extends StatelessWidget {
               title,
               style: theme.typography.body.md.copyWith(
                 color: statusColor,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

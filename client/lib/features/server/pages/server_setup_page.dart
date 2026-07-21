@@ -146,7 +146,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
               title: Text(
                 t.server.title,
                 style: theme.typography.body.xl.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: theme.colors.foreground,
                 ),
               ),
@@ -332,7 +332,7 @@ class _ConnectionStatusCard extends StatelessWidget {
                 Text(
                   title,
                   style: theme.typography.body.sm.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 if (subtitle != null)

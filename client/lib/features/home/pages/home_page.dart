@@ -177,7 +177,7 @@ class _FixedTabBar extends ConsumerWidget {
                   child: Text(
                     tabInfo.label,
                     style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: colors.primaryForeground,
                     ),
                   ),
@@ -278,7 +278,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                             Text(
                               t.home.totalExpense,
                               style: theme.typography.body.sm.copyWith(
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color: colors.primaryForeground.withValues(
                                   alpha: 0.9,
                                 ),
@@ -462,7 +462,7 @@ class _QuickStatItem extends StatelessWidget {
           isVisible ? displayString : '••••',
           style: theme.typography.body.md.copyWith(
             color: colors.primaryForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],

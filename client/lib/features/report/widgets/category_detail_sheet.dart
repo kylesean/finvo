@@ -72,7 +72,7 @@ class CategoryDetailSheet extends StatelessWidget {
                     Text(
                       t.statistics.analysis.breakdown,
                       style: theme.typography.body.lg.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     GestureDetector(
@@ -174,7 +174,7 @@ class _CategoryDetailItem extends StatelessWidget {
                 Text(
                   '¥${formatAmount(item.amount)}',
                   style: theme.typography.body.sm.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(

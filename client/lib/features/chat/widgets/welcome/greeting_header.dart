@@ -25,7 +25,9 @@ class GreetingHeader extends StatelessWidget {
         Text(
           greeting,
           style: theme.typography.body.xl2.copyWith(
-            fontWeight: FontWeight.w700,
+            // 3.44 起 Skia 回退选中 NotoSansCJK（较旧版 MiSans-L3 笔画更重），
+            // 标题字重下调一档以恢复升级前的视觉粗细。
+            fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
           ),
           textAlign: TextAlign.center,

@@ -35,65 +35,37 @@ class ForuiThemeConfig {
     final fallbacks = AppFontConfig.getGlobalFontFallbacks();
 
     FTypeface overrideTypeface(FTypeface base) {
+      // forui >=0.17 changed the default text leading distribution from
+      // proportional to even (see forui CHANGELOG). The font-weight values
+      // are unchanged, but the two distributions place glyphs at different
+      // vertical offsets within their line boxes. For bold CJK text (thick
+      // strokes) that offset changes how strokes align with the pixel grid,
+      // so headings render visibly heavier and sit at a different vertical
+      // rhythm than before the upgrade. Restore the pre-upgrade proportional
+      // distribution to keep the original look.
+      TextStyle restyle(TextStyle style) => style.copyWith(
+        fontFamily: fontFamily,
+        fontFamilyFallback: fallbacks,
+        leadingDistribution: TextLeadingDistribution.proportional,
+      );
+
       return FTypeface(
         fontFamily: fontFamily,
         fontFamilyFallback: fallbacks,
-        xs3: base.xs3.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xs2: base.xs2.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xs: base.xs.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        sm: base.sm.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        md: base.md.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        lg: base.lg.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xl: base.xl.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xl2: base.xl2.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xl3: base.xl3.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xl4: base.xl4.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xl5: base.xl5.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xl6: base.xl6.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xl7: base.xl7.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
-        xl8: base.xl8.copyWith(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fallbacks,
-        ),
+        xs3: restyle(base.xs3),
+        xs2: restyle(base.xs2),
+        xs: restyle(base.xs),
+        sm: restyle(base.sm),
+        md: restyle(base.md),
+        lg: restyle(base.lg),
+        xl: restyle(base.xl),
+        xl2: restyle(base.xl2),
+        xl3: restyle(base.xl3),
+        xl4: restyle(base.xl4),
+        xl5: restyle(base.xl5),
+        xl6: restyle(base.xl6),
+        xl7: restyle(base.xl7),
+        xl8: restyle(base.xl8),
       );
     }
 

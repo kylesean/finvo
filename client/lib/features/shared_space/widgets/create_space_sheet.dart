@@ -75,7 +75,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
               Text(
                 'Create Shared Space',
                 style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: colors.foreground,
                 ),
               ),

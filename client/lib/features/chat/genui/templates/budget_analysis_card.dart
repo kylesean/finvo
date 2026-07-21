@@ -108,7 +108,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
               data['title'] as String? ?? t.chat.genui.budgetAnalysis.title,
               style: theme.typography.body.md.copyWith(
                 color: colors.primary,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -225,7 +225,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             ),
             style: theme.typography.body.xs.copyWith(
               color: trendColor,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -257,7 +257,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             t.chat.genui.budgetAnalysis.categoryDistribution,
             style: theme.typography.body.xs.copyWith(
               color: colors.mutedForeground,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 12),
@@ -331,7 +331,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                       textAlign: TextAlign.right,
                       style: theme.typography.body.sm.copyWith(
                         color: colors.foreground,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -362,7 +362,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             t.chat.genui.budgetAnalysis.topSpenders,
             style: theme.typography.body.xs.copyWith(
               color: colors.mutedForeground,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
@@ -461,7 +461,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                 t.budgetSuggestion.financialInsights,
                 style: theme.typography.body.sm.copyWith(
                   color: accentColor,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -479,7 +479,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                     '•',
                     style: theme.typography.body.sm.copyWith(
                       color: accentColor,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(width: 8),

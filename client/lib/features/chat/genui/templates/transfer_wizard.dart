@@ -6,6 +6,7 @@ import 'package:augo/app/theme/app_semantic_colors.dart';
 import '../organisms/organisms.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
+import '../events/interaction_events.dart';
 import 'package:augo/shared/utils/amount_formatter.dart';
 
 /// 转账向导数据模型 (Data Layer)
@@ -545,20 +546,16 @@ class _TransferWizardState extends State<TransferWizard> {
         t.chat.transferWizard.targetAccount;
 
     widget.dispatchEvent(
-      UserActionEvent(
-        name: 'transfer_path_confirmed',
-        sourceComponentId: 'TransferWizard',
-        context: {
-          'surface_id': _model.surfaceId,
-          'source_account_id': _sourceId,
-          'target_account_id': _targetId,
-          'source_account_name': sourceAccountName,
-          'target_account_name': targetAccountName,
-          'amount': finalAmount,
-          'currency': _model.currency,
-          'memo': _model.memo,
-        },
-      ),
+      TransferPathConfirmedEvent(
+        surfaceId: _model.surfaceId,
+        sourceAccountId: _sourceId ?? '',
+        targetAccountId: _targetId ?? '',
+        sourceAccountName: sourceAccountName,
+        targetAccountName: targetAccountName,
+        amount: finalAmount,
+        currency: _model.currency,
+        memo: _model.memo,
+      ).toUserActionEvent(sourceComponentId: 'TransferWizard'),
     );
   }
 }

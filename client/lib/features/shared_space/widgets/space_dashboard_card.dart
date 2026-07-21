@@ -105,7 +105,7 @@ class SpaceDashboardCard extends StatelessWidget {
                     Text(
                       t.sharedSpace.dashboard.spendingDistribution,
                       style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: colors.foreground,
                       ),
                     ),
@@ -147,7 +147,7 @@ class SpaceDashboardCard extends StatelessWidget {
           value,
           style: theme.typography.body.sm.copyWith(
             color: colors.primaryForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],

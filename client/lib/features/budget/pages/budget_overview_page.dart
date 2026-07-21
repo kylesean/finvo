@@ -49,7 +49,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         title: Text(
           t.budget.title,
           style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.foreground,
           ),
         ),
@@ -215,7 +215,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
             Text(
               t.budget.loadFailed,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -312,7 +312,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
               Text(
                 budget.displayName,
                 style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: colors.primaryForeground,
                 ),
               ),
@@ -372,7 +372,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   Text(
                     '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount)}',
                     style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: colors.primaryForeground,
                     ),
                   ),
@@ -444,7 +444,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                 Text(
                   t.budget.monthlySummary,
                   style: theme.typography.body.md.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: colors.foreground,
                   ),
                 ),
@@ -463,7 +463,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                     '${usagePercent.toStringAsFixed(0)}%',
                     style: theme.typography.body.sm.copyWith(
                       color: isExceeded ? colors.destructive : colors.primary,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -529,7 +529,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         Text(
           value,
           style: theme.typography.body.md.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: valueColor,
           ),
         ),
@@ -607,7 +607,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                               child: Text(
                                 budget.displayName,
                                 style: theme.typography.body.md.copyWith(
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: isPaused
                                       ? colors.mutedForeground
                                       : colors.foreground,
@@ -653,7 +653,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                       Text(
                         '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
                         style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: statusColor,
                         ),
                       ),

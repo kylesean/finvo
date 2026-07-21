@@ -5,6 +5,7 @@ import 'package:genui/genui.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
+import '../events/interaction_events.dart';
 
 /// SpaceSelectorCard Data Layer
 class SpaceSelectorData {
@@ -456,16 +457,12 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
     final selectedSpace = _selectedSpace;
 
     widget.dispatchEvent(
-      UserActionEvent(
-        name: 'space_selected',
-        sourceComponentId: 'SpaceSelectorCard',
-        context: {
-          'surface_id': _model.surfaceId,
-          'space_id': _selectedSpaceId,
-          'space_name': selectedSpace?['name'] ?? '',
-          'transaction_ids': _model.pendingTransactionIds,
-        },
-      ),
+      SpaceSelectedEvent(
+        surfaceId: _model.surfaceId,
+        spaceId: _selectedSpaceId!,
+        spaceName: selectedSpace?['name'] as String?,
+        transactionIds: _model.pendingTransactionIds,
+      ).toUserActionEvent(sourceComponentId: 'SpaceSelectorCard'),
     );
   }
 }

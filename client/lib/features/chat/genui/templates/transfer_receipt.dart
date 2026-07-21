@@ -111,7 +111,7 @@ class TransferReceipt extends StatelessWidget {
             t.chat.transferWizard.transferSuccess,
             style: theme.typography.body.md.copyWith(
               color: colors.primary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const Spacer(),
@@ -302,7 +302,7 @@ class _TransferAnimationState extends State<_TransferAnimation>
             overflow: TextOverflow.ellipsis,
             style: theme.typography.body.xs.copyWith(
               color: colors.foreground,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               height: 1.2,
             ),
           ),

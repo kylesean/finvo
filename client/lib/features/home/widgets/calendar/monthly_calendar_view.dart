@@ -120,7 +120,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                 Text(
                   t.calendar.title,
                   style: theme.typography.body.xl.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: colors.foreground,
                   ),
                 ),

@@ -158,7 +158,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                         'My Cash Pockets',
                         style: theme.typography.body.xl.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],

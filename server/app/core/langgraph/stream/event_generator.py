@@ -290,19 +290,19 @@ class EventGenerator:
     ) -> AsyncGenerator[GenUIEvent]:
         """生成 UI 组件事件（a2ui_message）
 
-        Enhanced for GenUI Full Architecture:
+        Enhanced for GenUI Full Architecture (A2UI protocol v0.9):
         1. Check if reusable Surface exists for this component type
-        2. If reusable: emit DataModelUpdate for changed fields only
-        3. If new: emit SurfaceUpdate + BeginRendering as before
+        2. If reusable: emit UpdateDataModel for changed fields only
+        3. If new: emit CreateSurface + UpdateComponents (flat v0.9 format)
         """
         from app.core.genui_protocol import (
-            BeginRendering,
-            BeginRenderingPayload,
-            Component,
-            DataModelUpdate,
-            DataModelUpdatePayload,
-            SurfaceUpdate,
-            SurfaceUpdatePayload,
+            CreateSurface,
+            CreateSurfacePayload,
+            UpdateComponents,
+            UpdateComponentsPayload,
+            UpdateDataModel,
+            UpdateDataModelPayload,
+            V09Component,
         )
 
         # 使用 ComponentDetector 检测组件类型
@@ -338,11 +338,11 @@ class EventGenerator:
                 component=component_name,
             )
 
-            # Get changes and emit DataModelUpdate for each
+            # Get changes and emit UpdateDataModel for each
             changes = self._extract_data_changes(existing_surface_id, tool_result)
             for path, value in changes:
-                data_update_msg = DataModelUpdate(
-                    dataModelUpdate=DataModelUpdatePayload(
+                data_update_msg = UpdateDataModel(
+                    updateDataModel=UpdateDataModelPayload(
                         surfaceId=existing_surface_id,
                         path=path,
                         value=value,
@@ -366,7 +366,6 @@ class EventGenerator:
             tool_call_id = uuid.uuid4().hex[:8]
 
         surface_id = f"surface_{session_id}_{tool_call_id}"
-        component_id = f"comp_{tool_call_id}"
 
         logger.info(
             "emitting_genui_component",
@@ -388,14 +387,20 @@ class EventGenerator:
             tool_call_id=tool_call_id,
         )
 
-        # 发送 SurfaceUpdate
-        comp = Component(id=component_id, component={component_name: component_data})
-        update_msg = SurfaceUpdate(surfaceUpdate=SurfaceUpdatePayload(surfaceId=surface_id, components=[comp]))
-        yield GenUIEvent(type="a2ui_message", data=update_msg.model_dump())
+        # 发送 CreateSurface (v0.9)
+        create_msg = CreateSurface(createSurface=CreateSurfacePayload(surfaceId=surface_id))
+        yield GenUIEvent(type="a2ui_message", data=create_msg.model_dump())
 
-        # 发送 BeginRendering
-        render_msg = BeginRendering(beginRendering=BeginRenderingPayload(surfaceId=surface_id, root=component_id))
-        yield GenUIEvent(type="a2ui_message", data=render_msg.model_dump())
+        # 发送 UpdateComponents (v0.9)
+        # Flat component format: {id: 'root', component: TypeName, **props}.
+        # id/component are placed AFTER the spread so they always win over any
+        # colliding keys in component_data (the surface root MUST be id 'root').
+        flat_component = {**component_data, "id": "root", "component": component_name}
+        comp = V09Component.model_validate(flat_component)
+        update_msg = UpdateComponents(
+            updateComponents=UpdateComponentsPayload(surfaceId=surface_id, components=[comp])
+        )
+        yield GenUIEvent(type="a2ui_message", data=update_msg.model_dump())
 
     def _is_incremental_update(self, tool_result: Any) -> bool:
         """Check if this tool result should trigger incremental update.

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 import '../services/genui_logger.dart';
-import 'genui_event_registry.dart';
 import 'templates/templates.dart';
 
 /// 应用特定的组件目录
@@ -16,31 +15,30 @@ class AppCatalog {
   /// 从核心组件开始，然后添加应用特定的自定义组件。
   static Catalog build() {
     // 从核心组件开始
-    final catalog = CoreCatalogItems.asCatalog();
-
-    // 初始化事件注册表
-    GenUiEventRegistry.initialize();
+    final catalog = BasicCatalogItems.asCatalog();
 
     // 添加自定义组件
-    return catalog.copyWith([
-      _buildTransactionCard(),
-      _buildTransferReceipt(),
-      _buildExpenseTable(),
-      _buildChartCard(),
-      _buildSummaryCard(),
-      _buildTransferWizard(),
-      _buildBudgetStatusCard(),
-      _buildBudgetReceipt(),
-      _buildBudgetAnalysisCard(),
-      _buildTransactionGroupReceipt(),
-      _buildTransactionList(),
-      _buildCashFlowCard(),
-      _buildHealthScoreCard(),
-      _buildCashFlowForecastChart(),
-      _buildExpenseSummaryCard(),
-      _buildSpaceSelectorCard(),
-      _buildSpaceAssociationReceipt(),
-    ]);
+    return catalog.copyWith(
+      newItems: [
+        _buildTransactionCard(),
+        _buildTransferReceipt(),
+        _buildExpenseTable(),
+        _buildChartCard(),
+        _buildSummaryCard(),
+        _buildTransferWizard(),
+        _buildBudgetStatusCard(),
+        _buildBudgetReceipt(),
+        _buildBudgetAnalysisCard(),
+        _buildTransactionGroupReceipt(),
+        _buildTransactionList(),
+        _buildCashFlowCard(),
+        _buildHealthScoreCard(),
+        _buildCashFlowForecastChart(),
+        _buildExpenseSummaryCard(),
+        _buildSpaceSelectorCard(),
+        _buildSpaceAssociationReceipt(),
+      ],
+    );
   }
 
   /// 交易卡片组件
@@ -51,21 +49,18 @@ class AppCatalog {
       name: 'TransactionReceipt',
       dataSchema: ObjectSchema(
         properties: {
-          // 后端返回的字段
+          // 后端返回的字段（create_transaction / enricher 返回 UUID 字符串与类型字符串）
           'success': BooleanSchema(description: '操作是否成功'),
-          'transaction_id': IntegerSchema(description: '交易唯一标识符'),
+          'transaction_id': StringSchema(description: '交易唯一标识符（UUID 字符串）'),
           'raw_input': StringSchema(description: '交易描述'),
           'amount': NumberSchema(description: '交易金额'),
-          'type': BooleanSchema(description: '交易类型'),
+          'type': StringSchema(description: '交易类型（EXPENSE/INCOME/TRANSFER）'),
           'transaction_at': StringSchema(description: '交易时间（ISO 8601格式）'),
           'message': StringSchema(description: '操作结果消息'),
 
           // 可选字段（兼容旧格式）
           'transactionId': StringSchema(description: '交易唯一标识符（旧格式）'),
-          'status': StringSchema(
-            description: '交易状态',
-            enumValues: ['completed', 'pending', 'failed', 'cancelled'],
-          ),
+          'status': StringSchema(description: '交易状态'),
           'title': StringSchema(description: '交易标题或描述（旧格式）'),
           'currency': StringSchema(description: '货币类型代码（如 CNY, USD）'),
           'amountColor': StringSchema(description: '金额显示颜色（如 red, green）'),
@@ -834,7 +829,26 @@ class AppCatalog {
               },
             ),
           ),
-          'suggestions': ListSchema(description: '建议列表', items: StringSchema()),
+          // 后端 analyze_spending.py 返回结构化建议对象数组：
+          // {type: 'high_percentage'|'monthly_increase'|'frequent_small',
+          //  category_key?, percentage?, count?}
+          // 注意：genui 0.10 会对组件数据做 schema 验证，若声明为
+          // StringSchema 而实际是对象，会触发 reportError 错误反馈循环。
+          'suggestions': ListSchema(
+            description: '建议列表（结构化建议对象）',
+            items: ObjectSchema(
+              properties: {
+                'type': StringSchema(
+                  description:
+                      '建议类型: high_percentage/monthly_increase/frequent_small',
+                ),
+                'category_key': StringSchema(description: '相关分类键'),
+                'percentage': NumberSchema(description: '相关百分比'),
+                'count': IntegerSchema(description: '交易次数（frequent_small 类型）'),
+              },
+              required: ['type'],
+            ),
+          ),
           'ai_insight': StringSchema(description: 'AI 洞察文本'),
         },
         required: ['success'],
@@ -872,37 +886,71 @@ class AppCatalog {
   }
 
   /// 现金流分析卡片组件
+  ///
+  /// 数据源：reviewing-finances skill 的 analyze_cashflow.py。
+  /// 后端返回 camelCase 字段名（来自 StatisticsService 的 CashFlowResponse），
+  /// 其中 totalIncome/totalExpense/netCashFlow 为已格式化的字符串。
+  /// 健康评分数据（healthScore/healthGrade/healthDimensions/suggestions）
+  /// 也内嵌在同一载荷中。widget 读取 camelCase，schema 必须与之一致，
+  /// 否则 genui 0.10 的 schema 验证会因 required 字段缺失而触发错误反馈。
   static CatalogItem _buildCashFlowCard() {
     return CatalogItem(
       name: 'CashFlowCard',
       dataSchema: ObjectSchema(
         properties: {
-          'total_income': StringSchema(description: '总收入'),
-          'total_expense': StringSchema(description: '总支出'),
-          'net_cash_flow': StringSchema(description: '净现金流'),
-          'savings_rate': NumberSchema(description: '储蓄率'),
-          'expense_to_income_ratio': NumberSchema(description: '支出收入比'),
-          'essential_expense_ratio': NumberSchema(description: '必要支出占比'),
-          'discretionary_expense_ratio': NumberSchema(description: '可选消费占比'),
-          'income_change_percent': NumberSchema(description: '收入环比变化'),
-          'expense_change_percent': NumberSchema(description: '支出环比变化'),
-          'savings_rate_change': NumberSchema(description: '储蓄率变化'),
-          'period_start': StringSchema(description: '统计周期开始时间'),
-          'period_end': StringSchema(description: '统计周期结束时间'),
+          'title': StringSchema(description: '卡片标题'),
+          // 现金流数据（camelCase，与后端 CashFlowResponse 一致）
+          'totalIncome': StringSchema(description: '总收入（格式化字符串）'),
+          'totalExpense': StringSchema(description: '总支出（格式化字符串）'),
+          'netCashFlow': StringSchema(description: '净现金流（格式化字符串）'),
+          'savingsRate': NumberSchema(description: '储蓄率'),
+          'expenseToIncomeRatio': NumberSchema(description: '支出收入比'),
+          'essentialExpenseRatio': NumberSchema(description: '必要支出占比'),
+          'discretionaryExpenseRatio': NumberSchema(description: '可选消费占比'),
+          'incomeChangePercent': NumberSchema(description: '收入环比变化'),
+          'expenseChangePercent': NumberSchema(description: '支出环比变化'),
+          'savingsRateChange': NumberSchema(description: '储蓄率变化'),
+          'periodStart': StringSchema(description: '统计周期开始时间'),
+          'periodEnd': StringSchema(description: '统计周期结束时间'),
+          // 健康评分数据（analyze_cashflow.py 内嵌）
+          'healthScore': IntegerSchema(description: '财务健康评分 (0-100)'),
+          'healthGrade': StringSchema(description: '健康等级 (A/B/C/D/F)'),
+          'healthDimensions': ListSchema(
+            description: '各维度健康评分',
+            items: ObjectSchema(
+              properties: {
+                'name': StringSchema(description: '维度名称'),
+                'score': IntegerSchema(description: '维度得分'),
+                'weight': NumberSchema(description: '权重'),
+                'description': StringSchema(description: '维度描述'),
+                'status': StringSchema(
+                  description: '状态 (excellent/good/fair/poor)',
+                ),
+              },
+              required: ['name', 'score'],
+            ),
+          ),
+          'suggestions': ListSchema(
+            description: '改进建议列表',
+            items: StringSchema(),
+          ),
         },
-        required: ['net_cash_flow', 'savings_rate'],
+        required: ['netCashFlow', 'savingsRate'],
       ),
       widgetBuilder: _buildCashFlowCardWidget,
     );
   }
 
   /// 财务健康评分卡片组件
+  ///
+  /// 数据源：StatisticsService 的 HealthScoreResponse（camelCase）。
+  /// widget 读取 totalScore 等 camelCase 字段，schema 必须与之一致。
   static CatalogItem _buildHealthScoreCard() {
     return CatalogItem(
       name: 'HealthScoreCard',
       dataSchema: ObjectSchema(
         properties: {
-          'total_score': IntegerSchema(description: '总分 (0-100)'),
+          'totalScore': IntegerSchema(description: '总分 (0-100)'),
           'grade': StringSchema(description: '等级 (A/B/C/D/F)'),
           'dimensions': ListSchema(
             description: '各维度评分',
@@ -923,10 +971,10 @@ class AppCatalog {
             description: '改进建议列表',
             items: StringSchema(),
           ),
-          'period_start': StringSchema(description: '统计周期开始时间'),
-          'period_end': StringSchema(description: '统计周期结束时间'),
+          'periodStart': StringSchema(description: '统计周期开始时间'),
+          'periodEnd': StringSchema(description: '统计周期结束时间'),
         },
-        required: ['total_score', 'grade'],
+        required: ['totalScore', 'grade'],
       ),
       widgetBuilder: _buildHealthScoreCardWidget,
     );
@@ -1410,7 +1458,8 @@ class AppCatalog {
           'space': ObjectSchema(
             description: '关联的空间信息',
             properties: {
-              'id': IntegerSchema(description: '空间ID'),
+              // 后端 associate_transactions_to_space 返回的 space_id 是 UUID 字符串
+              'id': StringSchema(description: '空间ID（UUID 字符串）'),
               'name': StringSchema(description: '空间名称'),
             },
             required: ['id', 'name'],

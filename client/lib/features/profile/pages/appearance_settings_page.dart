@@ -31,7 +31,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
         title: Text(
           t.appearance.title,
           style: theme.typography.body.xl.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.foreground,
           ),
         ),
@@ -44,7 +44,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
             Text(
               t.appearance.themeMode,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -100,7 +100,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
             Text(
               t.appearance.colorScheme,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -201,7 +201,7 @@ class _PaletteOption extends StatelessWidget {
                   child: Text(
                     palette.label,
                     style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: colors.foreground,
                     ),
                   ),

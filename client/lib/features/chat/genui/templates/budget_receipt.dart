@@ -108,7 +108,7 @@ class BudgetReceipt extends StatelessWidget {
             t.chat.genui.budgetReceipt.budgetCreated,
             style: theme.typography.body.md.copyWith(
               color: colors.primary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const Spacer(),
