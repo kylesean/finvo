@@ -45,11 +45,7 @@ class CheckpointerManager:
         async with self._lock:
             if self._pool is not None:
                 return
-            connection_url = (
-                "postgresql://"
-                f"{quote_plus(settings.POSTGRES_USER)}:{quote_plus(settings.POSTGRES_PASSWORD)}"
-                f"@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
-            )
+            connection_url = settings.checkpointer_database_url
             pool: AsyncConnectionPool[AsyncConnection[dict[str, Any]]] = AsyncConnectionPool(
                 connection_url,
                 open=False,
