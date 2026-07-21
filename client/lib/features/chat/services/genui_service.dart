@@ -149,14 +149,14 @@ class GenUiService {
   bool get isInitialized => _isInitialized;
 
   /// Get a ValueListenable for a specific surface's definition
-  ValueNotifier<genui.SurfaceDefinition?> getSurfaceNotifier(String surfaceId) {
+  ValueListenable<genui.SurfaceDefinition?> getSurfaceNotifier(
+    String surfaceId,
+  ) {
     if (!_isInitialized || _controller == null) {
       throw StateError('GenUiService not initialized.');
     }
-    // In 0.8.0, contextFor().definition returns ValueListenable<SurfaceDefinition?>
-    // We cast to ValueNotifier for backward compatibility with callers
-    return _controller!.contextFor(surfaceId).definition
-        as ValueNotifier<genui.SurfaceDefinition?>;
+    // In GenUI 0.8+, contextFor().definition returns ValueListenable<SurfaceDefinition?>
+    return _controller!.contextFor(surfaceId).definition;
   }
 
   /// Clear the current session state
@@ -174,6 +174,10 @@ class GenUiService {
     if (!_isInitialized || _controller == null) return;
 
     try {
+      // Clean private/internal keys starting with '_' before replaying
+      final cleanData = Map<String, dynamic>.from(data)
+        ..removeWhere((key, _) => key.startsWith('_'));
+
       // 0.10.x: Use a2ui_core message types with raw JSON components
       final createMsg = a2ui.CreateSurfaceMessage(
         surfaceId: surfaceId,
@@ -181,11 +185,11 @@ class GenUiService {
       );
       _controller!.handleMessage(createMsg);
 
-      // Components are raw JSON maps: {'id': ..., 'component': 'TypeName', ...props}
+      // Components are raw JSON maps: {'id': 'root', 'component': 'TypeName', ...props}
       final updateMsg = a2ui.UpdateComponentsMessage(
         surfaceId: surfaceId,
         components: [
-          {'id': 'root', 'component': componentType, ...data},
+          {'id': 'root', 'component': componentType, ...cleanData},
         ],
       );
 

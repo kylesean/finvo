@@ -375,15 +375,15 @@ class EventGenerator:
             surface_id=surface_id,
         )
 
-        # 注入 _surfaceId 到组件数据
-        component_data = {**tool_result, "_surfaceId": surface_id}
+        # 注入 _surfaceId 到 Tracker 内部跟踪组件数据
+        tracker_data = {**tool_result, "_surfaceId": surface_id} if isinstance(tool_result, dict) else tool_result
 
         # Register Surface in tracker
         self._surface_tracker.register_surface(
             session_id=str(session_id),
             surface_id=surface_id,
             component_type=component_name,
-            data=component_data,
+            data=tracker_data,
             tool_call_id=tool_call_id,
         )
 
@@ -391,11 +391,18 @@ class EventGenerator:
         create_msg = CreateSurface(createSurface=CreateSurfacePayload(surfaceId=surface_id))
         yield GenUIEvent(type="a2ui_message", data=create_msg.model_dump())
 
+        # 清洗私有内部字段（以 '_' 开头），防止污染前端数据模式和 Schema 校验
+        clean_props = (
+            {k: v for k, v in tool_result.items() if not k.startswith("_")}
+            if isinstance(tool_result, dict)
+            else tool_result
+        )
+
         # 发送 UpdateComponents (v0.9)
         # Flat component format: {id: 'root', component: TypeName, **props}.
         # id/component are placed AFTER the spread so they always win over any
-        # colliding keys in component_data (the surface root MUST be id 'root').
-        flat_component = {**component_data, "id": "root", "component": component_name}
+        # colliding keys in clean_props (the surface root MUST be id 'root').
+        flat_component = {**clean_props, "id": "root", "component": component_name}
         comp = V09Component.model_validate(flat_component)
         update_msg = UpdateComponents(
             updateComponents=UpdateComponentsPayload(surfaceId=surface_id, components=[comp])

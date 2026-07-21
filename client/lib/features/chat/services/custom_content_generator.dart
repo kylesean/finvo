@@ -526,16 +526,19 @@ class CustomContentGenerator implements genui.Transport {
   /// Normalize a backend A2UI message to GenUI 0.10 v0.9 format.
   ///
   /// The backend emits A2UI v0.9 natively (createSurface / updateComponents /
-  /// updateDataModel / deleteSurface), so this is a thin pass-through that only:
+  /// updateDataModel / deleteSurface), so this is a thin pass-through that:
   ///   - forces `version` to 'v0.9' (required by a2ui_core's A2uiMessage.fromJson)
-  ///   - rewrites createSurface.catalogId to the app's basic catalog id so the
-  ///     SurfaceController catalog lookup always resolves.
+  ///   - sets a default catalogId for createSurface if missing or empty, preserving
+  ///     backend-specified custom catalog IDs.
   List<Map<String, dynamic>>? _translateProtocol(Map<String, dynamic> raw) {
     if (raw.containsKey('createSurface')) {
       final cs = Map<String, dynamic>.from(
         raw['createSurface'] as Map<String, dynamic>,
       );
-      cs['catalogId'] = genui.basicCatalogId;
+      final catalogIdStr = (cs['catalogId'] as String?)?.trim() ?? '';
+      if (catalogIdStr.isEmpty) {
+        cs['catalogId'] = genui.basicCatalogId;
+      }
       return [
         {...raw, 'version': 'v0.9', 'createSurface': cs},
       ];
