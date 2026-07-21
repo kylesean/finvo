@@ -50,7 +50,7 @@ class InviteCodeCard extends StatelessWidget {
                       Text(
                         '邀请码',
                         style: theme.typography.body.lg.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       Text(

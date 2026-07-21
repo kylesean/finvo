@@ -202,7 +202,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                     widget.data['title'] as String? ??
                         t.chat.genui.cashFlowForecast.title,
                     style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
@@ -227,7 +227,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
             child: Text(
               '¥${_formatAmount(_currentBalance)}',
               style: theme.typography.body.sm.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.secondaryForeground,
               ),
             ),
@@ -461,7 +461,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
           Text(
             t.chat.genui.cashFlowForecast.summary,
             style: theme.typography.body.sm.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 12),
@@ -519,7 +519,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
             Text(
               t.chat.genui.cashFlowForecast.keyEvents,
               style: theme.typography.body.sm.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -559,7 +559,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
           Text(
             '¥${_formatAmount(value)}',
             style: theme.typography.body.sm.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: isPositive
                   ? amountTheme.incomeColor
                   : amountTheme.expenseColor,
@@ -659,7 +659,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
             Text(
               '${isIncome ? '+' : ''}¥${_formatAmount(amount)}',
               style: theme.typography.body.xs.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: isIncome
                     ? amountTheme.incomeColor
                     : amountTheme.expenseColor,

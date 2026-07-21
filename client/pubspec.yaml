@@ -50,8 +50,9 @@ dependencies:
   visibility_detector: ^0.4.0+2
   # GenUI dependencies for dynamic UI generation
   # Note: GenUI packages from pub.dev
-  genui: ^0.6.0
-  json_schema_builder: ^0.1.0
+  genui: ^0.10.0
+  a2ui_core: ^0.1.0
+  json_schema_builder: ^0.1.3
   rrule: ^0.2.17
   speech_to_text: ^7.4.0
   gpt_markdown: ^1.1.8

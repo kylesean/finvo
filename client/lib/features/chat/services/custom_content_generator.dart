@@ -3,11 +3,12 @@ import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genui/genui.dart' as genui;
+import 'package:a2ui_core/a2ui_core.dart' as a2ui;
 import 'package:dio/dio.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/storage/secure_storage_service.dart';
-import '../genui/genui_event_registry.dart';
 import '../models/sse_event_models.dart';
+import 'interaction_router.dart';
 
 export '../models/sse_event_models.dart'
     show ToolCallStartEvent, ToolCallEndEvent, ToolInfo;
@@ -49,21 +50,21 @@ typedef OnToolCallStart = void Function(ToolCallStartEvent event);
 /// Tool call end callback - called when tool execution completes (Claude Code style)
 typedef OnToolCallEnd = void Function(ToolCallEndEvent event);
 
-/// Custom ContentGenerator implementation, connecting to our SSE backend API
+/// Custom Transport implementation, connecting to our SSE backend API
 ///
-/// Implements three core streams of ContentGenerator interface:
-/// - a2uiMessageStream: AI operation instruction stream (for creating/updating/deleting UI)
-/// - textResponseStream: Text response stream
-/// - errorStream: Error handling stream
-class CustomContentGenerator implements genui.ContentGenerator {
+/// Implements Transport interface for GenUI 0.8+:
+/// - incomingMessages: AI operation instruction stream (for creating/updating/deleting UI)
+/// - incomingText: Text response stream
+/// - sendRequest: Send user message to backend
+class CustomContentGenerator implements genui.Transport {
   final SecureStorageService _storageService;
 
-  // Three core stream controllers
-  final _a2uiMessageController =
-      StreamController<genui.A2uiMessage>.broadcast();
+  /// Routes outgoing genui messages to backend payloads (pure logic, no I/O).
+  final InteractionRouter _router = InteractionRouter();
+
+  // Core stream controllers (Transport interface)
+  final _a2uiMessageController = StreamController<a2ui.A2uiMessage>.broadcast();
   final _textResponseController = StreamController<String>.broadcast();
-  final _errorResponseController =
-      StreamController<genui.ContentGeneratorError>.broadcast();
 
   // Note: uiRenderStream removed, unified through onSurfaceCreated callback
 
@@ -95,7 +96,7 @@ class CustomContentGenerator implements genui.ContentGenerator {
 
   // Used to buffer A2UI messages for transactional rendering
   // These messages will only be sent to UI when stream ends normally
-  final _a2uiBuffer = <genui.A2uiMessage>[];
+  final _a2uiBuffer = <a2ui.A2uiMessage>[];
 
   // =========================================================================
   // SSE stream cancellation mechanism
@@ -171,91 +172,48 @@ class CustomContentGenerator implements genui.ContentGenerator {
     }
   }
 
+  // Transport interface implementation
   @override
-  Stream<genui.A2uiMessage> get a2uiMessageStream =>
+  Stream<a2ui.A2uiMessage> get incomingMessages =>
       _a2uiMessageController.stream;
 
   @override
-  Stream<String> get textResponseStream => _textResponseController.stream;
+  Stream<String> get incomingText => _textResponseController.stream;
 
-  @override
-  Stream<genui.ContentGeneratorError> get errorStream =>
-      _errorResponseController.stream;
+  // Legacy accessors for backward compatibility
+  Stream<a2ui.A2uiMessage> get a2uiMessageStream => incomingMessages;
+  Stream<String> get textResponseStream => incomingText;
 
-  @override
+  /// Processing state (not part of Transport interface)
   ValueListenable<bool> get isProcessing => _isProcessing;
 
   @override
-  Future<void> sendRequest(
-    genui.ChatMessage message, {
-    genui.A2UiClientCapabilities? clientCapabilities,
-    Iterable<genui.ChatMessage>? history,
-  }) async {
-    // 1. Preprocessing: Only process current new message
-    final messages = <Map<String, dynamic>>[];
+  Future<void> sendRequest(genui.ChatMessage message) async {
+    // Route the outgoing message: classify it, parse any UI interaction and
+    // dispatch business events via GenUiEventRegistry (see InteractionRouter).
+    // Error-feedback messages and empty content are skipped here, protecting
+    // the in-flight SSE stream from interruption.
+    final outgoing = _router.route(message);
+    if (outgoing.skip) {
+      _logger.info('CustomContentGenerator: Outgoing message skipped');
+      return;
+    }
 
-    // Only need to process current message
-    final currentMessage = await _convertMessage(message);
-    messages.add(currentMessage);
-
-    // GenUI event registry processing
-    Map<String, dynamic>? clientStateJson;
-    Map<String, dynamic>? payloadExtensions;
-    String? userMessageContent;
-
-    try {
-      if (currentMessage['content'] is String) {
-        userMessageContent = currentMessage['content'] as String;
-      }
-
-      if (currentMessage.containsKey('metadata')) {
-        final metadata = currentMessage['metadata'] as Map<String, dynamic>;
-        final eventType = metadata['event_type'] as String?;
-
-        if (eventType != null) {
-          final result = GenUiEventRegistry.dispatch(eventType, metadata);
-
-          if (result != null && !result.isEmpty) {
-            _logger.info('Event $eventType dispatched via registry');
-            if (result.mutation != null) {
-              clientStateJson = result.mutation!.toJson();
-            }
-            if (result.payloadExtensions != null) {
-              payloadExtensions = result.payloadExtensions;
-            }
-          }
-        }
-      }
-    } catch (e) {
-      _logger.info(
-        'CustomContentGenerator: Error parsing message for events: $e',
+    // Optimistic UI update. The [GENUI_INTERNAL] prefix tells the upper layer
+    // to display the message without sending a duplicate request (the request
+    // is already being sent below together with the atomic client_state).
+    final content = outgoing.displayContent;
+    if (content != null && content.isNotEmpty) {
+      onUserMessageSent?.call(
+        outgoing.clientState != null ? '[GENUI_INTERNAL]$content' : content,
       );
     }
 
-    // Prepare message for backend
-    var finalPayload = <Map<String, dynamic>>[currentMessage];
-    if (payloadExtensions != null) {
-      // If the registry provided a specialized payload for this event
-      finalPayload = [payloadExtensions];
-      if (payloadExtensions['content'] is String) {
-        userMessageContent = payloadExtensions['content'] as String;
-      }
-    }
-
-    // 2. Optimistic UI update
-    if (userMessageContent != null && userMessageContent.isNotEmpty) {
-      if (clientStateJson != null) {
-        onUserMessageSent?.call('[GENUI_INTERNAL]$userMessageContent');
-      } else {
-        onUserMessageSent?.call(userMessageContent);
-      }
-    }
-
-    // 3. Execute unified request logic
+    // Execute unified request logic.
     await _sendRequestInternal(
-      messages: finalPayload,
+      messages: outgoing.payload,
       sessionId: _currentSessionId,
-      clientState: clientStateJson,
+      clientState: outgoing.clientState,
     );
   }
 
@@ -295,6 +253,21 @@ class CustomContentGenerator implements genui.ContentGenerator {
     String? sessionId,
     Map<String, dynamic>? clientState,
   }) async {
+    // Defense in depth: never send empty/skipped messages to the backend.
+    // Empty content would be rejected (422: 'String should have at least 1
+    // character') and — worse — this method first cancels any in-flight
+    // stream, which would break active skills execution mid-way.
+    final hasValidContent = messages.any(
+      (m) => m['_skip'] != true && ((m['content'] as String?) ?? '').isNotEmpty,
+    );
+    if (!hasValidContent) {
+      _logger.warning(
+        'CustomContentGenerator: Skipping request with no valid content '
+        '(protecting active stream from interruption)',
+      );
+      return;
+    }
+
     // 0. Ensure any ongoing request is cancelled
     _internalCancel(notifyComplete: false);
 
@@ -314,9 +287,6 @@ class CustomContentGenerator implements genui.ContentGenerator {
         const error = 'Authentication token is missing';
         _logger.info('CustomContentGenerator: $error');
         onError?.call(error);
-        _errorResponseController.add(
-          genui.ContentGeneratorError(error, StackTrace.current),
-        );
         return;
       }
 
@@ -375,9 +345,6 @@ class CustomContentGenerator implements genui.ContentGenerator {
         final error = 'HTTP error: ${response.statusCode}';
         _logger.info('CustomContentGenerator: $error');
         onError?.call(error);
-        _errorResponseController.add(
-          genui.ContentGeneratorError(error, StackTrace.current),
-        );
         return;
       }
 
@@ -428,7 +395,6 @@ class CustomContentGenerator implements genui.ContentGenerator {
         stackTrace,
       );
       onError?.call(e.toString());
-      _errorResponseController.add(genui.ContentGeneratorError(e, stackTrace));
     } finally {
       _isProcessing.value = false;
     }
@@ -525,101 +491,108 @@ class CustomContentGenerator implements genui.ContentGenerator {
       }
 
       // =====================================================================
-      // NEW: Enhanced message type detection for DataModelUpdate support
-      // GenUI's A2uiMessage.fromJson uses the outer key as discriminator
+      // Protocol normalization: Backend emits A2UI v0.9 natively. This only
+      // forces version='v0.9' and rewrites createSurface.catalogId to the
+      // app's basic catalog (see _translateProtocol).
       // =====================================================================
+      final translatedMessages = _translateProtocol(a2uiMessageData);
+      if (translatedMessages == null || translatedMessages.isEmpty) return;
 
-      // Check for dataModelUpdate message type
-      if (a2uiMessageData.containsKey('dataModelUpdate')) {
-        final payload =
-            a2uiMessageData['dataModelUpdate'] as Map<String, dynamic>;
-        final surfaceId = payload['surfaceId'] as String?;
-        final path = payload['path'] as String?;
-        final value = payload['value'];
+      for (final translated in translatedMessages) {
+        final a2uiMessage = a2ui.A2uiMessage.fromJson(translated);
 
-        _logger.info(
-          '[A2UI] DataModelUpdate received: surfaceId=$surfaceId, path=$path, value=$value',
-        );
-
-        // Parse and emit the message - GenUI will handle the reactive update
-        final a2uiMessage = genui.A2uiMessage.fromJson(a2uiMessageData);
+        // Send immediately - GenUI components render without waiting for stream end
         _a2uiMessageController.add(a2uiMessage);
+        _logger.info('[A2UI] Message sent: ${a2uiMessage.runtimeType}');
 
-        // Yield to event loop for UI update
-        await Future<void>.delayed(Duration.zero);
-        return;
+        // Handle surface lifecycle callbacks
+        if (a2uiMessage is a2ui.CreateSurfaceMessage) {
+          onSurfaceCreated?.call(a2uiMessage.surfaceId);
+        } else if (a2uiMessage is a2ui.UpdateComponentsMessage) {
+          // Also notify surface creation for UpdateComponents (backward compat)
+          onSurfaceCreated?.call(a2uiMessage.surfaceId);
+          _checkAndNotifyTransaction(a2uiMessage);
+        }
       }
 
-      // Check for deleteSurface message type
-      if (a2uiMessageData.containsKey('deleteSurface')) {
-        final payload =
-            a2uiMessageData['deleteSurface'] as Map<String, dynamic>;
-        final surfaceId = payload['surfaceId'] as String?;
-
-        _logger.info('[A2UI] DeleteSurface received: surfaceId=$surfaceId');
-
-        final a2uiMessage = genui.A2uiMessage.fromJson(a2uiMessageData);
-        _a2uiMessageController.add(a2uiMessage);
-        return;
-      }
-
-      // Standard message handling (surfaceUpdate, beginRendering, etc.)
-      final a2uiMessage = genui.A2uiMessage.fromJson(a2uiMessageData);
-
-      // Send immediately - GenUI components render without waiting for stream end
-      _a2uiMessageController.add(a2uiMessage);
-      _logger.info('[A2UI] Message sent: ${a2uiMessage.runtimeType}');
-
-      // Handle surface lifecycle callbacks
-      if (a2uiMessage is genui.SurfaceUpdate) {
-        final surfaceId = a2uiMessage.surfaceId;
-        onSurfaceCreated?.call(surfaceId);
-        _checkAndNotifyTransaction(a2uiMessage);
-      }
+      // Yield to event loop for UI update
+      await Future<void>.delayed(Duration.zero);
     } catch (e, stackTrace) {
       _logger.severe('[A2UI] ERROR parsing message', e, stackTrace);
-      _errorResponseController.add(genui.ContentGeneratorError(e, stackTrace));
+      onError?.call(e.toString());
     }
   }
 
-  /// Detect transaction success within SurfaceUpdate and notify
-  void _checkAndNotifyTransaction(genui.SurfaceUpdate msg) {
+  /// Normalize a backend A2UI message to GenUI 0.10 v0.9 format.
+  ///
+  /// The backend emits A2UI v0.9 natively (createSurface / updateComponents /
+  /// updateDataModel / deleteSurface), so this is a thin pass-through that only:
+  ///   - forces `version` to 'v0.9' (required by a2ui_core's A2uiMessage.fromJson)
+  ///   - rewrites createSurface.catalogId to the app's basic catalog id so the
+  ///     SurfaceController catalog lookup always resolves.
+  List<Map<String, dynamic>>? _translateProtocol(Map<String, dynamic> raw) {
+    if (raw.containsKey('createSurface')) {
+      final cs = Map<String, dynamic>.from(
+        raw['createSurface'] as Map<String, dynamic>,
+      );
+      cs['catalogId'] = genui.basicCatalogId;
+      return [
+        {...raw, 'version': 'v0.9', 'createSurface': cs},
+      ];
+    }
+
+    if (raw.containsKey('updateComponents') ||
+        raw.containsKey('updateDataModel') ||
+        raw.containsKey('deleteSurface')) {
+      return [
+        {...raw, 'version': 'v0.9'},
+      ];
+    }
+
+    _logger.warning('[A2UI] Unknown message format: ${raw.keys}');
+    return null;
+  }
+
+  /// Detect transaction success within UpdateComponents and notify
+  void _checkAndNotifyTransaction(a2ui.UpdateComponentsMessage msg) {
     try {
       for (final component in msg.components) {
-        for (final entry in component.componentProperties.entries) {
-          final componentType = entry.key;
-          final props = entry.value as Map<String, dynamic>;
+        // 0.10.x: components are raw JSON maps
+        // Format: {'id': '...', 'component': 'TypeName', ...props}
+        final componentType = component['component'] as String?;
+        final props = Map<String, dynamic>.from(component)
+          ..remove('id')
+          ..remove('component');
 
-          if (componentType == 'transaction_success' ||
-              componentType == 'TransactionSuccess') {
-            final amount = (props['amount'] as num?)?.toDouble() ?? 0.0;
-            final type = props['transaction_type'] as String? ?? 'expense';
-            final currency = props['currency'] as String? ?? 'CNY';
+        if (componentType == 'transaction_success' ||
+            componentType == 'TransactionSuccess') {
+          final amount = (props['amount'] as num?)?.toDouble() ?? 0.0;
+          final type = props['transaction_type'] as String? ?? 'expense';
+          final currency = props['currency'] as String? ?? 'CNY';
+
+          _logger.info(
+            'CustomContentGenerator: Detected transaction success: $amount $currency ($type)',
+          );
+
+          onTransactionCreated?.call(amount, type, currency);
+        } else if (componentType == 'TransactionGroupReceipt') {
+          final summary = props['summary'] as Map<String, dynamic>?;
+          if (summary != null) {
+            final expenseTotal =
+                (summary['expense_total'] as num?)?.toDouble() ?? 0.0;
+            final incomeTotal =
+                (summary['income_total'] as num?)?.toDouble() ?? 0.0;
+
+            if (expenseTotal > 0) {
+              onTransactionCreated?.call(expenseTotal, 'expense', 'CNY');
+            }
+            if (incomeTotal > 0) {
+              onTransactionCreated?.call(incomeTotal, 'income', 'CNY');
+            }
 
             _logger.info(
-              'CustomContentGenerator: Detected transaction success: $amount $currency ($type)',
+              'CustomContentGenerator: Detected TransactionGroupReceipt: expense=$expenseTotal, income=$incomeTotal',
             );
-
-            onTransactionCreated?.call(amount, type, currency);
-          } else if (componentType == 'TransactionGroupReceipt') {
-            final summary = props['summary'] as Map<String, dynamic>?;
-            if (summary != null) {
-              final expenseTotal =
-                  (summary['expense_total'] as num?)?.toDouble() ?? 0.0;
-              final incomeTotal =
-                  (summary['income_total'] as num?)?.toDouble() ?? 0.0;
-
-              if (expenseTotal > 0) {
-                onTransactionCreated?.call(expenseTotal, 'expense', 'CNY');
-              }
-              if (incomeTotal > 0) {
-                onTransactionCreated?.call(incomeTotal, 'income', 'CNY');
-              }
-
-              _logger.info(
-                'CustomContentGenerator: Detected TransactionGroupReceipt: expense=$expenseTotal, income=$incomeTotal',
-              );
-            }
           }
         }
       }
@@ -630,148 +603,10 @@ class CustomContentGenerator implements genui.ContentGenerator {
     }
   }
 
-  /// Convert ChatMessage to backend API format
-  Future<Map<String, dynamic>> _convertMessage(
-    genui.ChatMessage message, {
-    List<Map<String, dynamic>>? attachments,
-  }) async {
-    _logger.info(
-      'CustomContentGenerator: _convertMessage received message type: ${message.runtimeType}',
-    );
-
-    if (message is genui.UserMessage) {
-      String messageContent = '';
-      for (final part in message.parts) {
-        if (part is genui.TextPart) {
-          messageContent += part.text;
-        }
-      }
-
-      _logger.info(
-        'CustomContentGenerator: UserMessage content length: ${messageContent.length}',
-      );
-
-      if (messageContent.startsWith('{')) {
-        try {
-          final json = jsonDecode(messageContent) as Map<String, dynamic>;
-          if (json.containsKey('userAction')) {
-            _logger.info('CustomContentGenerator: Detected UserActionEvent');
-            return await _handleUserActionEvent(json, messageContent);
-          }
-        } catch (e) {
-          _logger.info('CustomContentGenerator: JSON parse failed: $e');
-        }
-      }
-
-      final result = <String, dynamic>{
-        'role': 'user',
-        'content': messageContent,
-      };
-      if (attachments != null && attachments.isNotEmpty) {
-        result['attachments'] = attachments;
-      }
-      return result;
-    } else if (message is genui.AiTextMessage) {
-      return {'role': 'assistant', 'content': message.text};
-    } else if (message.runtimeType.toString() == 'UserUiInteractionMessage') {
-      String messageContent = '';
-      try {
-        messageContent = (message as dynamic).text as String;
-      } catch (_) {
-        try {
-          messageContent = (message as dynamic).content as String;
-        } catch (e) {
-          _logger.warning(
-            'CustomContentGenerator: Error accessing properties on UserUiInteractionMessage: $e',
-          );
-          messageContent = message.toString();
-        }
-      }
-
-      if (messageContent.startsWith('{')) {
-        try {
-          final json = jsonDecode(messageContent) as Map<String, dynamic>;
-          if (json.containsKey('userAction')) {
-            _logger.info(
-              'CustomContentGenerator: Detected UserActionEvent from UserUiInteractionMessage',
-            );
-            return await _handleUserActionEvent(json, messageContent);
-          }
-        } catch (_) {}
-      }
-      return {'role': 'user', 'content': messageContent};
-    }
-
-    final typeName = message.runtimeType.toString();
-    if (typeName.contains('Ai') || typeName.contains('AI')) {
-      _logger.info(
-        'CustomContentGenerator: Skipping AI message type: $typeName',
-      );
-      return {'role': 'assistant', 'content': '', '_skip': true};
-    }
-
-    String messageContent = '';
-    try {
-      if ((message as dynamic).text != null) {
-        messageContent = (message as dynamic).text as String;
-      } else if ((message as dynamic).content != null) {
-        messageContent = (message as dynamic).content as String;
-      }
-    } catch (e) {
-      _logger.warning(
-        'CustomContentGenerator: Cannot extract text from unknown message type: $typeName',
-      );
-      return {'role': 'user', 'content': '', '_skip': true};
-    }
-
-    if (messageContent.isEmpty) {
-      _logger.info(
-        'CustomContentGenerator: Empty content from unknown message type: $typeName, skipping',
-      );
-      return {'role': 'user', 'content': '', '_skip': true};
-    }
-
-    _logger.info(
-      'CustomContentGenerator: Extracted text from unknown type: $typeName',
-    );
-    return {'role': 'user', 'content': messageContent};
-  }
-
-  /// Handle UserActionEvent and convert to human-readable message
-  /// (Now only used as a parser, logic moved to registry)
-  Future<Map<String, dynamic>> _handleUserActionEvent(
-    Map<String, dynamic> rawEventData,
-    String rawContent,
-  ) async {
-    final Map<String, dynamic> eventData =
-        rawEventData.containsKey('userAction')
-        ? (rawEventData['userAction'] as Map<String, dynamic>)
-        : rawEventData;
-
-    final eventName = eventData['name'] as String?;
-    final context = eventData['context'] as Map<String, dynamic>?;
-
-    _logger.info(
-      'CustomContentGenerator: Parsing interaction event: $eventName',
-    );
-
-    // Return the specific event data in metadata for the registry to handle later in sendRequest
-    return {
-      'role': 'user',
-      'content': 'Action: $eventName',
-      'metadata': {
-        'event_type': eventName,
-        'surface_id': context?['surface_id'],
-        ...?context,
-      },
-    };
-  }
-
   @override
   void dispose() {
     unawaited(_a2uiMessageController.close());
     unawaited(_textResponseController.close());
-    unawaited(_errorResponseController.close());
     _cancelToken?.cancel('Disposed');
   }
 }

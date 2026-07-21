@@ -90,7 +90,7 @@ class _RecurringTransactionListPageState
         title: Text(
           t.forecast.recurringTransaction.title,
           style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.foreground,
           ),
         ),
@@ -265,7 +265,7 @@ class _RecurringTransactionListPageState
             Text(
               t.forecast.recurringTransaction.noRecurring,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -350,7 +350,7 @@ class _RecurringTransactionListPageState
                   : t.forecast.recurringTransaction.activated,
               style: theme.typography.body.sm.copyWith(
                 color: Colors.white,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -393,7 +393,7 @@ class _RecurringTransactionListPageState
                       Text(
                         _getDisplayName(transaction),
                         style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: colors.foreground,
                         ),
                         maxLines: 1,
@@ -470,7 +470,7 @@ class _RecurringTransactionListPageState
                       '$amountSign${Currency.fromCode(ref.watch(financialSettingsProvider).primaryCurrency)?.symbol ?? '¥'}${transaction.amount}',
                       style: theme.typography.body.md.copyWith(
                         color: typeColor,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 4),

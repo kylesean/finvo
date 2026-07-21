@@ -392,7 +392,7 @@ class TransactionDetailPage extends ConsumerWidget {
             child: Text(
               t.transaction.transactionDetail,
               style: theme.typography.body.xl2.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center, // 标题居中
             ),
@@ -722,7 +722,7 @@ class TransactionDetailPage extends ConsumerWidget {
               Text(
                 t.transaction.selectLinkedSpace,
                 style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 16),

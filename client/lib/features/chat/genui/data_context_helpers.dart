@@ -21,32 +21,32 @@ import 'package:genui/genui.dart';
 /// Extension on DataContext for easier field subscriptions
 extension DataContextExtensions on DataContext {
   /// Subscribe to a string field with path resolution
-  ValueNotifier<String?> subscribeString(String fieldPath) {
+  ValueListenable<String?> subscribeString(String fieldPath) {
     return subscribe<String>(DataPath(fieldPath));
   }
 
   /// Subscribe to a double/number field with path resolution
-  ValueNotifier<double?> subscribeDouble(String fieldPath) {
+  ValueListenable<double?> subscribeDouble(String fieldPath) {
     return subscribe<double>(DataPath(fieldPath));
   }
 
   /// Subscribe to an int field with path resolution
-  ValueNotifier<int?> subscribeInt(String fieldPath) {
+  ValueListenable<int?> subscribeInt(String fieldPath) {
     return subscribe<int>(DataPath(fieldPath));
   }
 
   /// Subscribe to a bool field with path resolution
-  ValueNotifier<bool?> subscribeBool(String fieldPath) {
+  ValueListenable<bool?> subscribeBool(String fieldPath) {
     return subscribe<bool>(DataPath(fieldPath));
   }
 
   /// Subscribe to a list field with path resolution
-  ValueNotifier<List<Object?>?> subscribeList(String fieldPath) {
+  ValueListenable<List<Object?>?> subscribeList(String fieldPath) {
     return subscribe<List<Object?>>(DataPath(fieldPath));
   }
 
   /// Subscribe to a map field with path resolution
-  ValueNotifier<Map<String, Object?>?> subscribeMap(String fieldPath) {
+  ValueListenable<Map<String, Object?>?> subscribeMap(String fieldPath) {
     return subscribe<Map<String, Object?>>(DataPath(fieldPath));
   }
 
@@ -105,7 +105,7 @@ T? extractLiteralValue<T>(Object? data, String fieldName) {
 /// If the field is bound (has boundValue), subscribes to DataModel.
 /// If the field is literal, returns a constant ValueNotifier.
 /// Falls back to direct data access for simple schemas.
-ValueNotifier<T?> subscribeOrLiteral<T>({
+ValueListenable<T?> subscribeOrLiteral<T>({
   required DataContext dataContext,
   required Object? data,
   required String fieldName,

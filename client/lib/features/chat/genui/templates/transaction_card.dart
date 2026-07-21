@@ -170,7 +170,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             t.chat.genui.transactionCard.title,
             style: theme.typography.body.md.copyWith(
               color: colors.primary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const Spacer(),
@@ -526,7 +526,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             Text(
               t.chat.genui.transactionCard.selectSpace,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),

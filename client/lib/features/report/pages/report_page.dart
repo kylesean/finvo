@@ -137,7 +137,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
             child: Text(
               t.statistics.title,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
             ),
@@ -203,7 +203,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
             Text(
               t.common.loadFailed,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -386,7 +386,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
             Text(
               t.statistics.ranking,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             Row(

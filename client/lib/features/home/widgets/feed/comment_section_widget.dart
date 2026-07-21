@@ -34,7 +34,7 @@ class CommentSectionWidget extends ConsumerWidget {
           child: Text(
             t.comment.note,
             style: theme.typography.body.xl.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),

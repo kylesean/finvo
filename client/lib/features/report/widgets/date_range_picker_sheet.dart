@@ -90,7 +90,7 @@ class _DateRangePickerSheetState extends State<DateRangePickerSheet> {
                 Text(
                   t.dateRange.pickerTitle,
                   style: theme.typography.body.lg.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 FButton.icon(

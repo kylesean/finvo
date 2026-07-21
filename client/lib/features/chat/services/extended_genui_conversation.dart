@@ -6,12 +6,12 @@ final _logger = Logger('ExtendedGenUiConversation');
 
 /// Extended GenUI conversation manager
 ///
-/// Encapsulates GenUI 0.6.0's core Facade and Host logic.
+/// Encapsulates GenUI 0.8.0's Conversation facade with additional
+/// session management and callback wiring.
 class ExtendedGenUiConversation {
   final CustomContentGenerator _customGenerator;
-  // ignore: unused_field - configured through constructor callbacks
-  final genui.GenUiConversation _conversation;
-  final genui.A2uiMessageProcessor _host;
+  final genui.Conversation _conversation;
+  final genui.SurfaceController _controller;
   String? _currentSessionId;
 
   // Callbacks
@@ -19,31 +19,37 @@ class ExtendedGenUiConversation {
   final void Function(String, dynamic) _onError;
 
   ExtendedGenUiConversation({
-    required genui.A2uiMessageProcessor host,
+    required genui.SurfaceController controller,
     required CustomContentGenerator contentGenerator,
     required void Function(String) onSurfaceAdded,
     required void Function(String) onSurfaceDeleted,
     required this._onTextResponse,
     required this._onError,
     void Function(String, String?)? onSessionInit,
-  }) : _host = host,
+  }) : _controller = controller,
        _customGenerator = contentGenerator,
-       _conversation = genui.GenUiConversation(
-         a2uiMessageProcessor: host,
-         contentGenerator: contentGenerator,
-         onSurfaceAdded: (genui.SurfaceAdded event) {
-           _logger.info(
-             'ExtendedGenUiConversation: Surface added: ${event.surfaceId}',
-           );
-           onSurfaceAdded(event.surfaceId);
-         },
-         onSurfaceDeleted: (genui.SurfaceRemoved event) {
-           _logger.info(
-             'ExtendedGenUiConversation: Surface deleted: ${event.surfaceId}',
-           );
-           onSurfaceDeleted(event.surfaceId);
-         },
+       _conversation = genui.Conversation(
+         controller: controller,
+         transport: contentGenerator,
        ) {
+    // Listen to Conversation events for surface lifecycle
+    _conversation.events.listen((event) {
+      switch (event) {
+        case genui.ConversationSurfaceAdded(:final surfaceId):
+          _logger.info('ExtendedGenUiConversation: Surface added: $surfaceId');
+          onSurfaceAdded(surfaceId);
+        case genui.ConversationSurfaceRemoved(:final surfaceId):
+          _logger.info(
+            'ExtendedGenUiConversation: Surface deleted: $surfaceId',
+          );
+          onSurfaceDeleted(surfaceId);
+        case genui.ConversationError(:final error):
+          _onError(error.toString(), error);
+        default:
+          break;
+      }
+    });
+
     // Listen to Session initialization events
     _customGenerator.onSessionInit = (String sessionId, String? messageId) {
       _logger.info(
@@ -117,6 +123,6 @@ class ExtendedGenUiConversation {
     _customGenerator.onUserMessageSent = callback;
   }
 
-  /// Expose internal Host (A2uiMessageProcessor) for UI rendering
-  genui.GenUiHost get host => _host;
+  /// Expose internal Host (SurfaceController) for UI rendering
+  genui.SurfaceHost get host => _controller;
 }

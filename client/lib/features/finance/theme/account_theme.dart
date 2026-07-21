@@ -78,7 +78,7 @@ class AccountTheme {
 
   static const TextStyle accountNameStyle = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: Color(0xFF1A1A1A),
   );
 

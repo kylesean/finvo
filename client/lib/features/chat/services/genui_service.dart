@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genui/genui.dart' as genui;
+import 'package:a2ui_core/a2ui_core.dart' as a2ui;
 import 'custom_content_generator.dart';
 import 'extended_genui_conversation.dart';
 import '../../../core/storage/secure_storage_service.dart';
@@ -17,16 +18,16 @@ typedef OnErrorCallback = void Function(String message, dynamic error);
 
 /// GenUI initialization and configuration service (Requirement 1.1, 1.4)
 ///
-/// Manages the lifecycle of GenUI 0.6.0 components.
+/// Manages the lifecycle of GenUI 0.8.0 components.
 class GenUiService {
-  genui.A2uiMessageProcessor? _processor;
+  genui.SurfaceController? _controller;
   ExtendedGenUiConversation? _genUiConversation;
   CustomContentGenerator? _contentGenerator;
   bool _isInitialized = false;
 
   /// Callbacks for surface lifecycle events
-  void Function(genui.SurfaceAdded)? _onSurfaceAdded;
-  void Function(genui.SurfaceRemoved)? _onSurfaceRemoved;
+  void Function(String surfaceId)? _onSurfaceAdded;
+  void Function(String surfaceId)? _onSurfaceRemoved;
   void Function(String)? _onTextResponse;
   void Function(String surfaceId)? _onSurfaceIdAdded;
 
@@ -35,8 +36,8 @@ class GenUiService {
     required genui.Catalog catalog,
     required SecureStorageService storageService,
     required String sseBaseUrl,
-    required void Function(genui.SurfaceAdded) onSurfaceAdded,
-    required void Function(genui.SurfaceRemoved) onSurfaceRemoved,
+    required void Function(String surfaceId) onSurfaceAdded,
+    required void Function(String surfaceId) onSurfaceRemoved,
     required void Function(String) onTextResponse,
     OnSessionInit? onSessionInit,
     OnStreamComplete? onStreamComplete,
@@ -55,11 +56,11 @@ class GenUiService {
       _onTextResponse = onTextResponse;
       _onSurfaceIdAdded = onSurfaceIdAdded;
 
-      // GenUI 0.6.0: A2uiMessageProcessor is the implementation of GenUiHost
-      _processor = genui.A2uiMessageProcessor(catalogs: [catalog]);
-      _logger.info('GenUiService: A2uiMessageProcessor created');
+      // GenUI 0.8.0: SurfaceController manages surfaces and implements SurfaceHost
+      _controller = genui.SurfaceController(catalogs: [catalog]);
+      _logger.info('GenUiService: SurfaceController created');
 
-      // Create custom ContentGenerator
+      // Create custom Transport (ContentGenerator)
       _contentGenerator = CustomContentGenerator(
         storageService,
         dio: dio,
@@ -91,21 +92,13 @@ class GenUiService {
 
       // Create ExtendedGenUiConversation to orchestrate everything
       _genUiConversation = ExtendedGenUiConversation(
-        host: _processor!,
+        controller: _controller!,
         contentGenerator: _contentGenerator!,
         onSurfaceAdded: (surfaceId) {
-          // SurfaceAdded constructor is (String surfaceId, UiDefinition content)
-          // UiDefinition needs (surfaceId: ..., components: Map<String, Component>)
-          _onSurfaceAdded?.call(
-            genui.SurfaceAdded(
-              surfaceId,
-              genui.UiDefinition(surfaceId: surfaceId, components: const {}),
-            ),
-          );
+          _onSurfaceAdded?.call(surfaceId);
         },
         onSurfaceDeleted: (surfaceId) {
-          // SurfaceRemoved constructor is (String surfaceId)
-          _onSurfaceRemoved?.call(genui.SurfaceRemoved(surfaceId));
+          _onSurfaceRemoved?.call(surfaceId);
         },
         onTextResponse: (text) => _onTextResponse?.call(text),
         onError: (message, rawError) => onError?.call(message, rawError),
@@ -128,8 +121,8 @@ class GenUiService {
       throw StateError('GenUiService not initialized.');
     }
 
-    // GenUI 0.6.0: Construct UserMessage with positional parts
-    final userMessage = genui.UserMessage([genui.TextPart(message)]);
+    // GenUI 0.8.0: Construct ChatMessage with factory
+    final userMessage = genui.ChatMessage.user(message);
 
     await _genUiConversation!.sendRequest(userMessage);
   }
@@ -142,25 +135,28 @@ class GenUiService {
     return _genUiConversation!;
   }
 
-  /// Get the GenUiHost instance (for direct surface manipulation)
-  genui.GenUiHost get manager {
-    if (!_isInitialized || _processor == null) {
+  /// Get the SurfaceHost instance (for direct surface manipulation)
+  genui.SurfaceHost get manager {
+    if (!_isInitialized || _controller == null) {
       throw StateError('GenUiService not initialized.');
     }
-    return _processor!;
+    return _controller!;
   }
 
   /// Alias for manager (for backward compatibility)
-  genui.GenUiHost get host => manager;
+  genui.SurfaceHost get host => manager;
 
   bool get isInitialized => _isInitialized;
 
-  /// Get a ValueNotifier for a specific surface
-  ValueNotifier<genui.UiDefinition?> getSurfaceNotifier(String surfaceId) {
-    if (!_isInitialized || _processor == null) {
+  /// Get a ValueListenable for a specific surface's definition
+  ValueNotifier<genui.SurfaceDefinition?> getSurfaceNotifier(String surfaceId) {
+    if (!_isInitialized || _controller == null) {
       throw StateError('GenUiService not initialized.');
     }
-    return _processor!.getSurfaceNotifier(surfaceId);
+    // In 0.8.0, contextFor().definition returns ValueListenable<SurfaceDefinition?>
+    // We cast to ValueNotifier for backward compatibility with callers
+    return _controller!.contextFor(surfaceId).definition
+        as ValueNotifier<genui.SurfaceDefinition?>;
   }
 
   /// Clear the current session state
@@ -175,22 +171,25 @@ class GenUiService {
     required String componentType,
     required Map<String, dynamic> data,
   }) {
-    if (!_isInitialized || _processor == null) return;
+    if (!_isInitialized || _controller == null) return;
 
     try {
-      // 0.6.0: Construct Component then SurfaceUpdate
-      final comp = genui.Component(
-        id: surfaceId,
-        componentProperties: {componentType: data},
-      );
-
-      final surfaceUpdate = genui.SurfaceUpdate(
+      // 0.10.x: Use a2ui_core message types with raw JSON components
+      final createMsg = a2ui.CreateSurfaceMessage(
         surfaceId: surfaceId,
-        components: [comp],
+        catalogId: genui.basicCatalogId,
+      );
+      _controller!.handleMessage(createMsg);
+
+      // Components are raw JSON maps: {'id': ..., 'component': 'TypeName', ...props}
+      final updateMsg = a2ui.UpdateComponentsMessage(
+        surfaceId: surfaceId,
+        components: [
+          {'id': 'root', 'component': componentType, ...data},
+        ],
       );
 
-      // Inject via handleMessage (Validated API)
-      _processor!.handleMessage(surfaceUpdate);
+      _controller!.handleMessage(updateMsg);
       _logger.info(
         'GenUiService: Surface $surfaceId replayed via handleMessage',
       );
@@ -202,7 +201,8 @@ class GenUiService {
   Future<void> _cleanup() async {
     _genUiConversation?.dispose();
     _genUiConversation = null;
-    _processor = null;
+    _controller?.dispose();
+    _controller = null;
     _isInitialized = false;
   }
 

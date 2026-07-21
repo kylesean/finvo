@@ -42,7 +42,7 @@ class AccountPickerCard extends StatelessWidget {
         Text(
           displayTitle,
           style: theme.typography.body.md.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.foreground,
           ),
         ),
@@ -96,7 +96,7 @@ class AccountPickerCard extends StatelessWidget {
               Text(
                 displayConfirm,
                 style: theme.typography.body.sm.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: colors.primary,
                 ),
               ),

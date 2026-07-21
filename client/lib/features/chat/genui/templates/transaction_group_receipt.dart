@@ -463,7 +463,7 @@ class _TransactionGroupReceiptState
                 Text(
                   '${t.chat.genui.transactionGroupReceipt.title} ${t.chat.genui.transactionGroupReceipt.count(count: count)}',
                   style: theme.typography.body.md.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: colors.primary,
                   ),
                 ),
@@ -980,7 +980,7 @@ class _TransactionGroupReceiptState
         ),
         Text(
           value,
-          style: theme.typography.body.sm.copyWith(fontWeight: FontWeight.w600),
+          style: theme.typography.body.sm.copyWith(fontWeight: FontWeight.w500),
         ),
       ],
     );

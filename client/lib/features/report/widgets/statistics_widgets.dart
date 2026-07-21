@@ -360,7 +360,7 @@ class TrendChart extends ConsumerWidget {
               Text(
                 t.statistics.trend.title,
                 style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Row(
@@ -614,7 +614,7 @@ class _CategoryAnalysisSectionState
             Text(
               t.statistics.analysis.title,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             // Custom icon toggle (FTabs needs bounded width)
@@ -985,7 +985,7 @@ class _CategoryAnalysisSectionState
                         Text(
                           category.displayText,
                           style: theme.typography.body.sm.copyWith(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -1071,7 +1071,7 @@ class TopTransactionCard extends ConsumerWidget {
                   Text(
                     category.displayText,
                     style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1216,7 +1216,7 @@ class PremiumEmptyState extends StatelessWidget {
               Text(
                 t.statistics.emptyState.title,
                 style: theme.typography.body.xl.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: colors.foreground,
                 ),
               ),

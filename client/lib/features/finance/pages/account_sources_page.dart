@@ -64,7 +64,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
       header: FHeader(
         title: Text(
           '账户管理',
-          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w600),
+          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w500),
         ),
         suffixes: [
           FHeaderAction(
@@ -304,7 +304,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                     : '$currencySymbol ${_formatAmount(netWorth)}',
                 style: const TextStyle(
                   fontSize: 32,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   fontFeatures: [FontFeature.tabularFigures()],
                 ).copyWith(color: colors.primaryForeground),
               ),
@@ -341,7 +341,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                       _hideAmounts ? '****' : '+${_formatAmount(assets)}',
                       style: theme.typography.body.md.copyWith(
                         color: const Color(0xFF4CAF50), // Keep semantic green
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -364,7 +364,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                       style: theme.typography.body.md.copyWith(
                         color: colors
                             .destructive, // Use destructive for liability (red)
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -462,7 +462,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                         Text(
                           account.name,
                           style: theme.typography.body.md.copyWith(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: colors.foreground,
                           ),
                         ),
@@ -488,7 +488,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                             ? '****'
                             : '${isLiabilityAccount ? '-' : ''}${_formatAmount(account.initialBalance)}',
                         style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: colors.foreground,
                           fontFeatures: [const FontFeature.tabularFigures()],
                         ),

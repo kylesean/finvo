@@ -121,7 +121,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
       title: Text(
         t.budget.detail,
         style: theme.typography.body.lg.copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: colors.foreground,
         ),
       ),
@@ -259,7 +259,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           Text(
             budgetWithUsage.budget.displayName,
             style: theme.typography.body.lg.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: colors.primaryForeground,
             ),
           ),
@@ -365,7 +365,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
         Text(
           '$_currencySymbol${_formatAmount(amount)}',
           style: theme.typography.body.md.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: colors.primaryForeground,
           ),
         ),
@@ -381,7 +381,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           t.budget.info,
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -531,7 +531,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
                 Text(
                   statusText,
                   style: theme.typography.body.md.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: statusColor,
                   ),
                 ),

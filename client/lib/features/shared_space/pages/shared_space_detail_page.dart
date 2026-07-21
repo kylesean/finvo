@@ -225,7 +225,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                     Text(
                       'Dashboard',
                       style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: colors.primary,
                         letterSpacing: 1.2,
                       ),
@@ -258,7 +258,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                     Text(
                       'Transactions',
                       style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: colors.foreground,
                         letterSpacing: 1.2,
                       ),

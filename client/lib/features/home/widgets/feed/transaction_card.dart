@@ -212,7 +212,7 @@ class TransactionCard extends ConsumerWidget {
                         child: Text(
                           _getCategoryDisplayName(transaction),
                           style: theme.typography.body.md.copyWith(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),

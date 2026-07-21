@@ -82,7 +82,7 @@ class AccountCard extends ConsumerWidget {
                   Text(
                     name,
                     style: theme.typography.body.md.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: selected ? colors.primary : colors.foreground,
                     ),
                   ),
@@ -108,7 +108,7 @@ class AccountCard extends ConsumerWidget {
                         : num.tryParse(balance.toString()) ?? 0,
                     currency: currency,
                     style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: selected ? colors.primary : colors.foreground,
                     ),
                   ),
@@ -126,7 +126,7 @@ class AccountCard extends ConsumerWidget {
                       child: Text(
                         currency,
                         style: theme.typography.body.xs.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: colors.primary,
                         ),
                       ),
@@ -193,7 +193,7 @@ class CompactAccountCard extends StatelessWidget {
             Text(
               name,
               style: theme.typography.body.xs.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: selected ? colors.primary : colors.foreground,
               ),
               textAlign: TextAlign.center,

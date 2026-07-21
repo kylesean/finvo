@@ -88,7 +88,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
               Text(
                 '加入共享空间',
                 style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: colors.foreground,
                 ),
               ),

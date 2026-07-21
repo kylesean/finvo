@@ -102,7 +102,7 @@ class ThemeSwitcher extends ConsumerWidget {
             Text(
               t.appearance.colorScheme,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colorScheme.foreground,
               ),
             ),
@@ -219,7 +219,7 @@ class _PaletteOption extends StatelessWidget {
                   child: Text(
                     palette.label,
                     style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: colors.foreground,
                     ),
                   ),

@@ -55,7 +55,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
             child: Text(
               t.financial.selectCurrency,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),

@@ -65,7 +65,7 @@ class NotificationCard extends StatelessWidget {
                               child: Text(
                                 notification.title,
                                 style: theme.typography.body.md.copyWith(
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: notification.isRead
                                       ? colors.mutedForeground
                                       : colors.foreground,

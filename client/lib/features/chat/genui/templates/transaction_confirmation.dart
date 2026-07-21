@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
+import '../events/interaction_events.dart';
 import '../organisms/organisms.dart';
 
 /// 提交缓存
@@ -135,21 +136,17 @@ class _TransactionConfirmationState extends State<TransactionConfirmation> {
     }
 
     widget.dispatchEvent(
-      UserActionEvent(
-        name: 'transaction_confirmed_with_account',
-        sourceComponentId: 'TransactionConfirmation',
-        context: {
-          'account_id': _selectedAccountId,
-          'account_name': accountName,
-          'amount': widget.data['amount'],
-          'description': widget.data['description'],
-          'transaction_type': widget.data['transaction_type'],
-          'category_key': widget.data['category_key'],
-          'currency': widget.data['currency'],
-          'raw_input': widget.data['raw_input'],
-          'tags': widget.data['tags'],
-        },
-      ),
+      TransactionConfirmedWithAccountEvent(
+        accountId: _selectedAccountId,
+        accountName: accountName,
+        amount: widget.data['amount'],
+        description: widget.data['description'] as String?,
+        transactionType: widget.data['transaction_type'] as String?,
+        categoryKey: widget.data['category_key'] as String?,
+        currency: widget.data['currency'] as String?,
+        rawInput: widget.data['raw_input'] as String?,
+        tags: widget.data['tags'] as List<dynamic>?,
+      ).toUserActionEvent(sourceComponentId: 'TransactionConfirmation'),
     );
   }
 

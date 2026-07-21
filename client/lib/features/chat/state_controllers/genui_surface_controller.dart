@@ -111,7 +111,7 @@ class GenUiSurfaceController {
   }
 
   /// Handle surface updated event from GenUI
-  void handleSurfaceUpdated(genui.SurfaceUpdated event) {
+  void handleSurfaceUpdated(genui.ComponentsUpdated event) {
     _logger.info(
       'GenUiSurfaceController: Surface updated - ${event.surfaceId}',
     );

@@ -139,19 +139,22 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
           final surfaceDataList = <Map<String, dynamic>>[];
 
           for (final surfaceId in message.surfaceIds) {
-            // 尝试从 GenUI Host 获取 surface 的 UiDefinition
-            final surfaceNotifier = genUiHost.getSurfaceNotifier(surfaceId);
-            final uiDefinition = surfaceNotifier.value;
+            // 尝试从 GenUI Host 获取 surface 的 SurfaceDefinition
+            final surfaceDefinition = genUiHost
+                .contextFor(surfaceId)
+                .definition
+                .value;
 
-            if (uiDefinition != null) {
+            if (surfaceDefinition != null) {
               // 提取组件数据
-              final components = uiDefinition.components;
+              final components = surfaceDefinition.components;
               if (components.isNotEmpty) {
                 for (final entry in components.entries) {
                   surfaceDataList.add({
                     'surfaceId': surfaceId,
                     'componentId': entry.key,
-                    'componentProperties': entry.value.componentProperties,
+                    'componentType': entry.value.type,
+                    'componentProperties': entry.value.properties,
                   });
                 }
               }
@@ -364,7 +367,8 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                 child: Text(
                   ref.watch(conversationExpenseTitleProvider),
                   style: theme.typography.body.xl.copyWith(
-                    fontWeight: FontWeight.w600,
+                    // 3.44 起 Skia 回退选中 NotoSansCJK（笔画更重），字重下调一档。
+                    fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

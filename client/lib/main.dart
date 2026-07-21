@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:augo/app/app.dart';
-import 'package:augo/features/chat/genui/genui_event_registry.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'i18n/strings.g.dart';
@@ -41,10 +40,6 @@ void main() async {
     await initializeDateFormatting('zh_CN', null);
     await initializeDateFormatting('en', null);
     _logger.info('Date format initialization completed');
-
-    // Initialize GenUI event registry
-    GenUiEventRegistry.initialize();
-    _logger.info('GenUI event registry initialization completed');
 
     // Initialize sound feedback service (for self-hosted ASR)
     // Wrapped in try-catch to not block app launch if assets are missing

@@ -8,7 +8,7 @@ void main() {
       expect(catalog, isNotNull);
       expect(catalog.items, isNotEmpty);
       expect(
-        catalog.items.any((item) => item.name == 'TransferPathBuilder'),
+        catalog.items.any((item) => item.name == 'TransferWizard'),
         isTrue,
       );
     });

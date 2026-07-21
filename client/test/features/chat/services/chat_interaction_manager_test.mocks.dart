@@ -61,8 +61,8 @@ class _FakeExtendedGenUiConversation_2 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
-class _FakeGenUiHost_3 extends _i1.SmartFake implements _i5.GenUiHost {
-  _FakeGenUiHost_3(Object parent, Invocation parentInvocation)
+class _FakeSurfaceHost_3 extends _i1.SmartFake implements _i5.SurfaceHost {
+  _FakeSurfaceHost_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -612,20 +612,20 @@ class MockGenUiService extends _i1.Mock implements _i17.GenUiService {
           as _i4.ExtendedGenUiConversation);
 
   @override
-  _i5.GenUiHost get manager =>
+  _i5.SurfaceHost get manager =>
       (super.noSuchMethod(
             Invocation.getter(#manager),
-            returnValue: _FakeGenUiHost_3(this, Invocation.getter(#manager)),
+            returnValue: _FakeSurfaceHost_3(this, Invocation.getter(#manager)),
           )
-          as _i5.GenUiHost);
+          as _i5.SurfaceHost);
 
   @override
-  _i5.GenUiHost get host =>
+  _i5.SurfaceHost get host =>
       (super.noSuchMethod(
             Invocation.getter(#host),
-            returnValue: _FakeGenUiHost_3(this, Invocation.getter(#host)),
+            returnValue: _FakeSurfaceHost_3(this, Invocation.getter(#host)),
           )
-          as _i5.GenUiHost);
+          as _i5.SurfaceHost);
 
   @override
   bool get isInitialized =>
@@ -637,8 +637,8 @@ class MockGenUiService extends _i1.Mock implements _i17.GenUiService {
     required _i5.Catalog? catalog,
     required _i18.SecureStorageService? storageService,
     required String? sseBaseUrl,
-    required void Function(_i5.SurfaceAdded)? onSurfaceAdded,
-    required void Function(_i5.SurfaceRemoved)? onSurfaceRemoved,
+    required void Function(String)? onSurfaceAdded,
+    required void Function(String)? onSurfaceRemoved,
     required void Function(String)? onTextResponse,
     _i17.OnSessionInit? onSessionInit,
     _i17.OnStreamComplete? onStreamComplete,
@@ -681,15 +681,17 @@ class MockGenUiService extends _i1.Mock implements _i17.GenUiService {
           as _i14.Future<void>);
 
   @override
-  _i6.ValueNotifier<_i5.UiDefinition?> getSurfaceNotifier(String? surfaceId) =>
+  _i6.ValueNotifier<_i5.SurfaceDefinition?> getSurfaceNotifier(
+    String? surfaceId,
+  ) =>
       (super.noSuchMethod(
             Invocation.method(#getSurfaceNotifier, [surfaceId]),
-            returnValue: _FakeValueNotifier_4<_i5.UiDefinition?>(
+            returnValue: _FakeValueNotifier_4<_i5.SurfaceDefinition?>(
               this,
               Invocation.method(#getSurfaceNotifier, [surfaceId]),
             ),
           )
-          as _i6.ValueNotifier<_i5.UiDefinition?>);
+          as _i6.ValueNotifier<_i5.SurfaceDefinition?>);
 
   @override
   void clearSessionToken() => super.noSuchMethod(
@@ -742,12 +744,12 @@ class MockExtendedGenUiConversation extends _i1.Mock
           as _i7.CustomContentGenerator);
 
   @override
-  _i5.GenUiHost get host =>
+  _i5.SurfaceHost get host =>
       (super.noSuchMethod(
             Invocation.getter(#host),
-            returnValue: _FakeGenUiHost_3(this, Invocation.getter(#host)),
+            returnValue: _FakeSurfaceHost_3(this, Invocation.getter(#host)),
           )
-          as _i5.GenUiHost);
+          as _i5.SurfaceHost);
 
   @override
   set onUserMessageSent(void Function(String)? callback) => super.noSuchMethod(

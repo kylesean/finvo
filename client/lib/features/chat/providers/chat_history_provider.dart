@@ -596,7 +596,7 @@ class ChatHistory extends _$ChatHistory {
     return _historicalProcessor.processHistoricalMessages(rawMessages);
   }
 
-  genui.GenUiHost? get genUiHost {
+  genui.SurfaceHost? get genUiHost {
     try {
       return _genUiService?.host;
     } catch (e) {

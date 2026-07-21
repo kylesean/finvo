@@ -132,7 +132,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
               widget.title,
               textAlign: TextAlign.center,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -275,7 +275,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                         Text(
                           account.name,
                           style: theme.typography.body.md.copyWith(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: colors.foreground,
                           ),
                         ),
@@ -300,7 +300,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                       Text(
                         '${isLiabilityAccount ? '-' : ''}${_formatAmount(account.currentBalance ?? account.initialBalance)}',
                         style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: colors.foreground,
                           fontFeatures: [const FontFeature.tabularFigures()],
                         ),

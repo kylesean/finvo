@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
-import 'package:genui/genui.dart' as genui;
 import '../../../core/storage/secure_storage_service.dart';
 import '../genui/app_catalog.dart';
 import '../models/chat_message.dart';
@@ -252,17 +251,17 @@ class GenUiLifecycleManager {
   // Event Handlers
   // ============================================================
 
-  void _handleSurfaceAdded(genui.SurfaceAdded event) {
-    _logger.info('GenUiLifecycleManager: Surface added - ${event.surfaceId}');
+  void _handleSurfaceAdded(String surfaceId) {
+    _logger.info('GenUiLifecycleManager: Surface added - $surfaceId');
 
-    if (event.surfaceId.startsWith('history_')) {
+    if (surfaceId.startsWith('history_')) {
       return;
     }
 
-    final messageId = _findTargetMessageIdForSurface(event.surfaceId);
+    final messageId = _findTargetMessageIdForSurface(surfaceId);
     if (messageId.isEmpty) return;
 
-    _registerSurface(event.surfaceId, messageId);
+    _registerSurface(surfaceId, messageId);
   }
 
   void _handleSurfaceIdAdded(String surfaceId) {
@@ -304,9 +303,9 @@ class GenUiLifecycleManager {
     );
   }
 
-  void _handleSurfaceRemoved(genui.SurfaceRemoved event) {
-    _logger.info('GenUiLifecycleManager: Surface removed - ${event.surfaceId}');
-    handleDeleteSurface(event.surfaceId);
+  void _handleSurfaceRemoved(String surfaceId) {
+    _logger.info('GenUiLifecycleManager: Surface removed - $surfaceId');
+    handleDeleteSurface(surfaceId);
   }
 
   void _handleGenUiError(String error) {
@@ -370,22 +369,12 @@ class GenUiLifecycleManager {
 
     final surfaceId = 'surface_$uuidV4';
 
-    final rootComponentId = 'root_$uuidV4'; // Hacky distinct ID
-
-    final component = genui.Component(
-      id: rootComponentId,
-      componentProperties: {componentName: componentData},
-    );
-
-    final definition = genui.UiDefinition(
+    // Use replayHistoricalSurface which handles CreateSurface + UpdateComponents
+    _genUiService!.replayHistoricalSurface(
       surfaceId: surfaceId,
-      rootComponentId: rootComponentId,
-      components: {rootComponentId: component},
+      componentType: componentName,
+      data: componentData,
     );
-
-    final manager = _genUiService!.manager;
-    final notifier = manager.getSurfaceNotifier(surfaceId);
-    notifier.value = definition;
 
     final messageId = _getCurrentStreamingMessageId();
     if (messageId.isNotEmpty) {

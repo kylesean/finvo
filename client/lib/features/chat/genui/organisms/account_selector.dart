@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../molecules/molecules.dart';
+import '../events/interaction_events.dart';
 
 /// A complete account selection widget with search functionality
 ///
@@ -79,7 +80,7 @@ class AccountSelector extends ConsumerStatefulWidget {
               child: Text(
                 displayTitle,
                 style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: colors.foreground,
                 ),
               ),
@@ -242,7 +243,7 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
             Text(
               title,
               style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
 
@@ -336,15 +337,11 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
 
     // Dispatch GenUI event
     widget.dispatchEvent?.call(
-      UserActionEvent(
-        name: 'account_selected',
-        sourceComponentId: 'account_selector',
-        context: {
-          'account_id': accountId,
-          'account_name': account['name'],
-          'account_type': account['type'],
-        },
-      ),
+      AccountSelectedEvent(
+        accountId: accountId,
+        accountName: account['name'] as String?,
+        accountType: account['type'] as String?,
+      ).toUserActionEvent(sourceComponentId: 'account_selector'),
     );
   }
 }

@@ -413,7 +413,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
               t.budget.period,
               textAlign: TextAlign.center,
               style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: colors.foreground,
               ),
             ),
@@ -424,7 +424,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
               t.common.ok,
               style: theme.typography.body.md.copyWith(
                 color: colors.primary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -494,7 +494,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           Text(
             '$_interval ${isZh ? _frequency.label : (_frequency.label + (_interval > 1 ? 's' : ''))}',
             style: theme.typography.body.md.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: colors.foreground,
             ),
           ),
@@ -540,7 +540,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           isZh ? '选择星期' : 'Select Days',
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -620,7 +620,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           t.dateRange.endDate,
           style: theme.typography.body.sm.copyWith(
             color: colors.mutedForeground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -729,7 +729,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 isZh ? '规则预览' : 'Preview',
                 style: theme.typography.body.sm.copyWith(
                   color: colors.primary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -787,7 +787,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                       Text(
                         t.dateRange.endDate,
                         style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: colors.foreground,
                         ),
                       ),

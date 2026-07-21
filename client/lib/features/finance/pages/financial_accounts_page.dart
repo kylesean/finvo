@@ -70,7 +70,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
         ),
         title: Text(
           t.financial.title,
-          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w600),
+          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w500),
         ),
       ),
       body: SafeArea(
@@ -293,7 +293,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                 style: theme.typography.body.xs.copyWith(
                   color: colors.primaryForeground.withValues(alpha: 0.6),
                   letterSpacing: 1.2,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Row(
@@ -337,7 +337,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                             viewCurrency,
                             style: theme.typography.body.xs.copyWith(
                               color: colors.primaryForeground,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                           const SizedBox(width: 4),
@@ -455,7 +455,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                   '****',
                   style: theme.typography.body.md.copyWith(
                     color: colors.primaryForeground.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 )
               : AmountText(
@@ -529,7 +529,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           account.name,
                           style: theme.typography.body.md.copyWith(
                             // Revert to base
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: colors.foreground,
                           ),
                         ),
@@ -565,7 +565,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                               semantic: AmountSemantic.status,
                               currency: account.currencyCode,
                               style: theme.typography.body.md.copyWith(
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color: colors.foreground,
                               ),
                             ),
@@ -715,7 +715,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                     child: Text(
                       t.financial.management,
                       style: theme.typography.body.lg.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: colorScheme.foreground,
                       ),
                     ),
@@ -735,7 +735,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                     Text(
                       t.financial.settings,
                       style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: colorScheme.mutedForeground,
                       ),
                     ),
@@ -965,7 +965,7 @@ class _SafetyThresholdBottomSheetState
                   Text(
                     t.financial.safetyThresholdSettings,
                     style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: colorScheme.foreground,
                     ),
                   ),
@@ -1123,7 +1123,7 @@ class _DailySpendingBottomSheetState
                   Text(
                     t.financial.dailyBurnRateSettings,
                     style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: colors.foreground,
                     ),
                   ),
