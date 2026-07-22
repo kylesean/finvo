@@ -1,7 +1,6 @@
 """User management API endpoints with unified response format."""
 
-from datetime import datetime
-from typing import Annotated, Any, cast
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Path

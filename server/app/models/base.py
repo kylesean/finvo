@@ -10,12 +10,12 @@ import logging as _logging
 from collections.abc import Callable
 from datetime import UTC, date, datetime, time
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 import sqlalchemy as sa
 from pydantic import ConfigDict
-from sqlalchemy import Column, DateTime, MetaData, Numeric, String, Text, Time, text
+from sqlalchemy import DateTime, MetaData, String, Text, Time, text
 from sqlalchemy.dialects.postgresql import (
     INET,
     JSONB,
@@ -26,11 +26,10 @@ from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
     mapped_column,
-    relationship,
 )
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import RelationshipProperty
+    pass
 
 _logger = _logging.getLogger(__name__)
 

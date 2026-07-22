@@ -6,7 +6,6 @@ This is used by manage.sh to help users configure the mobile app.
 import os
 import socket
 import subprocess  # nosec B404
-import sys
 
 
 def get_local_ip():

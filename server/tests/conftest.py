@@ -1,11 +1,9 @@
 from collections.abc import AsyncGenerator, Generator
-from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import text
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,

@@ -4,9 +4,6 @@ This module contains unit tests for the tool functions used by the
 LangGraph agent, including transaction, budget, and transfer tools.
 """
 
-from decimal import Decimal
-from uuid import uuid4
-
 import pytest
 
 

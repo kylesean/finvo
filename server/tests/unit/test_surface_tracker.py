@@ -1,9 +1,6 @@
 """Tests for SurfaceTracker."""
 
-import time
 from uuid import uuid4
-
-import pytest
 
 from app.core.genui import SurfaceInfo, SurfaceTracker
 

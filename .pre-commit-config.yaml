@@ -9,15 +9,25 @@ repos:
   # ============================================================================
   # Python Hooks (Backend)
   # ============================================================================
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.0
+  # Run ruff via uv inside server/ so hooks always use the locked version from
+  # server/uv.lock. A pinned ruff-pre-commit rev drifts from the project version
+  # and produces conflicting isort verdicts between commit time and `make lint`.
+  - repo: local
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix, --config, server/pyproject.toml]
+        name: ruff
+        entry: bash -c "cd server && uv run ruff check --force-exclude --fix"
+        language: system
+        pass_filenames: false
         files: ^server/
+        types: [python]
       - id: ruff-format
-        args: [--config, server/pyproject.toml]
+        name: ruff-format
+        entry: bash -c "cd server && uv run ruff format --force-exclude"
+        language: system
+        pass_filenames: false
         files: ^server/
+        types: [python]
 
   # Use local mypy via uv to ensure project venv and pyproject.toml config are used
   - repo: local

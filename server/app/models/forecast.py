@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Optional
-from uuid import UUID, uuid4 as uuid4_factory
+from typing import Any
+from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy import Boolean, String

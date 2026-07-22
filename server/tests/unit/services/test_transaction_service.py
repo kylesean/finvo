@@ -1,11 +1,10 @@
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import select
 
-from app.models.financial_account import FinancialAccount
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.services.transaction_service import TransactionService

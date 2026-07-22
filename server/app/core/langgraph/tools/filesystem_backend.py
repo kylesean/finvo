@@ -10,7 +10,7 @@ import logging
 import os
 import re
 import subprocess  # nosec B404
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 

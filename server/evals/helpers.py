@@ -3,12 +3,12 @@
 import json
 import os
 from datetime import datetime
-from typing import Any, Optional, Union
+from typing import Any
 
-from evals.schemas import ScoreSchema
 from langfuse.api.resources.commons.types.trace_with_details import TraceWithDetails
 
 from app.core.logging import logger
+from evals.schemas import ScoreSchema
 
 
 def format_messages(messages: list[dict]) -> str:

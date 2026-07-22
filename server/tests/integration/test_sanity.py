@@ -1,9 +1,3 @@
-import pytest
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-
 def test_health_check_strict(client):
     """Integration test to verify that the health endpoint returns 200 OK
     and indicates that the database is healthy.

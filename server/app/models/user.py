@@ -6,12 +6,12 @@ This model has been migrated to SQLAlchemy 2.0 with Mapped[...] annotations.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import bcrypt
 from pydantic import field_validator, model_validator
-from sqlalchemy import Integer, String
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, col

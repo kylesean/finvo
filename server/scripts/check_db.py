@@ -1,14 +1,10 @@
-import os
 import sys
 
 from sqlalchemy import create_engine, text
 
-# Add parent directory to path to import app
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.core.config import settings
 
 try:
-    from app.core.config import settings
-
     # Use sync engine for simple check (psycopg v3 driver, same as LangGraph checkpointer)
     url = f"postgresql+psycopg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
 

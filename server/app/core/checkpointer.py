@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
-from urllib.parse import quote_plus
 
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from psycopg import AsyncConnection

@@ -4,9 +4,6 @@ This module contains security boundary tests for the authentication service,
 including rate limiting, token validation, and attack resistance.
 """
 
-from datetime import datetime, timedelta
-from uuid import uuid4
-
 import pytest
 
 

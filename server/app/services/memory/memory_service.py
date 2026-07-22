@@ -15,9 +15,14 @@ Best Practices Implemented:
 
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime
 from typing import Any, cast
 from uuid import UUID
+
+# Disable mem0 telemetry before import — avoids PostHog client creation and
+# duplicate-client warnings. Users can opt back in via MEM0_TELEMETRY=true.
+os.environ.setdefault("MEM0_TELEMETRY", "false")
 
 from mem0 import AsyncMemory
 
@@ -88,7 +93,7 @@ class MemoryService:
             # Build embedder configuration based on provider
             embedder_config = self._build_embedder_config()
 
-            self._memory = await AsyncMemory.from_config(
+            self._memory = AsyncMemory.from_config(
                 config_dict={
                     "vector_store": {
                         "provider": "pgvector",

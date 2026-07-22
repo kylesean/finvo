@@ -295,7 +295,7 @@ wheels = [
 [[package]]
 name = "augo-api"
 version = "0.1.1a0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "aiobotocore" },
     { name = "aiofiles" },

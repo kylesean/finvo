@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
 from pydantic import field_validator
