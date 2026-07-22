@@ -10,8 +10,7 @@ This module provides endpoints for user authentication including:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
-from typing import Annotated, Any, cast
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status

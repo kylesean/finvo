@@ -1,6 +1,5 @@
 """Financial settings API endpoints."""
 
-from datetime import datetime
 from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends

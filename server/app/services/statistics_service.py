@@ -3,9 +3,8 @@ from decimal import Decimal
 from typing import Any, cast as type_cast
 from uuid import UUID
 
-from sqlalchemy import Select, and_, case, cast, desc, func, select
+from sqlalchemy import and_, case, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.elements import ColumnElement
 
 from app.models.financial_account import FinancialAccount
 from app.models.transaction import Transaction

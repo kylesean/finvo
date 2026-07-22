@@ -9,12 +9,11 @@ This model has been migrated to SQLAlchemy 2.0 with Mapped[...] annotations.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4 as uuid4_factory
 
 import sqlalchemy as sa
-from sqlalchemy import ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, col

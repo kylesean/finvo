@@ -6,7 +6,7 @@ from typing import Any, cast
 from uuid import UUID
 
 import structlog
-from sqlalchemy import and_, desc, select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import BusinessError

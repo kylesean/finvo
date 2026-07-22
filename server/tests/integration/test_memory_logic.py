@@ -1,10 +1,8 @@
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
 
-from app.core.langgraph.simple_agent import SimpleLangChainAgent
 from app.core.langgraph.tools.context import current_user_id
 from app.services.memory import get_memory_service
 

@@ -1,14 +1,10 @@
-import os
 import sys
 
 import redis
 
-# Add parent directory to path to import app
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.core.config import settings
 
 try:
-    from app.core.config import settings
-
     print(f"Connecting to Redis at {settings.REDIS_HOST}:{settings.REDIS_PORT} (DB: {settings.REDIS_DB})...")
 
     r = redis.Redis(

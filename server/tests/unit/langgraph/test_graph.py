@@ -3,10 +3,6 @@
 Verifies tool loading and system prompts.
 """
 
-from unittest.mock import MagicMock, patch
-
-import pytest
-
 
 def test_tools_module_imports():
     """Test that tool modules are imported correctly."""

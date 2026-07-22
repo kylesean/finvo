@@ -16,7 +16,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Any, cast
 
-from sqlalchemy import delete, desc, select, text
+from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
