@@ -2,89 +2,88 @@
 name = "augo-api"
 version = "0.1.1-alpha"
 description = "Augo: Self-Hosted & Privacy-First AI Financial Assistant"
-readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    # Web framework & ASGI server
     "fastapi>=0.121.0",
-    "langchain-core>=1.2.5",
-    "langchain-openai>=1.0.2",
-    "langfuse==3.9.1",
-    "langgraph>=1.1.0,<2.0.0",
-    "langgraph-checkpoint-postgres>=3.0.1,<4.0.0",
-    "passlib[bcrypt]>=1.7.4",
-    "psycopg2-binary>=2.9.10",
+    "uvicorn>=0.34.0",
+    "uvloop>=0.22.1",
+    "python-multipart>=0.0.31",
+    # Config & validation
     "pydantic[email]>=2.11.1",
     "pydantic-settings>=2.8.1",
-    "python-dotenv>=1.1.0",
-    "python-jose[cryptography]>=3.4.0",
-    "python-multipart>=0.0.20",
+    "python-dotenv>=1.2.2",
+    # Database: asyncpg for async ORM, psycopg v3 for LangGraph checkpointer & sync scripts
     "sqlmodel>=0.0.24",
-    "structlog>=25.2.0",
-    "supabase>=2.15.0",
-    "uvicorn>=0.34.0",
-    "bcrypt>=4.3.0",
-    "slowapi>=0.1.9",
-    "email-validator>=2.2.0",
-    "prometheus-client>=0.19.0",
-    "starlette-prometheus>=0.7.0",
-    "asgiref>=3.8.1",
-    "duckduckgo-search>=3.9.0",
-    "langchain-community>=0.4.1",
-    "tqdm>=4.67.1",
-    "colorama>=0.4.6",
-    "ddgs>=9.6.0",
-    "tenacity>=9.1.2",
-    "mem0ai>=1.0.0",
-    "uvloop>=0.22.1",
-    "alembic>=1.13.0",
-    "pillow>=10.0.0",
+    "sqlalchemy[asyncio]>=2.0.40",
     "asyncpg>=0.29.0",
+    "psycopg[binary]>=3.2.0",
+    "alembic>=1.13.0",
+    # Auth & security
+    "python-jose[cryptography]>=3.4.0",
+    "bcrypt>=4.3.0",
+    "cryptography>=48.0.1",
+    # LLM / agent framework
+    "langchain-core>=1.2.5",
+    "langchain-openai>=1.0.2",
+    "langchain-community>=0.4.1",
+    "langgraph>=1.1.0,<2.0.0",
+    "langgraph-checkpoint-postgres>=3.0.1,<4.0.0",
+    "langfuse==3.9.1",
+    "mem0ai>=1.0.0",
+    "tenacity>=9.1.2",
+    "ddgs>=9.6.0",
+    # Cache, scheduling & logging
     "redis>=5.0.0",
     "apscheduler>=3.10.0",
-    "python-dateutil>=2.8.2",
-    "aiofiles>=23.2.1",
-    "sqlalchemy[asyncio]>=2.0.40",
-    "multidict==6.7.0",
-    "fastapi-pagination>=0.15.1",
-    "fsspec>=2025.12.0",
-    "s3fs>=2024.9.0",
+    "structlog>=25.2.0",
+    # Rate limiting & metrics
+    "slowapi>=0.1.9",
+    "prometheus-client>=0.19.0",
+    # File storage & processing
     "aiobotocore>=2.13.0",
     "webdav4>=0.9.8",
-    "universal-pathlib>=0.2.0",
-    "cryptography>=42.0.0",
+    "aiofiles>=23.2.1",
+    "pillow>=12.3.0",
+    # Misc utilities
+    "fastapi-pagination>=0.15.1",
     "uuid-utils>=0.12.0",
+    "python-dateutil>=2.8.2",
     "jieba>=0.42.1",
-    "pandas>=2.3.3",
-    "scipy>=1.16.3",
-    "qrcode>=8.2",
 ]
-
-[project.optional-dependencies]
-dev = ["djlint==1.36.4"]
 
 [dependency-groups]
 dev = [
     "ruff>=0.8.0",
-    "aiosqlite>=0.22.0",
-    "mypy>=1.0.0",
+    # mypy 2.x works, but requires local_partial_types = false below (pydantic plugin compat)
+    "mypy>=1.20.0",
     "bandit>=1.7.0",
     "pip-audit>=2.7.0",
+    "pre-commit>=4.0.0",
+    "radon>=6.0.0",
     "types-requests>=2.31.0",
     "types-python-dateutil>=2.8.0",
     "types-aiofiles>=23.2.0",
-    "pytest-asyncio>=1.3.0",
-    "pre-commit>=4.0.0",
-    "radon>=6.0.0",
     "types-pyyaml>=6.0.12.20250915",
+    # Dev-only helper scripts (scripts/show_qr.py, evals/)
+    "qrcode>=8.2",
+    "tqdm>=4.67.1",
+    "colorama>=0.4.6",
 ]
 test = [
     "httpx>=0.28.1",
     "pytest>=8.3.5",
-    "pytest-asyncio>=0.23.0",
+    "pytest-asyncio>=1.3.0",
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.12.0",
     "hypothesis>=6.92.0",
+    "aiosqlite>=0.22.0",
 ]
+
+[tool.uv]
+# Install dev + test groups by default so `uv sync` / `uv run pytest` work out
+# of the box. Production builds must pass `--no-default-groups` (see Dockerfile).
+default-groups = ["dev", "test"]
 
 [tool.mypy]
 python_version = "3.13"
@@ -94,6 +93,12 @@ plugins = ["pydantic.mypy"]
 exclude = ["venv", ".venv", "venv_test", "alembic/versions"]
 # 禁用第三方库装饰器的类型检查错误
 disable_error_code = ["untyped-decorator"]
+# Since mypy 2.0, --local-partial-types is enabled by default. It changes field type
+# inference timing so that the pydantic.mypy plugin reads type_annotation=None when
+# collecting BaseSettings fields and hits its assertion in pydantic/mypy.py
+# ("All arguments must be fully typed"). Disable it to keep mypy 1.x inference
+# semantics (upstream: python/mypy#18612, closed as not planned).
+local_partial_types = false
 
 # Third-party libraries - 使用精细化配置而不是 ignore_errors
 # 只忽略真正没有类型支持的库的导入错误
@@ -101,7 +106,6 @@ disable_error_code = ["untyped-decorator"]
 module = [
     "jieba.*",             # 无类型支持
     "ddgs.*",              # 无类型支持
-    "duckduckgo_search.*", # 无类型支持
     "yaml.*",              # PyYAML 类型支持不完整
     "aiofiles.*",          # aiofiles 类型存根不完整
     "dateutil.*",          # dateutil 类型存根不完整
@@ -129,10 +133,7 @@ module = [
     "mem0.*",
     "slowapi.*",
     "structlog.*",
-    "fsspec.*",
-    "s3fs.*",
-    "webdavfs.*",
-    "upath.*",
+    "webdav4.*",
 ]
 disallow_untyped_defs = false
 warn_return_any = false
@@ -185,6 +186,9 @@ ignore = [
     "D106",
     "B904",
     "B008",
+    # StrEnum migration needs separate evaluation: str(member) behavior change
+    # would affect DB serialization and API output
+    "UP042",
 ]
 
 [tool.ruff.lint.isort]

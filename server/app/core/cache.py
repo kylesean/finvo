@@ -114,7 +114,9 @@ class CacheManager:
                     return json.loads(value)
                 except (json.JSONDecodeError, TypeError):
                     # Fall back to pickle for complex objects
-                    return pickle.loads(value)  # nosec B301
+                    # Narrow bytes | str to bytes (latin-1 round-trips raw bytes losslessly)
+                    data = value if isinstance(value, bytes) else value.encode("latin-1")
+                    return pickle.loads(data)  # nosec B301
 
             return value
 
