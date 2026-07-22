@@ -118,7 +118,10 @@ jobs:
           retention-days: 30
 
       - name: Run pip-audit for dependency vulnerabilities
-        run: uv run pip-audit --skip-editable --progress-spinner off
+        # PYSEC-2026-1325 (CVE-2024-23342): Minerva timing attack on ecdsa P-256.
+        # All versions affected; upstream considers side-channel attacks out of scope (no fix planned).
+        # Our JWT ops use python-jose[cryptography] which delegates to the cryptography lib, not ecdsa's pure-Python impl.
+        run: uv run pip-audit --skip-editable --progress-spinner off --ignore-vuln PYSEC-2026-1325
         continue-on-error: true
 
   # ============================================================================
