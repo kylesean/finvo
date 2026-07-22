@@ -166,12 +166,14 @@ gen-keys:
 # ============================================================
 
 # Run dependency security audit
+# --ignore-vuln PYSEC-2026-1325: ecdsa Minerva timing attack, no fix released upstream;
+# the project uses HS256 (symmetric) JWT, which never touches the ecdsa code path.
 audit:
-	cd server && uv run pip-audit --strict
+	cd server && uv run pip-audit --strict --ignore-vuln PYSEC-2026-1325
 
-# Run type checking with mypy
+# Run type checking with mypy (use --package like pre-commit to avoid duplicate-module conflicts)
 typecheck:
-	cd server && uv run mypy .
+	cd server && uv run mypy --package app
 
 # Run code complexity analysis
 complexity:

@@ -5,8 +5,9 @@ This module sets up and configures Prometheus metrics for monitoring the applica
 
 from typing import Any
 
-from prometheus_client import Counter, Gauge, Histogram
-from starlette_prometheus import PrometheusMiddleware, metrics
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+from starlette.requests import Request
+from starlette.responses import Response
 
 # Request metrics
 http_requests_total = Counter("http_requests_total", "Total number of HTTP requests", ["method", "endpoint", "status"])
@@ -37,14 +38,18 @@ llm_stream_duration_seconds = Histogram(
 )
 
 
+async def metrics_endpoint(request: Request) -> Response:
+    """Expose Prometheus metrics in the text exposition format.
+
+    HTTP request metrics are collected by MetricsMiddleware (app.core.middleware).
+    """
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
 def setup_metrics(app: Any) -> None:
-    """Set up Prometheus metrics middleware and endpoints.
+    """Set up Prometheus metrics endpoint.
 
     Args:
         app: FastAPI application instance
     """
-    # Add Prometheus middleware
-    app.add_middleware(PrometheusMiddleware)
-
-    # Add metrics endpoint
-    app.add_route("/metrics", metrics)
+    app.add_route("/metrics", metrics_endpoint, methods=["GET"], include_in_schema=False)
