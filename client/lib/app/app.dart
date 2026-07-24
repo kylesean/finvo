@@ -115,7 +115,7 @@ class _SplashScreen extends StatelessWidget {
             Text(
               t.app.splashTitle,
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: AppFontConfig.headingBold,
               ),
             ),
             const SizedBox(height: 8),
