@@ -624,34 +624,37 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
         context: context,
         builder: (context, style, animation) => FDialog(
           animation: animation,
-          builder: (context, dialogStyle) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(t.budget.deleteBudget, style: dialogStyle.titleTextStyle),
-              const SizedBox(height: 8),
-              Text(t.budget.deleteConfirm, style: dialogStyle.bodyTextStyle),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FButton(
-                    variant: .destructive,
-                    onPress: () async {
-                      await Navigator.maybePop(context);
-                      unawaited(_handleDelete());
-                    },
-                    child: Text(t.common.delete),
-                  ),
-                  const SizedBox(width: 8),
-                  FButton(
-                    variant: .outline,
-                    onPress: () => Navigator.pop(context),
-                    child: Text(t.common.cancel),
-                  ),
-                ],
-              ),
-            ],
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(t.budget.deleteBudget, style: dialogStyle.titleTextStyle),
+                const SizedBox(height: 8),
+                Text(t.budget.deleteConfirm, style: dialogStyle.bodyTextStyle),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FButton(
+                      variant: .destructive,
+                      onPress: () async {
+                        await Navigator.maybePop(context);
+                        unawaited(_handleDelete());
+                      },
+                      child: Text(t.common.delete),
+                    ),
+                    const SizedBox(width: 8),
+                    FButton(
+                      variant: .outline,
+                      onPress: () => Navigator.pop(context),
+                      child: Text(t.common.cancel),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

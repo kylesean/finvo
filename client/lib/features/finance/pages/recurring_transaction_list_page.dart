@@ -500,42 +500,45 @@ class _RecurringTransactionListPageState
       context: context,
       builder: (dialogContext, style, animation) => FDialog(
         animation: animation,
-        builder: (context, dialogStyle) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              t.forecast.recurringTransaction.confirmDelete,
-              style: dialogStyle.titleTextStyle,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              t.forecast.recurringTransaction.deleteConfirm(
-                name: _getDisplayName(transaction),
+        builder: (context, dialogStyle) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                t.forecast.recurringTransaction.confirmDelete,
+                style: dialogStyle.titleTextStyle,
               ),
-              style: dialogStyle.bodyTextStyle,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FButton(
-                  variant: .destructive,
-                  onPress: () {
-                    confirmed = true;
-                    Navigator.pop(dialogContext);
-                  },
-                  child: Text(t.common.delete),
+              const SizedBox(height: 8),
+              Text(
+                t.forecast.recurringTransaction.deleteConfirm(
+                  name: _getDisplayName(transaction),
                 ),
-                const SizedBox(width: 8),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.pop(dialogContext),
-                  child: Text(t.common.cancel),
-                ),
-              ],
-            ),
-          ],
+                style: dialogStyle.bodyTextStyle,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FButton(
+                    variant: .destructive,
+                    onPress: () {
+                      confirmed = true;
+                      Navigator.pop(dialogContext);
+                    },
+                    child: Text(t.common.delete),
+                  ),
+                  const SizedBox(width: 8),
+                  FButton(
+                    variant: .outline,
+                    onPress: () => Navigator.pop(dialogContext),
+                    child: Text(t.common.cancel),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -567,52 +570,55 @@ class _RecurringTransactionListPageState
       context: context,
       builder: (dialogContext, style, animation) => FDialog(
         animation: animation,
-        builder: (context, dialogStyle) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              newState
-                  ? t.forecast.recurringTransaction.confirmActivate
-                  : t.forecast.recurringTransaction.confirmPause,
-              style: dialogStyle.titleTextStyle,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              newState
-                  ? t.forecast.recurringTransaction.activateConfirm(
-                      name: _getDisplayName(transaction),
-                    )
-                  : t.forecast.recurringTransaction.pauseConfirm(
-                      name: _getDisplayName(transaction),
+        builder: (context, dialogStyle) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                newState
+                    ? t.forecast.recurringTransaction.confirmActivate
+                    : t.forecast.recurringTransaction.confirmPause,
+                style: dialogStyle.titleTextStyle,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                newState
+                    ? t.forecast.recurringTransaction.activateConfirm(
+                        name: _getDisplayName(transaction),
+                      )
+                    : t.forecast.recurringTransaction.pauseConfirm(
+                        name: _getDisplayName(transaction),
+                      ),
+                style: dialogStyle.bodyTextStyle,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FButton(
+                    variant: newState ? .primary : .outline,
+                    onPress: () {
+                      confirmed = true;
+                      Navigator.pop(dialogContext);
+                    },
+                    child: Text(
+                      newState
+                          ? t.forecast.recurringTransaction.activated
+                          : t.forecast.recurringTransaction.paused,
                     ),
-              style: dialogStyle.bodyTextStyle,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FButton(
-                  variant: newState ? .primary : .outline,
-                  onPress: () {
-                    confirmed = true;
-                    Navigator.pop(dialogContext);
-                  },
-                  child: Text(
-                    newState
-                        ? t.forecast.recurringTransaction.activated
-                        : t.forecast.recurringTransaction.paused,
                   ),
-                ),
-                const SizedBox(width: 8),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.pop(dialogContext),
-                  child: Text(t.common.cancel),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 8),
+                  FButton(
+                    variant: .outline,
+                    onPress: () => Navigator.pop(dialogContext),
+                    child: Text(t.common.cancel),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -428,33 +428,39 @@ class _FinancialAccountEditPageState
         context: context,
         builder: (context, style, animation) => FDialog(
           animation: animation,
-          builder: (context, dialogStyle) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(t.account.deleteAccount, style: dialogStyle.titleTextStyle),
-              const SizedBox(height: 8),
-              Text(t.account.deleteConfirm, style: dialogStyle.bodyTextStyle),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FButton(
-                    onPress: () {
-                      Navigator.pop(context);
-                      unawaited(_performDelete());
-                    },
-                    child: Text(t.common.delete),
-                  ),
-                  const SizedBox(width: 8),
-                  FButton(
-                    variant: .outline,
-                    onPress: () => Navigator.pop(context),
-                    child: Text(t.common.cancel),
-                  ),
-                ],
-              ),
-            ],
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.account.deleteAccount,
+                  style: dialogStyle.titleTextStyle,
+                ),
+                const SizedBox(height: 8),
+                Text(t.account.deleteConfirm, style: dialogStyle.bodyTextStyle),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FButton(
+                      onPress: () {
+                        Navigator.pop(context);
+                        unawaited(_performDelete());
+                      },
+                      child: Text(t.common.delete),
+                    ),
+                    const SizedBox(width: 8),
+                    FButton(
+                      variant: .outline,
+                      onPress: () => Navigator.pop(context),
+                      child: Text(t.common.cancel),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
