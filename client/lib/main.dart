@@ -54,9 +54,9 @@ void main() async {
     // Pre-load Xiaomi MiSans font to bypass Skia fallback selecting NotoSansCJK
     try {
       await AppFontConfig.preloadMiSans();
-      if (AppFontConfig.miSansLoaded) {
-        _logger.info('MiSans font loaded from device');
-      }
+      _logger.info(
+        'MiSans preload result: loaded=${AppFontConfig.miSansLoaded}',
+      );
     } catch (e) {
       _logger.warning('MiSans preload failed (will use fallback): $e');
     }
