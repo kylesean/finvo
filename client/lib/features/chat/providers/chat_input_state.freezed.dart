@@ -14,15 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatInputState {
 
- String get text;// Current text in the input box
- bool get isListening;// Whether speech recognition is in progress
- bool get isSpeechAvailable;// Whether speech recognition service is available
- bool get isLoadingResponse;// Whether waiting for AI response
- bool get showError;// Whether to show error提示
- String get errorMessage;// Error message content
- HintType get hintType;// Used to control input box hint text type
- List<XFile> get selectedFiles;// List of selected files
- Map<String, bool> get uploadingFiles;
+ String get text; bool get isListening; bool get isSpeechAvailable; bool get isLoadingResponse; bool get showError; String get errorMessage; HintType get hintType; List<XFile> get selectedFiles; Map<String, bool> get uploadingFiles;
 /// Create a copy of ChatInputState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -226,30 +218,20 @@ class _ChatInputState implements ChatInputState {
 
 
 @override@JsonKey() final  String text;
-// Current text in the input box
 @override@JsonKey() final  bool isListening;
-// Whether speech recognition is in progress
 @override@JsonKey() final  bool isSpeechAvailable;
-// Whether speech recognition service is available
 @override@JsonKey() final  bool isLoadingResponse;
-// Whether waiting for AI response
 @override@JsonKey() final  bool showError;
-// Whether to show error提示
 @override@JsonKey() final  String errorMessage;
-// Error message content
 @override@JsonKey() final  HintType hintType;
-// Used to control input box hint text type
  final  List<XFile> _selectedFiles;
-// Used to control input box hint text type
 @override@JsonKey() List<XFile> get selectedFiles {
   if (_selectedFiles is EqualUnmodifiableListView) return _selectedFiles;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_selectedFiles);
 }
 
-// List of selected files
  final  Map<String, bool> _uploadingFiles;
-// List of selected files
 @override@JsonKey() Map<String, bool> get uploadingFiles {
   if (_uploadingFiles is EqualUnmodifiableMapView) return _uploadingFiles;
   // ignore: implicit_dynamic_type

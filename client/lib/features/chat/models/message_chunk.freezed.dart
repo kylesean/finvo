@@ -15,8 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MessageChunk {
 
- String get type;// e.g., text / tool_call / image, etc.
- dynamic get content;
+ String get type; dynamic get content;
 /// Create a copy of MessageChunk
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -215,7 +214,6 @@ class _MessageChunk implements MessageChunk {
   factory _MessageChunk.fromJson(Map<String, dynamic> json) => _$MessageChunkFromJson(json);
 
 @override final  String type;
-// e.g., text / tool_call / image, etc.
 @override final  dynamic content;
 
 /// Create a copy of MessageChunk

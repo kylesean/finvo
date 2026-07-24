@@ -40,45 +40,45 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	Translations $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => Translations(meta: meta ?? this.$meta);
 
 	// Translations
-	late final TranslationsCommonZh common = TranslationsCommonZh.internal(_root);
-	late final TranslationsTimeZh time = TranslationsTimeZh.internal(_root);
-	late final TranslationsGreetingZh greeting = TranslationsGreetingZh.internal(_root);
-	late final TranslationsNavigationZh navigation = TranslationsNavigationZh.internal(_root);
-	late final TranslationsAuthZh auth = TranslationsAuthZh.internal(_root);
-	late final TranslationsTransactionZh transaction = TranslationsTransactionZh.internal(_root);
-	late final TranslationsHomeZh home = TranslationsHomeZh.internal(_root);
-	late final TranslationsCommentZh comment = TranslationsCommentZh.internal(_root);
-	late final TranslationsCalendarZh calendar = TranslationsCalendarZh.internal(_root);
-	late final TranslationsCategoryZh category = TranslationsCategoryZh.internal(_root);
-	late final TranslationsSettingsZh settings = TranslationsSettingsZh.internal(_root);
-	late final TranslationsAppearanceZh appearance = TranslationsAppearanceZh.internal(_root);
-	late final TranslationsSpeechZh speech = TranslationsSpeechZh.internal(_root);
-	late final TranslationsAmountThemeZh amountTheme = TranslationsAmountThemeZh.internal(_root);
-	late final TranslationsLocaleZh locale = TranslationsLocaleZh.internal(_root);
-	late final TranslationsBudgetZh budget = TranslationsBudgetZh.internal(_root);
-	late final TranslationsDateRangeZh dateRange = TranslationsDateRangeZh.internal(_root);
-	late final TranslationsForecastZh forecast = TranslationsForecastZh.internal(_root);
-	late final TranslationsChatZh chat = TranslationsChatZh.internal(_root);
-	late final TranslationsFootprintZh footprint = TranslationsFootprintZh.internal(_root);
-	late final TranslationsMediaZh media = TranslationsMediaZh.internal(_root);
-	late final TranslationsErrorZh error = TranslationsErrorZh.internal(_root);
-	late final TranslationsFontTestZh fontTest = TranslationsFontTestZh.internal(_root);
-	late final TranslationsWizardZh wizard = TranslationsWizardZh.internal(_root);
-	late final TranslationsUserZh user = TranslationsUserZh.internal(_root);
-	late final TranslationsAccountZh account = TranslationsAccountZh.internal(_root);
-	late final TranslationsFinancialZh financial = TranslationsFinancialZh.internal(_root);
-	late final TranslationsAppZh app = TranslationsAppZh.internal(_root);
-	late final TranslationsStatisticsZh statistics = TranslationsStatisticsZh.internal(_root);
-	late final TranslationsCurrencyZh currency = TranslationsCurrencyZh.internal(_root);
-	late final TranslationsBudgetSuggestionZh budgetSuggestion = TranslationsBudgetSuggestionZh.internal(_root);
-	late final TranslationsServerZh server = TranslationsServerZh.internal(_root);
-	late final TranslationsSharedSpaceZh sharedSpace = TranslationsSharedSpaceZh.internal(_root);
-	late final TranslationsErrorMappingZh errorMapping = TranslationsErrorMappingZh.internal(_root);
+	late final Translations$common$zh common = Translations$common$zh.internal(_root);
+	late final Translations$time$zh time = Translations$time$zh.internal(_root);
+	late final Translations$greeting$zh greeting = Translations$greeting$zh.internal(_root);
+	late final Translations$navigation$zh navigation = Translations$navigation$zh.internal(_root);
+	late final Translations$auth$zh auth = Translations$auth$zh.internal(_root);
+	late final Translations$transaction$zh transaction = Translations$transaction$zh.internal(_root);
+	late final Translations$home$zh home = Translations$home$zh.internal(_root);
+	late final Translations$comment$zh comment = Translations$comment$zh.internal(_root);
+	late final Translations$calendar$zh calendar = Translations$calendar$zh.internal(_root);
+	late final Translations$category$zh category = Translations$category$zh.internal(_root);
+	late final Translations$settings$zh settings = Translations$settings$zh.internal(_root);
+	late final Translations$appearance$zh appearance = Translations$appearance$zh.internal(_root);
+	late final Translations$speech$zh speech = Translations$speech$zh.internal(_root);
+	late final Translations$amountTheme$zh amountTheme = Translations$amountTheme$zh.internal(_root);
+	late final Translations$locale$zh locale = Translations$locale$zh.internal(_root);
+	late final Translations$budget$zh budget = Translations$budget$zh.internal(_root);
+	late final Translations$dateRange$zh dateRange = Translations$dateRange$zh.internal(_root);
+	late final Translations$forecast$zh forecast = Translations$forecast$zh.internal(_root);
+	late final Translations$chat$zh chat = Translations$chat$zh.internal(_root);
+	late final Translations$footprint$zh footprint = Translations$footprint$zh.internal(_root);
+	late final Translations$media$zh media = Translations$media$zh.internal(_root);
+	late final Translations$error$zh error = Translations$error$zh.internal(_root);
+	late final Translations$fontTest$zh fontTest = Translations$fontTest$zh.internal(_root);
+	late final Translations$wizard$zh wizard = Translations$wizard$zh.internal(_root);
+	late final Translations$user$zh user = Translations$user$zh.internal(_root);
+	late final Translations$account$zh account = Translations$account$zh.internal(_root);
+	late final Translations$financial$zh financial = Translations$financial$zh.internal(_root);
+	late final Translations$app$zh app = Translations$app$zh.internal(_root);
+	late final Translations$statistics$zh statistics = Translations$statistics$zh.internal(_root);
+	late final Translations$currency$zh currency = Translations$currency$zh.internal(_root);
+	late final Translations$budgetSuggestion$zh budgetSuggestion = Translations$budgetSuggestion$zh.internal(_root);
+	late final Translations$server$zh server = Translations$server$zh.internal(_root);
+	late final Translations$sharedSpace$zh sharedSpace = Translations$sharedSpace$zh.internal(_root);
+	late final Translations$errorMapping$zh errorMapping = Translations$errorMapping$zh.internal(_root);
 }
 
 // Path: common
-class TranslationsCommonZh {
-	TranslationsCommonZh.internal(this._root);
+class Translations$common$zh {
+	Translations$common$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -161,8 +161,8 @@ class TranslationsCommonZh {
 }
 
 // Path: time
-class TranslationsTimeZh {
-	TranslationsTimeZh.internal(this._root);
+class Translations$time$zh {
+	Translations$time$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -209,8 +209,8 @@ class TranslationsTimeZh {
 }
 
 // Path: greeting
-class TranslationsGreetingZh {
-	TranslationsGreetingZh.internal(this._root);
+class Translations$greeting$zh {
+	Translations$greeting$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -227,8 +227,8 @@ class TranslationsGreetingZh {
 }
 
 // Path: navigation
-class TranslationsNavigationZh {
-	TranslationsNavigationZh.internal(this._root);
+class Translations$navigation$zh {
+	Translations$navigation$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -248,8 +248,8 @@ class TranslationsNavigationZh {
 }
 
 // Path: auth
-class TranslationsAuthZh {
-	TranslationsAuthZh.internal(this._root);
+class Translations$auth$zh {
+	Translations$auth$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -315,14 +315,14 @@ class TranslationsAuthZh {
 	/// zh: '注册失败'
 	String get registrationFailed => '注册失败';
 
-	late final TranslationsAuthEmailZh email = TranslationsAuthEmailZh.internal(_root);
-	late final TranslationsAuthPasswordZh password = TranslationsAuthPasswordZh.internal(_root);
-	late final TranslationsAuthVerificationCodeZh verificationCode = TranslationsAuthVerificationCodeZh.internal(_root);
+	late final Translations$auth$email$zh email = Translations$auth$email$zh.internal(_root);
+	late final Translations$auth$password$zh password = Translations$auth$password$zh.internal(_root);
+	late final Translations$auth$verificationCode$zh verificationCode = Translations$auth$verificationCode$zh.internal(_root);
 }
 
 // Path: transaction
-class TranslationsTransactionZh {
-	TranslationsTransactionZh.internal(this._root);
+class Translations$transaction$zh {
+	Translations$transaction$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -459,8 +459,8 @@ class TranslationsTransactionZh {
 }
 
 // Path: home
-class TranslationsHomeZh {
-	TranslationsHomeZh.internal(this._root);
+class Translations$home$zh {
+	Translations$home$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -498,8 +498,8 @@ class TranslationsHomeZh {
 }
 
 // Path: comment
-class TranslationsCommentZh {
-	TranslationsCommentZh.internal(this._root);
+class Translations$comment$zh {
+	Translations$comment$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -555,8 +555,8 @@ class TranslationsCommentZh {
 }
 
 // Path: calendar
-class TranslationsCalendarZh {
-	TranslationsCalendarZh.internal(this._root);
+class Translations$calendar$zh {
+	Translations$calendar$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -565,7 +565,7 @@ class TranslationsCalendarZh {
 	/// zh: '消费日历'
 	String get title => '消费日历';
 
-	late final TranslationsCalendarWeekdaysZh weekdays = TranslationsCalendarWeekdaysZh.internal(_root);
+	late final Translations$calendar$weekdays$zh weekdays = Translations$calendar$weekdays$zh.internal(_root);
 
 	/// zh: '加载日历数据失败'
 	String get loadFailed => '加载日历数据失败';
@@ -590,8 +590,8 @@ class TranslationsCalendarZh {
 }
 
 // Path: category
-class TranslationsCategoryZh {
-	TranslationsCategoryZh.internal(this._root);
+class Translations$category$zh {
+	Translations$category$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -677,8 +677,8 @@ class TranslationsCategoryZh {
 }
 
 // Path: settings
-class TranslationsSettingsZh {
-	TranslationsSettingsZh.internal(this._root);
+class Translations$settings$zh {
+	Translations$settings$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -803,8 +803,8 @@ class TranslationsSettingsZh {
 }
 
 // Path: appearance
-class TranslationsAppearanceZh {
-	TranslationsAppearanceZh.internal(this._root);
+class Translations$appearance$zh {
+	Translations$appearance$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -828,12 +828,12 @@ class TranslationsAppearanceZh {
 	/// zh: '配色方案'
 	String get colorScheme => '配色方案';
 
-	late final TranslationsAppearancePalettesZh palettes = TranslationsAppearancePalettesZh.internal(_root);
+	late final Translations$appearance$palettes$zh palettes = Translations$appearance$palettes$zh.internal(_root);
 }
 
 // Path: speech
-class TranslationsSpeechZh {
-	TranslationsSpeechZh.internal(this._root);
+class Translations$speech$zh {
+	Translations$speech$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -889,8 +889,8 @@ class TranslationsSpeechZh {
 }
 
 // Path: amountTheme
-class TranslationsAmountThemeZh {
-	TranslationsAmountThemeZh.internal(this._root);
+class Translations$amountTheme$zh {
+	Translations$amountTheme$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -922,8 +922,8 @@ class TranslationsAmountThemeZh {
 }
 
 // Path: locale
-class TranslationsLocaleZh {
-	TranslationsLocaleZh.internal(this._root);
+class Translations$locale$zh {
+	Translations$locale$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -946,8 +946,8 @@ class TranslationsLocaleZh {
 }
 
 // Path: budget
-class TranslationsBudgetZh {
-	TranslationsBudgetZh.internal(this._root);
+class Translations$budget$zh {
+	Translations$budget$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1246,8 +1246,8 @@ class TranslationsBudgetZh {
 }
 
 // Path: dateRange
-class TranslationsDateRangeZh {
-	TranslationsDateRangeZh.internal(this._root);
+class Translations$dateRange$zh {
+	Translations$dateRange$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1270,8 +1270,8 @@ class TranslationsDateRangeZh {
 }
 
 // Path: forecast
-class TranslationsForecastZh {
-	TranslationsForecastZh.internal(this._root);
+class Translations$forecast$zh {
+	Translations$forecast$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1382,12 +1382,12 @@ class TranslationsForecastZh {
 	/// zh: '200-300元/天'
 	String get relaxedAmount => '200-300元/天';
 
-	late final TranslationsForecastRecurringTransactionZh recurringTransaction = TranslationsForecastRecurringTransactionZh.internal(_root);
+	late final Translations$forecast$recurringTransaction$zh recurringTransaction = Translations$forecast$recurringTransaction$zh.internal(_root);
 }
 
 // Path: chat
-class TranslationsChatZh {
-	TranslationsChatZh.internal(this._root);
+class Translations$chat$zh {
+	Translations$chat$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1411,7 +1411,7 @@ class TranslationsChatZh {
 	/// zh: '正在处理...'
 	String get aiThinking => '正在处理...';
 
-	late final TranslationsChatToolsZh tools = TranslationsChatToolsZh.internal(_root);
+	late final Translations$chat$tools$zh tools = Translations$chat$tools$zh.internal(_root);
 
 	/// zh: '未识别到语音，请重试'
 	String get speechNotRecognized => '未识别到语音，请重试';
@@ -1458,14 +1458,14 @@ class TranslationsChatZh {
 	/// zh: '删除会话失败'
 	String get deleteConversationFailed => '删除会话失败';
 
-	late final TranslationsChatTransferWizardZh transferWizard = TranslationsChatTransferWizardZh.internal(_root);
-	late final TranslationsChatGenuiZh genui = TranslationsChatGenuiZh.internal(_root);
-	late final TranslationsChatWelcomeZh welcome = TranslationsChatWelcomeZh.internal(_root);
+	late final Translations$chat$transferWizard$zh transferWizard = Translations$chat$transferWizard$zh.internal(_root);
+	late final Translations$chat$genui$zh genui = Translations$chat$genui$zh.internal(_root);
+	late final Translations$chat$welcome$zh welcome = Translations$chat$welcome$zh.internal(_root);
 }
 
 // Path: footprint
-class TranslationsFootprintZh {
-	TranslationsFootprintZh.internal(this._root);
+class Translations$footprint$zh {
+	Translations$footprint$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1479,8 +1479,8 @@ class TranslationsFootprintZh {
 }
 
 // Path: media
-class TranslationsMediaZh {
-	TranslationsMediaZh.internal(this._root);
+class Translations$media$zh {
+	Translations$media$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1539,8 +1539,8 @@ class TranslationsMediaZh {
 }
 
 // Path: error
-class TranslationsErrorZh {
-	TranslationsErrorZh.internal(this._root);
+class Translations$error$zh {
+	Translations$error$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1588,12 +1588,12 @@ class TranslationsErrorZh {
 	/// zh: '发生了意外错误，请重试或联系技术支持。'
 	String get unknownErrorHint => '发生了意外错误，请重试或联系技术支持。';
 
-	late final TranslationsErrorGenuiZh genui = TranslationsErrorGenuiZh.internal(_root);
+	late final Translations$error$genui$zh genui = Translations$error$genui$zh.internal(_root);
 }
 
 // Path: fontTest
-class TranslationsFontTestZh {
-	TranslationsFontTestZh.internal(this._root);
+class Translations$fontTest$zh {
+	Translations$fontTest$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1628,8 +1628,8 @@ class TranslationsFontTestZh {
 }
 
 // Path: wizard
-class TranslationsWizardZh {
-	TranslationsWizardZh.internal(this._root);
+class Translations$wizard$zh {
+	Translations$wizard$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1646,8 +1646,8 @@ class TranslationsWizardZh {
 }
 
 // Path: user
-class TranslationsUserZh {
-	TranslationsUserZh.internal(this._root);
+class Translations$user$zh {
+	Translations$user$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1661,8 +1661,8 @@ class TranslationsUserZh {
 }
 
 // Path: account
-class TranslationsAccountZh {
-	TranslationsAccountZh.internal(this._root);
+class Translations$account$zh {
+	Translations$account$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1746,12 +1746,12 @@ class TranslationsAccountZh {
 	/// zh: '其他账户'
 	String get other => '其他账户';
 
-	late final TranslationsAccountTypesZh types = TranslationsAccountTypesZh.internal(_root);
+	late final Translations$account$types$zh types = Translations$account$types$zh.internal(_root);
 }
 
 // Path: financial
-class TranslationsFinancialZh {
-	TranslationsFinancialZh.internal(this._root);
+class Translations$financial$zh {
+	Translations$financial$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1837,8 +1837,8 @@ class TranslationsFinancialZh {
 }
 
 // Path: app
-class TranslationsAppZh {
-	TranslationsAppZh.internal(this._root);
+class Translations$app$zh {
+	Translations$app$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1852,8 +1852,8 @@ class TranslationsAppZh {
 }
 
 // Path: statistics
-class TranslationsStatisticsZh {
-	TranslationsStatisticsZh.internal(this._root);
+class Translations$statistics$zh {
+	Translations$statistics$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1874,24 +1874,24 @@ class TranslationsStatisticsZh {
 	/// zh: '暂无数据'
 	String get noData => '暂无数据';
 
-	late final TranslationsStatisticsOverviewZh overview = TranslationsStatisticsOverviewZh.internal(_root);
-	late final TranslationsStatisticsTrendZh trend = TranslationsStatisticsTrendZh.internal(_root);
-	late final TranslationsStatisticsAnalysisZh analysis = TranslationsStatisticsAnalysisZh.internal(_root);
-	late final TranslationsStatisticsFilterZh filter = TranslationsStatisticsFilterZh.internal(_root);
-	late final TranslationsStatisticsSortZh sort = TranslationsStatisticsSortZh.internal(_root);
+	late final Translations$statistics$overview$zh overview = Translations$statistics$overview$zh.internal(_root);
+	late final Translations$statistics$trend$zh trend = Translations$statistics$trend$zh.internal(_root);
+	late final Translations$statistics$analysis$zh analysis = Translations$statistics$analysis$zh.internal(_root);
+	late final Translations$statistics$filter$zh filter = Translations$statistics$filter$zh.internal(_root);
+	late final Translations$statistics$sort$zh sort = Translations$statistics$sort$zh.internal(_root);
 
 	/// zh: '导出列表'
 	String get exportList => '导出列表';
 
-	late final TranslationsStatisticsEmptyStateZh emptyState = TranslationsStatisticsEmptyStateZh.internal(_root);
+	late final Translations$statistics$emptyState$zh emptyState = Translations$statistics$emptyState$zh.internal(_root);
 
 	/// zh: '没有更多数据了'
 	String get noMoreData => '没有更多数据了';
 }
 
 // Path: currency
-class TranslationsCurrencyZh {
-	TranslationsCurrencyZh.internal(this._root);
+class Translations$currency$zh {
+	Translations$currency$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1935,8 +1935,8 @@ class TranslationsCurrencyZh {
 }
 
 // Path: budgetSuggestion
-class TranslationsBudgetSuggestionZh {
-	TranslationsBudgetSuggestionZh.internal(this._root);
+class Translations$budgetSuggestion$zh {
+	Translations$budgetSuggestion$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1956,8 +1956,8 @@ class TranslationsBudgetSuggestionZh {
 }
 
 // Path: server
-class TranslationsServerZh {
-	TranslationsServerZh.internal(this._root);
+class Translations$server$zh {
+	Translations$server$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2017,39 +2017,39 @@ class TranslationsServerZh {
 	/// zh: '更换服务器将退出登录，是否继续？'
 	String get changeServerWarning => '更换服务器将退出登录，是否继续？';
 
-	late final TranslationsServerErrorZh error = TranslationsServerErrorZh.internal(_root);
+	late final Translations$server$error$zh error = Translations$server$error$zh.internal(_root);
 }
 
 // Path: sharedSpace
-class TranslationsSharedSpaceZh {
-	TranslationsSharedSpaceZh.internal(this._root);
+class Translations$sharedSpace$zh {
+	Translations$sharedSpace$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	late final TranslationsSharedSpaceDashboardZh dashboard = TranslationsSharedSpaceDashboardZh.internal(_root);
-	late final TranslationsSharedSpaceRolesZh roles = TranslationsSharedSpaceRolesZh.internal(_root);
+	late final Translations$sharedSpace$dashboard$zh dashboard = Translations$sharedSpace$dashboard$zh.internal(_root);
+	late final Translations$sharedSpace$roles$zh roles = Translations$sharedSpace$roles$zh.internal(_root);
 }
 
 // Path: errorMapping
-class TranslationsErrorMappingZh {
-	TranslationsErrorMappingZh.internal(this._root);
+class Translations$errorMapping$zh {
+	Translations$errorMapping$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	late final TranslationsErrorMappingGenericZh generic = TranslationsErrorMappingGenericZh.internal(_root);
-	late final TranslationsErrorMappingAuthZh auth = TranslationsErrorMappingAuthZh.internal(_root);
-	late final TranslationsErrorMappingTransactionZh transaction = TranslationsErrorMappingTransactionZh.internal(_root);
-	late final TranslationsErrorMappingSpaceZh space = TranslationsErrorMappingSpaceZh.internal(_root);
-	late final TranslationsErrorMappingRecurringZh recurring = TranslationsErrorMappingRecurringZh.internal(_root);
-	late final TranslationsErrorMappingUploadZh upload = TranslationsErrorMappingUploadZh.internal(_root);
-	late final TranslationsErrorMappingAiZh ai = TranslationsErrorMappingAiZh.internal(_root);
+	late final Translations$errorMapping$generic$zh generic = Translations$errorMapping$generic$zh.internal(_root);
+	late final Translations$errorMapping$auth$zh auth = Translations$errorMapping$auth$zh.internal(_root);
+	late final Translations$errorMapping$transaction$zh transaction = Translations$errorMapping$transaction$zh.internal(_root);
+	late final Translations$errorMapping$space$zh space = Translations$errorMapping$space$zh.internal(_root);
+	late final Translations$errorMapping$recurring$zh recurring = Translations$errorMapping$recurring$zh.internal(_root);
+	late final Translations$errorMapping$upload$zh upload = Translations$errorMapping$upload$zh.internal(_root);
+	late final Translations$errorMapping$ai$zh ai = Translations$errorMapping$ai$zh.internal(_root);
 }
 
 // Path: auth.email
-class TranslationsAuthEmailZh {
-	TranslationsAuthEmailZh.internal(this._root);
+class Translations$auth$email$zh {
+	Translations$auth$email$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2069,8 +2069,8 @@ class TranslationsAuthEmailZh {
 }
 
 // Path: auth.password
-class TranslationsAuthPasswordZh {
-	TranslationsAuthPasswordZh.internal(this._root);
+class Translations$auth$password$zh {
+	Translations$auth$password$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2102,8 +2102,8 @@ class TranslationsAuthPasswordZh {
 }
 
 // Path: auth.verificationCode
-class TranslationsAuthVerificationCodeZh {
-	TranslationsAuthVerificationCodeZh.internal(this._root);
+class Translations$auth$verificationCode$zh {
+	Translations$auth$verificationCode$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2132,8 +2132,8 @@ class TranslationsAuthVerificationCodeZh {
 }
 
 // Path: calendar.weekdays
-class TranslationsCalendarWeekdaysZh {
-	TranslationsCalendarWeekdaysZh.internal(this._root);
+class Translations$calendar$weekdays$zh {
+	Translations$calendar$weekdays$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2162,8 +2162,8 @@ class TranslationsCalendarWeekdaysZh {
 }
 
 // Path: appearance.palettes
-class TranslationsAppearancePalettesZh {
-	TranslationsAppearancePalettesZh.internal(this._root);
+class Translations$appearance$palettes$zh {
+	Translations$appearance$palettes$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2198,8 +2198,8 @@ class TranslationsAppearancePalettesZh {
 }
 
 // Path: forecast.recurringTransaction
-class TranslationsForecastRecurringTransactionZh {
-	TranslationsForecastRecurringTransactionZh.internal(this._root);
+class Translations$forecast$recurringTransaction$zh {
+	Translations$forecast$recurringTransaction$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2288,8 +2288,8 @@ class TranslationsForecastRecurringTransactionZh {
 }
 
 // Path: chat.tools
-class TranslationsChatToolsZh {
-	TranslationsChatToolsZh.internal(this._root);
+class Translations$chat$tools$zh {
+	Translations$chat$tools$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2355,12 +2355,6 @@ class TranslationsChatToolsZh {
 	/// zh: '正在推荐预算...'
 	String get suggestBudget => '正在推荐预算...';
 
-	/// zh: '正在准备预算模拟...'
-	String get prepareBudgetSimulation => '正在准备预算模拟...';
-
-	/// zh: '正在模拟预算影响...'
-	String get simulateBudget => '正在模拟预算影响...';
-
 	/// zh: '正在获取共享空间...'
 	String get listSpaces => '正在获取共享空间...';
 
@@ -2373,16 +2367,40 @@ class TranslationsChatToolsZh {
 	/// zh: '正在处理请求...'
 	String get unknown => '正在处理请求...';
 
-	late final TranslationsChatToolsDoneZh done = TranslationsChatToolsDoneZh.internal(_root);
-	late final TranslationsChatToolsFailedZh failed = TranslationsChatToolsFailedZh.internal(_root);
+	late final Translations$chat$tools$done$zh done = Translations$chat$tools$done$zh.internal(_root);
+	late final Translations$chat$tools$failed$zh failed = Translations$chat$tools$failed$zh.internal(_root);
 
 	/// zh: '已取消'
 	String get cancelled => '已取消';
+
+	/// zh: '正在分析財務狀況...'
+	String get analyzeFinance => '正在分析財務狀況...';
+
+	/// zh: '正在預測財務趨勢...'
+	String get forecastFinance => '正在預測財務趨勢...';
+
+	/// zh: '正在分析預算...'
+	String get analyzeBudget => '正在分析預算...';
+
+	/// zh: '正在審計分析...'
+	String get auditAnalysis => '正在審計分析...';
+
+	/// zh: '正在處理預算...'
+	String get budgetOps => '正在處理預算...';
+
+	/// zh: '正在創建共享帳單...'
+	String get createSharedTransaction => '正在創建共享帳單...';
+
+	/// zh: '正在准备预算模拟'
+	String get prepareBudgetSimulation => '正在准备预算模拟';
+
+	/// zh: '正在模拟预算'
+	String get simulateBudget => '正在模拟预算';
 }
 
 // Path: chat.transferWizard
-class TranslationsChatTransferWizardZh {
-	TranslationsChatTransferWizardZh.internal(this._root);
+class Translations$chat$transferWizard$zh {
+	Translations$chat$transferWizard$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2420,45 +2438,45 @@ class TranslationsChatTransferWizardZh {
 }
 
 // Path: chat.genui
-class TranslationsChatGenuiZh {
-	TranslationsChatGenuiZh.internal(this._root);
+class Translations$chat$genui$zh {
+	Translations$chat$genui$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	late final TranslationsChatGenuiExpenseSummaryZh expenseSummary = TranslationsChatGenuiExpenseSummaryZh.internal(_root);
-	late final TranslationsChatGenuiTransactionListZh transactionList = TranslationsChatGenuiTransactionListZh.internal(_root);
-	late final TranslationsChatGenuiTransactionGroupReceiptZh transactionGroupReceipt = TranslationsChatGenuiTransactionGroupReceiptZh.internal(_root);
-	late final TranslationsChatGenuiBudgetReceiptZh budgetReceipt = TranslationsChatGenuiBudgetReceiptZh.internal(_root);
-	late final TranslationsChatGenuiBudgetStatusCardZh budgetStatusCard = TranslationsChatGenuiBudgetStatusCardZh.internal(_root);
-	late final TranslationsChatGenuiCashFlowForecastZh cashFlowForecast = TranslationsChatGenuiCashFlowForecastZh.internal(_root);
-	late final TranslationsChatGenuiHealthScoreZh healthScore = TranslationsChatGenuiHealthScoreZh.internal(_root);
-	late final TranslationsChatGenuiSpaceSelectorZh spaceSelector = TranslationsChatGenuiSpaceSelectorZh.internal(_root);
-	late final TranslationsChatGenuiTransferPathZh transferPath = TranslationsChatGenuiTransferPathZh.internal(_root);
-	late final TranslationsChatGenuiTransactionCardZh transactionCard = TranslationsChatGenuiTransactionCardZh.internal(_root);
-	late final TranslationsChatGenuiTransactionConfirmationZh transactionConfirmation = TranslationsChatGenuiTransactionConfirmationZh.internal(_root);
-	late final TranslationsChatGenuiBudgetAnalysisZh budgetAnalysis = TranslationsChatGenuiBudgetAnalysisZh.internal(_root);
-	late final TranslationsChatGenuiCashFlowCardZh cashFlowCard = TranslationsChatGenuiCashFlowCardZh.internal(_root);
-	late final TranslationsChatGenuiBudgetSimulatorZh budgetSimulator = TranslationsChatGenuiBudgetSimulatorZh.internal(_root);
+	late final Translations$chat$genui$expenseSummary$zh expenseSummary = Translations$chat$genui$expenseSummary$zh.internal(_root);
+	late final Translations$chat$genui$transactionList$zh transactionList = Translations$chat$genui$transactionList$zh.internal(_root);
+	late final Translations$chat$genui$transactionGroupReceipt$zh transactionGroupReceipt = Translations$chat$genui$transactionGroupReceipt$zh.internal(_root);
+	late final Translations$chat$genui$budgetReceipt$zh budgetReceipt = Translations$chat$genui$budgetReceipt$zh.internal(_root);
+	late final Translations$chat$genui$budgetStatusCard$zh budgetStatusCard = Translations$chat$genui$budgetStatusCard$zh.internal(_root);
+	late final Translations$chat$genui$cashFlowForecast$zh cashFlowForecast = Translations$chat$genui$cashFlowForecast$zh.internal(_root);
+	late final Translations$chat$genui$healthScore$zh healthScore = Translations$chat$genui$healthScore$zh.internal(_root);
+	late final Translations$chat$genui$spaceSelector$zh spaceSelector = Translations$chat$genui$spaceSelector$zh.internal(_root);
+	late final Translations$chat$genui$transferPath$zh transferPath = Translations$chat$genui$transferPath$zh.internal(_root);
+	late final Translations$chat$genui$transactionCard$zh transactionCard = Translations$chat$genui$transactionCard$zh.internal(_root);
+	late final Translations$chat$genui$transactionConfirmation$zh transactionConfirmation = Translations$chat$genui$transactionConfirmation$zh.internal(_root);
+	late final Translations$chat$genui$budgetAnalysis$zh budgetAnalysis = Translations$chat$genui$budgetAnalysis$zh.internal(_root);
+	late final Translations$chat$genui$cashFlowCard$zh cashFlowCard = Translations$chat$genui$cashFlowCard$zh.internal(_root);
+	late final Translations$chat$genui$budgetSimulator$zh budgetSimulator = Translations$chat$genui$budgetSimulator$zh.internal(_root);
 }
 
 // Path: chat.welcome
-class TranslationsChatWelcomeZh {
-	TranslationsChatWelcomeZh.internal(this._root);
+class Translations$chat$welcome$zh {
+	Translations$chat$welcome$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	late final TranslationsChatWelcomeMorningZh morning = TranslationsChatWelcomeMorningZh.internal(_root);
-	late final TranslationsChatWelcomeMiddayZh midday = TranslationsChatWelcomeMiddayZh.internal(_root);
-	late final TranslationsChatWelcomeAfternoonZh afternoon = TranslationsChatWelcomeAfternoonZh.internal(_root);
-	late final TranslationsChatWelcomeEveningZh evening = TranslationsChatWelcomeEveningZh.internal(_root);
-	late final TranslationsChatWelcomeNightZh night = TranslationsChatWelcomeNightZh.internal(_root);
+	late final Translations$chat$welcome$morning$zh morning = Translations$chat$welcome$morning$zh.internal(_root);
+	late final Translations$chat$welcome$midday$zh midday = Translations$chat$welcome$midday$zh.internal(_root);
+	late final Translations$chat$welcome$afternoon$zh afternoon = Translations$chat$welcome$afternoon$zh.internal(_root);
+	late final Translations$chat$welcome$evening$zh evening = Translations$chat$welcome$evening$zh.internal(_root);
+	late final Translations$chat$welcome$night$zh night = Translations$chat$welcome$night$zh.internal(_root);
 }
 
 // Path: error.genui
-class TranslationsErrorGenuiZh {
-	TranslationsErrorGenuiZh.internal(this._root);
+class Translations$error$genui$zh {
+	Translations$error$genui$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2484,8 +2502,8 @@ class TranslationsErrorGenuiZh {
 }
 
 // Path: account.types
-class TranslationsAccountTypesZh {
-	TranslationsAccountTypesZh.internal(this._root);
+class Translations$account$types$zh {
+	Translations$account$types$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2547,8 +2565,8 @@ class TranslationsAccountTypesZh {
 }
 
 // Path: statistics.overview
-class TranslationsStatisticsOverviewZh {
-	TranslationsStatisticsOverviewZh.internal(this._root);
+class Translations$statistics$overview$zh {
+	Translations$statistics$overview$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2565,8 +2583,8 @@ class TranslationsStatisticsOverviewZh {
 }
 
 // Path: statistics.trend
-class TranslationsStatisticsTrendZh {
-	TranslationsStatisticsTrendZh.internal(this._root);
+class Translations$statistics$trend$zh {
+	Translations$statistics$trend$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2583,8 +2601,8 @@ class TranslationsStatisticsTrendZh {
 }
 
 // Path: statistics.analysis
-class TranslationsStatisticsAnalysisZh {
-	TranslationsStatisticsAnalysisZh.internal(this._root);
+class Translations$statistics$analysis$zh {
+	Translations$statistics$analysis$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2601,8 +2619,8 @@ class TranslationsStatisticsAnalysisZh {
 }
 
 // Path: statistics.filter
-class TranslationsStatisticsFilterZh {
-	TranslationsStatisticsFilterZh.internal(this._root);
+class Translations$statistics$filter$zh {
+	Translations$statistics$filter$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2619,8 +2637,8 @@ class TranslationsStatisticsFilterZh {
 }
 
 // Path: statistics.sort
-class TranslationsStatisticsSortZh {
-	TranslationsStatisticsSortZh.internal(this._root);
+class Translations$statistics$sort$zh {
+	Translations$statistics$sort$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2634,8 +2652,8 @@ class TranslationsStatisticsSortZh {
 }
 
 // Path: statistics.emptyState
-class TranslationsStatisticsEmptyStateZh {
-	TranslationsStatisticsEmptyStateZh.internal(this._root);
+class Translations$statistics$emptyState$zh {
+	Translations$statistics$emptyState$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2652,8 +2670,8 @@ class TranslationsStatisticsEmptyStateZh {
 }
 
 // Path: server.error
-class TranslationsServerErrorZh {
-	TranslationsServerErrorZh.internal(this._root);
+class Translations$server$error$zh {
+	Translations$server$error$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2679,8 +2697,8 @@ class TranslationsServerErrorZh {
 }
 
 // Path: sharedSpace.dashboard
-class TranslationsSharedSpaceDashboardZh {
-	TranslationsSharedSpaceDashboardZh.internal(this._root);
+class Translations$sharedSpace$dashboard$zh {
+	Translations$sharedSpace$dashboard$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2709,8 +2727,8 @@ class TranslationsSharedSpaceDashboardZh {
 }
 
 // Path: sharedSpace.roles
-class TranslationsSharedSpaceRolesZh {
-	TranslationsSharedSpaceRolesZh.internal(this._root);
+class Translations$sharedSpace$roles$zh {
+	Translations$sharedSpace$roles$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2727,8 +2745,8 @@ class TranslationsSharedSpaceRolesZh {
 }
 
 // Path: errorMapping.generic
-class TranslationsErrorMappingGenericZh {
-	TranslationsErrorMappingGenericZh.internal(this._root);
+class Translations$errorMapping$generic$zh {
+	Translations$errorMapping$generic$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2757,8 +2775,8 @@ class TranslationsErrorMappingGenericZh {
 }
 
 // Path: errorMapping.auth
-class TranslationsErrorMappingAuthZh {
-	TranslationsErrorMappingAuthZh.internal(this._root);
+class Translations$errorMapping$auth$zh {
+	Translations$errorMapping$auth$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2805,8 +2823,8 @@ class TranslationsErrorMappingAuthZh {
 }
 
 // Path: errorMapping.transaction
-class TranslationsErrorMappingTransactionZh {
-	TranslationsErrorMappingTransactionZh.internal(this._root);
+class Translations$errorMapping$transaction$zh {
+	Translations$errorMapping$transaction$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2829,8 +2847,8 @@ class TranslationsErrorMappingTransactionZh {
 }
 
 // Path: errorMapping.space
-class TranslationsErrorMappingSpaceZh {
-	TranslationsErrorMappingSpaceZh.internal(this._root);
+class Translations$errorMapping$space$zh {
+	Translations$errorMapping$space$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2880,8 +2898,8 @@ class TranslationsErrorMappingSpaceZh {
 }
 
 // Path: errorMapping.recurring
-class TranslationsErrorMappingRecurringZh {
-	TranslationsErrorMappingRecurringZh.internal(this._root);
+class Translations$errorMapping$recurring$zh {
+	Translations$errorMapping$recurring$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2895,8 +2913,8 @@ class TranslationsErrorMappingRecurringZh {
 }
 
 // Path: errorMapping.upload
-class TranslationsErrorMappingUploadZh {
-	TranslationsErrorMappingUploadZh.internal(this._root);
+class Translations$errorMapping$upload$zh {
+	Translations$errorMapping$upload$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2916,8 +2934,8 @@ class TranslationsErrorMappingUploadZh {
 }
 
 // Path: errorMapping.ai
-class TranslationsErrorMappingAiZh {
-	TranslationsErrorMappingAiZh.internal(this._root);
+class Translations$errorMapping$ai$zh {
+	Translations$errorMapping$ai$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2934,8 +2952,8 @@ class TranslationsErrorMappingAiZh {
 }
 
 // Path: chat.tools.done
-class TranslationsChatToolsDoneZh {
-	TranslationsChatToolsDoneZh.internal(this._root);
+class Translations$chat$tools$done$zh {
+	Translations$chat$tools$done$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -2998,12 +3016,6 @@ class TranslationsChatToolsDoneZh {
 	/// zh: '预算推荐完成'
 	String get suggestBudget => '预算推荐完成';
 
-	/// zh: '预算模拟准备完成'
-	String get prepareBudgetSimulation => '预算模拟准备完成';
-
-	/// zh: '预算模拟完成'
-	String get simulateBudget => '预算模拟完成';
-
 	/// zh: '共享空间获取完成'
 	String get listSpaces => '共享空间获取完成';
 
@@ -3015,11 +3027,35 @@ class TranslationsChatToolsDoneZh {
 
 	/// zh: '处理完成'
 	String get unknown => '处理完成';
+
+	/// zh: '財務分析完成'
+	String get analyzeFinance => '財務分析完成';
+
+	/// zh: '財務預測完成'
+	String get forecastFinance => '財務預測完成';
+
+	/// zh: '預算分析完成'
+	String get analyzeBudget => '預算分析完成';
+
+	/// zh: '審計分析完成'
+	String get auditAnalysis => '審計分析完成';
+
+	/// zh: '預算處理完成'
+	String get budgetOps => '預算處理完成';
+
+	/// zh: '共享帳單創建完成'
+	String get createSharedTransaction => '共享帳單創建完成';
+
+	/// zh: '预算模拟准备完成'
+	String get prepareBudgetSimulation => '预算模拟准备完成';
+
+	/// zh: '预算模拟完成'
+	String get simulateBudget => '预算模拟完成';
 }
 
 // Path: chat.tools.failed
-class TranslationsChatToolsFailedZh {
-	TranslationsChatToolsFailedZh.internal(this._root);
+class Translations$chat$tools$failed$zh {
+	Translations$chat$tools$failed$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3030,8 +3066,8 @@ class TranslationsChatToolsFailedZh {
 }
 
 // Path: chat.genui.expenseSummary
-class TranslationsChatGenuiExpenseSummaryZh {
-	TranslationsChatGenuiExpenseSummaryZh.internal(this._root);
+class Translations$chat$genui$expenseSummary$zh {
+	Translations$chat$genui$expenseSummary$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3051,8 +3087,8 @@ class TranslationsChatGenuiExpenseSummaryZh {
 }
 
 // Path: chat.genui.transactionList
-class TranslationsChatGenuiTransactionListZh {
-	TranslationsChatGenuiTransactionListZh.internal(this._root);
+class Translations$chat$genui$transactionList$zh {
+	Translations$chat$genui$transactionList$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3075,8 +3111,8 @@ class TranslationsChatGenuiTransactionListZh {
 }
 
 // Path: chat.genui.transactionGroupReceipt
-class TranslationsChatGenuiTransactionGroupReceiptZh {
-	TranslationsChatGenuiTransactionGroupReceiptZh.internal(this._root);
+class Translations$chat$genui$transactionGroupReceipt$zh {
+	Translations$chat$genui$transactionGroupReceipt$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3156,8 +3192,8 @@ class TranslationsChatGenuiTransactionGroupReceiptZh {
 }
 
 // Path: chat.genui.budgetReceipt
-class TranslationsChatGenuiBudgetReceiptZh {
-	TranslationsChatGenuiBudgetReceiptZh.internal(this._root);
+class Translations$chat$genui$budgetReceipt$zh {
+	Translations$chat$genui$budgetReceipt$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3183,8 +3219,8 @@ class TranslationsChatGenuiBudgetReceiptZh {
 }
 
 // Path: chat.genui.budgetStatusCard
-class TranslationsChatGenuiBudgetStatusCardZh {
-	TranslationsChatGenuiBudgetStatusCardZh.internal(this._root);
+class Translations$chat$genui$budgetStatusCard$zh {
+	Translations$chat$genui$budgetStatusCard$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3219,8 +3255,8 @@ class TranslationsChatGenuiBudgetStatusCardZh {
 }
 
 // Path: chat.genui.cashFlowForecast
-class TranslationsChatGenuiCashFlowForecastZh {
-	TranslationsChatGenuiCashFlowForecastZh.internal(this._root);
+class Translations$chat$genui$cashFlowForecast$zh {
+	Translations$chat$genui$cashFlowForecast$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3267,8 +3303,8 @@ class TranslationsChatGenuiCashFlowForecastZh {
 }
 
 // Path: chat.genui.healthScore
-class TranslationsChatGenuiHealthScoreZh {
-	TranslationsChatGenuiHealthScoreZh.internal(this._root);
+class Translations$chat$genui$healthScore$zh {
+	Translations$chat$genui$healthScore$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3283,12 +3319,12 @@ class TranslationsChatGenuiHealthScoreZh {
 	/// zh: '$score分'
 	String scorePoint({required Object score}) => '${score}分';
 
-	late final TranslationsChatGenuiHealthScoreStatusZh status = TranslationsChatGenuiHealthScoreStatusZh.internal(_root);
+	late final Translations$chat$genui$healthScore$status$zh status = Translations$chat$genui$healthScore$status$zh.internal(_root);
 }
 
 // Path: chat.genui.spaceSelector
-class TranslationsChatGenuiSpaceSelectorZh {
-	TranslationsChatGenuiSpaceSelectorZh.internal(this._root);
+class Translations$chat$genui$spaceSelector$zh {
+	Translations$chat$genui$spaceSelector$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3314,8 +3350,8 @@ class TranslationsChatGenuiSpaceSelectorZh {
 }
 
 // Path: chat.genui.transferPath
-class TranslationsChatGenuiTransferPathZh {
-	TranslationsChatGenuiTransferPathZh.internal(this._root);
+class Translations$chat$genui$transferPath$zh {
+	Translations$chat$genui$transferPath$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3386,8 +3422,8 @@ class TranslationsChatGenuiTransferPathZh {
 }
 
 // Path: chat.genui.transactionCard
-class TranslationsChatGenuiTransactionCardZh {
-	TranslationsChatGenuiTransactionCardZh.internal(this._root);
+class Translations$chat$genui$transactionCard$zh {
+	Translations$chat$genui$transactionCard$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3437,8 +3473,8 @@ class TranslationsChatGenuiTransactionCardZh {
 }
 
 // Path: chat.genui.transactionConfirmation
-class TranslationsChatGenuiTransactionConfirmationZh {
-	TranslationsChatGenuiTransactionConfirmationZh.internal(this._root);
+class Translations$chat$genui$transactionConfirmation$zh {
+	Translations$chat$genui$transactionConfirmation$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3452,8 +3488,8 @@ class TranslationsChatGenuiTransactionConfirmationZh {
 }
 
 // Path: chat.genui.budgetAnalysis
-class TranslationsChatGenuiBudgetAnalysisZh {
-	TranslationsChatGenuiBudgetAnalysisZh.internal(this._root);
+class Translations$chat$genui$budgetAnalysis$zh {
+	Translations$chat$genui$budgetAnalysis$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3482,8 +3518,8 @@ class TranslationsChatGenuiBudgetAnalysisZh {
 }
 
 // Path: chat.genui.cashFlowCard
-class TranslationsChatGenuiCashFlowCardZh {
-	TranslationsChatGenuiCashFlowCardZh.internal(this._root);
+class Translations$chat$genui$cashFlowCard$zh {
+	Translations$chat$genui$cashFlowCard$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3512,50 +3548,50 @@ class TranslationsChatGenuiCashFlowCardZh {
 }
 
 // Path: chat.genui.budgetSimulator
-class TranslationsChatGenuiBudgetSimulatorZh {
-	TranslationsChatGenuiBudgetSimulatorZh.internal(this._root);
+class Translations$chat$genui$budgetSimulator$zh {
+	Translations$chat$genui$budgetSimulator$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
 
-	/// zh: '预算压力模拟器'
-	String get title => '预算压力模拟器';
+	/// zh: '預算壓力模擬器'
+	String get title => '預算壓力模擬器';
 
-	/// zh: '目标预算金额'
-	String get targetAmount => '目标预算金额';
+	/// zh: '目標預算金額'
+	String get targetAmount => '目標預算金額';
 
-	/// zh: '预计超支概率'
-	String get overspendProbability => '预计超支概率';
+	/// zh: '預計超支機率'
+	String get overspendProbability => '預計超支機率';
 
-	/// zh: '风险极低'
-	String get riskLow => '风险极低';
+	/// zh: '風險極低'
+	String get riskLow => '風險極低';
 
-	/// zh: '风险适中'
-	String get riskMedium => '风险适中';
+	/// zh: '風險適中'
+	String get riskMedium => '風險適中';
 
 	/// zh: '超支高危'
 	String get riskHigh => '超支高危';
 
-	/// zh: '正在评估历史消费习惯...'
-	String get evaluating => '正在评估历史消费习惯...';
+	/// zh: '正在評估歷史消費習慣...'
+	String get evaluating => '正在評估歷史消費習慣...';
 
-	/// zh: '历史月均'
-	String get historyAverage => '历史月均';
+	/// zh: '歷史月均'
+	String get historyAverage => '歷史月均';
 
-	/// zh: '每日限额'
-	String get dailyAllowance => '每日限额';
+	/// zh: '每日限額'
+	String get dailyAllowance => '每日限額';
 
-	/// zh: '放弃'
-	String get cancel => '放弃';
+	/// zh: '放棄'
+	String get cancel => '放棄';
 
-	/// zh: '采用此预算'
-	String get confirm => '采用此预算';
+	/// zh: '採用此預算'
+	String get confirm => '採用此預算';
 }
 
 // Path: chat.welcome.morning
-class TranslationsChatWelcomeMorningZh {
-	TranslationsChatWelcomeMorningZh.internal(this._root);
+class Translations$chat$welcome$morning$zh {
+	Translations$chat$welcome$morning$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3564,14 +3600,14 @@ class TranslationsChatWelcomeMorningZh {
 	/// zh: '新的一天，从记录开始'
 	String get subtitle => '新的一天，从记录开始';
 
-	late final TranslationsChatWelcomeMorningBreakfastZh breakfast = TranslationsChatWelcomeMorningBreakfastZh.internal(_root);
-	late final TranslationsChatWelcomeMorningYesterdayReviewZh yesterdayReview = TranslationsChatWelcomeMorningYesterdayReviewZh.internal(_root);
-	late final TranslationsChatWelcomeMorningTodayBudgetZh todayBudget = TranslationsChatWelcomeMorningTodayBudgetZh.internal(_root);
+	late final Translations$chat$welcome$morning$breakfast$zh breakfast = Translations$chat$welcome$morning$breakfast$zh.internal(_root);
+	late final Translations$chat$welcome$morning$yesterdayReview$zh yesterdayReview = Translations$chat$welcome$morning$yesterdayReview$zh.internal(_root);
+	late final Translations$chat$welcome$morning$todayBudget$zh todayBudget = Translations$chat$welcome$morning$todayBudget$zh.internal(_root);
 }
 
 // Path: chat.welcome.midday
-class TranslationsChatWelcomeMiddayZh {
-	TranslationsChatWelcomeMiddayZh.internal(this._root);
+class Translations$chat$welcome$midday$zh {
+	Translations$chat$welcome$midday$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3583,14 +3619,14 @@ class TranslationsChatWelcomeMiddayZh {
 	/// zh: '午间时光，顺手记一笔'
 	String get subtitle => '午间时光，顺手记一笔';
 
-	late final TranslationsChatWelcomeMiddayLunchZh lunch = TranslationsChatWelcomeMiddayLunchZh.internal(_root);
-	late final TranslationsChatWelcomeMiddayWeeklyExpenseZh weeklyExpense = TranslationsChatWelcomeMiddayWeeklyExpenseZh.internal(_root);
-	late final TranslationsChatWelcomeMiddayCheckBalanceZh checkBalance = TranslationsChatWelcomeMiddayCheckBalanceZh.internal(_root);
+	late final Translations$chat$welcome$midday$lunch$zh lunch = Translations$chat$welcome$midday$lunch$zh.internal(_root);
+	late final Translations$chat$welcome$midday$weeklyExpense$zh weeklyExpense = Translations$chat$welcome$midday$weeklyExpense$zh.internal(_root);
+	late final Translations$chat$welcome$midday$checkBalance$zh checkBalance = Translations$chat$welcome$midday$checkBalance$zh.internal(_root);
 }
 
 // Path: chat.welcome.afternoon
-class TranslationsChatWelcomeAfternoonZh {
-	TranslationsChatWelcomeAfternoonZh.internal(this._root);
+class Translations$chat$welcome$afternoon$zh {
+	Translations$chat$welcome$afternoon$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3599,14 +3635,14 @@ class TranslationsChatWelcomeAfternoonZh {
 	/// zh: '下午茶时间，理理财'
 	String get subtitle => '下午茶时间，理理财';
 
-	late final TranslationsChatWelcomeAfternoonQuickRecordZh quickRecord = TranslationsChatWelcomeAfternoonQuickRecordZh.internal(_root);
-	late final TranslationsChatWelcomeAfternoonAnalyzeSpendingZh analyzeSpending = TranslationsChatWelcomeAfternoonAnalyzeSpendingZh.internal(_root);
-	late final TranslationsChatWelcomeAfternoonBudgetProgressZh budgetProgress = TranslationsChatWelcomeAfternoonBudgetProgressZh.internal(_root);
+	late final Translations$chat$welcome$afternoon$quickRecord$zh quickRecord = Translations$chat$welcome$afternoon$quickRecord$zh.internal(_root);
+	late final Translations$chat$welcome$afternoon$analyzeSpending$zh analyzeSpending = Translations$chat$welcome$afternoon$analyzeSpending$zh.internal(_root);
+	late final Translations$chat$welcome$afternoon$budgetProgress$zh budgetProgress = Translations$chat$welcome$afternoon$budgetProgress$zh.internal(_root);
 }
 
 // Path: chat.welcome.evening
-class TranslationsChatWelcomeEveningZh {
-	TranslationsChatWelcomeEveningZh.internal(this._root);
+class Translations$chat$welcome$evening$zh {
+	Translations$chat$welcome$evening$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3615,14 +3651,14 @@ class TranslationsChatWelcomeEveningZh {
 	/// zh: '辛苦一天，来理理账'
 	String get subtitle => '辛苦一天，来理理账';
 
-	late final TranslationsChatWelcomeEveningDinnerZh dinner = TranslationsChatWelcomeEveningDinnerZh.internal(_root);
-	late final TranslationsChatWelcomeEveningTodaySummaryZh todaySummary = TranslationsChatWelcomeEveningTodaySummaryZh.internal(_root);
-	late final TranslationsChatWelcomeEveningTomorrowPlanZh tomorrowPlan = TranslationsChatWelcomeEveningTomorrowPlanZh.internal(_root);
+	late final Translations$chat$welcome$evening$dinner$zh dinner = Translations$chat$welcome$evening$dinner$zh.internal(_root);
+	late final Translations$chat$welcome$evening$todaySummary$zh todaySummary = Translations$chat$welcome$evening$todaySummary$zh.internal(_root);
+	late final Translations$chat$welcome$evening$tomorrowPlan$zh tomorrowPlan = Translations$chat$welcome$evening$tomorrowPlan$zh.internal(_root);
 }
 
 // Path: chat.welcome.night
-class TranslationsChatWelcomeNightZh {
-	TranslationsChatWelcomeNightZh.internal(this._root);
+class Translations$chat$welcome$night$zh {
+	Translations$chat$welcome$night$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3634,14 +3670,14 @@ class TranslationsChatWelcomeNightZh {
 	/// zh: '静心理财，规划未来'
 	String get subtitle => '静心理财，规划未来';
 
-	late final TranslationsChatWelcomeNightMakeupRecordZh makeupRecord = TranslationsChatWelcomeNightMakeupRecordZh.internal(_root);
-	late final TranslationsChatWelcomeNightMonthlyReviewZh monthlyReview = TranslationsChatWelcomeNightMonthlyReviewZh.internal(_root);
-	late final TranslationsChatWelcomeNightFinancialThinkingZh financialThinking = TranslationsChatWelcomeNightFinancialThinkingZh.internal(_root);
+	late final Translations$chat$welcome$night$makeupRecord$zh makeupRecord = Translations$chat$welcome$night$makeupRecord$zh.internal(_root);
+	late final Translations$chat$welcome$night$monthlyReview$zh monthlyReview = Translations$chat$welcome$night$monthlyReview$zh.internal(_root);
+	late final Translations$chat$welcome$night$financialThinking$zh financialThinking = Translations$chat$welcome$night$financialThinking$zh.internal(_root);
 }
 
 // Path: chat.genui.healthScore.status
-class TranslationsChatGenuiHealthScoreStatusZh {
-	TranslationsChatGenuiHealthScoreStatusZh.internal(this._root);
+class Translations$chat$genui$healthScore$status$zh {
+	Translations$chat$genui$healthScore$status$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3664,8 +3700,8 @@ class TranslationsChatGenuiHealthScoreStatusZh {
 }
 
 // Path: chat.welcome.morning.breakfast
-class TranslationsChatWelcomeMorningBreakfastZh {
-	TranslationsChatWelcomeMorningBreakfastZh.internal(this._root);
+class Translations$chat$welcome$morning$breakfast$zh {
+	Translations$chat$welcome$morning$breakfast$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3682,8 +3718,8 @@ class TranslationsChatWelcomeMorningBreakfastZh {
 }
 
 // Path: chat.welcome.morning.yesterdayReview
-class TranslationsChatWelcomeMorningYesterdayReviewZh {
-	TranslationsChatWelcomeMorningYesterdayReviewZh.internal(this._root);
+class Translations$chat$welcome$morning$yesterdayReview$zh {
+	Translations$chat$welcome$morning$yesterdayReview$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3700,8 +3736,8 @@ class TranslationsChatWelcomeMorningYesterdayReviewZh {
 }
 
 // Path: chat.welcome.morning.todayBudget
-class TranslationsChatWelcomeMorningTodayBudgetZh {
-	TranslationsChatWelcomeMorningTodayBudgetZh.internal(this._root);
+class Translations$chat$welcome$morning$todayBudget$zh {
+	Translations$chat$welcome$morning$todayBudget$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3718,8 +3754,8 @@ class TranslationsChatWelcomeMorningTodayBudgetZh {
 }
 
 // Path: chat.welcome.midday.lunch
-class TranslationsChatWelcomeMiddayLunchZh {
-	TranslationsChatWelcomeMiddayLunchZh.internal(this._root);
+class Translations$chat$welcome$midday$lunch$zh {
+	Translations$chat$welcome$midday$lunch$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3736,8 +3772,8 @@ class TranslationsChatWelcomeMiddayLunchZh {
 }
 
 // Path: chat.welcome.midday.weeklyExpense
-class TranslationsChatWelcomeMiddayWeeklyExpenseZh {
-	TranslationsChatWelcomeMiddayWeeklyExpenseZh.internal(this._root);
+class Translations$chat$welcome$midday$weeklyExpense$zh {
+	Translations$chat$welcome$midday$weeklyExpense$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3754,8 +3790,8 @@ class TranslationsChatWelcomeMiddayWeeklyExpenseZh {
 }
 
 // Path: chat.welcome.midday.checkBalance
-class TranslationsChatWelcomeMiddayCheckBalanceZh {
-	TranslationsChatWelcomeMiddayCheckBalanceZh.internal(this._root);
+class Translations$chat$welcome$midday$checkBalance$zh {
+	Translations$chat$welcome$midday$checkBalance$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3772,8 +3808,8 @@ class TranslationsChatWelcomeMiddayCheckBalanceZh {
 }
 
 // Path: chat.welcome.afternoon.quickRecord
-class TranslationsChatWelcomeAfternoonQuickRecordZh {
-	TranslationsChatWelcomeAfternoonQuickRecordZh.internal(this._root);
+class Translations$chat$welcome$afternoon$quickRecord$zh {
+	Translations$chat$welcome$afternoon$quickRecord$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3790,8 +3826,8 @@ class TranslationsChatWelcomeAfternoonQuickRecordZh {
 }
 
 // Path: chat.welcome.afternoon.analyzeSpending
-class TranslationsChatWelcomeAfternoonAnalyzeSpendingZh {
-	TranslationsChatWelcomeAfternoonAnalyzeSpendingZh.internal(this._root);
+class Translations$chat$welcome$afternoon$analyzeSpending$zh {
+	Translations$chat$welcome$afternoon$analyzeSpending$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3808,8 +3844,8 @@ class TranslationsChatWelcomeAfternoonAnalyzeSpendingZh {
 }
 
 // Path: chat.welcome.afternoon.budgetProgress
-class TranslationsChatWelcomeAfternoonBudgetProgressZh {
-	TranslationsChatWelcomeAfternoonBudgetProgressZh.internal(this._root);
+class Translations$chat$welcome$afternoon$budgetProgress$zh {
+	Translations$chat$welcome$afternoon$budgetProgress$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3826,8 +3862,8 @@ class TranslationsChatWelcomeAfternoonBudgetProgressZh {
 }
 
 // Path: chat.welcome.evening.dinner
-class TranslationsChatWelcomeEveningDinnerZh {
-	TranslationsChatWelcomeEveningDinnerZh.internal(this._root);
+class Translations$chat$welcome$evening$dinner$zh {
+	Translations$chat$welcome$evening$dinner$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3844,8 +3880,8 @@ class TranslationsChatWelcomeEveningDinnerZh {
 }
 
 // Path: chat.welcome.evening.todaySummary
-class TranslationsChatWelcomeEveningTodaySummaryZh {
-	TranslationsChatWelcomeEveningTodaySummaryZh.internal(this._root);
+class Translations$chat$welcome$evening$todaySummary$zh {
+	Translations$chat$welcome$evening$todaySummary$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3862,8 +3898,8 @@ class TranslationsChatWelcomeEveningTodaySummaryZh {
 }
 
 // Path: chat.welcome.evening.tomorrowPlan
-class TranslationsChatWelcomeEveningTomorrowPlanZh {
-	TranslationsChatWelcomeEveningTomorrowPlanZh.internal(this._root);
+class Translations$chat$welcome$evening$tomorrowPlan$zh {
+	Translations$chat$welcome$evening$tomorrowPlan$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3880,8 +3916,8 @@ class TranslationsChatWelcomeEveningTomorrowPlanZh {
 }
 
 // Path: chat.welcome.night.makeupRecord
-class TranslationsChatWelcomeNightMakeupRecordZh {
-	TranslationsChatWelcomeNightMakeupRecordZh.internal(this._root);
+class Translations$chat$welcome$night$makeupRecord$zh {
+	Translations$chat$welcome$night$makeupRecord$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3898,8 +3934,8 @@ class TranslationsChatWelcomeNightMakeupRecordZh {
 }
 
 // Path: chat.welcome.night.monthlyReview
-class TranslationsChatWelcomeNightMonthlyReviewZh {
-	TranslationsChatWelcomeNightMonthlyReviewZh.internal(this._root);
+class Translations$chat$welcome$night$monthlyReview$zh {
+	Translations$chat$welcome$night$monthlyReview$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -3916,8 +3952,8 @@ class TranslationsChatWelcomeNightMonthlyReviewZh {
 }
 
 // Path: chat.welcome.night.financialThinking
-class TranslationsChatWelcomeNightFinancialThinkingZh {
-	TranslationsChatWelcomeNightFinancialThinkingZh.internal(this._root);
+class Translations$chat$welcome$night$financialThinking$zh {
+	Translations$chat$welcome$night$financialThinking$zh.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -4408,8 +4444,6 @@ extension on Translations {
 			'chat.tools.analyzeCashflow' => '正在分析现金流...',
 			'chat.tools.forecastBalance' => '正在预测未来余额...',
 			'chat.tools.suggestBudget' => '正在推荐预算...',
-			'chat.tools.prepareBudgetSimulation' => '正在准备预算模拟...',
-			'chat.tools.simulateBudget' => '正在模拟预算影响...',
 			'chat.tools.listSpaces' => '正在获取共享空间...',
 			'chat.tools.querySpaceSummary' => '正在查询空间摘要...',
 			'chat.tools.prepareTransfer' => '正在准备转账...',
@@ -4433,14 +4467,30 @@ extension on Translations {
 			'chat.tools.done.analyzeSpending' => '支出分析完成',
 			'chat.tools.done.analyzeCashflow' => '现金流分析完成',
 			'chat.tools.done.suggestBudget' => '预算推荐完成',
-			'chat.tools.done.prepareBudgetSimulation' => '预算模拟准备完成',
-			'chat.tools.done.simulateBudget' => '预算模拟完成',
 			'chat.tools.done.listSpaces' => '共享空间获取完成',
 			'chat.tools.done.querySpaceSummary' => '空间摘要查询完成',
 			'chat.tools.done.prepareTransfer' => '转账准备完成',
 			'chat.tools.done.unknown' => '处理完成',
+			'chat.tools.done.analyzeFinance' => '財務分析完成',
+			'chat.tools.done.forecastFinance' => '財務預測完成',
+			'chat.tools.done.analyzeBudget' => '預算分析完成',
+			'chat.tools.done.auditAnalysis' => '審計分析完成',
+			'chat.tools.done.budgetOps' => '預算處理完成',
+			'chat.tools.done.createSharedTransaction' => '共享帳單創建完成',
+			'chat.tools.done.prepareBudgetSimulation' => '预算模拟准备完成',
+			'chat.tools.done.simulateBudget' => '预算模拟完成',
 			'chat.tools.failed.unknown' => '操作失败',
 			'chat.tools.cancelled' => '已取消',
+			'chat.tools.analyzeFinance' => '正在分析財務狀況...',
+			'chat.tools.forecastFinance' => '正在預測財務趨勢...',
+			'chat.tools.analyzeBudget' => '正在分析預算...',
+			'chat.tools.auditAnalysis' => '正在審計分析...',
+			'chat.tools.budgetOps' => '正在處理預算...',
+			'chat.tools.createSharedTransaction' => '正在創建共享帳單...',
+			'chat.tools.prepareBudgetSimulation' => '正在准备预算模拟',
+			'chat.tools.simulateBudget' => '正在模拟预算',
+			_ => null,
+		} ?? switch (path) {
 			'chat.speechNotRecognized' => '未识别到语音，请重试',
 			'chat.currentExpense' => '当前支出',
 			'chat.loadingComponent' => '正在加载组件...',
@@ -4453,8 +4503,6 @@ extension on Translations {
 			'chat.tryOtherKeywords' => '尝试搜索其他关键词',
 			'chat.searchFailed' => '搜索失败',
 			'chat.deleteConversation' => '删除会话',
-			_ => null,
-		} ?? switch (path) {
 			'chat.deleteConversationConfirm' => '确定要删除这个会话吗？此操作无法撤销。',
 			'chat.conversationDeleted' => '会话已删除',
 			'chat.deleteConversationFailed' => '删除会话失败',
@@ -4594,17 +4642,17 @@ extension on Translations {
 			'chat.genui.cashFlowCard.essentialExpense' => '必要支出',
 			'chat.genui.cashFlowCard.discretionaryExpense' => '可选消费',
 			'chat.genui.cashFlowCard.aiInsight' => 'AI 分析',
-			'chat.genui.budgetSimulator.title' => '预算压力模拟器',
-			'chat.genui.budgetSimulator.targetAmount' => '目标预算金额',
-			'chat.genui.budgetSimulator.overspendProbability' => '预计超支概率',
-			'chat.genui.budgetSimulator.riskLow' => '风险极低',
-			'chat.genui.budgetSimulator.riskMedium' => '风险适中',
+			'chat.genui.budgetSimulator.title' => '預算壓力模擬器',
+			'chat.genui.budgetSimulator.targetAmount' => '目標預算金額',
+			'chat.genui.budgetSimulator.overspendProbability' => '預計超支機率',
+			'chat.genui.budgetSimulator.riskLow' => '風險極低',
+			'chat.genui.budgetSimulator.riskMedium' => '風險適中',
 			'chat.genui.budgetSimulator.riskHigh' => '超支高危',
-			'chat.genui.budgetSimulator.evaluating' => '正在评估历史消费习惯...',
-			'chat.genui.budgetSimulator.historyAverage' => '历史月均',
-			'chat.genui.budgetSimulator.dailyAllowance' => '每日限额',
-			'chat.genui.budgetSimulator.cancel' => '放弃',
-			'chat.genui.budgetSimulator.confirm' => '采用此预算',
+			'chat.genui.budgetSimulator.evaluating' => '正在評估歷史消費習慣...',
+			'chat.genui.budgetSimulator.historyAverage' => '歷史月均',
+			'chat.genui.budgetSimulator.dailyAllowance' => '每日限額',
+			'chat.genui.budgetSimulator.cancel' => '放棄',
+			'chat.genui.budgetSimulator.confirm' => '採用此預算',
 			'chat.welcome.morning.subtitle' => '新的一天，从记录开始',
 			'chat.welcome.morning.breakfast.title' => '早餐记账',
 			'chat.welcome.morning.breakfast.prompt' => '记一笔早餐',

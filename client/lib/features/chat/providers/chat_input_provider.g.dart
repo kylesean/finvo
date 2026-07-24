@@ -10,11 +10,11 @@ part of 'chat_input_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ChatInputNotifier)
-const chatInputProvider = ChatInputNotifierFamily._();
+final chatInputProvider = ChatInputNotifierFamily._();
 
 final class ChatInputNotifierProvider
     extends $NotifierProvider<ChatInputNotifier, ChatInputState> {
-  const ChatInputNotifierProvider._({
+  ChatInputNotifierProvider._({
     required ChatInputNotifierFamily super.from,
     required OnSendMessageCallback super.argument,
   }) : super(
@@ -69,7 +69,7 @@ final class ChatInputNotifierFamily extends $Family
           ChatInputState,
           OnSendMessageCallback
         > {
-  const ChatInputNotifierFamily._()
+  ChatInputNotifierFamily._()
     : super(
         retry: null,
         name: r'chatInputProvider',
@@ -92,8 +92,7 @@ abstract class _$ChatInputNotifier extends $Notifier<ChatInputState> {
   ChatInputState build(OnSendMessageCallback onSendMessage);
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build(_$args);
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ChatInputState, ChatInputState>;
     final element =
         ref.element
@@ -103,6 +102,6 @@ abstract class _$ChatInputNotifier extends $Notifier<ChatInputState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

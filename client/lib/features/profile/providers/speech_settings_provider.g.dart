@@ -11,13 +11,13 @@ part of 'speech_settings_provider.dart';
 /// Speech settings Notifier
 
 @ProviderFor(SpeechSettingsNotifier)
-const speechSettingsProvider = SpeechSettingsNotifierProvider._();
+final speechSettingsProvider = SpeechSettingsNotifierProvider._();
 
 /// Speech settings Notifier
 final class SpeechSettingsNotifierProvider
     extends $NotifierProvider<SpeechSettingsNotifier, SpeechSettingsState> {
   /// Speech settings Notifier
-  const SpeechSettingsNotifierProvider._()
+  SpeechSettingsNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -53,8 +53,7 @@ abstract class _$SpeechSettingsNotifier extends $Notifier<SpeechSettingsState> {
   SpeechSettingsState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<SpeechSettingsState, SpeechSettingsState>;
     final element =
         ref.element
@@ -64,14 +63,14 @@ abstract class _$SpeechSettingsNotifier extends $Notifier<SpeechSettingsState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Convenience provider for the current speech service type
 
 @ProviderFor(currentSpeechServiceType)
-const currentSpeechServiceTypeProvider = CurrentSpeechServiceTypeProvider._();
+final currentSpeechServiceTypeProvider = CurrentSpeechServiceTypeProvider._();
 
 /// Convenience provider for the current speech service type
 
@@ -84,7 +83,7 @@ final class CurrentSpeechServiceTypeProvider
         >
     with $Provider<SpeechServiceType> {
   /// Convenience provider for the current speech service type
-  const CurrentSpeechServiceTypeProvider._()
+  CurrentSpeechServiceTypeProvider._()
     : super(
         from: null,
         argument: null,

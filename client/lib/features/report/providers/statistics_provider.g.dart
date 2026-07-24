@@ -11,13 +11,13 @@ part of 'statistics_provider.dart';
 /// Statistics state notifier
 
 @ProviderFor(Statistics)
-const statisticsProvider = StatisticsProvider._();
+final statisticsProvider = StatisticsProvider._();
 
 /// Statistics state notifier
 final class StatisticsProvider
     extends $NotifierProvider<Statistics, StatisticsState> {
   /// Statistics state notifier
-  const StatisticsProvider._()
+  StatisticsProvider._()
     : super(
         from: null,
         argument: null,
@@ -52,8 +52,7 @@ abstract class _$Statistics extends $Notifier<StatisticsState> {
   StatisticsState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<StatisticsState, StatisticsState>;
     final element =
         ref.element
@@ -63,6 +62,6 @@ abstract class _$Statistics extends $Notifier<StatisticsState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

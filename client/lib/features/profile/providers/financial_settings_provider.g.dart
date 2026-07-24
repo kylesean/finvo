@@ -11,14 +11,14 @@ part of 'financial_settings_provider.dart';
 /// Financial settings state notifier
 
 @ProviderFor(FinancialSettingsNotifier)
-const financialSettingsProvider = FinancialSettingsNotifierProvider._();
+final financialSettingsProvider = FinancialSettingsNotifierProvider._();
 
 /// Financial settings state notifier
 final class FinancialSettingsNotifierProvider
     extends
         $NotifierProvider<FinancialSettingsNotifier, FinancialSettingsState> {
   /// Financial settings state notifier
-  const FinancialSettingsNotifierProvider._()
+  FinancialSettingsNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -55,8 +55,7 @@ abstract class _$FinancialSettingsNotifier
   FinancialSettingsState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<FinancialSettingsState, FinancialSettingsState>;
     final element =
@@ -67,6 +66,6 @@ abstract class _$FinancialSettingsNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

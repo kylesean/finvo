@@ -10,11 +10,11 @@ part of 'exchange_rate_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ExchangeRate)
-const exchangeRateProvider = ExchangeRateProvider._();
+final exchangeRateProvider = ExchangeRateProvider._();
 
 final class ExchangeRateProvider
     extends $AsyncNotifierProvider<ExchangeRate, ExchangeRateResponse> {
-  const ExchangeRateProvider._()
+  ExchangeRateProvider._()
     : super(
         from: null,
         argument: null,
@@ -39,8 +39,7 @@ abstract class _$ExchangeRate extends $AsyncNotifier<ExchangeRateResponse> {
   FutureOr<ExchangeRateResponse> build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<ExchangeRateResponse>, ExchangeRateResponse>;
@@ -55,6 +54,6 @@ abstract class _$ExchangeRate extends $AsyncNotifier<ExchangeRateResponse> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

@@ -10,7 +10,7 @@ part of 'shared_space_service.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(sharedSpaceService)
-const sharedSpaceServiceProvider = SharedSpaceServiceProvider._();
+final sharedSpaceServiceProvider = SharedSpaceServiceProvider._();
 
 final class SharedSpaceServiceProvider
     extends
@@ -20,7 +20,7 @@ final class SharedSpaceServiceProvider
           SharedSpaceService
         >
     with $Provider<SharedSpaceService> {
-  const SharedSpaceServiceProvider._()
+  SharedSpaceServiceProvider._()
     : super(
         from: null,
         argument: null,

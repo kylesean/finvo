@@ -15,14 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatMessage {
 
-@JsonKey(defaultValue: '') String get id;@JsonKey(fromJson: _senderFromJson, toJson: _senderToJson, readValue: _readSenderValue) MessageSender get sender;@JsonKey(fromJson: _dateTimeNullableFromJson, toJson: _dateTimeNullableToJson) DateTime? get timestamp; String get content;@JsonKey(name: 'messageType') MessageType get messageType;@JsonKey(name: 'feedbackStatus') AIFeedbackStatus get feedbackStatus;@JsonKey(name: 'streamingStatus') StreamingStatus get streamingStatus;@JsonKey(name: 'isTyping') bool get isTyping;// conversationId exists in each message from API response, can be added
-@JsonKey(name: 'conversationId') String? get conversationId;// GenUI surface IDs
-@JsonKey(name: 'surfaceIds') List<String> get surfaceIds;// Tool calls made by AI (from history)
-@JsonKey(name: 'toolCalls', fromJson: _toolCallsFromJson, toJson: _toolCallsToJson) List<ToolCallInfo> get toolCalls;// UI components for GenUI rendering (from history)
-@JsonKey(name: 'uiComponents', fromJson: _uiComponentsFromJson, toJson: _uiComponentsToJson) List<UIComponentInfo> get uiComponents;// Unified content parts (Text, ToolCall, or UIComponent)
-// This allows interleaving text and tools in order.
-@JsonKey(name: 'fullContent', fromJson: _fullContentFromJson, toJson: _fullContentToJson, readValue: _readFullContentValue) List<MessageContentPart> get fullContent;@JsonKey(name: 'attachments', fromJson: _attachmentsFromJson, toJson: _attachmentsToJson) List<ChatMessageAttachment> get attachments;// Media file data (attachments in user messages)
-@JsonKey(name: 'mediaFiles', fromJson: _mediaFilesFromJson, toJson: _mediaFilesToJson) List<DataUriFile> get mediaFiles;
+@JsonKey(defaultValue: '') String get id;@JsonKey(fromJson: _senderFromJson, toJson: _senderToJson, readValue: _readSenderValue) MessageSender get sender;@JsonKey(fromJson: _dateTimeNullableFromJson, toJson: _dateTimeNullableToJson) DateTime? get timestamp; String get content;@JsonKey(name: 'messageType') MessageType get messageType;@JsonKey(name: 'feedbackStatus') AIFeedbackStatus get feedbackStatus;@JsonKey(name: 'streamingStatus') StreamingStatus get streamingStatus;@JsonKey(name: 'isTyping') bool get isTyping;@JsonKey(name: 'conversationId') String? get conversationId;@JsonKey(name: 'surfaceIds') List<String> get surfaceIds;@JsonKey(name: 'toolCalls', fromJson: _toolCallsFromJson, toJson: _toolCallsToJson) List<ToolCallInfo> get toolCalls;@JsonKey(name: 'uiComponents', fromJson: _uiComponentsFromJson, toJson: _uiComponentsToJson) List<UIComponentInfo> get uiComponents;@JsonKey(name: 'fullContent', fromJson: _fullContentFromJson, toJson: _fullContentToJson, readValue: _readFullContentValue) List<MessageContentPart> get fullContent;@JsonKey(name: 'attachments', fromJson: _attachmentsFromJson, toJson: _attachmentsToJson) List<ChatMessageAttachment> get attachments;@JsonKey(name: 'mediaFiles', fromJson: _mediaFilesFromJson, toJson: _mediaFilesToJson) List<DataUriFile> get mediaFiles;
 /// Create a copy of ChatMessage
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -241,40 +234,29 @@ class _ChatMessage implements ChatMessage {
 @override@JsonKey(name: 'feedbackStatus') final  AIFeedbackStatus feedbackStatus;
 @override@JsonKey(name: 'streamingStatus') final  StreamingStatus streamingStatus;
 @override@JsonKey(name: 'isTyping') final  bool isTyping;
-// conversationId exists in each message from API response, can be added
 @override@JsonKey(name: 'conversationId') final  String? conversationId;
-// GenUI surface IDs
  final  List<String> _surfaceIds;
-// GenUI surface IDs
 @override@JsonKey(name: 'surfaceIds') List<String> get surfaceIds {
   if (_surfaceIds is EqualUnmodifiableListView) return _surfaceIds;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_surfaceIds);
 }
 
-// Tool calls made by AI (from history)
  final  List<ToolCallInfo> _toolCalls;
-// Tool calls made by AI (from history)
 @override@JsonKey(name: 'toolCalls', fromJson: _toolCallsFromJson, toJson: _toolCallsToJson) List<ToolCallInfo> get toolCalls {
   if (_toolCalls is EqualUnmodifiableListView) return _toolCalls;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_toolCalls);
 }
 
-// UI components for GenUI rendering (from history)
  final  List<UIComponentInfo> _uiComponents;
-// UI components for GenUI rendering (from history)
 @override@JsonKey(name: 'uiComponents', fromJson: _uiComponentsFromJson, toJson: _uiComponentsToJson) List<UIComponentInfo> get uiComponents {
   if (_uiComponents is EqualUnmodifiableListView) return _uiComponents;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_uiComponents);
 }
 
-// Unified content parts (Text, ToolCall, or UIComponent)
-// This allows interleaving text and tools in order.
  final  List<MessageContentPart> _fullContent;
-// Unified content parts (Text, ToolCall, or UIComponent)
-// This allows interleaving text and tools in order.
 @override@JsonKey(name: 'fullContent', fromJson: _fullContentFromJson, toJson: _fullContentToJson, readValue: _readFullContentValue) List<MessageContentPart> get fullContent {
   if (_fullContent is EqualUnmodifiableListView) return _fullContent;
   // ignore: implicit_dynamic_type
@@ -288,9 +270,7 @@ class _ChatMessage implements ChatMessage {
   return EqualUnmodifiableListView(_attachments);
 }
 
-// Media file data (attachments in user messages)
  final  List<DataUriFile> _mediaFiles;
-// Media file data (attachments in user messages)
 @override@JsonKey(name: 'mediaFiles', fromJson: _mediaFilesFromJson, toJson: _mediaFilesToJson) List<DataUriFile> get mediaFiles {
   if (_mediaFiles is EqualUnmodifiableListView) return _mediaFiles;
   // ignore: implicit_dynamic_type

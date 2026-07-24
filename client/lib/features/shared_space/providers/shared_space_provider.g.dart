@@ -10,11 +10,11 @@ part of 'shared_space_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(SharedSpaceNotifier)
-const sharedSpaceProvider = SharedSpaceNotifierProvider._();
+final sharedSpaceProvider = SharedSpaceNotifierProvider._();
 
 final class SharedSpaceNotifierProvider
     extends $NotifierProvider<SharedSpaceNotifier, SharedSpaceState> {
-  const SharedSpaceNotifierProvider._()
+  SharedSpaceNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,8 +48,7 @@ abstract class _$SharedSpaceNotifier extends $Notifier<SharedSpaceState> {
   SharedSpaceState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<SharedSpaceState, SharedSpaceState>;
     final element =
         ref.element
@@ -59,12 +58,12 @@ abstract class _$SharedSpaceNotifier extends $Notifier<SharedSpaceState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(spaceDetail)
-const spaceDetailProvider = SpaceDetailFamily._();
+final spaceDetailProvider = SpaceDetailFamily._();
 
 final class SpaceDetailProvider
     extends
@@ -74,7 +73,7 @@ final class SpaceDetailProvider
           FutureOr<SharedSpace>
         >
     with $FutureModifier<SharedSpace>, $FutureProvider<SharedSpace> {
-  const SpaceDetailProvider._({
+  SpaceDetailProvider._({
     required SpaceDetailFamily super.from,
     required String super.argument,
   }) : super(
@@ -122,7 +121,7 @@ String _$spaceDetailHash() => r'6aff9136a09a1b8c7f83a3fb932f73908b740909';
 
 final class SpaceDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SharedSpace>, String> {
-  const SpaceDetailFamily._()
+  SpaceDetailFamily._()
     : super(
         retry: null,
         name: r'spaceDetailProvider',
@@ -139,7 +138,7 @@ final class SpaceDetailFamily extends $Family
 }
 
 @ProviderFor(spaceSettlement)
-const spaceSettlementProvider = SpaceSettlementFamily._();
+final spaceSettlementProvider = SpaceSettlementFamily._();
 
 final class SpaceSettlementProvider
     extends
@@ -149,7 +148,7 @@ final class SpaceSettlementProvider
           FutureOr<Settlement>
         >
     with $FutureModifier<Settlement>, $FutureProvider<Settlement> {
-  const SpaceSettlementProvider._({
+  SpaceSettlementProvider._({
     required SpaceSettlementFamily super.from,
     required String super.argument,
   }) : super(
@@ -196,7 +195,7 @@ String _$spaceSettlementHash() => r'4d3556fbef2a5b7da9a8152b4d4e44313ca68f61';
 
 final class SpaceSettlementFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Settlement>, String> {
-  const SpaceSettlementFamily._()
+  SpaceSettlementFamily._()
     : super(
         retry: null,
         name: r'spaceSettlementProvider',
@@ -213,7 +212,7 @@ final class SpaceSettlementFamily extends $Family
 }
 
 @ProviderFor(spaceTransactions)
-const spaceTransactionsProvider = SpaceTransactionsFamily._();
+final spaceTransactionsProvider = SpaceTransactionsFamily._();
 
 final class SpaceTransactionsProvider
     extends
@@ -225,7 +224,7 @@ final class SpaceTransactionsProvider
     with
         $FutureModifier<SpaceTransactionListResponse>,
         $FutureProvider<SpaceTransactionListResponse> {
-  const SpaceTransactionsProvider._({
+  SpaceTransactionsProvider._({
     required SpaceTransactionsFamily super.from,
     required (String, {int page, int limit}) super.argument,
   }) : super(
@@ -282,7 +281,7 @@ final class SpaceTransactionsFamily extends $Family
           FutureOr<SpaceTransactionListResponse>,
           (String, {int page, int limit})
         > {
-  const SpaceTransactionsFamily._()
+  SpaceTransactionsFamily._()
     : super(
         retry: null,
         name: r'spaceTransactionsProvider',

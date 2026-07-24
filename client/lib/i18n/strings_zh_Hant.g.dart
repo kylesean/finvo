@@ -39,42 +39,45 @@ class TranslationsZhHant extends Translations with BaseTranslations<AppLocale, T
 	TranslationsZhHant $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsZhHant(meta: meta ?? this.$meta);
 
 	// Translations
-	@override late final _TranslationsCommonZhHant common = _TranslationsCommonZhHant._(_root);
-	@override late final _TranslationsTimeZhHant time = _TranslationsTimeZhHant._(_root);
-	@override late final _TranslationsGreetingZhHant greeting = _TranslationsGreetingZhHant._(_root);
-	@override late final _TranslationsNavigationZhHant navigation = _TranslationsNavigationZhHant._(_root);
-	@override late final _TranslationsAuthZhHant auth = _TranslationsAuthZhHant._(_root);
-	@override late final _TranslationsTransactionZhHant transaction = _TranslationsTransactionZhHant._(_root);
-	@override late final _TranslationsHomeZhHant home = _TranslationsHomeZhHant._(_root);
-	@override late final _TranslationsCommentZhHant comment = _TranslationsCommentZhHant._(_root);
-	@override late final _TranslationsCalendarZhHant calendar = _TranslationsCalendarZhHant._(_root);
-	@override late final _TranslationsCategoryZhHant category = _TranslationsCategoryZhHant._(_root);
-	@override late final _TranslationsSettingsZhHant settings = _TranslationsSettingsZhHant._(_root);
-	@override late final _TranslationsAppearanceZhHant appearance = _TranslationsAppearanceZhHant._(_root);
-	@override late final _TranslationsSpeechZhHant speech = _TranslationsSpeechZhHant._(_root);
-	@override late final _TranslationsAmountThemeZhHant amountTheme = _TranslationsAmountThemeZhHant._(_root);
-	@override late final _TranslationsLocaleZhHant locale = _TranslationsLocaleZhHant._(_root);
-	@override late final _TranslationsBudgetZhHant budget = _TranslationsBudgetZhHant._(_root);
-	@override late final _TranslationsDateRangeZhHant dateRange = _TranslationsDateRangeZhHant._(_root);
-	@override late final _TranslationsForecastZhHant forecast = _TranslationsForecastZhHant._(_root);
-	@override late final _TranslationsChatZhHant chat = _TranslationsChatZhHant._(_root);
-	@override late final _TranslationsFootprintZhHant footprint = _TranslationsFootprintZhHant._(_root);
-	@override late final _TranslationsMediaZhHant media = _TranslationsMediaZhHant._(_root);
-	@override late final _TranslationsErrorZhHant error = _TranslationsErrorZhHant._(_root);
-	@override late final _TranslationsFontTestZhHant fontTest = _TranslationsFontTestZhHant._(_root);
-	@override late final _TranslationsWizardZhHant wizard = _TranslationsWizardZhHant._(_root);
-	@override late final _TranslationsUserZhHant user = _TranslationsUserZhHant._(_root);
-	@override late final _TranslationsAccountZhHant account = _TranslationsAccountZhHant._(_root);
-	@override late final _TranslationsFinancialZhHant financial = _TranslationsFinancialZhHant._(_root);
-	@override late final _TranslationsAppZhHant app = _TranslationsAppZhHant._(_root);
-	@override late final _TranslationsStatisticsZhHant statistics = _TranslationsStatisticsZhHant._(_root);
-	@override late final _TranslationsCurrencyZhHant currency = _TranslationsCurrencyZhHant._(_root);
-	@override late final _TranslationsSharedSpaceZhHant sharedSpace = _TranslationsSharedSpaceZhHant._(_root);
+	@override late final _Translations$common$zh_Hant common = _Translations$common$zh_Hant._(_root);
+	@override late final _Translations$time$zh_Hant time = _Translations$time$zh_Hant._(_root);
+	@override late final _Translations$greeting$zh_Hant greeting = _Translations$greeting$zh_Hant._(_root);
+	@override late final _Translations$navigation$zh_Hant navigation = _Translations$navigation$zh_Hant._(_root);
+	@override late final _Translations$auth$zh_Hant auth = _Translations$auth$zh_Hant._(_root);
+	@override late final _Translations$transaction$zh_Hant transaction = _Translations$transaction$zh_Hant._(_root);
+	@override late final _Translations$home$zh_Hant home = _Translations$home$zh_Hant._(_root);
+	@override late final _Translations$comment$zh_Hant comment = _Translations$comment$zh_Hant._(_root);
+	@override late final _Translations$calendar$zh_Hant calendar = _Translations$calendar$zh_Hant._(_root);
+	@override late final _Translations$category$zh_Hant category = _Translations$category$zh_Hant._(_root);
+	@override late final _Translations$settings$zh_Hant settings = _Translations$settings$zh_Hant._(_root);
+	@override late final _Translations$appearance$zh_Hant appearance = _Translations$appearance$zh_Hant._(_root);
+	@override late final _Translations$speech$zh_Hant speech = _Translations$speech$zh_Hant._(_root);
+	@override late final _Translations$amountTheme$zh_Hant amountTheme = _Translations$amountTheme$zh_Hant._(_root);
+	@override late final _Translations$locale$zh_Hant locale = _Translations$locale$zh_Hant._(_root);
+	@override late final _Translations$budget$zh_Hant budget = _Translations$budget$zh_Hant._(_root);
+	@override late final _Translations$dateRange$zh_Hant dateRange = _Translations$dateRange$zh_Hant._(_root);
+	@override late final _Translations$forecast$zh_Hant forecast = _Translations$forecast$zh_Hant._(_root);
+	@override late final _Translations$chat$zh_Hant chat = _Translations$chat$zh_Hant._(_root);
+	@override late final _Translations$footprint$zh_Hant footprint = _Translations$footprint$zh_Hant._(_root);
+	@override late final _Translations$media$zh_Hant media = _Translations$media$zh_Hant._(_root);
+	@override late final _Translations$error$zh_Hant error = _Translations$error$zh_Hant._(_root);
+	@override late final _Translations$fontTest$zh_Hant fontTest = _Translations$fontTest$zh_Hant._(_root);
+	@override late final _Translations$wizard$zh_Hant wizard = _Translations$wizard$zh_Hant._(_root);
+	@override late final _Translations$user$zh_Hant user = _Translations$user$zh_Hant._(_root);
+	@override late final _Translations$account$zh_Hant account = _Translations$account$zh_Hant._(_root);
+	@override late final _Translations$financial$zh_Hant financial = _Translations$financial$zh_Hant._(_root);
+	@override late final _Translations$app$zh_Hant app = _Translations$app$zh_Hant._(_root);
+	@override late final _Translations$statistics$zh_Hant statistics = _Translations$statistics$zh_Hant._(_root);
+	@override late final _Translations$currency$zh_Hant currency = _Translations$currency$zh_Hant._(_root);
+	@override late final _Translations$sharedSpace$zh_Hant sharedSpace = _Translations$sharedSpace$zh_Hant._(_root);
+	@override late final _Translations$budgetSuggestion$zh_Hant budgetSuggestion = _Translations$budgetSuggestion$zh_Hant._(_root);
+	@override late final _Translations$server$zh_Hant server = _Translations$server$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$zh_Hant errorMapping = _Translations$errorMapping$zh_Hant._(_root);
 }
 
 // Path: common
-class _TranslationsCommonZhHant extends TranslationsCommonZh {
-	_TranslationsCommonZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$common$zh_Hant extends Translations$common$zh {
+	_Translations$common$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -107,8 +110,8 @@ class _TranslationsCommonZhHant extends TranslationsCommonZh {
 }
 
 // Path: time
-class _TranslationsTimeZhHant extends TranslationsTimeZh {
-	_TranslationsTimeZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$time$zh_Hant extends Translations$time$zh {
+	_Translations$time$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -129,8 +132,8 @@ class _TranslationsTimeZhHant extends TranslationsTimeZh {
 }
 
 // Path: greeting
-class _TranslationsGreetingZhHant extends TranslationsGreetingZh {
-	_TranslationsGreetingZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$greeting$zh_Hant extends Translations$greeting$zh {
+	_Translations$greeting$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -141,8 +144,8 @@ class _TranslationsGreetingZhHant extends TranslationsGreetingZh {
 }
 
 // Path: navigation
-class _TranslationsNavigationZhHant extends TranslationsNavigationZh {
-	_TranslationsNavigationZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$navigation$zh_Hant extends Translations$navigation$zh {
+	_Translations$navigation$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -154,8 +157,8 @@ class _TranslationsNavigationZhHant extends TranslationsNavigationZh {
 }
 
 // Path: auth
-class _TranslationsAuthZhHant extends TranslationsAuthZh {
-	_TranslationsAuthZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$auth$zh_Hant extends Translations$auth$zh {
+	_Translations$auth$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -177,14 +180,17 @@ class _TranslationsAuthZhHant extends TranslationsAuthZh {
 	@override String get completeRegistration => '完成註冊';
 	@override String get registrationSuccess => '註冊成功!';
 	@override String get registrationFailed => '註冊失敗';
-	@override late final _TranslationsAuthEmailZhHant email = _TranslationsAuthEmailZhHant._(_root);
-	@override late final _TranslationsAuthPasswordZhHant password = _TranslationsAuthPasswordZhHant._(_root);
-	@override late final _TranslationsAuthVerificationCodeZhHant verificationCode = _TranslationsAuthVerificationCodeZhHant._(_root);
+	@override late final _Translations$auth$email$zh_Hant email = _Translations$auth$email$zh_Hant._(_root);
+	@override late final _Translations$auth$password$zh_Hant password = _Translations$auth$password$zh_Hant._(_root);
+	@override late final _Translations$auth$verificationCode$zh_Hant verificationCode = _Translations$auth$verificationCode$zh_Hant._(_root);
+	@override String get logoutSuccess => 'Logged out successfully';
+	@override String get confirmLogoutTitle => 'Confirm Logout';
+	@override String get confirmLogoutContent => 'Are you sure you want to log out?';
 }
 
 // Path: transaction
-class _TranslationsTransactionZhHant extends TranslationsTransactionZh {
-	_TranslationsTransactionZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$transaction$zh_Hant extends Translations$transaction$zh {
+	_Translations$transaction$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -218,11 +224,25 @@ class _TranslationsTransactionZhHant extends TranslationsTransactionZh {
 	@override String get noActions => '沒有可用的操作';
 	@override String get deleted => '已刪除';
 	@override String get deleteFailed => '刪除失敗，請稍後重試';
+	@override String get linkedAccount => 'Linked Account';
+	@override String get linkedSpace => 'Linked Space';
+	@override String get notLinked => 'Not linked';
+	@override String get link => 'Link';
+	@override String get changeAccount => 'Change Account';
+	@override String get addSpace => 'Add Space';
+	@override String nSpaces({required Object count}) => '${count} spaces';
+	@override String get selectLinkedAccount => 'Select Linked Account';
+	@override String get selectLinkedSpace => 'Select Linked Space';
+	@override String get noSpacesAvailable => 'No spaces available';
+	@override String get linkSuccess => 'Link successful';
+	@override String get linkFailed => 'Link failed';
+	@override String get rawInput => 'Message';
+	@override String get noRawInput => 'No message';
 }
 
 // Path: home
-class _TranslationsHomeZhHant extends TranslationsHomeZh {
-	_TranslationsHomeZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$home$zh_Hant extends Translations$home$zh {
+	_Translations$home$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -240,8 +260,8 @@ class _TranslationsHomeZhHant extends TranslationsHomeZh {
 }
 
 // Path: comment
-class _TranslationsCommentZhHant extends TranslationsCommentZh {
-	_TranslationsCommentZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$comment$zh_Hant extends Translations$comment$zh {
+	_Translations$comment$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -265,14 +285,14 @@ class _TranslationsCommentZhHant extends TranslationsCommentZh {
 }
 
 // Path: calendar
-class _TranslationsCalendarZhHant extends TranslationsCalendarZh {
-	_TranslationsCalendarZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$calendar$zh_Hant extends Translations$calendar$zh {
+	_Translations$calendar$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
 	@override String get title => '消費日曆';
-	@override late final _TranslationsCalendarWeekdaysZhHant weekdays = _TranslationsCalendarWeekdaysZhHant._(_root);
+	@override late final _Translations$calendar$weekdays$zh_Hant weekdays = _Translations$calendar$weekdays$zh_Hant._(_root);
 	@override String get loadFailed => '載入日曆數據失敗';
 	@override String thisMonth({required Object amount}) => '本月: ${amount}';
 	@override String get counting => '統計中...';
@@ -283,8 +303,8 @@ class _TranslationsCalendarZhHant extends TranslationsCalendarZh {
 }
 
 // Path: category
-class _TranslationsCategoryZhHant extends TranslationsCategoryZh {
-	_TranslationsCategoryZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$category$zh_Hant extends Translations$category$zh {
+	_Translations$category$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -318,8 +338,8 @@ class _TranslationsCategoryZhHant extends TranslationsCategoryZh {
 }
 
 // Path: settings
-class _TranslationsSettingsZhHant extends TranslationsSettingsZh {
-	_TranslationsSettingsZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$settings$zh_Hant extends Translations$settings$zh {
+	_Translations$settings$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -356,11 +376,18 @@ class _TranslationsSettingsZhHant extends TranslationsSettingsZh {
 	@override String get userTypeRegular => '普通用戶';
 	@override String get selectAmountStyle => '選擇金額顯示樣式';
 	@override String get currencyDescription => '選擇您偏好的顯示幣種。所有金額都將以此幣種顯示。';
+	@override String get amountStyleNotice => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.';
+	@override String get editUsername => 'Edit Username';
+	@override String get enterUsername => 'Enter username';
+	@override String get usernameRequired => 'Username is required';
+	@override String get usernameUpdated => 'Username updated';
+	@override String get avatarUpdated => 'Avatar updated';
+	@override String get appearanceUpdated => '外观设置已更新';
 }
 
 // Path: appearance
-class _TranslationsAppearanceZhHant extends TranslationsAppearanceZh {
-	_TranslationsAppearanceZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$appearance$zh_Hant extends Translations$appearance$zh {
+	_Translations$appearance$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -371,11 +398,12 @@ class _TranslationsAppearanceZhHant extends TranslationsAppearanceZh {
 	@override String get dark => '深色';
 	@override String get system => '跟隨系統';
 	@override String get colorScheme => '配色方案';
+	@override late final _Translations$appearance$palettes$zh_Hant palettes = _Translations$appearance$palettes$zh_Hant._(_root);
 }
 
 // Path: speech
-class _TranslationsSpeechZhHant extends TranslationsSpeechZh {
-	_TranslationsSpeechZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$speech$zh_Hant extends Translations$speech$zh {
+	_Translations$speech$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -399,8 +427,8 @@ class _TranslationsSpeechZhHant extends TranslationsSpeechZh {
 }
 
 // Path: amountTheme
-class _TranslationsAmountThemeZhHant extends TranslationsAmountThemeZh {
-	_TranslationsAmountThemeZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$amountTheme$zh_Hant extends Translations$amountTheme$zh {
+	_Translations$amountTheme$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -416,8 +444,8 @@ class _TranslationsAmountThemeZhHant extends TranslationsAmountThemeZh {
 }
 
 // Path: locale
-class _TranslationsLocaleZhHant extends TranslationsLocaleZh {
-	_TranslationsLocaleZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$locale$zh_Hant extends Translations$locale$zh {
+	_Translations$locale$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -430,8 +458,8 @@ class _TranslationsLocaleZhHant extends TranslationsLocaleZh {
 }
 
 // Path: budget
-class _TranslationsBudgetZhHant extends TranslationsBudgetZh {
-	_TranslationsBudgetZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$budget$zh_Hant extends Translations$budget$zh {
+	_Translations$budget$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -536,8 +564,8 @@ class _TranslationsBudgetZhHant extends TranslationsBudgetZh {
 }
 
 // Path: dateRange
-class _TranslationsDateRangeZhHant extends TranslationsDateRangeZh {
-	_TranslationsDateRangeZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$dateRange$zh_Hant extends Translations$dateRange$zh {
+	_Translations$dateRange$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -550,8 +578,8 @@ class _TranslationsDateRangeZhHant extends TranslationsDateRangeZh {
 }
 
 // Path: forecast
-class _TranslationsForecastZhHant extends TranslationsForecastZh {
-	_TranslationsForecastZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$forecast$zh_Hant extends Translations$forecast$zh {
+	_Translations$forecast$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -591,12 +619,12 @@ class _TranslationsForecastZhHant extends TranslationsForecastZh {
 	@override String get frugalAmount => '50-100元/天';
 	@override String get comfortableAmount => '100-200元/天';
 	@override String get relaxedAmount => '200-300元/天';
-	@override late final _TranslationsForecastRecurringTransactionZhHant recurringTransaction = _TranslationsForecastRecurringTransactionZhHant._(_root);
+	@override late final _Translations$forecast$recurringTransaction$zh_Hant recurringTransaction = _Translations$forecast$recurringTransaction$zh_Hant._(_root);
 }
 
 // Path: chat
-class _TranslationsChatZhHant extends TranslationsChatZh {
-	_TranslationsChatZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$zh_Hant extends Translations$chat$zh {
+	_Translations$chat$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -607,7 +635,7 @@ class _TranslationsChatZhHant extends TranslationsChatZh {
 	@override String get inputMessage => '輸入消息...';
 	@override String get listening => '正在聆聽...';
 	@override String get aiThinking => '正在處理...';
-	@override late final _TranslationsChatToolsZhHant tools = _TranslationsChatToolsZhHant._(_root);
+	@override late final _Translations$chat$tools$zh_Hant tools = _Translations$chat$tools$zh_Hant._(_root);
 	@override String get speechNotRecognized => '未識別到語音，請重試';
 	@override String get currentExpense => '当前支出';
 	@override String get loadingComponent => '正在載入組件...';
@@ -623,13 +651,14 @@ class _TranslationsChatZhHant extends TranslationsChatZh {
 	@override String get deleteConversationConfirm => '確定要刪除這個對話嗎？此操作無法撤回。';
 	@override String get conversationDeleted => '對話已刪除';
 	@override String get deleteConversationFailed => '刪除對話失敗';
-	@override late final _TranslationsChatTransferWizardZhHant transferWizard = _TranslationsChatTransferWizardZhHant._(_root);
-	@override late final _TranslationsChatGenuiZhHant genui = _TranslationsChatGenuiZhHant._(_root);
+	@override late final _Translations$chat$transferWizard$zh_Hant transferWizard = _Translations$chat$transferWizard$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$zh_Hant genui = _Translations$chat$genui$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$zh_Hant welcome = _Translations$chat$welcome$zh_Hant._(_root);
 }
 
 // Path: footprint
-class _TranslationsFootprintZhHant extends TranslationsFootprintZh {
-	_TranslationsFootprintZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$footprint$zh_Hant extends Translations$footprint$zh {
+	_Translations$footprint$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -639,8 +668,8 @@ class _TranslationsFootprintZhHant extends TranslationsFootprintZh {
 }
 
 // Path: media
-class _TranslationsMediaZhHant extends TranslationsMediaZh {
-	_TranslationsMediaZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$media$zh_Hant extends Translations$media$zh {
+	_Translations$media$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -665,8 +694,8 @@ class _TranslationsMediaZhHant extends TranslationsMediaZh {
 }
 
 // Path: error
-class _TranslationsErrorZhHant extends TranslationsErrorZh {
-	_TranslationsErrorZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$error$zh_Hant extends Translations$error$zh {
+	_Translations$error$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -685,12 +714,12 @@ class _TranslationsErrorZhHant extends TranslationsErrorZh {
 	@override String get validationError => '文件驗證失敗';
 	@override String get unknownError => '未知錯誤';
 	@override String get unknownErrorHint => '發生了意外錯誤，請重試或聯繫技術支持。';
-	@override late final _TranslationsErrorGenuiZhHant genui = _TranslationsErrorGenuiZhHant._(_root);
+	@override late final _Translations$error$genui$zh_Hant genui = _Translations$error$genui$zh_Hant._(_root);
 }
 
 // Path: fontTest
-class _TranslationsFontTestZhHant extends TranslationsFontTestZh {
-	_TranslationsFontTestZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$fontTest$zh_Hant extends Translations$fontTest$zh {
+	_Translations$fontTest$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -707,8 +736,8 @@ class _TranslationsFontTestZhHant extends TranslationsFontTestZh {
 }
 
 // Path: wizard
-class _TranslationsWizardZhHant extends TranslationsWizardZh {
-	_TranslationsWizardZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$wizard$zh_Hant extends Translations$wizard$zh {
+	_Translations$wizard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -719,8 +748,8 @@ class _TranslationsWizardZhHant extends TranslationsWizardZh {
 }
 
 // Path: user
-class _TranslationsUserZhHant extends TranslationsUserZh {
-	_TranslationsUserZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$user$zh_Hant extends Translations$user$zh {
+	_Translations$user$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -730,8 +759,8 @@ class _TranslationsUserZhHant extends TranslationsUserZh {
 }
 
 // Path: account
-class _TranslationsAccountZhHant extends TranslationsAccountZh {
-	_TranslationsAccountZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$account$zh_Hant extends Translations$account$zh {
+	_Translations$account$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -762,11 +791,12 @@ class _TranslationsAccountZhHant extends TranslationsAccountZh {
 	@override String get receivable => '應收款項';
 	@override String get payable => '應付款項';
 	@override String get other => '其他帳戶';
+	@override late final _Translations$account$types$zh_Hant types = _Translations$account$types$zh_Hant._(_root);
 }
 
 // Path: financial
-class _TranslationsFinancialZhHant extends TranslationsFinancialZh {
-	_TranslationsFinancialZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$financial$zh_Hant extends Translations$financial$zh {
+	_Translations$financial$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -800,8 +830,8 @@ class _TranslationsFinancialZhHant extends TranslationsFinancialZh {
 }
 
 // Path: app
-class _TranslationsAppZhHant extends TranslationsAppZh {
-	_TranslationsAppZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$app$zh_Hant extends Translations$app$zh {
+	_Translations$app$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -811,8 +841,8 @@ class _TranslationsAppZhHant extends TranslationsAppZh {
 }
 
 // Path: statistics
-class _TranslationsStatisticsZhHant extends TranslationsStatisticsZh {
-	_TranslationsStatisticsZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$statistics$zh_Hant extends Translations$statistics$zh {
+	_Translations$statistics$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -822,18 +852,19 @@ class _TranslationsStatisticsZhHant extends TranslationsStatisticsZh {
 	@override String get exportInProgress => '導出功能開發中...';
 	@override String get ranking => '大額消費排行';
 	@override String get noData => '暫無數據';
-	@override late final _TranslationsStatisticsOverviewZhHant overview = _TranslationsStatisticsOverviewZhHant._(_root);
-	@override late final _TranslationsStatisticsTrendZhHant trend = _TranslationsStatisticsTrendZhHant._(_root);
-	@override late final _TranslationsStatisticsAnalysisZhHant analysis = _TranslationsStatisticsAnalysisZhHant._(_root);
-	@override late final _TranslationsStatisticsFilterZhHant filter = _TranslationsStatisticsFilterZhHant._(_root);
-	@override late final _TranslationsStatisticsSortZhHant sort = _TranslationsStatisticsSortZhHant._(_root);
+	@override late final _Translations$statistics$overview$zh_Hant overview = _Translations$statistics$overview$zh_Hant._(_root);
+	@override late final _Translations$statistics$trend$zh_Hant trend = _Translations$statistics$trend$zh_Hant._(_root);
+	@override late final _Translations$statistics$analysis$zh_Hant analysis = _Translations$statistics$analysis$zh_Hant._(_root);
+	@override late final _Translations$statistics$filter$zh_Hant filter = _Translations$statistics$filter$zh_Hant._(_root);
+	@override late final _Translations$statistics$sort$zh_Hant sort = _Translations$statistics$sort$zh_Hant._(_root);
 	@override String get exportList => '導出列表';
 	@override String get noMoreData => '沒有更多數據了';
+	@override late final _Translations$statistics$emptyState$zh_Hant emptyState = _Translations$statistics$emptyState$zh_Hant._(_root);
 }
 
 // Path: currency
-class _TranslationsCurrencyZhHant extends TranslationsCurrencyZh {
-	_TranslationsCurrencyZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$currency$zh_Hant extends Translations$currency$zh {
+	_Translations$currency$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -853,19 +884,76 @@ class _TranslationsCurrencyZhHant extends TranslationsCurrencyZh {
 }
 
 // Path: sharedSpace
-class _TranslationsSharedSpaceZhHant extends TranslationsSharedSpaceZh {
-	_TranslationsSharedSpaceZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$sharedSpace$zh_Hant extends Translations$sharedSpace$zh {
+	_Translations$sharedSpace$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override late final _TranslationsSharedSpaceDashboardZhHant dashboard = _TranslationsSharedSpaceDashboardZhHant._(_root);
-	@override late final _TranslationsSharedSpaceRolesZhHant roles = _TranslationsSharedSpaceRolesZhHant._(_root);
+	@override late final _Translations$sharedSpace$dashboard$zh_Hant dashboard = _Translations$sharedSpace$dashboard$zh_Hant._(_root);
+	@override late final _Translations$sharedSpace$roles$zh_Hant roles = _Translations$sharedSpace$roles$zh_Hant._(_root);
+}
+
+// Path: budgetSuggestion
+class _Translations$budgetSuggestion$zh_Hant extends Translations$budgetSuggestion$zh {
+	_Translations$budgetSuggestion$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String highPercentage({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.';
+	@override String monthlyIncrease({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.';
+	@override String frequentSmall({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.';
+	@override String get financialInsights => 'Financial Insights';
+}
+
+// Path: server
+class _Translations$server$zh_Hant extends Translations$server$zh {
+	_Translations$server$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Connect to Server';
+	@override String get subtitle => 'Enter your self-hosted server address or scan the QR code displayed when starting the server';
+	@override String get urlLabel => 'Server Address';
+	@override String get urlPlaceholder => 'e.g. https://api.example.com or 192.168.1.100:8000';
+	@override String get scanQr => 'Scan QR Code';
+	@override String get scanQrInstruction => 'Point at the QR code displayed in the server terminal';
+	@override String get testConnection => 'Test Connection';
+	@override String get connecting => 'Connecting...';
+	@override String get connected => 'Connected';
+	@override String get connectionFailed => 'Connection Failed';
+	@override String get continueToLogin => 'Continue to Login';
+	@override String get saveAndReturn => 'Save and Return';
+	@override String get serverSettings => 'Server Settings';
+	@override String get currentServer => 'Current Server';
+	@override String get version => 'Version';
+	@override String get environment => 'Environment';
+	@override String get changeServer => 'Change Server';
+	@override String get changeServerWarning => 'Changing server will log you out. Continue?';
+	@override late final _Translations$server$error$zh_Hant error = _Translations$server$error$zh_Hant._(_root);
+}
+
+// Path: errorMapping
+class _Translations$errorMapping$zh_Hant extends Translations$errorMapping$zh {
+	_Translations$errorMapping$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$errorMapping$generic$zh_Hant generic = _Translations$errorMapping$generic$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$auth$zh_Hant auth = _Translations$errorMapping$auth$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$transaction$zh_Hant transaction = _Translations$errorMapping$transaction$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$space$zh_Hant space = _Translations$errorMapping$space$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$recurring$zh_Hant recurring = _Translations$errorMapping$recurring$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$upload$zh_Hant upload = _Translations$errorMapping$upload$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$ai$zh_Hant ai = _Translations$errorMapping$ai$zh_Hant._(_root);
 }
 
 // Path: auth.email
-class _TranslationsAuthEmailZhHant extends TranslationsAuthEmailZh {
-	_TranslationsAuthEmailZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$auth$email$zh_Hant extends Translations$auth$email$zh {
+	_Translations$auth$email$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -877,8 +965,8 @@ class _TranslationsAuthEmailZhHant extends TranslationsAuthEmailZh {
 }
 
 // Path: auth.password
-class _TranslationsAuthPasswordZhHant extends TranslationsAuthPasswordZh {
-	_TranslationsAuthPasswordZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$auth$password$zh_Hant extends Translations$auth$password$zh {
+	_Translations$auth$password$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -894,8 +982,8 @@ class _TranslationsAuthPasswordZhHant extends TranslationsAuthPasswordZh {
 }
 
 // Path: auth.verificationCode
-class _TranslationsAuthVerificationCodeZhHant extends TranslationsAuthVerificationCodeZh {
-	_TranslationsAuthVerificationCodeZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$auth$verificationCode$zh_Hant extends Translations$auth$verificationCode$zh {
+	_Translations$auth$verificationCode$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -910,8 +998,8 @@ class _TranslationsAuthVerificationCodeZhHant extends TranslationsAuthVerificati
 }
 
 // Path: calendar.weekdays
-class _TranslationsCalendarWeekdaysZhHant extends TranslationsCalendarWeekdaysZh {
-	_TranslationsCalendarWeekdaysZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$calendar$weekdays$zh_Hant extends Translations$calendar$weekdays$zh {
+	_Translations$calendar$weekdays$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -925,9 +1013,27 @@ class _TranslationsCalendarWeekdaysZhHant extends TranslationsCalendarWeekdaysZh
 	@override String get sun => '日';
 }
 
+// Path: appearance.palettes
+class _Translations$appearance$palettes$zh_Hant extends Translations$appearance$palettes$zh {
+	_Translations$appearance$palettes$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get zinc => 'Zinc';
+	@override String get slate => 'Slate';
+	@override String get red => 'Red';
+	@override String get rose => 'Rose';
+	@override String get orange => 'Orange';
+	@override String get green => 'Green';
+	@override String get blue => 'Blue';
+	@override String get yellow => 'Yellow';
+	@override String get violet => 'Violet';
+}
+
 // Path: forecast.recurringTransaction
-class _TranslationsForecastRecurringTransactionZhHant extends TranslationsForecastRecurringTransactionZh {
-	_TranslationsForecastRecurringTransactionZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$forecast$recurringTransaction$zh_Hant extends Translations$forecast$recurringTransaction$zh {
+	_Translations$forecast$recurringTransaction$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -962,8 +1068,8 @@ class _TranslationsForecastRecurringTransactionZhHant extends TranslationsForeca
 }
 
 // Path: chat.tools
-class _TranslationsChatToolsZhHant extends TranslationsChatToolsZh {
-	_TranslationsChatToolsZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$tools$zh_Hant extends Translations$chat$tools$zh {
+	_Translations$chat$tools$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -995,13 +1101,19 @@ class _TranslationsChatToolsZhHant extends TranslationsChatToolsZh {
 	@override String get querySpaceSummary => '正在查詢空間摘要...';
 	@override String get prepareTransfer => '正在準備轉帳...';
 	@override String get unknown => '正在處理請求...';
-	@override late final _TranslationsChatToolsDoneZhHant done = _TranslationsChatToolsDoneZhHant._(_root);
-	@override late final _TranslationsChatToolsFailedZhHant failed = _TranslationsChatToolsFailedZhHant._(_root);
+	@override late final _Translations$chat$tools$done$zh_Hant done = _Translations$chat$tools$done$zh_Hant._(_root);
+	@override late final _Translations$chat$tools$failed$zh_Hant failed = _Translations$chat$tools$failed$zh_Hant._(_root);
+	@override String get analyzeSpending => 'Analyzing spendings...';
+	@override String get analyzeCashflow => 'Analyzing cashflow...';
+	@override String get suggestBudget => 'Suggesting budget...';
+	@override String get cancelled => 'Cancelled';
+	@override String get prepareBudgetSimulation => '正在準備預算模擬';
+	@override String get simulateBudget => '正在模擬預算';
 }
 
 // Path: chat.transferWizard
-class _TranslationsChatTransferWizardZhHant extends TranslationsChatTransferWizardZh {
-	_TranslationsChatTransferWizardZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$transferWizard$zh_Hant extends Translations$chat$transferWizard$zh {
+	_Translations$chat$transferWizard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1015,26 +1127,49 @@ class _TranslationsChatTransferWizardZhHant extends TranslationsChatTransferWiza
 	@override String get confirmTransfer => '確認轉帳';
 	@override String get confirmed => '已確認';
 	@override String get transferSuccess => '轉帳成功';
+	@override String get selectReceiveAccount => '选择收款账户';
 }
 
 // Path: chat.genui
-class _TranslationsChatGenuiZhHant extends TranslationsChatGenuiZh {
-	_TranslationsChatGenuiZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$genui$zh_Hant extends Translations$chat$genui$zh {
+	_Translations$chat$genui$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override late final _TranslationsChatGenuiExpenseSummaryZhHant expenseSummary = _TranslationsChatGenuiExpenseSummaryZhHant._(_root);
-	@override late final _TranslationsChatGenuiTransactionListZhHant transactionList = _TranslationsChatGenuiTransactionListZhHant._(_root);
-	@override late final _TranslationsChatGenuiTransactionGroupReceiptZhHant transactionGroupReceipt = _TranslationsChatGenuiTransactionGroupReceiptZhHant._(_root);
-	@override late final _TranslationsChatGenuiTransactionCardZhHant transactionCard = _TranslationsChatGenuiTransactionCardZhHant._(_root);
-	@override late final _TranslationsChatGenuiCashFlowCardZhHant cashFlowCard = _TranslationsChatGenuiCashFlowCardZhHant._(_root);
-	@override late final _TranslationsChatGenuiBudgetSimulatorZhHant budgetSimulator = _TranslationsChatGenuiBudgetSimulatorZhHant._(_root);
+	@override late final _Translations$chat$genui$expenseSummary$zh_Hant expenseSummary = _Translations$chat$genui$expenseSummary$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$transactionList$zh_Hant transactionList = _Translations$chat$genui$transactionList$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$transactionGroupReceipt$zh_Hant transactionGroupReceipt = _Translations$chat$genui$transactionGroupReceipt$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$transactionCard$zh_Hant transactionCard = _Translations$chat$genui$transactionCard$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$cashFlowCard$zh_Hant cashFlowCard = _Translations$chat$genui$cashFlowCard$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$budgetSimulator$zh_Hant budgetSimulator = _Translations$chat$genui$budgetSimulator$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$budgetReceipt$zh_Hant budgetReceipt = _Translations$chat$genui$budgetReceipt$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$budgetStatusCard$zh_Hant budgetStatusCard = _Translations$chat$genui$budgetStatusCard$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$cashFlowForecast$zh_Hant cashFlowForecast = _Translations$chat$genui$cashFlowForecast$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$healthScore$zh_Hant healthScore = _Translations$chat$genui$healthScore$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$spaceSelector$zh_Hant spaceSelector = _Translations$chat$genui$spaceSelector$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$transferPath$zh_Hant transferPath = _Translations$chat$genui$transferPath$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$transactionConfirmation$zh_Hant transactionConfirmation = _Translations$chat$genui$transactionConfirmation$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$budgetAnalysis$zh_Hant budgetAnalysis = _Translations$chat$genui$budgetAnalysis$zh_Hant._(_root);
+}
+
+// Path: chat.welcome
+class _Translations$chat$welcome$zh_Hant extends Translations$chat$welcome$zh {
+	_Translations$chat$welcome$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$chat$welcome$morning$zh_Hant morning = _Translations$chat$welcome$morning$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$midday$zh_Hant midday = _Translations$chat$welcome$midday$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$afternoon$zh_Hant afternoon = _Translations$chat$welcome$afternoon$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$evening$zh_Hant evening = _Translations$chat$welcome$evening$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$night$zh_Hant night = _Translations$chat$welcome$night$zh_Hant._(_root);
 }
 
 // Path: error.genui
-class _TranslationsErrorGenuiZhHant extends TranslationsErrorGenuiZh {
-	_TranslationsErrorGenuiZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$error$genui$zh_Hant extends Translations$error$genui$zh {
+	_Translations$error$genui$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1047,9 +1182,36 @@ class _TranslationsErrorGenuiZhHant extends TranslationsErrorGenuiZh {
 	@override String get maxRetriesReached => '已達最大重試次數';
 }
 
+// Path: account.types
+class _Translations$account$types$zh_Hant extends Translations$account$types$zh {
+	_Translations$account$types$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get cashTitle => 'Cash';
+	@override String get cashSubtitle => 'Physical currency and coins';
+	@override String get depositTitle => 'Bank Deposit';
+	@override String get depositSubtitle => 'Savings, checking accounts';
+	@override String get eMoneyTitle => 'E-Wallet';
+	@override String get eMoneySubtitle => 'Digital payment balances';
+	@override String get investmentTitle => 'Investment';
+	@override String get investmentSubtitle => 'Stocks, funds, bonds, etc.';
+	@override String get receivableTitle => 'Receivable';
+	@override String get receivableSubtitle => 'Loans to others, pending';
+	@override String get receivableHelper => 'Owed to me';
+	@override String get creditCardTitle => 'Credit Card';
+	@override String get creditCardSubtitle => 'Credit card balances';
+	@override String get loanTitle => 'Loan';
+	@override String get loanSubtitle => 'Mortgage, auto, personal';
+	@override String get payableTitle => 'Payable';
+	@override String get payableSubtitle => 'Amounts owed to others';
+	@override String get payableHelper => 'I owe';
+}
+
 // Path: statistics.overview
-class _TranslationsStatisticsOverviewZhHant extends TranslationsStatisticsOverviewZh {
-	_TranslationsStatisticsOverviewZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$statistics$overview$zh_Hant extends Translations$statistics$overview$zh {
+	_Translations$statistics$overview$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1060,8 +1222,8 @@ class _TranslationsStatisticsOverviewZhHant extends TranslationsStatisticsOvervi
 }
 
 // Path: statistics.trend
-class _TranslationsStatisticsTrendZhHant extends TranslationsStatisticsTrendZh {
-	_TranslationsStatisticsTrendZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$statistics$trend$zh_Hant extends Translations$statistics$trend$zh {
+	_Translations$statistics$trend$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1072,8 +1234,8 @@ class _TranslationsStatisticsTrendZhHant extends TranslationsStatisticsTrendZh {
 }
 
 // Path: statistics.analysis
-class _TranslationsStatisticsAnalysisZhHant extends TranslationsStatisticsAnalysisZh {
-	_TranslationsStatisticsAnalysisZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$statistics$analysis$zh_Hant extends Translations$statistics$analysis$zh {
+	_Translations$statistics$analysis$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1084,8 +1246,8 @@ class _TranslationsStatisticsAnalysisZhHant extends TranslationsStatisticsAnalys
 }
 
 // Path: statistics.filter
-class _TranslationsStatisticsFilterZhHant extends TranslationsStatisticsFilterZh {
-	_TranslationsStatisticsFilterZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$statistics$filter$zh_Hant extends Translations$statistics$filter$zh {
+	_Translations$statistics$filter$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1096,8 +1258,8 @@ class _TranslationsStatisticsFilterZhHant extends TranslationsStatisticsFilterZh
 }
 
 // Path: statistics.sort
-class _TranslationsStatisticsSortZhHant extends TranslationsStatisticsSortZh {
-	_TranslationsStatisticsSortZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$statistics$sort$zh_Hant extends Translations$statistics$sort$zh {
+	_Translations$statistics$sort$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1106,9 +1268,21 @@ class _TranslationsStatisticsSortZhHant extends TranslationsStatisticsSortZh {
 	@override String get date => '按時間排序';
 }
 
+// Path: statistics.emptyState
+class _Translations$statistics$emptyState$zh_Hant extends Translations$statistics$emptyState$zh {
+	_Translations$statistics$emptyState$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Unlock Financial Insights';
+	@override String get description => 'Your financial report is currently a blank canvas.\nRecord your first transaction and let the data tell your story.';
+	@override String get action => 'Record First Transaction';
+}
+
 // Path: sharedSpace.dashboard
-class _TranslationsSharedSpaceDashboardZhHant extends TranslationsSharedSpaceDashboardZh {
-	_TranslationsSharedSpaceDashboardZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$sharedSpace$dashboard$zh_Hant extends Translations$sharedSpace$dashboard$zh {
+	_Translations$sharedSpace$dashboard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1123,8 +1297,8 @@ class _TranslationsSharedSpaceDashboardZhHant extends TranslationsSharedSpaceDas
 }
 
 // Path: sharedSpace.roles
-class _TranslationsSharedSpaceRolesZhHant extends TranslationsSharedSpaceRolesZh {
-	_TranslationsSharedSpaceRolesZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$sharedSpace$roles$zh_Hant extends Translations$sharedSpace$roles$zh {
+	_Translations$sharedSpace$roles$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1134,9 +1308,135 @@ class _TranslationsSharedSpaceRolesZhHant extends TranslationsSharedSpaceRolesZh
 	@override String get member => '成員';
 }
 
+// Path: server.error
+class _Translations$server$error$zh_Hant extends Translations$server$error$zh {
+	_Translations$server$error$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get urlRequired => 'Server address is required';
+	@override String get invalidUrl => 'Invalid URL format';
+	@override String get connectionTimeout => 'Connection timed out';
+	@override String get connectionRefused => 'Could not connect to server';
+	@override String get sslError => 'SSL certificate error';
+	@override String get serverError => 'Server error';
+}
+
+// Path: errorMapping.generic
+class _Translations$errorMapping$generic$zh_Hant extends Translations$errorMapping$generic$zh {
+	_Translations$errorMapping$generic$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get badRequest => 'Bad Request';
+	@override String get authFailed => 'Authentication failed, please login again';
+	@override String get permissionDenied => 'Permission denied';
+	@override String get notFound => 'Resource not found';
+	@override String get serverError => 'Internal server error';
+	@override String get systemError => 'System error';
+	@override String get validationFailed => 'Validation failed';
+}
+
+// Path: errorMapping.auth
+class _Translations$errorMapping$auth$zh_Hant extends Translations$errorMapping$auth$zh {
+	_Translations$errorMapping$auth$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get failed => 'Authentication failed';
+	@override String get emailWrong => 'Incorrect email';
+	@override String get phoneWrong => 'Incorrect phone number';
+	@override String get phoneRegistered => 'Phone number already registered';
+	@override String get emailRegistered => 'Email already registered';
+	@override String get sendFailed => 'Failed to send verification code';
+	@override String get expired => 'Verification code expired';
+	@override String get tooFrequent => 'Code sent too frequently';
+	@override String get unsupportedType => 'Unsupported code type';
+	@override String get wrongPassword => 'Incorrect password';
+	@override String get userNotFound => 'User not found';
+	@override String get prefsMissing => 'Preference parameters missing';
+	@override String get invalidTimezone => 'Invalid client timezone';
+}
+
+// Path: errorMapping.transaction
+class _Translations$errorMapping$transaction$zh_Hant extends Translations$errorMapping$transaction$zh {
+	_Translations$errorMapping$transaction$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get commentEmpty => 'Comment content cannot be empty';
+	@override String get invalidParent => 'Invalid parent comment ID';
+	@override String get saveFailed => 'Failed to save comment';
+	@override String get deleteFailed => 'Failed to delete comment';
+	@override String get notExists => 'Transaction does not exist';
+}
+
+// Path: errorMapping.space
+class _Translations$errorMapping$space$zh_Hant extends Translations$errorMapping$space$zh {
+	_Translations$errorMapping$space$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get notFound => 'Shared space not found or access denied';
+	@override String get inviteDenied => 'No permission to invite members';
+	@override String get inviteSelf => 'Cannot invite yourself';
+	@override String get inviteSent => 'Invitation sent';
+	@override String get alreadyMember => 'User is already a member or invited';
+	@override String get invalidAction => 'Invalid action';
+	@override String get invitationNotFound => 'Invitation does not exist';
+	@override String get onlyOwner => 'Only owner can perform this action';
+	@override String get ownerNotRemovable => 'Owner cannot be removed';
+	@override String get memberNotFound => 'Member not found';
+	@override String get notMember => 'User is not a member of this space';
+	@override String get ownerCantLeave => 'Owner cannot leave directly, please transfer ownership first';
+	@override String get invalidCode => 'Invalid invitation code';
+	@override String get codeExpired => 'Invitation code expired or usage limit reached';
+}
+
+// Path: errorMapping.recurring
+class _Translations$errorMapping$recurring$zh_Hant extends Translations$errorMapping$recurring$zh {
+	_Translations$errorMapping$recurring$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get invalidRule => 'Invalid recurrence rule';
+	@override String get ruleNotFound => 'Recurrence rule not found';
+}
+
+// Path: errorMapping.upload
+class _Translations$errorMapping$upload$zh_Hant extends Translations$errorMapping$upload$zh {
+	_Translations$errorMapping$upload$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get noFile => 'No file uploaded';
+	@override String get tooLarge => 'File too large';
+	@override String get unsupportedType => 'Unsupported file type';
+	@override String get tooManyFiles => 'Too many files';
+}
+
+// Path: errorMapping.ai
+class _Translations$errorMapping$ai$zh_Hant extends Translations$errorMapping$ai$zh {
+	_Translations$errorMapping$ai$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get contextLimit => 'Context limit exceeded';
+	@override String get tokenLimit => 'Insufficient tokens';
+	@override String get emptyMessage => 'Empty user message';
+}
+
 // Path: chat.tools.done
-class _TranslationsChatToolsDoneZhHant extends TranslationsChatToolsDoneZh {
-	_TranslationsChatToolsDoneZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$tools$done$zh_Hant extends Translations$chat$tools$done$zh {
+	_Translations$chat$tools$done$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1167,11 +1467,16 @@ class _TranslationsChatToolsDoneZhHant extends TranslationsChatToolsDoneZh {
 	@override String get querySpaceSummary => '空間摘要查詢完成';
 	@override String get prepareTransfer => '轉帳準備完成';
 	@override String get unknown => '處理完成';
+	@override String get analyzeSpending => 'Spending analysis complete';
+	@override String get analyzeCashflow => 'Cashflow analysis complete';
+	@override String get suggestBudget => 'Budget suggestion complete';
+	@override String get prepareBudgetSimulation => '預算模擬準備完成';
+	@override String get simulateBudget => '預算模擬完成';
 }
 
 // Path: chat.tools.failed
-class _TranslationsChatToolsFailedZhHant extends TranslationsChatToolsFailedZh {
-	_TranslationsChatToolsFailedZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$tools$failed$zh_Hant extends Translations$chat$tools$failed$zh {
+	_Translations$chat$tools$failed$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1180,8 +1485,8 @@ class _TranslationsChatToolsFailedZhHant extends TranslationsChatToolsFailedZh {
 }
 
 // Path: chat.genui.expenseSummary
-class _TranslationsChatGenuiExpenseSummaryZhHant extends TranslationsChatGenuiExpenseSummaryZh {
-	_TranslationsChatGenuiExpenseSummaryZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$genui$expenseSummary$zh_Hant extends Translations$chat$genui$expenseSummary$zh {
+	_Translations$chat$genui$expenseSummary$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1193,8 +1498,8 @@ class _TranslationsChatGenuiExpenseSummaryZhHant extends TranslationsChatGenuiEx
 }
 
 // Path: chat.genui.transactionList
-class _TranslationsChatGenuiTransactionListZhHant extends TranslationsChatGenuiTransactionListZh {
-	_TranslationsChatGenuiTransactionListZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$genui$transactionList$zh_Hant extends Translations$chat$genui$transactionList$zh {
+	_Translations$chat$genui$transactionList$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1207,8 +1512,8 @@ class _TranslationsChatGenuiTransactionListZhHant extends TranslationsChatGenuiT
 }
 
 // Path: chat.genui.transactionGroupReceipt
-class _TranslationsChatGenuiTransactionGroupReceiptZhHant extends TranslationsChatGenuiTransactionGroupReceiptZh {
-	_TranslationsChatGenuiTransactionGroupReceiptZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$genui$transactionGroupReceipt$zh_Hant extends Translations$chat$genui$transactionGroupReceipt$zh {
+	_Translations$chat$genui$transactionGroupReceipt$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1235,11 +1540,13 @@ class _TranslationsChatGenuiTransactionGroupReceiptZhHant extends TranslationsCh
 	@override String get targetAccount => '目標帳戶';
 	@override String get currencyMismatchNote => '提示：帳戶餘額將按當時匯率進行換算扣減';
 	@override String get confirmAssociate => '確認關聯';
+	@override String get total => 'Total';
+	@override String spaceCount({required Object count}) => '${count} spaces';
 }
 
 // Path: chat.genui.transactionCard
-class _TranslationsChatGenuiTransactionCardZhHant extends TranslationsChatGenuiTransactionCardZh {
-	_TranslationsChatGenuiTransactionCardZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$genui$transactionCard$zh_Hant extends Translations$chat$genui$transactionCard$zh {
+	_Translations$chat$genui$transactionCard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1254,11 +1561,15 @@ class _TranslationsChatGenuiTransactionCardZhHant extends TranslationsChatGenuiT
 	@override String get missingId => '交易 ID 缺失，無法更新';
 	@override String associatedTo({required Object name}) => '已關聯到 ${name}';
 	@override String updateFailed({required Object error}) => '更新失敗: ${error}';
+	@override String get sharedSpace => 'Shared Space';
+	@override String get noSpace => 'No shared spaces available';
+	@override String get selectSpace => 'Select Shared Space';
+	@override String get linkedToSpace => 'Linked to shared space';
 }
 
 // Path: chat.genui.cashFlowCard
-class _TranslationsChatGenuiCashFlowCardZhHant extends TranslationsChatGenuiCashFlowCardZh {
-	_TranslationsChatGenuiCashFlowCardZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$genui$cashFlowCard$zh_Hant extends Translations$chat$genui$cashFlowCard$zh {
+	_Translations$chat$genui$cashFlowCard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1273,8 +1584,8 @@ class _TranslationsChatGenuiCashFlowCardZhHant extends TranslationsChatGenuiCash
 }
 
 // Path: chat.genui.budgetSimulator
-class _TranslationsChatGenuiBudgetSimulatorZhHant extends TranslationsChatGenuiBudgetSimulatorZh {
-	_TranslationsChatGenuiBudgetSimulatorZhHant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+class _Translations$chat$genui$budgetSimulator$zh_Hant extends Translations$chat$genui$budgetSimulator$zh {
+	_Translations$chat$genui$budgetSimulator$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
 
 	final TranslationsZhHant _root; // ignore: unused_field
 
@@ -1290,6 +1601,407 @@ class _TranslationsChatGenuiBudgetSimulatorZhHant extends TranslationsChatGenuiB
 	@override String get dailyAllowance => '每日限額';
 	@override String get cancel => '放棄';
 	@override String get confirm => '採用此預算';
+}
+
+// Path: chat.genui.budgetReceipt
+class _Translations$chat$genui$budgetReceipt$zh_Hant extends Translations$chat$genui$budgetReceipt$zh {
+	_Translations$chat$genui$budgetReceipt$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get newBudget => 'New Budget';
+	@override String get budgetCreated => 'Budget Created';
+	@override String get rolloverBudget => 'Rollover Budget';
+	@override String get createFailed => 'Failed to create budget';
+	@override String get thisMonth => 'This Month';
+	@override String dateRange({required Object start, required Object startDay, required Object end, required Object endDay}) => '${start}/${startDay} - ${end}/${endDay}';
+}
+
+// Path: chat.genui.budgetStatusCard
+class _Translations$chat$genui$budgetStatusCard$zh_Hant extends Translations$chat$genui$budgetStatusCard$zh {
+	_Translations$chat$genui$budgetStatusCard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get budget => 'Budget';
+	@override String get overview => 'Budget Overview';
+	@override String get totalBudget => 'Total Budget';
+	@override String spent({required Object amount}) => 'Used ¥${amount}';
+	@override String remaining({required Object amount}) => 'Remaining ¥${amount}';
+	@override String get exceeded => 'Exceeded';
+	@override String get warning => 'Warning';
+	@override String get plentiful => 'Healthy';
+	@override String get normal => 'Normal';
+}
+
+// Path: chat.genui.cashFlowForecast
+class _Translations$chat$genui$cashFlowForecast$zh_Hant extends Translations$chat$genui$cashFlowForecast$zh {
+	_Translations$chat$genui$cashFlowForecast$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Cash Flow Forecast';
+	@override String get recurringTransaction => 'Recurring Transaction';
+	@override String get recurringIncome => 'Recurring Income';
+	@override String get recurringExpense => 'Recurring Expense';
+	@override String get recurringTransfer => 'Recurring Transfer';
+	@override String nextDays({required Object days}) => 'Next ${days} days';
+	@override String get noData => 'No forecast data';
+	@override String get summary => 'Forecast Summary';
+	@override String get variableExpense => 'Predicted Variable Expense';
+	@override String get netChange => 'Est. Net Change';
+	@override String get keyEvents => 'Key Events';
+	@override String get noSignificantEvents => 'No significant events in forecast period';
+	@override String get dateFormat => 'M/d';
+}
+
+// Path: chat.genui.healthScore
+class _Translations$chat$genui$healthScore$zh_Hant extends Translations$chat$genui$healthScore$zh {
+	_Translations$chat$genui$healthScore$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Financial Health';
+	@override String get suggestions => 'Suggestions';
+	@override String scorePoint({required Object score}) => '${score} pts';
+	@override late final _Translations$chat$genui$healthScore$status$zh_Hant status = _Translations$chat$genui$healthScore$status$zh_Hant._(_root);
+}
+
+// Path: chat.genui.spaceSelector
+class _Translations$chat$genui$spaceSelector$zh_Hant extends Translations$chat$genui$spaceSelector$zh {
+	_Translations$chat$genui$spaceSelector$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get selected => 'Selected';
+	@override String get unnamedSpace => 'Unnamed Space';
+	@override String get linked => 'Linked';
+	@override String get roleOwner => 'Owner';
+	@override String get roleAdmin => 'Admin';
+	@override String get roleMember => 'Member';
+}
+
+// Path: chat.genui.transferPath
+class _Translations$chat$genui$transferPath$zh_Hant extends Translations$chat$genui$transferPath$zh {
+	_Translations$chat$genui$transferPath$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get selectSource => 'Select Source Account';
+	@override String get selectTarget => 'Select Target Account';
+	@override String get from => 'From (Source)';
+	@override String get to => 'To (Target)';
+	@override String get select => 'Select';
+	@override String get cancelled => 'Operation Cancelled';
+	@override String get loadError => 'Failed to load account data';
+	@override String get historyMissing => 'Account info missing in history';
+	@override String get amountUnconfirmed => 'Amount Unconfirmed';
+	@override String confirmedWithArrow({required Object source, required Object target}) => 'Confirmed: ${source} → ${target}';
+	@override String confirmAction({required Object source, required Object target}) => 'Confirm: ${source} → ${target}';
+	@override String get pleaseSelectSource => 'Please select source account';
+	@override String get pleaseSelectTarget => 'Please select target account';
+	@override String get confirmLinks => 'Confirm Transfer Path';
+	@override String get linkLocked => 'Path Locked';
+	@override String get clickToConfirm => 'Click button below to confirm';
+	@override String get reselect => 'Reselect';
+	@override String get title => 'Transfer';
+	@override String get history => 'History';
+	@override String get unknownAccount => 'Unknown Account';
+	@override String get confirmed => 'Confirmed';
+}
+
+// Path: chat.genui.transactionConfirmation
+class _Translations$chat$genui$transactionConfirmation$zh_Hant extends Translations$chat$genui$transactionConfirmation$zh {
+	_Translations$chat$genui$transactionConfirmation$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get multipleAccounts => '检测到多个关联账户';
+	@override String get confirmed => '已确认';
+}
+
+// Path: chat.genui.budgetAnalysis
+class _Translations$chat$genui$budgetAnalysis$zh_Hant extends Translations$chat$genui$budgetAnalysis$zh {
+	_Translations$chat$genui$budgetAnalysis$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '预算分析报告';
+	@override String periodDays({required Object days}) => '过去 ${days} 天';
+	@override String get totalExpense => '总支出';
+	@override String momChange({required Object change}) => '环比 ${change}%';
+	@override String get categoryDistribution => '分类占比';
+	@override String get topSpenders => '大额支出';
+	@override String amountWan({required Object amount}) => '${amount}万';
+}
+
+// Path: chat.welcome.morning
+class _Translations$chat$welcome$morning$zh_Hant extends Translations$chat$welcome$morning$zh {
+	_Translations$chat$welcome$morning$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get subtitle => 'Start your day by tracking';
+	@override late final _Translations$chat$welcome$morning$breakfast$zh_Hant breakfast = _Translations$chat$welcome$morning$breakfast$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$morning$yesterdayReview$zh_Hant yesterdayReview = _Translations$chat$welcome$morning$yesterdayReview$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$morning$todayBudget$zh_Hant todayBudget = _Translations$chat$welcome$morning$todayBudget$zh_Hant._(_root);
+}
+
+// Path: chat.welcome.midday
+class _Translations$chat$welcome$midday$zh_Hant extends Translations$chat$welcome$midday$zh {
+	_Translations$chat$welcome$midday$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get greeting => 'Good Afternoon';
+	@override String get subtitle => 'Quick record during lunch';
+	@override late final _Translations$chat$welcome$midday$lunch$zh_Hant lunch = _Translations$chat$welcome$midday$lunch$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$midday$weeklyExpense$zh_Hant weeklyExpense = _Translations$chat$welcome$midday$weeklyExpense$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$midday$checkBalance$zh_Hant checkBalance = _Translations$chat$welcome$midday$checkBalance$zh_Hant._(_root);
+}
+
+// Path: chat.welcome.afternoon
+class _Translations$chat$welcome$afternoon$zh_Hant extends Translations$chat$welcome$afternoon$zh {
+	_Translations$chat$welcome$afternoon$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get subtitle => 'Tea time, let\'s review finances';
+	@override late final _Translations$chat$welcome$afternoon$quickRecord$zh_Hant quickRecord = _Translations$chat$welcome$afternoon$quickRecord$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$afternoon$analyzeSpending$zh_Hant analyzeSpending = _Translations$chat$welcome$afternoon$analyzeSpending$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$afternoon$budgetProgress$zh_Hant budgetProgress = _Translations$chat$welcome$afternoon$budgetProgress$zh_Hant._(_root);
+}
+
+// Path: chat.welcome.evening
+class _Translations$chat$welcome$evening$zh_Hant extends Translations$chat$welcome$evening$zh {
+	_Translations$chat$welcome$evening$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get subtitle => 'End of day, time to balance the books';
+	@override late final _Translations$chat$welcome$evening$dinner$zh_Hant dinner = _Translations$chat$welcome$evening$dinner$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$evening$todaySummary$zh_Hant todaySummary = _Translations$chat$welcome$evening$todaySummary$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$evening$tomorrowPlan$zh_Hant tomorrowPlan = _Translations$chat$welcome$evening$tomorrowPlan$zh_Hant._(_root);
+}
+
+// Path: chat.welcome.night
+class _Translations$chat$welcome$night$zh_Hant extends Translations$chat$welcome$night$zh {
+	_Translations$chat$welcome$night$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get greeting => 'Late Night';
+	@override String get subtitle => 'Quiet time for financial planning';
+	@override late final _Translations$chat$welcome$night$makeupRecord$zh_Hant makeupRecord = _Translations$chat$welcome$night$makeupRecord$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$night$monthlyReview$zh_Hant monthlyReview = _Translations$chat$welcome$night$monthlyReview$zh_Hant._(_root);
+	@override late final _Translations$chat$welcome$night$financialThinking$zh_Hant financialThinking = _Translations$chat$welcome$night$financialThinking$zh_Hant._(_root);
+}
+
+// Path: chat.genui.healthScore.status
+class _Translations$chat$genui$healthScore$status$zh_Hant extends Translations$chat$genui$healthScore$status$zh {
+	_Translations$chat$genui$healthScore$status$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get excellent => 'Excellent';
+	@override String get good => 'Good';
+	@override String get fair => 'Fair';
+	@override String get needsImprovement => 'Needs Improvement';
+	@override String get poor => 'Poor';
+}
+
+// Path: chat.welcome.morning.breakfast
+class _Translations$chat$welcome$morning$breakfast$zh_Hant extends Translations$chat$welcome$morning$breakfast$zh {
+	_Translations$chat$welcome$morning$breakfast$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Breakfast';
+	@override String get prompt => 'Record breakfast expense';
+	@override String get description => 'Log today\'s first expense';
+}
+
+// Path: chat.welcome.morning.yesterdayReview
+class _Translations$chat$welcome$morning$yesterdayReview$zh_Hant extends Translations$chat$welcome$morning$yesterdayReview$zh {
+	_Translations$chat$welcome$morning$yesterdayReview$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Yesterday Review';
+	@override String get prompt => 'Analyze yesterday\'s spending';
+	@override String get description => 'Check how much you spent yesterday';
+}
+
+// Path: chat.welcome.morning.todayBudget
+class _Translations$chat$welcome$morning$todayBudget$zh_Hant extends Translations$chat$welcome$morning$todayBudget$zh {
+	_Translations$chat$welcome$morning$todayBudget$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Today\'s Budget';
+	@override String get prompt => 'How much budget left for today';
+	@override String get description => 'Plan your spending for today';
+}
+
+// Path: chat.welcome.midday.lunch
+class _Translations$chat$welcome$midday$lunch$zh_Hant extends Translations$chat$welcome$midday$lunch$zh {
+	_Translations$chat$welcome$midday$lunch$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Lunch';
+	@override String get prompt => 'Record lunch expense';
+	@override String get description => 'Log your lunch spending';
+}
+
+// Path: chat.welcome.midday.weeklyExpense
+class _Translations$chat$welcome$midday$weeklyExpense$zh_Hant extends Translations$chat$welcome$midday$weeklyExpense$zh {
+	_Translations$chat$welcome$midday$weeklyExpense$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Weekly Spending';
+	@override String get prompt => 'Analyze this week\'s spending';
+	@override String get description => 'See your weekly expenses';
+}
+
+// Path: chat.welcome.midday.checkBalance
+class _Translations$chat$welcome$midday$checkBalance$zh_Hant extends Translations$chat$welcome$midday$checkBalance$zh {
+	_Translations$chat$welcome$midday$checkBalance$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Check Balance';
+	@override String get prompt => 'Check my account balance';
+	@override String get description => 'View your account balances';
+}
+
+// Path: chat.welcome.afternoon.quickRecord
+class _Translations$chat$welcome$afternoon$quickRecord$zh_Hant extends Translations$chat$welcome$afternoon$quickRecord$zh {
+	_Translations$chat$welcome$afternoon$quickRecord$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Quick Record';
+	@override String get prompt => 'Help me record an expense';
+	@override String get description => 'Quickly log a transaction';
+}
+
+// Path: chat.welcome.afternoon.analyzeSpending
+class _Translations$chat$welcome$afternoon$analyzeSpending$zh_Hant extends Translations$chat$welcome$afternoon$analyzeSpending$zh {
+	_Translations$chat$welcome$afternoon$analyzeSpending$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Analyze Spending';
+	@override String get prompt => 'Analyze this month\'s spending';
+	@override String get description => 'View spending trends and breakdown';
+}
+
+// Path: chat.welcome.afternoon.budgetProgress
+class _Translations$chat$welcome$afternoon$budgetProgress$zh_Hant extends Translations$chat$welcome$afternoon$budgetProgress$zh {
+	_Translations$chat$welcome$afternoon$budgetProgress$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Budget Progress';
+	@override String get prompt => 'Check budget status';
+	@override String get description => 'See how your budget is doing';
+}
+
+// Path: chat.welcome.evening.dinner
+class _Translations$chat$welcome$evening$dinner$zh_Hant extends Translations$chat$welcome$evening$dinner$zh {
+	_Translations$chat$welcome$evening$dinner$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Dinner';
+	@override String get prompt => 'Record dinner expense';
+	@override String get description => 'Log tonight\'s dinner spending';
+}
+
+// Path: chat.welcome.evening.todaySummary
+class _Translations$chat$welcome$evening$todaySummary$zh_Hant extends Translations$chat$welcome$evening$todaySummary$zh {
+	_Translations$chat$welcome$evening$todaySummary$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Today\'s Summary';
+	@override String get prompt => 'Summarize today\'s spending';
+	@override String get description => 'See what you spent today';
+}
+
+// Path: chat.welcome.evening.tomorrowPlan
+class _Translations$chat$welcome$evening$tomorrowPlan$zh_Hant extends Translations$chat$welcome$evening$tomorrowPlan$zh {
+	_Translations$chat$welcome$evening$tomorrowPlan$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Tomorrow\'s Plan';
+	@override String get prompt => 'What fixed expenses tomorrow';
+	@override String get description => 'Plan ahead for tomorrow';
+}
+
+// Path: chat.welcome.night.makeupRecord
+class _Translations$chat$welcome$night$makeupRecord$zh_Hant extends Translations$chat$welcome$night$makeupRecord$zh {
+	_Translations$chat$welcome$night$makeupRecord$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Catch Up';
+	@override String get prompt => 'Help me log any missed expenses';
+	@override String get description => 'Record expenses you forgot today';
+}
+
+// Path: chat.welcome.night.monthlyReview
+class _Translations$chat$welcome$night$monthlyReview$zh_Hant extends Translations$chat$welcome$night$monthlyReview$zh {
+	_Translations$chat$welcome$night$monthlyReview$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Monthly Review';
+	@override String get prompt => 'Analyze this month\'s spending';
+	@override String get description => 'Review your monthly expenses';
+}
+
+// Path: chat.welcome.night.financialThinking
+class _Translations$chat$welcome$night$financialThinking$zh_Hant extends Translations$chat$welcome$night$financialThinking$zh {
+	_Translations$chat$welcome$night$financialThinking$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Financial Tips';
+	@override String get prompt => 'Give me some financial advice';
+	@override String get description => 'Get AI-powered financial insights';
 }
 
 /// The flat map containing all translations for locale <zh-Hant>.
@@ -1381,6 +2093,9 @@ extension on TranslationsZhHant {
 			'auth.verificationCode.sendFailed' => '發送失敗',
 			'auth.verificationCode.placeholder' => '請輸入驗證碼',
 			'auth.verificationCode.required' => '驗證碼不能為空',
+			'auth.logoutSuccess' => 'Logged out successfully',
+			'auth.confirmLogoutTitle' => 'Confirm Logout',
+			'auth.confirmLogoutContent' => 'Are you sure you want to log out?',
 			'transaction.expense' => '支出',
 			'transaction.income' => '收入',
 			'transaction.transfer' => '轉帳',
@@ -1410,6 +2125,20 @@ extension on TranslationsZhHant {
 			'transaction.noActions' => '沒有可用的操作',
 			'transaction.deleted' => '已刪除',
 			'transaction.deleteFailed' => '刪除失敗，請稍後重試',
+			'transaction.linkedAccount' => 'Linked Account',
+			'transaction.linkedSpace' => 'Linked Space',
+			'transaction.notLinked' => 'Not linked',
+			'transaction.link' => 'Link',
+			'transaction.changeAccount' => 'Change Account',
+			'transaction.addSpace' => 'Add Space',
+			'transaction.nSpaces' => ({required Object count}) => '${count} spaces',
+			'transaction.selectLinkedAccount' => 'Select Linked Account',
+			'transaction.selectLinkedSpace' => 'Select Linked Space',
+			'transaction.noSpacesAvailable' => 'No spaces available',
+			'transaction.linkSuccess' => 'Link successful',
+			'transaction.linkFailed' => 'Link failed',
+			'transaction.rawInput' => 'Message',
+			'transaction.noRawInput' => 'No message',
 			'home.totalExpense' => '總消費金額',
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
@@ -1509,12 +2238,28 @@ extension on TranslationsZhHant {
 			'settings.userTypeRegular' => '普通用戶',
 			'settings.selectAmountStyle' => '選擇金額顯示樣式',
 			'settings.currencyDescription' => '選擇您偏好的顯示幣種。所有金額都將以此幣種顯示。',
+			'settings.amountStyleNotice' => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.',
+			'settings.editUsername' => 'Edit Username',
+			'settings.enterUsername' => 'Enter username',
+			'settings.usernameRequired' => 'Username is required',
+			'settings.usernameUpdated' => 'Username updated',
+			'settings.avatarUpdated' => 'Avatar updated',
+			'settings.appearanceUpdated' => '外观设置已更新',
 			'appearance.title' => '外觀設置',
 			'appearance.themeMode' => '主題模式',
 			'appearance.light' => '淺色',
 			'appearance.dark' => '深色',
 			'appearance.system' => '跟隨系統',
 			'appearance.colorScheme' => '配色方案',
+			'appearance.palettes.zinc' => 'Zinc',
+			'appearance.palettes.slate' => 'Slate',
+			'appearance.palettes.red' => 'Red',
+			'appearance.palettes.rose' => 'Rose',
+			'appearance.palettes.orange' => 'Orange',
+			'appearance.palettes.green' => 'Green',
+			'appearance.palettes.blue' => 'Blue',
+			'appearance.palettes.yellow' => 'Yellow',
+			'appearance.palettes.violet' => 'Violet',
 			'speech.title' => '語音識別設置',
 			'speech.service' => '語音識別服務',
 			'speech.systemVoice' => '系統語音',
@@ -1767,7 +2512,20 @@ extension on TranslationsZhHant {
 			'chat.tools.done.querySpaceSummary' => '空間摘要查詢完成',
 			'chat.tools.done.prepareTransfer' => '轉帳準備完成',
 			'chat.tools.done.unknown' => '處理完成',
+			'chat.tools.done.analyzeSpending' => 'Spending analysis complete',
+			'chat.tools.done.analyzeCashflow' => 'Cashflow analysis complete',
+			'chat.tools.done.suggestBudget' => 'Budget suggestion complete',
+			'chat.tools.done.prepareBudgetSimulation' => '預算模擬準備完成',
+			'chat.tools.done.simulateBudget' => '預算模擬完成',
 			'chat.tools.failed.unknown' => '操作失敗',
+			'chat.tools.analyzeSpending' => 'Analyzing spendings...',
+			'chat.tools.analyzeCashflow' => 'Analyzing cashflow...',
+			'chat.tools.suggestBudget' => 'Suggesting budget...',
+			'chat.tools.cancelled' => 'Cancelled',
+			'chat.tools.prepareBudgetSimulation' => '正在準備預算模擬',
+			'chat.tools.simulateBudget' => '正在模擬預算',
+			_ => null,
+		} ?? switch (path) {
 			'chat.speechNotRecognized' => '未識別到語音，請重試',
 			'chat.currentExpense' => '当前支出',
 			'chat.loadingComponent' => '正在載入組件...',
@@ -1792,6 +2550,7 @@ extension on TranslationsZhHant {
 			'chat.transferWizard.confirmTransfer' => '確認轉帳',
 			'chat.transferWizard.confirmed' => '已確認',
 			'chat.transferWizard.transferSuccess' => '轉帳成功',
+			'chat.transferWizard.selectReceiveAccount' => '选择收款账户',
 			'chat.genui.expenseSummary.totalExpense' => '總支出',
 			'chat.genui.expenseSummary.mainExpenses' => '主要支出',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '查看全部 ${count} 筆消費',
@@ -1812,8 +2571,6 @@ extension on TranslationsZhHant {
 			'chat.genui.transactionGroupReceipt.accountAssociation' => '帳戶關聯',
 			'chat.genui.transactionGroupReceipt.sharedSpace' => '共享空間',
 			'chat.genui.transactionGroupReceipt.notAssociated' => '未關聯',
-			_ => null,
-		} ?? switch (path) {
 			'chat.genui.transactionGroupReceipt.addSpace' => '添加',
 			'chat.genui.transactionGroupReceipt.selectSpace' => '選擇共享空間',
 			'chat.genui.transactionGroupReceipt.spaceAssociateSuccess' => '已關聯到共享空間',
@@ -1825,6 +2582,8 @@ extension on TranslationsZhHant {
 			'chat.genui.transactionGroupReceipt.targetAccount' => '目標帳戶',
 			'chat.genui.transactionGroupReceipt.currencyMismatchNote' => '提示：帳戶餘額將按當時匯率進行換算扣減',
 			'chat.genui.transactionGroupReceipt.confirmAssociate' => '確認關聯',
+			'chat.genui.transactionGroupReceipt.total' => 'Total',
+			'chat.genui.transactionGroupReceipt.spaceCount' => ({required Object count}) => '${count} spaces',
 			'chat.genui.transactionCard.title' => '交易成功',
 			'chat.genui.transactionCard.associatedAccount' => '已關聯帳戶',
 			'chat.genui.transactionCard.notCounted' => '不計入資產',
@@ -1835,6 +2594,10 @@ extension on TranslationsZhHant {
 			'chat.genui.transactionCard.missingId' => '交易 ID 缺失，無法更新',
 			'chat.genui.transactionCard.associatedTo' => ({required Object name}) => '已關聯到 ${name}',
 			'chat.genui.transactionCard.updateFailed' => ({required Object error}) => '更新失敗: ${error}',
+			'chat.genui.transactionCard.sharedSpace' => 'Shared Space',
+			'chat.genui.transactionCard.noSpace' => 'No shared spaces available',
+			'chat.genui.transactionCard.selectSpace' => 'Select Shared Space',
+			'chat.genui.transactionCard.linkedToSpace' => 'Linked to shared space',
 			'chat.genui.cashFlowCard.title' => '現金流分析',
 			'chat.genui.cashFlowCard.savingsRate' => ({required Object rate}) => '儲蓄 ${rate}%',
 			'chat.genui.cashFlowCard.totalIncome' => '總收入',
@@ -1853,6 +2616,130 @@ extension on TranslationsZhHant {
 			'chat.genui.budgetSimulator.dailyAllowance' => '每日限額',
 			'chat.genui.budgetSimulator.cancel' => '放棄',
 			'chat.genui.budgetSimulator.confirm' => '採用此預算',
+			'chat.genui.budgetReceipt.newBudget' => 'New Budget',
+			'chat.genui.budgetReceipt.budgetCreated' => 'Budget Created',
+			'chat.genui.budgetReceipt.rolloverBudget' => 'Rollover Budget',
+			'chat.genui.budgetReceipt.createFailed' => 'Failed to create budget',
+			'chat.genui.budgetReceipt.thisMonth' => 'This Month',
+			'chat.genui.budgetReceipt.dateRange' => ({required Object start, required Object startDay, required Object end, required Object endDay}) => '${start}/${startDay} - ${end}/${endDay}',
+			'chat.genui.budgetStatusCard.budget' => 'Budget',
+			'chat.genui.budgetStatusCard.overview' => 'Budget Overview',
+			'chat.genui.budgetStatusCard.totalBudget' => 'Total Budget',
+			'chat.genui.budgetStatusCard.spent' => ({required Object amount}) => 'Used ¥${amount}',
+			'chat.genui.budgetStatusCard.remaining' => ({required Object amount}) => 'Remaining ¥${amount}',
+			'chat.genui.budgetStatusCard.exceeded' => 'Exceeded',
+			'chat.genui.budgetStatusCard.warning' => 'Warning',
+			'chat.genui.budgetStatusCard.plentiful' => 'Healthy',
+			'chat.genui.budgetStatusCard.normal' => 'Normal',
+			'chat.genui.cashFlowForecast.title' => 'Cash Flow Forecast',
+			'chat.genui.cashFlowForecast.recurringTransaction' => 'Recurring Transaction',
+			'chat.genui.cashFlowForecast.recurringIncome' => 'Recurring Income',
+			'chat.genui.cashFlowForecast.recurringExpense' => 'Recurring Expense',
+			'chat.genui.cashFlowForecast.recurringTransfer' => 'Recurring Transfer',
+			'chat.genui.cashFlowForecast.nextDays' => ({required Object days}) => 'Next ${days} days',
+			'chat.genui.cashFlowForecast.noData' => 'No forecast data',
+			'chat.genui.cashFlowForecast.summary' => 'Forecast Summary',
+			'chat.genui.cashFlowForecast.variableExpense' => 'Predicted Variable Expense',
+			'chat.genui.cashFlowForecast.netChange' => 'Est. Net Change',
+			'chat.genui.cashFlowForecast.keyEvents' => 'Key Events',
+			'chat.genui.cashFlowForecast.noSignificantEvents' => 'No significant events in forecast period',
+			'chat.genui.cashFlowForecast.dateFormat' => 'M/d',
+			'chat.genui.healthScore.title' => 'Financial Health',
+			'chat.genui.healthScore.suggestions' => 'Suggestions',
+			'chat.genui.healthScore.scorePoint' => ({required Object score}) => '${score} pts',
+			'chat.genui.healthScore.status.excellent' => 'Excellent',
+			'chat.genui.healthScore.status.good' => 'Good',
+			'chat.genui.healthScore.status.fair' => 'Fair',
+			'chat.genui.healthScore.status.needsImprovement' => 'Needs Improvement',
+			'chat.genui.healthScore.status.poor' => 'Poor',
+			'chat.genui.spaceSelector.selected' => 'Selected',
+			'chat.genui.spaceSelector.unnamedSpace' => 'Unnamed Space',
+			'chat.genui.spaceSelector.linked' => 'Linked',
+			'chat.genui.spaceSelector.roleOwner' => 'Owner',
+			'chat.genui.spaceSelector.roleAdmin' => 'Admin',
+			'chat.genui.spaceSelector.roleMember' => 'Member',
+			'chat.genui.transferPath.selectSource' => 'Select Source Account',
+			'chat.genui.transferPath.selectTarget' => 'Select Target Account',
+			'chat.genui.transferPath.from' => 'From (Source)',
+			'chat.genui.transferPath.to' => 'To (Target)',
+			'chat.genui.transferPath.select' => 'Select',
+			'chat.genui.transferPath.cancelled' => 'Operation Cancelled',
+			'chat.genui.transferPath.loadError' => 'Failed to load account data',
+			'chat.genui.transferPath.historyMissing' => 'Account info missing in history',
+			'chat.genui.transferPath.amountUnconfirmed' => 'Amount Unconfirmed',
+			'chat.genui.transferPath.confirmedWithArrow' => ({required Object source, required Object target}) => 'Confirmed: ${source} → ${target}',
+			'chat.genui.transferPath.confirmAction' => ({required Object source, required Object target}) => 'Confirm: ${source} → ${target}',
+			'chat.genui.transferPath.pleaseSelectSource' => 'Please select source account',
+			'chat.genui.transferPath.pleaseSelectTarget' => 'Please select target account',
+			'chat.genui.transferPath.confirmLinks' => 'Confirm Transfer Path',
+			'chat.genui.transferPath.linkLocked' => 'Path Locked',
+			'chat.genui.transferPath.clickToConfirm' => 'Click button below to confirm',
+			'chat.genui.transferPath.reselect' => 'Reselect',
+			'chat.genui.transferPath.title' => 'Transfer',
+			'chat.genui.transferPath.history' => 'History',
+			'chat.genui.transferPath.unknownAccount' => 'Unknown Account',
+			'chat.genui.transferPath.confirmed' => 'Confirmed',
+			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
+			'chat.genui.transactionConfirmation.confirmed' => '已确认',
+			'chat.genui.budgetAnalysis.title' => '预算分析报告',
+			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => '过去 ${days} 天',
+			'chat.genui.budgetAnalysis.totalExpense' => '总支出',
+			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => '环比 ${change}%',
+			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
+			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
+			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
+			'chat.welcome.morning.subtitle' => 'Start your day by tracking',
+			'chat.welcome.morning.breakfast.title' => 'Breakfast',
+			'chat.welcome.morning.breakfast.prompt' => 'Record breakfast expense',
+			'chat.welcome.morning.breakfast.description' => 'Log today\'s first expense',
+			'chat.welcome.morning.yesterdayReview.title' => 'Yesterday Review',
+			'chat.welcome.morning.yesterdayReview.prompt' => 'Analyze yesterday\'s spending',
+			'chat.welcome.morning.yesterdayReview.description' => 'Check how much you spent yesterday',
+			'chat.welcome.morning.todayBudget.title' => 'Today\'s Budget',
+			'chat.welcome.morning.todayBudget.prompt' => 'How much budget left for today',
+			'chat.welcome.morning.todayBudget.description' => 'Plan your spending for today',
+			'chat.welcome.midday.greeting' => 'Good Afternoon',
+			'chat.welcome.midday.subtitle' => 'Quick record during lunch',
+			'chat.welcome.midday.lunch.title' => 'Lunch',
+			'chat.welcome.midday.lunch.prompt' => 'Record lunch expense',
+			'chat.welcome.midday.lunch.description' => 'Log your lunch spending',
+			'chat.welcome.midday.weeklyExpense.title' => 'Weekly Spending',
+			'chat.welcome.midday.weeklyExpense.prompt' => 'Analyze this week\'s spending',
+			'chat.welcome.midday.weeklyExpense.description' => 'See your weekly expenses',
+			'chat.welcome.midday.checkBalance.title' => 'Check Balance',
+			'chat.welcome.midday.checkBalance.prompt' => 'Check my account balance',
+			'chat.welcome.midday.checkBalance.description' => 'View your account balances',
+			'chat.welcome.afternoon.subtitle' => 'Tea time, let\'s review finances',
+			'chat.welcome.afternoon.quickRecord.title' => 'Quick Record',
+			'chat.welcome.afternoon.quickRecord.prompt' => 'Help me record an expense',
+			'chat.welcome.afternoon.quickRecord.description' => 'Quickly log a transaction',
+			'chat.welcome.afternoon.analyzeSpending.title' => 'Analyze Spending',
+			'chat.welcome.afternoon.analyzeSpending.prompt' => 'Analyze this month\'s spending',
+			'chat.welcome.afternoon.analyzeSpending.description' => 'View spending trends and breakdown',
+			'chat.welcome.afternoon.budgetProgress.title' => 'Budget Progress',
+			'chat.welcome.afternoon.budgetProgress.prompt' => 'Check budget status',
+			'chat.welcome.afternoon.budgetProgress.description' => 'See how your budget is doing',
+			'chat.welcome.evening.subtitle' => 'End of day, time to balance the books',
+			'chat.welcome.evening.dinner.title' => 'Dinner',
+			'chat.welcome.evening.dinner.prompt' => 'Record dinner expense',
+			'chat.welcome.evening.dinner.description' => 'Log tonight\'s dinner spending',
+			'chat.welcome.evening.todaySummary.title' => 'Today\'s Summary',
+			'chat.welcome.evening.todaySummary.prompt' => 'Summarize today\'s spending',
+			'chat.welcome.evening.todaySummary.description' => 'See what you spent today',
+			'chat.welcome.evening.tomorrowPlan.title' => 'Tomorrow\'s Plan',
+			'chat.welcome.evening.tomorrowPlan.prompt' => 'What fixed expenses tomorrow',
+			'chat.welcome.evening.tomorrowPlan.description' => 'Plan ahead for tomorrow',
+			'chat.welcome.night.greeting' => 'Late Night',
+			'chat.welcome.night.subtitle' => 'Quiet time for financial planning',
+			'chat.welcome.night.makeupRecord.title' => 'Catch Up',
+			'chat.welcome.night.makeupRecord.prompt' => 'Help me log any missed expenses',
+			'chat.welcome.night.makeupRecord.description' => 'Record expenses you forgot today',
+			'chat.welcome.night.monthlyReview.title' => 'Monthly Review',
+			'chat.welcome.night.monthlyReview.prompt' => 'Analyze this month\'s spending',
+			'chat.welcome.night.monthlyReview.description' => 'Review your monthly expenses',
+			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
+			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
+			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
 			'footprint.searchIn' => '搜尋',
 			'footprint.searchInAllRecords' => '在所有記錄中搜尋相關內容',
 			'media.selectPhotos' => '選擇照片',
@@ -1932,6 +2819,24 @@ extension on TranslationsZhHant {
 			'account.receivable' => '應收款項',
 			'account.payable' => '應付款項',
 			'account.other' => '其他帳戶',
+			'account.types.cashTitle' => 'Cash',
+			'account.types.cashSubtitle' => 'Physical currency and coins',
+			'account.types.depositTitle' => 'Bank Deposit',
+			'account.types.depositSubtitle' => 'Savings, checking accounts',
+			'account.types.eMoneyTitle' => 'E-Wallet',
+			'account.types.eMoneySubtitle' => 'Digital payment balances',
+			'account.types.investmentTitle' => 'Investment',
+			'account.types.investmentSubtitle' => 'Stocks, funds, bonds, etc.',
+			'account.types.receivableTitle' => 'Receivable',
+			'account.types.receivableSubtitle' => 'Loans to others, pending',
+			'account.types.receivableHelper' => 'Owed to me',
+			'account.types.creditCardTitle' => 'Credit Card',
+			'account.types.creditCardSubtitle' => 'Credit card balances',
+			'account.types.loanTitle' => 'Loan',
+			'account.types.loanSubtitle' => 'Mortgage, auto, personal',
+			'account.types.payableTitle' => 'Payable',
+			'account.types.payableSubtitle' => 'Amounts owed to others',
+			'account.types.payableHelper' => 'I owe',
 			'financial.title' => '財務',
 			'financial.management' => '財務管理',
 			'financial.netWorth' => '總淨值',
@@ -1981,6 +2886,9 @@ extension on TranslationsZhHant {
 			'statistics.sort.date' => '按時間排序',
 			'statistics.exportList' => '導出列表',
 			'statistics.noMoreData' => '沒有更多數據了',
+			'statistics.emptyState.title' => 'Unlock Financial Insights',
+			'statistics.emptyState.description' => 'Your financial report is currently a blank canvas.\nRecord your first transaction and let the data tell your story.',
+			'statistics.emptyState.action' => 'Record First Transaction',
 			'currency.cny' => '人民幣',
 			'currency.usd' => '美元',
 			'currency.eur' => '歐元',
@@ -2003,6 +2911,82 @@ extension on TranslationsZhHant {
 			'sharedSpace.roles.owner' => '主理人',
 			'sharedSpace.roles.admin' => '管理員',
 			'sharedSpace.roles.member' => '成員',
+			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
+			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
+			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
+			'budgetSuggestion.financialInsights' => 'Financial Insights',
+			'server.title' => 'Connect to Server',
+			'server.subtitle' => 'Enter your self-hosted server address or scan the QR code displayed when starting the server',
+			'server.urlLabel' => 'Server Address',
+			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
+			'server.scanQr' => 'Scan QR Code',
+			'server.scanQrInstruction' => 'Point at the QR code displayed in the server terminal',
+			'server.testConnection' => 'Test Connection',
+			'server.connecting' => 'Connecting...',
+			'server.connected' => 'Connected',
+			'server.connectionFailed' => 'Connection Failed',
+			'server.continueToLogin' => 'Continue to Login',
+			'server.saveAndReturn' => 'Save and Return',
+			'server.serverSettings' => 'Server Settings',
+			'server.currentServer' => 'Current Server',
+			'server.version' => 'Version',
+			'server.environment' => 'Environment',
+			'server.changeServer' => 'Change Server',
+			'server.changeServerWarning' => 'Changing server will log you out. Continue?',
+			'server.error.urlRequired' => 'Server address is required',
+			'server.error.invalidUrl' => 'Invalid URL format',
+			'server.error.connectionTimeout' => 'Connection timed out',
+			'server.error.connectionRefused' => 'Could not connect to server',
+			'server.error.sslError' => 'SSL certificate error',
+			'server.error.serverError' => 'Server error',
+			'errorMapping.generic.badRequest' => 'Bad Request',
+			'errorMapping.generic.authFailed' => 'Authentication failed, please login again',
+			'errorMapping.generic.permissionDenied' => 'Permission denied',
+			'errorMapping.generic.notFound' => 'Resource not found',
+			'errorMapping.generic.serverError' => 'Internal server error',
+			'errorMapping.generic.systemError' => 'System error',
+			'errorMapping.generic.validationFailed' => 'Validation failed',
+			'errorMapping.auth.failed' => 'Authentication failed',
+			'errorMapping.auth.emailWrong' => 'Incorrect email',
+			'errorMapping.auth.phoneWrong' => 'Incorrect phone number',
+			'errorMapping.auth.phoneRegistered' => 'Phone number already registered',
+			'errorMapping.auth.emailRegistered' => 'Email already registered',
+			'errorMapping.auth.sendFailed' => 'Failed to send verification code',
+			'errorMapping.auth.expired' => 'Verification code expired',
+			'errorMapping.auth.tooFrequent' => 'Code sent too frequently',
+			'errorMapping.auth.unsupportedType' => 'Unsupported code type',
+			'errorMapping.auth.wrongPassword' => 'Incorrect password',
+			'errorMapping.auth.userNotFound' => 'User not found',
+			'errorMapping.auth.prefsMissing' => 'Preference parameters missing',
+			'errorMapping.auth.invalidTimezone' => 'Invalid client timezone',
+			'errorMapping.transaction.commentEmpty' => 'Comment content cannot be empty',
+			'errorMapping.transaction.invalidParent' => 'Invalid parent comment ID',
+			'errorMapping.transaction.saveFailed' => 'Failed to save comment',
+			'errorMapping.transaction.deleteFailed' => 'Failed to delete comment',
+			'errorMapping.transaction.notExists' => 'Transaction does not exist',
+			'errorMapping.space.notFound' => 'Shared space not found or access denied',
+			'errorMapping.space.inviteDenied' => 'No permission to invite members',
+			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',
+			'errorMapping.space.inviteSent' => 'Invitation sent',
+			'errorMapping.space.alreadyMember' => 'User is already a member or invited',
+			'errorMapping.space.invalidAction' => 'Invalid action',
+			'errorMapping.space.invitationNotFound' => 'Invitation does not exist',
+			'errorMapping.space.onlyOwner' => 'Only owner can perform this action',
+			'errorMapping.space.ownerNotRemovable' => 'Owner cannot be removed',
+			'errorMapping.space.memberNotFound' => 'Member not found',
+			'errorMapping.space.notMember' => 'User is not a member of this space',
+			'errorMapping.space.ownerCantLeave' => 'Owner cannot leave directly, please transfer ownership first',
+			'errorMapping.space.invalidCode' => 'Invalid invitation code',
+			'errorMapping.space.codeExpired' => 'Invitation code expired or usage limit reached',
+			'errorMapping.recurring.invalidRule' => 'Invalid recurrence rule',
+			'errorMapping.recurring.ruleNotFound' => 'Recurrence rule not found',
+			'errorMapping.upload.noFile' => 'No file uploaded',
+			'errorMapping.upload.tooLarge' => 'File too large',
+			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
+			'errorMapping.upload.tooManyFiles' => 'Too many files',
+			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
+			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
+			'errorMapping.ai.emptyMessage' => 'Empty user message',
 			_ => null,
 		};
 	}

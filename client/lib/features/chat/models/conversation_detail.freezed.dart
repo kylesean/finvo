@@ -15,8 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ConversationDetail {
 
- String get id; String get title;@JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime get updatedAt;// Directly include message list, no longer using pagination structure
- List<ChatMessage> get messages;
+ String get id; String get title;@JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime get updatedAt; List<ChatMessage> get messages;
 /// Create a copy of ConversationDetail
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -219,9 +218,7 @@ class _ConversationDetail implements ConversationDetail {
 @override final  String id;
 @override final  String title;
 @override@JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) final  DateTime updatedAt;
-// Directly include message list, no longer using pagination structure
  final  List<ChatMessage> _messages;
-// Directly include message list, no longer using pagination structure
 @override@JsonKey() List<ChatMessage> get messages {
   if (_messages is EqualUnmodifiableListView) return _messages;
   // ignore: implicit_dynamic_type

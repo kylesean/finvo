@@ -10,7 +10,7 @@ part of 'statistics_service.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(statisticsService)
-const statisticsServiceProvider = StatisticsServiceProvider._();
+final statisticsServiceProvider = StatisticsServiceProvider._();
 
 final class StatisticsServiceProvider
     extends
@@ -20,7 +20,7 @@ final class StatisticsServiceProvider
           StatisticsService
         >
     with $Provider<StatisticsService> {
-  const StatisticsServiceProvider._()
+  StatisticsServiceProvider._()
     : super(
         from: null,
         argument: null,

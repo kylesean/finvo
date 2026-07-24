@@ -14,9 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatHistoryState {
 
- String? get currentConversationId; String? get currentConversationTitle; bool get isLoadingHistory; List<ChatMessage> get messages; String? get historyError; int get historyCurrentPage;// Current loaded history message page
- bool get historyHasMore;// Whether there are more history messages to load
- bool get isStreamingResponse;
+ String? get currentConversationId; String? get currentConversationTitle; bool get isLoadingHistory; List<ChatMessage> get messages; String? get historyError; int get historyCurrentPage; bool get historyHasMore; bool get isStreamingResponse;
 /// Create a copy of ChatHistoryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -230,9 +228,7 @@ class _ChatHistoryState implements ChatHistoryState {
 
 @override final  String? historyError;
 @override@JsonKey() final  int historyCurrentPage;
-// Current loaded history message page
 @override@JsonKey() final  bool historyHasMore;
-// Whether there are more history messages to load
 @override@JsonKey() final  bool isStreamingResponse;
 
 /// Create a copy of ChatHistoryState

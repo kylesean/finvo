@@ -15,18 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CommentModel {
 
- String get id; String get transactionId;// Ensure API returns or can set
- String get userId;// ID of the user who posted the comment
- String get userName;// Username of the user who posted the comment
- String get userAvatarUrl;// Avatar URL of the user who posted the comment
- String? get parentCommentId;// Parent comment ID, used for replies
- String get commentText;// Reply text content
- String? get repliedToUserId;// ID of the user being replied to (optional, recommended)
- String? get repliedToUserName;// Name of the user being replied to (optional, recommended)
- DateTime get createdAt;@JsonKey(fromJson: _dateTimeNullableParse, toJson: _dateTimeNullableToIso8601String) DateTime? get updatedAt; List<CommentModel> get replies;// Current field only for backend returned data, UI no longer renders recursively
-// Or backend returns nested structure directly, but mind the hierarchy depth
- int get likeCount;// Optional: comment like count
- bool get likedByCurrentUser;
+ String get id; String get transactionId; String get userId; String get userName; String get userAvatarUrl; String? get parentCommentId; String get commentText; String? get repliedToUserId; String? get repliedToUserName; DateTime get createdAt;@JsonKey(fromJson: _dateTimeNullableParse, toJson: _dateTimeNullableToIso8601String) DateTime? get updatedAt; List<CommentModel> get replies; int get likeCount; bool get likedByCurrentUser;
 /// Create a copy of CommentModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -238,21 +227,13 @@ class _CommentModel implements CommentModel {
 
 @override final  String id;
 @override final  String transactionId;
-// Ensure API returns or can set
 @override final  String userId;
-// ID of the user who posted the comment
 @override final  String userName;
-// Username of the user who posted the comment
 @override final  String userAvatarUrl;
-// Avatar URL of the user who posted the comment
 @override final  String? parentCommentId;
-// Parent comment ID, used for replies
 @override final  String commentText;
-// Reply text content
 @override final  String? repliedToUserId;
-// ID of the user being replied to (optional, recommended)
 @override final  String? repliedToUserName;
-// Name of the user being replied to (optional, recommended)
 @override final  DateTime createdAt;
 @override@JsonKey(fromJson: _dateTimeNullableParse, toJson: _dateTimeNullableToIso8601String) final  DateTime? updatedAt;
  final  List<CommentModel> _replies;
@@ -262,10 +243,7 @@ class _CommentModel implements CommentModel {
   return EqualUnmodifiableListView(_replies);
 }
 
-// Current field only for backend returned data, UI no longer renders recursively
-// Or backend returns nested structure directly, but mind the hierarchy depth
 @override@JsonKey() final  int likeCount;
-// Optional: comment like count
 @override@JsonKey() final  bool likedByCurrentUser;
 
 /// Create a copy of CommentModel

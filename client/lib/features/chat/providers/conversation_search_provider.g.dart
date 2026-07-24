@@ -11,13 +11,13 @@ part of 'conversation_search_provider.dart';
 /// Conversation search state management
 
 @ProviderFor(ConversationSearch)
-const conversationSearchProvider = ConversationSearchProvider._();
+final conversationSearchProvider = ConversationSearchProvider._();
 
 /// Conversation search state management
 final class ConversationSearchProvider
     extends $NotifierProvider<ConversationSearch, ConversationSearchState> {
   /// Conversation search state management
-  const ConversationSearchProvider._()
+  ConversationSearchProvider._()
     : super(
         from: null,
         argument: null,
@@ -53,8 +53,7 @@ abstract class _$ConversationSearch extends $Notifier<ConversationSearchState> {
   ConversationSearchState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<ConversationSearchState, ConversationSearchState>;
     final element =
@@ -65,6 +64,6 @@ abstract class _$ConversationSearch extends $Notifier<ConversationSearchState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

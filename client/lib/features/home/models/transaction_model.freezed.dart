@@ -15,8 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SharedUserInfo {
 
- String get userId; String get avatarUrl;// User avatar URL
- String? get username;
+ String get userId; String get avatarUrl; String? get username;
 /// Create a copy of SharedUserInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -217,7 +216,6 @@ class _SharedUserInfo implements SharedUserInfo {
 
 @override final  String userId;
 @override final  String avatarUrl;
-// User avatar URL
 @override final  String? username;
 
 /// Create a copy of SharedUserInfo
@@ -1386,27 +1384,7 @@ as DateTime?,
 /// @nodoc
 mixin _$TransactionModel {
 
- String get id;// Unique ID
- TransactionType get type;// Transaction type (expense/income/transfer)
- String get category;// Category (e.g., Dining, Transport, Salary)
- String? get categoryKey;// Category ID
- String? get categoryText;// Server-side localized category name
- String get iconUrl;// Category icon URL (or local path)
- double get amount;// Display amount after conversion
- DateTime get timestamp;// Transaction time
-// Original amount information (historical data, immutable)
- double? get amountOriginal;// Original recorded amount
- String? get originalCurrency;// Original recorded currency (e.g., USD, CNY)
- String? get exchangeRate;// Exchange rate snapshot at time of recording
-// Other fields
- String? get description;// Note
- bool get isShared; List<SharedUserInfo> get sharedWith; String? get paymentMethod; String? get paymentMethodText;// Server-side localized payment method name
- String? get location; List<String> get tags; String? get rawInput; FinancialAccountInfo? get financialAccount; AmountDisplay? get display; DateTime? get createdAt; DateTime? get updatedAt; String? get photoPath; String? get geoLocation; List<TransactionCommentModel> get comments;// Comment list
-// Associated account and space information
- String? get sourceAccountId;// Source account ID
- String? get targetAccountId;// Target account ID
- List<SpaceInfo> get spaces;// Associated shared spaces
- String? get sourceThreadId;
+ String get id; TransactionType get type; String get category; String? get categoryKey; String? get categoryText; String get iconUrl; double get amount; DateTime get timestamp; double? get amountOriginal; String? get originalCurrency; String? get exchangeRate; String? get description; bool get isShared; List<SharedUserInfo> get sharedWith; String? get paymentMethod; String? get paymentMethodText; String? get location; List<String> get tags; String? get rawInput; FinancialAccountInfo? get financialAccount; AmountDisplay? get display; DateTime? get createdAt; DateTime? get updatedAt; String? get photoPath; String? get geoLocation; List<TransactionCommentModel> get comments; String? get sourceAccountId; String? get targetAccountId; List<SpaceInfo> get spaces; String? get sourceThreadId;
 /// Create a copy of TransactionModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1657,31 +1635,17 @@ class _TransactionModel implements TransactionModel {
   factory _TransactionModel.fromJson(Map<String, dynamic> json) => _$TransactionModelFromJson(json);
 
 @override final  String id;
-// Unique ID
 @override final  TransactionType type;
-// Transaction type (expense/income/transfer)
 @override final  String category;
-// Category (e.g., Dining, Transport, Salary)
 @override final  String? categoryKey;
-// Category ID
 @override final  String? categoryText;
-// Server-side localized category name
 @override final  String iconUrl;
-// Category icon URL (or local path)
 @override final  double amount;
-// Display amount after conversion
 @override final  DateTime timestamp;
-// Transaction time
-// Original amount information (historical data, immutable)
 @override final  double? amountOriginal;
-// Original recorded amount
 @override final  String? originalCurrency;
-// Original recorded currency (e.g., USD, CNY)
 @override final  String? exchangeRate;
-// Exchange rate snapshot at time of recording
-// Other fields
 @override final  String? description;
-// Note
 @override@JsonKey() final  bool isShared;
  final  List<SharedUserInfo> _sharedWith;
 @override@JsonKey() List<SharedUserInfo> get sharedWith {
@@ -1692,7 +1656,6 @@ class _TransactionModel implements TransactionModel {
 
 @override final  String? paymentMethod;
 @override final  String? paymentMethodText;
-// Server-side localized payment method name
 @override final  String? location;
  final  List<String> _tags;
 @override@JsonKey() List<String> get tags {
@@ -1715,21 +1678,15 @@ class _TransactionModel implements TransactionModel {
   return EqualUnmodifiableListView(_comments);
 }
 
-// Comment list
-// Associated account and space information
 @override final  String? sourceAccountId;
-// Source account ID
 @override final  String? targetAccountId;
-// Target account ID
  final  List<SpaceInfo> _spaces;
-// Target account ID
 @override@JsonKey() List<SpaceInfo> get spaces {
   if (_spaces is EqualUnmodifiableListView) return _spaces;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_spaces);
 }
 
-// Associated shared spaces
 @override final  String? sourceThreadId;
 
 /// Create a copy of TransactionModel

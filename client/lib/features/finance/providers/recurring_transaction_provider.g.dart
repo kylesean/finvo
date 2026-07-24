@@ -11,7 +11,7 @@ part of 'recurring_transaction_provider.dart';
 /// The recurring transaction list state manager.
 
 @ProviderFor(RecurringTransactionNotifier)
-const recurringTransactionProvider = RecurringTransactionNotifierProvider._();
+final recurringTransactionProvider = RecurringTransactionNotifierProvider._();
 
 /// The recurring transaction list state manager.
 final class RecurringTransactionNotifierProvider
@@ -21,7 +21,7 @@ final class RecurringTransactionNotifierProvider
           RecurringTransactionState
         > {
   /// The recurring transaction list state manager.
-  const RecurringTransactionNotifierProvider._()
+  RecurringTransactionNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -58,8 +58,7 @@ abstract class _$RecurringTransactionNotifier
   RecurringTransactionState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<RecurringTransactionState, RecurringTransactionState>;
     final element =
@@ -70,6 +69,6 @@ abstract class _$RecurringTransactionNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

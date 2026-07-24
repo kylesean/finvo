@@ -14,11 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ConversationSearchResult {
 
- String get id; String get title; String get snippet;// Search matched content snippet
- String? get messageId;// Message ID
- DateTime? get createdAt;// Creation time
- DateTime? get updatedAt;// Update time
- List<HighlightRange> get highlights;
+ String get id; String get title; String get snippet; String? get messageId; DateTime? get createdAt; DateTime? get updatedAt; List<HighlightRange> get highlights;
 /// Create a copy of ConversationSearchResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -222,15 +218,10 @@ class _ConversationSearchResult implements ConversationSearchResult {
 @override final  String id;
 @override final  String title;
 @override final  String snippet;
-// Search matched content snippet
 @override final  String? messageId;
-// Message ID
 @override final  DateTime? createdAt;
-// Creation time
 @override final  DateTime? updatedAt;
-// Update time
  final  List<HighlightRange> _highlights;
-// Update time
 @override@JsonKey() List<HighlightRange> get highlights {
   if (_highlights is EqualUnmodifiableListView) return _highlights;
   // ignore: implicit_dynamic_type
@@ -567,8 +558,7 @@ as String,
 /// @nodoc
 mixin _$ConversationSearchState {
 
- SearchMode get mode; String get query; List<ConversationSearchResult> get results; bool get isLoading; String? get error; bool get hasSearched;// Whether a search has been performed
- bool get isFullscreen;
+ SearchMode get mode; String get query; List<ConversationSearchResult> get results; bool get isLoading; String? get error; bool get hasSearched; bool get isFullscreen;
 /// Create a copy of ConversationSearchState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -781,7 +771,6 @@ class _ConversationSearchState implements ConversationSearchState {
 @override@JsonKey() final  bool isLoading;
 @override final  String? error;
 @override@JsonKey() final  bool hasSearched;
-// Whether a search has been performed
 @override@JsonKey() final  bool isFullscreen;
 
 /// Create a copy of ConversationSearchState

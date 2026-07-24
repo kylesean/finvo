@@ -10,12 +10,12 @@ part of 'home_providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(CurrentTransactionFeedType)
-const currentTransactionFeedTypeProvider =
+final currentTransactionFeedTypeProvider =
     CurrentTransactionFeedTypeProvider._();
 
 final class CurrentTransactionFeedTypeProvider
     extends $NotifierProvider<CurrentTransactionFeedType, TransactionFeedType> {
-  const CurrentTransactionFeedTypeProvider._()
+  CurrentTransactionFeedTypeProvider._()
     : super(
         from: null,
         argument: null,
@@ -50,8 +50,7 @@ abstract class _$CurrentTransactionFeedType
   TransactionFeedType build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<TransactionFeedType, TransactionFeedType>;
     final element =
         ref.element
@@ -61,16 +60,16 @@ abstract class _$CurrentTransactionFeedType
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(CurrentDisplayMonth)
-const currentDisplayMonthProvider = CurrentDisplayMonthProvider._();
+final currentDisplayMonthProvider = CurrentDisplayMonthProvider._();
 
 final class CurrentDisplayMonthProvider
     extends $NotifierProvider<CurrentDisplayMonth, DateTime> {
-  const CurrentDisplayMonthProvider._()
+  CurrentDisplayMonthProvider._()
     : super(
         from: null,
         argument: null,
@@ -104,8 +103,7 @@ abstract class _$CurrentDisplayMonth extends $Notifier<DateTime> {
   DateTime build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<DateTime, DateTime>;
     final element =
         ref.element
@@ -115,16 +113,16 @@ abstract class _$CurrentDisplayMonth extends $Notifier<DateTime> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(SelectedDate)
-const selectedDateProvider = SelectedDateProvider._();
+final selectedDateProvider = SelectedDateProvider._();
 
 final class SelectedDateProvider
     extends $NotifierProvider<SelectedDate, DateTime?> {
-  const SelectedDateProvider._()
+  SelectedDateProvider._()
     : super(
         from: null,
         argument: null,
@@ -157,8 +155,7 @@ abstract class _$SelectedDate extends $Notifier<DateTime?> {
   DateTime? build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<DateTime?, DateTime?>;
     final element =
         ref.element
@@ -168,12 +165,12 @@ abstract class _$SelectedDate extends $Notifier<DateTime?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(totalExpense)
-const totalExpenseProvider = TotalExpenseProvider._();
+final totalExpenseProvider = TotalExpenseProvider._();
 
 final class TotalExpenseProvider
     extends
@@ -183,7 +180,7 @@ final class TotalExpenseProvider
           FutureOr<TotalExpenseData>
         >
     with $FutureModifier<TotalExpenseData>, $FutureProvider<TotalExpenseData> {
-  const TotalExpenseProvider._()
+  TotalExpenseProvider._()
     : super(
         from: null,
         argument: null,
@@ -212,7 +209,7 @@ final class TotalExpenseProvider
 String _$totalExpenseHash() => r'1f85f74a152ffb9ab61c0bed0905f7a52185df98';
 
 @ProviderFor(calendarMonthData)
-const calendarMonthDataProvider = CalendarMonthDataFamily._();
+final calendarMonthDataProvider = CalendarMonthDataFamily._();
 
 final class CalendarMonthDataProvider
     extends
@@ -224,7 +221,7 @@ final class CalendarMonthDataProvider
     with
         $FutureModifier<CalendarMonthData>,
         $FutureProvider<CalendarMonthData> {
-  const CalendarMonthDataProvider._({
+  CalendarMonthDataProvider._({
     required CalendarMonthDataFamily super.from,
     required DateTime super.argument,
   }) : super(
@@ -272,7 +269,7 @@ String _$calendarMonthDataHash() => r'4efd50c45393d896f76fe15db3ee8c5ffbcb3b0c';
 
 final class CalendarMonthDataFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<CalendarMonthData>, DateTime> {
-  const CalendarMonthDataFamily._()
+  CalendarMonthDataFamily._()
     : super(
         retry: null,
         name: r'calendarMonthDataProvider',
@@ -289,7 +286,7 @@ final class CalendarMonthDataFamily extends $Family
 }
 
 @ProviderFor(transactionsForSelectedDate)
-const transactionsForSelectedDateProvider =
+final transactionsForSelectedDateProvider =
     TransactionsForSelectedDateFamily._();
 
 final class TransactionsForSelectedDateProvider
@@ -302,7 +299,7 @@ final class TransactionsForSelectedDateProvider
     with
         $FutureModifier<List<TransactionModel>>,
         $FutureProvider<List<TransactionModel>> {
-  const TransactionsForSelectedDateProvider._({
+  TransactionsForSelectedDateProvider._({
     required TransactionsForSelectedDateFamily super.from,
     required DateTime super.argument,
   }) : super(
@@ -352,7 +349,7 @@ String _$transactionsForSelectedDateHash() =>
 
 final class TransactionsForSelectedDateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<TransactionModel>>, DateTime> {
-  const TransactionsForSelectedDateFamily._()
+  TransactionsForSelectedDateFamily._()
     : super(
         retry: null,
         name: r'transactionsForSelectedDateProvider',
@@ -369,11 +366,11 @@ final class TransactionsForSelectedDateFamily extends $Family
 }
 
 @ProviderFor(TransactionFeed)
-const transactionFeedProvider = TransactionFeedProvider._();
+final transactionFeedProvider = TransactionFeedProvider._();
 
 final class TransactionFeedProvider
     extends $NotifierProvider<TransactionFeed, TransactionFeedState> {
-  const TransactionFeedProvider._()
+  TransactionFeedProvider._()
     : super(
         from: null,
         argument: null,
@@ -406,8 +403,7 @@ abstract class _$TransactionFeed extends $Notifier<TransactionFeedState> {
   TransactionFeedState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<TransactionFeedState, TransactionFeedState>;
     final element =
         ref.element
@@ -417,6 +413,6 @@ abstract class _$TransactionFeed extends $Notifier<TransactionFeedState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
