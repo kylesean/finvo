@@ -12,9 +12,9 @@ import 'package:augo/shared/models/currency.dart';
 import '../providers/financial_settings_provider.dart';
 import '../providers/user_profile_provider.dart';
 import '../models/user_info.dart';
-import '../../chat/widgets/authenticated_image.dart';
 import 'package:augo/shared/services/toast_service.dart';
 import 'package:augo/shared/widgets/themed_icon.dart';
+import 'package:augo/shared/widgets/user_avatar.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/services/server_config_service.dart';
 
@@ -259,25 +259,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             alignment: Alignment.center,
             children: [
               // Avatar
-              Container(
-                width: 88,
-                height: 88,
-                decoration: BoxDecoration(
-                  color: colors.muted,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: colors.border, width: 2),
-                ),
-                child: ClipOval(
-                  child: isUploadingAvatar
-                      ? Center(
+              isUploadingAvatar
+                  ? Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        color: colors.muted,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colors.border, width: 2),
+                      ),
+                      child: ClipOval(
+                        child: Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             color: colors.primary,
                           ),
-                        )
-                      : _buildAvatarContent(user?.avatarUrl, theme, colors),
-                ),
-              ),
+                        ),
+                      ),
+                    )
+                  : UserAvatar(
+                      userId: user?.id ?? 'augo',
+                      size: 88,
+                      border: Border.all(color: colors.border, width: 2),
+                      version: user?.updatedAt,
+                    ),
               // Edit icon
               Positioned(
                 bottom: 0,
@@ -451,54 +456,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         );
       }
     }
-  }
-
-  /// build avatar content
-  Widget _buildAvatarContent(
-    String? avatarUrl,
-    FThemeData theme,
-    FColors colors,
-  ) {
-    if (avatarUrl != null && avatarUrl.isNotEmpty) {
-      // Extract attachmentId from URL (URL format: http://.../view/{id} or /api/v1/files/view/{id})
-      final uri = Uri.parse(avatarUrl);
-      final pathSegments = uri.pathSegments;
-      final attachmentId = pathSegments.isNotEmpty ? pathSegments.last : '';
-
-      if (attachmentId.isNotEmpty) {
-        return AuthenticatedImage(
-          attachmentId: attachmentId,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            return Container(
-              color: colors.muted,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: colors.primary,
-                ),
-              ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) {
-            debugPrint('❌ Avatar load error: $error');
-            return Container(
-              color: colors.muted,
-              child: Icon(
-                FLucideIcons.user,
-                size: 40,
-                color: colors.mutedForeground,
-              ),
-            );
-          },
-        );
-      }
-    }
-
-    return Container(
-      color: colors.muted,
-      child: Icon(FLucideIcons.user, size: 40, color: colors.mutedForeground),
-    );
   }
 
   /// Pick and upload avatar

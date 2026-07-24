@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:augo/core/widgets/top_toast.dart';
 import 'package:augo/i18n/strings.g.dart';
+import 'package:augo/shared/widgets/user_avatar.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'dart:async';
 
@@ -131,7 +132,6 @@ class CommentItemWidget extends ConsumerWidget {
     timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
 
     final bool isSubComment = comment.parentCommentId != null;
-    final double avatarIconSize = isSubComment ? 10 : 14;
     final String currentLoggedInUserId = ref.watch(currentUserIdProvider);
     final bool canDelete = comment.userId == currentLoggedInUserId;
 
@@ -191,14 +191,7 @@ class CommentItemWidget extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FAvatar(
-                image: NetworkImage(comment.userAvatarUrl),
-                fallback: Icon(
-                  FLucideIcons.circleUserRound,
-                  size: avatarIconSize,
-                  color: colorScheme.mutedForeground,
-                ),
-              ),
+              UserAvatar(userId: comment.userId, size: 40),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(

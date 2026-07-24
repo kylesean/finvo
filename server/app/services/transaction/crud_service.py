@@ -17,6 +17,7 @@ from app.models.transaction import Transaction, TransactionComment
 from app.models.user import User
 from app.schemas.transaction import TransactionDisplayValue
 from app.utils.currency_utils import BASE_CURRENCY, get_exchange_rate_from_base, get_user_display_currency
+from app.utils.identicon import default_avatar_url
 
 logger = structlog.get_logger(__name__)
 
@@ -835,7 +836,7 @@ class TransactionCRUDService:
                     "transactionId": str(comment.transaction_id),
                     "userId": str(comment.user_uuid),
                     "userName": user_name or "default_name",
-                    "userAvatarUrl": user_avatar_url or "assets/images/avatars/default_avatar.png",
+                    "userAvatarUrl": user_avatar_url or default_avatar_url(comment.user_uuid),
                     "parentCommentId": str(comment.parent_comment_id) if comment.parent_comment_id else None,
                     "commentText": comment.comment_text,
                     "repliedToUserId": replied_to_user_uuid,
@@ -967,7 +968,7 @@ class TransactionCRUDService:
             "transactionId": str(comment.transaction_id),
             "userId": str(comment.user_uuid),
             "userName": user_name or "Anonymous",
-            "userAvatarUrl": user_avatar_url or "assets/images/avatars/default_avatar.png",
+            "userAvatarUrl": user_avatar_url or default_avatar_url(comment.user_uuid),
             "parentCommentId": str(comment.parent_comment_id) if comment.parent_comment_id else None,
             "commentText": comment.comment_text,
             "repliedToUserId": replied_to_user_uuid,

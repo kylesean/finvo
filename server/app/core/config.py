@@ -234,6 +234,7 @@ class Settings(BaseSettings):
         return {
             "root": [self.RATE_LIMIT_DEFAULT],
             "health": [self.RATE_LIMIT_DEFAULT],
+            "avatar": [self.RATE_LIMIT_DEFAULT],
             "register": [self.RATE_LIMIT_REGISTER],
             "login": [self.RATE_LIMIT_LOGIN],
             "chat": [self.RATE_LIMIT_CHAT],

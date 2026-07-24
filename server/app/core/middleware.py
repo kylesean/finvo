@@ -107,8 +107,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
 
         # Cache control for API responses - prevent caching of sensitive data
-        # Only apply to API routes, not static files
-        if request.url.path.startswith("/api/"):
+        # Only apply to API routes, not static files. Endpoints that serve
+        # deterministic public content (e.g. generated identicon avatars) may
+        # opt out by setting their own Cache-Control header explicitly.
+        if request.url.path.startswith("/api/") and "Cache-Control" not in response.headers:
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
             response.headers["Pragma"] = "no-cache"
 

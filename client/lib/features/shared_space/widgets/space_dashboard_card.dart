@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:augo/app/theme/app_font_config.dart';
 import 'package:augo/i18n/strings.g.dart';
+import 'package:augo/shared/widgets/user_avatar.dart';
 import '../models/shared_space_models.dart';
 
 class SpaceDashboardCard extends StatelessWidget {
@@ -239,24 +240,10 @@ class SpaceDashboardCard extends StatelessWidget {
 
   Widget _buildAvatar(BuildContext context, SharedSpaceMember member) {
     final colors = context.theme.colors;
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: colors.muted,
-        shape: BoxShape.circle,
-        border: Border.all(color: colors.background, width: 2),
-      ),
-      child: Center(
-        child: Text(
-          member.username.substring(0, 1).toUpperCase(),
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: colors.mutedForeground,
-          ),
-        ),
-      ),
+    return UserAvatar(
+      userId: member.userId,
+      size: 36,
+      border: Border.all(color: colors.background, width: 2),
     );
   }
 

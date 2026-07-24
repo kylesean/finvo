@@ -12,9 +12,9 @@ import '../providers/paginated_conversation_provider.dart';
 import '../models/conversation_info.dart';
 import '../services/conversation_service.dart';
 import 'conversation_item_skeleton.dart';
-import 'authenticated_image.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../../shared/services/toast_service.dart';
+import '../../../../shared/widgets/user_avatar.dart';
 import '../../../../shared/widgets/themed_icon.dart';
 import '../../profile/providers/user_profile_provider.dart';
 
@@ -436,20 +436,10 @@ class _ChatConversationDrawerState
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: theme.colors.secondary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: ClipOval(
-                    child: _buildAvatarContent(
-                      user?.avatarUrl,
-                      theme,
-                      theme.colors,
-                    ),
-                  ),
+                UserAvatar(
+                  userId: user?.id ?? 'augo',
+                  size: 32,
+                  backgroundColor: theme.colors.secondary,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -485,40 +475,6 @@ class _ChatConversationDrawerState
         ),
       ),
     );
-  }
-
-  /// build avatar content
-  Widget _buildAvatarContent(
-    String? avatarUrl,
-    FThemeData theme,
-    FColors colors,
-  ) {
-    if (avatarUrl != null && avatarUrl.isNotEmpty) {
-      // Extract attachmentId from URL (URL format: http://.../view/{id} or /api/v1/files/view/{id})
-      try {
-        final uri = Uri.parse(avatarUrl);
-        final pathSegments = uri.pathSegments;
-        final attachmentId = pathSegments.isNotEmpty ? pathSegments.last : '';
-
-        if (attachmentId.isNotEmpty) {
-          return AuthenticatedImage(
-            attachmentId: attachmentId,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Icon(
-                FLucideIcons.user,
-                size: 16,
-                color: colors.mutedForeground,
-              );
-            },
-          );
-        }
-      } catch (e) {
-        debugPrint('❌ Error parsing avatar URL: $e');
-      }
-    }
-
-    return Icon(FLucideIcons.user, size: 16, color: colors.mutedForeground);
   }
 
   // Build category column
