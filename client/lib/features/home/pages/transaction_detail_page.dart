@@ -832,7 +832,7 @@ class TransactionDetailPage extends ConsumerWidget {
                       padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
                             t.transaction.confirmDelete,
@@ -843,53 +843,42 @@ class TransactionDetailPage extends ConsumerWidget {
                             t.transaction.deleteTransactionConfirm,
                             style: dialogStyle.bodyTextStyle,
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              FButton(
-                                variant: .outline,
-                                onPress: () =>
-                                    Navigator.of(dialogContext).pop(),
-                                child: Text(t.common.cancel),
-                              ),
-                              const SizedBox(width: 8),
-                              FButton(
-                                onPress: () async {
-                                  Navigator.of(dialogContext).pop();
-                                  // Execute delete operation
-                                  try {
-                                    final networkClient = ref.read(
-                                      networkClientProvider,
-                                    );
-                                    final result = await networkClient
-                                        .requestMap(
-                                          '/transactions/${transaction.id}',
-                                          method: HttpMethod.delete,
-                                        );
+                          const SizedBox(height: 24),
+                          FButton(
+                            variant: .outline,
+                            onPress: () => Navigator.of(dialogContext).pop(),
+                            child: Text(t.common.cancel),
+                          ),
+                          const SizedBox(height: 8),
+                          FButton(
+                            onPress: () async {
+                              Navigator.of(dialogContext).pop();
+                              // Execute delete operation
+                              try {
+                                final networkClient = ref.read(
+                                  networkClientProvider,
+                                );
+                                final result = await networkClient.requestMap(
+                                  '/transactions/${transaction.id}',
+                                  method: HttpMethod.delete,
+                                );
 
-                                    if (result['code'] == 0) {
-                                      ToastService.success(
-                                        description: Text(
-                                          t.transaction.deleted,
-                                        ),
-                                      );
-                                      // Navigate back
-                                      if (rootContext.mounted) {
-                                        GoRouter.of(rootContext).pop();
-                                      }
-                                    }
-                                  } catch (e) {
-                                    ToastService.showDestructive(
-                                      description: Text(
-                                        t.transaction.deleteFailed,
-                                      ),
-                                    );
+                                if (result['code'] == 0) {
+                                  ToastService.success(
+                                    description: Text(t.transaction.deleted),
+                                  );
+                                  // Navigate back
+                                  if (rootContext.mounted) {
+                                    GoRouter.of(rootContext).pop();
                                   }
-                                },
-                                child: Text(t.common.delete),
-                              ),
-                            ],
+                                }
+                              } catch (e) {
+                                ToastService.showDestructive(
+                                  description: Text(t.transaction.deleteFailed),
+                                );
+                              }
+                            },
+                            child: Text(t.common.delete),
                           ),
                         ],
                       ),
