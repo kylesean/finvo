@@ -4,7 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:rrule/rrule.dart' as rrule_lib;
 import 'package:augo/i18n/strings.g.dart';
 
-/// 重复规则返回结果
+/// Recurrence rule result
 class RecurrenceRuleResult {
   final String rule;
   final String description;
@@ -19,7 +19,7 @@ class RecurrenceRuleResult {
   });
 }
 
-/// 重复周期类型
+/// Recurrence frequency type
 enum RecurrenceFrequency {
   daily('天', 'DAILY'),
   weekly('周', 'WEEKLY'),
@@ -47,7 +47,7 @@ enum RecurrenceFrequency {
   }
 }
 
-/// 星期几
+/// Day of week
 enum Weekday {
   monday('一', 'MO', 1),
   tuesday('二', 'TU', 2),
@@ -85,7 +85,7 @@ enum Weekday {
   }
 }
 
-/// 重复规则设置底部弹窗
+/// Recurrence rule settings bottom sheet
 class RecurrenceRuleSheet extends StatefulWidget {
   final DateTime initialStartDate;
   final String? initialRule;
@@ -96,7 +96,7 @@ class RecurrenceRuleSheet extends StatefulWidget {
     this.initialRule,
   });
 
-  /// 显示弹窗
+  /// Show the bottom sheet
   static Future<RecurrenceRuleResult?> show(
     BuildContext context, {
     required DateTime initialStartDate,
@@ -120,23 +120,23 @@ class RecurrenceRuleSheet extends StatefulWidget {
 class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   bool get isZh => LocaleSettings.currentLocale == AppLocale.zh;
 
-  // 当前选中的周期类型
+  // Currently selected frequency type
   RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
 
-  // 重复间隔
+  // Repeat interval
   int _interval = 1;
 
-  // 开始日期
+  // Start date
   late DateTime _startDate;
 
-  // 结束日期（可选）
+  // End date (optional)
   DateTime? _endDate;
   bool _hasEndDate = false;
 
-  // 按周时选中的星期
+  // Selected weekdays for weekly mode
   final Set<Weekday> _selectedWeekdays = {};
 
-  // 按月时选中的日期
+  // Selected day of month for monthly mode
   int _monthDay = 1;
 
   @override
@@ -145,11 +145,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     _startDate = widget.initialStartDate;
     _monthDay = _startDate.day;
 
-    // 解析初始规则（如果有）
+    // Parse initial rule (if any)
     if (widget.initialRule != null) {
       _parseInitialRule(widget.initialRule!);
     } else {
-      // 默认选中当前星期
+      // Default to selecting current weekday
       final today = DateTime.now().weekday;
       final weekday = Weekday.values.firstWhere((w) => w.isoWeekday == today);
       _selectedWeekdays.add(weekday);
@@ -157,11 +157,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   }
 
   void _parseInitialRule(String rule) {
-    // 使用 rrule 库解析
+    // Parse using rrule library
     final ruleString = rule.startsWith('RRULE:') ? rule : 'RRULE:$rule';
     final rrule = rrule_lib.RecurrenceRule.fromString(ruleString);
 
-    // 解析频率
+    // Parse frequency
     switch (rrule.frequency) {
       case rrule_lib.Frequency.daily:
         _frequency = RecurrenceFrequency.daily;
@@ -175,10 +175,10 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         _frequency = RecurrenceFrequency.monthly;
     }
 
-    // 解析间隔
+    // Parse interval
     _interval = rrule.interval ?? 1;
 
-    // 解析星期 (BYDAY)
+    // Parse weekdays (BYDAY)
     if (rrule.byWeekDays.isNotEmpty) {
       _selectedWeekdays.clear();
       for (final entry in rrule.byWeekDays) {
@@ -189,19 +189,19 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
       }
     }
 
-    // 解析月日 (BYMONTHDAY)
+    // Parse month day (BYMONTHDAY)
     if (rrule.byMonthDays.isNotEmpty) {
       _monthDay = rrule.byMonthDays.first;
     }
 
-    // 解析结束日期 (UNTIL)
+    // Parse end date (UNTIL)
     if (rrule.until != null) {
       _hasEndDate = true;
       _endDate = rrule.until;
     }
   }
 
-  /// 从 Dart 的 weekday 转换为 Weekday 枚举
+  /// Convert Dart weekday to Weekday enum
   Weekday? _getWeekdayFromDartWeekday(int dartWeekday) {
     return Weekday.values.cast<Weekday?>().firstWhere(
       (w) => w?.isoWeekday == dartWeekday,
@@ -347,7 +347,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
       child: SafeArea(
         child: Column(
           children: [
-            // 拖动条
+            // Drag handle
             Container(
               width: 32,
               height: 4,
@@ -357,36 +357,36 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // 标题栏
+            // Title bar
             _buildHeader(theme, colors),
             const SizedBox(height: 16),
-            // 内容区域
+            // Content area
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 周期类型切换
+                    // Frequency type selector
                     _buildFrequencySelector(theme, colors),
                     const SizedBox(height: 24),
-                    // 重复间隔
+                    // Repeat interval
                     _buildIntervalSection(theme, colors),
                     const SizedBox(height: 24),
-                    // 周期特定选项
+                    // Frequency-specific options
                     _buildFrequencySpecificOptions(theme, colors),
                     const SizedBox(height: 24),
-                    // 结束日期
+                    // End date
                     _buildEndDateSection(theme, colors),
                     const SizedBox(height: 24),
-                    // 规则预览
+                    // Rule preview
                     _buildRulePreview(theme, colors),
                     const SizedBox(height: 100),
                   ],
                 ),
               ),
             ),
-            // 底部按钮
+            // Bottom buttons
             _buildBottomBar(theme, colors),
           ],
         ),
@@ -433,7 +433,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// 周期类型切换 - 使用 FTabs 组件
+  /// Frequency type selector - using FTabs component
   Widget _buildFrequencySelector(FThemeData theme, FColors colors) {
     return FTabs(
       control: .managed(
@@ -445,26 +445,26 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
       children: RecurrenceFrequency.values.map((freq) {
         return FTabEntry(
           label: Text(freq.label),
-          child: const SizedBox.shrink(), // 不需要显示内容区域
+          child: const SizedBox.shrink(), // No content area needed
         );
       }).toList(),
     );
   }
 
-  /// 重复间隔 - 一行式设计（参考图片）
+  /// Repeat interval - single-row design
   Widget _buildIntervalSection(FThemeData theme, FColors colors) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          // 左侧标签
+          // Left label
           Text(
             isZh ? '重复间隔' : 'Interval',
             style: theme.typography.body.sm.copyWith(color: colors.foreground),
           ),
           const Spacer(),
-          // 右侧：- 数字 周期 +
-          // 减少按钮
+          // Right side: - number unit +
+          // Decrease button
           GestureDetector(
             onTap: () {
               if (_interval > 1) {
@@ -490,7 +490,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
             ),
           ),
           const SizedBox(width: 16),
-          // 数字 + 周期单位
+          // Number + frequency unit
           Text(
             '$_interval ${isZh ? _frequency.label : (_frequency.label + (_interval > 1 ? 's' : ''))}',
             style: theme.typography.body.md.copyWith(
@@ -499,7 +499,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
             ),
           ),
           const SizedBox(width: 16),
-          // 增加按钮
+          // Increase button
           GestureDetector(
             onTap: () => setState(() => _interval++),
             child: Container(
@@ -519,7 +519,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// 周期特定选项
+  /// Frequency-specific options
   Widget _buildFrequencySpecificOptions(FThemeData theme, FColors colors) {
     switch (_frequency) {
       case RecurrenceFrequency.weekly:
@@ -531,7 +531,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     }
   }
 
-  /// 星期选择器
+  /// Weekday selector
   Widget _buildWeekdaySelector(FThemeData theme, FColors colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -584,7 +584,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// 月日信息（只读，从开始日期获取）
+  /// Month day info (read-only, derived from start date)
   Widget _buildMonthDayInfo(FThemeData theme, FColors colors) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -611,7 +611,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// 结束日期
+  /// End date section
   Widget _buildEndDateSection(FThemeData theme, FColors colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,7 +659,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
               ),
               if (_hasEndDate) ...[
                 const SizedBox(height: 12),
-                // 点击选择结束日期
+                // Tap to select end date
                 GestureDetector(
                   onTap: () => _showEndDatePicker(theme, colors),
                   child: Container(
@@ -709,7 +709,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// 规则预览
+  /// Rule preview section
   Widget _buildRulePreview(FThemeData theme, FColors colors) {
     return Container(
       width: double.infinity,
@@ -747,7 +747,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// 显示结束日期选择器（使用 FCalendar）
+  /// Show end date picker (using FCalendar)
   void _showEndDatePicker(FThemeData theme, FColors colors) {
     final now = DateTime.now();
     final selectedDate = _endDate ?? _startDate.add(const Duration(days: 365));
@@ -766,7 +766,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           child: SafeArea(
             child: Column(
               children: [
-                // 拖动条
+                // Drag handle
                 Container(
                   width: 32,
                   height: 4,
@@ -776,7 +776,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                // 标题
+                // Title
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -804,7 +804,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // 日历
+                // Calendar
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -835,7 +835,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// 底部按钮栏
+  /// Bottom button bar
   Widget _buildBottomBar(FThemeData theme, FColors colors) {
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -853,7 +853,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   }
 
   void _handleConfirm() {
-    // 根据规则计算正确的开始日期
+    // Calculate adjusted start date based on rule
     final adjustedStartDate = _calculateAdjustedStartDate();
 
     Navigator.of(context).pop(
@@ -866,24 +866,24 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// 根据当前规则计算合理的开始日期
+  /// Calculate a reasonable start date based on current rule
   ///
-  /// 如果用户选择"每月8号"，但当前日期是15号，
-  /// 则开始日期应该是下个月8号（第一次执行的日期）
+  /// If user selects "8th of each month" but current date is the 15th,
+  /// the start date should be the 8th of next month (first execution date)
   DateTime _calculateAdjustedStartDate() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
     switch (_frequency) {
       case RecurrenceFrequency.monthly:
-        // 计算下一个 _monthDay 号
+        // Calculate next occurrence of _monthDay
         DateTime targetDate = DateTime(
           _startDate.year,
           _startDate.month,
           _monthDay,
         );
 
-        // 如果目标日期已过，移到下个月
+        // If target date has passed, move to next month
         if (targetDate.isBefore(today)) {
           targetDate = DateTime(
             _startDate.year,
@@ -894,12 +894,12 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         return targetDate;
 
       case RecurrenceFrequency.weekly:
-        // 计算下一个选中的星期几
+        // Calculate next selected weekday
         if (_selectedWeekdays.isNotEmpty) {
           final sortedDays = _selectedWeekdays.toList()
             ..sort((a, b) => a.isoWeekday.compareTo(b.isoWeekday));
 
-          // 找到下一个符合条件的星期
+          // Find next matching weekday
           for (int i = 0; i < 7; i++) {
             final checkDate = today.add(Duration(days: i));
             if (sortedDays.any((w) => w.isoWeekday == checkDate.weekday)) {
@@ -910,11 +910,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         return _startDate;
 
       case RecurrenceFrequency.daily:
-        // 每天执行，从今天或用户选择的日期开始
+        // Daily execution, start from today or user-selected date
         return _startDate.isBefore(today) ? today : _startDate;
 
       case RecurrenceFrequency.yearly:
-        // 每年执行
+        // Yearly execution
         DateTime targetDate = DateTime(
           _startDate.year,
           _startDate.month,

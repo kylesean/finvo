@@ -9,10 +9,10 @@ import 'package:augo/features/home/models/transaction_model.dart';
 import 'package:augo/i18n/strings.g.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
 
-/// 智能账单概览卡片 (Layer 4: Template)
+/// Smart expense overview card (Layer 4: Template)
 ///
-/// 展示总支出、类别分布占比以及 Top 3 交易。
-/// 使用 GenUI 四层架构：
+/// Displays total expense, category distribution, and Top 3 transactions.
+/// Uses GenUI four-layer architecture:
 /// - atoms: IconBadge, AmountDisplay
 /// - molecules: StatCard, TransactionItem
 /// - organisms: GenUIBottomSheet, TransactionListView
@@ -51,18 +51,18 @@ class ExpenseSummaryCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 顶部总额区
+          // 1. Top total section
           _buildTotalSection(context, theme, colors, totalExpense),
 
-          // 2. 类别分布进度条
+          // 2. Category distribution progress bar
           if (distribution.isNotEmpty)
             _buildDistributionSection(context, theme, colors, distribution),
 
-          // 3. Top 3 交易列表
+          // 3. Top 3 transaction list
           if (topItems.isNotEmpty)
             _buildTopItemsSection(context, theme, colors, topItems),
 
-          // 4. 底部全部按钮
+          // 4. Bottom view-all button
           _buildViewAllButton(context, theme, colors, totalCount),
         ],
       ),
@@ -88,7 +88,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
-          // 使用统一的 AmountText.large 组件
+          // Use unified AmountText.large component
           AmountText.large(
             amount: amount,
             type: TransactionType.expense,
@@ -111,7 +111,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Column(
         children: [
-          // 组合进度条
+          // Combined progress bar
           Container(
             height: 12,
             width: double.infinity,
@@ -135,7 +135,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          // 类别图例 (取前 4 个)
+          // Category legend (top 4)
           Wrap(
             spacing: 12,
             runSpacing: 8,

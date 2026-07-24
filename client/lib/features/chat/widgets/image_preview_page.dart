@@ -8,9 +8,9 @@ import 'package:photo_view/photo_view_gallery.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 
-/// 图片预览页面，支持缩放、滑动浏览多张图片
-/// iOS/Android：使用高效的 FileImage
-/// Web：使用 MemoryImage + readAsBytes
+/// Image preview page with zoom and swipe navigation support
+/// iOS/Android: uses efficient FileImage
+/// Web: uses MemoryImage + readAsBytes
 class ImagePreviewPage extends StatefulWidget {
   final List<XFile> images;
   final int initialIndex;
@@ -31,7 +31,7 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
   late PageController _pageController;
   late int _currentIndex;
 
-  // Web 平台：缓存图片字节数据，避免重复读取
+  // Web platform: cache image byte data to avoid redundant reads
   final Map<int, Uint8List> _imageCache = {};
 
   @override
@@ -40,14 +40,14 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
 
-    // Web 平台：预加载当前图片和相邻图片
+    // Web platform: preload current and adjacent images
     if (kIsWeb) {
       _preloadImages();
     }
   }
 
   void _preloadImages() {
-    // 预加载当前、前一张和后一张图片
+    // Preload current, previous, and next images
     for (int i = -1; i <= 1; i++) {
       final index = _currentIndex + i;
       if (index >= 0 &&
@@ -123,7 +123,7 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
           setState(() {
             _currentIndex = index;
           });
-          // Web 平台：当页面改变时预加载相邻图片
+          // Web platform: preload adjacent images when page changes
           if (kIsWeb) {
             _preloadImages();
           }
@@ -132,22 +132,22 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
     );
   }
 
-  /// 获取图片提供者
-  /// iOS/Android：使用高效的 FileImage
-  /// Web：使用 MemoryImage
+  /// Get image provider
+  /// iOS/Android: use efficient FileImage
+  /// Web: use MemoryImage
   ImageProvider _getImageProvider(int index) {
     final image = widget.images[index];
 
     if (kIsWeb) {
-      // Web 平台：使用缓存的字节数据
+      // Web platform: use cached byte data
       if (_imageCache.containsKey(index)) {
         return MemoryImage(_imageCache[index]!);
       }
-      // 如果还没加载，先触发加载，返回一个临时的空图片
+      // If not loaded yet, trigger loading and return a temporary empty image
       unawaited(_loadImage(index));
       return MemoryImage(Uint8List(0));
     } else {
-      // iOS/Android：使用高效的 FileImage
+      // iOS/Android: use efficient FileImage
       return FileImage(File(image.path));
     }
   }
@@ -158,19 +158,22 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('删除图片'),
-            content: const Text('确定要删除这张图片吗？'),
+            title: const Text('Delete Image'),
+            content: const Text('Are you sure you want to delete this image?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('取消'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   _deleteCurrentImage();
                 },
-                child: const Text('删除', style: TextStyle(color: Colors.red)),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           );

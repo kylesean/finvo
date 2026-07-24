@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
 
-/// 上传进度状态
+/// Upload progress status
 enum UploadStatus { uploading, success, failed, cancelled }
 
-/// 上传进度数据模型
+/// Upload progress data model
 class UploadProgressData {
   final String id;
   final XFile file;
@@ -45,21 +45,21 @@ class UploadProgressData {
     );
   }
 
-  /// 是否上传完成（成功或失败）
+  /// Whether upload is completed (success or failure)
   bool get isCompleted =>
       status == UploadStatus.success || status == UploadStatus.failed;
 
-  /// 是否正在上传
+  /// Whether upload is in progress
   bool get isUploading => status == UploadStatus.uploading;
 
-  /// 是否上传成功
+  /// Whether upload succeeded
   bool get isSuccess => status == UploadStatus.success;
 
-  /// 是否上传失败
+  /// Whether upload failed
   bool get isFailed => status == UploadStatus.failed;
 }
 
-/// 上传进度显示组件
+/// Upload progress display widget
 class UploadProgressWidget extends StatelessWidget {
   final UploadProgressData uploadData;
   final VoidCallback? onCancel;
@@ -89,16 +89,16 @@ class UploadProgressWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 文件缩略图
+          // File thumbnail
           _buildThumbnail(theme, colors),
           const SizedBox(width: 12),
 
-          // 文件信息和进度
+          // File info and progress
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 文件名
+                // File name
                 Text(
                   uploadData.file.name,
                   style: theme.typography.body.sm.copyWith(
@@ -110,7 +110,7 @@ class UploadProgressWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
 
-                // 状态和进度
+                // Status and progress
                 _buildStatusInfo(theme, colors),
               ],
             ),
@@ -118,16 +118,16 @@ class UploadProgressWidget extends StatelessWidget {
 
           const SizedBox(width: 8),
 
-          // 操作按钮
+          // Action button
           _buildActionButton(colors),
         ],
       ),
     );
   }
 
-  /// 构建文件缩略图
-  /// iOS/Android：使用高效的 Image.file
-  /// Web：使用 Image.memory + readAsBytes
+  /// Build file thumbnail
+  /// iOS/Android: use efficient Image.file
+  /// Web: use Image.memory + readAsBytes
   Widget _buildThumbnail(FThemeData theme, FColors colors) {
     return Container(
       width: 48,
@@ -145,10 +145,10 @@ class UploadProgressWidget extends StatelessWidget {
     );
   }
 
-  /// 构建图片缩略图
+  /// Build image thumbnail
   Widget _buildImageThumbnail(FColors colors) {
     if (kIsWeb) {
-      // Web 平台：使用 readAsBytes
+      // Web platform: use readAsBytes
       return FutureBuilder<List<int>>(
         future: uploadData.file.readAsBytes(),
         builder: (context, snapshot) {
@@ -179,7 +179,7 @@ class UploadProgressWidget extends StatelessWidget {
         },
       );
     } else {
-      // iOS/Android：使用高效的 Image.file
+      // iOS/Android: use efficient Image.file
       return Image.file(
         File(uploadData.file.path),
         fit: BoxFit.cover,
@@ -190,21 +190,21 @@ class UploadProgressWidget extends StatelessWidget {
     }
   }
 
-  /// 构建文件图标
+  /// Build file icon
   Widget _buildFileIcon(FColors colors) {
     return Center(
       child: Icon(FLucideIcons.file, size: 24, color: colors.mutedForeground),
     );
   }
 
-  /// 构建状态信息
+  /// Build status info
   Widget _buildStatusInfo(FThemeData theme, FColors colors) {
     switch (uploadData.status) {
       case UploadStatus.uploading:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 进度条
+            // Progress bar
             ClipRRect(
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
@@ -215,9 +215,9 @@ class UploadProgressWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            // 进度文本
+            // Progress text
             Text(
-              '上传中... ${(uploadData.progress * 100).toInt()}%',
+              'Uploading... ${(uploadData.progress * 100).toInt()}%',
               style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
               ),
@@ -231,7 +231,7 @@ class UploadProgressWidget extends StatelessWidget {
             const Icon(FLucideIcons.check, size: 16, color: Colors.green),
             const SizedBox(width: 4),
             Text(
-              '上传成功',
+              'Upload successful',
               style: theme.typography.body.xs.copyWith(color: Colors.green),
             ),
           ],
@@ -246,7 +246,7 @@ class UploadProgressWidget extends StatelessWidget {
                 Icon(FLucideIcons.x, size: 16, color: colors.destructive),
                 const SizedBox(width: 4),
                 Text(
-                  '上传失败',
+                  'Upload failed',
                   style: theme.typography.body.xs.copyWith(
                     color: colors.destructive,
                   ),
@@ -273,7 +273,7 @@ class UploadProgressWidget extends StatelessWidget {
             Icon(FLucideIcons.ban, size: 16, color: colors.mutedForeground),
             const SizedBox(width: 4),
             Text(
-              '已取消',
+              'Cancelled',
               style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground,
               ),
@@ -283,7 +283,7 @@ class UploadProgressWidget extends StatelessWidget {
     }
   }
 
-  /// 构建操作按钮
+  /// Build action button
   Widget _buildActionButton(FColors colors) {
     switch (uploadData.status) {
       case UploadStatus.uploading:
@@ -333,7 +333,7 @@ class UploadProgressWidget extends StatelessWidget {
     }
   }
 
-  /// 判断是否是图片文件
+  /// Check if file is an image
   bool _isImageFile(String fileName) {
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
     final extension = fileName.split('.').last.toLowerCase();
@@ -341,7 +341,7 @@ class UploadProgressWidget extends StatelessWidget {
   }
 }
 
-/// 批量上传进度显示组件
+/// Batch upload progress display widget
 class BatchUploadProgressWidget extends StatelessWidget {
   final List<UploadProgressData> uploadList;
   final void Function(String id)? onCancel;
@@ -370,11 +370,11 @@ class BatchUploadProgressWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 标题
+          // Title
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Text(
-              '上传进度 (${_getCompletedCount()}/${uploadList.length})',
+              'Upload progress (${_getCompletedCount()}/${uploadList.length})',
               style: theme.typography.body.sm.copyWith(
                 fontWeight: FontWeight.w500,
                 color: colors.foreground,
@@ -382,7 +382,7 @@ class BatchUploadProgressWidget extends StatelessWidget {
             ),
           ),
 
-          // 上传项列表
+          // Upload item list
           ...uploadList.map((uploadData) {
             return UploadProgressWidget(
               uploadData: uploadData,
@@ -400,7 +400,7 @@ class BatchUploadProgressWidget extends StatelessWidget {
     );
   }
 
-  /// 获取已完成的上传数量
+  /// Get count of completed uploads
   int _getCompletedCount() {
     return uploadList.where((data) => data.isCompleted).length;
   }

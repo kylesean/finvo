@@ -9,8 +9,9 @@ import 'dart:async';
 import '../../profile/models/financial_account.dart';
 import '../../profile/providers/financial_account_provider.dart';
 import '../models/account_type_definition.dart';
+import '../../../shared/widgets/app_card.dart';
 
-/// 账户选择返回结果
+/// Account selection result
 class AccountSelectionResult {
   final String accountId;
   final String accountName;
@@ -21,7 +22,7 @@ class AccountSelectionResult {
   });
 }
 
-/// 账户选择底部弹窗 - 参考财务账户首页列表设计
+/// Account selection bottom sheet - based on financial accounts page list design
 class AccountSelectionSheet extends ConsumerStatefulWidget {
   final String title;
   final String? selectedAccountId;
@@ -32,7 +33,7 @@ class AccountSelectionSheet extends ConsumerStatefulWidget {
     this.selectedAccountId,
   });
 
-  /// 显示弹窗
+  /// Show sheet
   static Future<AccountSelectionResult?> show(
     BuildContext context, {
     required String title,
@@ -82,7 +83,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
       child: SafeArea(
         child: Column(
           children: [
-            // 拖动条
+            // Drag handle
             Container(
               width: 32,
               height: 4,
@@ -92,10 +93,10 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // 标题栏
+            // Title bar
             _buildHeader(theme, colors),
             const SizedBox(height: 16),
-            // 账户列表
+            // Account list
             Expanded(
               child: accountState.isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -137,7 +138,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
               ),
             ),
           ),
-          const SizedBox(width: 48), // 平衡取消按钮
+          const SizedBox(width: 48), // Balance cancel button
         ],
       ),
     );
@@ -148,7 +149,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
     FColors colors,
     List<FinancialAccount> accounts,
   ) {
-    // 只获取资产账户（周期交易只需要资产账户）
+    // Only get asset accounts (recurring transactions only need asset accounts)
     final assetAccounts = accounts
         .where((a) => a.nature == FinancialNature.asset)
         .toList();
@@ -190,7 +191,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
         ...assetAccounts.map(
           (account) => _buildAccountCard(theme, colors, account),
         ),
-        const SizedBox(height: 24), // 底部空间
+        const SizedBox(height: 24), // Bottom spacing
       ],
     );
   }
@@ -208,7 +209,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
     );
   }
 
-  /// 账户卡片 - 参考 FinancialAccountsPage 的设计
+  /// Account card - based on FinancialAccountsPage design
   Widget _buildAccountCard(
     FThemeData theme,
     FColors colors,
@@ -220,7 +221,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: FCard(
+      child: AppCard(
         child: Material(
           type: MaterialType.transparency,
           borderRadius: BorderRadius.circular(10),
@@ -244,7 +245,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               child: Row(
                 children: [
-                  // 图标 - 使用统一的设计 token
+                  // Icon - using unified design token
                   Container(
                     width: 36,
                     height: 36,
@@ -267,7 +268,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
 
                   const SizedBox(width: 12),
 
-                  // 名称和类型
+                  // Name and type
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,7 +294,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                     ),
                   ),
 
-                  // 余额
+                  // Balance
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -314,7 +315,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                     ],
                   ),
 
-                  // 选中标记
+                  // Selection indicator
                   if (isSelected) ...[
                     const SizedBox(width: 8),
                     Icon(FLucideIcons.check, color: colors.primary, size: 20),

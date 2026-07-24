@@ -13,7 +13,7 @@ enum ChipSize { small, medium, large }
 /// Example:
 /// ```dart
 /// StatusChip(
-///   label: '餐饮美食',
+///   label: 'Food & Dining',
 ///   color: Colors.orange,
 ///   icon: Icons.restaurant,
 /// )

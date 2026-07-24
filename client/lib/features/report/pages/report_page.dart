@@ -130,9 +130,9 @@ class _ReportPageState extends ConsumerState<ReportPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          // 左侧占位，与右侧按钮平衡
+          // Left spacer to balance right button
           const SizedBox(width: 40),
-          // 居中标题
+          // Centered title
           Expanded(
             child: Text(
               t.statistics.title,
@@ -153,7 +153,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     );
   }
 
-  /// 全宽时间范围 Tab 按钮栏（类似首页设计）
+  /// Full-width time range tab bar (similar to home page design)
   Widget _buildTimeRangeTabs(
     BuildContext context,
     FThemeData theme,
@@ -257,7 +257,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           children: [
             const SizedBox(height: 8),
 
-            // 日期范围显示（仅自定义模式）
+            // Date range display (custom mode only)
             if (state.timeRange == TimeRange.custom &&
                 state.dateRangeDisplayText != null) ...[
               FadeInDown(

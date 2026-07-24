@@ -91,49 +91,49 @@ CategoryStyle getCategoryStyle(String? categoryKey) {
     case 'dining':
     case '1':
       return const CategoryStyle(
-        name: '餐饮美食',
+        name: 'Dining',
         icon: Icons.restaurant,
         color: Color(0xFFF97316), // Orange
       );
     case 'transport':
     case '2':
       return const CategoryStyle(
-        name: '交通出行',
+        name: 'Transport',
         icon: Icons.directions_car,
         color: Color(0xFF3B82F6), // Blue
       );
     case 'shopping':
     case '3':
       return const CategoryStyle(
-        name: '购物消费',
+        name: 'Shopping',
         icon: Icons.shopping_bag,
         color: Color(0xFFEC4899), // Pink
       );
     case 'life':
     case '4':
       return const CategoryStyle(
-        name: '生活服务',
+        name: 'Life Services',
         icon: Icons.home,
         color: Color(0xFF10B981), // Green
       );
     case 'medical':
     case '5':
       return const CategoryStyle(
-        name: '医疗健康',
+        name: 'Medical',
         icon: Icons.medical_services,
         color: Color(0xFFEF4444), // Red
       );
     case 'education':
     case '6':
       return const CategoryStyle(
-        name: '教育培训',
+        name: 'Education',
         icon: Icons.school,
         color: Color(0xFF8B5CF6), // Purple
       );
     case 'entertainment':
     case '7':
       return const CategoryStyle(
-        name: '休闲娱乐',
+        name: 'Entertainment',
         icon: Icons.sports_esports,
         color: Color(0xFFF59E0B), // Amber
       );
@@ -141,19 +141,19 @@ CategoryStyle getCategoryStyle(String? categoryKey) {
     case 'income':
     case '8':
       return const CategoryStyle(
-        name: '工资收入',
+        name: 'Salary',
         icon: Icons.attach_money,
         color: Color(0xFF22C55E), // Green
       );
     case 'transfer':
       return const CategoryStyle(
-        name: '转账',
+        name: 'Transfer',
         icon: Icons.swap_horiz,
         color: Color(0xFF6366F1), // Indigo
       );
     default:
       return const CategoryStyle(
-        name: '其他',
+        name: 'Others',
         icon: Icons.receipt_long,
         color: Color(0xFFF97316), // Default orange
       );
@@ -188,32 +188,32 @@ StatusStyle getStatusStyle(
     case 'completed':
     case 'success':
       return StatusStyle(
-        label: '已完成',
+        label: 'Completed',
         color: colors.primary,
         icon: FLucideIcons.check,
       );
     case 'pending':
       return StatusStyle(
-        label: '待处理',
+        label: 'Pending',
         color: warningColor,
         icon: FLucideIcons.clock,
       );
     case 'failed':
     case 'error':
       return StatusStyle(
-        label: '失败',
+        label: 'Failed',
         color: colors.destructive,
         icon: FLucideIcons.x,
       );
     case 'cancelled':
       return StatusStyle(
-        label: '已取消',
+        label: 'Cancelled',
         color: colors.mutedForeground,
         icon: FLucideIcons.x,
       );
     default:
       return StatusStyle(
-        label: status ?? '未知',
+        label: status ?? 'Unknown',
         color: colors.mutedForeground,
         icon: FLucideIcons.info,
       );

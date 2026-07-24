@@ -6,8 +6,8 @@ import 'package:forui/forui.dart';
 import '../providers/chat_input_provider.dart';
 import 'media_upload_bottom_sheet.dart';
 
-/// 媒体上传按钮组件
-/// 点击后弹出底部菜单，显示多个功能选项
+/// Media upload button component
+/// Tapping shows a bottom sheet with multiple function options
 class MediaUploadButton extends ConsumerWidget {
   final bool enabled;
   final ChatInputNotifierProvider chatInputProvider;
@@ -23,15 +23,15 @@ class MediaUploadButton extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // 与右侧按钮保持一致的样式
+    // Consistent styling with the right-side button
     return Container(
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        // 使用与右侧按钮相同的 muted 背景色
+        // Use same muted background color as right-side button
         color: colors.muted,
         shape: BoxShape.circle,
-        // 无边框
+        // No border
       ),
       child: Material(
         color: Colors.transparent,
@@ -52,7 +52,7 @@ class MediaUploadButton extends ConsumerWidget {
     );
   }
 
-  /// 处理上传按钮点击事件
+  /// Handle upload button press event
   void _handleUploadButtonPressed(BuildContext context, WidgetRef ref) {
     unawaited(
       MediaUploadBottomSheet.show(

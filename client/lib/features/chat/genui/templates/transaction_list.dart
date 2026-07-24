@@ -10,7 +10,7 @@ import '../../../../core/constants/category_constants.dart';
 import 'package:augo/features/home/models/transaction_model.dart';
 import 'dart:async';
 
-/// 交易列表组件 - 支持瀑布流分页加载
+/// Transaction list component - supports waterfall pagination
 class TransactionList extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
 
@@ -27,7 +27,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
   late int _total;
   bool _isLoadingMore = false;
 
-  // 缓存搜索参数，用于翻页
+  // Cache search parameters for pagination
   Map<String, dynamic>? _searchMetadata;
 
   @override
@@ -45,7 +45,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
     _searchMetadata = d['metadata'] as Map<String, dynamic>?;
   }
 
-  // 监听并执行翻页
+  // Monitor and execute pagination
   Future<void> _loadMore() async {
     if (_isLoadingMore || !_hasMore) return;
 
@@ -56,7 +56,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
     try {
       final homeService = ref.read(homeServiceProvider);
 
-      // 提取转换 transaction_types
+      // Extract and convert transaction_types
       String? typesString;
       final rawTypes = _searchMetadata?['transaction_types'];
       if (rawTypes is List) {
@@ -101,14 +101,14 @@ class _TransactionListState extends ConsumerState<TransactionList> {
       return _buildEmptyState(theme, colors);
     }
 
-    // 在 Modal 内部时，使用 Column + Expanded 填充空间
+    // When inside a Modal, use Column + Expanded to fill space
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 顶部：摘要
+        // Top: summary
         _buildHeader(theme, colors),
 
-        // 列表内容 - 占满剩余空间
+        // List content - fills remaining space
         Expanded(
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification scrollInfo) {
@@ -266,7 +266,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      // 使用统一的 AmountText 组件
+                      // Use unified AmountText component
                       item['display'] != null
                           ? AmountText.fromDisplay(
                               display: item['display'] as Map<String, dynamic>,
@@ -314,7 +314,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                 ],
               ),
             ),
-            // 添加右箭头指示可点击
+            // Add right arrow to indicate tappable
             const SizedBox(width: 8),
             Icon(
               Icons.chevron_right,

@@ -4,7 +4,6 @@ import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/chat_message.dart';
-// import '../models/message_sender.dart'; // Removed invalid import
 import '../models/message_attachments.dart';
 import '../models/chat_message_attachment.dart';
 import '../repositories/message_repository.dart';
@@ -82,8 +81,8 @@ class ChatInteractionManager {
     _streamingController.resetForNewMessage(aiMessageId);
 
     // 4. Create user message
-    // 注意：需要提供 signedUrl 以便在 UI 中显示图片预览
-    // 对于用户刚发送的消息，使用后端返回的 view URL
+    // Note: signedUrl is needed for image preview in UI
+    // For messages just sent by user, use the view URL returned by backend
     final userAttachments = attachmentList.map((a) {
       _logger.info(
         'ChatInteractionManager: Creating attachment - id=${a.uploadInfo.attachmentId}, uri=${a.uploadInfo.uri}',
@@ -91,7 +90,7 @@ class ChatInteractionManager {
       return ChatMessageAttachment(
         id: a.uploadInfo.attachmentId,
         filename: a.file.name,
-        // 使用后端返回的 uri 作为 signedUrl（新的渲染逻辑会自动检测并渲染）
+        // Use backend-returned uri as signedUrl (new rendering logic auto-detects and renders)
         signedUrl: a.uploadInfo.uri,
       );
     }).toList();
@@ -198,7 +197,9 @@ class ChatInteractionManager {
       // Check service availability
       if (genUiService == null || !_genUiLifecycleManager.isInitialized) {
         _logger.info("ChatInteractionManager: GenUI service not available");
-        _streamingController.handleStreamError("服务未初始化，请刷新重试");
+        _streamingController.handleStreamError(
+          "Service not initialized, please refresh and retry",
+        );
         _setStreamingStatus(false);
         return;
       }

@@ -179,7 +179,7 @@ class ChatHistory extends _$ChatHistory {
         if (!hasContent) {
           _updateAiMessageState(
             id: _currentStreamingAiMessageId,
-            content: '你已让系统停止这条回答',
+            content: 'You have stopped this response',
             isTyping: false,
             streamingStatus: StreamingStatus.completed,
           );
@@ -212,7 +212,7 @@ class ChatHistory extends _$ChatHistory {
 
   /// Initialize GenUI service with catalog and lifecycle callbacks
   Future<void> _initializeGenUi() async {
-    // 使用 SSE 专用 Dio 实例（无超时限制）
+    // Use SSE-dedicated Dio instance (no timeout)
     final dio = ref.read(sseDioProvider);
     final apiConstants = ref.read(apiConstantsProvider);
     await _genUiLifecycleManager.initialize(
@@ -229,7 +229,7 @@ class ChatHistory extends _$ChatHistory {
     });
   }
 
-  /// 处理会话初始化
+  /// Handle session initialization
   void _handleSessionInit(String sessionId, String? messageId) {
     final isNewSession =
         state.currentConversationId == null ||
@@ -261,7 +261,7 @@ class ChatHistory extends _$ChatHistory {
     }
   }
 
-  /// 处理流完成
+  /// Handle stream completion
   void _onGenUiStreamComplete() {
     if (!_streamingController.isMessageCompleted) {
       if (_streamingController.isUserCancelled) {
@@ -292,7 +292,7 @@ class ChatHistory extends _$ChatHistory {
     }
   }
 
-  /// 处理标题更新
+  /// Handle title update
   void _handleTitleUpdate(String title) {
     state = state.copyWith(currentConversationTitle: title);
     if (state.currentConversationId != null) {
@@ -302,7 +302,7 @@ class ChatHistory extends _$ChatHistory {
     }
   }
 
-  /// 处理工具调用开始事件 (Claude Code 风格可视化)
+  /// Handle tool call start event (Claude Code style visualization)
   void _handleToolCallStart(ToolCallInfo toolCall) {
     if (_currentStreamingAiMessageId.isEmpty) {
       _logger.warning('ChatHistory: Tool call start but no streaming message');
@@ -317,7 +317,7 @@ class ChatHistory extends _$ChatHistory {
     );
   }
 
-  /// 处理工具调用结束事件 (Claude Code 风格可视化)
+  /// Handle tool call end event (Claude Code style visualization)
   void _handleToolCallEnd(ToolCallInfo toolCall) {
     if (_currentStreamingAiMessageId.isEmpty) {
       _logger.warning('ChatHistory: Tool call end but no streaming message');
@@ -333,7 +333,7 @@ class ChatHistory extends _$ChatHistory {
     );
   }
 
-  /// 处理交易创建事件
+  /// Handle transaction created event
   void _handleTransactionCreated(
     double amount,
     String transactionType,
@@ -381,7 +381,7 @@ class ChatHistory extends _$ChatHistory {
     unawaited(_chatInteractionManager.handleOptimisticUserMessage(content));
   }
 
-  // 加载第一页历史消息
+  // Load first page of history messages
   Future<void> loadConversation(String conversationId) async {
     if (conversationId == state.currentConversationId &&
         !state.isLoadingHistory) {
@@ -394,7 +394,7 @@ class ChatHistory extends _$ChatHistory {
       messages: [],
       isLoadingHistory: true,
       historyError: null,
-      currentConversationTitle: "加载中...",
+      currentConversationTitle: "Loading...",
       isStreamingResponse: false,
     );
 
@@ -427,7 +427,7 @@ class ChatHistory extends _$ChatHistory {
       state = state.copyWith(
         isLoadingHistory: false,
         historyError: e.toString(),
-        currentConversationTitle: "加载失败",
+        currentConversationTitle: "Load failed",
       );
     }
   }
@@ -496,8 +496,9 @@ class ChatHistory extends _$ChatHistory {
   void _handleStreamError(dynamic error) {
     final errorMessageText = error is AppException
         ? error.message
-        : "发生未知错误: ${error.toString()}";
-    final displayError = "抱歉，AI助手通讯发生错误: $errorMessageText";
+        : "An unknown error occurred: ${error.toString()}";
+    final displayError =
+        "Sorry, AI assistant communication error: $errorMessageText";
 
     final currentText = state.messages
         .firstWhere(

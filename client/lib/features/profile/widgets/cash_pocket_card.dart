@@ -8,6 +8,7 @@ import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
 import 'package:decimal/decimal.dart';
 import '../providers/financial_account_provider.dart';
+import '../../../shared/widgets/app_card.dart';
 
 class CashPocketCard extends ConsumerStatefulWidget {
   const CashPocketCard({super.key});
@@ -121,7 +122,8 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
         // Navigate to account management on tap
         unawaited(context.push('/forecast', extra: 1));
       },
-      child: FCard(
+      child: AppCard(
+        style: const .delta(padding: .value(EdgeInsets.zero)),
         child: Container(
           padding: const EdgeInsets.all(20.0),
           decoration: BoxDecoration(

@@ -189,7 +189,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       }
 
       // 2. Start recording
-      // 音效已在 ChatInputNotifier 中播放，这里直接开始录音
+      // Sound effect already played in ChatInputNotifier, start recording directly
       final recordingStarted = await _audioRecorder.startRecording();
       if (!recordingStarted) {
         _logger.severe('Failed to start recording');
@@ -266,7 +266,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _statusController.add('stopped');
       _logger.info('Speech recognition stopped');
 
-      // 播放结束录音提示音（不等待，避免阻塞）
+      // Play stop recording sound (don't await to avoid blocking)
       _logger.info('Playing stop sound...');
       unawaited(SoundFeedbackService.instance.playStopSound());
     } catch (e) {

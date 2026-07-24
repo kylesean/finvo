@@ -13,8 +13,9 @@ import '../../../shared/widgets/themed_icon.dart';
 import 'account_edit_page.dart';
 import '../providers/financial_summary_provider.dart';
 import '../widgets/currency_selection_sheet.dart';
+import '../../../shared/widgets/app_card.dart';
 
-/// 账户管理页面 - 严格参照设计稿
+/// Account management page - strictly following design spec
 class AccountSourcesPage extends ConsumerStatefulWidget {
   const AccountSourcesPage({super.key});
 
@@ -29,7 +30,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
   @override
   void initState() {
     super.initState();
-    // 页面初始化时调用 API 加载账户列表
+    // Load account list via API on page init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(
         ref.read(financialAccountProvider.notifier).loadFinancialAccounts(),
@@ -63,7 +64,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
     return FScaffold(
       header: FHeader(
         title: Text(
-          '账户管理',
+          'Account Management',
           style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w500),
         ),
         suffixes: [
@@ -87,7 +88,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
     );
   }
 
-  /// 构建页面主体内容
+  /// Build page body content
   Widget _buildBody(
     FThemeData theme,
     FColors colors,
@@ -99,12 +100,12 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
     Decimal totalAssets,
     Decimal totalLiabilities,
   ) {
-    // 加载状态
+    // Loading state
     if (state.isLoading && accounts.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // 错误状态
+    // Error state
     if (state.error != null && accounts.isEmpty) {
       return Center(
         child: SingleChildScrollView(
@@ -143,15 +144,15 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
       );
     }
 
-    // 正常内容
+    // Normal content
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 如果可用高度太小，只显示列表
+        // If available height is too small, only show list
         final showCard = constraints.maxHeight > 300;
 
         return Column(
           children: [
-            // Black gold card at top (只在有足够空间时显示)
+            // Black gold card at top (only shown when enough space)
             if (showCard)
               _buildNetWorthCard(
                 theme,
@@ -175,14 +176,22 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         children: [
                           if (assetAccounts.isNotEmpty) ...[
-                            _buildSectionHeader(theme, colors, '资产账户'),
+                            _buildSectionHeader(
+                              theme,
+                              colors,
+                              'Asset Accounts',
+                            ),
                             ...assetAccounts.map(
                               (account) =>
                                   _buildAccountCard(theme, colors, account),
                             ),
                           ],
                           if (liabilityAccounts.isNotEmpty) ...[
-                            _buildSectionHeader(theme, colors, '负债账户'),
+                            _buildSectionHeader(
+                              theme,
+                              colors,
+                              'Liability Accounts',
+                            ),
                             ...liabilityAccounts.map(
                               (account) =>
                                   _buildAccountCard(theme, colors, account),
@@ -199,7 +208,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
     );
   }
 
-  /// 构建空状态界面
+  /// Build empty state UI
   Widget _buildEmptyState(FThemeData theme, FColors colors) {
     return ListView(
       children: [
@@ -215,14 +224,14 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                '暂无账户',
+                'No accounts yet',
                 style: theme.typography.body.lg.copyWith(
                   color: colors.mutedForeground,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                '点击下方按钮添加您的第一个账户',
+                'Tap the button below to add your first account',
                 style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground.withValues(alpha: 0.7),
                 ),
@@ -432,12 +441,12 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
   ) {
     final definition = AccountTypeRegistry.resolveByApiType(account.type);
 
-    // 使用 nature 字段判断是否为负债
+    // Use nature field to determine if liability
     final isLiabilityAccount = account.nature == FinancialNature.liability;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: FCard(
+      child: AppCard(
         child: Material(
           type: MaterialType.transparency,
           borderRadius: BorderRadius.circular(10), // Match FCard radius
@@ -470,7 +479,9 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                         Text(
                           definition != null
                               ? _getTypeDisplayName(definition)
-                              : (isLiabilityAccount ? '负债账户' : '资产账户'),
+                              : (isLiabilityAccount
+                                    ? 'Liability Account'
+                                    : 'Asset Account'),
                           style: theme.typography.body.sm.copyWith(
                             color: colors.mutedForeground,
                           ),
@@ -548,21 +559,21 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
   String _getTypeDisplayName(AccountTypeDefinition definition) {
     switch (definition.id) {
       case 'cash':
-        return '现金钱包';
+        return 'Cash Wallet';
       case 'deposit':
-        return '银行存款';
+        return 'Bank Deposit';
       case 'e_money':
-        return '电子钱包';
+        return 'E-Wallet';
       case 'investment':
-        return '投资理财';
+        return 'Investment';
       case 'receivable':
-        return '应收款项';
+        return 'Receivable';
       case 'credit_card':
-        return '信用卡';
+        return 'Credit Card';
       case 'loan':
-        return '贷款账户';
+        return 'Loan';
       case 'payable':
-        return '应付款项';
+        return 'Payable';
       default:
         return definition.title;
     }
@@ -580,7 +591,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
           .read(financialAccountProvider.notifier)
           .saveFinancialAccounts(updatedList);
 
-      // 保存成功后刷新账户列表
+      // Refresh account list after successful save
       if (success && mounted) {
         await ref
             .read(financialAccountProvider.notifier)
@@ -593,7 +604,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
     FinancialAccount account,
     AccountTypeDefinition? definition,
   ) async {
-    // 如果没有找到对应的定义，根据 account.type 尝试获取默认定义
+    // If no matching definition found, try to get default definition based on account.type
     final accountDefinition =
         definition ??
         AccountTypeRegistry.resolveByApiType(account.type) ??

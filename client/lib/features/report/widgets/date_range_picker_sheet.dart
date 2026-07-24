@@ -15,7 +15,7 @@ class DateRangePickerSheet extends StatefulWidget {
     required this.onConfirm,
   });
 
-  /// 显示日期范围选择器
+  /// Show date range picker
   static Future<void> show(
     BuildContext context, {
     DateTime? initialStart,
@@ -71,7 +71,7 @@ class _DateRangePickerSheetState extends State<DateRangePickerSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 拖动指示器
+          // Drag indicator
           Container(
             margin: const EdgeInsets.only(top: 12, bottom: 8),
             width: 40,
@@ -81,7 +81,7 @@ class _DateRangePickerSheetState extends State<DateRangePickerSheet> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          // 标题
+          // Title
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(

@@ -1,13 +1,13 @@
-// SSE 事件处理器注册表
+// SSE event handler registry
 //
-// 设计模式:
-// - 策略模式 (Strategy Pattern): 每个事件类型对应一个处理器
-// - 注册表模式 (Registry Pattern): 统一管理所有处理器
+// Design patterns:
+// - Strategy Pattern: each event type maps to a handler
+// - Registry Pattern: unified management of all handlers
 //
-// 设计意图:
-// - 消除 _handleSseEvent 中的大型 switch 语句
-// - 支持通过注册新处理器扩展事件处理
-// - 提高代码的可测试性和可维护性
+// Design intent:
+// - Eliminate large switch statement in _handleSseEvent
+// - Support extending event handling by registering new handlers
+// - Improve code testability and maintainability
 
 import 'package:logging/logging.dart';
 import 'package:a2ui_core/a2ui_core.dart' as a2ui;
@@ -15,7 +15,7 @@ import '../models/sse_event_models.dart';
 
 final _logger = Logger('SseEventHandlerRegistry');
 
-/// SSE 事件处理上下文
+/// SSE event handling context
 class SseEventContext {
   final void Function(String?) setSessionId;
   final String? Function() getCurrentSessionId;
@@ -34,12 +34,12 @@ class SseEventContext {
   });
 }
 
-/// SSE 事件处理器抽象基类
+/// SSE event handler abstract base class
 abstract class SseEventHandler {
   Future<void> handle(Map<String, dynamic> data, SseEventContext context);
 }
 
-/// session_init 事件处理器
+/// session_init event handler
 class SessionInitHandler implements SseEventHandler {
   @override
   Future<void> handle(
@@ -61,7 +61,7 @@ class SessionInitHandler implements SseEventHandler {
   }
 }
 
-/// text_delta 事件处理器
+/// text_delta event handler
 class TextDeltaHandler implements SseEventHandler {
   @override
   Future<void> handle(
@@ -77,7 +77,7 @@ class TextDeltaHandler implements SseEventHandler {
   }
 }
 
-/// title_update 事件处理器
+/// title_update event handler
 class TitleUpdateHandler implements SseEventHandler {
   @override
   Future<void> handle(
@@ -92,7 +92,7 @@ class TitleUpdateHandler implements SseEventHandler {
   }
 }
 
-/// a2ui_message 事件处理器
+/// a2ui_message event handler
 class A2uiMessageHandler implements SseEventHandler {
   @override
   Future<void> handle(
@@ -126,7 +126,7 @@ class A2uiMessageHandler implements SseEventHandler {
   }
 }
 
-/// tool_call_start 事件处理器
+/// tool_call_start event handler
 class ToolCallStartHandler implements SseEventHandler {
   @override
   Future<void> handle(
@@ -142,7 +142,7 @@ class ToolCallStartHandler implements SseEventHandler {
   }
 }
 
-/// tool_call_end 事件处理器
+/// tool_call_end event handler
 class ToolCallEndHandler implements SseEventHandler {
   @override
   Future<void> handle(
@@ -161,7 +161,7 @@ class ToolCallEndHandler implements SseEventHandler {
   }
 }
 
-/// done 事件处理器
+/// done event handler
 class DoneHandler implements SseEventHandler {
   @override
   Future<void> handle(
@@ -173,7 +173,7 @@ class DoneHandler implements SseEventHandler {
   }
 }
 
-/// 错误事件处理器
+/// Error event handler
 class ErrorHandler implements SseEventHandler {
   @override
   Future<void> handle(
@@ -188,7 +188,7 @@ class ErrorHandler implements SseEventHandler {
   }
 }
 
-/// SSE 事件处理器注册表
+/// SSE event handler registry
 class SseEventHandlerRegistry {
   static final Map<String, SseEventHandler> _handlers = {};
   static bool _initialized = false;

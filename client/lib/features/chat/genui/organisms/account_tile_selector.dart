@@ -2,30 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:augo/i18n/strings.g.dart';
 
-/// 账户 Tile 选择器
+/// Account tile selector
 ///
-/// 基于 FSelectTileGroup 实现的内联账户选择器
-/// 遵循 GenUI organisms 层规范，可被 templates 层复用
+/// Inline account selector based on FSelectTileGroup
+/// Follows GenUI organisms layer spec, reusable by templates layer
 class AccountTileSelector extends StatefulWidget {
-  /// 账户列表，格式: [{id, name, type?, subtitle?}, ...]
+  /// Account list, format: [{id, name, type?, subtitle?}, ...]
   final List<Map<String, dynamic>> accounts;
 
-  /// 当前选中的账户 ID
+  /// Currently selected account ID
   final String? selectedId;
 
-  /// 选择变化回调
+  /// Selection change callback
   final ValueChanged<String?>? onChanged;
 
-  /// 是否显示"不关联"选项
+  /// Whether to show "no account" option
   final bool showNoAccountOption;
 
-  /// "不关联"选项的文本
+  /// Text for "no account" option
   final String? noAccountText;
 
-  /// 最大高度（超出时可滚动）
+  /// Max height (scrollable when exceeded)
   final double? maxHeight;
 
-  /// 是否禁用
+  /// Whether disabled
   final bool enabled;
 
   const AccountTileSelector({
@@ -76,7 +76,7 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
 
     final List<FSelectTile<String>> tiles = [];
 
-    // "不关联"选项
+    // "No account" option
     if (widget.showNoAccountOption) {
       tiles.add(
         FSelectTile<String>(
@@ -93,7 +93,7 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
       );
     }
 
-    // 账户选项
+    // Account options
     for (final account in widget.accounts) {
       final id = account['id'] as String;
       final name = account['name'] as String;

@@ -5,7 +5,6 @@ import 'package:augo/app/theme/app_font_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'i18n/strings.g.dart';
-import 'features/chat/pages/media_upload_test_page.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
@@ -86,16 +85,4 @@ void main() async {
       ),
     ),
   );
-}
-
-/// Test page routing
-Route<dynamic> generateRoute(RouteSettings settings) {
-  switch (settings.name) {
-    case '/media_upload_test':
-      return MaterialPageRoute(
-        builder: (context) => const MediaUploadTestPage(),
-      );
-    default:
-      return MaterialPageRoute(builder: (context) => const MyApp());
-  }
 }

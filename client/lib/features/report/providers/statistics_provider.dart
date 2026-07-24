@@ -239,7 +239,7 @@ class Statistics extends _$Statistics {
     await loadStatistics();
   }
 
-  /// 加载更多大额交易
+  /// Load more top transactions
   Future<void> loadMoreTopTransactions() async {
     if (state.isLoadingMoreTopTransactions ||
         state.topTransactions == null ||

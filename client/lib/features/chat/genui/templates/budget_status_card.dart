@@ -9,20 +9,20 @@ import '../atoms/budget_progress_bar.dart';
 import '../atoms/empty_state_alert.dart';
 import '../molecules/budget_item_card.dart';
 
-/// 预算状态卡片模板
+/// Budget status card template
 ///
-/// Layer 4 (Template) - 完整的预算概览卡片
-/// 由 atoms 和 molecules 组合而成，遵循 GenUI 四层架构
+/// Layer 4 (Template) - Complete budget overview card
+/// Composed of atoms and molecules, following the GenUI four-layer architecture
 ///
-/// 设计说明：
+/// Design layout:
 /// ┌─────────────────────────────────────────────────┐
-/// │ 📊 预算概览                              本月   │  ← 顶部标题栏
+/// │ 📊 Budget Overview                     This Month │  ← Top header bar
 /// ├─────────────────────────────────────────────────┤
-/// │ 总预算  ████████░░░░░░  75%                     │  ← 总预算进度
-/// │ 已用 ¥7,500 / 剩余 ¥2,500                       │
+/// │ Total   ████████░░░░░░  75%                     │  ← Total budget progress
+/// │ Spent ¥7,500 / Remaining ¥2,500                 │
 /// ├─────────────────────────────────────────────────┤
-/// │ 餐饮  ██████████░░  90%  >                      │  ← 分类预算列表
-/// │ 购物  ████████░░░░  50%  >                      │
+/// │ Dining  ██████████░░  90%  >                    │  ← Category budget list
+/// │ Shopping ████████░░░░  50%  >                    │
 /// └─────────────────────────────────────────────────┘
 class BudgetStatusCard extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -40,7 +40,7 @@ class BudgetStatusCard extends StatelessWidget {
       return _buildNoBudgetCard();
     }
 
-    // 检查是单个预算还是摘要
+    // Check if it's a single budget or summary
     if (data.containsKey('budget')) {
       return _buildSingleBudgetCard(
         context,
@@ -53,12 +53,12 @@ class BudgetStatusCard extends StatelessWidget {
     }
   }
 
-  /// 无预算提示 - 使用简洁的 FAlert 样式
+  /// No budget hint - uses concise FAlert style
   Widget _buildNoBudgetCard() {
     return EmptyStateAlert.budget();
   }
 
-  /// 单个预算卡片
+  /// Single budget card
   Widget _buildSingleBudgetCard(
     BuildContext context,
     FThemeData theme,
@@ -85,7 +85,7 @@ class BudgetStatusCard extends StatelessWidget {
     );
   }
 
-  /// 预算摘要卡片
+  /// Budget summary card
   Widget _buildBudgetSummaryCard(
     BuildContext context,
     FThemeData theme,
@@ -118,7 +118,7 @@ class BudgetStatusCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 顶部标题栏
+          // Top header bar
           _buildHeader(
             theme,
             colors,
@@ -126,12 +126,12 @@ class BudgetStatusCard extends StatelessWidget {
             _getOverallStatus(alerts),
           ),
 
-          // 主内容区
+          // Main content area
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // 总预算部分（可点击）
+                // Total budget section (tappable)
                 _buildTotalBudgetSection(
                   context,
                   theme,
@@ -142,7 +142,7 @@ class BudgetStatusCard extends StatelessWidget {
                   overallRemaining,
                 ),
 
-                // 分类预算列表
+                // Category budget list
                 if (budgets.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Divider(height: 1, color: colors.border),
@@ -158,7 +158,7 @@ class BudgetStatusCard extends StatelessWidget {
                   }),
                 ],
 
-                // 警告信息
+                // Alert messages
                 if (alerts.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   ...alerts.take(2).map((a) {
@@ -174,7 +174,7 @@ class BudgetStatusCard extends StatelessWidget {
     );
   }
 
-  /// 总预算区域
+  /// Total budget section
   Widget _buildTotalBudgetSection(
     BuildContext context,
     FThemeData theme,
@@ -201,7 +201,7 @@ class BudgetStatusCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           children: [
-            // 标题行
+            // Title row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -235,7 +235,7 @@ class BudgetStatusCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // 进度条
+            // Progress bar
             BudgetProgressBar(
               percentage: percentage,
               status: status,
@@ -243,7 +243,7 @@ class BudgetStatusCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // 金额信息
+            // Amount info
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -272,14 +272,14 @@ class BudgetStatusCard extends StatelessWidget {
     );
   }
 
-  /// 分类预算项（使用分类名称）
+  /// Category budget item (using category name)
   Widget _buildCategoryBudgetItem(
     BuildContext context,
     FThemeData theme,
     FColors colors,
     Map<String, dynamic> budget,
   ) {
-    // 优先使用 category_key 获取分类显示名称
+    // Prefer category_key for category display name
     final categoryKey = budget['category_key'] as String?;
     final name = categoryKey != null
         ? _getCategoryDisplayName(categoryKey)
@@ -303,7 +303,7 @@ class BudgetStatusCard extends StatelessWidget {
     );
   }
 
-  /// 获取分类显示名称
+  /// Get category display name
   String _getCategoryDisplayName(String categoryKey) {
     try {
       return TransactionCategory.fromKey(categoryKey).displayText;
@@ -312,7 +312,7 @@ class BudgetStatusCard extends StatelessWidget {
     }
   }
 
-  /// 顶部标题栏
+  /// Top header bar
   Widget _buildHeader(
     FThemeData theme,
     FColors colors,
@@ -351,7 +351,7 @@ class BudgetStatusCard extends StatelessWidget {
     );
   }
 
-  /// 警告项
+  /// Alert item
   Widget _buildAlertItem(
     FThemeData theme,
     FColors colors,
@@ -389,7 +389,7 @@ class BudgetStatusCard extends StatelessWidget {
     );
   }
 
-  // ============ 工具方法 ============
+  // ============ Utility methods ============
 
   Color _getStatusColor(
     String status,

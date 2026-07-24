@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:augo/i18n/strings.g.dart';
 
-/// 日期选择底部弹窗（使用 FCalendar）
+/// Date picker bottom sheet (uses FCalendar)
 class DatePickerSheet extends StatefulWidget {
   final DateTime initialDate;
   final DateTime? firstDate;
@@ -17,7 +17,7 @@ class DatePickerSheet extends StatefulWidget {
     this.title = '',
   });
 
-  /// 显示弹窗
+  /// Show sheet
   static Future<DateTime?> show(
     BuildContext context, {
     required DateTime initialDate,
@@ -66,7 +66,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
       child: SafeArea(
         child: Column(
           children: [
-            // 拖动条
+            // Drag handle
             Container(
               width: 32,
               height: 4,
@@ -76,10 +76,10 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // 标题栏
+            // Title bar
             _buildHeader(theme, colors),
             const SizedBox(height: 12),
-            // 日历
+            // Calendar
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -99,7 +99,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
                 ),
               ),
             ),
-            // 底部按钮
+            // Bottom button
             _buildBottomBar(theme, colors),
           ],
         ),

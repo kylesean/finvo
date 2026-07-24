@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-/// 图表卡片 Widget 实现
+/// Chart card Widget implementation
 class ChartCard extends StatelessWidget {
   final Map<String, dynamic> data;
 
@@ -34,7 +34,7 @@ class ChartCard extends StatelessWidget {
             height: 200,
             alignment: Alignment.center,
             child: Text(
-              '图表类型: ${data['chartType']}\n(需要 fl_chart 库完整实现)',
+              'Chart type: ${data['chartType']}\n(Requires full fl_chart library implementation)',
               textAlign: TextAlign.center,
               style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,

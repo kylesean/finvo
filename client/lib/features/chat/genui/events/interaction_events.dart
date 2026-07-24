@@ -1,24 +1,25 @@
 /// Typed GenUI Interaction Events
 ///
-/// 类型化交互事件模型 —— GenUI 按钮交互 wire 契约的「单一事实来源」。
+/// Typed interaction event model — the single source of truth for GenUI button interaction wire contract.
 ///
-/// 设计理念（P0：根治键名拼写 / 类型不一致类 bug）：
-/// - 在 A2UI v0.9 中，Surface 按钮交互经 genui [genui.UserActionEvent] 发出，
-///   其 `context` 是无类型的 `Map<String, Object?>`。重构前 dispatcher（组件）
-///   与 handler（注册表）靠字符串键隐式约定 context 结构，编译器无法校验，
-///   曾导致 `sourceAccount` vs `source_account_id` 这类静默错配。
-/// - 本模型把每个交互事件定义为 sealed 子类，wire 键名只出现在对应类的
-///   [toContext]（编码 / dispatcher 侧）与 `fromContext`（解码 / handler 侧）
-///   中一次。dispatcher 通过 [toUserActionEvent] 发出，handler 通过
-///   [GenUiInteractionEvent.tryParse] 解码，两端共享同一类型契约。
-/// - sealed 层次使注册表可用穷尽 `switch` 处理事件：新增事件类型时编译器
-///   强制要求补充处理器，杜绝「漏处理」静默通过。
+/// Design rationale (P0: eliminate key-name spelling / type inconsistency bugs):
+/// - In A2UI v0.9, Surface button interactions are emitted via genui [genui.UserActionEvent],
+///   whose `context` is an untyped `Map<String, Object?>`. Before refactoring, dispatcher (component)
+///   and handler (registry) relied on implicit string-key conventions for context structure,
+///   which the compiler could not verify, leading to silent mismatches like
+///   `sourceAccount` vs `source_account_id`.
+/// - This model defines each interaction event as a sealed subclass; wire key names appear only once
+///   in the corresponding class's [toContext] (encoding / dispatcher side) and `fromContext`
+///   (decoding / handler side). Dispatcher emits via [toUserActionEvent], handler decodes via
+///   [GenUiInteractionEvent.tryParse], both sharing the same typed contract.
+/// - The sealed hierarchy enables exhaustive `switch` in the registry: adding a new event type
+///   forces the compiler to require a handler, eliminating silent "unhandled" pass-through.
 ///
-/// 行为契约（与重构前完全等价）：
-/// - [tryParse] 对未知事件名返回 null，由调用方（InteractionRouter）走
-///   `Action: <name>` 兜底。
-/// - 各事件 `toContext` 产出的键值与重构前组件内联构造的 context 字节级一致，
-///   保证后端契约不变。
+/// Behavioral contract (fully equivalent to pre-refactoring):
+/// - [tryParse] returns null for unknown event names; the caller (InteractionRouter) falls back
+///   to `Action: <name>`.
+/// - Each event's `toContext` output is byte-level identical to the pre-refactoring inline context,
+///   ensuring the backend contract remains unchanged.
 library;
 
 import 'package:genui/genui.dart' as genui;
@@ -26,33 +27,33 @@ import 'package:genui/genui.dart' as genui;
 import 'event_names.dart';
 import 'space_events.dart';
 
-/// 把 wire 上的 amount 字段（num 或 String）安全转换为 double。
+/// Safely convert wire amount field (num or String) to double.
 double _amountToDouble(Object? raw) {
   if (raw is num) return raw.toDouble();
   if (raw is String) return double.tryParse(raw) ?? 0.0;
   return 0.0;
 }
 
-/// GenUI 交互事件基类。
+/// GenUI interaction event base class.
 ///
-/// sealed 以支持穷尽 switch；每个子类对应一个 wire 事件名（[eventName]）。
+/// Sealed to support exhaustive switch; each subclass corresponds to a wire event name ([eventName]).
 sealed class GenUiInteractionEvent {
   const GenUiInteractionEvent();
 
-  /// wire 上的 `action.name`。
+  /// The `action.name` on the wire.
   String get eventName;
 
-  /// 来源 Surface ID（部分事件无 surface 上下文，可空）。
+  /// Source Surface ID (nullable for events without surface context).
   String? get surfaceId;
 
-  /// 编码为 wire context（dispatcher 侧）。
+  /// Encode to wire context (dispatcher side).
   ///
-  /// 键名必须与对应 `fromContext` 解码完全对称。
+  /// Key names must be fully symmetric with the corresponding `fromContext` decoding.
   Map<String, dynamic> toContext();
 
-  /// 编码为 genui [genui.UserActionEvent]（dispatcher 侧统一出口）。
+  /// Encode to genui [genui.UserActionEvent] (unified dispatcher exit).
   ///
-  /// [sourceComponentId] 为触发组件标识，写入 wire `action.sourceComponentId`。
+  /// [sourceComponentId] is the triggering component identifier, written to wire `action.sourceComponentId`.
   genui.UserActionEvent toUserActionEvent({required String sourceComponentId}) {
     return genui.UserActionEvent(
       name: eventName,
@@ -61,10 +62,10 @@ sealed class GenUiInteractionEvent {
     );
   }
 
-  /// 从 wire action 解码为类型化事件（handler 侧统一入口）。
+  /// Decode wire action to typed event (unified handler entry).
   ///
-  /// 未知事件名返回 null，由调用方走兜底；已知事件即使字段缺失也返回实例
-  /// （字段按各自默认值降级），与重构前注册表的宽松解析一致。
+  /// Returns null for unknown event names (caller falls back); known events return an instance
+  /// even with missing fields (fields degrade to defaults), consistent with pre-refactoring lenient parsing.
   static GenUiInteractionEvent? tryParse(
     String? name,
     Map<String, dynamic> context,
@@ -83,10 +84,10 @@ sealed class GenUiInteractionEvent {
   }
 }
 
-/// 转账路径确认事件（`transfer_path_confirmed`）。
+/// Transfer path confirmed event (`transfer_path_confirmed`).
 ///
-/// 由 TransferWizard 在用户确认转账路径时发出；注册表据此生成
-/// `direct_execute` 原子转账 mutation。
+/// Emitted by TransferWizard when user confirms the transfer path; the registry
+/// generates a `direct_execute` atomic transfer mutation from it.
 final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
   final String sourceAccountId;
   final String targetAccountId;
@@ -113,8 +114,10 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
     return TransferPathConfirmedEvent(
       sourceAccountId: context['source_account_id'] as String? ?? '',
       targetAccountId: context['target_account_id'] as String? ?? '',
-      sourceAccountName: context['source_account_name'] as String? ?? '转出账户',
-      targetAccountName: context['target_account_name'] as String? ?? '转入账户',
+      sourceAccountName:
+          context['source_account_name'] as String? ?? 'Source Account',
+      targetAccountName:
+          context['target_account_name'] as String? ?? 'Target Account',
       amount: _amountToDouble(context['amount']),
       currency: context['currency'] as String? ?? 'CNY',
       memo: context['memo'] as String?,
@@ -138,10 +141,10 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
   };
 }
 
-/// 共享空间选择事件（`space_selected`）。
+/// Shared space selected event (`space_selected`).
 ///
-/// 由 SpaceSelectorCard 在用户确认空间归属时发出；注册表据此生成
-/// `direct_execute` 交易关联 mutation。
+/// Emitted by SpaceSelectorCard when user confirms space assignment; the registry
+/// generates a `direct_execute` transaction association mutation from it.
 final class SpaceSelectedEvent extends GenUiInteractionEvent {
   final int spaceId;
   final String? spaceName;
@@ -178,10 +181,10 @@ final class SpaceSelectedEvent extends GenUiInteractionEvent {
   };
 }
 
-/// 账户选择事件（`account_selected`）。
+/// Account selected event (`account_selected`).
 ///
-/// 由 AccountSelector 在用户点选账户时发出；注册表据此生成回传给 LLM 的
-/// 人类可读文案（无原子 mutation）。
+/// Emitted by AccountSelector when user taps an account; the registry generates
+/// a human-readable message back to the LLM (no atomic mutation).
 final class AccountSelectedEvent extends GenUiInteractionEvent {
   final String? accountId;
   final String? accountName;
@@ -216,11 +219,11 @@ final class AccountSelectedEvent extends GenUiInteractionEvent {
   };
 }
 
-/// 交易确认（含账户关联）事件（`transaction_confirmed_with_account`）。
+/// Transaction confirmed (with account association) event (`transaction_confirmed_with_account`).
 ///
-/// 由 TransactionConfirmation 在用户确认记账时发出。当前无原子 mutation，
-/// 注册表对其返回 null，由 InteractionRouter 走兜底（保持重构前行为）。
-/// 类型化后 dispatcher 侧仍获得编译期键名/类型校验。
+/// Emitted by TransactionConfirmation when user confirms the entry. Currently no atomic mutation;
+/// the registry returns null for it, and InteractionRouter falls back (preserving pre-refactoring behavior).
+/// After typing, the dispatcher side still gains compile-time key-name/type validation.
 final class TransactionConfirmedWithAccountEvent extends GenUiInteractionEvent {
   final String? accountId;
   final String? accountName;

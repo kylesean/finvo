@@ -6,9 +6,9 @@ library;
 
 /// Client state mutation
 ///
-/// GenUI 原子模式协议：
-/// - Client 在消息请求中附带 state mutation
-/// - Server 在图执行前原子性地应用 mutation
+/// GenUI atomic mode protocol:
+/// - Client attaches state mutation in message request
+/// - Server atomically applies mutation before graph execution
 class ClientStateMutation {
   /// UI mode: Controls graph entry routing
   /// - 'idle': Goes through agent node

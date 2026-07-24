@@ -18,7 +18,7 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
 
-    // 添加滚动监听以触发加载更多
+    // Add scroll listener to trigger load more
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
         if (scrollInfo.metrics.axis == Axis.vertical &&
@@ -33,11 +33,11 @@ class HomePage extends ConsumerWidget {
         return false;
       },
       child: Scaffold(
-        // 将 Scaffold 背景设为白色(background)，彻底解决底部 overscroll 露黑线的问题
+        // Set Scaffold background to white (background), fully resolving bottom overscroll black line issue
         backgroundColor: theme.colors.background,
         body: Stack(
           children: [
-            // 底层：顶部黑色背景，覆盖 iOS 下拉 overscroll 区域
+            // Bottom layer: top black background, covering iOS pull-down overscroll area
             Positioned(
               top: 0,
               left: 0,
@@ -45,17 +45,17 @@ class HomePage extends ConsumerWidget {
               height: MediaQuery.of(context).size.height * 0.5,
               child: Container(color: theme.colors.primary),
             ),
-            // 主内容层
+            // Main content layer
             RefreshIndicator(
               color: theme.colors.primary,
-              // 下拉刷新指示器的背景色，保持白色
+              // Pull-to-refresh indicator background color, keep white
               backgroundColor: theme.colors.background,
               onRefresh: () async {
                 await ref.read(transactionFeedProvider.notifier).refreshFeed();
               },
               child: CustomScrollView(
                 slivers: [
-                  // Header - SliverAppBar (黑色)
+                  // Header - SliverAppBar (black)
                   SliverAppBar(
                     expandedHeight: 250.0,
                     floating: false,
@@ -64,14 +64,16 @@ class HomePage extends ConsumerWidget {
                     flexibleSpace: const _WelcomeHeader(),
                     actions: const [NotificationIcon(), SizedBox(width: 16)],
                   ),
-                  // 主要内容区域
+                  // Main content area
                   SliverToBoxAdapter(
                     child: Container(
-                      // 关键：外层容器设为黑色 (primary)，以无缝衔接 Header
+                      // Key: outer container set to black (primary) to seamlessly connect with Header
                       color: theme.colors.primary,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: theme.colors.background, // 内部内容设为白色
+                          color: theme
+                              .colors
+                              .background, // Inner content set to white
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(
                               theme.style.borderRadius.xl.topLeft.x + 4,
@@ -84,38 +86,38 @@ class HomePage extends ConsumerWidget {
                         child: const Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // 日历组件
+                            // Calendar component
                             Padding(
                               padding: EdgeInsets.only(top: 8, bottom: 4),
                               child: MonthlyCalendarView(),
                             ),
-                            // Tab 按钮栏
+                            // Tab button bar
                             _FixedTabBar(),
-                            // 移除底部的 padding，因为现在列表紧接在后面
+                            // Remove bottom padding since list follows immediately
                           ],
                         ),
                       ),
                     ),
                   ),
-                  // 交易列表 - 使用 Sliver 版本
-                  // 包装在 SliverMainAxisGroup 中以确保背景色一致（如果需要）
-                  // 或者直接放置。我们需要为列表设置背景色，这可以通过
-                  // SliverToBoxAdapter 绘制一个背景，或者在 SliverTransactionFeedView 中处理。
-                  // 由于 SliverList 没有 backgroundColor 属性，通常的做法是
-                  // 让整个 CustomScrollView 背景一致，或者使用 DecoratedSliver (Flutter 3.13+)
+                  // Transaction list - using Sliver version
+                  // Wrapped in SliverMainAxisGroup to ensure consistent background color (if needed)
+                  // or placed directly. We need to set background color for the list, which can be done via
+                  // SliverToBoxAdapter drawing a background, or handled in SliverTransactionFeedView.
+                  // Since SliverList has no backgroundColor property, the common approach is
+                  // to keep the entire CustomScrollView background consistent, or use DecoratedSliver (Flutter 3.13+)
 
-                  // 为了确保列表背景是白色（theme.colors.background），
-                  // 我们可以在这之前放一个 DecoratedSliver，包裹 FeedView。
-                  // 但 DecoratedSliver 需要特定 Flutter 版本。
-                  // 简单的做法是：Scaffold 已经在 Header 下方设置了背景色（通过主要内容区域的 Container）。
-                  // 但对于 Infinite List，我们需要确保延伸到底部。
-                  // 我们使用一个 Consumer 来根据当前 Tab 类型构建 SliverTransactionFeedView
+                  // To ensure the list background is white (theme.colors.background),
+                  // we can place a DecoratedSliver before it, wrapping the FeedView.
+                  // But DecoratedSliver requires a specific Flutter version.
+                  // Simple approach: Scaffold already sets background below Header (via main content area Container).
+                  // But for Infinite List, we need to ensure it extends to the bottom.
+                  // We use a Consumer to build SliverTransactionFeedView based on current Tab type
                   Consumer(
                     builder: (context, ref, child) {
                       final currentSelectedType = ref.watch(
                         currentTransactionFeedTypeProvider,
                       );
-                      // 使用 DecoratedSliver 确保列表区域背景为白色
+                      // Use DecoratedSliver to ensure list area background is white
                       return DecoratedSliver(
                         decoration: BoxDecoration(
                           color: theme.colors.background,
@@ -142,11 +144,11 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-// 固定的Tab按钮栏组件
+// Fixed Tab button bar component
 class _FixedTabBar extends ConsumerWidget {
   const _FixedTabBar();
 
-  // 定义 Tab 的数据结构 - 需要在 build 时动态生成以支持国际化
+  // Define Tab data structure - needs dynamic generation at build time for i18n support
   List<({TransactionFeedType type, String label})> _getTabData() {
     return [
       (type: TransactionFeedType.all, label: t.common.all),
@@ -173,7 +175,7 @@ class _FixedTabBar extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: FButton(
                   mainAxisSize: MainAxisSize.min,
-                  onPress: () {}, // 空函数，保持按钮启用状态
+                  onPress: () {}, // Empty function to keep button enabled
                   child: Text(
                     tabInfo.label,
                     style: theme.typography.body.sm.copyWith(
@@ -213,7 +215,7 @@ class _FixedTabBar extends ConsumerWidget {
   }
 }
 
-// 恢复的头部组件，显示总消费金额和年度进度
+// Header component showing total expense amount and yearly progress
 class _WelcomeHeader extends ConsumerStatefulWidget {
   const _WelcomeHeader();
 
@@ -224,7 +226,7 @@ class _WelcomeHeader extends ConsumerStatefulWidget {
 class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
   bool _isAmountVisible = true;
 
-  // 计算年度时间进度
+  // Calculate yearly time progress
   double _getYearProgress() {
     final now = DateTime.now();
     final startOfYear = DateTime(now.year, 1, 1);
@@ -235,12 +237,12 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
   }
 
   String _formatAmount(TotalExpenseData data) {
-    // 优先使用后端返回的格式化好的字符串
+    // Prefer backend-returned formatted string
     if (data.display != null) {
       return data.display!.fullString;
     }
 
-    // Fallback 到本地格式化
+    // Fallback to local formatting
     return AmountFormatter.formatCommon(
       data.totalExpense,
       currencyCode: data.currency,
@@ -272,7 +274,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // 总消费金额标签和眼睛图标
+                        // Total expense label and eye icon
                         Row(
                           children: [
                             Text(
@@ -306,7 +308,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                         ),
 
                         const SizedBox(height: 8),
-                        // 总消费金额
+                        // Total expense amount
                         totalExpenseAsync.when(
                           data: (data) => Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,7 +362,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                         ),
 
                         const SizedBox(height: 16),
-                        // 年度时间进度条 - 简化版本
+                        // Yearly time progress bar - simplified version
                         Row(
                           children: [
                             Text(

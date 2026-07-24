@@ -14,7 +14,7 @@ class InviteCodeCard extends StatelessWidget {
   const InviteCodeCard({
     super.key,
     required this.inviteCode,
-    this.appScheme = 'yourapp', // 可以从配置中获取
+    this.appScheme = 'yourapp', // Can be obtained from config
   });
 
   @override
@@ -27,7 +27,7 @@ class InviteCodeCard extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // 邀请码标题
+            // Invite code title
             Row(
               children: [
                 Container(
@@ -49,13 +49,13 @@ class InviteCodeCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '邀请码',
+                        'Invite Code',
                         style: theme.typography.body.lg.copyWith(
                           fontWeight: AppFontConfig.bodyMedium,
                         ),
                       ),
                       Text(
-                        '分享给朋友加入空间',
+                        'Share with friends to join the space',
                         style: theme.typography.body.sm.copyWith(
                           color: colorScheme.mutedForeground,
                         ),
@@ -68,7 +68,7 @@ class InviteCodeCard extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // 邀请码显示
+            // Invite code display
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -79,7 +79,7 @@ class InviteCodeCard extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // 邀请码
+                  // Invite code
                   Text(
                     inviteCode.code,
                     style: theme.typography.body.xl2.copyWith(
@@ -90,7 +90,7 @@ class InviteCodeCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // 有效期
+                  // Expiry
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -114,7 +114,7 @@ class InviteCodeCard extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // 操作按钮
+            // Action buttons
             Row(
               children: [
                 Expanded(
@@ -126,7 +126,7 @@ class InviteCodeCard extends StatelessWidget {
                       children: [
                         Icon(FLucideIcons.copy, size: 16),
                         SizedBox(width: 8),
-                        Text('复制邀请码'),
+                        Text('Copy Invite Code'),
                       ],
                     ),
                   ),
@@ -140,7 +140,7 @@ class InviteCodeCard extends StatelessWidget {
                       children: [
                         Icon(FLucideIcons.share, size: 16),
                         SizedBox(width: 8),
-                        Text('分享邀请链接'),
+                        Text('Share Invite Link'),
                       ],
                     ),
                   ),
@@ -154,37 +154,37 @@ class InviteCodeCard extends StatelessWidget {
   }
 
   String _formatExpiryTime(DateTime? expiresAt) {
-    if (expiresAt == null) return '长期有效';
+    if (expiresAt == null) return 'No expiry';
     final now = DateTime.now();
     final difference = expiresAt.difference(now);
 
     if (difference.isNegative) {
-      return '已过期';
+      return 'Expired';
     }
 
     if (difference.inDays > 0) {
-      return '${difference.inDays}天后过期';
+      return 'Expires in ${difference.inDays} days';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}小时后过期';
+      return 'Expires in ${difference.inHours} hours';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}分钟后过期';
+      return 'Expires in ${difference.inMinutes} minutes';
     } else {
-      return '即将过期';
+      return 'Expiring soon';
     }
   }
 
   void _copyInviteCode(BuildContext context) {
     unawaited(Clipboard.setData(ClipboardData(text: inviteCode.code)));
-    ToastService.show(description: const Text('邀请码已复制'));
+    ToastService.show(description: const Text('Invite code copied'));
   }
 
   void _shareInviteLink(BuildContext context) {
     final inviteLink = '$appScheme://join-space?code=${inviteCode.code}';
     final shareText =
-        '邀请你加入共享空间"${inviteCode.spaceName}"\n\n'
-        '邀请码：${inviteCode.code}\n'
-        '或点击链接直接加入：$inviteLink\n\n'
-        '邀请码将于${_formatExpiryTime(inviteCode.expiresAt)}';
+        'You are invited to join the shared space "${inviteCode.spaceName}"\n\n'
+        'Invite code: ${inviteCode.code}\n'
+        'Or click the link to join directly: $inviteLink\n\n'
+        'Invite code ${_formatExpiryTime(inviteCode.expiresAt)}';
 
     // ignore: deprecated_member_use
     unawaited(Share.share(shareText));

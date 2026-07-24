@@ -4,19 +4,19 @@ import 'package:genui/genui.dart' show UiEvent;
 
 final _logger = Logger('HistoricalWrapper');
 
-/// 历史模式工具类
+/// Historical mode utility class
 ///
-/// 提供统一的历史模式处理，包括：
-/// - 禁用交互
-/// - 视觉反馈
-/// - noopDispatch 函数
+/// Provides unified historical mode handling, including:
+/// - Disable interactions
+/// - Visual feedback
+/// - noopDispatch function
 
-/// 历史模式包装器
+/// Historical mode wrapper
 ///
-/// 自动处理：
-/// - 禁用交互（IgnorePointer）
-/// - 视觉反馈（可选的透明度调整）
-/// - 标记徽章（可选）
+/// Automatically handles:
+/// - Disable interactions (IgnorePointer)
+/// - Visual feedback (optional opacity adjustment)
+/// - Badge marker (optional)
 ///
 /// Example:
 /// ```dart
@@ -29,13 +29,13 @@ class HistoricalWrapper extends StatelessWidget {
   final Widget child;
   final bool isHistorical;
 
-  /// 是否降低透明度
+  /// Whether to reduce opacity
   final bool dimOpacity;
 
-  /// 透明度值（当 dimOpacity 为 true 时使用）
+  /// Opacity value (used when dimOpacity is true)
   final double opacity;
 
-  /// 是否显示历史标记
+  /// Whether to show historical badge
   final bool showBadge;
 
   const HistoricalWrapper({
@@ -53,35 +53,35 @@ class HistoricalWrapper extends StatelessWidget {
 
     Widget result = child;
 
-    // 可选：降低透明度
+    // Optional: reduce opacity
     if (dimOpacity) {
       result = Opacity(opacity: opacity, child: result);
     }
 
-    // 禁用交互
+    // Disable interactions
     return IgnorePointer(child: result);
   }
 }
 
-/// 历史模式辅助函数
+/// Historical mode helper functions
 class HistoricalModeHelper {
   HistoricalModeHelper._();
 
-  /// 空操作事件分发器
+  /// No-op event dispatcher
   ///
-  /// 用于历史模式下忽略所有事件
+  /// Used to ignore all events in historical mode
   static void noopDispatch(UiEvent event) {
     _logger.info(
       'HistoricalModeHelper: Ignored event in historical mode: ${event.runtimeType}',
     );
   }
 
-  /// 检查 data 中是否包含历史模式标记
+  /// Check if data contains historical mode marker
   static bool isHistorical(Map<String, dynamic>? data) {
     return data?['_isHistorical'] == true;
   }
 
-  /// 为 data 添加历史模式标记
+  /// Add historical mode marker to data
   static Map<String, dynamic> markAsHistorical(Map<String, dynamic> data) {
     return {...data, '_isHistorical': true};
   }

@@ -1,13 +1,13 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
 import '../events/interaction_events.dart';
 import '../organisms/organisms.dart';
+import '../../../../shared/widgets/app_card.dart';
 
-/// 提交缓存
+/// Submission cache
 class _ConfirmationCache {
   static const String _cacheCategory = 'transaction_confirmation';
 
@@ -22,15 +22,15 @@ class _ConfirmationCache {
       GenUiCacheService().get<String>(_cacheCategory, surfaceId);
 }
 
-/// 交易确认 - 账户选择
+/// Transaction confirmation - account selection
 ///
-/// @deprecated 此组件已废弃（2024-12）。
-/// 后端工具 `request_transaction_confirmation` 已被删除。
-/// 采用"先记录，后关联账户"的设计模式：
-/// - 用户直接记账（使用 create_transaction，不填 account_id）
-/// - 用户可在交易详情中事后关联账户
+/// @deprecated This component is deprecated (2024-12).
+/// The backend tool `request_transaction_confirmation` has been removed.
+/// Adopting a "record first, link account later" design pattern:
+/// - Users record transactions directly (using create_transaction without account_id)
+/// - Users can link accounts later in transaction details
 ///
-/// 此组件保留仅为支持历史数据渲染。
+/// This component is retained only to support historical data rendering.
 @Deprecated(
   'Use create_transaction without account_id, then link account in transaction details',
 )
@@ -60,7 +60,7 @@ class _TransactionConfirmationState extends State<TransactionConfirmation> {
   void initState() {
     super.initState();
 
-    // 检查缓存
+    // Check cache
     if (_ConfirmationCache.isConfirmed(_surfaceId)) {
       _isConfirmed = true;
       _selectedAccountId = _ConfirmationCache.getAccountId(_surfaceId);
@@ -83,7 +83,7 @@ class _TransactionConfirmationState extends State<TransactionConfirmation> {
         .map((e) => Map<String, dynamic>.from(e as Map))
         .toList();
 
-    // 是否禁用：已确认或历史模式
+    // Whether disabled: confirmed or historical mode
     final isDisabled = _isConfirmed || _isHistorical;
 
     final isIncome =
@@ -92,7 +92,8 @@ class _TransactionConfirmationState extends State<TransactionConfirmation> {
         ? t.chat.transferWizard.selectReceiveAccount
         : t.chat.transferWizard.selectAccount;
 
-    return FCard(
+    return AppCard(
+      style: const .delta(padding: .value(EdgeInsets.zero)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: AccountPickerCard(

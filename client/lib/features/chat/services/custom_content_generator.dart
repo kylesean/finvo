@@ -334,7 +334,7 @@ class CustomContentGenerator implements genui.Transport {
           },
           responseType: ResponseType.stream,
           validateStatus: (status) => true,
-          // 强制使用极长超时限制：SSE 流可能持续很长时间（例如 AI 执行脚本）
+          // Force extremely long timeout: SSE stream may last a long time (e.g. AI executing scripts)
           receiveTimeout: const Duration(hours: 1),
           sendTimeout: const Duration(hours: 1),
         ),

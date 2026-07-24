@@ -52,7 +52,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     final settings = ref.watch(speechSettingsProvider).settings;
     final newServiceType = settings?.serviceType ?? SpeechServiceType.system;
 
-    // 检测服务类型是否变化
+    // Detect if service type has changed
     final isFirstInit = _serviceType == null;
     final serviceTypeChanged = !isFirstInit && _serviceType != newServiceType;
 
@@ -272,7 +272,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       _logger.warning("Speech service not configured");
       state = state.copyWith(
         showError: true,
-        errorMessage: '语音服务未配置',
+        errorMessage: 'Speech service not configured',
         hintType: HintType.normal,
       );
       return;
@@ -294,7 +294,8 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         _logger.warning("Speech service not ready");
         state = state.copyWith(
           showError: true,
-          errorMessage: '语音服务连接失败，请检查网络',
+          errorMessage:
+              'Speech service connection failed, please check network',
           hintType: HintType.normal,
         );
         return;

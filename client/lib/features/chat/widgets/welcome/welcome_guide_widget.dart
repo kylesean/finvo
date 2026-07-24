@@ -6,11 +6,11 @@ import '../../providers/welcome_guide_provider.dart';
 import 'greeting_header.dart';
 import 'suggestion_card.dart';
 
-/// 欢迎引导组件
-/// 在聊天页面无消息时显示，根据时段提供场景化建议
+/// Welcome guide component
+/// Displayed when chat page has no messages, provides contextual suggestions based on time of day
 class WelcomeGuideWidget extends ConsumerWidget {
-  /// 当用户点击建议卡片时的回调
-  /// 参数为建议的 prompt，用于发送给 AI
+  /// Callback when user taps a suggestion card
+  /// Parameter is the suggested prompt, used to send to AI
   final void Function(String prompt) onSuggestionTap;
 
   const WelcomeGuideWidget({super.key, required this.onSuggestionTap});
@@ -23,18 +23,18 @@ class WelcomeGuideWidget extends ConsumerWidget {
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
         child: ConstrainedBox(
-          // 限制最大宽度，在大屏幕上保持居中紧凑
+          // Limit max width, keep centered and compact on large screens
           constraints: const BoxConstraints(maxWidth: 400),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 问候语头部
+              // Greeting header
               GreetingHeader(
                 greeting: guideState.greeting,
                 subtitle: guideState.subtitle,
               ),
               const SizedBox(height: 28),
-              // 场景化建议卡片 - 使用 Column + gap
+              // Contextual suggestion cards - using Column + gap
               ...guideState.suggestions.asMap().entries.map((entry) {
                 final index = entry.key;
                 final suggestion = entry.value;

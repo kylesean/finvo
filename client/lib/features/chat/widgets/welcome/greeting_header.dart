@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:augo/app/theme/app_font_config.dart';
 
-/// 问候语头部组件
-/// 居中显示时段问候语和副标题
+/// Greeting header component
+/// Centered display of time-based greeting and subtitle
 class GreetingHeader extends StatelessWidget {
   final String greeting;
   final String subtitle;
@@ -22,18 +22,18 @@ class GreetingHeader extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 问候语 - 更大更醒目
+        // Greeting - larger and more prominent
         Text(
           greeting,
           style: theme.typography.body.xl2.copyWith(
-            // CJK 字重补偿：下调一档以恢复升级前的视觉粗细。
+            // CJK font weight compensation: reduce one level to restore pre-upgrade visual weight.
             fontWeight: AppFontConfig.titleSemibold,
             letterSpacing: -0.5,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 6),
-        // 副标题 - 简洁提示
+        // Subtitle - concise hint
         Text(
           subtitle,
           style: theme.typography.body.sm.copyWith(

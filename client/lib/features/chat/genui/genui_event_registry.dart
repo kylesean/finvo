@@ -1,15 +1,15 @@
 /// GenUI Event Registry
 ///
-/// 事件注册表 —— 解耦 ContentGenerator/InteractionRouter 与业务逻辑。
+/// Event registry — decouples ContentGenerator/InteractionRouter from business logic.
 ///
-/// 设计理念（P0 类型化改造）：
-/// - 处理器以 [GenUiInteractionEvent] 密封层次为输入，通过穷尽 `switch` 分发。
-///   新增事件类型时编译器强制要求补充处理分支，杜绝「漏处理」静默通过。
-/// - 注册表不再维护字符串键 -> 处理器的动态映射；事件 wire 契约由
-///   `events/interaction_events.dart` 的密封类型单点定义。
-/// - Router 仅负责 `tryParse` + 调用 [handle]，无需知道具体业务事件。
+/// Design rationale (P0 typed refactoring):
+/// - Handlers take [GenUiInteractionEvent] sealed hierarchy as input, dispatching via exhaustive `switch`.
+///   Adding a new event type forces the compiler to require a handler branch, eliminating silent "unhandled" pass-through.
+/// - Registry no longer maintains string-key -> handler dynamic mapping; event wire contract is
+///   defined at a single point by the sealed types in `events/interaction_events.dart`.
+/// - Router only handles `tryParse` + calling [handle], without needing to know specific business events.
 ///
-/// 使用方式：
+/// Usage:
 /// ```dart
 /// final event = GenUiInteractionEvent.tryParse(name, context);
 /// if (event != null) {
@@ -26,9 +26,9 @@ import 'package:logging/logging.dart';
 import '../models/client_state_mutation.dart';
 import 'events/interaction_events.dart';
 
-/// 事件处理器结果
+/// Event processing result
 ///
-/// 包含业务变更 (ClientStateMutation) 和 可选的发送给 LLM 的 Payload 增强数据
+/// Contains business mutation (ClientStateMutation) and optional payload extensions sent to LLM
 class EventProcessingResult {
   final ClientStateMutation? mutation;
   final Map<String, dynamic>? payloadExtensions;
@@ -38,31 +38,31 @@ class EventProcessingResult {
   bool get isEmpty => mutation == null && payloadExtensions == null;
 }
 
-/// GenUI 事件注册表
+/// GenUI event registry
 ///
-/// 以密封事件类型为输入的无状态分发器。
+/// Stateless dispatcher with sealed event types as input.
 class GenUiEventRegistry {
-  GenUiEventRegistry._(); // 禁止实例化
+  GenUiEventRegistry._(); // Prevent instantiation
 
   static final _logger = Logger('GenUiEventRegistry');
 
-  /// 分发类型化事件，返回业务处理结果。
+  /// Dispatch typed event, return business processing result.
   ///
-  /// 穷尽 `switch` 保证新增 [GenUiInteractionEvent] 子类时编译期强制实现处理器。
-  /// 返回 null 表示该事件无业务处理（由调用方走兜底）。
+  /// Exhaustive `switch` guarantees compile-time enforcement of handler implementation when adding new [GenUiInteractionEvent] subclasses.
+  /// Returns null when the event has no business handler (caller falls back).
   static EventProcessingResult? handle(GenUiInteractionEvent event) {
     _logger.fine('GenUiEventRegistry: handling "${event.eventName}"');
     return switch (event) {
       TransferPathConfirmedEvent() => _handleTransferPathConfirmed(event),
       SpaceSelectedEvent() => _handleSpaceSelected(event),
       AccountSelectedEvent() => _handleAccountSelected(event),
-      // 交易确认（含账户）当前无原子 mutation，返回 null 让 Router 走兜底，
-      // 保持与重构前完全一致的行为。
+      // Transaction confirmation (with account) currently has no atomic mutation, return null to let Router fall back,
+      // preserving behavior fully consistent with pre-refactoring.
       TransactionConfirmedWithAccountEvent() => null,
     };
   }
 
-  /// 转账路径确认 -> direct_execute 原子转账。
+  /// Transfer path confirmed -> direct_execute atomic transfer.
   static EventProcessingResult _handleTransferPathConfirmed(
     TransferPathConfirmedEvent event,
   ) {
@@ -78,13 +78,13 @@ class GenUiEventRegistry {
       ),
       payloadExtensions: {
         'role': 'user',
-        'content': '按照我的选择执行转账',
+        'content': 'Execute transfer according to my selection',
         'metadata': {'event_type': event.eventName, ...event.toContext()},
       },
     );
   }
 
-  /// 空间选择 -> direct_execute 交易关联。
+  /// Space selected -> direct_execute transaction association.
   static EventProcessingResult _handleSpaceSelected(SpaceSelectedEvent event) {
     return EventProcessingResult(
       mutation: ClientStateMutation.forSpaceAssociation(
@@ -94,20 +94,21 @@ class GenUiEventRegistry {
       ),
       payloadExtensions: {
         'role': 'user',
-        'content': '关联选定的空间',
+        'content': 'Associate selected space',
         'metadata': {'event_type': event.eventName, ...event.toContext()},
       },
     );
   }
 
-  /// 账户选择 -> 回传 LLM 的人类可读文案（无原子 mutation）。
+  /// Account selected -> human-readable message back to LLM (no atomic mutation).
   static EventProcessingResult _handleAccountSelected(
     AccountSelectedEvent event,
   ) {
     return EventProcessingResult(
       payloadExtensions: {
         'role': 'user',
-        'content': '我选择了账户 ID: ${event.accountId} (${event.accountType})',
+        'content':
+            'I selected account ID: ${event.accountId} (${event.accountType})',
         'metadata': {'event_type': event.eventName, ...event.toContext()},
       },
     );

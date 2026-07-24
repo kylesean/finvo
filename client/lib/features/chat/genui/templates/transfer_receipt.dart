@@ -8,22 +8,22 @@ import 'package:augo/app/theme/app_semantic_colors.dart';
 
 import '../atoms/atoms.dart';
 
-/// 转账成功收据卡片 Widget - 简洁三段式设计
+/// Transfer success receipt card widget - concise three-section design
 ///
-/// 特色设计：
-/// - 电流动画连线（从转出到转入）
-/// - 只显示账户图标（标签已有名称）
-/// - 紧凑的横版布局
+/// Design highlights:
+/// - Electric current animation line (from source to target)
+/// - Only shows account icons (labels already have names)
+/// - Compact horizontal layout
 ///
-/// 参考设计：
+/// Reference design:
 /// ┌─────────────────────────────────────────────────┐
-/// │ ✓ 转账成功                           14:30      │
+/// │ ✓ Transfer Success                      14:30   │
 /// ├─────────────────────────────────────────────────┤
 /// │                    🔄                           │
 /// │                 ¥1,000.00                       │
-/// │            #转账 #储蓄卡 #现金                     │
+/// │            #transfer #debit-card #cash           │
 /// ├─────────────────────────────────────────────────┤
-/// │         💳  ~~~⚡~~~>  💵                       │  ← 电流动画
+/// │         💳  ~~~⚡~~~>  💵                       │  ← Electric animation
 /// └─────────────────────────────────────────────────┘
 class TransferReceipt extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -35,14 +35,14 @@ class TransferReceipt extends StatelessWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // 提取数据
+    // Extract data
     final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
     final currency = data['currency'] as String? ?? 'CNY';
     final time = data['transaction_at'] as String? ?? '';
     final tags =
         (data['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
 
-    // 转账信息
+    // Transfer info
     final transferInfo = data['transfer_info'] as Map<String, dynamic>?;
     final sourceAccount =
         transferInfo?['source_account'] as Map<String, dynamic>?;
@@ -68,13 +68,13 @@ class TransferReceipt extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 第一段：顶部状态栏
+          // Section 1: Top status bar
           _buildStatusHeader(theme, colors, time),
 
-          // 第二段：中部内容 - 金额 + 标签
+          // Section 2: Middle content - amount + tags
           _buildMainContent(theme, colors, currency, amount, tags),
 
-          // 第三段：底部账户动画（含账户名）
+          // Section 3: Bottom account animation (with account names)
           _TransferAnimation(
             colors: colors,
             sourceAccount: sourceAccount,
@@ -85,7 +85,7 @@ class TransferReceipt extends StatelessWidget {
     );
   }
 
-  /// 构建顶部状态栏
+  /// Build top status bar
   Widget _buildStatusHeader(FThemeData theme, FColors colors, String time) {
     return Container(
       width: double.infinity,
@@ -126,7 +126,7 @@ class TransferReceipt extends StatelessWidget {
     );
   }
 
-  /// 构建中部主内容区
+  /// Build middle main content area
   Widget _buildMainContent(
     FThemeData theme,
     FColors colors,
@@ -139,7 +139,7 @@ class TransferReceipt extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       child: Column(
         children: [
-          // 转账图标
+          // Transfer icon
           Container(
             width: 44,
             height: 44,
@@ -155,7 +155,7 @@ class TransferReceipt extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // 金额 - 使用统一的 AmountText（转账类型）
+          // Amount - use unified AmountText (transfer type)
           AmountText(
             amount: amount,
             type: TransactionType.transfer,
@@ -169,7 +169,7 @@ class TransferReceipt extends StatelessWidget {
             ),
           ),
 
-          // 标签
+          // Tags
           if (tags.isNotEmpty) ...[
             const SizedBox(height: 10),
             Wrap(
@@ -198,7 +198,7 @@ class TransferReceipt extends StatelessWidget {
   }
 }
 
-/// 转账动画组件 - 电流效果
+/// Transfer animation component - electric current effect
 class _TransferAnimation extends StatefulWidget {
   final FColors colors;
   final Map<String, dynamic>? sourceAccount;
@@ -252,10 +252,10 @@ class _TransferAnimationState extends State<_TransferAnimation>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 转出账户
+          // Source account
           _buildAccountWithLabel(theme, colors, sourceName, sourceType),
 
-          // 电流动画连线
+          // Electric current animation line
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: SizedBox(
@@ -275,7 +275,7 @@ class _TransferAnimationState extends State<_TransferAnimation>
             ),
           ),
 
-          // 转入账户
+          // Target account
           _buildAccountWithLabel(theme, colors, targetName, targetType),
         ],
       ),
@@ -332,11 +332,11 @@ class _TransferAnimationState extends State<_TransferAnimation>
         break;
       case 'ALIPAY':
         icon = FLucideIcons.smartphone;
-        bgColor = const Color(0xFF1677FF); // 支付宝品牌色
+        bgColor = const Color(0xFF1677FF); // Alipay brand color
         break;
       case 'WECHAT':
         icon = FLucideIcons.smartphone;
-        bgColor = const Color(0xFF07C160); // 微信品牌色
+        bgColor = const Color(0xFF07C160); // WeChat brand color
         break;
       default:
         icon = FLucideIcons.wallet;
@@ -356,7 +356,7 @@ class _TransferAnimationState extends State<_TransferAnimation>
   }
 }
 
-/// 电流连线绘制器
+/// Electric line painter
 class _ElectricLinePainter extends CustomPainter {
   final double progress;
   final Color color;
@@ -370,13 +370,13 @@ class _ElectricLinePainter extends CustomPainter {
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
-    // 基础线条
+    // Base line
     final basePath = Path();
     basePath.moveTo(0, size.height / 2);
     basePath.lineTo(size.width, size.height / 2);
     canvas.drawPath(basePath, paint);
 
-    // 箭头
+    // Arrow
     final arrowPaint = Paint()
       ..color = color.withValues(alpha: 0.5)
       ..strokeWidth = 2
@@ -389,12 +389,12 @@ class _ElectricLinePainter extends CustomPainter {
     arrowPath.lineTo(size.width - 8, size.height / 2 + 5);
     canvas.drawPath(arrowPath, arrowPaint);
 
-    // 电流光点（移动效果）
+    // Electric glow dots (moving effect)
     final glowPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
 
-    // 多个光点，形成电流流动效果
+    // Multiple dots to create electric flow effect
     for (int i = 0; i < 3; i++) {
       final dotProgress = (progress + i * 0.33) % 1.0;
       final x = dotProgress * (size.width - 12) + 4;

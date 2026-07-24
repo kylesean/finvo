@@ -13,6 +13,7 @@ import '../../../shared/models/currency.dart';
 import 'account_edit_page.dart';
 import '../providers/financial_summary_provider.dart';
 import '../providers/account_view_currency_provider.dart';
+import '../../../shared/widgets/app_card.dart';
 import 'package:augo/i18n/strings.g.dart';
 import 'package:augo/shared/widgets/amount_text.dart';
 import 'package:augo/shared/widgets/themed_icon.dart';
@@ -28,7 +29,7 @@ class FinancialAccountsPage extends ConsumerStatefulWidget {
 }
 
 class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
-  // 账户管理相关状态
+  // Account management related state
   bool _hideAmounts = false;
 
   @override
@@ -378,13 +379,13 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                       type: netWorth >= Decimal.zero
                           ? TransactionType.income
                           : TransactionType.expense,
-                      semantic: AmountSemantic.status, // 改为 status
+                      semantic: AmountSemantic.status, // Changed to status
                       currency: viewCurrency,
                       shrinkCurrency: true,
                       style: const TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white, // 显式强制白色
+                        color: Colors.white, // Explicitly force white
                       ),
                     ),
             ),
@@ -461,12 +462,12 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
               : AmountText(
                   amount: amount.toDouble(),
                   type: type,
-                  semantic: AmountSemantic.status, // 改为 status
+                  semantic: AmountSemantic.status, // Changed to status
                   currency: currency,
                   shrinkCurrency: true,
                   style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: Colors.white, // 显式强制白色
+                    color: Colors.white, // Explicitly force white
                   ),
                 ),
         ),
@@ -494,12 +495,12 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   ) {
     final definition = AccountTypeRegistry.resolveByApiType(account.type);
 
-    // 使用 nature 字段判断是否为负债
+    // Use nature field to determine if liability
     final isLiabilityAccount = account.nature == FinancialNature.liability;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8), // Reduced bottom padding
-      child: FCard(
+      child: AppCard(
         child: Material(
           type: MaterialType.transparency,
           borderRadius: BorderRadius.circular(10), // Match FCard radius
@@ -624,7 +625,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     }
   }
 
-  /// 根据账户类型 ID 获取对应的 Forui 图标
+  /// Get Forui icon for account type ID
   IconData _getAccountTypeIcon(String? typeId, bool isLiability) {
     switch (typeId) {
       case 'cash':
@@ -660,7 +661,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
           .read(financialAccountProvider.notifier)
           .saveFinancialAccounts(updatedList);
 
-      // 保存成功后刷新账户列表
+      // Refresh account list after successful save
       if (success && mounted) {
         await ref
             .read(financialAccountProvider.notifier)
@@ -673,7 +674,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     FinancialAccount account,
     AccountTypeDefinition? definition,
   ) async {
-    // 如果没有找到对应的定义，根据 account.type 尝试获取默认定义
+    // If no matching definition found, try to get default based on account.type
     final accountDefinition =
         definition ??
         AccountTypeRegistry.resolveByApiType(account.type) ??
@@ -689,18 +690,18 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     // Refresh is handled by the edit page's provider interaction
   }
 
-  /// 构建左侧抽屉栏内容
+  /// Build left drawer content
   Widget _buildDrawer(BuildContext context) {
     final theme = context.theme;
     final colorScheme = theme.colors;
 
     return Drawer(
       backgroundColor: colorScheme.background,
-      shape: const RoundedRectangleBorder(), // 移除圆角效果
+      shape: const RoundedRectangleBorder(), // Remove rounded corners
       child: SafeArea(
         child: Column(
           children: [
-            // 顶部：标题
+            // Top: title
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -724,14 +725,14 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
               ),
             ),
 
-            // 中间：功能列表
+            // Middle: feature list
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 财务设置分组
+                    // Financial settings group
                     Text(
                       t.financial.settings,
                       style: theme.typography.body.sm.copyWith(
@@ -749,8 +750,8 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           title: Text(t.financial.budgetManagement),
                           suffix: const Icon(FLucideIcons.chevronRight),
                           onPress: () {
-                            Navigator.of(context).pop(); // 关闭抽屉栏
-                            // 延迟导航，等待抽屉栏关闭动画完成
+                            Navigator.of(context).pop(); // Close drawer
+                            // Delay navigation to wait for drawer close animation
                             unawaited(
                               Future<void>.delayed(
                                 const Duration(milliseconds: 100),
@@ -770,8 +771,8 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           title: Text(t.financial.recurringTransactions),
                           suffix: const Icon(FLucideIcons.chevronRight),
                           onPress: () {
-                            Navigator.of(context).pop(); // 关闭抽屉栏
-                            // 延迟导航，等待抽屉栏关闭动画完成
+                            Navigator.of(context).pop(); // Close drawer
+                            // Delay navigation to wait for drawer close animation
                             unawaited(
                               Future<void>.delayed(
                                 const Duration(milliseconds: 100),
@@ -793,7 +794,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           title: Text(t.financial.safetyThreshold),
                           suffix: const Icon(FLucideIcons.chevronRight),
                           onPress: () {
-                            Navigator.of(context).pop(); // 关闭抽屉栏
+                            Navigator.of(context).pop(); // Close drawer
                             _showSafetyThresholdSettings(context);
                           },
                         ),
@@ -804,7 +805,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           title: Text(t.financial.dailyBurnRate),
                           suffix: const Icon(FLucideIcons.chevronRight),
                           onPress: () {
-                            Navigator.of(context).pop(); // 关闭抽屉栏
+                            Navigator.of(context).pop(); // Close drawer
                             _showDailySpendingSettings(context);
                           },
                         ),
@@ -815,7 +816,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
               ),
             ),
 
-            // 底部：用户信息（可选）
+            // Bottom: user info (optional)
             Container(
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: colorScheme.border)),
@@ -824,7 +825,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
-                    // 可以导航到个人资料页或其他功能
+                    // Navigate to profile page or other features
                     Navigator.of(context).pop();
                   },
                   child: Padding(
@@ -882,7 +883,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     );
   }
 
-  /// 显示财务安全线设置
+  /// Show safety threshold settings
   void _showSafetyThresholdSettings(BuildContext context) {
     unawaited(
       showModalBottomSheet<void>(
@@ -896,7 +897,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     );
   }
 
-  /// 显示日常消费预估设置
+  /// Show daily spending settings
   void _showDailySpendingSettings(BuildContext context) {
     unawaited(
       showModalBottomSheet<void>(
@@ -911,7 +912,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   }
 }
 
-// 以下是底部弹出框组件
+// Bottom sheet components below
 
 class _SafetyThresholdBottomSheet extends ConsumerStatefulWidget {
   const _SafetyThresholdBottomSheet();
@@ -957,7 +958,7 @@ class _SafetyThresholdBottomSheetState
               ),
             ),
 
-            // 标题区域
+            // Title area
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
@@ -982,7 +983,7 @@ class _SafetyThresholdBottomSheetState
 
             const SizedBox(height: 24),
 
-            // 内容区域
+            // Content area
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
@@ -1011,7 +1012,7 @@ class _SafetyThresholdBottomSheetState
 
                   const SizedBox(height: 32),
 
-                  // 按钮区域
+                  // Button area
                   Row(
                     children: [
                       Expanded(
@@ -1104,7 +1105,7 @@ class _DailySpendingBottomSheetState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 顶部拖拽指示器
+            // Top drag indicator
             Container(
               width: 32,
               height: 4,
@@ -1115,7 +1116,7 @@ class _DailySpendingBottomSheetState
               ),
             ),
 
-            // 标题区域
+            // Title area
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
@@ -1140,13 +1141,13 @@ class _DailySpendingBottomSheetState
 
             const SizedBox(height: 32),
 
-            // 内容区域
+            // Content area
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 children: [
                   Text(
-                    '¥${_currentValue.toStringAsFixed(0)} / 天',
+                    '¥${_currentValue.toStringAsFixed(0)} / day',
                     style: theme.typography.body.xl2.copyWith(
                       color: theme.colors.primary,
                       fontWeight: FontWeight.bold,
@@ -1169,7 +1170,7 @@ class _DailySpendingBottomSheetState
 
                   const SizedBox(height: 32),
 
-                  // 按钮区域
+                  // Button area
                   Row(
                     children: [
                       Expanded(

@@ -1,10 +1,10 @@
-/// SSE 事件模型定义
+/// SSE event model definitions
 ///
-/// 包含 SSE 事件相关的数据类型定义，供 CustomContentGenerator
-/// 和 SseEventHandlerRegistry 共同使用。
+/// Contains data type definitions for SSE events, shared by CustomContentGenerator
+/// and SseEventHandlerRegistry.
 library;
 
-/// 工具调用开始事件
+/// Tool call start event
 class ToolCallStartEvent {
   final String id;
   final String name;
@@ -28,7 +28,7 @@ class ToolCallStartEvent {
   }
 }
 
-/// 工具调用结束事件
+/// Tool call end event
 class ToolCallEndEvent {
   final String id;
   final String name;
@@ -58,7 +58,7 @@ class ToolCallEndEvent {
   }
 }
 
-/// 工具信息
+/// Tool info
 class ToolInfo {
   final String name;
   final String displayName;
@@ -92,7 +92,7 @@ class ToolInfo {
   bool get isHitl => toolType == 'hitl';
 }
 
-/// SSE 事件回调集合
+/// SSE event callback collection
 class SseEventCallbacks {
   final void Function(String sessionId, String? messageId)? onSessionInit;
   final void Function(String text)? onTextChunk;

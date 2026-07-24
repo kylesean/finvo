@@ -3,8 +3,6 @@ abstract class AppException implements Exception {
   final String? _message;
   final String? _prefix;
 
-  //final StackTrace? _stackTrace;
-
   AppException([this._message, this._prefix]);
 
   /// Exception message (defaults to class name)

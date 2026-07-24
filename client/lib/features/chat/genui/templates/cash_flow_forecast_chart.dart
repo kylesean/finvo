@@ -8,13 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:augo/shared/providers/amount_theme_provider.dart';
 import 'package:augo/i18n/strings.g.dart';
 
-/// 现金流预测图表 - GenUI Template
+/// Cash flow forecast chart - GenUI Template
 ///
-/// 用于在 AI 聊天中展示用户的未来现金流预测。
-/// 包含：
-/// - 折线图（预测余额曲线 + 置信区间）
-/// - 关键事件标记
-/// - 预警信息
+/// Displays user's future cash flow forecast in AI chat.
+/// Includes:
+/// - Line chart (predicted balance curve + confidence interval)
+/// - Key event markers
+/// - Warning information
 class CashFlowForecastChart extends StatefulWidget {
   final Map<String, dynamic> data;
 
@@ -64,8 +64,8 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
     return numberFormat.format((amount as num?)?.toDouble() ?? 0);
   }
 
-  /// 本地化事件描述
-  /// 尝试将 category_key 或 type 转换为本地化显示文本
+  /// Localize event description
+  /// Attempts to convert category_key or type to localized display text
   String _localizeDescription(String? description) {
     if (description == null || description.isEmpty) {
       return t.chat.genui.cashFlowForecast.recurringTransaction;
@@ -73,7 +73,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
 
     final upper = description.toUpperCase();
 
-    // 1. 先检查是否是交易类型（INCOME, EXPENSE, TRANSFER）
+    // 1. Check if it's a transaction type (INCOME, EXPENSE, TRANSFER)
     switch (upper) {
       case 'INCOME':
         return t.chat.genui.cashFlowForecast.recurringIncome;
@@ -83,14 +83,14 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
         return t.chat.genui.cashFlowForecast.recurringTransfer;
     }
 
-    // 2. 检查是否是有效的分类键
+    // 2. Check if it's a valid category key
     final category = TransactionCategory.fromKey(upper);
-    // fromKey 在找不到时返回 others，我们需要验证是否真的匹配
+    // fromKey returns 'others' when not found, verify it actually matches
     if (category.key == upper) {
       return category.displayText;
     }
 
-    // 3. 返回原始描述（可能是用户自定义的描述）
+    // 3. Return original description (may be user-defined)
     return description;
   }
 
@@ -392,11 +392,11 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
           ),
         ),
       ),
-      // 启用缩放和平移手势（fl_chart 0.70.0+）
+      // Enable zoom and pan gestures (fl_chart 0.70.0+)
       transformationConfig: const FlTransformationConfig(
-        scaleAxis: FlScaleAxis.horizontal, // 仅水平方向缩放
+        scaleAxis: FlScaleAxis.horizontal, // Horizontal-only zoom
         minScale: 1.0,
-        maxScale: 3.0, // 最大3倍缩放
+        maxScale: 3.0, // Max 3x zoom
         panEnabled: true,
         scaleEnabled: true,
       ),
@@ -575,7 +575,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
     final colors = theme.colors;
 
     // Collect significant events (recurring with amount > 500)
-    // 使用 source_id 去重，每种周期事件只保留第一次出现
+    // Deduplicate by source_id, keep only the first occurrence of each recurring event
     final seenSourceIds = <String>{};
     final keyEvents = <Map<String, dynamic>>[];
 
@@ -585,7 +585,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
             (event['amount'] as num).abs() > 500) {
           final sourceId = event['source_id'] as String? ?? '';
 
-          // 去重：每个 source_id 只保留第一次出现
+          // Deduplicate: keep only the first occurrence per source_id
           if (sourceId.isEmpty || !seenSourceIds.contains(sourceId)) {
             if (sourceId.isNotEmpty) seenSourceIds.add(sourceId);
             keyEvents.add({'date': point.date, ...event});

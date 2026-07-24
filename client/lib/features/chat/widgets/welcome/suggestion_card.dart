@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-/// 建议卡片组件
-/// 紧凑设计，点击后发送 prompt 给 AI
+/// Suggestion card component
+/// Compact design, sends prompt to AI on tap
 class SuggestionCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -40,7 +40,7 @@ class SuggestionCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Icon 图标容器
+              // Icon container
               Container(
                 width: 40,
                 height: 40,
@@ -52,24 +52,24 @@ class SuggestionCard extends StatelessWidget {
                 child: Icon(icon, size: 20, color: theme.colors.foreground),
               ),
               const SizedBox(width: 12),
-              // 文字内容
+              // Text content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // 标题
+                    // Title
                     Text(
                       title,
                       style: theme.typography.body.sm.copyWith(
-                        // 3.44 起 Skia 回退选中 NotoSansCJK（笔画更重），字重下调一档。
+                        // Since 3.44, Skia fallback selects NotoSansCJK (heavier strokes), reduce font weight one level.
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    // 描述
+                    // Description
                     Text(
                       description,
                       style: theme.typography.body.xs.copyWith(
@@ -82,7 +82,7 @@ class SuggestionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              // 箭头指示
+              // Arrow indicator
               Icon(
                 FLucideIcons.chevronRight,
                 size: 16,

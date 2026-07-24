@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:forui/forui.dart';
+import '../../../shared/widgets/app_card.dart';
 
 class TransactionDetailSkeleton extends StatelessWidget {
   const TransactionDetailSkeleton({super.key});
@@ -37,7 +38,7 @@ class TransactionDetailSkeleton extends StatelessWidget {
                         horizontal: 16.0,
                         vertical: 12.0,
                       ),
-                      child: FCard(
+                      child: AppCard(
                         child: Shimmer.fromColors(
                           baseColor: shimmerBaseColor,
                           highlightColor: shimmerHighlightColor,

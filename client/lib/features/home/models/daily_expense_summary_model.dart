@@ -66,7 +66,7 @@ abstract class CalendarMonthData with _$CalendarMonthData {
     required int month,
     required double totalExpenseForMonth,
     required List<DailyExpenseSummaryModel> dailySummaries,
-    List<String>? trendColors, // 可选
+    List<String>? trendColors, // optional
   }) = _CalendarMonthData;
 
   factory CalendarMonthData.fromJson(Map<String, dynamic> json) =>

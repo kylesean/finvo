@@ -71,7 +71,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier {
         hasMore: hasMore,
       );
     } catch (e) {
-      String errorMessage = '加载共享空间失败';
+      String errorMessage = 'Failed to load shared spaces';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -94,7 +94,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier {
 
       return newSpace;
     } catch (e) {
-      String errorMessage = '创建空间失败';
+      String errorMessage = 'Failed to create space';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -119,7 +119,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier {
 
       return space;
     } catch (e) {
-      String errorMessage = '加入空间失败';
+      String errorMessage = 'Failed to join space';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -139,7 +139,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier {
 
       return true;
     } catch (e) {
-      String errorMessage = '离开空间失败';
+      String errorMessage = 'Failed to leave space';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -159,7 +159,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier {
 
       return true;
     } catch (e) {
-      String errorMessage = '删除空间失败';
+      String errorMessage = 'Failed to delete space';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -188,7 +188,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier {
       state = state.copyWith(spaces: updatedSpaces);
       return true;
     } catch (e) {
-      String errorMessage = '更新空间失败';
+      String errorMessage = 'Failed to update space';
       if (e is AppException) {
         errorMessage = e.message;
       }

@@ -1,10 +1,10 @@
 import 'package:decimal/decimal.dart';
 
-/// 周期交易类型
+/// Recurring transaction type
 enum RecurringTransactionType {
-  expense('EXPENSE', '支出'),
-  income('INCOME', '收入'),
-  transfer('TRANSFER', '转账');
+  expense('EXPENSE', 'Expense'),
+  income('INCOME', 'Income'),
+  transfer('TRANSFER', 'Transfer');
 
   const RecurringTransactionType(this.value, this.label);
   final String value;
@@ -18,10 +18,10 @@ enum RecurringTransactionType {
   }
 }
 
-/// 金额类型
+/// Amount type
 enum AmountType {
-  fixed('FIXED', '固定金额'),
-  estimate('ESTIMATE', '动态预估');
+  fixed('FIXED', 'Fixed amount'),
+  estimate('ESTIMATE', 'Dynamic estimate');
 
   const AmountType(this.value, this.label);
   final String value;
@@ -35,7 +35,7 @@ enum AmountType {
   }
 }
 
-/// 周期交易模型
+/// Recurring transaction model
 class RecurringTransaction {
   final String id;
   final String userUuid;
@@ -142,7 +142,7 @@ class RecurringTransaction {
     };
   }
 
-  /// 创建副本并修改指定字段（用于乐观更新）
+  /// Create a copy with modified fields (for optimistic updates)
   RecurringTransaction copyWith({
     String? id,
     String? userUuid,
@@ -194,7 +194,7 @@ class RecurringTransaction {
   }
 }
 
-/// 创建周期交易请求
+/// Create recurring transaction request
 class RecurringTransactionCreateRequest {
   final RecurringTransactionType type;
   final Decimal amount;
@@ -251,7 +251,7 @@ class RecurringTransactionCreateRequest {
   }
 }
 
-/// 更新周期交易请求
+/// Update recurring transaction request
 class RecurringTransactionUpdateRequest {
   final RecurringTransactionType? type;
   final Decimal? amount;
