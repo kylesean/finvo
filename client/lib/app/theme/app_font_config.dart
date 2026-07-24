@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -60,16 +62,17 @@ class AppFontConfig {
 
   /// A comprehensive list of system font fallbacks to ensure correct rendering
   /// across iOS, Android, macOS, Windows, and Linux.
+  ///
+  /// Note: entries already covered by chinese_font_library's own fallback list
+  /// (e.g. PingFang SC, Microsoft YaHei, sans-serif) are omitted here to avoid
+  /// duplication. The plugin appends its list after ours at runtime.
   static List<String> getGlobalFontFallbacks() {
     return [
       'Inter', // Latin (via Google Fonts)
-      '.AppleSystemUIFont', // iOS/macOS San Francisco
-      'PingFang SC', // iOS/macOS Simplified Chinese
-      'Hiragino Sans GB', // macOS Chinese
-      'Noto Sans CJK SC', // Android/Linux Chinese
-      'Microsoft YaHei', // Windows Chinese
-      'Heiti SC', // Older iOS Chinese
-      'sans-serif', // General fallback
+      _miSansFamily, // Xiaomi MiSans (directly loaded via preloadMiSans)
+      'Hiragino Sans GB', // macOS Chinese (not in plugin list)
+      'Noto Sans CJK SC', // Stock Android / Linux Chinese
+      'Heiti SC', // Older iOS Chinese (not in plugin list)
     ];
   }
 
@@ -141,5 +144,48 @@ class AppFontConfig {
       fontFamily: primaryFontFamily,
       fontFamilyFallback: getGlobalFontFallbacks(),
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Xiaomi MiSans direct-load (fixes plugin's name-based lookup failure)
+  // ---------------------------------------------------------------------------
+  //
+  // The plugin adds 'miui'/'mipro' as family names, but on newer HyperOS the
+  // font may be registered under a different name in fonts.xml. We bypass this
+  // by loading the font file directly, similar to how the plugin handles Vivo.
+  // ---------------------------------------------------------------------------
+
+  /// Family name we register for the directly-loaded MiSans font.
+  static const String _miSansFamily = 'MiSans';
+
+  /// Known paths for MiSans font files on Xiaomi devices.
+  static const List<String> _miSansPaths = [
+    '/system/fonts/MiSans-Regular.ttf',
+    '/system/fonts/MiSansVF.ttf',
+    '/system/fonts/MiSans-L3.ttf',
+  ];
+
+  /// Whether MiSans has been successfully loaded.
+  static bool miSansLoaded = false;
+
+  /// Attempt to load MiSans from the device filesystem.
+  /// Call once at app startup (before first frame). Non-blocking on failure.
+  static Future<void> preloadMiSans() async {
+    if (miSansLoaded || !Platform.isAndroid) return;
+    for (final path in _miSansPaths) {
+      final file = File(path);
+      if (await file.exists()) {
+        try {
+          await DynamicFont.file(
+            fontFamily: _miSansFamily,
+            filepath: path,
+          ).load();
+          miSansLoaded = true;
+          return;
+        } catch (_) {
+          // Try next path
+        }
+      }
+    }
   }
 }

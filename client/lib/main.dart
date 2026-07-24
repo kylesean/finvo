@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:augo/app/app.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'i18n/strings.g.dart';
@@ -48,6 +49,16 @@ void main() async {
       _logger.info('Sound feedback service initialization completed');
     } catch (e) {
       _logger.warning('Sound feedback service initialization failed: $e');
+    }
+
+    // Pre-load Xiaomi MiSans font to bypass Skia fallback selecting NotoSansCJK
+    try {
+      await AppFontConfig.preloadMiSans();
+      if (AppFontConfig.miSansLoaded) {
+        _logger.info('MiSans font loaded from device');
+      }
+    } catch (e) {
+      _logger.warning('MiSans preload failed (will use fallback): $e');
     }
 
     _logger.info('Application initialization completed, launching app');
