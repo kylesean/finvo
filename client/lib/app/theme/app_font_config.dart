@@ -158,11 +158,12 @@ class AppFontConfig {
   /// Family name we register for the directly-loaded MiSans font.
   static const String _miSansFamily = 'MiSans';
 
-  /// Known paths for MiSans font files on Xiaomi devices.
+  /// Known paths for MiSans font files on Xiaomi devices (HyperOS/MIUI).
+  /// MiSansVF.ttf is the variable font with wght axis (preferred).
   static const List<String> _miSansPaths = [
-    '/system/fonts/MiSans-Regular.ttf',
-    '/system/fonts/MiSansVF.ttf',
-    '/system/fonts/MiSans-L3.ttf',
+    '/system/fonts/MiSansVF.ttf', // Variable font (all weights via wght axis)
+    '/product/fonts/MiSansC_3.005.ttf', // Product partition fallback
+    '/system/fonts/MiSansL3.otf', // Static L3 (thin) as last resort
   ];
 
   /// Whether MiSans has been successfully loaded.
