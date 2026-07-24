@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
@@ -168,7 +169,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
         Text(
           t.chat.genui.transactionGroupReceipt.selectSpace,
           style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: AppFontConfig.headingBold,
             letterSpacing: -0.5,
           ),
         ),
@@ -193,7 +194,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
                   t.chat.genui.spaceSelector.selected,
                   style: theme.typography.body.xs.copyWith(
                     color: theme.semantic.successAccent,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppFontConfig.headingBold,
                   ),
                 ),
               ],
@@ -338,7 +339,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
                       Text(
                         name,
                         style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppFontConfig.headingBold,
                           color: isSelected
                               ? colors.primary
                               : colors.foreground,

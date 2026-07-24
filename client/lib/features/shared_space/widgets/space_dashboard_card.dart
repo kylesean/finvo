@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../models/shared_space_models.dart';
 
@@ -53,7 +54,7 @@ class SpaceDashboardCard extends StatelessWidget {
                       t.sharedSpace.dashboard.cumulativeTotalExpense,
                       style: theme.typography.body.xs.copyWith(
                         color: colors.primaryForeground.withValues(alpha: 0.7),
-                        fontWeight: FontWeight.w500,
+                        fontWeight: AppFontConfig.bodyMedium,
                         letterSpacing: 1,
                       ),
                     ),
@@ -69,7 +70,7 @@ class SpaceDashboardCard extends StatelessWidget {
                   '¥${_formatAmount(space.totalExpense)}',
                   style: theme.typography.body.xl3.copyWith(
                     color: colors.primaryForeground,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppFontConfig.amountBold,
                     letterSpacing: -1,
                   ),
                 ),
@@ -198,7 +199,7 @@ class SpaceDashboardCard extends StatelessWidget {
                   Text(
                     member.username,
                     style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: AppFontConfig.bodyMedium,
                     ),
                   ),
                   Text(
@@ -218,7 +219,7 @@ class SpaceDashboardCard extends StatelessWidget {
                 Text(
                   '¥${_formatAmount(member.contributionAmount)}',
                   style: theme.typography.body.sm.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppFontConfig.amountBold,
                     color: colors.foreground,
                   ),
                 ),

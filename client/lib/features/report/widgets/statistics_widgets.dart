@@ -12,6 +12,7 @@ import '../../profile/providers/financial_settings_provider.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/themed_icon.dart';
 import '../../home/models/transaction_model.dart';
+import '../../../app/theme/app_font_config.dart';
 import '../../../app/theme/app_semantic_colors.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 
@@ -72,7 +73,7 @@ class OverviewCard extends ConsumerWidget {
                   t.statistics.overview.balance,
                   style: theme.typography.body.sm.copyWith(
                     color: Colors.white.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: AppFontConfig.bodyMedium,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -91,7 +92,7 @@ class OverviewCard extends ConsumerWidget {
                       shrinkCurrency: true,
                       style: theme.typography.body.xl4.copyWith(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppFontConfig.amountBold,
                         letterSpacing: -1.2,
                       ),
                     ),
@@ -182,7 +183,7 @@ class OverviewCard extends ConsumerWidget {
                 shrinkCurrency: true,
                 style: theme.typography.body.md.copyWith(
                   color: Colors.white, // 确保在大卡片上始终为白色
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppFontConfig.amountBold,
                 ),
               ),
             ),
@@ -193,7 +194,7 @@ class OverviewCard extends ConsumerWidget {
               theme: ref.watch(currentAmountThemeValueProvider),
               style: theme.typography.body.xs.copyWith(
                 fontSize: 9,
-                fontWeight: FontWeight.bold,
+                fontWeight: AppFontConfig.amountBold,
               ),
             ),
           ],
@@ -270,7 +271,7 @@ class MetricComparisonCard extends ConsumerWidget {
                         semantic: AmountSemantic.transaction,
                         currency: currencyCode,
                         style: theme.typography.body.lg.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppFontConfig.amountBold,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -308,7 +309,7 @@ class MetricComparisonCard extends ConsumerWidget {
               '${isPositive ? '+' : ''}${changePercent.abs().toStringAsFixed(1)}%',
               style: theme.typography.body.xs.copyWith(
                 color: displayColor,
-                fontWeight: FontWeight.bold,
+                fontWeight: AppFontConfig.amountBold,
               ),
             ),
           ],
@@ -360,7 +361,7 @@ class TrendChart extends ConsumerWidget {
               Text(
                 t.statistics.trend.title,
                 style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w500,
+                  fontWeight: AppFontConfig.titleSemibold,
                 ),
               ),
               Row(
@@ -461,7 +462,7 @@ class TrendChart extends ConsumerWidget {
                           '$label: $currencySymbol${NumberFormat("#,##0", "en_US").format(spot.y)}',
                           theme.typography.body.xs.copyWith(
                             color: colors.primaryForeground,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppFontConfig.headingBold,
                           ),
                         );
                       }).toList();
@@ -704,7 +705,7 @@ class _CategoryAnalysisSectionState
                   '${category.displayText}\n$currencySymbol${_formatAmount(item.amount)}',
                   theme.typography.body.xs.copyWith(
                     color: colors.primaryForeground,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppFontConfig.headingBold,
                   ),
                 );
               },

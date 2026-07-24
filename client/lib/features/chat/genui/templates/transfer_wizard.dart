@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
 import '../organisms/organisms.dart';
 import 'package:augo/i18n/strings.g.dart';
@@ -209,7 +210,7 @@ class _TransferWizardState extends State<TransferWizard> {
         Text(
           t.chat.transferWizard.title,
           style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: AppFontConfig.headingBold,
             letterSpacing: -0.5,
           ),
         ),
@@ -234,7 +235,7 @@ class _TransferWizardState extends State<TransferWizard> {
                   t.chat.transferWizard.confirmed,
                   style: theme.typography.body.xs.copyWith(
                     color: theme.semantic.successAccent,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppFontConfig.headingBold,
                   ),
                 ),
               ],
@@ -270,7 +271,7 @@ class _TransferWizardState extends State<TransferWizard> {
                 AmountFormatter.getCurrencySymbol(_model.currency),
                 style: theme.typography.body.xl.copyWith(
                   color: colors.primary,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppFontConfig.amountBold,
                 ),
               ),
               const SizedBox(width: 8),
@@ -283,7 +284,7 @@ class _TransferWizardState extends State<TransferWizard> {
                               ? '0.00'
                               : _amountController.text,
                           style: theme.typography.body.xl.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppFontConfig.amountBold,
                             color: colors.foreground,
                             letterSpacing: -1,
                           ),
@@ -307,7 +308,7 @@ class _TransferWizardState extends State<TransferWizard> {
                           contentPadding: EdgeInsets.zero,
                         ),
                         style: theme.typography.body.xl.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppFontConfig.amountBold,
                           color: colors.foreground,
                           letterSpacing: -1,
                         ),
@@ -459,7 +460,7 @@ class _TransferWizardState extends State<TransferWizard> {
                           account?['name'] as String? ??
                               t.chat.transferWizard.selectAccount,
                           style: theme.typography.body.sm.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppFontConfig.headingBold,
                             color: accountId == null
                                 ? colors.mutedForeground
                                 : colors.foreground,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import '../models/shared_space_models.dart';
 import '../../../shared/services/toast_service.dart';
 import 'dart:async';
@@ -50,7 +51,7 @@ class InviteCodeCard extends StatelessWidget {
                       Text(
                         '邀请码',
                         style: theme.typography.body.lg.copyWith(
-                          fontWeight: FontWeight.w500,
+                          fontWeight: AppFontConfig.bodyMedium,
                         ),
                       ),
                       Text(
