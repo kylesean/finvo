@@ -70,10 +70,15 @@ class TransactionQueryService:
         # 3. 组装数据并执行换算
         data = []
         for tx in transactions:
-            amount_val = float(tx.amount)
-            # 如果不是基准货币，则进行换算
-            if display_currency != BASE_CURRENCY:
-                amount_val = round(amount_val * float(rate), 2)
+            # 如果交易原始币种与用户显示币种一致，直接使用原始金额，
+            # 避免 原币→USD→原币 往返换算产生的精度损失（如 500 → 499.91）
+            if tx.currency and tx.currency.upper() == display_currency.upper():
+                amount_val = float(tx.amount_original)
+            else:
+                amount_val = float(tx.amount)
+                # 如果不是基准货币，则进行换算
+                if display_currency != BASE_CURRENCY:
+                    amount_val = round(amount_val * float(rate), 2)
 
             data.append(
                 {

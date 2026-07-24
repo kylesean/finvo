@@ -123,8 +123,13 @@ def _transaction_to_dict(tx: Any, display_currency: str = "CNY", exchange_rate: 
     amount_val, amount_original, original_currency, stored_exchange_rate = _extract_amounts(tx)
 
     # Apply exchange rate conversion if needed
-    if not is_already_converted and display_currency != BASE_CURRENCY:
-        amount_val = amount_val * exchange_rate
+    # 如果交易原始币种与用户显示币种一致，直接使用原始金额，
+    # 避免 原币→USD→原币 往返换算产生的精度损失（如 500 → 499.91）
+    if not is_already_converted:
+        if original_currency.upper() == display_currency.upper():
+            amount_val = amount_original
+        elif display_currency != BASE_CURRENCY:
+            amount_val = amount_val * exchange_rate
 
     # Build response dictionary
     return {
