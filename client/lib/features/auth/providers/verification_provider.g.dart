@@ -10,11 +10,11 @@ part of 'verification_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(Verification)
-const verificationProvider = VerificationProvider._();
+final verificationProvider = VerificationProvider._();
 
 final class VerificationProvider
     extends $NotifierProvider<Verification, VerificationState> {
-  const VerificationProvider._()
+  VerificationProvider._()
     : super(
         from: null,
         argument: null,
@@ -47,8 +47,7 @@ abstract class _$Verification extends $Notifier<VerificationState> {
   VerificationState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<VerificationState, VerificationState>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$Verification extends $Notifier<VerificationState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

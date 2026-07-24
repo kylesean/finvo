@@ -10,11 +10,11 @@ part of 'budget_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BudgetFilterState)
-const budgetFilterStateProvider = BudgetFilterStateProvider._();
+final budgetFilterStateProvider = BudgetFilterStateProvider._();
 
 final class BudgetFilterStateProvider
     extends $NotifierProvider<BudgetFilterState, BudgetFilter> {
-  const BudgetFilterStateProvider._()
+  BudgetFilterStateProvider._()
     : super(
         from: null,
         argument: null,
@@ -47,8 +47,7 @@ abstract class _$BudgetFilterState extends $Notifier<BudgetFilter> {
   BudgetFilter build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<BudgetFilter, BudgetFilter>;
     final element =
         ref.element
@@ -58,16 +57,16 @@ abstract class _$BudgetFilterState extends $Notifier<BudgetFilter> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(BudgetSummaryNotifier)
-const budgetSummaryProvider = BudgetSummaryNotifierProvider._();
+final budgetSummaryProvider = BudgetSummaryNotifierProvider._();
 
 final class BudgetSummaryNotifierProvider
     extends $NotifierProvider<BudgetSummaryNotifier, BudgetSummaryState> {
-  const BudgetSummaryNotifierProvider._()
+  BudgetSummaryNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -101,8 +100,7 @@ abstract class _$BudgetSummaryNotifier extends $Notifier<BudgetSummaryState> {
   BudgetSummaryState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<BudgetSummaryState, BudgetSummaryState>;
     final element =
         ref.element
@@ -112,12 +110,12 @@ abstract class _$BudgetSummaryNotifier extends $Notifier<BudgetSummaryState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(budgetList)
-const budgetListProvider = BudgetListProvider._();
+final budgetListProvider = BudgetListProvider._();
 
 final class BudgetListProvider
     extends
@@ -127,7 +125,7 @@ final class BudgetListProvider
           FutureOr<List<Budget>>
         >
     with $FutureModifier<List<Budget>>, $FutureProvider<List<Budget>> {
-  const BudgetListProvider._()
+  BudgetListProvider._()
     : super(
         from: null,
         argument: null,

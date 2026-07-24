@@ -14,8 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PaginatedConversationState {
 
- List<ConversationInfo> get conversations; int get currentPage; bool get isLoading; bool get isLoadingMore; bool get hasMore; int get perPage; int get total; bool get isInitialized;// Mark whether list has been initialized and loaded
- String? get error;
+ List<ConversationInfo> get conversations; int get currentPage; bool get isLoading; bool get isLoadingMore; bool get hasMore; int get perPage; int get total; bool get isInitialized; String? get error;
 /// Create a copy of PaginatedConversationState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -232,7 +231,6 @@ class _PaginatedConversationState implements PaginatedConversationState {
 @override@JsonKey() final  int perPage;
 @override@JsonKey() final  int total;
 @override@JsonKey() final  bool isInitialized;
-// Mark whether list has been initialized and loaded
 @override final  String? error;
 
 /// Create a copy of PaginatedConversationState

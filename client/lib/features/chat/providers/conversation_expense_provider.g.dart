@@ -13,7 +13,7 @@ part of 'conversation_expense_provider.dart';
 /// Maintains real-time expense accumulation for header display.
 
 @ProviderFor(ConversationExpenseNotifier)
-const conversationExpenseProvider = ConversationExpenseNotifierProvider._();
+final conversationExpenseProvider = ConversationExpenseNotifierProvider._();
 
 /// Current conversation expense Notifier
 ///
@@ -27,7 +27,7 @@ final class ConversationExpenseNotifierProvider
   /// Current conversation expense Notifier
   ///
   /// Maintains real-time expense accumulation for header display.
-  const ConversationExpenseNotifierProvider._()
+  ConversationExpenseNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -66,8 +66,7 @@ abstract class _$ConversationExpenseNotifier
   ConversationExpenseState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<ConversationExpenseState, ConversationExpenseState>;
     final element =
@@ -78,7 +77,7 @@ abstract class _$ConversationExpenseNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -87,7 +86,7 @@ abstract class _$ConversationExpenseNotifier
 /// Calculates total expenses from historical messages + real-time accumulation.
 
 @ProviderFor(conversationTotalExpense)
-const conversationTotalExpenseProvider = ConversationTotalExpenseProvider._();
+final conversationTotalExpenseProvider = ConversationTotalExpenseProvider._();
 
 /// Current conversation expense statistics Provider
 ///
@@ -99,7 +98,7 @@ final class ConversationTotalExpenseProvider
   /// Current conversation expense statistics Provider
   ///
   /// Calculates total expenses from historical messages + real-time accumulation.
-  const ConversationTotalExpenseProvider._()
+  ConversationTotalExpenseProvider._()
     : super(
         from: null,
         argument: null,
@@ -139,7 +138,7 @@ String _$conversationTotalExpenseHash() =>
 ///
 
 @ProviderFor(conversationExpenseTitle)
-const conversationExpenseTitleProvider = ConversationExpenseTitleProvider._();
+final conversationExpenseTitleProvider = ConversationExpenseTitleProvider._();
 
 /// Formatted current conversation expense title Provider
 ///
@@ -149,7 +148,7 @@ final class ConversationExpenseTitleProvider
     with $Provider<String> {
   /// Formatted current conversation expense title Provider
   ///
-  const ConversationExpenseTitleProvider._()
+  ConversationExpenseTitleProvider._()
     : super(
         from: null,
         argument: null,

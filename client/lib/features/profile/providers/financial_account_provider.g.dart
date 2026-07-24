@@ -10,11 +10,11 @@ part of 'financial_account_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(FinancialAccountNotifier)
-const financialAccountProvider = FinancialAccountNotifierProvider._();
+final financialAccountProvider = FinancialAccountNotifierProvider._();
 
 final class FinancialAccountNotifierProvider
     extends $NotifierProvider<FinancialAccountNotifier, FinancialAccountState> {
-  const FinancialAccountNotifierProvider._()
+  FinancialAccountNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,8 +49,7 @@ abstract class _$FinancialAccountNotifier
   FinancialAccountState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<FinancialAccountState, FinancialAccountState>;
     final element =
         ref.element
@@ -60,6 +59,6 @@ abstract class _$FinancialAccountNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

@@ -10,11 +10,11 @@ part of 'comment_providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TransactionComments)
-const transactionCommentsProvider = TransactionCommentsFamily._();
+final transactionCommentsProvider = TransactionCommentsFamily._();
 
 final class TransactionCommentsProvider
     extends $AsyncNotifierProvider<TransactionComments, List<CommentModel>> {
-  const TransactionCommentsProvider._({
+  TransactionCommentsProvider._({
     required TransactionCommentsFamily super.from,
     required String super.argument,
   }) : super(
@@ -62,7 +62,7 @@ final class TransactionCommentsFamily extends $Family
           FutureOr<List<CommentModel>>,
           String
         > {
-  const TransactionCommentsFamily._()
+  TransactionCommentsFamily._()
     : super(
         retry: null,
         name: r'transactionCommentsProvider',
@@ -86,8 +86,7 @@ abstract class _$TransactionComments
   FutureOr<List<CommentModel>> build(String transactionId);
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build(_$args);
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<List<CommentModel>>, List<CommentModel>>;
     final element =
@@ -98,16 +97,16 @@ abstract class _$TransactionComments
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
 @ProviderFor(ReplyingToCommentId)
-const replyingToCommentIdProvider = ReplyingToCommentIdProvider._();
+final replyingToCommentIdProvider = ReplyingToCommentIdProvider._();
 
 final class ReplyingToCommentIdProvider
     extends $NotifierProvider<ReplyingToCommentId, String?> {
-  const ReplyingToCommentIdProvider._()
+  ReplyingToCommentIdProvider._()
     : super(
         from: null,
         argument: null,
@@ -141,8 +140,7 @@ abstract class _$ReplyingToCommentId extends $Notifier<String?> {
   String? build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<String?, String?>;
     final element =
         ref.element
@@ -152,16 +150,16 @@ abstract class _$ReplyingToCommentId extends $Notifier<String?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(ReplyingToUserName)
-const replyingToUserNameProvider = ReplyingToUserNameProvider._();
+final replyingToUserNameProvider = ReplyingToUserNameProvider._();
 
 final class ReplyingToUserNameProvider
     extends $NotifierProvider<ReplyingToUserName, String?> {
-  const ReplyingToUserNameProvider._()
+  ReplyingToUserNameProvider._()
     : super(
         from: null,
         argument: null,
@@ -195,8 +193,7 @@ abstract class _$ReplyingToUserName extends $Notifier<String?> {
   String? build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<String?, String?>;
     final element =
         ref.element
@@ -206,6 +203,6 @@ abstract class _$ReplyingToUserName extends $Notifier<String?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

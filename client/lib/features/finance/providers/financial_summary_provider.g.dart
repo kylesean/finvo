@@ -10,11 +10,11 @@ part of 'financial_summary_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(FinancialSummaryNotifier)
-const financialSummaryProvider = FinancialSummaryNotifierFamily._();
+final financialSummaryProvider = FinancialSummaryNotifierFamily._();
 
 final class FinancialSummaryNotifierProvider
     extends $NotifierProvider<FinancialSummaryNotifier, FinancialSummary> {
-  const FinancialSummaryNotifierProvider._({
+  FinancialSummaryNotifierProvider._({
     required FinancialSummaryNotifierFamily super.from,
     required String super.argument,
   }) : super(
@@ -71,7 +71,7 @@ final class FinancialSummaryNotifierFamily extends $Family
           FinancialSummary,
           String
         > {
-  const FinancialSummaryNotifierFamily._()
+  FinancialSummaryNotifierFamily._()
     : super(
         retry: null,
         name: r'financialSummaryProvider',
@@ -94,8 +94,7 @@ abstract class _$FinancialSummaryNotifier extends $Notifier<FinancialSummary> {
   FinancialSummary build(String targetCurrency);
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build(_$args);
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<FinancialSummary, FinancialSummary>;
     final element =
         ref.element
@@ -105,6 +104,6 @@ abstract class _$FinancialSummaryNotifier extends $Notifier<FinancialSummary> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

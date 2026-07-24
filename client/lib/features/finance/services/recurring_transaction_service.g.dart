@@ -11,7 +11,7 @@ part of 'recurring_transaction_service.dart';
 /// 周期交易服务提供者
 
 @ProviderFor(recurringTransactionService)
-const recurringTransactionServiceProvider =
+final recurringTransactionServiceProvider =
     RecurringTransactionServiceProvider._();
 
 /// 周期交易服务提供者
@@ -25,7 +25,7 @@ final class RecurringTransactionServiceProvider
         >
     with $Provider<RecurringTransactionService> {
   /// 周期交易服务提供者
-  const RecurringTransactionServiceProvider._()
+  RecurringTransactionServiceProvider._()
     : super(
         from: null,
         argument: null,

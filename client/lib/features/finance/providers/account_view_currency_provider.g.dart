@@ -26,7 +26,7 @@ part of 'account_view_currency_provider.dart';
 /// ```
 
 @ProviderFor(AccountViewCurrency)
-const accountViewCurrencyProvider = AccountViewCurrencyProvider._();
+final accountViewCurrencyProvider = AccountViewCurrencyProvider._();
 
 /// Provider to manage the currency used for displaying account summaries.
 ///
@@ -62,7 +62,7 @@ final class AccountViewCurrencyProvider
   /// // Reset to follow global settings
   /// ref.read(accountViewCurrencyProvider.notifier).resetToGlobal();
   /// ```
-  const AccountViewCurrencyProvider._()
+  AccountViewCurrencyProvider._()
     : super(
         from: null,
         argument: null,
@@ -114,8 +114,7 @@ abstract class _$AccountViewCurrency
   AccountViewCurrencyState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AccountViewCurrencyState, AccountViewCurrencyState>;
     final element =
@@ -126,7 +125,7 @@ abstract class _$AccountViewCurrency
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -137,7 +136,7 @@ abstract class _$AccountViewCurrency
 /// - Otherwise returns the global primary currency
 
 @ProviderFor(effectiveViewCurrency)
-const effectiveViewCurrencyProvider = EffectiveViewCurrencyProvider._();
+final effectiveViewCurrencyProvider = EffectiveViewCurrencyProvider._();
 
 /// Derived provider that resolves the actual currency string to use.
 ///
@@ -153,7 +152,7 @@ final class EffectiveViewCurrencyProvider
   /// This provider:
   /// - Returns the temporary currency if set
   /// - Otherwise returns the global primary currency
-  const EffectiveViewCurrencyProvider._()
+  EffectiveViewCurrencyProvider._()
     : super(
         from: null,
         argument: null,

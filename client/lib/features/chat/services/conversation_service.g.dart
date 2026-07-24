@@ -10,7 +10,7 @@ part of 'conversation_service.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(conversationService)
-const conversationServiceProvider = ConversationServiceProvider._();
+final conversationServiceProvider = ConversationServiceProvider._();
 
 final class ConversationServiceProvider
     extends
@@ -20,7 +20,7 @@ final class ConversationServiceProvider
           ConversationService
         >
     with $Provider<ConversationService> {
-  const ConversationServiceProvider._()
+  ConversationServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -58,7 +58,7 @@ String _$conversationServiceHash() =>
     r'9df2218177ccdd1f021a0af3c6001d906574edce';
 
 @ProviderFor(conversationList)
-const conversationListProvider = ConversationListProvider._();
+final conversationListProvider = ConversationListProvider._();
 
 final class ConversationListProvider
     extends
@@ -70,7 +70,7 @@ final class ConversationListProvider
     with
         $FutureModifier<List<ConversationInfo>>,
         $FutureProvider<List<ConversationInfo>> {
-  const ConversationListProvider._()
+  ConversationListProvider._()
     : super(
         from: null,
         argument: null,
@@ -99,11 +99,11 @@ final class ConversationListProvider
 String _$conversationListHash() => r'73eb470256dadec04261277c964c12f0aca9b1fa';
 
 @ProviderFor(ConversationListRefresh)
-const conversationListRefreshProvider = ConversationListRefreshProvider._();
+final conversationListRefreshProvider = ConversationListRefreshProvider._();
 
 final class ConversationListRefreshProvider
     extends $NotifierProvider<ConversationListRefresh, int> {
-  const ConversationListRefreshProvider._()
+  ConversationListRefreshProvider._()
     : super(
         from: null,
         argument: null,
@@ -137,8 +137,7 @@ abstract class _$ConversationListRefresh extends $Notifier<int> {
   int build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<int, int>;
     final element =
         ref.element
@@ -148,12 +147,12 @@ abstract class _$ConversationListRefresh extends $Notifier<int> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(refreshableConversationList)
-const refreshableConversationListProvider =
+final refreshableConversationListProvider =
     RefreshableConversationListProvider._();
 
 final class RefreshableConversationListProvider
@@ -166,7 +165,7 @@ final class RefreshableConversationListProvider
     with
         $FutureModifier<List<ConversationInfo>>,
         $FutureProvider<List<ConversationInfo>> {
-  const RefreshableConversationListProvider._()
+  RefreshableConversationListProvider._()
     : super(
         from: null,
         argument: null,

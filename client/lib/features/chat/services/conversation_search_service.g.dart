@@ -11,7 +11,7 @@ part of 'conversation_search_service.dart';
 /// Conversation search service provider
 
 @ProviderFor(conversationSearchService)
-const conversationSearchServiceProvider = ConversationSearchServiceProvider._();
+final conversationSearchServiceProvider = ConversationSearchServiceProvider._();
 
 /// Conversation search service provider
 
@@ -24,7 +24,7 @@ final class ConversationSearchServiceProvider
         >
     with $Provider<ConversationSearchService> {
   /// Conversation search service provider
-  const ConversationSearchServiceProvider._()
+  ConversationSearchServiceProvider._()
     : super(
         from: null,
         argument: null,

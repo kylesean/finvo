@@ -10,10 +10,10 @@ part of 'auth_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(Auth)
-const authProvider = AuthProvider._();
+final authProvider = AuthProvider._();
 
 final class AuthProvider extends $NotifierProvider<Auth, AuthState> {
-  const AuthProvider._()
+  AuthProvider._()
     : super(
         from: null,
         argument: null,
@@ -46,8 +46,7 @@ abstract class _$Auth extends $Notifier<AuthState> {
   AuthState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AuthState, AuthState>;
     final element =
         ref.element
@@ -57,17 +56,17 @@ abstract class _$Auth extends $Notifier<AuthState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(authToken)
-const authTokenProvider = AuthTokenProvider._();
+final authTokenProvider = AuthTokenProvider._();
 
 final class AuthTokenProvider
     extends $FunctionalProvider<String?, String?, String?>
     with $Provider<String?> {
-  const AuthTokenProvider._()
+  AuthTokenProvider._()
     : super(
         from: null,
         argument: null,
@@ -103,12 +102,12 @@ final class AuthTokenProvider
 String _$authTokenHash() => r'6421f1b91498bdf5641b627b9a230dbf398e56ea';
 
 @ProviderFor(currentUser)
-const currentUserProvider = CurrentUserProvider._();
+final currentUserProvider = CurrentUserProvider._();
 
 final class CurrentUserProvider
     extends $FunctionalProvider<UserModel?, UserModel?, UserModel?>
     with $Provider<UserModel?> {
-  const CurrentUserProvider._()
+  CurrentUserProvider._()
     : super(
         from: null,
         argument: null,
@@ -144,12 +143,12 @@ final class CurrentUserProvider
 String _$currentUserHash() => r'97fc12251563e31e912507c92a0ad3667d563689';
 
 @ProviderFor(authStatus)
-const authStatusProvider = AuthStatusProvider._();
+final authStatusProvider = AuthStatusProvider._();
 
 final class AuthStatusProvider
     extends $FunctionalProvider<AuthStatus, AuthStatus, AuthStatus>
     with $Provider<AuthStatus> {
-  const AuthStatusProvider._()
+  AuthStatusProvider._()
     : super(
         from: null,
         argument: null,

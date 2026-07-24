@@ -10,12 +10,12 @@ part of 'comment_service.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(commentService)
-const commentServiceProvider = CommentServiceProvider._();
+final commentServiceProvider = CommentServiceProvider._();
 
 final class CommentServiceProvider
     extends $FunctionalProvider<CommentService, CommentService, CommentService>
     with $Provider<CommentService> {
-  const CommentServiceProvider._()
+  CommentServiceProvider._()
     : super(
         from: null,
         argument: null,

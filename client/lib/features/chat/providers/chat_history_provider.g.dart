@@ -10,11 +10,11 @@ part of 'chat_history_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ChatHistory)
-const chatHistoryProvider = ChatHistoryProvider._();
+final chatHistoryProvider = ChatHistoryProvider._();
 
 final class ChatHistoryProvider
     extends $NotifierProvider<ChatHistory, ChatHistoryState> {
-  const ChatHistoryProvider._()
+  ChatHistoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,14 +41,13 @@ final class ChatHistoryProvider
   }
 }
 
-String _$chatHistoryHash() => r'e3b4a9a2968d144aba6753971f55f02b544d094c';
+String _$chatHistoryHash() => r'2c4dde55cbd147efe3823e302cbcbff0fa943c94';
 
 abstract class _$ChatHistory extends $Notifier<ChatHistoryState> {
   ChatHistoryState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ChatHistoryState, ChatHistoryState>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$ChatHistory extends $Notifier<ChatHistoryState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

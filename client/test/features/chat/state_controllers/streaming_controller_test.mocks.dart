@@ -43,9 +43,9 @@ class _FakeSurfaceHost_1 extends _i1.SmartFake implements _i3.SurfaceHost {
     : super(parent, parentInvocation);
 }
 
-class _FakeValueNotifier_2<T> extends _i1.SmartFake
-    implements _i4.ValueNotifier<T> {
-  _FakeValueNotifier_2(Object parent, Invocation parentInvocation)
+class _FakeValueListenable_2<T> extends _i1.SmartFake
+    implements _i4.ValueListenable<T> {
+  _FakeValueListenable_2(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -138,17 +138,17 @@ class MockGenUiService extends _i1.Mock implements _i5.GenUiService {
           as _i6.Future<void>);
 
   @override
-  _i4.ValueNotifier<_i3.SurfaceDefinition?> getSurfaceNotifier(
+  _i4.ValueListenable<_i3.SurfaceDefinition?> getSurfaceNotifier(
     String? surfaceId,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getSurfaceNotifier, [surfaceId]),
-            returnValue: _FakeValueNotifier_2<_i3.SurfaceDefinition?>(
+            returnValue: _FakeValueListenable_2<_i3.SurfaceDefinition?>(
               this,
               Invocation.method(#getSurfaceNotifier, [surfaceId]),
             ),
           )
-          as _i4.ValueNotifier<_i3.SurfaceDefinition?>);
+          as _i4.ValueListenable<_i3.SurfaceDefinition?>);
 
   @override
   void clearSessionToken() => super.noSuchMethod(

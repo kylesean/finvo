@@ -11,7 +11,7 @@ part of 'welcome_guide_provider.dart';
 /// Welcome Guide Provider - returns greetings and contextual suggestions based on current time
 
 @ProviderFor(welcomeGuide)
-const welcomeGuideProvider = WelcomeGuideProvider._();
+final welcomeGuideProvider = WelcomeGuideProvider._();
 
 /// Welcome Guide Provider - returns greetings and contextual suggestions based on current time
 
@@ -24,7 +24,7 @@ final class WelcomeGuideProvider
         >
     with $Provider<WelcomeGuideState> {
   /// Welcome Guide Provider - returns greetings and contextual suggestions based on current time
-  const WelcomeGuideProvider._()
+  WelcomeGuideProvider._()
     : super(
         from: null,
         argument: null,

@@ -11,13 +11,13 @@ part of 'user_profile_provider.dart';
 /// User profile notifier
 
 @ProviderFor(UserProfile)
-const userProfileProvider = UserProfileProvider._();
+final userProfileProvider = UserProfileProvider._();
 
 /// User profile notifier
 final class UserProfileProvider
     extends $NotifierProvider<UserProfile, UserProfileState> {
   /// User profile notifier
-  const UserProfileProvider._()
+  UserProfileProvider._()
     : super(
         from: null,
         argument: null,
@@ -52,8 +52,7 @@ abstract class _$UserProfile extends $Notifier<UserProfileState> {
   UserProfileState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<UserProfileState, UserProfileState>;
     final element =
         ref.element
@@ -63,6 +62,6 @@ abstract class _$UserProfile extends $Notifier<UserProfileState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

@@ -2010,8 +2010,7 @@ as DateTime?,
 /// @nodoc
 mixin _$SpaceTransaction {
 
- String get id; String get type;// EXPENSE, INCOME, TRANSFER
- String get amount; String get currency; String? get description; String? get categoryKey;@JsonKey(name: 'transactionAt') DateTime? get transactionAt;@JsonKey(name: 'addedByUsername') String? get addedByUsername;@JsonKey(name: 'addedAt') DateTime? get addedAt; Map<String, dynamic>? get display;
+ String get id; String get type; String get amount; String get currency; String? get description; String? get categoryKey;@JsonKey(name: 'transactionAt') DateTime? get transactionAt;@JsonKey(name: 'addedByUsername') String? get addedByUsername;@JsonKey(name: 'addedAt') DateTime? get addedAt; Map<String, dynamic>? get display;
 /// Create a copy of SpaceTransaction
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2219,7 +2218,6 @@ class _SpaceTransaction implements SpaceTransaction {
 
 @override final  String id;
 @override final  String type;
-// EXPENSE, INCOME, TRANSFER
 @override final  String amount;
 @override@JsonKey() final  String currency;
 @override final  String? description;
