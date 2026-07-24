@@ -8,6 +8,7 @@ from fastapi import APIRouter
 
 from app.api.budget import router as budget_router
 from app.api.v1.auth import router as auth_router
+from app.api.v1.avatar import router as avatar_router
 from app.api.v1.chatbot import router as chatbot_router
 from app.api.v1.exchange_rate import router as exchange_rate_router
 from app.api.v1.financial_settings import router as financial_settings_router
@@ -26,6 +27,7 @@ api_router = APIRouter()
 
 # Include routers
 api_router.include_router(auth_router)
+api_router.include_router(avatar_router)
 api_router.include_router(chatbot_router)
 api_router.include_router(home_router)
 api_router.include_router(storage_config_router)
