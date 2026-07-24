@@ -862,100 +862,107 @@ class _TransactionGroupReceiptState
       context: context,
       builder: (dialogContext, style, animation) => FDialog(
         animation: animation,
-        builder: (context, dialogStyle) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  FLucideIcons.triangleAlert,
-                  color: theme.semantic.warningAccent,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  t.chat.genui.transactionGroupReceipt.currencyMismatchTitle,
-                  style: dialogStyle.titleTextStyle,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  t.chat.genui.transactionGroupReceipt.currencyMismatchDesc,
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colors.muted.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildInfoRow(
-                        theme,
-                        colors,
-                        t.chat.genui.transactionGroupReceipt.transactionAmount,
-                        '${amount.toStringAsFixed(2)} $fromCurrency',
-                      ),
-                      const SizedBox(height: 8),
-                      _buildInfoRow(
-                        theme,
-                        colors,
-                        t.chat.genui.transactionGroupReceipt.accountCurrency,
-                        toCurrency,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildInfoRow(
-                        theme,
-                        colors,
-                        t.chat.genui.transactionGroupReceipt.targetAccount,
-                        accountName,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  t.chat.genui.transactionGroupReceipt.currencyMismatchNote,
-                  style: theme.typography.body.xs.copyWith(
+        builder: (context, dialogStyle) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    FLucideIcons.triangleAlert,
                     color: theme.semantic.warningAccent,
-                    fontStyle: FontStyle.italic,
+                    size: 20,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FButton(
-                  onPress: () {
-                    confirmed = true;
-                    Navigator.pop(dialogContext);
-                  },
-                  child: Text(
-                    t.chat.genui.transactionGroupReceipt.confirmAssociate,
+                  const SizedBox(width: 8),
+                  Text(
+                    t.chat.genui.transactionGroupReceipt.currencyMismatchTitle,
+                    style: dialogStyle.titleTextStyle,
                   ),
-                ),
-                const SizedBox(width: 8),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.pop(dialogContext),
-                  child: Text(t.common.cancel),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 8),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    t.chat.genui.transactionGroupReceipt.currencyMismatchDesc,
+                    style: theme.typography.body.sm.copyWith(
+                      color: colors.mutedForeground,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colors.muted.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow(
+                          theme,
+                          colors,
+                          t
+                              .chat
+                              .genui
+                              .transactionGroupReceipt
+                              .transactionAmount,
+                          '${amount.toStringAsFixed(2)} $fromCurrency',
+                        ),
+                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                          theme,
+                          colors,
+                          t.chat.genui.transactionGroupReceipt.accountCurrency,
+                          toCurrency,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                          theme,
+                          colors,
+                          t.chat.genui.transactionGroupReceipt.targetAccount,
+                          accountName,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    t.chat.genui.transactionGroupReceipt.currencyMismatchNote,
+                    style: theme.typography.body.xs.copyWith(
+                      color: theme.semantic.warningAccent,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FButton(
+                    onPress: () {
+                      confirmed = true;
+                      Navigator.pop(dialogContext);
+                    },
+                    child: Text(
+                      t.chat.genui.transactionGroupReceipt.confirmAssociate,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FButton(
+                    variant: .outline,
+                    onPress: () => Navigator.pop(dialogContext),
+                    child: Text(t.common.cancel),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
