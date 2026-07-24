@@ -60,6 +60,7 @@ dependencies:
   http_parser: ^4.1.0
   qr_flutter: ^4.1.0
   google_fonts: ^6.3.3
+  chinese_font_library: ^1.2.0
   flutter_launcher_icons: ^0.14.4
   mobile_scanner: ^7.4.0
   just_audio: ^0.10.5
