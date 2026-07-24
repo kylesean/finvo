@@ -196,12 +196,9 @@ class TransactionCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // --- Left: Category Icon (ThemedIcon) ---
+              // 与账单详情页保持一致：使用 TransactionCategory.fromKey 解析后端 categoryKey
               ThemedIcon.large(
-                icon: transaction.categoryKey != null
-                    ? CategoryConfig.getCategoryIcon(transaction.categoryKey)
-                    : CategoryConfig.getCategoryIconByName(
-                        transaction.category,
-                      ),
+                icon: TransactionCategory.fromKey(transaction.categoryKey).icon,
               ),
               const SizedBox(width: 14),
 
