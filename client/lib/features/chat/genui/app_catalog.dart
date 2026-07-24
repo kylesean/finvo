@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import '../services/genui_logger.dart';
 import 'templates/templates.dart';
 
@@ -653,7 +654,7 @@ class AppCatalog {
                   '组件渲染遇到问题',
                   style: TextStyle(
                     color: Colors.red.shade900,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppFontConfig.headingBold,
                     fontSize: 14,
                   ),
                 ),

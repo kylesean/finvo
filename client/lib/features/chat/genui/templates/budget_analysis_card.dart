@@ -6,6 +6,7 @@ import 'package:augo/shared/widgets/amount_text.dart';
 import 'package:augo/features/home/models/transaction_model.dart';
 import 'package:augo/shared/utils/amount_formatter.dart';
 import 'package:augo/i18n/strings.g.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
 
 import '../../../../core/constants/category_constants.dart';
@@ -108,7 +109,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
               data['title'] as String? ?? t.chat.genui.budgetAnalysis.title,
               style: theme.typography.body.md.copyWith(
                 color: colors.primary,
-                fontWeight: FontWeight.w600,
+                fontWeight: AppFontConfig.titleSemibold,
               ),
             ),
           ),
@@ -461,7 +462,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                 t.budgetSuggestion.financialInsights,
                 style: theme.typography.body.sm.copyWith(
                   color: accentColor,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: AppFontConfig.titleSemibold,
                 ),
               ),
             ],

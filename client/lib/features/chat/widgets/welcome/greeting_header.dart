@@ -1,6 +1,7 @@
 // features/chat/widgets/welcome/greeting_header.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 
 /// 问候语头部组件
 /// 居中显示时段问候语和副标题
@@ -25,9 +26,8 @@ class GreetingHeader extends StatelessWidget {
         Text(
           greeting,
           style: theme.typography.body.xl2.copyWith(
-            // 3.44 起 Skia 回退选中 NotoSansCJK（较旧版 MiSans-L3 笔画更重），
-            // 标题字重下调一档以恢复升级前的视觉粗细。
-            fontWeight: FontWeight.w600,
+            // CJK 字重补偿：下调一档以恢复升级前的视觉粗细。
+            fontWeight: AppFontConfig.titleSemibold,
             letterSpacing: -0.5,
           ),
           textAlign: TextAlign.center,

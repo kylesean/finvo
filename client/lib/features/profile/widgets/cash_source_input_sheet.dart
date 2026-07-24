@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:decimal/decimal.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import '../models/financial_account.dart';
 import '../../finance/models/account_type_definition.dart';
 import 'package:augo/i18n/strings.g.dart';
@@ -91,7 +92,7 @@ class _FinancialAccountInputSheetState
                     Text(
                       _getLocalizedTitle(definition),
                       style: theme.typography.body.xl2.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: AppFontConfig.titleSemibold,
                         color: colors.foreground,
                       ),
                     ),
