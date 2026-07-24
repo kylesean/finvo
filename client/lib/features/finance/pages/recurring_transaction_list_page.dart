@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/core/widgets/top_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../models/recurring_transaction.dart';
 import '../providers/recurring_transaction_provider.dart';
-import '../../../core/widgets/top_toast.dart';
 import '../../../shared/models/currency.dart';
 import '../../profile/providers/financial_settings_provider.dart';
 import 'package:augo/core/constants/category_constants.dart';
@@ -16,7 +16,7 @@ import 'package:augo/i18n/strings.g.dart';
 import 'package:augo/shared/widgets/themed_icon.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 
-/// 周期交易列表页面
+/// Recurring transaction list page
 class RecurringTransactionListPage extends ConsumerStatefulWidget {
   const RecurringTransactionListPage({super.key});
 
@@ -28,7 +28,7 @@ class RecurringTransactionListPage extends ConsumerStatefulWidget {
 class _RecurringTransactionListPageState
     extends ConsumerState<RecurringTransactionListPage> {
   RecurringTransactionType? _filterType;
-  bool _sortAscending = true; // 按时间升序排序
+  bool _sortAscending = true; // Sort by time ascending
 
   @override
   void initState() {
@@ -82,7 +82,7 @@ class _RecurringTransactionListPageState
             if (context.canPop()) {
               context.pop();
             } else {
-              // 如果不能 pop，返回到 finance 页面
+              // If cannot pop, navigate to finance page
               context.go('/finance');
             }
           },
@@ -98,9 +98,9 @@ class _RecurringTransactionListPageState
       ),
       body: Column(
         children: [
-          // 筛选标签
+          // Filter tabs
           _buildFilterTabs(theme, colors),
-          // 列表内容
+          // List content
           Expanded(child: _buildContent(theme, colors, state)),
         ],
       ),
@@ -201,10 +201,10 @@ class _RecurringTransactionListPageState
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // 列表头：显示数量 + 排序按钮
+          // List header: show count + sort button
           _buildListHeader(theme, colors, sortedItems.length),
           const SizedBox(height: 12),
-          // 列表项
+          // List items
           ...sortedItems.map(
             (item) => _buildTransactionCard(theme, colors, item),
           ),
@@ -213,7 +213,7 @@ class _RecurringTransactionListPageState
     );
   }
 
-  /// 列表头：左侧显示数量，右侧显示排序按钮
+  /// List header: count on left, sort button on right
   Widget _buildListHeader(FThemeData theme, FColors colors, int count) {
     final typeLabel = _filterType?.label ?? t.forecast.recurringTransaction.all;
     return Row(
@@ -305,12 +305,12 @@ class _RecurringTransactionListPageState
         ? '-'
         : '';
 
-    // 获取下次执行日期（优先使用 nextExecutionAt，否则使用 startDate）
+    // Get next execution date (prefer nextExecutionAt, fallback to startDate)
     final nextDate = transaction.nextExecutionAt ?? transaction.startDate;
 
     return Dismissible(
       key: Key('recurring_${transaction.id}'),
-      direction: DismissDirection.horizontal, // 支持左右滑动
+      direction: DismissDirection.horizontal, // Support horizontal swipe
       dismissThresholds: const {
         DismissDirection.endToStart: 0.4,
         DismissDirection.startToEnd: 0.4,
@@ -318,15 +318,15 @@ class _RecurringTransactionListPageState
       confirmDismiss: (direction) async {
         unawaited(HapticFeedback.selectionClick());
         if (direction == DismissDirection.endToStart) {
-          // 左滑 → 删除
+          // Swipe left → delete
           return await _showDeleteConfirmDialog(transaction);
         } else {
-          // 右滑 → 切换激活状态
+          // Swipe right → toggle active state
           await _showToggleActiveDialog(transaction);
-          return false; // 不删除卡片
+          return false; // Don't dismiss card
         }
       },
-      // 左滑背景（删除）
+      // Left swipe background (pause/resume)
       background: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -356,7 +356,7 @@ class _RecurringTransactionListPageState
           ],
         ),
       ),
-      // 右滑背景（删除）
+      // Right swipe background (delete)
       secondaryBackground: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -382,10 +382,10 @@ class _RecurringTransactionListPageState
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // 左侧：类型图标
+                // Left: type icon
                 ThemedIcon.large(icon: typeIcon),
                 const SizedBox(width: 14),
-                // 中间：标题 + 标签
+                // Center: title + tags
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,7 +404,7 @@ class _RecurringTransactionListPageState
                         spacing: 8,
                         runSpacing: 4,
                         children: [
-                          // 规则标签
+                          // Rule tag
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -424,7 +424,7 @@ class _RecurringTransactionListPageState
                               ),
                             ),
                           ),
-                          // 动态金额标签
+                          // Dynamic amount tag
                           if (transaction.amountType == AmountType.estimate)
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -462,7 +462,7 @@ class _RecurringTransactionListPageState
                     ],
                   ),
                 ),
-                // 右侧：金额 + 下次日期
+                // Right: amount + next date
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -490,7 +490,7 @@ class _RecurringTransactionListPageState
     );
   }
 
-  /// 显示删除确认对话框
+  /// Show delete confirmation dialog
   Future<bool> _showDeleteConfirmDialog(
     RecurringTransaction transaction,
   ) async {
@@ -558,7 +558,7 @@ class _RecurringTransactionListPageState
     return false;
   }
 
-  /// 显示切换激活状态确认对话框
+  /// Show toggle active state confirmation dialog
   Future<void> _showToggleActiveDialog(RecurringTransaction transaction) async {
     final newState = !transaction.isActive;
     bool confirmed = false;
@@ -658,7 +658,7 @@ class _RecurringTransactionListPageState
     }
   }
 
-  /// 获取简短的频率标签
+  /// Get short frequency label
   String _getShortFrequencyLabel(String rule) {
     final isZh = LocaleSettings.currentLocale == AppLocale.zh;
     if (rule.contains('FREQ=DAILY')) {
@@ -673,11 +673,11 @@ class _RecurringTransactionListPageState
     return isZh ? '周期' : 'Cycle';
   }
 
-  /// 格式化简短日期（支持国际化）
-  /// 使用 switch 表达式，便于未来添加更多语言支持
+  /// Format short date (i18n support)
+  /// Uses switch expression for easy addition of more language support
   String _formatShortDate(DateTime date) {
     final locale = LocaleSettings.currentLocale;
-    // 根据语言返回对应的 DateFormat locale 和格式
+    // Return corresponding DateFormat locale and format based on language
     final (dateFormatLocale, pattern) = switch (locale) {
       AppLocale.zh => ('zh_CN', 'M 月 d 日'),
       AppLocale.en => ('en', 'MMM d'),
@@ -688,21 +688,21 @@ class _RecurringTransactionListPageState
     return DateFormat(pattern, dateFormatLocale).format(date);
   }
 
-  /// 生成交易的显示名称
-  /// 如果有描述使用描述，否则使用分类的本地化名称
+  /// Generate display name for transaction
+  /// Uses description if available, otherwise uses localized category name
   String _getDisplayName(RecurringTransaction transaction) {
     if (transaction.description != null &&
         transaction.description!.isNotEmpty) {
       return transaction.description!;
     }
 
-    // 使用分类的本地化显示名称（已包含国际化）
+    // Use localized category display name (already internationalized)
     if (transaction.categoryKey != null) {
       final category = TransactionCategory.fromKey(transaction.categoryKey!);
       return category.displayText;
     }
 
-    // 默认名称：根据类型返回
+    // Default name: return based on type
     return switch (transaction.type) {
       RecurringTransactionType.expense => t.transaction.expense,
       RecurringTransactionType.income => t.transaction.income,

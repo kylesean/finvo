@@ -3,6 +3,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/core/widgets/top_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
@@ -18,12 +19,11 @@ import 'package:augo/i18n/strings.g.dart';
 import 'package:augo/shared/models/currency.dart';
 import '../../profile/providers/financial_account_provider.dart';
 import '../../profile/providers/financial_settings_provider.dart';
-import '../../../core/widgets/top_toast.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 
-/// 周期交易新建/编辑页面
+/// Recurring transaction create/edit page
 class RecurringTransactionPage extends ConsumerStatefulWidget {
-  final String? editId; // 如果提供，则为编辑模式
+  final String? editId; // If provided, enters edit mode
 
   const RecurringTransactionPage({super.key, this.editId});
 
@@ -34,47 +34,47 @@ class RecurringTransactionPage extends ConsumerStatefulWidget {
 
 class _RecurringTransactionPageState
     extends ConsumerState<RecurringTransactionPage> {
-  // 当前选中的交易类型
+  // Currently selected transaction type
   RecurringTransactionType _selectedType = RecurringTransactionType.expense;
 
-  // 金额类型
+  // Amount type
   AmountType _amountType = AmountType.fixed;
 
-  // 金额输入控制器
+  // Amount input controller
   final _amountController = TextEditingController(text: '0.00');
 
   bool get isZh => LocaleSettings.currentLocale == AppLocale.zh;
 
-  // 周期规则
+  // Recurrence rule
   String _recurrenceRule = 'FREQ=MONTHLY;BYMONTHDAY=1';
   late String _recurrenceDescription;
 
-  // 开始日期
+  // Start date
   DateTime _startDate = DateTime.now();
 
-  // 结束日期（可选）
+  // End date (optional)
   DateTime? _endDate;
 
-  // 选中的账户
+  // Selected accounts
   String? _sourceAccountId;
   String? _targetAccountId;
   String? _sourceAccountName;
   String? _targetAccountName;
 
-  // 分类 - 默认使用支出分类的第一项
+  // Category - defaults to first expense category
   TransactionCategory _category = TransactionCategory.expenseCategories.first;
 
-  // 标签
+  // Tags
   final List<String> _tags = [];
   final _tagController = TextEditingController();
 
-  // 高级选项
+  // Advanced options
   bool _requiresConfirmation = false;
-  // 记录用户在金额固定状态下的原始选择（用于联动恢复）
+  // Record user's original choice in fixed amount state (for linked restoration)
   bool _userSetRequiresConfirmation = false;
   bool _isActive = true;
 
-  // 描述
+  // Description
   final _descriptionController = TextEditingController();
 
   // Is saving in progress
@@ -103,7 +103,7 @@ class _RecurringTransactionPageState
       final service = ref.read(recurringTransactionServiceProvider);
       final transaction = await service.getById(widget.editId!);
 
-      // 加载账户名称
+      // Load account names
       final accountState = ref.read(financialAccountProvider);
       String? sourceAccountName;
       String? targetAccountName;
@@ -120,8 +120,8 @@ class _RecurringTransactionPageState
         targetAccountName = account?.name;
       }
 
-      // 解析 RRULE 中的结束日期 (UNTIL)
-      // 格式可能是 UNTIL=20261231 或 UNTIL=20261231T000000Z
+      // Parse the end date (UNTIL) from RRULE
+      // Format may be UNTIL=20261231 or UNTIL=20261231T000000Z
       DateTime? endDateFromRule;
       final untilMatch = RegExp(
         r'UNTIL=(\d{4})(\d{2})(\d{2})',
@@ -150,7 +150,7 @@ class _RecurringTransactionPageState
           _sourceAccountName = sourceAccountName;
           _targetAccountName = targetAccountName;
           _requiresConfirmation = transaction.requiresConfirmation;
-          // 编辑模式下，如果金额固定，则记录用户原始选择
+          // In edit mode, if amount is fixed, record the user's original choice
           if (transaction.amountType == AmountType.fixed) {
             _userSetRequiresConfirmation = transaction.requiresConfirmation;
           }
@@ -283,30 +283,30 @@ class _RecurringTransactionPageState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 顶部三按钮切换（支出/收入/转账）
+                    // Top three-button toggle (expense/income/transfer)
                     _buildTypeSelector(theme, colors),
                     const SizedBox(height: 24),
 
-                    // 金额输入区域
+                    // Amount input area
                     _buildAmountSection(theme, colors),
                     const SizedBox(height: 24),
 
-                    // 周期设置卡片
+                    // Period settings card
                     _buildPeriodSettingsCard(theme, colors),
                     const SizedBox(height: 16),
 
-                    // 账户、分类与标签卡片
+                    // Account, category and tags card
                     _buildAccountCategoryTagsCard(theme, colors),
                     const SizedBox(height: 16),
 
-                    // 高级选项
+                    // Advanced options
                     _buildAdvancedOptions(theme, colors),
                     const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
-            // 底部保存按钮
+            // Bottom save button
             _buildBottomBar(theme, colors),
           ],
         ),
@@ -339,13 +339,13 @@ class _RecurringTransactionPageState
     );
   }
 
-  /// 切换交易类型，并重置分类为对应类型的默认分类
+  /// Switch transaction type and reset category to the default for that type
   void _changeTransactionType(RecurringTransactionType newType) {
     if (_selectedType == newType) return;
 
     setState(() {
       _selectedType = newType;
-      // 重置分类为对应类型的默认分类
+      // Reset category to the default for the selected type
       switch (newType) {
         case RecurringTransactionType.expense:
           _category = TransactionCategory.expenseCategories.first;
@@ -488,10 +488,10 @@ class _RecurringTransactionPageState
                 setState(() {
                   _amountType = value ? AmountType.estimate : AmountType.fixed;
                   if (value) {
-                    // 金额不固定时强制开启确认
+                    // Force enable confirmation when amount is not fixed
                     _requiresConfirmation = true;
                   } else {
-                    // 恢复用户原始选择
+                    // Restore user's original choice
                     _requiresConfirmation = _userSetRequiresConfirmation;
                   }
                 });
@@ -1068,7 +1068,7 @@ class _RecurringTransactionPageState
     final picked = await DatePickerSheet.show(
       context,
       initialDate: _startDate,
-      // Allow selecting past dates (for追溯记录)
+      // Allow selecting past dates (for retroactive records)
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
       title: t.dateRange.startDate,

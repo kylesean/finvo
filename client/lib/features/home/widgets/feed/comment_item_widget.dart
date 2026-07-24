@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/core/widgets/top_toast.dart';
 import 'package:augo/i18n/strings.g.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'dart:async';
@@ -49,20 +50,12 @@ class CommentItemWidget extends ConsumerWidget {
                       .read(transactionCommentsProvider(transactionId).notifier)
                       .deleteComment(comment.id);
                   if (!context.mounted) return;
-                  showFToast(
-                    context: context,
-                    title: Text(t.comment.success),
-                    description: Text(t.comment.commentDeleted),
-                  );
+                  TopToast.success(context, t.comment.commentDeleted);
                 } catch (e) {
                   if (!context.mounted) return;
-                  showFToast(
-                    context: context,
-                    icon: const Icon(FLucideIcons.triangleAlert),
-                    title: Text(t.comment.error),
-                    description: Text(
-                      '${t.comment.deleteFailed}: ${e.toString()}',
-                    ),
+                  TopToast.error(
+                    context,
+                    '${t.comment.deleteFailed}: ${e.toString()}',
                   );
                 }
               },
@@ -110,11 +103,7 @@ class CommentItemWidget extends ConsumerWidget {
     }
 
     if (actions.isEmpty) {
-      showFToast(
-        context: context,
-        title: Text(t.comment.hint),
-        description: Text(t.comment.noActions),
-      );
+      TopToast.info(context, t.comment.noActions);
       return;
     }
 

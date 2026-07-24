@@ -11,6 +11,7 @@ import '../../profile/providers/financial_settings_provider.dart';
 import '../models/budget_models.dart';
 import '../providers/budget_provider.dart';
 import 'package:augo/i18n/strings.g.dart';
+import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 
 class BudgetOverviewPage extends ConsumerStatefulWidget {
@@ -432,79 +433,73 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
     final usagePercent = summary.overallUsagePercentage;
     final isExceeded = usagePercent > 100;
 
-    return FCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  t.budget.monthlySummary,
-                  style: theme.typography.body.md.copyWith(
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                t.budget.monthlySummary,
+                style: theme.typography.body.md.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: colors.foreground,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isExceeded
+                      ? colors.destructive.withValues(alpha: 0.1)
+                      : colors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${usagePercent.toStringAsFixed(0)}%',
+                  style: theme.typography.body.sm.copyWith(
+                    color: isExceeded ? colors.destructive : colors.primary,
                     fontWeight: FontWeight.w500,
-                    color: colors.foreground,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isExceeded
-                        ? colors.destructive.withValues(alpha: 0.1)
-                        : colors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${usagePercent.toStringAsFixed(0)}%',
-                    style: theme.typography.body.sm.copyWith(
-                      color: isExceeded ? colors.destructive : colors.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  theme,
+                  colors,
+                  t.budget.totalBudget,
+                  '$_currencySymbol${_formatAmount(summary.totalBudget)}',
+                  colors.foreground,
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    theme,
-                    colors,
-                    t.budget.totalBudget,
-                    '$_currencySymbol${_formatAmount(summary.totalBudget)}',
-                    colors.foreground,
-                  ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  theme,
+                  colors,
+                  t.budget.used,
+                  '$_currencySymbol${_formatAmount(summary.totalSpent)}',
+                  isExceeded ? colors.destructive : colors.primary,
                 ),
-                Expanded(
-                  child: _buildStatItem(
-                    theme,
-                    colors,
-                    t.budget.used,
-                    '$_currencySymbol${_formatAmount(summary.totalSpent)}',
-                    isExceeded ? colors.destructive : colors.primary,
-                  ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  theme,
+                  colors,
+                  t.budget.remaining,
+                  '$_currencySymbol${_formatAmount(summary.totalRemaining)}',
+                  summary.totalRemaining < Decimal.zero
+                      ? colors.destructive
+                      : colors.primary,
                 ),
-                Expanded(
-                  child: _buildStatItem(
-                    theme,
-                    colors,
-                    t.budget.remaining,
-                    '$_currencySymbol${_formatAmount(summary.totalRemaining)}',
-                    summary.totalRemaining < Decimal.zero
-                        ? colors.destructive
-                        : colors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -573,147 +568,145 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: FCard(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // title row
-              Row(
-                children: [
-                  // category icon
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      _getCategoryIcon(budget.categoryKey),
-                      size: 18,
-                      color: statusColor,
-                    ),
+      child: AppCard(
+        style: const .delta(padding: .value(EdgeInsets.all(12))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // title row
+            Row(
+              children: [
+                // category icon
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
+                  child: Icon(
+                    _getCategoryIcon(budget.categoryKey),
+                    size: 18,
+                    color: statusColor,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              budget.displayName,
+                              style: theme.typography.body.md.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: isPaused
+                                    ? colors.mutedForeground
+                                    : colors.foreground,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isPaused) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.muted,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
                               child: Text(
-                                budget.displayName,
-                                style: theme.typography.body.md.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: isPaused
-                                      ? colors.mutedForeground
-                                      : colors.foreground,
+                                t.budget.paused,
+                                style: theme.typography.body.xs.copyWith(
+                                  color: colors.mutedForeground,
+                                  fontSize: 10,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (isPaused) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colors.muted,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  t.budget.paused,
-                                  style: theme.typography.body.xs.copyWith(
-                                    color: colors.mutedForeground,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              ),
-                            ],
                           ],
-                        ),
-                        Text(
-                          _getCategoryDisplayName(budget.categoryKey),
-                          style: theme.typography.body.xs.copyWith(
-                            color: colors.mutedForeground,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // amount and status
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
-                        style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: statusColor,
-                        ),
+                        ],
                       ),
                       Text(
-                        '$_currencySymbol${_formatAmount(budget.amount)}',
+                        _getCategoryDisplayName(budget.categoryKey),
                         style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // progress bar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: LinearProgressIndicator(
-                  value: (usagePercent / 100).clamp(0.0, 1.0),
-                  backgroundColor: colors.border,
-                  valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-                  minHeight: 6,
                 ),
-              ),
+                // amount and status
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
+                      style: theme.typography.body.md.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: statusColor,
+                      ),
+                    ),
+                    Text(
+                      '$_currencySymbol${_formatAmount(budget.amount)}',
+                      style: theme.typography.body.xs.copyWith(
+                        color: colors.mutedForeground,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
 
-              const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
-              // bottom info
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    t.budget.usedPercent(
-                      percent: usagePercent.toStringAsFixed(0),
-                    ),
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.mutedForeground,
-                    ),
-                  ),
-                  Text(
-                    budgetWithUsage.remainingAmount >= Decimal.zero
-                        ? t.budget.remainingAmount(
-                            amount:
-                                '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount)}',
-                          )
-                        : t.budget.overspentAmount(
-                            amount:
-                                '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount.abs())}',
-                          ),
-                    style: theme.typography.body.xs.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+            // progress bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: (usagePercent / 100).clamp(0.0, 1.0),
+                backgroundColor: colors.border,
+                valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                minHeight: 6,
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // bottom info
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  t.budget.usedPercent(
+                    percent: usagePercent.toStringAsFixed(0),
+                  ),
+                  style: theme.typography.body.xs.copyWith(
+                    color: colors.mutedForeground,
+                  ),
+                ),
+                Text(
+                  budgetWithUsage.remainingAmount >= Decimal.zero
+                      ? t.budget.remainingAmount(
+                          amount:
+                              '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount)}',
+                        )
+                      : t.budget.overspentAmount(
+                          amount:
+                              '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount.abs())}',
+                        ),
+                  style: theme.typography.body.xs.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
