@@ -1,9 +1,9 @@
 import "dart:async";
 // features/home/widgets/feed/transaction_card.dart
 import 'package:flutter/material.dart';
-import 'package:augo/shared/widgets/cards/app_card.dart';
 import 'package:augo/shared/widgets/themed_icon.dart';
 import 'package:augo/core/utils/app_haptics.dart';
+import 'package:augo/core/widgets/top_toast.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
@@ -12,7 +12,6 @@ import 'package:augo/i18n/strings.g.dart';
 import 'package:augo/features/home/models/transaction_model.dart';
 import 'package:augo/features/home/providers/home_providers.dart';
 import 'package:augo/shared/config/category_config.dart';
-import 'package:augo/core/widgets/top_toast.dart';
 import 'package:augo/core/constants/category_constants.dart';
 
 import 'package:augo/shared/utils/amount_formatter.dart';
@@ -74,40 +73,44 @@ class TransactionCard extends ConsumerWidget {
   }
 
   Future<bool> _showDeleteConfirmation(BuildContext context) async {
-    return await showAdaptiveDialog<bool>(
+    return await showFDialog<bool>(
           context: context,
-          builder: (context) => FDialog(
-            builder: (context, dialogStyle) => Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  t.transaction.confirmDelete,
-                  style: dialogStyle.titleTextStyle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.transaction.deleteTransactionConfirm,
-                  style: dialogStyle.bodyTextStyle,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    FButton(
-                      variant: .outline,
-                      onPress: () => Navigator.of(context).pop(false),
-                      child: Text(t.common.cancel),
-                    ),
-                    const SizedBox(width: 8),
-                    FButton(
-                      variant: .destructive,
-                      onPress: () => Navigator.of(context).pop(true),
-                      child: Text(t.common.delete),
-                    ),
-                  ],
-                ),
-              ],
+          builder: (dialogContext, style, animation) => FDialog(
+            animation: animation,
+            builder: (context, dialogStyle) => Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    t.transaction.confirmDelete,
+                    style: dialogStyle.titleTextStyle,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    t.transaction.deleteTransactionConfirm,
+                    style: dialogStyle.bodyTextStyle,
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FButton(
+                        variant: .outline,
+                        onPress: () => Navigator.of(dialogContext).pop(false),
+                        child: Text(t.common.cancel),
+                      ),
+                      const SizedBox(width: 8),
+                      FButton(
+                        variant: .destructive,
+                        onPress: () => Navigator.of(dialogContext).pop(true),
+                        child: Text(t.common.delete),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ) ??
@@ -176,7 +179,7 @@ class TransactionCard extends ConsumerWidget {
           ),
         ),
       ),
-      child: AppCard(
+      child: GestureDetector(
         onTap: () {
           unawaited(
             context.pushNamed(
@@ -185,88 +188,93 @@ class TransactionCard extends ConsumerWidget {
             ),
           );
         },
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        backgroundColor: colors.background,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // --- Left: Category Icon (ThemedIcon) ---
-            ThemedIcon.large(
-              icon: transaction.categoryKey != null
-                  ? CategoryConfig.getCategoryIcon(transaction.categoryKey)
-                  : CategoryConfig.getCategoryIconByName(transaction.category),
-            ),
-            const SizedBox(width: 14),
-
-            // --- Right: Content ---
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Row 1: Category Name + Amount
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _getCategoryDisplayName(transaction),
-                          style: theme.typography.body.md.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          color: colors.background,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // --- Left: Category Icon (ThemedIcon) ---
+              ThemedIcon.large(
+                icon: transaction.categoryKey != null
+                    ? CategoryConfig.getCategoryIcon(transaction.categoryKey)
+                    : CategoryConfig.getCategoryIconByName(
+                        transaction.category,
                       ),
-                      const SizedBox(width: 12),
-                      Text(
-                        _getAmountDisplayText(transaction),
-                        style: theme.typography.body.lg.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AmountFormatter.getAmountColor(
-                            transaction.type,
-                            amountTheme,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  // Row 2: Tags/PaymentMethod + Time
-                  Row(
-                    children: [
-                      // Tags or Payment Method
-                      Expanded(
-                        child: transaction.tags.isNotEmpty
-                            ? _buildTagsRow(theme, colors, transaction.tags)
-                            : Text(
-                                transaction.paymentMethod ??
-                                    t.transaction.expense,
-                                style: theme.typography.body.sm.copyWith(
-                                  color: colors.mutedForeground,
-                                ),
-                              ),
-                      ),
-                      // Time display
-                      Text(
-                        _getTimeDisplay(transaction.timestamp),
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ),
-            ),
-          ],
+              const SizedBox(width: 14),
+
+              // --- Right: Content ---
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Row 1: Category Name + Amount
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _getCategoryDisplayName(transaction),
+                            style: theme.typography.body.md.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          _getAmountDisplayText(transaction),
+                          style: theme.typography.body.lg.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AmountFormatter.getAmountColor(
+                              transaction.type,
+                              amountTheme,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // Row 2: Tags/PaymentMethod + Time
+                    Row(
+                      children: [
+                        // Tags or Payment Method
+                        Expanded(
+                          child: transaction.tags.isNotEmpty
+                              ? _buildTagsRow(theme, colors, transaction.tags)
+                              : Text(
+                                  transaction.paymentMethod ??
+                                      t.transaction.expense,
+                                  style: theme.typography.body.sm.copyWith(
+                                    color: colors.mutedForeground,
+                                  ),
+                                ),
+                        ),
+                        // Time display
+                        Text(
+                          _getTimeDisplay(transaction.timestamp),
+                          style: theme.typography.body.xs.copyWith(
+                            color: colors.mutedForeground,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// 构建标签行
+  /// Build tags row
   Widget _buildTagsRow(FThemeData theme, FColors colors, List<String> tags) {
     const maxVisible = 2;
     final visibleTags = tags.take(maxVisible).toList();

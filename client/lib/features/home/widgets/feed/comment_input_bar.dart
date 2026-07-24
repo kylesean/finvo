@@ -2,7 +2,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forui/forui.dart'; // Import forui
+import 'package:forui/forui.dart';
+import 'package:augo/core/widgets/top_toast.dart'; // Import forui
 import 'package:augo/i18n/strings.g.dart';
 
 // Assuming these Providers are imported from outside
@@ -108,12 +109,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
       _commentFocusNode.unfocus();
     } catch (e) {
       if (mounted) {
-        showFToast(
-          context: context,
-          icon: const Icon(FLucideIcons.triangleAlert),
-          title: Text(t.comment.error),
-          description: Text('${t.comment.commentFailed}: ${e.toString()}'),
-        );
+        TopToast.error(context, '${t.comment.commentFailed}: ${e.toString()}');
       }
     } finally {
       if (mounted) {

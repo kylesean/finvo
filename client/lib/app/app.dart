@@ -75,7 +75,7 @@ class MyApp extends ConsumerWidget {
 
         return FTheme(
           data: activeForuiTheme,
-          child: FToaster(child: _buildAppContent(ref, navigator!)),
+          child: _buildAppContent(ref, navigator!),
         );
       },
     );

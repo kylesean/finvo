@@ -494,7 +494,7 @@ class _ChatConversationDrawerState
     FColors colors,
   ) {
     if (avatarUrl != null && avatarUrl.isNotEmpty) {
-      // 从 URL 中提取 attachmentId (URL 格式: http://.../view/{id} 或 /api/v1/files/view/{id})
+      // Extract attachmentId from URL (URL format: http://.../view/{id} or /api/v1/files/view/{id})
       try {
         final uri = Uri.parse(avatarUrl);
         final pathSegments = uri.pathSegments;
@@ -718,37 +718,44 @@ class _ChatConversationDrawerState
 
     if (!context.mounted) return;
 
-    final confirmed = await showAdaptiveDialog<bool>(
+    final confirmed = await showFDialog<bool>(
       context: context,
-      builder: (dialogContext) => FDialog(
-        builder: (context, dialogStyle) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(t.chat.deleteConversation, style: dialogStyle.titleTextStyle),
-            const SizedBox(height: 8),
-            Text(
-              t.chat.deleteConversationConfirm,
-              style: dialogStyle.bodyTextStyle,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.of(dialogContext).pop(false),
-                  child: Text(t.common.cancel),
-                ),
-                const SizedBox(width: 8),
-                FButton(
-                  variant: .destructive,
-                  onPress: () => Navigator.of(dialogContext).pop(true),
-                  child: Text(t.common.delete),
-                ),
-              ],
-            ),
-          ],
+      builder: (dialogContext, style, animation) => FDialog(
+        animation: animation,
+        builder: (context, dialogStyle) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                t.chat.deleteConversation,
+                style: dialogStyle.titleTextStyle,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                t.chat.deleteConversationConfirm,
+                style: dialogStyle.bodyTextStyle,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FButton(
+                    variant: .outline,
+                    onPress: () => Navigator.of(dialogContext).pop(false),
+                    child: Text(t.common.cancel),
+                  ),
+                  const SizedBox(width: 8),
+                  FButton(
+                    variant: .destructive,
+                    onPress: () => Navigator.of(dialogContext).pop(true),
+                    child: Text(t.common.delete),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
