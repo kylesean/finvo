@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import 'package:tabler_icons_next/tabler_icons_next.dart' as tabler;
+
+import '../widgets/nav_icon.dart';
 
 /// Bottom navigation page - using Forui design system
 ///
-/// Combines FScaffold + FBottomNavigationBar, following Forui best practices
-/// Maintains original tabler icons usage for visual consistency
+/// Combines FScaffold + FBottomNavigationBar, following Forui best practices.
+/// Icons use [NavIcon] (inline SVG via flutter_svg) to achieve the
+/// outline → filled state switch that Lucide font icons cannot provide.
 class BottomPage extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -14,127 +16,68 @@ class BottomPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use Forui theme access method
     final colors = context.theme.colors;
+    final currentIndex = navigationShell.currentIndex;
 
     return FScaffold(
-      // Disable default content padding, maintain original full-screen layout
       childPad: false,
-      // Use Forui bottom navigation bar
       footer: FBottomNavigationBar(
-        index: navigationShell.currentIndex,
+        index: currentIndex,
         onChange: (index) => navigationShell.goBranch(index),
         children: [
-          // Home
           FBottomNavigationBarItem(
-            icon: _buildTablerIcon(
-              icon: tabler.Home(
-                width: 30,
-                height: 30,
-                strokeWidth: 1.4,
-                color: colors.foreground,
-              ),
-              activeIcon: tabler.HomeFilled(
-                width: 30,
-                height: 30,
-                strokeWidth: 1.4,
-                color: colors.foreground,
-              ),
-              isActive: navigationShell.currentIndex == 0,
+            icon: NavIcon(
+              type: NavIconType.house,
+              active: currentIndex == 0,
+              color: currentIndex == 0
+                  ? colors.primary
+                  : colors.mutedForeground,
             ),
             label: const Text(''),
           ),
-          // Explore
           FBottomNavigationBarItem(
-            icon: _buildTablerIcon(
-              icon: tabler.CreditCard(
-                width: 30,
-                height: 30,
-                strokeWidth: 1.4,
-                color: colors.foreground,
-              ),
-              activeIcon: tabler.CreditCardFilled(
-                width: 30,
-                height: 30,
-                strokeWidth: 1.4,
-                color: colors.foreground,
-              ),
-              isActive: navigationShell.currentIndex == 1,
+            icon: NavIcon(
+              type: NavIconType.creditCard,
+              active: currentIndex == 1,
+              color: currentIndex == 1
+                  ? colors.primary
+                  : colors.mutedForeground,
             ),
             label: const Text(''),
           ),
-          // AI Assistant
           FBottomNavigationBarItem(
-            icon: _buildTablerIcon(
-              icon: tabler.MessageChatbot(
-                strokeWidth: 1.4,
-                width: 30,
-                height: 30,
-                color: colors.foreground,
-              ),
-              activeIcon: tabler.MessageChatbotFilled(
-                strokeWidth: 1.4,
-                width: 30,
-                height: 30,
-                color: colors.foreground,
-              ),
-              isActive: navigationShell.currentIndex == 2,
+            icon: NavIcon(
+              type: NavIconType.botChat,
+              active: currentIndex == 2,
+              color: currentIndex == 2
+                  ? colors.primary
+                  : colors.mutedForeground,
             ),
             label: const Text(''),
           ),
-          // Statistics
           FBottomNavigationBarItem(
-            icon: _buildTablerIcon(
-              icon: tabler.ChartPie3(
-                strokeWidth: 1.4,
-                width: 30,
-                height: 30,
-                color: colors.foreground,
-              ),
-              activeIcon: tabler.ChartPie3Filled(
-                strokeWidth: 1.4,
-                width: 30,
-                height: 30,
-                color: colors.foreground,
-              ),
-              isActive: navigationShell.currentIndex == 3,
+            icon: NavIcon(
+              type: NavIconType.chartPie,
+              active: currentIndex == 3,
+              color: currentIndex == 3
+                  ? colors.primary
+                  : colors.mutedForeground,
             ),
             label: const Text(''),
           ),
-          // Profile
           FBottomNavigationBarItem(
-            icon: _buildTablerIcon(
-              icon: tabler.User(
-                strokeWidth: 1.4,
-                width: 30,
-                height: 30,
-                color: colors.foreground,
-              ),
-              activeIcon: tabler.UserFilled(
-                strokeWidth: 1.4,
-                width: 30,
-                height: 30,
-                color: colors.foreground,
-              ),
-              isActive: navigationShell.currentIndex == 4,
+            icon: NavIcon(
+              type: NavIconType.user,
+              active: currentIndex == 4,
+              color: currentIndex == 4
+                  ? colors.primary
+                  : colors.mutedForeground,
             ),
             label: const Text(''),
           ),
         ],
       ),
-      // Main content area
       child: navigationShell,
     );
-  }
-
-  /// Build Tabler icon component
-  ///
-  /// Maintains original icon usage, displaying different icons based on active state
-  Widget _buildTablerIcon({
-    required Widget icon,
-    required Widget activeIcon,
-    required bool isActive,
-  }) {
-    return isActive ? activeIcon : icon;
   }
 }
