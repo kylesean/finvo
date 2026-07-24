@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' show loadFontFromList;
 
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flutter/material.dart';
@@ -171,22 +172,36 @@ class AppFontConfig {
 
   /// Attempt to load MiSans from the device filesystem.
   /// Call once at app startup (before first frame). Non-blocking on failure.
+  ///
+  /// Note: We skip [File.exists()] and directly attempt [File.readAsBytes()]
+  /// because on some Android versions SELinux may deny stat() but allow read(),
+  /// or the exists() check may return false for /system/fonts paths from the
+  /// app sandbox. The actual read attempt gives us a concrete error message.
   static Future<void> preloadMiSans() async {
-    if (miSansLoaded || !Platform.isAndroid) return;
+    if (miSansLoaded) return;
+    if (!Platform.isAndroid) {
+      debugPrint('[AppFontConfig] preloadMiSans: skipped (not Android)');
+      return;
+    }
     for (final path in _miSansPaths) {
-      final file = File(path);
-      if (await file.exists()) {
-        try {
-          await DynamicFont.file(
-            fontFamily: _miSansFamily,
-            filepath: path,
-          ).load();
-          miSansLoaded = true;
-          return;
-        } catch (_) {
-          // Try next path
-        }
+      debugPrint('[AppFontConfig] preloadMiSans: trying $path');
+      try {
+        final bytes = await File(path).readAsBytes();
+        debugPrint(
+          '[AppFontConfig] preloadMiSans: read ${bytes.length} bytes from $path',
+        );
+        await loadFontFromList(bytes, fontFamily: _miSansFamily);
+        miSansLoaded = true;
+        debugPrint(
+          '[AppFontConfig] preloadMiSans: SUCCESS - registered as "$_miSansFamily"',
+        );
+        return;
+      } catch (e) {
+        debugPrint('[AppFontConfig] preloadMiSans: failed for $path → $e');
       }
     }
+    debugPrint(
+      '[AppFontConfig] preloadMiSans: all paths failed, will use system fallback',
+    );
   }
 }
