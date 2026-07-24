@@ -225,9 +225,14 @@ class TransactionCRUDService:
             )
 
         # Convert to dictionary and add calculated fields (converted amount)
-        amount_val = float(transaction.amount)
-        if display_currency != BASE_CURRENCY:
-            amount_val = amount_val * float(exchange_rate) if exchange_rate else amount_val
+        # 如果交易原始币种与用户显示币种一致，直接使用原始金额，
+        # 避免 原币→USD→原币 往返换算产生的精度损失（如 500 → 499.91）
+        if transaction.currency and transaction.currency.upper() == display_currency.upper():
+            amount_val = float(transaction.amount_original)
+        else:
+            amount_val = float(transaction.amount)
+            if display_currency != BASE_CURRENCY:
+                amount_val = amount_val * float(exchange_rate) if exchange_rate else amount_val
 
         return {
             "id": str(transaction.id),
