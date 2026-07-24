@@ -107,29 +107,9 @@ class LLMRegistry:
             ),
         },
         {
-            "name": "mimo-v2-flash",
+            "name": "deepseek-v4-flash",
             "llm": ChatOpenAI(
-                model="mimo-v2-flash",
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
-                max_tokens=settings.MAX_TOKENS,
-                temperature=settings.DEFAULT_LLM_TEMPERATURE,
-            ),
-        },
-        {
-            "name": "deepseek-chat",
-            "llm": ChatOpenAI(
-                model="deepseek-chat",
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
-                max_tokens=settings.MAX_TOKENS,
-                temperature=settings.DEFAULT_LLM_TEMPERATURE,
-            ),
-        },
-        {
-            "name": "xiaomi/mimo-v2-flash:free",
-            "llm": ChatOpenAI(
-                model="xiaomi/mimo-v2-flash:free",
+                model="deepseek-v4-flash",
                 api_key=settings.OPENAI_API_KEY,
                 base_url=settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
