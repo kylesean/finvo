@@ -21,6 +21,7 @@ import 'package:augo/features/profile/providers/financial_account_provider.dart'
 import 'package:augo/features/profile/models/financial_account.dart';
 import 'package:augo/features/chat/genui/organisms/account_picker_card.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
+import 'package:augo/app/theme/app_font_config.dart';
 import 'package:augo/core/network/network_client.dart';
 import 'package:augo/shared/services/toast_service.dart';
 import 'package:augo/i18n/strings.g.dart';
@@ -167,7 +168,8 @@ class TransactionDetailPage extends ConsumerWidget {
                                           _getCategoryDisplayName(transaction),
                                           style: theme.typography.body.lg
                                               .copyWith(
-                                                fontWeight: FontWeight.bold,
+                                                fontWeight:
+                                                    AppFontConfig.headingBold,
                                               ),
                                         ),
                                         const SizedBox(height: 4),

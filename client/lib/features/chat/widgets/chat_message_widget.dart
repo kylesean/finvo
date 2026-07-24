@@ -12,6 +12,7 @@ import 'authenticated_image.dart';
 import 'tool_execution_block.dart';
 import '../models/tool_call_info.dart';
 import '../models/message_content_part.dart';
+import '../../../app/theme/app_font_config.dart';
 import '../../../i18n/strings.g.dart';
 
 final _logger = Logger('ChatMessageWidget');
@@ -223,6 +224,8 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
             fontSize: 15,
             color: theme.colors.foreground,
             height: 1.5,
+            fontFamily: AppFontConfig.primaryFontFamily,
+            fontFamilyFallback: AppFontConfig.getGlobalFontFallbacks(),
           ),
           // Custom ordered list builder for proper number alignment
           orderedListBuilder: (ctx, no, child, config) {
@@ -425,12 +428,46 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
 
   /// Get Markdown theme configuration
   GptMarkdownThemeData _gptThemeData(BuildContext context, FThemeData theme) {
+    final fallbacks = AppFontConfig.getGlobalFontFallbacks();
+    final family = AppFontConfig.primaryFontFamily;
     return GptMarkdownThemeData(
       brightness: Theme.of(context).brightness,
       h1: TextStyle(
         fontSize: 28,
         color: theme.colors.primary,
-        fontWeight: FontWeight.bold,
+        fontWeight: AppFontConfig.headingBold,
+        fontFamily: family,
+        fontFamilyFallback: fallbacks,
+      ),
+      h2: TextStyle(
+        fontSize: 24,
+        fontWeight: AppFontConfig.headingBold,
+        fontFamily: family,
+        fontFamilyFallback: fallbacks,
+      ),
+      h3: TextStyle(
+        fontSize: 20,
+        fontWeight: AppFontConfig.titleSemibold,
+        fontFamily: family,
+        fontFamilyFallback: fallbacks,
+      ),
+      h4: TextStyle(
+        fontSize: 17,
+        fontWeight: AppFontConfig.titleSemibold,
+        fontFamily: family,
+        fontFamilyFallback: fallbacks,
+      ),
+      h5: TextStyle(
+        fontSize: 15,
+        fontWeight: AppFontConfig.titleSemibold,
+        fontFamily: family,
+        fontFamilyFallback: fallbacks,
+      ),
+      h6: TextStyle(
+        fontSize: 14,
+        fontWeight: AppFontConfig.titleSemibold,
+        fontFamily: family,
+        fontFamilyFallback: fallbacks,
       ),
     );
   }
