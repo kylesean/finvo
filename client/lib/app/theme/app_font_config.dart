@@ -1,3 +1,4 @@
+import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -9,22 +10,22 @@ class AppFontConfig {
   AppFontConfig._();
 
   // ---------------------------------------------------------------------------
-  // CJK font-weight compensation
+  // CJK font-weight compensation (fallback layer)
   // ---------------------------------------------------------------------------
   //
+  // Primary fix: `chinese_font_library` injects the device-native CJK font
+  // (e.g. MiSans on Xiaomi) with correct weight mappings via useSystemChineseFont().
+  //
+  // These constants serve as a SECONDARY fallback for:
+  //   1. Forui typography (theme.typography.*) which bypasses Material TextTheme
+  //   2. Devices where the plugin fails to locate the system CJK font file
+  //
   // Background: Flutter 3.38+ (Skia commit a918c0e) restructured the Android
-  // font-fallback logic. On devices like Xiaomi, CJK glyphs now resolve to
-  // NotoSansCJK-Regular (heavier strokes) instead of the previous MiSans-L3
-  // (lighter). This is *correct* engine behaviour, not a bug, but it makes
-  // Chinese text appear visually bolder at the same FontWeight value.
+  // font-fallback logic. On devices like Xiaomi, CJK glyphs may resolve to
+  // NotoSansCJK-Regular (heavier strokes) instead of MiSans-L3 (lighter).
   //
-  // Strategy: reduce the requested weight by one step for non-numeric display
-  // text so that the *rendered* weight matches the original design intent.
-  // Amount/numeric text keeps its original weight because digits are rendered
-  // by Inter (Latin font) and are unaffected by CJK fallback.
-  //
-  // When a future Flutter/Skia release or a bundled CJK font eliminates this
-  // discrepancy, simply set [cjkWeightCompensationEnabled] to false.
+  // When the plugin fully covers all text paths, set
+  // [cjkWeightCompensationEnabled] to false to remove the compensation.
   // ---------------------------------------------------------------------------
 
   /// Master switch for CJK weight compensation.
@@ -90,8 +91,12 @@ class AppFontConfig {
   }
 
   /// Resolve a [TextTheme] that applies global typography to all Material text styles.
+  ///
+  /// Applies [primaryFontFamily] (Inter) for Latin characters, then delegates to
+  /// `chinese_font_library` to inject the device-native CJK font (e.g. MiSans on
+  /// Xiaomi) with correct multi-weight support, bypassing Skia's fallback selection.
   static TextTheme createGlobalTextTheme(TextTheme baseTheme) {
-    return baseTheme.copyWith(
+    final theme = baseTheme.copyWith(
       displayLarge: _applyGlobalStyle(baseTheme.displayLarge),
       displayMedium: _applyGlobalStyle(baseTheme.displayMedium),
       displaySmall: _applyGlobalStyle(baseTheme.displaySmall),
@@ -107,6 +112,26 @@ class AppFontConfig {
       labelLarge: _applyGlobalStyle(baseTheme.labelLarge),
       labelMedium: _applyGlobalStyle(baseTheme.labelMedium),
       labelSmall: _applyGlobalStyle(baseTheme.labelSmall),
+    );
+    // Inject device-native CJK font (MiSans/PingFang/etc.) with proper weight
+    // mappings so Chinese text renders with the OEM-intended visual weight.
+    // Uses the TextStyle extension (append semantics) to preserve our fallbacks.
+    return TextTheme(
+      displayLarge: theme.displayLarge?.useSystemChineseFont(),
+      displayMedium: theme.displayMedium?.useSystemChineseFont(),
+      displaySmall: theme.displaySmall?.useSystemChineseFont(),
+      headlineLarge: theme.headlineLarge?.useSystemChineseFont(),
+      headlineMedium: theme.headlineMedium?.useSystemChineseFont(),
+      headlineSmall: theme.headlineSmall?.useSystemChineseFont(),
+      titleLarge: theme.titleLarge?.useSystemChineseFont(),
+      titleMedium: theme.titleMedium?.useSystemChineseFont(),
+      titleSmall: theme.titleSmall?.useSystemChineseFont(),
+      bodyLarge: theme.bodyLarge?.useSystemChineseFont(),
+      bodyMedium: theme.bodyMedium?.useSystemChineseFont(),
+      bodySmall: theme.bodySmall?.useSystemChineseFont(),
+      labelLarge: theme.labelLarge?.useSystemChineseFont(),
+      labelMedium: theme.labelMedium?.useSystemChineseFont(),
+      labelSmall: theme.labelSmall?.useSystemChineseFont(),
     );
   }
 
