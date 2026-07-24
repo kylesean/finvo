@@ -866,7 +866,7 @@ class _TransactionGroupReceiptState
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
@@ -940,26 +940,21 @@ class _TransactionGroupReceiptState
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FButton(
-                    onPress: () {
-                      confirmed = true;
-                      Navigator.pop(dialogContext);
-                    },
-                    child: Text(
-                      t.chat.genui.transactionGroupReceipt.confirmAssociate,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FButton(
-                    variant: .outline,
-                    onPress: () => Navigator.pop(dialogContext),
-                    child: Text(t.common.cancel),
-                  ),
-                ],
+              const SizedBox(height: 24),
+              FButton(
+                variant: .outline,
+                onPress: () => Navigator.pop(dialogContext),
+                child: Text(t.common.cancel),
+              ),
+              const SizedBox(height: 8),
+              FButton(
+                onPress: () {
+                  confirmed = true;
+                  Navigator.pop(dialogContext);
+                },
+                child: Text(
+                  t.chat.genui.transactionGroupReceipt.confirmAssociate,
+                ),
               ),
             ],
           ),

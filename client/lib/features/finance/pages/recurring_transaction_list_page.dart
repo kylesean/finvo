@@ -504,7 +504,7 @@ class _RecurringTransactionListPageState
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 t.forecast.recurringTransaction.confirmDelete,
@@ -517,25 +517,20 @@ class _RecurringTransactionListPageState
                 ),
                 style: dialogStyle.bodyTextStyle,
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FButton(
-                    variant: .destructive,
-                    onPress: () {
-                      confirmed = true;
-                      Navigator.pop(dialogContext);
-                    },
-                    child: Text(t.common.delete),
-                  ),
-                  const SizedBox(width: 8),
-                  FButton(
-                    variant: .outline,
-                    onPress: () => Navigator.pop(dialogContext),
-                    child: Text(t.common.cancel),
-                  ),
-                ],
+              const SizedBox(height: 24),
+              FButton(
+                variant: .outline,
+                onPress: () => Navigator.pop(dialogContext),
+                child: Text(t.common.cancel),
+              ),
+              const SizedBox(height: 8),
+              FButton(
+                variant: .destructive,
+                onPress: () {
+                  confirmed = true;
+                  Navigator.pop(dialogContext);
+                },
+                child: Text(t.common.delete),
               ),
             ],
           ),
@@ -574,7 +569,7 @@ class _RecurringTransactionListPageState
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 newState
@@ -593,29 +588,24 @@ class _RecurringTransactionListPageState
                       ),
                 style: dialogStyle.bodyTextStyle,
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FButton(
-                    variant: newState ? .primary : .outline,
-                    onPress: () {
-                      confirmed = true;
-                      Navigator.pop(dialogContext);
-                    },
-                    child: Text(
-                      newState
-                          ? t.forecast.recurringTransaction.activated
-                          : t.forecast.recurringTransaction.paused,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FButton(
-                    variant: .outline,
-                    onPress: () => Navigator.pop(dialogContext),
-                    child: Text(t.common.cancel),
-                  ),
-                ],
+              const SizedBox(height: 24),
+              FButton(
+                variant: .outline,
+                onPress: () => Navigator.pop(dialogContext),
+                child: Text(t.common.cancel),
+              ),
+              const SizedBox(height: 8),
+              FButton(
+                variant: newState ? .primary : .outline,
+                onPress: () {
+                  confirmed = true;
+                  Navigator.pop(dialogContext);
+                },
+                child: Text(
+                  newState
+                      ? t.forecast.recurringTransaction.activated
+                      : t.forecast.recurringTransaction.paused,
+                ),
               ),
             ],
           ),

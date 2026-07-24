@@ -628,30 +628,25 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(t.budget.deleteBudget, style: dialogStyle.titleTextStyle),
                 const SizedBox(height: 8),
                 Text(t.budget.deleteConfirm, style: dialogStyle.bodyTextStyle),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    FButton(
-                      variant: .destructive,
-                      onPress: () async {
-                        await Navigator.maybePop(context);
-                        unawaited(_handleDelete());
-                      },
-                      child: Text(t.common.delete),
-                    ),
-                    const SizedBox(width: 8),
-                    FButton(
-                      variant: .outline,
-                      onPress: () => Navigator.pop(context),
-                      child: Text(t.common.cancel),
-                    ),
-                  ],
+                const SizedBox(height: 24),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.pop(context),
+                  child: Text(t.common.cancel),
+                ),
+                const SizedBox(height: 8),
+                FButton(
+                  variant: .destructive,
+                  onPress: () async {
+                    await Navigator.maybePop(context);
+                    unawaited(_handleDelete());
+                  },
+                  child: Text(t.common.delete),
                 ),
               ],
             ),

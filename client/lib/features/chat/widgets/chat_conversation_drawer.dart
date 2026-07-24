@@ -726,7 +726,7 @@ class _ChatConversationDrawerState
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 t.chat.deleteConversation,
@@ -738,21 +738,16 @@ class _ChatConversationDrawerState
                 style: dialogStyle.bodyTextStyle,
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FButton(
-                    variant: .outline,
-                    onPress: () => Navigator.of(dialogContext).pop(false),
-                    child: Text(t.common.cancel),
-                  ),
-                  const SizedBox(width: 8),
-                  FButton(
-                    variant: .destructive,
-                    onPress: () => Navigator.of(dialogContext).pop(true),
-                    child: Text(t.common.delete),
-                  ),
-                ],
+              FButton(
+                variant: .outline,
+                onPress: () => Navigator.of(dialogContext).pop(false),
+                child: Text(t.common.cancel),
+              ),
+              const SizedBox(height: 8),
+              FButton(
+                variant: .destructive,
+                onPress: () => Navigator.of(dialogContext).pop(true),
+                child: Text(t.common.delete),
               ),
             ],
           ),
