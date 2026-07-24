@@ -1633,14 +1633,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.1+1"
-  tabler_icons_next:
-    dependency: "direct main"
-    description:
-      name: tabler_icons_next
-      sha256: "76cc757ddef03139df0d92f6f48d14c2e33a465da610ec5cb3c60770f78fb203"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.45.0"
   term_glyph:
     dependency: transitive
     description:

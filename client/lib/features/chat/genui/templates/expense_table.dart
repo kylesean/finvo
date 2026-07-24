@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-/// 数据表格 Widget 实现
+/// Data table Widget implementation
 class ExpenseTable extends StatelessWidget {
   final Map<String, dynamic> data;
 

@@ -3,10 +3,10 @@ import 'package:forui/forui.dart';
 import 'package:augo/app/theme/app_semantic_colors.dart';
 import 'package:augo/i18n/strings.g.dart';
 
-/// 财务健康评分卡片 - GenUI Template
+/// Financial health score card - GenUI Template
 ///
-/// 用于在 AI 聊天中展示用户的财务健康评分。
-/// 使用精简版 + 可展开设计，渐进披露详细信息。
+/// Displays user's financial health score in AI chat.
+/// Uses compact + expandable design for progressive disclosure.
 class HealthScoreAnalysisCard extends StatefulWidget {
   final Map<String, dynamic> data;
 
@@ -20,8 +20,8 @@ class HealthScoreAnalysisCard extends StatefulWidget {
 class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
   bool _isExpanded = false;
 
-  /// 获取等级颜色 - 基于主题语义色
-  /// A=成功(successAccent), B=主色(primary), C=警告(warningAccent), D/F=破坏(destructive)
+  /// Get grade color - based on theme semantic colors
+  /// A=success(successAccent), B=primary, C=warning(warningAccent), D/F=destructive
   Color _getGradeColor(
     String grade,
     FColors colors,

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import '../molecules/molecules.dart';
 
-/// 账户选择 Sheet（弹窗）
+/// Account selection sheet (bottom sheet)
 ///
-/// 可复用的账户选择弹窗，点击账户直接选中并关闭
+/// Reusable account selection sheet, tap to select and dismiss
 class AccountSelectSheet extends StatelessWidget {
   final String title;
   final List<Map<String, dynamic>> accounts;
@@ -17,7 +17,7 @@ class AccountSelectSheet extends StatelessWidget {
     this.selectedId,
   });
 
-  /// 显示账户选择 Sheet
+  /// Show account selection sheet
   static Future<String?> show({
     required BuildContext context,
     required String title,
@@ -53,7 +53,7 @@ class AccountSelectSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 顶部拖拽指示线
+          // Top drag indicator
           Container(
             width: 32,
             height: 4,
@@ -64,7 +64,7 @@ class AccountSelectSheet extends StatelessWidget {
             ),
           ),
 
-          // 头部
+          // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Row(
@@ -90,7 +90,7 @@ class AccountSelectSheet extends StatelessWidget {
             ),
           ),
 
-          // 账户列表
+          // Account list
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -116,7 +116,7 @@ class AccountSelectSheet extends StatelessWidget {
   }
 }
 
-/// 由于 FButton 可能没有 icon 构造函数方便直接用在 header，使用基础样式
+/// Since FButton may not have a convenient icon constructor for header use, use basic styling
 class FFancyButton extends StatelessWidget {
   final VoidCallback onPress;
   final Widget child;

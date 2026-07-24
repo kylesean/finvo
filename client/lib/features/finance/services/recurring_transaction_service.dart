@@ -4,13 +4,13 @@ import '../models/recurring_transaction.dart';
 
 part 'recurring_transaction_service.g.dart';
 
-/// 周期交易服务
+/// Recurring transaction service
 class RecurringTransactionService {
   final NetworkClient _networkClient;
 
   RecurringTransactionService(this._networkClient);
 
-  /// 获取周期交易列表
+  /// Get recurring transaction list
   Future<List<RecurringTransaction>> getList({
     RecurringTransactionType? type,
     bool? isActive,
@@ -37,7 +37,7 @@ class RecurringTransactionService {
         .toList();
   }
 
-  /// 获取周期交易详情
+  /// Get recurring transaction details
   Future<RecurringTransaction> getById(String id) async {
     final response = await _networkClient.requestMap(
       '/transactions/recurring/$id',
@@ -48,7 +48,7 @@ class RecurringTransactionService {
     );
   }
 
-  /// 创建周期交易
+  /// Create recurring transaction
   Future<RecurringTransaction> create(
     RecurringTransactionCreateRequest request,
   ) async {
@@ -62,7 +62,7 @@ class RecurringTransactionService {
     );
   }
 
-  /// 更新周期交易
+  /// Update recurring transaction
   Future<RecurringTransaction> update(
     String id,
     Map<String, dynamic> updates,
@@ -77,7 +77,7 @@ class RecurringTransactionService {
     );
   }
 
-  /// 删除周期交易
+  /// Delete recurring transaction
   Future<void> delete(String id) async {
     await _networkClient.requestMap(
       '/transactions/recurring/$id',
@@ -86,7 +86,7 @@ class RecurringTransactionService {
   }
 }
 
-/// 周期交易服务提供者
+/// Recurring transaction service provider
 @riverpod
 RecurringTransactionService recurringTransactionService(Ref ref) {
   final networkClient = ref.watch(networkClientProvider);

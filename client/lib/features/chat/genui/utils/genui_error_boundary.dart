@@ -4,9 +4,9 @@ import 'package:forui/forui.dart';
 
 final _logger = Logger('GenUiErrorBoundary');
 
-/// GenUI 组件错误边界
+/// GenUI component error boundary
 ///
-/// 捕获子组件的构建错误，提供优雅降级
+/// Catches child widget build errors and provides graceful degradation
 ///
 /// Example:
 /// ```dart
@@ -20,7 +20,7 @@ class GenUiErrorBoundary extends StatefulWidget {
   final String componentName;
   final Map<String, dynamic>? data;
 
-  /// 自定义错误回调
+  /// Custom error callback
   final void Function(Object error, StackTrace? stackTrace)? onError;
 
   const GenUiErrorBoundary({
@@ -47,7 +47,7 @@ class _GenUiErrorBoundaryState extends State<GenUiErrorBoundary> {
       );
     }
 
-    // 使用 ErrorWidget.builder 来捕获渲染错误
+    // Use ErrorWidget.builder to catch rendering errors
     return Builder(
       builder: (context) {
         try {
@@ -72,7 +72,7 @@ class _GenUiErrorBoundaryState extends State<GenUiErrorBoundary> {
 
     widget.onError?.call(error, stackTrace);
 
-    // 延迟 setState 避免在 build 中调用
+    // Defer setState to avoid calling during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {
@@ -83,7 +83,7 @@ class _GenUiErrorBoundaryState extends State<GenUiErrorBoundary> {
   }
 }
 
-/// 降级 UI 组件
+/// Fallback UI widget
 class _FallbackWidget extends StatelessWidget {
   final String componentName;
   final String error;
@@ -125,7 +125,7 @@ class _FallbackWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '组件加载失败',
+                      'Component failed to load',
                       style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w500,
                         color: colors.destructive,
@@ -166,7 +166,7 @@ class _FallbackWidget extends StatelessWidget {
   }
 }
 
-/// 公开的降级组件（供外部使用）
+/// Public fallback widget (for external use)
 class GenUiFallbackWidget extends StatelessWidget {
   final String componentName;
   final String error;

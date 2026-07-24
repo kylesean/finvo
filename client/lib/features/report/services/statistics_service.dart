@@ -10,7 +10,7 @@ class StatisticsService {
 
   StatisticsService(this._networkClient);
 
-  /// 获取统计概览
+  /// Get statistics overview
   Future<StatisticsOverview> getOverview({
     TimeRange timeRange = TimeRange.month,
     DateTime? startDate,
@@ -40,7 +40,7 @@ class StatisticsService {
     );
   }
 
-  /// 获取趋势数据
+  /// Get trend data
   Future<TrendDataResponse> getTrendData({
     TimeRange timeRange = TimeRange.month,
     ChartType chartType = ChartType.expense,
@@ -74,7 +74,7 @@ class StatisticsService {
     );
   }
 
-  /// 获取分类明细
+  /// Get category breakdown
   Future<CategoryBreakdownResponse> getCategoryBreakdown({
     TimeRange timeRange = TimeRange.month,
     DateTime? startDate,
@@ -108,7 +108,7 @@ class StatisticsService {
     );
   }
 
-  /// 获取大额消费排行
+  /// Get large expense ranking
   Future<TopTransactionsResponse> getTopTransactions({
     TimeRange timeRange = TimeRange.month,
     SortType sortBy = SortType.amount,
@@ -210,15 +210,17 @@ class StatisticsService {
         try {
           return fromJson(data);
         } catch (e) {
-          throw DataParsingException("解析统计响应失败 ($endpoint): ${e.toString()}");
+          throw DataParsingException(
+            "Failed to parse statistics response ($endpoint): ${e.toString()}",
+          );
         }
       }
       throw DataParsingException(
-        "API /statistics/$endpoint 响应中 data 字段格式错误，期望对象，收到 ${data.runtimeType}",
+        "API /statistics/$endpoint response data field format error, expected object, got ${data.runtimeType}",
       );
     }
     throw DataParsingException(
-      "API /statistics/$endpoint 期望返回一个对象，但收到了 ${json.runtimeType}",
+      "API /statistics/$endpoint expected an object response, but got ${json.runtimeType}",
     );
   }
 }

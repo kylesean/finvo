@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import '../models/shared_space_models.dart';
+import '../../../shared/widgets/app_card.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationModel notification;
@@ -23,7 +24,7 @@ class NotificationCard extends StatelessWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    return FCard(
+    return AppCard(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
@@ -32,11 +33,11 @@ class NotificationCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 头部：图标、标题和时间
+              // Header: icon, title and time
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 通知图标
+                  // Notification icon
                   Container(
                     width: 40,
                     height: 40,
@@ -54,7 +55,7 @@ class NotificationCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
 
-                  // 标题和消息
+                  // Title and message
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +101,7 @@ class NotificationCard extends StatelessWidget {
                     ),
                   ),
 
-                  // 删除按钮
+                  // Delete button
                   if (onDelete != null)
                     FButton(
                       variant: .ghost,
@@ -116,7 +117,7 @@ class NotificationCard extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // 时间
+              // Time
               Row(
                 children: [
                   Icon(
@@ -134,7 +135,7 @@ class NotificationCard extends StatelessWidget {
                 ],
               ),
 
-              // 邀请操作按钮
+              // Invite action buttons
               if (notification.type == NotificationType.spaceInvite &&
                   onAccept != null &&
                   onReject != null) ...[
@@ -145,14 +146,14 @@ class NotificationCard extends StatelessWidget {
                       child: FButton(
                         variant: .outline,
                         onPress: onReject,
-                        child: const Text('拒绝'),
+                        child: const Text('Reject'),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: FButton(
                         onPress: onAccept,
-                        child: const Text('接受'),
+                        child: const Text('Accept'),
                       ),
                     ),
                   ],
@@ -196,18 +197,18 @@ class NotificationCard extends StatelessWidget {
   }
 
   String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) return '未知时间';
+    if (dateTime == null) return 'Unknown time';
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays}天前';
+      return '${difference.inDays} days ago';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}小时前';
+      return '${difference.inHours} hours ago';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}分钟前';
+      return '${difference.inMinutes} minutes ago';
     } else {
-      return '刚刚';
+      return 'Just now';
     }
   }
 }

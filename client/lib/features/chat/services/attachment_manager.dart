@@ -100,7 +100,7 @@ class AttachmentManager {
           final failure = failureMap[failureKey]!;
           return attachment.copyWith(
             status: AttachmentLoadStatus.failed,
-            errorMessage: failure.displayMessage ?? '加载失败',
+            errorMessage: failure.displayMessage ?? 'Load failed',
           );
         }
 

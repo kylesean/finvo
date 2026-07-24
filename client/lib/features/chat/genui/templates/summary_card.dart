@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-/// 摘要卡片 Widget 实现
+/// Summary card Widget implementation
 class SummaryCard extends StatelessWidget {
   final Map<String, dynamic> data;
 

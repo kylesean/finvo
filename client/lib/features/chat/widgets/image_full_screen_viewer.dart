@@ -5,15 +5,15 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import '../models/media_file.dart';
 
-/// 图片全屏查看器
-/// 使用 photo_view 组件实现图片缩放和拖拽，支持多图片左右滑动切换
-/// iOS/Android：使用高效的 FileImage
-/// Web：使用 NetworkImage（因为 MediaFile.path 通常是服务器 URL）
+/// Full-screen image viewer
+/// Uses photo_view for image zoom and drag, supports multi-image swipe navigation
+/// iOS/Android: uses efficient FileImage
+/// Web: uses NetworkImage (since MediaFile.path is typically a server URL)
 class ImageFullScreenViewer extends StatefulWidget {
-  /// 图片文件列表
+  /// Image file list
   final List<MediaFile> imageFiles;
 
-  /// 初始显示的图片索引
+  /// Initial image index to display
   final int initialIndex;
 
   const ImageFullScreenViewer({
@@ -22,7 +22,7 @@ class ImageFullScreenViewer extends StatefulWidget {
     this.initialIndex = 0,
   });
 
-  /// 显示全屏图片查看器
+  /// Show full-screen image viewer
   static Future<void> show(
     BuildContext context, {
     required List<MediaFile> imageFiles,
@@ -50,7 +50,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
   @override
   void initState() {
     super.initState();
-    // 确保初始索引在有效范围内
+    // Ensure initial index is within valid range
     _currentIndex = widget.imageFiles.isEmpty
         ? 0
         : (widget.initialIndex >= 0 &&
@@ -68,7 +68,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
 
   @override
   Widget build(BuildContext context) {
-    // 处理空列表情况
+    // Handle empty list case
     if (widget.imageFiles.isEmpty) {
       return Scaffold(
         backgroundColor: Colors.black,
@@ -77,7 +77,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
             children: [
               const Center(
                 child: Text(
-                  '没有图片可显示',
+                  'No images to display',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
@@ -99,7 +99,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 图片查看器主体
+          // Image viewer body
           PhotoViewGallery.builder(
             scrollPhysics: const BouncingScrollPhysics(),
             builder: (BuildContext context, int index) {
@@ -121,7 +121,10 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
                           size: 48,
                         ),
                         SizedBox(height: 16),
-                        Text('图片加载失败', style: TextStyle(color: Colors.white)),
+                        Text(
+                          'Failed to load image',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ],
                     ),
                   );
@@ -143,7 +146,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
             },
           ),
 
-          // 顶部工具栏
+          // Top toolbar
           Positioned(
             top: 0,
             left: 0,
@@ -166,7 +169,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
                 ),
                 child: Row(
                   children: [
-                    // 关闭按钮
+                    // Close button
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(
@@ -178,7 +181,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
 
                     const Spacer(),
 
-                    // 图片计数器
+                    // Image counter
                     if (widget.imageFiles.length > 1)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -204,7 +207,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
             ),
           ),
 
-          // 底部图片信息
+          // Bottom image info
           Positioned(
             bottom: 0,
             left: 0,
@@ -231,7 +234,7 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
     );
   }
 
-  /// 构建图片信息组件
+  /// Build image info widget
   Widget _buildImageInfo() {
     if (widget.imageFiles.isEmpty ||
         _currentIndex < 0 ||
@@ -267,28 +270,28 @@ class _ImageFullScreenViewerState extends State<ImageFullScreenViewer> {
     );
   }
 
-  /// 获取图片提供者
-  /// MediaFile.path 通常是服务器 URL，所以使用 NetworkImage
-  /// 如果是本地文件路径，在 iOS/Android 上使用 FileImage
+  /// Get image provider
+  /// MediaFile.path is typically a server URL, so use NetworkImage
+  /// For local file paths, use FileImage on iOS/Android
   ImageProvider _getImageProvider(MediaFile imageFile) {
     final path = imageFile.path;
 
-    // 如果是网络 URL
+    // If network URL
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return NetworkImage(path);
     }
 
-    // 如果是本地文件路径
+    // If local file path
     if (kIsWeb) {
-      // Web 平台：本地文件路径不可用，尝试作为 URL 使用
+      // Web platform: local file path unavailable, try using as URL
       return NetworkImage(path);
     } else {
-      // iOS/Android：使用高效的 FileImage
+      // iOS/Android: use efficient FileImage
       return FileImage(File(path));
     }
   }
 
-  /// 格式化文件大小
+  /// Format file size
   String _formatFileSize(int bytes) {
     if (bytes < 1024) {
       return '$bytes B';

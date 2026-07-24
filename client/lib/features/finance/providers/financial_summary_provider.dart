@@ -2,7 +2,6 @@ import 'package:decimal/decimal.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../profile/models/financial_account.dart';
 import '../../profile/providers/financial_account_provider.dart';
-// import '../../profile/providers/financial_settings_provider.dart'; // Removed
 import '../../../shared/providers/exchange_rate_provider.dart';
 
 part 'financial_summary_provider.g.dart';
@@ -34,13 +33,13 @@ class FinancialSummary {
 class FinancialSummaryNotifier extends _$FinancialSummaryNotifier {
   @override
   FinancialSummary build(String targetCurrency) {
-    // 监听必要的 Providers
+    // Watch required providers
     final accountsState = ref.watch(financialAccountProvider);
     // ratesNotifier needs the state to be ready to access .value inside convert
     // So we watch the provider to rebuild when it changes.
     final ratesAsync = ref.watch(exchangeRateProvider);
 
-    // 如果汇率还在加载，返回带有 loading 标记的状态
+    // If exchange rates are still loading, return state with loading flag
     if (ratesAsync.isLoading) {
       return FinancialSummary.empty.copyWith(
         isLoading: true,
@@ -48,7 +47,7 @@ class FinancialSummaryNotifier extends _$FinancialSummaryNotifier {
       );
     }
 
-    // 如果账户也在加载，同理
+    // Same if accounts are loading
     if (accountsState.isLoading) {
       return FinancialSummary.empty.copyWith(
         isLoading: true,

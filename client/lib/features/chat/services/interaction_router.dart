@@ -1,20 +1,20 @@
 /// Interaction Router
 ///
-/// 出站消息路由器 —— 将 genui 的 [genui.ChatMessage] 分类并转换为后端 payload。
+/// Outbound message router — classifies and converts genui [genui.ChatMessage] into backend payload.
 ///
-/// 设计理念（单一职责、纯逻辑、可独立单测）：
-/// - 在 genui 0.10 / A2UI v0.9 中，Surface 按钮交互统一以"空文本 user 消息 +
-///   UiInteractionPart"形式到达（见 SurfaceController.handleUiEvent），旧的
-///   "文本里塞 {"userAction":...}" 约定已废弃。
-/// - 本组件负责：消息分类 -> 交互解析（类型化访问器，带 mimeType 校验）->
-///   经 [GenUiEventRegistry] 分发业务事件 -> 产出 [OutgoingMessage]。
-/// - 不含任何网络与副作用，[CustomContentGenerator] 仅负责把结果发出去。
+/// Design rationale (single responsibility, pure logic, independently unit-testable):
+/// - In genui 0.10 / A2UI v0.9, Surface button interactions arrive uniformly as "empty-text user message +
+///   UiInteractionPart" (see SurfaceController.handleUiEvent); the old
+///   "stuff {"userAction":...} into text" convention is deprecated.
+/// - This component handles: message classification -> interaction parsing (typed accessor with mimeType validation) ->
+///   dispatch business events via [GenUiEventRegistry] -> produce [OutgoingMessage].
+/// - Contains no network or side effects; [CustomContentGenerator] only sends the result.
 ///
-/// 行为契约（与重构前完全等价）：
-/// - SurfaceController.reportError 的错误反馈（interaction 内含 "error"）绝不转发。
-/// - 已注册业务事件（如 transfer_path_confirmed）产出人类可读文案 +
-///   client_state mutation（ui_mode=direct_execute），后端原子执行。
-/// - 未注册事件兜底为 `Action: <name>`（保持现状）。
+/// Behavioral contract (fully equivalent to pre-refactoring):
+/// - SurfaceController.reportError feedback (interaction containing "error") is never forwarded.
+/// - Registered business events (e.g. transfer_path_confirmed) produce human-readable text +
+///   client_state mutation (ui_mode=direct_execute), backend executes atomically.
+/// - Unregistered events fall back to `Action: <name>` (preserving current behavior).
 library;
 
 import 'dart:convert';
@@ -24,21 +24,21 @@ import 'package:genui/genui.dart' as genui;
 import '../genui/events/interaction_events.dart';
 import '../genui/genui_event_registry.dart';
 
-/// 出站消息的类型化结果。
+/// Typed result of an outbound message.
 ///
-/// 替代重构前松散 Map + `_skip` 哨兵键的返回约定。
+/// Replaces the pre-refactoring loose Map + `_skip` sentinel key return convention.
 class OutgoingMessage {
-  /// 发给后端的消息体列表。
+  /// Message payload list sent to backend.
   final List<Map<String, dynamic>> payload;
 
-  /// GenUI 原子模式的 client_state mutation（可空）。
-  /// 非空时后端走 direct_execute，跳过 LLM。
+  /// GenUI atomic mode client_state mutation (nullable).
+  /// When non-null, backend uses direct_execute, skipping LLM.
   final Map<String, dynamic>? clientState;
 
-  /// 乐观更新展示给用户的内容（null 表示不展示）。
+  /// Optimistic update content displayed to user (null means don't display).
   final String? displayContent;
 
-  /// 是否整体跳过（错误反馈 / 空内容）。为 true 时不发送、不展示。
+  /// Whether to skip entirely (error feedback / empty content). When true, don't send or display.
   final bool skip;
 
   const OutgoingMessage({
@@ -48,29 +48,29 @@ class OutgoingMessage {
     this.skip = false,
   });
 
-  /// 构造一条"跳过"消息。
+  /// Construct a "skipped" message.
   factory OutgoingMessage.skipped() =>
       const OutgoingMessage(payload: [], skip: true);
 }
 
-/// 出站交互路由器。
+/// Outbound interaction router.
 ///
-/// 纯逻辑组件：把一条 genui 用户消息路由为 [OutgoingMessage]。
+/// Pure logic component: routes a genui user message into [OutgoingMessage].
 class InteractionRouter {
-  /// 将 genui 消息路由为出站消息。
+  /// Route a genui message to an outbound message.
   OutgoingMessage route(genui.ChatMessage message) {
-    // sendRequest 只收到 user 消息（controller.onSubmit）；非 user 防御性跳过。
+    // sendRequest only receives user messages (controller.onSubmit); defensively skip non-user.
     if (message.role != genui.ChatMessageRole.user) {
       return OutgoingMessage.skipped();
     }
 
-    // A2UI v0.9 交互路径：空文本 + UiInteractionPart。
+    // A2UI v0.9 interaction path: empty text + UiInteractionPart.
     final interaction = _extractInteraction(message);
     if (interaction != null) {
       return _routeInteraction(interaction);
     }
 
-    // 纯文本用户消息。
+    // Plain text user message.
     final text = message.text;
     if (text.isEmpty) {
       return OutgoingMessage.skipped();
@@ -83,11 +83,11 @@ class InteractionRouter {
     );
   }
 
-  /// 用 genui 类型化访问器提取交互 JSON 字符串。
+  /// Extract interaction JSON string using genui typed accessor.
   ///
-  /// `uiInteractionParts` 只匹配 mimeType 为
-  /// `application/vnd.genui.interaction+json` 的 DataPart，避免误解析附件等
-  /// 其它 DataPart（重构前的手工字节解析无视 mimeType）。
+  /// `uiInteractionParts` only matches DataPart with mimeType
+  /// `application/vnd.genui.interaction+json`, avoiding mis-parsing attachments
+  /// or other DataParts (pre-refactoring manual byte parsing ignored mimeType).
   String? _extractInteraction(genui.ChatMessage message) {
     for (final part in message.parts.uiInteractionParts) {
       return part.interaction;
@@ -95,7 +95,7 @@ class InteractionRouter {
     return null;
   }
 
-  /// 解析交互 JSON 并路由。
+  /// Parse interaction JSON and route.
   OutgoingMessage _routeInteraction(String interactionJson) {
     final Map<String, dynamic> inner;
     try {
@@ -104,13 +104,13 @@ class InteractionRouter {
       return OutgoingMessage.skipped();
     }
 
-    // SurfaceController.reportError 的错误反馈，绝不转发回后端
-    // （会打断进行中的 SSE 流并被后端以 422 拒绝）。
+    // SurfaceController.reportError feedback — never forward to backend
+    // (would interrupt in-progress SSE stream and be rejected with 422).
     if (inner.containsKey('error')) {
       return OutgoingMessage.skipped();
     }
 
-    // 动作事件：交给业务注册表分发。
+    // Action event: delegate to business registry for dispatch.
     final action = inner['action'];
     if (action is Map<String, dynamic>) {
       return _routeAction(action);
@@ -119,12 +119,12 @@ class InteractionRouter {
     return OutgoingMessage.skipped();
   }
 
-  /// 将动作事件经类型化解析与 [GenUiEventRegistry] 分发并构造出站消息。
+  /// Route action event through typed parsing and [GenUiEventRegistry] dispatch to construct outbound message.
   OutgoingMessage _routeAction(Map<String, dynamic> action) {
     final name = action['name'] as String?;
     final context = (action['context'] as Map<String, dynamic>?) ?? const {};
 
-    // 类型化解码：未知事件 -> null，走 `Action: <name>` 兜底（保持现状）。
+    // Typed decode: unknown event -> null, fall back to `Action: <name>` (preserving current behavior).
     final event = GenUiInteractionEvent.tryParse(name, context);
     if (event == null) {
       return _fallback('Action: $name');
@@ -144,11 +144,11 @@ class InteractionRouter {
       );
     }
 
-    // 已知事件但无业务处理（如交易确认）-> 兜底，保持重构前行为。
+    // Known event but no business handler (e.g. transaction confirmation) -> fallback, preserving pre-refactoring behavior.
     return _fallback('Action: ${event.eventName}');
   }
 
-  /// 构造兜底出站消息（未注册 / 无业务处理的事件）。
+  /// Construct fallback outbound message (unregistered / no business handler events).
   OutgoingMessage _fallback(String content) {
     return OutgoingMessage(
       payload: [

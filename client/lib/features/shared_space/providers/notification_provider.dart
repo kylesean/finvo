@@ -69,7 +69,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
       final newNotifications = refresh
           ? response.notifications
           : [...state.notifications, ...response.notifications];
-      final hasMore = response.notifications.length >= 20; // 假设每页20条
+      final hasMore =
+          response.notifications.length >= 20; // Assume 20 items per page
 
       if (_mounted) {
         state = state.copyWith(
@@ -82,7 +83,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
         );
       }
     } catch (e) {
-      String errorMessage = '加载通知失败';
+      String errorMessage = 'Failed to load notifications';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -100,7 +101,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
         state = state.copyWith(unreadCount: count);
       }
     } catch (e) {
-      _logger.warning('加载未读通知数量失败', e);
+      _logger.warning('Failed to load unread notification count', e);
     }
   }
 
@@ -124,7 +125,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
         );
       }
     } catch (e) {
-      String errorMessage = '标记已读失败';
+      String errorMessage = 'Failed to mark as read';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -153,7 +154,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
         );
       }
     } catch (e) {
-      String errorMessage = '标记全部已读失败';
+      String errorMessage = 'Failed to mark all as read';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -170,7 +171,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
       final notification = state.notifications.firstWhere(
         (n) => n.id == notificationId,
-        orElse: () => throw Exception('通知不存在'),
+        orElse: () => throw Exception('Notification not found'),
       );
 
       final updatedNotifications = state.notifications
@@ -188,7 +189,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
         );
       }
     } catch (e) {
-      String errorMessage = '删除通知失败';
+      String errorMessage = 'Failed to delete notification';
       if (e is AppException) {
         errorMessage = e.message;
       }
@@ -215,7 +216,7 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
       return true;
     } catch (e) {
-      String errorMessage = '响应邀请失败';
+      String errorMessage = 'Failed to respond to invite';
       if (e is AppException) {
         errorMessage = e.message;
       }

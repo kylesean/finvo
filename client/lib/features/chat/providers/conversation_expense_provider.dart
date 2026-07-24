@@ -72,7 +72,7 @@ class ConversationExpenseNotifier extends _$ConversationExpenseNotifier {
 /// Calculates total expenses from historical messages + real-time accumulation.
 @riverpod
 double conversationTotalExpense(Ref ref) {
-  // 只订阅 messages 变化，避免其他状态变化触发重算
+  // Only subscribe to messages changes, avoid recalculation triggered by other state changes
   final messages = ref.watch(
     chatHistoryProvider.select((state) => state.messages),
   );

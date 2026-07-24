@@ -15,6 +15,7 @@ import '../../home/models/transaction_model.dart';
 import '../../../app/theme/app_font_config.dart';
 import '../../../app/theme/app_semantic_colors.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// A premium overview that uses large typography and subtle depth
 class OverviewCard extends ConsumerWidget {
@@ -182,7 +183,7 @@ class OverviewCard extends ConsumerWidget {
                 showSign: false,
                 shrinkCurrency: true,
                 style: theme.typography.body.md.copyWith(
-                  color: Colors.white, // 确保在大卡片上始终为白色
+                  color: Colors.white, // Ensure always white on large card
                   fontWeight: AppFontConfig.amountBold,
                 ),
               ),
@@ -235,7 +236,7 @@ class MetricComparisonCard extends ConsumerWidget {
         ? amountTheme.expenseColor
         : amountTheme.incomeColor;
 
-    return FCard(
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -351,7 +352,8 @@ class TrendChart extends ConsumerWidget {
         ? expenseColor
         : incomeColor;
 
-    return FCard(
+    return AppCard(
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -653,7 +655,8 @@ class _CategoryAnalysisSectionState
         ),
         const SizedBox(height: 16),
         // Chart content based on view mode
-        FCard(
+        AppCard(
+          clipBehavior: Clip.antiAlias,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: _buildChartContent(theme, colors),
@@ -847,7 +850,7 @@ class _CategoryAnalysisSectionState
                     final category = TransactionCategory.fromKey(
                       item.categoryKey,
                     );
-                    // 图例颜色需要与饼图扣区对应，使用原始 items 中的索引
+                    // Legend colors must correspond to pie chart segments, use index from original items
                     final originalIndex = widget.breakdown.items.indexOf(item);
                     final chartColor = context.theme.chartColorAt(
                       originalIndex,
@@ -902,7 +905,7 @@ class _CategoryAnalysisSectionState
         height: 200,
         child: Center(
           child: Text(
-            '雷达图需要至少3个分类数据',
+            'Radar chart requires at least 3 category data points',
             style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
             ),
@@ -1058,7 +1061,7 @@ class TopTransactionCard extends ConsumerWidget {
 
     final currencyCode = ref.watch(financialSettingsProvider).primaryCurrency;
 
-    return FCard(
+    return AppCard(
       child: InkWell(
         onTap: onTap,
         child: Row(
@@ -1101,7 +1104,7 @@ class TopTransactionCard extends ConsumerWidget {
               showSign: false,
               style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.bold,
-                color: colors.foreground, // 统计卡片使用中性颜色
+                color: colors.foreground, // Statistics card uses neutral color
                 letterSpacing: -0.5,
               ),
             ),

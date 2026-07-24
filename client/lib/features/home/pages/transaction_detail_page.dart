@@ -17,6 +17,7 @@ import '../widgets/transaction_detail_skeleton.dart';
 import 'package:augo/shared/widgets/amount_text.dart';
 import 'package:augo/shared/widgets/themed_icon.dart';
 import 'package:augo/core/constants/category_constants.dart';
+import 'package:augo/shared/widgets/app_card.dart';
 import 'package:augo/features/profile/providers/financial_account_provider.dart';
 import 'package:augo/features/profile/models/financial_account.dart';
 import 'package:augo/features/chat/genui/organisms/account_picker_card.dart';
@@ -31,14 +32,14 @@ class TransactionDetailPage extends ConsumerWidget {
 
   const TransactionDetailPage({super.key, required this.transactionId});
 
-  /// 获取分类显示名称
+  /// Get category display name
   String _getCategoryDisplayName(TransactionModel transaction) {
-    // 优先使用服务端返回的本地化名称
+    // Prefer server-returned localized name
     if (transaction.categoryText != null &&
         transaction.categoryText!.isNotEmpty) {
       return transaction.categoryText!;
     }
-    // 使用 TransactionCategory 获取本地化名称
+    // Use TransactionCategory to get localized name
     if (transaction.categoryKey != null &&
         transaction.categoryKey!.isNotEmpty) {
       return TransactionCategory.fromKey(transaction.categoryKey!).displayText;
@@ -52,12 +53,12 @@ class TransactionDetailPage extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // 显示骨架屏
+    // Show skeleton screen
     if (detailState.isLoading && detailState.transaction == null) {
       return const TransactionDetailSkeleton();
     }
 
-    // 显示错误状态
+    // Show error state
     if (detailState.errorMessage != null && detailState.transaction == null) {
       return Scaffold(
         backgroundColor: colors.background,
@@ -117,21 +118,21 @@ class TransactionDetailPage extends ConsumerWidget {
 
     timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
 
-    // 页面头部
+    // Page header
     final pageHeader = _buildPageHeader(context, theme, colors, transaction);
 
     return Scaffold(
-      // 仍然可以使用 Scaffold 作为根，以便 CommentInputBar 能正确固定在底部
+      // Still use Scaffold as root so CommentInputBar can be properly pinned to bottom
       resizeToAvoidBottomInset: false,
-      backgroundColor: colors.background, // 页面背景色来自主题
+      backgroundColor: colors.background, // Page background color from theme
       body: SafeArea(
-        // 3. 使用 SafeArea
+        // Use SafeArea
         child: Column(
           children: [
             pageHeader,
             Expanded(
               child: CustomScrollView(
-                // 保留 CustomScrollView 以便内容过多时滚动
+                // Keep CustomScrollView for scrolling when content overflows
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
@@ -139,14 +140,15 @@ class TransactionDetailPage extends ConsumerWidget {
                         horizontal: 16.0,
                         vertical: 12.0,
                       ),
-                      // 4. 使用 ShadCard 包裹主要详情区域
-                      child: FCard(
+                      // Wrap main detail area with FCard
+                      child: AppCard(
+                        style: const .delta(padding: .value(EdgeInsets.zero)),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // --- 顶部：类别图标、类别名称、时间、更多操作按钮 ---
+                              // --- Top: category icon, category name, time, more actions button ---
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -187,7 +189,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                     ),
                                   ),
                                   FButton.icon(
-                                    // 6. 更多操作按钮
+                                    // More actions button
                                     variant: .ghost,
                                     onPress: () => _showTransactionActions(
                                       context,
@@ -203,7 +205,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                 ],
                               ),
                               const SizedBox(height: 24),
-                              // 金额
+                              // Amount
                               Center(
                                 child: AmountText.large(
                                   amount: transaction.amount,
@@ -213,7 +215,7 @@ class TransactionDetailPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 16),
 
-                              // 关联账户和空间操作区
+                              // Linked account and space actions
                               _buildAccountSpaceActions(
                                 context,
                                 ref,
@@ -225,7 +227,7 @@ class TransactionDetailPage extends ConsumerWidget {
                               const SizedBox(height: 16),
                               const FDivider(axis: Axis.horizontal),
                               const SizedBox(height: 12),
-                              // 详细信息行 - 记账原文（用户原始输入）
+                              // Detail row - original entry text (user's raw input)
                               _buildDetailRow(
                                 context,
                                 icon: FLucideIcons.messageSquareText,
@@ -272,7 +274,7 @@ class TransactionDetailPage extends ConsumerWidget {
 
                               _buildDetailRow(
                                 context,
-                                icon: FLucideIcons.calendarClock, // 替换图标
+                                icon: FLucideIcons.calendarClock,
                                 label: t.transaction.time,
                                 valueWidget: Text(
                                   DateFormat(
@@ -280,7 +282,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                     'zh_CN',
                                   ).format(transaction.timestamp),
                                   style: theme.typography.body.sm.copyWith(
-                                    color: colors.foreground, // 值颜色
+                                    color: colors.foreground,
                                     fontWeight: FontWeight.normal,
                                   ),
                                 ),
@@ -289,12 +291,12 @@ class TransactionDetailPage extends ConsumerWidget {
                                   transaction.location!.isNotEmpty)
                                 _buildDetailRow(
                                   context,
-                                  icon: FLucideIcons.mapPin, // 替换图标
+                                  icon: FLucideIcons.mapPin,
                                   label: t.transaction.location,
                                   valueWidget: Text(
                                     transaction.location!,
                                     style: theme.typography.body.sm.copyWith(
-                                      color: colors.foreground, // 值颜色
+                                      color: colors.foreground,
                                       fontWeight: FontWeight.normal,
                                     ),
                                   ),
@@ -304,7 +306,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                 const SizedBox(height: 6),
                                 _buildDetailRow(
                                   context,
-                                  icon: FLucideIcons.tags, // 替换图标
+                                  icon: FLucideIcons.tags,
                                   label: t.transaction.tags,
                                   valueWidget: Wrap(
                                     spacing: 8.0,
@@ -312,51 +314,34 @@ class TransactionDetailPage extends ConsumerWidget {
                                     children: transaction.tags
                                         .map(
                                           (tag) => FBadge(
-                                            // 9. 使用 FBadge
+                                            // Use FBadge
                                             variant: .secondary,
                                             child: Text(
                                               tag,
                                               style: theme.typography.body.sm
                                                   .copyWith(fontSize: 11),
                                             ),
-                                            // FBadge 默认有合适的 padding 和圆角
+                                            // FBadge has appropriate padding and border radius by default
                                           ),
                                         )
                                         .toList(),
                                   ),
                                 ),
                               ],
-
-                              // if (transaction.isAiBuild == true)
-                              //   Padding(
-                              //     padding: const EdgeInsets.only(top: 20.0),
-                              //     child: Row(
-                              //       mainAxisAlignment: MainAxisAlignment.end,
-                              //       children: [
-                              //         Icon(FLucideIcons.sparkles, size: 16, color: colorScheme.primary), // 使用主题色
-                              //         const SizedBox(width: 4),
-                              //         Text(
-                              //           '由 AI 智能记录',
-                              //           style: theme.textTheme.small.copyWith(
-                              //             color: colorScheme.primary,
-                              //             fontStyle: FontStyle.italic,
-                              //           ),
-                              //         ),
-                              //       ],
-                              //     ),
-                              //   ),
                             ],
                           ),
                         ),
                       ),
                     ),
                   ),
-                  // --- 评论区 ---
+                  // --- Comment section ---
                   SliverToBoxAdapter(
                     child: CommentSectionWidget(transactionId: transaction.id),
                   ),
                   const SliverToBoxAdapter(
-                    child: SizedBox(height: 100), // 底部留白，防止被输入框遮挡
+                    child: SizedBox(
+                      height: 100,
+                    ), // Bottom spacing to prevent overlap with input bar
                   ),
                 ],
               ),
@@ -364,12 +349,12 @@ class TransactionDetailPage extends ConsumerWidget {
           ],
         ),
       ),
-      // 评论输入栏
+      // Comment input bar
       bottomNavigationBar: CommentInputBar(transactionId: transaction.id),
     );
   }
 
-  // 构建页面头部
+  // Build page header
   Widget _buildPageHeader(
     BuildContext context,
     FThemeData theme,
@@ -396,17 +381,17 @@ class TransactionDetailPage extends ConsumerWidget {
               style: theme.typography.body.xl2.copyWith(
                 fontWeight: FontWeight.w500,
               ),
-              textAlign: TextAlign.center, // 标题居中
+              textAlign: TextAlign.center, // Center the title
             ),
           ),
-          // 右侧占位，保持标题居中，或者可以放其他操作按钮
+          // Right spacer to keep title centered, or can hold other action buttons
           const SizedBox(width: 40),
         ],
       ),
     );
   }
 
-  // 详细信息行 - 优化多语言支持，使用灵活宽度
+  // Detail row - optimized for i18n with flexible width
   Widget _buildDetailRow(
     BuildContext context, {
     required IconData icon,
@@ -421,9 +406,9 @@ class TransactionDetailPage extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 图标和标签使用固定宽度的 Row，确保对齐
+          // Icon and label use fixed-width Row for alignment
           SizedBox(
-            width: 90, // 增加宽度以适应英文标签
+            width: 90, // Wider to accommodate English labels
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -450,7 +435,7 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  /// 构建关联账户和空间操作区
+  /// Build linked account and space actions section
   Widget _buildAccountSpaceActions(
     BuildContext context,
     WidgetRef ref,
@@ -458,25 +443,25 @@ class TransactionDetailPage extends ConsumerWidget {
     FColors colors,
     TransactionModel transaction,
   ) {
-    // 获取关联账户信息
+    // Get linked account info
     final isExpense = transaction.type == TransactionType.expense;
     final accountId = isExpense
         ? transaction.sourceAccountId
         : transaction.targetAccountId;
 
-    // 从 Provider 获取账户信息
+    // Get account info from Provider
     final accountState = ref.watch(financialAccountProvider);
     final linkedAccount = accountId != null
         ? accountState.accounts.where((a) => a.id == accountId).firstOrNull
         : null;
 
-    // 获取关联空间信息
+    // Get linked space info
     final spaces = transaction.spaces;
     final hasSpaces = spaces.isNotEmpty;
 
     return Row(
       children: [
-        // 关联账户按钮
+        // Linked account button
         Expanded(
           child: _buildActionPill(
             context: context,
@@ -492,7 +477,7 @@ class TransactionDetailPage extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // 关联空间按钮
+        // Linked space button
         Expanded(
           child: _buildActionPill(
             context: context,
@@ -511,7 +496,7 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  /// 胶囊按钮样式
+  /// Pill button style
   Widget _buildActionPill({
     required BuildContext context,
     required FThemeData theme,
@@ -561,7 +546,7 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  /// 显示账户选择弹窗
+  /// Show account picker bottom sheet
   Future<void> _showAccountPicker(
     BuildContext context,
     WidgetRef ref,
@@ -570,7 +555,7 @@ class TransactionDetailPage extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // 加载账户列表
+    // Load account list
     var accountState = ref.read(financialAccountProvider);
     if (accountState.accounts.isEmpty && !accountState.isLoading) {
       await ref.read(financialAccountProvider.notifier).loadFinancialAccounts();
@@ -578,7 +563,7 @@ class TransactionDetailPage extends ConsumerWidget {
       accountState = ref.read(financialAccountProvider);
     }
 
-    // 筛选可用账户
+    // Filter available accounts
     final accounts = accountState.accounts
         .where(
           (a) =>
@@ -604,7 +589,7 @@ class TransactionDetailPage extends ConsumerWidget {
       return;
     }
 
-    // 获取当前账户ID
+    // Get current account ID
     final isExpense = transaction.type == TransactionType.expense;
     final currentAccountId = isExpense
         ? transaction.sourceAccountId
@@ -638,7 +623,7 @@ class TransactionDetailPage extends ConsumerWidget {
     }
   }
 
-  /// 更新交易关联账户
+  /// Update transaction linked account
   Future<void> _updateTransactionAccount(
     BuildContext context,
     WidgetRef ref,
@@ -654,11 +639,11 @@ class TransactionDetailPage extends ConsumerWidget {
       );
 
       if (result['code'] == 0 && context.mounted) {
-        // 重新加载交易详情
+        // Reload transaction detail
         unawaited(
           ref.read(transactionDetailProvider(transactionId).notifier).reload(),
         );
-        // 刷新账户列表以更新余额
+        // Refresh account list to update balances
         unawaited(
           ref.read(financialAccountProvider.notifier).loadFinancialAccounts(),
         );
@@ -673,7 +658,7 @@ class TransactionDetailPage extends ConsumerWidget {
     }
   }
 
-  /// 显示空间选择弹窗
+  /// Show space picker bottom sheet
   Future<void> _showSpacePicker(
     BuildContext context,
     WidgetRef ref,
@@ -683,7 +668,7 @@ class TransactionDetailPage extends ConsumerWidget {
     final colors = theme.colors;
 
     try {
-      // 加载空间列表
+      // Load space list
       final networkClient = ref.read(networkClientProvider);
       final result = await networkClient.requestMap(
         '/shared-spaces',
@@ -701,7 +686,7 @@ class TransactionDetailPage extends ConsumerWidget {
         return;
       }
 
-      // 获取当前关联的空间IDs
+      // Get currently linked space IDs
       final currentSpaceIds = transaction.spaces.map((s) => s.id).toSet();
 
       final selectedSpaceId = await showModalBottomSheet<String>(
@@ -774,7 +759,7 @@ class TransactionDetailPage extends ConsumerWidget {
     }
   }
 
-  /// 关联交易到空间
+  /// Link transaction to space
   Future<void> _linkTransactionToSpace(
     BuildContext context,
     WidgetRef ref,
@@ -790,7 +775,7 @@ class TransactionDetailPage extends ConsumerWidget {
       );
 
       if (context.mounted) {
-        // 重新加载交易详情
+        // Reload transaction detail
         unawaited(
           ref.read(transactionDetailProvider(transactionId).notifier).reload(),
         );
@@ -818,7 +803,7 @@ class TransactionDetailPage extends ConsumerWidget {
         title: t.transaction.favorite,
         icon: FLucideIcons.bookmark,
         onTap: () {
-          // TODO: 实现收藏功能
+          // TODO: Implement favorite/bookmark functionality
         },
       ),
     );
@@ -828,13 +813,13 @@ class TransactionDetailPage extends ConsumerWidget {
         title: t.common.delete,
         icon: FLucideIcons.trash2,
         onTap: () {
-          // 获取 rootContext 用于后续对话框（此时 BottomSheet 已被 ActionBottomSheet 自动关闭）
+          // Get rootContext for subsequent dialogs (BottomSheet is auto-dismissed by ActionBottomSheet)
           final rootContext = GoRouter.of(
             context,
           ).routerDelegate.navigatorKey.currentContext;
           if (rootContext == null) return;
 
-          // 延迟显示对话框，等待 BottomSheet 动画完成
+          // Delay showing dialog to wait for BottomSheet animation to complete
           unawaited(
             Future<void>.delayed(const Duration(milliseconds: 100), () {
               if (!rootContext.mounted) return;
@@ -869,7 +854,7 @@ class TransactionDetailPage extends ConsumerWidget {
                             FButton(
                               onPress: () async {
                                 Navigator.of(dialogContext).pop();
-                                // 执行删除操作
+                                // Execute delete operation
                                 try {
                                   final networkClient = ref.read(
                                     networkClientProvider,
@@ -883,7 +868,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                     ToastService.success(
                                       description: Text(t.transaction.deleted),
                                     );
-                                    // 返回上一页
+                                    // Navigate back
                                     if (rootContext.mounted) {
                                       GoRouter.of(rootContext).pop();
                                     }
@@ -920,13 +905,13 @@ class TransactionDetailPage extends ConsumerWidget {
         context: GoRouter.of(context)
             .routerDelegate
             .navigatorKey
-            .currentContext!, // 获取GoRouter的根Navigator的context
-        // 或者，如果你的 MaterialApp 有一个全局的 navigatorKey:
+            .currentContext!, // Get root Navigator context from GoRouter
+        // Alternatively, if MaterialApp has a global navigatorKey:
         // context: rootNavigatorKey.currentContext!,
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         builder: (BuildContext sheetContext) {
-          // sheetContext 现在是根Navigator下的context
+          // sheetContext is now the context under root Navigator
           return ActionBottomSheet(
             actions: primaryActions,
             destructiveActions: destructiveActions.isNotEmpty

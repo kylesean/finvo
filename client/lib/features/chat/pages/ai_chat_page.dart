@@ -22,7 +22,7 @@ import '../widgets/welcome/welcome_guide_widget.dart';
 import 'package:augo/i18n/strings.g.dart';
 
 class AIChatPage extends ConsumerStatefulWidget {
-  final String? conversationId; // 从 GoRouter 获取
+  final String? conversationId; // From GoRouter
   const AIChatPage({super.key, this.conversationId});
 
   @override
@@ -39,8 +39,8 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
     _logger.info(
       "DEBUG: AIChatPage initState called. conversationId: ${widget.conversationId}",
     );
-    // 当 Widget 第一次被插入到树中时，根据传入的 conversationId 加载初始数据。
-    // 使用 addPostFrameCallback 确保在第一帧渲染后安全地与 Provider 交互。
+    // When the Widget is first inserted into the tree, load initial data based on the passed conversationId.
+    // Use addPostFrameCallback to safely interact with Provider after the first frame renders.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _logger.info(
         "AIChatPage(initState): Initializing with conversationId: ${widget.conversationId}",
@@ -55,10 +55,10 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
     _logger.info(
       "DEBUG: AIChatPage didUpdateWidget called. oldConversationId: ${oldWidget.conversationId}, newConversationId: ${widget.conversationId}",
     );
-    // 当 GoRouter 改变路由导致这个 Widget 的参数变化时，此方法被调用。
-    // 我们比较新旧 conversationId。
-    // 当路由变化导致 Widget 更新时 (例如从 /ai/123 导航到 /ai/456)
-    // 重新加载数据
+    // Called when GoRouter changes route causing this Widget's parameters to change.
+    // We compare old and new conversationId.
+    // When route change causes Widget update (e.g. navigating from /ai/123 to /ai/456)
+    // reload data
     if (widget.conversationId != oldWidget.conversationId) {
       _logger.info(
         "AIChatPage(didUpdateWidget): conversationId changed from ${oldWidget.conversationId} to ${widget.conversationId}. Reloading data.",
@@ -72,16 +72,16 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
       "DEBUG: _loadDataForCurrentRoute called. Current widget.conversationId: ${widget.conversationId}",
     );
     final notifier = ref.read(chatHistoryProvider.notifier);
-    // 如果路由提供了 conversationId，就加载它。
-    // 添加一个检查，避免在ID相同时重复加载。
+    // If the route provides a conversationId, load it.
+    // Add a check to avoid redundant loading when ID is the same.
     if (widget.conversationId != null) {
-      // 如果有ID，加载对应的会话
+      // If ID exists, load the corresponding conversation
       unawaited(notifier.loadConversation(widget.conversationId!));
     } else {
-      // 如果没有ID，检查当前 Notifier 中是否有会话，如果没有则创建新的
-      // 如果路由是 /ai (conversationId 为 null)，
-      // 检查 Notifier 是否已经有一个会话。如果没有，则创建一个新的。
-      // 这处理了“新建聊天”和应用首次启动进入 /ai 的情况。
+      // If no ID, check whether the current Notifier has a conversation; create new if not
+      // If route is /ai (conversationId is null),
+      // check if Notifier already has a conversation. If not, create a new one.
+      // This handles "new chat" and app first launch entering /ai.
       final currentConvId = ref.read(chatHistoryProvider).currentConversationId;
       if (currentConvId == null) {
         unawaited(notifier.createNewConversation());
@@ -89,27 +89,27 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
     }
   }
 
-  // 显示原生 Drawer 侧边栏
+  // Show native Drawer sidebar
   void _showSidebar() {
     _logger.info("DEBUG: _showSidebar called, opening drawer");
     _scaffoldKey.currentState?.openDrawer();
   }
 
-  /// 获取消息的可复制内容
-  /// 返回 CopyResult 包含复制内容和提示消息
+  /// Get copyable content from a message
+  /// Returns CopyResult containing copy content and toast message
   ({String content, String message}) _getCopyableContent(
     app.ChatMessage message,
     ChatHistory notifier,
   ) {
-    // 1. 如果有纯文本内容，直接返回
+    // 1. If plain text content exists, return directly
     if (message.content.trim().isNotEmpty) {
-      return (content: message.content, message: '内容已复制');
+      return (content: message.content, message: 'Content copied');
     }
 
-    // 2. 如果有 GenUI 组件数据（历史消息），复制 JSON 数据
+    // 2. If GenUI component data exists (history messages), copy JSON data
     if (message.uiComponents.isNotEmpty) {
       try {
-        // 将所有 UI 组件数据合并为 JSON
+        // Merge all UI component data into JSON
         final componentsData = message.uiComponents
             .map(
               (comp) => {
@@ -125,13 +125,13 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         final jsonString = const JsonEncoder.withIndent('  ').convert(
           componentsData.length == 1 ? componentsData.first : componentsData,
         );
-        return (content: jsonString, message: 'JSON 数据已复制');
+        return (content: jsonString, message: 'JSON data copied');
       } catch (e) {
         _logger.info('Failed to serialize UI components: $e');
       }
     }
 
-    // 3. 如果有 surfaceIds（实时消息），从 GenUI Host 获取数据
+    // 3. If surfaceIds exist (real-time messages), get data from GenUI Host
     if (message.surfaceIds.isNotEmpty) {
       try {
         final genUiHost = notifier.genUiHost;
@@ -139,14 +139,14 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
           final surfaceDataList = <Map<String, dynamic>>[];
 
           for (final surfaceId in message.surfaceIds) {
-            // 尝试从 GenUI Host 获取 surface 的 SurfaceDefinition
+            // Try to get SurfaceDefinition from GenUI Host
             final surfaceDefinition = genUiHost
                 .contextFor(surfaceId)
                 .definition
                 .value;
 
             if (surfaceDefinition != null) {
-              // 提取组件数据
+              // Extract component data
               final components = surfaceDefinition.components;
               if (components.isNotEmpty) {
                 for (final entry in components.entries) {
@@ -167,7 +167,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                   ? surfaceDataList.first
                   : surfaceDataList,
             );
-            return (content: jsonString, message: 'JSON 数据已复制');
+            return (content: jsonString, message: 'JSON data copied');
           }
         }
       } catch (e) {
@@ -175,7 +175,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
       }
     }
 
-    // 4. 无可复制内容
+    // 4. No copyable content
     return (content: '', message: '');
   }
 
@@ -195,7 +195,9 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const GenUiCompactErrorWidget(errorMessage: 'GenUI 服务未初始化'),
+            const GenUiCompactErrorWidget(
+              errorMessage: 'GenUI service not initialized',
+            ),
             const SizedBox(height: 8),
             if (message.content.isNotEmpty)
               Text(message.content, style: theme.typography.body.md),
@@ -225,7 +227,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
     );
   }
 
-  /// Build action buttons for AI messages - 简洁设计，无背景
+  /// Build action buttons for AI messages - minimal design, no background
   Widget _buildActionButtons(
     BuildContext context,
     app.ChatMessage message,
@@ -234,7 +236,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // 构建单个操作图标按钮 - 无背景
+    // Build individual action icon button - no background
     Widget buildIconButton({
       required IconData icon,
       required VoidCallback? onTap,
@@ -246,7 +248,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         behavior: HitTestBehavior.opaque,
         child: Padding(
           padding: EdgeInsets.only(
-            left: isFirst ? 0 : 20, // 增大间距
+            left: isFirst ? 0 : 20, // Increased spacing
             right: 0,
             top: 4,
             bottom: 4,
@@ -260,22 +262,22 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 复制按钮 - 第一个，左侧无 padding
+        // Copy button - first, no left padding
         buildIconButton(
           icon: FLucideIcons.copy,
           isFirst: true,
           onTap: () async {
-            // 智能复制逻辑：
-            // 1. 纯文本 -> 复制 content
-            // 2. GenUI 组件 -> 复制 JSON 数据
-            // 3. 无内容 -> 提示
+            // Smart copy logic:
+            // 1. Plain text -> copy content
+            // 2. GenUI components -> copy JSON data
+            // 3. No content -> show hint
             final copyResult = _getCopyableContent(message, notifier);
 
             if (copyResult.content.isEmpty) {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('没有可以复制的内容'),
+                    content: Text('No content to copy'),
                     behavior: SnackBarBehavior.fixed,
                     shape: RoundedRectangleBorder(),
                   ),
@@ -296,7 +298,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
             }
           },
         ),
-        // 点赞按钮
+        // Like button
         buildIconButton(
           icon: FLucideIcons.thumbsUp,
           onTap: () =>
@@ -305,7 +307,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
               ? colors.primary
               : colors.mutedForeground,
         ),
-        // 点踩按钮
+        // Dislike button
         buildIconButton(
           icon: FLucideIcons.thumbsDown,
           onTap: () => notifier.updateAIFeedback(
@@ -316,13 +318,13 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
               ? colors.primary
               : colors.mutedForeground,
         ),
-        // 分享按钮
+        // Share button
         buildIconButton(
           icon: FLucideIcons.share2,
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('分享功能开发中...'),
+                content: Text('Share feature coming soon...'),
                 duration: Duration(seconds: 1),
                 behavior: SnackBarBehavior.fixed,
                 shape: RoundedRectangleBorder(),
@@ -356,8 +358,8 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
           onPress: _showSidebar,
           child: const Icon(FLucideIcons.menu),
         ),
-        // [REFACTORED] 使用今日消费统计替代动态对话标题
-        // 财务 Agent 不需要 chatbot 风格的标题
+        // [REFACTORED] Use today's expense summary instead of dynamic conversation title
+        // Finance Agent doesn't need chatbot-style title
         title: GestureDetector(
           onTap: _showSidebar,
           child: Row(
@@ -367,7 +369,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                 child: Text(
                   ref.watch(conversationExpenseTitleProvider),
                   style: theme.typography.body.xl.copyWith(
-                    // 3.44 起 Skia 回退选中 NotoSansCJK（笔画更重），字重下调一档。
+                    // Since 3.44, Skia fallback selects NotoSansCJK (heavier strokes), reduce font weight by one level.
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -393,22 +395,6 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
       ),
       body: Column(
         children: [
-          // --- DEBUG INFO START ---
-          // Container(
-          //   padding: const EdgeInsets.all(8.0),
-          //   color: Colors.yellow.withOpacity(0.2),
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text('Debug Info:', style: TextStyle(fontWeight: FontWeight.bold)),
-          //       Text('Conversation ID: ${widget.conversationId ?? 'N/A'}'),
-          //       Text('Is Loading History: ${chatHistoryState.isLoadingHistory}'),
-          //       Text('History Error: ${chatHistoryState.historyError ?? 'None'}'),
-          //       Text('Messages Count: ${messages.length}'),
-          //     ],
-          //   ),
-          // ),
-          // --- DEBUG INFO END ---
           Expanded(
             child: messages.isEmpty && !chatHistoryState.isLoadingHistory
                 ? chatHistoryState.historyError != null
@@ -434,7 +420,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                     itemBuilder: (context, index) {
                       final message = messages[messages.length - 1 - index];
 
-                      // 根据消息发送者和类型选择合适的消息气泡
+                      // Select appropriate message bubble based on sender and type
                       switch (message.sender) {
                         case app.MessageSender.user:
                           return UserMessageBubble(message: message);
@@ -462,7 +448,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
           ),
         ],
       ),
-      // 完全复制交易详情页面的做法
+      // Same approach as transaction detail page
       bottomNavigationBar: ChatInputField(
         onSendMessage:
             (String text, {List<PendingMessageAttachment>? attachments}) {

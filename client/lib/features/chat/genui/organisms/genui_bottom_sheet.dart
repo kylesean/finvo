@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-/// GenUI 可复用底部弹窗容器
+/// GenUI reusable bottom sheet container
 ///
-/// Layer 3 (Organism) 组件，提供统一的底部弹窗外观和行为。
-/// 包含拖拽手柄、标题栏和可滚动内容区。
+/// Layer 3 (Organism) component, providing unified bottom sheet appearance and behavior.
+/// Includes drag handle, title bar, and scrollable content area.
 ///
-/// 使用方式：
+/// Usage:
 /// ```dart
 /// GenUIBottomSheet.show(
 ///   context: context,
-///   title: '消费明细',
+///   title: 'Expense Details',
 ///   builder: (context) => TransactionListView(data: data),
 /// );
 /// ```
@@ -28,7 +28,7 @@ class GenUIBottomSheet extends StatelessWidget {
     this.heightFactor = 0.85,
   });
 
-  /// 显示底部弹窗
+  /// Show bottom sheet
   static Future<T?> show<T>({
     required BuildContext context,
     required String title,
@@ -63,7 +63,7 @@ class GenUIBottomSheet extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // 拖拽手柄
+          // Drag handle
           const SizedBox(height: 8),
           Container(
             width: 32,
@@ -73,7 +73,7 @@ class GenUIBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          // 标题栏
+          // Title bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Row(
@@ -102,7 +102,7 @@ class GenUIBottomSheet extends StatelessWidget {
 
           Container(height: 1, color: colors.border),
 
-          // 内容区 - 填充到底部
+          // Content area - fills to bottom
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(bottom: bottomPadding),

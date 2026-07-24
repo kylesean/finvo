@@ -253,8 +253,9 @@ class BudgetWithUsage {
   /// Creates a BudgetWithUsage from a flat backend BudgetResponse.
   factory BudgetWithUsage.fromBudgetResponse(Map<String, dynamic> json) {
     return BudgetWithUsage(
-      budget: Budget.fromJson(json), // BudgetResponse 直接解析为 Budget
-      currentPeriod: null, // BudgetResponse 不包含独立的 period 对象
+      budget: Budget.fromJson(json), // BudgetResponse parsed directly as Budget
+      currentPeriod:
+          null, // BudgetResponse does not contain a separate period object
       spentAmount: Decimal.parse((json['spent_amount'] ?? 0).toString()),
       remainingAmount: Decimal.parse(
         (json['remaining_amount'] ?? 0).toString(),

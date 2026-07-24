@@ -13,7 +13,7 @@ abstract class ChatInputState with _$ChatInputState {
     @Default(false)
     bool isSpeechAvailable, // Whether speech recognition service is available
     @Default(false) bool isLoadingResponse, // Whether waiting for AI response
-    @Default(false) bool showError, // Whether to show error提示
+    @Default(false) bool showError, // Whether to show error prompt
     @Default('') String errorMessage, // Error message content
     @Default(HintType.normal)
     HintType hintType, // Used to control input box hint text type
@@ -29,5 +29,5 @@ enum HintType {
   normal, // "Input message..."
   listening, // "Listening..."
   aiProcessing, // "AI thinking..."
-  speechNotRecognized, // "Speech not recognized, please try again" (brief提示)
+  speechNotRecognized, // "Speech not recognized, please try again" (brief prompt)
 }

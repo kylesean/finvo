@@ -77,7 +77,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('共享空间', style: theme.typography.body.xl),
+        title: Text('Shared Space', style: theme.typography.body.xl),
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         elevation: 0,
@@ -93,7 +93,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('共享空间', style: theme.typography.body.xl),
+        title: Text('Shared Space', style: theme.typography.body.xl),
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         elevation: 0,

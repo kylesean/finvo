@@ -257,7 +257,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
       onPress: state.isSaving
           ? null
           : () async {
-              // 切换服务类型，即时生效，无需提示
+              // Switch service type, takes effect immediately, no prompt needed
               await ref
                   .read(speechSettingsProvider.notifier)
                   .updateServiceType(type);

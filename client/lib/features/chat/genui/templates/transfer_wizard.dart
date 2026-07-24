@@ -10,7 +10,7 @@ import '../../services/genui_cache_service.dart';
 import '../events/interaction_events.dart';
 import 'package:augo/shared/utils/amount_formatter.dart';
 
-/// 转账向导数据模型 (Data Layer)
+/// Transfer wizard data model (Data Layer)
 class TransferWizardData {
   final double amount;
   final String currency;
@@ -70,7 +70,7 @@ class TransferWizard extends StatefulWidget {
   State<TransferWizard> createState() => _TransferWizardState();
 }
 
-/// 用户确认时的状态缓存
+/// State cache upon user confirmation
 class _ConfirmedState {
   final String? sourceId;
   final String? targetId;
@@ -97,7 +97,7 @@ class _TransferWizardState extends State<TransferWizard> {
     super.initState();
     _model = TransferWizardData.fromJson(widget.data);
 
-    // 优先从缓存恢复确认状态（解决组件重建后状态丢失问题）
+    // Prefer restoring confirmed state from cache (fixes state loss on widget rebuild)
     final cachedState = GenUiCacheService().get<_ConfirmedState>(
       _cacheCategory,
       _model.surfaceId,
@@ -108,7 +108,7 @@ class _TransferWizardState extends State<TransferWizard> {
       _amountController = TextEditingController(text: cachedState.amount);
       _isConfirmed = true;
     } else if (_model.isConfirmed) {
-      // 历史加载场景：从后端回填的数据恢复
+      // Historical load scenario: restore from backend backfilled data
       _sourceId = _model.preselectedSourceId;
       _targetId = _model.preselectedTargetId;
       _amountController = TextEditingController(
@@ -116,7 +116,7 @@ class _TransferWizardState extends State<TransferWizard> {
       );
       _isConfirmed = true;
     } else {
-      // 使用原始数据初始化
+      // Initialize with original data
       _sourceId = _model.preselectedSourceId;
       _targetId = _model.preselectedTargetId;
       _amountController = TextEditingController(
@@ -330,7 +330,7 @@ class _TransferWizardState extends State<TransferWizard> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // 2. 基础卡片层
+        // 2. Base card layer
         Column(
           children: [
             _buildAccountItem(
@@ -357,7 +357,7 @@ class _TransferWizardState extends State<TransferWizard> {
           ],
         ),
 
-        // 3. 特色交互：中心重叠圆圈
+        // 3. Featured interaction: center overlapping circle
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -406,7 +406,7 @@ class _TransferWizardState extends State<TransferWizard> {
             },
       child: Row(
         children: [
-          // 恢复：左侧固有的图标圆圈
+          // Restore: left-side inherent icon circle
           Container(
             width: 42,
             height: 42,
@@ -429,7 +429,7 @@ class _TransferWizardState extends State<TransferWizard> {
             ),
           ),
           const SizedBox(width: 16),
-          // 卡片主体
+          // Card body
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -525,7 +525,7 @@ class _TransferWizardState extends State<TransferWizard> {
     setState(() => _isConfirmed = true);
     final finalAmount = double.tryParse(_amountController.text) ?? 0;
 
-    // 将用户选择保存到缓存，防止组件重建时状态丢失
+    // Save user selection to cache to prevent state loss on widget rebuild
     GenUiCacheService().put(
       _cacheCategory,
       _model.surfaceId,
@@ -536,7 +536,7 @@ class _TransferWizardState extends State<TransferWizard> {
       ),
     );
 
-    // 获取账户名称用于后端 TransferReceipt 组件显示
+    // Get account names for backend TransferReceipt component display
     final sourceAccount = _getAccount(_sourceId, _model.sourceAccounts);
     final targetAccount = _getAccount(_targetId, _model.targetAccounts);
     final sourceAccountName =

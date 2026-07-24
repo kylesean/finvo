@@ -35,7 +35,7 @@ class EmptyStateAlert extends StatelessWidget {
   });
 
   factory EmptyStateAlert.budget({
-    String title = '暂无预算',
+    String title = 'No budgets yet',
     String? actionText,
     VoidCallback? onAction,
   }) {
@@ -48,7 +48,7 @@ class EmptyStateAlert extends StatelessWidget {
   }
 
   factory EmptyStateAlert.transaction({
-    String title = '暂无交易记录',
+    String title = 'No transactions yet',
     String? actionText,
     VoidCallback? onAction,
   }) {
@@ -61,7 +61,7 @@ class EmptyStateAlert extends StatelessWidget {
   }
 
   factory EmptyStateAlert.account({
-    String title = '暂无账户',
+    String title = 'No accounts yet',
     String? actionText,
     VoidCallback? onAction,
   }) {

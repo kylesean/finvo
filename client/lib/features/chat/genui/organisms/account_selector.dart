@@ -5,6 +5,7 @@ import 'package:genui/genui.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../molecules/molecules.dart';
 import '../events/interaction_events.dart';
+import '../../../../shared/widgets/app_card.dart';
 
 /// A complete account selection widget with search functionality
 ///
@@ -232,7 +233,8 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
         widget.data['show_search'] as bool? ?? _accounts.length > 5;
     final enabled = (widget.data['enabled'] as bool? ?? true) && !_isHistorical;
 
-    return FCard(
+    return AppCard(
+      style: const .delta(padding: .value(EdgeInsets.zero)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

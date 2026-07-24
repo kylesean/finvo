@@ -57,7 +57,7 @@ class AccountTypePickerPage extends ConsumerWidget {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 1.3, // 增加比例，缩小卡片高度
+                childAspectRatio: 1.3, // Increase ratio to reduce card height
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
@@ -153,7 +153,7 @@ class _AccountTypeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 图标容器 - 使用统一的设计 token
+            // Icon container - using unified design token
             Container(
               width: 40,
               height: 40,
@@ -164,7 +164,7 @@ class _AccountTypeCard extends StatelessWidget {
               child: Center(child: definition.iconBuilder(colors.foreground)),
             ),
             const SizedBox(height: 8),
-            // 标题 - 使用 Flexible 防止溢出
+            // Title - use Flexible to prevent overflow
             Text(
               title,
               style: theme.typography.body.md.copyWith(
@@ -175,7 +175,7 @@ class _AccountTypeCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
-            // 描述 - 使用 Expanded 填充剩余空间
+            // Description - use Expanded to fill remaining space
             Expanded(
               child: Text(
                 subtitle,
@@ -193,7 +193,7 @@ class _AccountTypeCard extends StatelessWidget {
     );
   }
 
-  /// 获取本地化的标题和描述
+  /// Get localized title and description
   (String title, String subtitle) _getLocalizedText(
     AccountTypeDefinition definition,
   ) {

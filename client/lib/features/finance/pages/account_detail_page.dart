@@ -48,14 +48,14 @@ class FinancialAccountDetailPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '账户名称',
+              'Account Name',
               style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              // 使用 name 字段
+              // Use name field
               args.account.name,
               style: theme.typography.body.lg.copyWith(
                 fontWeight: FontWeight.w500,
@@ -64,7 +64,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              '当前余额',
+              'Current Balance',
               style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
@@ -89,7 +89,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '账户类型',
+                    'Account Type',
                     style: theme.typography.body.sm.copyWith(
                       color: colors.mutedForeground,
                     ),
@@ -118,7 +118,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
             Expanded(
               child: Center(
                 child: Text(
-                  '账户详情功能正在建设中',
+                  'Account details feature is under construction',
                   style: theme.typography.body.sm.copyWith(
                     color: colors.mutedForeground,
                   ),

@@ -11,18 +11,17 @@ import 'package:augo/app/theme/app_semantic_colors.dart';
 
 import '../../../../core/constants/category_constants.dart';
 
-/// 预算分析卡片 (Layer 4: Template)
+/// Budget analysis card (Layer 4: Template)
 ///
-/// 展示预算深度分析结果，包含：
-/// - 总支出摘要和趋势
-/// - 分类占比可视化
-/// - Top 支出列表
-/// - AI 建议
+/// Displays in-depth budget analysis results, including:
+/// - Total expense summary and trends
+/// - Category distribution visualization
+/// - Top spenders list
+/// - AI suggestions
 ///
-/// 与 BudgetStatusCard 的区别：
-/// - BudgetStatusCard: 简单查询，展示当前预算状态
-/// - BudgetAnalysisCard: 深度分析，展示趋势、洞察、建议
-/// - BudgetAnalysisCard: 深度分析，展示趋势、洞察、建议
+/// Difference from BudgetStatusCard:
+/// - BudgetStatusCard: simple query, shows current budget status
+/// - BudgetAnalysisCard: deep analysis, shows trends, insights, suggestions
 class BudgetAnalysisCard extends ConsumerWidget {
   final Map<String, dynamic> data;
 
@@ -63,21 +62,21 @@ class BudgetAnalysisCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 顶部标题栏（深蓝色调，区别于状态卡片）
+          // 1. Header bar (dark blue tone, distinct from status card)
           _buildHeader(theme, colors, periodDays),
 
-          // 2. 总支出 + 趋势指标
+          // 2. Total expense + trend indicators
           _buildTotalSection(theme, colors, totalExpense, trends, currency),
 
-          // 3. 分类占比
+          // 3. Category distribution
           if (byCategory.isNotEmpty)
             _buildCategorySection(theme, colors, byCategory, currencySymbol),
 
-          // 4. Top 支出
+          // 4. Top spenders
           if (topSpenders.isNotEmpty)
             _buildTopSpendersSection(theme, colors, topSpenders, currency),
 
-          // 5. 建议（基于结构化数据）
+          // 5. Suggestions (based on structured data)
           if (suggestions.isNotEmpty)
             _buildSuggestionsSection(theme, colors, suggestions),
         ],
@@ -85,7 +84,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     );
   }
 
-  /// 顶部标题栏 - 使用深蓝色调区别于普通状态卡片
+  /// Header bar - using dark blue tone to distinguish from regular status card
   Widget _buildHeader(FThemeData theme, FColors colors, int periodDays) {
     return Container(
       width: double.infinity,
@@ -132,7 +131,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     );
   }
 
-  /// 总支出区域 + 趋势指标
+  /// Total expense section + trend indicators
   Widget _buildTotalSection(
     FThemeData theme,
     FColors colors,
@@ -149,7 +148,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // 总支出金额
+          // Total expense amount
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,7 +181,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             ),
           ),
 
-          // 趋势指标
+          // Trend indicators
           if (mom != null)
             _buildTrendBadge(theme, colors, changePercent, direction),
         ],
@@ -190,7 +189,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     );
   }
 
-  /// 趋势徽章
+  /// Trend badge
   Widget _buildTrendBadge(
     FThemeData theme,
     FColors colors,
@@ -200,7 +199,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     final semantic = theme.semantic;
     final isUp = direction == 'up';
     final isFlat = direction == 'flat';
-    // 使用语义色：上升用红色(destructive)，下降用绿色(success)
+    // Use semantic colors: up uses red (destructive), down uses green (success)
     final trendColor = isFlat
         ? colors.mutedForeground
         : (isUp ? colors.destructive : semantic.successAccent);
@@ -234,14 +233,14 @@ class BudgetAnalysisCard extends ConsumerWidget {
     );
   }
 
-  /// 分类占比区域
+  /// Category distribution section
   Widget _buildCategorySection(
     FThemeData theme,
     FColors colors,
     Map<String, dynamic> byCategory,
     String currencySymbol,
   ) {
-    // 按占比排序
+    // Sort by proportion
     final sortedCategories = byCategory.entries.toList()
       ..sort((a, b) {
         final aTotal = (a.value['total'] as num?)?.toDouble() ?? 0;
@@ -262,7 +261,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          // 组合进度条
+          // Combined progress bar
           Container(
             height: 10,
             width: double.infinity,
@@ -287,7 +286,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          // 分类列表（取前 4 个）
+          // Category list (top 4)
           ...sortedCategories.take(4).toList().asMap().entries.map((mapEntry) {
             final index = mapEntry.key;
             final entry = mapEntry.value;
@@ -345,7 +344,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     );
   }
 
-  /// Top 支出列表
+  /// Top spenders list
   Widget _buildTopSpendersSection(
     FThemeData theme,
     FColors colors,
@@ -431,13 +430,13 @@ class BudgetAnalysisCard extends ConsumerWidget {
     );
   }
 
-  /// 建议区域
+  /// Suggestions section
   Widget _buildSuggestionsSection(
     FThemeData theme,
     FColors colors,
     List<dynamic> suggestions,
   ) {
-    // 使用主题 primary 色的变体，保持 warning 语义但与主题统一
+    // Use theme primary color variant, maintaining warning semantics while unified with theme
     final accentColor = colors.primary;
     final bgColor = colors.primary.withValues(alpha: 0.08);
     final borderColor = colors.primary.withValues(alpha: 0.2);
@@ -469,7 +468,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           ...suggestions.take(3).map((suggestion) {
-            // 处理结构化 suggestion 数据
+            // Process structured suggestion data
             final text = _formatSuggestion(suggestion);
             return Padding(
               padding: const EdgeInsets.only(bottom: 6),
@@ -502,7 +501,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     );
   }
 
-  /// 格式化结构化建议为可读文本
+  /// Format structured suggestion into readable text
   String _formatSuggestion(dynamic suggestion) {
     if (suggestion is String) return suggestion;
     if (suggestion is! Map) return suggestion.toString();
@@ -512,7 +511,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     final percentage = suggestion['percentage'];
     final count = suggestion['count'];
 
-    // 获取本地化分类名
+    // Get localized category name
     final categoryName = categoryKey != null
         ? TransactionCategory.fromKey(categoryKey).displayText
         : '';

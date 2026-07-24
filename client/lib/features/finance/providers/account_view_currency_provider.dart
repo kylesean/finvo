@@ -73,7 +73,7 @@ String effectiveViewCurrency(Ref ref) {
   final viewState = ref.watch(accountViewCurrencyProvider);
   final globalCurrency = ref.watch(financialSettingsProvider).primaryCurrency;
 
-  // 使用 freezed 生成的 .map 方法进行模式匹配
+  // Use freezed-generated .map method for pattern matching
   return viewState.map(
     global: (_) => globalCurrency,
     temporary: (temp) => temp.currency,

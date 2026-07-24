@@ -20,10 +20,10 @@ import 'package:augo/shared/widgets/themed_icon.dart';
 import 'package:augo/features/home/models/transaction_model.dart';
 import 'package:augo/i18n/strings.g.dart';
 
-/// 批量交易收据组件
+/// Batch transaction receipt component
 ///
-/// 支持轮播 (Carousel) 和 列表 (List) 两种模式切换
-/// 每笔交易独立关联账户（取消批量关联，改为逐笔操作）
+/// Supports carousel and list view mode switching
+/// Each transaction has independent account association (per-transaction operation)
 class TransactionGroupReceipt extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
   final void Function(UiEvent)? dispatchEvent;
@@ -47,19 +47,19 @@ class _TransactionGroupReceiptState
   int _currentIndex = 0;
   late final PageController _pageController;
 
-  /// 每笔交易的账户关联状态
+  /// Account association state per transaction
   final Map<String, String?> _accountAssociations = {};
 
-  /// 每笔交易的共享空间关联状态
+  /// Shared space association state per transaction
   final Map<String, List<String>> _spaceAssociations = {};
 
-  /// 正在更新账户的交易 ID 集合
+  /// Set of transaction IDs currently updating account
   final Set<String> _updatingTransactions = {};
 
-  /// 正在更新共享空间的交易 ID 集合
+  /// Set of transaction IDs currently updating shared space
   final Set<String> _updatingSpaceTransactions = {};
 
-  /// 缓存的共享空间列表
+  /// Cached shared space list
   List<Map<String, dynamic>>? _cachedSpaces;
 
   @override
@@ -67,7 +67,7 @@ class _TransactionGroupReceiptState
     super.initState();
     _pageController = PageController();
     _initializeAccountAssociations();
-    // 异步刷新最新的账户关联状态
+    // Async refresh latest account association state
     unawaited(_refreshAccountAssociations());
   }
 
@@ -77,13 +77,13 @@ class _TransactionGroupReceiptState
       final txMap = tx as Map<String, dynamic>;
       final id = txMap['id']?.toString();
       if (id != null) {
-        // 优先使用 source_account_id（支出），否则使用 target_account_id（收入）
+        // Prefer source_account_id (expense), otherwise use target_account_id (income)
         final accountId =
             txMap['source_account_id']?.toString() ??
             txMap['target_account_id']?.toString();
         _accountAssociations[id] = accountId;
 
-        // 初始化共享空间关联
+        // Initialize shared space association
         final spaceId = txMap['space_id']?.toString();
         if (spaceId != null) {
           _spaceAssociations[id] = [spaceId];
@@ -94,7 +94,7 @@ class _TransactionGroupReceiptState
     }
   }
 
-  /// 从服务器刷新最新的账户关联状态（并行请求优化）
+  /// Refresh latest account association state from server (parallel request optimization)
   Future<void> _refreshAccountAssociations() async {
     final transactions = (widget.data['transactions'] as List? ?? []);
     if (transactions.isEmpty) return;
@@ -110,7 +110,7 @@ class _TransactionGroupReceiptState
     try {
       final networkClient = ref.read(networkClientProvider);
 
-      // 并行请求所有交易详情
+      // Parallel fetch all transaction details
       final results = await Future.wait(
         transactionIds.map((txId) async {
           try {
@@ -125,7 +125,7 @@ class _TransactionGroupReceiptState
         }),
       );
 
-      // 处理所有结果
+      // Process all results
       if (mounted) {
         setState(() {
           for (int i = 0; i < transactionIds.length; i++) {
@@ -134,7 +134,7 @@ class _TransactionGroupReceiptState
 
             if (result['code'] == 0 && result['data'] != null) {
               final data = result['data'] as Map<String, dynamic>;
-              // 根据交易类型获取正确的账户 ID
+              // Get correct account ID based on transaction type
               final type = data['type']?.toString().toUpperCase() ?? 'EXPENSE';
               String? accountId;
               if (type == 'INCOME') {
@@ -145,7 +145,7 @@ class _TransactionGroupReceiptState
 
               _accountAssociations[txId] = accountId;
 
-              // 同步共享空间关联
+              // Sync shared space association
               final spaces = data['spaces'] as List<dynamic>?;
               if (spaces != null) {
                 _spaceAssociations[txId] = spaces
@@ -172,10 +172,10 @@ class _TransactionGroupReceiptState
     super.dispose();
   }
 
-  // ==================== 积木分子 (Molecules) ====================
+  // ==================== Molecules ====================
 
-  /// 积木 1: 交易信息分子 (图标 + 信息 + 金额)
-  /// 仿照首页 flow 卡片布局
+  /// Molecule 1: Transaction info (icon + info + amount)
+  /// Following home page flow card layout
   Widget _moleculeTransactionInfo(
     FThemeData theme,
     FColors colors,
@@ -244,9 +244,9 @@ class _TransactionGroupReceiptState
     );
   }
 
-  /// 原子组件: 标签行
+  /// Atom: Tags row
   Widget _atomTagsRow(FThemeData theme, FColors colors, List<String> tags) {
-    // 只显示前2个
+    // Only show first 2
     final visibleTags = tags.take(2);
     return Row(
       children: visibleTags.map((tag) {
@@ -272,7 +272,7 @@ class _TransactionGroupReceiptState
     );
   }
 
-  /// 积木 2: 金额分子
+  /// Molecule 2: Amount
   Widget _moleculeAmount(
     FThemeData theme,
     double amount,
@@ -288,11 +288,11 @@ class _TransactionGroupReceiptState
           style ??
           theme.typography.body.sm.copyWith(
             fontWeight: FontWeight.w700,
-          ), // 提升默认权重和大小
+          ), // Elevated default weight and size
     );
   }
 
-  /// 积木 3: 操作分子 (账户 + 空间按钮组)
+  /// Molecule 3: Actions (account + space button group)
   Widget _moleculeActions(
     FThemeData theme,
     FColors colors,
@@ -348,7 +348,7 @@ class _TransactionGroupReceiptState
     );
   }
 
-  /// 原子组件: 操作胶囊样式
+  /// Atom: Action pill style
   Widget _atomActionPill(
     FThemeData theme,
     FColors colors, {
@@ -423,10 +423,10 @@ class _TransactionGroupReceiptState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 头部
+          // Header
           _buildHeader(theme, colors, transactions.length, totalAmount),
 
-          // 内容
+          // Content
           AnimatedCrossFade(
             firstChild: _buildCarouselView(theme, colors, transactions),
             secondChild: _buildListView(theme, colors, transactions),
@@ -450,7 +450,7 @@ class _TransactionGroupReceiptState
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 16,
-      ), // 恢复紧凑布局
+      ), // Restore compact layout
       decoration: BoxDecoration(color: colors.primary.withValues(alpha: 0.05)),
       child: Row(
         children: [
@@ -490,7 +490,7 @@ class _TransactionGroupReceiptState
               ],
             ),
           ),
-          // 切换按钮
+          // Toggle button
           _buildToggle(theme, colors),
         ],
       ),
@@ -563,7 +563,7 @@ class _TransactionGroupReceiptState
     return Column(
       children: [
         SizedBox(
-          height: 196, // 增加高度以防止内容溢出
+          height: 196, // Increased height to prevent content overflow
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (index) => setState(() => _currentIndex = index),
@@ -608,8 +608,8 @@ class _TransactionGroupReceiptState
     final category = TransactionCategory.fromKey(tx['category_key'] as String?);
     final tags = (tx['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
 
-    // 优先使用原始币种和金额（针对汇率转换场景）
-    // 后端返回 camelCase: originalAmount, originalCurrency
+    // Prefer original currency and amount (for exchange rate conversion scenarios)
+    // Backend returns camelCase: originalAmount, originalCurrency
     final originalAmount = tx['originalAmount'] != null
         ? double.tryParse(tx['originalAmount'].toString())
         : null;
@@ -628,7 +628,7 @@ class _TransactionGroupReceiptState
       behavior: HitTestBehavior.opaque,
       onTap: () => _navigateToTransactionDetail(transactionId),
       child: Container(
-        // 高度自适应，不再强制固定太大，避免空隙
+        // Height auto-adapts, no longer forcing a large fixed size to avoid gaps
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -681,8 +681,8 @@ class _TransactionGroupReceiptState
     final category = TransactionCategory.fromKey(tx['category_key'] as String?);
     final tags = (tx['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
 
-    // 优先使用原始币种和金额（针对汇率转换场景）
-    // 后端返回 camelCase: originalAmount, originalCurrency
+    // Prefer original currency and amount (for exchange rate conversion scenarios)
+    // Backend returns camelCase: originalAmount, originalCurrency
     final originalAmount = tx['originalAmount'] != null
         ? double.tryParse(tx['originalAmount'].toString())
         : null;
@@ -723,7 +723,7 @@ class _TransactionGroupReceiptState
     );
   }
 
-  /// 跳转到交易详情页面
+  /// Navigate to transaction detail page
   void _navigateToTransactionDetail(String? transactionId) {
     if (transactionId == null || transactionId.isEmpty) {
       _log.warning('Transaction ID is null or empty, cannot navigate');
@@ -745,13 +745,13 @@ class _TransactionGroupReceiptState
     final theme = context.theme;
     final colors = theme.colors;
 
-    // 获取交易币种
+    // Get transaction currency
     final txCurrency =
         (tx['originalCurrency'] as String?) ??
         (tx['currency'] as String?) ??
         'USD';
 
-    // 获取交易金额
+    // Get transaction amount
     final txAmount = tx['originalAmount'] != null
         ? double.tryParse(tx['originalAmount'].toString())
         : double.tryParse(tx['amount']?.toString() ?? '0');
@@ -774,12 +774,12 @@ class _TransactionGroupReceiptState
             'name': a.name,
             'type': a.type?.name ?? 'unknown',
             'balance': a.currentBalance,
-            'currencyCode': a.currencyCode, // 添加币种信息
+            'currencyCode': a.currencyCode, // Include currency info
           },
         )
         .toList();
 
-    // 如果没有可用账户，显示提示
+    // If no available accounts, show a hint
     if (printableAccounts.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -810,7 +810,7 @@ class _TransactionGroupReceiptState
             accounts: printableAccounts,
             selectedId: currentAccountId,
             title: t.chat.genui.transactionCard.selectAccount,
-            transactionCurrency: txCurrency, // 传入交易币种
+            transactionCurrency: txCurrency, // Pass transaction currency
             onSelect: (id) {
               Navigator.pop(context, id);
             },
@@ -819,7 +819,7 @@ class _TransactionGroupReceiptState
         ),
       ).then((selectedId) async {
         if (selectedId != null) {
-          // 获取选中的账户
+          // Get selected account
           final selectedAccount = accountState.accounts
               .where((a) => a.id == selectedId)
               .firstOrNull;
@@ -828,7 +828,7 @@ class _TransactionGroupReceiptState
             final accountCurrency = selectedAccount.currencyCode.toUpperCase();
             final transactionCurrency = txCurrency.toUpperCase();
 
-            // 币种不一致，显示确认弹窗
+            // Currency mismatch, show confirmation dialog
             if (accountCurrency != transactionCurrency) {
               final confirmed = await _showCurrencyMismatchConfirmDialog(
                 txAmount ?? 0,
@@ -847,7 +847,7 @@ class _TransactionGroupReceiptState
     );
   }
 
-  /// 显示币种不匹配确认弹窗
+  /// Show currency mismatch confirmation dialog
   Future<bool?> _showCurrencyMismatchConfirmDialog(
     double amount,
     String fromCurrency,

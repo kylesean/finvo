@@ -315,15 +315,16 @@ class GenUiLifecycleManager {
     // Converter logic
     String userFriendlyMessage;
     if (error.contains('No generations') || error.contains('empty stream')) {
-      userFriendlyMessage = '抱歉，服务暂时繁忙，请稍后再试';
+      userFriendlyMessage =
+          'Sorry, the service is temporarily busy, please try again later';
     } else if (error.contains('timeout') || error.contains('Timeout')) {
-      userFriendlyMessage = '请求超时了，请检查网络后重试';
+      userFriendlyMessage = 'Request timed out, please check network and retry';
     } else if (error.contains('network') || error.contains('connection')) {
-      userFriendlyMessage = '网络连接出现问题，请检查后重试';
+      userFriendlyMessage = 'Network connection issue, please check and retry';
     } else if (error.contains('Authentication') || error.contains('token')) {
-      userFriendlyMessage = '登录状态已过期，请重新登录';
+      userFriendlyMessage = 'Session expired, please log in again';
     } else {
-      userFriendlyMessage = '出了点小问题，请稍后再试';
+      userFriendlyMessage = 'Something went wrong, please try again later';
     }
 
     final currentId = _getCurrentStreamingMessageId();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../molecules/molecules.dart';
+import '../../../../shared/widgets/app_card.dart';
 
 class AccountPickerCard extends StatelessWidget {
   final List<Map<String, dynamic>> accounts;
@@ -85,7 +86,8 @@ class AccountPickerCard extends StatelessWidget {
     final isConfirmedState = !enabled && selectedId != null;
 
     if (isConfirmedState) {
-      return FCard(
+      return AppCard(
+        style: const .delta(padding: .value(EdgeInsets.zero)),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           child: Row(

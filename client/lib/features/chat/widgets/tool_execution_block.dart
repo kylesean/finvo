@@ -37,7 +37,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
         widget.toolCall.status == ToolExecutionStatus.pending) {
       unawaited(_controller.repeat());
     }
-    // cancelled/success/error 状态不启动动画
+    // Do not start animation for cancelled/success/error status
   }
 
   @override
@@ -64,7 +64,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
     final theme = context.theme;
     final t = Translations.of(context);
 
-    // 根据状态获取不同的语义化文本
+    // Get semantic label text based on status
     final label = _getLabelForStatus(
       widget.toolCall.name,
       widget.toolCall.status,
@@ -145,16 +145,16 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
     );
   }
 
-  /// 根据状态获取不同的标签文本
-  /// - pending/running: 带 "..." 的进行中标签
-  /// - success: 不带 "..." 的完成标签
-  /// - error: 失败标签
+  /// Get label text based on status
+  /// - pending/running: in-progress label with "..."
+  /// - success: completed label without "..."
+  /// - error: failure label
   String _getLabelForStatus(
     String toolName,
     ToolExecutionStatus status,
     Translations t,
   ) {
-    // 对于 execute 工具，尝试从 args 中解析脚本名以显示更语义化的状态
+    // For execute tool, try to parse script name from args for more semantic status display
     final semanticName = _getSemanticToolName(toolName, widget.toolCall.args);
 
     switch (status) {
@@ -170,8 +170,8 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
     }
   }
 
-  /// 从 execute 工具的参数中解析语义化的工具名
-  /// 例如：execute({command: "python analyze_finance.py"}) -> "analyze_finance"
+  /// Parse semantic tool name from execute tool arguments
+  /// e.g.: execute({command: "python analyze_finance.py"}) -> "analyze_finance"
   String _getSemanticToolName(String toolName, Map<String, dynamic> args) {
     if (toolName != 'execute') return toolName;
 
@@ -201,10 +201,10 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
       }
     }
 
-    return toolName; // 无法识别时返回原始工具名
+    return toolName; // Return original tool name when unrecognized
   }
 
-  /// 进行中标签（带 ...）
+  /// In-progress label (with ...)
   String _getRunningLabel(String toolName, Translations t) {
     final tools = t.chat.tools;
     return switch (toolName) {
@@ -221,7 +221,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
       'list_spaces' => tools.listSpaces,
       'query_space_summary' => tools.querySpaceSummary,
       'prepare_transfer' => tools.prepareTransfer,
-      // 保留旧工具映射（向后兼容）
+      // Keep legacy tool mappings (backward compatibility)
       'get_cash_flow_analysis' => tools.getCashFlowAnalysis,
       'get_financial_health_score' => tools.getFinancialHealthScore,
       'get_financial_summary' => tools.getFinancialSummary,
@@ -237,7 +237,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
     };
   }
 
-  /// 完成标签（无 ...）
+  /// Completed label (without ...)
   String _getDoneLabel(String toolName, Translations t) {
     final done = t.chat.tools.done;
     return switch (toolName) {
@@ -254,7 +254,7 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
       'list_spaces' => done.listSpaces,
       'query_space_summary' => done.querySpaceSummary,
       'prepare_transfer' => done.prepareTransfer,
-      // 保留旧工具映射（向后兼容）
+      // Keep legacy tool mappings (backward compatibility)
       'get_cash_flow_analysis' => done.getCashFlowAnalysis,
       'get_financial_health_score' => done.getFinancialHealthScore,
       'get_financial_summary' => done.getFinancialSummary,

@@ -49,11 +49,11 @@ class HistoricalMessageProcessor {
         return attachment;
       }).toList();
 
-      // 不再尝试通过 GenUI 重放历史 UI 组件
-      // 原因：replayHistoricalSurface 机制不可靠，历史组件应由 HistoricalComponentRenderer 直接渲染
-      // 这是更简单且稳定的方案
+      // No longer attempt to replay historical UI components via GenUI
+      // Reason: replayHistoricalSurface mechanism is unreliable, historical components should be rendered directly by HistoricalComponentRenderer
+      // This is a simpler and more stable approach
 
-      // 记录历史 UI 组件信息（仅用于调试）
+      // Log historical UI component info (for debugging only)
       if (processedMessage.uiComponents.isNotEmpty) {
         _logger.info(
           "HistoricalMessageProcessor: Message ${processedMessage.id} has ${processedMessage.uiComponents.length} UI components (will be rendered by HistoricalComponentRenderer)",
@@ -64,8 +64,8 @@ class HistoricalMessageProcessor {
         streamingStatus: StreamingStatus.completed,
         isTyping: false,
         attachments: normalizedAttachments,
-        // 保留原有的 surfaceIds（来自实时渲染的 surfaces）
-        // uiComponents 保持不变，供 HistoricalComponentRenderer 使用
+        // Preserve original surfaceIds (from real-time rendered surfaces)
+        // uiComponents remain unchanged, for HistoricalComponentRenderer to use
       );
 
       // Merge consecutive AI messages (tool call messages + final reply)

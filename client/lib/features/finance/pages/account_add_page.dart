@@ -21,7 +21,7 @@ class FinancialAccountAddArgs {
   final FinancialAccount? initialAccount;
 }
 
-/// 添加账户页面 - 紧凑布局设计
+/// Add account page - compact layout design
 class FinancialAccountAddPage extends ConsumerStatefulWidget {
   const FinancialAccountAddPage({super.key, required this.args});
 
@@ -72,7 +72,8 @@ class _FinancialAccountAddPageState
 
     return Scaffold(
       backgroundColor: colors.background,
-      resizeToAvoidBottomInset: false, // 防止键盘顶起布局
+      resizeToAvoidBottomInset:
+          false, // Prevent keyboard from pushing layout up
       appBar: AppBar(
         backgroundColor: colors.background,
         elevation: 0,
@@ -103,12 +104,12 @@ class _FinancialAccountAddPageState
           ],
         ),
       ),
-      // 固定在底部的保存按钮
+      // Save button pinned to bottom
       bottomNavigationBar: _buildSaveButton(theme, colors),
     );
   }
 
-  /// 统一的表单卡片 - 所有输入项合并在一个卡片中
+  /// Unified form card - all inputs combined in a single card
   Widget _buildFormCard(
     FThemeData theme,
     FColors colors,
@@ -125,11 +126,13 @@ class _FinancialAccountAddPageState
       ),
       child: Column(
         children: [
-          // 账户名称
+          // Account name
           _buildInputRow(
             theme: theme,
             colors: colors,
-            icon: definition.iconBuilder(colors.foreground), // 使用前景色保持一致性
+            icon: definition.iconBuilder(
+              colors.foreground,
+            ), // Use foreground color for consistency
             label: t.account.nameLabel,
             child: TextField(
               controller: _nameController,
@@ -159,7 +162,7 @@ class _FinancialAccountAddPageState
 
           _buildDivider(colors),
 
-          // 初始余额
+          // Initial balance
           _buildInputRow(
             theme: theme,
             colors: colors,
@@ -167,7 +170,7 @@ class _FinancialAccountAddPageState
               _selectedCurrency.symbol,
               style: theme.typography.body.md.copyWith(
                 fontWeight: FontWeight.w500,
-                color: colors.primary, // 使用主题色
+                color: colors.primary, // Use theme color
               ),
             ),
             label: t.account.amountLabel,
@@ -198,7 +201,7 @@ class _FinancialAccountAddPageState
 
           _buildDivider(colors),
 
-          // 币种选择
+          // Currency selection
           _buildTapRow(
             theme: theme,
             colors: colors,
@@ -206,7 +209,7 @@ class _FinancialAccountAddPageState
               FLucideIcons.globe,
               size: 20,
               color: colors.primary,
-            ), // 使用主题色
+            ), // Use theme color
             label: t.account.currencyLabel,
             value:
                 '${_selectedCurrency.code} - ${_selectedCurrency.localizedName}',
@@ -216,7 +219,7 @@ class _FinancialAccountAddPageState
 
           _buildDivider(colors),
 
-          // 隐藏开关
+          // Hidden toggle
           _buildSwitchRow(
             theme: theme,
             colors: colors,
@@ -228,7 +231,7 @@ class _FinancialAccountAddPageState
 
           _buildDivider(colors),
 
-          // 计入资产开关
+          // Include in assets toggle
           _buildSwitchRow(
             theme: theme,
             colors: colors,
@@ -252,7 +255,7 @@ class _FinancialAccountAddPageState
     );
   }
 
-  /// 输入行组件
+  /// Input row widget
   Widget _buildInputRow({
     required FThemeData theme,
     required FColors colors,
@@ -287,7 +290,7 @@ class _FinancialAccountAddPageState
     );
   }
 
-  /// 点击行组件
+  /// Tap row widget
   Widget _buildTapRow({
     required FThemeData theme,
     required FColors colors,
@@ -339,7 +342,7 @@ class _FinancialAccountAddPageState
     );
   }
 
-  /// 开关行组件
+  /// Switch row widget
   Widget _buildSwitchRow({
     required FThemeData theme,
     required FColors colors,

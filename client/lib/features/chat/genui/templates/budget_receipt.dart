@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:augo/i18n/strings.g.dart';
 
-/// 预算创建成功收据卡片
+/// Budget creation success receipt card
 ///
-/// 展示新创建的预算信息。
-/// 参考设计：
+/// Displays newly created budget information.
+/// Reference design:
 /// ┌─────────────────────────────────────────────────┐
-/// │ ✓ 预算已创建                           14:30   │  ← 顶部：成功状态栏
+/// │ ✓ Budget Created                       14:30   │  ← Top: success status bar
 /// ├─────────────────────────────────────────────────┤
 /// │                    📊                           │
-/// │               ¥10,000                           │  ← 中部：预算金额
-/// │            2024年12月总预算                       │
+/// │               ¥10,000                           │  ← Middle: budget amount
+/// │            Dec 2024 Total Budget                │
 /// ├─────────────────────────────────────────────────┤
-/// │ 周期: 12月1日 - 12月31日              滚动预算   │  ← 底部：详情
+/// │ Period: Dec 1 - Dec 31             Rollover    │  ← Bottom: details
 /// └─────────────────────────────────────────────────┘
 class BudgetReceipt extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -34,7 +34,7 @@ class BudgetReceipt extends StatelessWidget {
     return _buildSuccessCard(theme, colors);
   }
 
-  /// 构建成功卡片
+  /// Build success card
   Widget _buildSuccessCard(FThemeData theme, FColors colors) {
     final name =
         data['name'] as String? ?? t.chat.genui.budgetReceipt.newBudget;
@@ -63,13 +63,13 @@ class BudgetReceipt extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 顶部状态栏
+          // Top status bar
           _buildStatusHeader(theme, colors),
 
-          // 中部内容
+          // Middle content
           _buildMainContent(theme, colors, name, amount, scope, categoryKey),
 
-          // 底部详情
+          // Bottom details
           _buildDetailsFooter(
             theme,
             colors,
@@ -82,7 +82,7 @@ class BudgetReceipt extends StatelessWidget {
     );
   }
 
-  /// 构建顶部状态栏
+  /// Build top status bar
   Widget _buildStatusHeader(FThemeData theme, FColors colors) {
     return Container(
       width: double.infinity,
@@ -123,7 +123,7 @@ class BudgetReceipt extends StatelessWidget {
     );
   }
 
-  /// 构建中部内容
+  /// Build middle content
   Widget _buildMainContent(
     FThemeData theme,
     FColors colors,
@@ -141,7 +141,7 @@ class BudgetReceipt extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       child: Column(
         children: [
-          // 图标
+          // Icon
           Container(
             width: 48,
             height: 48,
@@ -153,7 +153,7 @@ class BudgetReceipt extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // 金额
+          // Amount
           Text(
             '¥${_formatAmount(amount)}',
             style: TextStyle(
@@ -165,7 +165,7 @@ class BudgetReceipt extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // 预算名称
+          // Budget name
           Text(
             name,
             style: theme.typography.body.sm.copyWith(
@@ -174,7 +174,7 @@ class BudgetReceipt extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
 
-          // 分类标签（如果是分类预算）
+          // Category tag (if category budget)
           if (categoryKey != null) ...[
             const SizedBox(height: 8),
             Container(
@@ -197,7 +197,7 @@ class BudgetReceipt extends StatelessWidget {
     );
   }
 
-  /// 构建底部详情
+  /// Build bottom details
   Widget _buildDetailsFooter(
     FThemeData theme,
     FColors colors,
@@ -255,7 +255,7 @@ class BudgetReceipt extends StatelessWidget {
     );
   }
 
-  /// 构建错误卡片
+  /// Build error card
   Widget _buildErrorCard(FThemeData theme, FColors colors) {
     final message =
         data['message'] as String? ?? t.chat.genui.budgetReceipt.createFailed;
@@ -286,13 +286,13 @@ class BudgetReceipt extends StatelessWidget {
     );
   }
 
-  /// 格式化当前时间
+  /// Format current time
   String _formatCurrentTime() {
     final now = DateTime.now();
     return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
   }
 
-  /// 格式化金额
+  /// Format amount
   String _formatAmount(double amount) {
     if (amount >= 10000) {
       final wan = amount / 10000;
@@ -307,7 +307,7 @@ class BudgetReceipt extends StatelessWidget {
     return amount.toStringAsFixed(2);
   }
 
-  /// 格式化周期
+  /// Format period
   String _formatPeriod(String? start, String? end) {
     if (start == null || end == null) {
       return t.chat.genui.budgetReceipt.thisMonth;

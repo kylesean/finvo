@@ -10,14 +10,14 @@ import '../../../home/models/transaction_model.dart';
 import '../../../../core/constants/category_constants.dart';
 import 'dart:async';
 
-/// 交易列表视图组件
+/// Transaction list view component
 ///
-/// Layer 3 (Organism) 组件，支持瀑布流分页加载。
-/// 用于底部弹窗等场景中展示完整交易列表。
+/// Layer 3 (Organism) component, supports waterfall pagination.
+/// Used to display full transaction list in bottom sheets and similar scenarios.
 class TransactionListView extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
 
-  /// 每页加载数量
+  /// Page size
   final int pageSize;
 
   const TransactionListView({
@@ -38,7 +38,7 @@ class _TransactionListViewState extends ConsumerState<TransactionListView> {
   late int _total;
   bool _isLoadingMore = false;
 
-  // 缓存搜索参数，用于翻页
+  // Cache search parameters for pagination
   Map<String, dynamic>? _searchMetadata;
 
   @override
@@ -235,7 +235,7 @@ class _TransactionListViewState extends ConsumerState<TransactionListView> {
   }
 }
 
-/// 交易列表项 - 复用现有逻辑但更简洁
+/// Transaction list item - reuses existing logic but more concise
 class _TransactionListItem extends StatelessWidget {
   final Map<String, dynamic> data;
   final VoidCallback? onTap;
@@ -287,7 +287,7 @@ class _TransactionListItem extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      // 优先使用后端 display，否则 fallback 到客户端计算
+                      // Prefer backend display, otherwise fallback to client-side calculation
                       data['display'] != null
                           ? AmountText.fromDisplay(
                               display: data['display'] as Map<String, dynamic>,

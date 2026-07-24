@@ -8,8 +8,8 @@ import 'dart:async';
 import '../../../core/storage/secure_storage_service.dart';
 import '../../../core/constants/api_constants.dart';
 
-/// 带认证的图片加载组件
-/// 自动携带 JWT token 请求图片
+/// Authenticated image loading component
+/// Automatically attaches JWT token when requesting images
 class AuthenticatedImage extends ConsumerStatefulWidget {
   final String attachmentId;
   final BoxFit fit;
@@ -61,7 +61,7 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
       final token = await storageService.getToken();
 
       if (token == null || token.isEmpty) {
-        throw Exception('未找到认证令牌');
+        throw Exception('Authentication token not found');
       }
 
       final dio = Dio();
@@ -84,7 +84,7 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
           _isLoading = false;
         });
       } else {
-        throw Exception('图片数据为空');
+        throw Exception('Image data is empty');
       }
     } catch (e) {
       if (!mounted) return;
@@ -124,8 +124,8 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
   }
 }
 
-/// 带认证的网络图片 Provider
-/// 用于缓存已加载的图片数据
+/// Authenticated network image provider
+/// Used to cache loaded image data
 final authenticatedImageProvider = FutureProvider.family<Uint8List, String>((
   ref,
   attachmentId,
@@ -134,7 +134,7 @@ final authenticatedImageProvider = FutureProvider.family<Uint8List, String>((
   final token = await storageService.getToken();
 
   if (token == null || token.isEmpty) {
-    throw Exception('未找到认证令牌');
+    throw Exception('Authentication token not found');
   }
 
   final dio = Dio();
@@ -150,7 +150,7 @@ final authenticatedImageProvider = FutureProvider.family<Uint8List, String>((
   );
 
   if (response.data == null) {
-    throw Exception('图片数据为空');
+    throw Exception('Image data is empty');
   }
 
   return Uint8List.fromList(response.data!);

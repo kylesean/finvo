@@ -5,7 +5,6 @@ import 'package:augo/features/home/models/total_expense_model.dart';
 import 'package:augo/features/home/models/transaction_model.dart';
 
 import 'package:augo/core/network/exceptions/app_exception.dart';
-// import 'package:augo/i18n/strings.g.dart'; // Unused
 
 class HomeService {
   final NetworkClient _networkClient;

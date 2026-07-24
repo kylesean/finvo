@@ -23,7 +23,7 @@ class FinancialAccountEditArgs {
   final FinancialAccount account;
 }
 
-/// 编辑账户页面 - 紧凑布局设计
+/// Edit account page - compact layout design
 class FinancialAccountEditPage extends ConsumerStatefulWidget {
   const FinancialAccountEditPage({super.key, required this.args});
 

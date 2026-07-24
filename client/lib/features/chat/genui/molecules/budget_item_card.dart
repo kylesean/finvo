@@ -7,6 +7,7 @@ import 'package:augo/shared/models/currency.dart';
 import 'package:augo/i18n/strings.g.dart';
 
 import '../atoms/budget_progress_bar.dart';
+import '../../../../shared/widgets/app_card.dart';
 
 class BudgetItemCard extends ConsumerWidget {
   final String? budgetId;
@@ -71,7 +72,7 @@ class BudgetItemCard extends ConsumerWidget {
     return _buildFullView(theme, colors, currencySymbol);
   }
 
-  /// 紧凑视图 - 用于列表中显示
+  /// Compact view - for list display
   Widget _buildCompactView(FThemeData theme, FColors colors) {
     return InkWell(
       onTap: onTap,
@@ -80,7 +81,7 @@ class BudgetItemCard extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            // 预算名称
+            // Budget name
             SizedBox(
               width: 72,
               child: Text(
@@ -92,7 +93,7 @@ class BudgetItemCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // 进度条
+            // Progress bar
             Expanded(
               child: BudgetProgressBar(
                 percentage: percentage,
@@ -101,7 +102,7 @@ class BudgetItemCard extends ConsumerWidget {
                 showLabel: true,
               ),
             ),
-            // 点击指示器
+            // Tap indicator
             if (onTap != null) ...[
               const SizedBox(width: 4),
               Icon(
@@ -116,7 +117,7 @@ class BudgetItemCard extends ConsumerWidget {
     );
   }
 
-  /// 完整视图 - 用于详细展示
+  /// Full view - for detailed display
   Widget _buildFullView(
     FThemeData theme,
     FColors colors,
@@ -125,7 +126,7 @@ class BudgetItemCard extends ConsumerWidget {
     final semantic = theme.semantic;
     final statusColor = _getStatusColor(status, colors, semantic);
 
-    return FCard(
+    return AppCard(
       child: InkWell(
         onTap: onTap,
         borderRadius: theme.style.borderRadius.md,
@@ -134,7 +135,7 @@ class BudgetItemCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 标题行
+              // Title row
               Row(
                 children: [
                   Expanded(
@@ -167,7 +168,7 @@ class BudgetItemCard extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
 
-              // 进度条
+              // Progress bar
               BudgetProgressBar(
                 percentage: percentage,
                 status: status,
@@ -175,7 +176,7 @@ class BudgetItemCard extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
 
-              // 百分比和金额
+              // Percentage and amount
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

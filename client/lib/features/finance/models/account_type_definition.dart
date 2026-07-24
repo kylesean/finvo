@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tabler_icons_next/tabler_icons_next.dart' as tabler;
+import 'package:forui/forui.dart';
 
 import '../../profile/models/financial_account.dart';
 
-/// UI 层的账户性质分类（用于分组显示）
+/// UI-layer account nature classification (for grouped display)
 enum AccountNature {
   liquidAssets,
   creditAccounts,
@@ -14,21 +14,21 @@ enum AccountNature {
 }
 
 extension AccountNatureX on AccountNature {
-  /// Chinese + English header to match the PRD wording.
+  /// Display name header matching the PRD wording.
   String get displayName {
     switch (this) {
       case AccountNature.liquidAssets:
-        return '流动资产';
+        return 'Liquid Assets';
       case AccountNature.creditAccounts:
-        return '信用账户';
+        return 'Credit Accounts';
       case AccountNature.investmentAssets:
-        return '投资资产';
+        return 'Investment Assets';
       case AccountNature.longTermLiabilities:
-        return '长期负债 ';
+        return 'Long-term Liabilities';
       case AccountNature.receivablesPayables:
-        return '往来款项';
+        return 'Receivables & Payables';
       case AccountNature.otherAssets:
-        return '其他资产';
+        return 'Other Assets';
     }
   }
 
@@ -36,17 +36,17 @@ extension AccountNatureX on AccountNature {
   String get description {
     switch (this) {
       case AccountNature.liquidAssets:
-        return '日常随时可用、流动性最高的钱。';
+        return 'Everyday accessible funds with the highest liquidity.';
       case AccountNature.creditAccounts:
-        return '金融机构授予的循环使用信贷额度。';
+        return 'Revolving credit lines granted by financial institutions.';
       case AccountNature.investmentAssets:
-        return '以增值为目的、价值随市场波动的资产。';
+        return 'Assets aimed at appreciation, with values fluctuating by market.';
       case AccountNature.longTermLiabilities:
-        return '结构化的长期贷款或融资性债务。';
+        return 'Structured long-term loans or financing debts.';
       case AccountNature.receivablesPayables:
-        return '因往来产生的短期债权债务。';
+        return 'Short-term receivables and payables from transactions.';
       case AccountNature.otherAssets:
-        return '其他特殊用途或流动性较低的资产。';
+        return 'Other special-purpose or less liquid assets.';
     }
   }
 }
@@ -67,13 +67,13 @@ class AccountTypeDefinition {
     this.keywords = const [],
   });
 
-  /// UI 层的唯一标识（与后端 FinancialAccountType 一致）
+  /// Unique identifier at the UI layer (matches backend FinancialAccountType)
   final String id;
 
-  /// 对应后端的 FinancialAccountType 枚举值
+  /// Corresponding backend FinancialAccountType enum value
   final FinancialAccountType apiType;
 
-  /// UI 层的账户性质分类
+  /// UI-layer account nature classification
   final AccountNature nature;
 
   final String title;
@@ -100,121 +100,116 @@ class AccountTypeDefinition {
   }
 }
 
-AccountTypeIconBuilder _tablerIcon(
-  Widget Function({Color? color, double? width, double? height}) builder,
-) {
-  return (Color color) => SizedBox.square(
-    dimension: 28, // 进一步增大容器尺寸
-    child: builder(color: color, width: 24, height: 24), // 进一步增大图标尺寸
-  );
+AccountTypeIconBuilder _lucideIcon(IconData iconData) {
+  return (Color color) => Icon(iconData, color: color, size: 24);
 }
 
 /// Registry of all account-type definitions.
 ///
-/// 每个后端 FinancialAccountType 对应唯一一个 UI 定义。
+/// Each backend FinancialAccountType maps to exactly one UI definition.
 class AccountTypeRegistry {
   static final List<AccountTypeDefinition> definitions = [
-    // === 资产类 (ASSET) ===
+    // === Asset types (ASSET) ===
 
-    // CASH: 实体货币、零钱
+    // CASH: physical currency, pocket change
     AccountTypeDefinition(
       id: 'cash',
       apiType: FinancialAccountType.cash,
       nature: AccountNature.liquidAssets,
-      title: '现金 (Cash)',
-      subtitle: '手头的实体货币、零钱。',
-      iconBuilder: _tablerIcon(tabler.Cash.new),
+      title: 'Cash',
+      subtitle: 'Physical currency and pocket change.',
+      iconBuilder: _lucideIcon(FLucideIcons.banknote),
       accentColor: const Color(0xFF16A34A),
       requiresCustomName: false,
-      keywords: ['现金', 'cash', 'wallet', '零钱'],
+      keywords: ['cash', 'wallet', 'change'],
     ),
 
-    // DEPOSIT: 银行存款（活期、定期、支票账户）
+    // DEPOSIT: bank deposits (demand, fixed, checking accounts)
     AccountTypeDefinition(
       id: 'deposit',
       apiType: FinancialAccountType.deposit,
       nature: AccountNature.liquidAssets,
-      title: '银行存款 (Deposit)',
-      subtitle: '储蓄卡、活期、定期、支票账户等。',
-      iconBuilder: _tablerIcon(tabler.BuildingBank.new),
+      title: 'Bank Deposit',
+      subtitle: 'Savings, demand, fixed, and checking accounts.',
+      iconBuilder: _lucideIcon(FLucideIcons.landmark),
       accentColor: const Color(0xFF2563EB),
-      keywords: ['bank', '银行卡', '储蓄卡', '支票', '活期', '定期'],
+      keywords: ['bank', 'deposit', 'savings', 'checking'],
     ),
 
-    // E_MONEY: 电子货币账户、第三方支付平台余额
+    // E_MONEY: electronic money accounts, third-party payment platform balances
     AccountTypeDefinition(
       id: 'e_money',
       apiType: FinancialAccountType.eMoney,
       nature: AccountNature.liquidAssets,
-      title: '电子钱包 (E-Money)',
-      subtitle: '微信零钱、支付宝、PayPal等。',
-      iconBuilder: _tablerIcon(tabler.Wallet.new),
+      title: 'E-Wallet',
+      subtitle: 'WeChat Pay, Alipay, PayPal, etc.',
+      iconBuilder: _lucideIcon(FLucideIcons.wallet),
       accentColor: const Color(0xFF7C3AED),
-      keywords: ['digital', 'wallet', '支付宝', '微信', 'pay', 'e-wallet'],
+      keywords: ['digital', 'wallet', 'alipay', 'wechat', 'pay', 'e-wallet'],
     ),
 
-    // INVESTMENT: 股票、基金、债券、理财产品
+    // INVESTMENT: stocks, funds, bonds, wealth management products
     AccountTypeDefinition(
       id: 'investment',
       apiType: FinancialAccountType.investment,
       nature: AccountNature.investmentAssets,
-      title: '投资 (Investment)',
-      subtitle: '股票、基金、债券、理财产品等。',
-      iconBuilder: _tablerIcon(tabler.ChartLine.new),
+      title: 'Investment',
+      subtitle: 'Stocks, funds, bonds, and wealth management products.',
+      iconBuilder: _lucideIcon(FLucideIcons.chartLine),
       accentColor: const Color(0xFF0EA5E9),
-      keywords: ['stocks', 'funds', '证券', '基金', '理财', '债券'],
+      keywords: ['stocks', 'funds', 'securities', 'bonds', 'investment'],
     ),
 
-    // RECEIVABLE: 应收款项（如借给朋友的钱）
+    // RECEIVABLE: amounts owed to you (e.g. money lent to friends)
     AccountTypeDefinition(
       id: 'receivable',
       apiType: FinancialAccountType.receivable,
       nature: AccountNature.receivablesPayables,
-      title: '应收账款 (Receivable)',
-      subtitle: '别人欠你的钱、借出去的钱。',
-      helper: '别人欠我',
-      iconBuilder: _tablerIcon(tabler.ArrowRightCircle.new),
+      title: 'Receivable',
+      subtitle: 'Money others owe you or lent out.',
+      helper: 'Others owe me',
+      iconBuilder: _lucideIcon(FLucideIcons.circleArrowRight),
       accentColor: const Color(0xFF10B981),
-      keywords: ['receivable', '别人欠我', '借出去'],
+      keywords: ['receivable', 'lent', 'owed'],
     ),
 
-    // === 负债类 (LIABILITY) ===
+    // === Liability types (LIABILITY) ===
 
-    // CREDIT_CARD: 信用卡账户（欠款）
+    // CREDIT_CARD: credit card accounts (outstanding balance)
     AccountTypeDefinition(
       id: 'credit_card',
       apiType: FinancialAccountType.creditCard,
       nature: AccountNature.creditAccounts,
-      title: '信用卡 (Credit Card)',
-      subtitle: '银行发行的信用卡欠款。',
-      iconBuilder: _tablerIcon(tabler.CreditCard.new),
+      title: 'Credit Card',
+      subtitle: 'Outstanding credit card balances.',
+      iconBuilder: _lucideIcon(FLucideIcons.creditCard),
       accentColor: const Color(0xFFDB2777),
-      keywords: ['信用卡', 'credit card'],
+      keywords: ['credit card', 'credit'],
     ),
 
-    // LOAN: 贷款、房贷、车贷
+    // LOAN: mortgages, auto loans, personal loans
     AccountTypeDefinition(
       id: 'loan',
       apiType: FinancialAccountType.loan,
       nature: AccountNature.longTermLiabilities,
-      title: '贷款 (Loan)',
-      subtitle: '房贷、车贷、消费贷、学生贷款等。',
-      iconBuilder: _tablerIcon(tabler.HomeDollar.new),
+      title: 'Loan',
+      subtitle: 'Mortgages, auto loans, personal loans, student loans, etc.',
+      iconBuilder: _lucideIcon(FLucideIcons.circleDollarSign),
       accentColor: const Color(0xFFFB7185),
-      keywords: ['mortgage', '房贷', '车贷', '消费贷', 'loan'],
+      keywords: ['mortgage', 'auto loan', 'personal loan', 'loan'],
     ),
 
-    // PAYABLE: 应付款项（如花呗账单未出）
+    // PAYABLE: amounts you owe (e.g. pending payment installments)
     AccountTypeDefinition(
       id: 'payable',
       apiType: FinancialAccountType.payable,
       nature: AccountNature.receivablesPayables,
-      title: '应付账款 (Payable)',
-      subtitle: '你欠别人的钱、花呗等未出账单。',
-      helper: '我欠别人',
-      iconBuilder: _tablerIcon(tabler.ArrowLeftCircle.new),
+      title: 'Payable',
+      subtitle: 'Money you owe, pending installments, etc.',
+      helper: 'I owe others',
+      iconBuilder: _lucideIcon(FLucideIcons.circleArrowLeft),
       accentColor: const Color(0xFFEF4444),
-      keywords: ['payable', '我欠别人', '花呗', '短期借款'],
+      keywords: ['payable', 'owe', 'installment', 'short-term loan'],
     ),
   ];
 
@@ -227,7 +222,7 @@ class AccountTypeRegistry {
     for (final definition in definitions) definition.apiType: definition,
   };
 
-  /// 根据 UI id 查找定义
+  /// Look up definition by UI id
   static AccountTypeDefinition? resolve(String? id) {
     if (id == null) {
       return null;
@@ -235,7 +230,7 @@ class AccountTypeRegistry {
     return _definitionsById[id];
   }
 
-  /// 根据后端 FinancialAccountType 查找定义
+  /// Look up definition by backend FinancialAccountType
   static AccountTypeDefinition? resolveByApiType(FinancialAccountType? type) {
     if (type == null) {
       return null;
@@ -249,15 +244,15 @@ class AccountTypeRegistry {
         .toList();
   }
 
-  /// 根据后端的 FinancialNature 获取默认的账户类型定义
-  /// 用于当无法找到对应定义时提供后备方案
+  /// Get default account type definition based on backend FinancialNature
+  /// Used as a fallback when no matching definition is found
   static AccountTypeDefinition getDefaultDefinition(FinancialNature nature) {
     if (nature == FinancialNature.liability) {
-      // 负债账户默认使用 PAYABLE 类型
+      // Liability accounts default to PAYABLE type
       return _definitionsByApiType[FinancialAccountType.payable] ??
           definitions.last;
     } else {
-      // 资产账户默认使用 CASH 类型
+      // Asset accounts default to CASH type
       return _definitionsByApiType[FinancialAccountType.cash] ??
           definitions.first;
     }

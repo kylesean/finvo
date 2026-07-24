@@ -27,7 +27,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
   @override
   void initState() {
     super.initState();
-    // 如果有初始邀请码，设置到输入框中
+    // If initial invite code exists, set it in the input field
     if (widget.initialCode != null) {
       _codeController.text = widget.initialCode!.toUpperCase();
     }
@@ -42,15 +42,17 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
   bool _validate() {
     final code = _codeController.text.trim().toUpperCase();
     if (code.isEmpty) {
-      setState(() => _codeError = '请输入邀请码');
+      setState(() => _codeError = 'Please enter invite code');
       return false;
     }
     if (code.length < 6 || code.length > 16) {
-      setState(() => _codeError = '邀请码格式不正确');
+      setState(() => _codeError = 'Invalid invite code format');
       return false;
     }
     if (!RegExp(r'^[A-Z0-9]+$').hasMatch(code)) {
-      setState(() => _codeError = '邀请码只能包含字母和数字');
+      setState(
+        () => _codeError = 'Invite code can only contain letters and numbers',
+      );
       return false;
     }
     setState(() => _codeError = null);
@@ -73,7 +75,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 顶部拖拽指示器
+              // Top drag indicator
               Container(
                 width: 32,
                 height: 4,
@@ -84,9 +86,9 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                 ),
               ),
 
-              // 标题区域
+              // Title area
               Text(
-                '加入共享空间',
+                'Join Shared Space',
                 style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w500,
                   color: colors.foreground,
@@ -94,7 +96,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                '输入朋友分享的邀请码，立即开启协同记账',
+                'Enter the invite code shared by a friend to start collaborative bookkeeping',
                 textAlign: TextAlign.center,
                 style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
@@ -102,7 +104,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
               ),
               const SizedBox(height: 32),
 
-              // 邀请码输入
+              // Invite code input
               FTextField(
                 control: .managed(
                   controller: _codeController,
@@ -124,8 +126,8 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                     }
                   },
                 ),
-                label: const Text('邀请码'),
-                hint: '请输入邀请码，例如：A8K2F9G7',
+                label: const Text('Invite Code'),
+                hint: 'Enter invite code, e.g.: A8K2F9G7',
               ),
               if (_codeError != null)
                 Align(
@@ -141,7 +143,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                   ),
                 ),
 
-              // 错误信息显示
+              // Error message display
               if (_errorMessage != null) ...[
                 const SizedBox(height: 12),
                 FAlert(
@@ -153,14 +155,14 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
 
               const SizedBox(height: 48),
 
-              // 按钮区域
+              // Button area
               Row(
                 children: [
                   Expanded(
                     child: FButton(
                       variant: .outline,
                       onPress: () => Navigator.of(context).pop(),
-                      child: const Text('取消'),
+                      child: const Text('Cancel'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -175,7 +177,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('加入'),
+                          : const Text('Join'),
                     ),
                   ),
                 ],
@@ -206,7 +208,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
       if (space != null) {
         widget.onSpaceJoined(space);
       } else {
-        // 如果返回null，说明有错误，错误信息已经在provider中处理
+        // If null is returned, an error occurred; the error message is already handled in the provider
         final error = ref.read(sharedSpaceProvider).error;
         if (error != null) {
           setState(() {

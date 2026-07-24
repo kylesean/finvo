@@ -17,8 +17,8 @@ import '../services/data_uri_service.dart';
 import 'authenticated_image.dart';
 import '../services/genui_cache_service.dart';
 
-/// 用户消息气泡组件
-/// 支持显示文本和多媒体附件
+/// User message bubble widget
+/// Supports displaying text and multimedia attachments
 class UserMessageBubble extends ConsumerStatefulWidget {
   final ChatMessage message;
 
@@ -175,42 +175,42 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     );
   }
 
-  /// 渲染附件图片内容
+  /// Render attachment image content
   ///
-  /// 设计原则：**数据优先于状态**
-  /// - 如果 signedUrl 已存在，直接渲染，不依赖 status
-  /// - 只有在没有数据时才根据 status 显示骨架屏或错误
+  /// Design principle: **data over status**
+  /// - If signedUrl exists, render directly without depending on status
+  /// - Only show skeleton or error based on status when no data is available
   Widget _buildAttachmentImageContent(
     ChatMessageAttachment attachment,
     ThemeData theme,
   ) {
     final url = attachment.signedUrl;
 
-    // 1. 数据优先：如果有 URL，直接渲染
+    // 1. Data first: if URL exists, render directly
     if (url != null && url.isNotEmpty) {
       if (url.startsWith('data:')) {
-        // Base64 data URI - 直接解码渲染
+        // Base64 data URI - decode and render directly
         return _renderBase64Image(attachment, url, theme);
       } else {
-        // 网络 URL - 使用认证图片组件
+        // Network URL - use authenticated image widget
         return _renderNetworkImage(attachment, theme);
       }
     }
 
-    // 2. 没有数据时，根据状态显示不同 UI
+    // 2. No data: show different UI based on status
     switch (attachment.status) {
       case AttachmentLoadStatus.initial:
       case AttachmentLoadStatus.loading:
         return _buildAttachmentSkeleton(theme);
       case AttachmentLoadStatus.loaded:
-        // 状态是 loaded 但没有 URL，显示错误
+        // Status is loaded but no URL, show error
         return _buildAttachmentError(theme, attachment);
       case AttachmentLoadStatus.failed:
         return _buildAttachmentError(theme, attachment);
     }
   }
 
-  /// 渲染 Base64 图片
+  /// Render Base64 image
   Widget _renderBase64Image(
     ChatMessageAttachment attachment,
     String dataUri,
@@ -237,7 +237,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     }
   }
 
-  /// 渲染网络图片（带认证）
+  /// Render network image (with authentication)
   Widget _renderNetworkImage(
     ChatMessageAttachment attachment,
     ThemeData theme,
@@ -394,7 +394,8 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     ThemeData theme,
     ChatMessageAttachment attachment,
   ) {
-    final message = attachment.errorMessage ?? '附件加载失败，点击重试';
+    final message =
+        attachment.errorMessage ?? 'Failed to load attachment, tap to retry';
     return InkWell(
       onTap: () => _retryAttachment(attachment),
       child: Container(
@@ -467,7 +468,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              '共 ${widget.message.mediaFiles.length} 个文件',
+              '${widget.message.mediaFiles.length} files total',
               style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
             ),
           ),
@@ -647,16 +648,16 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('附件链接无效')));
+      ).showSnackBar(const SnackBar(content: Text('Invalid attachment link')));
       return;
     }
 
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
 
     if (!launched && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('无法打开附件链接')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open attachment link')),
+      );
     }
   }
 

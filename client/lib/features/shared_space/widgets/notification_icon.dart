@@ -16,7 +16,7 @@ class _NotificationIconState extends ConsumerState<NotificationIcon> {
   @override
   void initState() {
     super.initState();
-    // 初始加载未读数量
+    // Load unread count on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(ref.read(notificationProvider.notifier).loadUnreadCount());
     });

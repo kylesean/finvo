@@ -311,7 +311,7 @@ class AIService {
 // AIService Provider
 final aiServiceProvider = Provider<AIService>((ref) {
   final storageService = ref.watch(secureStorageServiceProvider);
-  // 使用 SSE 专用 Dio 实例（无 receiveTimeout 限制）
+  // Use SSE-dedicated Dio instance (no receiveTimeout limit)
   final dio = ref.watch(sseDioProvider);
   final apiConstants = ref.watch(apiConstantsProvider);
   return AIService(

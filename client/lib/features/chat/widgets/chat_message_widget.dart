@@ -68,14 +68,14 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     // Access message from widget.message
     final message = widget.message;
 
-    // Debug: 追踪消息数据
+    // Log surface/UI component rendering details
     if (message.surfaceIds.isNotEmpty || message.uiComponents.isNotEmpty) {
       _logger.fine(
         'ChatMessageWidget: Rendering message ${message.id} - surfaceIds: ${message.surfaceIds.length}, uiComponents: ${message.uiComponents.length}',
       );
     }
 
-    // Debug: 追踪附件数据
+    // Log user message attachment count
     if (message.sender == app.MessageSender.user) {
       _logger.info(
         'ChatMessageWidget: User message ${message.id} has ${message.attachments.length} attachments',
@@ -89,36 +89,36 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 主内容流：文本 + 工具执行日志（过程）
-          // 保持原始的时间顺序，确保 Loading 状态和执行日志出现在正确的位置（如：“正在查询...”应该在结果之前）
+          // Main content stream: text + tool execution logs (process)
+          // Preserve original chronological order, ensuring loading states and execution logs appear in correct positions (e.g., "Querying..." should appear before results)
           ...message.fullContent
               .where(
                 (part) => part.maybeWhen(
-                  uiComponent: (_) => false, // 排除 UI 组件
-                  orElse: () => true, // 包含 Text 和 ToolCall
+                  uiComponent: (_) => false, // Exclude UI components
+                  orElse: () => true, // Include Text and ToolCall
                 ),
               )
               .map((part) => _buildContentPart(context, theme, part, message)),
 
-          // 结果附件：GenUI 组件（卡片/结果）
-          // 将大块的 UI 结果沉底，类似邮件附件或报表展示，避免打断文本阅读流
+          // Result attachments: GenUI components (cards/results)
+          // Sink large UI results to bottom, similar to email attachments or report display, avoiding interruption of text reading flow
           ...message.fullContent
               .where(
                 (part) => part.maybeWhen(
-                  uiComponent: (_) => true, // 只包含 UI 组件
+                  uiComponent: (_) => true, // Only include UI components
                   orElse: () => false,
                 ),
               )
               .map((part) => _buildContentPart(context, theme, part, message)),
 
-          // 如果没有任何工具正在运行，且消息正在 typing，则在末尾显示流式指示器
+          // If no tools are running and message is typing, show streaming indicator at the end
           if (_shouldShowStreamingIndicator())
             Padding(
               padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
               child: _buildStreamingIndicator(context, theme),
             ),
 
-          // 4. 用户消息的附件
+          // 4. User message attachments
           if (message.attachments.isNotEmpty) ...[
             const SizedBox(height: 12.0),
             _buildAttachments(context, theme, message),
@@ -287,7 +287,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
 
         Widget imageWidget;
         if (url.startsWith('data:')) {
-          // Base64 data URI - 直接解码并渲染
+          // Base64 data URI - decode and render directly
           final base64Data = url.split(',').last;
           imageWidget = Image.memory(
             base64Decode(base64Data),
@@ -297,8 +297,8 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
             },
           );
         } else {
-          // Network URL - 使用 AuthenticatedImage 组件（带认证 header）
-          // 从 URL 中提取 attachment ID（如：/api/v1/files/view/{id}）
+          // Network URL - use AuthenticatedImage component (with auth header)
+          // Extract attachment ID from URL (e.g., /api/v1/files/view/{id})
           final attachmentId = attachment.id;
           imageWidget = AuthenticatedImage(
             attachmentId: attachmentId,
@@ -365,7 +365,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 动态图标 - 与 ToolExecutionBlock 保持一致
+          // Animated icon - consistent with ToolExecutionBlock
           AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
@@ -380,7 +380,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
             },
           ),
           const SizedBox(width: 8),
-          // Shimmer 文字 - 与 ToolExecutionBlock 保持一致
+          // Shimmer text - consistent with ToolExecutionBlock
           AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
@@ -430,9 +430,9 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   GptMarkdownThemeData _gptThemeData(BuildContext context, FThemeData theme) {
     final fallbacks = AppFontConfig.getGlobalFontFallbacks();
     final family = AppFontConfig.primaryFontFamily;
-    // MiSansVF 是可变字体，wght 轴忠实执行字重。
-    // 标题已通过字号 + 颜色区分层级，字重保持轻量以匹配
-    // 用户记忆中 MiSans-L3（静态细体）的和谐观感。
+    // MiSansVF is a variable font; the wght axis faithfully applies font weight.
+    // Headings already differentiate hierarchy via font size + color; weight stays
+    // lightweight to match the harmonious feel of MiSans-L3 (static light).
     return GptMarkdownThemeData(
       brightness: Theme.of(context).brightness,
       h1: TextStyle(

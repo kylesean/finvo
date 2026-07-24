@@ -27,8 +27,8 @@ class SpaceAssociationReceiptData {
     );
   }
 
-  String get spaceName => space['name'] as String? ?? '共享空间';
-  // 后端返回的 space.id 是 UUID 字符串
+  String get spaceName => space['name'] as String? ?? 'Shared Space';
+  // Backend returns space.id as UUID string
   String get spaceId => space['id']?.toString() ?? '';
   int get totalCount => association['total_count'] as int? ?? 0;
   int get successCount => association['success_count'] as int? ?? 0;
@@ -123,7 +123,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '关联成功',
+                'Association Successful',
                 style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colors.foreground,
@@ -131,7 +131,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                '已关联到「${model.spaceName}」',
+                'Linked to "${model.spaceName}"',
                 style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
                 ),
@@ -159,7 +159,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildStatItem(
-            label: '总计',
+            label: 'Total',
             value: model.totalCount.toString(),
             theme: theme,
             colors: colors,
@@ -170,7 +170,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
             color: colors.border.withValues(alpha: 0.5),
           ),
           _buildStatItem(
-            label: '成功',
+            label: 'Success',
             value: model.successCount.toString(),
             valueColor: semantic.successAccent,
             theme: theme,
@@ -183,7 +183,7 @@ class SpaceAssociationReceipt extends StatelessWidget {
               color: colors.border.withValues(alpha: 0.5),
             ),
             _buildStatItem(
-              label: '失败',
+              label: 'Failed',
               value: model.failedCount.toString(),
               valueColor: colors.destructive,
               theme: theme,

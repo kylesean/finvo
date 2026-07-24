@@ -6,19 +6,19 @@ import 'package:augo/app/theme/app_font_config.dart';
 import '../services/genui_logger.dart';
 import 'templates/templates.dart';
 
-/// 应用特定的组件目录
+/// Application-specific component catalog
 ///
-/// 此类定义了聊天应用中可用的自定义 GenUI 组件。
-/// 包括交易卡片、数据表格、图表卡片和摘要卡片。
+/// This class defines the custom GenUI components available in the chat app.
+/// Includes transaction cards, data tables, chart cards, and summary cards.
 class AppCatalog {
-  /// 构建完整的组件目录
+  /// Build the complete component catalog
   ///
-  /// 从核心组件开始，然后添加应用特定的自定义组件。
+  /// Starts with core components, then adds application-specific custom components.
   static Catalog build() {
-    // 从核心组件开始
+    // Start with core components
     final catalog = BasicCatalogItems.asCatalog();
 
-    // 添加自定义组件
+    // Add custom components
     return catalog.copyWith(
       newItems: [
         _buildTransactionCard(),
@@ -42,15 +42,15 @@ class AppCatalog {
     );
   }
 
-  /// 交易卡片组件
+  /// Transaction card component
   ///
-  /// 用于显示交易收据信息，包括状态、金额、详情等。
+  /// Used to display transaction receipt information, including status, amount, details, etc.
   static CatalogItem _buildTransactionCard() {
     return CatalogItem(
       name: 'TransactionReceipt',
       dataSchema: ObjectSchema(
         properties: {
-          // 后端返回的字段（create_transaction / enricher 返回 UUID 字符串与类型字符串）
+          // Fields returned by backend (create_transaction / enricher returns UUID string and type string)
           'success': BooleanSchema(description: '操作是否成功'),
           'transaction_id': StringSchema(description: '交易唯一标识符（UUID 字符串）'),
           'raw_input': StringSchema(description: '交易描述'),
@@ -59,7 +59,7 @@ class AppCatalog {
           'transaction_at': StringSchema(description: '交易时间（ISO 8601格式）'),
           'message': StringSchema(description: '操作结果消息'),
 
-          // 可选字段（兼容旧格式）
+          // Optional fields (backward compatibility with old format)
           'transactionId': StringSchema(description: '交易唯一标识符（旧格式）'),
           'status': StringSchema(description: '交易状态'),
           'title': StringSchema(description: '交易标题或描述（旧格式）'),
@@ -80,8 +80,8 @@ class AppCatalog {
           'tags': ListSchema(description: '交易标签列表', items: StringSchema()),
         },
         required: [
-          // 只要求后端实际返回的必需字段
-          // raw_input 和 type 可能为空，不作为必需字段
+          // Only require fields actually returned by backend
+          // raw_input and type may be empty, not treated as required fields
           'transaction_id',
           'amount',
         ],
@@ -90,10 +90,10 @@ class AppCatalog {
     );
   }
 
-  /// 转账收据组件
+  /// Transfer receipt component
   ///
-  /// 专用于显示转账交易结果，与普通交易卡片分离。
-  /// 显示双账户（转出 → 转入）的布局。
+  /// Dedicated to displaying transfer transaction results, separated from regular transaction cards.
+  /// Shows a dual-account (from → to) layout.
   static CatalogItem _buildTransferReceipt() {
     return CatalogItem(
       name: 'TransferReceipt',
@@ -138,9 +138,9 @@ class AppCatalog {
     );
   }
 
-  /// 数据表格组件
+  /// Data table component
   ///
-  /// 用于显示结构化的表格数据，支持分页。
+  /// Used to display structured tabular data with pagination support.
   static CatalogItem _buildExpenseTable() {
     return CatalogItem(
       name: 'DataTable',
@@ -184,9 +184,9 @@ class AppCatalog {
     );
   }
 
-  /// 图表卡片组件
+  /// Chart card component
   ///
-  /// 用于显示各种类型的图表（饼图、柱状图、折线图等）。
+  /// Used to display various types of charts (pie, bar, line, etc.).
   static CatalogItem _buildChartCard() {
     return CatalogItem(
       name: 'ChartCard',
@@ -234,9 +234,9 @@ class AppCatalog {
     );
   }
 
-  /// 摘要卡片组件
+  /// Summary card component
   ///
-  /// 用于显示摘要信息和关键指标。
+  /// Used to display summary information and key metrics.
   static CatalogItem _buildSummaryCard() {
     return CatalogItem(
       name: 'SummaryCard',
@@ -271,7 +271,7 @@ class AppCatalog {
     );
   }
 
-  /// 转账向导组件
+  /// Transfer wizard component
   static CatalogItem _buildTransferWizard() {
     return CatalogItem(
       name: 'TransferWizard',
@@ -316,7 +316,7 @@ class AppCatalog {
     );
   }
 
-  /// 构建交易卡片 Widget
+  /// Build transaction card widget
   static Widget _buildTransactionCardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'TransactionReceipt';
@@ -324,9 +324,9 @@ class AppCatalog {
     try {
       final data = context.data as Map<String, dynamic>;
 
-      // 验证必需字段（只检查真正必需的字段）
-      // transaction_id 和 amount 是必需的
-      // raw_input/description 可以为空，会使用默认值
+      // Validate required fields (only check truly required fields)
+      // transaction_id and amount are required
+      // raw_input/description can be empty, will use default values
       final hasTransactionId =
           data.containsKey('transaction_id') && data['transaction_id'] != null;
       final hasAmount = data.containsKey('amount') && data['amount'] != null;
@@ -342,7 +342,10 @@ class AppCatalog {
           message: 'TransactionReceipt missing required fields',
           schema: data,
         );
-        return _buildErrorWidget(context.buildContext, '交易记录加载失败，请重试');
+        return _buildErrorWidget(
+          context.buildContext,
+          'Failed to load transaction record, please retry',
+        );
       }
 
       // Use standard TransactionCard (no reactive binding needed for one-shot receipts)
@@ -366,11 +369,11 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '渲染失败: $e');
+      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
     }
   }
 
-  /// 构建转账收据 Widget
+  /// Build transfer receipt widget
   static Widget _buildTransferReceiptWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'TransferReceipt';
@@ -378,7 +381,7 @@ class AppCatalog {
     try {
       final data = context.data as Map<String, dynamic>;
 
-      // 验证必需字段
+      // Validate required fields
       final hasTransactionId =
           data.containsKey('transaction_id') && data['transaction_id'] != null;
       final hasAmount = data.containsKey('amount') && data['amount'] != null;
@@ -396,7 +399,10 @@ class AppCatalog {
           message: 'TransferReceipt missing required fields',
           schema: data,
         );
-        return _buildErrorWidget(context.buildContext, '转账记录加载失败，请重试');
+        return _buildErrorWidget(
+          context.buildContext,
+          'Failed to load transfer record, please retry',
+        );
       }
 
       final widget = TransferReceipt(data: data);
@@ -419,11 +425,11 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '渲染失败: $e');
+      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
     }
   }
 
-  /// 构建数据表格 Widget
+  /// Build data table widget
   static Widget _buildExpenseTableWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'DataTable';
@@ -431,7 +437,7 @@ class AppCatalog {
     try {
       final data = context.data as Map<String, dynamic>;
 
-      // 验证必需字段
+      // Validate required fields
       if (!_validateRequiredFields(data, ['title', 'headers', 'rows'])) {
         final duration = DateTime.now().difference(startTime).inMilliseconds;
         GenUiLogger.logBuilderInvocation(
@@ -439,7 +445,10 @@ class AppCatalog {
           success: false,
           durationMs: duration,
         );
-        return _buildErrorWidget(context.buildContext, '缺少必需字段');
+        return _buildErrorWidget(
+          context.buildContext,
+          'Missing required fields',
+        );
       }
 
       final widget = ExpenseTable(data: data);
@@ -462,11 +471,11 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '渲染失败: $e');
+      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
     }
   }
 
-  /// 构建图表卡片 Widget
+  /// Build chart card widget
   static Widget _buildChartCardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'ChartCard';
@@ -474,7 +483,7 @@ class AppCatalog {
     try {
       final data = context.data as Map<String, dynamic>;
 
-      // 验证必需字段
+      // Validate required fields
       if (!_validateRequiredFields(data, ['title', 'chartType', 'chartData'])) {
         final duration = DateTime.now().difference(startTime).inMilliseconds;
         GenUiLogger.logBuilderInvocation(
@@ -482,7 +491,10 @@ class AppCatalog {
           success: false,
           durationMs: duration,
         );
-        return _buildErrorWidget(context.buildContext, '缺少必需字段');
+        return _buildErrorWidget(
+          context.buildContext,
+          'Missing required fields',
+        );
       }
 
       final widget = ChartCard(data: data);
@@ -505,11 +517,11 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '渲染失败: $e');
+      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
     }
   }
 
-  /// 构建摘要卡片 Widget
+  /// Build summary card widget
   static Widget _buildSummaryCardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'SummaryCard';
@@ -517,7 +529,7 @@ class AppCatalog {
     try {
       final data = context.data as Map<String, dynamic>;
 
-      // 验证必需字段
+      // Validate required fields
       if (!_validateRequiredFields(data, ['title', 'summary', 'items'])) {
         final duration = DateTime.now().difference(startTime).inMilliseconds;
         GenUiLogger.logBuilderInvocation(
@@ -525,7 +537,10 @@ class AppCatalog {
           success: false,
           durationMs: duration,
         );
-        return _buildErrorWidget(context.buildContext, '缺少必需字段');
+        return _buildErrorWidget(
+          context.buildContext,
+          'Missing required fields',
+        );
       }
 
       final widget = SummaryCard(data: data);
@@ -548,11 +563,11 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '渲染失败: $e');
+      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
     }
   }
 
-  /// 构建转账向导 Widget
+  /// Build transfer wizard widget
   static Widget _buildTransferWizardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'TransferWizard';
@@ -560,7 +575,7 @@ class AppCatalog {
     try {
       final data = context.data as Map<String, dynamic>;
 
-      // 验证必需字段
+      // Validate required fields
       if (!_validateRequiredFields(data, [
         'sourceAccounts',
         'targetAccounts',
@@ -571,7 +586,10 @@ class AppCatalog {
           success: false,
           durationMs: duration,
         );
-        return _buildErrorWidget(context.buildContext, '转账向导加载失败，请重试');
+        return _buildErrorWidget(
+          context.buildContext,
+          'Failed to load transfer wizard, please retry',
+        );
       }
       final widget = TransferWizard(
         data: data,
@@ -596,11 +614,14 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '转账向导渲染失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Transfer wizard rendering failed: $e',
+      );
     }
   }
 
-  /// 验证必需字段
+  /// Validate required fields
   static bool _validateRequiredFields(
     Map<String, dynamic> data,
     List<String> requiredFields,
@@ -613,7 +634,7 @@ class AppCatalog {
     return true;
   }
 
-  /// 构建错误 Widget
+  /// Build error widget
   static Widget _buildErrorWidget(BuildContext context, String message) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8.0),
@@ -674,10 +695,10 @@ class AppCatalog {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 预算相关组件
+  // Budget-related components
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// 预算状态卡片组件
+  /// Budget status card component
   static CatalogItem _buildBudgetStatusCard() {
     return CatalogItem(
       name: 'BudgetStatusCard',
@@ -686,7 +707,7 @@ class AppCatalog {
           'success': BooleanSchema(description: '操作是否成功'),
           'has_budget': BooleanSchema(description: '是否有预算'),
           'message': StringSchema(description: '消息'),
-          // 单个预算查询
+          // Single budget query
           'budget': ObjectSchema(
             description: '单个预算信息',
             properties: {
@@ -702,7 +723,7 @@ class AppCatalog {
               'period_end': StringSchema(description: '周期结束'),
             },
           ),
-          // 预算摘要
+          // Budget summary
           'overall_spent': NumberSchema(description: '总已用金额'),
           'overall_remaining': NumberSchema(description: '总剩余金额'),
           'overall_percentage': NumberSchema(description: '总使用百分比'),
@@ -741,7 +762,7 @@ class AppCatalog {
     );
   }
 
-  /// 交易列表组件
+  /// Transaction list component
   static CatalogItem _buildTransactionList() {
     return CatalogItem(
       name: 'TransactionList',
@@ -772,7 +793,7 @@ class AppCatalog {
     );
   }
 
-  /// 预算创建收据组件
+  /// Budget creation receipt component
   static CatalogItem _buildBudgetReceipt() {
     return CatalogItem(
       name: 'BudgetReceipt',
@@ -796,7 +817,7 @@ class AppCatalog {
     );
   }
 
-  /// 预算分析卡片组件（Skills 专用）
+  /// Budget analysis card component (Skills-specific)
   static CatalogItem _buildBudgetAnalysisCard() {
     return CatalogItem(
       name: 'BudgetAnalysisCard',
@@ -830,11 +851,11 @@ class AppCatalog {
               },
             ),
           ),
-          // 后端 analyze_spending.py 返回结构化建议对象数组：
+          // Backend analyze_spending.py returns structured suggestion object array:
           // {type: 'high_percentage'|'monthly_increase'|'frequent_small',
           //  category_key?, percentage?, count?}
-          // 注意：genui 0.10 会对组件数据做 schema 验证，若声明为
-          // StringSchema 而实际是对象，会触发 reportError 错误反馈循环。
+          // Note: genui 0.10 performs schema validation on component data. If declared as
+          // StringSchema but actually an object, it triggers reportError feedback loop.
           'suggestions': ListSchema(
             description: '建议列表（结构化建议对象）',
             items: ObjectSchema(
@@ -858,7 +879,7 @@ class AppCatalog {
     );
   }
 
-  /// 批量交易收据组件
+  /// Batch transaction receipt component
   static CatalogItem _buildTransactionGroupReceipt() {
     return CatalogItem(
       name: 'TransactionGroupReceipt',
@@ -886,21 +907,21 @@ class AppCatalog {
     );
   }
 
-  /// 现金流分析卡片组件
+  /// Cash flow analysis card component
   ///
-  /// 数据源：reviewing-finances skill 的 analyze_cashflow.py。
-  /// 后端返回 camelCase 字段名（来自 StatisticsService 的 CashFlowResponse），
-  /// 其中 totalIncome/totalExpense/netCashFlow 为已格式化的字符串。
-  /// 健康评分数据（healthScore/healthGrade/healthDimensions/suggestions）
-  /// 也内嵌在同一载荷中。widget 读取 camelCase，schema 必须与之一致，
-  /// 否则 genui 0.10 的 schema 验证会因 required 字段缺失而触发错误反馈。
+  /// Data source: reviewing-finances skill's analyze_cashflow.py.
+  /// Backend returns camelCase field names (from StatisticsService's CashFlowResponse),
+  /// where totalIncome/totalExpense/netCashFlow are pre-formatted strings.
+  /// Health score data (healthScore/healthGrade/healthDimensions/suggestions)
+  /// is also embedded in the same payload. Widget reads camelCase, schema must match,
+  /// otherwise genui 0.10's schema validation will trigger error feedback due to missing required fields.
   static CatalogItem _buildCashFlowCard() {
     return CatalogItem(
       name: 'CashFlowCard',
       dataSchema: ObjectSchema(
         properties: {
           'title': StringSchema(description: '卡片标题'),
-          // 现金流数据（camelCase，与后端 CashFlowResponse 一致）
+          // Cash flow data (camelCase, consistent with backend CashFlowResponse)
           'totalIncome': StringSchema(description: '总收入（格式化字符串）'),
           'totalExpense': StringSchema(description: '总支出（格式化字符串）'),
           'netCashFlow': StringSchema(description: '净现金流（格式化字符串）'),
@@ -913,7 +934,7 @@ class AppCatalog {
           'savingsRateChange': NumberSchema(description: '储蓄率变化'),
           'periodStart': StringSchema(description: '统计周期开始时间'),
           'periodEnd': StringSchema(description: '统计周期结束时间'),
-          // 健康评分数据（analyze_cashflow.py 内嵌）
+          // Health score data (embedded in analyze_cashflow.py)
           'healthScore': IntegerSchema(description: '财务健康评分 (0-100)'),
           'healthGrade': StringSchema(description: '健康等级 (A/B/C/D/F)'),
           'healthDimensions': ListSchema(
@@ -942,10 +963,10 @@ class AppCatalog {
     );
   }
 
-  /// 财务健康评分卡片组件
+  /// Financial health score card component
   ///
-  /// 数据源：StatisticsService 的 HealthScoreResponse（camelCase）。
-  /// widget 读取 totalScore 等 camelCase 字段，schema 必须与之一致。
+  /// Data source: StatisticsService's HealthScoreResponse (camelCase).
+  /// Widget reads camelCase fields like totalScore, schema must match.
   static CatalogItem _buildHealthScoreCard() {
     return CatalogItem(
       name: 'HealthScoreCard',
@@ -981,7 +1002,7 @@ class AppCatalog {
     );
   }
 
-  /// 现金流预测图表组件
+  /// Cash flow forecast chart component
   static CatalogItem _buildCashFlowForecastChart() {
     return CatalogItem(
       name: 'CashFlowForecastChart',
@@ -1071,7 +1092,7 @@ class AppCatalog {
     );
   }
 
-  /// 构建交易列表 Widget
+  /// Build transaction list widget
   static Widget _buildTransactionListWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'TransactionList';
@@ -1097,11 +1118,11 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '渲染失败: $e');
+      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
     }
   }
 
-  /// 构建预算状态卡片 Widget
+  /// Build budget status card widget
   static Widget _buildBudgetStatusCardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'BudgetStatusCard';
@@ -1127,11 +1148,14 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '预算状态卡片渲染失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Budget status card rendering failed: $e',
+      );
     }
   }
 
-  /// 构建预算创建收据 Widget
+  /// Build budget creation receipt widget
   static Widget _buildBudgetReceiptWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'BudgetReceipt';
@@ -1157,11 +1181,14 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '预算收据渲染失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Budget receipt rendering failed: $e',
+      );
     }
   }
 
-  /// 构建预算分析卡片 Widget（Skills 专用）
+  /// Build budget analysis card widget (Skills-specific)
   static Widget _buildBudgetAnalysisCardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'BudgetAnalysisCard';
@@ -1187,11 +1214,14 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '预算分析卡片渲染失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Budget analysis card rendering failed: $e',
+      );
     }
   }
 
-  /// 构建批量交易收据 Widget
+  /// Build batch transaction receipt widget
   static Widget _buildTransactionGroupReceiptWidget(
     CatalogItemContext context,
   ) {
@@ -1233,11 +1263,14 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '批量收据渲染失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Batch receipt rendering failed: $e',
+      );
     }
   }
 
-  /// 构建现金流卡片 Widget
+  /// Build cash flow card widget
   static Widget _buildCashFlowCardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'CashFlowCard';
@@ -1250,7 +1283,10 @@ class AppCatalog {
           success: false,
           durationMs: duration,
         );
-        return _buildErrorWidget(context.buildContext, '现金流数据不完整');
+        return _buildErrorWidget(
+          context.buildContext,
+          'Incomplete cash flow data',
+        );
       }
       final widget = CashFlowAnalysisCard(data: data);
       final duration = DateTime.now().difference(startTime).inMilliseconds;
@@ -1272,11 +1308,14 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '现金流分析渲染失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Cash flow analysis rendering failed: $e',
+      );
     }
   }
 
-  /// 构建财务健康评分卡片 Widget
+  /// Build financial health score card widget
   static Widget _buildHealthScoreCardWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'HealthScoreCard';
@@ -1289,7 +1328,10 @@ class AppCatalog {
           success: false,
           durationMs: duration,
         );
-        return _buildErrorWidget(context.buildContext, '财务健康评分数据不完整');
+        return _buildErrorWidget(
+          context.buildContext,
+          'Incomplete financial health score data',
+        );
       }
       final widget = HealthScoreAnalysisCard(data: data);
       final duration = DateTime.now().difference(startTime).inMilliseconds;
@@ -1311,11 +1353,14 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '财务健康评分渲染失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Financial health score rendering failed: $e',
+      );
     }
   }
 
-  /// 构建现金流预测图表 Widget
+  /// Build cash flow forecast chart widget
   static Widget _buildCashFlowForecastChartWidget(CatalogItemContext context) {
     final startTime = DateTime.now();
     const componentName = 'CashFlowForecastChart';
@@ -1323,7 +1368,7 @@ class AppCatalog {
       final data = context.data as Map<String, dynamic>;
       final success = data['success'] as bool? ?? false;
       if (!success) {
-        final errorMsg = data['error'] as String? ?? '预测失败';
+        final errorMsg = data['error'] as String? ?? 'Forecast failed';
         final duration = DateTime.now().difference(startTime).inMilliseconds;
         GenUiLogger.logBuilderInvocation(
           componentName: componentName,
@@ -1352,11 +1397,14 @@ class AppCatalog {
         error: e,
         stackTrace: stackTrace,
       );
-      return _buildErrorWidget(context.buildContext, '现金流预测渲染失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Cash flow forecast rendering failed: $e',
+      );
     }
   }
 
-  /// 账单概览卡片组件
+  /// Expense summary card component
   static CatalogItem _buildExpenseSummaryCard() {
     return CatalogItem(
       name: 'ExpenseSummaryCard',
@@ -1384,15 +1432,18 @@ class AppCatalog {
       final data = context.data as Map<String, dynamic>;
       return ExpenseSummaryCard(data: data);
     } catch (e) {
-      return _buildErrorWidget(context.buildContext, '账单概览加载失败');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Failed to load expense summary',
+      );
     }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 共享空间相关组件
+  // Shared space related components
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// 空间选择器卡片组件
+  /// Space selector card component
   static CatalogItem _buildSpaceSelectorCard() {
     return CatalogItem(
       name: 'SpaceSelectorCard',
@@ -1446,11 +1497,14 @@ class AppCatalog {
         dispatchEvent: context.dispatchEvent,
       );
     } catch (e) {
-      return _buildErrorWidget(context.buildContext, '空间选择器加载失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Failed to load space selector: $e',
+      );
     }
   }
 
-  /// 空间关联确认组件
+  /// Space association confirmation component
   static CatalogItem _buildSpaceAssociationReceipt() {
     return CatalogItem(
       name: 'SpaceAssociationReceipt',
@@ -1459,7 +1513,7 @@ class AppCatalog {
           'space': ObjectSchema(
             description: '关联的空间信息',
             properties: {
-              // 后端 associate_transactions_to_space 返回的 space_id 是 UUID 字符串
+              // Backend associate_transactions_to_space returns space_id as UUID string
               'id': StringSchema(description: '空间ID（UUID 字符串）'),
               'name': StringSchema(description: '空间名称'),
             },
@@ -1494,7 +1548,10 @@ class AppCatalog {
         dispatchEvent: context.dispatchEvent,
       );
     } catch (e) {
-      return _buildErrorWidget(context.buildContext, '关联确认加载失败: $e');
+      return _buildErrorWidget(
+        context.buildContext,
+        'Failed to load association confirmation: $e',
+      );
     }
   }
 }

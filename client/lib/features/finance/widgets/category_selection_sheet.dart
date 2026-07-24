@@ -4,7 +4,7 @@ import 'package:augo/core/constants/category_constants.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../models/recurring_transaction.dart';
 
-/// 分类选择返回结果
+/// Category selection result
 class CategorySelectionResult {
   final TransactionCategory category;
   final String categoryKey;
@@ -17,9 +17,9 @@ class CategorySelectionResult {
   });
 }
 
-/// 分类选择底部弹窗 - 使用 FPicker 滚轮选择器
+/// Category selection bottom sheet - uses FPicker wheel selector
 ///
-/// 支持根据交易类型过滤分类列表
+/// Supports filtering category list by transaction type
 class CategorySelectionSheet extends StatefulWidget {
   final TransactionCategory? selectedCategory;
   final RecurringTransactionType? transactionType;
@@ -30,7 +30,7 @@ class CategorySelectionSheet extends StatefulWidget {
     this.transactionType,
   });
 
-  /// 显示弹窗
+  /// Show sheet
   static Future<CategorySelectionResult?> show(
     BuildContext context, {
     TransactionCategory? selectedCategory,
@@ -58,10 +58,10 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
   @override
   void initState() {
     super.initState();
-    // 根据交易类型过滤分类
+    // Filter categories by transaction type
     _categories = _getCategoriesForType(widget.transactionType);
 
-    // 找到当前选中分类的索引
+    // Find index of currently selected category
     final initialIndex = widget.selectedCategory != null
         ? _categories.indexOf(widget.selectedCategory!)
         : 0;
@@ -71,7 +71,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
     );
   }
 
-  /// 根据交易类型获取对应的分类列表
+  /// Get category list for the given transaction type
   List<TransactionCategory> _getCategoriesForType(
     RecurringTransactionType? type,
   ) {
@@ -83,7 +83,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
       case RecurringTransactionType.transfer:
         return TransactionCategory.transferCategories;
       case null:
-        // 默认显示支出分类
+        // Default to expense categories
         return TransactionCategory.expenseCategories;
     }
   }
@@ -108,7 +108,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
       child: SafeArea(
         child: Column(
           children: [
-            // 拖动条
+            // Drag handle
             Container(
               width: 32,
               height: 4,
@@ -118,12 +118,12 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // 标题栏
+            // Title bar
             _buildHeader(theme, colors),
             const SizedBox(height: 16),
-            // FPicker 分类选择器
+            // FPicker category selector
             Expanded(child: _buildCategoryPicker(theme, colors)),
-            // 底部按钮
+            // Bottom buttons
             _buildBottomButtons(theme, colors),
           ],
         ),
@@ -136,7 +136,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          const SizedBox(width: 48), // 平衡右侧空间
+          const SizedBox(width: 48), // Balance right side spacing
           Expanded(
             child: Text(
               t.transaction.category,
@@ -158,7 +158,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
       control: .managed(controller: _controller),
       children: [
         FPickerWheel(
-          loop: true, // 开启循环（禁用会导致 Web 平台 bug）
+          loop: true, // Enable loop (disabling causes Web platform bug)
           children: _categories.map((category) {
             return Center(
               child: Row(
@@ -204,8 +204,8 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
             child: FButton(
               onPress: () {
                 final rawIndex = _controller.value[0];
-                // 循环模式下索引可能为负数或超大值，使用取模运算
-                // Dart 的 % 对负数有问题，需要特殊处理
+                // In loop mode, index may be negative or very large; use modulo
+                // Dart's % has issues with negatives, needs special handling
                 int selectedIndex = rawIndex % _categories.length;
                 if (selectedIndex < 0) {
                   selectedIndex += _categories.length;
