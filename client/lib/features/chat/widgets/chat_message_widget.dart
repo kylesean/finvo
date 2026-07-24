@@ -430,42 +430,45 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   GptMarkdownThemeData _gptThemeData(BuildContext context, FThemeData theme) {
     final fallbacks = AppFontConfig.getGlobalFontFallbacks();
     final family = AppFontConfig.primaryFontFamily;
+    // MiSansVF 是可变字体，wght 轴忠实执行字重。
+    // 标题已通过字号 + 颜色区分层级，字重保持轻量以匹配
+    // 用户记忆中 MiSans-L3（静态细体）的和谐观感。
     return GptMarkdownThemeData(
       brightness: Theme.of(context).brightness,
       h1: TextStyle(
         fontSize: 28,
         color: theme.colors.primary,
-        fontWeight: AppFontConfig.headingBold,
+        fontWeight: AppFontConfig.titleSemibold, // w500
         fontFamily: family,
         fontFamilyFallback: fallbacks,
       ),
       h2: TextStyle(
         fontSize: 24,
-        fontWeight: AppFontConfig.headingBold,
+        fontWeight: AppFontConfig.titleSemibold, // w500
         fontFamily: family,
         fontFamilyFallback: fallbacks,
       ),
       h3: TextStyle(
         fontSize: 20,
-        fontWeight: AppFontConfig.titleSemibold,
+        fontWeight: AppFontConfig.bodyMedium, // w400
         fontFamily: family,
         fontFamilyFallback: fallbacks,
       ),
       h4: TextStyle(
         fontSize: 17,
-        fontWeight: AppFontConfig.titleSemibold,
+        fontWeight: AppFontConfig.bodyMedium, // w400
         fontFamily: family,
         fontFamilyFallback: fallbacks,
       ),
       h5: TextStyle(
         fontSize: 15,
-        fontWeight: AppFontConfig.titleSemibold,
+        fontWeight: AppFontConfig.bodyMedium, // w400
         fontFamily: family,
         fontFamilyFallback: fallbacks,
       ),
       h6: TextStyle(
         fontSize: 14,
-        fontWeight: AppFontConfig.titleSemibold,
+        fontWeight: AppFontConfig.bodyMedium, // w400
         fontFamily: family,
         fontFamilyFallback: fallbacks,
       ),
