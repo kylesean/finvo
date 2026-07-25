@@ -208,19 +208,49 @@ async def chat_stream(
     if chat_request.messages:
         user_message = chat_request.messages[-1].content
 
-    # For new sessions, generate and save title synchronously (fast, no LLM)
-    if is_new and user_message:
-        title = generate_session_title(user_message)
-        async with get_session_context() as db:
-            repo = SessionRepository(db)
-            await repo.update_name(session.id, title)
-        logger.info("session_title_set", session_id=session.id, title=title)
-
     # Extract attachment IDs from messages
     attachment_ids = []
     for msg in chat_request.messages:
         if msg.attachments:
             attachment_ids.extend([att.id for att in msg.attachments])
+
+    # Detect session language early (needed for title + middleware)
+    app_language = request.headers.get("X-App-Language")
+    if not app_language:
+        accept_language = request.headers.get("Accept-Language", "zh")
+        app_language = accept_language.split(",")[0].split(";")[0].strip()
+
+    # Normalize language code
+    if app_language.startswith("zh-TW") or app_language.startswith("zh-Hant"):
+        app_language = "zh-Hant"
+    elif app_language.startswith("zh"):
+        app_language = "zh"
+    elif app_language.startswith("ja"):
+        app_language = "ja"
+    elif app_language.startswith("ko"):
+        app_language = "ko"
+    elif app_language.startswith("en"):
+        app_language = "en"
+    else:
+        app_language = "zh"  # Default to Chinese
+
+    # For new sessions, generate and save title synchronously (fast, no LLM)
+    if is_new:
+        if user_message:
+            title = generate_session_title(user_message)
+        elif attachment_ids:
+            # Image-only message: use localized fallback title
+            _image_titles = {"zh": "图片识别", "en": "Image Analysis", "ja": "画像認識", "ko": "이미지 분석"}
+            lang_key = app_language.split("-")[0].lower()
+            title = _image_titles.get(lang_key, _image_titles["en"])
+        else:
+            title = None
+
+        if title:
+            async with get_session_context() as db:
+                repo = SessionRepository(db)
+                await repo.update_name(session.id, title)
+            logger.info("session_title_set", session_id=session.id, title=title)
 
     async def event_generator() -> AsyncGenerator[str]:
         try:
@@ -246,26 +276,7 @@ async def chat_stream(
             # 2.5 Set session language for skill script localization
             from app.core.langgraph.tools import current_session_language, current_user_id
 
-            # Prefer X-App-Language header, fallback to Accept-Language
-            app_language = request.headers.get("X-App-Language")
-            if not app_language:
-                accept_language = request.headers.get("Accept-Language", "zh")
-                app_language = accept_language.split(",")[0].split(";")[0].strip()
-
-            # Normalize language code
-            if app_language.startswith("zh-TW") or app_language.startswith("zh-Hant"):
-                app_language = "zh-Hant"
-            elif app_language.startswith("zh"):
-                app_language = "zh"
-            elif app_language.startswith("ja"):
-                app_language = "ja"
-            elif app_language.startswith("ko"):
-                app_language = "ko"
-            elif app_language.startswith("en"):
-                app_language = "en"
-            else:
-                app_language = "zh"  # Default to Chinese
-
+            # Use pre-computed app_language from request headers
             lang_token = current_session_language.set(app_language)
             user_token = current_user_id.set(str(session.user_uuid)) if session.user_uuid else None
 

@@ -254,11 +254,13 @@ class CustomContentGenerator implements genui.Transport {
     Map<String, dynamic>? clientState,
   }) async {
     // Defense in depth: never send empty/skipped messages to the backend.
-    // Empty content would be rejected (422: 'String should have at least 1
-    // character') and — worse — this method first cancels any in-flight
-    // stream, which would break active skills execution mid-way.
+    // A message is valid if it has non-empty content OR has attachments
+    // (image-only messages are legitimate for multimodal LLMs).
     final hasValidContent = messages.any(
-      (m) => m['_skip'] != true && ((m['content'] as String?) ?? '').isNotEmpty,
+      (m) =>
+          m['_skip'] != true &&
+          (((m['content'] as String?) ?? '').isNotEmpty ||
+              (m['attachments'] as List?)?.isNotEmpty == true),
     );
     if (!hasValidContent) {
       _logger.warning(
