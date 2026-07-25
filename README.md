@@ -1,108 +1,137 @@
-<p align="center">
-  <img src="client/assets/images/logo.png" width="120" alt="Augo Logo">
+<p align="right">
+  <strong>English</strong> · <a href="./README_ZH.md">简体中文</a>
 </p>
 
-<h1 align="center">Augo</h1>
-
 <p align="center">
-  <ins><b>支持私有化部署的 AI 个人财务助理</b></ins>
+  <img src="./assets/readme/hero.svg" width="100%" alt="Augo - Self-Hosted AI Personal Financial Assistant">
 </p>
 
 <p align="center">
   <a href="https://github.com/kylesean/augo/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3"></a>
   <a href="https://www.python.org/downloads/release/python-3130/"><img src="https://img.shields.io/badge/Python-3.13-blue.svg" alt="Python 3.13"></a>
-  <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-Environment-02569B.svg" alt="Flutter"></a>
-  <a href="https://github.com/kylesean/augo/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+  <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-Cross--Platform-02569B.svg" alt="Flutter"></a>
+  <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-0.115+-009688.svg" alt="FastAPI"></a>
+  <a href="https://www.langchain.com/langgraph"><img src="https://img.shields.io/badge/LangGraph-Agentic-orange.svg" alt="LangGraph"></a>
 </p>
+
+---
 
 <p align="center">
-  <a href="./README.md">简体中文</a> | <a href="./README_EN.md">English</a>
+  Augo is an open-source, <strong>self-hosted AI financial assistant</strong> designed to manage personal and family finances with complete data privacy. Operating on your own infrastructure, it retains conversation memory, connects seamlessly to both cloud LLMs and local models, and renders interactive UI components dynamically.
 </p>
+
+---
 
 <p align="center">
-  <img src="client/assets/images/record-transactions.png" width="24%" />
-  <img src="client/assets/images/analysis.png" width="24%" />
-  <img src="client/assets/images/skills.png" width="24%" />
-  <img src="client/assets/images/transfer.png" width="24%" />
+  <img src="client/assets/images/record-transactions.png" width="24%" alt="Record Transactions" />
+  <img src="client/assets/images/analysis.png" width="24%" alt="Financial Analysis" />
+  <img src="client/assets/images/skills.png" width="24%" alt="Skill Extensions" />
+  <img src="client/assets/images/transfer.png" width="24%" alt="Transfer & Assets" />
 </p>
 
 ---
 
-Augo 是一款开源的 AI 财务助理，核心特点是支持私有化部署。它能帮你管理个人或家庭的财务账目，数据和 AI 记忆通过私有环境存储，可以根据需要灵活接入不同的云端或本地大模型。
+## Key Features
+
+- **Agent-Based Orchestration (LangGraph + Mem0)**
+  Goes far beyond static transaction logging. Augo uses LangGraph for multi-step financial reasoning, automatic self-correction, long/short-term memory management via Mem0, and complex querying via natural conversation.
+
+- **100% Self-Hosted & Privacy-First**
+  Keep your ledger and AI memories entirely within your local network. Supports private voice recognition via the customized [asr_server](https://github.com/kylesean/asr_server) project, ensuring voice data never leaks to third parties.
+
+- **Model-Agnostic LLM Connectivity**
+  No vendor lock-in. Connect seamlessly to cloud LLMs (**OpenAI**, **DeepSeek**, **Qwen**) or run 100% offline with local LLM frameworks like **Ollama**.
+
+- **Dynamic UI Streaming (Google A2UI Protocol)**
+  Powered by the **Google A2UI** protocol and built with [forui](https://github.com/duobaseio/forui). The AI agent dynamically pushes custom interactive widgets (charts, breakdown cards, transaction confirmations) directly into the app stream based on context.
+
+- **Extensible Anthropic-Style Skills**
+  Supports plugin skills following the **Anthropic Skills** standard. Add python-based skill modules for advanced capabilities like specialized budget planning, investment tracking, and custom expense analysis.
+
+- **NAS & Home Server Optimized**
+  Pre-packaged for one-click deployment on **Synology**, **QNAP**, Unraid, or standard Docker hosts. Includes multi-member family sharing support out of the box.
 
 ---
 
-## 🛠️ 功能特性
+## Architecture
 
-### 基于 Agent 架构的财务处理
-Augo 使用 **LangGraph** 进行任务编排。它不仅能记录流水，还能通过对话理解你的需求，支持多步骤的财务查询、自动纠错并保留长短期的财务背景信息。
+```mermaid
+flowchart TD
+    subgraph Client ["Client Layer"]
+        A[Flutter Mobile App] <-->|Google A2UI Protocol| B[ForUI Components]
+    end
 
-### 支持多种模型接入
-Augo 不绑定特定的 AI 服务商：
-- **云端接入**: 支持接入 OpenAI、DeepSeek 等主流模型。
-- **本地接入**: 支持通过 **Ollama** 等框架接入本地模型，适合拥有个人算力设备的用户。
+    subgraph Backend ["Server Layer (Python 3.13 / FastAPI)"]
+        C[FastAPI Gateway] <--> D[LangGraph Agent Core]
+        D <--> E[Mem0 Memory Manager]
+        D <--> F[Skill Engine]
+    end
 
-### 语音与隐私交互
-支持集成 [asr_server](https://github.com/kylesean/asr_server) 项目（基于开源 ASR 方案深度定制）：
-- **自建语音识别**: 可以在本地部署 ASR 服务。
-- **灵活切换**: 支持在系统原生语音和本地语音服务间切换，让语音数据尽量留在本地。
-
-### Skill 技能扩展
-采用类 **Anthropic Skills** 规范的插件机制。通过增加不同的 Skill 脚本，可以让助手具备更专业的分析能力（如消费分析、预算规划等）。
-
-### 交互界面
-基于 **Google A2UI** 协议实现。界面组件（如分析图表、详情卡片）由 AI 根据对话内容动态推送，前端使用 [forui](https://github.com/duobaseio/forui) UI 组件库。
-
-## 🏠 部署与使用场景
-
-- **NAS 私有部署**: 适配 **群晖 (Synology)**、**威联通 (QNAP)** 等常见 NAS 系统。通过 Docker 一键部署，让家用服务器兼具财务管理功能。
-- **家庭共享**: 支持多成员协同，数据存储在本地数据库中，由用户完全控制。
-- **开发者调试**: 提供 Makefile 工具链。
-
-## ⚙️ 技术栈
-
-- **后端**: **Python 3.13** + **FastAPI**，使用 **uv** 管理依赖。
-- **AI 编排**: **LangGraph** + **Mem0**。
-- **前端**: **Flutter** + [forui](https://github.com/duobaseio/forui)。
-- **存储**: **PostgreSQL (pgvector)** 存储账目信息与向量数据。
+    subgraph External ["Services & Storage"]
+        D <--> G[(PostgreSQL / pgvector)]
+        D <--> H[Cloud / Local LLM\nOpenAI / DeepSeek / Ollama]
+        A <--> I[Self-Hosted ASR Server]
+    end
+```
 
 ---
 
-## 🚀 快速开始
+## Tech Stack
 
-### 前置条件
-- **Docker & Docker Compose** (推荐)
-- **AI 模型 API Key** 或 **本地大模型地址**
+| Component | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Backend** | Python 3.13 + FastAPI + `uv` | High-performance API server & dependency management |
+| **AI Agent Core** | LangGraph + Mem0 | Multi-step reasoning, intent dispatching & memory |
+| **Frontend App** | Flutter + ForUI | Cross-platform mobile UI with dynamic A2UI renderer |
+| **Database** | PostgreSQL + `pgvector` | Transaction records & vector embeddings |
+| **Voice / ASR** | `asr_server` | Local, self-hosted Speech-to-Text processing |
 
 ---
 
-### 🐳 Docker 部署
+## Quick Start
 
-1. **获取代码**:
+### Prerequisites
+- **Docker & Docker Compose** (Recommended)
+- **AI Model API Key** (e.g., DeepSeek, OpenAI, Qwen) OR a local **Ollama** endpoint
+
+### Docker Deployment
+
+1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/kylesean/augo.git && cd augo
+   git clone https://github.com/kylesean/augo.git
+   cd augo
    ```
-2. **环境配置**:
+
+2. **Configure Environment Variables**:
    ```bash
    cp server/.env.example server/.env
-   # 在 server/.env 中填入你的 Key 或地址
+   # Edit server/.env with your preferred LLM provider credentials
    ```
-3. **启动**:
+
+3. **Launch Containers**:
    ```bash
    make docker-up
    ```
-   *启动后扫描终端二维码即可连接 App。*
+
+> Once started, scan the QR code displayed in the terminal using the Flutter Mobile App to pair immediately.
 
 ---
 
-## 🗺️ 项目结构
-- `/client`: Flutter 客户端源码。
-- `/server`: FastAPI 后端源码。
-- `/docker-compose.yml`: Docker 集群配置。
+## Repository Structure
 
-## 📄 开源协议
-本项目采用 [AGPLv3 License](LICENSE) 协议。
+```text
+augo/
+├── client/              # Flutter mobile application codebase
+│   └── assets/images/   # Screenshots and brand assets
+├── server/              # FastAPI backend & LangGraph Agent service
+│   ├── app/             # Core application logic & API endpoints
+│   └── .env.example     # Environment template
+├── docker-compose.yml   # Multi-container deployment configuration
+└── Makefile             # Developer shortcuts & lifecycle scripts
+```
 
 ---
 
-Email: jkxsai@gmail.com | WeChat: Ky1eSean
+## License
+
+This project is open-source under the [AGPL-3.0 License](LICENSE).
