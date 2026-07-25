@@ -209,8 +209,19 @@ class SimpleLangChainAgent:
         lc_messages = []
         if messages:
             last_msg = messages[-1]
+            # Keep `content` a plain string — never multimodal / base64. Carry the
+            # attachment id references in additional_kwargs so the history API
+            # (get_detailed_history) can emit signed URLs, and so the model node
+            # can rebuild the multimodal payload transiently (including on resume,
+            # where the middleware is bypassed). A single list literal keeps the
+            # element type as `HumanMessage | AIMessage` (mypy list invariance).
             lc_messages = [
-                HumanMessage(content=last_msg.content)
+                HumanMessage(
+                    content=last_msg.content,
+                    additional_kwargs=(
+                        {"attachment_ids": [str(aid) for aid in attachment_ids]} if attachment_ids else {}
+                    ),
+                )
                 if last_msg.role == "user"
                 else AIMessage(content=last_msg.content)
             ]

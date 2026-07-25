@@ -9,10 +9,15 @@ from collections.abc import Callable
 from typing import Any, cast
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
 
+from app.core.langgraph.agent.multimodal import (
+    build_multimodal_content,
+    load_image_parts,
+    vision_unsupported_message,
+)
 from app.core.langgraph.agent.state import AgentState
 from app.core.logging import logger
 
@@ -57,16 +62,60 @@ def create_agent_node(
 
     async def agent_node(state: AgentState, config: RunnableConfig) -> dict[str, list[BaseMessage]]:
         messages = state["messages"]
+        cfg = config.get("configurable", {})
+
+        # Vision guard: a non-vision model must not receive images. Short-circuit here
+        # (before any LLM call) with a localized assistant message; having no
+        # tool_calls, route_after_agent sends us straight to END. Mirrors the official
+        # `before_agent` + jump_to:"end" pattern and yields a turn identical in the
+        # live stream and in history. On resume the middleware is bypassed, so
+        # `_has_images` is absent and the guard is skipped — which is fine: a
+        # non-vision+image turn is refused on its first (fresh) iteration and never
+        # reaches a resumable interrupted state.
+        if cfg.get("_has_images"):
+            from app.services.llm import LLMRegistry
+
+            if not LLMRegistry.supports_vision():
+                from app.core.langgraph.tools.context import current_session_language
+
+                return {"messages": [AIMessage(content=vision_unsupported_message(current_session_language.get()))]}
+
+        # Ephemeral multimodal enrichment: build what the MODEL sees without touching
+        # state["messages"] (so the checkpoint keeps the compact plain-text user
+        # message). Image parts come from the middleware's config cache on the fresh
+        # path; on resume (middleware bypassed) we rebuild them from the stored
+        # attachment id references. Only the local prompt copy is enriched.
+        target_idx: int | None = None
+        for idx in range(len(messages) - 1, -1, -1):
+            m = messages[idx]
+            if isinstance(m, HumanMessage):
+                if (getattr(m, "additional_kwargs", {}) or {}).get("attachment_ids"):
+                    target_idx = idx
+                break
+
+        image_parts = cfg.get("_image_multimodal_parts")
+        if target_idx is not None and image_parts is None:
+            ref_ids = (getattr(messages[target_idx], "additional_kwargs", {}) or {})["attachment_ids"]
+            image_parts = await load_image_parts(ref_ids, cfg.get("user_uuid"))
+
+        prompt_messages: list[BaseMessage] = [SystemMessage(content=system_prompt)] + list(messages)
+        if target_idx is not None and image_parts:
+            original = messages[target_idx]
+            user_text = original.content if isinstance(original.content, str) else ""
+            # +1 accounts for the SystemMessage prepended above.
+            prompt_messages[target_idx + 1] = HumanMessage(
+                content=build_multimodal_content(user_text, image_parts),
+                additional_kwargs=getattr(original, "additional_kwargs", {}),
+            )
 
         # 支持 SkillConstraintMiddleware 动态过滤工具
-        filtered_tools = config.get("configurable", {}).get("filtered_tools")
+        filtered_tools = cfg.get("filtered_tools")
         current_tools = cast(list[BaseTool], filtered_tools or state.get("filtered_tools") or tools)
 
         # 搜索策略路由: Responses API → 内置 web_search, Chat Completions → ddg
         resolved_tools = _resolve_search_tools(llm, current_tools)
 
         bound_llm = llm.bind_tools(resolved_tools)
-        prompt_messages = [SystemMessage(content=system_prompt)] + messages
         response = await bound_llm.ainvoke(prompt_messages, config)
 
         logger.debug(
