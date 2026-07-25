@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-labelledby="title desc">
+  <title id="title">Augo - 支持私有化部署的 AI 个人财务助理</title>
+  <desc id="desc">展示 Augo 架构的视觉 Banner，包含 LangGraph Agent 核心、Google A2UI 协议、Mem0 记忆系统与私有化 ASR/大模型集成。</desc>
+
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F19"/>
+      <stop offset="50%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#070A12"/>
+    </linearGradient>
+
+    <!-- Node Glow Gradients -->
+    <linearGradient id="emeraldGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <linearGradient id="cyanGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+
+    <linearGradient id="indigoGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+
+    <!-- Card Background Gradient -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <!-- Subtle Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" stroke-width="0.5" stroke-opacity="0.2"/>
+    </pattern>
+  </defs>
+
+  <!-- Canvas Container -->
+  <rect width="1200" height="380" rx="20" fill="url(#bgGrad)"/>
+  <rect width="1200" height="380" rx="20" fill="url(#grid)"/>
+
+  <!-- Decorative Outer Border -->
+  <rect x="1" y="1" width="1198" height="378" rx="19" fill="none" stroke="#1E293B" stroke-width="1.5"/>
+
+  <!-- ================= LEFT TITLE BLOCK ================= -->
+  <g id="title-block" transform="translate(60, 50)">
+    <!-- Eyebrow Category Tag -->
+    <rect x="0" y="0" width="220" height="28" rx="14" fill="#10B981" fill-opacity="0.15" stroke="#10B981" stroke-width="1" stroke-opacity="0.4"/>
+    <text x="110" y="18" text-anchor="middle" fill="#34D399" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="12" font-weight="600" letter-spacing="1">开源私有化 · 隐私安全</text>
+
+    <!-- Project Title -->
+    <text x="0" y="80" fill="#F8FAFC" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="52" font-weight="800" letter-spacing="-1">Augo</text>
+    <circle cx="125" cy="45" r="5" fill="#10B981"/>
+
+    <!-- Subtitle / Value Proposition -->
+    <text x="0" y="122" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="20" font-weight="400">支持私有化部署的 AI 个人财务助理</text>
+    <text x="0" y="150" fill="#64748B" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="15" font-weight="400">基于 LangGraph Agent 架构、Google A2UI 与 Mem0 记忆系统</text>
+
+    <!-- Feature Pill Badges -->
+    <g transform="translate(0, 190)">
+      <!-- Badge 1: LangGraph -->
+      <rect x="0" y="0" width="135" height="32" rx="8" fill="url(#cardGrad)" stroke="#334155" stroke-width="1"/>
+      <circle cx="16" cy="16" r="4" fill="#10B981"/>
+      <text x="28" y="21" fill="#E2E8F0" font-family="ui-monospace, SFMono-Regular, monospace" font-size="13" font-weight="500">LangGraph Agent</text>
+
+      <!-- Badge 2: Google A2UI -->
+      <rect x="145" y="0" width="145" height="32" rx="8" fill="url(#cardGrad)" stroke="#334155" stroke-width="1"/>
+      <circle cx="161" cy="16" r="4" fill="#06B6D4"/>
+      <text x="173" y="21" fill="#E2E8F0" font-family="ui-monospace, SFMono-Regular, monospace" font-size="13" font-weight="500">Google A2UI 动态 UI</text>
+
+      <!-- Badge 3: Local / Cloud LLM -->
+      <rect x="300" y="0" width="155" height="32" rx="8" fill="url(#cardGrad)" stroke="#334155" stroke-width="1"/>
+      <circle cx="316" cy="16" r="4" fill="#6366F1"/>
+      <text x="328" y="21" fill="#E2E8F0" font-family="ui-monospace, SFMono-Regular, monospace" font-size="13" font-weight="500">Ollama / DeepSeek</text>
+    </g>
+
+    <!-- Docker / NAS Command Cue -->
+    <g transform="translate(0, 248)">
+      <rect x="0" y="0" width="455" height="38" rx="8" fill="#090D16" stroke="#1E293B" stroke-width="1"/>
+      <text x="16" y="24" fill="#34D399" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" font-weight="600">$</text>
+      <text x="32" y="24" fill="#F1F5F9" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14">git clone https://github.com/kylesean/augo.git</text>
+    </g>
+  </g>
+
+  <!-- ================= RIGHT ARCHITECTURE PROOF DIAGRAM ================= -->
+  <g id="project-proof" transform="translate(570, 40)">
+    <!-- Outer Diagram Frame -->
+    <rect x="0" y="0" width="570" height="300" rx="16" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5"/>
+
+    <!-- Diagram Header Bar -->
+    <rect x="0" y="0" width="570" height="36" rx="16" fill="#0F172A"/>
+    <rect x="0" y="20" width="570" height="16" fill="#0F172A"/>
+    <circle cx="20" cy="18" r="5" fill="#EF4444"/>
+    <circle cx="36" cy="18" r="5" fill="#F59E0B"/>
+    <circle cx="52" cy="18" r="5" fill="#10B981"/>
+    <text x="285" y="23" text-anchor="middle" fill="#64748B" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" font-weight="500">augo-architecture-flow</text>
+
+    <!-- Node 1: Mobile App (Flutter + ForUI) -->
+    <g transform="translate(30, 65)">
+      <rect x="0" y="0" width="145" height="85" rx="10" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/>
+      <rect x="0" y="0" width="145" height="4" rx="2" fill="url(#emeraldGlow)"/>
+      <text x="72" y="32" text-anchor="middle" fill="#F8FAFC" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="14" font-weight="700">Flutter 移动端</text>
+      <text x="72" y="52" text-anchor="middle" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="12">ForUI &amp; A2UI</text>
+      <rect x="37" y="62" width="70" height="16" rx="8" fill="#10B981" fill-opacity="0.2"/>
+      <text x="72" y="74" text-anchor="middle" fill="#34D399" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10">Client App</text>
+    </g>
+
+    <!-- Connection Arrow 1 -->
+    <path d="M 175 107 L 210 107" stroke="#38BDF8" stroke-width="2" stroke-dasharray="4 3"/>
+    <polygon points="210,103 218,107 210,111" fill="#38BDF8"/>
+    <text x="195" y="98" text-anchor="middle" fill="#38BDF8" font-family="ui-monospace, SFMono-Regular, monospace" font-size="9">A2UI 流</text>
+
+    <!-- Node 2: FastAPI + LangGraph Agent Core -->
+    <g transform="translate(220, 65)">
+      <rect x="0" y="0" width="160" height="85" rx="10" fill="#0F172A" stroke="#06B6D4" stroke-width="1.5"/>
+      <rect x="0" y="0" width="160" height="4" rx="2" fill="url(#cyanGlow)"/>
+      <text x="80" y="32" text-anchor="middle" fill="#F8FAFC" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="14" font-weight="700">FastAPI 服务端</text>
+      <text x="80" y="52" text-anchor="middle" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="12">LangGraph &amp; Mem0</text>
+      <rect x="40" y="62" width="80" height="16" rx="8" fill="#06B6D4" fill-opacity="0.2"/>
+      <text x="80" y="74" text-anchor="middle" fill="#38BDF8" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10">Agent 核心</text>
+    </g>
+
+    <!-- Connection Arrow 2 -->
+    <path d="M 380 107 L 415 107" stroke="#818CF8" stroke-width="2" stroke-dasharray="4 3"/>
+    <polygon points="415,103 423,107 415,111" fill="#818CF8"/>
+    <text x="400" y="98" text-anchor="middle" fill="#818CF8" font-family="ui-monospace, SFMono-Regular, monospace" font-size="9">LLM API</text>
+
+    <!-- Node 3: LLM & Storage (Cloud / Local Ollama) -->
+    <g transform="translate(425, 65)">
+      <rect x="0" y="0" width="115" height="85" rx="10" fill="#0F172A" stroke="#6366F1" stroke-width="1.5"/>
+      <rect x="0" y="0" width="115" height="4" rx="2" fill="url(#indigoGlow)"/>
+      <text x="57" y="32" text-anchor="middle" fill="#F8FAFC" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="13" font-weight="700">大模型与存储</text>
+      <text x="57" y="52" text-anchor="middle" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="11">DeepSeek/Ollama</text>
+      <rect x="22" y="62" width="70" height="16" rx="8" fill="#6366F1" fill-opacity="0.2"/>
+      <text x="57" y="74" text-anchor="middle" fill="#A5B4FC" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10">pgvector</text>
+    </g>
+
+    <!-- Bottom Row: Self-Hosted Voice ASR & Skills -->
+    <g transform="translate(30, 180)">
+      <!-- Box 1: Voice Privacy ASR -->
+      <rect x="0" y="0" width="240" height="90" rx="10" fill="#090D16" stroke="#334155" stroke-width="1"/>
+      <circle cx="28" cy="28" r="12" fill="#10B981" fill-opacity="0.2"/>
+      <path d="M 28 21 L 28 35 M 23 26 L 33 26 M 25 31 L 31 31" stroke="#34D399" stroke-width="2" stroke-linecap="round"/>
+      <text x="52" y="30" fill="#F8FAFC" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="13" font-weight="700">自建 ASR 语音识别</text>
+      <text x="52" y="48" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="11">本地语音服务，数据不流出</text>
+      <text x="52" y="68" fill="#64748B" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10">github.com/kylesean/asr_server</text>
+
+      <!-- Box 2: Skill Plugins -->
+      <rect x="270" y="0" width="240" height="90" rx="10" fill="#090D16" stroke="#334155" stroke-width="1"/>
+      <circle cx="298" cy="28" r="12" fill="#06B6D4" fill-opacity="0.2"/>
+      <text x="298" y="33" text-anchor="middle" fill="#38BDF8" font-family="ui-monospace, SFMono-Regular, monospace" font-size="13" font-weight="700">🧩</text>
+      <text x="322" y="30" fill="#F8FAFC" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="13" font-weight="700">Anthropic Skills 规范</text>
+      <text x="322" y="48" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="11">定制消费分析与预算规划</text>
+      <text x="322" y="68" fill="#64748B" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10">可扩展 Python 技能模块</text>
+    </g>
+
+    <!-- Connecting line between Agent and ASR/Skills -->
+    <path d="M 300 150 L 300 180" stroke="#334155" stroke-width="1.5" stroke-dasharray="3 3"/>
+  </g>
+</svg>
