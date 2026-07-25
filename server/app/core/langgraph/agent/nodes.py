@@ -16,6 +16,34 @@ from langchain_core.tools import BaseTool
 from app.core.langgraph.agent.state import AgentState
 from app.core.logging import logger
 
+# DuckDuckGo 工具名称常量（用于搜索策略路由）
+_DDG_TOOL_NAME = "duckduckgo_results_json"
+
+# Responses API 内置搜索工具声明
+_BUILTIN_WEB_SEARCH: dict[str, str] = {"type": "web_search"}
+
+
+def _resolve_search_tools(
+    llm: BaseChatModel,
+    tools: list[BaseTool],
+) -> list[BaseTool | dict[str, Any]]:
+    """根据模型 API 协议动态选择搜索工具。
+
+    策略:
+    - Responses API 模型: 使用厂商内置 web_search（服务端执行，无需 ToolNode）
+    - Chat Completions 模型 (如 DeepSeek): 保留 DuckDuckGo 工具（ToolNode 执行）
+    """
+    uses_responses_api = getattr(llm, "use_responses_api", False)
+
+    if uses_responses_api:
+        # 移除 ddg，替换为内置 web_search
+        resolved: list[BaseTool | dict[str, Any]] = [t for t in tools if getattr(t, "name", None) != _DDG_TOOL_NAME]
+        resolved.append(_BUILTIN_WEB_SEARCH)
+        return resolved
+
+    # Chat Completions 模型保持 ddg 不变
+    return list(tools)
+
 
 def create_agent_node(
     llm: BaseChatModel,
@@ -24,7 +52,7 @@ def create_agent_node(
 ) -> Callable[[AgentState, RunnableConfig], Any]:
     """创建 Agent 节点
 
-    Agent 节点调用 LLM 生成响应，支持动态工具过滤。
+    Agent 节点调用 LLM 生成响应，支持动态工具过滤和搜索策略路由。
     """
 
     async def agent_node(state: AgentState, config: RunnableConfig) -> dict[str, list[BaseMessage]]:
@@ -34,7 +62,10 @@ def create_agent_node(
         filtered_tools = config.get("configurable", {}).get("filtered_tools")
         current_tools = cast(list[BaseTool], filtered_tools or state.get("filtered_tools") or tools)
 
-        bound_llm = llm.bind_tools(current_tools)
+        # 搜索策略路由: Responses API → 内置 web_search, Chat Completions → ddg
+        resolved_tools = _resolve_search_tools(llm, current_tools)
+
+        bound_llm = llm.bind_tools(resolved_tools)
         prompt_messages = [SystemMessage(content=system_prompt)] + messages
         response = await bound_llm.ainvoke(prompt_messages, config)
 

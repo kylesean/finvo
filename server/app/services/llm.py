@@ -25,10 +25,7 @@ from tenacity import (
     wait_exponential,
 )
 
-from app.core.config import (
-    Environment,
-    settings,
-)
+from app.core.config import settings
 from app.core.logging import logger
 
 
@@ -37,81 +34,81 @@ class LLMRegistry:
 
     This class maintains a list of LLM configurations and provides
     methods to retrieve them by name with optional argument overrides.
+
+    Each model entry supports a ``capabilities`` dict declaring feature
+    flags such as ``vision`` (multimodal image understanding).  Use
+    :meth:`supports_vision` to query the current default model's capability.
     """
 
     # Class-level variable containing all available LLM models
     LLMS: list[dict[str, Any]] = [
         {
-            "name": "gpt-5-mini",
+            "name": "gpt-5.6-sol",
+            "capabilities": {"vision": True},
             "llm": ChatOpenAI(
-                model="gpt-5-mini",
+                model="gpt-5.6-sol",
                 api_key=settings.OPENAI_API_KEY,
                 base_url=settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
-                reasoning={"effort": "low"},
+                reasoning_effort="medium",
+                use_responses_api=True,
+            ),
+        },
+        {
+            "name": "gpt-5.6-terra",
+            "capabilities": {"vision": True},
+            "llm": ChatOpenAI(
+                model="gpt-5.6-terra",
+                api_key=settings.OPENAI_API_KEY,
+                base_url=settings.OPENAI_BASE_URL,
+                max_tokens=settings.MAX_TOKENS,
+                reasoning_effort="low",
+                use_responses_api=True,
+            ),
+        },
+        {
+            "name": "gpt-5.6-luna",
+            "capabilities": {"vision": True},
+            "llm": ChatOpenAI(
+                model="gpt-5.6-luna",
+                api_key=settings.OPENAI_API_KEY,
+                base_url=settings.OPENAI_BASE_URL,
+                max_tokens=settings.MAX_TOKENS,
+                reasoning_effort="low",
+                use_responses_api=True,
+            ),
+        },
+        {
+            "name": "qwen3.8-max-preview",
+            "capabilities": {"vision": True},
+            "llm": ChatOpenAI(
+                model="qwen3.8-max-preview",
+                api_key=settings.QWEN_API_KEY or settings.OPENAI_API_KEY,
+                base_url=settings.QWEN_BASE_URL or settings.OPENAI_BASE_URL,
+                max_tokens=settings.MAX_TOKENS,
+                reasoning_effort="low",
+                use_responses_api=True,
             ),
         },
         {
             "name": "doubao-seed-1-6-251015",
+            "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="doubao-seed-1-6-251015",
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
+                api_key=settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY,
+                base_url=settings.DOUBAO_BASE_URL or settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
                 temperature=settings.DEFAULT_LLM_TEMPERATURE,
-                # 注意: 移除 reasoning 参数以兼容多模态图片调用
-            ),
-        },
-        {
-            "name": "gpt-5",
-            "llm": ChatOpenAI(
-                model="gpt-5",
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
-                max_tokens=settings.MAX_TOKENS,
-                reasoning={"effort": "medium"},
-            ),
-        },
-        {
-            "name": "gpt-5-nano",
-            "llm": ChatOpenAI(
-                model="gpt-5-nano",
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
-                max_tokens=settings.MAX_TOKENS,
-                reasoning={"effort": "minimal"},
-            ),
-        },
-        {
-            "name": "gpt-4o",
-            "llm": ChatOpenAI(
-                model="gpt-4o",
-                temperature=settings.DEFAULT_LLM_TEMPERATURE,
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
-                max_tokens=settings.MAX_TOKENS,
-                top_p=0.95 if settings.ENVIRONMENT == Environment.PRODUCTION else 0.8,
-                presence_penalty=0.1 if settings.ENVIRONMENT == Environment.PRODUCTION else 0.0,
-                frequency_penalty=0.1 if settings.ENVIRONMENT == Environment.PRODUCTION else 0.0,
-            ),
-        },
-        {
-            "name": "gpt-4o-mini",
-            "llm": ChatOpenAI(
-                model="gpt-4o-mini",
-                temperature=settings.DEFAULT_LLM_TEMPERATURE,
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
-                max_tokens=settings.MAX_TOKENS,
-                top_p=0.95 if settings.ENVIRONMENT == Environment.PRODUCTION else 0.8,
+                use_responses_api=True,
             ),
         },
         {
             "name": "deepseek-v4-flash",
+            "capabilities": {"vision": False},
             "llm": ChatOpenAI(
                 model="deepseek-v4-flash",
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
+                api_key=settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY,
+                base_url=settings.DEEPSEEK_BASE_URL or settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
                 temperature=settings.DEFAULT_LLM_TEMPERATURE,
             ),
@@ -192,6 +189,34 @@ class LLMRegistry:
         if 0 <= index < len(cls.LLMS):
             return cls.LLMS[index]
         return cls.LLMS[0]  # Wrap around to first model
+
+    @classmethod
+    def supports_vision(cls, model_name: str | None = None) -> bool:
+        """Check whether a model supports vision (multimodal image input).
+
+        Resolution order:
+        1. Explicit ``LLM_SUPPORTS_VISION`` env override (if set)
+        2. ``capabilities.vision`` declared in the registry entry
+        3. Default to False for unknown / dynamic models
+
+        Args:
+            model_name: Model to check.  Defaults to ``settings.DEFAULT_LLM_MODEL``.
+
+        Returns:
+            True if the model can accept ``image_url`` content parts.
+        """
+        # Env-level override takes highest priority
+        if settings.LLM_SUPPORTS_VISION is not None:
+            return settings.LLM_SUPPORTS_VISION
+
+        target = model_name or settings.DEFAULT_LLM_MODEL
+        for entry in cls.LLMS:
+            if entry["name"] == target:
+                caps = entry.get("capabilities", {})
+                return bool(caps.get("vision", False))
+
+        # Unknown model – conservative default
+        return False
 
 
 class LLMService:

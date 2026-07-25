@@ -89,9 +89,33 @@ class MessageWithAttachments(Message):
 
     This model extends the base Message to support multimodal content
     by allowing references to uploaded files (images, documents).
+
+    Note: content may be empty when the user sends only attachments
+    (e.g. image-only messages for OCR / visual understanding).
     """
 
+    # Override content to allow empty string when attachments are present
+    content: str = Field(
+        default="",
+        description="The content of the message (may be empty if attachments are provided)",
+        max_length=3000,
+    )
     attachments: list[AttachmentRef] | None = Field(default=None, description="List of attachment references")
+
+    @field_validator("content")
+    @classmethod
+    def validate_content_with_attachments(cls, v: str) -> str:
+        """Validate content - allow empty when used with attachments.
+
+        The base Message validator is bypassed here because image-only
+        messages legitimately have no text content.
+        """
+        # Still check for harmful content if non-empty
+        if v and re.search(r"<script.*?>.*?</script>", v, re.IGNORECASE | re.DOTALL):
+            raise ValueError("Content contains potentially harmful script tags")
+        if v and "\0" in v:
+            raise ValueError("Content contains null bytes")
+        return v
 
 
 class ChatRequestWithAttachments(BaseModel):

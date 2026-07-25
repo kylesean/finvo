@@ -129,16 +129,48 @@ class Settings(BaseSettings):
     LANGFUSE_HOST: str = "https://cloud.langfuse.com"
 
     # LLM Configuration
-    OPENAI_API_KEY: str = Field("", validation_alias="OPENAI_API_KEY")
-    OPENAI_BASE_URL: str | None = Field(None, validation_alias="OPENAI_BASE_URL")
-    DEFAULT_LLM_MODEL: str = "gpt-4o-mini"
+    DEFAULT_LLM_MODEL: str = "gpt-5.6-luna"
     DEFAULT_LLM_TEMPERATURE: float = 0.2
     MAX_TOKENS: int = 2000
     MAX_LLM_CALL_RETRIES: int = 3
 
+    # Vision / Multimodal Configuration
+    # None = auto-detect from LLMRegistry capabilities declaration
+    # True/False = force override (useful when using custom OpenAI-compatible endpoints)
+    LLM_SUPPORTS_VISION: bool | None = None
+
+    # --- Per-Provider Credentials ---
+    # OpenAI (GPT-5.6 系列)
+    OPENAI_API_KEY: str = Field("", validation_alias="OPENAI_API_KEY")
+    OPENAI_BASE_URL: str | None = Field(None, validation_alias="OPENAI_BASE_URL")
+
+    # DeepSeek
+    DEEPSEEK_API_KEY: str | None = Field(None, validation_alias="DEEPSEEK_API_KEY")
+    DEEPSEEK_BASE_URL: str | None = Field(
+        None,
+        validation_alias="DEEPSEEK_BASE_URL",
+        description="e.g. https://api.deepseek.com/v1",
+    )
+
+    # Qwen - 阿里云百炼
+    QWEN_API_KEY: str | None = Field(None, validation_alias="QWEN_API_KEY")
+    QWEN_BASE_URL: str | None = Field(
+        None,
+        validation_alias="QWEN_BASE_URL",
+        description="e.g. https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+    )
+
+    # Doubao - 火山方舟
+    DOUBAO_API_KEY: str | None = Field(None, validation_alias="DOUBAO_API_KEY")
+    DOUBAO_BASE_URL: str | None = Field(
+        None,
+        validation_alias="DOUBAO_BASE_URL",
+        description="e.g. https://ark.cn-beijing.volces.com/api/v3",
+    )
+
     # Long term memory Configuration (Mem0)
     # Supported Embedder Providers: "openai", "ollama", "huggingface", "azure_openai"
-    LONG_TERM_MEMORY_MODEL: str = "gpt-4o-mini"  # LLM for memory extraction
+    LONG_TERM_MEMORY_MODEL: str = "deepseek-v4-flash"  # LLM for memory extraction
     LONG_TERM_MEMORY_EMBEDDER_PROVIDER: str = "openai"  # openai, ollama, huggingface
     LONG_TERM_MEMORY_EMBEDDER_MODEL: str = "text-embedding-3-small"
     LONG_TERM_MEMORY_EMBEDDER_DIMS: int = 1024  # Embedding dimensions
@@ -256,7 +288,7 @@ class Settings(BaseSettings):
     SMTP_FROM_NAME: str = "Augo"
 
     # Evaluation Configuration
-    EVALUATION_LLM: str = "gpt-4o"
+    EVALUATION_LLM: str = "deepseek-v4-flash"
     EVALUATION_BASE_URL: str = "https://api.openai.com/v1"
     EVALUATION_API_KEY: str | None = None
     EVALUATION_SLEEP_TIME: int = 10
