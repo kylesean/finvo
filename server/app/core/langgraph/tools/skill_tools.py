@@ -34,7 +34,7 @@ def load_skill(
     for handling the task.
 
     Args:
-        skill_name: The EXACT ID string of the skill (e.g. 'reviewing-finances', 'planning-budgets', 'forecasting-finances', 'managing-shared-ledgers'). MUST match an ID from Available Skills. Do NOT pass script names or Chinese text.
+        skill_name: The EXACT ID string of the skill (e.g. 'reviewing-finances', 'forecasting-finances', 'managing-shared-ledgers', 'executing-transfers'). MUST match an ID from Available Skills. Do NOT pass script names or Chinese text.
         tool_call_id: Injected by LangGraph runtime, do not provide manually
 
     Returns:

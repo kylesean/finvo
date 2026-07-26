@@ -1,101 +1,64 @@
 ---
 name: reviewing-finances
 description: >
-  Analyzes past financial data: spending breakdown by category, income vs expense
-  balance, and financial health scoring. THE skill for understanding where money went
-  and current financial status.
-
-  USE WHEN user asks about:
-  - 钱都花到哪了, 消费分析, 消费习惯, 各类消费, 本月消费
-  - 收支情况, 收支分析, 存了多少钱, 财务健康, 收支平衡, 财务评分
-
-  NOT FOR:
-  - 预测未来余额 (下个月还剩多少) → forecasting-finances skill
-  - 设置预算金额 (预算多少合适) → planning-budgets skill
-  - 查询预算剩余状态 → query_budget_status tool
+  Analyzes past spending by category, income vs expense balance, and financial health scoring.
+  USE WHEN: spending breakdown, category analysis, cashflow review, financial health score.
+  NOT FOR: future forecast (→ forecasting-finances), budget creation (→ guide to app UI), budget status (→ query_budget_status tool).
 
 allowed-tools: "execute search_transactions read_file"
 ---
 
-# Skill: Reviewing Finances
+# Reviewing Finances
 
-You help users understand WHERE their money went and HOW HEALTHY their finances are.
-This skill focuses on **analyzing the past and present**, not predicting the future.
+Analyze past spending patterns and assess financial health.
 
-## Core Principle
+## Scripts
 
-This skill answers two fundamental questions:
-1. **WHERE did money go?** → Spending breakdown by category
-2. **HOW is my financial health?** → Income vs expense balance + health score
-
-## Use Cases
-
-| User Request | Action |
-|--------------|--------|
-| "钱都花哪了" / "消费分析" | Run analyze_spending.py → Show category breakdown |
-| "收支情况" / "存了多少" | Run analyze_cashflow.py → Show income/expense balance |
-| "财务健康吗" / "财务评分" | Run analyze_cashflow.py → Show health score with dimensions |
-| "本月消费习惯" | Run analyze_spending.py → Analyze patterns and trends |
-
-## Available Scripts
-
-### analyze_spending.py - Spending Breakdown
+### analyze_spending.py
 
 ```bash
 uv run python app/skills/reviewing-finances/scripts/analyze_spending.py --start-date YYYY-MM-01 --end-date YYYY-MM-DD
 ```
 
-Analyzes spending patterns and provides category breakdown.
-
 **Parameters**:
-- `--start-date`: Start date YYYY-MM-DD (e.g. 1st day of current month)
-- `--end-date`: End date YYYY-MM-DD (e.g. today)
-- `--days`: Analysis period in days, default 90 (used if start_date/end_date omitted)
-- `--category`: Focus on specific category (e.g., "FOOD_DINING")
+- `--start-date` / `--end-date`: Date range (YYYY-MM-DD)
+- `--days`: Fallback period if dates omitted (default: 90)
+- `--category`: Filter by category key (e.g. "FOOD_DINING")
 
-Note for LLM: When user asks for "本月消费" (current month spending), calculate start_date as 1st day of current month and end_date as today, then run with CLI arguments directly.
-CRITICAL: Execute scripts directly without `cd`, `&&`, or `echo |` pipelines to satisfy security policies.
+**Note**: For "current month" queries, set start_date to 1st of current month and end_date to today.
 
-### analyze_cashflow.py - Income/Expense + Health Score
+### analyze_cashflow.py
 
 ```bash
 uv run python app/skills/reviewing-finances/scripts/analyze_cashflow.py --days 90
 ```
 
-Analyzes income vs expense balance and calculates financial health.
-
 **Parameters**:
-- `--start-date`: Start date YYYY-MM-DD
-- `--end-date`: End date YYYY-MM-DD
+- `--start-date` / `--end-date`: Date range
 - `--days`: Analysis period (default: 90)
 
-**Output**:
-- `netCashFlow`: Income minus expenses
-- `savingsRate`: Percentage of income saved
-- `healthScore`: Overall financial health (0-100)
-- `healthDimensions`: Breakdown by dimensions (emergency fund, debt ratio, etc.)
+**Output**: `netCashFlow`, `savingsRate`, `healthScore` (0-100), `healthDimensions`
 
 **GenUI Component**: `CashFlowCard`
 
-## Workflow
+## Workflows
 
-### Spending Analysis Flow
-1. Run `analyze_spending.py` directly
-2. Present the category breakdown via GenUI
-3. Highlight top spending categories and unusual patterns
-4. Localize category keys (FOOD_DINING → 餐饮美食)
+### Spending Analysis
+1. Run `analyze_spending.py` with appropriate date range
+2. Present category breakdown via GenUI
+3. Highlight top categories and unusual patterns
+4. Localize category keys to user's language
 
-### Financial Health Flow
-1. Run `analyze_cashflow.py` with appropriate period
-2. Present CashFlowCard GenUI component
-3. Interpret the health score (excellent/good/fair/poor)
-4. Explain what each dimension means to the user
+### Financial Health
+1. Run `analyze_cashflow.py`
+2. Present CashFlowCard
+3. Interpret health score (excellent/good/fair/poor)
 
 ## Rules
 
-1. **Focus on PAST & PRESENT**: This skill answers "what happened" not "what will happen"
-2. **Category Localization**: Always translate category keys to user's language
-3. **Silent Execution**: Never mention scripts, Python, or technical details
-4. **No Predictions**: Do NOT forecast future → use forecasting-finances skill
-5. **No Budget Setting**: Do NOT recommend budget amounts → use planning-budgets skill
-6. **Combine When Appropriate**: If user asks both "消费分析" and "财务健康", run both scripts
+1. Focus on PAST & PRESENT only — no predictions
+2. Always localize category keys to user's language
+3. Never mention scripts or technical details to user
+4. Do NOT create budgets — guide user to app budget module
+5. Execute scripts directly without `cd`, `&&`, or pipe operators
+6. If user asks both spending + health, run both scripts
