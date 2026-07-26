@@ -69,7 +69,7 @@ async def query_budget_status(
     *,
     config: RunnableConfig,
 ) -> dict[str, Any]:
-    """Query budget balance and usage percentage. Suitable for quick inquiries like 'how much budget is left?'. For deep analysis, use the budget-expert skill."""
+    """Query budget balance and usage percentage. Suitable for quick inquiries like 'how much budget is left?'. If user wants to create or modify budgets, guide them to the budget management module in the app."""
     user_uuid = get_user_uuid(config)
 
     logger.debug("query_budget_status_called", user_uuid=user_uuid, category_key=category_key)
@@ -195,9 +195,9 @@ async def query_budget_status(
 # Export Tools
 # ============================================================================
 
-# Note: Budget simulation (BudgetSimulatorCard) is triggered by the
-# planning-budgets skill, not a standalone tool. The skill presents the
-# GenUI component and handles the interactive flow.
+# Note: Budget creation/modification is handled exclusively by the budget
+# management UI module, not by AI tools or skills. The query_budget_status
+# tool only provides read-only budget status information.
 
 budget_tools = [
     query_budget_status,
