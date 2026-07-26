@@ -54,16 +54,21 @@ class _NotificationCenterPageState
         foregroundColor: colors.foreground,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(FLucideIcons.chevronLeft),
-          onPressed: () => context.pop(),
+        leading: FButton.icon(
+          variant: .ghost,
+          onPress: () => context.pop(),
+          child: Icon(
+            FLucideIcons.chevronLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
         ),
         actions: [
           if (state.unreadCount > 0)
             FButton.icon(
               variant: .ghost,
               onPress: () => notifier.markAllAsRead(),
-              child: const Icon(FLucideIcons.checkCheck, size: 18),
+              child: const Icon(FLucideIcons.checkCheck, size: 20),
             ),
           const SizedBox(width: 8),
         ],
@@ -189,7 +194,7 @@ class _NotificationCenterPageState
   void _handleNavigation(BuildContext context, NotificationItem item) {
     final targetPath = item.data?['target_path'] as String?;
     if (targetPath != null && targetPath.isNotEmpty) {
-      context.go(targetPath);
+      unawaited(context.push(targetPath));
     }
   }
 }

@@ -57,13 +57,22 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         centerTitle: true,
         backgroundColor: colors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(FLucideIcons.arrowLeft, color: colors.foreground),
-          onPressed: () => context.pop(),
+        leading: FButton.icon(
+          variant: .ghost,
+          onPress: () => context.pop(),
+          child: Icon(
+            FLucideIcons.chevronLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
         ),
         actions: [
-          IconButton(
-            icon: state.isLoading
+          FButton.icon(
+            variant: .ghost,
+            onPress: state.isLoading
+                ? null
+                : () => ref.read(budgetSummaryProvider.notifier).refresh(),
+            child: state.isLoading
                 ? SizedBox(
                     width: 20,
                     height: 20,
@@ -77,9 +86,6 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                     color: colors.foreground,
                     size: 20,
                   ),
-            onPressed: state.isLoading
-                ? null
-                : () => ref.read(budgetSummaryProvider.notifier).refresh(),
           ),
         ],
       ),

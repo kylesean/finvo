@@ -201,9 +201,10 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
           backgroundColor: colors.background,
           foregroundColor: colors.foreground,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(FLucideIcons.chevronLeft),
-            onPressed: () => context.pop(),
+          leading: FButton.icon(
+            variant: .ghost,
+            onPress: () => context.pop(),
+            child: const Icon(FLucideIcons.chevronLeft, size: 20),
           ),
           actions: [
             // Invite member button - visible to all members
@@ -648,12 +649,14 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
     if (tx.transactionAt != null) {
       final now = DateTime.now();
       final diff = now.difference(tx.transactionAt!);
-      if (diff.inMinutes < 60) {
-        timeDisplay = '${diff.inMinutes}m ago';
+      if (diff.inMinutes < 1) {
+        timeDisplay = t.notification.justNow;
+      } else if (diff.inMinutes < 60) {
+        timeDisplay = t.notification.minutesAgo(minutes: diff.inMinutes);
       } else if (diff.inHours < 24) {
-        timeDisplay = '${diff.inHours}h ago';
+        timeDisplay = t.notification.hoursAgo(hours: diff.inHours);
       } else if (diff.inDays < 7) {
-        timeDisplay = '${diff.inDays}d ago';
+        timeDisplay = t.notification.daysAgo(days: diff.inDays);
       } else {
         timeDisplay = '${tx.transactionAt!.month}/${tx.transactionAt!.day}';
       }

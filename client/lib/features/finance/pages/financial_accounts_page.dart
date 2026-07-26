@@ -64,9 +64,14 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
         elevation: 0,
         centerTitle: true,
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: theme.colors.foreground),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+          builder: (context) => FButton.icon(
+            variant: .ghost,
+            onPress: () => Scaffold.of(context).openDrawer(),
+            child: Icon(
+              FLucideIcons.menu,
+              color: theme.colors.foreground,
+              size: 20,
+            ),
           ),
         ),
         title: Text(

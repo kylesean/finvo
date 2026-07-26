@@ -85,9 +85,14 @@ class _SharedSpaceSettingsPageState
         foregroundColor: colors.foreground,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(FLucideIcons.chevronLeft),
-          onPressed: () => context.pop(),
+        leading: FButton.icon(
+          variant: .ghost,
+          onPress: () => context.pop(),
+          child: Icon(
+            FLucideIcons.chevronLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
         ),
       ),
       body: spaceAsync.when(

@@ -153,13 +153,14 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
     return AppBar(
       backgroundColor: colors.background,
       elevation: 0,
-      leading: IconButton(
-        icon: Icon(
-          FLucideIcons.arrowBigLeft,
+      leading: FButton.icon(
+        variant: .ghost,
+        onPress: () => context.pop(),
+        child: Icon(
+          FLucideIcons.chevronLeft,
           color: colors.foreground,
           size: 20,
         ),
-        onPressed: () => context.pop(),
       ),
       title: Text(
         widget.editId != null ? t.budget.editBudget : t.budget.newBudget,

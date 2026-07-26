@@ -35,11 +35,26 @@ class FinancialAccountDetailPage extends ConsumerWidget {
     ).format(amount);
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text(args.definition.title),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+        backgroundColor: colors.background,
+        elevation: 0,
+        centerTitle: true,
+        leading: FButton.icon(
+          variant: .ghost,
+          onPress: () => context.pop(),
+          child: Icon(
+            FLucideIcons.chevronLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          args.definition.title,
+          style: theme.typography.body.lg.copyWith(
+            fontWeight: FontWeight.w500,
+            color: colors.foreground,
+          ),
         ),
       ),
       body: Padding(

@@ -72,13 +72,9 @@ class _RecurringTransactionListPageState
       appBar: AppBar(
         backgroundColor: colors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            FLucideIcons.arrowLeft,
-            color: colors.foreground,
-            size: 20,
-          ),
-          onPressed: () {
+        leading: FButton.icon(
+          variant: .ghost,
+          onPress: () {
             if (context.canPop()) {
               context.pop();
             } else {
@@ -86,6 +82,11 @@ class _RecurringTransactionListPageState
               context.go('/finance');
             }
           },
+          child: Icon(
+            FLucideIcons.chevronLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
         ),
         title: Text(
           t.forecast.recurringTransaction.title,

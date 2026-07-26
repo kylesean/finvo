@@ -318,13 +318,14 @@ class _RecurringTransactionPageState
     return AppBar(
       backgroundColor: colors.background,
       elevation: 0,
-      leading: IconButton(
-        icon: Icon(
+      leading: FButton.icon(
+        variant: .ghost,
+        onPress: () => context.pop(),
+        child: Icon(
           FLucideIcons.chevronLeft,
           color: colors.foreground,
           size: 20,
         ),
-        onPressed: () => context.pop(),
       ),
       title: Text(
         widget.editId != null

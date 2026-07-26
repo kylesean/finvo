@@ -75,9 +75,14 @@ class _FinancialAccountEditPageState
       appBar: AppBar(
         backgroundColor: colors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
-          onPressed: () => context.pop(),
+        leading: FButton.icon(
+          variant: .ghost,
+          onPress: () => context.pop(),
+          child: Icon(
+            FLucideIcons.chevronLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
         ),
         titleSpacing: 0,
         centerTitle: true,
@@ -89,13 +94,14 @@ class _FinancialAccountEditPageState
           ),
         ),
         actions: [
-          IconButton(
-            icon: Icon(
+          FButton.icon(
+            variant: .ghost,
+            onPress: _handleDelete,
+            child: Icon(
               FLucideIcons.trash2,
               size: 20,
               color: colors.mutedForeground,
             ),
-            onPressed: _handleDelete,
           ),
         ],
       ),
