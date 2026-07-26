@@ -79,22 +79,26 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
             // Title bar
             _buildHeader(theme, colors),
             const SizedBox(height: 12),
-            // Calendar
+            // Calendar - force English locale to avoid CJK characters in header/weekdays
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: FCalendar.grid(
-                  selectionControl: .liftedSingle(
-                    value: _selectedDate,
-                    onChange: (date) {
-                      if (date != null) setState(() => _selectedDate = date);
-                    },
-                    toggleable: false,
-                  ),
-                  control: FGridCalendarControl(
-                    start: widget.firstDate ?? DateTime(2020),
-                    end: widget.lastDate ?? DateTime(2030),
-                    initial: _selectedDate,
+                child: Localizations.override(
+                  context: context,
+                  locale: const Locale('en'),
+                  child: FCalendar.grid(
+                    selectionControl: .liftedSingle(
+                      value: _selectedDate,
+                      onChange: (date) {
+                        if (date != null) setState(() => _selectedDate = date);
+                      },
+                      toggleable: false,
+                    ),
+                    control: FGridCalendarControl(
+                      start: widget.firstDate ?? DateTime(2020),
+                      end: widget.lastDate ?? DateTime(2030),
+                      initial: _selectedDate,
+                    ),
                   ),
                 ),
               ),
