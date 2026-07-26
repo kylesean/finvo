@@ -46,6 +46,12 @@ class AddTransactionToSpaceRequest(BaseModel):
     transaction_id: UUID = Field(..., description="交易ID")
 
 
+class UpdateMemberRoleRequest(BaseModel):
+    """Request schema for updating a member's role."""
+
+    role: str = Field(..., pattern="^(ADMIN|MEMBER)$", description="新角色: ADMIN 或 MEMBER")
+
+
 # ============================================================================
 # Response Schemas
 # ============================================================================

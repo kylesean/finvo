@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:augo/i18n/strings.g.dart';
 import '../../../shared/services/toast_service.dart';
 import '../models/shared_space_models.dart';
 import '../services/shared_space_service.dart';
@@ -43,7 +44,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
       debugPrint('[InviteSuccessPage] Error: $e');
       if (mounted) {
         setState(() {
-          _error = 'Failed to generate invite code';
+          _error = t.sharedSpace.inviteSuccess.generateFailed;
           _isLoading = false;
         });
       }
@@ -53,7 +54,9 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
   void _copyCode() {
     if (_inviteCode != null) {
       unawaited(Clipboard.setData(ClipboardData(text: _inviteCode!.code)));
-      ToastService.show(description: const Text('Invite code copied'));
+      ToastService.show(
+        description: Text(t.sharedSpace.inviteSuccess.codeCopied),
+      );
     }
   }
 
@@ -65,7 +68,10 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text('Created Successfully', style: theme.typography.body.lg),
+        title: Text(
+          t.sharedSpace.inviteSuccess.title,
+          style: theme.typography.body.lg,
+        ),
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         elevation: 0,
@@ -103,7 +109,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Space Created Successfully',
+                          t.sharedSpace.inviteSuccess.subtitle,
                           style: theme.typography.body.lg.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -136,7 +142,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                         context.pop();
                         context.pop();
                       },
-                      child: const Text('Invite Later'),
+                      child: Text(t.sharedSpace.inviteSuccess.inviteLater),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -150,7 +156,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                           ),
                         );
                       },
-                      child: const Text('Enter Space'),
+                      child: Text(t.sharedSpace.inviteSuccess.enterSpace),
                     ),
                   ),
                 ],
@@ -174,7 +180,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
             CircularProgressIndicator(color: colors.primary),
             const SizedBox(height: 16),
             Text(
-              'Generating invite code...',
+              t.sharedSpace.inviteSuccess.generatingCode,
               style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
@@ -196,7 +202,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Failed to generate invite code',
+              t.sharedSpace.inviteSuccess.generateFailed,
               style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground,
               ),
@@ -211,7 +217,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                 });
                 unawaited(_generateInviteCode());
               },
-              child: const Text('Retry'),
+              child: Text(t.sharedSpace.inviteSuccess.retry),
             ),
           ],
         ),
@@ -258,7 +264,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
 
           // Invite Code
           Text(
-            'Invite Code',
+            t.sharedSpace.inviteSuccess.codeLabel,
             style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
             ),
@@ -295,7 +301,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
 
           const SizedBox(height: 8),
           Text(
-            'Valid for 24 hours · Tap to copy',
+            t.sharedSpace.inviteSuccess.validHint,
             style: theme.typography.body.xs.copyWith(
               color: colors.mutedForeground,
             ),

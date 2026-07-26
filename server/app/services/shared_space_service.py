@@ -223,8 +223,18 @@ class SharedSpaceService:
         await self.db.commit()
         await self.db.refresh(space)
 
+        # Load creator separately to avoid lazy-load in async context
+        creator_query = select(User).where(cast(Any, User.uuid == space.creator_uuid))
+        creator_result = await self.db.execute(creator_query)
+        creator = creator_result.scalar_one_or_none()
+
         stats = await self._get_space_financial_stats(space_id)
-        return self._space_to_dict(space, stats["transaction_count"])
+        return self._space_to_dict_with_creator(
+            space,
+            creator,
+            tx_count=stats["transaction_count"],
+            total_expense=stats["total_expense"],
+        )
 
     async def delete_space(self, space_id: UUID, user_uuid: UUID) -> bool:
         """Delete a space (owner only).
@@ -354,8 +364,22 @@ class SharedSpaceService:
 
         await self.db.commit()
 
-        # Return space info
-        return await self.get_space_detail(space.id, user_uuid)
+        # Get space detail FIRST (ensures response is ready before any side-effects)
+        space_detail = await self.get_space_detail(space.id, user_uuid)
+
+        # Emit domain event (async, fire-and-forget, never blocks response)
+        from app.core.events import event_bus
+        from app.services.notification_handlers import MemberJoinedEvent
+
+        event_bus.emit(
+            MemberJoinedEvent(
+                space_id=space.id,
+                space_name=space.name,
+                joined_user_uuid=user_uuid,
+            )
+        )
+
+        return space_detail
 
     # =========================================================================
     # Member Management
@@ -441,6 +465,71 @@ class SharedSpaceService:
         logger.info("member_removed", space_id=space_id, removed=str(target_user_uuid), by=str(user_uuid))
         return True
 
+    async def update_member_role(
+        self, space_id: UUID, user_uuid: UUID, target_user_uuid: UUID, new_role: str
+    ) -> dict[str, Any]:
+        """Update a member's role (owner only).
+
+        Args:
+            space_id: Space ID
+            user_uuid: Requesting user's UUID (must be owner)
+            target_user_uuid: Target member's UUID
+            new_role: New role ('ADMIN' or 'MEMBER')
+
+        Returns:
+            Updated member info dict
+
+        Raises:
+            AuthorizationError: Not owner
+            BusinessError: Invalid role change
+        """
+        from app.core.exceptions import ErrorCode
+
+        await self._verify_owner(space_id, user_uuid)
+
+        if new_role not in ("ADMIN", "MEMBER"):
+            raise BusinessError("role must be ADMIN or MEMBER", error_code=ErrorCode.INVALID_ACTION)
+
+        # Cannot change own role
+        if user_uuid == target_user_uuid:
+            raise BusinessError("cannot change your own role", error_code=ErrorCode.INVALID_ACTION)
+
+        query = select(SpaceMember).where(
+            cast(
+                Any,
+                and_(
+                    cast(Any, SpaceMember.space_id == space_id),
+                    cast(Any, SpaceMember.user_uuid == target_user_uuid),
+                ),
+            )
+        )
+        result = await self.db.execute(query)
+        member = result.scalar_one_or_none()
+
+        if not member:
+            raise NotFoundError("user is not a member of this space")
+
+        if member.role == "OWNER":
+            raise BusinessError("cannot change owner role", error_code=ErrorCode.PERMISSION_DENIED)
+
+        member.role = new_role
+        await self.db.commit()
+        await self.db.refresh(member)
+
+        logger.info(
+            "member_role_updated",
+            space_id=space_id,
+            target=str(target_user_uuid),
+            new_role=new_role,
+            by=str(user_uuid),
+        )
+
+        return {
+            "userId": str(member.user_uuid),
+            "role": member.role,
+            "status": member.status,
+        }
+
     # =========================================================================
     # Transaction Management
     # =========================================================================
@@ -497,6 +586,28 @@ class SharedSpaceService:
         )
         self.db.add(space_tx)
         await self.db.commit()
+
+        # Emit domain event (async, fire-and-forget)
+        from app.core.events import event_bus
+        from app.services.notification_handlers import TransactionAddedEvent
+
+        # Get space name for notification content
+        space_name_query = select(SharedSpace.name).where(cast(Any, SharedSpace.id == space_id))
+        space_name_result = await self.db.execute(space_name_query)
+        space_name = space_name_result.scalar_one_or_none() or "Shared Space"
+
+        event_bus.emit(
+            TransactionAddedEvent(
+                space_id=space_id,
+                space_name=space_name,
+                transaction_id=cast(UUID, transaction.id),
+                added_by_user_uuid=user_uuid,
+                amount=float(transaction.amount),
+                currency=(transaction.currency or "CNY").upper(),
+                tx_type=transaction.type.lower() if transaction.type else "expense",
+                description=transaction.description or transaction.category_key or "",
+            )
+        )
 
         return {"message": "transaction added to space"}
 
@@ -830,7 +941,6 @@ class SharedSpaceService:
                     "contributionAmount": f"{contributions.get(m.user_uuid, Decimal('0')):.2f}",
                 }
                 for m in space.members
-                if m.status == "ACCEPTED"
             ]
 
             # Get current valid invite code
@@ -884,7 +994,6 @@ class SharedSpaceService:
                     "contributionAmount": f"{contributions.get(m.user_uuid, Decimal('0')):.2f}",
                 }
                 for m in space.members
-                if m.status == "ACCEPTED"
             ]
 
             # Get current valid invite code

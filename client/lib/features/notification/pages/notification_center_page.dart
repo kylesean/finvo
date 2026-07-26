@@ -2,39 +2,83 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:forui/forui.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../models/notification_item.dart';
 import '../providers/notification_provider.dart';
 
-class NotificationCenterPage extends ConsumerWidget {
+class NotificationCenterPage extends ConsumerStatefulWidget {
   const NotificationCenterPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificationCenterPage> createState() =>
+      _NotificationCenterPageState();
+}
+
+class _NotificationCenterPageState
+    extends ConsumerState<NotificationCenterPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      unawaited(ref.read(notificationProvider.notifier).loadMore());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    final colors = theme.colors;
     final state = ref.watch(notificationProvider);
     final notifier = ref.read(notificationProvider.notifier);
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text(t.notification.title),
+        title: Text(t.notification.title, style: theme.typography.body.xl),
+        backgroundColor: colors.background,
+        foregroundColor: colors.foreground,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(FLucideIcons.chevronLeft),
+          onPressed: () => context.pop(),
+        ),
         actions: [
           if (state.unreadCount > 0)
-            TextButton.icon(
-              onPressed: () => notifier.markAllAsRead(),
-              icon: const Icon(Icons.done_all, size: 18),
-              label: Text(t.notification.markAllRead),
+            FButton.icon(
+              variant: .ghost,
+              onPress: () => notifier.markAllAsRead(),
+              child: const Icon(FLucideIcons.checkCheck, size: 18),
             ),
+          const SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(
         onRefresh: () => notifier.refresh(),
-        child: _buildBody(context, state, notifier),
+        child: _buildBody(context, theme, colors, state, notifier),
       ),
     );
   }
 
   Widget _buildBody(
     BuildContext context,
+    FThemeData theme,
+    FColors colors,
     NotificationState state,
     NotificationNotifier notifier,
   ) {
@@ -47,12 +91,22 @@ class NotificationCenterPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+            Icon(
+              FLucideIcons.circleAlert,
+              size: 48,
+              color: colors.mutedForeground,
+            ),
             const SizedBox(height: 12),
-            Text('${t.notification.loadFailed}: ${state.error}'),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () => notifier.refresh(),
+            Text(
+              '${t.notification.loadFailed}: ${state.error}',
+              style: theme.typography.body.sm.copyWith(
+                color: colors.mutedForeground,
+              ),
+            ),
+            const SizedBox(height: 16),
+            FButton(
+              variant: .outline,
+              onPress: () => notifier.refresh(),
               child: Text(t.notification.retry),
             ),
           ],
@@ -62,20 +116,23 @@ class NotificationCenterPage extends ConsumerWidget {
 
     if (state.items.isEmpty) {
       return ListView(
+        controller: _scrollController,
         children: [
           const SizedBox(height: 120),
           Center(
             child: Column(
               children: [
-                const Icon(
-                  Icons.notifications_none,
-                  size: 64,
-                  color: Colors.grey,
+                Icon(
+                  FLucideIcons.bellOff,
+                  size: 56,
+                  color: colors.mutedForeground.withValues(alpha: 0.5),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   t.notification.empty,
-                  style: const TextStyle(color: Colors.grey),
+                  style: theme.typography.body.sm.copyWith(
+                    color: colors.mutedForeground,
+                  ),
                 ),
               ],
             ),
@@ -85,18 +142,32 @@ class NotificationCenterPage extends ConsumerWidget {
     }
 
     return ListView.separated(
-      itemCount: state.items.length,
-      separatorBuilder: (_, _) => const Divider(height: 1),
+      controller: _scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: state.items.length + (state.hasReachedMax ? 0 : 1),
+      separatorBuilder: (_, _) =>
+          Divider(height: 1, color: colors.border.withValues(alpha: 0.5)),
       itemBuilder: (context, index) {
+        if (index >= state.items.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        }
+
         final item = state.items[index];
         return Dismissible(
           key: Key(item.id),
           direction: DismissDirection.endToStart,
           background: Container(
-            color: Colors.red,
+            color: colors.destructive,
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
-            child: const Icon(Icons.delete, color: Colors.white),
+            child: Icon(
+              FLucideIcons.trash2,
+              color: colors.destructiveForeground,
+              size: 20,
+            ),
           ),
           onDismissed: (_) {
             unawaited(notifier.deleteNotification(item.id));
@@ -116,14 +187,16 @@ class NotificationCenterPage extends ConsumerWidget {
   }
 
   void _handleNavigation(BuildContext context, NotificationItem item) {
-    final data = item.data;
-    if (data != null && data.containsKey('target_path')) {
-      final targetPath = data['target_path'] as String;
-      // If project uses go_router or navigator
-      debugPrint('Navigate to notification target path: $targetPath');
+    final targetPath = item.data?['target_path'] as String?;
+    if (targetPath != null && targetPath.isNotEmpty) {
+      context.go(targetPath);
     }
   }
 }
+
+// =============================================================================
+// Notification Tile
+// =============================================================================
 
 class _NotificationTile extends StatelessWidget {
   final NotificationItem item;
@@ -133,78 +206,173 @@ class _NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = context.theme;
+    final colors = theme.colors;
     final isUnread = !item.isRead;
 
-    return ListTile(
+    return InkWell(
       onTap: onTap,
-      tileColor: isUnread
-          ? theme.colorScheme.primary.withValues(alpha: 0.05)
-          : null,
-      leading: CircleAvatar(
-        backgroundColor: _getTypeColor(item.type).withValues(alpha: 0.1),
-        child: Icon(_getTypeIcon(item.type), color: _getTypeColor(item.type)),
-      ),
-      title: Row(
-        children: [
-          Expanded(
-            child: Text(
-              item.title,
-              style: TextStyle(
-                fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        color: isUnread ? colors.primary.withValues(alpha: 0.04) : null,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Type icon
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _getTypeColor(colors).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                _getTypeIcon(),
+                size: 20,
+                color: _getTypeColor(colors),
               ),
             ),
-          ),
-          Text(
-            _formatTime(item.createdAt),
-            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-          ),
-        ],
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(
-          item.message,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: isUnread ? Colors.black87 : Colors.grey[700]),
+            const SizedBox(width: 12),
+            // Content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _buildSemanticTitle(),
+                          style: theme.typography.body.sm.copyWith(
+                            fontWeight: isUnread
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: colors.foreground,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _formatTime(item.createdAt),
+                        style: theme.typography.body.xs.copyWith(
+                          color: colors.mutedForeground,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _buildSemanticContent(),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.typography.body.xs.copyWith(
+                      color: isUnread
+                          ? colors.foreground.withValues(alpha: 0.8)
+                          : colors.mutedForeground,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Unread dot
+            if (isUnread) ...[
+              const SizedBox(width: 8),
+              Container(
+                margin: const EdgeInsets.only(top: 6),
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
-      trailing: isUnread
-          ? Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-            )
-          : null,
     );
   }
 
-  IconData _getTypeIcon(String type) {
-    switch (type) {
-      case 'space_invite':
-        return Icons.group_add;
-      case 'bill_comment':
-        return Icons.comment;
-      case 'system':
-      default:
-        return Icons.notifications;
-    }
+  // ===========================================================================
+  // Semantic content builders (localized from structured data)
+  // ===========================================================================
+
+  String _buildSemanticTitle() {
+    final data = item.data;
+    final username =
+        (data?['joined_username'] ?? data?['added_by_username'] ?? '')
+            .toString();
+    final spaceName = (data?['space_name'] ?? '').toString();
+
+    return switch (item.type) {
+      'member_joined' =>
+        username.isNotEmpty
+            ? t.notification.semantic.memberJoined(name: username)
+            : item.title,
+      'space_activity' =>
+        spaceName.isNotEmpty
+            ? t.notification.semantic.welcome(space: spaceName)
+            : item.title,
+      'transaction' =>
+        username.isNotEmpty
+            ? t.notification.semantic.newTransaction(name: username)
+            : item.title,
+      'member_left' =>
+        username.isNotEmpty
+            ? t.notification.semantic.memberLeft(name: username)
+            : item.title,
+      _ => item.title,
+    };
   }
 
-  Color _getTypeColor(String type) {
-    switch (type) {
-      case 'space_invite':
-        return Colors.blue;
-      case 'bill_comment':
-        return Colors.orange;
-      case 'system':
-      default:
-        return Colors.teal;
-    }
+  String _buildSemanticContent() {
+    final data = item.data;
+    final spaceName = (data?['space_name'] ?? '').toString();
+    final amount = (data?['amount'] ?? '').toString();
+    final currency = (data?['currency'] ?? '').toString();
+
+    return switch (item.type) {
+      'member_joined' =>
+        spaceName.isNotEmpty
+            ? t.notification.semantic.memberJoinedDetail(space: spaceName)
+            : item.message,
+      'transaction' =>
+        amount.isNotEmpty
+            ? t.notification.semantic.newTransactionDetail(
+                amount: '$currency $amount',
+                space: spaceName,
+              )
+            : item.message,
+      _ => item.message,
+    };
+  }
+
+  // ===========================================================================
+  // Type icon & color
+  // ===========================================================================
+
+  IconData _getTypeIcon() {
+    return switch (item.type) {
+      'space_invite' => FLucideIcons.userPlus,
+      'member_joined' || 'space_activity' => FLucideIcons.userPlus,
+      'member_left' => FLucideIcons.userMinus,
+      'bill_comment' => FLucideIcons.messageSquare,
+      'budget_alert' => FLucideIcons.alertTriangle,
+      'transaction' => FLucideIcons.receipt,
+      _ => FLucideIcons.bell,
+    };
+  }
+
+  Color _getTypeColor(FColors colors) {
+    return switch (item.type) {
+      'space_invite' => colors.primary,
+      'member_joined' || 'space_activity' => colors.primary,
+      'member_left' => colors.mutedForeground,
+      'bill_comment' => colors.primary,
+      'budget_alert' => colors.destructive,
+      'transaction' => colors.primary,
+      _ => colors.mutedForeground,
+    };
   }
 
   String _formatTime(DateTime dateTime) {

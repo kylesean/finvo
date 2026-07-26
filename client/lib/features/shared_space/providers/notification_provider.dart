@@ -224,9 +224,9 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
   NotificationType _mapNotificationType(String type) {
     return switch (type) {
       'space_invite' => NotificationType.spaceInvite,
-      'new_transaction' => NotificationType.newTransaction,
+      'new_transaction' || 'transaction' => NotificationType.newTransaction,
       'settlement_update' => NotificationType.settlementUpdate,
-      'member_joined' => NotificationType.memberJoined,
+      'member_joined' || 'space_activity' => NotificationType.memberJoined,
       'member_left' => NotificationType.memberLeft,
       _ => NotificationType.spaceInvite,
     };

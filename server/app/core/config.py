@@ -356,12 +356,12 @@ class Settings(BaseSettings):
         if self.DATABASE_URL:
             url = self.DATABASE_URL
             if "+asyncpg" in url:
-                url = url.replace("+asyncpg", "", 1)
-            elif "+psycopg" in url:
-                url = url.replace("+psycopg", "", 1)
+                url = url.replace("+asyncpg", "+psycopg", 1)
+            elif "+psycopg" not in url:
+                url = url.replace("postgresql://", "postgresql+psycopg://", 1)
             return url
         return (
-            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
 

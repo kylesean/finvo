@@ -10,7 +10,12 @@ from app.core.dependencies import get_current_user
 from app.core.responses import error_response, get_error_code_int, success_response
 from app.models.notification import Notification
 from app.models.user import User
-from app.schemas.notification import RegisterDeviceTokenRequest, UnregisterDeviceTokenRequest
+from app.schemas.notification import (
+    NotificationListResponse,
+    NotificationResponse,
+    RegisterDeviceTokenRequest,
+    UnregisterDeviceTokenRequest,
+)
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
@@ -52,26 +57,30 @@ async def get_notifications(
     result = await db.execute(query)
     notifications = result.scalars().all()
 
-    # Convert to response objects
-    items = []
-    for n in notifications:
-        items.append(
-            {
-                "id": str(n.id),
-                "userId": str(current_user.uuid),
-                "type": n.type,
-                "title": n.title,
-                "message": n.content or "",
-                "data": n.data,
-                "isRead": n.is_read,
-                "createdAt": n.created_at,
-                "readAt": n.read_at,
-            }
+    # Convert to response objects using schema
+    items = [
+        NotificationResponse(
+            id=str(n.id),
+            userId=str(current_user.uuid),
+            type=n.type,
+            title=n.title,
+            message=n.content or "",
+            data=n.data,
+            isRead=n.is_read,
+            createdAt=n.created_at,
+            readAt=n.read_at,
         )
+        for n in notifications
+    ]
 
-    return success_response(
-        data={"notifications": items, "total": total, "unreadCount": unread_count, "page": page, "limit": limit}
+    response = NotificationListResponse(
+        notifications=items,
+        total=total,
+        unreadCount=unread_count,
+        page=page,
+        limit=limit,
     )
+    return success_response(data=response.model_dump(mode="json"))
 
 
 @router.get("/unread-count")

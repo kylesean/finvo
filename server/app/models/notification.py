@@ -9,7 +9,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
-from pydantic import field_validator
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -55,43 +54,11 @@ class Notification(Base):
         primaryjoin="Notification.user_uuid == User.uuid",
     )
 
-    @field_validator("title")
-    @classmethod
-    def validate_title(cls, v: str) -> str:
-        """Validate title is not empty.
-
-        Args:
-            v: Title to validate
-
-        Returns:
-            str: Validated title
-
-        Raises:
-            ValueError: If title is empty
-        """
-        if not v or not v.strip():
-            raise ValueError("Notification title cannot be empty")
-        return v.strip()
-
-    @field_validator("type")
-    @classmethod
-    def validate_type(cls, v: str) -> str:
-        """Validate notification type.
-
-        Args:
-            v: Type to validate
-
-        Returns:
-            str: Validated type
-        """
-        if not v or not v.strip():
-            raise ValueError("Notification type cannot be empty")
-        return v.strip()
-
     def mark_as_read(self) -> None:
         """Mark this notification as read."""
         self.is_read = True
         self.read_at = utc_now()
+        self.updated_at = utc_now()
 
     @property
     def is_unread(self) -> bool:

@@ -1092,6 +1092,7 @@
   },
   "sharedSpace": {
     "dashboard": {
+      "sectionTitle": "财务概览",
       "cumulativeTotalExpense": "累计总支出",
       "participatingMembers": "参与成员",
       "membersCount": "$count 人",
@@ -1123,7 +1124,7 @@
       "title": "加入共享空间",
       "subtitle": "输入朋友分享的邀请码，开始协作记账",
       "codeLabel": "邀请码",
-      "codeHint": "输入邀请码，例如：A8K2F9G7",
+      "codeHint": "输入邀请码，例如：123456",
       "cancel": "取消",
       "submit": "加入",
       "codeRequired": "请输入邀请码",
@@ -1140,6 +1141,7 @@
     "detail": {
       "members": "成员",
       "transactions": "交易记录",
+      "recordsCount": "${count} 笔",
       "settlement": "结算",
       "inviteCode": "邀请码",
       "copyCode": "复制邀请码",
@@ -1155,7 +1157,9 @@
       "loadFailed": "加载失败",
       "retry": "重试",
       "noTransactions": "暂无交易记录",
-      "noTransactionsHint": "空间内的交易将显示在这里"
+      "noTransactionsHint": "空间内的交易将显示在这里",
+      "refreshCode": "刷新生成新码",
+      "joinOtherSpace": "加入其他空间"
     },
     "notifications": {
       "title": "通知",
@@ -1165,6 +1169,79 @@
       "inviteAccepted": "已接受邀请！",
       "inviteRejected": "已拒绝邀请",
       "allMarkedRead": "全部标记为已读"
+    },
+    "inviteCard": {
+      "title": "邀请码",
+      "subtitle": "分享给朋友以加入空间",
+      "copyCode": "复制邀请码",
+      "shareLink": "分享邀请链接",
+      "codeCopied": "邀请码已复制",
+      "noExpiry": "无有效期限制",
+      "expired": "已过期",
+      "expiresInDays": "${days} 天后过期",
+      "expiresInHours": "${hours} 小时后过期",
+      "expiresInMinutes": "${minutes} 分钟后过期",
+      "expiringSoon": "即将过期",
+      "shareText": "邀请你加入共享空间「${spaceName}」\n\n邀请码：${code}\n或点击链接直接加入：${link}\n\n邀请码${expiry}"
+    },
+    "inviteSuccess": {
+      "title": "创建成功",
+      "subtitle": "共享空间创建成功",
+      "inviteLater": "稍后邀请",
+      "enterSpace": "进入空间",
+      "generatingCode": "正在生成邀请码...",
+      "generateFailed": "邀请码生成失败",
+      "codeCopied": "邀请码已复制",
+      "retry": "重试",
+      "codeLabel": "邀请码",
+      "validHint": "24 小时内有效 · 点击复制"
+    },
+    "notificationCard": {
+      "accept": "接受",
+      "reject": "拒绝",
+      "unknownTime": "未知时间",
+      "justNow": "刚刚"
+    },
+    "spaceCard": {
+      "noDescription": "暂无描述",
+      "creator": "创建者",
+      "member": "成员",
+      "membersCount": "${count} 位成员",
+      "transactionsCount": "${count} 笔账单"
+    },
+    "settings": {
+      "title": "空间设置",
+      "spaceInfo": "空间信息",
+      "nameLabel": "空间名称",
+      "descLabel": "空间描述",
+      "save": "保存",
+      "saved": "保存成功",
+      "saveFailed": "保存失败",
+      "memberManagement": "成员管理",
+      "membersCount": "$count 位成员",
+      "removeMemberConfirm": "确定要将「$name」移出空间吗？",
+      "removed": "已移除成员",
+      "removeFailed": "移除失败",
+      "inviteManagement": "邀请管理",
+      "currentCode": "当前邀请码",
+      "generateNew": "生成新邀请码",
+      "noValidCode": "暂无有效邀请码",
+      "refreshCode": "刷新生成新码",
+      "refreshConfirm": "生成新码将使旧邀请码失效，确定继续？",
+      "codeRefreshed": "邀请码已刷新",
+      "dangerZone": "危险操作",
+      "editHint": "仅管理员可编辑",
+      "edit": "编辑",
+      "you": "我",
+      "pending": "待接受",
+      "declined": "已拒绝",
+      "setAsAdmin": "设为管理员",
+      "setAsMember": "设为普通成员",
+      "changeRole": "变更角色",
+      "changeRoleConfirm": "确定要将「$name」的角色变更为「$role」吗？",
+      "confirm": "确认",
+      "roleChanged": "角色已变更",
+      "roleChangeFailed": "角色变更失败"
     }
   },
   "errorMapping": {
@@ -1249,6 +1326,14 @@
       "billComment": "账单评论",
       "budgetAlert": "预算提醒",
       "transaction": "交易通知"
+    },
+    "semantic": {
+      "memberJoined": "${name} 加入了你的空间",
+      "memberJoinedDetail": "新成员加入了「${space}」",
+      "welcome": "欢迎加入「${space}」",
+      "newTransaction": "${name} 记录了一笔新账单",
+      "newTransactionDetail": "${amount}，来自「${space}」",
+      "memberLeft": "${name} 离开了空间"
     }
   }
 }

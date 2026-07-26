@@ -14,6 +14,8 @@ import '../../../core/constants/category_constants.dart';
 import '../../../shared/config/category_config.dart';
 import '../../../i18n/strings.g.dart';
 import '../widgets/detail/space_invite_code_sheet.dart';
+import '../../../shared/widgets/dialogs/action_bottom_sheet.dart';
+import '../../../shared/models/action_item_model.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
 
@@ -27,24 +29,39 @@ class SharedSpaceDetailPage extends ConsumerStatefulWidget {
       _SharedSpaceDetailPageState();
 }
 
-class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
+class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Initial load data
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(spaceDetailProvider(widget.spaceId));
-      ref.invalidate(spaceSettlementProvider(widget.spaceId));
-      ref.invalidate(spaceTransactionsProvider(widget.spaceId));
+      _refreshAll();
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Layer 3: Auto-refresh when app returns to foreground
+    if (state == AppLifecycleState.resumed) {
+      _refreshAll();
+    }
+  }
+
+  void _refreshAll() {
+    ref.invalidate(spaceDetailProvider(widget.spaceId));
+    ref.invalidate(spaceSettlementProvider(widget.spaceId));
+    ref.invalidate(spaceTransactionsProvider(widget.spaceId));
   }
 
   @override
@@ -189,33 +206,24 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
             onPressed: () => context.pop(),
           ),
           actions: [
-            // Invite member button
+            // Invite member button - visible to all members
             FButton.icon(
               variant: .ghost,
               onPress: () => _showInviteSheet(space),
               child: const Icon(FLucideIcons.userPlus, size: 20),
             ),
+            // Settings - only for OWNER/ADMIN
+            if (space.canManage)
+              FButton.icon(
+                variant: .ghost,
+                onPress: () => _navigateToSettings(space),
+                child: const Icon(FLucideIcons.settings, size: 20),
+              ),
+            // More actions - visible to all (content varies by role)
             FButton.icon(
               variant: .ghost,
-              onPress: () => _navigateToSettings(space),
-              child: const Icon(FLucideIcons.settings, size: 20),
-            ),
-            PopupMenuButton<String>(
-              icon: const Icon(FLucideIcons.moreVertical, size: 20),
-              onSelected: (value) => _handleMenuAction(value, space),
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'leave',
-                  child: Text(t.sharedSpace.detail.leaveSpace),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Text(
-                    t.sharedSpace.detail.deleteSpace,
-                    style: TextStyle(color: colors.destructive),
-                  ),
-                ),
-              ],
+              onPress: () => _showSpaceActions(space),
+              child: const Icon(FLucideIcons.moreVertical, size: 20),
             ),
             const SizedBox(width: 8),
           ],
@@ -238,7 +246,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      t.sharedSpace.dashboard.cumulativeTotalExpense,
+                      t.sharedSpace.dashboard.sectionTitle,
                       style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w500,
                         color: colors.primary,
@@ -289,7 +297,9 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '${space.transactionCount} records',
+                        t.sharedSpace.detail.recordsCount(
+                          count: space.transactionCount,
+                        ),
                         style: theme.typography.body.xs.copyWith(
                           color: colors.mutedForeground,
                           fontWeight: FontWeight.w500,
@@ -749,77 +759,138 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
     );
   }
 
-  void _handleMenuAction(String action, SharedSpace space) {
-    switch (action) {
-      case 'leave':
-        _showConfirmDialog(
+  void _showSpaceActions(SharedSpace space) {
+    final isOwner = space.isOwner;
+
+    final primaryActions = <ActionItem>[];
+    final destructiveActions = <ActionItem>[];
+
+    // Leave space - visible for non-owner members
+    if (!isOwner) {
+      primaryActions.add(
+        ActionItem(
           title: t.sharedSpace.detail.leaveSpace,
-          message: t.sharedSpace.detail.leaveConfirm,
-          onConfirm: () async {
-            final success = await ref
-                .read(sharedSpaceProvider.notifier)
-                .leaveSpace(space.id);
-            if (success && mounted) {
-              context.pop();
-            }
+          icon: FLucideIcons.logOut,
+          onTap: () {
+            final rootContext = GoRouter.of(
+              context,
+            ).routerDelegate.navigatorKey.currentContext;
+            if (rootContext == null) return;
+            unawaited(
+              Future<void>.delayed(const Duration(milliseconds: 100), () {
+                if (!rootContext.mounted) return;
+                _showConfirmDialog(
+                  context: rootContext,
+                  title: t.sharedSpace.detail.leaveSpace,
+                  message: t.sharedSpace.detail.leaveConfirm,
+                  onConfirm: () async {
+                    final success = await ref
+                        .read(sharedSpaceProvider.notifier)
+                        .leaveSpace(space.id);
+                    if (success && mounted) {
+                      context.pop();
+                    }
+                  },
+                );
+              }),
+            );
           },
-        );
-      case 'delete':
-        _showConfirmDialog(
-          title: t.sharedSpace.detail.deleteSpace,
-          message: t.sharedSpace.detail.deleteConfirm,
-          onConfirm: () async {
-            final success = await ref
-                .read(sharedSpaceProvider.notifier)
-                .deleteSpace(space.id);
-            if (success && mounted) {
-              context.pop();
-            }
-          },
-        );
+        ),
+      );
     }
+
+    // Delete space - visible for owner only
+    if (isOwner) {
+      destructiveActions.add(
+        ActionItem(
+          title: t.sharedSpace.detail.deleteSpace,
+          icon: FLucideIcons.trash2,
+          isDestructive: true,
+          onTap: () {
+            final rootContext = GoRouter.of(
+              context,
+            ).routerDelegate.navigatorKey.currentContext;
+            if (rootContext == null) return;
+            unawaited(
+              Future<void>.delayed(const Duration(milliseconds: 100), () {
+                if (!rootContext.mounted) return;
+                _showConfirmDialog(
+                  context: rootContext,
+                  title: t.sharedSpace.detail.deleteSpace,
+                  message: t.sharedSpace.detail.deleteConfirm,
+                  onConfirm: () async {
+                    final success = await ref
+                        .read(sharedSpaceProvider.notifier)
+                        .deleteSpace(space.id);
+                    if (success && mounted) {
+                      context.pop();
+                    }
+                  },
+                );
+              }),
+            );
+          },
+        ),
+      );
+    }
+
+    unawaited(
+      showModalBottomSheet<void>(
+        context: GoRouter.of(
+          context,
+        ).routerDelegate.navigatorKey.currentContext!,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (sheetContext) {
+          return ActionBottomSheet(
+            actions: primaryActions,
+            destructiveActions: destructiveActions.isNotEmpty
+                ? destructiveActions
+                : null,
+          );
+        },
+      ),
+    );
   }
 
   void _showConfirmDialog({
+    required BuildContext context,
     required String title,
     required String message,
     required VoidCallback onConfirm,
   }) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
     unawaited(
-      showDialog<void>(
+      showFDialog<void>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: colors.background,
-          title: Text(
-            title,
-            style: theme.typography.body.lg.copyWith(
-              fontWeight: FontWeight.bold,
+        builder: (dialogContext, style, animation) => FDialog(
+          animation: animation,
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(title, style: dialogStyle.titleTextStyle),
+                const SizedBox(height: 8),
+                Text(message, style: dialogStyle.bodyTextStyle),
+                const SizedBox(height: 24),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.of(dialogContext).pop(),
+                  child: Text(t.sharedSpace.create.cancel),
+                ),
+                const SizedBox(height: 8),
+                FButton(
+                  variant: .destructive,
+                  onPress: () {
+                    Navigator.of(dialogContext).pop();
+                    onConfirm();
+                  },
+                  child: Text(title),
+                ),
+              ],
             ),
           ),
-          content: Text(
-            message,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
-          ),
-          actions: [
-            FButton(
-              variant: .outline,
-              onPress: () => Navigator.of(dialogContext).pop(),
-              child: Text(t.sharedSpace.create.cancel),
-            ),
-            FButton(
-              variant: .destructive,
-              onPress: () {
-                Navigator.of(dialogContext).pop();
-                onConfirm();
-              },
-              child: Text(title),
-            ),
-          ],
         ),
       ),
     );

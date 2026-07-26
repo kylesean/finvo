@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:augo/app/theme/app_font_config.dart';
+import 'package:augo/i18n/strings.g.dart';
 import '../models/shared_space_models.dart';
 import '../../../shared/services/toast_service.dart';
 import 'dart:async';
@@ -49,13 +50,13 @@ class InviteCodeCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Invite Code',
+                        t.sharedSpace.inviteCard.title,
                         style: theme.typography.body.lg.copyWith(
                           fontWeight: AppFontConfig.bodyMedium,
                         ),
                       ),
                       Text(
-                        'Share with friends to join the space',
+                        t.sharedSpace.inviteCard.subtitle,
                         style: theme.typography.body.sm.copyWith(
                           color: colorScheme.mutedForeground,
                         ),
@@ -121,12 +122,12 @@ class InviteCodeCard extends StatelessWidget {
                   child: FButton(
                     variant: .outline,
                     onPress: () => _copyInviteCode(context),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(FLucideIcons.copy, size: 16),
-                        SizedBox(width: 8),
-                        Text('Copy Invite Code'),
+                        const Icon(FLucideIcons.copy, size: 16),
+                        const SizedBox(width: 8),
+                        Text(t.sharedSpace.inviteCard.copyCode),
                       ],
                     ),
                   ),
@@ -135,12 +136,12 @@ class InviteCodeCard extends StatelessWidget {
                 Expanded(
                   child: FButton(
                     onPress: () => _shareInviteLink(context),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(FLucideIcons.share, size: 16),
-                        SizedBox(width: 8),
-                        Text('Share Invite Link'),
+                        const Icon(FLucideIcons.share, size: 16),
+                        const SizedBox(width: 8),
+                        Text(t.sharedSpace.inviteCard.shareLink),
                       ],
                     ),
                   ),
@@ -154,37 +155,40 @@ class InviteCodeCard extends StatelessWidget {
   }
 
   String _formatExpiryTime(DateTime? expiresAt) {
-    if (expiresAt == null) return 'No expiry';
+    if (expiresAt == null) return t.sharedSpace.inviteCard.noExpiry;
     final now = DateTime.now();
     final difference = expiresAt.difference(now);
 
     if (difference.isNegative) {
-      return 'Expired';
+      return t.sharedSpace.inviteCard.expired;
     }
 
     if (difference.inDays > 0) {
-      return 'Expires in ${difference.inDays} days';
+      return t.sharedSpace.inviteCard.expiresInDays(days: difference.inDays);
     } else if (difference.inHours > 0) {
-      return 'Expires in ${difference.inHours} hours';
+      return t.sharedSpace.inviteCard.expiresInHours(hours: difference.inHours);
     } else if (difference.inMinutes > 0) {
-      return 'Expires in ${difference.inMinutes} minutes';
+      return t.sharedSpace.inviteCard.expiresInMinutes(
+        minutes: difference.inMinutes,
+      );
     } else {
-      return 'Expiring soon';
+      return t.sharedSpace.inviteCard.expiringSoon;
     }
   }
 
   void _copyInviteCode(BuildContext context) {
     unawaited(Clipboard.setData(ClipboardData(text: inviteCode.code)));
-    ToastService.show(description: const Text('Invite code copied'));
+    ToastService.show(description: Text(t.sharedSpace.inviteCard.codeCopied));
   }
 
   void _shareInviteLink(BuildContext context) {
     final inviteLink = '$appScheme://join-space?code=${inviteCode.code}';
-    final shareText =
-        'You are invited to join the shared space "${inviteCode.spaceName}"\n\n'
-        'Invite code: ${inviteCode.code}\n'
-        'Or click the link to join directly: $inviteLink\n\n'
-        'Invite code ${_formatExpiryTime(inviteCode.expiresAt)}';
+    final shareText = t.sharedSpace.inviteCard.shareText(
+      spaceName: inviteCode.spaceName,
+      code: inviteCode.code,
+      link: inviteLink,
+      expiry: _formatExpiryTime(inviteCode.expiresAt),
+    );
 
     // ignore: deprecated_member_use
     unawaited(Share.share(shareText));

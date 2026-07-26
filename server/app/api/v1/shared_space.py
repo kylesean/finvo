@@ -14,6 +14,7 @@ from app.schemas.shared_space import (
     AddTransactionToSpaceRequest,
     CreateSpaceRequest,
     JoinWithCodeRequest,
+    UpdateMemberRoleRequest,
     UpdateSpaceRequest,
 )
 from app.services.shared_space_service import SharedSpaceService
@@ -165,6 +166,26 @@ async def remove_member(
     target_uuid = UUID(user_id)
     await service.remove_member(space_id, current_user.uuid, target_uuid)
     return success_response(data={"message": "Remove member successfully"})
+
+
+@router.put("/{space_id}/members/{user_id}/role")
+async def update_member_role(
+    space_id: UUID,
+    user_id: str,
+    request: UpdateMemberRoleRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+) -> JSONResponse:
+    """Update a member's role (owner only)."""
+    service = SharedSpaceService(db)
+    target_uuid = UUID(user_id)
+    result = await service.update_member_role(
+        space_id=space_id,
+        user_uuid=current_user.uuid,
+        target_user_uuid=target_uuid,
+        new_role=request.role,
+    )
+    return success_response(data=result)
 
 
 @router.get("/{space_id}/settlement")

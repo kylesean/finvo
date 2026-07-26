@@ -19,12 +19,14 @@ class SharedSpaceListPage extends ConsumerStatefulWidget {
       _SharedSpaceListPageState();
 }
 
-class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
+class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -48,8 +50,19 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Layer 3: Refresh space list when app returns to foreground
+    if (state == AppLifecycleState.resumed) {
+      unawaited(
+        ref.read(sharedSpaceProvider.notifier).loadSpaces(refresh: true),
+      );
+    }
   }
 
   void _onScroll() {

@@ -62,6 +62,8 @@ class SharedSpaceService {
       method: HttpMethod.post,
       data: {'code': inviteCode},
       fromJsonT: (json) => _parseItemResponse(json, SharedSpace.fromJson),
+      enableRetry:
+          false, // Non-idempotent: must NOT retry to avoid "already member" errors
     );
   }
 
@@ -70,6 +72,19 @@ class SharedSpaceService {
     await _networkClient.request<void>(
       '/shared-spaces/$spaceId/members/$userId',
       method: HttpMethod.delete,
+    );
+  }
+
+  /// Update member role (owner only)
+  Future<void> updateMemberRole(
+    String spaceId,
+    String userId,
+    String newRole,
+  ) async {
+    await _networkClient.request<void>(
+      '/shared-spaces/$spaceId/members/$userId/role',
+      method: HttpMethod.put,
+      data: {'role': newRole},
     );
   }
 

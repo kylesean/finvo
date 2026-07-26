@@ -1092,6 +1092,7 @@
   },
   "sharedSpace": {
     "dashboard": {
+      "sectionTitle": "Financial Overview",
       "cumulativeTotalExpense": "Cumulative Total Expense",
       "participatingMembers": "Participating Members",
       "membersCount": "$count people",
@@ -1123,7 +1124,7 @@
       "title": "Join Shared Space",
       "subtitle": "Enter the invite code shared by a friend to start collaborative bookkeeping",
       "codeLabel": "Invite Code",
-      "codeHint": "Enter invite code, e.g.: A8K2F9G7",
+      "codeHint": "Enter invite code, e.g.: 123456",
       "cancel": "Cancel",
       "submit": "Join",
       "codeRequired": "Please enter invite code",
@@ -1140,6 +1141,7 @@
     "detail": {
       "members": "Members",
       "transactions": "Transactions",
+      "recordsCount": "${count} records",
       "settlement": "Settlement",
       "inviteCode": "Invite Code",
       "copyCode": "Copy Invite Code",
@@ -1155,7 +1157,9 @@
       "loadFailed": "Failed to load",
       "retry": "Retry",
       "noTransactions": "No transactions yet",
-      "noTransactionsHint": "Transactions in this space will appear here"
+      "noTransactionsHint": "Transactions in this space will appear here",
+      "refreshCode": "Refresh Code",
+      "joinOtherSpace": "Join Another Space"
     },
     "notifications": {
       "title": "Notifications",
@@ -1165,6 +1169,79 @@
       "inviteAccepted": "Invite accepted!",
       "inviteRejected": "Invite rejected",
       "allMarkedRead": "All notifications marked as read"
+    },
+    "inviteCard": {
+      "title": "Invite Code",
+      "subtitle": "Share with friends to join the space",
+      "copyCode": "Copy Invite Code",
+      "shareLink": "Share Invite Link",
+      "codeCopied": "Invite code copied",
+      "noExpiry": "No expiry",
+      "expired": "Expired",
+      "expiresInDays": "Expires in ${days} days",
+      "expiresInHours": "Expires in ${hours} hours",
+      "expiresInMinutes": "Expires in ${minutes} minutes",
+      "expiringSoon": "Expiring soon",
+      "shareText": "You are invited to join the shared space \"${spaceName}\"\n\nInvite code: ${code}\nOr click the link to join directly: ${link}\n\nInvite code ${expiry}"
+    },
+    "inviteSuccess": {
+      "title": "Created Successfully",
+      "subtitle": "Space Created Successfully",
+      "inviteLater": "Invite Later",
+      "enterSpace": "Enter Space",
+      "generatingCode": "Generating invite code...",
+      "generateFailed": "Failed to generate invite code",
+      "codeCopied": "Invite code copied",
+      "retry": "Retry",
+      "codeLabel": "Invite Code",
+      "validHint": "Valid for 24 hours · Tap to copy"
+    },
+    "notificationCard": {
+      "accept": "Accept",
+      "reject": "Reject",
+      "unknownTime": "Unknown time",
+      "justNow": "Just now"
+    },
+    "spaceCard": {
+      "noDescription": "No description",
+      "creator": "Creator",
+      "member": "Member",
+      "membersCount": "${count} members",
+      "transactionsCount": "${count} transactions"
+    },
+    "settings": {
+      "title": "Space Settings",
+      "spaceInfo": "Space Info",
+      "nameLabel": "Space Name",
+      "descLabel": "Space Description",
+      "save": "Save",
+      "saved": "Saved successfully",
+      "saveFailed": "Failed to save",
+      "memberManagement": "Member Management",
+      "membersCount": "$count members",
+      "removeMemberConfirm": "Are you sure you want to remove \"$name\" from this space?",
+      "removed": "Member removed",
+      "removeFailed": "Failed to remove member",
+      "inviteManagement": "Invite Management",
+      "currentCode": "Current Invite Code",
+      "generateNew": "Generate New Code",
+      "noValidCode": "No valid invite code",
+      "refreshCode": "Refresh Code",
+      "refreshConfirm": "Generating a new code will invalidate the old one. Continue?",
+      "codeRefreshed": "Invite code refreshed",
+      "dangerZone": "Danger Zone",
+      "editHint": "Only admins can edit",
+      "edit": "Edit",
+      "you": "You",
+      "pending": "Pending",
+      "declined": "Declined",
+      "setAsAdmin": "Set as Admin",
+      "setAsMember": "Set as Member",
+      "changeRole": "Change Role",
+      "changeRoleConfirm": "Are you sure you want to change \"$name\"'s role to \"$role\"?",
+      "confirm": "Confirm",
+      "roleChanged": "Role changed",
+      "roleChangeFailed": "Failed to change role"
     }
   },
   "errorMapping": {
@@ -1249,6 +1326,14 @@
       "billComment": "Bill Comment",
       "budgetAlert": "Budget Alert",
       "transaction": "Transaction"
+    },
+    "semantic": {
+      "memberJoined": "${name} joined your space",
+      "memberJoinedDetail": "A new member joined \"${space}\"",
+      "welcome": "Welcome to \"${space}\"",
+      "newTransaction": "${name} recorded a new expense",
+      "newTransactionDetail": "${amount} in \"${space}\"",
+      "memberLeft": "${name} left the space"
     }
   }
 }

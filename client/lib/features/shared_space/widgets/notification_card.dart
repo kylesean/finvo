@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/i18n/strings.g.dart';
 import '../models/shared_space_models.dart';
 import '../../../shared/widgets/app_card.dart';
 
@@ -146,14 +147,14 @@ class NotificationCard extends StatelessWidget {
                       child: FButton(
                         variant: .outline,
                         onPress: onReject,
-                        child: const Text('Reject'),
+                        child: Text(t.sharedSpace.notificationCard.reject),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: FButton(
                         onPress: onAccept,
-                        child: const Text('Accept'),
+                        child: Text(t.sharedSpace.notificationCard.accept),
                       ),
                     ),
                   ],
@@ -197,7 +198,7 @@ class NotificationCard extends StatelessWidget {
   }
 
   String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) return 'Unknown time';
+    if (dateTime == null) return t.sharedSpace.notificationCard.unknownTime;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
@@ -208,7 +209,7 @@ class NotificationCard extends StatelessWidget {
     } else if (difference.inMinutes > 0) {
       return '${difference.inMinutes} minutes ago';
     } else {
-      return 'Just now';
+      return t.sharedSpace.notificationCard.justNow;
     }
   }
 }

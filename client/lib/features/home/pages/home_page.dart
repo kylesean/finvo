@@ -227,14 +227,27 @@ class _WelcomeHeader extends ConsumerStatefulWidget {
 class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
   bool _isAmountVisible = true;
 
-  // Calculate yearly time progress
-  double _getYearProgress() {
+  // Calculate yearly remaining time (countdown)
+  ({
+    int remainingDays,
+    int totalDays,
+    double remainingFraction,
+    int remainingPercentage,
+  })
+  _getYearRemaining() {
     final now = DateTime.now();
     final startOfYear = DateTime(now.year, 1, 1);
     final endOfYear = DateTime(now.year + 1, 1, 1);
     final totalDays = endOfYear.difference(startOfYear).inDays;
-    final passedDays = now.difference(startOfYear).inDays;
-    return passedDays / totalDays;
+    final remainingDays = endOfYear.difference(now).inDays;
+    final remainingFraction = (remainingDays / totalDays).clamp(0.0, 1.0);
+    final remainingPercentage = (remainingFraction * 100).round();
+    return (
+      remainingDays: remainingDays,
+      totalDays: totalDays,
+      remainingFraction: remainingFraction,
+      remainingPercentage: remainingPercentage,
+    );
   }
 
   String _formatAmount(TotalExpenseData data) {
@@ -257,8 +270,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
     final now = DateTime.now();
     final totalExpenseAsync = ref.watch(totalExpenseProvider);
 
-    final yearProgress = _getYearProgress();
-    final progressPercentage = (yearProgress * 100).toInt();
+    final yearRemaining = _getYearRemaining();
 
     return FlexibleSpaceBar(
       background: Container(
@@ -370,50 +382,72 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                         ),
 
                         const SizedBox(height: 16),
-                        // Yearly time progress bar - simplified version
-                        Row(
+                        // Yearly remaining time (Countdown) progress bar with sense of urgency
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              t.home.yearProgress(year: now.year),
-                              style: theme.typography.body.xs.copyWith(
-                                color: colors.primaryForeground.withValues(
-                                  alpha: 0.8,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Container(
-                                height: 3,
-                                decoration: BoxDecoration(
-                                  color: colors.primaryForeground.withValues(
-                                    alpha: 0.2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(1.5),
-                                ),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: FractionallySizedBox(
-                                    widthFactor: yearProgress,
-                                    child: Container(
-                                      height: 3,
-                                      decoration: BoxDecoration(
-                                        color: colors.primaryForeground,
-                                        borderRadius: BorderRadius.circular(
-                                          1.5,
-                                        ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      FLucideIcons.timer,
+                                      size: 13,
+                                      color: colors.primaryForeground
+                                          .withValues(alpha: 0.9),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      '${now.year}年仅剩',
+                                      style: theme.typography.body.xs.copyWith(
+                                        color: colors.primaryForeground
+                                            .withValues(alpha: 0.85),
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
+                                  ],
+                                ),
+                                Text(
+                                  '仅剩 ${yearRemaining.remainingDays} 天 (${yearRemaining.remainingPercentage}%)',
+                                  style: theme.typography.body.xs.copyWith(
+                                    color: colors.primaryForeground,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.2,
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '$progressPercentage%',
-                              style: theme.typography.body.xs.copyWith(
+                            const SizedBox(height: 6),
+                            Container(
+                              height: 4,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
                                 color: colors.primaryForeground.withValues(
-                                  alpha: 0.7,
+                                  alpha: 0.18,
+                                ),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: FractionallySizedBox(
+                                  widthFactor: yearRemaining.remainingFraction,
+                                  child: Container(
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: colors.primaryForeground,
+                                      borderRadius: BorderRadius.circular(2),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: colors.primaryForeground
+                                              .withValues(alpha: 0.4),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

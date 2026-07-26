@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/notification_provider.dart';
-import '../pages/notification_center_page.dart';
 
 class NotificationBadgeIcon extends ConsumerWidget {
   final Color? iconColor;
@@ -30,15 +28,7 @@ class NotificationBadgeIcon extends ConsumerWidget {
             color: iconColor,
             size: iconSize,
           ),
-          onPressed: () {
-            unawaited(
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const NotificationCenterPage(),
-                ),
-              ),
-            );
-          },
+          onPressed: () => context.push('/notifications'),
         ),
         if (unreadCount > 0)
           Positioned(
