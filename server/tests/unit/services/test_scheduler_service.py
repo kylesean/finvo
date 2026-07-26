@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from datetime import date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from unittest.mock import patch
 from uuid import uuid4
@@ -20,8 +20,6 @@ async def test_process_due_transactions(db_session):
 
     # 2. Setup Due Recurring Transaction
     # Due today (start from yesterday to ensure stable next_execution calculation)
-    from datetime import timedelta
-
     start = date.today() - timedelta(days=1)
     rt = RecurringTransaction(
         id=uuid4(),
@@ -32,7 +30,7 @@ async def test_process_due_transactions(db_session):
         category_key="FOOD",
         recurrence_rule="FREQ=DAILY;INTERVAL=1",
         start_date=start,
-        next_execution_at=datetime.combine(date.today(), datetime.min.time()),
+        next_execution_at=datetime.combine(date.today(), datetime.min.time(), tzinfo=UTC),
         is_active=True,
         amount_type="FIXED",
         requires_confirmation=False,

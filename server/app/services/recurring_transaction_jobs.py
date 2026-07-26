@@ -5,17 +5,22 @@ recurring transactions. These functions are called by the
 scheduler service.
 """
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime, time as dt_time
 from decimal import Decimal
 from typing import Any, cast as type_cast
+from uuid import uuid4
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session_context
 from app.core.logging import logger
 from app.models.transaction import RecurringTransaction, Transaction
-from app.services.transaction_service import TransactionService
+from app.services.transaction.recurring_service import RecurringTransactionService
+
+# Maximum iterations when scanning rrule occurrences to prevent infinite loops
+# on rules without UNTIL/COUNT that start far in the past.
+_MAX_RRULE_ITERATIONS = 1000
 
 
 async def process_due_transactions() -> None:
@@ -23,14 +28,16 @@ async def process_due_transactions() -> None:
 
     This job runs daily and creates actual transaction records
     for any recurring transactions scheduled for today.
+    Uses UTC-aware datetimes to match the tz-aware next_execution_at column.
     """
     logger.info("processing_due_recurring_transactions_started")
 
     async with get_session_context() as db:
         try:
             today = date.today()
-            today_start = datetime.combine(today, datetime.min.time())
-            today_end = datetime.combine(today, datetime.max.time())
+            # Use UTC-aware boundaries to match the TIMESTAMP WITH TIME ZONE column
+            today_start = datetime.combine(today, dt_time.min, tzinfo=UTC)
+            today_end = datetime.combine(today, dt_time.max, tzinfo=UTC)
 
             # Find all active recurring transactions due today
             query = select(RecurringTransaction).where(
@@ -49,10 +56,18 @@ async def process_due_transactions() -> None:
             due_transactions = result.scalars().all()
 
             processed_count = 0
+            skipped_count = 0
             error_count = 0
 
             for recurring_tx in due_transactions:
                 try:
+                    # Idempotency: skip if already generated today
+                    if await _already_generated_today(db, recurring_tx, today):
+                        skipped_count += 1
+                        # Still advance the schedule
+                        await _update_next_execution(db, recurring_tx)
+                        continue
+
                     await _create_transaction_from_recurring(db, recurring_tx)
                     await _update_next_execution(db, recurring_tx)
                     processed_count += 1
@@ -69,6 +84,7 @@ async def process_due_transactions() -> None:
             logger.info(
                 "processing_due_recurring_transactions_completed",
                 processed=processed_count,
+                skipped=skipped_count,
                 errors=error_count,
                 total=len(due_transactions),
             )
@@ -81,74 +97,44 @@ async def process_due_transactions() -> None:
             await db.rollback()
 
 
-async def update_next_execution_dates() -> None:
-    """Update next_execution_at for all active recurring transactions.
+async def _already_generated_today(
+    db: AsyncSession,
+    recurring_tx: RecurringTransaction,
+    today: date,
+) -> bool:
+    """Check if a transaction was already generated for this rule today.
 
-    This ensures the next_execution_at field stays accurate,
-    especially for transactions that may have been skipped.
+    Provides idempotency protection against misfire retries or multi-worker races.
     """
-    logger.info("updating_next_execution_dates_started")
+    today_start = datetime.combine(today, dt_time.min, tzinfo=UTC)
+    today_end = datetime.combine(today, dt_time.max, tzinfo=UTC)
 
-    async with get_session_context() as db:
-        try:
-            query = select(RecurringTransaction).where(
-                type_cast(Any, RecurringTransaction.is_active == True)  # noqa: E712
-            )
-
-            result = await db.execute(query)
-            active_transactions = result.scalars().all()
-
-            service = TransactionService(db)
-            updated_count = 0
-
-            for recurring_tx in active_transactions:
-                new_next_execution = service._calculate_next_execution(
-                    recurring_tx.recurrence_rule,
-                    recurring_tx.start_date,
-                    recurring_tx.end_date,
-                    recurring_tx.exception_dates,
-                )
-
-                if recurring_tx.next_execution_at != new_next_execution:
-                    recurring_tx.next_execution_at = new_next_execution
-                    updated_count += 1
-
-                    if new_next_execution is None:
-                        recurring_tx.is_active = False
-
-            await db.commit()
-
-            logger.info(
-                "updating_next_execution_dates_completed",
-                updated=updated_count,
-                total=len(active_transactions),
-            )
-
-        except Exception as e:
-            logger.error(
-                "updating_next_execution_dates_failed",
-                error=str(e),
-            )
-            await db.rollback()
+    query = select(func.count()).where(
+        type_cast(
+            Any,
+            and_(
+                type_cast(Any, Transaction.recurring_transaction_id) == recurring_tx.id,
+                type_cast(Any, Transaction.transaction_at) >= today_start,
+                type_cast(Any, Transaction.transaction_at) <= today_end,
+            ),
+        )
+    )
+    result = await db.execute(query)
+    count = result.scalar() or 0
+    return count > 0
 
 
 async def _create_transaction_from_recurring(
     db: AsyncSession,
     recurring_tx: RecurringTransaction,
 ) -> None:
-    """Create an actual transaction from a recurring transaction rule."""
-    from uuid import uuid4
+    """Create an actual transaction from a recurring transaction rule.
 
+    If requires_confirmation is True, the transaction is created with
+    status='PENDING' so the user can review it before it affects totals.
+    """
     from app.models.base import utc_now
     from app.utils.currency_utils import convert_to_user_base, get_user_base_currency
-
-    # Skip if requires confirmation
-    if recurring_tx.requires_confirmation:
-        logger.info(
-            "recurring_transaction_skipped_requires_confirmation",
-            recurring_id=str(recurring_tx.id),
-        )
-        return
 
     # Currency conversion: convert to user's base currency with rate snapshot
     amount_original = recurring_tx.amount
@@ -157,6 +143,9 @@ async def _create_transaction_from_recurring(
     user_base = await get_user_base_currency(db, recurring_tx.user_uuid)
     base_amount, exchange_rate = await convert_to_user_base(abs(amount_original), currency, user_base)
     amount = base_amount.quantize(Decimal("0.00000001"))
+
+    # requires_confirmation → PENDING (user must approve); otherwise CONFIRMED
+    status = "PENDING" if recurring_tx.requires_confirmation else "CONFIRMED"
 
     transaction = Transaction(
         id=uuid4(),
@@ -175,7 +164,8 @@ async def _create_transaction_from_recurring(
         target_account_id=recurring_tx.target_account_id,
         tags=recurring_tx.tags,
         source="RECURRING",
-        status="CONFIRMED",
+        status=status,
+        recurring_transaction_id=recurring_tx.id,
     )
 
     db.add(transaction)
@@ -186,6 +176,7 @@ async def _create_transaction_from_recurring(
         transaction_id=str(transaction.id),
         recurring_id=str(recurring_tx.id),
         amount=str(recurring_tx.amount),
+        status=status,
     )
 
 
@@ -194,7 +185,7 @@ async def _update_next_execution(
     recurring_tx: RecurringTransaction,
 ) -> None:
     """Update the next execution date for a recurring transaction."""
-    service = TransactionService(db)
+    service = RecurringTransactionService(db)
 
     next_execution = service._calculate_next_execution(
         recurring_tx.recurrence_rule,
