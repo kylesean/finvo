@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/i18n/strings.g.dart';
 import '../providers/shared_space_provider.dart';
 import '../models/shared_space_models.dart';
 
@@ -42,17 +43,15 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
   bool _validate() {
     final code = _codeController.text.trim().toUpperCase();
     if (code.isEmpty) {
-      setState(() => _codeError = 'Please enter invite code');
+      setState(() => _codeError = t.sharedSpace.join.codeRequired);
       return false;
     }
     if (code.length < 6 || code.length > 16) {
-      setState(() => _codeError = 'Invalid invite code format');
+      setState(() => _codeError = t.sharedSpace.join.codeInvalid);
       return false;
     }
     if (!RegExp(r'^[A-Z0-9]+$').hasMatch(code)) {
-      setState(
-        () => _codeError = 'Invite code can only contain letters and numbers',
-      );
+      setState(() => _codeError = t.sharedSpace.join.codeFormat);
       return false;
     }
     setState(() => _codeError = null);
@@ -88,7 +87,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
 
               // Title area
               Text(
-                'Join Shared Space',
+                t.sharedSpace.join.title,
                 style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w500,
                   color: colors.foreground,
@@ -96,7 +95,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Enter the invite code shared by a friend to start collaborative bookkeeping',
+                t.sharedSpace.join.subtitle,
                 textAlign: TextAlign.center,
                 style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
@@ -126,8 +125,8 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                     }
                   },
                 ),
-                label: const Text('Invite Code'),
-                hint: 'Enter invite code, e.g.: A8K2F9G7',
+                label: Text(t.sharedSpace.join.codeLabel),
+                hint: t.sharedSpace.join.codeHint,
               ),
               if (_codeError != null)
                 Align(
@@ -162,7 +161,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                     child: FButton(
                       variant: .outline,
                       onPress: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(t.sharedSpace.join.cancel),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -177,7 +176,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Join'),
+                          : Text(t.sharedSpace.join.submit),
                     ),
                   ),
                 ],

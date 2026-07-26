@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/i18n/strings.g.dart';
 import '../providers/shared_space_provider.dart';
 import '../models/shared_space_models.dart';
 import '../widgets/shared_space_card.dart';
@@ -79,7 +80,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Shared Space',
+          t.sharedSpace.title,
           style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.bold),
         ),
         backgroundColor: colorScheme.background,
@@ -148,7 +149,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
             ),
             const SizedBox(height: 32),
             Text(
-              'Managing joint expenses never been easier',
+              t.sharedSpace.list.emptyTitle,
               style: theme.typography.body.xl.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.foreground,
@@ -157,7 +158,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Create a shared space and easily sync joint\ndebts and expenses with partners or friends',
+              t.sharedSpace.list.emptySubtitle,
               style: theme.typography.body.md.copyWith(
                 color: colorScheme.mutedForeground,
                 height: 1.5,
@@ -167,9 +168,9 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
             const SizedBox(height: 48),
             FButton(
               onPress: _showCreateSpaceSheet,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: Text('Get Started'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(t.sharedSpace.list.getStarted),
               ),
             ),
             const SizedBox(height: 16),
@@ -177,7 +178,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
               variant: .ghost,
               onPress: _showJoinSpaceSheet,
               child: Text(
-                'Have an invite code? Tap to join',
+                t.sharedSpace.list.hasInviteCode,
                 style: TextStyle(color: colorScheme.primary),
               ),
             ),
@@ -237,7 +238,9 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
           onSpaceJoined: (space) {
             Navigator.of(context).pop();
             ToastService.show(
-              description: Text('Successfully joined "${space.name}"!'),
+              description: Text(
+                t.sharedSpace.list.joinedSuccess(name: space.name),
+              ),
             );
             _navigateToSpaceDetail(space.id);
           },
@@ -256,7 +259,9 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage> {
           onSpaceJoined: (space) {
             Navigator.of(context).pop();
             ToastService.show(
-              description: Text('Successfully joined "${space.name}"!'),
+              description: Text(
+                t.sharedSpace.list.joinedSuccess(name: space.name),
+              ),
             );
             _navigateToSpaceDetail(space.id);
           },

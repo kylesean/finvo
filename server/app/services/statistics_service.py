@@ -20,7 +20,7 @@ from app.schemas.statistics import (
     TrendDataPoint,
     TrendDataResponse,
 )
-from app.utils.currency_utils import get_exchange_rate_from_base, get_user_display_currency
+from app.utils.currency_utils import get_user_display_currency
 
 
 class StatisticsService:
@@ -201,16 +201,8 @@ class StatisticsService:
         prev_income = Decimal(str(prev_income_result.scalar() or 0))
         prev_expense = Decimal(str(prev_expense_result.scalar() or 0))
 
-        # 获取汇率
+        # Amounts are already in user's base currency - no conversion needed
         display_currency = await get_user_display_currency(self.db, user_uuid)
-        exchange_rate = await get_exchange_rate_from_base(display_currency)
-
-        # 应用汇率换算
-        total_balance = total_balance * Decimal(str(exchange_rate))
-        total_income = total_income * Decimal(str(exchange_rate))
-        total_expense = total_expense * Decimal(str(exchange_rate))
-        prev_income = prev_income * Decimal(str(exchange_rate))
-        prev_expense = prev_expense * Decimal(str(exchange_rate))
 
         # Calculate separate change percentages using helper method
         prev_net = prev_income - prev_expense
@@ -286,15 +278,11 @@ class StatisticsService:
         result = await self.db.execute(query)
         rows = result.all()
 
-        # 获取汇率
-        display_currency = await get_user_display_currency(self.db, user_uuid)
-        exchange_rate = Decimal(str(await get_exchange_rate_from_base(display_currency)))
-
         # Build date to amount mapping from query results
         date_amount_map = {}
         for row in rows:
             period_dt = row.period
-            amount = Decimal(str(row.total)) * exchange_rate
+            amount = Decimal(str(row.total))
 
             if time_range == "year":
                 date_key = period_dt.strftime("%Y-%m")
@@ -386,17 +374,13 @@ class StatisticsService:
         result = await self.db.execute(query)
         rows = result.all()
 
-        # 获取汇率
-        display_currency = await get_user_display_currency(self.db, user_uuid)
-        exchange_rate = Decimal(str(await get_exchange_rate_from_base(display_currency)))
-
         # Calculate total for percentages
-        grand_total = sum(Decimal(str(row.total)) for row in rows) * exchange_rate
+        grand_total = sum(Decimal(str(row.total)) for row in rows)
 
         items = []
         for row in rows:
             category_key = row.category_key or "OTHERS"
-            amount = Decimal(str(row.total)) * exchange_rate
+            amount = Decimal(str(row.total))
 
             percentage = float(amount / grand_total * 100) if grand_total > 0 else 0.0
 
@@ -466,10 +450,6 @@ class StatisticsService:
         result = await self.db.execute(query)
         transactions = result.scalars().all()
 
-        # 获取汇率
-        display_currency = await get_user_display_currency(self.db, user_uuid)
-        exchange_rate = Decimal(str(await get_exchange_rate_from_base(display_currency)))
-
         items = []
         for tx in transactions:
             category_key = tx.category_key or "OTHERS"
@@ -478,7 +458,7 @@ class StatisticsService:
                 TopTransactionItem(
                     id=str(tx.id),
                     description=tx.description or tx.raw_input or "",
-                    amount=f"{(Decimal(str(tx.amount)) * exchange_rate):.2f}",
+                    amount=f"{Decimal(str(tx.amount)):.2f}",
                     categoryKey=category_key,
                     categoryName=category_key,  # Client should translate
                     transactionAt=tx.transaction_at,
@@ -568,16 +548,7 @@ class StatisticsService:
         prev_income = Decimal(str(prev_income_result.scalar() or 0))
         prev_expense = Decimal(str(prev_expense_result.scalar() or 0))
 
-        # 获取汇率
-        display_currency = await get_user_display_currency(self.db, user_uuid)
-        exchange_rate = Decimal(str(await get_exchange_rate_from_base(display_currency)))
-
-        # 应用汇率换算
-        total_income = total_income * exchange_rate
-        total_expense = total_expense * exchange_rate
         net_cash_flow = total_income - total_expense
-        prev_income = prev_income * exchange_rate
-        prev_expense = prev_expense * exchange_rate
 
         # Calculate savings rate and expense ratio
         if total_income > 0:
@@ -592,7 +563,7 @@ class StatisticsService:
         discretionary_expense = Decimal("0")
 
         if total_expense > 0:
-            # Query essential expenses (in BASE currency)
+            # Query essential expenses (already in user's base currency)
             essential_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
                 type_cast(
                     Any,
@@ -604,7 +575,6 @@ class StatisticsService:
                 )
             )
             essential_result = await self.db.execute(essential_query)
-            # Use original amount and calculate ratio (conversion not needed for internal ratio)
             essential_expense = Decimal(str(essential_result.scalar() or 0))
 
             # Query discretionary expenses
@@ -621,19 +591,9 @@ class StatisticsService:
             discretionary_result = await self.db.execute(discretionary_query)
             discretionary_expense = Decimal(str(discretionary_result.scalar() or 0))
 
-        # Re-fetch total_expense in BASE for ratio calculation to be safe,
-        # but we already have it in BASE before line 589.
-        # Let's just use the converted values since both are scaled by exchange_rate.
-        # However, it's cleaner to use the BASE ones.
-        # But wait, we don't have the BASE total_expense anymore (it was overwritten at 589).
-        # We'll use the converted ones.
-        total_expense_val = total_expense
-        essential_ratio = (
-            float((essential_expense * exchange_rate) / total_expense_val * 100) if total_expense_val > 0 else 0.0
-        )
-        discretionary_ratio = (
-            float((discretionary_expense * exchange_rate) / total_expense_val * 100) if total_expense_val > 0 else 0.0
-        )
+        # Calculate ratios (all values already in same base currency)
+        essential_ratio = float(essential_expense / total_expense * 100) if total_expense > 0 else 0.0
+        discretionary_ratio = float(discretionary_expense / total_expense * 100) if total_expense > 0 else 0.0
 
         # Calculate previous savings rate
         if prev_income > 0:

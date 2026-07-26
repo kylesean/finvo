@@ -240,7 +240,7 @@ class ExchangeRateService:
         amount_in_usd = amount / from_rate
         converted_amount = amount_in_usd * to_rate
 
-        return cast(float, round(converted_amount, 4))
+        return cast(float, converted_amount)
 
 
 # Global service instance

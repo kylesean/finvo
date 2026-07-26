@@ -22,7 +22,7 @@ from app.core.database import db_manager
 from app.core.logging import logger
 from app.models.transaction import Transaction
 from app.schemas.transaction import TransactionDisplayValue
-from app.utils.currency_utils import BASE_CURRENCY, get_exchange_rate_from_base, get_user_display_currency
+from app.utils.currency_utils import get_user_display_currency
 
 # ============================================================================
 # Enums
@@ -74,20 +74,16 @@ class TransactionItem(BaseModel):
     ) -> TransactionItem:
         """从 Transaction 模型创建响应实例
 
+        展示原币金额，保留交易发生时的币种上下文。
+
         Args:
             tx: 交易模型
-            display_currency: 目标显示币种
-            exchange_rate: 从基准币种 (CNY) 到目标币种的汇率
+            display_currency: 用户本位币（用于 baseCurrency 字段）
+            exchange_rate: 已废弃，保留参数兼容性
         """
-        # 换算金额
-        # 如果交易原始币种与用户显示币种一致，直接使用原始金额，
-        # 避免 原币→USD→原币 往返换算产生的精度损失（如 500 → 499.91）
-        if tx.currency and tx.currency.upper() == display_currency.upper():
-            amount_val = float(tx.amount_original)
-        else:
-            amount_val = float(tx.amount)
-            if display_currency != BASE_CURRENCY:
-                amount_val = amount_val * exchange_rate
+        # Display original currency amount directly
+        amount_val = float(tx.amount_original)
+        original_currency = (tx.currency or display_currency).upper()
 
         return cls(
             id=str(tx.id),
@@ -95,7 +91,7 @@ class TransactionItem(BaseModel):
             type=tx.type,
             amount=round(amount_val, 2),
             amount_original=str(tx.amount_original),
-            currency=display_currency,
+            currency=original_currency,
             category_key=tx.category_key,
             description=tx.description or "",
             transaction_at=tx.transaction_at.isoformat() if tx.transaction_at else "",
@@ -109,7 +105,9 @@ class TransactionItem(BaseModel):
             target_account_id=str(tx.target_account_id) if tx.target_account_id else None,
             created_at=tx.created_at.isoformat() if tx.created_at else None,
             updated_at=tx.updated_at.isoformat() if tx.updated_at else None,
-            display=TransactionDisplayValue.from_params(amount=amount_val, tx_type=tx.type, currency=display_currency),
+            display=TransactionDisplayValue.from_params(
+                amount=amount_val, tx_type=tx.type, currency=original_currency
+            ),
         )
 
 
@@ -305,15 +303,11 @@ class TransactionQueryService:
             result = await self.db.execute(stmt)
             transactions = result.scalars().all()
 
-            # 获取汇率和用户偏好币种
+            # 获取用户本位币
             display_currency = await get_user_display_currency(self.db, UUID(user_uuid))
-            exchange_rate = await get_exchange_rate_from_base(display_currency)
 
-            # 转换为响应模型
-            items = [
-                TransactionItem.from_transaction(tx, display_currency=display_currency, exchange_rate=exchange_rate)
-                for tx in transactions
-            ]
+            # 转换为响应模型（展示原币金额）
+            items = [TransactionItem.from_transaction(tx, display_currency=display_currency) for tx in transactions]
 
             logger.info(
                 "transaction_query_complete",

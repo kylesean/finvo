@@ -2,31 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import '../providers/notification_provider.dart';
+import '../../notification/providers/notification_provider.dart';
 import 'dart:async';
 
-class NotificationIcon extends ConsumerStatefulWidget {
+class NotificationIcon extends ConsumerWidget {
   const NotificationIcon({super.key});
 
   @override
-  ConsumerState<NotificationIcon> createState() => _NotificationIconState();
-}
-
-class _NotificationIconState extends ConsumerState<NotificationIcon> {
-  @override
-  void initState() {
-    super.initState();
-    // Load unread count on init
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(ref.read(notificationProvider.notifier).loadUnreadCount());
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
     final colors = theme.colors;
-    final unreadCount = ref.watch(unreadCountProvider);
+    final unreadCount = ref.watch(notificationProvider).unreadCount;
 
     return FButton.icon(
       variant: .ghost,

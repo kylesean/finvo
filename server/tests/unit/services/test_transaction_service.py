@@ -48,7 +48,13 @@ async def test_create_transaction_simple(db_session):
 
     assert tx_record is not None
     assert tx_record.user_uuid == user_uuid
-    assert float(tx_record.amount) == 100.0
+    # User-base-currency model: amount_original preserves original CNY amount,
+    # amount is converted to user's base currency (USD fallback since no FinancialSettings)
+    assert float(tx_record.amount_original) == 100.0
+    assert tx_record.currency == "CNY"
+    # amount is the USD equivalent (converted at write time)
+    assert float(tx_record.amount) > 0
+    assert tx_record.exchange_rate is not None
     assert tx_record.category_key == "FOOD"
     assert tx_record.tags == ["food", "lunch"]
 

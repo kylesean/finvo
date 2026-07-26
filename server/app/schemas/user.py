@@ -358,7 +358,7 @@ class UserSettingsResponse(BaseModel):
         updatedAt: ISO 8601 timestamp of last update
     """
 
-    defaultCurrency: str = "CNY"  # Placeholder
+    defaultCurrency: str = "USD"  # Placeholder
     timezone: str = "Asia/Shanghai"  # Placeholder
     estimatedAvgDailySpending: str
     safetyBalanceThreshold: str
@@ -434,7 +434,7 @@ class FinancialSettingsResponseSchema(BaseModel):
     safetyThreshold: str
     dailyBurnRate: str
     burnRateMode: Literal["MANUAL", "AI_AUTO"] = "AI_AUTO"
-    primaryCurrency: str = "CNY"
+    primaryCurrency: str = "USD"
     monthStartDay: int = 1
     updatedAt: str | None = None
 

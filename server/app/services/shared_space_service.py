@@ -355,7 +355,7 @@ class SharedSpaceService:
         await self.db.commit()
 
         # Return space info
-        return await self.get_space_detail(cast(UUID, space.id), user_uuid)
+        return await self.get_space_detail(space.id, user_uuid)
 
     # =========================================================================
     # Member Management

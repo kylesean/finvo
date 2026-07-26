@@ -8,13 +8,13 @@ part of 'recurring_transaction_service.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 周期交易服务提供者
+/// Recurring transaction service provider
 
 @ProviderFor(recurringTransactionService)
 final recurringTransactionServiceProvider =
     RecurringTransactionServiceProvider._();
 
-/// 周期交易服务提供者
+/// Recurring transaction service provider
 
 final class RecurringTransactionServiceProvider
     extends
@@ -24,7 +24,7 @@ final class RecurringTransactionServiceProvider
           RecurringTransactionService
         >
     with $Provider<RecurringTransactionService> {
-  /// 周期交易服务提供者
+  /// Recurring transaction service provider
   RecurringTransactionServiceProvider._()
     : super(
         from: null,

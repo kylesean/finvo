@@ -1,14 +1,11 @@
 // features/shared_space/pages/shared_space_detail_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import '../providers/shared_space_provider.dart';
-import '../services/shared_space_service.dart';
 import '../widgets/space_dashboard_card.dart';
 import '../models/shared_space_models.dart';
-import '../../../shared/services/toast_service.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/utils/amount_formatter.dart';
 import '../../../shared/providers/amount_theme_provider.dart';
@@ -16,6 +13,7 @@ import '../../../features/home/models/transaction_model.dart';
 import '../../../core/constants/category_constants.dart';
 import '../../../shared/config/category_config.dart';
 import '../../../i18n/strings.g.dart';
+import '../widgets/detail/space_invite_code_sheet.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
 
@@ -77,7 +75,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Shared Space', style: theme.typography.body.xl),
+        title: Text(t.sharedSpace.title, style: theme.typography.body.xl),
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         elevation: 0,
@@ -93,7 +91,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Shared Space', style: theme.typography.body.xl),
+        title: Text(t.sharedSpace.title, style: theme.typography.body.xl),
         backgroundColor: colors.background,
         foregroundColor: colors.foreground,
         elevation: 0,
@@ -112,7 +110,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Failed to load',
+                t.sharedSpace.detail.loadFailed,
                 style: theme.typography.body.lg.copyWith(
                   color: colors.foreground,
                   fontWeight: FontWeight.w500,
@@ -133,7 +131,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                   ref.invalidate(spaceDetailProvider(widget.spaceId));
                   ref.invalidate(spaceSettlementProvider(widget.spaceId));
                 },
-                child: const Text('Retry'),
+                child: Text(t.sharedSpace.detail.retry),
               ),
             ],
           ),
@@ -202,6 +200,23 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
               onPress: () => _navigateToSettings(space),
               child: const Icon(FLucideIcons.settings, size: 20),
             ),
+            PopupMenuButton<String>(
+              icon: const Icon(FLucideIcons.moreVertical, size: 20),
+              onSelected: (value) => _handleMenuAction(value, space),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'leave',
+                  child: Text(t.sharedSpace.detail.leaveSpace),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text(
+                    t.sharedSpace.detail.deleteSpace,
+                    style: TextStyle(color: colors.destructive),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(width: 8),
           ],
         ),
@@ -223,7 +238,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Dashboard',
+                      t.sharedSpace.dashboard.cumulativeTotalExpense,
                       style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w500,
                         color: colors.primary,
@@ -256,7 +271,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Transactions',
+                      t.sharedSpace.detail.transactions,
                       style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w500,
                         color: colors.foreground,
@@ -423,7 +438,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Dashboard unavailable',
+            t.sharedSpace.detail.loadFailed,
             style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
             ),
@@ -433,7 +448,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
             variant: .outline,
             onPress: () =>
                 ref.invalidate(spaceSettlementProvider(widget.spaceId)),
-            child: const Text('Retry'),
+            child: Text(t.sharedSpace.detail.retry),
           ),
         ],
       ),
@@ -534,7 +549,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Failed to load transactions',
+            t.sharedSpace.detail.loadFailed,
             style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
             ),
@@ -544,7 +559,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
             variant: .outline,
             onPress: () =>
                 ref.invalidate(spaceTransactionsProvider(widget.spaceId)),
-            child: const Text('Retry'),
+            child: Text(t.sharedSpace.detail.retry),
           ),
         ],
       ),
@@ -576,7 +591,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No transactions yet',
+              t.sharedSpace.detail.noTransactions,
               style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
                 fontWeight: FontWeight.w500,
@@ -584,7 +599,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Add your first transaction to start collaborating',
+              t.sharedSpace.detail.noTransactionsHint,
               style: theme.typography.body.sm.copyWith(
                 color: colors.mutedForeground.withValues(alpha: 0.6),
               ),
@@ -720,7 +735,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) => _InviteCodeSheet(space: space),
+        builder: (context) => SpaceInviteCodeSheet(space: space),
       ),
     );
   }
@@ -733,192 +748,79 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage> {
       ),
     );
   }
-}
 
-/// Invite Code BottomSheet
-class _InviteCodeSheet extends ConsumerStatefulWidget {
-  final SharedSpace space;
-
-  const _InviteCodeSheet({required this.space});
-
-  @override
-  ConsumerState<_InviteCodeSheet> createState() => _InviteCodeSheetState();
-}
-
-class _InviteCodeSheetState extends ConsumerState<_InviteCodeSheet> {
-  InviteCode? _inviteCode;
-  bool _isLoading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_generateInviteCode());
-  }
-
-  Future<void> _generateInviteCode() async {
-    try {
-      final service = ref.read(sharedSpaceServiceProvider);
-      final inviteCode = await service.generateInviteCode(widget.space.id);
-      if (mounted) {
-        setState(() {
-          _inviteCode = inviteCode;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('[_InviteCodeSheet] Error: $e');
-      if (mounted) {
-        setState(() {
-          _error = 'Failed to generate invite code';
-          _isLoading = false;
-        });
-      }
+  void _handleMenuAction(String action, SharedSpace space) {
+    switch (action) {
+      case 'leave':
+        _showConfirmDialog(
+          title: t.sharedSpace.detail.leaveSpace,
+          message: t.sharedSpace.detail.leaveConfirm,
+          onConfirm: () async {
+            final success = await ref
+                .read(sharedSpaceProvider.notifier)
+                .leaveSpace(space.id);
+            if (success && mounted) {
+              context.pop();
+            }
+          },
+        );
+      case 'delete':
+        _showConfirmDialog(
+          title: t.sharedSpace.detail.deleteSpace,
+          message: t.sharedSpace.detail.deleteConfirm,
+          onConfirm: () async {
+            final success = await ref
+                .read(sharedSpaceProvider.notifier)
+                .deleteSpace(space.id);
+            if (success && mounted) {
+              context.pop();
+            }
+          },
+        );
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void _showConfirmDialog({
+    required String title,
+    required String message,
+    required VoidCallback onConfirm,
+  }) {
     final theme = context.theme;
     final colors = theme.colors;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colors.muted,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 20),
-          // Title
-          Text(
-            'Invite Members',
-            style: theme.typography.body.xl.copyWith(
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: colors.background,
+          title: Text(
+            title,
+            style: theme.typography.body.lg.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Share the invite code with friends to collaborate',
+          content: Text(
+            message,
             style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
             ),
           ),
-          const SizedBox(height: 24),
-          // Content
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
-            )
-          else if (_error != null)
-            Column(
-              children: [
-                Icon(
-                  FLucideIcons.circleAlert,
-                  size: 48,
-                  color: colors.mutedForeground,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Failed to generate invite code',
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                FButton(
-                  variant: .outline,
-                  onPress: () {
-                    setState(() {
-                      _isLoading = true;
-                      _error = null;
-                    });
-                    unawaited(_generateInviteCode());
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            )
-          else if (_inviteCode != null)
-            Column(
-              children: [
-                // Invite code display
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: colors.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Invite Code',
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _inviteCode!.code,
-                        style: theme.typography.body.xl3.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 4,
-                          color: colors.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Valid for 24 hours',
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Copy button
-                FButton(
-                  variant: .primary,
-                  onPress: () {
-                    unawaited(
-                      Clipboard.setData(ClipboardData(text: _inviteCode!.code)),
-                    );
-                    ToastService.show(
-                      description: Text(
-                        'Invite code copied: ${_inviteCode!.code}',
-                      ),
-                    );
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(FLucideIcons.copy, size: 16),
-                      SizedBox(width: 8),
-                      Text('Copy Invite Code'),
-                    ],
-                  ),
-                ),
-              ],
+          actions: [
+            FButton(
+              variant: .outline,
+              onPress: () => Navigator.of(dialogContext).pop(),
+              child: Text(t.sharedSpace.create.cancel),
             ),
-          const SizedBox(height: 24),
-        ],
+            FButton(
+              variant: .destructive,
+              onPress: () {
+                Navigator.of(dialogContext).pop();
+                onConfirm();
+              },
+              child: Text(title),
+            ),
+          ],
+        ),
       ),
     );
   }

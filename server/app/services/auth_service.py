@@ -175,23 +175,29 @@ class AuthService:
         await self.db.refresh(user)
 
         # Create default financial settings for the new user
-        await self._create_default_financial_settings(user.uuid)
+        await self._create_default_financial_settings(user.uuid, locale=locale, timezone=timezone)
 
         logger.info("user_registered", user_uuid=user.uuid, account_type=account_type)
 
         return user
 
-    async def _create_default_financial_settings(self, user_uuid: Any) -> None:
+    async def _create_default_financial_settings(
+        self, user_uuid: Any, locale: str | None = None, timezone: str | None = None
+    ) -> None:
         """Create default financial settings for a new user.
+
+        Currency is inferred from locale/timezone when available.
 
         Args:
             user_uuid: The user's UUID
+            locale: User's locale (e.g. "zh_CN")
+            timezone: User's IANA timezone (e.g. "Asia/Shanghai")
         """
         from app.services.user_service import UserService
 
         try:
             user_service = UserService(type_cast(Any, self.db))
-            await user_service.create_default_financial_settings(user_uuid)
+            await user_service.create_default_financial_settings(user_uuid, locale=locale, timezone=timezone)
             logger.info("default_financial_settings_created", user_uuid=str(user_uuid))
         except Exception as e:
             # Log error but don't fail registration

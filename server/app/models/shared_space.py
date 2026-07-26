@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING
-from uuid import UUID
+from uuid import UUID, uuid4 as uuid4_factory
 
 import sqlalchemy as sa
 from sqlalchemy import String
@@ -26,7 +26,7 @@ class SharedSpace(Base):
 
     __tablename__ = "shared_spaces"
 
-    id: Mapped[UUID | None] = mapped_column(primary_key=True, default=None)
+    id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     name: Mapped[str] = mapped_column(String(50))
     creator_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="uuid")
     status: Mapped[str] = mapped_column(String(50), default="ACTIVE")
@@ -85,7 +85,7 @@ class SpaceTransaction(Base):
 
     __tablename__ = "space_transactions"
 
-    id: Mapped[UUID | None] = mapped_column(primary_key=True, default=None)
+    id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     space_id: Mapped[UUID] = col.uuid_fk("shared_spaces", ondelete="NO ACTION")
     transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE")
     added_by_user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="uuid")

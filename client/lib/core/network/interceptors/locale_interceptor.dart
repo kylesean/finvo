@@ -24,7 +24,7 @@ class LocaleInterceptor extends Interceptor {
     // Add Accept-Language header
     options.headers[ApiConstants.acceptLanguageHeader] = acceptLanguage;
 
-    _logger.info(
+    _logger.fine(
       'LocaleInterceptor: Added Accept-Language header: $acceptLanguage for path: ${options.path}',
     );
 

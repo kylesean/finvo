@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.transaction import Transaction
 from app.schemas.transaction import TransactionDisplayValue
-from app.utils.currency_utils import BASE_CURRENCY, get_exchange_rate_from_base, get_user_display_currency
+from app.utils.currency_utils import get_user_display_currency
 
 logger = structlog.get_logger(__name__)
 
@@ -29,10 +29,9 @@ class TransactionQueryService:
         page: int = 1,
         limit: int = 10,
     ) -> dict[str, Any]:
-        """获取交易流列表（包含自动汇率转换）"""
-        # 1. 获取用户偏好币种和汇率
+        """获取交易流列表（展示原币金额）"""
+        # 1. 获取用户本位币（用于 baseCurrency 字段）
         display_currency = await get_user_display_currency(self.db, user_uuid)
-        rate = await get_exchange_rate_from_base(display_currency)
 
         # 2. 构建查询
         query = select(Transaction).where(type_cast(Any, Transaction.user_uuid == user_uuid))
@@ -67,18 +66,12 @@ class TransactionQueryService:
         result = await self.db.execute(query)
         transactions = result.scalars().all()
 
-        # 3. 组装数据并执行换算
+        # 3. 组装数据：单笔展示原币金额
         data = []
         for tx in transactions:
-            # 如果交易原始币种与用户显示币种一致，直接使用原始金额，
-            # 避免 原币→USD→原币 往返换算产生的精度损失（如 500 → 499.91）
-            if tx.currency and tx.currency.upper() == display_currency.upper():
-                amount_val = float(tx.amount_original)
-            else:
-                amount_val = float(tx.amount)
-                # 如果不是基准货币，则进行换算
-                if display_currency != BASE_CURRENCY:
-                    amount_val = round(amount_val * float(rate), 2)
+            # Display original currency amount directly
+            amount_val = float(tx.amount_original)
+            original_currency = (tx.currency or display_currency).upper()
 
             data.append(
                 {
@@ -86,7 +79,10 @@ class TransactionQueryService:
                     "userUuid": str(tx.user_uuid),
                     "type": tx.type,
                     "amount": amount_val,
-                    "currency": display_currency,
+                    "amountBase": float(tx.amount),
+                    "currency": original_currency,
+                    "baseCurrency": display_currency,
+                    "exchangeRate": str(tx.exchange_rate) if tx.exchange_rate else None,
                     "categoryKey": tx.category_key,
                     "description": tx.description,
                     "transactionAt": tx.transaction_at.isoformat(),
@@ -94,7 +90,7 @@ class TransactionQueryService:
                     "createdAt": tx.created_at.isoformat(),
                     "updatedAt": tx.updated_at.isoformat() if tx.updated_at else None,
                     "display": TransactionDisplayValue.from_params(
-                        amount=amount_val, tx_type=tx.type, currency=display_currency
+                        amount=amount_val, tx_type=tx.type, currency=original_currency
                     ).model_dump(),
                 }
             )

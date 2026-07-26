@@ -32,9 +32,9 @@ async def get_total_expense(
 ) -> JSONResponse:
     """Get user's expense summary, including today, month, year, and total expense.
 
-    Base currency scheme:
-    - amount field stores CNY base amount
-    - returns converted to user preferred display_currency
+    User-base-currency scheme:
+    - amount field stores user's base currency (primary_currency) amount
+    - SUM(amount) is already in user's base currency, no conversion needed
 
     Performance optimization: use single query + conditional aggregation, avoid N+1 queries
 
@@ -42,7 +42,6 @@ async def get_total_expense(
        Unified response format, containing detailed expense statistics
     """
     from app.utils.currency_utils import (
-        convert_base_to_display,
         get_currency_symbol,
         get_user_display_currency,
     )
@@ -91,16 +90,11 @@ async def get_total_expense(
         )
         row = result.one()
 
-        today_expense_cny = float(row.today or 0)
-        month_expense_cny = float(row.month or 0)
-        year_expense_cny = float(row.year or 0)
-        total_expense_cny = float(row.total or 0)
-
-        # Convert to user preferred currency
-        today_expense = await convert_base_to_display(today_expense_cny, display_currency)
-        month_expense = await convert_base_to_display(month_expense_cny, display_currency)
-        year_expense = await convert_base_to_display(year_expense_cny, display_currency)
-        total_expense = await convert_base_to_display(total_expense_cny, display_currency)
+        # SUM(amount) is already in user's base currency - no conversion needed
+        today_expense = round(float(row.today or 0), 2)
+        month_expense = round(float(row.month or 0), 2)
+        year_expense = round(float(row.year or 0), 2)
+        total_expense = round(float(row.total or 0), 2)
 
         return success_response(
             data={
@@ -136,9 +130,9 @@ async def get_calendar_month_details(
 ) -> JSONResponse:
     """Get calendar month details for the specified month.
 
-    Base currency scheme:
-    - amount field stores CNY base amount
-    - get exchange rate once, convert all amounts to display currency
+    User-base-currency scheme:
+    - amount field stores user's base currency (primary_currency) amount
+    - SUM(amount) is already in user's base currency, no conversion needed
 
     Args:
         year: Year
@@ -151,15 +145,13 @@ async def get_calendar_month_details(
     """
     from app.utils.currency_utils import (
         get_currency_symbol,
-        get_exchange_rate_from_base,
         get_user_display_currency,
     )
 
     try:
-        # Get user's preferred currency and exchange rate
+        # Get user's preferred currency
         display_currency = await get_user_display_currency(db, current_user.uuid)
         currency_symbol = get_currency_symbol(display_currency)
-        exchange_rate = await get_exchange_rate_from_base(display_currency)
 
         # Get number of days in the month
         _, days_in_month = monthrange(year, month)
@@ -171,7 +163,7 @@ async def get_calendar_month_details(
         else:
             end_date = datetime(year, month + 1, 1)
 
-        # Query daily expense totals (CNY base)
+        # Query daily expense totals (already in user's base currency)
         result = await db.execute(
             select(
                 func.date(Transaction.transaction_at).label("date"),
@@ -187,8 +179,8 @@ async def get_calendar_month_details(
             )
             .group_by(func.date(Transaction.transaction_at))
         )
-        # Convert to user preferred currency
-        daily_totals = {row.date: round(float(row.total) * exchange_rate, 2) for row in result.all()}
+        # No conversion needed - amounts are already in user's base currency
+        daily_totals = {row.date: round(float(row.total), 2) for row in result.all()}
 
         # Calculate monthly total expense
         total_expense_for_month = round(sum(daily_totals.values()), 2)
@@ -239,7 +231,6 @@ async def get_calendar_month_details(
                 "dailySummaries": daily_summaries,
                 "display_currency": display_currency,
                 "currency_symbol": currency_symbol,
-                "exchange_rate": exchange_rate,
             },
             message="Calendar month details retrieved successfully",
         )

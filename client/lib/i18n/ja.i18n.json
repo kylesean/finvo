@@ -1070,6 +1070,67 @@
       "owner": "オーナー",
       "admin": "管理者",
       "member": "メンバー"
+    },
+    "title": "共有スペース",
+    "create": {
+      "title": "共有スペースを作成",
+      "subtitle": "新しい共有スペースを作成して、友達と支出を管理しましょう",
+      "nameLabel": "スペース名",
+      "nameHint": "例：卒業旅行",
+      "descLabel": "説明（任意）",
+      "descHint": "共同旅行の支出を記録",
+      "cancel": "キャンセル",
+      "submit": "作成",
+      "nameRequired": "スペース名を入力してください",
+      "nameTooShort": "スペース名は2文字以上必要です",
+      "nameTooLong": "スペース名は50文字以内にしてください"
+    },
+    "join": {
+      "title": "共有スペースに参加",
+      "subtitle": "友達から共有された招待コードを入力して、共同家計を始めましょう",
+      "codeLabel": "招待コード",
+      "codeHint": "招待コードを入力、例：A8K2F9G7",
+      "cancel": "キャンセル",
+      "submit": "参加",
+      "codeRequired": "招待コードを入力してください",
+      "codeInvalid": "招待コードの形式が無効です",
+      "codeFormat": "招待コードは英数字のみ使用できます"
+    },
+    "list": {
+      "emptyTitle": "共同支出の管理がこんなに簡単に",
+      "emptySubtitle": "共有スペースを作成して、パートナーや友達と\n共同の支出を簡単に同期しましょう",
+      "getStarted": "始める",
+      "hasInviteCode": "招待コードをお持ちですか？タップして参加",
+      "joinedSuccess": "「${name}」に参加しました！"
+    },
+    "detail": {
+      "members": "メンバー",
+      "transactions": "取引履歴",
+      "settlement": "精算",
+      "inviteCode": "招待コード",
+      "copyCode": "招待コードをコピー",
+      "codeCopied": "招待コードをコピーしました：${code}",
+      "validFor24h": "24時間有効",
+      "leaveSpace": "スペースを退出",
+      "deleteSpace": "スペースを削除",
+      "removeMember": "メンバーを削除",
+      "leaveConfirm": "この共有スペースを退出しますか？退出後は取引履歴を閲覧できなくなります。",
+      "deleteConfirm": "この共有スペースを削除しますか？この操作は取り消せず、すべてのメンバーが削除されます。",
+      "removeConfirm": "このメンバーを共有スペースから削除しますか？",
+      "generatingCode": "招待コードを生成中...",
+      "loadFailed": "読み込みに失敗しました",
+      "retry": "再試行",
+      "noTransactions": "取引はまだありません",
+      "noTransactionsHint": "このスペースの取引がここに表示されます"
+    },
+    "notifications": {
+      "title": "お知らせ",
+      "empty": "お知らせはありません",
+      "emptyHint": "新しい招待やアクティビティがあると、\nここにお知らせが表示されます",
+      "incompleteInfo": "招待情報が不完全です",
+      "inviteAccepted": "招待を承認しました！",
+      "inviteRejected": "招待を拒否しました",
+      "allMarkedRead": "すべて既読にしました"
     }
   },
   "budgetSuggestion": {
@@ -1168,6 +1229,26 @@
       "contextLimit": "Context limit exceeded",
       "tokenLimit": "Insufficient tokens",
       "emptyMessage": "Empty user message"
+    }
+  },
+  "notification": {
+    "title": "お知らせ",
+    "markAllRead": "すべて既読",
+    "empty": "お知らせはありません",
+    "loadFailed": "読み込みに失敗しました",
+    "retry": "再試行",
+    "justNow": "たった今",
+    "minutesAgo": "${minutes}分前",
+    "hoursAgo": "${hours}時間前",
+    "daysAgo": "${days}日前",
+    "deleted": "削除しました",
+    "types": {
+      "system": "システム",
+      "spaceInvite": "スペース招待",
+      "spaceActivity": "スペース活動",
+      "billComment": "請求コメント",
+      "budgetAlert": "予算アラート",
+      "transaction": "取引通知"
     }
   }
 }

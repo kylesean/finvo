@@ -22,6 +22,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import SessionRepository, get_session, get_session_context
+from app.core.exceptions import AppException
 from app.core.logging import bind_context, logger
 from app.models.session import Session
 from app.models.user import User
@@ -253,6 +254,8 @@ async def register(
         auth_response = AuthResponse(token=token, user=user_info)
         return success_response(data=auth_response.model_dump(), message="Registration successful")
 
+    except AppException:
+        raise
     except ValueError as e:
         logger.error("registration_failed", error=str(e), account_type=data.type)
         # Parse error code from ValueError message (format: "ERROR_CODE: message")
@@ -332,6 +335,8 @@ async def login(
         auth_response = AuthResponse(token=token, user=user_info)
         return success_response(data=auth_response.model_dump(), message="Login successful")
 
+    except AppException:
+        raise
     except ValueError as e:
         logger.error("login_failed", error=str(e), account_type=data.type)
         # Parse error code from ValueError message (format: "ERROR_CODE: message")

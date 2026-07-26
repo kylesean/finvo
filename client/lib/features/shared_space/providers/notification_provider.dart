@@ -1,10 +1,19 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
+import '../../../core/network/network_client.dart';
+import '../../../core/network/dio_provider.dart';
 import '../../../core/network/exceptions/app_exception.dart';
+import '../../notification/repositories/notification_repository.dart';
+import '../../notification/providers/notification_provider.dart';
 import '../models/shared_space_models.dart';
-import '../services/notification_service.dart';
 
-class NotificationState {
+part 'notification_provider.g.dart';
+
+final _logger = Logger('SharedSpaceNotification');
+
+/// Shared-space notification state (uses NotificationModel for space-specific UI)
+class SharedSpaceNotificationState {
   final List<NotificationModel> notifications;
   final bool isLoading;
   final String? error;
@@ -12,7 +21,7 @@ class NotificationState {
   final int currentPage;
   final bool hasMore;
 
-  const NotificationState({
+  const SharedSpaceNotificationState({
     this.notifications = const [],
     this.isLoading = false,
     this.error,
@@ -21,7 +30,7 @@ class NotificationState {
     this.hasMore = true,
   });
 
-  NotificationState copyWith({
+  SharedSpaceNotificationState copyWith({
     List<NotificationModel>? notifications,
     bool? isLoading,
     String? error,
@@ -29,7 +38,7 @@ class NotificationState {
     int? currentPage,
     bool? hasMore,
   }) {
-    return NotificationState(
+    return SharedSpaceNotificationState(
       notifications: notifications ?? this.notifications,
       isLoading: isLoading ?? this.isLoading,
       error: error,
@@ -40,22 +49,26 @@ class NotificationState {
   }
 }
 
-class NotificationNotifier extends Notifier<NotificationState> {
-  late final NotificationService _service;
-  bool _mounted = true;
-  static final _logger = Logger('NotificationNotifier');
+/// Shared-space notification provider.
+///
+/// Delegates generic notification CRUD to the central NotificationRepository.
+/// Only adds space-specific logic (respondToSpaceInvite).
+@riverpod
+class SharedSpaceNotification extends _$SharedSpaceNotification {
+  static const _pageSize = 20;
 
   @override
-  NotificationState build() {
-    _mounted = true;
-    _service = ref.watch(notificationServiceProvider);
-    ref.onDispose(() => _mounted = false);
-    return const NotificationState();
+  SharedSpaceNotificationState build() {
+    return const SharedSpaceNotificationState();
   }
 
+  NotificationRepository get _repository =>
+      ref.read(notificationRepositoryProvider);
+
+  /// Load notifications with pagination
   Future<void> loadNotifications({bool refresh = false}) async {
     if (refresh) {
-      state = const NotificationState(isLoading: true);
+      state = const SharedSpaceNotificationState(isLoading: true);
     } else if (state.isLoading || !state.hasMore) {
       return;
     } else {
@@ -64,166 +77,141 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
     try {
       final page = refresh ? 1 : state.currentPage;
-      final response = await _service.getNotifications(page: page);
+      final res = await _repository.getNotifications(
+        page: page,
+        limit: _pageSize,
+      );
+
+      // Map central NotificationItem -> shared_space NotificationModel
+      final mapped = res.items
+          .map(
+            (item) => NotificationModel(
+              id: item.id,
+              userId: item.userId,
+              type: _mapNotificationType(item.type),
+              title: item.title,
+              message: item.message,
+              data: item.data,
+              isRead: item.isRead,
+              createdAt: item.createdAt,
+              readAt: item.readAt,
+            ),
+          )
+          .toList();
 
       final newNotifications = refresh
-          ? response.notifications
-          : [...state.notifications, ...response.notifications];
-      final hasMore =
-          response.notifications.length >= 20; // Assume 20 items per page
+          ? mapped
+          : [...state.notifications, ...mapped];
+      final hasMore = res.items.length >= _pageSize;
 
-      if (_mounted) {
-        state = state.copyWith(
-          notifications: newNotifications,
-          isLoading: false,
-          error: null,
-          unreadCount: response.unreadCount,
-          currentPage: page + 1,
-          hasMore: hasMore,
-        );
-      }
+      state = state.copyWith(
+        notifications: newNotifications,
+        isLoading: false,
+        error: null,
+        unreadCount: res.unreadCount,
+        currentPage: page + 1,
+        hasMore: hasMore,
+      );
     } catch (e) {
-      String errorMessage = 'Failed to load notifications';
-      if (e is AppException) {
-        errorMessage = e.message;
-      }
-
-      if (_mounted) {
-        state = state.copyWith(isLoading: false, error: errorMessage);
-      }
+      _logger.severe('Failed to load notifications', e);
+      state = state.copyWith(
+        isLoading: false,
+        error: e is AppException ? e.message : 'Failed to load notifications',
+      );
     }
   }
 
+  /// Load unread count (syncs with central provider)
   Future<void> loadUnreadCount() async {
     try {
-      final count = await _service.getUnreadCount();
-      if (_mounted) {
-        state = state.copyWith(unreadCount: count);
-      }
+      final count = await _repository.getUnreadCount();
+      state = state.copyWith(unreadCount: count);
     } catch (e) {
-      _logger.warning('Failed to load unread notification count', e);
+      _logger.warning('Failed to load unread count', e);
     }
   }
 
+  /// Mark notification as read
   Future<void> markAsRead(String notificationId) async {
-    try {
-      await _service.markAsRead(notificationId);
-
-      final updatedNotifications = state.notifications.map((notification) {
-        if (notification.id == notificationId && !notification.isRead) {
-          return notification.copyWith(isRead: true, readAt: DateTime.now());
+    final success = await _repository.markAsRead(notificationId);
+    if (success) {
+      final updated = state.notifications.map((n) {
+        if (n.id == notificationId && !n.isRead) {
+          return n.copyWith(isRead: true, readAt: DateTime.now());
         }
-        return notification;
+        return n;
       }).toList();
 
       final newUnreadCount = state.unreadCount > 0 ? state.unreadCount - 1 : 0;
-
-      if (_mounted) {
-        state = state.copyWith(
-          notifications: updatedNotifications,
-          unreadCount: newUnreadCount,
-        );
-      }
-    } catch (e) {
-      String errorMessage = 'Failed to mark as read';
-      if (e is AppException) {
-        errorMessage = e.message;
-      }
-
-      if (_mounted) {
-        state = state.copyWith(error: errorMessage);
-      }
-    }
-  }
-
-  Future<void> markAllAsRead() async {
-    try {
-      await _service.markAllAsRead();
-
-      final updatedNotifications = state.notifications.map((notification) {
-        if (!notification.isRead) {
-          return notification.copyWith(isRead: true, readAt: DateTime.now());
-        }
-        return notification;
-      }).toList();
-
-      if (_mounted) {
-        state = state.copyWith(
-          notifications: updatedNotifications,
-          unreadCount: 0,
-        );
-      }
-    } catch (e) {
-      String errorMessage = 'Failed to mark all as read';
-      if (e is AppException) {
-        errorMessage = e.message;
-      }
-
-      if (_mounted) {
-        state = state.copyWith(error: errorMessage);
-      }
-    }
-  }
-
-  Future<void> deleteNotification(String notificationId) async {
-    try {
-      await _service.deleteNotification(notificationId);
-
-      final notification = state.notifications.firstWhere(
-        (n) => n.id == notificationId,
-        orElse: () => throw Exception('Notification not found'),
+      state = state.copyWith(
+        notifications: updated,
+        unreadCount: newUnreadCount,
       );
+    }
+  }
 
-      final updatedNotifications = state.notifications
+  /// Mark all as read
+  Future<void> markAllAsRead() async {
+    final success = await _repository.markAllAsRead();
+    if (success) {
+      final updated = state.notifications
+          .map(
+            (n) =>
+                n.isRead ? n : n.copyWith(isRead: true, readAt: DateTime.now()),
+          )
+          .toList();
+      state = state.copyWith(notifications: updated, unreadCount: 0);
+    }
+  }
+
+  /// Delete notification
+  Future<void> deleteNotification(String notificationId) async {
+    final item = state.notifications
+        .where((n) => n.id == notificationId)
+        .firstOrNull;
+    if (item == null) return;
+
+    final success = await _repository.deleteNotification(notificationId);
+    if (success) {
+      final updated = state.notifications
           .where((n) => n.id != notificationId)
           .toList();
-
-      final newUnreadCount = !notification.isRead && state.unreadCount > 0
+      final newUnreadCount = !item.isRead && state.unreadCount > 0
           ? state.unreadCount - 1
           : state.unreadCount;
-
-      if (_mounted) {
-        state = state.copyWith(
-          notifications: updatedNotifications,
-          unreadCount: newUnreadCount,
-        );
-      }
-    } catch (e) {
-      String errorMessage = 'Failed to delete notification';
-      if (e is AppException) {
-        errorMessage = e.message;
-      }
-
-      if (_mounted) {
-        state = state.copyWith(error: errorMessage);
-      }
+      state = state.copyWith(
+        notifications: updated,
+        unreadCount: newUnreadCount,
+      );
     }
   }
 
+  /// Respond to a space invite (space-specific action)
   Future<bool> respondToSpaceInvite(
     String spaceId,
     String action,
     String notificationId,
   ) async {
     try {
-      await _service.respondToSpaceInvite(spaceId, action);
+      final dio = ref.read(dioProvider);
+      final networkClient = NetworkClient(dio);
+      await networkClient.request<void>(
+        '/shared-spaces/$spaceId/invites/respond',
+        method: HttpMethod.put,
+        data: {'action': action},
+      );
 
       if (action == 'reject') {
         await deleteNotification(notificationId);
       } else {
         await markAsRead(notificationId);
       }
-
       return true;
     } catch (e) {
-      String errorMessage = 'Failed to respond to invite';
-      if (e is AppException) {
-        errorMessage = e.message;
-      }
-
-      if (_mounted) {
-        state = state.copyWith(error: errorMessage);
-      }
+      _logger.severe('Failed to respond to invite', e);
+      state = state.copyWith(
+        error: e is AppException ? e.message : 'Failed to respond to invite',
+      );
       return false;
     }
   }
@@ -231,14 +219,22 @@ class NotificationNotifier extends Notifier<NotificationState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
+
+  /// Map string type to shared_space NotificationType enum
+  NotificationType _mapNotificationType(String type) {
+    return switch (type) {
+      'space_invite' => NotificationType.spaceInvite,
+      'new_transaction' => NotificationType.newTransaction,
+      'settlement_update' => NotificationType.settlementUpdate,
+      'member_joined' => NotificationType.memberJoined,
+      'member_left' => NotificationType.memberLeft,
+      _ => NotificationType.spaceInvite,
+    };
+  }
 }
 
-// Provider
-final notificationProvider =
-    NotifierProvider<NotificationNotifier, NotificationState>(
-      NotificationNotifier.new,
-    );
-
-final unreadCountProvider = Provider<int>((ref) {
+/// Unread count derived from central notification provider
+@riverpod
+int sharedSpaceUnreadCount(Ref ref) {
   return ref.watch(notificationProvider).unreadCount;
-});
+}

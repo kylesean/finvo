@@ -1,0 +1,174 @@
+import 'dart:async';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:logging/logging.dart';
+import '../../../core/network/network_client.dart';
+import '../../../core/network/dio_provider.dart';
+import '../models/notification_item.dart';
+import '../repositories/notification_repository.dart';
+
+part 'notification_provider.g.dart';
+
+final _logger = Logger('NotificationNotifier');
+
+/// State object for Notifications feature
+class NotificationState {
+  final List<NotificationItem> items;
+  final int total;
+  final int unreadCount;
+  final int currentPage;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final bool hasReachedMax;
+  final String? error;
+
+  const NotificationState({
+    this.items = const [],
+    this.total = 0,
+    this.unreadCount = 0,
+    this.currentPage = 1,
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.hasReachedMax = false,
+    this.error,
+  });
+
+  NotificationState copyWith({
+    List<NotificationItem>? items,
+    int? total,
+    int? unreadCount,
+    int? currentPage,
+    bool? isLoading,
+    bool? isLoadingMore,
+    bool? hasReachedMax,
+    String? error,
+  }) {
+    return NotificationState(
+      items: items ?? this.items,
+      total: total ?? this.total,
+      unreadCount: unreadCount ?? this.unreadCount,
+      currentPage: currentPage ?? this.currentPage,
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      error: error,
+    );
+  }
+}
+
+/// Notification Repository Provider
+@riverpod
+NotificationRepository notificationRepository(Ref ref) {
+  final dio = ref.watch(dioProvider);
+  final networkClient = NetworkClient(dio);
+  return NotificationRepository(networkClient);
+}
+
+/// Notification State Notifier Provider
+@riverpod
+class NotificationNotifier extends _$NotificationNotifier {
+  static const _pageSize = 20;
+
+  @override
+  NotificationState build() {
+    // Trigger initial load asynchronously
+    unawaited(Future<void>.microtask(() => unawaited(refresh())));
+    return const NotificationState();
+  }
+
+  /// Refresh notification list (resets to page 1)
+  Future<void> refresh() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repository = ref.read(notificationRepositoryProvider);
+      final res = await repository.getNotifications(page: 1, limit: _pageSize);
+      state = state.copyWith(
+        items: res.items,
+        total: res.total,
+        unreadCount: res.unreadCount,
+        currentPage: 1,
+        isLoading: false,
+        hasReachedMax: res.items.length < _pageSize,
+      );
+    } catch (e) {
+      _logger.severe('Failed to refresh notifications', e);
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  /// Load more notifications (next page)
+  Future<void> loadMore() async {
+    if (state.isLoadingMore || state.hasReachedMax || state.isLoading) return;
+
+    state = state.copyWith(isLoadingMore: true);
+    try {
+      final repository = ref.read(notificationRepositoryProvider);
+      final nextPage = state.currentPage + 1;
+      final res = await repository.getNotifications(
+        page: nextPage,
+        limit: _pageSize,
+      );
+
+      state = state.copyWith(
+        items: [...state.items, ...res.items],
+        total: res.total,
+        unreadCount: res.unreadCount,
+        currentPage: nextPage,
+        isLoadingMore: false,
+        hasReachedMax: res.items.length < _pageSize,
+      );
+    } catch (e) {
+      _logger.warning('Failed to load more notifications', e);
+      state = state.copyWith(isLoadingMore: false);
+    }
+  }
+
+  /// Mark notification as read
+  Future<void> markAsRead(String id) async {
+    final repository = ref.read(notificationRepositoryProvider);
+    final success = await repository.markAsRead(id);
+    if (success) {
+      final updatedItems = state.items.map((item) {
+        if (item.id == id) {
+          return item.copyWith(isRead: true, readAt: DateTime.now());
+        }
+        return item;
+      }).toList();
+
+      final newUnreadCount = (state.unreadCount - 1).clamp(0, 999);
+      state = state.copyWith(items: updatedItems, unreadCount: newUnreadCount);
+    }
+  }
+
+  /// Mark all notifications as read
+  Future<void> markAllAsRead() async {
+    final repository = ref.read(notificationRepositoryProvider);
+    final success = await repository.markAllAsRead();
+    if (success) {
+      final updatedItems = state.items
+          .map((item) => item.copyWith(isRead: true))
+          .toList();
+      state = state.copyWith(items: updatedItems, unreadCount: 0);
+    }
+  }
+
+  /// Delete a notification
+  Future<void> deleteNotification(String id) async {
+    // Safe lookup - return early if item not found
+    final itemToDelete = state.items.where((item) => item.id == id).firstOrNull;
+    if (itemToDelete == null) return;
+
+    final repository = ref.read(notificationRepositoryProvider);
+    final success = await repository.deleteNotification(id);
+    if (success) {
+      final updatedItems = state.items.where((item) => item.id != id).toList();
+      final newUnreadCount = !itemToDelete.isRead
+          ? (state.unreadCount - 1).clamp(0, 999)
+          : state.unreadCount;
+      state = state.copyWith(
+        items: updatedItems,
+        total: (state.total - 1).clamp(0, 9999),
+        unreadCount: newUnreadCount,
+      );
+    }
+  }
+}

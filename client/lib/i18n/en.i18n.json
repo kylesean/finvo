@@ -1104,6 +1104,67 @@
       "owner": "Owner",
       "admin": "Admin",
       "member": "Member"
+    },
+    "title": "Shared Space",
+    "create": {
+      "title": "Create Shared Space",
+      "subtitle": "Create a new shared space to track expenses with friends",
+      "nameLabel": "Space Name",
+      "nameHint": "e.g., Graduation Trip",
+      "descLabel": "Description (Optional)",
+      "descHint": "Track our joint travel expenses",
+      "cancel": "Cancel",
+      "submit": "Create",
+      "nameRequired": "Please enter a space name",
+      "nameTooShort": "Space name must be at least 2 characters",
+      "nameTooLong": "Space name cannot exceed 50 characters"
+    },
+    "join": {
+      "title": "Join Shared Space",
+      "subtitle": "Enter the invite code shared by a friend to start collaborative bookkeeping",
+      "codeLabel": "Invite Code",
+      "codeHint": "Enter invite code, e.g.: A8K2F9G7",
+      "cancel": "Cancel",
+      "submit": "Join",
+      "codeRequired": "Please enter invite code",
+      "codeInvalid": "Invalid invite code format",
+      "codeFormat": "Invite code can only contain letters and numbers"
+    },
+    "list": {
+      "emptyTitle": "Managing joint expenses never been easier",
+      "emptySubtitle": "Create a shared space and easily sync joint\ndebts and expenses with partners or friends",
+      "getStarted": "Get Started",
+      "hasInviteCode": "Have an invite code? Tap to join",
+      "joinedSuccess": "Successfully joined \"${name}\"!"
+    },
+    "detail": {
+      "members": "Members",
+      "transactions": "Transactions",
+      "settlement": "Settlement",
+      "inviteCode": "Invite Code",
+      "copyCode": "Copy Invite Code",
+      "codeCopied": "Invite code copied: ${code}",
+      "validFor24h": "Valid for 24 hours",
+      "leaveSpace": "Leave Space",
+      "deleteSpace": "Delete Space",
+      "removeMember": "Remove Member",
+      "leaveConfirm": "Are you sure you want to leave this shared space? You will no longer have access to its transactions.",
+      "deleteConfirm": "Are you sure you want to delete this shared space? This action cannot be undone and all members will be removed.",
+      "removeConfirm": "Are you sure you want to remove this member from the shared space?",
+      "generatingCode": "Generating invite code...",
+      "loadFailed": "Failed to load",
+      "retry": "Retry",
+      "noTransactions": "No transactions yet",
+      "noTransactionsHint": "Transactions in this space will appear here"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No notifications",
+      "emptyHint": "When you have new invites or activities,\nyou will receive notifications here",
+      "incompleteInfo": "Incomplete invite info",
+      "inviteAccepted": "Invite accepted!",
+      "inviteRejected": "Invite rejected",
+      "allMarkedRead": "All notifications marked as read"
     }
   },
   "errorMapping": {
@@ -1168,6 +1229,26 @@
       "contextLimit": "Context limit exceeded",
       "tokenLimit": "Insufficient tokens",
       "emptyMessage": "Empty user message"
+    }
+  },
+  "notification": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "empty": "No notifications yet",
+    "loadFailed": "Failed to load",
+    "retry": "Retry",
+    "justNow": "Just now",
+    "minutesAgo": "${minutes}m ago",
+    "hoursAgo": "${hours}h ago",
+    "daysAgo": "${days}d ago",
+    "deleted": "Deleted",
+    "types": {
+      "system": "System",
+      "spaceInvite": "Space Invite",
+      "spaceActivity": "Space Activity",
+      "billComment": "Bill Comment",
+      "budgetAlert": "Budget Alert",
+      "transaction": "Transaction"
     }
   }
 }

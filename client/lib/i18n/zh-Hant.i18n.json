@@ -1070,6 +1070,67 @@
       "owner": "主理人",
       "admin": "管理員",
       "member": "成員"
+    },
+    "title": "共享空間",
+    "create": {
+      "title": "建立共享空間",
+      "subtitle": "建立一個新的共享空間，與朋友一起記帳",
+      "nameLabel": "空間名稱",
+      "nameHint": "例如：畢業旅行",
+      "descLabel": "描述（選填）",
+      "descHint": "記錄我們的共同旅行開銷",
+      "cancel": "取消",
+      "submit": "建立",
+      "nameRequired": "請輸入空間名稱",
+      "nameTooShort": "空間名稱至少需要 2 個字元",
+      "nameTooLong": "空間名稱不能超過 50 個字元"
+    },
+    "join": {
+      "title": "加入共享空間",
+      "subtitle": "輸入朋友分享的邀請碼，開始協作記帳",
+      "codeLabel": "邀請碼",
+      "codeHint": "輸入邀請碼，例如：A8K2F9G7",
+      "cancel": "取消",
+      "submit": "加入",
+      "codeRequired": "請輸入邀請碼",
+      "codeInvalid": "邀請碼格式無效",
+      "codeFormat": "邀請碼只能包含字母和數字"
+    },
+    "list": {
+      "emptyTitle": "共同記帳從未如此簡單",
+      "emptySubtitle": "建立一個共享空間，與夥伴或朋友輕鬆同步共同債務和支出",
+      "getStarted": "開始使用",
+      "hasInviteCode": "有邀請碼？點擊加入",
+      "joinedSuccess": "成功加入「${name}」！"
+    },
+    "detail": {
+      "members": "成員",
+      "transactions": "交易紀錄",
+      "settlement": "結算",
+      "inviteCode": "邀請碼",
+      "copyCode": "複製邀請碼",
+      "codeCopied": "邀請碼已複製：${code}",
+      "validFor24h": "24 小時內有效",
+      "leaveSpace": "退出空間",
+      "deleteSpace": "刪除空間",
+      "removeMember": "移除成員",
+      "leaveConfirm": "確定要退出此共享空間嗎？退出後將無法查看空間內的交易紀錄。",
+      "deleteConfirm": "確定要刪除此共享空間嗎？此操作不可撤銷，所有成員將被移出。",
+      "removeConfirm": "確定要將此成員移出共享空間嗎？",
+      "generatingCode": "正在產生邀請碼...",
+      "loadFailed": "載入失敗",
+      "retry": "重試",
+      "noTransactions": "暫無交易紀錄",
+      "noTransactionsHint": "空間內的交易將顯示在這裡"
+    },
+    "notifications": {
+      "title": "通知",
+      "empty": "暫無通知",
+      "emptyHint": "當你收到新的邀請或動態時，\n通知將顯示在這裡",
+      "incompleteInfo": "邀請資訊不完整",
+      "inviteAccepted": "已接受邀請！",
+      "inviteRejected": "已拒絕邀請",
+      "allMarkedRead": "全部標記為已讀"
     }
   },
   "budgetSuggestion": {
@@ -1168,6 +1229,26 @@
       "contextLimit": "Context limit exceeded",
       "tokenLimit": "Insufficient tokens",
       "emptyMessage": "Empty user message"
+    }
+  },
+  "notification": {
+    "title": "訊息通知",
+    "markAllRead": "全部已讀",
+    "empty": "暫無通知訊息",
+    "loadFailed": "載入失敗",
+    "retry": "重試",
+    "justNow": "剛剛",
+    "minutesAgo": "${minutes}分鐘前",
+    "hoursAgo": "${hours}小時前",
+    "daysAgo": "${days}天前",
+    "deleted": "已刪除",
+    "types": {
+      "system": "系統通知",
+      "spaceInvite": "空間邀請",
+      "spaceActivity": "空間動態",
+      "billComment": "帳單評論",
+      "budgetAlert": "預算提醒",
+      "transaction": "交易通知"
     }
   }
 }

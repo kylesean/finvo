@@ -40,7 +40,7 @@ class FinancialSettings(Base):
         safety_threshold: Minimum safe balance threshold (default: 1000)
         daily_burn_rate: Daily spending estimate (default: 100)
         burn_rate_mode: How burn rate is calculated (MANUAL or AI_AUTO)
-        primary_currency: Default display currency (default: CNY)
+        primary_currency: Default display currency (default: USD)
         month_start_day: Day of month to start calculations (default: 1)
         updated_at: Last update timestamp
         user: Relationship to user
@@ -56,7 +56,7 @@ class FinancialSettings(Base):
     safety_threshold: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("1000.00"))
     daily_burn_rate: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("100.00"))
     burn_rate_mode: Mapped[str] = mapped_column(String(20), default="AI_AUTO")
-    primary_currency: Mapped[str] = mapped_column(String(3), default="CNY")
+    primary_currency: Mapped[str] = mapped_column(String(3), default="USD")
     month_start_day: Mapped[int] = mapped_column(Integer, default=1)
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
 

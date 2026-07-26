@@ -20,6 +20,7 @@ from app.models.user import User
 from app.models.user_settings import UserSettings
 from app.utils.currency_utils import (
     convert_to_display_currency,
+    convert_to_user_base,
     get_user_display_currency,
 )
 
@@ -645,24 +646,32 @@ class UserService:
 
         return settings
 
-    async def create_default_financial_settings(self, user_uuid: UUID) -> FinancialSettings:
+    async def create_default_financial_settings(
+        self, user_uuid: UUID, locale: str | None = None, timezone: str | None = None
+    ) -> FinancialSettings:
         """Create default financial settings for a user.
 
         Called during user registration or when settings don't exist.
-        Uses USD as the default currency. Users can change this in settings.
+        Currency is inferred from locale/timezone; falls back to USD.
 
         Args:
             user_uuid: The user's UUID
+            locale: User's locale (e.g. "zh_CN") for currency inference
+            timezone: User's IANA timezone (e.g. "Asia/Shanghai") for currency inference
 
         Returns:
             FinancialSettings: The created settings object
         """
+        from app.utils.currency_inference import infer_currency
+
+        inferred_currency = infer_currency(locale=locale, timezone=timezone)
+
         settings = FinancialSettings(
             user_uuid=user_uuid,
             safety_threshold=Decimal("1000.00"),
             daily_burn_rate=Decimal("100.00"),
             burn_rate_mode="AI_AUTO",
-            primary_currency="USD",
+            primary_currency=inferred_currency,
             month_start_day=1,
             updated_at=utc_now(),
         )
@@ -670,7 +679,13 @@ class UserService:
         await self.db.commit()
         await self.db.refresh(settings)
 
-        logger.info("financial_settings_created", user_uuid=str(user_uuid), primary_currency="USD")
+        logger.info(
+            "financial_settings_created",
+            user_uuid=str(user_uuid),
+            primary_currency=inferred_currency,
+            locale=locale,
+            timezone=timezone,
+        )
 
         return settings
 
@@ -686,6 +701,9 @@ class UserService:
         """Update user's financial settings using UPSERT.
 
         If settings don't exist, creates them with provided values.
+        When primary_currency changes, triggers a one-time recalculation of
+        all transaction ``amount`` fields (derived values) to maintain
+        aggregation correctness.
 
         Args:
             user_uuid: The user's UUID
@@ -704,6 +722,7 @@ class UserService:
         settings = result.scalar_one_or_none()
 
         now = utc_now()
+        old_currency: str | None = None
 
         if settings is None:
             # Create new settings with provided values or defaults (UPSERT behavior)
@@ -719,6 +738,7 @@ class UserService:
             self.db.add(settings)
         else:
             # Update existing settings
+            old_currency = settings.primary_currency
             if safety_threshold is not None:
                 settings.safety_threshold = Decimal(safety_threshold)
             if daily_burn_rate is not None:
@@ -734,11 +754,61 @@ class UserService:
         await self.db.commit()
         await self.db.refresh(settings)
 
+        # Trigger recalculation if base currency actually changed
+        new_currency = settings.primary_currency
+        if old_currency is not None and primary_currency is not None:
+            if old_currency.upper() != new_currency.upper():
+                await self._recalculate_transaction_amounts(user_uuid, new_currency)
+
         logger.info(
             "financial_settings_updated",
             user_uuid=str(user_uuid),
             safety_threshold=str(settings.safety_threshold),
             daily_burn_rate=str(settings.daily_burn_rate),
+            primary_currency=new_currency,
         )
 
         return settings
+
+    async def _recalculate_transaction_amounts(self, user_uuid: UUID, new_base_currency: str) -> None:
+        """Recalculate all transaction ``amount`` fields after a base currency change.
+
+        This re-derives ``amount`` from the immutable facts (``amount_original`` + ``currency``)
+        using current exchange rates. The original data is never modified.
+
+        Args:
+            user_uuid: The user's UUID
+            new_base_currency: The new base currency code
+        """
+        from app.models.transaction import Transaction
+
+        # Fetch all transactions for this user
+        result = await self.db.execute(select(Transaction).where(type_cast(Any, Transaction.user_uuid == user_uuid)))
+        transactions = result.scalars().all()
+
+        if not transactions:
+            logger.info(
+                "base_currency_change_no_transactions",
+                user_uuid=str(user_uuid),
+                new_base_currency=new_base_currency,
+            )
+            return
+
+        recalculated = 0
+        for tx in transactions:
+            original_currency = (tx.currency or new_base_currency).upper()
+            base_amount, new_rate = await convert_to_user_base(
+                tx.amount_original, original_currency, new_base_currency
+            )
+            tx.amount = base_amount.quantize(Decimal("0.00000001"))
+            tx.exchange_rate = new_rate.quantize(Decimal("0.00000001"))
+            recalculated += 1
+
+        await self.db.commit()
+
+        logger.info(
+            "base_currency_change_recalculation_complete",
+            user_uuid=str(user_uuid),
+            new_base_currency=new_base_currency,
+            transactions_recalculated=recalculated,
+        )

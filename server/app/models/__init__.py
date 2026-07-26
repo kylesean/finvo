@@ -20,10 +20,12 @@ from app.models.transaction import (
     TransactionShare,
 )
 from app.models.user import User
+from app.models.user_device import UserDevice
 from app.models.user_settings import UserSettings
 
 __all__ = [
     "User",
+    "UserDevice",
     "UserSettings",
     "Session",
     "Attachment",

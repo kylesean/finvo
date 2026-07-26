@@ -1104,6 +1104,67 @@
       "owner": "主理人",
       "admin": "管理员",
       "member": "成员"
+    },
+    "title": "共享空间",
+    "create": {
+      "title": "创建共享空间",
+      "subtitle": "创建一个新的共享空间，与朋友一起记账",
+      "nameLabel": "空间名称",
+      "nameHint": "例如：毕业旅行",
+      "descLabel": "描述（可选）",
+      "descHint": "记录我们的共同旅行开销",
+      "cancel": "取消",
+      "submit": "创建",
+      "nameRequired": "请输入空间名称",
+      "nameTooShort": "空间名称至少需要 2 个字符",
+      "nameTooLong": "空间名称不能超过 50 个字符"
+    },
+    "join": {
+      "title": "加入共享空间",
+      "subtitle": "输入朋友分享的邀请码，开始协作记账",
+      "codeLabel": "邀请码",
+      "codeHint": "输入邀请码，例如：A8K2F9G7",
+      "cancel": "取消",
+      "submit": "加入",
+      "codeRequired": "请输入邀请码",
+      "codeInvalid": "邀请码格式无效",
+      "codeFormat": "邀请码只能包含字母和数字"
+    },
+    "list": {
+      "emptyTitle": "共同记账从未如此简单",
+      "emptySubtitle": "创建一个共享空间，与伙伴或朋友轻松同步共同债务和支出",
+      "getStarted": "开始使用",
+      "hasInviteCode": "有邀请码？点击加入",
+      "joinedSuccess": "成功加入「${name}」！"
+    },
+    "detail": {
+      "members": "成员",
+      "transactions": "交易记录",
+      "settlement": "结算",
+      "inviteCode": "邀请码",
+      "copyCode": "复制邀请码",
+      "codeCopied": "邀请码已复制：${code}",
+      "validFor24h": "24 小时内有效",
+      "leaveSpace": "退出空间",
+      "deleteSpace": "删除空间",
+      "removeMember": "移除成员",
+      "leaveConfirm": "确定要退出此共享空间吗？退出后将无法查看空间内的交易记录。",
+      "deleteConfirm": "确定要删除此共享空间吗？此操作不可撤销，所有成员将被移出。",
+      "removeConfirm": "确定要将此成员移出共享空间吗？",
+      "generatingCode": "正在生成邀请码...",
+      "loadFailed": "加载失败",
+      "retry": "重试",
+      "noTransactions": "暂无交易记录",
+      "noTransactionsHint": "空间内的交易将显示在这里"
+    },
+    "notifications": {
+      "title": "通知",
+      "empty": "暂无通知",
+      "emptyHint": "当你收到新的邀请或动态时，\n通知将显示在这里",
+      "incompleteInfo": "邀请信息不完整",
+      "inviteAccepted": "已接受邀请！",
+      "inviteRejected": "已拒绝邀请",
+      "allMarkedRead": "全部标记为已读"
     }
   },
   "errorMapping": {
@@ -1168,6 +1229,26 @@
       "contextLimit": "上下文长度超出限制",
       "tokenLimit": "Token配额不足",
       "emptyMessage": "用户消息为空"
+    }
+  },
+  "notification": {
+    "title": "消息通知",
+    "markAllRead": "全部已读",
+    "empty": "暂无通知消息",
+    "loadFailed": "加载失败",
+    "retry": "重试",
+    "justNow": "刚刚",
+    "minutesAgo": "${minutes}分钟前",
+    "hoursAgo": "${hours}小时前",
+    "daysAgo": "${days}天前",
+    "deleted": "已删除",
+    "types": {
+      "system": "系统通知",
+      "spaceInvite": "空间邀请",
+      "spaceActivity": "空间动态",
+      "billComment": "账单评论",
+      "budgetAlert": "预算提醒",
+      "transaction": "交易通知"
     }
   }
 }
