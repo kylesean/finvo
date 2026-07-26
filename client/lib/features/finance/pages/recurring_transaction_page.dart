@@ -69,9 +69,6 @@ class _RecurringTransactionPageState
   final _tagController = TextEditingController();
 
   // Advanced options
-  bool _requiresConfirmation = false;
-  // Record user's original choice in fixed amount state (for linked restoration)
-  bool _userSetRequiresConfirmation = false;
   bool _isActive = true;
 
   // Description
@@ -149,11 +146,6 @@ class _RecurringTransactionPageState
           _targetAccountId = transaction.targetAccountId;
           _sourceAccountName = sourceAccountName;
           _targetAccountName = targetAccountName;
-          _requiresConfirmation = transaction.requiresConfirmation;
-          // In edit mode, if amount is fixed, record the user's original choice
-          if (transaction.amountType == AmountType.fixed) {
-            _userSetRequiresConfirmation = transaction.requiresConfirmation;
-          }
           _isActive = transaction.isActive;
           if (transaction.categoryKey != null) {
             _category = TransactionCategory.fromKey(transaction.categoryKey!);
@@ -488,13 +480,6 @@ class _RecurringTransactionPageState
               onChange: (value) {
                 setState(() {
                   _amountType = value ? AmountType.estimate : AmountType.fixed;
-                  if (value) {
-                    // Force enable confirmation when amount is not fixed
-                    _requiresConfirmation = true;
-                  } else {
-                    // Restore user's original choice
-                    _requiresConfirmation = _userSetRequiresConfirmation;
-                  }
                 });
               },
             ),
@@ -891,9 +876,6 @@ class _RecurringTransactionPageState
 
   /// Advanced options - confirmation required before generation + activation switch
   Widget _buildAdvancedOptions(FThemeData theme, FColors colors) {
-    // When amount is not fixed, force confirmation and disable switching
-    final isEstimateAmount = _amountType == AmountType.estimate;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -911,110 +893,38 @@ class _RecurringTransactionPageState
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: colors.border),
           ),
-          child: Column(
-            children: [
-              // Confirmation required before generation
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                isZh ? '生成前需确认' : 'Confirm Before Generation',
-                                style: theme.typography.body.sm.copyWith(
-                                  color: isEstimateAmount
-                                      ? colors.mutedForeground
-                                      : colors.foreground,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              // When amount is not fixed, show lock icon
-                              if (isEstimateAmount) ...[
-                                const SizedBox(width: 6),
-                                Icon(
-                                  FLucideIcons.lock,
-                                  size: 12,
-                                  color: colors.mutedForeground,
-                                ),
-                              ],
-                            ],
-                          ),
-                          Text(
-                            isEstimateAmount
-                                ? (isZh
-                                      ? '金额不固定时必须开启'
-                                      : 'Always required for estimate amount')
-                                : (isZh
-                                      ? '到期不自动记账，发送提醒'
-                                      : 'Do not record automatically, send reminder'),
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.mutedForeground,
-                            ),
-                          ),
-                        ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.budget.enabled,
+                        style: theme.typography.body.sm.copyWith(
+                          color: colors.foreground,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    FSwitch(
-                      value: _requiresConfirmation,
-                      enabled:
-                          !isEstimateAmount, // When amount is not fixed, disable
-                      onChange: (value) {
-                        setState(() {
-                          _requiresConfirmation = value;
-                          // Record user's manual selection (only triggered when amount is fixed)
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Divider(height: 1, color: colors.border),
-              // Activation switch
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            t.budget.enabled,
-                            style: theme.typography.body.sm.copyWith(
-                              color: colors.foreground,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            isZh
-                                ? '开启后按规则自动生成交易'
-                                : 'Automatically generate transactions by rule',
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.mutedForeground,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        isZh
+                            ? '开启后按规则自动生成交易'
+                            : 'Automatically generate transactions by rule',
+                        style: theme.typography.body.xs.copyWith(
+                          color: colors.mutedForeground,
+                        ),
                       ),
-                    ),
-                    FSwitch(
-                      value: _isActive,
-                      onChange: (value) => setState(() => _isActive = value),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                FSwitch(
+                  value: _isActive,
+                  onChange: (value) => setState(() => _isActive = value),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -1205,7 +1115,7 @@ class _RecurringTransactionPageState
           sourceAccountId: _sourceAccountId,
           targetAccountId: _targetAccountId,
           amountType: _amountType,
-          requiresConfirmation: _requiresConfirmation,
+          requiresConfirmation: false,
           categoryKey: _category.key,
           tags: _tags.isEmpty ? null : _tags,
           endDate: _endDate,
@@ -1227,7 +1137,7 @@ class _RecurringTransactionPageState
           sourceAccountId: _sourceAccountId,
           targetAccountId: _targetAccountId,
           amountType: _amountType,
-          requiresConfirmation: _requiresConfirmation,
+          requiresConfirmation: false,
           categoryKey: _category.key,
           tags: _tags.isEmpty ? null : _tags,
           endDate: _endDate,

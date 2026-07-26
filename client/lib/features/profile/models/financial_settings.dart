@@ -49,7 +49,7 @@ abstract class FinancialSettingsState with _$FinancialSettingsState {
     @JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonNullable)
     Decimal? dailyBurnRate,
     @Default("AI_AUTO") String burnRateMode,
-    @Default("USD") String primaryCurrency,
+    @Default("CNY") String primaryCurrency,
     @Default(1) int monthStartDay,
     String? lastUpdatedAt,
     @Default(false) bool isLoading,
