@@ -10,8 +10,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
-from pydantic import field_validator
-from sqlalchemy import Boolean, Integer, String
+from sqlalchemy import Boolean, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -77,6 +76,7 @@ class Transaction(Base):
     subject: Mapped[str] = mapped_column(String(20), default="SELF")
     intent: Mapped[str] = mapped_column(String(20), default="SURVIVAL")
     source_thread_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
+    recurring_transaction_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
     created_at: Mapped[datetime] = col.timestamptz()
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
 
@@ -155,14 +155,6 @@ class TransactionComment(Base):
         primaryjoin="TransactionComment.user_uuid == User.uuid",
     )
 
-    @field_validator("comment_text")
-    @classmethod
-    def validate_comment_text(cls, v: str) -> str:
-        """Validate comment text is not empty."""
-        if not v or not v.strip():
-            raise ValueError("Comment text cannot be empty")
-        return v.strip()
-
 
 class RecurringTransaction(Base):
     """Recurring transaction model for scheduled transactions (RRULE rules)."""
@@ -192,49 +184,12 @@ class RecurringTransaction(Base):
 
     exception_dates: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
     last_generated_at: Mapped[datetime | None] = col.datetime_tz(nullable=True)
-    next_execution_at: Mapped[datetime | None] = col.datetime_tz(nullable=True)
+    next_execution_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
 
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = col.timestamptz()
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
-
-    @field_validator("recurrence_rule")
-    @classmethod
-    def validate_recurrence_rule(cls, v: str) -> str:
-        """Validate RRULE format using dateutil."""
-        if not v or not v.strip():
-            raise ValueError("Recurrence rule cannot be empty")
-
-        rule = v.strip().upper()
-
-        if not rule.startswith("FREQ="):
-            raise ValueError("Invalid RRULE format: must start with FREQ=")
-
-        valid_freqs = {"DAILY", "WEEKLY", "MONTHLY", "YEARLY"}
-        freq_part = rule.split(";")[0].replace("FREQ=", "")
-        if freq_part not in valid_freqs:
-            raise ValueError(f"Invalid frequency: {freq_part}. Must be one of {valid_freqs}")
-
-        return rule
-
-    @field_validator("type")
-    @classmethod
-    def validate_type(cls, v: str) -> str:
-        """Validate transaction type."""
-        valid_types = {"EXPENSE", "INCOME", "TRANSFER"}
-        if v.upper() not in valid_types:
-            raise ValueError(f"Type must be one of: {', '.join(valid_types)}")
-        return v.upper()
-
-    @field_validator("amount_type")
-    @classmethod
-    def validate_amount_type(cls, v: str) -> str:
-        """Validate amount type."""
-        valid_types = {"FIXED", "ESTIMATE"}
-        if v.upper() not in valid_types:
-            raise ValueError(f"Amount type must be one of: {', '.join(valid_types)}")
-        return v.upper()
 
     @property
     def amount_float(self) -> float:

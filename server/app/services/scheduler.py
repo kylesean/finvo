@@ -152,27 +152,6 @@ class RecurringTransactionJob(ScheduledJob):
         await process_due_transactions()
 
 
-class UpdateNextExecutionJob(ScheduledJob):
-    """Update next execution dates for recurring transactions hourly."""
-
-    @property
-    def job_id(self) -> str:
-        return "update_next_execution_dates"
-
-    @property
-    def job_name(self) -> str:
-        return "Update Next Execution Dates"
-
-    @property
-    def trigger(self) -> CronTrigger:
-        return CronTrigger(hour="*", minute=30)
-
-    async def execute(self) -> None:
-        from app.services.recurring_transaction_jobs import update_next_execution_dates
-
-        await update_next_execution_dates()
-
-
 class ExchangeRateUpdateJob(ScheduledJob):
     """Update exchange rates daily."""
 
@@ -226,7 +205,6 @@ class MemoryCleanupJob(ScheduledJob):
 def _register_all_jobs() -> None:
     """Register all scheduled jobs with the app scheduler."""
     app_scheduler.register_job(RecurringTransactionJob())
-    app_scheduler.register_job(UpdateNextExecutionJob())
 
     if settings.EXCHANGE_RATE_API_URL:
         app_scheduler.register_job(ExchangeRateUpdateJob())

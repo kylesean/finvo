@@ -15,6 +15,45 @@ from app.models.transaction import RecurringTransaction
 
 logger = structlog.get_logger(__name__)
 
+# Maximum iterations when scanning rrule to prevent infinite loops
+_MAX_RRULE_ITERATIONS = 1000
+
+
+def validate_recurrence_rule(v: str) -> str:
+    """Validate RRULE format. Standalone function (not a model decorator).
+
+    Args:
+        v: The RRULE string to validate.
+
+    Returns:
+        The normalized (uppercased, stripped) rule string.
+
+    Raises:
+        ValueError: If the rule is invalid.
+    """
+    if not v or not v.strip():
+        raise ValueError("Recurrence rule cannot be empty")
+
+    rule = v.strip().upper()
+
+    if not rule.startswith("FREQ="):
+        raise ValueError("Invalid RRULE format: must start with FREQ=")
+
+    valid_freqs = {"DAILY", "WEEKLY", "MONTHLY", "YEARLY"}
+    freq_part = rule.split(";")[0].replace("FREQ=", "")
+    if freq_part not in valid_freqs:
+        raise ValueError(f"Invalid frequency: {freq_part}. Must be one of {valid_freqs}")
+
+    return rule
+
+
+def validate_transaction_type(v: str) -> str:
+    """Validate transaction type."""
+    valid_types = {"EXPENSE", "INCOME", "TRANSFER"}
+    if v.upper() not in valid_types:
+        raise ValueError(f"Type must be one of: {', '.join(valid_types)}")
+    return v.upper()
+
 
 class RecurringTransactionService:
     """Service for recurring transaction operations."""
@@ -35,9 +74,16 @@ class RecurringTransactionService:
         # Explicitly validate RRULE to ensure data integrity
         if "recurrence_rule" in data:
             try:
-                RecurringTransaction.validate_recurrence_rule(data["recurrence_rule"])
+                validate_recurrence_rule(data["recurrence_rule"])
             except ValueError as e:
                 raise BusinessError(f"Invalid recurrence rule: {e}", error_code="INVALID_RECURRENCE_RULE")
+
+        # Validate type
+        if "type" in data:
+            try:
+                validate_transaction_type(data["type"])
+            except ValueError as e:
+                raise BusinessError(str(e), error_code="INVALID_TYPE")
 
         start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
         end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date() if data.get("end_date") else None
@@ -110,7 +156,16 @@ class RecurringTransactionService:
             now = dt.now(UTC)
             exception_set = set(exception_dates or [])
 
+            iterations = 0
             for occurrence in rrule:
+                iterations += 1
+                if iterations > _MAX_RRULE_ITERATIONS:
+                    logger.warning(
+                        "rrule_iteration_limit_reached",
+                        rrule=rrule_str,
+                        limit=_MAX_RRULE_ITERATIONS,
+                    )
+                    return None
                 # 跳过过去的日期
                 if occurrence <= now:
                     continue
@@ -375,7 +430,16 @@ class RecurringTransactionService:
 
             # 生成日期范围内的所有出现日期
             occurrences = []
+            iterations = 0
             for occurrence in rrule:
+                iterations += 1
+                if iterations > _MAX_RRULE_ITERATIONS:
+                    logger.warning(
+                        "rrule_parse_iteration_limit_reached",
+                        rrule=rrule_string,
+                        limit=_MAX_RRULE_ITERATIONS,
+                    )
+                    break
                 occ_date = occurrence.date()
                 if occ_date < forecast_start:
                     continue
