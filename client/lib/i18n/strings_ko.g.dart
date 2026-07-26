@@ -899,6 +899,11 @@ class _Translations$sharedSpace$ko extends Translations$sharedSpace$zh {
 	@override late final _Translations$sharedSpace$list$ko list = _Translations$sharedSpace$list$ko._(_root);
 	@override late final _Translations$sharedSpace$detail$ko detail = _Translations$sharedSpace$detail$ko._(_root);
 	@override late final _Translations$sharedSpace$notifications$ko notifications = _Translations$sharedSpace$notifications$ko._(_root);
+	@override late final _Translations$sharedSpace$inviteCard$ko inviteCard = _Translations$sharedSpace$inviteCard$ko._(_root);
+	@override late final _Translations$sharedSpace$inviteSuccess$ko inviteSuccess = _Translations$sharedSpace$inviteSuccess$ko._(_root);
+	@override late final _Translations$sharedSpace$notificationCard$ko notificationCard = _Translations$sharedSpace$notificationCard$ko._(_root);
+	@override late final _Translations$sharedSpace$spaceCard$ko spaceCard = _Translations$sharedSpace$spaceCard$ko._(_root);
+	@override late final _Translations$sharedSpace$settings$ko settings = _Translations$sharedSpace$settings$ko._(_root);
 }
 
 // Path: budgetSuggestion
@@ -976,6 +981,7 @@ class _Translations$notification$ko extends Translations$notification$zh {
 	@override String daysAgo({required Object days}) => '${days}일 전';
 	@override String get deleted => '삭제됨';
 	@override late final _Translations$notification$types$ko types = _Translations$notification$types$ko._(_root);
+	@override late final _Translations$notification$semantic$ko semantic = _Translations$notification$semantic$ko._(_root);
 }
 
 // Path: auth.email
@@ -1314,6 +1320,7 @@ class _Translations$sharedSpace$dashboard$ko extends Translations$sharedSpace$da
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
+	@override String get sectionTitle => '재무 개요';
 	@override String get cumulativeTotalExpense => '누적 총 지출';
 	@override String get participatingMembers => '참여 멤버';
 	@override String membersCount({required Object count}) => '${count} 명';
@@ -1365,7 +1372,7 @@ class _Translations$sharedSpace$join$ko extends Translations$sharedSpace$join$zh
 	@override String get title => '공유 공간 참여';
 	@override String get subtitle => '친구가 공유한 초대 코드를 입력하여 함께 가계를 관리하세요';
 	@override String get codeLabel => '초대 코드';
-	@override String get codeHint => '초대 코드 입력, 예: A8K2F9G7';
+	@override String get codeHint => '초대 코드 입력, 예: 123456';
 	@override String get cancel => '취소';
 	@override String get submit => '참여';
 	@override String get codeRequired => '초대 코드를 입력하세요';
@@ -1396,6 +1403,7 @@ class _Translations$sharedSpace$detail$ko extends Translations$sharedSpace$detai
 	// Translations
 	@override String get members => '멤버';
 	@override String get transactions => '거래 내역';
+	@override String recordsCount({required Object count}) => '${count}건';
 	@override String get settlement => '정산';
 	@override String get inviteCode => '초대 코드';
 	@override String get copyCode => '초대 코드 복사';
@@ -1412,6 +1420,8 @@ class _Translations$sharedSpace$detail$ko extends Translations$sharedSpace$detai
 	@override String get retry => '재시도';
 	@override String get noTransactions => '거래 내역이 없습니다';
 	@override String get noTransactionsHint => '이 공간의 거래가 여기에 표시됩니다';
+	@override String get refreshCode => '코드 새로고침';
+	@override String get joinOtherSpace => '다른 공간 참여';
 }
 
 // Path: sharedSpace.notifications
@@ -1428,6 +1438,114 @@ class _Translations$sharedSpace$notifications$ko extends Translations$sharedSpac
 	@override String get inviteAccepted => '초대를 수락했습니다!';
 	@override String get inviteRejected => '초대를 거절했습니다';
 	@override String get allMarkedRead => '모두 읽음으로 표시';
+}
+
+// Path: sharedSpace.inviteCard
+class _Translations$sharedSpace$inviteCard$ko extends Translations$sharedSpace$inviteCard$zh {
+	_Translations$sharedSpace$inviteCard$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '초대 코드';
+	@override String get subtitle => '친구와 공유하여 공간에 참여';
+	@override String get copyCode => '초대 코드 복사';
+	@override String get shareLink => '초대 링크 공유';
+	@override String get codeCopied => '초대 코드 복사됨';
+	@override String get noExpiry => '무기한';
+	@override String get expired => '만료됨';
+	@override String expiresInDays({required Object days}) => '${days}일 후 만료';
+	@override String expiresInHours({required Object hours}) => '${hours}시간 후 만료';
+	@override String expiresInMinutes({required Object minutes}) => '${minutes}분 후 만료';
+	@override String get expiringSoon => '곧 만료';
+	@override String shareText({required Object spaceName, required Object code, required Object link, required Object expiry}) => '공유 공간 "${spaceName}"에 초대되었습니다\n\n초대 코드: ${code}\n또는 링크를 클릭하여 직접 참여: ${link}\n\n초대 코드 ${expiry}';
+}
+
+// Path: sharedSpace.inviteSuccess
+class _Translations$sharedSpace$inviteSuccess$ko extends Translations$sharedSpace$inviteSuccess$zh {
+	_Translations$sharedSpace$inviteSuccess$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '생성 완료';
+	@override String get subtitle => '공유 공간이 생성되었습니다';
+	@override String get inviteLater => '나중에 초대';
+	@override String get enterSpace => '공간 입장';
+	@override String get generatingCode => '초대 코드 생성 중...';
+	@override String get generateFailed => '초대 코드 생성 실패';
+	@override String get codeCopied => '초대 코드 복사됨';
+	@override String get retry => '재시도';
+	@override String get codeLabel => '초대 코드';
+	@override String get validHint => '24시간 유효 · 탭하여 복사';
+}
+
+// Path: sharedSpace.notificationCard
+class _Translations$sharedSpace$notificationCard$ko extends Translations$sharedSpace$notificationCard$zh {
+	_Translations$sharedSpace$notificationCard$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get accept => '수락';
+	@override String get reject => '거절';
+	@override String get unknownTime => '알 수 없는 시간';
+	@override String get justNow => '방금';
+}
+
+// Path: sharedSpace.spaceCard
+class _Translations$sharedSpace$spaceCard$ko extends Translations$sharedSpace$spaceCard$zh {
+	_Translations$sharedSpace$spaceCard$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get noDescription => '설명 없음';
+	@override String get creator => '생성자';
+	@override String get member => '멤버';
+	@override String membersCount({required Object count}) => '${count}명의 멤버';
+	@override String transactionsCount({required Object count}) => '${count}건의 거래';
+}
+
+// Path: sharedSpace.settings
+class _Translations$sharedSpace$settings$ko extends Translations$sharedSpace$settings$zh {
+	_Translations$sharedSpace$settings$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '공간 설정';
+	@override String get spaceInfo => '공간 정보';
+	@override String get nameLabel => '공간 이름';
+	@override String get descLabel => '공간 설명';
+	@override String get save => '저장';
+	@override String get saved => '저장되었습니다';
+	@override String get saveFailed => '저장에 실패했습니다';
+	@override String get memberManagement => '멤버 관리';
+	@override String membersCount({required Object count}) => '${count} 명의 멤버';
+	@override String removeMemberConfirm({required Object name}) => '"${name}"님을 공간에서 제거하시겠습니까?';
+	@override String get removed => '멤버가 제거되었습니다';
+	@override String get removeFailed => '제거에 실패했습니다';
+	@override String get inviteManagement => '초대 관리';
+	@override String get currentCode => '현재 초대 코드';
+	@override String get generateNew => '새 코드 생성';
+	@override String get noValidCode => '유효한 초대 코드가 없습니다';
+	@override String get refreshCode => '코드 새로고침';
+	@override String get refreshConfirm => '새 코드를 생성하면 기존 코드가 무효화됩니다. 계속하시겠습니까?';
+	@override String get codeRefreshed => '초대 코드가 새로고침되었습니다';
+	@override String get dangerZone => '위험 작업';
+	@override String get editHint => '관리자만 편집 가능';
+	@override String get edit => '편집';
+	@override String get you => '나';
+	@override String get pending => '대기 중';
+	@override String get declined => '거절됨';
+	@override String get setAsAdmin => '관리자로 설정';
+	@override String get setAsMember => '멤버로 설정';
+	@override String get changeRole => '역할 변경';
+	@override String changeRoleConfirm({required Object name, required Object role}) => '"${name}"님의 역할을 "${role}"(으)로 변경하시겠습니까?';
+	@override String get confirm => '확인';
+	@override String get roleChanged => '역할이 변경되었습니다';
+	@override String get roleChangeFailed => '역할 변경에 실패했습니다';
 }
 
 // Path: server.error
@@ -1569,6 +1687,21 @@ class _Translations$notification$types$ko extends Translations$notification$type
 	@override String get billComment => '청구서 댓글';
 	@override String get budgetAlert => '예산 경고';
 	@override String get transaction => '거래 알림';
+}
+
+// Path: notification.semantic
+class _Translations$notification$semantic$ko extends Translations$notification$semantic$zh {
+	_Translations$notification$semantic$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String memberJoined({required Object name}) => '${name}님이 공간에 참여했습니다';
+	@override String memberJoinedDetail({required Object space}) => '새 멤버가 "${space}"에 참여했습니다';
+	@override String welcome({required Object space}) => '"${space}"에 오신 것을 환영합니다';
+	@override String newTransaction({required Object name}) => '${name}님이 새 지출을 기록했습니다';
+	@override String newTransactionDetail({required Object amount, required Object space}) => '${amount}, "${space}"에서';
+	@override String memberLeft({required Object name}) => '${name}님이 공간에서 나갔습니다';
 }
 
 // Path: chat.tools.done
@@ -3038,6 +3171,7 @@ extension on TranslationsKo {
 			'currency.hkd' => '홍콩 달러',
 			'currency.twd' => '대만 달러',
 			'currency.inr' => '인도 루피',
+			'sharedSpace.dashboard.sectionTitle' => '재무 개요',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => '누적 총 지출',
 			'sharedSpace.dashboard.participatingMembers' => '참여 멤버',
 			'sharedSpace.dashboard.membersCount' => ({required Object count}) => '${count} 명',
@@ -3063,7 +3197,7 @@ extension on TranslationsKo {
 			'sharedSpace.join.title' => '공유 공간 참여',
 			'sharedSpace.join.subtitle' => '친구가 공유한 초대 코드를 입력하여 함께 가계를 관리하세요',
 			'sharedSpace.join.codeLabel' => '초대 코드',
-			'sharedSpace.join.codeHint' => '초대 코드 입력, 예: A8K2F9G7',
+			'sharedSpace.join.codeHint' => '초대 코드 입력, 예: 123456',
 			'sharedSpace.join.cancel' => '취소',
 			'sharedSpace.join.submit' => '참여',
 			'sharedSpace.join.codeRequired' => '초대 코드를 입력하세요',
@@ -3076,6 +3210,7 @@ extension on TranslationsKo {
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '"${name}"에 참여했습니다!',
 			'sharedSpace.detail.members' => '멤버',
 			'sharedSpace.detail.transactions' => '거래 내역',
+			'sharedSpace.detail.recordsCount' => ({required Object count}) => '${count}건',
 			'sharedSpace.detail.settlement' => '정산',
 			'sharedSpace.detail.inviteCode' => '초대 코드',
 			'sharedSpace.detail.copyCode' => '초대 코드 복사',
@@ -3092,6 +3227,8 @@ extension on TranslationsKo {
 			'sharedSpace.detail.retry' => '재시도',
 			'sharedSpace.detail.noTransactions' => '거래 내역이 없습니다',
 			'sharedSpace.detail.noTransactionsHint' => '이 공간의 거래가 여기에 표시됩니다',
+			'sharedSpace.detail.refreshCode' => '코드 새로고침',
+			'sharedSpace.detail.joinOtherSpace' => '다른 공간 참여',
 			'sharedSpace.notifications.title' => '알림',
 			'sharedSpace.notifications.empty' => '알림이 없습니다',
 			'sharedSpace.notifications.emptyHint' => '새로운 초대나 활동이 있으면\n여기에 알림이 표시됩니다',
@@ -3099,6 +3236,69 @@ extension on TranslationsKo {
 			'sharedSpace.notifications.inviteAccepted' => '초대를 수락했습니다!',
 			'sharedSpace.notifications.inviteRejected' => '초대를 거절했습니다',
 			'sharedSpace.notifications.allMarkedRead' => '모두 읽음으로 표시',
+			'sharedSpace.inviteCard.title' => '초대 코드',
+			'sharedSpace.inviteCard.subtitle' => '친구와 공유하여 공간에 참여',
+			'sharedSpace.inviteCard.copyCode' => '초대 코드 복사',
+			'sharedSpace.inviteCard.shareLink' => '초대 링크 공유',
+			'sharedSpace.inviteCard.codeCopied' => '초대 코드 복사됨',
+			'sharedSpace.inviteCard.noExpiry' => '무기한',
+			'sharedSpace.inviteCard.expired' => '만료됨',
+			'sharedSpace.inviteCard.expiresInDays' => ({required Object days}) => '${days}일 후 만료',
+			'sharedSpace.inviteCard.expiresInHours' => ({required Object hours}) => '${hours}시간 후 만료',
+			'sharedSpace.inviteCard.expiresInMinutes' => ({required Object minutes}) => '${minutes}분 후 만료',
+			'sharedSpace.inviteCard.expiringSoon' => '곧 만료',
+			'sharedSpace.inviteCard.shareText' => ({required Object spaceName, required Object code, required Object link, required Object expiry}) => '공유 공간 "${spaceName}"에 초대되었습니다\n\n초대 코드: ${code}\n또는 링크를 클릭하여 직접 참여: ${link}\n\n초대 코드 ${expiry}',
+			'sharedSpace.inviteSuccess.title' => '생성 완료',
+			'sharedSpace.inviteSuccess.subtitle' => '공유 공간이 생성되었습니다',
+			'sharedSpace.inviteSuccess.inviteLater' => '나중에 초대',
+			'sharedSpace.inviteSuccess.enterSpace' => '공간 입장',
+			'sharedSpace.inviteSuccess.generatingCode' => '초대 코드 생성 중...',
+			'sharedSpace.inviteSuccess.generateFailed' => '초대 코드 생성 실패',
+			'sharedSpace.inviteSuccess.codeCopied' => '초대 코드 복사됨',
+			'sharedSpace.inviteSuccess.retry' => '재시도',
+			'sharedSpace.inviteSuccess.codeLabel' => '초대 코드',
+			'sharedSpace.inviteSuccess.validHint' => '24시간 유효 · 탭하여 복사',
+			'sharedSpace.notificationCard.accept' => '수락',
+			'sharedSpace.notificationCard.reject' => '거절',
+			'sharedSpace.notificationCard.unknownTime' => '알 수 없는 시간',
+			'sharedSpace.notificationCard.justNow' => '방금',
+			'sharedSpace.spaceCard.noDescription' => '설명 없음',
+			'sharedSpace.spaceCard.creator' => '생성자',
+			'sharedSpace.spaceCard.member' => '멤버',
+			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count}명의 멤버',
+			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count}건의 거래',
+			'sharedSpace.settings.title' => '공간 설정',
+			'sharedSpace.settings.spaceInfo' => '공간 정보',
+			'sharedSpace.settings.nameLabel' => '공간 이름',
+			'sharedSpace.settings.descLabel' => '공간 설명',
+			'sharedSpace.settings.save' => '저장',
+			'sharedSpace.settings.saved' => '저장되었습니다',
+			'sharedSpace.settings.saveFailed' => '저장에 실패했습니다',
+			'sharedSpace.settings.memberManagement' => '멤버 관리',
+			'sharedSpace.settings.membersCount' => ({required Object count}) => '${count} 명의 멤버',
+			'sharedSpace.settings.removeMemberConfirm' => ({required Object name}) => '"${name}"님을 공간에서 제거하시겠습니까?',
+			'sharedSpace.settings.removed' => '멤버가 제거되었습니다',
+			'sharedSpace.settings.removeFailed' => '제거에 실패했습니다',
+			'sharedSpace.settings.inviteManagement' => '초대 관리',
+			'sharedSpace.settings.currentCode' => '현재 초대 코드',
+			'sharedSpace.settings.generateNew' => '새 코드 생성',
+			'sharedSpace.settings.noValidCode' => '유효한 초대 코드가 없습니다',
+			'sharedSpace.settings.refreshCode' => '코드 새로고침',
+			'sharedSpace.settings.refreshConfirm' => '새 코드를 생성하면 기존 코드가 무효화됩니다. 계속하시겠습니까?',
+			'sharedSpace.settings.codeRefreshed' => '초대 코드가 새로고침되었습니다',
+			'sharedSpace.settings.dangerZone' => '위험 작업',
+			'sharedSpace.settings.editHint' => '관리자만 편집 가능',
+			'sharedSpace.settings.edit' => '편집',
+			'sharedSpace.settings.you' => '나',
+			'sharedSpace.settings.pending' => '대기 중',
+			'sharedSpace.settings.declined' => '거절됨',
+			'sharedSpace.settings.setAsAdmin' => '관리자로 설정',
+			'sharedSpace.settings.setAsMember' => '멤버로 설정',
+			'sharedSpace.settings.changeRole' => '역할 변경',
+			'sharedSpace.settings.changeRoleConfirm' => ({required Object name, required Object role}) => '"${name}"님의 역할을 "${role}"(으)로 변경하시겠습니까?',
+			'sharedSpace.settings.confirm' => '확인',
+			'sharedSpace.settings.roleChanged' => '역할이 변경되었습니다',
+			'sharedSpace.settings.roleChangeFailed' => '역할 변경에 실패했습니다',
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
@@ -3108,6 +3308,8 @@ extension on TranslationsKo {
 			'server.urlLabel' => 'Server Address',
 			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
 			'server.scanQr' => 'Scan QR Code',
+			_ => null,
+		} ?? switch (path) {
 			'server.scanQrInstruction' => 'Point at the QR code displayed in the server terminal',
 			'server.testConnection' => 'Test Connection',
 			'server.connecting' => 'Connecting...',
@@ -3175,8 +3377,6 @@ extension on TranslationsKo {
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
-			_ => null,
-		} ?? switch (path) {
 			'notification.title' => '알림',
 			'notification.markAllRead' => '모두 읽음',
 			'notification.empty' => '알림이 없습니다',
@@ -3193,6 +3393,12 @@ extension on TranslationsKo {
 			'notification.types.billComment' => '청구서 댓글',
 			'notification.types.budgetAlert' => '예산 경고',
 			'notification.types.transaction' => '거래 알림',
+			'notification.semantic.memberJoined' => ({required Object name}) => '${name}님이 공간에 참여했습니다',
+			'notification.semantic.memberJoinedDetail' => ({required Object space}) => '새 멤버가 "${space}"에 참여했습니다',
+			'notification.semantic.welcome' => ({required Object space}) => '"${space}"에 오신 것을 환영합니다',
+			'notification.semantic.newTransaction' => ({required Object name}) => '${name}님이 새 지출을 기록했습니다',
+			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount}, "${space}"에서',
+			'notification.semantic.memberLeft' => ({required Object name}) => '${name}님이 공간에서 나갔습니다',
 			_ => null,
 		};
 	}

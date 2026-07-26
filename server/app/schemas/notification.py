@@ -13,23 +13,25 @@ class NotificationType(StrEnum):
     SYSTEM = "system"
     SPACE_INVITE = "space_invite"
     SPACE_ACTIVITY = "space_activity"
+    MEMBER_JOINED = "member_joined"
+    MEMBER_LEFT = "member_left"
     BILL_COMMENT = "bill_comment"
     BUDGET_ALERT = "budget_alert"
     TRANSACTION = "transaction"
 
 
 class NotificationResponse(BaseModel):
-    """Response schema for a single notification."""
+    """Response schema for a single notification (camelCase for client)."""
 
-    id: int
-    user_uuid: str
+    id: str
+    userId: str
     type: str
     title: str
-    content: str | None = None
+    message: str = ""
     data: dict[str, Any] | None = None
-    is_read: bool
-    read_at: datetime | None = None
-    created_at: datetime
+    isRead: bool = False
+    createdAt: datetime
+    readAt: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -39,7 +41,7 @@ class NotificationListResponse(BaseModel):
 
     notifications: list[NotificationResponse]
     total: int
-    unread_count: int
+    unreadCount: int
     page: int
     limit: int
 

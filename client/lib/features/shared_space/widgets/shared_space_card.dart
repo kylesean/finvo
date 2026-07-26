@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/i18n/strings.g.dart';
 import 'package:augo/features/auth/providers/auth_provider.dart';
 import '../models/shared_space_models.dart';
 
@@ -103,7 +104,8 @@ class SharedSpaceCard extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                space.description ?? 'No description',
+                                space.description ??
+                                    t.sharedSpace.spaceCard.noDescription,
                                 style: theme.typography.body.sm.copyWith(
                                   color: colorScheme.mutedForeground,
                                 ),
@@ -134,7 +136,9 @@ class SharedSpaceCard extends ConsumerWidget {
                         _buildInfoChip(
                           context,
                           icon: FLucideIcons.users,
-                          label: '${space.members?.length ?? 1} members',
+                          label: t.sharedSpace.spaceCard.membersCount(
+                            count: space.members?.length ?? 1,
+                          ),
                         ),
                         const SizedBox(width: 12),
 
@@ -142,7 +146,9 @@ class SharedSpaceCard extends ConsumerWidget {
                         _buildInfoChip(
                           context,
                           icon: FLucideIcons.receipt,
-                          label: '${space.transactionCount} transactions',
+                          label: t.sharedSpace.spaceCard.transactionsCount(
+                            count: space.transactionCount,
+                          ),
                         ),
 
                         const Spacer(),
@@ -206,13 +212,13 @@ class SharedSpaceCard extends ConsumerWidget {
     ) = isCreator
         ? (
             FLucideIcons.crown,
-            'Creator',
+            t.sharedSpace.spaceCard.creator,
             colorScheme.primary.withValues(alpha: 0.1),
             colorScheme.primary,
           )
         : (
             FLucideIcons.user,
-            'Member',
+            t.sharedSpace.spaceCard.member,
             colorScheme.secondary.withValues(alpha: 0.1),
             colorScheme.secondaryForeground,
           );

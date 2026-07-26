@@ -20,7 +20,7 @@ class NotificationIcon extends ConsumerWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Icon(FLucideIcons.bell, color: colors.foreground, size: 20),
+          Icon(FLucideIcons.bell, color: colors.primaryForeground, size: 20),
           if (unreadCount > 0)
             Positioned(
               right: -2,

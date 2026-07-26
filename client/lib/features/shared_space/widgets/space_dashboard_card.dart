@@ -48,23 +48,13 @@ class SpaceDashboardCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      t.sharedSpace.dashboard.cumulativeTotalExpense,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.primaryForeground.withValues(alpha: 0.7),
-                        fontWeight: AppFontConfig.bodyMedium,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    Icon(
-                      FLucideIcons.info,
-                      size: 14,
-                      color: colors.primaryForeground.withValues(alpha: 0.5),
-                    ),
-                  ],
+                Text(
+                  t.sharedSpace.dashboard.cumulativeTotalExpense,
+                  style: theme.typography.body.xs.copyWith(
+                    color: colors.primaryForeground.withValues(alpha: 0.7),
+                    fontWeight: AppFontConfig.bodyMedium,
+                    letterSpacing: 1,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -102,23 +92,12 @@ class SpaceDashboardCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      t.sharedSpace.dashboard.spendingDistribution,
-                      style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colors.foreground,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      t.sharedSpace.dashboard.realtimeUpdates,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
-                    ),
-                  ],
+                Text(
+                  t.sharedSpace.dashboard.spendingDistribution,
+                  style: theme.typography.body.sm.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: colors.foreground,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _buildDistributionBar(context),
@@ -158,6 +137,38 @@ class SpaceDashboardCard extends StatelessWidget {
 
   Widget _buildDistributionBar(BuildContext context) {
     final colors = context.theme.colors;
+    final members = space.members ?? [];
+    final total = members.fold<double>(
+      0,
+      (sum, m) => sum + (double.tryParse(m.contributionAmount) ?? 0),
+    );
+
+    if (total <= 0 || members.isEmpty) {
+      return Container(
+        height: 8,
+        decoration: BoxDecoration(
+          color: colors.muted.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(4),
+        ),
+      );
+    }
+
+    // Build proportional segments based on real contribution data
+    final segments = <Widget>[];
+    for (int i = 0; i < members.length; i++) {
+      final amount = double.tryParse(members[i].contributionAmount) ?? 0;
+      final ratio = (amount / total * 100).round();
+      if (ratio <= 0) continue;
+      // Use decreasing opacity to distinguish members
+      final opacity = 1.0 - (i * 0.25).clamp(0.0, 0.7);
+      segments.add(
+        Expanded(
+          flex: ratio,
+          child: Container(color: colors.primary.withValues(alpha: opacity)),
+        ),
+      );
+    }
+
     return Container(
       height: 8,
       decoration: BoxDecoration(
@@ -166,15 +177,7 @@ class SpaceDashboardCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(4),
-        child: Row(
-          children: [
-            Expanded(flex: 65, child: Container(color: colors.primary)),
-            Expanded(
-              flex: 35,
-              child: Container(color: colors.primary.withValues(alpha: 0.3)),
-            ),
-          ],
-        ),
+        child: Row(children: segments),
       ),
     );
   }
@@ -187,6 +190,7 @@ class SpaceDashboardCard extends StatelessWidget {
     if (members.isEmpty) return [const SizedBox()];
 
     return members.map((member) {
+      final isOwner = member.role == MemberRole.owner;
       return Padding(
         padding: const EdgeInsets.only(bottom: 16),
         child: Row(
@@ -194,43 +198,31 @@ class SpaceDashboardCard extends StatelessWidget {
             _buildAvatar(context, member),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    member.username,
-                    style: theme.typography.body.sm.copyWith(
-                      fontWeight: AppFontConfig.bodyMedium,
+                  Flexible(
+                    child: Text(
+                      member.username,
+                      style: theme.typography.body.sm.copyWith(
+                        fontWeight: AppFontConfig.bodyMedium,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Text(
-                    member.role == MemberRole.owner
-                        ? t.sharedSpace.roles.owner
-                        : t.sharedSpace.roles.member,
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.mutedForeground,
-                    ),
-                  ),
+                  if (isOwner) ...[
+                    const SizedBox(width: 6),
+                    Icon(FLucideIcons.crown, size: 14, color: colors.primary),
+                  ],
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '¥${_formatAmount(member.contributionAmount)}',
-                  style: theme.typography.body.sm.copyWith(
-                    fontWeight: AppFontConfig.amountBold,
-                    color: colors.foreground,
-                  ),
-                ),
-                Text(
-                  t.sharedSpace.dashboard.paid,
-                  style: theme.typography.body.xs.copyWith(
-                    color: colors.mutedForeground,
-                  ),
-                ),
-              ],
+            Text(
+              '¥${_formatAmount(member.contributionAmount)}',
+              style: theme.typography.body.sm.copyWith(
+                fontWeight: AppFontConfig.amountBold,
+                color: colors.foreground,
+              ),
             ),
           ],
         ),

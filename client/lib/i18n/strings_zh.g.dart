@@ -2039,6 +2039,11 @@ class Translations$sharedSpace$zh {
 	late final Translations$sharedSpace$list$zh list = Translations$sharedSpace$list$zh.internal(_root);
 	late final Translations$sharedSpace$detail$zh detail = Translations$sharedSpace$detail$zh.internal(_root);
 	late final Translations$sharedSpace$notifications$zh notifications = Translations$sharedSpace$notifications$zh.internal(_root);
+	late final Translations$sharedSpace$inviteCard$zh inviteCard = Translations$sharedSpace$inviteCard$zh.internal(_root);
+	late final Translations$sharedSpace$inviteSuccess$zh inviteSuccess = Translations$sharedSpace$inviteSuccess$zh.internal(_root);
+	late final Translations$sharedSpace$notificationCard$zh notificationCard = Translations$sharedSpace$notificationCard$zh.internal(_root);
+	late final Translations$sharedSpace$spaceCard$zh spaceCard = Translations$sharedSpace$spaceCard$zh.internal(_root);
+	late final Translations$sharedSpace$settings$zh settings = Translations$sharedSpace$settings$zh.internal(_root);
 }
 
 // Path: errorMapping
@@ -2096,6 +2101,7 @@ class Translations$notification$zh {
 	String get deleted => '已删除';
 
 	late final Translations$notification$types$zh types = Translations$notification$types$zh.internal(_root);
+	late final Translations$notification$semantic$zh semantic = Translations$notification$semantic$zh.internal(_root);
 }
 
 // Path: auth.email
@@ -2755,6 +2761,9 @@ class Translations$sharedSpace$dashboard$zh {
 
 	// Translations
 
+	/// zh: '财务概览'
+	String get sectionTitle => '财务概览';
+
 	/// zh: '累计总支出'
 	String get cumulativeTotalExpense => '累计总支出';
 
@@ -2854,8 +2863,8 @@ class Translations$sharedSpace$join$zh {
 	/// zh: '邀请码'
 	String get codeLabel => '邀请码';
 
-	/// zh: '输入邀请码，例如：A8K2F9G7'
-	String get codeHint => '输入邀请码，例如：A8K2F9G7';
+	/// zh: '输入邀请码，例如：123456'
+	String get codeHint => '输入邀请码，例如：123456';
 
 	/// zh: '取消'
 	String get cancel => '取消';
@@ -2911,6 +2920,9 @@ class Translations$sharedSpace$detail$zh {
 	/// zh: '交易记录'
 	String get transactions => '交易记录';
 
+	/// zh: '${count} 笔'
+	String recordsCount({required Object count}) => '${count} 笔';
+
 	/// zh: '结算'
 	String get settlement => '结算';
 
@@ -2958,6 +2970,12 @@ class Translations$sharedSpace$detail$zh {
 
 	/// zh: '空间内的交易将显示在这里'
 	String get noTransactionsHint => '空间内的交易将显示在这里';
+
+	/// zh: '刷新生成新码'
+	String get refreshCode => '刷新生成新码';
+
+	/// zh: '加入其他空间'
+	String get joinOtherSpace => '加入其他空间';
 }
 
 // Path: sharedSpace.notifications
@@ -2988,6 +3006,240 @@ class Translations$sharedSpace$notifications$zh {
 
 	/// zh: '全部标记为已读'
 	String get allMarkedRead => '全部标记为已读';
+}
+
+// Path: sharedSpace.inviteCard
+class Translations$sharedSpace$inviteCard$zh {
+	Translations$sharedSpace$inviteCard$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '邀请码'
+	String get title => '邀请码';
+
+	/// zh: '分享给朋友以加入空间'
+	String get subtitle => '分享给朋友以加入空间';
+
+	/// zh: '复制邀请码'
+	String get copyCode => '复制邀请码';
+
+	/// zh: '分享邀请链接'
+	String get shareLink => '分享邀请链接';
+
+	/// zh: '邀请码已复制'
+	String get codeCopied => '邀请码已复制';
+
+	/// zh: '无有效期限制'
+	String get noExpiry => '无有效期限制';
+
+	/// zh: '已过期'
+	String get expired => '已过期';
+
+	/// zh: '${days} 天后过期'
+	String expiresInDays({required Object days}) => '${days} 天后过期';
+
+	/// zh: '${hours} 小时后过期'
+	String expiresInHours({required Object hours}) => '${hours} 小时后过期';
+
+	/// zh: '${minutes} 分钟后过期'
+	String expiresInMinutes({required Object minutes}) => '${minutes} 分钟后过期';
+
+	/// zh: '即将过期'
+	String get expiringSoon => '即将过期';
+
+	/// zh: '邀请你加入共享空间「${spaceName}」 邀请码：${code} 或点击链接直接加入：${link} 邀请码${expiry}'
+	String shareText({required Object spaceName, required Object code, required Object link, required Object expiry}) => '邀请你加入共享空间「${spaceName}」\n\n邀请码：${code}\n或点击链接直接加入：${link}\n\n邀请码${expiry}';
+}
+
+// Path: sharedSpace.inviteSuccess
+class Translations$sharedSpace$inviteSuccess$zh {
+	Translations$sharedSpace$inviteSuccess$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '创建成功'
+	String get title => '创建成功';
+
+	/// zh: '共享空间创建成功'
+	String get subtitle => '共享空间创建成功';
+
+	/// zh: '稍后邀请'
+	String get inviteLater => '稍后邀请';
+
+	/// zh: '进入空间'
+	String get enterSpace => '进入空间';
+
+	/// zh: '正在生成邀请码...'
+	String get generatingCode => '正在生成邀请码...';
+
+	/// zh: '邀请码生成失败'
+	String get generateFailed => '邀请码生成失败';
+
+	/// zh: '邀请码已复制'
+	String get codeCopied => '邀请码已复制';
+
+	/// zh: '重试'
+	String get retry => '重试';
+
+	/// zh: '邀请码'
+	String get codeLabel => '邀请码';
+
+	/// zh: '24 小时内有效 · 点击复制'
+	String get validHint => '24 小时内有效 · 点击复制';
+}
+
+// Path: sharedSpace.notificationCard
+class Translations$sharedSpace$notificationCard$zh {
+	Translations$sharedSpace$notificationCard$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '接受'
+	String get accept => '接受';
+
+	/// zh: '拒绝'
+	String get reject => '拒绝';
+
+	/// zh: '未知时间'
+	String get unknownTime => '未知时间';
+
+	/// zh: '刚刚'
+	String get justNow => '刚刚';
+}
+
+// Path: sharedSpace.spaceCard
+class Translations$sharedSpace$spaceCard$zh {
+	Translations$sharedSpace$spaceCard$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '暂无描述'
+	String get noDescription => '暂无描述';
+
+	/// zh: '创建者'
+	String get creator => '创建者';
+
+	/// zh: '成员'
+	String get member => '成员';
+
+	/// zh: '${count} 位成员'
+	String membersCount({required Object count}) => '${count} 位成员';
+
+	/// zh: '${count} 笔账单'
+	String transactionsCount({required Object count}) => '${count} 笔账单';
+}
+
+// Path: sharedSpace.settings
+class Translations$sharedSpace$settings$zh {
+	Translations$sharedSpace$settings$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '空间设置'
+	String get title => '空间设置';
+
+	/// zh: '空间信息'
+	String get spaceInfo => '空间信息';
+
+	/// zh: '空间名称'
+	String get nameLabel => '空间名称';
+
+	/// zh: '空间描述'
+	String get descLabel => '空间描述';
+
+	/// zh: '保存'
+	String get save => '保存';
+
+	/// zh: '保存成功'
+	String get saved => '保存成功';
+
+	/// zh: '保存失败'
+	String get saveFailed => '保存失败';
+
+	/// zh: '成员管理'
+	String get memberManagement => '成员管理';
+
+	/// zh: '$count 位成员'
+	String membersCount({required Object count}) => '${count} 位成员';
+
+	/// zh: '确定要将「$name」移出空间吗？'
+	String removeMemberConfirm({required Object name}) => '确定要将「${name}」移出空间吗？';
+
+	/// zh: '已移除成员'
+	String get removed => '已移除成员';
+
+	/// zh: '移除失败'
+	String get removeFailed => '移除失败';
+
+	/// zh: '邀请管理'
+	String get inviteManagement => '邀请管理';
+
+	/// zh: '当前邀请码'
+	String get currentCode => '当前邀请码';
+
+	/// zh: '生成新邀请码'
+	String get generateNew => '生成新邀请码';
+
+	/// zh: '暂无有效邀请码'
+	String get noValidCode => '暂无有效邀请码';
+
+	/// zh: '刷新生成新码'
+	String get refreshCode => '刷新生成新码';
+
+	/// zh: '生成新码将使旧邀请码失效，确定继续？'
+	String get refreshConfirm => '生成新码将使旧邀请码失效，确定继续？';
+
+	/// zh: '邀请码已刷新'
+	String get codeRefreshed => '邀请码已刷新';
+
+	/// zh: '危险操作'
+	String get dangerZone => '危险操作';
+
+	/// zh: '仅管理员可编辑'
+	String get editHint => '仅管理员可编辑';
+
+	/// zh: '编辑'
+	String get edit => '编辑';
+
+	/// zh: '我'
+	String get you => '我';
+
+	/// zh: '待接受'
+	String get pending => '待接受';
+
+	/// zh: '已拒绝'
+	String get declined => '已拒绝';
+
+	/// zh: '设为管理员'
+	String get setAsAdmin => '设为管理员';
+
+	/// zh: '设为普通成员'
+	String get setAsMember => '设为普通成员';
+
+	/// zh: '变更角色'
+	String get changeRole => '变更角色';
+
+	/// zh: '确定要将「$name」的角色变更为「$role」吗？'
+	String changeRoleConfirm({required Object name, required Object role}) => '确定要将「${name}」的角色变更为「${role}」吗？';
+
+	/// zh: '确认'
+	String get confirm => '确认';
+
+	/// zh: '角色已变更'
+	String get roleChanged => '角色已变更';
+
+	/// zh: '角色变更失败'
+	String get roleChangeFailed => '角色变更失败';
 }
 
 // Path: errorMapping.generic
@@ -3222,6 +3474,33 @@ class Translations$notification$types$zh {
 
 	/// zh: '交易通知'
 	String get transaction => '交易通知';
+}
+
+// Path: notification.semantic
+class Translations$notification$semantic$zh {
+	Translations$notification$semantic$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '${name} 加入了你的空间'
+	String memberJoined({required Object name}) => '${name} 加入了你的空间';
+
+	/// zh: '新成员加入了「${space}」'
+	String memberJoinedDetail({required Object space}) => '新成员加入了「${space}」';
+
+	/// zh: '欢迎加入「${space}」'
+	String welcome({required Object space}) => '欢迎加入「${space}」';
+
+	/// zh: '${name} 记录了一笔新账单'
+	String newTransaction({required Object name}) => '${name} 记录了一笔新账单';
+
+	/// zh: '${amount}，来自「${space}」'
+	String newTransactionDetail({required Object amount, required Object space}) => '${amount}，来自「${space}」';
+
+	/// zh: '${name} 离开了空间'
+	String memberLeft({required Object name}) => '${name} 离开了空间';
 }
 
 // Path: chat.tools.done
@@ -5167,6 +5446,7 @@ extension on Translations {
 			'server.error.connectionRefused' => '无法连接到服务器',
 			'server.error.sslError' => 'SSL 证书错误',
 			'server.error.serverError' => '服务器错误',
+			'sharedSpace.dashboard.sectionTitle' => '财务概览',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => '累计总支出',
 			'sharedSpace.dashboard.participatingMembers' => '参与成员',
 			'sharedSpace.dashboard.membersCount' => ({required Object count}) => '${count} 人',
@@ -5192,7 +5472,7 @@ extension on Translations {
 			'sharedSpace.join.title' => '加入共享空间',
 			'sharedSpace.join.subtitle' => '输入朋友分享的邀请码，开始协作记账',
 			'sharedSpace.join.codeLabel' => '邀请码',
-			'sharedSpace.join.codeHint' => '输入邀请码，例如：A8K2F9G7',
+			'sharedSpace.join.codeHint' => '输入邀请码，例如：123456',
 			'sharedSpace.join.cancel' => '取消',
 			'sharedSpace.join.submit' => '加入',
 			'sharedSpace.join.codeRequired' => '请输入邀请码',
@@ -5205,6 +5485,7 @@ extension on Translations {
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '成功加入「${name}」！',
 			'sharedSpace.detail.members' => '成员',
 			'sharedSpace.detail.transactions' => '交易记录',
+			'sharedSpace.detail.recordsCount' => ({required Object count}) => '${count} 笔',
 			'sharedSpace.detail.settlement' => '结算',
 			'sharedSpace.detail.inviteCode' => '邀请码',
 			'sharedSpace.detail.copyCode' => '复制邀请码',
@@ -5221,6 +5502,8 @@ extension on Translations {
 			'sharedSpace.detail.retry' => '重试',
 			'sharedSpace.detail.noTransactions' => '暂无交易记录',
 			'sharedSpace.detail.noTransactionsHint' => '空间内的交易将显示在这里',
+			'sharedSpace.detail.refreshCode' => '刷新生成新码',
+			'sharedSpace.detail.joinOtherSpace' => '加入其他空间',
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暂无通知',
 			'sharedSpace.notifications.emptyHint' => '当你收到新的邀请或动态时，\n通知将显示在这里',
@@ -5228,6 +5511,71 @@ extension on Translations {
 			'sharedSpace.notifications.inviteAccepted' => '已接受邀请！',
 			'sharedSpace.notifications.inviteRejected' => '已拒绝邀请',
 			'sharedSpace.notifications.allMarkedRead' => '全部标记为已读',
+			'sharedSpace.inviteCard.title' => '邀请码',
+			'sharedSpace.inviteCard.subtitle' => '分享给朋友以加入空间',
+			'sharedSpace.inviteCard.copyCode' => '复制邀请码',
+			'sharedSpace.inviteCard.shareLink' => '分享邀请链接',
+			'sharedSpace.inviteCard.codeCopied' => '邀请码已复制',
+			'sharedSpace.inviteCard.noExpiry' => '无有效期限制',
+			'sharedSpace.inviteCard.expired' => '已过期',
+			'sharedSpace.inviteCard.expiresInDays' => ({required Object days}) => '${days} 天后过期',
+			'sharedSpace.inviteCard.expiresInHours' => ({required Object hours}) => '${hours} 小时后过期',
+			'sharedSpace.inviteCard.expiresInMinutes' => ({required Object minutes}) => '${minutes} 分钟后过期',
+			'sharedSpace.inviteCard.expiringSoon' => '即将过期',
+			'sharedSpace.inviteCard.shareText' => ({required Object spaceName, required Object code, required Object link, required Object expiry}) => '邀请你加入共享空间「${spaceName}」\n\n邀请码：${code}\n或点击链接直接加入：${link}\n\n邀请码${expiry}',
+			'sharedSpace.inviteSuccess.title' => '创建成功',
+			'sharedSpace.inviteSuccess.subtitle' => '共享空间创建成功',
+			'sharedSpace.inviteSuccess.inviteLater' => '稍后邀请',
+			'sharedSpace.inviteSuccess.enterSpace' => '进入空间',
+			'sharedSpace.inviteSuccess.generatingCode' => '正在生成邀请码...',
+			'sharedSpace.inviteSuccess.generateFailed' => '邀请码生成失败',
+			'sharedSpace.inviteSuccess.codeCopied' => '邀请码已复制',
+			'sharedSpace.inviteSuccess.retry' => '重试',
+			'sharedSpace.inviteSuccess.codeLabel' => '邀请码',
+			'sharedSpace.inviteSuccess.validHint' => '24 小时内有效 · 点击复制',
+			'sharedSpace.notificationCard.accept' => '接受',
+			'sharedSpace.notificationCard.reject' => '拒绝',
+			'sharedSpace.notificationCard.unknownTime' => '未知时间',
+			'sharedSpace.notificationCard.justNow' => '刚刚',
+			'sharedSpace.spaceCard.noDescription' => '暂无描述',
+			'sharedSpace.spaceCard.creator' => '创建者',
+			'sharedSpace.spaceCard.member' => '成员',
+			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count} 位成员',
+			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count} 笔账单',
+			'sharedSpace.settings.title' => '空间设置',
+			'sharedSpace.settings.spaceInfo' => '空间信息',
+			'sharedSpace.settings.nameLabel' => '空间名称',
+			'sharedSpace.settings.descLabel' => '空间描述',
+			'sharedSpace.settings.save' => '保存',
+			'sharedSpace.settings.saved' => '保存成功',
+			'sharedSpace.settings.saveFailed' => '保存失败',
+			'sharedSpace.settings.memberManagement' => '成员管理',
+			'sharedSpace.settings.membersCount' => ({required Object count}) => '${count} 位成员',
+			'sharedSpace.settings.removeMemberConfirm' => ({required Object name}) => '确定要将「${name}」移出空间吗？',
+			'sharedSpace.settings.removed' => '已移除成员',
+			'sharedSpace.settings.removeFailed' => '移除失败',
+			'sharedSpace.settings.inviteManagement' => '邀请管理',
+			_ => null,
+		} ?? switch (path) {
+			'sharedSpace.settings.currentCode' => '当前邀请码',
+			'sharedSpace.settings.generateNew' => '生成新邀请码',
+			'sharedSpace.settings.noValidCode' => '暂无有效邀请码',
+			'sharedSpace.settings.refreshCode' => '刷新生成新码',
+			'sharedSpace.settings.refreshConfirm' => '生成新码将使旧邀请码失效，确定继续？',
+			'sharedSpace.settings.codeRefreshed' => '邀请码已刷新',
+			'sharedSpace.settings.dangerZone' => '危险操作',
+			'sharedSpace.settings.editHint' => '仅管理员可编辑',
+			'sharedSpace.settings.edit' => '编辑',
+			'sharedSpace.settings.you' => '我',
+			'sharedSpace.settings.pending' => '待接受',
+			'sharedSpace.settings.declined' => '已拒绝',
+			'sharedSpace.settings.setAsAdmin' => '设为管理员',
+			'sharedSpace.settings.setAsMember' => '设为普通成员',
+			'sharedSpace.settings.changeRole' => '变更角色',
+			'sharedSpace.settings.changeRoleConfirm' => ({required Object name, required Object role}) => '确定要将「${name}」的角色变更为「${role}」吗？',
+			'sharedSpace.settings.confirm' => '确认',
+			'sharedSpace.settings.roleChanged' => '角色已变更',
+			'sharedSpace.settings.roleChangeFailed' => '角色变更失败',
 			'errorMapping.generic.badRequest' => '请求无效',
 			'errorMapping.generic.authFailed' => '认证失败，请重新登录',
 			'errorMapping.generic.permissionDenied' => '权限不足',
@@ -5276,8 +5624,6 @@ extension on Translations {
 			'errorMapping.ai.contextLimit' => '上下文长度超出限制',
 			'errorMapping.ai.tokenLimit' => 'Token配额不足',
 			'errorMapping.ai.emptyMessage' => '用户消息为空',
-			_ => null,
-		} ?? switch (path) {
 			'notification.title' => '消息通知',
 			'notification.markAllRead' => '全部已读',
 			'notification.empty' => '暂无通知消息',
@@ -5294,6 +5640,12 @@ extension on Translations {
 			'notification.types.billComment' => '账单评论',
 			'notification.types.budgetAlert' => '预算提醒',
 			'notification.types.transaction' => '交易通知',
+			'notification.semantic.memberJoined' => ({required Object name}) => '${name} 加入了你的空间',
+			'notification.semantic.memberJoinedDetail' => ({required Object space}) => '新成员加入了「${space}」',
+			'notification.semantic.welcome' => ({required Object space}) => '欢迎加入「${space}」',
+			'notification.semantic.newTransaction' => ({required Object name}) => '${name} 记录了一笔新账单',
+			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount}，来自「${space}」',
+			'notification.semantic.memberLeft' => ({required Object name}) => '${name} 离开了空间',
 			_ => null,
 		};
 	}

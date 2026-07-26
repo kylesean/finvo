@@ -1058,6 +1058,7 @@
   },
   "sharedSpace": {
     "dashboard": {
+      "sectionTitle": "財務概覽",
       "cumulativeTotalExpense": "累計總支出",
       "participatingMembers": "參與成員",
       "membersCount": "$count 人",
@@ -1089,7 +1090,7 @@
       "title": "加入共享空間",
       "subtitle": "輸入朋友分享的邀請碼，開始協作記帳",
       "codeLabel": "邀請碼",
-      "codeHint": "輸入邀請碼，例如：A8K2F9G7",
+      "codeHint": "輸入邀請碼，例如：123456",
       "cancel": "取消",
       "submit": "加入",
       "codeRequired": "請輸入邀請碼",
@@ -1106,6 +1107,7 @@
     "detail": {
       "members": "成員",
       "transactions": "交易紀錄",
+      "recordsCount": "${count} 筆",
       "settlement": "結算",
       "inviteCode": "邀請碼",
       "copyCode": "複製邀請碼",
@@ -1121,7 +1123,9 @@
       "loadFailed": "載入失敗",
       "retry": "重試",
       "noTransactions": "暫無交易紀錄",
-      "noTransactionsHint": "空間內的交易將顯示在這裡"
+      "noTransactionsHint": "空間內的交易將顯示在這裡",
+      "refreshCode": "重新產生新碼",
+      "joinOtherSpace": "加入其他空間"
     },
     "notifications": {
       "title": "通知",
@@ -1131,6 +1135,79 @@
       "inviteAccepted": "已接受邀請！",
       "inviteRejected": "已拒絕邀請",
       "allMarkedRead": "全部標記為已讀"
+    },
+    "inviteCard": {
+      "title": "邀請碼",
+      "subtitle": "分享給朋友以加入空間",
+      "copyCode": "複製邀請碼",
+      "shareLink": "分享邀請連結",
+      "codeCopied": "邀請碼已複製",
+      "noExpiry": "無有效期限制",
+      "expired": "已過期",
+      "expiresInDays": "${days} 天後過期",
+      "expiresInHours": "${hours} 小時後過期",
+      "expiresInMinutes": "${minutes} 分鐘後過期",
+      "expiringSoon": "即將過期",
+      "shareText": "邀請你加入共享空間「${spaceName}」\n\n邀請碼：${code}\n或點擊連結直接加入：${link}\n\n邀請碼${expiry}"
+    },
+    "inviteSuccess": {
+      "title": "建立成功",
+      "subtitle": "共享空間建立成功",
+      "inviteLater": "稍後邀請",
+      "enterSpace": "進入空間",
+      "generatingCode": "正在產生邀請碼...",
+      "generateFailed": "邀請碼產生失敗",
+      "codeCopied": "邀請碼已複製",
+      "retry": "重試",
+      "codeLabel": "邀請碼",
+      "validHint": "24 小時內有效 · 點擊複製"
+    },
+    "notificationCard": {
+      "accept": "接受",
+      "reject": "拒絕",
+      "unknownTime": "未知時間",
+      "justNow": "剛剛"
+    },
+    "spaceCard": {
+      "noDescription": "暫無描述",
+      "creator": "建立者",
+      "member": "成員",
+      "membersCount": "${count} 位成員",
+      "transactionsCount": "${count} 筆帳單"
+    },
+    "settings": {
+      "title": "空間設定",
+      "spaceInfo": "空間資訊",
+      "nameLabel": "空間名稱",
+      "descLabel": "空間描述",
+      "save": "儲存",
+      "saved": "儲存成功",
+      "saveFailed": "儲存失敗",
+      "memberManagement": "成員管理",
+      "membersCount": "$count 位成員",
+      "removeMemberConfirm": "確定要將「$name」移出空間嗎？",
+      "removed": "已移除成員",
+      "removeFailed": "移除失敗",
+      "inviteManagement": "邀請管理",
+      "currentCode": "目前邀請碼",
+      "generateNew": "產生新邀請碼",
+      "noValidCode": "暫無有效邀請碼",
+      "refreshCode": "重新產生新碼",
+      "refreshConfirm": "產生新碼將使舊邀請碼失效，確定繼續？",
+      "codeRefreshed": "邀請碼已重新整理",
+      "dangerZone": "危險操作",
+      "editHint": "僅管理員可編輯",
+      "edit": "編輯",
+      "you": "我",
+      "pending": "待接受",
+      "declined": "已拒絕",
+      "setAsAdmin": "設為管理員",
+      "setAsMember": "設為普通成員",
+      "changeRole": "變更角色",
+      "changeRoleConfirm": "確定要將「$name」的角色變更為「$role」嗎？",
+      "confirm": "確認",
+      "roleChanged": "角色已變更",
+      "roleChangeFailed": "角色變更失敗"
     }
   },
   "budgetSuggestion": {
@@ -1249,6 +1326,14 @@
       "billComment": "帳單評論",
       "budgetAlert": "預算提醒",
       "transaction": "交易通知"
+    },
+    "semantic": {
+      "memberJoined": "${name} 加入了你的空間",
+      "memberJoinedDetail": "新成員加入了「${space}」",
+      "welcome": "歡迎加入「${space}」",
+      "newTransaction": "${name} 記錄了一筆新帳單",
+      "newTransactionDetail": "${amount}，來自「${space}」",
+      "memberLeft": "${name} 離開了空間"
     }
   }
 }

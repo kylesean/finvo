@@ -1058,6 +1058,7 @@
   },
   "sharedSpace": {
     "dashboard": {
+      "sectionTitle": "財務概要",
       "cumulativeTotalExpense": "累計総支出",
       "participatingMembers": "参加メンバー",
       "membersCount": "$count 人",
@@ -1089,7 +1090,7 @@
       "title": "共有スペースに参加",
       "subtitle": "友達から共有された招待コードを入力して、共同家計を始めましょう",
       "codeLabel": "招待コード",
-      "codeHint": "招待コードを入力、例：A8K2F9G7",
+      "codeHint": "招待コードを入力、例：123456",
       "cancel": "キャンセル",
       "submit": "参加",
       "codeRequired": "招待コードを入力してください",
@@ -1106,6 +1107,7 @@
     "detail": {
       "members": "メンバー",
       "transactions": "取引履歴",
+      "recordsCount": "${count} 件",
       "settlement": "精算",
       "inviteCode": "招待コード",
       "copyCode": "招待コードをコピー",
@@ -1121,7 +1123,9 @@
       "loadFailed": "読み込みに失敗しました",
       "retry": "再試行",
       "noTransactions": "取引はまだありません",
-      "noTransactionsHint": "このスペースの取引がここに表示されます"
+      "noTransactionsHint": "このスペースの取引がここに表示されます",
+      "refreshCode": "コードを更新",
+      "joinOtherSpace": "他のスペースに参加"
     },
     "notifications": {
       "title": "お知らせ",
@@ -1131,6 +1135,79 @@
       "inviteAccepted": "招待を承認しました！",
       "inviteRejected": "招待を拒否しました",
       "allMarkedRead": "すべて既読にしました"
+    },
+    "inviteCard": {
+      "title": "招待コード",
+      "subtitle": "友達と共有してスペースに参加",
+      "copyCode": "招待コードをコピー",
+      "shareLink": "招待リンクを共有",
+      "codeCopied": "招待コードをコピーしました",
+      "noExpiry": "無期限",
+      "expired": "期限切れ",
+      "expiresInDays": "${days}日後に期限切れ",
+      "expiresInHours": "${hours}時間後に期限切れ",
+      "expiresInMinutes": "${minutes}分後に期限切れ",
+      "expiringSoon": "まもなく期限切れ",
+      "shareText": "共有スペース「${spaceName}」に招待されました\n\n招待コード：${code}\nまたはリンクをクリックして直接参加：${link}\n\n招待コード${expiry}"
+    },
+    "inviteSuccess": {
+      "title": "作成完了",
+      "subtitle": "共有スペースが作成されました",
+      "inviteLater": "後で招待",
+      "enterSpace": "スペースに入る",
+      "generatingCode": "招待コードを生成中...",
+      "generateFailed": "招待コードの生成に失敗しました",
+      "codeCopied": "招待コードをコピーしました",
+      "retry": "再試行",
+      "codeLabel": "招待コード",
+      "validHint": "24時間有効 · タップしてコピー"
+    },
+    "notificationCard": {
+      "accept": "承認",
+      "reject": "拒否",
+      "unknownTime": "不明な時間",
+      "justNow": "たった今"
+    },
+    "spaceCard": {
+      "noDescription": "説明なし",
+      "creator": "作成者",
+      "member": "メンバー",
+      "membersCount": "${count} 人のメンバー",
+      "transactionsCount": "${count} 件の取引"
+    },
+    "settings": {
+      "title": "スペース設定",
+      "spaceInfo": "スペース情報",
+      "nameLabel": "スペース名",
+      "descLabel": "スペースの説明",
+      "save": "保存",
+      "saved": "保存しました",
+      "saveFailed": "保存に失敗しました",
+      "memberManagement": "メンバー管理",
+      "membersCount": "$count 人のメンバー",
+      "removeMemberConfirm": "「$name」をスペースから削除しますか？",
+      "removed": "メンバーを削除しました",
+      "removeFailed": "削除に失敗しました",
+      "inviteManagement": "招待管理",
+      "currentCode": "現在の招待コード",
+      "generateNew": "新しいコードを生成",
+      "noValidCode": "有効な招待コードがありません",
+      "refreshCode": "コードを更新",
+      "refreshConfirm": "新しいコードを生成すると古いコードは無効になります。続行しますか？",
+      "codeRefreshed": "招待コードを更新しました",
+      "dangerZone": "危険な操作",
+      "editHint": "管理者のみ編集可能",
+      "edit": "編集",
+      "you": "自分",
+      "pending": "承認待ち",
+      "declined": "拒否済み",
+      "setAsAdmin": "管理者に設定",
+      "setAsMember": "メンバーに設定",
+      "changeRole": "役割を変更",
+      "changeRoleConfirm": "「$name」の役割を「$role」に変更しますか？",
+      "confirm": "確認",
+      "roleChanged": "役割を変更しました",
+      "roleChangeFailed": "役割の変更に失敗しました"
     }
   },
   "budgetSuggestion": {
@@ -1249,6 +1326,14 @@
       "billComment": "請求コメント",
       "budgetAlert": "予算アラート",
       "transaction": "取引通知"
+    },
+    "semantic": {
+      "memberJoined": "${name} さんがスペースに参加しました",
+      "memberJoinedDetail": "新しいメンバーが「${space}」に参加しました",
+      "welcome": "「${space}」へようこそ",
+      "newTransaction": "${name} さんが新しい支出を記録しました",
+      "newTransactionDetail": "${amount}、「${space}」より",
+      "memberLeft": "${name} さんがスペースを退出しました"
     }
   }
 }

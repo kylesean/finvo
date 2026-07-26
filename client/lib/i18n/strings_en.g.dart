@@ -940,6 +940,11 @@ class _Translations$sharedSpace$en extends Translations$sharedSpace$zh {
 	@override late final _Translations$sharedSpace$list$en list = _Translations$sharedSpace$list$en._(_root);
 	@override late final _Translations$sharedSpace$detail$en detail = _Translations$sharedSpace$detail$en._(_root);
 	@override late final _Translations$sharedSpace$notifications$en notifications = _Translations$sharedSpace$notifications$en._(_root);
+	@override late final _Translations$sharedSpace$inviteCard$en inviteCard = _Translations$sharedSpace$inviteCard$en._(_root);
+	@override late final _Translations$sharedSpace$inviteSuccess$en inviteSuccess = _Translations$sharedSpace$inviteSuccess$en._(_root);
+	@override late final _Translations$sharedSpace$notificationCard$en notificationCard = _Translations$sharedSpace$notificationCard$en._(_root);
+	@override late final _Translations$sharedSpace$spaceCard$en spaceCard = _Translations$sharedSpace$spaceCard$en._(_root);
+	@override late final _Translations$sharedSpace$settings$en settings = _Translations$sharedSpace$settings$en._(_root);
 }
 
 // Path: errorMapping
@@ -976,6 +981,7 @@ class _Translations$notification$en extends Translations$notification$zh {
 	@override String daysAgo({required Object days}) => '${days}d ago';
 	@override String get deleted => 'Deleted';
 	@override late final _Translations$notification$types$en types = _Translations$notification$types$en._(_root);
+	@override late final _Translations$notification$semantic$en semantic = _Translations$notification$semantic$en._(_root);
 }
 
 // Path: auth.email
@@ -1329,6 +1335,7 @@ class _Translations$sharedSpace$dashboard$en extends Translations$sharedSpace$da
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
+	@override String get sectionTitle => 'Financial Overview';
 	@override String get cumulativeTotalExpense => 'Cumulative Total Expense';
 	@override String get participatingMembers => 'Participating Members';
 	@override String membersCount({required Object count}) => '${count} people';
@@ -1380,7 +1387,7 @@ class _Translations$sharedSpace$join$en extends Translations$sharedSpace$join$zh
 	@override String get title => 'Join Shared Space';
 	@override String get subtitle => 'Enter the invite code shared by a friend to start collaborative bookkeeping';
 	@override String get codeLabel => 'Invite Code';
-	@override String get codeHint => 'Enter invite code, e.g.: A8K2F9G7';
+	@override String get codeHint => 'Enter invite code, e.g.: 123456';
 	@override String get cancel => 'Cancel';
 	@override String get submit => 'Join';
 	@override String get codeRequired => 'Please enter invite code';
@@ -1411,6 +1418,7 @@ class _Translations$sharedSpace$detail$en extends Translations$sharedSpace$detai
 	// Translations
 	@override String get members => 'Members';
 	@override String get transactions => 'Transactions';
+	@override String recordsCount({required Object count}) => '${count} records';
 	@override String get settlement => 'Settlement';
 	@override String get inviteCode => 'Invite Code';
 	@override String get copyCode => 'Copy Invite Code';
@@ -1427,6 +1435,8 @@ class _Translations$sharedSpace$detail$en extends Translations$sharedSpace$detai
 	@override String get retry => 'Retry';
 	@override String get noTransactions => 'No transactions yet';
 	@override String get noTransactionsHint => 'Transactions in this space will appear here';
+	@override String get refreshCode => 'Refresh Code';
+	@override String get joinOtherSpace => 'Join Another Space';
 }
 
 // Path: sharedSpace.notifications
@@ -1443,6 +1453,114 @@ class _Translations$sharedSpace$notifications$en extends Translations$sharedSpac
 	@override String get inviteAccepted => 'Invite accepted!';
 	@override String get inviteRejected => 'Invite rejected';
 	@override String get allMarkedRead => 'All notifications marked as read';
+}
+
+// Path: sharedSpace.inviteCard
+class _Translations$sharedSpace$inviteCard$en extends Translations$sharedSpace$inviteCard$zh {
+	_Translations$sharedSpace$inviteCard$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Invite Code';
+	@override String get subtitle => 'Share with friends to join the space';
+	@override String get copyCode => 'Copy Invite Code';
+	@override String get shareLink => 'Share Invite Link';
+	@override String get codeCopied => 'Invite code copied';
+	@override String get noExpiry => 'No expiry';
+	@override String get expired => 'Expired';
+	@override String expiresInDays({required Object days}) => 'Expires in ${days} days';
+	@override String expiresInHours({required Object hours}) => 'Expires in ${hours} hours';
+	@override String expiresInMinutes({required Object minutes}) => 'Expires in ${minutes} minutes';
+	@override String get expiringSoon => 'Expiring soon';
+	@override String shareText({required Object spaceName, required Object code, required Object link, required Object expiry}) => 'You are invited to join the shared space "${spaceName}"\n\nInvite code: ${code}\nOr click the link to join directly: ${link}\n\nInvite code ${expiry}';
+}
+
+// Path: sharedSpace.inviteSuccess
+class _Translations$sharedSpace$inviteSuccess$en extends Translations$sharedSpace$inviteSuccess$zh {
+	_Translations$sharedSpace$inviteSuccess$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Created Successfully';
+	@override String get subtitle => 'Space Created Successfully';
+	@override String get inviteLater => 'Invite Later';
+	@override String get enterSpace => 'Enter Space';
+	@override String get generatingCode => 'Generating invite code...';
+	@override String get generateFailed => 'Failed to generate invite code';
+	@override String get codeCopied => 'Invite code copied';
+	@override String get retry => 'Retry';
+	@override String get codeLabel => 'Invite Code';
+	@override String get validHint => 'Valid for 24 hours · Tap to copy';
+}
+
+// Path: sharedSpace.notificationCard
+class _Translations$sharedSpace$notificationCard$en extends Translations$sharedSpace$notificationCard$zh {
+	_Translations$sharedSpace$notificationCard$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get accept => 'Accept';
+	@override String get reject => 'Reject';
+	@override String get unknownTime => 'Unknown time';
+	@override String get justNow => 'Just now';
+}
+
+// Path: sharedSpace.spaceCard
+class _Translations$sharedSpace$spaceCard$en extends Translations$sharedSpace$spaceCard$zh {
+	_Translations$sharedSpace$spaceCard$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get noDescription => 'No description';
+	@override String get creator => 'Creator';
+	@override String get member => 'Member';
+	@override String membersCount({required Object count}) => '${count} members';
+	@override String transactionsCount({required Object count}) => '${count} transactions';
+}
+
+// Path: sharedSpace.settings
+class _Translations$sharedSpace$settings$en extends Translations$sharedSpace$settings$zh {
+	_Translations$sharedSpace$settings$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Space Settings';
+	@override String get spaceInfo => 'Space Info';
+	@override String get nameLabel => 'Space Name';
+	@override String get descLabel => 'Space Description';
+	@override String get save => 'Save';
+	@override String get saved => 'Saved successfully';
+	@override String get saveFailed => 'Failed to save';
+	@override String get memberManagement => 'Member Management';
+	@override String membersCount({required Object count}) => '${count} members';
+	@override String removeMemberConfirm({required Object name}) => 'Are you sure you want to remove "${name}" from this space?';
+	@override String get removed => 'Member removed';
+	@override String get removeFailed => 'Failed to remove member';
+	@override String get inviteManagement => 'Invite Management';
+	@override String get currentCode => 'Current Invite Code';
+	@override String get generateNew => 'Generate New Code';
+	@override String get noValidCode => 'No valid invite code';
+	@override String get refreshCode => 'Refresh Code';
+	@override String get refreshConfirm => 'Generating a new code will invalidate the old one. Continue?';
+	@override String get codeRefreshed => 'Invite code refreshed';
+	@override String get dangerZone => 'Danger Zone';
+	@override String get editHint => 'Only admins can edit';
+	@override String get edit => 'Edit';
+	@override String get you => 'You';
+	@override String get pending => 'Pending';
+	@override String get declined => 'Declined';
+	@override String get setAsAdmin => 'Set as Admin';
+	@override String get setAsMember => 'Set as Member';
+	@override String get changeRole => 'Change Role';
+	@override String changeRoleConfirm({required Object name, required Object role}) => 'Are you sure you want to change "${name}"\'s role to "${role}"?';
+	@override String get confirm => 'Confirm';
+	@override String get roleChanged => 'Role changed';
+	@override String get roleChangeFailed => 'Failed to change role';
 }
 
 // Path: errorMapping.generic
@@ -1569,6 +1687,21 @@ class _Translations$notification$types$en extends Translations$notification$type
 	@override String get billComment => 'Bill Comment';
 	@override String get budgetAlert => 'Budget Alert';
 	@override String get transaction => 'Transaction';
+}
+
+// Path: notification.semantic
+class _Translations$notification$semantic$en extends Translations$notification$semantic$zh {
+	_Translations$notification$semantic$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String memberJoined({required Object name}) => '${name} joined your space';
+	@override String memberJoinedDetail({required Object space}) => 'A new member joined "${space}"';
+	@override String welcome({required Object space}) => 'Welcome to "${space}"';
+	@override String newTransaction({required Object name}) => '${name} recorded a new expense';
+	@override String newTransactionDetail({required Object amount, required Object space}) => '${amount} in "${space}"';
+	@override String memberLeft({required Object name}) => '${name} left the space';
 }
 
 // Path: chat.tools.done
@@ -3066,6 +3199,7 @@ extension on TranslationsEn {
 			'server.error.connectionRefused' => 'Could not connect to server',
 			'server.error.sslError' => 'SSL certificate error',
 			'server.error.serverError' => 'Server error',
+			'sharedSpace.dashboard.sectionTitle' => 'Financial Overview',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => 'Cumulative Total Expense',
 			'sharedSpace.dashboard.participatingMembers' => 'Participating Members',
 			'sharedSpace.dashboard.membersCount' => ({required Object count}) => '${count} people',
@@ -3091,7 +3225,7 @@ extension on TranslationsEn {
 			'sharedSpace.join.title' => 'Join Shared Space',
 			'sharedSpace.join.subtitle' => 'Enter the invite code shared by a friend to start collaborative bookkeeping',
 			'sharedSpace.join.codeLabel' => 'Invite Code',
-			'sharedSpace.join.codeHint' => 'Enter invite code, e.g.: A8K2F9G7',
+			'sharedSpace.join.codeHint' => 'Enter invite code, e.g.: 123456',
 			'sharedSpace.join.cancel' => 'Cancel',
 			'sharedSpace.join.submit' => 'Join',
 			'sharedSpace.join.codeRequired' => 'Please enter invite code',
@@ -3104,6 +3238,7 @@ extension on TranslationsEn {
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => 'Successfully joined "${name}"!',
 			'sharedSpace.detail.members' => 'Members',
 			'sharedSpace.detail.transactions' => 'Transactions',
+			'sharedSpace.detail.recordsCount' => ({required Object count}) => '${count} records',
 			'sharedSpace.detail.settlement' => 'Settlement',
 			'sharedSpace.detail.inviteCode' => 'Invite Code',
 			'sharedSpace.detail.copyCode' => 'Copy Invite Code',
@@ -3120,6 +3255,8 @@ extension on TranslationsEn {
 			'sharedSpace.detail.retry' => 'Retry',
 			'sharedSpace.detail.noTransactions' => 'No transactions yet',
 			'sharedSpace.detail.noTransactionsHint' => 'Transactions in this space will appear here',
+			'sharedSpace.detail.refreshCode' => 'Refresh Code',
+			'sharedSpace.detail.joinOtherSpace' => 'Join Another Space',
 			'sharedSpace.notifications.title' => 'Notifications',
 			'sharedSpace.notifications.empty' => 'No notifications',
 			'sharedSpace.notifications.emptyHint' => 'When you have new invites or activities,\nyou will receive notifications here',
@@ -3127,6 +3264,71 @@ extension on TranslationsEn {
 			'sharedSpace.notifications.inviteAccepted' => 'Invite accepted!',
 			'sharedSpace.notifications.inviteRejected' => 'Invite rejected',
 			'sharedSpace.notifications.allMarkedRead' => 'All notifications marked as read',
+			'sharedSpace.inviteCard.title' => 'Invite Code',
+			'sharedSpace.inviteCard.subtitle' => 'Share with friends to join the space',
+			'sharedSpace.inviteCard.copyCode' => 'Copy Invite Code',
+			'sharedSpace.inviteCard.shareLink' => 'Share Invite Link',
+			'sharedSpace.inviteCard.codeCopied' => 'Invite code copied',
+			'sharedSpace.inviteCard.noExpiry' => 'No expiry',
+			'sharedSpace.inviteCard.expired' => 'Expired',
+			'sharedSpace.inviteCard.expiresInDays' => ({required Object days}) => 'Expires in ${days} days',
+			'sharedSpace.inviteCard.expiresInHours' => ({required Object hours}) => 'Expires in ${hours} hours',
+			'sharedSpace.inviteCard.expiresInMinutes' => ({required Object minutes}) => 'Expires in ${minutes} minutes',
+			'sharedSpace.inviteCard.expiringSoon' => 'Expiring soon',
+			'sharedSpace.inviteCard.shareText' => ({required Object spaceName, required Object code, required Object link, required Object expiry}) => 'You are invited to join the shared space "${spaceName}"\n\nInvite code: ${code}\nOr click the link to join directly: ${link}\n\nInvite code ${expiry}',
+			'sharedSpace.inviteSuccess.title' => 'Created Successfully',
+			'sharedSpace.inviteSuccess.subtitle' => 'Space Created Successfully',
+			'sharedSpace.inviteSuccess.inviteLater' => 'Invite Later',
+			'sharedSpace.inviteSuccess.enterSpace' => 'Enter Space',
+			'sharedSpace.inviteSuccess.generatingCode' => 'Generating invite code...',
+			'sharedSpace.inviteSuccess.generateFailed' => 'Failed to generate invite code',
+			'sharedSpace.inviteSuccess.codeCopied' => 'Invite code copied',
+			'sharedSpace.inviteSuccess.retry' => 'Retry',
+			'sharedSpace.inviteSuccess.codeLabel' => 'Invite Code',
+			'sharedSpace.inviteSuccess.validHint' => 'Valid for 24 hours · Tap to copy',
+			'sharedSpace.notificationCard.accept' => 'Accept',
+			'sharedSpace.notificationCard.reject' => 'Reject',
+			'sharedSpace.notificationCard.unknownTime' => 'Unknown time',
+			'sharedSpace.notificationCard.justNow' => 'Just now',
+			'sharedSpace.spaceCard.noDescription' => 'No description',
+			'sharedSpace.spaceCard.creator' => 'Creator',
+			'sharedSpace.spaceCard.member' => 'Member',
+			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count} members',
+			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count} transactions',
+			'sharedSpace.settings.title' => 'Space Settings',
+			'sharedSpace.settings.spaceInfo' => 'Space Info',
+			'sharedSpace.settings.nameLabel' => 'Space Name',
+			'sharedSpace.settings.descLabel' => 'Space Description',
+			'sharedSpace.settings.save' => 'Save',
+			'sharedSpace.settings.saved' => 'Saved successfully',
+			'sharedSpace.settings.saveFailed' => 'Failed to save',
+			'sharedSpace.settings.memberManagement' => 'Member Management',
+			'sharedSpace.settings.membersCount' => ({required Object count}) => '${count} members',
+			'sharedSpace.settings.removeMemberConfirm' => ({required Object name}) => 'Are you sure you want to remove "${name}" from this space?',
+			'sharedSpace.settings.removed' => 'Member removed',
+			'sharedSpace.settings.removeFailed' => 'Failed to remove member',
+			'sharedSpace.settings.inviteManagement' => 'Invite Management',
+			_ => null,
+		} ?? switch (path) {
+			'sharedSpace.settings.currentCode' => 'Current Invite Code',
+			'sharedSpace.settings.generateNew' => 'Generate New Code',
+			'sharedSpace.settings.noValidCode' => 'No valid invite code',
+			'sharedSpace.settings.refreshCode' => 'Refresh Code',
+			'sharedSpace.settings.refreshConfirm' => 'Generating a new code will invalidate the old one. Continue?',
+			'sharedSpace.settings.codeRefreshed' => 'Invite code refreshed',
+			'sharedSpace.settings.dangerZone' => 'Danger Zone',
+			'sharedSpace.settings.editHint' => 'Only admins can edit',
+			'sharedSpace.settings.edit' => 'Edit',
+			'sharedSpace.settings.you' => 'You',
+			'sharedSpace.settings.pending' => 'Pending',
+			'sharedSpace.settings.declined' => 'Declined',
+			'sharedSpace.settings.setAsAdmin' => 'Set as Admin',
+			'sharedSpace.settings.setAsMember' => 'Set as Member',
+			'sharedSpace.settings.changeRole' => 'Change Role',
+			'sharedSpace.settings.changeRoleConfirm' => ({required Object name, required Object role}) => 'Are you sure you want to change "${name}"\'s role to "${role}"?',
+			'sharedSpace.settings.confirm' => 'Confirm',
+			'sharedSpace.settings.roleChanged' => 'Role changed',
+			'sharedSpace.settings.roleChangeFailed' => 'Failed to change role',
 			'errorMapping.generic.badRequest' => 'Bad Request',
 			'errorMapping.generic.authFailed' => 'Authentication failed, please login again',
 			'errorMapping.generic.permissionDenied' => 'Permission denied',
@@ -3175,8 +3377,6 @@ extension on TranslationsEn {
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
-			_ => null,
-		} ?? switch (path) {
 			'notification.title' => 'Notifications',
 			'notification.markAllRead' => 'Mark all read',
 			'notification.empty' => 'No notifications yet',
@@ -3193,6 +3393,12 @@ extension on TranslationsEn {
 			'notification.types.billComment' => 'Bill Comment',
 			'notification.types.budgetAlert' => 'Budget Alert',
 			'notification.types.transaction' => 'Transaction',
+			'notification.semantic.memberJoined' => ({required Object name}) => '${name} joined your space',
+			'notification.semantic.memberJoinedDetail' => ({required Object space}) => 'A new member joined "${space}"',
+			'notification.semantic.welcome' => ({required Object space}) => 'Welcome to "${space}"',
+			'notification.semantic.newTransaction' => ({required Object name}) => '${name} recorded a new expense',
+			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount} in "${space}"',
+			'notification.semantic.memberLeft' => ({required Object name}) => '${name} left the space',
 			_ => null,
 		};
 	}

@@ -6,6 +6,7 @@ Gracefully falls back to mock/logging mode if Firebase credentials are not confi
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 from uuid import UUID
@@ -134,16 +135,25 @@ class PushService:
             data=data,
             is_read=False,
         )
-        db.add(notification)
-        await db.commit()
-        await db.refresh(notification)
+        try:
+            db.add(notification)
+            await db.commit()
+            await db.refresh(notification)
+        except Exception as exc:
+            await db.rollback()
+            logger.error(f"Failed to save notification to DB: {exc}")
+            raise
 
-        # 2. Fetch active device tokens
-        query = select(UserDevice.device_token).where(
-            and_(UserDevice.user_uuid == user_uuid, UserDevice.is_active == True)  # noqa: E712
-        )
-        result = await db.execute(query)
-        tokens = list(result.scalars().all())
+        # 2. Fetch active device tokens (non-critical: skip push if query fails)
+        try:
+            query = select(UserDevice.device_token).where(
+                and_(UserDevice.user_uuid == user_uuid, UserDevice.is_active == True)  # noqa: E712
+            )
+            result = await db.execute(query)
+            tokens = list(result.scalars().all())
+        except Exception as exc:
+            logger.warning(f"Failed to query device tokens, push skipped: {exc}")
+            return notification
 
         if not tokens:
             logger.debug(f"No active tokens for user {user_uuid}. Push skipped.")
@@ -165,7 +175,7 @@ class PushService:
                     tokens=tokens,
                 )
 
-                batch_response = messaging.send_each_for_multicast(message)
+                batch_response = await asyncio.to_thread(messaging.send_each_for_multicast, message)
                 logger.info(
                     f"FCM Multicast sent to user {user_uuid}. Success: {batch_response.success_count}, Fail: {batch_response.failure_count}"
                 )

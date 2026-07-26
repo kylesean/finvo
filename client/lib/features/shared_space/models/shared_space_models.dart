@@ -71,6 +71,7 @@ abstract class SharedSpace with _$SharedSpace {
     required String name,
     String? description,
     required SpaceCreator creator,
+    @Default(MemberRole.member) MemberRole role,
     DateTime? createdAt,
     DateTime? updatedAt,
     List<SharedSpaceMember>? members,
@@ -82,6 +83,18 @@ abstract class SharedSpace with _$SharedSpace {
 
   factory SharedSpace.fromJson(Map<String, dynamic> json) =>
       _$SharedSpaceFromJson(json);
+}
+
+/// Permission helpers for the current user's role in a space.
+extension SharedSpacePermissions on SharedSpace {
+  /// Whether the current user can manage the space (edit info, manage members).
+  bool get canManage => role == MemberRole.owner || role == MemberRole.admin;
+
+  /// Whether the current user is the owner.
+  bool get isOwner => role == MemberRole.owner;
+
+  /// Whether the current user can generate/refresh invite codes.
+  bool get canGenerateInvite => canManage;
 }
 
 @freezed

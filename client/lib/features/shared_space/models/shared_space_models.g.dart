@@ -67,6 +67,9 @@ _SharedSpace _$SharedSpaceFromJson(Map<String, dynamic> json) => _SharedSpace(
   name: json['name'] as String,
   description: json['description'] as String?,
   creator: SpaceCreator.fromJson(json['creator'] as Map<String, dynamic>),
+  role:
+      $enumDecodeNullable(_$MemberRoleEnumMap, json['role']) ??
+      MemberRole.member,
   createdAt: json['createdAt'] == null
       ? null
       : DateTime.parse(json['createdAt'] as String),
@@ -90,6 +93,7 @@ Map<String, dynamic> _$SharedSpaceToJson(_SharedSpace instance) =>
       'name': instance.name,
       'description': instance.description,
       'creator': instance.creator,
+      'role': _$MemberRoleEnumMap[instance.role]!,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'members': instance.members,

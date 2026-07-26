@@ -899,6 +899,11 @@ class _Translations$sharedSpace$ja extends Translations$sharedSpace$zh {
 	@override late final _Translations$sharedSpace$list$ja list = _Translations$sharedSpace$list$ja._(_root);
 	@override late final _Translations$sharedSpace$detail$ja detail = _Translations$sharedSpace$detail$ja._(_root);
 	@override late final _Translations$sharedSpace$notifications$ja notifications = _Translations$sharedSpace$notifications$ja._(_root);
+	@override late final _Translations$sharedSpace$inviteCard$ja inviteCard = _Translations$sharedSpace$inviteCard$ja._(_root);
+	@override late final _Translations$sharedSpace$inviteSuccess$ja inviteSuccess = _Translations$sharedSpace$inviteSuccess$ja._(_root);
+	@override late final _Translations$sharedSpace$notificationCard$ja notificationCard = _Translations$sharedSpace$notificationCard$ja._(_root);
+	@override late final _Translations$sharedSpace$spaceCard$ja spaceCard = _Translations$sharedSpace$spaceCard$ja._(_root);
+	@override late final _Translations$sharedSpace$settings$ja settings = _Translations$sharedSpace$settings$ja._(_root);
 }
 
 // Path: budgetSuggestion
@@ -976,6 +981,7 @@ class _Translations$notification$ja extends Translations$notification$zh {
 	@override String daysAgo({required Object days}) => '${days}日前';
 	@override String get deleted => '削除しました';
 	@override late final _Translations$notification$types$ja types = _Translations$notification$types$ja._(_root);
+	@override late final _Translations$notification$semantic$ja semantic = _Translations$notification$semantic$ja._(_root);
 }
 
 // Path: auth.email
@@ -1314,6 +1320,7 @@ class _Translations$sharedSpace$dashboard$ja extends Translations$sharedSpace$da
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
+	@override String get sectionTitle => '財務概要';
 	@override String get cumulativeTotalExpense => '累計総支出';
 	@override String get participatingMembers => '参加メンバー';
 	@override String membersCount({required Object count}) => '${count} 人';
@@ -1365,7 +1372,7 @@ class _Translations$sharedSpace$join$ja extends Translations$sharedSpace$join$zh
 	@override String get title => '共有スペースに参加';
 	@override String get subtitle => '友達から共有された招待コードを入力して、共同家計を始めましょう';
 	@override String get codeLabel => '招待コード';
-	@override String get codeHint => '招待コードを入力、例：A8K2F9G7';
+	@override String get codeHint => '招待コードを入力、例：123456';
 	@override String get cancel => 'キャンセル';
 	@override String get submit => '参加';
 	@override String get codeRequired => '招待コードを入力してください';
@@ -1396,6 +1403,7 @@ class _Translations$sharedSpace$detail$ja extends Translations$sharedSpace$detai
 	// Translations
 	@override String get members => 'メンバー';
 	@override String get transactions => '取引履歴';
+	@override String recordsCount({required Object count}) => '${count} 件';
 	@override String get settlement => '精算';
 	@override String get inviteCode => '招待コード';
 	@override String get copyCode => '招待コードをコピー';
@@ -1412,6 +1420,8 @@ class _Translations$sharedSpace$detail$ja extends Translations$sharedSpace$detai
 	@override String get retry => '再試行';
 	@override String get noTransactions => '取引はまだありません';
 	@override String get noTransactionsHint => 'このスペースの取引がここに表示されます';
+	@override String get refreshCode => 'コードを更新';
+	@override String get joinOtherSpace => '他のスペースに参加';
 }
 
 // Path: sharedSpace.notifications
@@ -1428,6 +1438,114 @@ class _Translations$sharedSpace$notifications$ja extends Translations$sharedSpac
 	@override String get inviteAccepted => '招待を承認しました！';
 	@override String get inviteRejected => '招待を拒否しました';
 	@override String get allMarkedRead => 'すべて既読にしました';
+}
+
+// Path: sharedSpace.inviteCard
+class _Translations$sharedSpace$inviteCard$ja extends Translations$sharedSpace$inviteCard$zh {
+	_Translations$sharedSpace$inviteCard$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '招待コード';
+	@override String get subtitle => '友達と共有してスペースに参加';
+	@override String get copyCode => '招待コードをコピー';
+	@override String get shareLink => '招待リンクを共有';
+	@override String get codeCopied => '招待コードをコピーしました';
+	@override String get noExpiry => '無期限';
+	@override String get expired => '期限切れ';
+	@override String expiresInDays({required Object days}) => '${days}日後に期限切れ';
+	@override String expiresInHours({required Object hours}) => '${hours}時間後に期限切れ';
+	@override String expiresInMinutes({required Object minutes}) => '${minutes}分後に期限切れ';
+	@override String get expiringSoon => 'まもなく期限切れ';
+	@override String shareText({required Object spaceName, required Object code, required Object link, required Object expiry}) => '共有スペース「${spaceName}」に招待されました\n\n招待コード：${code}\nまたはリンクをクリックして直接参加：${link}\n\n招待コード${expiry}';
+}
+
+// Path: sharedSpace.inviteSuccess
+class _Translations$sharedSpace$inviteSuccess$ja extends Translations$sharedSpace$inviteSuccess$zh {
+	_Translations$sharedSpace$inviteSuccess$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '作成完了';
+	@override String get subtitle => '共有スペースが作成されました';
+	@override String get inviteLater => '後で招待';
+	@override String get enterSpace => 'スペースに入る';
+	@override String get generatingCode => '招待コードを生成中...';
+	@override String get generateFailed => '招待コードの生成に失敗しました';
+	@override String get codeCopied => '招待コードをコピーしました';
+	@override String get retry => '再試行';
+	@override String get codeLabel => '招待コード';
+	@override String get validHint => '24時間有効 · タップしてコピー';
+}
+
+// Path: sharedSpace.notificationCard
+class _Translations$sharedSpace$notificationCard$ja extends Translations$sharedSpace$notificationCard$zh {
+	_Translations$sharedSpace$notificationCard$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get accept => '承認';
+	@override String get reject => '拒否';
+	@override String get unknownTime => '不明な時間';
+	@override String get justNow => 'たった今';
+}
+
+// Path: sharedSpace.spaceCard
+class _Translations$sharedSpace$spaceCard$ja extends Translations$sharedSpace$spaceCard$zh {
+	_Translations$sharedSpace$spaceCard$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get noDescription => '説明なし';
+	@override String get creator => '作成者';
+	@override String get member => 'メンバー';
+	@override String membersCount({required Object count}) => '${count} 人のメンバー';
+	@override String transactionsCount({required Object count}) => '${count} 件の取引';
+}
+
+// Path: sharedSpace.settings
+class _Translations$sharedSpace$settings$ja extends Translations$sharedSpace$settings$zh {
+	_Translations$sharedSpace$settings$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'スペース設定';
+	@override String get spaceInfo => 'スペース情報';
+	@override String get nameLabel => 'スペース名';
+	@override String get descLabel => 'スペースの説明';
+	@override String get save => '保存';
+	@override String get saved => '保存しました';
+	@override String get saveFailed => '保存に失敗しました';
+	@override String get memberManagement => 'メンバー管理';
+	@override String membersCount({required Object count}) => '${count} 人のメンバー';
+	@override String removeMemberConfirm({required Object name}) => '「${name}」をスペースから削除しますか？';
+	@override String get removed => 'メンバーを削除しました';
+	@override String get removeFailed => '削除に失敗しました';
+	@override String get inviteManagement => '招待管理';
+	@override String get currentCode => '現在の招待コード';
+	@override String get generateNew => '新しいコードを生成';
+	@override String get noValidCode => '有効な招待コードがありません';
+	@override String get refreshCode => 'コードを更新';
+	@override String get refreshConfirm => '新しいコードを生成すると古いコードは無効になります。続行しますか？';
+	@override String get codeRefreshed => '招待コードを更新しました';
+	@override String get dangerZone => '危険な操作';
+	@override String get editHint => '管理者のみ編集可能';
+	@override String get edit => '編集';
+	@override String get you => '自分';
+	@override String get pending => '承認待ち';
+	@override String get declined => '拒否済み';
+	@override String get setAsAdmin => '管理者に設定';
+	@override String get setAsMember => 'メンバーに設定';
+	@override String get changeRole => '役割を変更';
+	@override String changeRoleConfirm({required Object name, required Object role}) => '「${name}」の役割を「${role}」に変更しますか？';
+	@override String get confirm => '確認';
+	@override String get roleChanged => '役割を変更しました';
+	@override String get roleChangeFailed => '役割の変更に失敗しました';
 }
 
 // Path: server.error
@@ -1569,6 +1687,21 @@ class _Translations$notification$types$ja extends Translations$notification$type
 	@override String get billComment => '請求コメント';
 	@override String get budgetAlert => '予算アラート';
 	@override String get transaction => '取引通知';
+}
+
+// Path: notification.semantic
+class _Translations$notification$semantic$ja extends Translations$notification$semantic$zh {
+	_Translations$notification$semantic$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String memberJoined({required Object name}) => '${name} さんがスペースに参加しました';
+	@override String memberJoinedDetail({required Object space}) => '新しいメンバーが「${space}」に参加しました';
+	@override String welcome({required Object space}) => '「${space}」へようこそ';
+	@override String newTransaction({required Object name}) => '${name} さんが新しい支出を記録しました';
+	@override String newTransactionDetail({required Object amount, required Object space}) => '${amount}、「${space}」より';
+	@override String memberLeft({required Object name}) => '${name} さんがスペースを退出しました';
 }
 
 // Path: chat.tools.done
@@ -3038,6 +3171,7 @@ extension on TranslationsJa {
 			'currency.hkd' => '香港ドル',
 			'currency.twd' => '新台湾ドル',
 			'currency.inr' => 'インドルピー',
+			'sharedSpace.dashboard.sectionTitle' => '財務概要',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => '累計総支出',
 			'sharedSpace.dashboard.participatingMembers' => '参加メンバー',
 			'sharedSpace.dashboard.membersCount' => ({required Object count}) => '${count} 人',
@@ -3063,7 +3197,7 @@ extension on TranslationsJa {
 			'sharedSpace.join.title' => '共有スペースに参加',
 			'sharedSpace.join.subtitle' => '友達から共有された招待コードを入力して、共同家計を始めましょう',
 			'sharedSpace.join.codeLabel' => '招待コード',
-			'sharedSpace.join.codeHint' => '招待コードを入力、例：A8K2F9G7',
+			'sharedSpace.join.codeHint' => '招待コードを入力、例：123456',
 			'sharedSpace.join.cancel' => 'キャンセル',
 			'sharedSpace.join.submit' => '参加',
 			'sharedSpace.join.codeRequired' => '招待コードを入力してください',
@@ -3076,6 +3210,7 @@ extension on TranslationsJa {
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '「${name}」に参加しました！',
 			'sharedSpace.detail.members' => 'メンバー',
 			'sharedSpace.detail.transactions' => '取引履歴',
+			'sharedSpace.detail.recordsCount' => ({required Object count}) => '${count} 件',
 			'sharedSpace.detail.settlement' => '精算',
 			'sharedSpace.detail.inviteCode' => '招待コード',
 			'sharedSpace.detail.copyCode' => '招待コードをコピー',
@@ -3092,6 +3227,8 @@ extension on TranslationsJa {
 			'sharedSpace.detail.retry' => '再試行',
 			'sharedSpace.detail.noTransactions' => '取引はまだありません',
 			'sharedSpace.detail.noTransactionsHint' => 'このスペースの取引がここに表示されます',
+			'sharedSpace.detail.refreshCode' => 'コードを更新',
+			'sharedSpace.detail.joinOtherSpace' => '他のスペースに参加',
 			'sharedSpace.notifications.title' => 'お知らせ',
 			'sharedSpace.notifications.empty' => 'お知らせはありません',
 			'sharedSpace.notifications.emptyHint' => '新しい招待やアクティビティがあると、\nここにお知らせが表示されます',
@@ -3099,6 +3236,69 @@ extension on TranslationsJa {
 			'sharedSpace.notifications.inviteAccepted' => '招待を承認しました！',
 			'sharedSpace.notifications.inviteRejected' => '招待を拒否しました',
 			'sharedSpace.notifications.allMarkedRead' => 'すべて既読にしました',
+			'sharedSpace.inviteCard.title' => '招待コード',
+			'sharedSpace.inviteCard.subtitle' => '友達と共有してスペースに参加',
+			'sharedSpace.inviteCard.copyCode' => '招待コードをコピー',
+			'sharedSpace.inviteCard.shareLink' => '招待リンクを共有',
+			'sharedSpace.inviteCard.codeCopied' => '招待コードをコピーしました',
+			'sharedSpace.inviteCard.noExpiry' => '無期限',
+			'sharedSpace.inviteCard.expired' => '期限切れ',
+			'sharedSpace.inviteCard.expiresInDays' => ({required Object days}) => '${days}日後に期限切れ',
+			'sharedSpace.inviteCard.expiresInHours' => ({required Object hours}) => '${hours}時間後に期限切れ',
+			'sharedSpace.inviteCard.expiresInMinutes' => ({required Object minutes}) => '${minutes}分後に期限切れ',
+			'sharedSpace.inviteCard.expiringSoon' => 'まもなく期限切れ',
+			'sharedSpace.inviteCard.shareText' => ({required Object spaceName, required Object code, required Object link, required Object expiry}) => '共有スペース「${spaceName}」に招待されました\n\n招待コード：${code}\nまたはリンクをクリックして直接参加：${link}\n\n招待コード${expiry}',
+			'sharedSpace.inviteSuccess.title' => '作成完了',
+			'sharedSpace.inviteSuccess.subtitle' => '共有スペースが作成されました',
+			'sharedSpace.inviteSuccess.inviteLater' => '後で招待',
+			'sharedSpace.inviteSuccess.enterSpace' => 'スペースに入る',
+			'sharedSpace.inviteSuccess.generatingCode' => '招待コードを生成中...',
+			'sharedSpace.inviteSuccess.generateFailed' => '招待コードの生成に失敗しました',
+			'sharedSpace.inviteSuccess.codeCopied' => '招待コードをコピーしました',
+			'sharedSpace.inviteSuccess.retry' => '再試行',
+			'sharedSpace.inviteSuccess.codeLabel' => '招待コード',
+			'sharedSpace.inviteSuccess.validHint' => '24時間有効 · タップしてコピー',
+			'sharedSpace.notificationCard.accept' => '承認',
+			'sharedSpace.notificationCard.reject' => '拒否',
+			'sharedSpace.notificationCard.unknownTime' => '不明な時間',
+			'sharedSpace.notificationCard.justNow' => 'たった今',
+			'sharedSpace.spaceCard.noDescription' => '説明なし',
+			'sharedSpace.spaceCard.creator' => '作成者',
+			'sharedSpace.spaceCard.member' => 'メンバー',
+			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count} 人のメンバー',
+			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count} 件の取引',
+			'sharedSpace.settings.title' => 'スペース設定',
+			'sharedSpace.settings.spaceInfo' => 'スペース情報',
+			'sharedSpace.settings.nameLabel' => 'スペース名',
+			'sharedSpace.settings.descLabel' => 'スペースの説明',
+			'sharedSpace.settings.save' => '保存',
+			'sharedSpace.settings.saved' => '保存しました',
+			'sharedSpace.settings.saveFailed' => '保存に失敗しました',
+			'sharedSpace.settings.memberManagement' => 'メンバー管理',
+			'sharedSpace.settings.membersCount' => ({required Object count}) => '${count} 人のメンバー',
+			'sharedSpace.settings.removeMemberConfirm' => ({required Object name}) => '「${name}」をスペースから削除しますか？',
+			'sharedSpace.settings.removed' => 'メンバーを削除しました',
+			'sharedSpace.settings.removeFailed' => '削除に失敗しました',
+			'sharedSpace.settings.inviteManagement' => '招待管理',
+			'sharedSpace.settings.currentCode' => '現在の招待コード',
+			'sharedSpace.settings.generateNew' => '新しいコードを生成',
+			'sharedSpace.settings.noValidCode' => '有効な招待コードがありません',
+			'sharedSpace.settings.refreshCode' => 'コードを更新',
+			'sharedSpace.settings.refreshConfirm' => '新しいコードを生成すると古いコードは無効になります。続行しますか？',
+			'sharedSpace.settings.codeRefreshed' => '招待コードを更新しました',
+			'sharedSpace.settings.dangerZone' => '危険な操作',
+			'sharedSpace.settings.editHint' => '管理者のみ編集可能',
+			'sharedSpace.settings.edit' => '編集',
+			'sharedSpace.settings.you' => '自分',
+			'sharedSpace.settings.pending' => '承認待ち',
+			'sharedSpace.settings.declined' => '拒否済み',
+			'sharedSpace.settings.setAsAdmin' => '管理者に設定',
+			'sharedSpace.settings.setAsMember' => 'メンバーに設定',
+			'sharedSpace.settings.changeRole' => '役割を変更',
+			'sharedSpace.settings.changeRoleConfirm' => ({required Object name, required Object role}) => '「${name}」の役割を「${role}」に変更しますか？',
+			'sharedSpace.settings.confirm' => '確認',
+			'sharedSpace.settings.roleChanged' => '役割を変更しました',
+			'sharedSpace.settings.roleChangeFailed' => '役割の変更に失敗しました',
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
@@ -3108,6 +3308,8 @@ extension on TranslationsJa {
 			'server.urlLabel' => 'Server Address',
 			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
 			'server.scanQr' => 'Scan QR Code',
+			_ => null,
+		} ?? switch (path) {
 			'server.scanQrInstruction' => 'Point at the QR code displayed in the server terminal',
 			'server.testConnection' => 'Test Connection',
 			'server.connecting' => 'Connecting...',
@@ -3175,8 +3377,6 @@ extension on TranslationsJa {
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
-			_ => null,
-		} ?? switch (path) {
 			'notification.title' => 'お知らせ',
 			'notification.markAllRead' => 'すべて既読',
 			'notification.empty' => 'お知らせはありません',
@@ -3193,6 +3393,12 @@ extension on TranslationsJa {
 			'notification.types.billComment' => '請求コメント',
 			'notification.types.budgetAlert' => '予算アラート',
 			'notification.types.transaction' => '取引通知',
+			'notification.semantic.memberJoined' => ({required Object name}) => '${name} さんがスペースに参加しました',
+			'notification.semantic.memberJoinedDetail' => ({required Object space}) => '新しいメンバーが「${space}」に参加しました',
+			'notification.semantic.welcome' => ({required Object space}) => '「${space}」へようこそ',
+			'notification.semantic.newTransaction' => ({required Object name}) => '${name} さんが新しい支出を記録しました',
+			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount}、「${space}」より',
+			'notification.semantic.memberLeft' => ({required Object name}) => '${name} さんがスペースを退出しました',
 			_ => null,
 		};
 	}

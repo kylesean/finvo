@@ -899,6 +899,11 @@ class _Translations$sharedSpace$zh_Hant extends Translations$sharedSpace$zh {
 	@override late final _Translations$sharedSpace$list$zh_Hant list = _Translations$sharedSpace$list$zh_Hant._(_root);
 	@override late final _Translations$sharedSpace$detail$zh_Hant detail = _Translations$sharedSpace$detail$zh_Hant._(_root);
 	@override late final _Translations$sharedSpace$notifications$zh_Hant notifications = _Translations$sharedSpace$notifications$zh_Hant._(_root);
+	@override late final _Translations$sharedSpace$inviteCard$zh_Hant inviteCard = _Translations$sharedSpace$inviteCard$zh_Hant._(_root);
+	@override late final _Translations$sharedSpace$inviteSuccess$zh_Hant inviteSuccess = _Translations$sharedSpace$inviteSuccess$zh_Hant._(_root);
+	@override late final _Translations$sharedSpace$notificationCard$zh_Hant notificationCard = _Translations$sharedSpace$notificationCard$zh_Hant._(_root);
+	@override late final _Translations$sharedSpace$spaceCard$zh_Hant spaceCard = _Translations$sharedSpace$spaceCard$zh_Hant._(_root);
+	@override late final _Translations$sharedSpace$settings$zh_Hant settings = _Translations$sharedSpace$settings$zh_Hant._(_root);
 }
 
 // Path: budgetSuggestion
@@ -976,6 +981,7 @@ class _Translations$notification$zh_Hant extends Translations$notification$zh {
 	@override String daysAgo({required Object days}) => '${days}天前';
 	@override String get deleted => '已刪除';
 	@override late final _Translations$notification$types$zh_Hant types = _Translations$notification$types$zh_Hant._(_root);
+	@override late final _Translations$notification$semantic$zh_Hant semantic = _Translations$notification$semantic$zh_Hant._(_root);
 }
 
 // Path: auth.email
@@ -1314,6 +1320,7 @@ class _Translations$sharedSpace$dashboard$zh_Hant extends Translations$sharedSpa
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
+	@override String get sectionTitle => '財務概覽';
 	@override String get cumulativeTotalExpense => '累計總支出';
 	@override String get participatingMembers => '參與成員';
 	@override String membersCount({required Object count}) => '${count} 人';
@@ -1365,7 +1372,7 @@ class _Translations$sharedSpace$join$zh_Hant extends Translations$sharedSpace$jo
 	@override String get title => '加入共享空間';
 	@override String get subtitle => '輸入朋友分享的邀請碼，開始協作記帳';
 	@override String get codeLabel => '邀請碼';
-	@override String get codeHint => '輸入邀請碼，例如：A8K2F9G7';
+	@override String get codeHint => '輸入邀請碼，例如：123456';
 	@override String get cancel => '取消';
 	@override String get submit => '加入';
 	@override String get codeRequired => '請輸入邀請碼';
@@ -1396,6 +1403,7 @@ class _Translations$sharedSpace$detail$zh_Hant extends Translations$sharedSpace$
 	// Translations
 	@override String get members => '成員';
 	@override String get transactions => '交易紀錄';
+	@override String recordsCount({required Object count}) => '${count} 筆';
 	@override String get settlement => '結算';
 	@override String get inviteCode => '邀請碼';
 	@override String get copyCode => '複製邀請碼';
@@ -1412,6 +1420,8 @@ class _Translations$sharedSpace$detail$zh_Hant extends Translations$sharedSpace$
 	@override String get retry => '重試';
 	@override String get noTransactions => '暫無交易紀錄';
 	@override String get noTransactionsHint => '空間內的交易將顯示在這裡';
+	@override String get refreshCode => '重新產生新碼';
+	@override String get joinOtherSpace => '加入其他空間';
 }
 
 // Path: sharedSpace.notifications
@@ -1428,6 +1438,114 @@ class _Translations$sharedSpace$notifications$zh_Hant extends Translations$share
 	@override String get inviteAccepted => '已接受邀請！';
 	@override String get inviteRejected => '已拒絕邀請';
 	@override String get allMarkedRead => '全部標記為已讀';
+}
+
+// Path: sharedSpace.inviteCard
+class _Translations$sharedSpace$inviteCard$zh_Hant extends Translations$sharedSpace$inviteCard$zh {
+	_Translations$sharedSpace$inviteCard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '邀請碼';
+	@override String get subtitle => '分享給朋友以加入空間';
+	@override String get copyCode => '複製邀請碼';
+	@override String get shareLink => '分享邀請連結';
+	@override String get codeCopied => '邀請碼已複製';
+	@override String get noExpiry => '無有效期限制';
+	@override String get expired => '已過期';
+	@override String expiresInDays({required Object days}) => '${days} 天後過期';
+	@override String expiresInHours({required Object hours}) => '${hours} 小時後過期';
+	@override String expiresInMinutes({required Object minutes}) => '${minutes} 分鐘後過期';
+	@override String get expiringSoon => '即將過期';
+	@override String shareText({required Object spaceName, required Object code, required Object link, required Object expiry}) => '邀請你加入共享空間「${spaceName}」\n\n邀請碼：${code}\n或點擊連結直接加入：${link}\n\n邀請碼${expiry}';
+}
+
+// Path: sharedSpace.inviteSuccess
+class _Translations$sharedSpace$inviteSuccess$zh_Hant extends Translations$sharedSpace$inviteSuccess$zh {
+	_Translations$sharedSpace$inviteSuccess$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '建立成功';
+	@override String get subtitle => '共享空間建立成功';
+	@override String get inviteLater => '稍後邀請';
+	@override String get enterSpace => '進入空間';
+	@override String get generatingCode => '正在產生邀請碼...';
+	@override String get generateFailed => '邀請碼產生失敗';
+	@override String get codeCopied => '邀請碼已複製';
+	@override String get retry => '重試';
+	@override String get codeLabel => '邀請碼';
+	@override String get validHint => '24 小時內有效 · 點擊複製';
+}
+
+// Path: sharedSpace.notificationCard
+class _Translations$sharedSpace$notificationCard$zh_Hant extends Translations$sharedSpace$notificationCard$zh {
+	_Translations$sharedSpace$notificationCard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get accept => '接受';
+	@override String get reject => '拒絕';
+	@override String get unknownTime => '未知時間';
+	@override String get justNow => '剛剛';
+}
+
+// Path: sharedSpace.spaceCard
+class _Translations$sharedSpace$spaceCard$zh_Hant extends Translations$sharedSpace$spaceCard$zh {
+	_Translations$sharedSpace$spaceCard$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get noDescription => '暫無描述';
+	@override String get creator => '建立者';
+	@override String get member => '成員';
+	@override String membersCount({required Object count}) => '${count} 位成員';
+	@override String transactionsCount({required Object count}) => '${count} 筆帳單';
+}
+
+// Path: sharedSpace.settings
+class _Translations$sharedSpace$settings$zh_Hant extends Translations$sharedSpace$settings$zh {
+	_Translations$sharedSpace$settings$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '空間設定';
+	@override String get spaceInfo => '空間資訊';
+	@override String get nameLabel => '空間名稱';
+	@override String get descLabel => '空間描述';
+	@override String get save => '儲存';
+	@override String get saved => '儲存成功';
+	@override String get saveFailed => '儲存失敗';
+	@override String get memberManagement => '成員管理';
+	@override String membersCount({required Object count}) => '${count} 位成員';
+	@override String removeMemberConfirm({required Object name}) => '確定要將「${name}」移出空間嗎？';
+	@override String get removed => '已移除成員';
+	@override String get removeFailed => '移除失敗';
+	@override String get inviteManagement => '邀請管理';
+	@override String get currentCode => '目前邀請碼';
+	@override String get generateNew => '產生新邀請碼';
+	@override String get noValidCode => '暫無有效邀請碼';
+	@override String get refreshCode => '重新產生新碼';
+	@override String get refreshConfirm => '產生新碼將使舊邀請碼失效，確定繼續？';
+	@override String get codeRefreshed => '邀請碼已重新整理';
+	@override String get dangerZone => '危險操作';
+	@override String get editHint => '僅管理員可編輯';
+	@override String get edit => '編輯';
+	@override String get you => '我';
+	@override String get pending => '待接受';
+	@override String get declined => '已拒絕';
+	@override String get setAsAdmin => '設為管理員';
+	@override String get setAsMember => '設為普通成員';
+	@override String get changeRole => '變更角色';
+	@override String changeRoleConfirm({required Object name, required Object role}) => '確定要將「${name}」的角色變更為「${role}」嗎？';
+	@override String get confirm => '確認';
+	@override String get roleChanged => '角色已變更';
+	@override String get roleChangeFailed => '角色變更失敗';
 }
 
 // Path: server.error
@@ -1569,6 +1687,21 @@ class _Translations$notification$types$zh_Hant extends Translations$notification
 	@override String get billComment => '帳單評論';
 	@override String get budgetAlert => '預算提醒';
 	@override String get transaction => '交易通知';
+}
+
+// Path: notification.semantic
+class _Translations$notification$semantic$zh_Hant extends Translations$notification$semantic$zh {
+	_Translations$notification$semantic$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String memberJoined({required Object name}) => '${name} 加入了你的空間';
+	@override String memberJoinedDetail({required Object space}) => '新成員加入了「${space}」';
+	@override String welcome({required Object space}) => '歡迎加入「${space}」';
+	@override String newTransaction({required Object name}) => '${name} 記錄了一筆新帳單';
+	@override String newTransactionDetail({required Object amount, required Object space}) => '${amount}，來自「${space}」';
+	@override String memberLeft({required Object name}) => '${name} 離開了空間';
 }
 
 // Path: chat.tools.done
@@ -3038,6 +3171,7 @@ extension on TranslationsZhHant {
 			'currency.hkd' => '港幣',
 			'currency.twd' => '新台幣',
 			'currency.inr' => '印度盧比',
+			'sharedSpace.dashboard.sectionTitle' => '財務概覽',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => '累計總支出',
 			'sharedSpace.dashboard.participatingMembers' => '參與成員',
 			'sharedSpace.dashboard.membersCount' => ({required Object count}) => '${count} 人',
@@ -3063,7 +3197,7 @@ extension on TranslationsZhHant {
 			'sharedSpace.join.title' => '加入共享空間',
 			'sharedSpace.join.subtitle' => '輸入朋友分享的邀請碼，開始協作記帳',
 			'sharedSpace.join.codeLabel' => '邀請碼',
-			'sharedSpace.join.codeHint' => '輸入邀請碼，例如：A8K2F9G7',
+			'sharedSpace.join.codeHint' => '輸入邀請碼，例如：123456',
 			'sharedSpace.join.cancel' => '取消',
 			'sharedSpace.join.submit' => '加入',
 			'sharedSpace.join.codeRequired' => '請輸入邀請碼',
@@ -3076,6 +3210,7 @@ extension on TranslationsZhHant {
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '成功加入「${name}」！',
 			'sharedSpace.detail.members' => '成員',
 			'sharedSpace.detail.transactions' => '交易紀錄',
+			'sharedSpace.detail.recordsCount' => ({required Object count}) => '${count} 筆',
 			'sharedSpace.detail.settlement' => '結算',
 			'sharedSpace.detail.inviteCode' => '邀請碼',
 			'sharedSpace.detail.copyCode' => '複製邀請碼',
@@ -3092,6 +3227,8 @@ extension on TranslationsZhHant {
 			'sharedSpace.detail.retry' => '重試',
 			'sharedSpace.detail.noTransactions' => '暫無交易紀錄',
 			'sharedSpace.detail.noTransactionsHint' => '空間內的交易將顯示在這裡',
+			'sharedSpace.detail.refreshCode' => '重新產生新碼',
+			'sharedSpace.detail.joinOtherSpace' => '加入其他空間',
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暫無通知',
 			'sharedSpace.notifications.emptyHint' => '當你收到新的邀請或動態時，\n通知將顯示在這裡',
@@ -3099,6 +3236,69 @@ extension on TranslationsZhHant {
 			'sharedSpace.notifications.inviteAccepted' => '已接受邀請！',
 			'sharedSpace.notifications.inviteRejected' => '已拒絕邀請',
 			'sharedSpace.notifications.allMarkedRead' => '全部標記為已讀',
+			'sharedSpace.inviteCard.title' => '邀請碼',
+			'sharedSpace.inviteCard.subtitle' => '分享給朋友以加入空間',
+			'sharedSpace.inviteCard.copyCode' => '複製邀請碼',
+			'sharedSpace.inviteCard.shareLink' => '分享邀請連結',
+			'sharedSpace.inviteCard.codeCopied' => '邀請碼已複製',
+			'sharedSpace.inviteCard.noExpiry' => '無有效期限制',
+			'sharedSpace.inviteCard.expired' => '已過期',
+			'sharedSpace.inviteCard.expiresInDays' => ({required Object days}) => '${days} 天後過期',
+			'sharedSpace.inviteCard.expiresInHours' => ({required Object hours}) => '${hours} 小時後過期',
+			'sharedSpace.inviteCard.expiresInMinutes' => ({required Object minutes}) => '${minutes} 分鐘後過期',
+			'sharedSpace.inviteCard.expiringSoon' => '即將過期',
+			'sharedSpace.inviteCard.shareText' => ({required Object spaceName, required Object code, required Object link, required Object expiry}) => '邀請你加入共享空間「${spaceName}」\n\n邀請碼：${code}\n或點擊連結直接加入：${link}\n\n邀請碼${expiry}',
+			'sharedSpace.inviteSuccess.title' => '建立成功',
+			'sharedSpace.inviteSuccess.subtitle' => '共享空間建立成功',
+			'sharedSpace.inviteSuccess.inviteLater' => '稍後邀請',
+			'sharedSpace.inviteSuccess.enterSpace' => '進入空間',
+			'sharedSpace.inviteSuccess.generatingCode' => '正在產生邀請碼...',
+			'sharedSpace.inviteSuccess.generateFailed' => '邀請碼產生失敗',
+			'sharedSpace.inviteSuccess.codeCopied' => '邀請碼已複製',
+			'sharedSpace.inviteSuccess.retry' => '重試',
+			'sharedSpace.inviteSuccess.codeLabel' => '邀請碼',
+			'sharedSpace.inviteSuccess.validHint' => '24 小時內有效 · 點擊複製',
+			'sharedSpace.notificationCard.accept' => '接受',
+			'sharedSpace.notificationCard.reject' => '拒絕',
+			'sharedSpace.notificationCard.unknownTime' => '未知時間',
+			'sharedSpace.notificationCard.justNow' => '剛剛',
+			'sharedSpace.spaceCard.noDescription' => '暫無描述',
+			'sharedSpace.spaceCard.creator' => '建立者',
+			'sharedSpace.spaceCard.member' => '成員',
+			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count} 位成員',
+			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count} 筆帳單',
+			'sharedSpace.settings.title' => '空間設定',
+			'sharedSpace.settings.spaceInfo' => '空間資訊',
+			'sharedSpace.settings.nameLabel' => '空間名稱',
+			'sharedSpace.settings.descLabel' => '空間描述',
+			'sharedSpace.settings.save' => '儲存',
+			'sharedSpace.settings.saved' => '儲存成功',
+			'sharedSpace.settings.saveFailed' => '儲存失敗',
+			'sharedSpace.settings.memberManagement' => '成員管理',
+			'sharedSpace.settings.membersCount' => ({required Object count}) => '${count} 位成員',
+			'sharedSpace.settings.removeMemberConfirm' => ({required Object name}) => '確定要將「${name}」移出空間嗎？',
+			'sharedSpace.settings.removed' => '已移除成員',
+			'sharedSpace.settings.removeFailed' => '移除失敗',
+			'sharedSpace.settings.inviteManagement' => '邀請管理',
+			'sharedSpace.settings.currentCode' => '目前邀請碼',
+			'sharedSpace.settings.generateNew' => '產生新邀請碼',
+			'sharedSpace.settings.noValidCode' => '暫無有效邀請碼',
+			'sharedSpace.settings.refreshCode' => '重新產生新碼',
+			'sharedSpace.settings.refreshConfirm' => '產生新碼將使舊邀請碼失效，確定繼續？',
+			'sharedSpace.settings.codeRefreshed' => '邀請碼已重新整理',
+			'sharedSpace.settings.dangerZone' => '危險操作',
+			'sharedSpace.settings.editHint' => '僅管理員可編輯',
+			'sharedSpace.settings.edit' => '編輯',
+			'sharedSpace.settings.you' => '我',
+			'sharedSpace.settings.pending' => '待接受',
+			'sharedSpace.settings.declined' => '已拒絕',
+			'sharedSpace.settings.setAsAdmin' => '設為管理員',
+			'sharedSpace.settings.setAsMember' => '設為普通成員',
+			'sharedSpace.settings.changeRole' => '變更角色',
+			'sharedSpace.settings.changeRoleConfirm' => ({required Object name, required Object role}) => '確定要將「${name}」的角色變更為「${role}」嗎？',
+			'sharedSpace.settings.confirm' => '確認',
+			'sharedSpace.settings.roleChanged' => '角色已變更',
+			'sharedSpace.settings.roleChangeFailed' => '角色變更失敗',
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
@@ -3108,6 +3308,8 @@ extension on TranslationsZhHant {
 			'server.urlLabel' => 'Server Address',
 			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
 			'server.scanQr' => 'Scan QR Code',
+			_ => null,
+		} ?? switch (path) {
 			'server.scanQrInstruction' => 'Point at the QR code displayed in the server terminal',
 			'server.testConnection' => 'Test Connection',
 			'server.connecting' => 'Connecting...',
@@ -3175,8 +3377,6 @@ extension on TranslationsZhHant {
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
-			_ => null,
-		} ?? switch (path) {
 			'notification.title' => '訊息通知',
 			'notification.markAllRead' => '全部已讀',
 			'notification.empty' => '暫無通知訊息',
@@ -3193,6 +3393,12 @@ extension on TranslationsZhHant {
 			'notification.types.billComment' => '帳單評論',
 			'notification.types.budgetAlert' => '預算提醒',
 			'notification.types.transaction' => '交易通知',
+			'notification.semantic.memberJoined' => ({required Object name}) => '${name} 加入了你的空間',
+			'notification.semantic.memberJoinedDetail' => ({required Object space}) => '新成員加入了「${space}」',
+			'notification.semantic.welcome' => ({required Object space}) => '歡迎加入「${space}」',
+			'notification.semantic.newTransaction' => ({required Object name}) => '${name} 記錄了一筆新帳單',
+			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount}，來自「${space}」',
+			'notification.semantic.memberLeft' => ({required Object name}) => '${name} 離開了空間',
 			_ => null,
 		};
 	}

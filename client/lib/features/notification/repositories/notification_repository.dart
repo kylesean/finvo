@@ -26,16 +26,17 @@ class NotificationRepository {
         },
       );
 
-      final notificationsJson =
-          (response['notifications'] as List<dynamic>?) ?? [];
+      // API response structure: {code, message, data: {notifications, total, unreadCount}}
+      final data = response['data'] as Map<String, dynamic>? ?? response;
+      final notificationsJson = (data['notifications'] as List<dynamic>?) ?? [];
       final items = notificationsJson
           .map(
             (json) => NotificationItem.fromJson(json as Map<String, dynamic>),
           )
           .toList();
 
-      final total = response['total'] as int? ?? items.length;
-      final unreadCount = response['unreadCount'] as int? ?? 0;
+      final total = data['total'] as int? ?? items.length;
+      final unreadCount = data['unreadCount'] as int? ?? 0;
 
       return (items: items, total: total, unreadCount: unreadCount);
     } catch (e, stackTrace) {
@@ -51,7 +52,8 @@ class NotificationRepository {
         '/notifications/unread-count',
         method: HttpMethod.get,
       );
-      return response['count'] as int? ?? 0;
+      final data = response['data'] as Map<String, dynamic>? ?? response;
+      return data['count'] as int? ?? 0;
     } catch (e) {
       _logger.warning('Failed to get unread count: $e');
       return 0;

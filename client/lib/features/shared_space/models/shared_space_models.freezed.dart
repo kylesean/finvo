@@ -568,7 +568,7 @@ as String?,
 /// @nodoc
 mixin _$SharedSpace {
 
- String get id; String get name; String? get description; SpaceCreator get creator; DateTime? get createdAt; DateTime? get updatedAt; List<SharedSpaceMember>? get members; int get transactionCount; String? get currentInviteCode; DateTime? get inviteCodeExpiresAt; String get totalExpense;
+ String get id; String get name; String? get description; SpaceCreator get creator; MemberRole get role; DateTime? get createdAt; DateTime? get updatedAt; List<SharedSpaceMember>? get members; int get transactionCount; String? get currentInviteCode; DateTime? get inviteCodeExpiresAt; String get totalExpense;
 /// Create a copy of SharedSpace
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -581,16 +581,16 @@ $SharedSpaceCopyWith<SharedSpace> get copyWith => _$SharedSpaceCopyWithImpl<Shar
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedSpace&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.creator, creator) || other.creator == creator)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.members, members)&&(identical(other.transactionCount, transactionCount) || other.transactionCount == transactionCount)&&(identical(other.currentInviteCode, currentInviteCode) || other.currentInviteCode == currentInviteCode)&&(identical(other.inviteCodeExpiresAt, inviteCodeExpiresAt) || other.inviteCodeExpiresAt == inviteCodeExpiresAt)&&(identical(other.totalExpense, totalExpense) || other.totalExpense == totalExpense));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedSpace&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.creator, creator) || other.creator == creator)&&(identical(other.role, role) || other.role == role)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.members, members)&&(identical(other.transactionCount, transactionCount) || other.transactionCount == transactionCount)&&(identical(other.currentInviteCode, currentInviteCode) || other.currentInviteCode == currentInviteCode)&&(identical(other.inviteCodeExpiresAt, inviteCodeExpiresAt) || other.inviteCodeExpiresAt == inviteCodeExpiresAt)&&(identical(other.totalExpense, totalExpense) || other.totalExpense == totalExpense));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,creator,createdAt,updatedAt,const DeepCollectionEquality().hash(members),transactionCount,currentInviteCode,inviteCodeExpiresAt,totalExpense);
+int get hashCode => Object.hash(runtimeType,id,name,description,creator,role,createdAt,updatedAt,const DeepCollectionEquality().hash(members),transactionCount,currentInviteCode,inviteCodeExpiresAt,totalExpense);
 
 @override
 String toString() {
-  return 'SharedSpace(id: $id, name: $name, description: $description, creator: $creator, createdAt: $createdAt, updatedAt: $updatedAt, members: $members, transactionCount: $transactionCount, currentInviteCode: $currentInviteCode, inviteCodeExpiresAt: $inviteCodeExpiresAt, totalExpense: $totalExpense)';
+  return 'SharedSpace(id: $id, name: $name, description: $description, creator: $creator, role: $role, createdAt: $createdAt, updatedAt: $updatedAt, members: $members, transactionCount: $transactionCount, currentInviteCode: $currentInviteCode, inviteCodeExpiresAt: $inviteCodeExpiresAt, totalExpense: $totalExpense)';
 }
 
 
@@ -601,7 +601,7 @@ abstract mixin class $SharedSpaceCopyWith<$Res>  {
   factory $SharedSpaceCopyWith(SharedSpace value, $Res Function(SharedSpace) _then) = _$SharedSpaceCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String? description, SpaceCreator creator, DateTime? createdAt, DateTime? updatedAt, List<SharedSpaceMember>? members, int transactionCount, String? currentInviteCode, DateTime? inviteCodeExpiresAt, String totalExpense
+ String id, String name, String? description, SpaceCreator creator, MemberRole role, DateTime? createdAt, DateTime? updatedAt, List<SharedSpaceMember>? members, int transactionCount, String? currentInviteCode, DateTime? inviteCodeExpiresAt, String totalExpense
 });
 
 
@@ -618,13 +618,14 @@ class _$SharedSpaceCopyWithImpl<$Res>
 
 /// Create a copy of SharedSpace
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = freezed,Object? creator = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? members = freezed,Object? transactionCount = null,Object? currentInviteCode = freezed,Object? inviteCodeExpiresAt = freezed,Object? totalExpense = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = freezed,Object? creator = null,Object? role = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? members = freezed,Object? transactionCount = null,Object? currentInviteCode = freezed,Object? inviteCodeExpiresAt = freezed,Object? totalExpense = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,creator: null == creator ? _self.creator : creator // ignore: cast_nullable_to_non_nullable
-as SpaceCreator,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as SpaceCreator,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as MemberRole,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,members: freezed == members ? _self.members : members // ignore: cast_nullable_to_non_nullable
 as List<SharedSpaceMember>?,transactionCount: null == transactionCount ? _self.transactionCount : transactionCount // ignore: cast_nullable_to_non_nullable
@@ -725,10 +726,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  SpaceCreator creator,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  SpaceCreator creator,  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SharedSpace() when $default != null:
-return $default(_that.id,_that.name,_that.description,_that.creator,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
+return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
   return orElse();
 
 }
@@ -746,10 +747,10 @@ return $default(_that.id,_that.name,_that.description,_that.creator,_that.create
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  SpaceCreator creator,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  SpaceCreator creator,  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)  $default,) {final _that = this;
 switch (_that) {
 case _SharedSpace():
-return $default(_that.id,_that.name,_that.description,_that.creator,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
+return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -766,10 +767,10 @@ return $default(_that.id,_that.name,_that.description,_that.creator,_that.create
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? description,  SpaceCreator creator,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? description,  SpaceCreator creator,  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)?  $default,) {final _that = this;
 switch (_that) {
 case _SharedSpace() when $default != null:
-return $default(_that.id,_that.name,_that.description,_that.creator,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
+return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
   return null;
 
 }
@@ -781,13 +782,14 @@ return $default(_that.id,_that.name,_that.description,_that.creator,_that.create
 @JsonSerializable()
 
 class _SharedSpace implements SharedSpace {
-  const _SharedSpace({required this.id, required this.name, this.description, required this.creator, this.createdAt, this.updatedAt, final  List<SharedSpaceMember>? members, this.transactionCount = 0, this.currentInviteCode, this.inviteCodeExpiresAt, this.totalExpense = '0.00'}): _members = members;
+  const _SharedSpace({required this.id, required this.name, this.description, required this.creator, this.role = MemberRole.member, this.createdAt, this.updatedAt, final  List<SharedSpaceMember>? members, this.transactionCount = 0, this.currentInviteCode, this.inviteCodeExpiresAt, this.totalExpense = '0.00'}): _members = members;
   factory _SharedSpace.fromJson(Map<String, dynamic> json) => _$SharedSpaceFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override final  String? description;
 @override final  SpaceCreator creator;
+@override@JsonKey() final  MemberRole role;
 @override final  DateTime? createdAt;
 @override final  DateTime? updatedAt;
  final  List<SharedSpaceMember>? _members;
@@ -817,16 +819,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedSpace&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.creator, creator) || other.creator == creator)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._members, _members)&&(identical(other.transactionCount, transactionCount) || other.transactionCount == transactionCount)&&(identical(other.currentInviteCode, currentInviteCode) || other.currentInviteCode == currentInviteCode)&&(identical(other.inviteCodeExpiresAt, inviteCodeExpiresAt) || other.inviteCodeExpiresAt == inviteCodeExpiresAt)&&(identical(other.totalExpense, totalExpense) || other.totalExpense == totalExpense));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedSpace&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.creator, creator) || other.creator == creator)&&(identical(other.role, role) || other.role == role)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._members, _members)&&(identical(other.transactionCount, transactionCount) || other.transactionCount == transactionCount)&&(identical(other.currentInviteCode, currentInviteCode) || other.currentInviteCode == currentInviteCode)&&(identical(other.inviteCodeExpiresAt, inviteCodeExpiresAt) || other.inviteCodeExpiresAt == inviteCodeExpiresAt)&&(identical(other.totalExpense, totalExpense) || other.totalExpense == totalExpense));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,creator,createdAt,updatedAt,const DeepCollectionEquality().hash(_members),transactionCount,currentInviteCode,inviteCodeExpiresAt,totalExpense);
+int get hashCode => Object.hash(runtimeType,id,name,description,creator,role,createdAt,updatedAt,const DeepCollectionEquality().hash(_members),transactionCount,currentInviteCode,inviteCodeExpiresAt,totalExpense);
 
 @override
 String toString() {
-  return 'SharedSpace(id: $id, name: $name, description: $description, creator: $creator, createdAt: $createdAt, updatedAt: $updatedAt, members: $members, transactionCount: $transactionCount, currentInviteCode: $currentInviteCode, inviteCodeExpiresAt: $inviteCodeExpiresAt, totalExpense: $totalExpense)';
+  return 'SharedSpace(id: $id, name: $name, description: $description, creator: $creator, role: $role, createdAt: $createdAt, updatedAt: $updatedAt, members: $members, transactionCount: $transactionCount, currentInviteCode: $currentInviteCode, inviteCodeExpiresAt: $inviteCodeExpiresAt, totalExpense: $totalExpense)';
 }
 
 
@@ -837,7 +839,7 @@ abstract mixin class _$SharedSpaceCopyWith<$Res> implements $SharedSpaceCopyWith
   factory _$SharedSpaceCopyWith(_SharedSpace value, $Res Function(_SharedSpace) _then) = __$SharedSpaceCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String? description, SpaceCreator creator, DateTime? createdAt, DateTime? updatedAt, List<SharedSpaceMember>? members, int transactionCount, String? currentInviteCode, DateTime? inviteCodeExpiresAt, String totalExpense
+ String id, String name, String? description, SpaceCreator creator, MemberRole role, DateTime? createdAt, DateTime? updatedAt, List<SharedSpaceMember>? members, int transactionCount, String? currentInviteCode, DateTime? inviteCodeExpiresAt, String totalExpense
 });
 
 
@@ -854,13 +856,14 @@ class __$SharedSpaceCopyWithImpl<$Res>
 
 /// Create a copy of SharedSpace
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = freezed,Object? creator = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? members = freezed,Object? transactionCount = null,Object? currentInviteCode = freezed,Object? inviteCodeExpiresAt = freezed,Object? totalExpense = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = freezed,Object? creator = null,Object? role = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? members = freezed,Object? transactionCount = null,Object? currentInviteCode = freezed,Object? inviteCodeExpiresAt = freezed,Object? totalExpense = null,}) {
   return _then(_SharedSpace(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,creator: null == creator ? _self.creator : creator // ignore: cast_nullable_to_non_nullable
-as SpaceCreator,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as SpaceCreator,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as MemberRole,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,members: freezed == members ? _self._members : members // ignore: cast_nullable_to_non_nullable
 as List<SharedSpaceMember>?,transactionCount: null == transactionCount ? _self.transactionCount : transactionCount // ignore: cast_nullable_to_non_nullable

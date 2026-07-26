@@ -1058,6 +1058,7 @@
   },
   "sharedSpace": {
     "dashboard": {
+      "sectionTitle": "재무 개요",
       "cumulativeTotalExpense": "누적 총 지출",
       "participatingMembers": "참여 멤버",
       "membersCount": "$count 명",
@@ -1089,7 +1090,7 @@
       "title": "공유 공간 참여",
       "subtitle": "친구가 공유한 초대 코드를 입력하여 함께 가계를 관리하세요",
       "codeLabel": "초대 코드",
-      "codeHint": "초대 코드 입력, 예: A8K2F9G7",
+      "codeHint": "초대 코드 입력, 예: 123456",
       "cancel": "취소",
       "submit": "참여",
       "codeRequired": "초대 코드를 입력하세요",
@@ -1106,6 +1107,7 @@
     "detail": {
       "members": "멤버",
       "transactions": "거래 내역",
+      "recordsCount": "${count}건",
       "settlement": "정산",
       "inviteCode": "초대 코드",
       "copyCode": "초대 코드 복사",
@@ -1121,7 +1123,9 @@
       "loadFailed": "로드 실패",
       "retry": "재시도",
       "noTransactions": "거래 내역이 없습니다",
-      "noTransactionsHint": "이 공간의 거래가 여기에 표시됩니다"
+      "noTransactionsHint": "이 공간의 거래가 여기에 표시됩니다",
+      "refreshCode": "코드 새로고침",
+      "joinOtherSpace": "다른 공간 참여"
     },
     "notifications": {
       "title": "알림",
@@ -1131,6 +1135,79 @@
       "inviteAccepted": "초대를 수락했습니다!",
       "inviteRejected": "초대를 거절했습니다",
       "allMarkedRead": "모두 읽음으로 표시"
+    },
+    "inviteCard": {
+      "title": "초대 코드",
+      "subtitle": "친구와 공유하여 공간에 참여",
+      "copyCode": "초대 코드 복사",
+      "shareLink": "초대 링크 공유",
+      "codeCopied": "초대 코드 복사됨",
+      "noExpiry": "무기한",
+      "expired": "만료됨",
+      "expiresInDays": "${days}일 후 만료",
+      "expiresInHours": "${hours}시간 후 만료",
+      "expiresInMinutes": "${minutes}분 후 만료",
+      "expiringSoon": "곧 만료",
+      "shareText": "공유 공간 \"${spaceName}\"에 초대되었습니다\n\n초대 코드: ${code}\n또는 링크를 클릭하여 직접 참여: ${link}\n\n초대 코드 ${expiry}"
+    },
+    "inviteSuccess": {
+      "title": "생성 완료",
+      "subtitle": "공유 공간이 생성되었습니다",
+      "inviteLater": "나중에 초대",
+      "enterSpace": "공간 입장",
+      "generatingCode": "초대 코드 생성 중...",
+      "generateFailed": "초대 코드 생성 실패",
+      "codeCopied": "초대 코드 복사됨",
+      "retry": "재시도",
+      "codeLabel": "초대 코드",
+      "validHint": "24시간 유효 · 탭하여 복사"
+    },
+    "notificationCard": {
+      "accept": "수락",
+      "reject": "거절",
+      "unknownTime": "알 수 없는 시간",
+      "justNow": "방금"
+    },
+    "spaceCard": {
+      "noDescription": "설명 없음",
+      "creator": "생성자",
+      "member": "멤버",
+      "membersCount": "${count}명의 멤버",
+      "transactionsCount": "${count}건의 거래"
+    },
+    "settings": {
+      "title": "공간 설정",
+      "spaceInfo": "공간 정보",
+      "nameLabel": "공간 이름",
+      "descLabel": "공간 설명",
+      "save": "저장",
+      "saved": "저장되었습니다",
+      "saveFailed": "저장에 실패했습니다",
+      "memberManagement": "멤버 관리",
+      "membersCount": "$count 명의 멤버",
+      "removeMemberConfirm": "\"$name\"님을 공간에서 제거하시겠습니까?",
+      "removed": "멤버가 제거되었습니다",
+      "removeFailed": "제거에 실패했습니다",
+      "inviteManagement": "초대 관리",
+      "currentCode": "현재 초대 코드",
+      "generateNew": "새 코드 생성",
+      "noValidCode": "유효한 초대 코드가 없습니다",
+      "refreshCode": "코드 새로고침",
+      "refreshConfirm": "새 코드를 생성하면 기존 코드가 무효화됩니다. 계속하시겠습니까?",
+      "codeRefreshed": "초대 코드가 새로고침되었습니다",
+      "dangerZone": "위험 작업",
+      "editHint": "관리자만 편집 가능",
+      "edit": "편집",
+      "you": "나",
+      "pending": "대기 중",
+      "declined": "거절됨",
+      "setAsAdmin": "관리자로 설정",
+      "setAsMember": "멤버로 설정",
+      "changeRole": "역할 변경",
+      "changeRoleConfirm": "\"$name\"님의 역할을 \"$role\"(으)로 변경하시겠습니까?",
+      "confirm": "확인",
+      "roleChanged": "역할이 변경되었습니다",
+      "roleChangeFailed": "역할 변경에 실패했습니다"
     }
   },
   "budgetSuggestion": {
@@ -1249,6 +1326,14 @@
       "billComment": "청구서 댓글",
       "budgetAlert": "예산 경고",
       "transaction": "거래 알림"
+    },
+    "semantic": {
+      "memberJoined": "${name}님이 공간에 참여했습니다",
+      "memberJoinedDetail": "새 멤버가 \"${space}\"에 참여했습니다",
+      "welcome": "\"${space}\"에 오신 것을 환영합니다",
+      "newTransaction": "${name}님이 새 지출을 기록했습니다",
+      "newTransactionDetail": "${amount}, \"${space}\"에서",
+      "memberLeft": "${name}님이 공간에서 나갔습니다"
     }
   }
 }

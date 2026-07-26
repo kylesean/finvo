@@ -29,8 +29,9 @@ import '../../features/profile/pages/speech_settings_page.dart';
 import '../../features/report/pages/report_page.dart';
 import '../../features/shared_space/pages/shared_space_list_page.dart';
 import '../../features/shared_space/pages/shared_space_detail_page.dart';
+import '../../features/shared_space/pages/shared_space_settings_page.dart';
 import '../../features/shared_space/pages/invite_success_page.dart';
-import '../../features/shared_space/pages/notification_list_page.dart';
+import '../../features/notification/pages/notification_center_page.dart';
 import '../../features/shared_space/models/shared_space_models.dart';
 import '../../features/profile/pages/currency_settings_page.dart';
 import '../../features/profile/pages/amount_settings_page.dart';
@@ -149,6 +150,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     },
                   ),
                 ],
+              ),
+              GoRoute(
+                path: '/notifications',
+                name: 'notifications',
+                builder: (context, state) => const NotificationCenterPage(),
               ),
             ],
           ),
@@ -366,16 +372,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                             path: 'settings',
                             name: 'sharedSpaceSettings',
                             builder: (context, state) {
-                              return Scaffold(
-                                appBar: AppBar(
-                                  title: const Text('Space Settings'),
-                                ),
-                                body: const Center(
-                                  child: Text(
-                                    'Space settings page under development...',
-                                  ),
-                                ),
-                              );
+                              final spaceId = state.pathParameters['spaceId']!;
+                              return SharedSpaceSettingsPage(spaceId: spaceId);
                             },
                           ),
                         ],
@@ -389,11 +387,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      GoRoute(
-        path: '/notifications',
-        name: 'notifications',
-        builder: (context, state) => const NotificationListPage(),
-      ),
       GoRoute(
         path: '/join-space',
         name: 'joinSpace',

@@ -1,0 +1,826 @@
+// features/shared_space/pages/shared_space_settings_page.dart
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:forui/forui.dart';
+import 'package:augo/i18n/strings.g.dart';
+import '../models/shared_space_models.dart';
+import '../providers/shared_space_provider.dart';
+import '../services/shared_space_service.dart';
+import '../../../shared/services/toast_service.dart';
+import '../../../shared/widgets/user_avatar.dart';
+import '../../../shared/models/action_item_model.dart';
+import '../../../shared/widgets/dialogs/action_bottom_sheet.dart';
+import '../../auth/providers/auth_provider.dart';
+
+class SharedSpaceSettingsPage extends ConsumerStatefulWidget {
+  final String spaceId;
+
+  const SharedSpaceSettingsPage({super.key, required this.spaceId});
+
+  @override
+  ConsumerState<SharedSpaceSettingsPage> createState() =>
+      _SharedSpaceSettingsPageState();
+}
+
+class _SharedSpaceSettingsPageState
+    extends ConsumerState<SharedSpaceSettingsPage> {
+  late TextEditingController _nameController;
+  late TextEditingController _descController;
+  bool _isEditing = false;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _descController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  void _initControllers(SharedSpace space) {
+    if (_nameController.text.isEmpty && !_isEditing) {
+      _nameController.text = space.name;
+      _descController.text = space.description ?? '';
+    }
+  }
+
+  bool _isOwnerOrAdmin(SharedSpace space, String? currentUserId) {
+    if (currentUserId == null) return false;
+    if (space.creator.id == currentUserId) return true;
+    final members = space.members ?? [];
+    return members.any(
+      (m) =>
+          m.userId == currentUserId &&
+          (m.role == MemberRole.owner || m.role == MemberRole.admin),
+    );
+  }
+
+  bool _isOwner(SharedSpace space, String? currentUserId) {
+    if (currentUserId == null) return false;
+    return space.creator.id == currentUserId;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    final colors = theme.colors;
+    final spaceAsync = ref.watch(spaceDetailProvider(widget.spaceId));
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        title: Text(
+          t.sharedSpace.settings.title,
+          style: theme.typography.body.xl,
+        ),
+        backgroundColor: colors.background,
+        foregroundColor: colors.foreground,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(FLucideIcons.chevronLeft),
+          onPressed: () => context.pop(),
+        ),
+      ),
+      body: spaceAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                FLucideIcons.circleAlert,
+                size: 48,
+                color: colors.mutedForeground,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                t.sharedSpace.detail.loadFailed,
+                style: theme.typography.body.lg,
+              ),
+              const SizedBox(height: 16),
+              FButton(
+                variant: .outline,
+                onPress: () =>
+                    ref.invalidate(spaceDetailProvider(widget.spaceId)),
+                child: Text(t.sharedSpace.detail.retry),
+              ),
+            ],
+          ),
+        ),
+        data: (space) {
+          _initControllers(space);
+          return _buildSettingsContent(context, space);
+        },
+      ),
+    );
+  }
+
+  Widget _buildSettingsContent(BuildContext context, SharedSpace space) {
+    final theme = context.theme;
+    final colors = theme.colors;
+    final currentUser = ref.watch(currentUserProvider);
+    final canEdit = _isOwnerOrAdmin(space, currentUser?.id);
+    final isOwner = _isOwner(space, currentUser?.id);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Section: Space Info
+        _buildSectionHeader(theme, t.sharedSpace.settings.spaceInfo),
+        const SizedBox(height: 8),
+        _buildSpaceInfoSection(theme, colors, space, canEdit),
+        const SizedBox(height: 24),
+
+        // Section: Member Management
+        _buildSectionHeader(theme, t.sharedSpace.settings.memberManagement),
+        const SizedBox(height: 8),
+        _buildMemberSection(theme, colors, space, canEdit, currentUser?.id),
+        const SizedBox(height: 24),
+
+        // Section: Danger Zone
+        _buildSectionHeader(theme, t.sharedSpace.settings.dangerZone),
+        const SizedBox(height: 8),
+        _buildDangerZone(theme, colors, space, isOwner),
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(FThemeData theme, String title) {
+    return Text(
+      title,
+      style: theme.typography.body.sm.copyWith(
+        fontWeight: FontWeight.w600,
+        color: theme.colors.mutedForeground,
+      ),
+    );
+  }
+
+  // ==================== Space Info Section ====================
+
+  Widget _buildSpaceInfoSection(
+    FThemeData theme,
+    FColors colors,
+    SharedSpace space,
+    bool canEdit,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: theme.style.borderRadius.md,
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Name field
+          Text(
+            t.sharedSpace.settings.nameLabel,
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
+          ),
+          const SizedBox(height: 8),
+          FTextField(
+            control: .managed(controller: _nameController),
+            enabled: _isEditing && canEdit,
+            hint: t.sharedSpace.create.nameHint,
+          ),
+          const SizedBox(height: 16),
+
+          // Description field
+          Text(
+            t.sharedSpace.settings.descLabel,
+            style: theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
+          ),
+          const SizedBox(height: 8),
+          FTextField(
+            control: .managed(controller: _descController),
+            enabled: _isEditing && canEdit,
+            hint: t.sharedSpace.create.descHint,
+            maxLines: 3,
+          ),
+          const SizedBox(height: 16),
+
+          // Action buttons
+          if (!canEdit)
+            Text(
+              t.sharedSpace.settings.editHint,
+              style: theme.typography.body.xs.copyWith(
+                color: colors.mutedForeground,
+              ),
+            )
+          else if (_isEditing)
+            Row(
+              children: [
+                Expanded(
+                  child: FButton(
+                    variant: .outline,
+                    onPress: () {
+                      setState(() {
+                        _isEditing = false;
+                        _nameController.text = space.name;
+                        _descController.text = space.description ?? '';
+                      });
+                    },
+                    child: Text(t.sharedSpace.create.cancel),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FButton(
+                    onPress: () => _saveSpaceInfo(space),
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(t.sharedSpace.settings.save),
+                  ),
+                ),
+              ],
+            )
+          else
+            FButton(
+              variant: .outline,
+              onPress: () => setState(() => _isEditing = true),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(FLucideIcons.pencil, size: 16),
+                  const SizedBox(width: 8),
+                  Text(t.sharedSpace.settings.edit),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveSpaceInfo(SharedSpace space) async {
+    final name = _nameController.text.trim();
+    if (name.length < 2) {
+      ToastService.showDestructive(
+        description: Text(t.sharedSpace.create.nameTooShort),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final success = await ref
+          .read(sharedSpaceProvider.notifier)
+          .updateSpace(
+            space.id,
+            name: name,
+            description: _descController.text.trim(),
+          );
+      if (success) {
+        ref.invalidate(spaceDetailProvider(widget.spaceId));
+        setState(() => _isEditing = false);
+        ToastService.show(description: Text(t.sharedSpace.settings.saved));
+      } else {
+        ToastService.showDestructive(
+          description: Text(t.sharedSpace.settings.saveFailed),
+        );
+      }
+    } catch (_) {
+      ToastService.showDestructive(
+        description: Text(t.sharedSpace.settings.saveFailed),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  // ==================== Member Section ====================
+
+  Widget _buildMemberSection(
+    FThemeData theme,
+    FColors colors,
+    SharedSpace space,
+    bool canManage,
+    String? currentUserId,
+  ) {
+    final members = space.members ?? [];
+    final isOwner = _isOwner(space, currentUserId);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: theme.style.borderRadius.md,
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Member count header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Text(
+              t.sharedSpace.settings.membersCount(
+                count: members
+                    .where((m) => m.status == InviteStatus.accepted)
+                    .length,
+              ),
+              style: theme.typography.body.xs.copyWith(
+                color: colors.mutedForeground,
+              ),
+            ),
+          ),
+          // Member list
+          for (int i = 0; i < members.length; i++) ...[
+            _buildMemberRow(
+              theme,
+              colors,
+              members[i],
+              canManage,
+              isOwner,
+              currentUserId,
+              space,
+            ),
+            if (i < members.length - 1)
+              Divider(height: 1, indent: 60, color: colors.border),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMemberRow(
+    FThemeData theme,
+    FColors colors,
+    SharedSpaceMember member,
+    bool canManage,
+    bool isOwner,
+    String? currentUserId,
+    SharedSpace space,
+  ) {
+    final isMemberOwner = member.role == MemberRole.owner;
+    final isCurrentUser = member.userId == currentUserId;
+    final isAccepted = member.status == InviteStatus.accepted;
+    final canActOn = canManage && !isMemberOwner && !isCurrentUser;
+
+    return Opacity(
+      opacity: isAccepted ? 1.0 : 0.5,
+      child: InkWell(
+        onTap: canActOn
+            ? () => _showMemberActions(member, space, isOwner)
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              // Avatar - same as dashboard card
+              UserAvatar(
+                userId: member.userId,
+                size: 36,
+                border: Border.all(color: colors.background, width: 2),
+              ),
+              const SizedBox(width: 12),
+              // Username + icons
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        member.username,
+                        style: theme.typography.body.sm.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (isMemberOwner) ...[
+                      const SizedBox(width: 6),
+                      Icon(FLucideIcons.crown, size: 14, color: colors.primary),
+                    ],
+                    if (isCurrentUser) ...[
+                      const SizedBox(width: 6),
+                      Icon(
+                        FLucideIcons.shieldCheck,
+                        size: 14,
+                        color: colors.mutedForeground,
+                      ),
+                    ],
+                    if (!isAccepted) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        member.status == InviteStatus.pending
+                            ? t.sharedSpace.settings.pending
+                            : t.sharedSpace.settings.declined,
+                        style: theme.typography.body.xs.copyWith(
+                          color: member.status == InviteStatus.pending
+                              ? colors.primary.withValues(alpha: 0.7)
+                              : colors.destructive.withValues(alpha: 0.7),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              // Management indicator
+              if (canActOn)
+                Icon(
+                  FLucideIcons.chevronRight,
+                  size: 16,
+                  color: colors.mutedForeground.withValues(alpha: 0.5),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMemberActions(
+    SharedSpaceMember member,
+    SharedSpace space,
+    bool isOwner,
+  ) {
+    final actions = <ActionItem>[];
+    final destructiveActions = <ActionItem>[];
+
+    // Role change - owner only
+    if (isOwner) {
+      if (member.role == MemberRole.member) {
+        actions.add(
+          ActionItem(
+            title: t.sharedSpace.settings.setAsAdmin,
+            icon: FLucideIcons.shieldPlus,
+            onTap: () => _confirmRoleChange(member, space, 'ADMIN'),
+          ),
+        );
+      } else if (member.role == MemberRole.admin) {
+        actions.add(
+          ActionItem(
+            title: t.sharedSpace.settings.setAsMember,
+            icon: FLucideIcons.user,
+            onTap: () => _confirmRoleChange(member, space, 'MEMBER'),
+          ),
+        );
+      }
+    }
+
+    // Remove member
+    destructiveActions.add(
+      ActionItem(
+        title: t.sharedSpace.detail.removeMember,
+        icon: FLucideIcons.userMinus,
+        isDestructive: true,
+        onTap: () => _confirmRemoveMember(member, space),
+      ),
+    );
+
+    unawaited(
+      showModalBottomSheet<void>(
+        context: GoRouter.of(
+          context,
+        ).routerDelegate.navigatorKey.currentContext!,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (sheetContext) {
+          return ActionBottomSheet(
+            actions: actions,
+            destructiveActions: destructiveActions,
+          );
+        },
+      ),
+    );
+  }
+
+  void _confirmRoleChange(
+    SharedSpaceMember member,
+    SharedSpace space,
+    String newRole,
+  ) {
+    final roleLabel = newRole == 'ADMIN'
+        ? t.sharedSpace.roles.admin
+        : t.sharedSpace.roles.member;
+
+    unawaited(
+      showFDialog<void>(
+        context: context,
+        builder: (dialogContext, style, animation) => FDialog(
+          animation: animation,
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  t.sharedSpace.settings.changeRole,
+                  style: dialogStyle.titleTextStyle,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  t.sharedSpace.settings.changeRoleConfirm(
+                    name: member.username,
+                    role: roleLabel,
+                  ),
+                  style: dialogStyle.bodyTextStyle,
+                ),
+                const SizedBox(height: 24),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.of(dialogContext).pop(),
+                  child: Text(t.sharedSpace.create.cancel),
+                ),
+                const SizedBox(height: 8),
+                FButton(
+                  onPress: () {
+                    Navigator.of(dialogContext).pop();
+                    unawaited(_updateRole(member, space, newRole));
+                  },
+                  child: Text(t.sharedSpace.settings.confirm),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateRole(
+    SharedSpaceMember member,
+    SharedSpace space,
+    String newRole,
+  ) async {
+    try {
+      final service = ref.read(sharedSpaceServiceProvider);
+      await service.updateMemberRole(space.id, member.userId, newRole);
+      ref.invalidate(spaceDetailProvider(widget.spaceId));
+      ToastService.show(description: Text(t.sharedSpace.settings.roleChanged));
+    } catch (_) {
+      ToastService.showDestructive(
+        description: Text(t.sharedSpace.settings.roleChangeFailed),
+      );
+    }
+  }
+
+  void _confirmRemoveMember(SharedSpaceMember member, SharedSpace space) {
+    unawaited(
+      showFDialog<void>(
+        context: context,
+        builder: (dialogContext, style, animation) => FDialog(
+          animation: animation,
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  t.sharedSpace.detail.removeMember,
+                  style: dialogStyle.titleTextStyle,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  t.sharedSpace.settings.removeMemberConfirm(
+                    name: member.username,
+                  ),
+                  style: dialogStyle.bodyTextStyle,
+                ),
+                const SizedBox(height: 24),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.of(dialogContext).pop(),
+                  child: Text(t.sharedSpace.create.cancel),
+                ),
+                const SizedBox(height: 8),
+                FButton(
+                  variant: .destructive,
+                  onPress: () {
+                    Navigator.of(dialogContext).pop();
+                    unawaited(_removeMember(member, space));
+                  },
+                  child: Text(t.sharedSpace.detail.removeMember),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _removeMember(
+    SharedSpaceMember member,
+    SharedSpace space,
+  ) async {
+    try {
+      final service = ref.read(sharedSpaceServiceProvider);
+      await service.removeMember(space.id, member.userId);
+      ref.invalidate(spaceDetailProvider(widget.spaceId));
+      ToastService.show(description: Text(t.sharedSpace.settings.removed));
+    } catch (_) {
+      ToastService.showDestructive(
+        description: Text(t.sharedSpace.settings.removeFailed),
+      );
+    }
+  }
+
+  // ==================== Danger Zone ====================
+
+  Widget _buildDangerZone(
+    FThemeData theme,
+    FColors colors,
+    SharedSpace space,
+    bool isOwner,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.destructive.withValues(alpha: 0.03),
+        borderRadius: theme.style.borderRadius.md,
+        border: Border.all(color: colors.destructive.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        children: [
+          if (!isOwner) ...[
+            // Leave space
+            InkWell(
+              onTap: () => _confirmLeaveSpace(space),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(
+                      FLucideIcons.logOut,
+                      size: 20,
+                      color: colors.destructive,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        t.sharedSpace.detail.leaveSpace,
+                        style: theme.typography.body.md.copyWith(
+                          color: colors.destructive,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      FLucideIcons.chevronRight,
+                      size: 16,
+                      color: colors.destructive.withValues(alpha: 0.5),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            // Delete space
+            InkWell(
+              onTap: () => _confirmDeleteSpace(space),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(
+                      FLucideIcons.trash2,
+                      size: 20,
+                      color: colors.destructive,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        t.sharedSpace.detail.deleteSpace,
+                        style: theme.typography.body.md.copyWith(
+                          color: colors.destructive,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      FLucideIcons.chevronRight,
+                      size: 16,
+                      color: colors.destructive.withValues(alpha: 0.5),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _confirmLeaveSpace(SharedSpace space) {
+    unawaited(
+      showFDialog<void>(
+        context: context,
+        builder: (dialogContext, style, animation) => FDialog(
+          animation: animation,
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  t.sharedSpace.detail.leaveSpace,
+                  style: dialogStyle.titleTextStyle,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  t.sharedSpace.detail.leaveConfirm,
+                  style: dialogStyle.bodyTextStyle,
+                ),
+                const SizedBox(height: 24),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.of(dialogContext).pop(),
+                  child: Text(t.sharedSpace.create.cancel),
+                ),
+                const SizedBox(height: 8),
+                FButton(
+                  variant: .destructive,
+                  onPress: () async {
+                    Navigator.of(dialogContext).pop();
+                    final success = await ref
+                        .read(sharedSpaceProvider.notifier)
+                        .leaveSpace(space.id);
+                    if (success && mounted) {
+                      this.context.pop();
+                      this.context.pop();
+                    }
+                  },
+                  child: Text(t.sharedSpace.detail.leaveSpace),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteSpace(SharedSpace space) {
+    unawaited(
+      showFDialog<void>(
+        context: context,
+        builder: (dialogContext, style, animation) => FDialog(
+          animation: animation,
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  t.sharedSpace.detail.deleteSpace,
+                  style: dialogStyle.titleTextStyle,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  t.sharedSpace.detail.deleteConfirm,
+                  style: dialogStyle.bodyTextStyle,
+                ),
+                const SizedBox(height: 24),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.of(dialogContext).pop(),
+                  child: Text(t.sharedSpace.create.cancel),
+                ),
+                const SizedBox(height: 8),
+                FButton(
+                  variant: .destructive,
+                  onPress: () async {
+                    Navigator.of(dialogContext).pop();
+                    final success = await ref
+                        .read(sharedSpaceProvider.notifier)
+                        .deleteSpace(space.id);
+                    if (success && mounted) {
+                      this.context.pop();
+                      this.context.pop();
+                    }
+                  },
+                  child: Text(t.sharedSpace.detail.deleteSpace),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

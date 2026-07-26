@@ -83,6 +83,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     await init_scheduler()
 
+    # Register domain event handlers (notification system)
+    from app.services.notification_handlers import register_space_notification_handlers
+
+    register_space_notification_handlers()
+
     yield
 
     # Cleanup connections
