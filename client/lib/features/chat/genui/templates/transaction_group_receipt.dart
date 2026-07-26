@@ -245,30 +245,51 @@ class _TransactionGroupReceiptState
   }
 
   /// Atom: Tags row
+  ///
+  /// Mirrors the home feed: show at most [maxVisible] tags and collapse the
+  /// rest into a `+N` counter. Each visible tag is [Flexible] so a long label
+  /// (e.g. a merchant name) ellipsizes instead of overflowing the row when the
+  /// amount column on the right leaves little room.
   Widget _atomTagsRow(FThemeData theme, FColors colors, List<String> tags) {
-    // Only show first 2
-    final visibleTags = tags.take(2);
+    const maxVisible = 2;
+    final visibleTags = tags.take(maxVisible).toList();
+    final extraCount = tags.length - maxVisible;
+
     return Row(
-      children: visibleTags.map((tag) {
-        return Padding(
-          padding: const EdgeInsets.only(right: 6),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: colors.muted.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: colors.border.withValues(alpha: 0.5)),
-            ),
-            child: Text(
-              tag,
-              style: theme.typography.body.xs.copyWith(
-                color: colors.mutedForeground,
+      children: [
+        for (final tag in visibleTags)
+          Flexible(
+            fit: FlexFit.loose,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: colors.muted.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: colors.border.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Text(
+                  tag,
+                  style: theme.typography.body.xs.copyWith(
+                    color: colors.mutedForeground,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              maxLines: 1,
             ),
           ),
-        );
-      }).toList(),
+        if (extraCount > 0)
+          Text(
+            '+$extraCount',
+            style: theme.typography.body.xs.copyWith(
+              color: colors.mutedForeground,
+            ),
+          ),
+      ],
     );
   }
 
