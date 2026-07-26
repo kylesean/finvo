@@ -115,9 +115,14 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
     return AppBar(
       backgroundColor: colors.background,
       elevation: 0,
-      leading: IconButton(
-        icon: Icon(FLucideIcons.arrowLeft, color: colors.foreground),
-        onPressed: () => context.pop(),
+      leading: FButton.icon(
+        variant: .ghost,
+        onPress: () => context.pop(),
+        child: Icon(
+          FLucideIcons.chevronLeft,
+          color: colors.foreground,
+          size: 20,
+        ),
       ),
       title: Text(
         t.budget.detail,
@@ -129,26 +134,26 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
       centerTitle: true,
       actions: [
         if (_budgetWithUsage != null) ...[
-          IconButton(
-            icon: Icon(
+          FButton.icon(
+            variant: .ghost,
+            onPress: _handlePauseToggle,
+            child: Icon(
               isPaused ? FLucideIcons.play : FLucideIcons.pause,
               color: colors.foreground,
               size: 20,
             ),
-            tooltip: isPaused ? t.budget.resume : t.budget.pause,
-            onPressed: _handlePauseToggle,
           ),
 
-          IconButton(
-            icon: Icon(
+          FButton.icon(
+            variant: .ghost,
+            onPress: () => context.pushNamed(
+              'budgetEdit',
+              pathParameters: {'id': widget.budgetId},
+            ),
+            child: Icon(
               FLucideIcons.squarePen,
               color: colors.foreground,
               size: 20,
-            ),
-            tooltip: t.common.edit,
-            onPressed: () => context.pushNamed(
-              'budgetEdit',
-              pathParameters: {'id': widget.budgetId},
             ),
           ),
         ],

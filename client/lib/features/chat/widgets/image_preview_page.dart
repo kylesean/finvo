@@ -3,6 +3,7 @@ import 'dart:io' show File;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:image_picker/image_picker.dart';
@@ -91,9 +92,10 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
         centerTitle: true,
         actions: [
           if (widget.onDelete != null)
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () => _showDeleteConfirmation(),
+            FButton.icon(
+              variant: .ghost,
+              onPress: () => _showDeleteConfirmation(),
+              child: const Icon(FLucideIcons.trash2, size: 20),
             ),
         ],
       ),

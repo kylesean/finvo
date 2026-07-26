@@ -21,9 +21,14 @@ class AccountTypePickerPage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: colors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
-          onPressed: () => context.pop(),
+        leading: FButton.icon(
+          variant: .ghost,
+          onPress: () => context.pop(),
+          child: Icon(
+            FLucideIcons.chevronLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
         ),
         titleSpacing: 0,
 
