@@ -220,7 +220,7 @@ async def chat_stream(
         accept_language = request.headers.get("Accept-Language", "zh")
         app_language = accept_language.split(",")[0].split(";")[0].strip()
 
-    # Normalize language code
+    # Normalize language code (preserve original for non-CJK languages)
     if app_language.startswith("zh-TW") or app_language.startswith("zh-Hant"):
         app_language = "zh-Hant"
     elif app_language.startswith("zh"):
@@ -232,7 +232,9 @@ async def chat_stream(
     elif app_language.startswith("en"):
         app_language = "en"
     else:
-        app_language = "zh"  # Default to Chinese
+        # Preserve original locale code (fr, de, es, pt, etc.)
+        # Only take primary subtag (e.g. "fr-FR" → "fr")
+        app_language = app_language.split("-")[0].split("_")[0].lower()
 
     # For new sessions, generate and save title synchronously (fast, no LLM)
     if is_new:
