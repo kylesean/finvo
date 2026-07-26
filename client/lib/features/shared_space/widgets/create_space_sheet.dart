@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/i18n/strings.g.dart';
 import '../providers/shared_space_provider.dart';
 import '../models/shared_space_models.dart';
 
@@ -29,15 +30,15 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
   bool _validate() {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _nameError = 'Please enter a space name');
+      setState(() => _nameError = t.sharedSpace.create.nameRequired);
       return false;
     }
     if (name.length < 2) {
-      setState(() => _nameError = 'Space name must be at least 2 characters');
+      setState(() => _nameError = t.sharedSpace.create.nameTooShort);
       return false;
     }
     if (name.length > 50) {
-      setState(() => _nameError = 'Space name cannot exceed 50 characters');
+      setState(() => _nameError = t.sharedSpace.create.nameTooLong);
       return false;
     }
     setState(() => _nameError = null);
@@ -73,7 +74,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
 
               // Title area
               Text(
-                'Create Shared Space',
+                t.sharedSpace.create.title,
                 style: theme.typography.body.lg.copyWith(
                   fontWeight: FontWeight.w500,
                   color: colors.foreground,
@@ -81,7 +82,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Create a new shared space to track expenses with friends',
+                t.sharedSpace.create.subtitle,
                 textAlign: TextAlign.center,
                 style: theme.typography.body.sm.copyWith(
                   color: colors.mutedForeground,
@@ -99,8 +100,8 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
                     }
                   },
                 ),
-                label: const Text('Space Name'),
-                hint: 'e.g., Graduation Trip',
+                label: Text(t.sharedSpace.create.nameLabel),
+                hint: t.sharedSpace.create.nameHint,
               ),
               if (_nameError != null)
                 Align(
@@ -120,8 +121,8 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
               // Space description input
               FTextField(
                 control: .managed(controller: _descriptionController),
-                label: const Text('Description (Optional)'),
-                hint: 'Track our joint travel expenses',
+                label: Text(t.sharedSpace.create.descLabel),
+                hint: t.sharedSpace.create.descHint,
                 maxLines: 2,
               ),
 
@@ -134,7 +135,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
                     child: FButton(
                       variant: .outline,
                       onPress: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(t.sharedSpace.create.cancel),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -149,7 +150,7 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Create'),
+                          : Text(t.sharedSpace.create.submit),
                     ),
                   ),
                 ],

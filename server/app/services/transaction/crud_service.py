@@ -16,7 +16,12 @@ from app.models.financial_account import FinancialAccount
 from app.models.transaction import Transaction, TransactionComment
 from app.models.user import User
 from app.schemas.transaction import TransactionDisplayValue
-from app.utils.currency_utils import BASE_CURRENCY, get_exchange_rate_from_base, get_user_display_currency
+from app.utils.currency_utils import (
+    BASE_CURRENCY,
+    convert_to_user_base,
+    get_user_base_currency,
+    get_user_display_currency,
+)
 from app.utils.identicon import default_avatar_url
 
 logger = structlog.get_logger(__name__)
@@ -82,6 +87,13 @@ class TransactionCRUDService:
                     "message": f"Target account not found: {target_account_id}",
                 }
 
+        tx_currency = currency.upper()
+        amount_original = transfer_amount
+
+        # Convert to user's base currency (primary_currency) with rate snapshot
+        user_base = await get_user_base_currency(self.db, user_uuid)
+        base_amount, exchange_rate_val = await convert_to_user_base(abs(amount_original), tx_currency, user_base)
+
         # Create record
         transaction = Transaction(
             id=uuid4(),
@@ -89,9 +101,10 @@ class TransactionCRUDService:
             type=tx_type.upper(),
             raw_input=raw_input or "",
             description=None,
-            amount_original=transfer_amount,
-            amount=transfer_amount,
-            currency=currency,
+            amount_original=abs(amount_original),
+            amount=base_amount.quantize(Decimal("0.00000001")),
+            currency=tx_currency,
+            exchange_rate=exchange_rate_val.quantize(Decimal("0.00000001")),
             transaction_at=tx_time,
             transaction_timezone=str(tx_time.tzinfo or "UTC"),
             category_key=category_key.upper() if category_key else "OTHERS",
@@ -188,9 +201,8 @@ class TransactionCRUDService:
         if not transaction:
             return None
 
-        # Get exchange rate and user preferred currency
+        # Get user preferred currency (base currency)
         display_currency = await get_user_display_currency(self.db, user_uuid)
-        exchange_rate = await get_exchange_rate_from_base(display_currency)
 
         # Get associated shared spaces
         spaces_query = (
@@ -225,23 +237,20 @@ class TransactionCRUDService:
                 }
             )
 
-        # Convert to dictionary and add calculated fields (converted amount)
-        # 如果交易原始币种与用户显示币种一致，直接使用原始金额，
-        # 避免 原币→USD→原币 往返换算产生的精度损失（如 500 → 499.91）
-        if transaction.currency and transaction.currency.upper() == display_currency.upper():
-            amount_val = float(transaction.amount_original)
-        else:
-            amount_val = float(transaction.amount)
-            if display_currency != BASE_CURRENCY:
-                amount_val = amount_val * float(exchange_rate) if exchange_rate else amount_val
+        # Display: show original currency amount for individual transaction
+        amount_val = float(transaction.amount_original)
+        original_currency = (transaction.currency or display_currency).upper()
 
         return {
             "id": str(transaction.id),
             "userUuid": str(transaction.user_uuid),
             "type": transaction.type,
-            "amount": round(amount_val, 2),  # Use converted amount
+            "amount": round(amount_val, 2),
             "amountOriginal": str(transaction.amount_original) if transaction.amount_original else None,
-            "currency": display_currency,  # Use user preferred currency
+            "amountBase": float(transaction.amount),
+            "currency": original_currency,
+            "baseCurrency": display_currency,
+            "exchangeRate": str(transaction.exchange_rate) if transaction.exchange_rate else None,
             "categoryKey": transaction.category_key,
             "rawInput": transaction.raw_input,
             "description": transaction.description,
@@ -262,7 +271,7 @@ class TransactionCRUDService:
             "spaces": spaces_data,
             "sourceThreadId": str(transaction.source_thread_id) if transaction.source_thread_id else None,
             "display": TransactionDisplayValue.from_params(
-                amount=amount_val, tx_type=transaction.type, currency=display_currency
+                amount=amount_val, tx_type=transaction.type, currency=original_currency
             ).model_dump(),
         }
 
@@ -298,8 +307,6 @@ class TransactionCRUDService:
             NotFoundError: Transaction not found
             BusinessError: Permission denied
         """
-        from app.services.exchange_rate_service import exchange_rate_service
-
         # Query transaction
         query = select(Transaction).where(cast(Any, Transaction.id == transaction_id))
         result = await self.db.execute(query)
@@ -318,25 +325,18 @@ class TransactionCRUDService:
         # Update amount if provided
         if amount is not None and amount > 0:
             old_amount = transaction.amount
-            new_amount = Decimal(str(amount))
+            new_original = Decimal(str(amount))
 
-            # Get user's display currency
-            display_currency = await get_user_display_currency(self.db, user_uuid)
-            tx_currency = (transaction.currency or BASE_CURRENCY).upper()
+            # Get user's base currency and transaction currency
+            user_base = await get_user_base_currency(self.db, user_uuid)
+            tx_currency = (transaction.currency or user_base).upper()
 
-            # If different currency, convert
-            if tx_currency != display_currency:
-                rate = await exchange_rate_service.convert(
-                    amount=1.0,
-                    from_currency=display_currency,
-                    to_currency=tx_currency,
-                )
-                if rate:
-                    # User input is in display currency, convert to storage currency
-                    new_amount = Decimal(str(amount)) * Decimal(str(rate))
+            # Convert new original amount to user base currency for storage
+            base_amount, new_rate = await convert_to_user_base(new_original, tx_currency, user_base)
 
-            transaction.amount = new_amount.quantize(Decimal("0.00000001"))
-            transaction.amount_original = Decimal(str(amount))
+            transaction.amount = base_amount.quantize(Decimal("0.00000001"))
+            transaction.amount_original = new_original
+            transaction.exchange_rate = new_rate.quantize(Decimal("0.00000001"))
             changed_fields.append("/amount")
 
             # Update linked account balance if exists
@@ -349,7 +349,7 @@ class TransactionCRUDService:
                 account = account_result.scalar_one_or_none()
                 if account:
                     # Rollback old amount, apply new amount
-                    diff = new_amount - old_amount
+                    diff = base_amount - old_amount
                     if transaction.type == "EXPENSE":
                         account.current_balance -= diff
                     else:
@@ -388,19 +388,19 @@ class TransactionCRUDService:
             changed_fields=changed_fields,
         )
 
-        # Get display values
+        # Get display values - show original currency amount
         display_currency = await get_user_display_currency(self.db, user_uuid)
-        exchange_rate = await get_exchange_rate_from_base(display_currency)
-        display_amount = float(transaction.amount)
-        if display_currency != BASE_CURRENCY and exchange_rate:
-            display_amount = display_amount * float(exchange_rate)
+        original_currency = (transaction.currency or display_currency).upper()
+        display_amount = float(transaction.amount_original)
 
         return {
             "success": True,
             "transaction_id": str(transaction.id),
             "amount": round(display_amount, 2),
             "amount_original": float(transaction.amount_original) if transaction.amount_original else display_amount,
-            "currency": display_currency,
+            "amount_base": float(transaction.amount),
+            "currency": original_currency,
+            "baseCurrency": display_currency,
             "type": transaction.type,
             "category_key": transaction.category_key,
             "raw_input": transaction.raw_input,
@@ -469,8 +469,6 @@ class TransactionCRUDService:
         - currency: Original currency (if not specified, use the user's primaryCurrency)
         - exchange_rate: Exchange rate snapshot at the time of storage
         """
-        from app.services.exchange_rate_service import exchange_rate_service
-
         transactions_data = data.get("transactions", [])
         source_account_id = data.get("source_account_id")
         created_transactions = []
@@ -486,29 +484,11 @@ class TransactionCRUDService:
             # Use user's primaryCurrency as default value, instead of hardcoding CNY
             currency = (item.get("currency") or user_default_currency).upper()
 
-            # Convert to CNY base amount
-            if currency == BASE_CURRENCY:
-                amount = abs(amount_original)
-                exchange_rate_val = Decimal("1.0")
-            else:
-                # Use convert to get exchange rate (convert 1 unit to get rate)
-                rate = await exchange_rate_service.convert(
-                    amount=1.0,
-                    from_currency=currency,
-                    to_currency=BASE_CURRENCY,
-                )
-                if rate is not None:
-                    exchange_rate_val = Decimal(str(rate))
-                    amount = abs(amount_original) * exchange_rate_val
-                else:
-                    # Exchange rate not found, handle as 1:1 (keep original amount)
-                    exchange_rate_val = Decimal("1.0")
-                    amount = abs(amount_original)
-                    logger.warning(
-                        "exchange_rate_not_found",
-                        currency=currency,
-                        amount=str(amount_original),
-                    )
+            # Convert to user's base currency with rate snapshot
+            base_amount, exchange_rate_val = await convert_to_user_base(
+                abs(amount_original), currency, user_default_currency
+            )
+            amount = base_amount
 
             tx = Transaction(
                 id=uuid4(),

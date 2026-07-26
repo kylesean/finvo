@@ -6,8 +6,8 @@ final _logger = Logger('LoggerSetup');
 /// Initialize logging configuration
 void setupLogging() {
   // Set global log level
-  // Can be set to Level.ALL in development, Level.INFO recommended for production
-  Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+  // Level.INFO for development to avoid trace/fine log spam, Level.WARNING for production
+  Logger.root.level = kDebugMode ? Level.INFO : Level.WARNING;
 
   // Configure log output format
   Logger.root.onRecord.listen((record) {

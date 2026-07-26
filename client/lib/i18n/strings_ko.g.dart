@@ -73,6 +73,7 @@ class TranslationsKo extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$budgetSuggestion$ko budgetSuggestion = _Translations$budgetSuggestion$ko._(_root);
 	@override late final _Translations$server$ko server = _Translations$server$ko._(_root);
 	@override late final _Translations$errorMapping$ko errorMapping = _Translations$errorMapping$ko._(_root);
+	@override late final _Translations$notification$ko notification = _Translations$notification$ko._(_root);
 }
 
 // Path: common
@@ -892,6 +893,12 @@ class _Translations$sharedSpace$ko extends Translations$sharedSpace$zh {
 	// Translations
 	@override late final _Translations$sharedSpace$dashboard$ko dashboard = _Translations$sharedSpace$dashboard$ko._(_root);
 	@override late final _Translations$sharedSpace$roles$ko roles = _Translations$sharedSpace$roles$ko._(_root);
+	@override String get title => '공유 공간';
+	@override late final _Translations$sharedSpace$create$ko create = _Translations$sharedSpace$create$ko._(_root);
+	@override late final _Translations$sharedSpace$join$ko join = _Translations$sharedSpace$join$ko._(_root);
+	@override late final _Translations$sharedSpace$list$ko list = _Translations$sharedSpace$list$ko._(_root);
+	@override late final _Translations$sharedSpace$detail$ko detail = _Translations$sharedSpace$detail$ko._(_root);
+	@override late final _Translations$sharedSpace$notifications$ko notifications = _Translations$sharedSpace$notifications$ko._(_root);
 }
 
 // Path: budgetSuggestion
@@ -949,6 +956,26 @@ class _Translations$errorMapping$ko extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$recurring$ko recurring = _Translations$errorMapping$recurring$ko._(_root);
 	@override late final _Translations$errorMapping$upload$ko upload = _Translations$errorMapping$upload$ko._(_root);
 	@override late final _Translations$errorMapping$ai$ko ai = _Translations$errorMapping$ai$ko._(_root);
+}
+
+// Path: notification
+class _Translations$notification$ko extends Translations$notification$zh {
+	_Translations$notification$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '알림';
+	@override String get markAllRead => '모두 읽음';
+	@override String get empty => '알림이 없습니다';
+	@override String get loadFailed => '로드 실패';
+	@override String get retry => '재시도';
+	@override String get justNow => '방금';
+	@override String minutesAgo({required Object minutes}) => '${minutes}분 전';
+	@override String hoursAgo({required Object hours}) => '${hours}시간 전';
+	@override String daysAgo({required Object days}) => '${days}일 전';
+	@override String get deleted => '삭제됨';
+	@override late final _Translations$notification$types$ko types = _Translations$notification$types$ko._(_root);
 }
 
 // Path: auth.email
@@ -1308,6 +1335,101 @@ class _Translations$sharedSpace$roles$ko extends Translations$sharedSpace$roles$
 	@override String get member => '멤버';
 }
 
+// Path: sharedSpace.create
+class _Translations$sharedSpace$create$ko extends Translations$sharedSpace$create$zh {
+	_Translations$sharedSpace$create$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '공유 공간 만들기';
+	@override String get subtitle => '새로운 공유 공간을 만들어 친구와 함께 지출을 관리하세요';
+	@override String get nameLabel => '공간 이름';
+	@override String get nameHint => '예: 졸업 여행';
+	@override String get descLabel => '설명 (선택)';
+	@override String get descHint => '공동 여행 지출 기록';
+	@override String get cancel => '취소';
+	@override String get submit => '만들기';
+	@override String get nameRequired => '공간 이름을 입력하세요';
+	@override String get nameTooShort => '공간 이름은 2자 이상이어야 합니다';
+	@override String get nameTooLong => '공간 이름은 50자를 초과할 수 없습니다';
+}
+
+// Path: sharedSpace.join
+class _Translations$sharedSpace$join$ko extends Translations$sharedSpace$join$zh {
+	_Translations$sharedSpace$join$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '공유 공간 참여';
+	@override String get subtitle => '친구가 공유한 초대 코드를 입력하여 함께 가계를 관리하세요';
+	@override String get codeLabel => '초대 코드';
+	@override String get codeHint => '초대 코드 입력, 예: A8K2F9G7';
+	@override String get cancel => '취소';
+	@override String get submit => '참여';
+	@override String get codeRequired => '초대 코드를 입력하세요';
+	@override String get codeInvalid => '초대 코드 형식이 잘못되었습니다';
+	@override String get codeFormat => '초대 코드는 영문과 숫자만 사용할 수 있습니다';
+}
+
+// Path: sharedSpace.list
+class _Translations$sharedSpace$list$ko extends Translations$sharedSpace$list$zh {
+	_Translations$sharedSpace$list$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get emptyTitle => '공동 지출 관리가 이렇게 쉬워졌습니다';
+	@override String get emptySubtitle => '공유 공간을 만들어 파트너나 친구와\n공동 지출을 쉽게 동기화하세요';
+	@override String get getStarted => '시작하기';
+	@override String get hasInviteCode => '초대 코드가 있으신가요? 탭하여 참여';
+	@override String joinedSuccess({required Object name}) => '"${name}"에 참여했습니다!';
+}
+
+// Path: sharedSpace.detail
+class _Translations$sharedSpace$detail$ko extends Translations$sharedSpace$detail$zh {
+	_Translations$sharedSpace$detail$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get members => '멤버';
+	@override String get transactions => '거래 내역';
+	@override String get settlement => '정산';
+	@override String get inviteCode => '초대 코드';
+	@override String get copyCode => '초대 코드 복사';
+	@override String codeCopied({required Object code}) => '초대 코드 복사됨: ${code}';
+	@override String get validFor24h => '24시간 유효';
+	@override String get leaveSpace => '공간 나가기';
+	@override String get deleteSpace => '공간 삭제';
+	@override String get removeMember => '멤버 제거';
+	@override String get leaveConfirm => '이 공유 공간을 나가시겠습니까? 나간 후에는 거래 내역을 볼 수 없습니다.';
+	@override String get deleteConfirm => '이 공유 공간을 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며 모든 멤버가 제거됩니다.';
+	@override String get removeConfirm => '이 멤버를 공유 공간에서 제거하시겠습니까?';
+	@override String get generatingCode => '초대 코드 생성 중...';
+	@override String get loadFailed => '로드 실패';
+	@override String get retry => '재시도';
+	@override String get noTransactions => '거래 내역이 없습니다';
+	@override String get noTransactionsHint => '이 공간의 거래가 여기에 표시됩니다';
+}
+
+// Path: sharedSpace.notifications
+class _Translations$sharedSpace$notifications$ko extends Translations$sharedSpace$notifications$zh {
+	_Translations$sharedSpace$notifications$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '알림';
+	@override String get empty => '알림이 없습니다';
+	@override String get emptyHint => '새로운 초대나 활동이 있으면\n여기에 알림이 표시됩니다';
+	@override String get incompleteInfo => '초대 정보가 불완전합니다';
+	@override String get inviteAccepted => '초대를 수락했습니다!';
+	@override String get inviteRejected => '초대를 거절했습니다';
+	@override String get allMarkedRead => '모두 읽음으로 표시';
+}
+
 // Path: server.error
 class _Translations$server$error$ko extends Translations$server$error$zh {
 	_Translations$server$error$ko._(TranslationsKo root) : this._root = root, super.internal(root);
@@ -1432,6 +1554,21 @@ class _Translations$errorMapping$ai$ko extends Translations$errorMapping$ai$zh {
 	@override String get contextLimit => 'Context limit exceeded';
 	@override String get tokenLimit => 'Insufficient tokens';
 	@override String get emptyMessage => 'Empty user message';
+}
+
+// Path: notification.types
+class _Translations$notification$types$ko extends Translations$notification$types$zh {
+	_Translations$notification$types$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get system => '시스템';
+	@override String get spaceInvite => '공간 초대';
+	@override String get spaceActivity => '공간 활동';
+	@override String get billComment => '청구서 댓글';
+	@override String get budgetAlert => '예산 경고';
+	@override String get transaction => '거래 알림';
 }
 
 // Path: chat.tools.done
@@ -2911,6 +3048,57 @@ extension on TranslationsKo {
 			'sharedSpace.roles.owner' => '공간장',
 			'sharedSpace.roles.admin' => '관리자',
 			'sharedSpace.roles.member' => '멤버',
+			'sharedSpace.title' => '공유 공간',
+			'sharedSpace.create.title' => '공유 공간 만들기',
+			'sharedSpace.create.subtitle' => '새로운 공유 공간을 만들어 친구와 함께 지출을 관리하세요',
+			'sharedSpace.create.nameLabel' => '공간 이름',
+			'sharedSpace.create.nameHint' => '예: 졸업 여행',
+			'sharedSpace.create.descLabel' => '설명 (선택)',
+			'sharedSpace.create.descHint' => '공동 여행 지출 기록',
+			'sharedSpace.create.cancel' => '취소',
+			'sharedSpace.create.submit' => '만들기',
+			'sharedSpace.create.nameRequired' => '공간 이름을 입력하세요',
+			'sharedSpace.create.nameTooShort' => '공간 이름은 2자 이상이어야 합니다',
+			'sharedSpace.create.nameTooLong' => '공간 이름은 50자를 초과할 수 없습니다',
+			'sharedSpace.join.title' => '공유 공간 참여',
+			'sharedSpace.join.subtitle' => '친구가 공유한 초대 코드를 입력하여 함께 가계를 관리하세요',
+			'sharedSpace.join.codeLabel' => '초대 코드',
+			'sharedSpace.join.codeHint' => '초대 코드 입력, 예: A8K2F9G7',
+			'sharedSpace.join.cancel' => '취소',
+			'sharedSpace.join.submit' => '참여',
+			'sharedSpace.join.codeRequired' => '초대 코드를 입력하세요',
+			'sharedSpace.join.codeInvalid' => '초대 코드 형식이 잘못되었습니다',
+			'sharedSpace.join.codeFormat' => '초대 코드는 영문과 숫자만 사용할 수 있습니다',
+			'sharedSpace.list.emptyTitle' => '공동 지출 관리가 이렇게 쉬워졌습니다',
+			'sharedSpace.list.emptySubtitle' => '공유 공간을 만들어 파트너나 친구와\n공동 지출을 쉽게 동기화하세요',
+			'sharedSpace.list.getStarted' => '시작하기',
+			'sharedSpace.list.hasInviteCode' => '초대 코드가 있으신가요? 탭하여 참여',
+			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '"${name}"에 참여했습니다!',
+			'sharedSpace.detail.members' => '멤버',
+			'sharedSpace.detail.transactions' => '거래 내역',
+			'sharedSpace.detail.settlement' => '정산',
+			'sharedSpace.detail.inviteCode' => '초대 코드',
+			'sharedSpace.detail.copyCode' => '초대 코드 복사',
+			'sharedSpace.detail.codeCopied' => ({required Object code}) => '초대 코드 복사됨: ${code}',
+			'sharedSpace.detail.validFor24h' => '24시간 유효',
+			'sharedSpace.detail.leaveSpace' => '공간 나가기',
+			'sharedSpace.detail.deleteSpace' => '공간 삭제',
+			'sharedSpace.detail.removeMember' => '멤버 제거',
+			'sharedSpace.detail.leaveConfirm' => '이 공유 공간을 나가시겠습니까? 나간 후에는 거래 내역을 볼 수 없습니다.',
+			'sharedSpace.detail.deleteConfirm' => '이 공유 공간을 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며 모든 멤버가 제거됩니다.',
+			'sharedSpace.detail.removeConfirm' => '이 멤버를 공유 공간에서 제거하시겠습니까?',
+			'sharedSpace.detail.generatingCode' => '초대 코드 생성 중...',
+			'sharedSpace.detail.loadFailed' => '로드 실패',
+			'sharedSpace.detail.retry' => '재시도',
+			'sharedSpace.detail.noTransactions' => '거래 내역이 없습니다',
+			'sharedSpace.detail.noTransactionsHint' => '이 공간의 거래가 여기에 표시됩니다',
+			'sharedSpace.notifications.title' => '알림',
+			'sharedSpace.notifications.empty' => '알림이 없습니다',
+			'sharedSpace.notifications.emptyHint' => '새로운 초대나 활동이 있으면\n여기에 알림이 표시됩니다',
+			'sharedSpace.notifications.incompleteInfo' => '초대 정보가 불완전합니다',
+			'sharedSpace.notifications.inviteAccepted' => '초대를 수락했습니다!',
+			'sharedSpace.notifications.inviteRejected' => '초대를 거절했습니다',
+			'sharedSpace.notifications.allMarkedRead' => '모두 읽음으로 표시',
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
@@ -2987,6 +3175,24 @@ extension on TranslationsKo {
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
+			_ => null,
+		} ?? switch (path) {
+			'notification.title' => '알림',
+			'notification.markAllRead' => '모두 읽음',
+			'notification.empty' => '알림이 없습니다',
+			'notification.loadFailed' => '로드 실패',
+			'notification.retry' => '재시도',
+			'notification.justNow' => '방금',
+			'notification.minutesAgo' => ({required Object minutes}) => '${minutes}분 전',
+			'notification.hoursAgo' => ({required Object hours}) => '${hours}시간 전',
+			'notification.daysAgo' => ({required Object days}) => '${days}일 전',
+			'notification.deleted' => '삭제됨',
+			'notification.types.system' => '시스템',
+			'notification.types.spaceInvite' => '공간 초대',
+			'notification.types.spaceActivity' => '공간 활동',
+			'notification.types.billComment' => '청구서 댓글',
+			'notification.types.budgetAlert' => '예산 경고',
+			'notification.types.transaction' => '거래 알림',
 			_ => null,
 		};
 	}

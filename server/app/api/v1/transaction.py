@@ -24,7 +24,7 @@ from app.schemas.transaction import (
     UpdateBatchAccountRequest,
 )
 from app.services.transaction_service import TransactionService
-from app.utils.currency_utils import BASE_CURRENCY, get_exchange_rate_from_base, get_user_display_currency
+from app.utils.currency_utils import get_user_display_currency
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -91,16 +91,17 @@ def _transaction_to_dict(tx: Any, display_currency: str = "CNY", exchange_rate: 
     - Pydantic TransactionItem objects
     - Pre-formatted dictionaries
 
-    Returns format:
-    - amount: Display amount converted to display_currency
-    - amountOriginal: Original recorded amount (immutable)
-    - originalCurrency: Original currency (immutable)
+    Returns format (user-base-currency model):
+    - amount: Original currency amount (amount_original)
+    - currency: Original currency code
+    - amountBase: Base currency equivalent (Transaction.amount)
+    - baseCurrency: User's base currency code
     - exchangeRate: Exchange rate snapshot at recording time
 
     Args:
         tx: Transaction object, dict, or TransactionItem
-        display_currency: Target currency for display
-        exchange_rate: Exchange rate from base currency to display currency
+        display_currency: User's base currency
+        exchange_rate: Deprecated, kept for compatibility
 
     Returns:
         Dictionary representation of the transaction
@@ -122,14 +123,9 @@ def _transaction_to_dict(tx: Any, display_currency: str = "CNY", exchange_rate: 
     # Extract amounts
     amount_val, amount_original, original_currency, stored_exchange_rate = _extract_amounts(tx)
 
-    # Apply exchange rate conversion if needed
-    # 如果交易原始币种与用户显示币种一致，直接使用原始金额，
-    # 避免 原币→USD→原币 往返换算产生的精度损失（如 500 → 499.91）
+    # Display original currency amount directly
     if not is_already_converted:
-        if original_currency.upper() == display_currency.upper():
-            amount_val = amount_original
-        elif display_currency != BASE_CURRENCY:
-            amount_val = amount_val * exchange_rate
+        amount_val = amount_original
 
     # Build response dictionary
     return {
@@ -137,9 +133,11 @@ def _transaction_to_dict(tx: Any, display_currency: str = "CNY", exchange_rate: 
         "id": tx_id,
         "userUuid": str(user_uuid),
         "type": tx_type,
-        # Amount fields
+        # Amount fields - show original currency
         "amount": round(amount_val, 2),
-        "currency": display_currency,
+        "currency": original_currency,
+        "amountBase": round(float(_get_attr(tx, "amount") or 0), 2),
+        "baseCurrency": display_currency,
         "amountOriginal": round(amount_original, 2),
         "originalCurrency": original_currency,
         "exchangeRate": str(stored_exchange_rate) if stored_exchange_rate else None,
@@ -158,9 +156,9 @@ def _transaction_to_dict(tx: Any, display_currency: str = "CNY", exchange_rate: 
         # Account references
         "sourceAccountId": str(_get_attr(tx, "source_account_id")) if _get_attr(tx, "source_account_id") else None,
         "targetAccountId": str(_get_attr(tx, "target_account_id")) if _get_attr(tx, "target_account_id") else None,
-        # Display value for UI
+        # Display value for UI (uses original currency)
         "display": TransactionDisplayValue.from_params(
-            amount=amount_val, tx_type=tx_type, currency=display_currency
+            amount=amount_val, tx_type=tx_type, currency=original_currency
         ).model_dump(by_alias=False),
     }
 
@@ -206,18 +204,15 @@ async def get_transactions(
 
         # 使用共享服务执行查询
         service = TransactionQueryService(db)
-        # 注意：这里我们获取原始数据，然后在 API 层应用换算（或者获取已换算的并直接返回）
-        # 为了避免 get_transactions 和 search_transactions 逻辑不一致，我们在下面统一处理
         result = await service.search(str(current_user.uuid), params)
 
-        # 获取汇率和用户偏好币种
+        # 获取用户本位币
         display_currency = await get_user_display_currency(db, current_user.uuid)
-        exchange_rate = await get_exchange_rate_from_base(display_currency)
 
-        # 在此处重新映射，确保使用的是最新的换算逻辑，且 items 里的每一个 tx 都是 Transaction 对象或 Model
+        # 映射响应（展示原币金额）
         return success_response(
             data={
-                "items": [_transaction_to_dict(item, display_currency, exchange_rate) for item in result.items],
+                "items": [_transaction_to_dict(item, display_currency) for item in result.items],
                 "page": result.page,
                 "size": result.per_page,
                 "total": result.total,
@@ -337,16 +332,15 @@ async def search_transactions(
         # 构建查询
         query = select(Transaction).where(and_(True, *conditions)).order_by(desc(Transaction.transaction_at))
 
-        # 获取汇率和用户偏好币种
+        # 获取用户本位币
         display_currency = await get_user_display_currency(db, current_user.uuid)
-        exchange_rate = await get_exchange_rate_from_base(display_currency)
 
         # 使用 fastapi-pagination 分页
         page_result = await apaginate(
             db,
             query,
             params=params,
-            transformer=lambda items: [_transaction_to_dict(t, display_currency, exchange_rate) for t in items],
+            transformer=lambda items: [_transaction_to_dict(t, display_currency) for t in items],
         )
 
         # 返回统一格式

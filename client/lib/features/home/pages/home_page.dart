@@ -8,6 +8,7 @@ import 'package:forui/forui.dart';
 import '../../shared_space/widgets/notification_icon.dart';
 import 'package:augo/i18n/strings.g.dart';
 import 'package:augo/shared/utils/amount_formatter.dart';
+import 'package:augo/features/profile/providers/financial_settings_provider.dart';
 import '../models/total_expense_model.dart';
 import 'dart:async';
 
@@ -353,7 +354,14 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                             ),
                           ),
                           error: (error, _) => Text(
-                            _isAmountVisible ? '¥0.00' : t.home.amountHidden,
+                            _isAmountVisible
+                                ? AmountFormatter.formatCommon(
+                                    0,
+                                    currencyCode: ref
+                                        .read(financialSettingsProvider)
+                                        .primaryCurrency,
+                                  )
+                                : t.home.amountHidden,
                             style: theme.typography.body.xl2.copyWith(
                               color: colors.primaryForeground,
                               fontWeight: FontWeight.bold,

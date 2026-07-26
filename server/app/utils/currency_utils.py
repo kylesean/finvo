@@ -2,6 +2,12 @@
 
 This module provides helper functions for currency conversion
 and user display currency preferences.
+
+Architecture (user-base-currency model):
+- Each user's base currency is their ``financial_settings.primary_currency``.
+- ``Transaction.amount`` stores the equivalent in the user's base currency.
+- ``Transaction.exchange_rate`` is a snapshot: 1 unit of original currency = X units of base currency.
+- Aggregations (SUM) operate directly on ``amount`` without real-time conversion.
 """
 
 from __future__ import annotations
@@ -14,32 +20,101 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import logger
 
+# ---------------------------------------------------------------------------
+# Deprecated: kept only for backward compatibility with exchange_rate_service
+# internal USD-hub logic. Do NOT use in new code.
+# ---------------------------------------------------------------------------
+BASE_CURRENCY = "USD"
 
-async def get_user_display_currency(db: AsyncSession, user_uuid: UUID) -> str:
-    """Get user's preferred display currency.
+
+async def get_user_base_currency(db: AsyncSession, user_uuid: UUID) -> str:
+    """Get user's base (primary) currency from financial settings.
+
+    This is the Single Source of Truth for the user's ledger currency.
+    All ``Transaction.amount`` values are denominated in this currency.
 
     Args:
         db: Database session
         user_uuid: User's UUID
 
     Returns:
-        str: Currency code (default: CNY)
+        str: ISO 4217 currency code (falls back to USD)
     """
     from app.models.financial_settings import FinancialSettings
+    from app.utils.currency_inference import FALLBACK_CURRENCY
 
     try:
         result = await db.execute(
             select(FinancialSettings.primary_currency).where(FinancialSettings.user_uuid == user_uuid)
         )
         currency = result.scalar_one_or_none()
-        return currency or "CNY"
+        return currency or FALLBACK_CURRENCY
     except Exception as e:
         logger.warning(
-            "get_user_display_currency_failed",
+            "get_user_base_currency_failed",
             user_uuid=str(user_uuid),
             error=str(e),
         )
-        return "CNY"
+        return FALLBACK_CURRENCY
+
+
+# Alias: display currency IS the base currency in the new architecture.
+get_user_display_currency = get_user_base_currency
+
+
+async def convert_to_user_base(
+    amount: Decimal,
+    from_currency: str,
+    user_base_currency: str,
+) -> tuple[Decimal, Decimal]:
+    """Convert an original amount to the user's base currency with a rate snapshot.
+
+    Args:
+        amount: Original amount (positive, in ``from_currency``)
+        from_currency: ISO code of the original currency
+        user_base_currency: User's base currency code
+
+    Returns:
+        Tuple of (base_amount, exchange_rate) where exchange_rate is
+        "1 unit of from_currency = X units of user_base_currency".
+        If conversion fails, returns (amount, Decimal("1.0")) as fallback.
+    """
+    if from_currency.upper() == user_base_currency.upper():
+        return amount, Decimal("1.0")
+
+    if amount == 0:
+        return Decimal("0"), Decimal("1.0")
+
+    try:
+        from app.services.exchange_rate_service import exchange_rate_service
+
+        rate = await exchange_rate_service.convert(
+            amount=1.0,
+            from_currency=from_currency,
+            to_currency=user_base_currency,
+        )
+
+        if rate is not None:
+            exchange_rate = Decimal(str(rate))
+            base_amount = amount * exchange_rate
+            return base_amount, exchange_rate
+
+        logger.warning(
+            "convert_to_user_base_rate_not_found",
+            from_currency=from_currency,
+            user_base_currency=user_base_currency,
+            amount=str(amount),
+        )
+        return amount, Decimal("1.0")
+
+    except Exception as e:
+        logger.error(
+            "convert_to_user_base_error",
+            error=str(e),
+            from_currency=from_currency,
+            user_base_currency=user_base_currency,
+        )
+        return amount, Decimal("1.0")
 
 
 async def convert_to_display_currency(
@@ -47,7 +122,7 @@ async def convert_to_display_currency(
     from_currency: str,
     to_currency: str,
 ) -> Decimal:
-    """Convert amount from one currency to another.
+    """Convert amount from one currency to another (general-purpose).
 
     Args:
         amount: Amount to convert
@@ -88,98 +163,6 @@ async def convert_to_display_currency(
             to_currency=to_currency,
         )
         return amount
-
-
-# System default base currency for database storage and aggregate statistics.
-# All values stored in Transaction.amount use this currency.
-# Using USD as the international standard base currency, consistent with exchange rate API base_code.
-BASE_CURRENCY = "USD"
-
-
-async def convert_base_to_display(
-    amount: float,
-    display_currency: str,
-) -> float:
-    """Convert amount from base currency (USD) to user's display currency.
-
-    This is the core function for the base currency approach:
-    - All transaction amounts are stored in USD (base currency)
-    - When displaying, convert USD -> user's preferred currency
-
-    Args:
-        amount: Amount in USD (base currency)
-        display_currency: Target currency code
-
-    Returns:
-        float: Converted amount (original if conversion fails or same currency)
-    """
-    if display_currency.upper() == BASE_CURRENCY:
-        return amount
-
-    if amount == 0:
-        return 0.0
-
-    try:
-        from app.services.exchange_rate_service import exchange_rate_service
-
-        converted = await exchange_rate_service.convert(
-            amount=amount,
-            from_currency=BASE_CURRENCY,
-            to_currency=display_currency,
-        )
-
-        if converted is not None:
-            return round(converted, 2)
-
-        logger.warning(
-            "base_to_display_conversion_failed",
-            display_currency=display_currency,
-            amount=amount,
-        )
-        return amount
-
-    except Exception as e:
-        logger.error(
-            "base_to_display_conversion_error",
-            error=str(e),
-            display_currency=display_currency,
-        )
-        return amount
-
-
-async def get_exchange_rate_from_base(display_currency: str) -> float:
-    """Get exchange rate from base currency (USD) to display currency.
-
-    Uses convert(1, USD, target) to get the exchange rate.
-
-    Args:
-        display_currency: Target currency code
-
-    Returns:
-        float: Exchange rate (1.0 if same currency or conversion fails)
-    """
-    if display_currency.upper() == BASE_CURRENCY:
-        return 1.0
-
-    try:
-        from app.services.exchange_rate_service import exchange_rate_service
-
-        # Convert 1 USD to target currency to get the rate
-        rate = await exchange_rate_service.convert(
-            amount=1.0,
-            from_currency=BASE_CURRENCY,
-            to_currency=display_currency,
-        )
-
-        return rate if rate is not None else 1.0
-
-    except Exception as e:
-        logger.error(
-            "get_exchange_rate_error",
-            error=str(e),
-            display_currency=display_currency,
-        )
-        return 1.0
 
 
 def get_currency_symbol(currency_code: str) -> str:

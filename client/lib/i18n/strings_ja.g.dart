@@ -73,6 +73,7 @@ class TranslationsJa extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$budgetSuggestion$ja budgetSuggestion = _Translations$budgetSuggestion$ja._(_root);
 	@override late final _Translations$server$ja server = _Translations$server$ja._(_root);
 	@override late final _Translations$errorMapping$ja errorMapping = _Translations$errorMapping$ja._(_root);
+	@override late final _Translations$notification$ja notification = _Translations$notification$ja._(_root);
 }
 
 // Path: common
@@ -892,6 +893,12 @@ class _Translations$sharedSpace$ja extends Translations$sharedSpace$zh {
 	// Translations
 	@override late final _Translations$sharedSpace$dashboard$ja dashboard = _Translations$sharedSpace$dashboard$ja._(_root);
 	@override late final _Translations$sharedSpace$roles$ja roles = _Translations$sharedSpace$roles$ja._(_root);
+	@override String get title => '共有スペース';
+	@override late final _Translations$sharedSpace$create$ja create = _Translations$sharedSpace$create$ja._(_root);
+	@override late final _Translations$sharedSpace$join$ja join = _Translations$sharedSpace$join$ja._(_root);
+	@override late final _Translations$sharedSpace$list$ja list = _Translations$sharedSpace$list$ja._(_root);
+	@override late final _Translations$sharedSpace$detail$ja detail = _Translations$sharedSpace$detail$ja._(_root);
+	@override late final _Translations$sharedSpace$notifications$ja notifications = _Translations$sharedSpace$notifications$ja._(_root);
 }
 
 // Path: budgetSuggestion
@@ -949,6 +956,26 @@ class _Translations$errorMapping$ja extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$recurring$ja recurring = _Translations$errorMapping$recurring$ja._(_root);
 	@override late final _Translations$errorMapping$upload$ja upload = _Translations$errorMapping$upload$ja._(_root);
 	@override late final _Translations$errorMapping$ai$ja ai = _Translations$errorMapping$ai$ja._(_root);
+}
+
+// Path: notification
+class _Translations$notification$ja extends Translations$notification$zh {
+	_Translations$notification$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'お知らせ';
+	@override String get markAllRead => 'すべて既読';
+	@override String get empty => 'お知らせはありません';
+	@override String get loadFailed => '読み込みに失敗しました';
+	@override String get retry => '再試行';
+	@override String get justNow => 'たった今';
+	@override String minutesAgo({required Object minutes}) => '${minutes}分前';
+	@override String hoursAgo({required Object hours}) => '${hours}時間前';
+	@override String daysAgo({required Object days}) => '${days}日前';
+	@override String get deleted => '削除しました';
+	@override late final _Translations$notification$types$ja types = _Translations$notification$types$ja._(_root);
 }
 
 // Path: auth.email
@@ -1308,6 +1335,101 @@ class _Translations$sharedSpace$roles$ja extends Translations$sharedSpace$roles$
 	@override String get member => 'メンバー';
 }
 
+// Path: sharedSpace.create
+class _Translations$sharedSpace$create$ja extends Translations$sharedSpace$create$zh {
+	_Translations$sharedSpace$create$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '共有スペースを作成';
+	@override String get subtitle => '新しい共有スペースを作成して、友達と支出を管理しましょう';
+	@override String get nameLabel => 'スペース名';
+	@override String get nameHint => '例：卒業旅行';
+	@override String get descLabel => '説明（任意）';
+	@override String get descHint => '共同旅行の支出を記録';
+	@override String get cancel => 'キャンセル';
+	@override String get submit => '作成';
+	@override String get nameRequired => 'スペース名を入力してください';
+	@override String get nameTooShort => 'スペース名は2文字以上必要です';
+	@override String get nameTooLong => 'スペース名は50文字以内にしてください';
+}
+
+// Path: sharedSpace.join
+class _Translations$sharedSpace$join$ja extends Translations$sharedSpace$join$zh {
+	_Translations$sharedSpace$join$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '共有スペースに参加';
+	@override String get subtitle => '友達から共有された招待コードを入力して、共同家計を始めましょう';
+	@override String get codeLabel => '招待コード';
+	@override String get codeHint => '招待コードを入力、例：A8K2F9G7';
+	@override String get cancel => 'キャンセル';
+	@override String get submit => '参加';
+	@override String get codeRequired => '招待コードを入力してください';
+	@override String get codeInvalid => '招待コードの形式が無効です';
+	@override String get codeFormat => '招待コードは英数字のみ使用できます';
+}
+
+// Path: sharedSpace.list
+class _Translations$sharedSpace$list$ja extends Translations$sharedSpace$list$zh {
+	_Translations$sharedSpace$list$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get emptyTitle => '共同支出の管理がこんなに簡単に';
+	@override String get emptySubtitle => '共有スペースを作成して、パートナーや友達と\n共同の支出を簡単に同期しましょう';
+	@override String get getStarted => '始める';
+	@override String get hasInviteCode => '招待コードをお持ちですか？タップして参加';
+	@override String joinedSuccess({required Object name}) => '「${name}」に参加しました！';
+}
+
+// Path: sharedSpace.detail
+class _Translations$sharedSpace$detail$ja extends Translations$sharedSpace$detail$zh {
+	_Translations$sharedSpace$detail$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get members => 'メンバー';
+	@override String get transactions => '取引履歴';
+	@override String get settlement => '精算';
+	@override String get inviteCode => '招待コード';
+	@override String get copyCode => '招待コードをコピー';
+	@override String codeCopied({required Object code}) => '招待コードをコピーしました：${code}';
+	@override String get validFor24h => '24時間有効';
+	@override String get leaveSpace => 'スペースを退出';
+	@override String get deleteSpace => 'スペースを削除';
+	@override String get removeMember => 'メンバーを削除';
+	@override String get leaveConfirm => 'この共有スペースを退出しますか？退出後は取引履歴を閲覧できなくなります。';
+	@override String get deleteConfirm => 'この共有スペースを削除しますか？この操作は取り消せず、すべてのメンバーが削除されます。';
+	@override String get removeConfirm => 'このメンバーを共有スペースから削除しますか？';
+	@override String get generatingCode => '招待コードを生成中...';
+	@override String get loadFailed => '読み込みに失敗しました';
+	@override String get retry => '再試行';
+	@override String get noTransactions => '取引はまだありません';
+	@override String get noTransactionsHint => 'このスペースの取引がここに表示されます';
+}
+
+// Path: sharedSpace.notifications
+class _Translations$sharedSpace$notifications$ja extends Translations$sharedSpace$notifications$zh {
+	_Translations$sharedSpace$notifications$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'お知らせ';
+	@override String get empty => 'お知らせはありません';
+	@override String get emptyHint => '新しい招待やアクティビティがあると、\nここにお知らせが表示されます';
+	@override String get incompleteInfo => '招待情報が不完全です';
+	@override String get inviteAccepted => '招待を承認しました！';
+	@override String get inviteRejected => '招待を拒否しました';
+	@override String get allMarkedRead => 'すべて既読にしました';
+}
+
 // Path: server.error
 class _Translations$server$error$ja extends Translations$server$error$zh {
 	_Translations$server$error$ja._(TranslationsJa root) : this._root = root, super.internal(root);
@@ -1432,6 +1554,21 @@ class _Translations$errorMapping$ai$ja extends Translations$errorMapping$ai$zh {
 	@override String get contextLimit => 'Context limit exceeded';
 	@override String get tokenLimit => 'Insufficient tokens';
 	@override String get emptyMessage => 'Empty user message';
+}
+
+// Path: notification.types
+class _Translations$notification$types$ja extends Translations$notification$types$zh {
+	_Translations$notification$types$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get system => 'システム';
+	@override String get spaceInvite => 'スペース招待';
+	@override String get spaceActivity => 'スペース活動';
+	@override String get billComment => '請求コメント';
+	@override String get budgetAlert => '予算アラート';
+	@override String get transaction => '取引通知';
 }
 
 // Path: chat.tools.done
@@ -2911,6 +3048,57 @@ extension on TranslationsJa {
 			'sharedSpace.roles.owner' => 'オーナー',
 			'sharedSpace.roles.admin' => '管理者',
 			'sharedSpace.roles.member' => 'メンバー',
+			'sharedSpace.title' => '共有スペース',
+			'sharedSpace.create.title' => '共有スペースを作成',
+			'sharedSpace.create.subtitle' => '新しい共有スペースを作成して、友達と支出を管理しましょう',
+			'sharedSpace.create.nameLabel' => 'スペース名',
+			'sharedSpace.create.nameHint' => '例：卒業旅行',
+			'sharedSpace.create.descLabel' => '説明（任意）',
+			'sharedSpace.create.descHint' => '共同旅行の支出を記録',
+			'sharedSpace.create.cancel' => 'キャンセル',
+			'sharedSpace.create.submit' => '作成',
+			'sharedSpace.create.nameRequired' => 'スペース名を入力してください',
+			'sharedSpace.create.nameTooShort' => 'スペース名は2文字以上必要です',
+			'sharedSpace.create.nameTooLong' => 'スペース名は50文字以内にしてください',
+			'sharedSpace.join.title' => '共有スペースに参加',
+			'sharedSpace.join.subtitle' => '友達から共有された招待コードを入力して、共同家計を始めましょう',
+			'sharedSpace.join.codeLabel' => '招待コード',
+			'sharedSpace.join.codeHint' => '招待コードを入力、例：A8K2F9G7',
+			'sharedSpace.join.cancel' => 'キャンセル',
+			'sharedSpace.join.submit' => '参加',
+			'sharedSpace.join.codeRequired' => '招待コードを入力してください',
+			'sharedSpace.join.codeInvalid' => '招待コードの形式が無効です',
+			'sharedSpace.join.codeFormat' => '招待コードは英数字のみ使用できます',
+			'sharedSpace.list.emptyTitle' => '共同支出の管理がこんなに簡単に',
+			'sharedSpace.list.emptySubtitle' => '共有スペースを作成して、パートナーや友達と\n共同の支出を簡単に同期しましょう',
+			'sharedSpace.list.getStarted' => '始める',
+			'sharedSpace.list.hasInviteCode' => '招待コードをお持ちですか？タップして参加',
+			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '「${name}」に参加しました！',
+			'sharedSpace.detail.members' => 'メンバー',
+			'sharedSpace.detail.transactions' => '取引履歴',
+			'sharedSpace.detail.settlement' => '精算',
+			'sharedSpace.detail.inviteCode' => '招待コード',
+			'sharedSpace.detail.copyCode' => '招待コードをコピー',
+			'sharedSpace.detail.codeCopied' => ({required Object code}) => '招待コードをコピーしました：${code}',
+			'sharedSpace.detail.validFor24h' => '24時間有効',
+			'sharedSpace.detail.leaveSpace' => 'スペースを退出',
+			'sharedSpace.detail.deleteSpace' => 'スペースを削除',
+			'sharedSpace.detail.removeMember' => 'メンバーを削除',
+			'sharedSpace.detail.leaveConfirm' => 'この共有スペースを退出しますか？退出後は取引履歴を閲覧できなくなります。',
+			'sharedSpace.detail.deleteConfirm' => 'この共有スペースを削除しますか？この操作は取り消せず、すべてのメンバーが削除されます。',
+			'sharedSpace.detail.removeConfirm' => 'このメンバーを共有スペースから削除しますか？',
+			'sharedSpace.detail.generatingCode' => '招待コードを生成中...',
+			'sharedSpace.detail.loadFailed' => '読み込みに失敗しました',
+			'sharedSpace.detail.retry' => '再試行',
+			'sharedSpace.detail.noTransactions' => '取引はまだありません',
+			'sharedSpace.detail.noTransactionsHint' => 'このスペースの取引がここに表示されます',
+			'sharedSpace.notifications.title' => 'お知らせ',
+			'sharedSpace.notifications.empty' => 'お知らせはありません',
+			'sharedSpace.notifications.emptyHint' => '新しい招待やアクティビティがあると、\nここにお知らせが表示されます',
+			'sharedSpace.notifications.incompleteInfo' => '招待情報が不完全です',
+			'sharedSpace.notifications.inviteAccepted' => '招待を承認しました！',
+			'sharedSpace.notifications.inviteRejected' => '招待を拒否しました',
+			'sharedSpace.notifications.allMarkedRead' => 'すべて既読にしました',
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
@@ -2987,6 +3175,24 @@ extension on TranslationsJa {
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
+			_ => null,
+		} ?? switch (path) {
+			'notification.title' => 'お知らせ',
+			'notification.markAllRead' => 'すべて既読',
+			'notification.empty' => 'お知らせはありません',
+			'notification.loadFailed' => '読み込みに失敗しました',
+			'notification.retry' => '再試行',
+			'notification.justNow' => 'たった今',
+			'notification.minutesAgo' => ({required Object minutes}) => '${minutes}分前',
+			'notification.hoursAgo' => ({required Object hours}) => '${hours}時間前',
+			'notification.daysAgo' => ({required Object days}) => '${days}日前',
+			'notification.deleted' => '削除しました',
+			'notification.types.system' => 'システム',
+			'notification.types.spaceInvite' => 'スペース招待',
+			'notification.types.spaceActivity' => 'スペース活動',
+			'notification.types.billComment' => '請求コメント',
+			'notification.types.budgetAlert' => '予算アラート',
+			'notification.types.transaction' => '取引通知',
 			_ => null,
 		};
 	}

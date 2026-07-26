@@ -59,12 +59,15 @@ async def test_process_due_transactions(db_session):
         result = await db_session.execute(query)
         txs = result.scalars().all()
         assert len(txs) == 1
-        # In our system BASE_CURRENCY is USD, but the test uses CNY.
-        # So amount will be converted, and amount_original will be the original 100.0.
+        # User-base-currency model: amount is converted to user's base currency.
+        # Since no FinancialSettings exists, fallback is USD. CNY -> USD conversion applies.
+        # amount_original preserves the original 100.0 CNY.
         assert txs[0].amount_original == Decimal("100.0")
         assert txs[0].currency == "CNY"
-        # We don't assert the exact converted amount because it depends on the current rate in exchange_rate_service
+        # amount is the USD equivalent (converted at write time with rate snapshot)
         assert txs[0].amount > 0
+        # exchange_rate snapshot should be stored
+        assert txs[0].exchange_rate is not None
 
         # Check rt updated
         await db_session.refresh(rt)

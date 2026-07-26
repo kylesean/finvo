@@ -5,12 +5,12 @@ import 'package:flutter/foundation.dart';
 /// Only enables logging in Debug mode.
 Interceptor get loggingInterceptor {
   return LogInterceptor(
-    request: kDebugMode, // Print request [default: true]
-    requestHeader: kDebugMode, // Print request headers [default: true]
-    requestBody: false, // Print request body [default: true]
-    responseHeader: kDebugMode, // Print response headers [default: true]
-    responseBody: false, // Print response body [default: true]
-    error: kDebugMode, // Print error information [default: true]
+    request: kDebugMode, // Print request summary
+    requestHeader: false, // Do not spam headers
+    requestBody: false, // Print request body
+    responseHeader: false, // Do not spam headers
+    responseBody: false, // Print response body
+    error: kDebugMode, // Print error information
     logPrint: (object) {
       // Custom log printing method
       if (kDebugMode) {

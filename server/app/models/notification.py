@@ -13,7 +13,7 @@ from pydantic import field_validator
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.user import User
@@ -91,7 +91,7 @@ class Notification(Base):
     def mark_as_read(self) -> None:
         """Mark this notification as read."""
         self.is_read = True
-        self.read_at = datetime.now()
+        self.read_at = utc_now()
 
     @property
     def is_unread(self) -> bool:

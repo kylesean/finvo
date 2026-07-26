@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/i18n/strings.g.dart';
 import '../providers/notification_provider.dart';
 import '../providers/shared_space_provider.dart';
 import '../widgets/notification_card.dart';
@@ -28,7 +29,7 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(
         ref
-            .read(notificationProvider.notifier)
+            .read(sharedSpaceNotificationProvider.notifier)
             .loadNotifications(refresh: true),
       );
     });
@@ -43,7 +44,9 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      unawaited(ref.read(notificationProvider.notifier).loadNotifications());
+      unawaited(
+        ref.read(sharedSpaceNotificationProvider.notifier).loadNotifications(),
+      );
     }
   }
 
@@ -51,22 +54,22 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
   Widget build(BuildContext context) {
     final theme = context.theme;
     final colors = theme.colors;
-    final state = ref.watch(notificationProvider);
+    final state = ref.watch(sharedSpaceNotificationProvider);
 
-    ref.listen<String?>(notificationProvider.select((state) => state.error), (
-      previous,
-      error,
-    ) {
-      if (error != null) {
-        ToastService.showDestructive(description: Text(error));
-        ref.read(notificationProvider.notifier).clearError();
-      }
-    });
+    ref.listen<String?>(
+      sharedSpaceNotificationProvider.select((state) => state.error),
+      (previous, error) {
+        if (error != null) {
+          ToastService.showDestructive(description: Text(error));
+          ref.read(sharedSpaceNotificationProvider.notifier).clearError();
+        }
+      },
+    );
 
     return FScaffold(
       header: FHeader(
         title: Text(
-          'Notifications',
+          t.sharedSpace.notifications.title,
           style: theme.typography.body.xl.copyWith(color: colors.foreground),
         ),
         suffixes: [
@@ -80,7 +83,7 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
       child: RefreshIndicator(
         onRefresh: () async {
           await ref
-              .read(notificationProvider.notifier)
+              .read(sharedSpaceNotificationProvider.notifier)
               .loadNotifications(refresh: true);
         },
         child: state.notifications.isEmpty && !state.isLoading
@@ -115,14 +118,14 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              'No notifications',
+              t.sharedSpace.notifications.empty,
               style: theme.typography.body.xl.copyWith(
                 color: colors.foreground,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'When you have new invites or activities,\nyou will receive notifications here',
+              t.sharedSpace.notifications.emptyHint,
               style: theme.typography.body.md.copyWith(
                 color: colors.mutedForeground,
               ),
@@ -136,7 +139,7 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
 
   Widget _buildNotificationsList(
     BuildContext context,
-    NotificationState state,
+    SharedSpaceNotificationState state,
   ) {
     return ListView.builder(
       controller: _scrollController,
@@ -174,7 +177,9 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
     // Mark as read
     if (!notification.isRead) {
       unawaited(
-        ref.read(notificationProvider.notifier).markAsRead(notification.id),
+        ref
+            .read(sharedSpaceNotificationProvider.notifier)
+            .markAsRead(notification.id),
       );
     }
 
@@ -215,18 +220,20 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
     final spaceId = notification.data?['spaceId'] as String?;
     if (spaceId == null) {
       ToastService.showDestructive(
-        description: const Text('Incomplete invite info'),
+        description: Text(t.sharedSpace.notifications.incompleteInfo),
       );
       return;
     }
 
     final success = await ref
-        .read(notificationProvider.notifier)
+        .read(sharedSpaceNotificationProvider.notifier)
         .respondToSpaceInvite(spaceId, action, notification.id);
 
     if (success) {
       if (action == 'accept') {
-        ToastService.show(description: const Text('Invite accepted!'));
+        ToastService.show(
+          description: Text(t.sharedSpace.notifications.inviteAccepted),
+        );
 
         // Refresh shared space list
         unawaited(
@@ -238,21 +245,23 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
           unawaited(context.push('/profile/shared-space/$spaceId'));
         }
       } else {
-        ToastService.show(description: const Text('Invite rejected'));
+        ToastService.show(
+          description: Text(t.sharedSpace.notifications.inviteRejected),
+        );
       }
     }
   }
 
   Future<void> _deleteNotification(String notificationId) async {
     await ref
-        .read(notificationProvider.notifier)
+        .read(sharedSpaceNotificationProvider.notifier)
         .deleteNotification(notificationId);
   }
 
   Future<void> _markAllAsRead() async {
-    await ref.read(notificationProvider.notifier).markAllAsRead();
+    await ref.read(sharedSpaceNotificationProvider.notifier).markAllAsRead();
     ToastService.show(
-      description: const Text('All notifications marked as read'),
+      description: Text(t.sharedSpace.notifications.allMarkedRead),
     );
   }
 }

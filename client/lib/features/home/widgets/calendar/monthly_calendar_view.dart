@@ -8,7 +8,7 @@ import 'package:augo/features/home/models/daily_expense_summary_model.dart';
 import 'package:forui/forui.dart'; // Import forui
 import 'package:intl/intl.dart';
 import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/models/currency.dart';
+import 'package:augo/shared/utils/amount_formatter.dart';
 import 'package:augo/features/profile/providers/financial_settings_provider.dart';
 
 class MonthlyCalendarView extends ConsumerWidget {
@@ -344,8 +344,9 @@ class MonthlyCalendarView extends ConsumerWidget {
                       final currencyCode = ref
                           .watch(financialSettingsProvider)
                           .primaryCurrency;
-                      final currency = Currency.fromCode(currencyCode);
-                      final currencySymbol = currency?.symbol ?? '¥';
+                      final currencySymbol = AmountFormatter.getCurrencySymbol(
+                        currencyCode,
+                      );
 
                       // Get locale based on language, not currency
                       final numberLocale = switch (locale) {

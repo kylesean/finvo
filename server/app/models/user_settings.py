@@ -26,7 +26,7 @@ class UserSettings(Base):
 
     Attributes:
         user_uuid: Primary key, references users.uuid
-        currency: User's preferred currency (default: CNY)
+        currency: User's preferred currency (default: USD)
         timezone: User's timezone (default: Asia/Shanghai)
         avg_daily_spending: Estimated average daily spending
         safety_balance_threshold: Minimum safe balance threshold
@@ -38,7 +38,7 @@ class UserSettings(Base):
     __tablename__ = "user_settings"
 
     user_uuid: Mapped[UUID] = col.uuid_pk()
-    currency: Mapped[str] = mapped_column(String(10), default="CNY")
+    currency: Mapped[str] = mapped_column(String(10), default="USD")
     timezone: Mapped[str] = mapped_column(String(100), default="Asia/Shanghai")
     avg_daily_spending: Mapped[str] = mapped_column(String, default="100.00")
     safety_balance_threshold: Mapped[str] = mapped_column(String, default="500.00")

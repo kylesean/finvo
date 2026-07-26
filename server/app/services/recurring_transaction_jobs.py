@@ -140,8 +140,7 @@ async def _create_transaction_from_recurring(
     from uuid import uuid4
 
     from app.models.base import utc_now
-    from app.services.exchange_rate_service import exchange_rate_service
-    from app.utils.currency_utils import BASE_CURRENCY
+    from app.utils.currency_utils import convert_to_user_base, get_user_base_currency
 
     # Skip if requires confirmation
     if recurring_tx.requires_confirmation:
@@ -151,30 +150,13 @@ async def _create_transaction_from_recurring(
         )
         return
 
-    # Currency conversion logic
+    # Currency conversion: convert to user's base currency with rate snapshot
     amount_original = recurring_tx.amount
     currency = recurring_tx.currency.upper()
 
-    if currency == BASE_CURRENCY:
-        amount = amount_original
-        exchange_rate = Decimal("1.0")
-    else:
-        rate = await exchange_rate_service.convert(
-            amount=1.0,
-            from_currency=currency,
-            to_currency=BASE_CURRENCY,
-        )
-        if rate is not None:
-            exchange_rate = Decimal(str(rate))
-            amount = (amount_original * exchange_rate).quantize(Decimal("0.00000001"))
-        else:
-            exchange_rate = None
-            amount = amount_original
-            logger.warning(
-                "exchange_rate_not_found_for_recurring",
-                currency=currency,
-                recurring_id=str(recurring_tx.id),
-            )
+    user_base = await get_user_base_currency(db, recurring_tx.user_uuid)
+    base_amount, exchange_rate = await convert_to_user_base(abs(amount_original), currency, user_base)
+    amount = base_amount.quantize(Decimal("0.00000001"))
 
     transaction = Transaction(
         id=uuid4(),

@@ -10,12 +10,12 @@ from app.core.dependencies import get_current_user
 from app.core.responses import error_response, get_error_code_int, success_response
 from app.models.notification import Notification
 from app.models.user import User
-from app.schemas.notification import NotificationListResponse
+from app.schemas.notification import RegisterDeviceTokenRequest, UnregisterDeviceTokenRequest
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
-@router.get("", response_model=NotificationListResponse)
+@router.get("")
 async def get_notifications(
     page: int = 1,
     limit: int = 20,
@@ -146,3 +146,34 @@ async def delete_notification(
     await db.delete(notification)
     await db.commit()
     return success_response(data={"message": "Notification deleted"})
+
+
+@router.post("/device-token")
+async def register_device_token(
+    payload: RegisterDeviceTokenRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+) -> JSONResponse:
+    """Register or update user FCM device token."""
+    from app.services.push_service import PushService
+
+    device = await PushService.register_device_token(
+        db=db,
+        user_uuid=current_user.uuid,
+        device_token=payload.deviceToken.strip(),
+        platform=payload.platform,
+    )
+    return success_response(data={"message": "Device token registered", "id": device.id, "platform": device.platform})
+
+
+@router.delete("/device-token")
+async def unregister_device_token(
+    payload: UnregisterDeviceTokenRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+) -> JSONResponse:
+    """Unregister device token on logout."""
+    from app.services.push_service import PushService
+
+    success = await PushService.unregister_device_token(db=db, device_token=payload.deviceToken.strip())
+    return success_response(data={"message": "Device token unregistered", "success": success})
