@@ -22,6 +22,7 @@ import '../../features/finance/pages/recurring_transaction_list_page.dart';
 import '../../features/budget/pages/budget_overview_page.dart';
 import '../../features/budget/pages/budget_form_page.dart';
 import '../../features/budget/pages/budget_detail_page.dart';
+import '../../features/budget/pages/budget_settings_page.dart';
 
 import '../../features/home/pages/transaction_detail_page.dart';
 import '../../features/profile/pages/language_settings_page.dart';
@@ -258,6 +259,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: 'new',
                         name: 'budgetNew',
                         builder: (context, state) => const BudgetFormPage(),
+                      ),
+                      GoRoute(
+                        path: 'settings',
+                        name: 'budgetSettings',
+                        builder: (context, state) => const BudgetSettingsPage(),
                       ),
                       GoRoute(
                         path: ':id',

@@ -477,7 +477,7 @@ class _Translations$budget$en extends Translations$budget$zh {
 	@override String get budget => 'Budget';
 	@override String get loadFailed => 'Failed to load';
 	@override String get noBudget => 'No budgets yet';
-	@override String get createHint => 'Say "Help me set a budget" to your Augo assistant';
+	@override String get createHint => 'Tap the button below to set up your budget';
 	@override String get paused => 'Paused';
 	@override String get pause => 'Pause';
 	@override String get resume => 'Resume';
@@ -562,6 +562,15 @@ class _Translations$budget$en extends Translations$budget$zh {
 	@override String usedPercent({required Object percent}) => '${percent}% used';
 	@override String dayOfMonth({required Object day}) => 'Day ${day}';
 	@override String get tenThousandSuffix => '0k';
+	@override String get settingsLoadFailed => 'Failed to load settings';
+	@override String get settingsSaveSuccess => 'Settings saved';
+	@override String get settingsSaveFailed => 'Failed to save';
+	@override String get settingsSave => 'Save Settings';
+	@override String get settingsWarningThreshold => 'Warning Threshold';
+	@override String get settingsWarningDesc => 'Shows warning status when usage reaches this percentage';
+	@override String get settingsAlertThreshold => 'Alert Threshold';
+	@override String get settingsAlertDesc => 'Shows exceeded status when usage reaches this percentage';
+	@override String get settingsThresholdOrder => 'Warning threshold cannot exceed alert threshold';
 }
 
 // Path: dateRange
@@ -2571,7 +2580,7 @@ extension on TranslationsEn {
 			'budget.budget' => 'Budget',
 			'budget.loadFailed' => 'Failed to load',
 			'budget.noBudget' => 'No budgets yet',
-			'budget.createHint' => 'Say "Help me set a budget" to your Augo assistant',
+			'budget.createHint' => 'Tap the button below to set up your budget',
 			'budget.paused' => 'Paused',
 			'budget.pause' => 'Pause',
 			'budget.resume' => 'Resume',
@@ -2656,6 +2665,15 @@ extension on TranslationsEn {
 			'budget.usedPercent' => ({required Object percent}) => '${percent}% used',
 			'budget.dayOfMonth' => ({required Object day}) => 'Day ${day}',
 			'budget.tenThousandSuffix' => '0k',
+			'budget.settingsLoadFailed' => 'Failed to load settings',
+			'budget.settingsSaveSuccess' => 'Settings saved',
+			'budget.settingsSaveFailed' => 'Failed to save',
+			'budget.settingsSave' => 'Save Settings',
+			'budget.settingsWarningThreshold' => 'Warning Threshold',
+			'budget.settingsWarningDesc' => 'Shows warning status when usage reaches this percentage',
+			'budget.settingsAlertThreshold' => 'Alert Threshold',
+			'budget.settingsAlertDesc' => 'Shows exceeded status when usage reaches this percentage',
+			'budget.settingsThresholdOrder' => 'Warning threshold cannot exceed alert threshold',
 			'dateRange.custom' => 'Custom',
 			'dateRange.pickerTitle' => 'Select Date Range',
 			'dateRange.startDate' => 'Start Date',
@@ -2785,6 +2803,8 @@ extension on TranslationsEn {
 			'chat.tools.done.prepareBudgetSimulation' => 'Budget simulation prepared',
 			'chat.tools.done.simulateBudget' => 'Budget simulation completed',
 			'chat.tools.failed.unknown' => 'Action failed',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.cancelled' => 'Cancelled',
 			'chat.tools.analyzeFinance' => '正在分析財務狀況...',
 			'chat.tools.forecastFinance' => '正在預測財務趨勢...',
@@ -2794,8 +2814,6 @@ extension on TranslationsEn {
 			'chat.tools.createSharedTransaction' => '正在創建共享帳單...',
 			'chat.tools.prepareBudgetSimulation' => 'Preparing budget simulation',
 			'chat.tools.simulateBudget' => 'Simulating budget',
-			_ => null,
-		} ?? switch (path) {
 			'chat.speechNotRecognized' => 'Speech not recognized, please try again',
 			'chat.currentExpense' => 'Session Expense',
 			'chat.loadingComponent' => 'Loading component...',
@@ -3299,6 +3317,8 @@ extension on TranslationsEn {
 			'sharedSpace.settings.spaceInfo' => 'Space Info',
 			'sharedSpace.settings.nameLabel' => 'Space Name',
 			'sharedSpace.settings.descLabel' => 'Space Description',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.settings.save' => 'Save',
 			'sharedSpace.settings.saved' => 'Saved successfully',
 			'sharedSpace.settings.saveFailed' => 'Failed to save',
@@ -3308,8 +3328,6 @@ extension on TranslationsEn {
 			'sharedSpace.settings.removed' => 'Member removed',
 			'sharedSpace.settings.removeFailed' => 'Failed to remove member',
 			'sharedSpace.settings.inviteManagement' => 'Invite Management',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.settings.currentCode' => 'Current Invite Code',
 			'sharedSpace.settings.generateNew' => 'Generate New Code',
 			'sharedSpace.settings.noValidCode' => 'No valid invite code',

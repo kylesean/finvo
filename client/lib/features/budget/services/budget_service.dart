@@ -69,6 +69,25 @@ class BudgetService {
     );
   }
 
+  /// Get single budget with usage details (spent, remaining, percentage, status)
+  Future<BudgetWithUsage> getDetailWithUsage(String id) async {
+    return await _networkClient.request<BudgetWithUsage>(
+      '/budgets/$id',
+      method: HttpMethod.get,
+      fromJsonT: (json) {
+        if (json is Map<String, dynamic>) {
+          final data = json['data'];
+          if (data is Map<String, dynamic>) {
+            return BudgetWithUsage.fromBudgetResponse(data);
+          }
+        }
+        throw DataParsingException(
+          'Invalid format for /budgets/$id detail response',
+        );
+      },
+    );
+  }
+
   /// Delete budget
   Future<void> delete(String id) async {
     await _networkClient.request<void>(
@@ -111,6 +130,47 @@ class BudgetService {
         }
         throw DataParsingException(
           'Invalid format for PUT /budgets/$id response',
+        );
+      },
+    );
+  }
+
+  /// Get budget threshold settings
+  Future<BudgetSettings> getSettings() async {
+    return await _networkClient.request<BudgetSettings>(
+      '/budgets/settings/me',
+      method: HttpMethod.get,
+      fromJsonT: (json) {
+        if (json is Map<String, dynamic>) {
+          final data = json['data'];
+          if (data is Map<String, dynamic>) {
+            return BudgetSettings.fromJson(data);
+          }
+        }
+        throw DataParsingException(
+          'Invalid format for /budgets/settings/me response',
+        );
+      },
+    );
+  }
+
+  /// Update budget threshold settings
+  Future<BudgetSettings> updateSettings(
+    BudgetSettingsUpdateRequest request,
+  ) async {
+    return await _networkClient.request<BudgetSettings>(
+      '/budgets/settings/me',
+      method: HttpMethod.put,
+      data: request.toJson(),
+      fromJsonT: (json) {
+        if (json is Map<String, dynamic>) {
+          final data = json['data'];
+          if (data is Map<String, dynamic>) {
+            return BudgetSettings.fromJson(data);
+          }
+        }
+        throw DataParsingException(
+          'Invalid format for PUT /budgets/settings/me response',
         );
       },
     );

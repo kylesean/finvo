@@ -52,39 +52,12 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
 
     try {
       final service = ref.read(budgetServiceProvider);
-      final summary = await service.getSummary(includePaused: true);
-      BudgetWithUsage? found;
-
-      if (summary.totalBudgetDetail != null &&
-          summary.totalBudgetDetail!.budget.id == widget.budgetId) {
-        found = summary.totalBudgetDetail!;
-      }
-
-      if (found == null) {
-        for (final b in summary.categoryBudgets) {
-          if (b.budget.id == widget.budgetId) {
-            found = b;
-            break;
-          }
-        }
-      }
-
-      if (found == null) {
-        for (final b in summary.budgets) {
-          if (b.budget.id == widget.budgetId) {
-            found = b;
-            break;
-          }
-        }
-      }
+      final detail = await service.getDetailWithUsage(widget.budgetId);
 
       if (mounted) {
         setState(() {
-          _budgetWithUsage = found;
+          _budgetWithUsage = detail;
           _isLoading = false;
-          if (found == null) {
-            _error = t.budget.notFound;
-          }
         });
       }
     } catch (e) {

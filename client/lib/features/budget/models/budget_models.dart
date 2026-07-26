@@ -310,14 +310,18 @@ class BudgetSummary {
     }
 
     // calculate total amount
-    final overallSpent = json['overall_spent'] as num? ?? 0.0;
-    final overallRemaining = json['overall_remaining'] as num? ?? 0.0;
+    final overallSpent = Decimal.parse(
+      (json['overall_spent'] ?? '0').toString(),
+    );
+    final overallRemaining = Decimal.parse(
+      (json['overall_remaining'] ?? '0').toString(),
+    );
     final totalAmount = overallSpent + overallRemaining;
 
     return BudgetSummary(
-      totalBudget: Decimal.parse(totalAmount.toString()),
-      totalSpent: Decimal.parse(overallSpent.toString()),
-      totalRemaining: Decimal.parse(overallRemaining.toString()),
+      totalBudget: totalAmount,
+      totalSpent: overallSpent,
+      totalRemaining: overallRemaining,
       overallUsagePercentage:
           (json['overall_percentage'] as num?)?.toDouble() ?? 0.0,
       budgets: categoryBudgets,
@@ -392,6 +396,47 @@ class BudgetUpdateRequest {
     if (rolloverEnabled != null) json['rollover_enabled'] = rolloverEnabled;
     if (status != null) json['status'] = status!.value;
     if (periodAnchorDay != null) json['period_anchor_day'] = periodAnchorDay;
+    return json;
+  }
+}
+
+// ============================================================================
+// Settings Models
+// ============================================================================
+
+class BudgetSettings {
+  final String userUuid;
+  final int warningThreshold;
+  final int alertThreshold;
+
+  const BudgetSettings({
+    required this.userUuid,
+    required this.warningThreshold,
+    required this.alertThreshold,
+  });
+
+  factory BudgetSettings.fromJson(Map<String, dynamic> json) {
+    return BudgetSettings(
+      userUuid: json['user_uuid'] as String? ?? '',
+      warningThreshold: json['warning_threshold'] as int? ?? 70,
+      alertThreshold: json['alert_threshold'] as int? ?? 90,
+    );
+  }
+}
+
+class BudgetSettingsUpdateRequest {
+  final int? warningThreshold;
+  final int? alertThreshold;
+
+  const BudgetSettingsUpdateRequest({
+    this.warningThreshold,
+    this.alertThreshold,
+  });
+
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{};
+    if (warningThreshold != null) json['warning_threshold'] = warningThreshold;
+    if (alertThreshold != null) json['alert_threshold'] = alertThreshold;
     return json;
   }
 }

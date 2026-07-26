@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, time
+from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
@@ -15,7 +15,6 @@ from app.models.budget import (
     BudgetPeriodType,
     BudgetScope,
     BudgetStatus,
-    OverspendBehavior,
 )
 
 # ============================================================================
@@ -93,25 +92,6 @@ class BudgetSettingsUpdateRequest(BaseModel):
 
     warning_threshold: int | None = Field(default=None, ge=0, le=100)
     alert_threshold: int | None = Field(default=None, ge=0, le=100)
-    overspend_behavior: OverspendBehavior | None = None
-    weekly_summary_enabled: bool | None = None
-    weekly_summary_day: str | None = None
-    monthly_summary_enabled: bool | None = None
-    anomaly_detection_enabled: bool | None = None
-    anomaly_threshold: Decimal | None = Field(default=None, ge=0)
-    quiet_hours_start: time | None = None
-    quiet_hours_end: time | None = None
-
-    @field_validator("weekly_summary_day")
-    @classmethod
-    def validate_weekly_day(cls, v: str | None) -> str | None:
-        """Validate weekly summary day."""
-        if v is not None:
-            valid_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-            if v.lower() not in valid_days:
-                raise ValueError(f"Must be one of: {', '.join(valid_days)}")
-            return v.lower()
-        return v
 
 
 # ============================================================================
@@ -127,19 +107,23 @@ class BudgetPeriodResponse(BaseModel):
     id: UUID
     period_start: date
     period_end: date
-    spent_amount: float
-    rollover_in: float
-    rollover_out: float
-    adjusted_target: float
-    remaining_amount: float
+    spent_amount: str
+    rollover_in: str
+    rollover_out: str
+    adjusted_target: str
+    remaining_amount: str
     usage_percentage: float
     status: str
-    ai_forecast: float | None = None
+    ai_forecast: str | None = None
     notes: str | None = None
 
 
 class BudgetResponse(BaseModel):
-    """Response schema for a budget with current period status."""
+    """Response schema for a budget with current period status.
+
+    Monetary fields are serialized as strings to preserve Decimal precision
+    and avoid IEEE-754 floating-point rounding errors.
+    """
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -147,24 +131,24 @@ class BudgetResponse(BaseModel):
     name: str
     scope: str
     category_key: str | None = None
-    amount: float
+    amount: str
     currency_code: str
     period_type: str
     period_anchor_day: int
     rollover_enabled: bool
-    rollover_balance: float
+    rollover_balance: str
     source: str
     ai_confidence: float | None = None
     status: str
 
     # Calculated fields for current period
-    spent_amount: float = 0.0
-    remaining_amount: float = 0.0
+    spent_amount: str = "0"
+    remaining_amount: str = "0"
     usage_percentage: float = 0.0
     period_status: str = "ON_TRACK"
     period_start: date | None = None
     period_end: date | None = None
-    ai_forecast: float | None = None
+    ai_forecast: str | None = None
 
     # Timestamps
     created_at: str | None = None
@@ -180,7 +164,7 @@ class BudgetAlert(BaseModel):
     alert_type: str  # "warning" | "exceeded" | "forecast_exceed"
     message: str
     usage_percentage: float
-    remaining_amount: float
+    remaining_amount: str
 
 
 class BudgetSummaryResponse(BaseModel):
@@ -188,8 +172,8 @@ class BudgetSummaryResponse(BaseModel):
 
     total_budget: BudgetResponse | None = None
     category_budgets: list[BudgetResponse] = []
-    overall_spent: float = 0.0
-    overall_remaining: float = 0.0
+    overall_spent: str = "0"
+    overall_remaining: str = "0"
     overall_percentage: float = 0.0
     alerts: list[BudgetAlert] = []
     period_start: date | None = None
@@ -201,7 +185,7 @@ class BudgetSuggestion(BaseModel):
 
     scope: str  # TOTAL or CATEGORY
     category_key: str | None = None
-    suggested_amount: float
+    suggested_amount: str
     confidence: float
     reasoning: str
     based_on_months: int = 3
@@ -215,11 +199,3 @@ class BudgetSettingsResponse(BaseModel):
     user_uuid: UUID
     warning_threshold: int
     alert_threshold: int
-    overspend_behavior: str
-    weekly_summary_enabled: bool
-    weekly_summary_day: str
-    monthly_summary_enabled: bool
-    anomaly_detection_enabled: bool
-    anomaly_threshold: float
-    quiet_hours_start: time | None = None
-    quiet_hours_end: time | None = None

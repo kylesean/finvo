@@ -477,7 +477,7 @@ class _Translations$budget$ja extends Translations$budget$zh {
 	@override String get budget => '予算';
 	@override String get loadFailed => '読み込み失敗';
 	@override String get noBudget => '予算未設定';
-	@override String get createHint => 'Augoアシスタントに「予算を設定して」と言って作成';
+	@override String get createHint => '下のボタンをタップして予算を設定しましょう';
 	@override String get paused => '一時停止中';
 	@override String get pause => '停止';
 	@override String get resume => '再開';
@@ -562,6 +562,15 @@ class _Translations$budget$ja extends Translations$budget$zh {
 	@override String usedPercent({required Object percent}) => '${percent}% 使用済み';
 	@override String dayOfMonth({required Object day}) => '${day} 日';
 	@override String get tenThousandSuffix => '万';
+	@override String get settingsLoadFailed => '設定の読み込みに失敗しました';
+	@override String get settingsSaveSuccess => '設定を保存しました';
+	@override String get settingsSaveFailed => '保存に失敗しました';
+	@override String get settingsSave => '設定を保存';
+	@override String get settingsWarningThreshold => '警告閾値';
+	@override String get settingsWarningDesc => '使用率がこの割合に達すると警告状態を表示';
+	@override String get settingsAlertThreshold => '超過閾値';
+	@override String get settingsAlertDesc => '使用率がこの割合に達すると超過状態を表示';
+	@override String get settingsThresholdOrder => '警告閾値は超過閾値を超えられません';
 }
 
 // Path: dateRange
@@ -2571,7 +2580,7 @@ extension on TranslationsJa {
 			'budget.budget' => '予算',
 			'budget.loadFailed' => '読み込み失敗',
 			'budget.noBudget' => '予算未設定',
-			'budget.createHint' => 'Augoアシスタントに「予算を設定して」と言って作成',
+			'budget.createHint' => '下のボタンをタップして予算を設定しましょう',
 			'budget.paused' => '一時停止中',
 			'budget.pause' => '停止',
 			'budget.resume' => '再開',
@@ -2656,6 +2665,15 @@ extension on TranslationsJa {
 			'budget.usedPercent' => ({required Object percent}) => '${percent}% 使用済み',
 			'budget.dayOfMonth' => ({required Object day}) => '${day} 日',
 			'budget.tenThousandSuffix' => '万',
+			'budget.settingsLoadFailed' => '設定の読み込みに失敗しました',
+			'budget.settingsSaveSuccess' => '設定を保存しました',
+			'budget.settingsSaveFailed' => '保存に失敗しました',
+			'budget.settingsSave' => '設定を保存',
+			'budget.settingsWarningThreshold' => '警告閾値',
+			'budget.settingsWarningDesc' => '使用率がこの割合に達すると警告状態を表示',
+			'budget.settingsAlertThreshold' => '超過閾値',
+			'budget.settingsAlertDesc' => '使用率がこの割合に達すると超過状態を表示',
+			'budget.settingsThresholdOrder' => '警告閾値は超過閾値を超えられません',
 			'dateRange.custom' => 'カスタム',
 			'dateRange.pickerTitle' => '期間を選択',
 			'dateRange.startDate' => '開始日',
@@ -2785,6 +2803,8 @@ extension on TranslationsJa {
 			'chat.tools.done.analyzeSpending' => 'Spending analysis complete',
 			'chat.tools.done.analyzeCashflow' => 'Cashflow analysis complete',
 			'chat.tools.done.suggestBudget' => 'Budget suggestion complete',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.prepareBudgetSimulation' => '予算シミュレーション準備完了',
 			'chat.tools.done.simulateBudget' => '予算シミュレーション完了',
 			'chat.tools.failed.unknown' => '操作に失敗しました',
@@ -2794,8 +2814,6 @@ extension on TranslationsJa {
 			'chat.tools.cancelled' => 'Cancelled',
 			'chat.tools.prepareBudgetSimulation' => '予算シミュレーションを準備中',
 			'chat.tools.simulateBudget' => '予算をシミュレーション中',
-			_ => null,
-		} ?? switch (path) {
 			'chat.speechNotRecognized' => '音声を認識できませんでした',
 			'chat.currentExpense' => '今回の支出',
 			'chat.loadingComponent' => 'コンポーネントを読み込み中...',
@@ -3299,6 +3317,8 @@ extension on TranslationsJa {
 			'sharedSpace.settings.confirm' => '確認',
 			'sharedSpace.settings.roleChanged' => '役割を変更しました',
 			'sharedSpace.settings.roleChangeFailed' => '役割の変更に失敗しました',
+			_ => null,
+		} ?? switch (path) {
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
@@ -3308,8 +3328,6 @@ extension on TranslationsJa {
 			'server.urlLabel' => 'Server Address',
 			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
 			'server.scanQr' => 'Scan QR Code',
-			_ => null,
-		} ?? switch (path) {
 			'server.scanQrInstruction' => 'Point at the QR code displayed in the server terminal',
 			'server.testConnection' => 'Test Connection',
 			'server.connecting' => 'Connecting...',
