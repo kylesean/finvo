@@ -477,7 +477,7 @@ class _Translations$budget$zh_Hant extends Translations$budget$zh {
 	@override String get budget => '預算';
 	@override String get loadFailed => '載入失敗';
 	@override String get noBudget => '暫無預算';
-	@override String get createHint => '通過 Augo 助手說"幫我設置預算"來創建';
+	@override String get createHint => '點擊下方按鈕設置您的預算';
 	@override String get paused => '已暫停';
 	@override String get pause => '暫停';
 	@override String get resume => '恢復';
@@ -562,6 +562,15 @@ class _Translations$budget$zh_Hant extends Translations$budget$zh {
 	@override String usedPercent({required Object percent}) => '${percent}% 已使用';
 	@override String dayOfMonth({required Object day}) => '${day} 號';
 	@override String get tenThousandSuffix => '萬';
+	@override String get settingsLoadFailed => '載入設定失敗';
+	@override String get settingsSaveSuccess => '設定已儲存';
+	@override String get settingsSaveFailed => '儲存失敗';
+	@override String get settingsSave => '儲存設定';
+	@override String get settingsWarningThreshold => '預警閾值';
+	@override String get settingsWarningDesc => '當使用率達到此百分比時顯示預警狀態';
+	@override String get settingsAlertThreshold => '超支閾值';
+	@override String get settingsAlertDesc => '當使用率達到此百分比時顯示超支狀態';
+	@override String get settingsThresholdOrder => '預警閾值不能大於超支閾值';
 }
 
 // Path: dateRange
@@ -2571,7 +2580,7 @@ extension on TranslationsZhHant {
 			'budget.budget' => '預算',
 			'budget.loadFailed' => '載入失敗',
 			'budget.noBudget' => '暫無預算',
-			'budget.createHint' => '通過 Augo 助手說"幫我設置預算"來創建',
+			'budget.createHint' => '點擊下方按鈕設置您的預算',
 			'budget.paused' => '已暫停',
 			'budget.pause' => '暫停',
 			'budget.resume' => '恢復',
@@ -2656,6 +2665,15 @@ extension on TranslationsZhHant {
 			'budget.usedPercent' => ({required Object percent}) => '${percent}% 已使用',
 			'budget.dayOfMonth' => ({required Object day}) => '${day} 號',
 			'budget.tenThousandSuffix' => '萬',
+			'budget.settingsLoadFailed' => '載入設定失敗',
+			'budget.settingsSaveSuccess' => '設定已儲存',
+			'budget.settingsSaveFailed' => '儲存失敗',
+			'budget.settingsSave' => '儲存設定',
+			'budget.settingsWarningThreshold' => '預警閾值',
+			'budget.settingsWarningDesc' => '當使用率達到此百分比時顯示預警狀態',
+			'budget.settingsAlertThreshold' => '超支閾值',
+			'budget.settingsAlertDesc' => '當使用率達到此百分比時顯示超支狀態',
+			'budget.settingsThresholdOrder' => '預警閾值不能大於超支閾值',
 			'dateRange.custom' => '自定義',
 			'dateRange.pickerTitle' => '選擇時間範圍',
 			'dateRange.startDate' => '開始日期',
@@ -2785,6 +2803,8 @@ extension on TranslationsZhHant {
 			'chat.tools.done.analyzeSpending' => 'Spending analysis complete',
 			'chat.tools.done.analyzeCashflow' => 'Cashflow analysis complete',
 			'chat.tools.done.suggestBudget' => 'Budget suggestion complete',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.prepareBudgetSimulation' => '預算模擬準備完成',
 			'chat.tools.done.simulateBudget' => '預算模擬完成',
 			'chat.tools.failed.unknown' => '操作失敗',
@@ -2794,8 +2814,6 @@ extension on TranslationsZhHant {
 			'chat.tools.cancelled' => 'Cancelled',
 			'chat.tools.prepareBudgetSimulation' => '正在準備預算模擬',
 			'chat.tools.simulateBudget' => '正在模擬預算',
-			_ => null,
-		} ?? switch (path) {
 			'chat.speechNotRecognized' => '未識別到語音，請重試',
 			'chat.currentExpense' => '当前支出',
 			'chat.loadingComponent' => '正在載入組件...',
@@ -3299,6 +3317,8 @@ extension on TranslationsZhHant {
 			'sharedSpace.settings.confirm' => '確認',
 			'sharedSpace.settings.roleChanged' => '角色已變更',
 			'sharedSpace.settings.roleChangeFailed' => '角色變更失敗',
+			_ => null,
+		} ?? switch (path) {
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
@@ -3308,8 +3328,6 @@ extension on TranslationsZhHant {
 			'server.urlLabel' => 'Server Address',
 			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
 			'server.scanQr' => 'Scan QR Code',
-			_ => null,
-		} ?? switch (path) {
 			'server.scanQrInstruction' => 'Point at the QR code displayed in the server terminal',
 			'server.testConnection' => 'Test Connection',
 			'server.connecting' => 'Connecting...',

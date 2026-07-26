@@ -6,14 +6,14 @@ This model has been migrated to SQLAlchemy 2.0 with Mapped[...] annotations.
 
 from __future__ import annotations
 
-from datetime import date, datetime, time
+from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, CheckConstraint, Integer, String
+from sqlalchemy import Boolean, CheckConstraint, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -36,10 +36,13 @@ class BudgetScope(str, Enum):
 
 
 class BudgetType(str, Enum):
-    """Budget type - expense limit or savings goal."""
+    """Budget type.
+
+    Note: SAVINGS_GOAL was removed as it requires a fundamentally different
+    product model. Future savings-goal features should use a dedicated model.
+    """
 
     EXPENSE_LIMIT = "EXPENSE_LIMIT"
-    SAVINGS_GOAL = "SAVINGS_GOAL"
 
 
 class BudgetPeriodType(str, Enum):
@@ -75,11 +78,8 @@ class BudgetPeriodStatus(str, Enum):
     ACHIEVED = "ACHIEVED"
 
 
-class OverspendBehavior(str, Enum):
-    """User preference for overspend handling."""
-
-    WARN = "WARN"
-    SUGGEST_REBALANCE = "SUGGEST_REBALANCE"
+# OverspendBehavior enum removed — no consumer existed.
+# Future overspend-handling UX should be designed alongside the Rebalance UI.
 
 
 # ============================================================================
@@ -91,14 +91,13 @@ class Budget(Base):
     """Budget model for managing spending limits.
 
     Supports both total budgets and category-specific budgets.
-    Designed for future extension to savings goals and shared budgets.
 
     Attributes:
         id: Primary key (UUID)
         owner_uuid: Foreign key to users.uuid
-        shared_space_id: Optional shared space for collaborative budgets
+        shared_space_id: Reserved for shared-space collaborative budgets (not yet implemented)
         name: Budget display name
-        type: EXPENSE_LIMIT or SAVINGS_GOAL
+        type: Always EXPENSE_LIMIT (SAVINGS_GOAL removed)
         scope: TOTAL or CATEGORY
         category_key: Category key for category budgets (NULL for total)
         amount: Budget limit amount
@@ -110,14 +109,11 @@ class Budget(Base):
         source: AI_SUGGESTED or USER_DEFINED
         ai_confidence: Confidence score for AI suggestions
         status: ACTIVE, PAUSED, or ARCHIVED
-        target_date: Target date for savings goals
-        linked_account_id: Linked account for savings goals
-        current_progress: Current progress for savings goals
     """
 
     __tablename__ = "budgets"
     __table_args__ = (
-        CheckConstraint("type IN ('EXPENSE_LIMIT', 'SAVINGS_GOAL')", name="chk_budgets_type"),
+        # chk_budgets_type dropped: only EXPENSE_LIMIT remains after SAVINGS_GOAL removal
         CheckConstraint("scope IN ('TOTAL', 'CATEGORY')", name="chk_budgets_scope"),
         CheckConstraint("period_type IN ('WEEKLY', 'BIWEEKLY', 'MONTHLY', 'YEARLY')", name="chk_budgets_period_type"),
         CheckConstraint("period_anchor_day >= 1 AND period_anchor_day <= 31", name="chk_budgets_anchor_day"),
@@ -128,6 +124,7 @@ class Budget(Base):
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     owner_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
+    # TODO: Shared budget collaboration - not yet implemented
     shared_space_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
 
     name: Mapped[str] = mapped_column(String(100))
@@ -148,9 +145,6 @@ class Budget(Base):
     ai_confidence: Mapped[Decimal | None] = col.numeric(precision=5, scale=4, nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="ACTIVE")
 
-    target_date: Mapped[date | None] = col.date_column(nullable=True)
-    linked_account_id: Mapped[UUID | None] = col.uuid_column(nullable=True)
-    current_progress: Mapped[Decimal | None] = col.numeric(precision=20, scale=8, nullable=True)
     created_at: Mapped[datetime] = col.timestamptz()
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
 
@@ -220,6 +214,8 @@ class BudgetPeriod(Base):
         CheckConstraint("period_end >= period_start", name="chk_budget_periods_dates"),
         CheckConstraint("status IN ('ON_TRACK', 'WARNING', 'EXCEEDED', 'ACHIEVED')", name="chk_budget_periods_status"),
         CheckConstraint("spent_amount >= 0", name="chk_budget_periods_spent_positive"),
+        # Prevents duplicate periods for the same budget+start date under concurrent requests
+        UniqueConstraint("budget_id", "period_start", name="uq_budget_periods_budget_start"),
     )
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
@@ -234,6 +230,7 @@ class BudgetPeriod(Base):
     adjusted_target: Mapped[Decimal] = col.numeric(precision=20, scale=8)
 
     status: Mapped[str] = mapped_column(String(20), default="ON_TRACK")
+    # TODO: AI spending forecast - not yet implemented
     ai_forecast: Mapped[Decimal | None] = col.numeric(precision=20, scale=8, nullable=True)
 
     notes: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -279,22 +276,18 @@ class BudgetPeriod(Base):
 
 
 class BudgetSettings(Base):
-    """User budget preferences and notification settings.
+    """User budget threshold preferences.
 
     One-to-one relationship with User (user_uuid is primary key).
+    Only warning/alert thresholds are stored here; notification-related
+    settings (weekly summary, anomaly detection, quiet hours) were removed
+    as they had no consumer and will be redesigned when push infrastructure
+    is built.
 
     Attributes:
         user_uuid: Primary key, references users.uuid
-        warning_threshold: Percentage threshold for warning (default 70)
-        alert_threshold: Percentage threshold for alert (default 90)
-        overspend_behavior: WARN or SUGGEST_REBALANCE
-        weekly_summary_enabled: Whether to send weekly summaries
-        weekly_summary_day: Day of week for weekly summary
-        monthly_summary_enabled: Whether to send monthly summaries
-        anomaly_detection_enabled: Whether to detect anomalies
-        anomaly_threshold: Amount threshold for anomaly detection
-        quiet_hours_start: Start of quiet hours
-        quiet_hours_end: End of quiet hours
+        warning_threshold: Percentage threshold for WARNING status (default 70)
+        alert_threshold: Percentage threshold for EXCEEDED status (default 90)
     """
 
     __tablename__ = "budget_settings"
@@ -302,12 +295,6 @@ class BudgetSettings(Base):
         CheckConstraint("warning_threshold >= 0 AND warning_threshold <= 100", name="chk_budget_settings_warning"),
         CheckConstraint("alert_threshold >= 0 AND alert_threshold <= 100", name="chk_budget_settings_alert"),
         CheckConstraint("warning_threshold <= alert_threshold", name="chk_budget_settings_thresholds"),
-        CheckConstraint("overspend_behavior IN ('WARN', 'SUGGEST_REBALANCE')", name="chk_budget_settings_overspend"),
-        CheckConstraint(
-            "weekly_summary_day IN ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')",
-            name="chk_budget_settings_week_day",
-        ),
-        CheckConstraint("anomaly_threshold >= 0", name="chk_budget_settings_anomaly"),
     )
 
     user_uuid: Mapped[UUID] = mapped_column(
@@ -319,25 +306,8 @@ class BudgetSettings(Base):
     warning_threshold: Mapped[int] = mapped_column(Integer, default=70)
     alert_threshold: Mapped[int] = mapped_column(Integer, default=90)
 
-    overspend_behavior: Mapped[str] = mapped_column(String(20), default="WARN")
-
-    weekly_summary_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
-    weekly_summary_day: Mapped[str] = mapped_column(String(10), default="sunday")
-    monthly_summary_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
-
-    anomaly_detection_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
-    anomaly_threshold: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("500"))
-
-    quiet_hours_start: Mapped[time | None] = col.time_column()
-    quiet_hours_end: Mapped[time | None] = col.time_column()
-
     user: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[BudgetSettings.user_uuid]",
         primaryjoin="BudgetSettings.user_uuid == User.uuid",
     )
-
-    @property
-    def anomaly_threshold_float(self) -> float:
-        """Get anomaly threshold as float."""
-        return float(self.anomaly_threshold)

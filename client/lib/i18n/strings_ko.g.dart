@@ -477,7 +477,7 @@ class _Translations$budget$ko extends Translations$budget$zh {
 	@override String get budget => '예산';
 	@override String get loadFailed => '불러오기 실패';
 	@override String get noBudget => '예산 없음';
-	@override String get createHint => 'AuGo 비서에게 "예산 설정해줘"라고 말해보세요';
+	@override String get createHint => '아래 버튼을 눌러 예산을 설정하세요';
 	@override String get paused => '일시 정지됨';
 	@override String get pause => '일시 정지';
 	@override String get resume => '재개';
@@ -562,6 +562,15 @@ class _Translations$budget$ko extends Translations$budget$zh {
 	@override String usedPercent({required Object percent}) => '${percent}% 사용됨';
 	@override String dayOfMonth({required Object day}) => '${day}일';
 	@override String get tenThousandSuffix => '만';
+	@override String get settingsLoadFailed => '설정을 불러오지 못했습니다';
+	@override String get settingsSaveSuccess => '설정이 저장되었습니다';
+	@override String get settingsSaveFailed => '저장 실패';
+	@override String get settingsSave => '설정 저장';
+	@override String get settingsWarningThreshold => '경고 임계값';
+	@override String get settingsWarningDesc => '사용률이 이 비율에 도달하면 경고 상태 표시';
+	@override String get settingsAlertThreshold => '초과 임계값';
+	@override String get settingsAlertDesc => '사용률이 이 비율에 도달하면 초과 상태 표시';
+	@override String get settingsThresholdOrder => '경고 임계값은 초과 임계값을 넘을 수 없습니다';
 }
 
 // Path: dateRange
@@ -2571,7 +2580,7 @@ extension on TranslationsKo {
 			'budget.budget' => '예산',
 			'budget.loadFailed' => '불러오기 실패',
 			'budget.noBudget' => '예산 없음',
-			'budget.createHint' => 'AuGo 비서에게 "예산 설정해줘"라고 말해보세요',
+			'budget.createHint' => '아래 버튼을 눌러 예산을 설정하세요',
 			'budget.paused' => '일시 정지됨',
 			'budget.pause' => '일시 정지',
 			'budget.resume' => '재개',
@@ -2656,6 +2665,15 @@ extension on TranslationsKo {
 			'budget.usedPercent' => ({required Object percent}) => '${percent}% 사용됨',
 			'budget.dayOfMonth' => ({required Object day}) => '${day}일',
 			'budget.tenThousandSuffix' => '만',
+			'budget.settingsLoadFailed' => '설정을 불러오지 못했습니다',
+			'budget.settingsSaveSuccess' => '설정이 저장되었습니다',
+			'budget.settingsSaveFailed' => '저장 실패',
+			'budget.settingsSave' => '설정 저장',
+			'budget.settingsWarningThreshold' => '경고 임계값',
+			'budget.settingsWarningDesc' => '사용률이 이 비율에 도달하면 경고 상태 표시',
+			'budget.settingsAlertThreshold' => '초과 임계값',
+			'budget.settingsAlertDesc' => '사용률이 이 비율에 도달하면 초과 상태 표시',
+			'budget.settingsThresholdOrder' => '경고 임계값은 초과 임계값을 넘을 수 없습니다',
 			'dateRange.custom' => '직접 선택',
 			'dateRange.pickerTitle' => '기간 선택',
 			'dateRange.startDate' => '시작일',
@@ -2785,6 +2803,8 @@ extension on TranslationsKo {
 			'chat.tools.done.analyzeSpending' => 'Spending analysis complete',
 			'chat.tools.done.analyzeCashflow' => 'Cashflow analysis complete',
 			'chat.tools.done.suggestBudget' => 'Budget suggestion complete',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.prepareBudgetSimulation' => '예산 시뮬레이션 준비 완료',
 			'chat.tools.done.simulateBudget' => '예산 시뮬레이션 완료',
 			'chat.tools.failed.unknown' => '작업 실패',
@@ -2794,8 +2814,6 @@ extension on TranslationsKo {
 			'chat.tools.cancelled' => 'Cancelled',
 			'chat.tools.prepareBudgetSimulation' => '예산 시뮬레이션 준비 중',
 			'chat.tools.simulateBudget' => '예산 시뮬레이션 중',
-			_ => null,
-		} ?? switch (path) {
 			'chat.speechNotRecognized' => '음성을 인식하지 못했습니다',
 			'chat.currentExpense' => '이번 지출',
 			'chat.loadingComponent' => '컴포넌트 로딩 중...',
@@ -3299,6 +3317,8 @@ extension on TranslationsKo {
 			'sharedSpace.settings.confirm' => '확인',
 			'sharedSpace.settings.roleChanged' => '역할이 변경되었습니다',
 			'sharedSpace.settings.roleChangeFailed' => '역할 변경에 실패했습니다',
+			_ => null,
+		} ?? switch (path) {
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',
@@ -3308,8 +3328,6 @@ extension on TranslationsKo {
 			'server.urlLabel' => 'Server Address',
 			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
 			'server.scanQr' => 'Scan QR Code',
-			_ => null,
-		} ?? switch (path) {
 			'server.scanQrInstruction' => 'Point at the QR code displayed in the server terminal',
 			'server.testConnection' => 'Test Connection',
 			'server.connecting' => 'Connecting...',

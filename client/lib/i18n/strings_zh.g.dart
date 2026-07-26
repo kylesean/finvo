@@ -990,8 +990,8 @@ class Translations$budget$zh {
 	/// zh: '暂无预算'
 	String get noBudget => '暂无预算';
 
-	/// zh: '通过 Augo 助手说"帮我设置预算"来创建'
-	String get createHint => '通过 Augo 助手说"帮我设置预算"来创建';
+	/// zh: '点击下方按钮设置您的预算'
+	String get createHint => '点击下方按钮设置您的预算';
 
 	/// zh: '已暂停'
 	String get paused => '已暂停';
@@ -1244,6 +1244,33 @@ class Translations$budget$zh {
 
 	/// zh: '万'
 	String get tenThousandSuffix => '万';
+
+	/// zh: '加载设置失败'
+	String get settingsLoadFailed => '加载设置失败';
+
+	/// zh: '设置已保存'
+	String get settingsSaveSuccess => '设置已保存';
+
+	/// zh: '保存失败'
+	String get settingsSaveFailed => '保存失败';
+
+	/// zh: '保存设置'
+	String get settingsSave => '保存设置';
+
+	/// zh: '预警阈值'
+	String get settingsWarningThreshold => '预警阈值';
+
+	/// zh: '当使用率达到此百分比时显示预警状态'
+	String get settingsWarningDesc => '当使用率达到此百分比时显示预警状态';
+
+	/// zh: '超支阈值'
+	String get settingsAlertThreshold => '超支阈值';
+
+	/// zh: '当使用率达到此百分比时显示超支状态'
+	String get settingsAlertDesc => '当使用率达到此百分比时显示超支状态';
+
+	/// zh: '预警阈值不能大于超支阈值'
+	String get settingsThresholdOrder => '预警阈值不能大于超支阈值';
 }
 
 // Path: dateRange
@@ -4818,7 +4845,7 @@ extension on Translations {
 			'budget.budget' => '预算',
 			'budget.loadFailed' => '加载失败',
 			'budget.noBudget' => '暂无预算',
-			'budget.createHint' => '通过 Augo 助手说"帮我设置预算"来创建',
+			'budget.createHint' => '点击下方按钮设置您的预算',
 			'budget.paused' => '已暂停',
 			'budget.pause' => '暂停',
 			'budget.resume' => '恢复',
@@ -4903,6 +4930,15 @@ extension on Translations {
 			'budget.usedPercent' => ({required Object percent}) => '${percent}% 已使用',
 			'budget.dayOfMonth' => ({required Object day}) => '${day} 号',
 			'budget.tenThousandSuffix' => '万',
+			'budget.settingsLoadFailed' => '加载设置失败',
+			'budget.settingsSaveSuccess' => '设置已保存',
+			'budget.settingsSaveFailed' => '保存失败',
+			'budget.settingsSave' => '保存设置',
+			'budget.settingsWarningThreshold' => '预警阈值',
+			'budget.settingsWarningDesc' => '当使用率达到此百分比时显示预警状态',
+			'budget.settingsAlertThreshold' => '超支阈值',
+			'budget.settingsAlertDesc' => '当使用率达到此百分比时显示超支状态',
+			'budget.settingsThresholdOrder' => '预警阈值不能大于超支阈值',
 			'dateRange.custom' => '自定义',
 			'dateRange.pickerTitle' => '选择时间范围',
 			'dateRange.startDate' => '开始日期',
@@ -5032,6 +5068,8 @@ extension on Translations {
 			'chat.tools.done.prepareBudgetSimulation' => '预算模拟准备完成',
 			'chat.tools.done.simulateBudget' => '预算模拟完成',
 			'chat.tools.failed.unknown' => '操作失败',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.cancelled' => '已取消',
 			'chat.tools.analyzeFinance' => '正在分析財務狀況...',
 			'chat.tools.forecastFinance' => '正在預測財務趨勢...',
@@ -5041,8 +5079,6 @@ extension on Translations {
 			'chat.tools.createSharedTransaction' => '正在創建共享帳單...',
 			'chat.tools.prepareBudgetSimulation' => '正在准备预算模拟',
 			'chat.tools.simulateBudget' => '正在模拟预算',
-			_ => null,
-		} ?? switch (path) {
 			'chat.speechNotRecognized' => '未识别到语音，请重试',
 			'chat.currentExpense' => '当前支出',
 			'chat.loadingComponent' => '正在加载组件...',
@@ -5546,6 +5582,8 @@ extension on Translations {
 			'sharedSpace.settings.spaceInfo' => '空间信息',
 			'sharedSpace.settings.nameLabel' => '空间名称',
 			'sharedSpace.settings.descLabel' => '空间描述',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.settings.save' => '保存',
 			'sharedSpace.settings.saved' => '保存成功',
 			'sharedSpace.settings.saveFailed' => '保存失败',
@@ -5555,8 +5593,6 @@ extension on Translations {
 			'sharedSpace.settings.removed' => '已移除成员',
 			'sharedSpace.settings.removeFailed' => '移除失败',
 			'sharedSpace.settings.inviteManagement' => '邀请管理',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.settings.currentCode' => '当前邀请码',
 			'sharedSpace.settings.generateNew' => '生成新邀请码',
 			'sharedSpace.settings.noValidCode' => '暂无有效邀请码',

@@ -329,7 +329,7 @@
     "budget": "예산",
     "loadFailed": "불러오기 실패",
     "noBudget": "예산 없음",
-    "createHint": "AuGo 비서에게 \"예산 설정해줘\"라고 말해보세요",
+    "createHint": "아래 버튼을 눌러 예산을 설정하세요",
     "paused": "일시 정지됨",
     "pause": "일시 정지",
     "resume": "재개",
@@ -413,7 +413,16 @@
     "periodStatusAchieved": "달성",
     "usedPercent": "$percent% 사용됨",
     "dayOfMonth": "$day일",
-    "tenThousandSuffix": "만"
+    "tenThousandSuffix": "만",
+    "settingsLoadFailed": "설정을 불러오지 못했습니다",
+    "settingsSaveSuccess": "설정이 저장되었습니다",
+    "settingsSaveFailed": "저장 실패",
+    "settingsSave": "설정 저장",
+    "settingsWarningThreshold": "경고 임계값",
+    "settingsWarningDesc": "사용률이 이 비율에 도달하면 경고 상태 표시",
+    "settingsAlertThreshold": "초과 임계값",
+    "settingsAlertDesc": "사용률이 이 비율에 도달하면 초과 상태 표시",
+    "settingsThresholdOrder": "경고 임계값은 초과 임계값을 넘을 수 없습니다"
   },
   "dateRange": {
     "custom": "직접 선택",

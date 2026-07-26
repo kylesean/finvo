@@ -329,7 +329,7 @@
     "budget": "Budget",
     "loadFailed": "Failed to load",
     "noBudget": "No budgets yet",
-    "createHint": "Say \"Help me set a budget\" to your Augo assistant",
+    "createHint": "Tap the button below to set up your budget",
     "paused": "Paused",
     "pause": "Pause",
     "resume": "Resume",
@@ -413,7 +413,16 @@
     "periodStatusAchieved": "Achieved",
     "usedPercent": "$percent% used",
     "dayOfMonth": "Day $day",
-    "tenThousandSuffix": "0k"
+    "tenThousandSuffix": "0k",
+    "settingsLoadFailed": "Failed to load settings",
+    "settingsSaveSuccess": "Settings saved",
+    "settingsSaveFailed": "Failed to save",
+    "settingsSave": "Save Settings",
+    "settingsWarningThreshold": "Warning Threshold",
+    "settingsWarningDesc": "Shows warning status when usage reaches this percentage",
+    "settingsAlertThreshold": "Alert Threshold",
+    "settingsAlertDesc": "Shows exceeded status when usage reaches this percentage",
+    "settingsThresholdOrder": "Warning threshold cannot exceed alert threshold"
   },
   "dateRange": {
     "custom": "Custom",

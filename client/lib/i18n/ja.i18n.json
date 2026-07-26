@@ -329,7 +329,7 @@
     "budget": "予算",
     "loadFailed": "読み込み失敗",
     "noBudget": "予算未設定",
-    "createHint": "Augoアシスタントに「予算を設定して」と言って作成",
+    "createHint": "下のボタンをタップして予算を設定しましょう",
     "paused": "一時停止中",
     "pause": "停止",
     "resume": "再開",
@@ -413,7 +413,16 @@
     "periodStatusAchieved": "達成",
     "usedPercent": "$percent% 使用済み",
     "dayOfMonth": "$day 日",
-    "tenThousandSuffix": "万"
+    "tenThousandSuffix": "万",
+    "settingsLoadFailed": "設定の読み込みに失敗しました",
+    "settingsSaveSuccess": "設定を保存しました",
+    "settingsSaveFailed": "保存に失敗しました",
+    "settingsSave": "設定を保存",
+    "settingsWarningThreshold": "警告閾値",
+    "settingsWarningDesc": "使用率がこの割合に達すると警告状態を表示",
+    "settingsAlertThreshold": "超過閾値",
+    "settingsAlertDesc": "使用率がこの割合に達すると超過状態を表示",
+    "settingsThresholdOrder": "警告閾値は超過閾値を超えられません"
   },
   "dateRange": {
     "custom": "カスタム",

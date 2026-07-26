@@ -4,15 +4,19 @@ from __future__ import annotations
 
 from calendar import monthrange
 from datetime import (
+    UTC,
     date,
     datetime as dt_datetime,
+    time as dt_time,
     timedelta,
+    timezone,
 )
 from decimal import Decimal
 from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import asc, desc, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -38,6 +42,22 @@ from app.schemas.budget import (
     BudgetSummaryResponse,
     BudgetUpdateRequest,
 )
+
+# Default threshold values used when no BudgetSettings row exists yet.
+# These match the DB column defaults and avoid a write on the read path.
+_DEFAULT_WARNING_THRESHOLD = 70
+_DEFAULT_ALERT_THRESHOLD = 90
+
+
+def _date_range_to_dt(period_start: date, period_end: date) -> tuple[dt_datetime, dt_datetime]:
+    """Convert an inclusive date range to a half-open [start, end) datetime range.
+
+    Using direct column comparisons (no func.date() wrapping) allows the
+    B-tree index on transaction_at to be used efficiently.
+    """
+    start_dt = dt_datetime.combine(period_start, dt_time.min, tzinfo=UTC)
+    end_dt = dt_datetime.combine(period_end + timedelta(days=1), dt_time.min, tzinfo=UTC)
+    return start_dt, end_dt
 
 
 class BudgetService:
@@ -118,6 +138,9 @@ class BudgetService:
         self.session.add(initial_period)
         await self.session.commit()
         await self.session.refresh(budget)
+
+        # Ensure a BudgetSettings row exists so threshold lookups never write on the read path
+        await self._ensure_settings_exists(user_uuid)
 
         logger.info(
             "budget_created",
@@ -367,9 +390,17 @@ class BudgetService:
             status=BudgetPeriodStatus.ON_TRACK.value,
         )
 
-        self.session.add(new_period)
-        await self.session.commit()
-        await self.session.refresh(new_period)
+        try:
+            self.session.add(new_period)
+            await self.session.commit()
+            await self.session.refresh(new_period)
+        except IntegrityError:
+            # Concurrent request already created this period — roll back and re-query
+            await self.session.rollback()
+            existing = await self._get_current_period(budget)
+            if existing:
+                return existing
+            raise  # Unexpected constraint violation
 
         logger.info(
             "budget_period_created",
@@ -480,12 +511,13 @@ class BudgetService:
         Returns:
             Total spent amount
         """
+        start_dt, end_dt = _date_range_to_dt(period_start, period_end)
         query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
             cast(Any, Transaction.user_uuid == user_uuid),
             cast(Any, Transaction.type == "EXPENSE"),
             cast(Any, Transaction.status == "CLEARED"),
-            cast(Any, func.date(Transaction.transaction_at) >= period_start),
-            cast(Any, func.date(Transaction.transaction_at) <= period_end),
+            cast(Any, Transaction.transaction_at >= start_dt),
+            cast(Any, Transaction.transaction_at < end_dt),
         )
 
         if category_key:
@@ -501,8 +533,17 @@ class BudgetService:
         self,
         budget: Budget,
         period: BudgetPeriod,
+        *,
+        auto_commit: bool = True,
     ) -> BudgetPeriod:
-        """Update spent amount and status for a period."""
+        """Update spent amount and status for a period.
+
+        Args:
+            budget: The budget instance.
+            period: The budget period to update.
+            auto_commit: Whether to commit immediately. Set to False when
+                calling in a loop to batch commits for better performance.
+        """
         spent = await self.calculate_spent_amount(
             budget.owner_uuid,
             period.period_start,
@@ -512,20 +553,23 @@ class BudgetService:
 
         period.spent_amount = spent
 
-        # Update status based on thresholds
-        settings = await self.get_or_create_settings(budget.owner_uuid)
+        # Read thresholds without triggering a write on the read path
+        settings = await self._get_settings(budget.owner_uuid)
+        warning_threshold = settings.warning_threshold if settings else _DEFAULT_WARNING_THRESHOLD
+        alert_threshold = settings.alert_threshold if settings else _DEFAULT_ALERT_THRESHOLD
         usage_pct = period.usage_percentage
 
         if spent > period.adjusted_target:
             period.status = BudgetPeriodStatus.EXCEEDED.value
-        elif usage_pct >= settings.alert_threshold:
-            period.status = BudgetPeriodStatus.WARNING.value
-        elif usage_pct >= settings.warning_threshold:
+        elif usage_pct >= alert_threshold:
+            period.status = BudgetPeriodStatus.EXCEEDED.value
+        elif usage_pct >= warning_threshold:
             period.status = BudgetPeriodStatus.WARNING.value
         else:
             period.status = BudgetPeriodStatus.ON_TRACK.value
 
-        await self.session.commit()
+        if auto_commit:
+            await self.session.commit()
         return period
 
     # ========================================================================
@@ -563,9 +607,9 @@ class BudgetService:
 
         for budget in budgets:
             period = await self.get_or_create_current_period(budget)
-            period = await self.update_period_spent_amount(budget, period)
+            period = await self.update_period_spent_amount(budget, period, auto_commit=False)
 
-            response = await self._build_budget_response(budget, period)
+            response = await self.build_budget_response(budget, period)
 
             if budget.is_total_budget:
                 total_budget_response = response
@@ -588,7 +632,7 @@ class BudgetService:
                         # Message is a key for frontend to translate, with data for interpolation
                         message=f"budget.alert.exceeded:{period.spent_amount - period.adjusted_target:.2f}",
                         usage_percentage=period.usage_percentage,
-                        remaining_amount=float(period.remaining_amount),
+                        remaining_amount=str(period.remaining_amount),
                     )
                 )
             elif period.status == BudgetPeriodStatus.WARNING.value:
@@ -601,50 +645,56 @@ class BudgetService:
                         # Message is a key for frontend to translate, with data for interpolation
                         message=f"budget.alert.warning:{period.usage_percentage:.0f}:{period.remaining_amount:.2f}",
                         usage_percentage=period.usage_percentage,
-                        remaining_amount=float(period.remaining_amount),
+                        remaining_amount=str(period.remaining_amount),
                     )
                 )
 
         overall_pct = float(overall_spent / overall_target * 100) if overall_target > 0 else 0.0
 
+        # Batch commit all period updates at once
+        await self.session.commit()
+
         return BudgetSummaryResponse(
             total_budget=total_budget_response,
             category_budgets=category_budgets,
-            overall_spent=float(overall_spent),
-            overall_remaining=float(overall_target - overall_spent),
+            overall_spent=str(overall_spent),
+            overall_remaining=str(overall_target - overall_spent),
             overall_percentage=overall_pct,
             alerts=alerts,
             period_start=period_start,
             period_end=period_end,
         )
 
-    async def _build_budget_response(
+    async def build_budget_response(
         self,
         budget: Budget,
         period: BudgetPeriod,
     ) -> BudgetResponse:
-        """Build response object for a budget."""
+        """Build response object for a budget.
+
+        Monetary values are serialized as strings to preserve Decimal precision.
+        """
         return BudgetResponse(
             id=budget.id,
             name=budget.name,
             scope=budget.scope,
             category_key=budget.category_key,
-            amount=float(budget.amount),
+            amount=str(budget.amount),
             currency_code=budget.currency_code,
             period_type=budget.period_type,
             period_anchor_day=budget.period_anchor_day,
             rollover_enabled=budget.rollover_enabled,
-            rollover_balance=float(budget.rollover_balance),
+            rollover_balance=str(budget.rollover_balance),
             source=budget.source,
             ai_confidence=float(budget.ai_confidence) if budget.ai_confidence else None,
             status=budget.status,
-            spent_amount=float(period.spent_amount),
-            remaining_amount=float(period.remaining_amount),
+            spent_amount=str(period.spent_amount),
+            remaining_amount=str(period.remaining_amount),
             usage_percentage=period.usage_percentage,
             period_status=period.status,
             period_start=period.period_start,
             period_end=period.period_end,
-            ai_forecast=float(period.ai_forecast) if period.ai_forecast else None,
+            ai_forecast=str(period.ai_forecast) if period.ai_forecast else None,
             created_at=budget.created_at.isoformat() if isinstance(budget.created_at, dt_datetime) else None,
             updated_at=budget.updated_at.isoformat() if isinstance(budget.updated_at, dt_datetime) else None,
         )
@@ -672,6 +722,7 @@ class BudgetService:
         # Calculate date range
         end_date = date.today()
         start_date = end_date - timedelta(days=months * 30)
+        start_dt, end_dt = _date_range_to_dt(start_date, end_date)
 
         # Get historical spending
         query = select(
@@ -682,8 +733,8 @@ class BudgetService:
             cast(Any, Transaction.user_uuid == user_uuid),
             cast(Any, Transaction.type == "EXPENSE"),
             cast(Any, Transaction.status == "CLEARED"),
-            cast(Any, func.date(Transaction.transaction_at) >= start_date),
-            cast(Any, func.date(Transaction.transaction_at) <= end_date),
+            cast(Any, Transaction.transaction_at >= start_dt),
+            cast(Any, Transaction.transaction_at < end_dt),
         )
 
         if category_key:
@@ -700,7 +751,7 @@ class BudgetService:
             return BudgetSuggestion(
                 scope=BudgetScope.CATEGORY.value if category_key else BudgetScope.TOTAL.value,
                 category_key=category_key,
-                suggested_amount=0,
+                suggested_amount="0",
                 confidence=0.0,
                 # Structured format: key|data for frontend interpolation
                 reasoning="budget.suggestion.noData",
@@ -727,7 +778,7 @@ class BudgetService:
         return BudgetSuggestion(
             scope=scope,
             category_key=category_key,
-            suggested_amount=float(suggested_amount),
+            suggested_amount=str(suggested_amount),
             confidence=confidence,
             reasoning=reasoning,
             based_on_months=months,
@@ -749,6 +800,7 @@ class BudgetService:
         """
         end_date = date.today()
         start_date = end_date - timedelta(days=months * 30)
+        start_dt, end_dt = _date_range_to_dt(start_date, end_date)
 
         # Get spending by category and month
         query = (
@@ -761,8 +813,8 @@ class BudgetService:
                 cast(Any, Transaction.user_uuid == user_uuid),
                 cast(Any, Transaction.type == "EXPENSE"),
                 cast(Any, Transaction.status == "CLEARED"),
-                cast(Any, func.date(Transaction.transaction_at) >= start_date),
-                cast(Any, func.date(Transaction.transaction_at) <= end_date),
+                cast(Any, Transaction.transaction_at >= start_dt),
+                cast(Any, Transaction.transaction_at < end_dt),
             )
             .group_by(Transaction.category_key)
             .having(cast(Any, func.count(cast(Any, Transaction.id)) >= 5))  # At least 5 transactions
@@ -784,20 +836,46 @@ class BudgetService:
     # Settings
     # ========================================================================
 
-    async def get_or_create_settings(self, user_uuid: UUID) -> BudgetSettings:
-        """Get or create budget settings for a user."""
+    async def _get_settings(self, user_uuid: UUID) -> BudgetSettings | None:
+        """Read-only settings lookup. Returns None if no row exists.
+
+        Used on the hot read path (update_period_spent_amount) to avoid
+        triggering an implicit write/commit when the settings row is absent.
+        """
         result = await self.session.execute(
             select(BudgetSettings).where(cast(Any, BudgetSettings.user_uuid == user_uuid))
         )
-        settings = result.scalar_one_or_none()
+        return result.scalar_one_or_none()
 
-        if not settings:
-            settings = BudgetSettings(user_uuid=user_uuid)
+    async def _ensure_settings_exists(self, user_uuid: UUID) -> BudgetSettings:
+        """Create default settings row if it does not exist.
+
+        Called only on write paths (create_budget, update_settings).
+        Uses IntegrityError protection for concurrent first-time creation.
+        """
+        settings = await self._get_settings(user_uuid)
+        if settings:
+            return settings
+
+        settings = BudgetSettings(user_uuid=user_uuid)
+        try:
             self.session.add(settings)
             await self.session.commit()
             await self.session.refresh(settings)
-
+        except IntegrityError:
+            await self.session.rollback()
+            existing = await self._get_settings(user_uuid)
+            if existing:
+                return existing
+            raise
         return settings
+
+    async def get_or_create_settings(self, user_uuid: UUID) -> BudgetSettings:
+        """Public API: get or create budget settings for a user.
+
+        Used by the /settings/me endpoints where a write is acceptable.
+        """
+        return await self._ensure_settings_exists(user_uuid)
 
     async def update_settings(
         self,
@@ -805,7 +883,7 @@ class BudgetService:
         request: BudgetSettingsUpdateRequest,
     ) -> BudgetSettings:
         """Update budget settings."""
-        settings = await self.get_or_create_settings(user_uuid)
+        settings = await self._ensure_settings_exists(user_uuid)
 
         for field, value in request.model_dump(exclude_unset=True).items():
             if value is not None:

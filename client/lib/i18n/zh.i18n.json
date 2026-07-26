@@ -329,7 +329,7 @@
     "budget": "预算",
     "loadFailed": "加载失败",
     "noBudget": "暂无预算",
-    "createHint": "通过 Augo 助手说\"帮我设置预算\"来创建",
+    "createHint": "点击下方按钮设置您的预算",
     "paused": "已暂停",
     "pause": "暂停",
     "resume": "恢复",
@@ -413,7 +413,16 @@
     "periodStatusAchieved": "达成",
     "usedPercent": "$percent% 已使用",
     "dayOfMonth": "$day 号",
-    "tenThousandSuffix": "万"
+    "tenThousandSuffix": "万",
+    "settingsLoadFailed": "加载设置失败",
+    "settingsSaveSuccess": "设置已保存",
+    "settingsSaveFailed": "保存失败",
+    "settingsSave": "保存设置",
+    "settingsWarningThreshold": "预警阈值",
+    "settingsWarningDesc": "当使用率达到此百分比时显示预警状态",
+    "settingsAlertThreshold": "超支阈值",
+    "settingsAlertDesc": "当使用率达到此百分比时显示超支状态",
+    "settingsThresholdOrder": "预警阈值不能大于超支阈值"
   },
   "dateRange": {
     "custom": "自定义",

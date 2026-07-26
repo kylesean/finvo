@@ -69,23 +69,12 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         actions: [
           FButton.icon(
             variant: .ghost,
-            onPress: state.isLoading
-                ? null
-                : () => ref.read(budgetSummaryProvider.notifier).refresh(),
-            child: state.isLoading
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colors.foreground,
-                    ),
-                  )
-                : Icon(
-                    FLucideIcons.refreshCw,
-                    color: colors.foreground,
-                    size: 20,
-                  ),
+            onPress: () => context.pushNamed('budgetSettings'),
+            child: Icon(
+              FLucideIcons.settings,
+              color: colors.foreground,
+              size: 20,
+            ),
           ),
         ],
       ),

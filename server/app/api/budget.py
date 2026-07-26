@@ -79,7 +79,7 @@ async def create_budget(
     period = await service.get_or_create_current_period(budget)
 
     return success_response(
-        data=await service._build_budget_response(budget, period),
+        data=await service.build_budget_response(budget, period),
         http_status=201,
     )
 
@@ -113,9 +113,10 @@ async def get_budgets(
     responses = []
     for budget in budgets:
         period = await service.get_or_create_current_period(budget)
-        period = await service.update_period_spent_amount(budget, period)
-        responses.append(await service._build_budget_response(budget, period))
+        period = await service.update_period_spent_amount(budget, period, auto_commit=False)
+        responses.append(await service.build_budget_response(budget, period))
 
+    await db.commit()
     return success_response(data=responses)
 
 
@@ -178,7 +179,7 @@ async def get_budget(
     period = await service.get_or_create_current_period(budget)
     period = await service.update_period_spent_amount(budget, period)
 
-    return success_response(data=await service._build_budget_response(budget, period))
+    return success_response(data=await service.build_budget_response(budget, period))
 
 
 @router.put("/{budget_id}", response_model=BudgetResponse)
@@ -198,7 +199,7 @@ async def update_budget(
     period = await service.get_or_create_current_period(budget)
     period = await service.update_period_spent_amount(budget, period)
 
-    return success_response(data=await service._build_budget_response(budget, period))
+    return success_response(data=await service.build_budget_response(budget, period))
 
 
 @router.delete("/{budget_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -220,6 +221,7 @@ async def delete_budget(
 # ============================================================================
 
 
+# TODO: Client UI entry not yet available
 @router.post("/rebalance", status_code=status.HTTP_200_OK)
 async def rebalance_budgets(
     request: BudgetRebalanceRequest,
@@ -265,14 +267,6 @@ async def get_budget_settings(
             user_uuid=settings.user_uuid,
             warning_threshold=settings.warning_threshold,
             alert_threshold=settings.alert_threshold,
-            overspend_behavior=settings.overspend_behavior,
-            weekly_summary_enabled=settings.weekly_summary_enabled,
-            weekly_summary_day=settings.weekly_summary_day,
-            monthly_summary_enabled=settings.monthly_summary_enabled,
-            anomaly_detection_enabled=settings.anomaly_detection_enabled,
-            anomaly_threshold=float(settings.anomaly_threshold),
-            quiet_hours_start=settings.quiet_hours_start,
-            quiet_hours_end=settings.quiet_hours_end,
         )
     )
 
@@ -292,13 +286,5 @@ async def update_budget_settings(
             user_uuid=settings.user_uuid,
             warning_threshold=settings.warning_threshold,
             alert_threshold=settings.alert_threshold,
-            overspend_behavior=settings.overspend_behavior,
-            weekly_summary_enabled=settings.weekly_summary_enabled,
-            weekly_summary_day=settings.weekly_summary_day,
-            monthly_summary_enabled=settings.monthly_summary_enabled,
-            anomaly_detection_enabled=settings.anomaly_detection_enabled,
-            anomaly_threshold=float(settings.anomaly_threshold),
-            quiet_hours_start=settings.quiet_hours_start,
-            quiet_hours_end=settings.quiet_hours_end,
         )
     )
