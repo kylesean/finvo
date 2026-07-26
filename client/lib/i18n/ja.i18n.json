@@ -494,7 +494,16 @@
       "confirmPause": "停止確認",
       "dynamicAmount": "動態平均",
       "dynamicAmountTitle": "金額の確認が必要",
-      "dynamicAmountDescription": "通知が届いたら金額を確認して記帳を完了させてください。"
+      "dynamicAmountDescription": "通知が届いたら金額を確認して記帳を完了させてください。",
+      "confirmBeforeGeneration": "生成前に確認",
+      "confirmBeforeGenerationDesc": "期限日に確認待ち取引を生成、手動確認後に記帳",
+      "pendingTitle": "確認待ち取引",
+      "pendingCount": "$count 件確認待ち",
+      "confirm": "確認",
+      "skip": "スキップ",
+      "noPending": "確認待ち取引なし",
+      "confirmSuccess": "取引を確認しました",
+      "skipSuccess": "取引をスキップしました"
     }
   },
   "chat": {

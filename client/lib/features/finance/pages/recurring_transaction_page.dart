@@ -69,6 +69,7 @@ class _RecurringTransactionPageState
   final _tagController = TextEditingController();
 
   // Advanced options
+  bool _requiresConfirmation = false;
   bool _isActive = true;
 
   // Description
@@ -146,6 +147,7 @@ class _RecurringTransactionPageState
           _targetAccountId = transaction.targetAccountId;
           _sourceAccountName = sourceAccountName;
           _targetAccountName = targetAccountName;
+          _requiresConfirmation = transaction.requiresConfirmation;
           _isActive = transaction.isActive;
           if (transaction.categoryKey != null) {
             _category = TransactionCategory.fromKey(transaction.categoryKey!);
@@ -893,38 +895,90 @@ class _RecurringTransactionPageState
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: colors.border),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.budget.enabled,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.foreground,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        isZh
-                            ? '开启后按规则自动生成交易'
-                            : 'Automatically generate transactions by rule',
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                        ),
-                      ),
-                    ],
-                  ),
+          child: Column(
+            children: [
+              // Confirm before generation toggle
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
-                FSwitch(
-                  value: _isActive,
-                  onChange: (value) => setState(() => _isActive = value),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t
+                                .forecast
+                                .recurringTransaction
+                                .confirmBeforeGeneration,
+                            style: theme.typography.body.sm.copyWith(
+                              color: colors.foreground,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            t
+                                .forecast
+                                .recurringTransaction
+                                .confirmBeforeGenerationDesc,
+                            style: theme.typography.body.xs.copyWith(
+                              color: colors.mutedForeground,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FSwitch(
+                      value: _requiresConfirmation,
+                      onChange: (value) {
+                        setState(() => _requiresConfirmation = value);
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Divider(height: 1, color: colors.border),
+              // Activation toggle
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.budget.enabled,
+                            style: theme.typography.body.sm.copyWith(
+                              color: colors.foreground,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            isZh
+                                ? '开启后按规则自动生成交易'
+                                : 'Automatically generate transactions by rule',
+                            style: theme.typography.body.xs.copyWith(
+                              color: colors.mutedForeground,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FSwitch(
+                      value: _isActive,
+                      onChange: (value) => setState(() => _isActive = value),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -1115,7 +1169,7 @@ class _RecurringTransactionPageState
           sourceAccountId: _sourceAccountId,
           targetAccountId: _targetAccountId,
           amountType: _amountType,
-          requiresConfirmation: false,
+          requiresConfirmation: _requiresConfirmation,
           categoryKey: _category.key,
           tags: _tags.isEmpty ? null : _tags,
           endDate: _endDate,
@@ -1137,7 +1191,7 @@ class _RecurringTransactionPageState
           sourceAccountId: _sourceAccountId,
           targetAccountId: _targetAccountId,
           amountType: _amountType,
-          requiresConfirmation: false,
+          requiresConfirmation: _requiresConfirmation,
           categoryKey: _category.key,
           tags: _tags.isEmpty ? null : _tags,
           endDate: _endDate,

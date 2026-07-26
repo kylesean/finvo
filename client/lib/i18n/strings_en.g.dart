@@ -1107,6 +1107,15 @@ class _Translations$forecast$recurringTransaction$en extends Translations$foreca
 	@override String get dynamicAmount => 'Est. Avg';
 	@override String get dynamicAmountTitle => 'Amount Requires Confirmation';
 	@override String get dynamicAmountDescription => 'System will send a reminder on the due date. You need to manually confirm the amount before recording.';
+	@override String get confirmBeforeGeneration => 'Confirm Before Generation';
+	@override String get confirmBeforeGenerationDesc => 'Generates a pending transaction on due date, requires manual confirmation';
+	@override String get pendingTitle => 'Pending Transactions';
+	@override String pendingCount({required Object count}) => '${count} pending';
+	@override String get confirm => 'Confirm';
+	@override String get skip => 'Skip';
+	@override String get noPending => 'No pending transactions';
+	@override String get confirmSuccess => 'Transaction confirmed';
+	@override String get skipSuccess => 'Transaction skipped';
 }
 
 // Path: chat.tools
@@ -2741,6 +2750,15 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.dynamicAmount' => 'Est. Avg',
 			'forecast.recurringTransaction.dynamicAmountTitle' => 'Amount Requires Confirmation',
 			'forecast.recurringTransaction.dynamicAmountDescription' => 'System will send a reminder on the due date. You need to manually confirm the amount before recording.',
+			'forecast.recurringTransaction.confirmBeforeGeneration' => 'Confirm Before Generation',
+			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => 'Generates a pending transaction on due date, requires manual confirmation',
+			'forecast.recurringTransaction.pendingTitle' => 'Pending Transactions',
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} pending',
+			'forecast.recurringTransaction.confirm' => 'Confirm',
+			'forecast.recurringTransaction.skip' => 'Skip',
+			'forecast.recurringTransaction.noPending' => 'No pending transactions',
+			'forecast.recurringTransaction.confirmSuccess' => 'Transaction confirmed',
+			'forecast.recurringTransaction.skipSuccess' => 'Transaction skipped',
 			'chat.newChat' => 'New Chat',
 			'chat.noMessages' => 'No messages to display.',
 			'chat.loadingFailed' => 'Loading failed',
@@ -2794,6 +2812,8 @@ extension on TranslationsEn {
 			'chat.tools.done.querySpaceSummary' => 'Space summary ready',
 			'chat.tools.done.prepareTransfer' => 'Transfer ready',
 			'chat.tools.done.unknown' => 'Processing complete',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.analyzeFinance' => '財務分析完成',
 			'chat.tools.done.forecastFinance' => '財務預測完成',
 			'chat.tools.done.analyzeBudget' => '預算分析完成',
@@ -2803,8 +2823,6 @@ extension on TranslationsEn {
 			'chat.tools.done.prepareBudgetSimulation' => 'Budget simulation prepared',
 			'chat.tools.done.simulateBudget' => 'Budget simulation completed',
 			'chat.tools.failed.unknown' => 'Action failed',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.cancelled' => 'Cancelled',
 			'chat.tools.analyzeFinance' => '正在分析財務狀況...',
 			'chat.tools.forecastFinance' => '正在預測財務趨勢...',
@@ -3308,6 +3326,8 @@ extension on TranslationsEn {
 			'sharedSpace.notificationCard.reject' => 'Reject',
 			'sharedSpace.notificationCard.unknownTime' => 'Unknown time',
 			'sharedSpace.notificationCard.justNow' => 'Just now',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.spaceCard.noDescription' => 'No description',
 			'sharedSpace.spaceCard.creator' => 'Creator',
 			'sharedSpace.spaceCard.member' => 'Member',
@@ -3317,8 +3337,6 @@ extension on TranslationsEn {
 			'sharedSpace.settings.spaceInfo' => 'Space Info',
 			'sharedSpace.settings.nameLabel' => 'Space Name',
 			'sharedSpace.settings.descLabel' => 'Space Description',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.settings.save' => 'Save',
 			'sharedSpace.settings.saved' => 'Saved successfully',
 			'sharedSpace.settings.saveFailed' => 'Failed to save',

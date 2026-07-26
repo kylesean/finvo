@@ -1107,6 +1107,15 @@ class _Translations$forecast$recurringTransaction$ko extends Translations$foreca
 	@override String get dynamicAmount => '동적 평균';
 	@override String get dynamicAmountTitle => '금액 수동 확인 필요';
 	@override String get dynamicAmountDescription => '알림이 오면 금액을 확인해야 기록이 완료됩니다.';
+	@override String get confirmBeforeGeneration => '생성 전 확인';
+	@override String get confirmBeforeGenerationDesc => '만기일에 대기 거래 생성, 수동 확인 후 기록';
+	@override String get pendingTitle => '대기 거래';
+	@override String pendingCount({required Object count}) => '${count} 건 대기';
+	@override String get confirm => '확인';
+	@override String get skip => '건너뛰기';
+	@override String get noPending => '대기 거래 없음';
+	@override String get confirmSuccess => '거래 확인됨';
+	@override String get skipSuccess => '거래 건너뜀';
 }
 
 // Path: chat.tools
@@ -2741,6 +2750,15 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.dynamicAmount' => '동적 평균',
 			'forecast.recurringTransaction.dynamicAmountTitle' => '금액 수동 확인 필요',
 			'forecast.recurringTransaction.dynamicAmountDescription' => '알림이 오면 금액을 확인해야 기록이 완료됩니다.',
+			'forecast.recurringTransaction.confirmBeforeGeneration' => '생성 전 확인',
+			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '만기일에 대기 거래 생성, 수동 확인 후 기록',
+			'forecast.recurringTransaction.pendingTitle' => '대기 거래',
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 건 대기',
+			'forecast.recurringTransaction.confirm' => '확인',
+			'forecast.recurringTransaction.skip' => '건너뛰기',
+			'forecast.recurringTransaction.noPending' => '대기 거래 없음',
+			'forecast.recurringTransaction.confirmSuccess' => '거래 확인됨',
+			'forecast.recurringTransaction.skipSuccess' => '거래 건너뜀',
 			'chat.newChat' => '새 대화',
 			'chat.noMessages' => '표시할 메시지가 없습니다.',
 			'chat.loadingFailed' => '로딩 실패',
@@ -2794,6 +2812,8 @@ extension on TranslationsKo {
 			'chat.tools.done.forecastFinance' => '예측 완료',
 			'chat.tools.done.analyzeBudget' => '예산 분석 완료',
 			'chat.tools.done.auditAnalysis' => '감사 완료',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.budgetOps' => '처리 완료',
 			'chat.tools.done.createSharedTransaction' => '공유 가계부 생성 완료',
 			'chat.tools.done.listSpaces' => '공유 공간 조회 완료',
@@ -2803,8 +2823,6 @@ extension on TranslationsKo {
 			'chat.tools.done.analyzeSpending' => 'Spending analysis complete',
 			'chat.tools.done.analyzeCashflow' => 'Cashflow analysis complete',
 			'chat.tools.done.suggestBudget' => 'Budget suggestion complete',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.prepareBudgetSimulation' => '예산 시뮬레이션 준비 완료',
 			'chat.tools.done.simulateBudget' => '예산 시뮬레이션 완료',
 			'chat.tools.failed.unknown' => '작업 실패',
@@ -3308,6 +3326,8 @@ extension on TranslationsKo {
 			'sharedSpace.settings.editHint' => '관리자만 편집 가능',
 			'sharedSpace.settings.edit' => '편집',
 			'sharedSpace.settings.you' => '나',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.settings.pending' => '대기 중',
 			'sharedSpace.settings.declined' => '거절됨',
 			'sharedSpace.settings.setAsAdmin' => '관리자로 설정',
@@ -3317,8 +3337,6 @@ extension on TranslationsKo {
 			'sharedSpace.settings.confirm' => '확인',
 			'sharedSpace.settings.roleChanged' => '역할이 변경되었습니다',
 			'sharedSpace.settings.roleChangeFailed' => '역할 변경에 실패했습니다',
-			_ => null,
-		} ?? switch (path) {
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',

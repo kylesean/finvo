@@ -364,6 +364,7 @@ class _NotificationTile extends StatelessWidget {
       'bill_comment' => FLucideIcons.messageSquare,
       'budget_alert' => FLucideIcons.alertTriangle,
       'transaction' => FLucideIcons.receipt,
+      'recurring_pending' => FLucideIcons.clock,
       _ => FLucideIcons.bell,
     };
   }
@@ -376,6 +377,7 @@ class _NotificationTile extends StatelessWidget {
       'bill_comment' => colors.primary,
       'budget_alert' => colors.destructive,
       'transaction' => colors.primary,
+      'recurring_pending' => colors.primary,
       _ => colors.mutedForeground,
     };
   }

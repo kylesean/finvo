@@ -84,6 +84,36 @@ class RecurringTransactionService {
       method: HttpMethod.delete,
     );
   }
+
+  /// Get pending transactions awaiting confirmation
+  Future<List<PendingTransaction>> getPending() async {
+    final response = await _networkClient.requestMap(
+      '/transactions/pending',
+      method: HttpMethod.get,
+    );
+    final data = response['data'] as List<dynamic>;
+    return data
+        .map(
+          (json) => PendingTransaction.fromJson(json as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
+  /// Confirm a pending transaction
+  Future<void> confirmPending(String id) async {
+    await _networkClient.requestMap(
+      '/transactions/$id/confirm',
+      method: HttpMethod.post,
+    );
+  }
+
+  /// Skip (delete) a pending transaction
+  Future<void> skipPending(String id) async {
+    await _networkClient.requestMap(
+      '/transactions/$id/skip',
+      method: HttpMethod.post,
+    );
+  }
 }
 
 /// Recurring transaction service provider

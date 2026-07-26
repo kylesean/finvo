@@ -494,7 +494,16 @@
       "confirmPause": "정지 확인",
       "dynamicAmount": "동적 평균",
       "dynamicAmountTitle": "금액 수동 확인 필요",
-      "dynamicAmountDescription": "알림이 오면 금액을 확인해야 기록이 완료됩니다."
+      "dynamicAmountDescription": "알림이 오면 금액을 확인해야 기록이 완료됩니다.",
+      "confirmBeforeGeneration": "생성 전 확인",
+      "confirmBeforeGenerationDesc": "만기일에 대기 거래 생성, 수동 확인 후 기록",
+      "pendingTitle": "대기 거래",
+      "pendingCount": "$count 건 대기",
+      "confirm": "확인",
+      "skip": "건너뛰기",
+      "noPending": "대기 거래 없음",
+      "confirmSuccess": "거래 확인됨",
+      "skipSuccess": "거래 건너뜀"
     }
   },
   "chat": {

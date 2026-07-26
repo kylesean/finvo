@@ -1107,6 +1107,15 @@ class _Translations$forecast$recurringTransaction$ja extends Translations$foreca
 	@override String get dynamicAmount => '動態平均';
 	@override String get dynamicAmountTitle => '金額の確認が必要';
 	@override String get dynamicAmountDescription => '通知が届いたら金額を確認して記帳を完了させてください。';
+	@override String get confirmBeforeGeneration => '生成前に確認';
+	@override String get confirmBeforeGenerationDesc => '期限日に確認待ち取引を生成、手動確認後に記帳';
+	@override String get pendingTitle => '確認待ち取引';
+	@override String pendingCount({required Object count}) => '${count} 件確認待ち';
+	@override String get confirm => '確認';
+	@override String get skip => 'スキップ';
+	@override String get noPending => '確認待ち取引なし';
+	@override String get confirmSuccess => '取引を確認しました';
+	@override String get skipSuccess => '取引をスキップしました';
 }
 
 // Path: chat.tools
@@ -2741,6 +2750,15 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.dynamicAmount' => '動態平均',
 			'forecast.recurringTransaction.dynamicAmountTitle' => '金額の確認が必要',
 			'forecast.recurringTransaction.dynamicAmountDescription' => '通知が届いたら金額を確認して記帳を完了させてください。',
+			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前に確認',
+			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '期限日に確認待ち取引を生成、手動確認後に記帳',
+			'forecast.recurringTransaction.pendingTitle' => '確認待ち取引',
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 件確認待ち',
+			'forecast.recurringTransaction.confirm' => '確認',
+			'forecast.recurringTransaction.skip' => 'スキップ',
+			'forecast.recurringTransaction.noPending' => '確認待ち取引なし',
+			'forecast.recurringTransaction.confirmSuccess' => '取引を確認しました',
+			'forecast.recurringTransaction.skipSuccess' => '取引をスキップしました',
 			'chat.newChat' => '新しいチャット',
 			'chat.noMessages' => 'メッセージがありません。',
 			'chat.loadingFailed' => '読み込み失敗',
@@ -2794,6 +2812,8 @@ extension on TranslationsJa {
 			'chat.tools.done.forecastFinance' => '予測完了',
 			'chat.tools.done.analyzeBudget' => '予算分析完了',
 			'chat.tools.done.auditAnalysis' => '監査完了',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.budgetOps' => '予算処理完了',
 			'chat.tools.done.createSharedTransaction' => '共有帳簿作成完了',
 			'chat.tools.done.listSpaces' => '共有スペース取得完了',
@@ -2803,8 +2823,6 @@ extension on TranslationsJa {
 			'chat.tools.done.analyzeSpending' => 'Spending analysis complete',
 			'chat.tools.done.analyzeCashflow' => 'Cashflow analysis complete',
 			'chat.tools.done.suggestBudget' => 'Budget suggestion complete',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.prepareBudgetSimulation' => '予算シミュレーション準備完了',
 			'chat.tools.done.simulateBudget' => '予算シミュレーション完了',
 			'chat.tools.failed.unknown' => '操作に失敗しました',
@@ -3308,6 +3326,8 @@ extension on TranslationsJa {
 			'sharedSpace.settings.editHint' => '管理者のみ編集可能',
 			'sharedSpace.settings.edit' => '編集',
 			'sharedSpace.settings.you' => '自分',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.settings.pending' => '承認待ち',
 			'sharedSpace.settings.declined' => '拒否済み',
 			'sharedSpace.settings.setAsAdmin' => '管理者に設定',
@@ -3317,8 +3337,6 @@ extension on TranslationsJa {
 			'sharedSpace.settings.confirm' => '確認',
 			'sharedSpace.settings.roleChanged' => '役割を変更しました',
 			'sharedSpace.settings.roleChangeFailed' => '役割の変更に失敗しました',
-			_ => null,
-		} ?? switch (path) {
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',

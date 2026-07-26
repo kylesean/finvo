@@ -494,7 +494,16 @@
       "confirmPause": "确认暂停",
       "dynamicAmount": "动态均值",
       "dynamicAmountTitle": "金额需手动确认",
-      "dynamicAmountDescription": "系统将在账单日发送提醒，需要您手动确认具体金额后才会记账。"
+      "dynamicAmountDescription": "系统将在账单日发送提醒，需要您手动确认具体金额后才会记账。",
+      "confirmBeforeGeneration": "生成前需确认",
+      "confirmBeforeGenerationDesc": "到期时生成待确认交易，需手动确认后记账",
+      "pendingTitle": "待确认交易",
+      "pendingCount": "$count 笔待确认",
+      "confirm": "确认",
+      "skip": "跳过",
+      "noPending": "无待确认交易",
+      "confirmSuccess": "已确认记账",
+      "skipSuccess": "已跳过"
     }
   },
   "chat": {

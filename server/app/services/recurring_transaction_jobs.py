@@ -179,6 +179,36 @@ async def _create_transaction_from_recurring(
         status=status,
     )
 
+    # Send notification when transaction requires user confirmation
+    if status == "PENDING":
+        try:
+            from app.services.push_service import PushService
+
+            desc = recurring_tx.description or recurring_tx.category_key or "Recurring"
+            await PushService.send_notification(
+                db=db,
+                user_uuid=recurring_tx.user_uuid,
+                type_="recurring_pending",
+                title=f"{desc} \u00a5{amount_original:.2f} pending confirmation",
+                content="A recurring transaction is waiting for your review.",
+                data={
+                    "action": "recurring_pending",
+                    "transaction_id": str(transaction.id),
+                    "amount": str(amount_original),
+                    "currency": currency,
+                    "category_key": recurring_tx.category_key,
+                    "description": desc,
+                    "target_path": "/finance/recurring",
+                },
+            )
+        except Exception as e:
+            # Non-critical: notification failure should not block transaction creation
+            logger.warning(
+                "recurring_pending_notification_failed",
+                transaction_id=str(transaction.id),
+                error=str(e),
+            )
+
 
 async def _update_next_execution(
     db: AsyncSession,

@@ -4,11 +4,13 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:augo/core/widgets/top_toast.dart';
+import 'package:augo/app/theme/app_semantic_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../models/recurring_transaction.dart';
 import '../providers/recurring_transaction_provider.dart';
+import '../services/recurring_transaction_service.dart';
 import '../../../shared/models/currency.dart';
 import '../../profile/providers/financial_settings_provider.dart';
 import 'package:augo/core/constants/category_constants.dart';
@@ -29,6 +31,7 @@ class _RecurringTransactionListPageState
     extends ConsumerState<RecurringTransactionListPage> {
   RecurringTransactionType? _filterType;
   bool _sortAscending = true; // Sort by time ascending
+  List<PendingTransaction> _pendingTransactions = [];
 
   @override
   void initState() {
@@ -36,8 +39,19 @@ class _RecurringTransactionListPageState
     unawaited(
       Future<void>.microtask(() {
         unawaited(ref.read(recurringTransactionProvider.notifier).loadList());
+        unawaited(_loadPending());
       }),
     );
+  }
+
+  Future<void> _loadPending() async {
+    try {
+      final service = ref.read(recurringTransactionServiceProvider);
+      final pending = await service.getPending();
+      if (mounted) setState(() => _pendingTransactions = pending);
+    } catch (_) {
+      // Non-critical
+    }
   }
 
   void _onFilterChanged(RecurringTransactionType? type) {
@@ -99,6 +113,9 @@ class _RecurringTransactionListPageState
       ),
       body: Column(
         children: [
+          // Pending transactions banner
+          if (_pendingTransactions.isNotEmpty)
+            _buildPendingBanner(theme, colors),
           // Filter tabs
           _buildFilterTabs(theme, colors),
           // List content
@@ -148,6 +165,133 @@ class _RecurringTransactionListPageState
         }).toList(),
       ),
     );
+  }
+
+  Widget _buildPendingBanner(FThemeData theme, FColors colors) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.semantic.warningAccent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.semantic.warningAccent.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                FLucideIcons.clock,
+                size: 16,
+                color: theme.semantic.warningAccent,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                t.forecast.recurringTransaction.pendingCount(
+                  count: _pendingTransactions.length.toString(),
+                ),
+                style: theme.typography.body.sm.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.semantic.warningAccent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ..._pendingTransactions.map(
+            (tx) => _buildPendingItem(theme, colors, tx),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPendingItem(
+    FThemeData theme,
+    FColors colors,
+    PendingTransaction tx,
+  ) {
+    final currencySymbol = Currency.fromCode(tx.currency)?.symbol ?? '¥';
+    final desc = tx.description ?? tx.categoryKey ?? '';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '$desc  $currencySymbol${tx.amount.toString()}',
+              style: theme.typography.body.sm.copyWith(
+                color: colors.foreground,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Skip button
+          GestureDetector(
+            onTap: () => _skipPending(tx.id),
+            child: Text(
+              t.forecast.recurringTransaction.skip,
+              style: theme.typography.body.xs.copyWith(
+                color: colors.mutedForeground,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Confirm button
+          GestureDetector(
+            onTap: () => _confirmPending(tx.id),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: colors.primary,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                t.forecast.recurringTransaction.confirm,
+                style: theme.typography.body.xs.copyWith(
+                  color: colors.primaryForeground,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmPending(String id) async {
+    try {
+      final service = ref.read(recurringTransactionServiceProvider);
+      await service.confirmPending(id);
+      setState(() => _pendingTransactions.removeWhere((t) => t.id == id));
+      if (mounted) {
+        TopToast.success(
+          context,
+          t.forecast.recurringTransaction.confirmSuccess,
+        );
+      }
+    } catch (e) {
+      if (mounted) TopToast.error(context, e.toString());
+    }
+  }
+
+  Future<void> _skipPending(String id) async {
+    try {
+      final service = ref.read(recurringTransactionServiceProvider);
+      await service.skipPending(id);
+      setState(() => _pendingTransactions.removeWhere((t) => t.id == id));
+      if (mounted) {
+        TopToast.success(context, t.forecast.recurringTransaction.skipSuccess);
+      }
+    } catch (e) {
+      if (mounted) TopToast.error(context, e.toString());
+    }
   }
 
   Widget _buildContent(
