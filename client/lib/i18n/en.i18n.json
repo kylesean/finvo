@@ -494,7 +494,16 @@
       "confirmPause": "Confirm Pause",
       "dynamicAmount": "Est. Avg",
       "dynamicAmountTitle": "Amount Requires Confirmation",
-      "dynamicAmountDescription": "System will send a reminder on the due date. You need to manually confirm the amount before recording."
+      "dynamicAmountDescription": "System will send a reminder on the due date. You need to manually confirm the amount before recording.",
+      "confirmBeforeGeneration": "Confirm Before Generation",
+      "confirmBeforeGenerationDesc": "Generates a pending transaction on due date, requires manual confirmation",
+      "pendingTitle": "Pending Transactions",
+      "pendingCount": "$count pending",
+      "confirm": "Confirm",
+      "skip": "Skip",
+      "noPending": "No pending transactions",
+      "confirmSuccess": "Transaction confirmed",
+      "skipSuccess": "Transaction skipped"
     }
   },
   "chat": {

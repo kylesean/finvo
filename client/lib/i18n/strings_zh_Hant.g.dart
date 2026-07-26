@@ -1107,6 +1107,15 @@ class _Translations$forecast$recurringTransaction$zh_Hant extends Translations$f
 	@override String get dynamicAmount => '動態均值';
 	@override String get dynamicAmountTitle => '金額需手動確認';
 	@override String get dynamicAmountDescription => '系統將在帳單日發送提醒，需要您手動確認具體金額後才會記帳。';
+	@override String get confirmBeforeGeneration => '生成前需確認';
+	@override String get confirmBeforeGenerationDesc => '到期時生成待確認交易，需手動確認後記帳';
+	@override String get pendingTitle => '待確認交易';
+	@override String pendingCount({required Object count}) => '${count} 筆待確認';
+	@override String get confirm => '確認';
+	@override String get skip => '跳過';
+	@override String get noPending => '無待確認交易';
+	@override String get confirmSuccess => '已確認記帳';
+	@override String get skipSuccess => '已跳過';
 }
 
 // Path: chat.tools
@@ -2741,6 +2750,15 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.dynamicAmount' => '動態均值',
 			'forecast.recurringTransaction.dynamicAmountTitle' => '金額需手動確認',
 			'forecast.recurringTransaction.dynamicAmountDescription' => '系統將在帳單日發送提醒，需要您手動確認具體金額後才會記帳。',
+			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前需確認',
+			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期時生成待確認交易，需手動確認後記帳',
+			'forecast.recurringTransaction.pendingTitle' => '待確認交易',
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 筆待確認',
+			'forecast.recurringTransaction.confirm' => '確認',
+			'forecast.recurringTransaction.skip' => '跳過',
+			'forecast.recurringTransaction.noPending' => '無待確認交易',
+			'forecast.recurringTransaction.confirmSuccess' => '已確認記帳',
+			'forecast.recurringTransaction.skipSuccess' => '已跳過',
 			'chat.newChat' => '新聊天',
 			'chat.noMessages' => '沒有消息可顯示。',
 			'chat.loadingFailed' => '載入失敗',
@@ -2794,6 +2812,8 @@ extension on TranslationsZhHant {
 			'chat.tools.done.forecastFinance' => '財務預測完成',
 			'chat.tools.done.analyzeBudget' => '預算分析完成',
 			'chat.tools.done.auditAnalysis' => '審計分析完成',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.budgetOps' => '預算處理完成',
 			'chat.tools.done.createSharedTransaction' => '共享帳單創建完成',
 			'chat.tools.done.listSpaces' => '共享空間獲取完成',
@@ -2803,8 +2823,6 @@ extension on TranslationsZhHant {
 			'chat.tools.done.analyzeSpending' => 'Spending analysis complete',
 			'chat.tools.done.analyzeCashflow' => 'Cashflow analysis complete',
 			'chat.tools.done.suggestBudget' => 'Budget suggestion complete',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.prepareBudgetSimulation' => '預算模擬準備完成',
 			'chat.tools.done.simulateBudget' => '預算模擬完成',
 			'chat.tools.failed.unknown' => '操作失敗',
@@ -3308,6 +3326,8 @@ extension on TranslationsZhHant {
 			'sharedSpace.settings.editHint' => '僅管理員可編輯',
 			'sharedSpace.settings.edit' => '編輯',
 			'sharedSpace.settings.you' => '我',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.settings.pending' => '待接受',
 			'sharedSpace.settings.declined' => '已拒絕',
 			'sharedSpace.settings.setAsAdmin' => '設為管理員',
@@ -3317,8 +3337,6 @@ extension on TranslationsZhHant {
 			'sharedSpace.settings.confirm' => '確認',
 			'sharedSpace.settings.roleChanged' => '角色已變更',
 			'sharedSpace.settings.roleChangeFailed' => '角色變更失敗',
-			_ => null,
-		} ?? switch (path) {
 			'budgetSuggestion.highPercentage' => ({required Object category, required Object percentage}) => '${category} accounts for ${percentage}% of spending. Consider setting a budget limit.',
 			'budgetSuggestion.monthlyIncrease' => ({required Object percentage}) => 'Spending increased by ${percentage}% this month. Needs attention.',
 			'budgetSuggestion.frequentSmall' => ({required Object category, required Object count}) => '${category} has ${count} small transactions. These might be subscriptions.',

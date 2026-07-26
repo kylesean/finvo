@@ -494,7 +494,16 @@
       "confirmPause": "確認暫停",
       "dynamicAmount": "動態均值",
       "dynamicAmountTitle": "金額需手動確認",
-      "dynamicAmountDescription": "系統將在帳單日發送提醒，需要您手動確認具體金額後才會記帳。"
+      "dynamicAmountDescription": "系統將在帳單日發送提醒，需要您手動確認具體金額後才會記帳。",
+      "confirmBeforeGeneration": "生成前需確認",
+      "confirmBeforeGenerationDesc": "到期時生成待確認交易，需手動確認後記帳",
+      "pendingTitle": "待確認交易",
+      "pendingCount": "$count 筆待確認",
+      "confirm": "確認",
+      "skip": "跳過",
+      "noPending": "無待確認交易",
+      "confirmSuccess": "已確認記帳",
+      "skipSuccess": "已跳過"
     }
   },
   "chat": {

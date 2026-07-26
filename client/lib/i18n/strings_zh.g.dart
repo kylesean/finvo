@@ -2369,6 +2369,33 @@ class Translations$forecast$recurringTransaction$zh {
 
 	/// zh: '系统将在账单日发送提醒，需要您手动确认具体金额后才会记账。'
 	String get dynamicAmountDescription => '系统将在账单日发送提醒，需要您手动确认具体金额后才会记账。';
+
+	/// zh: '生成前需确认'
+	String get confirmBeforeGeneration => '生成前需确认';
+
+	/// zh: '到期时生成待确认交易，需手动确认后记账'
+	String get confirmBeforeGenerationDesc => '到期时生成待确认交易，需手动确认后记账';
+
+	/// zh: '待确认交易'
+	String get pendingTitle => '待确认交易';
+
+	/// zh: '$count 笔待确认'
+	String pendingCount({required Object count}) => '${count} 笔待确认';
+
+	/// zh: '确认'
+	String get confirm => '确认';
+
+	/// zh: '跳过'
+	String get skip => '跳过';
+
+	/// zh: '无待确认交易'
+	String get noPending => '无待确认交易';
+
+	/// zh: '已确认记账'
+	String get confirmSuccess => '已确认记账';
+
+	/// zh: '已跳过'
+	String get skipSuccess => '已跳过';
 }
 
 // Path: chat.tools
@@ -5006,6 +5033,15 @@ extension on Translations {
 			'forecast.recurringTransaction.dynamicAmount' => '动态均值',
 			'forecast.recurringTransaction.dynamicAmountTitle' => '金额需手动确认',
 			'forecast.recurringTransaction.dynamicAmountDescription' => '系统将在账单日发送提醒，需要您手动确认具体金额后才会记账。',
+			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前需确认',
+			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期时生成待确认交易，需手动确认后记账',
+			'forecast.recurringTransaction.pendingTitle' => '待确认交易',
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 笔待确认',
+			'forecast.recurringTransaction.confirm' => '确认',
+			'forecast.recurringTransaction.skip' => '跳过',
+			'forecast.recurringTransaction.noPending' => '无待确认交易',
+			'forecast.recurringTransaction.confirmSuccess' => '已确认记账',
+			'forecast.recurringTransaction.skipSuccess' => '已跳过',
 			'chat.newChat' => '新聊天',
 			'chat.noMessages' => '没有消息可显示。',
 			'chat.loadingFailed' => '加载失败',
@@ -5059,6 +5095,8 @@ extension on Translations {
 			'chat.tools.done.querySpaceSummary' => '空间摘要查询完成',
 			'chat.tools.done.prepareTransfer' => '转账准备完成',
 			'chat.tools.done.unknown' => '处理完成',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.analyzeFinance' => '財務分析完成',
 			'chat.tools.done.forecastFinance' => '財務預測完成',
 			'chat.tools.done.analyzeBudget' => '預算分析完成',
@@ -5068,8 +5106,6 @@ extension on Translations {
 			'chat.tools.done.prepareBudgetSimulation' => '预算模拟准备完成',
 			'chat.tools.done.simulateBudget' => '预算模拟完成',
 			'chat.tools.failed.unknown' => '操作失败',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.cancelled' => '已取消',
 			'chat.tools.analyzeFinance' => '正在分析財務狀況...',
 			'chat.tools.forecastFinance' => '正在預測財務趨勢...',
@@ -5573,6 +5609,8 @@ extension on Translations {
 			'sharedSpace.notificationCard.reject' => '拒绝',
 			'sharedSpace.notificationCard.unknownTime' => '未知时间',
 			'sharedSpace.notificationCard.justNow' => '刚刚',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.spaceCard.noDescription' => '暂无描述',
 			'sharedSpace.spaceCard.creator' => '创建者',
 			'sharedSpace.spaceCard.member' => '成员',
@@ -5582,8 +5620,6 @@ extension on Translations {
 			'sharedSpace.settings.spaceInfo' => '空间信息',
 			'sharedSpace.settings.nameLabel' => '空间名称',
 			'sharedSpace.settings.descLabel' => '空间描述',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.settings.save' => '保存',
 			'sharedSpace.settings.saved' => '保存成功',
 			'sharedSpace.settings.saveFailed' => '保存失败',

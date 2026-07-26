@@ -18,6 +18,7 @@ class NotificationType(StrEnum):
     BILL_COMMENT = "bill_comment"
     BUDGET_ALERT = "budget_alert"
     TRANSACTION = "transaction"
+    RECURRING_PENDING = "recurring_pending"
 
 
 class NotificationResponse(BaseModel):
