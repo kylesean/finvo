@@ -34,8 +34,8 @@ async def process_due_transactions() -> None:
 
     async with get_session_context() as db:
         try:
-            today = date.today()
-            # Use UTC-aware boundaries to match the TIMESTAMP WITH TIME ZONE column
+            # Use UTC date to stay consistent with tz-aware columns
+            today = datetime.now(UTC).date()
             today_start = datetime.combine(today, dt_time.min, tzinfo=UTC)
             today_end = datetime.combine(today, dt_time.max, tzinfo=UTC)
 
@@ -158,7 +158,7 @@ async def _create_transaction_from_recurring(
         category_key=recurring_tx.category_key,
         description=recurring_tx.description,
         raw_input=f"[自动生成] {recurring_tx.description or '周期交易'}",
-        transaction_at=utc_now(),
+        transaction_at=recurring_tx.next_execution_at or utc_now(),
         transaction_timezone=recurring_tx.timezone,
         source_account_id=recurring_tx.source_account_id,
         target_account_id=recurring_tx.target_account_id,
