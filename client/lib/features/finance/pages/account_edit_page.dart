@@ -90,7 +90,11 @@ class _FinancialAccountEditPageState
         ),
         actions: [
           IconButton(
-            icon: Icon(FLucideIcons.trash, color: colors.destructive),
+            icon: Icon(
+              FLucideIcons.trash2,
+              size: 20,
+              color: colors.mutedForeground,
+            ),
             onPressed: _handleDelete,
           ),
         ],
