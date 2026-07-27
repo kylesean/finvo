@@ -85,6 +85,13 @@ def upgrade() -> None:
         sa.Column("subject", sa.String(20), nullable=False, server_default="SELF"),
         sa.Column("intent", sa.String(20), nullable=False, server_default="SURVIVAL"),
         sa.Column("source_thread_id", postgresql.UUID(as_uuid=True), nullable=True),
+        # FK linking generated transactions back to their recurring rule (idempotency)
+        sa.Column(
+            "recurring_transaction_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("recurring_transactions.id", ondelete="SET NULL"),
+            nullable=True,
+        ),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -106,6 +113,9 @@ def upgrade() -> None:
     op.create_index("ix_transactions_source_thread_id", "transactions", ["source_thread_id"])
     op.create_index("ix_transactions_source_account_id", "transactions", ["source_account_id"])
     op.create_index("ix_transactions_target_account_id", "transactions", ["target_account_id"])
+    op.create_index("ix_transactions_recurring_id", "transactions", ["recurring_transaction_id"])
+    # Composite index for efficient range-based spending queries
+    op.create_index("ix_transactions_user_at", "transactions", ["user_uuid", "transaction_at"])
 
     # =========================================================================
     # transaction_comments - Comments on transactions (matches TransactionComment model)
@@ -264,10 +274,13 @@ def upgrade() -> None:
 
     op.create_index("ix_recurring_transactions_user_uuid", "recurring_transactions", ["user_uuid"])
     op.create_index("ix_recurring_transactions_active", "recurring_transactions", ["is_active"])
+    # Index for daily job query: WHERE is_active AND next_execution_at BETWEEN ...
+    op.create_index("ix_recurring_next_execution", "recurring_transactions", ["next_execution_at"])
 
 
 def downgrade() -> None:
     """Drop transactions and related tables."""
+    op.drop_index("ix_recurring_next_execution", table_name="recurring_transactions")
     op.drop_index("ix_recurring_transactions_active")
     op.drop_index("ix_recurring_transactions_user_uuid")
     op.drop_table("recurring_transactions")
@@ -281,6 +294,8 @@ def downgrade() -> None:
     op.drop_index("ix_transaction_comments_transaction_id")
     op.drop_table("transaction_comments")
 
+    op.drop_index("ix_transactions_user_at")
+    op.drop_index("ix_transactions_recurring_id")
     op.drop_index("ix_transactions_target_account_id")
     op.drop_index("ix_transactions_source_account_id")
     op.drop_index("ix_transactions_source_thread_id")
