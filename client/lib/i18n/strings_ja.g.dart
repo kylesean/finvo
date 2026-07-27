@@ -1720,6 +1720,8 @@ class _Translations$notification$semantic$ja extends Translations$notification$s
 	@override String newTransaction({required Object name}) => '${name} さんが新しい支出を記録しました';
 	@override String newTransactionDetail({required Object amount, required Object space}) => '${amount}、「${space}」より';
 	@override String memberLeft({required Object name}) => '${name} さんがスペースを退出しました';
+	@override String get recurringPending => '定期取引の確認待ち';
+	@override String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}、確認待ちです';
 }
 
 // Path: chat.tools.done
@@ -3435,6 +3437,8 @@ extension on TranslationsJa {
 			'notification.semantic.newTransaction' => ({required Object name}) => '${name} さんが新しい支出を記録しました',
 			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount}、「${space}」より',
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name} さんがスペースを退出しました',
+			'notification.semantic.recurringPending' => '定期取引の確認待ち',
+			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}、確認待ちです',
 			_ => null,
 		};
 	}

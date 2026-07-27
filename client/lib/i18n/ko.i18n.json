@@ -1351,7 +1351,9 @@
       "welcome": "\"${space}\"에 오신 것을 환영합니다",
       "newTransaction": "${name}님이 새 지출을 기록했습니다",
       "newTransactionDetail": "${amount}, \"${space}\"에서",
-      "memberLeft": "${name}님이 공간에서 나갔습니다"
+      "memberLeft": "${name}님이 공간에서 나갔습니다",
+      "recurringPending": "정기 거래 확인 대기",
+      "recurringPendingDetail": "${description} ${amount}, 확인을 기다리고 있습니다"
     }
   }
 }

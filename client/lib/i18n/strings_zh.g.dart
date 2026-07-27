@@ -3555,6 +3555,12 @@ class Translations$notification$semantic$zh {
 
 	/// zh: '${name} 离开了空间'
 	String memberLeft({required Object name}) => '${name} 离开了空间';
+
+	/// zh: '周期交易待确认'
+	String get recurringPending => '周期交易待确认';
+
+	/// zh: '${description} ${amount}，等待您确认记账'
+	String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}，等待您确认记账';
 }
 
 // Path: chat.tools.done
@@ -5718,6 +5724,8 @@ extension on Translations {
 			'notification.semantic.newTransaction' => ({required Object name}) => '${name} 记录了一笔新账单',
 			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount}，来自「${space}」',
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name} 离开了空间',
+			'notification.semantic.recurringPending' => '周期交易待确认',
+			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}，等待您确认记账',
 			_ => null,
 		};
 	}

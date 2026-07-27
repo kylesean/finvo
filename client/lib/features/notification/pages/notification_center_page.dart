@@ -326,6 +326,7 @@ class _NotificationTile extends StatelessWidget {
         username.isNotEmpty
             ? t.notification.semantic.memberLeft(name: username)
             : item.title,
+      'recurring_pending' => t.notification.semantic.recurringPending,
       _ => item.title,
     };
   }
@@ -335,6 +336,7 @@ class _NotificationTile extends StatelessWidget {
     final spaceName = (data?['space_name'] ?? '').toString();
     final amount = (data?['amount'] ?? '').toString();
     final currency = (data?['currency'] ?? '').toString();
+    final description = (data?['description'] ?? '').toString();
 
     return switch (item.type) {
       'member_joined' =>
@@ -348,6 +350,10 @@ class _NotificationTile extends StatelessWidget {
                 space: spaceName,
               )
             : item.message,
+      'recurring_pending' => t.notification.semantic.recurringPendingDetail(
+        description: description,
+        amount: '$currency $amount',
+      ),
       _ => item.message,
     };
   }
