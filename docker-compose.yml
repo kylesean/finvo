@@ -44,7 +44,7 @@ services:
 
   # Single API service with dynamic environment
   app:
-    image: Finvo-api:${APP_ENV:-development}
+    image: finvo-api:${APP_ENV:-development}
     build:
       context: ./server
       args:

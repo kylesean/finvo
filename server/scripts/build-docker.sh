@@ -66,6 +66,6 @@ echo "API keys: ******** (masked for security)"
 # Build the Docker image
 docker build \
     --build-arg APP_ENV="$ENV" \
-    -t Finvo-api:"$ENV" .
+    -t finvo-api:"$ENV" .
 
-echo "Docker image Finvo-api:$ENV built successfully"
+echo "Docker image finvo-api:$ENV built successfully"
