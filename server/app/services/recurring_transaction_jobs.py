@@ -5,7 +5,7 @@ recurring transactions. These functions are called by the
 scheduler service.
 """
 
-from datetime import UTC, date, datetime, time as dt_time
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any, cast as type_cast
 from uuid import uuid4
@@ -27,27 +27,23 @@ async def process_due_transactions() -> None:
     """Process all recurring transactions due today.
 
     This job runs daily and creates actual transaction records
-    for any recurring transactions scheduled for today.
-    Uses UTC-aware datetimes to match the tz-aware next_execution_at column.
+    for any recurring transactions whose next_execution_at has arrived.
+    Uses exact next_execution_at matching for idempotency — timezone-independent.
     """
     logger.info("processing_due_recurring_transactions_started")
 
     async with get_session_context() as db:
         try:
-            # Use UTC date to stay consistent with tz-aware columns
-            today = datetime.now(UTC).date()
-            today_start = datetime.combine(today, dt_time.min, tzinfo=UTC)
-            today_end = datetime.combine(today, dt_time.max, tzinfo=UTC)
+            now = datetime.now(UTC)
 
-            # Find all active recurring transactions due today
+            # Find all active recurring transactions whose next_execution_at <= now
             query = select(RecurringTransaction).where(
                 type_cast(
                     Any,
                     and_(
                         type_cast(Any, RecurringTransaction.is_active) == True,  # noqa: E712
                         type_cast(Any, RecurringTransaction.next_execution_at) != None,  # noqa: E711
-                        type_cast(Any, RecurringTransaction.next_execution_at) >= today_start,
-                        type_cast(Any, RecurringTransaction.next_execution_at) <= today_end,
+                        type_cast(Any, RecurringTransaction.next_execution_at) <= now,
                     ),
                 )
             )
@@ -61,8 +57,8 @@ async def process_due_transactions() -> None:
 
             for recurring_tx in due_transactions:
                 try:
-                    # Idempotency: skip if already generated today
-                    if await _already_generated_today(db, recurring_tx, today):
+                    # Idempotency: skip if already generated for this exact execution point
+                    if await _already_generated(db, recurring_tx):
                         skipped_count += 1
                         # Still advance the schedule
                         await _update_next_execution(db, recurring_tx)
@@ -97,25 +93,25 @@ async def process_due_transactions() -> None:
             await db.rollback()
 
 
-async def _already_generated_today(
+async def _already_generated(
     db: AsyncSession,
     recurring_tx: RecurringTransaction,
-    today: date,
 ) -> bool:
-    """Check if a transaction was already generated for this rule today.
+    """Check if a transaction was already generated for this exact next_execution_at.
 
-    Provides idempotency protection against misfire retries or multi-worker races.
+    Uses precise timestamp matching (not date-range) so it is fully
+    timezone-independent: the same next_execution_at value will never
+    produce duplicate transactions regardless of server timezone.
     """
-    today_start = datetime.combine(today, dt_time.min, tzinfo=UTC)
-    today_end = datetime.combine(today, dt_time.max, tzinfo=UTC)
+    if recurring_tx.next_execution_at is None:
+        return False
 
     query = select(func.count()).where(
         type_cast(
             Any,
             and_(
                 type_cast(Any, Transaction.recurring_transaction_id) == recurring_tx.id,
-                type_cast(Any, Transaction.transaction_at) >= today_start,
-                type_cast(Any, Transaction.transaction_at) <= today_end,
+                type_cast(Any, Transaction.transaction_at) == recurring_tx.next_execution_at,
             ),
         )
     )

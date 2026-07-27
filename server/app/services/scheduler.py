@@ -16,6 +16,7 @@ Usage:
 """
 
 from abc import ABC, abstractmethod
+from datetime import UTC
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -75,11 +76,12 @@ class AppScheduler:
             return
 
         self._scheduler = AsyncIOScheduler(
+            timezone=UTC,
             job_defaults={
                 "coalesce": True,
                 "max_instances": 1,
                 "misfire_grace_time": 3600,
-            }
+            },
         )
 
         # Add all registered jobs
