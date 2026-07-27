@@ -104,6 +104,16 @@ async def main() -> None:
                 # Convert to dict
                 result_dict = result.to_dict()
 
+            # Check for insufficient data scenario:
+            # No balance + no recurring events + no historical spending = new/empty user
+            first_day_events = result.data_points[0].events if result.data_points else []
+            has_meaningful_data = (
+                result.current_balance != Decimal("0")
+                or len(first_day_events) > 1  # more than just default daily spending
+                or result.summary.total_recurring_income > Decimal("0")
+                or result.summary.total_recurring_expense > Decimal("0")
+            )
+
             # Output with GenUI signal
             # Note: No aiInsight - LLM generates insights in user's language
             output = {
@@ -115,10 +125,31 @@ async def main() -> None:
                 **result_dict,
             }
 
+            # Add guidance for empty/new user scenario
+            if not has_meaningful_data:
+                output["data_quality"] = "insufficient"
+                output["guidance"] = (
+                    "当前账户没有足够的财务数据来生成有意义的预测。"
+                    "建议用户先添加账户余额或记录一些交易后，再使用预测功能。"
+                )
+
             print(json.dumps(output, ensure_ascii=False, indent=2, default=json_serializer))
 
     except Exception as e:
-        print(json.dumps({"success": False, "error": str(e)}, ensure_ascii=False))
+        error_msg = str(e)
+        # Provide structured error info to help LLM understand the failure
+        print(
+            json.dumps(
+                {
+                    "success": False,
+                    "error": error_msg,
+                    "error_type": type(e).__name__,
+                    "retryable": False,
+                    "suggestion": "此错误为确定性错误，重试不会产生不同结果。请根据错误信息向用户解释情况。",
+                },
+                ensure_ascii=False,
+            )
+        )
         sys.exit(1)
 
 

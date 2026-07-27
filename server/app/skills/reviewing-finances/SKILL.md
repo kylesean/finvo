@@ -62,3 +62,4 @@ uv run python app/skills/reviewing-finances/scripts/analyze_cashflow.py --days 9
 4. Do NOT create budgets — guide user to app budget module
 5. Execute scripts directly without `cd`, `&&`, or pipe operators
 6. If user asks both spending + health, run both scripts
+7. Run each script at most once per user request. If it fails or returns empty data, explain the situation to the user.

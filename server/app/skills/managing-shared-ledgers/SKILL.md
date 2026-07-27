@@ -56,3 +56,4 @@ echo '{"space_id": "uuid-string"}' | uv run python app/skills/managing-shared-le
 4. For transfers → executing-transfers skill
 5. For recording → use `record_transactions` tool with space context
 6. Execute scripts directly without `cd`, `&&`, or pipe operators
+7. Run each script at most once per user request. If it fails, explain the error to the user.

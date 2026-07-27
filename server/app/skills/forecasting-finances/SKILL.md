@@ -52,3 +52,5 @@ uv run python app/skills/forecasting-finances/scripts/forecast_balance.py --simu
 3. Highlight low balance warnings prominently
 4. Do NOT create budgets — guide user to app budget module
 5. Execute scripts directly without `cd`, `&&`, or pipe operators
+6. If the script output contains `"data_quality": "insufficient"`, inform the user that forecasting requires some financial data (accounts or transactions) and suggest they add some first.
+7. Run each script at most once per user request. If it fails, explain the error to the user — do not retry the same command.
