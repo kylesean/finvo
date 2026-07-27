@@ -154,6 +154,15 @@ def execute_tool(command: str) -> Any:
             has_last_brace=last_brace != -1,
         )
 
+    # Log script failures for observability (LLM decides retry based on error content)
+    if response.exit_code != 0:
+        logger.warning(
+            "execute_tool_script_failed",
+            command=command[:100],
+            exit_code=response.exit_code,
+            error_preview=(result_data.get("error", "") or output[:200]),
+        )
+
     return result_data
 
 
