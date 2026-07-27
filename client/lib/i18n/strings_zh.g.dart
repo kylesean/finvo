@@ -1860,6 +1860,9 @@ class Translations$financial$zh {
 	/// zh: '日常消费预估已保存'
 	String get dailyBurnRateSaved => '日常消费预估已保存';
 
+	/// zh: '天'
+	String get dayUnit => '天';
+
 	/// zh: '保存失败'
 	String get saveFailed => '保存失败';
 }
@@ -2944,11 +2947,11 @@ class Translations$sharedSpace$list$zh {
 
 	// Translations
 
-	/// zh: '共同记账从未如此简单'
-	String get emptyTitle => '共同记账从未如此简单';
+	/// zh: '开启多方协同的财务空间'
+	String get emptyTitle => '开启多方协同的财务空间';
 
-	/// zh: '创建一个共享空间，与伙伴或朋友轻松同步共同债务和支出'
-	String get emptySubtitle => '创建一个共享空间，与伙伴或朋友轻松同步共同债务和支出';
+	/// zh: '创建或加入共享空间，与家人、伴侣或团队协同管理共享账目与资产'
+	String get emptySubtitle => '创建或加入共享空间，与家人、伴侣或团队协同管理共享账目与资产';
 
 	/// zh: '开始使用'
 	String get getStarted => '开始使用';
@@ -5457,6 +5460,7 @@ extension on Translations {
 			'financial.dailyBurnRateSettings' => '日常消费预估',
 			'financial.setDailyBurnRate' => '设置您的日常消费预估金额',
 			'financial.dailyBurnRateSaved' => '日常消费预估已保存',
+			'financial.dayUnit' => '天',
 			'financial.saveFailed' => '保存失败',
 			'app.splashTitle' => '智见增长，格物致富。',
 			'app.splashSubtitle' => '智能财务助手',
@@ -5556,8 +5560,8 @@ extension on Translations {
 			'sharedSpace.join.codeRequired' => '请输入邀请码',
 			'sharedSpace.join.codeInvalid' => '邀请码格式无效',
 			'sharedSpace.join.codeFormat' => '邀请码只能包含字母和数字',
-			'sharedSpace.list.emptyTitle' => '共同记账从未如此简单',
-			'sharedSpace.list.emptySubtitle' => '创建一个共享空间，与伙伴或朋友轻松同步共同债务和支出',
+			'sharedSpace.list.emptyTitle' => '开启多方协同的财务空间',
+			'sharedSpace.list.emptySubtitle' => '创建或加入共享空间，与家人、伴侣或团队协同管理共享账目与资产',
 			'sharedSpace.list.getStarted' => '开始使用',
 			'sharedSpace.list.hasInviteCode' => '有邀请码？点击加入',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '成功加入「${name}」！',

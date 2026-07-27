@@ -836,6 +836,7 @@ class _Translations$financial$en extends Translations$financial$zh {
 	@override String get dailyBurnRateSettings => 'Daily Burn Rate';
 	@override String get setDailyBurnRate => 'Set your estimated daily spending';
 	@override String get dailyBurnRateSaved => 'Daily burn rate saved';
+	@override String get dayUnit => 'day';
 	@override String get saveFailed => 'Save failed';
 }
 
@@ -1420,8 +1421,8 @@ class _Translations$sharedSpace$list$en extends Translations$sharedSpace$list$zh
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get emptyTitle => 'Managing joint expenses never been easier';
-	@override String get emptySubtitle => 'Create a shared space and easily sync joint\ndebts and expenses with partners or friends';
+	@override String get emptyTitle => 'Start Collaborative Financial Spaces';
+	@override String get emptySubtitle => 'Create or join a space to manage shared accounts and assets with family, partners, or teams';
 	@override String get getStarted => 'Get Started';
 	@override String get hasInviteCode => 'Have an invite code? Tap to join';
 	@override String joinedSuccess({required Object name}) => 'Successfully joined "${name}"!';
@@ -3170,6 +3171,7 @@ extension on TranslationsEn {
 			'financial.dailyBurnRateSettings' => 'Daily Burn Rate',
 			'financial.setDailyBurnRate' => 'Set your estimated daily spending',
 			'financial.dailyBurnRateSaved' => 'Daily burn rate saved',
+			'financial.dayUnit' => 'day',
 			'financial.saveFailed' => 'Save failed',
 			'app.splashTitle' => 'Augo: Intelligence that Grows.',
 			'app.splashSubtitle' => 'Smart Financial Assistant',
@@ -3269,8 +3271,8 @@ extension on TranslationsEn {
 			'sharedSpace.join.codeRequired' => 'Please enter invite code',
 			'sharedSpace.join.codeInvalid' => 'Invalid invite code format',
 			'sharedSpace.join.codeFormat' => 'Invite code can only contain letters and numbers',
-			'sharedSpace.list.emptyTitle' => 'Managing joint expenses never been easier',
-			'sharedSpace.list.emptySubtitle' => 'Create a shared space and easily sync joint\ndebts and expenses with partners or friends',
+			'sharedSpace.list.emptyTitle' => 'Start Collaborative Financial Spaces',
+			'sharedSpace.list.emptySubtitle' => 'Create or join a space to manage shared accounts and assets with family, partners, or teams',
 			'sharedSpace.list.getStarted' => 'Get Started',
 			'sharedSpace.list.hasInviteCode' => 'Have an invite code? Tap to join',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => 'Successfully joined "${name}"!',

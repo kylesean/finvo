@@ -175,3 +175,62 @@ async def test_update_period_status(db_session):
     # 4. Verify Status
     assert updated_period.spent_amount == Decimal("150.0")
     assert updated_period.status == BudgetPeriodStatus.EXCEEDED.value
+
+
+@pytest.mark.asyncio
+async def test_rebalance_with_status(db_session):
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid, username="rebalance_user", email="reb@example.com", password="hash", registration_type="email"
+    )
+    db_session.add(user)
+    await db_session.commit()
+
+    service = BudgetService(db_session)
+    b1 = await service.create_budget(
+        user_uuid,
+        BudgetCreateRequest(name="Category A", amount=1000.0, scope="CATEGORY", category_key="FOOD"),
+    )
+    b2 = await service.create_budget(
+        user_uuid,
+        BudgetCreateRequest(name="Category B", amount=500.0, scope="CATEGORY", category_key="TRANSPORT"),
+    )
+
+    # Test insufficient funds
+    status_insufficient = await service.rebalance_with_status(b1.id, b2.id, Decimal("1500.0"), user_uuid)
+    assert status_insufficient == "INSUFFICIENT_FUNDS"
+
+    # Test valid transfer
+    status_success = await service.rebalance_with_status(b1.id, b2.id, Decimal("300.0"), user_uuid)
+    assert status_success == "SUCCESS"
+
+    await db_session.refresh(b1)
+    await db_session.refresh(b2)
+    assert b1.amount == Decimal("700.0")
+    assert b2.amount == Decimal("800.0")
+
+
+@pytest.mark.asyncio
+async def test_budget_summary_deduplication(db_session):
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid, username="summary_user", email="sum@example.com", password="hash", registration_type="email"
+    )
+    db_session.add(user)
+    await db_session.commit()
+
+    service = BudgetService(db_session)
+    # Create total budget (5000) and category budget (1000)
+    await service.create_budget(
+        user_uuid,
+        BudgetCreateRequest(name="Total", amount=5000.0, scope="TOTAL"),
+    )
+    await service.create_budget(
+        user_uuid,
+        BudgetCreateRequest(name="Food", amount=1000.0, scope="CATEGORY", category_key="FOOD"),
+    )
+
+    summary = await service.get_budget_summary(user_uuid)
+    assert summary.total_budget is not None
+    assert summary.overall_spent == "0"
+    assert summary.overall_remaining == "5000"

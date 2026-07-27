@@ -836,6 +836,7 @@ class _Translations$financial$ja extends Translations$financial$zh {
 	@override String get dailyBurnRateSettings => '支出見積もり';
 	@override String get setDailyBurnRate => '1日の支出見積もりを設定';
 	@override String get dailyBurnRateSaved => '支出見積もりを保存しました';
+	@override String get dayUnit => '日';
 	@override String get saveFailed => '保存失敗';
 }
 
@@ -1405,8 +1406,8 @@ class _Translations$sharedSpace$list$ja extends Translations$sharedSpace$list$zh
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get emptyTitle => '共同支出の管理がこんなに簡単に';
-	@override String get emptySubtitle => '共有スペースを作成して、パートナーや友達と\n共同の支出を簡単に同期しましょう';
+	@override String get emptyTitle => '共同財務スペースを開始';
+	@override String get emptySubtitle => '共有スペースを作成・参加し、家族、パートナー、チームと共同の口座や資産を管理';
 	@override String get getStarted => '始める';
 	@override String get hasInviteCode => '招待コードをお持ちですか？タップして参加';
 	@override String joinedSuccess({required Object name}) => '「${name}」に参加しました！';
@@ -3170,6 +3171,7 @@ extension on TranslationsJa {
 			'financial.dailyBurnRateSettings' => '支出見積もり',
 			'financial.setDailyBurnRate' => '1日の支出見積もりを設定',
 			'financial.dailyBurnRateSaved' => '支出見積もりを保存しました',
+			'financial.dayUnit' => '日',
 			'financial.saveFailed' => '保存失敗',
 			'app.splashTitle' => 'スマートに、豊かに。',
 			'app.splashSubtitle' => 'インテリジェント財務アシスタント',
@@ -3241,8 +3243,8 @@ extension on TranslationsJa {
 			'sharedSpace.join.codeRequired' => '招待コードを入力してください',
 			'sharedSpace.join.codeInvalid' => '招待コードの形式が無効です',
 			'sharedSpace.join.codeFormat' => '招待コードは英数字のみ使用できます',
-			'sharedSpace.list.emptyTitle' => '共同支出の管理がこんなに簡単に',
-			'sharedSpace.list.emptySubtitle' => '共有スペースを作成して、パートナーや友達と\n共同の支出を簡単に同期しましょう',
+			'sharedSpace.list.emptyTitle' => '共同財務スペースを開始',
+			'sharedSpace.list.emptySubtitle' => '共有スペースを作成・参加し、家族、パートナー、チームと共同の口座や資産を管理',
 			'sharedSpace.list.getStarted' => '始める',
 			'sharedSpace.list.hasInviteCode' => '招待コードをお持ちですか？タップして参加',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '「${name}」に参加しました！',

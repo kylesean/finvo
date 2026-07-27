@@ -265,10 +265,18 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
             buffer.write(sortedDays.map((w) => '周${w.zhLabel}').join('、'));
           }
         case RecurrenceFrequency.monthly:
-          if (_interval == 1) {
-            buffer.write('每月 $_monthDay 号');
+          if (_monthDay == -1) {
+            if (_interval == 1) {
+              buffer.write('每月最后一天');
+            } else {
+              buffer.write('每 $_interval 个月的最后一天');
+            }
           } else {
-            buffer.write('每 $_interval 个月的 $_monthDay 号');
+            if (_interval == 1) {
+              buffer.write('每月 $_monthDay 号');
+            } else {
+              buffer.write('每 $_interval 个月的 $_monthDay 号');
+            }
           }
         case RecurrenceFrequency.yearly:
           if (_interval == 1) {
@@ -300,11 +308,21 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
             buffer.write(sortedDays.map((w) => w.label).join(', '));
           }
         case RecurrenceFrequency.monthly:
-          final daySuffix = _getDaySuffix(_monthDay);
-          if (_interval == 1) {
-            buffer.write('Monthly on the $_monthDay$daySuffix');
+          if (_monthDay == -1) {
+            if (_interval == 1) {
+              buffer.write('Monthly on the last day');
+            } else {
+              buffer.write('Every $_interval months on the last day');
+            }
           } else {
-            buffer.write('Every $_interval months on the $_monthDay$daySuffix');
+            final daySuffix = _getDaySuffix(_monthDay);
+            if (_interval == 1) {
+              buffer.write('Monthly on the $_monthDay$daySuffix');
+            } else {
+              buffer.write(
+                'Every $_interval months on the $_monthDay$daySuffix',
+              );
+            }
           }
         case RecurrenceFrequency.yearly:
           if (_interval == 1) {
@@ -584,30 +602,70 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// Month day info (read-only, derived from start date)
+  /// Month day info (derived from start date or fixed last day)
   Widget _buildMonthDayInfo(FThemeData theme, FColors colors) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(FLucideIcons.calendarDays, size: 20, color: colors.primary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              isZh
-                  ? '将在每月 ${_startDate.day} 号执行（基于开始日期）'
-                  : 'Will execute on the ${_startDate.day}${_getDaySuffix(_startDate.day)} of each month (based on start date)',
-              style: theme.typography.body.sm.copyWith(
-                color: colors.foreground,
-              ),
-            ),
+    final isLastDaySelected = _monthDay == -1;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
           ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    FLucideIcons.calendarDays,
+                    size: 20,
+                    color: colors.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      isLastDaySelected
+                          ? (isZh
+                                ? '将在每月最后一天执行'
+                                : 'Will execute on the last day of each month')
+                          : (isZh
+                                ? '将在每月 ${_startDate.day} 号执行（短月份自动对齐月末）'
+                                : 'Will execute on the ${_startDate.day}${_getDaySuffix(_startDate.day)} of each month (clamped for short months)'),
+                      style: theme.typography.body.sm.copyWith(
+                        color: colors.foreground,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isZh ? '固定在每月最后一天' : 'Always execute on last day',
+                    style: theme.typography.body.xs.copyWith(
+                      color: colors.mutedForeground,
+                    ),
+                  ),
+                  FSwitch(
+                    value: isLastDaySelected,
+                    onChange: (value) {
+                      setState(() {
+                        _monthDay = value ? -1 : _startDate.day;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

@@ -6,9 +6,9 @@ endpoints like authentication and chatbot functionality.
 
 from fastapi import APIRouter
 
-from app.api.budget import router as budget_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.avatar import router as avatar_router
+from app.api.v1.budget import router as budget_router
 from app.api.v1.chatbot import router as chatbot_router
 from app.api.v1.exchange_rate import router as exchange_rate_router
 from app.api.v1.financial_settings import router as financial_settings_router

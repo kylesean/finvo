@@ -44,6 +44,15 @@ def validate_recurrence_rule(v: str) -> str:
     if freq_part not in valid_freqs:
         raise ValueError(f"Invalid frequency: {freq_part}. Must be one of {valid_freqs}")
 
+    # Validate parseability with rrulestr
+    from dateutil.rrule import rrulestr
+
+    try:
+        rule_str = rule if rule.startswith("RRULE:") else f"RRULE:{rule}"
+        rrulestr(rule_str, dtstart=datetime.now(UTC))
+    except Exception as e:
+        raise ValueError(f"Invalid recurrence rule string: {e}")
+
     return rule
 
 
@@ -142,41 +151,66 @@ class RecurringTransactionService:
         Returns:
             下次执行的 datetime (UTC)，如果无法计算则返回 None
         """
-        from datetime import (
-            datetime as dt,
-        )
+        import calendar
+        import re
+        from datetime import date as d_cls, datetime as dt
 
         from dateutil.rrule import rrulestr
 
         try:
             # 使用 UTC 时区，与 RRULE 中的 UNTIL 保持一致
             dtstart = dt.combine(start_date, dt.min.time(), tzinfo=UTC)
-            rrule = rrulestr(rrule_str, dtstart=dtstart)
+            rule_formatted = rrule_str if rrule_str.startswith("RRULE:") else f"RRULE:{rrule_str}"
+            rrule = rrulestr(rule_formatted, dtstart=dtstart)
 
             now = dt.now(UTC)
             exception_set = set(exception_dates or [])
 
-            iterations = 0
-            for occurrence in rrule:
-                iterations += 1
-                if iterations > _MAX_RRULE_ITERATIONS:
-                    logger.warning(
-                        "rrule_iteration_limit_reached",
-                        rrule=rrule_str,
-                        limit=_MAX_RRULE_ITERATIONS,
-                    )
-                    return None
-                # 跳过过去的日期
-                if occurrence <= now:
-                    continue
-                # 跳过排除日期
-                if occurrence.date().isoformat() in exception_set:
-                    continue
-                # 检查是否超过结束日期
-                if end_date and occurrence.date() > end_date:
-                    return None
-                return occurrence
-            return None
+            # 从当前时间节点向下索引，避免历史起点的无限循环迭代
+            next_occ = rrule.after(now, inc=False)
+
+            # 月末对齐对策 (Month-End Alignment):
+            # 若 FREQ=MONTHLY 且指定了 BYMONTHDAY (例如 29, 30, 31)，
+            # dateutil 会自动跳过天数不足的月份（如2月没有31日）。
+            # 这里检查当月及后续月份是否存在因天数不足而产生的“月末最后一日”备选。
+            if "FREQ=MONTHLY" in rrule_str.upper() and "BYMONTHDAY=" in rrule_str.upper():
+                match = re.search(r"BYMONTHDAY=(-?\d+)", rrule_str.upper())
+                if match:
+                    target_day = int(match.group(1))
+                    if target_day > 28:
+                        cur_year = now.year
+                        cur_month = now.month
+                        for _ in range(12):
+                            max_days = calendar.monthrange(cur_year, cur_month)[1]
+                            clamped_day = min(target_day, max_days)
+                            cand_date = d_cls(cur_year, cur_month, clamped_day)
+                            cand_dt = dt.combine(cand_date, dt.min.time(), tzinfo=UTC)
+
+                            if cand_dt > now and cand_date >= start_date:
+                                if end_date and cand_date > end_date:
+                                    break
+                                if cand_date.isoformat() not in exception_set:
+                                    if next_occ is None or cand_dt < next_occ:
+                                        next_occ = cand_dt
+                                    break
+
+                            if cur_month == 12:
+                                cur_year += 1
+                                cur_month = 1
+                            else:
+                                cur_month += 1
+
+            if next_occ is None:
+                return None
+
+            if end_date and next_occ.date() > end_date:
+                return None
+
+            if next_occ.date().isoformat() in exception_set:
+                # 排除日跳过，递归查找下一个可用时间
+                return self._calculate_next_execution(rrule_str, next_occ.date(), end_date, exception_dates)
+
+            return next_occ
         except Exception as e:
             logger.warning(f"Failed to calculate next execution: {e}")
             return None

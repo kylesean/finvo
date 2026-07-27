@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
 import '../../profile/models/financial_account.dart';
 import '../../profile/providers/financial_account_provider.dart';
@@ -13,6 +14,7 @@ import '../../../shared/models/currency.dart';
 import 'account_edit_page.dart';
 import '../providers/financial_summary_provider.dart';
 import '../providers/account_view_currency_provider.dart';
+import '../../../shared/providers/exchange_rate_provider.dart';
 import '../../../shared/widgets/app_card.dart';
 import 'package:augo/i18n/strings.g.dart';
 import 'package:augo/shared/widgets/amount_text.dart';
@@ -581,6 +583,47 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                           color: colors.mutedForeground,
                         ),
                       ),
+                      if (!_hideAmounts) ...[
+                        Builder(
+                          builder: (context) {
+                            final viewCurrency = ref.watch(
+                              effectiveViewCurrencyProvider,
+                            );
+                            if (viewCurrency.toUpperCase() ==
+                                account.currencyCode.toUpperCase()) {
+                              return const SizedBox.shrink();
+                            }
+                            final rawBalance =
+                                account.currentBalance ??
+                                account.initialBalance;
+                            final ratesNotifier = ref.watch(
+                              exchangeRateProvider.notifier,
+                            );
+                            final converted = ratesNotifier.convert(
+                              rawBalance,
+                              account.currencyCode,
+                              viewCurrency,
+                            );
+                            if (converted == null) {
+                              return const SizedBox.shrink();
+                            }
+                            final symbol =
+                                Currency.fromCode(viewCurrency)?.symbol ?? '';
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(
+                                '≈ $symbol${converted.toDouble().toStringAsFixed(2)} $viewCurrency',
+                                style: theme.typography.body.xs.copyWith(
+                                  color: colors.mutedForeground.withValues(
+                                    alpha: 0.7,
+                                  ),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ],
                   ),
                   // const SizedBox(width: 8),
@@ -931,18 +974,55 @@ class _SafetyThresholdBottomSheetState
     extends ConsumerState<_SafetyThresholdBottomSheet> {
   double _currentValue = 1000.0;
   bool _hasInitialized = false;
+  bool _isUpdatingFromSlider = false;
+  late final TextEditingController _controller;
+
+  static const double _maxSliderLimit = 50000.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onSliderChanged(double val) {
+    _isUpdatingFromSlider = true;
+    setState(() {
+      _currentValue = val;
+      _controller.text = val.toStringAsFixed(0);
+    });
+    _isUpdatingFromSlider = false;
+  }
+
+  void _onTextChanged(String text) {
+    if (_isUpdatingFromSlider) return;
+    final parsed = double.tryParse(text) ?? 0.0;
+    setState(() {
+      _currentValue = math.max(0.0, parsed);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
     final colorScheme = theme.colors;
     final settingsState = ref.watch(financialSettingsProvider);
+    final primaryCurrency = settingsState.primaryCurrency;
+    final symbol = Currency.fromCode(primaryCurrency)?.symbol ?? '¥';
 
-    // Initialize from provider on first build
     if (!_hasInitialized && settingsState.safetyThreshold != null) {
       _currentValue = settingsState.effectiveSafetyThreshold.toDouble();
+      _controller.text = _currentValue.toStringAsFixed(0);
       _hasInitialized = true;
     }
+
+    final double sliderValue = _currentValue.clamp(0.0, _maxSliderLimit);
 
     return Container(
       decoration: BoxDecoration(
@@ -950,106 +1030,150 @@ class _SafetyThresholdBottomSheetState
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 32,
-              height: 4,
-              margin: const EdgeInsets.only(top: 12.0, bottom: 16.0),
-              decoration: BoxDecoration(
-                color: colorScheme.border.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(2),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 32,
+                height: 4,
+                margin: const EdgeInsets.only(top: 12.0, bottom: 16.0),
+                decoration: BoxDecoration(
+                  color: colorScheme.border.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
 
-            // Title area
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  Text(
-                    t.financial.safetyThresholdSettings,
-                    style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.foreground,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    t.financial.setSafetyThreshold,
-                    style: theme.typography.body.sm.copyWith(
-                      color: colorScheme.mutedForeground,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Content area
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  Text(
-                    '¥${_currentValue.toStringAsFixed(0)}',
-                    style: theme.typography.body.xl2.copyWith(
-                      color: theme.colors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  Slider(
-                    value: _currentValue,
-                    max: 10000.0,
-                    onChanged: settingsState.isLoading
-                        ? null
-                        : (value) {
-                            setState(() {
-                              _currentValue = value;
-                            });
-                          },
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Button area
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FButton(
-                          variant: .outline,
-                          onPress: () => Navigator.of(context).pop(),
-                          child: Text(t.common.cancel),
-                        ),
+              // Title area
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    Text(
+                      t.financial.safetyThresholdSettings,
+                      style: theme.typography.body.lg.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.foreground,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: FButton(
-                          onPress: settingsState.isLoading ? null : _handleSave,
-                          child: settingsState.isLoading
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(t.common.save),
-                        ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      t.financial.setSafetyThreshold,
+                      style: theme.typography.body.sm.copyWith(
+                        color: colorScheme.mutedForeground,
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 24),
+
+              // Minimal Underline Amount Input Area
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      symbol,
+                      style: theme.typography.body.lg.copyWith(
+                        color: theme.colors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 140,
+                      child: TextField(
+                        controller: _controller,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: false,
+                        ),
+                        textAlign: TextAlign.center,
+                        style: theme.typography.body.xl2.copyWith(
+                          color: colorScheme.foreground,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.only(bottom: 4),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: colorScheme.border,
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: theme.colors.primary,
+                              width: 2.0,
+                            ),
+                          ),
+                        ),
+                        onChanged: _onTextChanged,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Slider Area
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    Slider(
+                      value: sliderValue,
+                      min: 0.0,
+                      max: _maxSliderLimit,
+                      activeColor: theme.colors.primary,
+                      onChanged: settingsState.isLoading
+                          ? null
+                          : _onSliderChanged,
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Button area
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FButton(
+                            variant: .outline,
+                            onPress: () => Navigator.of(context).pop(),
+                            child: Text(t.common.cancel),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FButton(
+                            onPress: settingsState.isLoading
+                                ? null
+                                : _handleSave,
+                            child: settingsState.isLoading
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(t.common.save),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1088,18 +1212,55 @@ class _DailySpendingBottomSheetState
     extends ConsumerState<_DailySpendingBottomSheet> {
   double _currentValue = 100.0;
   bool _hasInitialized = false;
+  bool _isUpdatingFromSlider = false;
+  late final TextEditingController _controller;
+
+  static const double _maxSliderLimit = 2000.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onSliderChanged(double val) {
+    _isUpdatingFromSlider = true;
+    setState(() {
+      _currentValue = val;
+      _controller.text = val.toStringAsFixed(0);
+    });
+    _isUpdatingFromSlider = false;
+  }
+
+  void _onTextChanged(String text) {
+    if (_isUpdatingFromSlider) return;
+    final parsed = double.tryParse(text) ?? 0.0;
+    setState(() {
+      _currentValue = math.max(0.0, parsed);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
     final colors = theme.colors;
     final settingsState = ref.watch(financialSettingsProvider);
+    final primaryCurrency = settingsState.primaryCurrency;
+    final symbol = Currency.fromCode(primaryCurrency)?.symbol ?? '¥';
 
-    // Initialize from provider on first build
     if (!_hasInitialized && settingsState.dailyBurnRate != null) {
       _currentValue = settingsState.effectiveDailyBurnRate.toDouble();
+      _controller.text = _currentValue.toStringAsFixed(0);
       _hasInitialized = true;
     }
+
+    final double sliderValue = _currentValue.clamp(0.0, _maxSliderLimit);
 
     return Container(
       decoration: BoxDecoration(
@@ -1107,107 +1268,158 @@ class _DailySpendingBottomSheetState
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Top drag indicator
-            Container(
-              width: 32,
-              height: 4,
-              margin: const EdgeInsets.only(top: 12.0, bottom: 16.0),
-              decoration: BoxDecoration(
-                color: colors.border.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(2),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 32,
+                height: 4,
+                margin: const EdgeInsets.only(top: 12.0, bottom: 16.0),
+                decoration: BoxDecoration(
+                  color: colors.border.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
 
-            // Title area
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  Text(
-                    t.financial.dailyBurnRateSettings,
-                    style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.foreground,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    t.financial.setDailyBurnRate,
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // Content area
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  Text(
-                    '¥${_currentValue.toStringAsFixed(0)} / day',
-                    style: theme.typography.body.xl2.copyWith(
-                      color: theme.colors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  Slider(
-                    value: _currentValue,
-                    max: 1000.0,
-                    onChanged: settingsState.isLoading
-                        ? null
-                        : (value) {
-                            setState(() {
-                              _currentValue = value;
-                            });
-                          },
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Button area
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FButton(
-                          variant: .outline,
-                          onPress: () => Navigator.of(context).pop(),
-                          child: Text(t.common.cancel),
-                        ),
+              // Title area
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    Text(
+                      t.financial.dailyBurnRateSettings,
+                      style: theme.typography.body.lg.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colors.foreground,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: FButton(
-                          onPress: settingsState.isLoading ? null : _handleSave,
-                          child: settingsState.isLoading
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(t.common.save),
-                        ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      t.financial.setDailyBurnRate,
+                      style: theme.typography.body.sm.copyWith(
+                        color: colors.mutedForeground,
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 24),
+
+              // Minimal Underline Amount Input Area
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      symbol,
+                      style: theme.typography.body.lg.copyWith(
+                        color: theme.colors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 130,
+                      child: TextField(
+                        controller: _controller,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: false,
+                        ),
+                        textAlign: TextAlign.center,
+                        style: theme.typography.body.xl2.copyWith(
+                          color: colors.foreground,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.only(bottom: 4),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: colors.border,
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: theme.colors.primary,
+                              width: 2.0,
+                            ),
+                          ),
+                        ),
+                        onChanged: _onTextChanged,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      t.financial.dayUnit,
+                      style: theme.typography.body.md.copyWith(
+                        color: colors.mutedForeground,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Slider Area
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    Slider(
+                      value: sliderValue,
+                      min: 0.0,
+                      max: _maxSliderLimit,
+                      activeColor: theme.colors.primary,
+                      onChanged: settingsState.isLoading
+                          ? null
+                          : _onSliderChanged,
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Button area
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FButton(
+                            variant: .outline,
+                            onPress: () => Navigator.of(context).pop(),
+                            child: Text(t.common.cancel),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FButton(
+                            onPress: settingsState.isLoading
+                                ? null
+                                : _handleSave,
+                            child: settingsState.isLoading
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(t.common.save),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

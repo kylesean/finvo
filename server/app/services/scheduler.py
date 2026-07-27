@@ -134,7 +134,7 @@ app_scheduler = AppScheduler()
 
 
 class RecurringTransactionJob(ScheduledJob):
-    """Process due recurring transactions daily."""
+    """Process due recurring transactions hourly."""
 
     @property
     def job_id(self) -> str:
@@ -146,7 +146,8 @@ class RecurringTransactionJob(ScheduledJob):
 
     @property
     def trigger(self) -> CronTrigger:
-        return CronTrigger(hour=0, minute=5)
+        # Run hourly at :05 to check for due transactions across timezones
+        return CronTrigger(minute=5)
 
     async def execute(self) -> None:
         from app.services.recurring_transaction_jobs import process_due_transactions

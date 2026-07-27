@@ -164,7 +164,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
             Text(
               t.sharedSpace.list.emptyTitle,
               style: theme.typography.body.xl.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: colorScheme.foreground,
               ),
               textAlign: TextAlign.center,

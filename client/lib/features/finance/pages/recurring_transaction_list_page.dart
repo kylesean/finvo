@@ -614,7 +614,7 @@ class _RecurringTransactionListPageState
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '$amountSign${Currency.fromCode(ref.watch(financialSettingsProvider).primaryCurrency)?.symbol ?? '¥'}${transaction.amount}',
+                      '$amountSign${Currency.fromCode(ref.watch(financialSettingsProvider).primaryCurrency)?.symbol ?? '¥'}${transaction.amount.toDouble().toStringAsFixed(2)}',
                       style: theme.typography.body.md.copyWith(
                         color: typeColor,
                         fontWeight: FontWeight.w500,

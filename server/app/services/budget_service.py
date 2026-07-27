@@ -274,29 +274,29 @@ class BudgetService:
 
         return True
 
-    async def rebalance(
+    async def rebalance_with_status(
         self,
         from_budget_id: UUID,
         to_budget_id: UUID,
         amount: Decimal,
         user_uuid: UUID,
-    ) -> bool:
-        """Rebalance amount between two budgets.
+    ) -> str:
+        """Rebalance amount between two budgets with detailed status code.
 
-        Transfers budget allocation from one budget to another.
+        Returns:
+            'SUCCESS', 'INVALID_AMOUNT', 'NOT_FOUND', or 'INSUFFICIENT_FUNDS'
         """
         if amount <= 0:
-            return False
+            return "INVALID_AMOUNT"
 
         from_budget = await self.get_budget(from_budget_id, user_uuid)
         to_budget = await self.get_budget(to_budget_id, user_uuid)
 
         if not from_budget or not to_budget:
-            return False
+            return "NOT_FOUND"
 
-        # Ensure we don't go negative on the source budget
         if from_budget.amount < amount:
-            return False
+            return "INSUFFICIENT_FUNDS"
 
         # Update budget amounts
         from_budget.amount -= amount
@@ -308,11 +308,11 @@ class BudgetService:
 
         if from_period:
             from_period.adjusted_target -= amount
-            await self.update_period_spent_amount(from_budget, from_period)
+            await self.update_period_spent_amount(from_budget, from_period, auto_commit=False)
 
         if to_period:
             to_period.adjusted_target += amount
-            await self.update_period_spent_amount(to_budget, to_period)
+            await self.update_period_spent_amount(to_budget, to_period, auto_commit=False)
 
         await self.session.commit()
 
@@ -324,7 +324,18 @@ class BudgetService:
             user_uuid=str(user_uuid),
         )
 
-        return True
+        return "SUCCESS"
+
+    async def rebalance(
+        self,
+        from_budget_id: UUID,
+        to_budget_id: UUID,
+        amount: Decimal,
+        user_uuid: UUID,
+    ) -> bool:
+        """Rebalance amount between two budgets."""
+        status_code = await self.rebalance_with_status(from_budget_id, to_budget_id, amount, user_uuid)
+        return status_code == "SUCCESS"
 
     # ========================================================================
     # Period Management
@@ -346,71 +357,111 @@ class BudgetService:
     async def get_or_create_current_period(self, budget: Budget) -> BudgetPeriod:
         """Get current period, creating if necessary.
 
-        Also handles rollover from previous period.
+        Handles rollover from previous period, capping surplus at >= 0 to prevent
+        deficit debt compounding. Iteratively fills missing intermediate periods
+        if multiple periods have elapsed.
         """
         current_period = await self._get_current_period(budget)
 
         if current_period:
             return current_period
 
-        # Need to create new period
         today = date.today()
+
+        # Get latest existing period for rollover
+        result = await self.session.execute(
+            select(BudgetPeriod)
+            .where(cast(Any, BudgetPeriod.budget_id == budget.id))
+            .order_by(desc(cast(Any, BudgetPeriod.period_end)))
+            .limit(1)
+        )
+        prev_period = result.scalar_one_or_none()
+
+        # Sequentially step forward through missing periods if inactive across multi-period gaps
+        if prev_period and prev_period.period_end < today:
+            reference_date = prev_period.period_end + timedelta(days=1)
+            while reference_date <= today:
+                p_start, p_end = self._calculate_period_range(
+                    budget.period_type, budget.period_anchor_day, reference_date
+                )
+
+                # Check if intermediate period exists
+                check_res = await self.session.execute(
+                    select(BudgetPeriod).where(
+                        cast(Any, BudgetPeriod.budget_id == budget.id),
+                        cast(Any, BudgetPeriod.period_start == p_start),
+                    )
+                )
+                existing_p = check_res.scalar_one_or_none()
+                if existing_p:
+                    prev_period = existing_p
+                    reference_date = p_end + timedelta(days=1)
+                    continue
+
+                rollover_in = Decimal("0")
+                if budget.rollover_enabled and prev_period:
+                    unused = prev_period.adjusted_target - prev_period.spent_amount
+                    surplus = max(unused, Decimal("0"))
+                    rollover_in = surplus
+                    prev_period.rollover_out = surplus
+                    budget.rollover_balance = budget.rollover_balance + surplus
+
+                new_period = BudgetPeriod(
+                    budget_id=budget.id,
+                    period_start=p_start,
+                    period_end=p_end,
+                    spent_amount=Decimal("0"),
+                    rollover_in=rollover_in,
+                    rollover_out=Decimal("0"),
+                    adjusted_target=budget.amount + rollover_in,
+                    status=BudgetPeriodStatus.ON_TRACK.value,
+                )
+
+                try:
+                    self.session.add(new_period)
+                    await self.session.commit()
+                    await self.session.refresh(new_period)
+                    prev_period = new_period
+                except IntegrityError:
+                    await self.session.rollback()
+                    ex_res = await self.session.execute(
+                        select(BudgetPeriod).where(
+                            cast(Any, BudgetPeriod.budget_id == budget.id),
+                            cast(Any, BudgetPeriod.period_start == p_start),
+                        )
+                    )
+                    prev_period = ex_res.scalar_one_or_none() or prev_period
+
+                reference_date = p_end + timedelta(days=1)
+
+            final_period = await self._get_current_period(budget)
+            if final_period:
+                return final_period
+
+        # Initial period creation
         period_start, period_end = self._calculate_period_range(budget.period_type, budget.period_anchor_day, today)
-
-        # Calculate rollover from previous period
-        rollover_in = Decimal("0")
-        if budget.rollover_enabled:
-            # Get previous period
-            result = await self.session.execute(
-                select(BudgetPeriod)
-                .where(cast(Any, BudgetPeriod.budget_id == budget.id))
-                .order_by(desc(cast(Any, BudgetPeriod.period_end)))
-                .limit(1)
-            )
-            prev_period = result.scalar_one_or_none()
-
-            if prev_period:
-                # Calculate unused amount
-                unused = prev_period.adjusted_target - prev_period.spent_amount
-                rollover_in = unused
-                prev_period.rollover_out = unused
-
-                # Update budget's rollover balance
-                budget.rollover_balance = budget.rollover_balance + unused
-
-        # Create new period
-        new_period = BudgetPeriod(
+        initial_period = BudgetPeriod(
             budget_id=budget.id,
             period_start=period_start,
             period_end=period_end,
             spent_amount=Decimal("0"),
-            rollover_in=rollover_in,
+            rollover_in=Decimal("0"),
             rollover_out=Decimal("0"),
-            adjusted_target=budget.amount + rollover_in,
+            adjusted_target=budget.amount,
             status=BudgetPeriodStatus.ON_TRACK.value,
         )
 
         try:
-            self.session.add(new_period)
+            self.session.add(initial_period)
             await self.session.commit()
-            await self.session.refresh(new_period)
+            await self.session.refresh(initial_period)
+            return initial_period
         except IntegrityError:
-            # Concurrent request already created this period — roll back and re-query
             await self.session.rollback()
             existing = await self._get_current_period(budget)
             if existing:
                 return existing
-            raise  # Unexpected constraint violation
-
-        logger.info(
-            "budget_period_created",
-            budget_id=str(budget.id),
-            period_start=str(period_start),
-            period_end=str(period_end),
-            rollover_in=str(rollover_in),
-        )
-
-        return new_period
+            raise
 
     def _calculate_period_range(
         self,
@@ -600,8 +651,8 @@ class BudgetService:
         total_budget_response = None
         category_budgets = []
         alerts = []
-        overall_spent = Decimal("0")
-        overall_target = Decimal("0")
+        category_spent = Decimal("0")
+        category_target = Decimal("0")
         period_start = None
         period_end = None
 
@@ -617,20 +668,19 @@ class BudgetService:
                 period_end = period.period_end
             else:
                 category_budgets.append(response)
-
-            overall_spent += period.spent_amount
-            overall_target += period.adjusted_target
+                category_spent += period.spent_amount
+                category_target += period.adjusted_target
 
             # Generate alerts
             if period.status == BudgetPeriodStatus.EXCEEDED.value:
+                over_amt = period.spent_amount - period.adjusted_target
                 alerts.append(
                     BudgetAlert(
                         budget_id=budget.id,
                         budget_name=budget.name,
                         category_key=budget.category_key,
                         alert_type="exceeded",
-                        # Message is a key for frontend to translate, with data for interpolation
-                        message=f"budget.alert.exceeded:{period.spent_amount - period.adjusted_target:.2f}",
+                        message=f"budget.alert.exceeded|overAmount={over_amt:.2f}",
                         usage_percentage=period.usage_percentage,
                         remaining_amount=str(period.remaining_amount),
                     )
@@ -642,14 +692,21 @@ class BudgetService:
                         budget_name=budget.name,
                         category_key=budget.category_key,
                         alert_type="warning",
-                        # Message is a key for frontend to translate, with data for interpolation
-                        message=f"budget.alert.warning:{period.usage_percentage:.0f}:{period.remaining_amount:.2f}",
+                        message=f"budget.alert.warning|pct={period.usage_percentage:.0f}|remaining={period.remaining_amount:.2f}",
                         usage_percentage=period.usage_percentage,
                         remaining_amount=str(period.remaining_amount),
                     )
                 )
 
-        overall_pct = float(overall_spent / overall_target * 100) if overall_target > 0 else 0.0
+        # Use total budget figures if available to prevent double counting with category budgets
+        if total_budget_response:
+            overall_spent = Decimal(total_budget_response.spent_amount)
+            overall_remaining = Decimal(total_budget_response.remaining_amount)
+            overall_pct = total_budget_response.usage_percentage
+        else:
+            overall_spent = category_spent
+            overall_remaining = category_target - category_spent
+            overall_pct = float(category_spent / category_target * 100) if category_target > 0 else 0.0
 
         # Batch commit all period updates at once
         await self.session.commit()
@@ -658,7 +715,7 @@ class BudgetService:
             total_budget=total_budget_response,
             category_budgets=category_budgets,
             overall_spent=str(overall_spent),
-            overall_remaining=str(overall_target - overall_spent),
+            overall_remaining=str(overall_remaining),
             overall_percentage=overall_pct,
             alerts=alerts,
             period_start=period_start,

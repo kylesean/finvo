@@ -119,10 +119,16 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
 
           FButton.icon(
             variant: .ghost,
-            onPress: () => context.pushNamed(
-              'budgetEdit',
-              pathParameters: {'id': widget.budgetId},
-            ),
+            onPress: () async {
+              await context.pushNamed(
+                'budgetEdit',
+                pathParameters: {'id': widget.budgetId},
+              );
+              if (mounted) {
+                unawaited(_loadBudgetDetail());
+                unawaited(ref.read(budgetSummaryProvider.notifier).refresh());
+              }
+            },
             child: Icon(
               FLucideIcons.squarePen,
               color: colors.foreground,
