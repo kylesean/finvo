@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import 'package:augo/core/constants/api_constants.dart';
+import 'package:finvo/core/constants/api_constants.dart';
 import 'identicon_avatar.dart';
 
 /// A circular user avatar loaded from the public ``/avatars/{userId}``

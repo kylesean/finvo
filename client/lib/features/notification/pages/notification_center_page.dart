@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/core/constants/category_constants.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../models/notification_item.dart';
 import '../providers/notification_provider.dart';
 

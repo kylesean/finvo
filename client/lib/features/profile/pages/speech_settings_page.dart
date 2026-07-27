@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:augo/features/chat/services/speech_recognition_service.dart';
-import 'package:augo/features/chat/config/speech_config.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/services/toast_service.dart';
+import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/features/chat/config/speech_config.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/services/toast_service.dart';
 import '../models/speech_settings.dart';
 import '../providers/speech_settings_provider.dart';
 

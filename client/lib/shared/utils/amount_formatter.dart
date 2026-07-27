@@ -1,9 +1,9 @@
 // lib/shared/utils/amount_formatter.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
-import 'package:augo/shared/theme/amount_theme.dart';
-import 'package:augo/shared/models/currency.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/shared/theme/amount_theme.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Unified amount formatting service
 ///

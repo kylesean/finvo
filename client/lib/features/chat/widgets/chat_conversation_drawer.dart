@@ -437,7 +437,7 @@ class _ChatConversationDrawerState
             child: Row(
               children: [
                 UserAvatar(
-                  userId: user?.id ?? 'augo',
+                  userId: user?.id ?? 'Finvo',
                   size: 32,
                   backgroundColor: theme.colors.secondary,
                 ),

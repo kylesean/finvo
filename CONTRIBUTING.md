@@ -1,6 +1,6 @@
-# Contributing to Augo
+# Contributing to Finvo
 
-First off, thank you for considering contributing to **Augo**! It's people like you that make the open source community such an amazing place to learn, inspire, and create.
+First off, thank you for considering contributing to **Finvo**! It's people like you that make the open source community such an amazing place to learn, inspire, and create.
 
 ## Code of Conduct
 
@@ -10,7 +10,7 @@ By participating in this project, you are expected to uphold our [Code of Conduc
 
 ### Reporting Bugs
 
-- Check the [Issues tab](https://github.com/kylesean/augo/issues) to see if the bug has already been reported.
+- Check the [Issues tab](https://github.com/kylesean/Finvo/issues) to see if the bug has already been reported.
 - If not, create a new issue. Use a clear and descriptive title.
 - Provide a step-by-step reproduction of the issue.
 - Include environment details (OS, Python version, Flutter version).

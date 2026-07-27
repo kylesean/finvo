@@ -1,4 +1,4 @@
-package com.augo.app
+package com.finvo.app
 
 import android.content.Intent
 import android.speech.RecognitionService
@@ -7,7 +7,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.augo.app/speech_check"
+    private val CHANNEL = "com.finvo.app/speech_check"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

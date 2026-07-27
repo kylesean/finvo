@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:augo/core/network/network_client.dart';
+import 'package:finvo/core/network/network_client.dart';
 import '../../../core/network/exceptions/app_exception.dart';
 import '../models/shared_space_models.dart';
 

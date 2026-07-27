@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/exceptions/app_exception.dart';
 import '../providers/auth_provider.dart';
 import '../providers/verification_provider.dart';
-import 'package:augo/shared/services/toast_service.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class RegisterStep2Page extends ConsumerStatefulWidget {
   final String contact;

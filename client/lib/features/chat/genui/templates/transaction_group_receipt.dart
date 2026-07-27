@@ -15,10 +15,10 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/app_semantic_colors.dart';
 import '../../../../core/network/network_client.dart';
 import '../../../../core/constants/category_constants.dart';
-import 'package:augo/shared/widgets/amount_text.dart';
-import 'package:augo/shared/widgets/themed_icon.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Batch transaction receipt component
 ///

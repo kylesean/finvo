@@ -1,6 +1,6 @@
 // features/home/providers/transaction_feed_state.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
 
 part 'transaction_feed_state.freezed.dart';
 

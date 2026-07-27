@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:augo/features/chat/services/interaction_router.dart';
+import 'package:finvo/features/chat/services/interaction_router.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:genui/genui.dart' as genui;
 

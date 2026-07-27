@@ -5,15 +5,15 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:augo/features/chat/services/chat_interaction_manager.dart';
-import 'package:augo/features/chat/repositories/message_repository.dart';
-import 'package:augo/features/chat/services/genui_lifecycle_manager.dart';
-import 'package:augo/features/chat/state_controllers/streaming_controller.dart';
-import 'package:augo/features/chat/services/data_uri_service.dart';
-import 'package:augo/features/chat/services/genui_service.dart';
-import 'package:augo/features/chat/models/chat_message.dart';
-import 'package:augo/features/chat/models/message_attachments.dart';
-import 'package:augo/features/chat/services/extended_genui_conversation.dart';
+import 'package:finvo/features/chat/services/chat_interaction_manager.dart';
+import 'package:finvo/features/chat/repositories/message_repository.dart';
+import 'package:finvo/features/chat/services/genui_lifecycle_manager.dart';
+import 'package:finvo/features/chat/state_controllers/streaming_controller.dart';
+import 'package:finvo/features/chat/services/data_uri_service.dart';
+import 'package:finvo/features/chat/services/genui_service.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/models/message_attachments.dart';
+import 'package:finvo/features/chat/services/extended_genui_conversation.dart';
 
 import 'chat_interaction_manager_test.mocks.dart';
 

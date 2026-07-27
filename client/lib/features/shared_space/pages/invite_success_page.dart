@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../../shared/services/toast_service.dart';
 import '../models/shared_space_models.dart';
 import '../services/shared_space_service.dart';
@@ -245,7 +245,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
               ],
             ),
             child: QrImageView(
-              data: 'augo://join-space/${_inviteCode!.code}',
+              data: 'Finvo://join-space/${_inviteCode!.code}',
               version: QrVersions.auto,
               size: 180,
               padding: EdgeInsets.zero,

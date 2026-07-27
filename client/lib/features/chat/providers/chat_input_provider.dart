@@ -7,7 +7,7 @@ import '../services/speech_service_factory.dart';
 import '../services/file_upload_service.dart';
 import '../services/sound_feedback_service.dart';
 import '../models/message_attachments.dart';
-import 'package:augo/features/profile/providers/speech_settings_provider.dart';
+import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
 import 'chat_input_state.dart';
 
 part 'chat_input_provider.g.dart';

@@ -4,7 +4,7 @@
 /// display values used across all GenUI components.
 library;
 
-import 'package:augo/shared/models/currency.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Formats a numeric amount with currency symbol
 ///

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/features/chat/genui/templates/transaction_card.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/core/services/server_config_service.dart';
-import 'package:augo/features/profile/providers/financial_settings_provider.dart';
-import 'package:augo/features/profile/models/financial_settings.dart';
-import 'package:augo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/features/chat/genui/templates/transaction_card.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/core/services/server_config_service.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/profile/models/financial_settings.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

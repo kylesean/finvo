@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'package:logging/logging.dart';
-import 'package:augo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:intl/intl.dart';
-import 'package:augo/features/home/models/daily_expense_summary_model.dart';
-import 'package:augo/features/home/models/total_expense_model.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
-import 'package:augo/features/home/services/home_service.dart';
-import 'package:augo/features/profile/providers/financial_settings_provider.dart';
-import 'package:augo/features/profile/models/financial_settings.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
+import 'package:finvo/features/home/models/total_expense_model.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/services/home_service.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/profile/models/financial_settings.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'home_providers.g.dart';
 

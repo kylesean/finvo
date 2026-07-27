@@ -1,7 +1,7 @@
 // lib/shared/providers/amount_theme_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:augo/shared/theme/amount_theme.dart';
-import 'package:augo/core/services/server_config_service.dart'
+import 'package:finvo/shared/theme/amount_theme.dart';
+import 'package:finvo/core/services/server_config_service.dart'
     show sharedPreferencesProvider;
 
 /// Amount theme Provider

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/core/widgets/top_toast.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/widgets/user_avatar.dart';
+import 'package:finvo/core/widgets/top_toast.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/user_avatar.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'dart:async';
 

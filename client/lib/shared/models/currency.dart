@@ -1,5 +1,5 @@
 // shared/models/currency.dart
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Supported currencies for the application
 /// G9 countries + TWD + HKD

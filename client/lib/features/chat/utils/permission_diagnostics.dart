@@ -81,11 +81,11 @@ class PermissionDiagnostics {
 
       if (Platform.isIOS) {
         suggestions.add(
-          'iOS: Settings > Privacy & Security > Microphone > Flutter Augo',
+          'iOS: Settings > Privacy & Security > Microphone > Flutter Finvo',
         );
       } else if (Platform.isAndroid) {
         suggestions.add(
-          'Android: Settings > Apps > Flutter Augo > Permissions > Microphone',
+          'Android: Settings > Apps > Flutter Finvo > Permissions > Microphone',
         );
       }
     }

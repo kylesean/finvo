@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/core/widgets/top_toast.dart';
-import 'package:augo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/core/widgets/top_toast.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
@@ -13,9 +13,9 @@ import '../providers/recurring_transaction_provider.dart';
 import '../services/recurring_transaction_service.dart';
 import '../../../shared/models/currency.dart';
 import '../../profile/providers/financial_settings_provider.dart';
-import 'package:augo/core/constants/category_constants.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/widgets/themed_icon.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 
 /// Recurring transaction list page

@@ -5,8 +5,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:augo/features/chat/models/genui_surface_info.dart';
-import 'package:augo/features/chat/genui/data_context_helpers.dart';
+import 'package:finvo/features/chat/models/genui_surface_info.dart';
+import 'package:finvo/features/chat/genui/data_context_helpers.dart';
 
 void main() {
   group('GenUI Reactive Architecture Tests', () {

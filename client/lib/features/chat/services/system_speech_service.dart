@@ -14,7 +14,7 @@ import 'speech_recognition_service.dart';
 /// Supports iOS, Android, and Web platforms.
 class SystemSpeechService implements SpeechRecognitionService {
   static final _logger = Logger('SystemSpeechService');
-  static const _platformChannel = MethodChannel('com.augo.app/speech_check');
+  static const _platformChannel = MethodChannel('com.finvo.app/speech_check');
 
   final SpeechToText _speech = SpeechToText();
   bool _isInitialized = false;

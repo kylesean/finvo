@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../providers/conversation_search_state.dart';
-import 'package:augo/core/network/network_client.dart';
+import 'package:finvo/core/network/network_client.dart';
 
 part 'conversation_search_service.g.dart';
 

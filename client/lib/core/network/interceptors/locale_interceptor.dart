@@ -1,9 +1,9 @@
 import 'package:logging/logging.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:augo/shared/providers/locale_provider.dart';
-import 'package:augo/core/constants/api_constants.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
+import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Language interceptor
 /// Automatically adds Accept-Language header to all requests, passing user's current language setting

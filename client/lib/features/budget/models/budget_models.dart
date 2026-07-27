@@ -1,6 +1,6 @@
 import 'package:decimal/decimal.dart';
 import '../../../core/constants/category_constants.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 enum BudgetScope {
   total('TOTAL'),

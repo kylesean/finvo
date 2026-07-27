@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'transaction_model.freezed.dart';
 part 'transaction_model.g.dart';

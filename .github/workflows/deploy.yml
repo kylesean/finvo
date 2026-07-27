@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DOCKER_IMAGE_NAME: augo-api
+  DOCKER_IMAGE_NAME: Finvo-api
 
 jobs:
   build-and-push:

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/core/widgets/app_calendar.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/core/widgets/app_calendar.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Date picker bottom sheet (uses FCalendar)
 class DatePickerSheet extends StatefulWidget {

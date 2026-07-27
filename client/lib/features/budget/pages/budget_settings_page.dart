@@ -8,7 +8,7 @@ import '../../../core/widgets/top_toast.dart';
 import '../../../app/theme/app_semantic_colors.dart';
 import '../services/budget_service.dart';
 import '../models/budget_models.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class BudgetSettingsPage extends ConsumerStatefulWidget {
   const BudgetSettingsPage({super.key});

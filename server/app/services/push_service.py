@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.notification import Notification
 from app.models.user_device import UserDevice
 
-logger = logging.getLogger("augo.push_service")
+logger = logging.getLogger("Finvo.push_service")
 
 # Global flag to track if Firebase Admin is initialized
 _firebase_initialized = False

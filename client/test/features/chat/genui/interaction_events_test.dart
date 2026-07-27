@@ -1,5 +1,5 @@
-import 'package:augo/features/chat/genui/events/interaction_events.dart';
-import 'package:augo/features/chat/genui/genui_event_registry.dart';
+import 'package:finvo/features/chat/genui/events/interaction_events.dart';
+import 'package:finvo/features/chat/genui/genui_event_registry.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 类型化交互事件模型单元测试。

@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:augo/features/chat/state_controllers/streaming_controller.dart';
-import 'package:augo/features/chat/state_controllers/stream_state_controller.dart';
-import 'package:augo/features/chat/services/genui_service.dart';
-import 'package:augo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/state_controllers/streaming_controller.dart';
+import 'package:finvo/features/chat/state_controllers/stream_state_controller.dart';
+import 'package:finvo/features/chat/services/genui_service.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
 
 import 'streaming_controller_test.mocks.dart';
 

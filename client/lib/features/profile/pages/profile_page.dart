@@ -4,17 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:augo/app/router/app_routes.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/providers/locale_provider.dart';
-import 'package:augo/shared/providers/amount_theme_provider.dart';
-import 'package:augo/shared/models/currency.dart';
+import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
+import 'package:finvo/shared/providers/amount_theme_provider.dart';
+import 'package:finvo/shared/models/currency.dart';
 import '../providers/financial_settings_provider.dart';
 import '../providers/user_profile_provider.dart';
 import '../models/user_info.dart';
-import 'package:augo/shared/services/toast_service.dart';
-import 'package:augo/shared/widgets/themed_icon.dart';
-import 'package:augo/shared/widgets/user_avatar.dart';
+import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
+import 'package:finvo/shared/widgets/user_avatar.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/services/server_config_service.dart';
 import '../../version/providers/version_provider.dart';
@@ -278,7 +278,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ),
                     )
                   : UserAvatar(
-                      userId: user?.id ?? 'augo',
+                      userId: user?.id ?? 'Finvo',
                       size: 88,
                       border: Border.all(color: colors.border, width: 2),
                       version: user?.updatedAt,

@@ -6,9 +6,9 @@ import '../widgets/feed/sliver_transaction_feed_view.dart';
 import '../providers/home_providers.dart';
 import 'package:forui/forui.dart';
 import '../../shared_space/widgets/notification_icon.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/utils/amount_formatter.dart';
-import 'package:augo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import '../models/total_expense_model.dart';
 import 'dart:async';
 

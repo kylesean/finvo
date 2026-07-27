@@ -19,7 +19,7 @@ import '../models/message_attachments.dart';
 import '../widgets/enhanced_user_message_bubble.dart';
 import '../widgets/chat_conversation_drawer.dart';
 import '../widgets/welcome/welcome_guide_widget.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class AIChatPage extends ConsumerStatefulWidget {
   final String? conversationId; // From GoRouter

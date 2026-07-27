@@ -16,10 +16,10 @@ import '../providers/financial_summary_provider.dart';
 import '../providers/account_view_currency_provider.dart';
 import '../../../shared/providers/exchange_rate_provider.dart';
 import '../../../shared/widgets/app_card.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/widgets/amount_text.dart';
-import 'package:augo/shared/widgets/themed_icon.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
 import '../widgets/currency_selection_sheet.dart';
 
 class FinancialAccountsPage extends ConsumerStatefulWidget {

@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
-import 'package:augo/features/home/providers/home_providers.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/providers/home_providers.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class DailyTransactionModal extends ConsumerWidget {
   final DateTime selectedDate;

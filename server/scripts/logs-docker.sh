@@ -17,7 +17,7 @@ if [[ ! "$ENV" =~ ^(development|staging|production)$ ]]; then
   exit 1
 fi
 
-CONTAINER_NAME="augo-api"
+CONTAINER_NAME="Finvo-api"
 
 echo "Viewing logs for $ENV environment container"
 

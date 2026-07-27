@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:augo/shared/widgets/amount_text.dart';
-import 'package:augo/shared/widgets/themed_icon.dart';
-import 'package:augo/features/home/services/home_service.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
+import 'package:finvo/features/home/services/home_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../../../core/constants/category_constants.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
 import 'dart:async';
 
 /// Transaction list component - supports waterfall pagination

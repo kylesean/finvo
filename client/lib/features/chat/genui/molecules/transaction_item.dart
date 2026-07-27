@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import '../atoms/atoms.dart';
 import '../utils/formatters.dart';
 import '../utils/theme_helpers.dart' as helpers;

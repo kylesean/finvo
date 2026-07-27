@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
-import 'package:augo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 /// SpaceAssociationReceipt Data Layer
 class SpaceAssociationReceiptData {

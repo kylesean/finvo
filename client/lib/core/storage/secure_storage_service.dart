@@ -89,9 +89,9 @@ final flutterSecureStorageProvider = Provider<FlutterSecureStorage>((ref) {
     // Note: encryptedSharedPreferences has been deprecated in v10+, the library will automatically use Tink encryption
     aOptions: AndroidOptions(
       // Set storage namespace (replaces deprecated sharedPreferencesName)
-      storageNamespace: 'augo_secure_storage',
+      storageNamespace: 'Finvo_secure_storage',
       // Set key prefix
-      preferencesKeyPrefix: 'augo_',
+      preferencesKeyPrefix: 'Finvo_',
     ),
     // Configure iOS options
     iOptions: IOSOptions(

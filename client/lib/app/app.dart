@@ -53,7 +53,7 @@ class MyApp extends ConsumerWidget {
         );
 
     return MaterialApp.router(
-      title: 'augo',
+      title: 'Finvo',
       theme: materialLightTheme,
       darkTheme: materialDarkTheme,
       themeMode: appThemeMode,

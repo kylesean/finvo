@@ -5,7 +5,7 @@ import '../../../app/theme/theme_notifier.dart';
 import '../../../app/theme/app_theme_palette.dart';
 import '../../../app/theme/theme_palette_provider.dart';
 import '../../../app/theme/theme_provider.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'theme_preview.dart';
 
 class ThemeSwitcher extends ConsumerWidget {

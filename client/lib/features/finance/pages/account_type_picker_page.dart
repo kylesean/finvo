@@ -5,7 +5,7 @@ import 'package:forui/forui.dart';
 
 import '../models/account_type_definition.dart';
 import 'account_add_page.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class AccountTypePickerPage extends ConsumerWidget {
   const AccountTypePickerPage({super.key});

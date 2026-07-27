@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes the Mem0 long-term memory integration optimization for the Augo project.
+This document summarizes the Mem0 long-term memory integration optimization for the Finvo project.
 
 ## Changes Made
 

@@ -5,7 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 /// Account type visual configuration
 class AccountTypeStyle {

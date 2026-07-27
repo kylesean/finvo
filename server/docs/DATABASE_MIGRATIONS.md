@@ -94,13 +94,13 @@ These tables are managed externally:
 | `checkpoints`, `checkpoint_*` | LangGraph |
 | `longterm_memory`, `mem0*` | Mem0 |
 
-See [alembic/env.py](file:///home/kylesean/projects/python/augo/server/alembic/env.py) → `include_object()` for the filter.
+See [alembic/env.py](file:///home/kylesean/projects/python/Finvo/server/alembic/env.py) → `include_object()` for the filter.
 
 ## Fresh Database Setup
 
 ```bash
 # 1. Create database
-createdb augo
+createdb Finvo
 
 # 2. Run migrations
 cd server && uv run alembic upgrade head

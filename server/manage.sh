@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Augo Assistant - Unified Management Script
+# Finvo Assistant - Unified Management Script
 # This script provides a central entry point for all development and deployment tasks.
 
 # COLORS
@@ -11,7 +11,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 function help() {
-    echo -e "${GREEN}Augo Assistant Management Tool${NC}"
+    echo -e "${GREEN}Finvo Assistant Management Tool${NC}"
     echo "Usage: ./manage.sh <command> [env]"
     echo ""
     echo "Commands:"

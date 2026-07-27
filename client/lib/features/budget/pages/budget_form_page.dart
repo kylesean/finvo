@@ -2,7 +2,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/core/widgets/top_toast.dart';
+import 'package:finvo/core/widgets/top_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
@@ -14,7 +14,7 @@ import '../../../shared/models/currency.dart';
 import '../models/budget_models.dart';
 import '../providers/budget_provider.dart';
 import '../services/budget_service.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 
 class BudgetFormPage extends ConsumerStatefulWidget {

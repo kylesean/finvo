@@ -8,9 +8,9 @@ import '../providers/chat_history_provider.dart';
 import '../models/message_attachments.dart';
 import 'media_upload_button.dart';
 import 'media_preview_widget.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:go_router/go_router.dart';
-import 'package:augo/app/router/app_routes.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'dart:async';
 
 class ChatInputField extends ConsumerStatefulWidget {

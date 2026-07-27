@@ -9,7 +9,7 @@ import '../../profile/models/financial_account.dart';
 import '../models/account_type_definition.dart';
 import '../../../shared/models/currency.dart';
 import '../widgets/currency_selection_sheet.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class FinancialAccountAddArgs {
   const FinancialAccountAddArgs({

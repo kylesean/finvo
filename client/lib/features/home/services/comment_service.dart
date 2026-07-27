@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:augo/core/network/network_client.dart';
+import 'package:finvo/core/network/network_client.dart';
 import '../models/comment_model.dart';
-import 'package:augo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 part 'comment_service.g.dart';
 

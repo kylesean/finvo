@@ -2,8 +2,8 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/widgets/themed_icon.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'dart:async';
 
 import '../../profile/models/financial_account.dart';

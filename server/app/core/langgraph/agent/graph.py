@@ -32,7 +32,7 @@ def build_agent_graph(
     tools: list[BaseTool],
     system_prompt: str,
     checkpointer: BaseCheckpointSaver[Any] | None = None,
-    name: str = "AugoAgent",
+    name: str = "FinvoAgent",
 ) -> CompiledStateGraph[Any, Any]:
     """Build the Agent graph.
 
