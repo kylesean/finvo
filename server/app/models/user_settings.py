@@ -13,6 +13,7 @@ from pydantic import field_validator
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.config.currency import PROJECT_DEFAULT_CURRENCY
 from app.models.base import Base, col
 
 if TYPE_CHECKING:
@@ -38,7 +39,7 @@ class UserSettings(Base):
     __tablename__ = "user_settings"
 
     user_uuid: Mapped[UUID] = col.uuid_pk()
-    currency: Mapped[str] = mapped_column(String(10), default="USD")
+    currency: Mapped[str] = mapped_column(String(10), default=PROJECT_DEFAULT_CURRENCY)
     timezone: Mapped[str] = mapped_column(String(100), default="Asia/Shanghai")
     avg_daily_spending: Mapped[str] = mapped_column(String, default="100.00")
     safety_balance_threshold: Mapped[str] = mapped_column(String, default="500.00")

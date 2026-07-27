@@ -9,6 +9,8 @@ signals collected during user registration. The priority is:
 
 from __future__ import annotations
 
+from app.config.currency import PROJECT_DEFAULT_CURRENCY
+
 # Mapping: locale (exact or prefix) -> currency code
 # Exact keys (e.g. "en_US") are checked first, then prefix keys (e.g. "en")
 LOCALE_CURRENCY_MAP: dict[str, str] = {
@@ -80,8 +82,9 @@ SUPPORTED_CURRENCIES: set[str] = {
     "TWD",
 }
 
-# Fallback currency when no signal is available
-FALLBACK_CURRENCY: str = "USD"
+# Fallback currency when no signal is available (no locale, no timezone match).
+# Aligned with PROJECT_DEFAULT_CURRENCY to ensure consistency across all layers.
+FALLBACK_CURRENCY: str = PROJECT_DEFAULT_CURRENCY
 
 
 def infer_currency(locale: str | None = None, timezone: str | None = None) -> str:

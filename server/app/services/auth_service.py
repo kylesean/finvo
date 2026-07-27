@@ -174,7 +174,12 @@ class AuthService:
         await self.db.commit()
         await self.db.refresh(user)
 
-        # Create default financial settings for the new user
+        # Create default financial settings for the new user.
+        # IMPORTANT: Currency inference runs ONLY HERE (once at registration).
+        # Do NOT add login hooks, background jobs, or periodic tasks that
+        # re-infer currency from locale — the user's primary_currency is
+        # immutable after registration unless explicitly changed via the
+        # financial-settings API.
         await self._create_default_financial_settings(user.uuid, locale=locale, timezone=timezone)
 
         logger.info("user_registered", user_uuid=user.uuid, account_type=account_type)
@@ -187,6 +192,8 @@ class AuthService:
         """Create default financial settings for a new user.
 
         Currency is inferred from locale/timezone when available.
+        This method is called EXACTLY ONCE during registration.
+        It must NOT be called from login, scheduled jobs, or any other path.
 
         Args:
             user_uuid: The user's UUID

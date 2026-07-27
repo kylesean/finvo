@@ -10,6 +10,7 @@ from uuid import UUID
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.config.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import NotFoundError
 from app.core.logging import logger
 from app.models.base import utc_now
@@ -731,7 +732,7 @@ class UserService:
                 safety_threshold=Decimal(safety_threshold) if safety_threshold else Decimal("1000.00"),
                 daily_burn_rate=Decimal(daily_burn_rate) if daily_burn_rate else Decimal("100.00"),
                 burn_rate_mode=burn_rate_mode or "AI_AUTO",
-                primary_currency=primary_currency or "CNY",
+                primary_currency=primary_currency or PROJECT_DEFAULT_CURRENCY,
                 month_start_day=month_start_day or 1,
                 updated_at=now,
             )
