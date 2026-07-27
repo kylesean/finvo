@@ -363,7 +363,14 @@ class _Translations$settings$ja extends Translations$settings$zh {
 	@override String get helpAndFeedback => 'ヘルプとフィードバック';
 	@override String get helpAndFeedbackSubtitle => 'ヘルプの参照またはフィードバック送信';
 	@override String get aboutApp => 'アプリについて';
-	@override String get aboutAppSubtitle => 'バージョン情報と開発者情報';
+	@override String get aboutAppSubtitle => 'バージョン情報とアップデート確認';
+	@override String get checkUpdate => 'アップデートを確認';
+	@override String get checkingUpdate => 'アップデートを確認中...';
+	@override String get latestVersionToast => '最新バージョンを使用中です';
+	@override String get newVersionTitle => '新しいバージョンがあります';
+	@override String get updateNow => '今すぐアップデート';
+	@override String get updateLater => '後で';
+	@override String get fetchUpdateFailed => 'アップデートの確認に失敗しました';
 	@override String currencyChangedRefreshHint({required Object currency}) => '${currency} に切り替えました。新しい取引はこの通貨で記録されます';
 	@override String get sharedSpace => '共有スペース';
 	@override String get speechRecognition => '音声認識';
@@ -425,6 +432,11 @@ class _Translations$speech$ja extends Translations$speech$zh {
 	@override String get enterAddress => 'サーバーアドレスを入力してください';
 	@override String get enterValidPort => '有効なポート番号(1-65535)を入力してください';
 	@override String get configSaved => '設定を保存しました';
+	@override String get systemVoiceRestrictedTitle => 'システム音声が利用できません';
+	@override String get systemVoiceRestrictedContent => 'お使いの端末の音声認識エンジンが制限されているか利用できません。WebSocket自作ASRサービスの設定を推奨します。';
+	@override String get goToSettings => '設定へ';
+	@override String get systemVoiceStatusAvailable => 'システム音声認識利用可能';
+	@override String get systemVoiceStatusRestricted => 'システム音声制限あり (自作 ASR 推奨)';
 }
 
 // Path: amountTheme
@@ -2515,7 +2527,14 @@ extension on TranslationsJa {
 			'settings.helpAndFeedback' => 'ヘルプとフィードバック',
 			'settings.helpAndFeedbackSubtitle' => 'ヘルプの参照またはフィードバック送信',
 			'settings.aboutApp' => 'アプリについて',
-			'settings.aboutAppSubtitle' => 'バージョン情報と開発者情報',
+			'settings.aboutAppSubtitle' => 'バージョン情報とアップデート確認',
+			'settings.checkUpdate' => 'アップデートを確認',
+			'settings.checkingUpdate' => 'アップデートを確認中...',
+			'settings.latestVersionToast' => '最新バージョンを使用中です',
+			'settings.newVersionTitle' => '新しいバージョンがあります',
+			'settings.updateNow' => '今すぐアップデート',
+			'settings.updateLater' => '後で',
+			'settings.fetchUpdateFailed' => 'アップデートの確認に失敗しました',
 			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '${currency} に切り替えました。新しい取引はこの通貨で記録されます',
 			'settings.sharedSpace' => '共有スペース',
 			'settings.speechRecognition' => '音声認識',
@@ -2567,6 +2586,11 @@ extension on TranslationsJa {
 			'speech.enterAddress' => 'サーバーアドレスを入力してください',
 			'speech.enterValidPort' => '有効なポート番号(1-65535)を入力してください',
 			'speech.configSaved' => '設定を保存しました',
+			'speech.systemVoiceRestrictedTitle' => 'システム音声が利用できません',
+			'speech.systemVoiceRestrictedContent' => 'お使いの端末の音声認識エンジンが制限されているか利用できません。WebSocket自作ASRサービスの設定を推奨します。',
+			'speech.goToSettings' => '設定へ',
+			'speech.systemVoiceStatusAvailable' => 'システム音声認識利用可能',
+			'speech.systemVoiceStatusRestricted' => 'システム音声制限あり (自作 ASR 推奨)',
 			'amountTheme.chinaMarket' => '中国市場慣習',
 			'amountTheme.chinaMarketDesc' => '赤上昇/緑下落（推奨）',
 			'amountTheme.international' => '国際標準',

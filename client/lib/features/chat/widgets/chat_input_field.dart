@@ -9,6 +9,8 @@ import '../models/message_attachments.dart';
 import 'media_upload_button.dart';
 import 'media_preview_widget.dart';
 import 'package:augo/i18n/strings.g.dart';
+import 'package:go_router/go_router.dart';
+import 'package:augo/app/router/app_routes.dart';
 import 'dart:async';
 
 class ChatInputField extends ConsumerStatefulWidget {
@@ -84,17 +86,74 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
       if (isShowingError && !wasShowingError) {
         final errorMessage = currentState.errorMessage;
         if (errorMessage.isNotEmpty) {
-          ScaffoldMessenger.of(context).removeCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              duration: const Duration(seconds: 3),
-              action: SnackBarAction(
-                label: t.common.ok,
-                onPressed: () => ref.read(provider.notifier).clearError(),
+          if (errorMessage == 'system_speech_restricted' ||
+              errorMessage == 'speech_not_configured' ||
+              errorMessage == 'speech_connection_failed') {
+            final String dialogTitle =
+                errorMessage == 'system_speech_restricted'
+                ? t.speech.systemVoiceRestrictedTitle
+                : t.speech.connectionFailedTitle;
+
+            final String dialogContent =
+                errorMessage == 'system_speech_restricted'
+                ? t.speech.systemVoiceRestrictedContent
+                : errorMessage == 'speech_not_configured'
+                ? t.speech.serviceNotConfigured
+                : t.speech.connectionFailed;
+
+            unawaited(
+              showFDialog<void>(
+                context: context,
+                builder: (dialogContext, style, animation) => FDialog(
+                  animation: animation,
+                  builder: (context, dialogStyle) => Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(dialogTitle, style: dialogStyle.titleTextStyle),
+                        const SizedBox(height: 12),
+                        Text(dialogContent, style: dialogStyle.bodyTextStyle),
+                        const SizedBox(height: 24),
+                        FButton(
+                          variant: .primary,
+                          onPress: () {
+                            Navigator.of(dialogContext).pop();
+                            unawaited(
+                              context.pushNamed(AppRouteNames.speechSettings),
+                            );
+                          },
+                          child: Text(t.speech.goToSettings),
+                        ),
+                        const SizedBox(height: 8),
+                        FButton(
+                          variant: .outline,
+                          onPress: () => Navigator.of(dialogContext).pop(),
+                          child: Text(t.common.cancel),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          );
+            );
+          } else {
+            final String displayMsg = errorMessage == 'no_speech_recognized'
+                ? t.speech.noSpeechRecognized
+                : errorMessage;
+            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(displayMsg),
+                duration: const Duration(seconds: 3),
+                action: SnackBarAction(
+                  label: t.common.ok,
+                  onPressed: () => ref.read(provider.notifier).clearError(),
+                ),
+              ),
+            );
+          }
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               ref.read(provider.notifier).clearError();

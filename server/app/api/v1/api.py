@@ -21,6 +21,7 @@ from app.api.v1.storage_config import router as storage_config_router
 from app.api.v1.transaction import router as transaction_router
 from app.api.v1.upload import router as upload_router
 from app.api.v1.user import router as user_router
+from app.api.v1.version import router as version_router
 from app.core.config import settings
 from app.core.logging import logger
 
@@ -42,6 +43,7 @@ api_router.include_router(notification_router)
 api_router.include_router(exchange_rate_router)
 api_router.include_router(memory_router)
 api_router.include_router(budget_router)
+api_router.include_router(version_router)
 
 
 @api_router.get("/health")

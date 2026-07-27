@@ -363,7 +363,14 @@ class _Translations$settings$zh_Hant extends Translations$settings$zh {
 	@override String get helpAndFeedback => '幫助與反饋';
 	@override String get helpAndFeedbackSubtitle => '獲取幫助或提供反饋';
 	@override String get aboutApp => '關於應用';
-	@override String get aboutAppSubtitle => '版本信息和開發者信息';
+	@override String get aboutAppSubtitle => '版本資訊與檢查更新';
+	@override String get checkUpdate => '檢查更新';
+	@override String get checkingUpdate => '正在檢查更新...';
+	@override String get latestVersionToast => '當前已是最新版本';
+	@override String get newVersionTitle => '發現新版本';
+	@override String get updateNow => '立即更新';
+	@override String get updateLater => '暫不更新';
+	@override String get fetchUpdateFailed => '檢查更新失敗，請稍後重試';
 	@override String currencyChangedRefreshHint({required Object currency}) => '已切換為 ${currency}，新交易將以此貨幣記錄';
 	@override String get sharedSpace => '共享空間';
 	@override String get speechRecognition => '語音識別';
@@ -425,6 +432,11 @@ class _Translations$speech$zh_Hant extends Translations$speech$zh {
 	@override String get enterAddress => '請輸入服務器地址';
 	@override String get enterValidPort => '請輸入有效的端口 (1-65535)';
 	@override String get configSaved => '配置已儲存';
+	@override String get systemVoiceRestrictedTitle => '系統語音不可用';
+	@override String get systemVoiceRestrictedContent => '您的手機系統語音引擎受到廠商權限限制或服務未開啟。建議配置並開啟 WebSocket 自建語音服務。';
+	@override String get goToSettings => '前往設定';
+	@override String get systemVoiceStatusAvailable => '系統語音服務支援正常';
+	@override String get systemVoiceStatusRestricted => '系統語音限制或不可用 (建議使用自建 ASR)';
 }
 
 // Path: amountTheme
@@ -2515,7 +2527,14 @@ extension on TranslationsZhHant {
 			'settings.helpAndFeedback' => '幫助與反饋',
 			'settings.helpAndFeedbackSubtitle' => '獲取幫助或提供反饋',
 			'settings.aboutApp' => '關於應用',
-			'settings.aboutAppSubtitle' => '版本信息和開發者信息',
+			'settings.aboutAppSubtitle' => '版本資訊與檢查更新',
+			'settings.checkUpdate' => '檢查更新',
+			'settings.checkingUpdate' => '正在檢查更新...',
+			'settings.latestVersionToast' => '當前已是最新版本',
+			'settings.newVersionTitle' => '發現新版本',
+			'settings.updateNow' => '立即更新',
+			'settings.updateLater' => '暫不更新',
+			'settings.fetchUpdateFailed' => '檢查更新失敗，請稍後重試',
 			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '已切換為 ${currency}，新交易將以此貨幣記錄',
 			'settings.sharedSpace' => '共享空間',
 			'settings.speechRecognition' => '語音識別',
@@ -2567,6 +2586,11 @@ extension on TranslationsZhHant {
 			'speech.enterAddress' => '請輸入服務器地址',
 			'speech.enterValidPort' => '請輸入有效的端口 (1-65535)',
 			'speech.configSaved' => '配置已儲存',
+			'speech.systemVoiceRestrictedTitle' => '系統語音不可用',
+			'speech.systemVoiceRestrictedContent' => '您的手機系統語音引擎受到廠商權限限制或服務未開啟。建議配置並開啟 WebSocket 自建語音服務。',
+			'speech.goToSettings' => '前往設定',
+			'speech.systemVoiceStatusAvailable' => '系統語音服務支援正常',
+			'speech.systemVoiceStatusRestricted' => '系統語音限制或不可用 (建議使用自建 ASR)',
 			'amountTheme.chinaMarket' => '中國市場習慣',
 			'amountTheme.chinaMarketDesc' => '紅漲綠跌/黑跌 (推薦)',
 			'amountTheme.international' => '國際標準',

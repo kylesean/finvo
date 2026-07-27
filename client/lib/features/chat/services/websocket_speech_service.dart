@@ -120,7 +120,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       return true;
     } catch (e) {
       _logger.severe('WebSocket connection failed: $e');
-      _errorController.add('Connection failed: $e');
+      _errorController.add('speech_connection_failed');
       _statusController.add('disconnected');
       _isConnected = false;
       return false;

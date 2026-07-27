@@ -220,13 +220,20 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       return;
     }
 
-    String userMessage = 'Error occurred during speech recognition';
-    if (error.toLowerCase().contains('connection') ||
-        error.toLowerCase().contains('connect')) {
-      userMessage =
-          'Cannot connect to ASR service, please check if service is running';
+    String userMessage = error;
+    if (error == 'system_speech_restricted') {
+      userMessage = 'system_speech_restricted';
+    } else if (error == 'speech_not_configured') {
+      userMessage = 'speech_not_configured';
+    } else if (error == 'speech_connection_failed' ||
+        error.toLowerCase().contains('connection') ||
+        error.toLowerCase().contains('connect') ||
+        error.toLowerCase().contains('failed') ||
+        error.toLowerCase().contains('refused') ||
+        error.toLowerCase().contains('socket')) {
+      userMessage = 'speech_connection_failed';
     } else if (error.toLowerCase().contains('timeout')) {
-      userMessage = 'No speech recognized, please try again';
+      userMessage = 'no_speech_recognized';
       _textBeforeSpeechSession = '';
       state = state.copyWith(text: '');
     }
@@ -270,9 +277,12 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
     if (_speechService == null) {
       _logger.warning("Speech service not configured");
+      final errMsg = _serviceType == SpeechServiceType.system
+          ? 'system_speech_restricted'
+          : 'Speech service not configured';
       state = state.copyWith(
         showError: true,
-        errorMessage: 'Speech service not configured',
+        errorMessage: errMsg,
         hintType: HintType.normal,
       );
       return;
@@ -292,10 +302,12 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
       if (!isReady) {
         _logger.warning("Speech service not ready");
+        final errMsg = _serviceType == SpeechServiceType.system
+            ? 'system_speech_restricted'
+            : 'Speech service connection failed, please check network';
         state = state.copyWith(
           showError: true,
-          errorMessage:
-              'Speech service connection failed, please check network',
+          errorMessage: errMsg,
           hintType: HintType.normal,
         );
         return;
