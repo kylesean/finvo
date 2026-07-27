@@ -46,6 +46,7 @@
   <rect x="1" y="1" width="1198" height="378" rx="19" fill="none" stroke="#1E293B" stroke-width="1.5"/>
 
   <!-- ================= LEFT TITLE BLOCK ================= -->
+  <!-- cache-bust: force GitHub CDN refresh after repo rename -->
   <g id="title-block" transform="translate(60, 50)">
     <!-- Eyebrow Category Tag -->
     <rect x="0" y="0" width="220" height="28" rx="14" fill="#10B981" fill-opacity="0.15" stroke="#10B981" stroke-width="1" stroke-opacity="0.4"/>
