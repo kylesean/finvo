@@ -1,6 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'package:logging/logging.dart';
-
 abstract class PaginationConstants {
   static const int defaultPageSize = 20;
 
@@ -13,6 +10,7 @@ abstract class UIConstants {
   static const double paddingXs = 4.0;
   static const double paddingSm = 8.0;
   static const double paddingMd = 16.0;
+  static const double paddingL = 20.0;
   static const double paddingLg = 24.0;
   static const double paddingXl = 32.0;
 
@@ -26,14 +24,6 @@ abstract class UIConstants {
   static const Duration animationSlow = Duration(milliseconds: 500);
 
   static const Duration debounceDelay = Duration(milliseconds: 300);
-}
-
-abstract class LoggingConstants {
-  static const Level debugLevel = Level.ALL;
-
-  static const Level productionLevel = Level.INFO;
-
-  static Level get currentLevel => kDebugMode ? debugLevel : productionLevel;
 }
 
 abstract class RetryConstants {

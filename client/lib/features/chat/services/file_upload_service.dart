@@ -129,7 +129,6 @@ class FileUploadService {
       );
 
       _logger.info('Upload status code: ${response.statusCode}');
-      _logger.finer('Response data: ${response.data}');
 
       // BusinessInterceptor has already processed API response format, response.data is the data part
       if (response.data is Map<String, dynamic>) {

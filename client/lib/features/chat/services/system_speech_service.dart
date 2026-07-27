@@ -241,7 +241,7 @@ class SystemSpeechService implements SpeechRecognitionService {
 
     if (recognizedWords.isEmpty) return;
 
-    _logger.info(
+    _logger.fine(
       'Recognition result: $recognizedWords (final: ${result.finalResult})',
     );
 

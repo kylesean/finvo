@@ -117,7 +117,6 @@ class ProfileService {
       method: HttpMethod.post,
       data: request.toJson(),
       fromJsonT: (json) {
-        _logger.fine('saveFinancialAccounts response: $json');
         if (json is Map<String, dynamic>) {
           try {
             // Response format is {code, message, data}, need to extract data field
