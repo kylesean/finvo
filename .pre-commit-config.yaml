@@ -40,13 +40,13 @@ repos:
         files: ^server/
         types: [python]
 
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.8.0
-    hooks:
       - id: bandit
-        args: [-c, server/pyproject.toml, -r, server/app/]
-        additional_dependencies: ["bandit[toml]"]
+        name: bandit
+        entry: bash -c "cd server && uv run bandit -c pyproject.toml -r app/ -ll"
+        language: system
+        pass_filenames: false
         files: ^server/
+        types: [python]
 
   # ============================================================================
   # Dart/Flutter Hooks (Frontend) - Using Local Commands

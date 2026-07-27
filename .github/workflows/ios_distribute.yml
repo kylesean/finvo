@@ -1,15 +1,21 @@
 # iOS IPA Build (Sideload Version)
 # Builds an unsigned IPA for sideloading via AltStore, Sideloadly, etc.
+# Only triggered manually or on version tags to save macOS runner costs (10x Linux).
 
 name: Build iOS IPA (Sideload)
 
 on:
+  workflow_dispatch:  # Manual trigger
   push:
-    branches: [main]
-    paths:
-      - 'client/**'
-      - '.github/workflows/ios_distribute.yml'
-  workflow_dispatch:  # Allow manual trigger
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-ios:
