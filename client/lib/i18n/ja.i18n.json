@@ -149,6 +149,7 @@
     "todayExpense": "今日の支出",
     "monthExpense": "今月の支出",
     "yearProgress": "$year年の進捗",
+    "yearRemainingInfo": "残り $days 日 · $percent%",
     "amountHidden": "••••••••",
     "loadFailed": "読み込み失敗",
     "noTransactions": "取引履歴なし",
@@ -1041,8 +1042,11 @@
     },
     "analysis": {
       "title": "支出分析",
+      "expenseTitle": "支出分析",
+      "incomeTitle": "収入分析",
       "total": "合計",
-      "breakdown": "カテゴリー詳細"
+      "breakdown": "支出カテゴリ内訳",
+      "radarNeedMoreData": "レーダーチャートには3つ以上のカテゴリデータが必要です"
     },
     "filter": {
       "accountType": "口座タイプ",

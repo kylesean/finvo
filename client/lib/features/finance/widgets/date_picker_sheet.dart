@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/core/widgets/app_calendar.dart';
 import 'package:augo/i18n/strings.g.dart';
 
 /// Date picker bottom sheet (uses FCalendar)
@@ -58,13 +59,13 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
     final colors = theme.colors;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.55,
       decoration: BoxDecoration(
         color: colors.background,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: SafeArea(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Drag handle
             Container(
@@ -78,31 +79,28 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
             ),
             // Title bar
             _buildHeader(theme, colors),
-            const SizedBox(height: 12),
-            // Calendar - force English locale to avoid CJK characters in header/weekdays
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Localizations.override(
-                  context: context,
-                  locale: const Locale('en'),
-                  child: FCalendar.grid(
-                    selectionControl: .liftedSingle(
-                      value: _selectedDate,
-                      onChange: (date) {
-                        if (date != null) setState(() => _selectedDate = date);
-                      },
-                      toggleable: false,
-                    ),
-                    control: FGridCalendarControl(
-                      start: widget.firstDate ?? DateTime(2020),
-                      end: widget.lastDate ?? DateTime(2030),
-                      initial: _selectedDate,
-                    ),
+            const SizedBox(height: 8),
+            // Calendar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: AppCalendar.grid(
+                  selectionControl: .liftedSingle(
+                    value: _selectedDate,
+                    onChange: (date) {
+                      if (date != null) setState(() => _selectedDate = date);
+                    },
+                    toggleable: false,
+                  ),
+                  control: FGridCalendarControl(
+                    start: widget.firstDate ?? DateTime(2020),
+                    end: widget.lastDate ?? DateTime(2030),
+                    initial: _selectedDate,
                   ),
                 ),
               ),
             ),
+            const SizedBox(height: 8),
             // Bottom button
             _buildBottomBar(theme, colors),
           ],

@@ -149,6 +149,7 @@
     "todayExpense": "今日支出",
     "monthExpense": "本月支出",
     "yearProgress": "$year年進度",
+    "yearRemainingInfo": "餘 $days 天 · $percent%",
     "amountHidden": "••••••••",
     "loadFailed": "載入失敗",
     "noTransactions": "暫無交易記錄",
@@ -1041,8 +1042,11 @@
     },
     "analysis": {
       "title": "支出分析",
+      "expenseTitle": "支出分析",
+      "incomeTitle": "收入分析",
       "total": "總計",
-      "breakdown": "支出分類明細"
+      "breakdown": "支出分類明細",
+      "radarNeedMoreData": "雷達圖需要至少3個分類資料"
     },
     "filter": {
       "accountType": "帳戶類型",

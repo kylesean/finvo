@@ -20,6 +20,7 @@ async def get_statistics_overview(
     start_date: str | None = Query(default=None, description="Start date for custom range (ISO 8601)"),
     end_date: str | None = Query(default=None, description="End date for custom range (ISO 8601)"),
     account_types: str | None = Query(default=None, description="Comma-separated account types to filter"),
+    tz_offset: int | None = Query(default=None, description="Timezone offset in minutes"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
@@ -38,6 +39,7 @@ async def get_statistics_overview(
             start_date=start_date,
             end_date=end_date,
             account_types=account_type_list,
+            tz_offset_minutes=tz_offset,
         )
 
         return success_response(data=result.model_dump(), message="Statistics overview retrieved successfully")

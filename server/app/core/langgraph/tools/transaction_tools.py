@@ -380,9 +380,8 @@ async def search_transactions(
             reverse=True,
         )[:3]
 
-        return {
+        response_data: dict[str, Any] = {
             "success": True,
-            "componentType": "ExpenseSummaryCard",
             "summary": {
                 "total_expense": float(total_expense),
                 "currency": display_currency,  # 使用用户的 primaryCurrency
@@ -404,6 +403,12 @@ async def search_transactions(
                 "max_amount": max_amount,
             },
         }
+
+        # Only emit GenUI component card if transactions were actually found
+        if result.total > 0:
+            response_data["componentType"] = "ExpenseSummaryCard"
+
+        return response_data
 
     except ValueError as e:
         return {

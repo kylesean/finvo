@@ -479,6 +479,9 @@ class Translations$home$zh {
 	/// zh: '$year年进度'
 	String yearProgress({required Object year}) => '${year}年进度';
 
+	/// zh: '余 $days 天 · $percent%'
+	String yearRemainingInfo({required Object days, required Object percent}) => '余 ${days} 天 · ${percent}%';
+
 	/// zh: '••••••••'
 	String get amountHidden => '••••••••';
 
@@ -2724,6 +2727,15 @@ class Translations$statistics$analysis$zh {
 
 	/// zh: '支出分析'
 	String get title => '支出分析';
+
+	/// zh: '支出分析'
+	String get expenseTitle => '支出分析';
+
+	/// zh: '收入分析'
+	String get incomeTitle => '收入分析';
+
+	/// zh: '雷达图需要至少3个分类数据'
+	String get radarNeedMoreData => '雷达图需要至少3个分类数据';
 
 	/// zh: '总计'
 	String get total => '总计';

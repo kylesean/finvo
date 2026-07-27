@@ -82,6 +82,12 @@ abstract class StatisticsOverview with _$StatisticsOverview {
       _$StatisticsOverviewFromJson(json);
 }
 
+extension StatisticsOverviewExtension on StatisticsOverview {
+  double get balanceNum => double.tryParse(totalBalance) ?? 0.0;
+  double get incomeNum => double.tryParse(totalIncome) ?? 0.0;
+  double get expenseNum => double.tryParse(totalExpense) ?? 0.0;
+}
+
 /// Trend data point for chart
 @freezed
 abstract class TrendDataPoint with _$TrendDataPoint {
@@ -93,6 +99,10 @@ abstract class TrendDataPoint with _$TrendDataPoint {
 
   factory TrendDataPoint.fromJson(Map<String, dynamic> json) =>
       _$TrendDataPointFromJson(json);
+}
+
+extension TrendDataPointExtension on TrendDataPoint {
+  double get amountNum => double.tryParse(amount) ?? 0.0;
 }
 
 /// Trend data response
@@ -122,6 +132,10 @@ abstract class CategoryBreakdownItem with _$CategoryBreakdownItem {
 
   factory CategoryBreakdownItem.fromJson(Map<String, dynamic> json) =>
       _$CategoryBreakdownItemFromJson(json);
+}
+
+extension CategoryBreakdownItemExtension on CategoryBreakdownItem {
+  double get amountNum => double.tryParse(amount) ?? 0.0;
 }
 
 /// Category breakdown response

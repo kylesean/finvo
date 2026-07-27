@@ -64,14 +64,19 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     );
   }
 
-  void _showDateRangePicker() {
+  Future<void> _showDateRangePicker() async {
     final state = ref.read(statisticsProvider);
-    unawaited(
-      DateRangePickerSheet.show(
-        context,
+    bool confirmed = false;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DateRangePickerSheet(
         initialStart: state.customStartDate,
         initialEnd: state.customEndDate,
         onConfirm: (startDate, endDate) {
+          confirmed = true;
           unawaited(
             ref
                 .read(statisticsProvider.notifier)
@@ -84,11 +89,18 @@ class _ReportPageState extends ConsumerState<ReportPage> {
         },
       ),
     );
+    if (!confirmed &&
+        state.timeRange == TimeRange.custom &&
+        state.customStartDate == null) {
+      unawaited(
+        ref.read(statisticsProvider.notifier).setTimeRange(TimeRange.month),
+      );
+    }
   }
 
   void _onTimeRangeSelected(TimeRange timeRange) {
     if (timeRange == TimeRange.custom) {
-      _showDateRangePicker();
+      unawaited(_showDateRangePicker());
     } else {
       unawaited(ref.read(statisticsProvider.notifier).setTimeRange(timeRange));
     }
@@ -247,7 +259,9 @@ class _ReportPageState extends ConsumerState<ReportPage> {
             (state.categoryBreakdown?.items.isEmpty ?? true));
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(statisticsProvider.notifier).loadStatistics(),
+      onRefresh: () async {
+        await ref.read(statisticsProvider.notifier).loadStatistics();
+      },
       child: SingleChildScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -342,6 +356,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                   delay: const Duration(milliseconds: 400),
                   child: CategoryAnalysisSection(
                     breakdown: state.categoryBreakdown!,
+                    chartType: state.chartType,
                   ),
                 ),
                 const SizedBox(height: 24),
