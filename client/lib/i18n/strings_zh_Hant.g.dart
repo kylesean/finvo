@@ -173,7 +173,8 @@ class _Translations$auth$zh_Hant extends Translations$auth$zh {
 	@override String get loginSuccess => '歡迎回來!';
 	@override String get loginFailed => '登錄失敗';
 	@override String get pleaseTryAgain => '請稍後重試。';
-	@override String get loginSubtitle => '登錄以繼續使用 AI 記帳助理';
+	@override @Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
+	String get loginSubtitle => '登錄以繼續使用 AI 記帳助理';
 	@override String get noAccount => '還沒有帳戶？註冊';
 	@override String get createAccount => '創建您的帳戶';
 	@override String get setPassword => '設置密碼';

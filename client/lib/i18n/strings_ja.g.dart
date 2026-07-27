@@ -173,7 +173,8 @@ class _Translations$auth$ja extends Translations$auth$zh {
 	@override String get loginSuccess => 'おかえりなさい！';
 	@override String get loginFailed => 'ログイン失敗';
 	@override String get pleaseTryAgain => '後ほど再試行してください。';
-	@override String get loginSubtitle => 'AI家計簿アシスタントを利用するにはログインしてください';
+	@override @Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
+	String get loginSubtitle => 'AI家計簿アシスタントを利用するにはログインしてください';
 	@override String get noAccount => 'アカウントをお持ちでないですか？ 登録';
 	@override String get createAccount => 'アカウントを作成';
 	@override String get setPassword => 'パスワード設定';

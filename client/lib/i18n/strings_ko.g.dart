@@ -173,7 +173,8 @@ class _Translations$auth$ko extends Translations$auth$zh {
 	@override String get loginSuccess => '반가워요!';
 	@override String get loginFailed => '로그인 실패';
 	@override String get pleaseTryAgain => '잠시 후 다시 시도해주세요.';
-	@override String get loginSubtitle => 'AI 가계부 도우미를 계속 사용하려면 로그인하세요';
+	@override @Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
+	String get loginSubtitle => 'AI 가계부 도우미를 계속 사용하려면 로그인하세요';
 	@override String get noAccount => '계정이 없으신가요? 가입하기';
 	@override String get createAccount => '계정 만들기';
 	@override String get setPassword => '비밀번호 설정';

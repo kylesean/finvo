@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:finvo/features/auth/widgets/brand_header.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/auth/providers/verification_provider.dart'; // Import new verification code Provider
@@ -95,19 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          t.auth.welcomeBack,
-                          style: theme.typography.body.xl2,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          t.auth.loginSubtitle,
-                          style: theme.typography.body.sm.copyWith(
-                            color: theme.colors.mutedForeground,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        BrandHeader(title: t.auth.welcomeBack),
                         const SizedBox(height: 32),
                         FTextFormField.email(
                           control: .managed(controller: _emailController),

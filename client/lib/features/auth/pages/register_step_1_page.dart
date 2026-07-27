@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:finvo/features/auth/widgets/brand_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -84,19 +85,7 @@ class _RegisterStep1PageState extends ConsumerState<RegisterStep1Page> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          t.auth.createAccount,
-                          style: theme.typography.body.xl2,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          t.auth.loginSubtitle,
-                          style: theme.typography.body.sm.copyWith(
-                            color: theme.colors.mutedForeground,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        BrandHeader(title: t.auth.createAccount),
                         const SizedBox(height: 32),
                         FTextFormField.email(
                           control: .managed(controller: _contactController),
