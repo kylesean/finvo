@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:finvo/features/auth/widgets/brand_header.dart';
 import '../../../core/network/exceptions/app_exception.dart';
 import '../providers/auth_provider.dart';
 import '../providers/verification_provider.dart';
@@ -95,19 +96,7 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          t.auth.setAccountPassword,
-                          style: theme.typography.body.xl2,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          t.auth.loginSubtitle,
-                          style: theme.typography.body.sm.copyWith(
-                            color: theme.colors.mutedForeground,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        BrandHeader(title: t.auth.setAccountPassword),
                         const SizedBox(height: 32),
                         FTextFormField.password(
                           control: .managed(controller: _passwordController),

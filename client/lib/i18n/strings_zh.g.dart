@@ -293,6 +293,7 @@ class Translations$auth$zh {
 	String get pleaseTryAgain => '请稍后重试。';
 
 	/// zh: '登录以继续使用 AI 记账助理'
+	@Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
 	String get loginSubtitle => '登录以继续使用 AI 记账助理';
 
 	/// zh: '还没有账户？注册'

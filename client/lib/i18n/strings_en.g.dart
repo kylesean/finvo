@@ -176,7 +176,8 @@ class _Translations$auth$en extends Translations$auth$zh {
 	@override String get loginSuccess => 'Welcome back!';
 	@override String get loginFailed => 'Login Failed';
 	@override String get pleaseTryAgain => 'Please try again later.';
-	@override String get loginSubtitle => 'Log in to continue using Finvo';
+	@override @Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
+	String get loginSubtitle => 'Log in to continue using Finvo';
 	@override String get noAccount => 'Don\'t have an account? Sign Up';
 	@override String get createAccount => 'Create Your Account';
 	@override String get setPassword => 'Set Password';
