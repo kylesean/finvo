@@ -29,6 +29,7 @@ from app.schemas.user import (
     UserSettingsResponse,
 )
 from app.services.user_service import UserService
+from app.utils.currency_utils import get_user_display_currency
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -341,9 +342,12 @@ async def update_user_settings(
         estimated_avg_daily_spending=request.estimatedAvgDailySpending,
     )
 
+    # Read actual currency from financial_settings (Single Source of Truth)
+    display_currency = await get_user_display_currency(db, current_user.uuid)
+
     settings_response = UserSettingsResponse(
-        defaultCurrency="CNY",  # Placeholder - not in current schema
-        timezone="Asia/Shanghai",  # Placeholder - not in current schema
+        defaultCurrency=display_currency,
+        timezone=current_user.timezone,
         estimatedAvgDailySpending=settings.avg_daily_spending,
         safetyBalanceThreshold=settings.safety_balance_threshold,
         createdAt=settings.created_at.isoformat().replace("+00:00", "Z"),
