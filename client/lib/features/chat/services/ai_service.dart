@@ -97,7 +97,6 @@ class AIService {
       "session_id": sessionId, // null for new session, backend will create one
     };
 
-    _logger.info("AIService: Request body: ${requestBody.toString()}");
     _logger.info("AIService: Starting SSE connection...");
 
     controller.onCancel = () {

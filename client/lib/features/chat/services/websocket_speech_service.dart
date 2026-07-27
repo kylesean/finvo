@@ -1,7 +1,7 @@
 // features/chat/services/websocket_speech_service.dart
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
@@ -202,7 +202,9 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       if (audioStream != null) {
         _audioSubscription = audioStream.listen(
           (audioData) {
-            _logger.info('Sending audio data: ${audioData.length} bytes');
+            if (kDebugMode) {
+              _logger.finest('Sending audio data: ${audioData.length} bytes');
+            }
             sendAudioData(audioData);
           },
           onError: (Object error) {

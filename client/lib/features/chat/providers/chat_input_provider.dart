@@ -251,7 +251,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     final newText = _textBeforeSpeechSession.isEmpty
         ? recognizedText
         : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
-    _logger.info(
+    _logger.fine(
       "Speech result: '$recognizedText', concatenated text: '$newText'",
     );
     state = state.copyWith(text: newText.trim());

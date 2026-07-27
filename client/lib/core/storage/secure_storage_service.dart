@@ -21,9 +21,7 @@ class SecureStorageService {
       // Update cache
       _cachedToken = token;
       _tokenCacheInitialized = true;
-      _logger.info(
-        'SecureStorageService: Token saved - ${token.substring(0, 10)}...',
-      );
+      _logger.fine('SecureStorageService: Token saved (${token.length} chars)');
     } catch (e) {
       _logger.info('SecureStorageService: Failed to save token: $e');
       rethrow;
@@ -33,9 +31,7 @@ class SecureStorageService {
   Future<String?> getToken() async {
     // If cache is initialized, return cache value directly
     if (_tokenCacheInitialized) {
-      _logger.info(
-        'SecureStorageService: Read token from cache - ${_cachedToken != null ? '${_cachedToken!.substring(0, 10)}...' : 'null'}',
-      );
+      _logger.fine('SecureStorageService: Read token from cache');
       return _cachedToken;
     }
 
@@ -44,8 +40,8 @@ class SecureStorageService {
       // Initialize cache
       _cachedToken = token;
       _tokenCacheInitialized = true;
-      _logger.info(
-        'SecureStorageService: Read token - ${token != null ? '${token.substring(0, 10)}...' : 'null'}',
+      _logger.fine(
+        'SecureStorageService: Read token (${token != null ? 'present' : 'null'})',
       );
       return token;
     } catch (e) {

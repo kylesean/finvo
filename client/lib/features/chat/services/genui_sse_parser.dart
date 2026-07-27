@@ -75,7 +75,7 @@ class GenUiSseParser {
       final json = jsonDecode(jsonStr) as Map<String, dynamic>;
       return _parseFromJson(json);
     } catch (e) {
-      _logger.info('GenUiSseParser: Error parsing SSE event: $e');
+      _logger.warning('GenUiSseParser: Error parsing SSE event: $e');
       return ParsedSseEvent(
         type: SseEventType.error,
         errorMessage: 'Failed to parse SSE event: ${e.toString()}',

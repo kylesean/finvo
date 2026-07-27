@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -264,12 +265,9 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     FThemeData theme,
     app.ChatMessage message,
   ) {
-    _logger.info(
-      'Building attachments for message ${message.id}: ${message.attachments.length} attachments',
-    );
-    for (final att in message.attachments) {
-      _logger.info(
-        '  Attachment: id=${att.id}, filename=${att.filename}, signedUrl=${att.signedUrl}',
+    if (kDebugMode) {
+      _logger.fine(
+        'Building attachments for message ${message.id}: ${message.attachments.length} attachments',
       );
     }
 

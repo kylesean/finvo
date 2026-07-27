@@ -321,7 +321,7 @@ class CustomContentGenerator implements genui.Transport {
         );
       }
 
-      _logger.info('CustomContentGenerator: Sending request to $uri');
+      _logger.fine('CustomContentGenerator: Sending SSE request');
 
       // 3. Send request
       final response = await _dio!.post<ResponseBody>(
