@@ -8,6 +8,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note**: During alpha development, this changelog is updated only at version releases.
 > For detailed changes between releases, see the [Git commit history](https://github.com/kylesean/Finvo/commits/main).
 
+## [0.2.0-alpha] - 2026-07-27
+
+### Added
+- App version update checker with in-app update prompt (Android & iOS).
+- Registration now works out-of-box without an email server: verification code
+  check is skipped when `EMAIL_PROVIDER`/`SMS_PROVIDER` is `mock` (default).
+- i18n-friendly username generation derived from email local-part or mobile
+  tail digits (inspired by GitLab/Grafana/Discourse), replacing random
+  `user_XXXXXX` names.
+- Animated BrandHeader on auth screens.
+
+### Changed
+- **Breaking**: Project renamed from *Augo* to **Finvo** — package identifiers,
+  Docker image names, and CI references updated accordingly.
+- Unified default currency to CNY via `PROJECT_DEFAULT_CURRENCY` constant
+  (single source of truth across model, inference, and service layers).
+- Upgraded CI/CD pipelines: hardened security scanning, improved versioning
+  and Docker deployment configuration.
+- Docker image names lowercased (`finvo-api`) to comply with OCI spec.
+
+### Fixed
+- Removed redundant and sensitive console logging in the client.
+- Fixed Docker Compose `invalid reference format` caused by uppercase image name.
+- Handled native Android speech recognition restrictions gracefully.
+
+## [0.1.2-alpha] - 2026-01-15
+
+### Changed
+- Security hardening and dependency upgrades.
+- Improved configuration management for versioning and Docker deployments.
+
 ## [0.1.1-alpha] - 2025-12-28
 
 ### Fixed
