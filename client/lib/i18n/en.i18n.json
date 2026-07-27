@@ -1016,6 +1016,7 @@
     "dailyBurnRateSettings": "Daily Burn Rate",
     "setDailyBurnRate": "Set your estimated daily spending",
     "dailyBurnRateSaved": "Daily burn rate saved",
+    "dayUnit": "day",
     "saveFailed": "Save failed"
   },
   "app": {
@@ -1150,8 +1151,8 @@
       "codeFormat": "Invite code can only contain letters and numbers"
     },
     "list": {
-      "emptyTitle": "Managing joint expenses never been easier",
-      "emptySubtitle": "Create a shared space and easily sync joint\ndebts and expenses with partners or friends",
+      "emptyTitle": "Start Collaborative Financial Spaces",
+      "emptySubtitle": "Create or join a space to manage shared accounts and assets with family, partners, or teams",
       "getStarted": "Get Started",
       "hasInviteCode": "Have an invite code? Tap to join",
       "joinedSuccess": "Successfully joined \"${name}\"!"

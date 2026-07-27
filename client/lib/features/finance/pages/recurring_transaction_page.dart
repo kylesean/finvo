@@ -1049,19 +1049,23 @@ class _RecurringTransactionPageState
 
   /// Update the recurrence rule with the new start date
   void _updateRecurrenceRuleWithNewDate(DateTime newDate) {
-    // If it's a monthly rule, update BYMONTHDAY
+    // If it's a monthly rule, update BYMONTHDAY (preserve -1 for last day of month)
     if (_recurrenceRule.contains('FREQ=MONTHLY')) {
-      _recurrenceRule = _recurrenceRule.replaceAllMapped(
-        RegExp(r'BYMONTHDAY=\d+'),
-        (match) => 'BYMONTHDAY=${newDate.day}',
-      );
-      // If there is no BYMONTHDAY, add it
-      if (!_recurrenceRule.contains('BYMONTHDAY')) {
-        _recurrenceRule += ';BYMONTHDAY=${newDate.day}';
+      if (_recurrenceRule.contains('BYMONTHDAY=-1')) {
+        _recurrenceDescription = isZh ? '每月最后一天' : 'Monthly on the last day';
+      } else {
+        _recurrenceRule = _recurrenceRule.replaceAllMapped(
+          RegExp(r'BYMONTHDAY=-?\d+'),
+          (match) => 'BYMONTHDAY=${newDate.day}',
+        );
+        // If there is no BYMONTHDAY, add it
+        if (!_recurrenceRule.contains('BYMONTHDAY')) {
+          _recurrenceRule += ';BYMONTHDAY=${newDate.day}';
+        }
+        _recurrenceDescription = isZh
+            ? '每月 ${newDate.day} 号'
+            : 'Monthly on the ${newDate.day}${_getDaySuffix(newDate.day.toString())}';
       }
-      _recurrenceDescription = isZh
-          ? '每月 ${newDate.day} 号'
-          : 'Monthly on the ${newDate.day}${_getDaySuffix(newDate.day.toString())}';
     } else if (_recurrenceRule.contains('FREQ=WEEKLY')) {
       // If it's a weekly rule, update BYDAY
       final weekdays = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];

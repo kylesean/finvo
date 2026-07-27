@@ -1016,6 +1016,7 @@
     "dailyBurnRateSettings": "日常消費預估",
     "setDailyBurnRate": "設置您的日常消費預估金額",
     "dailyBurnRateSaved": "日常消費預估已保存",
+    "dayUnit": "天",
     "saveFailed": "保存失敗"
   },
   "app": {
@@ -1116,8 +1117,8 @@
       "codeFormat": "邀請碼只能包含字母和數字"
     },
     "list": {
-      "emptyTitle": "共同記帳從未如此簡單",
-      "emptySubtitle": "建立一個共享空間，與夥伴或朋友輕鬆同步共同債務和支出",
+      "emptyTitle": "開啟多方協同的財務空間",
+      "emptySubtitle": "建立或加入共享空間，與家人、夥伴或團隊協同管理共享帳目與資產",
       "getStarted": "開始使用",
       "hasInviteCode": "有邀請碼？點擊加入",
       "joinedSuccess": "成功加入「${name}」！"

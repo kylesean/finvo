@@ -1016,7 +1016,8 @@
     "dailyBurnRateSettings": "支出見積もり",
     "setDailyBurnRate": "1日の支出見積もりを設定",
     "dailyBurnRateSaved": "支出見積もりを保存しました",
-    "saveFailed": "保存失敗"
+    "dayUnit": "日",
+    "saveFailed": "保存に失敗しました"
   },
   "app": {
     "splashTitle": "スマートに、豊かに。",
@@ -1116,8 +1117,8 @@
       "codeFormat": "招待コードは英数字のみ使用できます"
     },
     "list": {
-      "emptyTitle": "共同支出の管理がこんなに簡単に",
-      "emptySubtitle": "共有スペースを作成して、パートナーや友達と\n共同の支出を簡単に同期しましょう",
+      "emptyTitle": "共同財務スペースを開始",
+      "emptySubtitle": "共有スペースを作成・参加し、家族、パートナー、チームと共同の口座や資産を管理",
       "getStarted": "始める",
       "hasInviteCode": "招待コードをお持ちですか？タップして参加",
       "joinedSuccess": "「${name}」に参加しました！"

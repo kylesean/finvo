@@ -740,35 +740,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
   /// get category icon
   IconData _getCategoryIcon(String? categoryKey) {
     if (categoryKey == null) return FLucideIcons.wallet;
-
-    switch (categoryKey) {
-      case 'FOOD_DINING':
-        return FLucideIcons.coffee;
-      case 'TRANSPORT':
-        return FLucideIcons.navigation;
-      case 'SHOPPING':
-        return FLucideIcons.shoppingBag;
-      case 'ENTERTAINMENT':
-        return FLucideIcons.film;
-      case 'HOME_UTILITIES':
-        return FLucideIcons.housePlus;
-      case 'HEALTHCARE':
-        return FLucideIcons.heart;
-      case 'EDUCATION':
-        return FLucideIcons.book;
-      case 'PERSONAL':
-        return FLucideIcons.user;
-      case 'TRAVEL':
-        return FLucideIcons.mapPin;
-      case 'GIFTS_CHARITY':
-        return FLucideIcons.gift;
-      case 'FINANCIAL':
-        return FLucideIcons.dollarSign;
-      case 'OTHER':
-        return FLucideIcons.ellipsis;
-      default:
-        return FLucideIcons.wallet;
-    }
+    return TransactionCategory.fromKey(categoryKey).icon;
   }
 
   /// get category display name

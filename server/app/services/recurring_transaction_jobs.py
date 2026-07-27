@@ -8,7 +8,7 @@ scheduler service.
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any, cast as type_cast
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,6 +55,9 @@ async def process_due_transactions() -> None:
             skipped_count = 0
             error_count = 0
 
+            # Caches to prevent N+1 DB queries per due item
+            user_base_cache: dict[UUID, str] = {}
+
             for recurring_tx in due_transactions:
                 try:
                     # Idempotency: skip if already generated for this exact execution point
@@ -64,7 +67,7 @@ async def process_due_transactions() -> None:
                         await _update_next_execution(db, recurring_tx)
                         continue
 
-                    await _create_transaction_from_recurring(db, recurring_tx)
+                    await _create_transaction_from_recurring(db, recurring_tx, user_base_cache=user_base_cache)
                     await _update_next_execution(db, recurring_tx)
                     processed_count += 1
                 except Exception as e:
@@ -123,6 +126,7 @@ async def _already_generated(
 async def _create_transaction_from_recurring(
     db: AsyncSession,
     recurring_tx: RecurringTransaction,
+    user_base_cache: dict[UUID, str] | None = None,
 ) -> None:
     """Create an actual transaction from a recurring transaction rule.
 
@@ -136,7 +140,14 @@ async def _create_transaction_from_recurring(
     amount_original = recurring_tx.amount
     currency = recurring_tx.currency.upper()
 
-    user_base = await get_user_base_currency(db, recurring_tx.user_uuid)
+    user_uuid = recurring_tx.user_uuid
+    if user_base_cache is not None and user_uuid in user_base_cache:
+        user_base = user_base_cache[user_uuid]
+    else:
+        user_base = await get_user_base_currency(db, user_uuid)
+        if user_base_cache is not None:
+            user_base_cache[user_uuid] = user_base
+
     base_amount, exchange_rate = await convert_to_user_base(abs(amount_original), currency, user_base)
     amount = base_amount.quantize(Decimal("0.00000001"))
 

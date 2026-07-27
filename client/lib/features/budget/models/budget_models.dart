@@ -119,7 +119,7 @@ class Budget {
   factory Budget.fromJson(Map<String, dynamic> json) {
     DateTime parseDate(String? dateStr) {
       if (dateStr == null || dateStr.isEmpty) {
-        return DateTime.now();
+        return DateTime.fromMillisecondsSinceEpoch(0);
       }
       return DateTime.parse(dateStr);
     }

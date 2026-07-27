@@ -6,7 +6,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 # ============================================================================
 # Enums (imported from models for consistency)
@@ -92,6 +92,14 @@ class BudgetSettingsUpdateRequest(BaseModel):
 
     warning_threshold: int | None = Field(default=None, ge=0, le=100)
     alert_threshold: int | None = Field(default=None, ge=0, le=100)
+
+    @model_validator(mode="after")
+    def validate_thresholds(self) -> BudgetSettingsUpdateRequest:
+        """Ensure warning_threshold <= alert_threshold if both are provided."""
+        if self.warning_threshold is not None and self.alert_threshold is not None:
+            if self.warning_threshold > self.alert_threshold:
+                raise ValueError("warning_threshold must be less than or equal to alert_threshold")
+        return self
 
 
 # ============================================================================

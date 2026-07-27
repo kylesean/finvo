@@ -147,35 +147,39 @@ class TransactionSearchRequest(BaseModel):
 
 
 class RecurringTransactionCreateRequest(BaseModel):
-    """创建周期性交易请求"""
+    """create recurring transaction request"""
 
     # Required fields
     type: str = Field(..., description="Transaction type: EXPENSE, INCOME, TRANSFER")
     amount: str = Field(..., description="Transaction amount as string")
-    recurrence_rule: str  # RRULE format
-    start_date: str  # YYYY-MM-DD
+    recurrence_rule: str = Field(..., description="RRULE format", alias="recurrenceRule")
+    start_date: str = Field(..., description="YYYY-MM-DD", alias="startDate")
 
     # Optional account references
-    source_account_id: str | None = Field(None, description="Source account UUID")
-    target_account_id: str | None = Field(None, description="Target account UUID")
+    source_account_id: str | None = Field(None, description="Source account UUID", alias="sourceAccountId")
+    target_account_id: str | None = Field(None, description="Target account UUID", alias="targetAccountId")
 
     # Amount settings
-    amount_type: str = Field(default="FIXED", description="FIXED or ESTIMATE")
-    requires_confirmation: bool = Field(default=False, description="Requires confirmation before generating")
+    amount_type: str = Field(default="FIXED", description="FIXED or ESTIMATE", alias="amountType")
+    requires_confirmation: bool = Field(
+        default=False, description="Requires confirmation before generating", alias="requiresConfirmation"
+    )
     currency: str = Field(default="CNY", description="Currency code (CNY, USD, JPY, etc.)")
 
     # Classification
-    category_key: str | None = Field(default="OTHERS", description="Category key")
+    category_key: str | None = Field(default="OTHERS", description="Category key", alias="categoryKey")
     tags: list[str] | None = Field(default=None, description="Tags list")
 
     # Rule settings
     timezone: str = Field(default="Asia/Shanghai", description="Timezone for the rule")
-    end_date: str | None = None  # YYYY-MM-DD
-    exception_dates: list[str] | None = None
+    end_date: str | None = Field(default=None, alias="endDate")  # YYYY-MM-DD
+    exception_dates: list[str] | None = Field(default=None, alias="exceptionDates")
 
     # Metadata
     description: str | None = None
-    is_active: bool = True
+    is_active: bool = Field(default=True, alias="isActive")
+
+    model_config = ConfigDict(populate_by_name=True)
 
     @field_validator("amount")
     @classmethod
@@ -206,45 +210,12 @@ class RecurringTransactionCreateRequest(BaseModel):
         return v.upper()
 
 
-class RecurringTransactionCreate(BaseModel):
-    """Recurring transaction creation schema (camelCase support)"""
-
-    # Required fields
-    type: str = Field(..., description="Transaction type: EXPENSE, INCOME, TRANSFER")
-    amount: str = Field(..., description="Transaction amount")
-    recurrenceRule: str = Field(..., description="RRULE format recurrence rule", alias="recurrence_rule")
-    startDate: str = Field(..., description="Start date (YYYY-MM-DD)", alias="start_date")
-
-    # Optional account references
-    sourceAccountId: str | None = Field(None, description="Source account UUID", alias="source_account_id")
-    targetAccountId: str | None = Field(None, description="Target account UUID", alias="target_account_id")
-
-    # Amount settings
-    amountType: str = Field(default="FIXED", description="FIXED or ESTIMATE", alias="amount_type")
-    requiresConfirmation: bool = Field(
-        default=False, description="Requires confirmation", alias="requires_confirmation"
-    )
-    currency: str = Field(default="CNY", description="Currency code")
-
-    # Classification
-    categoryKey: str | None = Field(default="OTHERS", description="Category key", alias="category_key")
-    tags: list[str] | None = Field(default=None, description="Tags list")
-
-    # Rule settings
-    timezone: str = Field(default="Asia/Shanghai", description="Timezone")
-    endDate: str | None = Field(None, description="End date (YYYY-MM-DD)", alias="end_date")
-    exceptionDates: list[str] | None = Field(None, description="Exception dates", alias="exception_dates")
-
-    # Metadata
-    description: str | None = Field(None, description="Transaction description")
-    isActive: bool = Field(default=True, alias="is_active")
-
-    # Allow both camelCase and snake_case
-    model_config = ConfigDict(populate_by_name=True)
+# Alias for backward compatibility
+RecurringTransactionCreate = RecurringTransactionCreateRequest
 
 
 class RecurringTransactionUpdateRequest(BaseModel):
-    """更新周期性交易请求"""
+    """update recurring transaction request"""
 
     # Transaction type
     type: str | None = None
@@ -313,7 +284,7 @@ class RecurringTransactionUpdateRequest(BaseModel):
 
 
 class CashFlowForecastRequest(BaseModel):
-    """现金流预测请求"""
+    """cash flow forecast request"""
 
     forecast_days: int = Field(default=60, ge=1, le=365)
     granularity: str = Field(default="daily")
@@ -322,14 +293,14 @@ class CashFlowForecastRequest(BaseModel):
     @field_validator("granularity")
     @classmethod
     def validate_granularity(cls, v: str) -> str:
-        """验证粒度参数"""
+        """Validate granularity"""
         if v not in ["daily", "weekly", "monthly"]:
             raise ValueError("granularity must be one of: daily, weekly, monthly")
         return v
 
 
 class CommentCreateRequest(BaseModel):
-    """创建评论请求"""
+    """create comment request"""
 
     comment_text: str = Field(min_length=1)
     parent_comment_id: int | None = None
@@ -337,7 +308,7 @@ class CommentCreateRequest(BaseModel):
 
 # Response schemas
 class TransactionResponse(BaseModel):
-    """交易响应"""
+    """transaction response"""
 
     id: str  # UUID as string
     user_uuid: str
@@ -362,7 +333,7 @@ class TransactionResponse(BaseModel):
 
 
 class TransactionDetailResponse(BaseModel):
-    """交易详情响应"""
+    """transaction detail response"""
 
     id: str  # UUID as string
     user_uuid: str
@@ -392,7 +363,7 @@ class TransactionDetailResponse(BaseModel):
 
 
 class CommentResponse(BaseModel):
-    """评论响应"""
+    """comment response"""
 
     id: str
     transaction_id: str
@@ -408,7 +379,7 @@ class CommentResponse(BaseModel):
 
 
 class RecurringTransactionResponse(BaseModel):
-    """周期性交易响应"""
+    """recurring transaction response"""
 
     id: str  # UUID as string
     user_uuid: str  # UUID as string
@@ -451,7 +422,7 @@ class RecurringTransactionResponse(BaseModel):
 
 
 class ForecastDayBreakdown(BaseModel):
-    """预测日明细"""
+    """forecast day breakdown"""
 
     date: str
     closingBalance: str
@@ -459,14 +430,14 @@ class ForecastDayBreakdown(BaseModel):
 
 
 class ForecastWarning(BaseModel):
-    """预测预警"""
+    """forecast warning"""
 
     date: str
     message: str
 
 
 class ForecastSummary(BaseModel):
-    """预测汇总"""
+    """forecast summary"""
 
     startBalance: str
     endBalance: str
@@ -475,7 +446,7 @@ class ForecastSummary(BaseModel):
 
 
 class CashFlowForecastResponse(BaseModel):
-    """现金流预测响应"""
+    """cash flow forecast response"""
 
     dailyBreakdown: list[ForecastDayBreakdown]
     warnings: list[ForecastWarning]
@@ -483,7 +454,7 @@ class CashFlowForecastResponse(BaseModel):
 
 
 class PaginatedTransactionResponse(BaseModel):
-    """分页交易响应"""
+    """paginated transaction response"""
 
     data: list[TransactionResponse]
     meta: dict[str, Any]

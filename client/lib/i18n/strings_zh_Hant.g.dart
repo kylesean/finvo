@@ -836,6 +836,7 @@ class _Translations$financial$zh_Hant extends Translations$financial$zh {
 	@override String get dailyBurnRateSettings => '日常消費預估';
 	@override String get setDailyBurnRate => '設置您的日常消費預估金額';
 	@override String get dailyBurnRateSaved => '日常消費預估已保存';
+	@override String get dayUnit => '天';
 	@override String get saveFailed => '保存失敗';
 }
 
@@ -1405,8 +1406,8 @@ class _Translations$sharedSpace$list$zh_Hant extends Translations$sharedSpace$li
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get emptyTitle => '共同記帳從未如此簡單';
-	@override String get emptySubtitle => '建立一個共享空間，與夥伴或朋友輕鬆同步共同債務和支出';
+	@override String get emptyTitle => '開啟多方協同的財務空間';
+	@override String get emptySubtitle => '建立或加入共享空間，與家人、夥伴或團隊協同管理共享帳目與資產';
 	@override String get getStarted => '開始使用';
 	@override String get hasInviteCode => '有邀請碼？點擊加入';
 	@override String joinedSuccess({required Object name}) => '成功加入「${name}」！';
@@ -3170,6 +3171,7 @@ extension on TranslationsZhHant {
 			'financial.dailyBurnRateSettings' => '日常消費預估',
 			'financial.setDailyBurnRate' => '設置您的日常消費預估金額',
 			'financial.dailyBurnRateSaved' => '日常消費預估已保存',
+			'financial.dayUnit' => '天',
 			'financial.saveFailed' => '保存失敗',
 			'app.splashTitle' => '智見增長，格物致富。',
 			'app.splashSubtitle' => '智能財務助手',
@@ -3241,8 +3243,8 @@ extension on TranslationsZhHant {
 			'sharedSpace.join.codeRequired' => '請輸入邀請碼',
 			'sharedSpace.join.codeInvalid' => '邀請碼格式無效',
 			'sharedSpace.join.codeFormat' => '邀請碼只能包含字母和數字',
-			'sharedSpace.list.emptyTitle' => '共同記帳從未如此簡單',
-			'sharedSpace.list.emptySubtitle' => '建立一個共享空間，與夥伴或朋友輕鬆同步共同債務和支出',
+			'sharedSpace.list.emptyTitle' => '開啟多方協同的財務空間',
+			'sharedSpace.list.emptySubtitle' => '建立或加入共享空間，與家人、夥伴或團隊協同管理共享帳目與資產',
 			'sharedSpace.list.getStarted' => '開始使用',
 			'sharedSpace.list.hasInviteCode' => '有邀請碼？點擊加入',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '成功加入「${name}」！',

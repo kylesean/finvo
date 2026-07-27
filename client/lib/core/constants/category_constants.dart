@@ -134,11 +134,12 @@ enum TransactionCategory {
     debtRepayment,
   ];
 
-  /// Get enum from key, case insensitive. Returns 'others' as fallback.
+  /// Get enum from key (case-insensitive). Returns 'others' as fallback.
   static TransactionCategory fromKey(String? key) {
     if (key == null || key.isEmpty) return others;
+    final upperKey = key.toUpperCase();
     try {
-      return values.firstWhere((e) => e.key == key.toUpperCase());
+      return values.firstWhere((e) => e.key == upperKey);
     } catch (_) {
       return others;
     }

@@ -836,6 +836,7 @@ class _Translations$financial$ko extends Translations$financial$zh {
 	@override String get dailyBurnRateSettings => '일일 소비 추정';
 	@override String get setDailyBurnRate => '일일 예상 소비 금액 설정';
 	@override String get dailyBurnRateSaved => '일일 소비 추정 금액 저장됨';
+	@override String get dayUnit => '일';
 	@override String get saveFailed => '저장 실패';
 }
 
@@ -1405,8 +1406,8 @@ class _Translations$sharedSpace$list$ko extends Translations$sharedSpace$list$zh
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get emptyTitle => '공동 지출 관리가 이렇게 쉬워졌습니다';
-	@override String get emptySubtitle => '공유 공간을 만들어 파트너나 친구와\n공동 지출을 쉽게 동기화하세요';
+	@override String get emptyTitle => '협력 재무 공간 시작하기';
+	@override String get emptySubtitle => '공유 공간을 생성하거나 참여하여 가족, 파트너, 팀과 함께 재무 및 자산을 관리하세요';
 	@override String get getStarted => '시작하기';
 	@override String get hasInviteCode => '초대 코드가 있으신가요? 탭하여 참여';
 	@override String joinedSuccess({required Object name}) => '"${name}"에 참여했습니다!';
@@ -3170,6 +3171,7 @@ extension on TranslationsKo {
 			'financial.dailyBurnRateSettings' => '일일 소비 추정',
 			'financial.setDailyBurnRate' => '일일 예상 소비 금액 설정',
 			'financial.dailyBurnRateSaved' => '일일 소비 추정 금액 저장됨',
+			'financial.dayUnit' => '일',
 			'financial.saveFailed' => '저장 실패',
 			'app.splashTitle' => '지혜로운 성장, 가치 있는 부.',
 			'app.splashSubtitle' => '스마트 금융 비서',
@@ -3241,8 +3243,8 @@ extension on TranslationsKo {
 			'sharedSpace.join.codeRequired' => '초대 코드를 입력하세요',
 			'sharedSpace.join.codeInvalid' => '초대 코드 형식이 잘못되었습니다',
 			'sharedSpace.join.codeFormat' => '초대 코드는 영문과 숫자만 사용할 수 있습니다',
-			'sharedSpace.list.emptyTitle' => '공동 지출 관리가 이렇게 쉬워졌습니다',
-			'sharedSpace.list.emptySubtitle' => '공유 공간을 만들어 파트너나 친구와\n공동 지출을 쉽게 동기화하세요',
+			'sharedSpace.list.emptyTitle' => '협력 재무 공간 시작하기',
+			'sharedSpace.list.emptySubtitle' => '공유 공간을 생성하거나 참여하여 가족, 파트너, 팀과 함께 재무 및 자산을 관리하세요',
 			'sharedSpace.list.getStarted' => '시작하기',
 			'sharedSpace.list.hasInviteCode' => '초대 코드가 있으신가요? 탭하여 참여',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '"${name}"에 참여했습니다!',
