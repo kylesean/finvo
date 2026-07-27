@@ -363,7 +363,14 @@ class _Translations$settings$ko extends Translations$settings$zh {
 	@override String get helpAndFeedback => '도움말 및 피드백';
 	@override String get helpAndFeedbackSubtitle => '도움 받기 또는 피드백 제공';
 	@override String get aboutApp => '앱 정보';
-	@override String get aboutAppSubtitle => '버전 및 개발자 정보';
+	@override String get aboutAppSubtitle => '버전 정보 및 업데이트 확인';
+	@override String get checkUpdate => '업데이트 확인';
+	@override String get checkingUpdate => '업데이트 확인 중...';
+	@override String get latestVersionToast => '최신 버전을 사용 중입니다';
+	@override String get newVersionTitle => '새 버전 출시';
+	@override String get updateNow => '지금 업데이트';
+	@override String get updateLater => '나중에';
+	@override String get fetchUpdateFailed => '업데이트 확인 실패';
 	@override String currencyChangedRefreshHint({required Object currency}) => '${currency}로 변경되었습니다. 새 거래는 이 통화로 기록됩니다.';
 	@override String get sharedSpace => '공유 공간';
 	@override String get speechRecognition => '음성 인식';
@@ -425,6 +432,11 @@ class _Translations$speech$ko extends Translations$speech$zh {
 	@override String get enterAddress => '서버 주소를 입력하세요';
 	@override String get enterValidPort => '유효한 포트 번호를 입력하세요 (1-65535)';
 	@override String get configSaved => '구성이 저장되었습니다';
+	@override String get systemVoiceRestrictedTitle => '시스템 음성을 사용할 수 없음';
+	@override String get systemVoiceRestrictedContent => '기기 제조사 권한 제한으로 인해 시스템 음성을 사용할 수 없습니다. WebSocket 자작 ASR 설정을 권장합니다.';
+	@override String get goToSettings => '설정으로 이동';
+	@override String get systemVoiceStatusAvailable => '시스템 음성 지원됨';
+	@override String get systemVoiceStatusRestricted => '시스템 음성 제한됨 (자작 ASR 권장)';
 }
 
 // Path: amountTheme
@@ -2515,7 +2527,14 @@ extension on TranslationsKo {
 			'settings.helpAndFeedback' => '도움말 및 피드백',
 			'settings.helpAndFeedbackSubtitle' => '도움 받기 또는 피드백 제공',
 			'settings.aboutApp' => '앱 정보',
-			'settings.aboutAppSubtitle' => '버전 및 개발자 정보',
+			'settings.aboutAppSubtitle' => '버전 정보 및 업데이트 확인',
+			'settings.checkUpdate' => '업데이트 확인',
+			'settings.checkingUpdate' => '업데이트 확인 중...',
+			'settings.latestVersionToast' => '최신 버전을 사용 중입니다',
+			'settings.newVersionTitle' => '새 버전 출시',
+			'settings.updateNow' => '지금 업데이트',
+			'settings.updateLater' => '나중에',
+			'settings.fetchUpdateFailed' => '업데이트 확인 실패',
 			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '${currency}로 변경되었습니다. 새 거래는 이 통화로 기록됩니다.',
 			'settings.sharedSpace' => '공유 공간',
 			'settings.speechRecognition' => '음성 인식',
@@ -2567,6 +2586,11 @@ extension on TranslationsKo {
 			'speech.enterAddress' => '서버 주소를 입력하세요',
 			'speech.enterValidPort' => '유효한 포트 번호를 입력하세요 (1-65535)',
 			'speech.configSaved' => '구성이 저장되었습니다',
+			'speech.systemVoiceRestrictedTitle' => '시스템 음성을 사용할 수 없음',
+			'speech.systemVoiceRestrictedContent' => '기기 제조사 권한 제한으로 인해 시스템 음성을 사용할 수 없습니다. WebSocket 자작 ASR 설정을 권장합니다.',
+			'speech.goToSettings' => '설정으로 이동',
+			'speech.systemVoiceStatusAvailable' => '시스템 음성 지원됨',
+			'speech.systemVoiceStatusRestricted' => '시스템 음성 제한됨 (자작 ASR 권장)',
 			'amountTheme.chinaMarket' => '중국 시장 관습',
 			'amountTheme.chinaMarketDesc' => '빨강 상승/초록 하락 (권장)',
 			'amountTheme.international' => '국제 표준',

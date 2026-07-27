@@ -364,7 +364,14 @@ class _Translations$settings$en extends Translations$settings$zh {
 	@override String get helpAndFeedback => 'Help & Feedback';
 	@override String get helpAndFeedbackSubtitle => 'Get help or provide feedback';
 	@override String get aboutApp => 'About';
-	@override String get aboutAppSubtitle => 'Version info and developer information';
+	@override String get aboutAppSubtitle => 'Version info and check for updates';
+	@override String get checkUpdate => 'Check for Updates';
+	@override String get checkingUpdate => 'Checking for updates...';
+	@override String get latestVersionToast => 'You are on the latest version';
+	@override String get newVersionTitle => 'New Version Available';
+	@override String get updateNow => 'Update Now';
+	@override String get updateLater => 'Later';
+	@override String get fetchUpdateFailed => 'Failed to check for updates, please try again later';
 	@override String currencyChangedRefreshHint({required Object currency}) => 'Switched to ${currency}. New transactions will use this currency.';
 	@override String get sharedSpace => 'Shared Space';
 	@override String get speechRecognition => 'Speech Recognition';
@@ -426,6 +433,15 @@ class _Translations$speech$en extends Translations$speech$zh {
 	@override String get enterAddress => 'Please enter server address';
 	@override String get enterValidPort => 'Please enter a valid port (1-65535)';
 	@override String get configSaved => 'Configuration saved';
+	@override String get systemVoiceRestrictedTitle => 'System Speech Unavailable';
+	@override String get systemVoiceRestrictedContent => 'Your device vendor restricts standard system speech services. We recommend configuring a custom WebSocket ASR in Speech Settings.';
+	@override String get goToSettings => 'Go to Settings';
+	@override String get systemVoiceStatusAvailable => 'System Speech Supported';
+	@override String get systemVoiceStatusRestricted => 'System Speech Restricted or Unavailable (Self-hosted ASR recommended)';
+	@override String get serviceNotConfigured => 'Speech service is not configured. Please set the server address in Speech Settings.';
+	@override String get connectionFailedTitle => 'Speech Service Connection Failed';
+	@override String get connectionFailed => 'Cannot connect to WebSocket speech recognition service. Please check your server address, port, or network connectivity.';
+	@override String get noSpeechRecognized => 'No speech input detected, please try again.';
 }
 
 // Path: amountTheme
@@ -2519,7 +2535,14 @@ extension on TranslationsEn {
 			'settings.helpAndFeedback' => 'Help & Feedback',
 			'settings.helpAndFeedbackSubtitle' => 'Get help or provide feedback',
 			'settings.aboutApp' => 'About',
-			'settings.aboutAppSubtitle' => 'Version info and developer information',
+			'settings.aboutAppSubtitle' => 'Version info and check for updates',
+			'settings.checkUpdate' => 'Check for Updates',
+			'settings.checkingUpdate' => 'Checking for updates...',
+			'settings.latestVersionToast' => 'You are on the latest version',
+			'settings.newVersionTitle' => 'New Version Available',
+			'settings.updateNow' => 'Update Now',
+			'settings.updateLater' => 'Later',
+			'settings.fetchUpdateFailed' => 'Failed to check for updates, please try again later',
 			'settings.currencyChangedRefreshHint' => ({required Object currency}) => 'Switched to ${currency}. New transactions will use this currency.',
 			'settings.sharedSpace' => 'Shared Space',
 			'settings.speechRecognition' => 'Speech Recognition',
@@ -2571,6 +2594,15 @@ extension on TranslationsEn {
 			'speech.enterAddress' => 'Please enter server address',
 			'speech.enterValidPort' => 'Please enter a valid port (1-65535)',
 			'speech.configSaved' => 'Configuration saved',
+			'speech.systemVoiceRestrictedTitle' => 'System Speech Unavailable',
+			'speech.systemVoiceRestrictedContent' => 'Your device vendor restricts standard system speech services. We recommend configuring a custom WebSocket ASR in Speech Settings.',
+			'speech.goToSettings' => 'Go to Settings',
+			'speech.systemVoiceStatusAvailable' => 'System Speech Supported',
+			'speech.systemVoiceStatusRestricted' => 'System Speech Restricted or Unavailable (Self-hosted ASR recommended)',
+			'speech.serviceNotConfigured' => 'Speech service is not configured. Please set the server address in Speech Settings.',
+			'speech.connectionFailedTitle' => 'Speech Service Connection Failed',
+			'speech.connectionFailed' => 'Cannot connect to WebSocket speech recognition service. Please check your server address, port, or network connectivity.',
+			'speech.noSpeechRecognized' => 'No speech input detected, please try again.',
 			'amountTheme.chinaMarket' => 'China Market Style',
 			'amountTheme.chinaMarketDesc' => 'Red up, Green/Black down (Recommended)',
 			'amountTheme.international' => 'International Standard',

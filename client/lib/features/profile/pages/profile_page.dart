@@ -17,6 +17,8 @@ import 'package:augo/shared/widgets/themed_icon.dart';
 import 'package:augo/shared/widgets/user_avatar.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/services/server_config_service.dart';
+import '../../version/providers/version_provider.dart';
+import '../../version/services/app_version_service.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -212,9 +214,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       size: 16,
                       color: colors.mutedForeground,
                     ),
-                    onPress: () {
-                      // TODO: Implement about page
-                    },
+                    onPress: () => _checkAppUpdate(context),
                   ),
                 ],
               ),
@@ -574,5 +574,99 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       return Text('${t.server.currentServer}: $displayUrl');
     }
     return Text(t.server.currentServer);
+  }
+
+  /// Check app updates and display Forui update dialog
+  Future<void> _checkAppUpdate(BuildContext context) async {
+    final versionState = ref.read(versionNotifierProvider);
+    if (versionState.isChecking) return;
+
+    ToastService.success(description: Text(t.settings.checkingUpdate));
+
+    final updateInfo = await ref
+        .read(versionNotifierProvider.notifier)
+        .checkUpdate();
+
+    if (!context.mounted) return;
+
+    if (updateInfo == null) {
+      ToastService.showDestructive(
+        description: Text(t.settings.fetchUpdateFailed),
+      );
+      return;
+    }
+
+    if (!updateInfo.hasUpdate) {
+      ToastService.success(
+        description: Text(
+          '${t.settings.latestVersionToast} (v${updateInfo.currentVersion})',
+        ),
+      );
+      return;
+    }
+
+    // Show update modal dialog using showFDialog
+    unawaited(
+      showFDialog<void>(
+        context: context,
+        builder: (dialogContext, style, animation) => FDialog(
+          animation: animation,
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '${t.settings.newVersionTitle} v${updateInfo.latestVersion}',
+                  style: dialogStyle.titleTextStyle,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '当前版本: v${updateInfo.currentVersion}',
+                  style: dialogStyle.bodyTextStyle.copyWith(fontSize: 12),
+                ),
+                if (updateInfo.changelog.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: context.theme.colors.muted.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      updateInfo.changelog,
+                      style: dialogStyle.bodyTextStyle,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                FButton(
+                  variant: .primary,
+                  onPress: () async {
+                    Navigator.of(dialogContext).pop();
+                    if (updateInfo.targetDownloadUrl != null &&
+                        updateInfo.targetDownloadUrl!.isNotEmpty) {
+                      await ref
+                          .read(appVersionServiceProvider)
+                          .openUpdateUrl(updateInfo.targetDownloadUrl!);
+                    }
+                  },
+                  child: Text(t.settings.updateNow),
+                ),
+                if (!updateInfo.forceUpdate) ...[
+                  const SizedBox(height: 8),
+                  FButton(
+                    variant: .outline,
+                    onPress: () => Navigator.of(dialogContext).pop(),
+                    child: Text(t.settings.updateLater),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

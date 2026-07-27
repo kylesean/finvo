@@ -129,6 +129,35 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                       ),
                     ],
                   ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colors.muted.withValues(alpha: 0.05),
+                      borderRadius: theme.style.borderRadius.md,
+                      border: Border.all(color: colors.border),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          FLucideIcons.info,
+                          size: 16,
+                          color: colors.mutedForeground,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            t.speech.systemVoiceStatusRestricted,
+                            style: theme.typography.body.xs.copyWith(
+                              color: colors.mutedForeground,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                   // WebSocket Configuration Section
                   if (state.settings?.serviceType ==

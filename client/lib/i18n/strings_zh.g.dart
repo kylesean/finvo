@@ -742,8 +742,29 @@ class Translations$settings$zh {
 	/// zh: '关于应用'
 	String get aboutApp => '关于应用';
 
-	/// zh: '版本信息和开发者信息'
-	String get aboutAppSubtitle => '版本信息和开发者信息';
+	/// zh: '版本信息和检查更新'
+	String get aboutAppSubtitle => '版本信息和检查更新';
+
+	/// zh: '检查更新'
+	String get checkUpdate => '检查更新';
+
+	/// zh: '正在检查更新...'
+	String get checkingUpdate => '正在检查更新...';
+
+	/// zh: '当前已是最新版本'
+	String get latestVersionToast => '当前已是最新版本';
+
+	/// zh: '发现新版本'
+	String get newVersionTitle => '发现新版本';
+
+	/// zh: '静态更新'
+	String get updateNow => '立即更新';
+
+	/// zh: '暂不更新'
+	String get updateLater => '暂不更新';
+
+	/// zh: '检查更新失败，请稍后重试'
+	String get fetchUpdateFailed => '检查更新失败，请稍后重试';
 
 	/// zh: '已切换为 $currency，新交易将以此货币记录'
 	String currencyChangedRefreshHint({required Object currency}) => '已切换为 ${currency}，新交易将以此货币记录';
@@ -890,6 +911,25 @@ class Translations$speech$zh {
 
 	/// zh: '配置已保存'
 	String get configSaved => '配置已保存';
+
+	/// zh: '系统语音不可用'
+	String get systemVoiceRestrictedTitle => '系统语音不可用';
+
+	/// zh: '您的手机系统语音引擎受到厂商权限限制或服务未开启。建议配置并开启 WebSocket 自建语音服务。'
+	String get systemVoiceRestrictedContent => '您的手机系统语音引擎受到厂商权限限制或服务未开启。建议配置并开启 WebSocket 自建语音服务。';
+
+	/// zh: '前往设置'
+	String get goToSettings => '前往设置';
+
+	/// zh: '系统语音服务支持正常'
+	String get systemVoiceStatusAvailable => '系统语音服务支持正常';
+
+	/// zh: '系统语音限制或不可用 (建议使用自建 ASR)'
+	String get systemVoiceStatusRestricted => '系统语音限制或不可用 (建议使用自建 ASR)';
+	String get serviceNotConfigured => '语音服务未配置，请在【设置 -> 语音识别】中配置服务器地址';
+	String get connectionFailedTitle => '语音服务连接失败';
+	String get connectionFailed => '无法连接到 WebSocket 语音识别服务，请检查服务器地址、端口或网络连通性。';
+	String get noSpeechRecognized => '未检测到语音输入，请重试';
 }
 
 // Path: amountTheme
@@ -4816,7 +4856,14 @@ extension on Translations {
 			'settings.helpAndFeedback' => '帮助与反馈',
 			'settings.helpAndFeedbackSubtitle' => '获取帮助或提供反馈',
 			'settings.aboutApp' => '关于应用',
-			'settings.aboutAppSubtitle' => '版本信息和开发者信息',
+			'settings.aboutAppSubtitle' => '版本信息和检查更新',
+			'settings.checkUpdate' => '检查更新',
+			'settings.checkingUpdate' => '正在检查更新...',
+			'settings.latestVersionToast' => '当前已是最新版本',
+			'settings.newVersionTitle' => '发现新版本',
+			'settings.updateNow' => '立即更新',
+			'settings.updateLater' => '暂不更新',
+			'settings.fetchUpdateFailed' => '检查更新失败，请稍后重试',
 			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '已切换为 ${currency}，新交易将以此货币记录',
 			'settings.sharedSpace' => '共享空间',
 			'settings.speechRecognition' => '语音识别',
@@ -4868,6 +4915,15 @@ extension on Translations {
 			'speech.enterAddress' => '请输入服务器地址',
 			'speech.enterValidPort' => '请输入有效的端口 (1-65535)',
 			'speech.configSaved' => '配置已保存',
+			'speech.systemVoiceRestrictedTitle' => '系统语音不可用',
+			'speech.systemVoiceRestrictedContent' => '您的手机系统语音引擎受到厂商权限限制或服务未开启。建议配置并开启 WebSocket 自建语音服务。',
+			'speech.goToSettings' => '前往设置',
+			'speech.systemVoiceStatusAvailable' => '系统语音服务支持正常',
+			'speech.systemVoiceStatusRestricted' => '系统语音限制或不可用 (建议使用自建 ASR)',
+			'speech.serviceNotConfigured' => '语音服务未配置，请在【设置 -> 语音识别】中配置服务器地址',
+			'speech.connectionFailedTitle' => '语音服务连接失败',
+			'speech.connectionFailed' => '无法连接到 WebSocket 语音识别服务，请检查服务器地址、端口或网络连通性。',
+			'speech.noSpeechRecognized' => '未检测到语音输入，请重试',
 			'amountTheme.chinaMarket' => '中国市场',
 			'amountTheme.chinaMarketDesc' => '红涨绿跌/黑跌',
 			'amountTheme.international' => '国际标准',

@@ -1,5 +1,7 @@
-// features/chat/services/system_speech_service.dart
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -12,6 +14,7 @@ import 'speech_recognition_service.dart';
 /// Supports iOS, Android, and Web platforms.
 class SystemSpeechService implements SpeechRecognitionService {
   static final _logger = Logger('SystemSpeechService');
+  static const _platformChannel = MethodChannel('com.augo.app/speech_check');
 
   final SpeechToText _speech = SpeechToText();
   bool _isInitialized = false;
@@ -86,6 +89,20 @@ class SystemSpeechService implements SpeechRecognitionService {
     return await initialize();
   }
 
+  Future<bool> _isPlatformSpeechAvailable() async {
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        final bool? isAvailable = await _platformChannel.invokeMethod<bool>(
+          'isSystemSpeechAvailable',
+        );
+        return isAvailable ?? false;
+      } catch (e) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   Future<bool> initialize() async {
     if (_isInitialized) {
@@ -98,6 +115,16 @@ class SystemSpeechService implements SpeechRecognitionService {
     try {
       _logger.info('Initializing system speech recognition service...');
       _statusController.add('connecting');
+
+      final isPlatformAvailable = await _isPlatformSpeechAvailable();
+      if (!isPlatformAvailable) {
+        _logger.warning(
+          'Native Android speech service is restricted or unavailable',
+        );
+        _statusController.add('error');
+        _errorController.add('system_speech_restricted');
+        return false;
+      }
 
       final available = await _speech.initialize(
         onStatus: _onStatus,
@@ -137,7 +164,8 @@ class SystemSpeechService implements SpeechRecognitionService {
   Future<void> startListening() async {
     if (!_isInitialized) {
       _logger.warning('Service not initialized, cannot start listening');
-      _errorController.add('Service not initialized');
+      _statusController.add('error');
+      _errorController.add('system_speech_restricted');
       return;
     }
 
@@ -172,7 +200,15 @@ class SystemSpeechService implements SpeechRecognitionService {
       _logger.severe('Failed to start listening: $e');
       _isListening = false;
       _statusController.add('error');
-      _errorController.add('Failed to start listening: $e');
+      final errStr = e.toString();
+      if (errStr.contains('SecurityException') ||
+          errStr.contains('Not allowed to bind') ||
+          errStr.contains('error_speech_restricted') ||
+          errStr.contains('bindService')) {
+        _errorController.add('system_speech_restricted');
+      } else {
+        _errorController.add('Failed to start listening: $e');
+      }
     }
   }
 
@@ -257,7 +293,12 @@ class SystemSpeechService implements SpeechRecognitionService {
     }
 
     String userMessage;
-    if (error.errorMsg.contains('audio')) {
+    if (error.errorMsg.contains('error_speech_restricted') ||
+        error.errorMsg.contains('SecurityException') ||
+        error.errorMsg.contains('Not allowed to bind') ||
+        error.errorMsg.contains('bindService')) {
+      userMessage = 'system_speech_restricted';
+    } else if (error.errorMsg.contains('audio')) {
       userMessage = 'Audio capture error, please check microphone permissions';
     } else if (error.errorMsg.contains('network')) {
       userMessage = 'Network error, please check network connection';
