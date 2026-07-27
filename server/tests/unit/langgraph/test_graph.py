@@ -20,4 +20,4 @@ def test_system_prompt_loading():
 
     prompt = get_stable_system_prompt()
     assert prompt is not None
-    assert "You are Augo" in prompt or "Augo" in prompt
+    assert "You are Finvo" in prompt or "Finvo" in prompt

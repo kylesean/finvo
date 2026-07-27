@@ -5,8 +5,8 @@ import '../../../app/theme/app_theme_palette.dart';
 import '../../../app/theme/theme_palette_provider.dart';
 import '../../../app/theme/theme_provider.dart';
 import '../../../app/theme/theme_notifier.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/services/toast_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/services/toast_service.dart';
 import '../widgets/theme_preview.dart';
 
 class AppearanceSettingsPage extends ConsumerWidget {

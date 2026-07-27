@@ -3,7 +3,7 @@ import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
 import '../../constants/api_constants.dart';
-import 'package:augo/core/storage/secure_storage_service.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
 
 /// Authentication Interceptor
 ///

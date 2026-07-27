@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/shared/models/currency.dart';
-import 'package:augo/shared/services/toast_service.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../providers/financial_settings_provider.dart';
 
 class CurrencySettingsPage extends ConsumerWidget {

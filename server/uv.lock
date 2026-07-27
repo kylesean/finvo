@@ -293,7 +293,7 @@ wheels = [
 ]
 
 [[package]]
-name = "augo-api"
+name = "Finvo-api"
 version = "0.1.2a0"
 source = { editable = "." }
 dependencies = [

@@ -2,13 +2,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
-import 'package:augo/app/theme/app_font_config.dart';
-import 'package:augo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import '../organisms/organisms.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
 import '../events/interaction_events.dart';
-import 'package:augo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 
 /// Transfer wizard data model (Data Layer)
 class TransferWizardData {

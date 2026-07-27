@@ -10,7 +10,7 @@ import '../../../shared/models/currency.dart';
 import '../../profile/providers/financial_settings_provider.dart';
 import '../models/budget_models.dart';
 import '../providers/budget_provider.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 

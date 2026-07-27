@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/app/theme/app_font_config.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/widgets/user_avatar.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/user_avatar.dart';
 import '../models/shared_space_models.dart';
 
 class SpaceDashboardCard extends StatelessWidget {

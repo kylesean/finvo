@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
 import '../events/interaction_events.dart';
 import '../organisms/organisms.dart';

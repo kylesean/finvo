@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:augo/features/auth/models/user.dart';
+import 'package:finvo/features/auth/models/user.dart';
 
 part 'auth_state.freezed.dart';
 

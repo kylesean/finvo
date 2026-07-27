@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:augo/shared/theme/amount_theme.dart';
-import 'package:augo/core/constants/category_constants.dart';
+import 'package:finvo/shared/theme/amount_theme.dart';
+import 'package:finvo/core/constants/category_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:augo/shared/providers/amount_theme_provider.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/amount_theme_provider.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Cash flow forecast chart - GenUI Template
 ///

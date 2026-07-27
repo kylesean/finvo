@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 import '../models/shared_space_models.dart';
 
 class SharedSpaceCard extends ConsumerWidget {

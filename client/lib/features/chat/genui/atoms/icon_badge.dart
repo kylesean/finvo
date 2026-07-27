@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/shared/widgets/themed_icon.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
 
 /// A themed icon badge - wrapper around ThemedIcon for GenUI compatibility
 ///

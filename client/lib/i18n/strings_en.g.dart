@@ -176,7 +176,7 @@ class _Translations$auth$en extends Translations$auth$zh {
 	@override String get loginSuccess => 'Welcome back!';
 	@override String get loginFailed => 'Login Failed';
 	@override String get pleaseTryAgain => 'Please try again later.';
-	@override String get loginSubtitle => 'Log in to continue using Augo';
+	@override String get loginSubtitle => 'Log in to continue using Finvo';
 	@override String get noAccount => 'Don\'t have an account? Sign Up';
 	@override String get createAccount => 'Create Your Account';
 	@override String get setPassword => 'Set Password';
@@ -864,7 +864,7 @@ class _Translations$app$en extends Translations$app$zh {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get splashTitle => 'Augo: Intelligence that Grows.';
+	@override String get splashTitle => 'Finvo: Intelligence that Grows.';
 	@override String get splashSubtitle => 'Smart Financial Assistant';
 }
 
@@ -2380,7 +2380,7 @@ extension on TranslationsEn {
 			'auth.loginSuccess' => 'Welcome back!',
 			'auth.loginFailed' => 'Login Failed',
 			'auth.pleaseTryAgain' => 'Please try again later.',
-			'auth.loginSubtitle' => 'Log in to continue using Augo',
+			'auth.loginSubtitle' => 'Log in to continue using Finvo',
 			'auth.noAccount' => 'Don\'t have an account? Sign Up',
 			'auth.createAccount' => 'Create Your Account',
 			'auth.setPassword' => 'Set Password',
@@ -3209,7 +3209,7 @@ extension on TranslationsEn {
 			'financial.dailyBurnRateSaved' => 'Daily burn rate saved',
 			'financial.dayUnit' => 'day',
 			'financial.saveFailed' => 'Save failed',
-			'app.splashTitle' => 'Augo: Intelligence that Grows.',
+			'app.splashTitle' => 'Finvo: Intelligence that Grows.',
 			'app.splashSubtitle' => 'Smart Financial Assistant',
 			'statistics.title' => 'Analysis',
 			'statistics.analyze' => 'Analysis',

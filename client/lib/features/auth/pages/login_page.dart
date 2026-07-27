@@ -1,13 +1,13 @@
 import 'dart:async';
-import 'package:augo/core/network/exceptions/app_exception.dart';
-import 'package:augo/features/auth/providers/auth_provider.dart';
-import 'package:augo/features/auth/providers/verification_provider.dart'; // Import new verification code Provider
-import 'package:augo/shared/services/toast_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/features/auth/providers/verification_provider.dart'; // Import new verification code Provider
+import 'package:finvo/shared/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});

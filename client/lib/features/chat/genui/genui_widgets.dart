@@ -9,7 +9,7 @@
 ///
 /// Usage:
 /// ```dart
-/// import 'package:augo/features/chat/genui/genui_widgets.dart';
+/// import 'package:finvo/features/chat/genui/genui_widgets.dart';
 ///
 /// // Use atoms
 /// IconBadge(icon: FLucideIcons.wallet, ...);

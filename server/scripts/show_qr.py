@@ -102,7 +102,7 @@ def generate_qr_code(url: str, local_ip: str):
         print(f"   - For real devices on same network: {url}")
     print("   - For localhost: http://localhost:8000")
 
-    print("\nScan this QR code with the Augo app:\n")
+    print("\nScan this QR code with the Finvo app:\n")
 
     # Print ASCII QR code
     qr.print_ascii(invert=True)

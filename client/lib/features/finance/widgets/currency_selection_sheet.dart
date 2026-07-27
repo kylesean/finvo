@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/models/currency.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 class CurrencySelectionSheet extends StatefulWidget {
   final String initialCurrency;

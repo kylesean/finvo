@@ -1,4 +1,4 @@
-# Global Pre-commit hooks for Augo (Mono-repo)
+# Global Pre-commit hooks for Finvo (Mono-repo)
 # Install: pip install pre-commit && pre-commit install
 # Run: pre-commit run --all-files
 

@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import '../providers/verification_provider.dart';
-import 'package:augo/shared/services/toast_service.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class RegisterStep1Page extends ConsumerStatefulWidget {
   const RegisterStep1Page({super.key});

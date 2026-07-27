@@ -136,7 +136,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: Environment = Field(default_factory=get_environment)
 
     # Application Settings
-    PROJECT_NAME: str = "Augo"
+    PROJECT_NAME: str = "Finvo"
     VERSION: str = _read_version()
     DESCRIPTION: str = "AI-powered expense tracking and financial management system"
     API_V1_STR: str = "/api/v1"
@@ -218,7 +218,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str | None = None
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "augo"
+    POSTGRES_DB: str = "Finvo"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
 
@@ -266,7 +266,7 @@ class Settings(BaseSettings):
     S3_ENDPOINT: str | None = None
     S3_ACCESS_KEY: str | None = None
     S3_SECRET_KEY: str | None = None
-    S3_BUCKET: str = "augo-data"
+    S3_BUCKET: str = "Finvo-data"
     S3_REGION: str = "us-east-1"
 
     # Storage System Configuration
@@ -307,7 +307,7 @@ class Settings(BaseSettings):
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
     SMTP_FROM_EMAIL: str = "noreply@localhost"
-    SMTP_FROM_NAME: str = "Augo"
+    SMTP_FROM_NAME: str = "Finvo"
 
     # Evaluation Configuration
     EVALUATION_LLM: str = "deepseek-v4-flash"

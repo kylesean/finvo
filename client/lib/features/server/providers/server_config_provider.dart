@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logging/logging.dart';
-import 'package:augo/core/services/server_config_service.dart';
-import 'package:augo/core/storage/secure_storage_service.dart';
+import 'package:finvo/core/services/server_config_service.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
 
 part 'server_config_provider.freezed.dart';
 

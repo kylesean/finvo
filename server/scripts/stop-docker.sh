@@ -17,7 +17,7 @@ if [[ ! "$ENV" =~ ^(development|staging|production)$ ]]; then
     exit 1
 fi
 
-echo "Stopping and removing all Augo services for $ENV environment..."
+echo "Stopping and removing all Finvo services for $ENV environment..."
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -32,4 +32,4 @@ else
     APP_ENV=$ENV docker compose down
 fi
 
-echo "Augo services stopped and removed successfully"
+echo "Finvo services stopped and removed successfully"

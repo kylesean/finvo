@@ -1,1 +1,1 @@
-"""Evaluation framework for Augo."""
+"""Evaluation framework for Finvo."""

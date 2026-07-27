@@ -1,7 +1,7 @@
 // features/chat/providers/welcome_guide_provider.dart
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 import 'package:forui/forui.dart';
 

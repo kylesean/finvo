@@ -43,9 +43,9 @@ async def check_version() -> JSONResponse:
         releaseDate="2026-07-27",
         changelog="1. 新增应用自动版本检查与更新支持\n2. 优化共享空间交互逻辑\n3. 提升网络连通性与服务稳定性",
         downloadUrls=DownloadUrlsSchema(
-            androidApk="https://github.com/augo-ai/augo/releases/latest",
-            iosTestFlight="https://testflight.apple.com/join/augo",
-            webUrl="https://app.augo.ai",
+            androidApk="https://github.com/Finvo-ai/Finvo/releases/latest",
+            iosTestFlight="https://testflight.apple.com/join/Finvo",
+            webUrl="https://app.Finvo.ai",
         ),
     )
     return success_response(

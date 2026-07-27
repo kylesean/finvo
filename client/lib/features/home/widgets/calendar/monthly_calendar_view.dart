@@ -2,14 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart'; // Import shimmer package
-import 'package:augo/features/home/providers/home_providers.dart';
-import 'package:augo/features/home/widgets/calendar/daily_cell_widget.dart';
-import 'package:augo/features/home/models/daily_expense_summary_model.dart';
+import 'package:finvo/features/home/providers/home_providers.dart';
+import 'package:finvo/features/home/widgets/calendar/daily_cell_widget.dart';
+import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
 import 'package:forui/forui.dart'; // Import forui
 import 'package:intl/intl.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/utils/amount_formatter.dart';
-import 'package:augo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 
 class MonthlyCalendarView extends ConsumerWidget {
   const MonthlyCalendarView({super.key});

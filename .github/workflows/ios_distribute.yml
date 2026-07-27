@@ -46,12 +46,12 @@ jobs:
           cd build/ios/iphoneos
           mkdir -p Payload
           cp -r Runner.app Payload/
-          zip -r ../../Augo_Sideload.ipa Payload
-          echo "IPA created at: $(pwd)/../../Augo_Sideload.ipa"
+          zip -r ../../Finvo_Sideload.ipa Payload
+          echo "IPA created at: $(pwd)/../../Finvo_Sideload.ipa"
 
-      - name: Upload Artifact
+      - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Augo-iOS-IPA
-          path: client/build/Augo_Sideload.ipa
+          name: Finvo-iOS-IPA
+          path: client/build/Finvo_Sideload.ipa
           retention-days: 30

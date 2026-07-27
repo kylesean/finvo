@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../../../shared/widgets/app_filter_chip.dart';
 import '../../providers/home_providers.dart';
 import 'transaction_feed_view.dart';

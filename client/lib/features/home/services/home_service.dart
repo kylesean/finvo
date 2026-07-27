@@ -1,10 +1,10 @@
-import 'package:augo/core/network/network_client.dart';
+import 'package:finvo/core/network/network_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:augo/features/home/models/daily_expense_summary_model.dart';
-import 'package:augo/features/home/models/total_expense_model.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
+import 'package:finvo/features/home/models/total_expense_model.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
 
-import 'package:augo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 class HomeService {
   final NetworkClient _networkClient;

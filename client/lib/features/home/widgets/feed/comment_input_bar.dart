@@ -3,8 +3,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/core/widgets/top_toast.dart'; // Import forui
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/core/widgets/top_toast.dart'; // Import forui
+import 'package:finvo/i18n/strings.g.dart';
 
 // Assuming these Providers are imported from outside
 // Core logic migrated to transactionCommentsProvider

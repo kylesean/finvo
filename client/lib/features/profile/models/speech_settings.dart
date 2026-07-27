@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:augo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 
 part 'speech_settings.freezed.dart';
 part 'speech_settings.g.dart';

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:rrule/rrule.dart' as rrule_lib;
-import 'package:augo/core/widgets/app_calendar.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/core/widgets/app_calendar.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Recurrence rule result
 class RecurrenceRuleResult {

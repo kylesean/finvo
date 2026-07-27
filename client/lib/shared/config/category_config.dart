@@ -1,7 +1,7 @@
 // shared/config/category_config.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Category configuration management class
 /// Responsible for managing the mapping relationship between category IDs, names, and icons, using slang multi-language support

@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/widgets/amount_text.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
-import 'package:augo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 import '../atoms/atoms.dart';
 

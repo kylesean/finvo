@@ -3,11 +3,11 @@
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero-zh.svg" width="100%" alt="Augo - 支持私有化部署的 AI 个人财务助理">
+  <img src="./assets/readme/hero-zh.svg" width="100%" alt="Finvo - 支持私有化部署的 AI 个人财务助理">
 </p>
 
 <p align="center">
-  <a href="https://github.com/kylesean/augo/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3"></a>
+  <a href="https://github.com/kylesean/Finvo/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3"></a>
   <a href="https://www.python.org/downloads/release/python-3130/"><img src="https://img.shields.io/badge/Python-3.13-blue.svg" alt="Python 3.13"></a>
   <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-Cross--Platform-02569B.svg" alt="Flutter"></a>
   <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-0.115+-009688.svg" alt="FastAPI"></a>
@@ -17,7 +17,7 @@
 ---
 
 <p align="center">
-  Augo 是一款开源的 <strong>AI 财务助理</strong>，核心特色是支持完全私有化部署。它能帮助您管理个人及家庭财务，账目数据与 AI 记忆均保存在您的私有环境中，并可灵活接入各类云端大模型或本地模型，配合动态 UI 渲染带来极致的智能交互体验。
+  Finvo 是一款开源的 <strong>AI 财务助理</strong>，核心特色是支持完全私有化部署。它能帮助您管理个人及家庭财务，账目数据与 AI 记忆均保存在您的私有环境中，并可灵活接入各类云端大模型或本地模型，配合动态 UI 渲染带来极致的智能交互体验。
 </p>
 
 ---
@@ -34,7 +34,7 @@
 ## 核心特性
 
 - **基于 LangGraph + Mem0 的智能 Agent**
-  超越传统的静态流水记录，Augo 采用 LangGraph 进行多步骤财务推理、自动纠错，并通过 Mem0 管理长短期对话记忆，支持自然语言下的复杂财务查询与分析。
+  超越传统的静态流水记录，Finvo 采用 LangGraph 进行多步骤财务推理、自动纠错，并通过 Mem0 管理长短期对话记忆，支持自然语言下的复杂财务查询与分析。
 
 - **100% 私有化部署与隐私安全**
   数据与 AI 记忆全部驻留本地网络。集成 [asr_server](https://github.com/kylesean/asr_server) 自建语音识别服务，让语音数据不出私有环境，极大保护隐私。
@@ -98,8 +98,8 @@ flowchart TD
 
 1. **获取项目代码**:
    ```bash
-   git clone https://github.com/kylesean/augo.git
-   cd augo
+   git clone https://github.com/kylesean/Finvo.git
+   cd Finvo
    ```
 
 2. **配置环境变量**:
@@ -120,7 +120,7 @@ flowchart TD
 ## 项目目录结构
 
 ```text
-augo/
+Finvo/
 ├── client/              # Flutter 客户端源码
 │   └── assets/images/   # 应用截图与 Icon 资源
 ├── server/              # FastAPI 后端与 LangGraph 服务

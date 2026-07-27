@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/media_upload_exception.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/shared/services/toast_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/services/toast_service.dart';
 import 'dart:async';
 
 /// Media upload error handling service

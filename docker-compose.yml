@@ -1,8 +1,8 @@
-name: augo
+name: Finvo
 services:
   db:
     image: pgvector/pgvector:pg16
-    container_name: augo-db
+    container_name: Finvo-db
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -20,12 +20,12 @@ services:
     networks:
       - monitoring
     labels:
-      - "project=augo"
+      - "project=Finvo"
       - "component=database"
 
   redis:
     image: redis:alpine
-    container_name: augo-redis
+    container_name: Finvo-redis
     ports:
       - "6380:6379" # Use 6380 externally to avoid conflict with local Redis
     volumes:
@@ -39,17 +39,17 @@ services:
       timeout: 5s
       retries: 5
     labels:
-      - "project=augo"
+      - "project=Finvo"
       - "component=redis"
 
   # Single API service with dynamic environment
   app:
-    image: augo-api:${APP_ENV:-development}
+    image: Finvo-api:${APP_ENV:-development}
     build:
       context: ./server
       args:
         APP_ENV: ${APP_ENV:-development}
-    container_name: augo-api
+    container_name: Finvo-api
     ports:
       - "8000:8000"
     # WARNING: keep UVICORN_WORKERS=1. The in-process scheduler (recurring
@@ -83,7 +83,7 @@ services:
       - DEFAULT_LLM_MODEL=${DEFAULT_LLM_MODEL:-gpt-4o-mini}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
     labels:
-      - "project=augo"
+      - "project=Finvo"
       - "component=api"
     depends_on:
       db:
@@ -109,7 +109,7 @@ services:
   prometheus:
     profiles: [monitoring]
     image: prom/prometheus:v3.13.1
-    container_name: augo-prometheus
+    container_name: Finvo-prometheus
     ports:
       - "9099:9090"
     volumes:
@@ -120,14 +120,14 @@ services:
       - monitoring
     restart: always
     labels:
-      - "project=augo"
+      - "project=Finvo"
       - "component=monitoring"
 
   # Grafana - Visualization and dashboards
   grafana:
     profiles: [monitoring]
     image: grafana/grafana:13.1.1
-    container_name: augo-grafana
+    container_name: Finvo-grafana
     ports:
       - "3000:3000"
     volumes:
@@ -141,14 +141,14 @@ services:
       - monitoring
     restart: always
     labels:
-      - "project=augo"
+      - "project=Finvo"
       - "component=monitoring-ui"
 
   # cAdvisor - Container resource monitoring
   cadvisor:
     profiles: [monitoring]
     image: ghcr.io/google/cadvisor:v0.60.5
-    container_name: augo-cadvisor
+    container_name: Finvo-cadvisor
     ports:
       - "8080:8080"
     volumes:
@@ -160,7 +160,7 @@ services:
       - monitoring
     restart: always
     labels:
-      - "project=augo"
+      - "project=Finvo"
       - "component=monitoring-agent"
 
 networks:

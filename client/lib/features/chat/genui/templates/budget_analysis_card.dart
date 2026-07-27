@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:augo/features/profile/providers/financial_settings_provider.dart';
-import 'package:augo/shared/widgets/amount_text.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
-import 'package:augo/shared/utils/amount_formatter.dart';
-import 'package:augo/i18n/strings.g.dart';
-import 'package:augo/app/theme/app_font_config.dart';
-import 'package:augo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 import '../../../../core/constants/category_constants.dart';
 

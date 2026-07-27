@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:augo/app/app.dart';
-import 'package:augo/app/theme/app_font_config.dart';
+import 'package:finvo/app/app.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'i18n/strings.g.dart';

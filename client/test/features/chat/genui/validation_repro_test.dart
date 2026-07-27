@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:a2ui_core/a2ui_core.dart' as core;
-import 'package:augo/features/chat/genui/app_catalog.dart';
+import 'package:finvo/features/chat/genui/app_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:genui/genui.dart' as genui;
 

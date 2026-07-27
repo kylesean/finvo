@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/network/network_client.dart';
-import 'package:augo/features/auth/models/user.dart';
-import 'package:augo/core/utils/map_require.dart';
+import 'package:finvo/features/auth/models/user.dart';
+import 'package:finvo/core/utils/map_require.dart';
 import '../../../core/services/timezone_service.dart';
 
 class AuthService {

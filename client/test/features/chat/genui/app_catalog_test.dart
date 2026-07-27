@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:augo/features/chat/genui/app_catalog.dart';
+import 'package:finvo/features/chat/genui/app_catalog.dart';
 
 void main() {
   group('AppCatalog', () {

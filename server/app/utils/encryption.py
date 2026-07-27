@@ -60,7 +60,7 @@ class CredentialEncryption:
                 message="ENCRYPTION_KEY not set. Using insecure dev-only fallback key. NEVER use this in production!",
             )
             # Use a deterministic key for development only
-            fallback_seed = b"augo-dev-key-do-not-use-in-prod"
+            fallback_seed = b"Finvo-dev-key-do-not-use-in-prod"
             key = base64.urlsafe_b64encode(fallback_seed[:32].ljust(32, b"0"))
 
         # Ensure key is properly formatted (bytes or base64 string)

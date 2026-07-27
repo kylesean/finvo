@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/app/theme/app_semantic_colors.dart';
-import 'package:augo/features/profile/providers/financial_settings_provider.dart';
-import 'package:augo/shared/models/currency.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 import '../atoms/budget_progress_bar.dart';
 import '../../../../shared/widgets/app_card.dart';

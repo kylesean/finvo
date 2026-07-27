@@ -65,7 +65,7 @@
     "loginSuccess": "Welcome back!",
     "loginFailed": "Login Failed",
     "pleaseTryAgain": "Please try again later.",
-    "loginSubtitle": "Log in to continue using Augo",
+    "loginSubtitle": "Log in to continue using Finvo",
     "noAccount": "Don't have an account? Sign Up",
     "createAccount": "Create Your Account",
     "setPassword": "Set Password",
@@ -1037,7 +1037,7 @@
     "saveFailed": "Save failed"
   },
   "app": {
-    "splashTitle": "Augo: Intelligence that Grows.",
+    "splashTitle": "Finvo: Intelligence that Grows.",
     "splashSubtitle": "Smart Financial Assistant"
   },
   "statistics": {

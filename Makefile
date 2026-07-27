@@ -1,4 +1,4 @@
-# Augo Project Makefile
+# Finvo Project Makefile
 # This is a thin wrapper that delegates to ./server/manage.sh
 # For detailed command help, run: cd server && ./manage.sh
 
@@ -8,7 +8,7 @@
 
 # Default target
 help:
-	@echo "Augo Project Commands"
+	@echo "Finvo Project Commands"
 	@echo "====================="
 	@echo ""
 	@echo "Quick Start:"

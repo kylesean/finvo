@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "Augo" "\0"
-            VALUE "FileDescription", "Augo" "\0"
+            VALUE "CompanyName", "Finvo" "\0"
+            VALUE "FileDescription", "Finvo" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "augo" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 Augo. All rights reserved." "\0"
-            VALUE "OriginalFilename", "augo.exe" "\0"
-            VALUE "ProductName", "Augo" "\0"
+            VALUE "InternalName", "Finvo" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Finvo. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Finvo.exe" "\0"
+            VALUE "ProductName", "Finvo" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

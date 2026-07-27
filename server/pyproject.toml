@@ -6,9 +6,9 @@ build-backend = "hatchling.build"
 packages = ["app", "evals"]
 
 [project]
-name = "augo-api"
+name = "Finvo-api"
 version = "0.1.2-alpha"
-description = "Augo: Self-Hosted & Privacy-First AI Financial Assistant"
+description = "Finvo: Self-Hosted & Privacy-First AI Financial Assistant"
 requires-python = ">=3.13"
 dependencies = [
     # Web framework & ASGI server

@@ -1,21 +1,21 @@
 import "dart:async";
 // features/home/widgets/feed/transaction_card.dart
 import 'package:flutter/material.dart';
-import 'package:augo/shared/widgets/themed_icon.dart';
-import 'package:augo/core/utils/app_haptics.dart';
-import 'package:augo/core/widgets/top_toast.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
+import 'package:finvo/core/utils/app_haptics.dart';
+import 'package:finvo/core/widgets/top_toast.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
-import 'package:augo/features/home/models/transaction_model.dart';
-import 'package:augo/features/home/providers/home_providers.dart';
-import 'package:augo/shared/config/category_config.dart';
-import 'package:augo/core/constants/category_constants.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/providers/home_providers.dart';
+import 'package:finvo/shared/config/category_config.dart';
+import 'package:finvo/core/constants/category_constants.dart';
 
-import 'package:augo/shared/utils/amount_formatter.dart';
-import 'package:augo/shared/providers/amount_theme_provider.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/providers/amount_theme_provider.dart';
 
 /// TransactionCard
 class TransactionCard extends ConsumerWidget {

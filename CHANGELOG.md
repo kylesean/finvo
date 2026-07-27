@@ -1,12 +1,12 @@
 # Changelog
 
-All notable changes to **Augo** will be documented in this file.
+All notable changes to **Finvo** will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 > **Note**: During alpha development, this changelog is updated only at version releases.
-> For detailed changes between releases, see the [Git commit history](https://github.com/kylesean/augo/commits/main).
+> For detailed changes between releases, see the [Git commit history](https://github.com/kylesean/Finvo/commits/main).
 
 ## [0.1.1-alpha] - 2025-12-28
 
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0-alpha] - 2025-12-27
 
 ### Added
-- Initial alpha release of **Augo**, the privacy-first AI financial assistant.
+- Initial alpha release of **Finvo**, the privacy-first AI financial assistant.
 - Core FastAPI backend with LangGraph agent support.
 - Flutter mobile client with GenUI (Server-driven UI) capabilities.
 - Transaction management, budget analysis, and financial forecasting features.

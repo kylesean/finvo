@@ -1,4 +1,4 @@
-import 'package:augo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 extension RequireField on Map<String, dynamic>? {
   T require<T>(String key) {

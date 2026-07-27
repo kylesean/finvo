@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:augo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:augo/features/home/providers/home_providers.dart';
-import 'package:augo/features/home/widgets/feed/transaction_card.dart';
+import 'package:finvo/features/home/providers/home_providers.dart';
+import 'package:finvo/features/home/widgets/feed/transaction_card.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:forui/forui.dart';
-import 'package:augo/i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class TransactionFeedView extends ConsumerStatefulWidget {
   final TransactionFeedType intendedFeedType;

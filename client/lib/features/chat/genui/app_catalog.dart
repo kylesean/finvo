@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
-import 'package:augo/app/theme/app_font_config.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
 import '../services/genui_logger.dart';
 import 'templates/templates.dart';
 

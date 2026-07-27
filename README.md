@@ -3,11 +3,11 @@
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Augo - Self-Hosted AI Personal Financial Assistant">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Finvo - Self-Hosted AI Personal Financial Assistant">
 </p>
 
 <p align="center">
-  <a href="https://github.com/kylesean/augo/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3"></a>
+  <a href="https://github.com/kylesean/Finvo/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3"></a>
   <a href="https://www.python.org/downloads/release/python-3130/"><img src="https://img.shields.io/badge/Python-3.13-blue.svg" alt="Python 3.13"></a>
   <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-Cross--Platform-02569B.svg" alt="Flutter"></a>
   <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-0.115+-009688.svg" alt="FastAPI"></a>
@@ -17,7 +17,7 @@
 ---
 
 <p align="center">
-  Augo is an open-source, <strong>self-hosted AI financial assistant</strong> designed to manage personal and family finances with complete data privacy. Operating on your own infrastructure, it retains conversation memory, connects seamlessly to both cloud LLMs and local models, and renders interactive UI components dynamically.
+  Finvo is an open-source, <strong>self-hosted AI financial assistant</strong> designed to manage personal and family finances with complete data privacy. Operating on your own infrastructure, it retains conversation memory, connects seamlessly to both cloud LLMs and local models, and renders interactive UI components dynamically.
 </p>
 
 ---
@@ -34,7 +34,7 @@
 ## Key Features
 
 - **Agent-Based Orchestration (LangGraph + Mem0)**
-  Goes far beyond static transaction logging. Augo uses LangGraph for multi-step financial reasoning, automatic self-correction, long/short-term memory management via Mem0, and complex querying via natural conversation.
+  Goes far beyond static transaction logging. Finvo uses LangGraph for multi-step financial reasoning, automatic self-correction, long/short-term memory management via Mem0, and complex querying via natural conversation.
 
 - **100% Self-Hosted & Privacy-First**
   Keep your ledger and AI memories entirely within your local network. Supports private voice recognition via the customized [asr_server](https://github.com/kylesean/asr_server) project, ensuring voice data never leaks to third parties.
@@ -98,8 +98,8 @@ flowchart TD
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/kylesean/augo.git
-   cd augo
+   git clone https://github.com/kylesean/Finvo.git
+   cd Finvo
    ```
 
 2. **Configure Environment Variables**:
@@ -120,7 +120,7 @@ flowchart TD
 ## Repository Structure
 
 ```text
-augo/
+Finvo/
 ├── client/              # Flutter mobile application codebase
 │   └── assets/images/   # Screenshots and brand assets
 ├── server/              # FastAPI backend & LangGraph Agent service

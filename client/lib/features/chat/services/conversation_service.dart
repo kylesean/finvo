@@ -1,13 +1,13 @@
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:augo/core/network/network_client.dart';
-import 'package:augo/features/chat/models/conversation_info.dart';
-import 'package:augo/features/chat/models/paginated_conversations.dart';
-import 'package:augo/core/network/exceptions/app_exception.dart';
-import 'package:augo/features/chat/models/conversation_detail.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/features/chat/models/conversation_info.dart';
+import 'package:finvo/features/chat/models/paginated_conversations.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/chat/models/conversation_detail.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/chat_message.dart';
-import 'package:augo/features/chat/models/paginated_messages.dart';
+import 'package:finvo/features/chat/models/paginated_messages.dart';
 
 part 'conversation_service.g.dart';
 

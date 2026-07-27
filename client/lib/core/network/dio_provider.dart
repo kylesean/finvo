@@ -1,7 +1,7 @@
 import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
-import 'package:augo/core/network/interceptors/business_interceptor.dart';
+import 'package:finvo/core/network/interceptors/business_interceptor.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_constants.dart';
 import './interceptors/auth_interceptor.dart';
