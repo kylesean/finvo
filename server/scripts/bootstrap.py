@@ -63,6 +63,8 @@ async def init_mem0():
     """Initialize Mem0 storage tables.
 
     These tables are managed by Mem0, not Alembic.
+    Mem0 is optional — if initialization fails (e.g. missing API key),
+    the service continues without AI memory features.
     """
     try:
         from app.services.memory.memory_service import MemoryService
@@ -71,8 +73,11 @@ async def init_mem0():
         await MemoryService.get_instance()
         logger.info("bootstrap_mem0_storage_initialized")
     except Exception as e:
-        logger.error("bootstrap_mem0_init_failed", error=str(e))
-        raise
+        logger.warning(
+            "bootstrap_mem0_init_skipped",
+            error=str(e),
+            message="AI memory features disabled. Set OPENAI_API_KEY to enable.",
+        )
 
 
 async def main():
