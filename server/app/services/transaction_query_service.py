@@ -30,7 +30,7 @@ from app.utils.currency_utils import get_user_display_currency
 
 
 class TransactionType(str, Enum):
-    """交易类型枚举"""
+    """Transaction type enum."""
 
     EXPENSE = "EXPENSE"
     INCOME = "INCOME"
@@ -45,7 +45,7 @@ class TransactionType(str, Enum):
 
 
 class TransactionItem(BaseModel):
-    """单个交易记录的响应模型"""
+    """Response model for a single transaction record."""
 
     id: str
     user_uuid: str
@@ -72,14 +72,14 @@ class TransactionItem(BaseModel):
     def from_transaction(
         cls, tx: Transaction, display_currency: str = "CNY", exchange_rate: float = 1.0
     ) -> TransactionItem:
-        """从 Transaction 模型创建响应实例
+        """Create a response model instance from a Transaction model.
 
-        展示原币金额，保留交易发生时的币种上下文。
+        Displays original currency amount while preserving currency context.
 
         Args:
-            tx: 交易模型
-            display_currency: 用户本位币（用于 baseCurrency 字段）
-            exchange_rate: 已废弃，保留参数兼容性
+            tx: Transaction model instance.
+            display_currency: User primary currency (used for baseCurrency field).
+            exchange_rate: Deprecated, kept for backward compatibility.
         """
         # Display original currency amount directly
         amount_val = float(tx.amount_original)
@@ -112,7 +112,7 @@ class TransactionItem(BaseModel):
 
 
 class TransactionQueryResult(BaseModel):
-    """交易查询结果"""
+    """Transaction query result model."""
 
     items: list[TransactionItem]
     total: int
@@ -128,19 +128,21 @@ class TransactionQueryResult(BaseModel):
 
 
 class TransactionQueryParams(BaseModel):
-    """交易查询参数"""
+    """Transaction query parameters model."""
 
-    keyword: str | None = Field(None, description="关键词搜索（描述、地点、标签）")
-    min_amount: float | None = Field(None, description="最小金额（绝对值）")
-    max_amount: float | None = Field(None, description="最大金额（绝对值）")
-    transaction_types: list[TransactionType] | None = Field(None, description="交易类型列表")
-    category_keys: list[str] | None = Field(None, description="分类键列表")
-    tags: list[str] | None = Field(None, description="标签列表")
-    start_date: str | None = Field(None, description="开始日期 (ISO 8601)")
-    end_date: str | None = Field(None, description="结束日期 (ISO 8601)")
-    date: str | None = Field(None, description="指定日期 (YYYY-MM-DD)，用于首页日历")
-    page: int = Field(1, ge=1, description="页码")
-    per_page: int = Field(20, ge=1, le=100, description="每页数量")
+    keyword: str | None = Field(
+        default=None, description="Keyword search across description, location, category_key, and tags"
+    )
+    min_amount: float | None = Field(default=None, description="Minimum amount (absolute value)")
+    max_amount: float | None = Field(default=None, description="Maximum amount (absolute value)")
+    transaction_types: list[TransactionType] | None = Field(default=None, description="List of transaction types")
+    category_keys: list[str] | None = Field(default=None, description="List of category keys")
+    tags: list[str] | None = Field(default=None, description="List of tags")
+    start_date: str | None = Field(default=None, description="Start date (ISO 8601)")
+    end_date: str | None = Field(default=None, description="End date (ISO 8601)")
+    date: str | None = Field(default=None, description="Specific date (YYYY-MM-DD), used for home calendar")
+    page: int = Field(default=1, ge=1, description="Page number")
+    per_page: int = Field(default=20, ge=1, le=100, description="Items per page")
 
 
 # ============================================================================
@@ -149,19 +151,19 @@ class TransactionQueryParams(BaseModel):
 
 
 def _parse_date_to_utc(date_str: str, end_of_day: bool = False) -> datetime | None:
-    """将日期字符串解析为 UTC 时区的 datetime 对象。
+    """Parse a date string into a UTC datetime object.
 
-    使用 dateutil.parser 处理各种日期格式，包括:
-    - ISO 8601 带时区: 2025-12-25T00:00:00+08:00
+    Uses dateutil.parser to handle various date formats including:
+    - ISO 8601 with timezone offset: 2025-12-25T00:00:00+08:00
     - ISO 8601 UTC: 2025-12-25T00:00:00Z
-    - 纯日期: 2025-12-25 (默认 UTC 00:00:00)
+    - Plain date: 2025-12-25 (defaults to 00:00:00 UTC)
 
     Args:
-        date_str: 日期字符串
-        end_of_day: 如果为 True，设置为当天 23:59:59.999999 UTC
+        date_str: Date string to parse.
+        end_of_day: If True, set time to 23:59:59.999999 UTC.
 
     Returns:
-        UTC 时区的 datetime 对象，解析失败返回 None
+        UTC datetime object, or None if parsing fails.
     """
     if not date_str:
         return None
@@ -172,17 +174,17 @@ def _parse_date_to_utc(date_str: str, end_of_day: bool = False) -> datetime | No
             tz,
         )
 
-        # dateutil 自动处理各种格式，包括 'Z' 后缀
+        # dateutil automatically handles various formats including 'Z' suffix
         dt = dateutil_parser.parse(date_str)
 
-        # 如果是 naive datetime，假定为 UTC
+        # If naive datetime, assume UTC
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=tz.UTC)
         else:
-            # 转换为 UTC
+            # Convert timezone to UTC
             dt = dt.astimezone(tz.UTC)
 
-        # 设置为当天结束
+        # Set to end of day
         if end_of_day:
             dt = dt.replace(hour=23, minute=59, second=59, microsecond=999999)
 
@@ -193,76 +195,77 @@ def _parse_date_to_utc(date_str: str, end_of_day: bool = False) -> datetime | No
 
 
 class TransactionQueryService:
-    """交易查询服务 - 核心业务逻辑
+    """Transaction Query Service - Core business logic for transaction queries.
 
-    使用方式:
-        # 在 API 端点中
+    Usage:
+        # In API routes:
         service = TransactionQueryService(db_session)
         result = await service.search(user_uuid, params)
 
-        # 在 LangGraph 工具中
+        # In LangGraph tools:
         async with db_manager.session_factory() as session:
             service = TransactionQueryService(session)
             result = await service.search(user_uuid, params)
     """
 
     def __init__(self, db: AsyncSession):
-        """初始化服务
+        """Initialize service.
 
         Args:
-            db: 异步数据库会话
+            db: Async database session.
         """
         self.db = db
 
     async def search(self, user_uuid: str, params: TransactionQueryParams) -> TransactionQueryResult:
-        """搜索交易记录
+        """Search transaction records with filtering and pagination.
 
         Args:
-            user_uuid: 用户 UUID
-            params: 查询参数
+            user_uuid: User UUID string.
+            params: Query parameters.
 
         Returns:
-            TransactionQueryResult 包含分页的交易列表
+            TransactionQueryResult containing paginated transaction list.
         """
         try:
-            # 构建基础查询条件
+            # Build base query conditions
             conditions = [type_cast(Any, Transaction.user_uuid == UUID(user_uuid))]
 
-            # 关键词搜索：匹配 description, location, tags
+            # Keyword search: match description, location, category_key, and tags
             if params.keyword:
-                keyword_pattern = f"%{params.keyword}%"
+                keyword_pattern = f"%{params.keyword.strip()}%"
                 conditions.append(
                     type_cast(
                         Any,
                         or_(
                             type_cast(Any, Transaction.description).ilike(keyword_pattern),
                             type_cast(Any, Transaction.location).ilike(keyword_pattern),
+                            type_cast(Any, Transaction.category_key).ilike(keyword_pattern),
                             sql_cast(Transaction.tags, String).ilike(keyword_pattern),
                         ),
                     )
                 )
 
-            # 金额范围 - func.abs returns ColumnElement which may need cast or ignore
+            # Amount range filter - func.abs returns ColumnElement which may need cast or ignore
             if params.min_amount is not None:
                 conditions.append(type_cast(Any, func.abs(Transaction.amount) >= params.min_amount))
             if params.max_amount is not None:
                 conditions.append(type_cast(Any, func.abs(Transaction.amount) <= params.max_amount))
 
-            # 交易类型
+            # Transaction type filter
             if params.transaction_types:
                 type_values = [t.value for t in params.transaction_types]
                 conditions.append(type_cast(Any, Transaction.type).in_(type_values))
 
-            # 分类
+            # Category filter
             if params.category_keys:
                 conditions.append(type_cast(Any, Transaction.category_key).in_(params.category_keys))
 
-            # 标签（JSONB contains）
+            # Tags filter (JSONB contains)
             if params.tags:
                 for tag in params.tags:
                     conditions.append(type_cast(Any, Transaction.tags).contains([tag]))
 
-            # 日期范围
+            # Date range filter
             if params.start_date:
                 start_dt = _parse_date_to_utc(params.start_date, end_of_day=False)
                 if start_dt:
@@ -273,7 +276,7 @@ class TransactionQueryService:
                 if end_dt:
                     conditions.append(type_cast(Any, Transaction.transaction_at <= end_dt))
 
-            # 指定日期（用于首页日历）
+            # Specific date filter (used for home calendar)
             if params.date:
                 day_start = _parse_date_to_utc(params.date, end_of_day=False)
                 day_end = _parse_date_to_utc(params.date, end_of_day=True)
@@ -281,32 +284,32 @@ class TransactionQueryService:
                     conditions.append(type_cast(Any, Transaction.transaction_at >= day_start))
                     conditions.append(type_cast(Any, Transaction.transaction_at <= day_end))
 
-            # 构建查询
+            # Build query statement
             # Mypy cannot handle the *conditions expansion with SQLModel fields correctly
             stmt = select(Transaction).where(type_cast(Any, and_(True, *conditions)))
 
-            # 计算总数
+            # Count total matching items
             count_stmt = select(func.count()).select_from(stmt.subquery())
             total_result = await self.db.execute(count_stmt)
             total = total_result.scalar() or 0
 
-            # 计算分页
+            # Calculate pagination
             pages = (total + params.per_page - 1) // params.per_page if total > 0 else 0
             has_more = params.page < pages
 
-            # 排序和分页
+            # Ordering and pagination
             # Transaction.transaction_at is seen as a datetime instance, not a column by Mypy
             stmt = stmt.order_by(desc(type_cast(Any, Transaction.transaction_at)))
             stmt = stmt.offset((params.page - 1) * params.per_page).limit(params.per_page)
 
-            # 执行查询
+            # Execute query
             result = await self.db.execute(stmt)
             transactions = result.scalars().all()
 
-            # 获取用户本位币
+            # Get user primary currency
             display_currency = await get_user_display_currency(self.db, UUID(user_uuid))
 
-            # 转换为响应模型（展示原币金额）
+            # Convert to response models (display original currency amount)
             items = [TransactionItem.from_transaction(tx, display_currency=display_currency) for tx in transactions]
 
             logger.info(
@@ -338,14 +341,14 @@ class TransactionQueryService:
         page: int = 1,
         per_page: int = 20,
     ) -> TransactionQueryResult:
-        """获取首页交易 Feed
+        """Get home page transaction feed.
 
         Args:
-            user_uuid: 用户 UUID
-            date: 可选的日期过滤 (YYYY-MM-DD)
-            transaction_type: 可选的交易类型过滤
-            page: 页码
-            per_page: 每页数量
+            user_uuid: User UUID string.
+            date: Optional date filter (YYYY-MM-DD).
+            transaction_type: Optional transaction type filter.
+            page: Page number.
+            per_page: Number of items per page.
 
         Returns:
             TransactionQueryResult
@@ -362,13 +365,13 @@ class TransactionQueryService:
 
 
 async def query_transactions(user_uuid: str, params: TransactionQueryParams) -> TransactionQueryResult:
-    """便捷函数：在 LangGraph 工具中使用
+    """Convenience function for use in LangGraph tools.
 
-    自动创建数据库会话并执行查询。
+    Automatically creates a database session and executes the search query.
 
     Args:
-        user_uuid: 用户 UUID
-        params: 查询参数
+        user_uuid: User UUID string.
+        params: Query parameters.
 
     Returns:
         TransactionQueryResult

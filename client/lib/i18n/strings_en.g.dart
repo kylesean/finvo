@@ -252,6 +252,7 @@ class _Translations$home$en extends Translations$home$zh {
 	@override String get todayExpense => 'Today\'s';
 	@override String get monthExpense => 'This Month\'s';
 	@override String yearProgress({required Object year}) => '${year} Progress';
+	@override String yearRemainingInfo({required Object days, required Object percent}) => 'Left ${days} days · ${percent}%';
 	@override String get amountHidden => '••••••••';
 	@override String get loadFailed => 'Load failed';
 	@override String get noTransactions => 'No transactions';
@@ -1292,7 +1293,10 @@ class _Translations$statistics$analysis$en extends Translations$statistics$analy
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Analysis';
+	@override String get title => 'Expense Analysis';
+	@override String get expenseTitle => 'Expense Analysis';
+	@override String get incomeTitle => 'Income Analysis';
+	@override String get radarNeedMoreData => 'Radar chart requires at least 3 categories';
 	@override String get total => 'Total';
 	@override String get breakdown => 'Category Breakdown';
 }

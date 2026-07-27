@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
+import '../../../core/widgets/app_calendar.dart';
 import '../../../i18n/strings.g.dart';
 
 class DateRangePickerSheet extends StatefulWidget {
@@ -68,119 +69,135 @@ class _DateRangePickerSheetState extends State<DateRangePickerSheet> {
           topRight: Radius.circular(theme.style.borderRadius.xl.topRight.x),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag indicator
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 8),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colors.muted,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          // Title
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  t.dateRange.pickerTitle,
-                  style: theme.typography.body.lg.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                FButton.icon(
-                  variant: .ghost,
-                  onPress: () => Navigator.pop(context),
-                  child: Icon(FLucideIcons.x, color: colors.foreground),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colors.muted,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(FLucideIcons.calendar, size: 16, color: colors.foreground),
-                const SizedBox(width: 8),
-                Text(
-                  _formatDateRange(_selectedRange),
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.foreground,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: FCalendar.grid(
-              selectionControl: .liftedRange(
-                value: _selectedRange,
-                onChange: (range) => setState(() => _selectedRange = range),
-              ),
-              control: FGridCalendarControl(
-                start: DateTime.now().subtract(const Duration(days: 365 * 2)),
-                end: DateTime.now(),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag indicator
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.muted,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-          ),
-
-          Padding(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 16,
-              bottom: MediaQuery.of(context).padding.bottom + 16,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 40,
-                    child: FButton(
-                      variant: .outline,
-                      onPress: () {
-                        setState(() {
-                          _selectedRange = null;
-                        });
-                      },
-                      child: Text(t.common.reset),
+            // Header Row (Title, Active Date Range Subtitle, Close Button)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          t.dateRange.pickerTitle,
+                          style: theme.typography.body.lg.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colors.foreground,
+                          ),
+                        ),
+                        if (_selectedRange != null) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                FLucideIcons.calendar,
+                                size: 14,
+                                color: colors.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _formatDateRange(_selectedRange),
+                                style: theme.typography.body.sm.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ),
+                  FButton.icon(
+                    variant: .ghost,
+                    onPress: () => Navigator.pop(context),
+                    child: Icon(FLucideIcons.x, color: colors.foreground),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: AppCalendar.grid(
+                  selectionControl: .liftedRange(
+                    value: _selectedRange,
+                    onChange: (range) => setState(() => _selectedRange = range),
+                  ),
+                  control: FGridCalendarControl(
+                    start: DateTime.now().subtract(
+                      const Duration(days: 365 * 2),
+                    ),
+                    end: DateTime.now(),
+                  ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: SizedBox(
-                    height: 40,
-                    child: FButton(
-                      onPress: _selectedRange != null
-                          ? () {
-                              final range = _selectedRange;
-                              if (range != null) {
-                                Navigator.pop(context);
-                                widget.onConfirm(range.$1, range.$2);
+              ),
+            ),
+
+            Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: MediaQuery.of(context).padding.bottom + 16,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 40,
+                      child: FButton(
+                        variant: .outline,
+                        onPress: () {
+                          setState(() {
+                            _selectedRange = null;
+                          });
+                        },
+                        child: Text(t.common.reset),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 40,
+                      child: FButton(
+                        onPress: _selectedRange != null
+                            ? () {
+                                final range = _selectedRange;
+                                if (range != null) {
+                                  Navigator.pop(context);
+                                  widget.onConfirm(range.$1, range.$2);
+                                }
                               }
-                            }
-                          : null,
-                      child: Text(t.common.confirm),
+                            : null,
+                        child: Text(t.common.confirm),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

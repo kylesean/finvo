@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:rrule/rrule.dart' as rrule_lib;
+import 'package:augo/core/widgets/app_calendar.dart';
 import 'package:augo/i18n/strings.g.dart';
 
 /// Recurrence rule result
@@ -816,13 +817,13 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) => Container(
-          height: MediaQuery.of(context).size.height * 0.55,
           decoration: BoxDecoration(
             color: colors.background,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           ),
           child: SafeArea(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Drag handle
                 Container(
@@ -863,10 +864,10 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 ),
                 const SizedBox(height: 8),
                 // Calendar
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: FCalendar.grid(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Center(
+                    child: AppCalendar.grid(
                       selectionControl: .liftedSingle(
                         value: selectedDate,
                         onChange: (date) {
@@ -885,6 +886,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
               ],
             ),
           ),

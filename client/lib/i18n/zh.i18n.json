@@ -149,6 +149,7 @@
     "todayExpense": "今日支出",
     "monthExpense": "本月支出",
     "yearProgress": "$year年进度",
+    "yearRemainingInfo": "余 $days 天 · $percent%",
     "amountHidden": "••••••••",
     "loadFailed": "加载失败",
     "noTransactions": "暂无交易记录",
@@ -1041,8 +1042,11 @@
     },
     "analysis": {
       "title": "支出分析",
+      "expenseTitle": "支出分析",
+      "incomeTitle": "收入分析",
       "total": "总计",
-      "breakdown": "支出分类明细"
+      "breakdown": "支出分类明细",
+      "radarNeedMoreData": "雷达图需要至少3个分类数据"
     },
     "filter": {
       "accountType": "账户类型",

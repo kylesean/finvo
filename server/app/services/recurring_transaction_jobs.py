@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session_context
 from app.core.logging import logger
+from app.models.base import utc_now
 from app.models.transaction import RecurringTransaction, Transaction
 from app.services.transaction.recurring_service import RecurringTransactionService
 
@@ -123,6 +124,59 @@ async def _already_generated(
     return count > 0
 
 
+async def _update_account_balances_for_recurring(
+    db: AsyncSession,
+    recurring_tx: RecurringTransaction,
+    amount_original: Decimal,
+    amount_base: Decimal,
+    currency: str,
+) -> None:
+    """Update linked financial account balances when recurring transaction is automatically confirmed."""
+    from app.models.financial_account import FinancialAccount
+    from app.services.exchange_rate_service import ExchangeRateService
+
+    exchange_rate_svc = ExchangeRateService()
+
+    async def _adjust_account_balance(account_id: UUID, is_deduction: bool) -> None:
+        account = await db.get(FinancialAccount, account_id)
+        if not account:
+            return
+
+        account_currency = (account.currency_code or "CNY").upper()
+        if currency == account_currency:
+            delta = abs(Decimal(str(amount_original)))
+        else:
+            try:
+                converted = await exchange_rate_svc.convert(
+                    amount=float(abs(Decimal(str(amount_original)))),
+                    from_currency=currency,
+                    to_currency=account_currency,
+                )
+                delta = Decimal(str(converted)) if converted is not None else abs(Decimal(str(amount_base)))
+            except Exception:
+                delta = abs(Decimal(str(amount_base)))
+
+        if is_deduction:
+            account.current_balance -= delta
+        else:
+            account.current_balance += delta
+        account.updated_at = utc_now()
+
+    tx_type = recurring_tx.type.upper() if recurring_tx.type else "EXPENSE"
+
+    if tx_type == "EXPENSE" and recurring_tx.source_account_id:
+        await _adjust_account_balance(recurring_tx.source_account_id, is_deduction=True)
+    elif tx_type == "INCOME":
+        target_id = recurring_tx.target_account_id or recurring_tx.source_account_id
+        if target_id:
+            await _adjust_account_balance(target_id, is_deduction=False)
+    elif tx_type == "TRANSFER":
+        if recurring_tx.source_account_id:
+            await _adjust_account_balance(recurring_tx.source_account_id, is_deduction=True)
+        if recurring_tx.target_account_id:
+            await _adjust_account_balance(recurring_tx.target_account_id, is_deduction=False)
+
+
 async def _create_transaction_from_recurring(
     db: AsyncSession,
     recurring_tx: RecurringTransaction,
@@ -176,6 +230,17 @@ async def _create_transaction_from_recurring(
     )
 
     db.add(transaction)
+
+    # Immediately adjust linked account balances if transaction is automatically confirmed
+    if status == "CONFIRMED":
+        await _update_account_balances_for_recurring(
+            db=db,
+            recurring_tx=recurring_tx,
+            amount_original=amount_original,
+            amount_base=amount,
+            currency=currency,
+        )
+
     recurring_tx.last_generated_at = utc_now()
 
     logger.info(

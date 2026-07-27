@@ -149,6 +149,7 @@
     "todayExpense": "오늘 지출",
     "monthExpense": "이번 달 지출",
     "yearProgress": "$year년 진행률",
+    "yearRemainingInfo": "$days일 남음 · $percent%",
     "amountHidden": "••••••••",
     "loadFailed": "불러오기 실패",
     "noTransactions": "거래 내역 없음",
@@ -1041,8 +1042,11 @@
     },
     "analysis": {
       "title": "지출 분석",
+      "expenseTitle": "지출 분석",
+      "incomeTitle": "수입 분석",
       "total": "합계",
-      "breakdown": "카테고리별 상세"
+      "breakdown": "지출 카테고리 내역",
+      "radarNeedMoreData": "레이더 차트는 3개 이상의 카테고리 데이터가 필요합니다"
     },
     "filter": {
       "accountType": "계좌 유형",

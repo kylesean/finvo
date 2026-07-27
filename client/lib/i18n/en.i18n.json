@@ -149,6 +149,7 @@
     "todayExpense": "Today's",
     "monthExpense": "This Month's",
     "yearProgress": "$year Progress",
+    "yearRemainingInfo": "Left $days days · $percent%",
     "amountHidden": "••••••••",
     "loadFailed": "Load failed",
     "noTransactions": "No transactions",
@@ -1040,9 +1041,12 @@
       "income": "Income"
     },
     "analysis": {
-      "title": "Analysis",
+      "title": "Expense Analysis",
+      "expenseTitle": "Expense Analysis",
+      "incomeTitle": "Income Analysis",
       "total": "Total",
-      "breakdown": "Category Breakdown"
+      "breakdown": "Expense Breakdown",
+      "radarNeedMoreData": "Radar chart requires at least 3 categories"
     },
     "filter": {
       "accountType": "Account Type",

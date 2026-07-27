@@ -139,22 +139,28 @@ class Statistics extends _$Statistics {
           page: 1,
           pageSize: 15,
         ),
-        service.getCashFlow(
-          timeRange: state.timeRange.name,
-          startDate: state.customStartDate?.toIso8601String(),
-          endDate: state.customEndDate?.toIso8601String(),
-          accountTypes: state.selectedAccountTypes.isNotEmpty
-              ? state.selectedAccountTypes
-              : null,
-        ),
-        service.getHealthScore(
-          timeRange: state.timeRange.name,
-          startDate: state.customStartDate?.toIso8601String(),
-          endDate: state.customEndDate?.toIso8601String(),
-          accountTypes: state.selectedAccountTypes.isNotEmpty
-              ? state.selectedAccountTypes
-              : null,
-        ),
+        service
+            .getCashFlow(
+              timeRange: state.timeRange.name,
+              startDate: state.customStartDate?.toIso8601String(),
+              endDate: state.customEndDate?.toIso8601String(),
+              accountTypes: state.selectedAccountTypes.isNotEmpty
+                  ? state.selectedAccountTypes
+                  : null,
+            )
+            .then<CashFlowAnalysis?>((res) => res)
+            .catchError((_) => null),
+        service
+            .getHealthScore(
+              timeRange: state.timeRange.name,
+              startDate: state.customStartDate?.toIso8601String(),
+              endDate: state.customEndDate?.toIso8601String(),
+              accountTypes: state.selectedAccountTypes.isNotEmpty
+                  ? state.selectedAccountTypes
+                  : null,
+            )
+            .then<HealthScore?>((res) => res)
+            .catchError((_) => null),
       ]);
 
       state = state.copyWith(
@@ -163,8 +169,8 @@ class Statistics extends _$Statistics {
         trendData: results[1] as TrendDataResponse,
         categoryBreakdown: results[2] as CategoryBreakdownResponse,
         topTransactions: results[3] as TopTransactionsResponse,
-        cashFlow: results[4] as CashFlowAnalysis,
-        healthScore: results[5] as HealthScore,
+        cashFlow: results[4] as CashFlowAnalysis?,
+        healthScore: results[5] as HealthScore?,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

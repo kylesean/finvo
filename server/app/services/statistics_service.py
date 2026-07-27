@@ -56,43 +56,53 @@ class StatisticsService:
         time_range: str,
         start_date: str | None = None,
         end_date: str | None = None,
+        tz_offset_minutes: int | None = None,
     ) -> tuple[datetime, datetime]:
-        """Calculate date range based on time_range parameter."""
-        now = datetime.now(UTC)
+        """Calculate date range based on time_range parameter and optional client timezone offset."""
+        now_utc = datetime.now(UTC)
+
+        if tz_offset_minutes is not None:
+            # Shift UTC now to client local time for boundary calculations
+            local_now = now_utc + timedelta(minutes=tz_offset_minutes)
+        else:
+            local_now = now_utc
 
         if time_range == "week":
-            # Start of current week (Monday) to end of current week (Sunday)
-            start = now - timedelta(days=now.weekday())
-            start = start.replace(hour=0, minute=0, second=0, microsecond=0)
-            # End of current week (Sunday 23:59:59)
-            end = start + timedelta(days=6)
-            end = end.replace(hour=23, minute=59, second=59, microsecond=999999)
+            # Start of current week (Monday) to end of current week (Sunday) in local time
+            local_start = local_now - timedelta(days=local_now.weekday())
+            local_start = local_start.replace(hour=0, minute=0, second=0, microsecond=0)
+            local_end = local_start + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
         elif time_range == "month":
-            # Start of current month to end of current month
-            start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            # Calculate end of month
-            if now.month == 12:
-                next_month = now.replace(year=now.year + 1, month=1, day=1)
+            local_start = local_now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            if local_now.month == 12:
+                next_month = local_now.replace(year=local_now.year + 1, month=1, day=1)
             else:
-                next_month = now.replace(month=now.month + 1, day=1)
-            end = next_month - timedelta(seconds=1)
+                next_month = local_now.replace(month=local_now.month + 1, day=1)
+            local_end = next_month - timedelta(microseconds=1)
         elif time_range == "year":
-            # Start of current year to end of current year
-            start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-            end = now.replace(month=12, day=31, hour=23, minute=59, second=59, microsecond=999999)
+            local_start = local_now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+            local_end = local_now.replace(month=12, day=31, hour=23, minute=59, second=59, microsecond=999999)
         elif time_range == "custom" and start_date and end_date:
-            start = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
-            end = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            start_utc = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            end_utc = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            return start_utc, end_utc
         else:
-            # Default to current month
-            start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            if now.month == 12:
-                next_month = now.replace(year=now.year + 1, month=1, day=1)
+            local_start = local_now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            if local_now.month == 12:
+                next_month = local_now.replace(year=local_now.year + 1, month=1, day=1)
             else:
-                next_month = now.replace(month=now.month + 1, day=1)
-            end = next_month - timedelta(seconds=1)
+                next_month = local_now.replace(month=local_now.month + 1, day=1)
+            local_end = next_month - timedelta(microseconds=1)
 
-        return start, end
+        if tz_offset_minutes is not None:
+            # Convert local boundaries back to UTC
+            start_utc = local_start - timedelta(minutes=tz_offset_minutes)
+            end_utc = local_end - timedelta(minutes=tz_offset_minutes)
+        else:
+            start_utc = local_start
+            end_utc = local_end
+
+        return start_utc, end_utc
 
     def _get_previous_period_range(
         self,
@@ -112,9 +122,10 @@ class StatisticsService:
         start_date: str | None = None,
         end_date: str | None = None,
         account_types: list[str] | None = None,
+        tz_offset_minutes: int | None = None,
     ) -> StatisticsOverviewResponse:
         """Get statistics overview for the period."""
-        period_start, period_end = self._get_date_range(time_range, start_date, end_date)
+        period_start, period_end = self._get_date_range(time_range, start_date, end_date, tz_offset_minutes)
         prev_start, prev_end = self._get_previous_period_range(period_start, period_end)
 
         # Build base query conditions
@@ -129,23 +140,25 @@ class StatisticsService:
         if account_filter is not None:
             base_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
 
-        # Calculate current period totals
-        income_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            type_cast(
-                Any, and_(*[type_cast(Any, c) for c in base_conditions], type_cast(Any, Transaction.type == "INCOME"))
-            )
-        )
-        expense_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            type_cast(
-                Any, and_(*[type_cast(Any, c) for c in base_conditions], type_cast(Any, Transaction.type == "EXPENSE"))
-            )
-        )
+        # Single-query conditional aggregation for income and expense
+        totals_query = select(
+            func.coalesce(
+                func.sum(case((type_cast(Any, Transaction.type == "INCOME"), Transaction.amount), else_=Decimal("0"))),
+                Decimal("0"),
+            ).label("income"),
+            func.coalesce(
+                func.sum(
+                    case((type_cast(Any, Transaction.type == "EXPENSE"), Transaction.amount), else_=Decimal("0"))
+                ),
+                Decimal("0"),
+            ).label("expense"),
+        ).where(and_(*[type_cast(Any, c) for c in base_conditions]))
 
-        income_result = await self.db.execute(income_query)
-        expense_result = await self.db.execute(expense_query)
+        totals_result = await self.db.execute(totals_query)
+        totals_row = totals_result.one()
 
-        total_income = Decimal(str(income_result.scalar() or 0))
-        total_expense = Decimal(str(expense_result.scalar() or 0))
+        total_income = Decimal(str(totals_row.income or 0))
+        total_expense = Decimal(str(totals_row.expense or 0))
 
         # Get total balance from financial accounts
         balance_conditions: list[Any] = [
@@ -171,35 +184,33 @@ class StatisticsService:
         balance_result = await self.db.execute(balance_query)
         total_balance = Decimal(str(balance_result.scalar() or 0))
 
-        # Calculate previous period for comparison
+        # Calculate previous period for comparison with single-query conditional aggregation
         prev_conditions: list[Any] = [
             Transaction.user_uuid == user_uuid,
             Transaction.transaction_at >= prev_start,
             Transaction.transaction_at <= prev_end,
         ]
-        # Apply same account type filter to previous period
-        account_filter = self._build_account_filter(
-            user_uuid, account_types
-        )  # Re-build for consistency if needed, though same value
         if account_filter is not None:
             prev_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
 
-        prev_income_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            type_cast(
-                Any, and_(*[type_cast(Any, c) for c in prev_conditions], type_cast(Any, Transaction.type == "INCOME"))
-            )
-        )
-        prev_expense_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            type_cast(
-                Any, and_(*[type_cast(Any, c) for c in prev_conditions], type_cast(Any, Transaction.type == "EXPENSE"))
-            )
-        )
+        prev_totals_query = select(
+            func.coalesce(
+                func.sum(case((type_cast(Any, Transaction.type == "INCOME"), Transaction.amount), else_=Decimal("0"))),
+                Decimal("0"),
+            ).label("income"),
+            func.coalesce(
+                func.sum(
+                    case((type_cast(Any, Transaction.type == "EXPENSE"), Transaction.amount), else_=Decimal("0"))
+                ),
+                Decimal("0"),
+            ).label("expense"),
+        ).where(and_(*[type_cast(Any, c) for c in prev_conditions]))
 
-        prev_income_result = await self.db.execute(prev_income_query)
-        prev_expense_result = await self.db.execute(prev_expense_query)
+        prev_totals_result = await self.db.execute(prev_totals_query)
+        prev_totals_row = prev_totals_result.one()
 
-        prev_income = Decimal(str(prev_income_result.scalar() or 0))
-        prev_expense = Decimal(str(prev_expense_result.scalar() or 0))
+        prev_income = Decimal(str(prev_totals_row.income or 0))
+        prev_expense = Decimal(str(prev_totals_row.expense or 0))
 
         # Amounts are already in user's base currency - no conversion needed
         display_currency = await get_user_display_currency(self.db, user_uuid)
@@ -232,27 +243,22 @@ class StatisticsService:
         start_date: str | None = None,
         end_date: str | None = None,
         account_types: list[str] | None = None,
+        tz_offset_minutes: int | None = None,
     ) -> TrendDataResponse:
         """Get trend data for chart visualization."""
-        period_start, period_end = self._get_date_range(time_range, start_date, end_date)
+        period_start, period_end = self._get_date_range(time_range, start_date, end_date, tz_offset_minutes)
 
         tx_type = transaction_type.upper()
 
         # Determine grouping granularity based on time range
         if time_range == "week":
-            # Group by day of week
             date_trunc = func.date_trunc("day", Transaction.transaction_at)
-            # Use raw dates; frontend will handle localization
         elif time_range == "month":
-            # Group by day of month (simplified to ~6 points)
             date_trunc = func.date_trunc("day", Transaction.transaction_at)
         elif time_range == "year":
-            # Group by month
             date_trunc = func.date_trunc("month", Transaction.transaction_at)
-            # Use raw dates; frontend will handle localization
         else:
             date_trunc = func.date_trunc("day", Transaction.transaction_at)
-            _labels = None
 
         # Build base conditions
         base_conditions: list[Any] = [
@@ -269,38 +275,42 @@ class StatisticsService:
 
         # Query aggregated data
         query = (
-            select(date_trunc.label("period"), func.coalesce(func.sum(Transaction.amount), 0).label("total"))
+            select(type_cast(Any, date_trunc).label("point_date"), func.sum(Transaction.amount).label("total"))
             .where(type_cast(Any, and_(*[type_cast(Any, c) for c in base_conditions])))
             .group_by(date_trunc)
-            .order_by(type_cast(Any, date_trunc))
+            .order_by(date_trunc)
         )
 
         result = await self.db.execute(query)
         rows = result.all()
 
-        # Build date to amount mapping from query results
-        date_amount_map = {}
+        # Build date to amount map from aggregated rows
+        date_amount_map: dict[str, Decimal] = {}
         for row in rows:
-            period_dt = row.period
-            amount = Decimal(str(row.total))
+            point_dt = row.point_date
+            if point_dt:
+                if time_range == "year":
+                    key = point_dt.strftime("%Y-%m")
+                else:
+                    key = point_dt.strftime("%Y-%m-%d")
+                date_amount_map[key] = Decimal(str(row.total or 0))
 
-            if time_range == "year":
-                date_key = period_dt.strftime("%Y-%m")
-            else:
-                date_key = period_dt.strftime("%Y-%m-%d")
-
-            date_amount_map[date_key] = amount
-
-        # Generate complete date sequence and fill missing dates with 0
+        # Generate complete date sequence from period_start to period_end
         data_points = []
         current = period_start
 
         while current <= period_end:
             if time_range == "year":
                 date_key = current.strftime("%Y-%m")
-                # Return standard YYYY-MM format as label for Year view
-                # This allows frontend to parse and format it (e.g. "Jan", "1月")
-                label = date_key
+                label_str = current.strftime("%Y-%m")
+                amount = date_amount_map.get(date_key, Decimal("0"))
+                data_points.append(
+                    TrendDataPoint(
+                        date=date_key,
+                        amount=f"{amount:.2f}",
+                        label=label_str,
+                    )
+                )
                 # Move to next month
                 if current.month == 12:
                     current = current.replace(year=current.year + 1, month=1)
@@ -308,25 +318,17 @@ class StatisticsService:
                     current = current.replace(month=current.month + 1)
             else:
                 date_key = current.strftime("%Y-%m-%d")
-                if time_range == "week":
-                    # For week view, use the date string YYYY-MM-DD as label
-                    # Frontend will format it to Mon/Tue etc.
-                    label = date_key
-                else:
-                    # For month view (days), also use date key or Day number
-                    # Keeping it simple: use date_key so frontend parses it consistently
-                    label = date_key
+                label_str = current.strftime("%m/%d")
+                amount = date_amount_map.get(date_key, Decimal("0"))
+                data_points.append(
+                    TrendDataPoint(
+                        date=date_key,
+                        amount=f"{amount:.2f}",
+                        label=label_str,
+                    )
+                )
                 # Move to next day
                 current = current + timedelta(days=1)
-
-            amount = date_amount_map.get(date_key, Decimal("0"))
-            data_points.append(
-                TrendDataPoint(
-                    date=date_key,
-                    amount=f"{amount:.2f}",
-                    label=label,
-                )
-            )
 
         return TrendDataResponse(
             dataPoints=data_points,
@@ -343,9 +345,10 @@ class StatisticsService:
         account_types: list[str] | None = None,
         transaction_type: str = "expense",
         limit: int = 10,
+        tz_offset_minutes: int | None = None,
     ) -> CategoryBreakdownResponse:
         """Get breakdown by category for specified transaction type."""
-        period_start, period_end = self._get_date_range(time_range, start_date, end_date)
+        period_start, period_end = self._get_date_range(time_range, start_date, end_date, tz_offset_minutes)
 
         tx_type = transaction_type.upper()
 
@@ -411,9 +414,10 @@ class StatisticsService:
         sort_by: str = "amount",
         page: int = 1,
         size: int = 10,
+        tz_offset_minutes: int | None = None,
     ) -> TopTransactionsResponse:
         """Get top transactions for the period."""
-        period_start, period_end = self._get_date_range(time_range, start_date, end_date)
+        period_start, period_end = self._get_date_range(time_range, start_date, end_date, tz_offset_minutes)
 
         tx_type = transaction_type.upper()
 
@@ -487,9 +491,10 @@ class StatisticsService:
         start_date: str | None = None,
         end_date: str | None = None,
         account_types: list[str] | None = None,
+        tz_offset_minutes: int | None = None,
     ) -> CashFlowResponse:
         """Get comprehensive cash flow analysis for the period."""
-        period_start, period_end = self._get_date_range(time_range, start_date, end_date)
+        period_start, period_end = self._get_date_range(time_range, start_date, end_date, tz_offset_minutes)
         prev_start, prev_end = self._get_previous_period_range(period_start, period_end)
 
         # Build base query conditions
@@ -504,25 +509,27 @@ class StatisticsService:
         if account_filter is not None:
             base_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
 
-        # Calculate current period totals
-        income_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            type_cast(
-                Any, and_(*[type_cast(Any, c) for c in base_conditions], type_cast(Any, Transaction.type == "INCOME"))
-            )
-        )
-        expense_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            type_cast(
-                Any, and_(*[type_cast(Any, c) for c in base_conditions], type_cast(Any, Transaction.type == "EXPENSE"))
-            )
-        )
+        # Single-query conditional aggregation for current period totals
+        totals_query = select(
+            func.coalesce(
+                func.sum(case((type_cast(Any, Transaction.type == "INCOME"), Transaction.amount), else_=Decimal("0"))),
+                Decimal("0"),
+            ).label("income"),
+            func.coalesce(
+                func.sum(
+                    case((type_cast(Any, Transaction.type == "EXPENSE"), Transaction.amount), else_=Decimal("0"))
+                ),
+                Decimal("0"),
+            ).label("expense"),
+        ).where(and_(*[type_cast(Any, c) for c in base_conditions]))
 
-        income_result = await self.db.execute(income_query)
-        expense_result = await self.db.execute(expense_query)
+        totals_result = await self.db.execute(totals_query)
+        totals_row = totals_result.one()
 
-        total_income = Decimal(str(income_result.scalar() or 0))
-        total_expense = Decimal(str(expense_result.scalar() or 0))
+        total_income = Decimal(str(totals_row.income or 0))
+        total_expense = Decimal(str(totals_row.expense or 0))
 
-        # Calculate previous period for comparison
+        # Single-query conditional aggregation for previous period
         prev_conditions: list[Any] = [
             Transaction.user_uuid == user_uuid,
             Transaction.transaction_at >= prev_start,
@@ -531,22 +538,24 @@ class StatisticsService:
         if account_filter is not None:
             prev_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
 
-        prev_income_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            type_cast(
-                Any, and_(*[type_cast(Any, c) for c in prev_conditions], type_cast(Any, Transaction.type == "INCOME"))
-            )
-        )
-        prev_expense_query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            type_cast(
-                Any, and_(*[type_cast(Any, c) for c in prev_conditions], type_cast(Any, Transaction.type == "EXPENSE"))
-            )
-        )
+        prev_totals_query = select(
+            func.coalesce(
+                func.sum(case((type_cast(Any, Transaction.type == "INCOME"), Transaction.amount), else_=Decimal("0"))),
+                Decimal("0"),
+            ).label("income"),
+            func.coalesce(
+                func.sum(
+                    case((type_cast(Any, Transaction.type == "EXPENSE"), Transaction.amount), else_=Decimal("0"))
+                ),
+                Decimal("0"),
+            ).label("expense"),
+        ).where(and_(*[type_cast(Any, c) for c in prev_conditions]))
 
-        prev_income_result = await self.db.execute(prev_income_query)
-        prev_expense_result = await self.db.execute(prev_expense_query)
+        prev_totals_result = await self.db.execute(prev_totals_query)
+        prev_totals_row = prev_totals_result.one()
 
-        prev_income = Decimal(str(prev_income_result.scalar() or 0))
-        prev_expense = Decimal(str(prev_expense_result.scalar() or 0))
+        prev_income = Decimal(str(prev_totals_row.income or 0))
+        prev_expense = Decimal(str(prev_totals_row.expense or 0))
 
         net_cash_flow = total_income - total_expense
 
@@ -628,12 +637,15 @@ class StatisticsService:
         start_date: str | None = None,
         end_date: str | None = None,
         account_types: list[str] | None = None,
+        tz_offset_minutes: int | None = None,
     ) -> HealthScoreResponse:
         """Calculate comprehensive financial health score based on multiple dimensions."""
         # First get cash flow data as base
-        cash_flow = await self.get_cash_flow(user_uuid, time_range, start_date, end_date, account_types)
+        cash_flow = await self.get_cash_flow(
+            user_uuid, time_range, start_date, end_date, account_types, tz_offset_minutes
+        )
 
-        period_start, period_end = self._get_date_range(time_range, start_date, end_date)
+        period_start, period_end = self._get_date_range(time_range, start_date, end_date, tz_offset_minutes)
 
         dimensions = []
         suggestions = []

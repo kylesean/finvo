@@ -581,8 +581,13 @@ class TrendChart extends ConsumerWidget {
 /// Replaces both CategoryDonutChart and CategoryDetailedReport
 class CategoryAnalysisSection extends ConsumerStatefulWidget {
   final CategoryBreakdownResponse breakdown;
+  final ChartType chartType;
 
-  const CategoryAnalysisSection({super.key, required this.breakdown});
+  const CategoryAnalysisSection({
+    super.key,
+    required this.breakdown,
+    this.chartType = ChartType.expense,
+  });
 
   @override
   ConsumerState<CategoryAnalysisSection> createState() =>
@@ -615,7 +620,9 @@ class _CategoryAnalysisSectionState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              t.statistics.analysis.title,
+              widget.chartType == ChartType.expense
+                  ? t.statistics.analysis.expenseTitle
+                  : t.statistics.analysis.incomeTitle,
               style: theme.typography.body.lg.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -680,96 +687,109 @@ class _CategoryAnalysisSectionState
   }
 
   Widget _buildBarChart(FThemeData theme, FColors colors) {
-    final maxY =
-        widget.breakdown.items
-            .map((e) => e.percentage)
-            .reduce((a, b) => a > b ? a : b) *
-        1.2;
+    final maxPercentage = widget.breakdown.items.isEmpty
+        ? 100.0
+        : widget.breakdown.items
+              .map((e) => e.percentage)
+              .reduce((a, b) => a > b ? a : b);
+    final maxY = maxPercentage > 0 ? maxPercentage * 1.35 : 100.0;
 
     return SizedBox(
       key: const ValueKey('bar'),
-      height: 200,
-      child: BarChart(
-        BarChartData(
-          alignment: BarChartAlignment.spaceAround,
-          maxY: maxY,
-          barTouchData: BarTouchData(
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (group) => colors.primary,
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                final item = widget.breakdown.items[group.x];
-                final category = TransactionCategory.fromKey(item.categoryKey);
-                final currencyCode = ref
-                    .read(financialSettingsProvider)
-                    .primaryCurrency;
-                final currencySymbol =
-                    Currency.fromCode(currencyCode)?.symbol ?? currencyCode;
-                return BarTooltipItem(
-                  '${category.displayText}\n$currencySymbol${_formatAmount(item.amount)}',
-                  theme.typography.body.xs.copyWith(
-                    color: colors.primaryForeground,
-                    fontWeight: AppFontConfig.headingBold,
-                  ),
-                );
-              },
-            ),
-          ),
-          titlesData: FlTitlesData(
-            show: true,
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 32,
-                getTitlesWidget: (value, meta) {
-                  final index = value.toInt();
-                  if (index < 0 || index >= widget.breakdown.items.length) {
-                    return const SizedBox();
-                  }
-                  final item = widget.breakdown.items[index];
+      height: 220,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16, bottom: 4),
+        child: BarChart(
+          BarChartData(
+            alignment: BarChartAlignment.spaceAround,
+            maxY: maxY,
+            barTouchData: BarTouchData(
+              touchTooltipData: BarTouchTooltipData(
+                fitInsideHorizontally: true,
+                fitInsideVertically: true,
+                tooltipMargin: 4,
+                tooltipPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                getTooltipColor: (group) => colors.primary,
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                  final item = widget.breakdown.items[group.x];
                   final category = TransactionCategory.fromKey(
                     item.categoryKey,
                   );
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Icon(
-                      category.icon,
-                      size: 14,
-                      color: colors.foreground,
+                  final currencyCode = ref
+                      .read(financialSettingsProvider)
+                      .primaryCurrency;
+                  final currencySymbol =
+                      Currency.fromCode(currencyCode)?.symbol ?? currencyCode;
+                  return BarTooltipItem(
+                    '${category.displayText}\n$currencySymbol${_formatAmount(item.amount)}',
+                    theme.typography.body.xs.copyWith(
+                      color: colors.primaryForeground,
+                      fontWeight: AppFontConfig.headingBold,
                     ),
                   );
                 },
               ),
             ),
-            leftTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-          ),
-          borderData: FlBorderData(show: false),
-          gridData: const FlGridData(show: false),
-          barGroups: widget.breakdown.items.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            final chartColor = context.theme.chartColorAt(index);
-            return BarChartGroupData(
-              x: index,
-              barRods: [
-                BarChartRodData(
-                  toY: item.percentage,
-                  color: chartColor,
-                  width: 18,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(4),
-                  ),
+            titlesData: FlTitlesData(
+              show: true,
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 32,
+                  getTitlesWidget: (value, meta) {
+                    final index = value.toInt();
+                    if (index < 0 || index >= widget.breakdown.items.length) {
+                      return const SizedBox();
+                    }
+                    final item = widget.breakdown.items[index];
+                    final category = TransactionCategory.fromKey(
+                      item.categoryKey,
+                    );
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Icon(
+                        category.icon,
+                        size: 16,
+                        color: colors.foreground,
+                      ),
+                    );
+                  },
                 ),
-              ],
-            );
-          }).toList(),
+              ),
+              leftTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+            ),
+            borderData: FlBorderData(show: false),
+            gridData: const FlGridData(show: false),
+            barGroups: widget.breakdown.items.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              final chartColor = context.theme.chartColorAt(index);
+              return BarChartGroupData(
+                x: index,
+                barRods: [
+                  BarChartRodData(
+                    toY: item.percentage,
+                    color: chartColor,
+                    width: 20,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -905,7 +925,7 @@ class _CategoryAnalysisSectionState
         height: 200,
         child: Center(
           child: Text(
-            'Radar chart requires at least 3 category data points',
+            t.statistics.analysis.radarNeedMoreData,
             style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
             ),

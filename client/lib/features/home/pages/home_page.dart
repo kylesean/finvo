@@ -393,14 +393,16 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                                 Row(
                                   children: [
                                     Icon(
-                                      FLucideIcons.timer,
+                                      FLucideIcons.calendarDays,
                                       size: 13,
                                       color: colors.primaryForeground
                                           .withValues(alpha: 0.9),
                                     ),
                                     const SizedBox(width: 5),
                                     Text(
-                                      '${now.year}年仅剩',
+                                      t.home.yearProgress(
+                                        year: now.year.toString(),
+                                      ),
                                       style: theme.typography.body.xs.copyWith(
                                         color: colors.primaryForeground
                                             .withValues(alpha: 0.85),
@@ -410,10 +412,17 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                                   ],
                                 ),
                                 Text(
-                                  '仅剩 ${yearRemaining.remainingDays} 天 (${yearRemaining.remainingPercentage}%)',
+                                  t.home.yearRemainingInfo(
+                                    days: yearRemaining.remainingDays
+                                        .toString(),
+                                    percent: yearRemaining.remainingPercentage
+                                        .toString(),
+                                  ),
                                   style: theme.typography.body.xs.copyWith(
-                                    color: colors.primaryForeground,
-                                    fontWeight: FontWeight.bold,
+                                    color: colors.primaryForeground.withValues(
+                                      alpha: 0.9,
+                                    ),
+                                    fontWeight: FontWeight.w500,
                                     letterSpacing: 0.2,
                                   ),
                                 ),
