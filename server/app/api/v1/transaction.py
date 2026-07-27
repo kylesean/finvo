@@ -6,13 +6,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi_pagination import Params
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.responses import error_response, get_error_code_int, success_response
 from app.core.service_deps import get_transaction_service
+from app.models.notification import Notification
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.schemas.transaction import (
@@ -755,6 +756,8 @@ async def confirm_pending_transaction(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Transaction is not in PENDING status")
 
     tx.status = "CONFIRMED"
+    # Auto-mark associated notification as read
+    await _mark_recurring_notification_read(db, current_user.uuid, transaction_id)
     await db.commit()
 
     return success_response(data={"id": str(tx.id), "status": "CONFIRMED"}, message="Transaction confirmed")
@@ -778,7 +781,26 @@ async def skip_pending_transaction(
     if tx.status != "PENDING":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Transaction is not in PENDING status")
 
+    # Auto-mark associated notification as read before deleting the transaction
+    await _mark_recurring_notification_read(db, current_user.uuid, transaction_id)
     await db.delete(tx)
     await db.commit()
 
     return success_response(data=None, message="Transaction skipped")
+
+
+async def _mark_recurring_notification_read(db: AsyncSession, user_uuid: UUID, transaction_id: UUID) -> None:
+    """Mark the recurring_pending notification associated with this transaction as read."""
+    from sqlalchemy import update as sa_update
+
+    stmt = (
+        sa_update(Notification)
+        .where(
+            cast(Any, Notification.user_uuid == user_uuid),
+            cast(Any, Notification.type == "recurring_pending"),
+            cast(Any, Notification.is_read == False),  # noqa: E712
+            cast(Any, Notification.data["transaction_id"].as_string() == str(transaction_id)),
+        )
+        .values(is_read=True, read_at=func.now())
+    )
+    await db.execute(stmt)

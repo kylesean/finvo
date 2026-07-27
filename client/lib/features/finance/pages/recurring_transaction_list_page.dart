@@ -215,7 +215,9 @@ class _RecurringTransactionListPageState
     PendingTransaction tx,
   ) {
     final currencySymbol = Currency.fromCode(tx.currency)?.symbol ?? '¥';
-    final desc = tx.description ?? tx.categoryKey ?? '';
+    final desc =
+        tx.description ??
+        TransactionCategory.fromKey(tx.categoryKey).displayText;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
