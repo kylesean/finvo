@@ -184,21 +184,21 @@ async def _create_transaction_from_recurring(
         try:
             from app.services.push_service import PushService
 
-            desc = recurring_tx.description or recurring_tx.category_key or "Recurring"
+            desc = recurring_tx.description or recurring_tx.category_key or ""
             await PushService.send_notification(
                 db=db,
                 user_uuid=recurring_tx.user_uuid,
                 type_="recurring_pending",
-                title=f"{desc} \u00a5{amount_original:.2f} pending confirmation",
-                content="A recurring transaction is waiting for your review.",
+                title="recurring_pending",
+                content=desc,
                 data={
                     "action": "recurring_pending",
                     "transaction_id": str(transaction.id),
                     "amount": str(amount_original),
                     "currency": currency,
-                    "category_key": recurring_tx.category_key,
+                    "category_key": recurring_tx.category_key or "",
                     "description": desc,
-                    "target_path": "/finance/recurring",
+                    "target_path": "/finance/recurring-transactions",
                 },
             )
         except Exception as e:

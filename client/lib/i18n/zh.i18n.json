@@ -1351,7 +1351,9 @@
       "welcome": "欢迎加入「${space}」",
       "newTransaction": "${name} 记录了一笔新账单",
       "newTransactionDetail": "${amount}，来自「${space}」",
-      "memberLeft": "${name} 离开了空间"
+      "memberLeft": "${name} 离开了空间",
+      "recurringPending": "周期交易待确认",
+      "recurringPendingDetail": "${description} ${amount}，等待您确认记账"
     }
   }
 }

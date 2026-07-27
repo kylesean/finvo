@@ -1351,7 +1351,9 @@
       "welcome": "歡迎加入「${space}」",
       "newTransaction": "${name} 記錄了一筆新帳單",
       "newTransactionDetail": "${amount}，來自「${space}」",
-      "memberLeft": "${name} 離開了空間"
+      "memberLeft": "${name} 離開了空間",
+      "recurringPending": "週期交易待確認",
+      "recurringPendingDetail": "${description} ${amount}，等待您確認記帳"
     }
   }
 }

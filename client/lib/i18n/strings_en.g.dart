@@ -1720,6 +1720,8 @@ class _Translations$notification$semantic$en extends Translations$notification$s
 	@override String newTransaction({required Object name}) => '${name} recorded a new expense';
 	@override String newTransactionDetail({required Object amount, required Object space}) => '${amount} in "${space}"';
 	@override String memberLeft({required Object name}) => '${name} left the space';
+	@override String get recurringPending => 'Recurring transaction pending';
+	@override String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}, awaiting your confirmation';
 }
 
 // Path: chat.tools.done
@@ -3435,6 +3437,8 @@ extension on TranslationsEn {
 			'notification.semantic.newTransaction' => ({required Object name}) => '${name} recorded a new expense',
 			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount} in "${space}"',
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name} left the space',
+			'notification.semantic.recurringPending' => 'Recurring transaction pending',
+			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}, awaiting your confirmation',
 			_ => null,
 		};
 	}

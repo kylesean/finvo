@@ -1351,7 +1351,9 @@
       "welcome": "「${space}」へようこそ",
       "newTransaction": "${name} さんが新しい支出を記録しました",
       "newTransactionDetail": "${amount}、「${space}」より",
-      "memberLeft": "${name} さんがスペースを退出しました"
+      "memberLeft": "${name} さんがスペースを退出しました",
+      "recurringPending": "定期取引の確認待ち",
+      "recurringPendingDetail": "${description} ${amount}、確認待ちです"
     }
   }
 }

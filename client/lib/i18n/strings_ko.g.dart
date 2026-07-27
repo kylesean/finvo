@@ -1720,6 +1720,8 @@ class _Translations$notification$semantic$ko extends Translations$notification$s
 	@override String newTransaction({required Object name}) => '${name}님이 새 지출을 기록했습니다';
 	@override String newTransactionDetail({required Object amount, required Object space}) => '${amount}, "${space}"에서';
 	@override String memberLeft({required Object name}) => '${name}님이 공간에서 나갔습니다';
+	@override String get recurringPending => '정기 거래 확인 대기';
+	@override String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}, 확인을 기다리고 있습니다';
 }
 
 // Path: chat.tools.done
@@ -3435,6 +3437,8 @@ extension on TranslationsKo {
 			'notification.semantic.newTransaction' => ({required Object name}) => '${name}님이 새 지출을 기록했습니다',
 			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount}, "${space}"에서',
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name}님이 공간에서 나갔습니다',
+			'notification.semantic.recurringPending' => '정기 거래 확인 대기',
+			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}, 확인을 기다리고 있습니다',
 			_ => null,
 		};
 	}

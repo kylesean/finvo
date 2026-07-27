@@ -1720,6 +1720,8 @@ class _Translations$notification$semantic$zh_Hant extends Translations$notificat
 	@override String newTransaction({required Object name}) => '${name} 記錄了一筆新帳單';
 	@override String newTransactionDetail({required Object amount, required Object space}) => '${amount}，來自「${space}」';
 	@override String memberLeft({required Object name}) => '${name} 離開了空間';
+	@override String get recurringPending => '週期交易待確認';
+	@override String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}，等待您確認記帳';
 }
 
 // Path: chat.tools.done
@@ -3435,6 +3437,8 @@ extension on TranslationsZhHant {
 			'notification.semantic.newTransaction' => ({required Object name}) => '${name} 記錄了一筆新帳單',
 			'notification.semantic.newTransactionDetail' => ({required Object amount, required Object space}) => '${amount}，來自「${space}」',
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name} 離開了空間',
+			'notification.semantic.recurringPending' => '週期交易待確認',
+			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}，等待您確認記帳',
 			_ => null,
 		};
 	}

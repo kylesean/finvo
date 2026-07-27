@@ -1351,7 +1351,9 @@
       "welcome": "Welcome to \"${space}\"",
       "newTransaction": "${name} recorded a new expense",
       "newTransactionDetail": "${amount} in \"${space}\"",
-      "memberLeft": "${name} left the space"
+      "memberLeft": "${name} left the space",
+      "recurringPending": "Recurring transaction pending",
+      "recurringPendingDetail": "${description} ${amount}, awaiting your confirmation"
     }
   }
 }
