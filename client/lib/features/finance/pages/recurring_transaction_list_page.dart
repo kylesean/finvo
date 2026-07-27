@@ -223,7 +223,7 @@ class _RecurringTransactionListPageState
         children: [
           Expanded(
             child: Text(
-              '$desc  $currencySymbol${tx.amount.toString()}',
+              '$desc  $currencySymbol${tx.amount.toDouble().toStringAsFixed(2)}',
               style: theme.typography.body.sm.copyWith(
                 color: colors.foreground,
               ),

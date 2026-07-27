@@ -334,9 +334,11 @@ class _NotificationTile extends StatelessWidget {
   String _buildSemanticContent() {
     final data = item.data;
     final spaceName = (data?['space_name'] ?? '').toString();
-    final amount = (data?['amount'] ?? '').toString();
+    final rawAmount = (data?['amount'] ?? '').toString();
     final currency = (data?['currency'] ?? '').toString();
     final description = (data?['description'] ?? '').toString();
+    // Format amount to 2 decimal places for display
+    final amount = double.tryParse(rawAmount)?.toStringAsFixed(2) ?? rawAmount;
 
     return switch (item.type) {
       'member_joined' =>
