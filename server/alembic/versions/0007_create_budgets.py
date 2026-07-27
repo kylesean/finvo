@@ -62,15 +62,6 @@ def upgrade() -> None:
         sa.Column("source", sa.String(20), nullable=False, server_default="USER_DEFINED"),
         sa.Column("ai_confidence", sa.Numeric(precision=5, scale=4), nullable=True),
         sa.Column("status", sa.String(20), nullable=False, server_default="ACTIVE"),
-        # Savings goal fields
-        sa.Column("target_date", sa.Date, nullable=True),
-        sa.Column(
-            "linked_account_id",
-            postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("financial_accounts.id", ondelete="SET NULL"),
-            nullable=True,
-        ),
-        sa.Column("current_progress", sa.Numeric(precision=20, scale=8), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -84,7 +75,6 @@ def upgrade() -> None:
             server_default=sa.text("CURRENT_TIMESTAMP"),
         ),
         # Constraints
-        sa.CheckConstraint("type IN ('EXPENSE_LIMIT', 'SAVINGS_GOAL')", name="chk_budgets_type"),
         sa.CheckConstraint("scope IN ('TOTAL', 'CATEGORY')", name="chk_budgets_scope"),
         sa.CheckConstraint("period_type IN ('WEEKLY', 'BIWEEKLY', 'MONTHLY', 'YEARLY')", name="chk_budgets_period_type"),
         sa.CheckConstraint("period_anchor_day >= 1 AND period_anchor_day <= 31", name="chk_budgets_anchor_day"),
@@ -140,6 +130,7 @@ def upgrade() -> None:
         sa.CheckConstraint("period_end >= period_start", name="chk_budget_periods_dates"),
         sa.CheckConstraint("status IN ('ON_TRACK', 'WARNING', 'EXCEEDED', 'ACHIEVED')", name="chk_budget_periods_status"),
         sa.CheckConstraint("spent_amount >= 0", name="chk_budget_periods_spent_positive"),
+        sa.UniqueConstraint("budget_id", "period_start", name="uq_budget_periods_budget_start"),
     )
 
     op.create_index("ix_budget_periods_budget_id", "budget_periods", ["budget_id"])
@@ -159,14 +150,6 @@ def upgrade() -> None:
         ),
         sa.Column("warning_threshold", sa.Integer, nullable=False, server_default="70"),
         sa.Column("alert_threshold", sa.Integer, nullable=False, server_default="90"),
-        sa.Column("overspend_behavior", sa.String(20), nullable=False, server_default="WARN"),
-        sa.Column("weekly_summary_enabled", sa.Boolean, nullable=False, server_default="true"),
-        sa.Column("weekly_summary_day", sa.String(10), nullable=False, server_default="'sunday'"),
-        sa.Column("monthly_summary_enabled", sa.Boolean, nullable=False, server_default="true"),
-        sa.Column("anomaly_detection_enabled", sa.Boolean, nullable=False, server_default="true"),
-        sa.Column("anomaly_threshold", sa.Numeric(precision=20, scale=8), nullable=False, server_default="500"),
-        sa.Column("quiet_hours_start", sa.Time, nullable=True),
-        sa.Column("quiet_hours_end", sa.Time, nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -183,12 +166,6 @@ def upgrade() -> None:
         sa.CheckConstraint("warning_threshold >= 0 AND warning_threshold <= 100", name="chk_budget_settings_warning"),
         sa.CheckConstraint("alert_threshold >= 0 AND alert_threshold <= 100", name="chk_budget_settings_alert"),
         sa.CheckConstraint("warning_threshold <= alert_threshold", name="chk_budget_settings_thresholds"),
-        sa.CheckConstraint("overspend_behavior IN ('WARN', 'SUGGEST_REBALANCE')", name="chk_budget_settings_overspend"),
-        sa.CheckConstraint(
-            "weekly_summary_day IN ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')",
-            name="chk_budget_settings_week_day",
-        ),
-        sa.CheckConstraint("anomaly_threshold >= 0", name="chk_budget_settings_anomaly"),
     )
 
 
