@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
+import 'package:augo/core/constants/category_constants.dart';
 import 'package:augo/i18n/strings.g.dart';
 import '../models/notification_item.dart';
 import '../providers/notification_provider.dart';
@@ -353,7 +354,11 @@ class _NotificationTile extends StatelessWidget {
               )
             : item.message,
       'recurring_pending' => t.notification.semantic.recurringPendingDetail(
-        description: description,
+        description: description.isNotEmpty
+            ? description
+            : TransactionCategory.fromKey(
+                data?['category_key'] as String?,
+              ).displayText,
         amount: '$currency $amount',
       ),
       _ => item.message,

@@ -180,7 +180,7 @@ async def _create_transaction_from_recurring(
         try:
             from app.services.push_service import PushService
 
-            desc = recurring_tx.description or recurring_tx.category_key or ""
+            desc = recurring_tx.description or ""
             await PushService.send_notification(
                 db=db,
                 user_uuid=recurring_tx.user_uuid,
