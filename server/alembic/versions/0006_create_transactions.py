@@ -86,10 +86,10 @@ def upgrade() -> None:
         sa.Column("intent", sa.String(20), nullable=False, server_default="SURVIVAL"),
         sa.Column("source_thread_id", postgresql.UUID(as_uuid=True), nullable=True),
         # FK linking generated transactions back to their recurring rule (idempotency)
+        # Note: FK constraint added after recurring_transactions table is created below
         sa.Column(
             "recurring_transaction_id",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("recurring_transactions.id", ondelete="SET NULL"),
             nullable=True,
         ),
         sa.Column(
@@ -277,9 +277,20 @@ def upgrade() -> None:
     # Index for daily job query: WHERE is_active AND next_execution_at BETWEEN ...
     op.create_index("ix_recurring_next_execution", "recurring_transactions", ["next_execution_at"])
 
+    # Now that recurring_transactions exists, add the deferred FK from transactions
+    op.create_foreign_key(
+        "fk_transactions_recurring_transaction_id",
+        "transactions",
+        "recurring_transactions",
+        ["recurring_transaction_id"],
+        ["id"],
+        ondelete="SET NULL",
+    )
+
 
 def downgrade() -> None:
     """Drop transactions and related tables."""
+    op.drop_constraint("fk_transactions_recurring_transaction_id", "transactions", type_="foreignkey")
     op.drop_index("ix_recurring_next_execution", table_name="recurring_transactions")
     op.drop_index("ix_recurring_transactions_active")
     op.drop_index("ix_recurring_transactions_user_uuid")
