@@ -67,6 +67,8 @@ services:
       - ./server/logs:/app/logs
       - ./server/storage:/app/storage
       - ./server/artifacts:/app/artifacts
+    env_file:
+      - ./server/.env
     environment:
       - APP_ENV=${APP_ENV:-development}
       - UVICORN_WORKERS=${UVICORN_WORKERS:-1}
