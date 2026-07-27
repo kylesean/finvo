@@ -45,7 +45,7 @@ fi
 # Required Environment Variables Check
 # ==============================================================================
 
-required_vars=("JWT_SECRET_KEY" "OPENAI_API_KEY")
+required_vars=("JWT_SECRET_KEY")
 missing_vars=()
 
 for var in "${required_vars[@]}"; do

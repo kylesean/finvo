@@ -81,17 +81,39 @@ ENV_FILE = load_env_file()
 
 
 def _read_version() -> str:
-    """Read version from the root VERSION file (single source of truth).
+    """Read version from root VERSION, server VERSION, or pyproject.toml (single source of truth).
 
-    Falls back to '0.0.0-dev' if the file is not found (e.g., in Docker builds
-    where only the server/ directory is available).
+    Falls back gracefully if files are not found (e.g. minimal container environments).
     """
-    # server/app/core/config.py -> project root is 4 levels up
-    version_file = Path(__file__).resolve().parent.parent.parent.parent / "VERSION"
-    try:
-        return version_file.read_text(encoding="utf-8").strip()
-    except (FileNotFoundError, OSError):
-        return "0.0.0-dev"
+    # 1. Try project root VERSION (4 levels up from config.py: server/app/core/config.py -> root)
+    root_version_file = Path(__file__).resolve().parents[3] / "VERSION"
+    if root_version_file.exists():
+        try:
+            return root_version_file.read_text(encoding="utf-8").strip()
+        except OSError:
+            pass
+
+    # 2. Try server VERSION (2 levels up from config.py: server/app/core/config.py -> server)
+    server_version_file = Path(__file__).resolve().parents[2] / "VERSION"
+    if server_version_file.exists():
+        try:
+            return server_version_file.read_text(encoding="utf-8").strip()
+        except OSError:
+            pass
+
+    # 3. Try pyproject.toml in server directory
+    pyproject_file = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    if pyproject_file.exists():
+        try:
+            content = pyproject_file.read_text(encoding="utf-8")
+            for line in content.splitlines():
+                line_str = line.strip()
+                if line_str.startswith("version ="):
+                    return line_str.split("=")[1].strip().strip("\"'")
+        except OSError:
+            pass
+
+    return "0.1.2-alpha"
 
 
 class Settings(BaseSettings):

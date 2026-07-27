@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv package manager
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+# Install uv package manager (pinned version for reproducible builds)
+COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /usr/local/bin/uv
 
 # Set uv environment variables for optimization
 ENV UV_COMPILE_BYTECODE=1 \
@@ -47,14 +47,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser
 
-# Copy virtual environment from builder stage
-COPY --from=builder /app/.venv /app/.venv
-
-# Copy application code from builder stage
-COPY --from=builder /app/app /app/app
-COPY --from=builder /app/alembic /app/alembic
-COPY --from=builder /app/alembic.ini /app/alembic.ini
-COPY --from=builder /app/scripts /app/scripts
+# Copy virtual environment and application code from builder stage
+# Using --chown avoids a separate chown -R layer that would duplicate all files
+COPY --chown=appuser:appuser --from=builder /app/.venv /app/.venv
+COPY --chown=appuser:appuser --from=builder /app/app /app/app
+COPY --chown=appuser:appuser --from=builder /app/alembic /app/alembic
+COPY --chown=appuser:appuser --from=builder /app/alembic.ini /app/alembic.ini
+COPY --chown=appuser:appuser --from=builder /app/pyproject.toml /app/pyproject.toml
+COPY --chown=appuser:appuser --from=builder /app/scripts /app/scripts
 
 # Set environment variables
 ARG APP_ENV=production
@@ -64,10 +64,10 @@ ENV APP_ENV=${APP_ENV} \
     PYTHONPATH="/app" \
     PATH="/app/.venv/bin:$PATH"
 
-# Setup directories and permissions
+# Setup directories and permissions (only for dirs not covered by COPY --chown)
 RUN mkdir -p /app/logs /app/storage \
     && chmod +x /app/scripts/docker-entrypoint.sh \
-    && chown -R appuser:appuser /app
+    && chown appuser:appuser /app/logs /app/storage
 
 # Switch to non-root user
 USER appuser

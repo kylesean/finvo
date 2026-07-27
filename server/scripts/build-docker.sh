@@ -64,7 +64,7 @@ echo "Database user: $(mask_env "${POSTGRES_USER:-${DB_USER:-}}")"
 echo "API keys: ******** (masked for security)"
 
 # Build the Docker image
-docker build --no-cache \
+docker build \
     --build-arg APP_ENV="$ENV" \
     -t augo-api:"$ENV" .
 

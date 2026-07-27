@@ -1,13 +1,20 @@
 # Docker Build and Push to Docker Hub
-# Triggers on push to main branch
+# Triggers on semantic version tags (e.g., v1.0.0, v0.1.0-alpha)
 
 name: Deploy to Docker Hub
 
 on:
   push:
     tags:
-      - "v*" # Trigger only on version tags (e.g., v1.0.0, v0.1.0-alpha)
+      - "v[0-9]+.[0-9]+.[0-9]+*"
   workflow_dispatch: # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   DOCKER_IMAGE_NAME: augo-api
@@ -30,9 +37,10 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}
           tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest
             type=sha,prefix=
-            type=ref,event=branch
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3

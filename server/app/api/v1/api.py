@@ -21,6 +21,7 @@ from app.api.v1.storage_config import router as storage_config_router
 from app.api.v1.transaction import router as transaction_router
 from app.api.v1.upload import router as upload_router
 from app.api.v1.user import router as user_router
+from app.core.config import settings
 from app.core.logging import logger
 
 api_router = APIRouter()
@@ -51,4 +52,4 @@ async def health_check() -> dict[str, str]:
         dict: Health status information.
     """
     logger.info("health_check_called")
-    return {"status": "healthy", "version": "0.1.2"}
+    return {"status": "healthy", "version": settings.VERSION}

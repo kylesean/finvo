@@ -108,7 +108,7 @@ services:
   # Prometheus - Time-series database for metrics collection
   prometheus:
     profiles: [monitoring]
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.13.1
     container_name: augo-prometheus
     ports:
       - "9099:9090"
@@ -126,7 +126,7 @@ services:
   # Grafana - Visualization and dashboards
   grafana:
     profiles: [monitoring]
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.1.1
     container_name: augo-grafana
     ports:
       - "3000:3000"
@@ -135,7 +135,7 @@ services:
       - ./server/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./server/grafana/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     networks:
       - monitoring
@@ -147,7 +147,7 @@ services:
   # cAdvisor - Container resource monitoring
   cadvisor:
     profiles: [monitoring]
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: ghcr.io/google/cadvisor:v0.60.5
     container_name: augo-cadvisor
     ports:
       - "8080:8080"
