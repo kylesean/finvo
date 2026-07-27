@@ -135,15 +135,16 @@ class AuthService:
                     message="Mobile number already registered", error_code=ErrorCode.PHONE_NUMBER_REGISTERED
                 )
 
-        # Verify the code
-        if not await self.verify_code(account, code):
+        # Verify the code (skip when provider is mock — no real code is sent)
+        provider = settings.EMAIL_PROVIDER if account_type == "email" else settings.SMS_PROVIDER
+        if provider != "mock" and not await self.verify_code(account, code):
             raise BusinessError("Verification code is invalid or expired", error_code=ErrorCode.CODE_EXPIRED)
 
         # Generate unique UUID
         user_uuid = self._generate_uuid()
 
-        # Generate random username
-        username = self._generate_random_username()
+        # Generate username derived from account (i18n-friendly)
+        username = self._generate_username(account, account_type)
 
         # Hash password
         hashed_password = User.hash_password(password)
@@ -425,12 +426,51 @@ class AuthService:
         """
         return type_cast(uuid.UUID, uuid7())
 
-    def _generate_random_username(self) -> str:
-        """Generate a random username.
+    def _generate_username(self, account: str, account_type: str) -> str:
+        """Generate a user-friendly username derived from the account.
+
+        Strategy (inspired by GitLab/Grafana/Discourse):
+        - Email: use the local part (before @) as base, sanitized
+        - Mobile: use masked digits as base
+        - Append a short random suffix for uniqueness feel
+
+        The result is language-neutral and works across all locales.
+
+        Args:
+            account: Email address or mobile number
+            account_type: 'email' or 'mobile'
 
         Returns:
-            str: Random username
+            str: Generated username (max 30 chars)
         """
-        # Generate username like "user_123456"
-        random_num = secrets.randbelow(1000000)
-        return f"user_{random_num:06d}"
+        import re as _re
+
+        max_len = 30
+        suffix_len = 5  # e.g. "_a3x7"
+
+        if account_type == "email":
+            # Extract local part: "john.doe@gmail.com" -> "john.doe"
+            local_part = account.split("@")[0]
+            # Replace dots, hyphens, plus signs with underscore
+            base = _re.sub(r"[.+\-]", "_", local_part)
+            # Keep only alphanumeric and underscore
+            base = _re.sub(r"[^a-zA-Z0-9_]", "", base)
+            # Collapse consecutive underscores
+            base = _re.sub(r"_+", "_", base).strip("_")
+        else:
+            # Mobile: use last 4 digits as base
+            digits = _re.sub(r"\D", "", account)
+            base = f"user_{digits[-4:]}" if len(digits) >= 4 else "user"
+
+        # Truncate base to leave room for suffix
+        base = base[: max_len - suffix_len].rstrip("_")
+
+        # If base is too short or empty, use a generic prefix
+        if len(base) < 2:
+            base = "user"
+
+        # Generate a short alphanumeric suffix (lowercase)
+        alphabet = "abcdefghjkmnpqrstuvwxyz23456789"  # pragma: allowlist secret
+        suffix = "".join(alphabet[secrets.randbelow(len(alphabet))] for _ in range(suffix_len - 1))
+
+        return f"{base}_{suffix}"
