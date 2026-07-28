@@ -44,7 +44,7 @@ services:
 
   # Single API service with dynamic environment
   app:
-    image: finvo-api:${APP_ENV:-development}
+    image: ghcr.io/kylesean/finvo-api:${APP_ENV:-latest}
     build:
       context: ./server
       args:

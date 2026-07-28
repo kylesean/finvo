@@ -1,27 +1,31 @@
-# Docker Build and Push to Docker Hub
-# Triggers on semantic version tags (e.g., v1.0.0, v0.1.0-alpha)
+# Build and Push Docker Image to GitHub Container Registry (GHCR)
+# Triggers on push to main branch, semantic version tags (e.g., v1.0.0, v0.2.1-alpha), and manual dispatch.
 
-name: Deploy to Docker Hub
+name: Deploy Docker Image to GHCR
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+*"
-  workflow_dispatch: # Allow manual trigger from GitHub UI
+  workflow_dispatch:
 
 permissions:
   contents: read
+  packages: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  DOCKER_IMAGE_NAME: finvo-api
+  REGISTRY: ghcr.io
+  IMAGE_NAME: kylesean/finvo-api
 
 jobs:
   build-and-push:
-    name: Build and Push Docker Image
+    name: Build and Push Docker Image to GHCR
     runs-on: ubuntu-latest
 
     steps:
@@ -31,22 +35,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest
             type=sha,prefix=
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -57,4 +63,4 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
