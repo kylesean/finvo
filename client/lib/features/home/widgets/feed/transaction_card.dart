@@ -24,6 +24,16 @@ class TransactionCard extends ConsumerWidget {
 
   const TransactionCard({super.key, required this.transaction});
 
+  /// Primary title: description > rawInput > category name.
+  /// Text widget handles truncation via maxLines + ellipsis.
+  String _getPrimaryTitle(TransactionModel transaction) {
+    final desc = transaction.description?.trim();
+    if (desc != null && desc.isNotEmpty) return desc;
+    final raw = transaction.rawInput?.trim();
+    if (raw != null && raw.isNotEmpty) return raw;
+    return _getCategoryDisplayName(transaction);
+  }
+
   String _getCategoryDisplayName(TransactionModel transaction) {
     if (transaction.categoryText != null &&
         transaction.categoryText!.isNotEmpty) {
@@ -211,8 +221,9 @@ class TransactionCard extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            _getCategoryDisplayName(transaction),
+                            _getPrimaryTitle(transaction),
                             style: AppTextStyles.listTitle(theme),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
