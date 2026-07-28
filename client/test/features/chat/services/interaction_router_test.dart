@@ -85,7 +85,10 @@ void main() {
       );
 
       expect(outgoing.skip, isFalse);
-      expect(outgoing.displayContent, '按照我的选择执行转账');
+      expect(
+        outgoing.displayContent,
+        'Execute transfer according to my selection',
+      );
 
       // client_state 触发后端 direct_execute 原子转账。
       final clientState = outgoing.clientState;
@@ -99,7 +102,10 @@ void main() {
 
       // 发给后端的 payload 为注册表提供的 payloadExtensions。
       expect(outgoing.payload, hasLength(1));
-      expect(outgoing.payload.first['content'], '按照我的选择执行转账');
+      expect(
+        outgoing.payload.first['content'],
+        'Execute transfer according to my selection',
+      );
     });
 
     test('unregistered action falls back to "Action: <name>"', () {

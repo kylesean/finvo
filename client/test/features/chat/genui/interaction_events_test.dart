@@ -45,8 +45,8 @@ void main() {
 
       expect(event.amount, 88.5);
       // 缺省字段降级为默认值。
-      expect(event.sourceAccountName, '转出账户');
-      expect(event.targetAccountName, '转入账户');
+      expect(event.sourceAccountName, 'Source Account');
+      expect(event.targetAccountName, 'Target Account');
       expect(event.currency, 'CNY');
     });
 
@@ -178,7 +178,10 @@ void main() {
       final toolParams = json['tool_params'] as Map<String, dynamic>;
       expect(toolParams['source_account_id'], 'src-1');
       expect(toolParams['amount'], 50.0);
-      expect(result.payloadExtensions!['content'], '按照我的选择执行转账');
+      expect(
+        result.payloadExtensions!['content'],
+        'Execute transfer according to my selection',
+      );
     });
 
     test('space yields space-association mutation', () {
@@ -210,7 +213,10 @@ void main() {
 
       expect(result, isNotNull);
       expect(result!.mutation, isNull);
-      expect(result.payloadExtensions!['content'], '我选择了账户 ID: acc-1 (BANK)');
+      expect(
+        result.payloadExtensions!['content'],
+        'I selected account ID: acc-1 (BANK)',
+      );
     });
 
     test('transaction confirmation returns null to preserve fallback', () {
