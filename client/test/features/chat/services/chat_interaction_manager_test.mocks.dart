@@ -235,6 +235,12 @@ class MockMessageRepository extends _i1.Mock implements _i8.MessageRepository {
     Invocation.method(#cancelPendingToolCalls, [messageId]),
     returnValueForMissingStub: null,
   );
+
+  @override
+  void completePendingToolCalls(String? messageId) => super.noSuchMethod(
+    Invocation.method(#completePendingToolCalls, [messageId]),
+    returnValueForMissingStub: null,
+  );
 }
 
 /// A class which mocks [GenUiLifecycleManager].

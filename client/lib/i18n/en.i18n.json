@@ -142,7 +142,10 @@
     "linkSuccess": "Link successful",
     "linkFailed": "Link failed",
     "rawInput": "Message",
-    "noRawInput": "No message"
+    "noRawInput": "No message",
+    "attachments": "$count attachments",
+    "viewInConversation": "View more in conversation",
+    "statusPending": "Pending"
   },
   "home": {
     "totalExpense": "Total Expense",
@@ -163,6 +166,7 @@
     "replyToPrefix": "Reply to @$name:",
     "reply": "Reply",
     "addNote": "Add a note...",
+    "addNoteWithMention": "Comment or @mention members...",
     "confirmDeleteTitle": "Confirm Delete",
     "confirmDeleteContent": "Are you sure you want to delete this comment? This action cannot be undone.",
     "success": "Success",

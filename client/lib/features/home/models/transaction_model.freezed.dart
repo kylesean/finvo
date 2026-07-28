@@ -814,6 +814,287 @@ as String,
 
 
 /// @nodoc
+mixin _$TransactionAttachment {
+
+ String get id; String get filename; String? get mimeType; int? get size; String get url; bool get isImage; DateTime? get createdAt;
+/// Create a copy of TransactionAttachment
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TransactionAttachmentCopyWith<TransactionAttachment> get copyWith => _$TransactionAttachmentCopyWithImpl<TransactionAttachment>(this as TransactionAttachment, _$identity);
+
+  /// Serializes this TransactionAttachment to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionAttachment&&(identical(other.id, id) || other.id == id)&&(identical(other.filename, filename) || other.filename == filename)&&(identical(other.mimeType, mimeType) || other.mimeType == mimeType)&&(identical(other.size, size) || other.size == size)&&(identical(other.url, url) || other.url == url)&&(identical(other.isImage, isImage) || other.isImage == isImage)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,filename,mimeType,size,url,isImage,createdAt);
+
+@override
+String toString() {
+  return 'TransactionAttachment(id: $id, filename: $filename, mimeType: $mimeType, size: $size, url: $url, isImage: $isImage, createdAt: $createdAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TransactionAttachmentCopyWith<$Res>  {
+  factory $TransactionAttachmentCopyWith(TransactionAttachment value, $Res Function(TransactionAttachment) _then) = _$TransactionAttachmentCopyWithImpl;
+@useResult
+$Res call({
+ String id, String filename, String? mimeType, int? size, String url, bool isImage, DateTime? createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$TransactionAttachmentCopyWithImpl<$Res>
+    implements $TransactionAttachmentCopyWith<$Res> {
+  _$TransactionAttachmentCopyWithImpl(this._self, this._then);
+
+  final TransactionAttachment _self;
+  final $Res Function(TransactionAttachment) _then;
+
+/// Create a copy of TransactionAttachment
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? filename = null,Object? mimeType = freezed,Object? size = freezed,Object? url = null,Object? isImage = null,Object? createdAt = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,filename: null == filename ? _self.filename : filename // ignore: cast_nullable_to_non_nullable
+as String,mimeType: freezed == mimeType ? _self.mimeType : mimeType // ignore: cast_nullable_to_non_nullable
+as String?,size: freezed == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as int?,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,isImage: null == isImage ? _self.isImage : isImage // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [TransactionAttachment].
+extension TransactionAttachmentPatterns on TransactionAttachment {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _TransactionAttachment value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _TransactionAttachment() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _TransactionAttachment value)  $default,){
+final _that = this;
+switch (_that) {
+case _TransactionAttachment():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _TransactionAttachment value)?  $default,){
+final _that = this;
+switch (_that) {
+case _TransactionAttachment() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String filename,  String? mimeType,  int? size,  String url,  bool isImage,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _TransactionAttachment() when $default != null:
+return $default(_that.id,_that.filename,_that.mimeType,_that.size,_that.url,_that.isImage,_that.createdAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String filename,  String? mimeType,  int? size,  String url,  bool isImage,  DateTime? createdAt)  $default,) {final _that = this;
+switch (_that) {
+case _TransactionAttachment():
+return $default(_that.id,_that.filename,_that.mimeType,_that.size,_that.url,_that.isImage,_that.createdAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String filename,  String? mimeType,  int? size,  String url,  bool isImage,  DateTime? createdAt)?  $default,) {final _that = this;
+switch (_that) {
+case _TransactionAttachment() when $default != null:
+return $default(_that.id,_that.filename,_that.mimeType,_that.size,_that.url,_that.isImage,_that.createdAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _TransactionAttachment implements TransactionAttachment {
+  const _TransactionAttachment({required this.id, required this.filename, this.mimeType, this.size, required this.url, this.isImage = false, this.createdAt});
+  factory _TransactionAttachment.fromJson(Map<String, dynamic> json) => _$TransactionAttachmentFromJson(json);
+
+@override final  String id;
+@override final  String filename;
+@override final  String? mimeType;
+@override final  int? size;
+@override final  String url;
+@override@JsonKey() final  bool isImage;
+@override final  DateTime? createdAt;
+
+/// Create a copy of TransactionAttachment
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TransactionAttachmentCopyWith<_TransactionAttachment> get copyWith => __$TransactionAttachmentCopyWithImpl<_TransactionAttachment>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$TransactionAttachmentToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionAttachment&&(identical(other.id, id) || other.id == id)&&(identical(other.filename, filename) || other.filename == filename)&&(identical(other.mimeType, mimeType) || other.mimeType == mimeType)&&(identical(other.size, size) || other.size == size)&&(identical(other.url, url) || other.url == url)&&(identical(other.isImage, isImage) || other.isImage == isImage)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,filename,mimeType,size,url,isImage,createdAt);
+
+@override
+String toString() {
+  return 'TransactionAttachment(id: $id, filename: $filename, mimeType: $mimeType, size: $size, url: $url, isImage: $isImage, createdAt: $createdAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TransactionAttachmentCopyWith<$Res> implements $TransactionAttachmentCopyWith<$Res> {
+  factory _$TransactionAttachmentCopyWith(_TransactionAttachment value, $Res Function(_TransactionAttachment) _then) = __$TransactionAttachmentCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String filename, String? mimeType, int? size, String url, bool isImage, DateTime? createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$TransactionAttachmentCopyWithImpl<$Res>
+    implements _$TransactionAttachmentCopyWith<$Res> {
+  __$TransactionAttachmentCopyWithImpl(this._self, this._then);
+
+  final _TransactionAttachment _self;
+  final $Res Function(_TransactionAttachment) _then;
+
+/// Create a copy of TransactionAttachment
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? filename = null,Object? mimeType = freezed,Object? size = freezed,Object? url = null,Object? isImage = null,Object? createdAt = freezed,}) {
+  return _then(_TransactionAttachment(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,filename: null == filename ? _self.filename : filename // ignore: cast_nullable_to_non_nullable
+as String,mimeType: freezed == mimeType ? _self.mimeType : mimeType // ignore: cast_nullable_to_non_nullable
+as String?,size: freezed == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as int?,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,isImage: null == isImage ? _self.isImage : isImage // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$AmountDisplay {
 
  String get sign; String get value; String get currencySymbol; String get fullString;
@@ -1384,7 +1665,7 @@ as DateTime?,
 /// @nodoc
 mixin _$TransactionModel {
 
- String get id; TransactionType get type; String get category; String? get categoryKey; String? get categoryText; String get iconUrl; double get amount; DateTime get timestamp; double? get amountOriginal; String? get originalCurrency; String? get exchangeRate; String? get description; bool get isShared; List<SharedUserInfo> get sharedWith; String? get paymentMethod; String? get paymentMethodText; String? get location; List<String> get tags; String? get rawInput; FinancialAccountInfo? get financialAccount; AmountDisplay? get display; DateTime? get createdAt; DateTime? get updatedAt; String? get photoPath; String? get geoLocation; List<TransactionCommentModel> get comments; String? get sourceAccountId; String? get targetAccountId; List<SpaceInfo> get spaces; String? get sourceThreadId;
+ String get id; TransactionType get type; String get category; String? get categoryKey; String? get categoryText; String get iconUrl; double get amount; DateTime get timestamp; double? get amountOriginal; String? get originalCurrency; String? get exchangeRate; String? get description; bool get isShared; List<SharedUserInfo> get sharedWith; String? get paymentMethod; String? get paymentMethodText; String? get location; List<String> get tags; String? get rawInput; String get status; FinancialAccountInfo? get financialAccount; AmountDisplay? get display; DateTime? get createdAt; DateTime? get updatedAt; String? get photoPath; String? get geoLocation; List<TransactionCommentModel> get comments; String? get sourceAccountId; String? get targetAccountId; List<SpaceInfo> get spaces; String? get sourceThreadId; List<TransactionAttachment> get attachments;
 /// Create a copy of TransactionModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1397,16 +1678,16 @@ $TransactionModelCopyWith<TransactionModel> get copyWith => _$TransactionModelCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.categoryKey, categoryKey) || other.categoryKey == categoryKey)&&(identical(other.categoryText, categoryText) || other.categoryText == categoryText)&&(identical(other.iconUrl, iconUrl) || other.iconUrl == iconUrl)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.amountOriginal, amountOriginal) || other.amountOriginal == amountOriginal)&&(identical(other.originalCurrency, originalCurrency) || other.originalCurrency == originalCurrency)&&(identical(other.exchangeRate, exchangeRate) || other.exchangeRate == exchangeRate)&&(identical(other.description, description) || other.description == description)&&(identical(other.isShared, isShared) || other.isShared == isShared)&&const DeepCollectionEquality().equals(other.sharedWith, sharedWith)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.paymentMethodText, paymentMethodText) || other.paymentMethodText == paymentMethodText)&&(identical(other.location, location) || other.location == location)&&const DeepCollectionEquality().equals(other.tags, tags)&&(identical(other.rawInput, rawInput) || other.rawInput == rawInput)&&(identical(other.financialAccount, financialAccount) || other.financialAccount == financialAccount)&&(identical(other.display, display) || other.display == display)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.photoPath, photoPath) || other.photoPath == photoPath)&&(identical(other.geoLocation, geoLocation) || other.geoLocation == geoLocation)&&const DeepCollectionEquality().equals(other.comments, comments)&&(identical(other.sourceAccountId, sourceAccountId) || other.sourceAccountId == sourceAccountId)&&(identical(other.targetAccountId, targetAccountId) || other.targetAccountId == targetAccountId)&&const DeepCollectionEquality().equals(other.spaces, spaces)&&(identical(other.sourceThreadId, sourceThreadId) || other.sourceThreadId == sourceThreadId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.categoryKey, categoryKey) || other.categoryKey == categoryKey)&&(identical(other.categoryText, categoryText) || other.categoryText == categoryText)&&(identical(other.iconUrl, iconUrl) || other.iconUrl == iconUrl)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.amountOriginal, amountOriginal) || other.amountOriginal == amountOriginal)&&(identical(other.originalCurrency, originalCurrency) || other.originalCurrency == originalCurrency)&&(identical(other.exchangeRate, exchangeRate) || other.exchangeRate == exchangeRate)&&(identical(other.description, description) || other.description == description)&&(identical(other.isShared, isShared) || other.isShared == isShared)&&const DeepCollectionEquality().equals(other.sharedWith, sharedWith)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.paymentMethodText, paymentMethodText) || other.paymentMethodText == paymentMethodText)&&(identical(other.location, location) || other.location == location)&&const DeepCollectionEquality().equals(other.tags, tags)&&(identical(other.rawInput, rawInput) || other.rawInput == rawInput)&&(identical(other.status, status) || other.status == status)&&(identical(other.financialAccount, financialAccount) || other.financialAccount == financialAccount)&&(identical(other.display, display) || other.display == display)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.photoPath, photoPath) || other.photoPath == photoPath)&&(identical(other.geoLocation, geoLocation) || other.geoLocation == geoLocation)&&const DeepCollectionEquality().equals(other.comments, comments)&&(identical(other.sourceAccountId, sourceAccountId) || other.sourceAccountId == sourceAccountId)&&(identical(other.targetAccountId, targetAccountId) || other.targetAccountId == targetAccountId)&&const DeepCollectionEquality().equals(other.spaces, spaces)&&(identical(other.sourceThreadId, sourceThreadId) || other.sourceThreadId == sourceThreadId)&&const DeepCollectionEquality().equals(other.attachments, attachments));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,type,category,categoryKey,categoryText,iconUrl,amount,timestamp,amountOriginal,originalCurrency,exchangeRate,description,isShared,const DeepCollectionEquality().hash(sharedWith),paymentMethod,paymentMethodText,location,const DeepCollectionEquality().hash(tags),rawInput,financialAccount,display,createdAt,updatedAt,photoPath,geoLocation,const DeepCollectionEquality().hash(comments),sourceAccountId,targetAccountId,const DeepCollectionEquality().hash(spaces),sourceThreadId]);
+int get hashCode => Object.hashAll([runtimeType,id,type,category,categoryKey,categoryText,iconUrl,amount,timestamp,amountOriginal,originalCurrency,exchangeRate,description,isShared,const DeepCollectionEquality().hash(sharedWith),paymentMethod,paymentMethodText,location,const DeepCollectionEquality().hash(tags),rawInput,status,financialAccount,display,createdAt,updatedAt,photoPath,geoLocation,const DeepCollectionEquality().hash(comments),sourceAccountId,targetAccountId,const DeepCollectionEquality().hash(spaces),sourceThreadId,const DeepCollectionEquality().hash(attachments)]);
 
 @override
 String toString() {
-  return 'TransactionModel(id: $id, type: $type, category: $category, categoryKey: $categoryKey, categoryText: $categoryText, iconUrl: $iconUrl, amount: $amount, timestamp: $timestamp, amountOriginal: $amountOriginal, originalCurrency: $originalCurrency, exchangeRate: $exchangeRate, description: $description, isShared: $isShared, sharedWith: $sharedWith, paymentMethod: $paymentMethod, paymentMethodText: $paymentMethodText, location: $location, tags: $tags, rawInput: $rawInput, financialAccount: $financialAccount, display: $display, createdAt: $createdAt, updatedAt: $updatedAt, photoPath: $photoPath, geoLocation: $geoLocation, comments: $comments, sourceAccountId: $sourceAccountId, targetAccountId: $targetAccountId, spaces: $spaces, sourceThreadId: $sourceThreadId)';
+  return 'TransactionModel(id: $id, type: $type, category: $category, categoryKey: $categoryKey, categoryText: $categoryText, iconUrl: $iconUrl, amount: $amount, timestamp: $timestamp, amountOriginal: $amountOriginal, originalCurrency: $originalCurrency, exchangeRate: $exchangeRate, description: $description, isShared: $isShared, sharedWith: $sharedWith, paymentMethod: $paymentMethod, paymentMethodText: $paymentMethodText, location: $location, tags: $tags, rawInput: $rawInput, status: $status, financialAccount: $financialAccount, display: $display, createdAt: $createdAt, updatedAt: $updatedAt, photoPath: $photoPath, geoLocation: $geoLocation, comments: $comments, sourceAccountId: $sourceAccountId, targetAccountId: $targetAccountId, spaces: $spaces, sourceThreadId: $sourceThreadId, attachments: $attachments)';
 }
 
 
@@ -1417,7 +1698,7 @@ abstract mixin class $TransactionModelCopyWith<$Res>  {
   factory $TransactionModelCopyWith(TransactionModel value, $Res Function(TransactionModel) _then) = _$TransactionModelCopyWithImpl;
 @useResult
 $Res call({
- String id, TransactionType type, String category, String? categoryKey, String? categoryText, String iconUrl, double amount, DateTime timestamp, double? amountOriginal, String? originalCurrency, String? exchangeRate, String? description, bool isShared, List<SharedUserInfo> sharedWith, String? paymentMethod, String? paymentMethodText, String? location, List<String> tags, String? rawInput, FinancialAccountInfo? financialAccount, AmountDisplay? display, DateTime? createdAt, DateTime? updatedAt, String? photoPath, String? geoLocation, List<TransactionCommentModel> comments, String? sourceAccountId, String? targetAccountId, List<SpaceInfo> spaces, String? sourceThreadId
+ String id, TransactionType type, String category, String? categoryKey, String? categoryText, String iconUrl, double amount, DateTime timestamp, double? amountOriginal, String? originalCurrency, String? exchangeRate, String? description, bool isShared, List<SharedUserInfo> sharedWith, String? paymentMethod, String? paymentMethodText, String? location, List<String> tags, String? rawInput, String status, FinancialAccountInfo? financialAccount, AmountDisplay? display, DateTime? createdAt, DateTime? updatedAt, String? photoPath, String? geoLocation, List<TransactionCommentModel> comments, String? sourceAccountId, String? targetAccountId, List<SpaceInfo> spaces, String? sourceThreadId, List<TransactionAttachment> attachments
 });
 
 
@@ -1434,7 +1715,7 @@ class _$TransactionModelCopyWithImpl<$Res>
 
 /// Create a copy of TransactionModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? category = null,Object? categoryKey = freezed,Object? categoryText = freezed,Object? iconUrl = null,Object? amount = null,Object? timestamp = null,Object? amountOriginal = freezed,Object? originalCurrency = freezed,Object? exchangeRate = freezed,Object? description = freezed,Object? isShared = null,Object? sharedWith = null,Object? paymentMethod = freezed,Object? paymentMethodText = freezed,Object? location = freezed,Object? tags = null,Object? rawInput = freezed,Object? financialAccount = freezed,Object? display = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? photoPath = freezed,Object? geoLocation = freezed,Object? comments = null,Object? sourceAccountId = freezed,Object? targetAccountId = freezed,Object? spaces = null,Object? sourceThreadId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? category = null,Object? categoryKey = freezed,Object? categoryText = freezed,Object? iconUrl = null,Object? amount = null,Object? timestamp = null,Object? amountOriginal = freezed,Object? originalCurrency = freezed,Object? exchangeRate = freezed,Object? description = freezed,Object? isShared = null,Object? sharedWith = null,Object? paymentMethod = freezed,Object? paymentMethodText = freezed,Object? location = freezed,Object? tags = null,Object? rawInput = freezed,Object? status = null,Object? financialAccount = freezed,Object? display = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? photoPath = freezed,Object? geoLocation = freezed,Object? comments = null,Object? sourceAccountId = freezed,Object? targetAccountId = freezed,Object? spaces = null,Object? sourceThreadId = freezed,Object? attachments = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -1455,7 +1736,8 @@ as String?,paymentMethodText: freezed == paymentMethodText ? _self.paymentMethod
 as String?,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as String?,tags: null == tags ? _self.tags : tags // ignore: cast_nullable_to_non_nullable
 as List<String>,rawInput: freezed == rawInput ? _self.rawInput : rawInput // ignore: cast_nullable_to_non_nullable
-as String?,financialAccount: freezed == financialAccount ? _self.financialAccount : financialAccount // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,financialAccount: freezed == financialAccount ? _self.financialAccount : financialAccount // ignore: cast_nullable_to_non_nullable
 as FinancialAccountInfo?,display: freezed == display ? _self.display : display // ignore: cast_nullable_to_non_nullable
 as AmountDisplay?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -1466,7 +1748,8 @@ as List<TransactionCommentModel>,sourceAccountId: freezed == sourceAccountId ? _
 as String?,targetAccountId: freezed == targetAccountId ? _self.targetAccountId : targetAccountId // ignore: cast_nullable_to_non_nullable
 as String?,spaces: null == spaces ? _self.spaces : spaces // ignore: cast_nullable_to_non_nullable
 as List<SpaceInfo>,sourceThreadId: freezed == sourceThreadId ? _self.sourceThreadId : sourceThreadId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,attachments: null == attachments ? _self.attachments : attachments // ignore: cast_nullable_to_non_nullable
+as List<TransactionAttachment>,
   ));
 }
 /// Create a copy of TransactionModel
@@ -1575,10 +1858,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransactionModel() when $default != null:
-return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId);case _:
+return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.status,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId,_that.attachments);case _:
   return orElse();
 
 }
@@ -1596,10 +1879,10 @@ return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categ
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)  $default,) {final _that = this;
 switch (_that) {
 case _TransactionModel():
-return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId);case _:
+return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.status,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId,_that.attachments);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1616,10 +1899,10 @@ return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categ
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)?  $default,) {final _that = this;
 switch (_that) {
 case _TransactionModel() when $default != null:
-return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId);case _:
+return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.status,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId,_that.attachments);case _:
   return null;
 
 }
@@ -1631,7 +1914,7 @@ return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categ
 @JsonSerializable()
 
 class _TransactionModel implements TransactionModel {
-  const _TransactionModel({required this.id, required this.type, required this.category, this.categoryKey, this.categoryText, required this.iconUrl, required this.amount, required this.timestamp, this.amountOriginal, this.originalCurrency, this.exchangeRate, this.description, this.isShared = false, final  List<SharedUserInfo> sharedWith = const [], this.paymentMethod, this.paymentMethodText, this.location, final  List<String> tags = const [], this.rawInput, this.financialAccount, this.display, this.createdAt, this.updatedAt, this.photoPath, this.geoLocation, final  List<TransactionCommentModel> comments = const [], this.sourceAccountId, this.targetAccountId, final  List<SpaceInfo> spaces = const [], this.sourceThreadId}): _sharedWith = sharedWith,_tags = tags,_comments = comments,_spaces = spaces;
+  const _TransactionModel({required this.id, required this.type, required this.category, this.categoryKey, this.categoryText, required this.iconUrl, required this.amount, required this.timestamp, this.amountOriginal, this.originalCurrency, this.exchangeRate, this.description, this.isShared = false, final  List<SharedUserInfo> sharedWith = const [], this.paymentMethod, this.paymentMethodText, this.location, final  List<String> tags = const [], this.rawInput, this.status = 'CLEARED', this.financialAccount, this.display, this.createdAt, this.updatedAt, this.photoPath, this.geoLocation, final  List<TransactionCommentModel> comments = const [], this.sourceAccountId, this.targetAccountId, final  List<SpaceInfo> spaces = const [], this.sourceThreadId, final  List<TransactionAttachment> attachments = const []}): _sharedWith = sharedWith,_tags = tags,_comments = comments,_spaces = spaces,_attachments = attachments;
   factory _TransactionModel.fromJson(Map<String, dynamic> json) => _$TransactionModelFromJson(json);
 
 @override final  String id;
@@ -1665,6 +1948,7 @@ class _TransactionModel implements TransactionModel {
 }
 
 @override final  String? rawInput;
+@override@JsonKey() final  String status;
 @override final  FinancialAccountInfo? financialAccount;
 @override final  AmountDisplay? display;
 @override final  DateTime? createdAt;
@@ -1688,6 +1972,13 @@ class _TransactionModel implements TransactionModel {
 }
 
 @override final  String? sourceThreadId;
+ final  List<TransactionAttachment> _attachments;
+@override@JsonKey() List<TransactionAttachment> get attachments {
+  if (_attachments is EqualUnmodifiableListView) return _attachments;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_attachments);
+}
+
 
 /// Create a copy of TransactionModel
 /// with the given fields replaced by the non-null parameter values.
@@ -1702,16 +1993,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.categoryKey, categoryKey) || other.categoryKey == categoryKey)&&(identical(other.categoryText, categoryText) || other.categoryText == categoryText)&&(identical(other.iconUrl, iconUrl) || other.iconUrl == iconUrl)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.amountOriginal, amountOriginal) || other.amountOriginal == amountOriginal)&&(identical(other.originalCurrency, originalCurrency) || other.originalCurrency == originalCurrency)&&(identical(other.exchangeRate, exchangeRate) || other.exchangeRate == exchangeRate)&&(identical(other.description, description) || other.description == description)&&(identical(other.isShared, isShared) || other.isShared == isShared)&&const DeepCollectionEquality().equals(other._sharedWith, _sharedWith)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.paymentMethodText, paymentMethodText) || other.paymentMethodText == paymentMethodText)&&(identical(other.location, location) || other.location == location)&&const DeepCollectionEquality().equals(other._tags, _tags)&&(identical(other.rawInput, rawInput) || other.rawInput == rawInput)&&(identical(other.financialAccount, financialAccount) || other.financialAccount == financialAccount)&&(identical(other.display, display) || other.display == display)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.photoPath, photoPath) || other.photoPath == photoPath)&&(identical(other.geoLocation, geoLocation) || other.geoLocation == geoLocation)&&const DeepCollectionEquality().equals(other._comments, _comments)&&(identical(other.sourceAccountId, sourceAccountId) || other.sourceAccountId == sourceAccountId)&&(identical(other.targetAccountId, targetAccountId) || other.targetAccountId == targetAccountId)&&const DeepCollectionEquality().equals(other._spaces, _spaces)&&(identical(other.sourceThreadId, sourceThreadId) || other.sourceThreadId == sourceThreadId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.categoryKey, categoryKey) || other.categoryKey == categoryKey)&&(identical(other.categoryText, categoryText) || other.categoryText == categoryText)&&(identical(other.iconUrl, iconUrl) || other.iconUrl == iconUrl)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.amountOriginal, amountOriginal) || other.amountOriginal == amountOriginal)&&(identical(other.originalCurrency, originalCurrency) || other.originalCurrency == originalCurrency)&&(identical(other.exchangeRate, exchangeRate) || other.exchangeRate == exchangeRate)&&(identical(other.description, description) || other.description == description)&&(identical(other.isShared, isShared) || other.isShared == isShared)&&const DeepCollectionEquality().equals(other._sharedWith, _sharedWith)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.paymentMethodText, paymentMethodText) || other.paymentMethodText == paymentMethodText)&&(identical(other.location, location) || other.location == location)&&const DeepCollectionEquality().equals(other._tags, _tags)&&(identical(other.rawInput, rawInput) || other.rawInput == rawInput)&&(identical(other.status, status) || other.status == status)&&(identical(other.financialAccount, financialAccount) || other.financialAccount == financialAccount)&&(identical(other.display, display) || other.display == display)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.photoPath, photoPath) || other.photoPath == photoPath)&&(identical(other.geoLocation, geoLocation) || other.geoLocation == geoLocation)&&const DeepCollectionEquality().equals(other._comments, _comments)&&(identical(other.sourceAccountId, sourceAccountId) || other.sourceAccountId == sourceAccountId)&&(identical(other.targetAccountId, targetAccountId) || other.targetAccountId == targetAccountId)&&const DeepCollectionEquality().equals(other._spaces, _spaces)&&(identical(other.sourceThreadId, sourceThreadId) || other.sourceThreadId == sourceThreadId)&&const DeepCollectionEquality().equals(other._attachments, _attachments));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,type,category,categoryKey,categoryText,iconUrl,amount,timestamp,amountOriginal,originalCurrency,exchangeRate,description,isShared,const DeepCollectionEquality().hash(_sharedWith),paymentMethod,paymentMethodText,location,const DeepCollectionEquality().hash(_tags),rawInput,financialAccount,display,createdAt,updatedAt,photoPath,geoLocation,const DeepCollectionEquality().hash(_comments),sourceAccountId,targetAccountId,const DeepCollectionEquality().hash(_spaces),sourceThreadId]);
+int get hashCode => Object.hashAll([runtimeType,id,type,category,categoryKey,categoryText,iconUrl,amount,timestamp,amountOriginal,originalCurrency,exchangeRate,description,isShared,const DeepCollectionEquality().hash(_sharedWith),paymentMethod,paymentMethodText,location,const DeepCollectionEquality().hash(_tags),rawInput,status,financialAccount,display,createdAt,updatedAt,photoPath,geoLocation,const DeepCollectionEquality().hash(_comments),sourceAccountId,targetAccountId,const DeepCollectionEquality().hash(_spaces),sourceThreadId,const DeepCollectionEquality().hash(_attachments)]);
 
 @override
 String toString() {
-  return 'TransactionModel(id: $id, type: $type, category: $category, categoryKey: $categoryKey, categoryText: $categoryText, iconUrl: $iconUrl, amount: $amount, timestamp: $timestamp, amountOriginal: $amountOriginal, originalCurrency: $originalCurrency, exchangeRate: $exchangeRate, description: $description, isShared: $isShared, sharedWith: $sharedWith, paymentMethod: $paymentMethod, paymentMethodText: $paymentMethodText, location: $location, tags: $tags, rawInput: $rawInput, financialAccount: $financialAccount, display: $display, createdAt: $createdAt, updatedAt: $updatedAt, photoPath: $photoPath, geoLocation: $geoLocation, comments: $comments, sourceAccountId: $sourceAccountId, targetAccountId: $targetAccountId, spaces: $spaces, sourceThreadId: $sourceThreadId)';
+  return 'TransactionModel(id: $id, type: $type, category: $category, categoryKey: $categoryKey, categoryText: $categoryText, iconUrl: $iconUrl, amount: $amount, timestamp: $timestamp, amountOriginal: $amountOriginal, originalCurrency: $originalCurrency, exchangeRate: $exchangeRate, description: $description, isShared: $isShared, sharedWith: $sharedWith, paymentMethod: $paymentMethod, paymentMethodText: $paymentMethodText, location: $location, tags: $tags, rawInput: $rawInput, status: $status, financialAccount: $financialAccount, display: $display, createdAt: $createdAt, updatedAt: $updatedAt, photoPath: $photoPath, geoLocation: $geoLocation, comments: $comments, sourceAccountId: $sourceAccountId, targetAccountId: $targetAccountId, spaces: $spaces, sourceThreadId: $sourceThreadId, attachments: $attachments)';
 }
 
 
@@ -1722,7 +2013,7 @@ abstract mixin class _$TransactionModelCopyWith<$Res> implements $TransactionMod
   factory _$TransactionModelCopyWith(_TransactionModel value, $Res Function(_TransactionModel) _then) = __$TransactionModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, TransactionType type, String category, String? categoryKey, String? categoryText, String iconUrl, double amount, DateTime timestamp, double? amountOriginal, String? originalCurrency, String? exchangeRate, String? description, bool isShared, List<SharedUserInfo> sharedWith, String? paymentMethod, String? paymentMethodText, String? location, List<String> tags, String? rawInput, FinancialAccountInfo? financialAccount, AmountDisplay? display, DateTime? createdAt, DateTime? updatedAt, String? photoPath, String? geoLocation, List<TransactionCommentModel> comments, String? sourceAccountId, String? targetAccountId, List<SpaceInfo> spaces, String? sourceThreadId
+ String id, TransactionType type, String category, String? categoryKey, String? categoryText, String iconUrl, double amount, DateTime timestamp, double? amountOriginal, String? originalCurrency, String? exchangeRate, String? description, bool isShared, List<SharedUserInfo> sharedWith, String? paymentMethod, String? paymentMethodText, String? location, List<String> tags, String? rawInput, String status, FinancialAccountInfo? financialAccount, AmountDisplay? display, DateTime? createdAt, DateTime? updatedAt, String? photoPath, String? geoLocation, List<TransactionCommentModel> comments, String? sourceAccountId, String? targetAccountId, List<SpaceInfo> spaces, String? sourceThreadId, List<TransactionAttachment> attachments
 });
 
 
@@ -1739,7 +2030,7 @@ class __$TransactionModelCopyWithImpl<$Res>
 
 /// Create a copy of TransactionModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? category = null,Object? categoryKey = freezed,Object? categoryText = freezed,Object? iconUrl = null,Object? amount = null,Object? timestamp = null,Object? amountOriginal = freezed,Object? originalCurrency = freezed,Object? exchangeRate = freezed,Object? description = freezed,Object? isShared = null,Object? sharedWith = null,Object? paymentMethod = freezed,Object? paymentMethodText = freezed,Object? location = freezed,Object? tags = null,Object? rawInput = freezed,Object? financialAccount = freezed,Object? display = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? photoPath = freezed,Object? geoLocation = freezed,Object? comments = null,Object? sourceAccountId = freezed,Object? targetAccountId = freezed,Object? spaces = null,Object? sourceThreadId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? category = null,Object? categoryKey = freezed,Object? categoryText = freezed,Object? iconUrl = null,Object? amount = null,Object? timestamp = null,Object? amountOriginal = freezed,Object? originalCurrency = freezed,Object? exchangeRate = freezed,Object? description = freezed,Object? isShared = null,Object? sharedWith = null,Object? paymentMethod = freezed,Object? paymentMethodText = freezed,Object? location = freezed,Object? tags = null,Object? rawInput = freezed,Object? status = null,Object? financialAccount = freezed,Object? display = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? photoPath = freezed,Object? geoLocation = freezed,Object? comments = null,Object? sourceAccountId = freezed,Object? targetAccountId = freezed,Object? spaces = null,Object? sourceThreadId = freezed,Object? attachments = null,}) {
   return _then(_TransactionModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -1760,7 +2051,8 @@ as String?,paymentMethodText: freezed == paymentMethodText ? _self.paymentMethod
 as String?,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as String?,tags: null == tags ? _self._tags : tags // ignore: cast_nullable_to_non_nullable
 as List<String>,rawInput: freezed == rawInput ? _self.rawInput : rawInput // ignore: cast_nullable_to_non_nullable
-as String?,financialAccount: freezed == financialAccount ? _self.financialAccount : financialAccount // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,financialAccount: freezed == financialAccount ? _self.financialAccount : financialAccount // ignore: cast_nullable_to_non_nullable
 as FinancialAccountInfo?,display: freezed == display ? _self.display : display // ignore: cast_nullable_to_non_nullable
 as AmountDisplay?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -1771,7 +2063,8 @@ as List<TransactionCommentModel>,sourceAccountId: freezed == sourceAccountId ? _
 as String?,targetAccountId: freezed == targetAccountId ? _self.targetAccountId : targetAccountId // ignore: cast_nullable_to_non_nullable
 as String?,spaces: null == spaces ? _self._spaces : spaces // ignore: cast_nullable_to_non_nullable
 as List<SpaceInfo>,sourceThreadId: freezed == sourceThreadId ? _self.sourceThreadId : sourceThreadId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,attachments: null == attachments ? _self._attachments : attachments // ignore: cast_nullable_to_non_nullable
+as List<TransactionAttachment>,
   ));
 }
 

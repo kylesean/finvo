@@ -51,6 +51,23 @@ abstract class SpaceInfo with _$SpaceInfo {
       _$SpaceInfoFromJson(json);
 }
 
+// Transaction attachment (linked via AI conversation thread)
+@freezed
+abstract class TransactionAttachment with _$TransactionAttachment {
+  const factory TransactionAttachment({
+    required String id,
+    required String filename,
+    String? mimeType,
+    int? size,
+    required String url,
+    @Default(false) bool isImage,
+    DateTime? createdAt,
+  }) = _TransactionAttachment;
+
+  factory TransactionAttachment.fromJson(Map<String, dynamic> json) =>
+      _$TransactionAttachmentFromJson(json);
+}
+
 // Amount display information
 @freezed
 abstract class AmountDisplay with _$AmountDisplay {
@@ -130,6 +147,7 @@ abstract class TransactionModel with _$TransactionModel {
     String? location,
     @Default([]) List<String> tags,
     String? rawInput,
+    @Default('CLEARED') String status, // CLEARED, PENDING, CONFIRMED
     FinancialAccountInfo? financialAccount,
     AmountDisplay? display,
     DateTime? createdAt,
@@ -142,6 +160,8 @@ abstract class TransactionModel with _$TransactionModel {
     String? targetAccountId, // Target account ID
     @Default([]) List<SpaceInfo> spaces, // Associated shared spaces
     String? sourceThreadId, // Source AI chat session ID for message anchor
+    @Default([])
+    List<TransactionAttachment> attachments, // Attachments from AI conversation
   }) = _TransactionModel;
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) =>
@@ -212,6 +232,16 @@ abstract class TransactionModel with _$TransactionModel {
             .toList() ??
         [];
 
+    // Parse attachments (linked via AI conversation thread)
+    final attachmentsList = json['attachments'] as List<dynamic>?;
+    final attachments =
+        attachmentsList
+            ?.map(
+              (a) => TransactionAttachment.fromJson(a as Map<String, dynamic>),
+            )
+            .toList() ??
+        [];
+
     return TransactionModel(
       id: json['id'] as String,
       type: type,
@@ -238,6 +268,7 @@ abstract class TransactionModel with _$TransactionModel {
       display: display,
       iconUrl: '', // Keep default empty string
       rawInput: rawInput,
+      status: json['status'] as String? ?? 'CLEARED',
       financialAccount: null, // Keep default null
       createdAt: createdAt,
       updatedAt: null, // Keep default null
@@ -250,6 +281,7 @@ abstract class TransactionModel with _$TransactionModel {
       targetAccountId: json['targetAccountId']?.toString(),
       spaces: spaces,
       sourceThreadId: json['sourceThreadId']?.toString(),
+      attachments: attachments,
     );
   }
 }

@@ -142,7 +142,10 @@
     "linkSuccess": "关联成功",
     "linkFailed": "关联失败",
     "rawInput": "消息",
-    "noRawInput": "无消息"
+    "noRawInput": "无消息",
+    "attachments": "$count 个附件",
+    "viewInConversation": "在对话中查看更多",
+    "statusPending": "待确认"
   },
   "home": {
     "totalExpense": "总消费金额",
@@ -163,6 +166,7 @@
     "replyToPrefix": "回复 @$name:",
     "reply": "回复",
     "addNote": "添加备注...",
+    "addNoteWithMention": "评论或 @提及成员...",
     "confirmDeleteTitle": "确认删除",
     "confirmDeleteContent": "你确定要删除这条评论吗？此操作无法撤销。",
     "success": "成功",

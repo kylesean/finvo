@@ -6,11 +6,12 @@ from typing import Any, cast
 from uuid import UUID, uuid4
 
 import structlog
-from sqlalchemy import Select, and_, select
+from sqlalchemy import Select, String, and_, cast as sa_cast, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.exceptions import BusinessError, NotFoundError
+from app.models.attachment import Attachment
 from app.models.base import utc_now
 from app.models.financial_account import FinancialAccount
 from app.models.transaction import Transaction, TransactionComment
@@ -241,6 +242,29 @@ class TransactionCRUDService:
         amount_val = float(transaction.amount_original)
         original_currency = (transaction.currency or display_currency).upper()
 
+        # Query attachments linked via source_thread_id
+        attachments_data: list[dict[str, Any]] = []
+        if transaction.source_thread_id:
+            # thread_id is text in DB but UUID in model; cast column to String for comparison
+            att_query = select(Attachment).where(
+                cast(Any, sa_cast(Attachment.thread_id, String) == str(transaction.source_thread_id)),
+                cast(Any, Attachment.user_uuid == user_uuid),
+            )
+            att_result = await self.db.execute(att_query)
+            attachments = att_result.scalars().all()
+            attachments_data = [
+                {
+                    "id": str(a.id),
+                    "filename": a.filename,
+                    "mimeType": a.mime_type,
+                    "size": a.size,
+                    "url": f"/files/view/{a.id}",
+                    "isImage": a.is_image,
+                    "createdAt": a.created_at.isoformat() if a.created_at else None,
+                }
+                for a in attachments
+            ]
+
         return {
             "id": str(transaction.id),
             "userUuid": str(transaction.user_uuid),
@@ -270,6 +294,7 @@ class TransactionCRUDService:
             "commentCount": len(comments_data),
             "spaces": spaces_data,
             "sourceThreadId": str(transaction.source_thread_id) if transaction.source_thread_id else None,
+            "attachments": attachments_data,
             "display": TransactionDisplayValue.from_params(
                 amount=amount_val, tx_type=transaction.type, currency=original_currency
             ).model_dump(),
@@ -751,6 +776,45 @@ class TransactionCRUDService:
 
     # ===== Comment Operations =====
 
+    async def _can_access_transaction_comments(self, transaction_id: UUID, user_uuid: UUID) -> Transaction:
+        """Check if user can access transaction comments.
+
+        Access is granted if:
+        1. User is the transaction owner, OR
+        2. Transaction is linked to a space the user is a member of.
+
+        Returns the transaction if access is granted, raises NotFoundError otherwise.
+        """
+        from app.models.shared_space import SpaceMember, SpaceTransaction
+
+        # Check ownership first (fast path)
+        tx_query = select(Transaction).where(cast(Any, Transaction.id == transaction_id))
+        tx_result = await self.db.execute(tx_query)
+        transaction = tx_result.scalar_one_or_none()
+
+        if not transaction:
+            raise NotFoundError("Transaction")
+
+        if transaction.user_uuid == user_uuid:
+            return transaction
+
+        # Check space membership: is the transaction linked to any space the user belongs to?
+        space_access_query = (
+            select(SpaceTransaction.id)
+            .join(SpaceMember, cast(Any, SpaceMember.space_id == SpaceTransaction.space_id))
+            .where(
+                cast(Any, SpaceTransaction.transaction_id == transaction_id),
+                cast(Any, SpaceMember.user_uuid == user_uuid),
+                cast(Any, SpaceMember.status == "ACCEPTED"),
+            )
+            .limit(1)
+        )
+        space_result = await self.db.execute(space_access_query)
+        if space_result.scalar_one_or_none() is not None:
+            return transaction
+
+        raise NotFoundError("Transaction")
+
     async def get_comments_for_transaction(self, transaction_id: UUID, user_uuid: UUID) -> list[dict[str, Any]]:
         """Get transaction comments list
 
@@ -761,15 +825,8 @@ class TransactionCRUDService:
         Returns:
             List of comments
         """
-        # First verify if the transaction exists and belongs to the user
-        tx_query = select(Transaction).where(
-            cast(Any, and_(cast(Any, Transaction.id == transaction_id), cast(Any, Transaction.user_uuid == user_uuid)))
-        )
-        tx_result = await self.db.execute(tx_query)
-        transaction = tx_result.scalar_one_or_none()
-
-        if not transaction:
-            raise NotFoundError("Transaction")
+        # Verify access permission (owner or space member)
+        await self._can_access_transaction_comments(transaction_id, user_uuid)
 
         # Query comments and related user information
         query = (
@@ -855,18 +912,8 @@ class TransactionCRUDService:
             )
             raise BusinessError("Comment content cannot be empty", "TRANSACTION_COMMENT_NULL")
 
-        # Validate transaction exists
-        tx_query = select(Transaction).where(cast(Any, Transaction.id == transaction_id))
-        tx_result = await self.db.execute(tx_query)
-        transaction = tx_result.scalar_one_or_none()
-
-        if not transaction:
-            logger.warning(
-                "transaction_not_found_for_comment",
-                user_uuid=user_uuid,
-                transaction_id=transaction_id,
-            )
-            raise NotFoundError("Transaction")
+        # Validate transaction exists and user has access
+        await self._can_access_transaction_comments(transaction_id, user_uuid)
 
         # If there is a parent comment, validate the parent comment
         if parent_comment_id is not None:

@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import '../models/transaction_model.dart';
 import '../widgets/feed/comment_section_widget.dart';
 import '../widgets/feed/comment_input_bar.dart';
+import '../widgets/feed/attachment_section_widget.dart';
 import '../providers/transaction_detail_provider.dart';
 import '../widgets/transaction_detail_skeleton.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
@@ -22,7 +23,6 @@ import 'package:finvo/features/profile/providers/financial_account_provider.dart
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/chat/genui/organisms/account_picker_card.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
-import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -157,6 +157,9 @@ class TransactionDetailPage extends ConsumerWidget {
                                       icon: TransactionCategory.fromKey(
                                         transaction.categoryKey,
                                       ).icon,
+                                      backgroundColor: colors.primary
+                                          .withValues(alpha: 0.1),
+                                      iconColor: colors.primary,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -167,11 +170,9 @@ class TransactionDetailPage extends ConsumerWidget {
                                       children: [
                                         Text(
                                           _getCategoryDisplayName(transaction),
-                                          style: theme.typography.body.lg
-                                              .copyWith(
-                                                fontWeight:
-                                                    AppFontConfig.headingBold,
-                                              ),
+                                          style: AppTextStyles.detailValueLarge(
+                                            theme,
+                                          ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -204,15 +205,52 @@ class TransactionDetailPage extends ConsumerWidget {
                                 ],
                               ),
                               const SizedBox(height: 24),
-                              // Amount
+                              // Amount with subtle primary-tinted background
                               Center(
-                                child: AmountText.large(
-                                  amount: transaction.amount,
-                                  type: transaction.type,
-                                  currency: transaction.paymentMethod ?? 'CNY',
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.primary.withValues(
+                                      alpha: 0.05,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: AmountText.large(
+                                    amount: transaction.amount,
+                                    type: transaction.type,
+                                    currency:
+                                        transaction.paymentMethod ?? 'CNY',
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 16),
+
+                              // Status indicator chip
+                              if (transaction.status == 'PENDING')
+                                Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: theme.semantic.warningBackground,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      t.transaction.statusPending,
+                                      style: theme.typography.body.xs.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        color: theme.semantic.warningAccent,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              if (transaction.status == 'PENDING')
+                                const SizedBox(height: 12),
 
                               // Linked account and space actions
                               _buildAccountSpaceActions(
@@ -333,6 +371,20 @@ class TransactionDetailPage extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  // --- Attachment section ---
+                  if (transaction.attachments.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
+                        child: AttachmentSectionWidget(
+                          attachments: transaction.attachments,
+                          sourceThreadId: transaction.sourceThreadId,
+                        ),
+                      ),
+                    ),
                   // --- Comment section ---
                   SliverToBoxAdapter(
                     child: CommentSectionWidget(transactionId: transaction.id),
@@ -349,7 +401,10 @@ class TransactionDetailPage extends ConsumerWidget {
         ),
       ),
       // Comment input bar
-      bottomNavigationBar: CommentInputBar(transactionId: transaction.id),
+      bottomNavigationBar: CommentInputBar(
+        transactionId: transaction.id,
+        spaces: transaction.spaces,
+      ),
     );
   }
 
@@ -377,7 +432,7 @@ class TransactionDetailPage extends ConsumerWidget {
           Expanded(
             child: Text(
               t.transaction.transactionDetail,
-              style: AppTextStyles.listTitle(theme),
+              style: AppTextStyles.pageTitle(theme),
               textAlign: TextAlign.center, // Center the title
             ),
           ),
@@ -409,7 +464,11 @@ class TransactionDetailPage extends ConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(icon, size: 18, color: colors.mutedForeground),
+                Icon(
+                  icon,
+                  size: 18,
+                  color: colors.primary.withValues(alpha: 0.7),
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

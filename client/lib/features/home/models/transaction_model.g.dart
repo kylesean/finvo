@@ -37,6 +37,32 @@ _SpaceInfo _$SpaceInfoFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$SpaceInfoToJson(_SpaceInfo instance) =>
     <String, dynamic>{'id': instance.id, 'name': instance.name};
 
+_TransactionAttachment _$TransactionAttachmentFromJson(
+  Map<String, dynamic> json,
+) => _TransactionAttachment(
+  id: json['id'] as String,
+  filename: json['filename'] as String,
+  mimeType: json['mimeType'] as String?,
+  size: (json['size'] as num?)?.toInt(),
+  url: json['url'] as String,
+  isImage: json['isImage'] as bool? ?? false,
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+);
+
+Map<String, dynamic> _$TransactionAttachmentToJson(
+  _TransactionAttachment instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'filename': instance.filename,
+  'mimeType': instance.mimeType,
+  'size': instance.size,
+  'url': instance.url,
+  'isImage': instance.isImage,
+  'createdAt': instance.createdAt?.toIso8601String(),
+};
+
 _AmountDisplay _$AmountDisplayFromJson(Map<String, dynamic> json) =>
     _AmountDisplay(
       sign: json['sign'] as String,
@@ -118,6 +144,7 @@ _TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
           const [],
       rawInput: json['rawInput'] as String?,
+      status: json['status'] as String? ?? 'CLEARED',
       financialAccount: json['financialAccount'] == null
           ? null
           : FinancialAccountInfo.fromJson(
@@ -150,6 +177,14 @@ _TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       sourceThreadId: json['sourceThreadId'] as String?,
+      attachments:
+          (json['attachments'] as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    TransactionAttachment.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$TransactionModelToJson(_TransactionModel instance) =>
@@ -173,6 +208,7 @@ Map<String, dynamic> _$TransactionModelToJson(_TransactionModel instance) =>
       'location': instance.location,
       'tags': instance.tags,
       'rawInput': instance.rawInput,
+      'status': instance.status,
       'financialAccount': instance.financialAccount,
       'display': instance.display,
       'createdAt': instance.createdAt?.toIso8601String(),
@@ -184,6 +220,7 @@ Map<String, dynamic> _$TransactionModelToJson(_TransactionModel instance) =>
       'targetAccountId': instance.targetAccountId,
       'spaces': instance.spaces,
       'sourceThreadId': instance.sourceThreadId,
+      'attachments': instance.attachments,
     };
 
 const _$TransactionTypeEnumMap = {

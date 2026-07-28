@@ -457,6 +457,15 @@ class Translations$transaction$zh {
 
 	/// zh: '无消息'
 	String get noRawInput => '无消息';
+
+	/// zh: '$count 个附件'
+	String attachments({required Object count}) => '${count} 个附件';
+
+	/// zh: '在对话中查看更多'
+	String get viewInConversation => '在对话中查看更多';
+
+	/// zh: '待确认'
+	String get statusPending => '待确认';
 }
 
 // Path: home
@@ -523,6 +532,9 @@ class Translations$comment$zh {
 
 	/// zh: '添加备注...'
 	String get addNote => '添加备注...';
+
+	/// zh: '评论或 @提及成员...'
+	String get addNoteWithMention => '评论或 @提及成员...';
 
 	/// zh: '确认删除'
 	String get confirmDeleteTitle => '确认删除';
@@ -4794,6 +4806,9 @@ extension on Translations {
 			'transaction.linkFailed' => '关联失败',
 			'transaction.rawInput' => '消息',
 			'transaction.noRawInput' => '无消息',
+			'transaction.attachments' => ({required Object count}) => '${count} 个附件',
+			'transaction.viewInConversation' => '在对话中查看更多',
+			'transaction.statusPending' => '待确认',
 			'home.totalExpense' => '总消费金额',
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
@@ -4810,6 +4825,7 @@ extension on Translations {
 			'comment.replyToPrefix' => ({required Object name}) => '回复 @${name}:',
 			'comment.reply' => '回复',
 			'comment.addNote' => '添加备注...',
+			'comment.addNoteWithMention' => '评论或 @提及成员...',
 			'comment.confirmDeleteTitle' => '确认删除',
 			'comment.confirmDeleteContent' => '你确定要删除这条评论吗？此操作无法撤销。',
 			'comment.success' => '成功',
@@ -5175,12 +5191,12 @@ extension on Translations {
 			'chat.tools.suggestBudget' => '正在推荐预算...',
 			'chat.tools.listSpaces' => '正在获取共享空间...',
 			'chat.tools.querySpaceSummary' => '正在查询空间摘要...',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.prepareTransfer' => '正在准备转账...',
 			'chat.tools.unknown' => '正在处理请求...',
 			'chat.tools.done.readFile' => '已查看文件',
 			'chat.tools.done.searchTransactions' => '已查询交易',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.queryBudgetStatus' => '已检查预算',
 			'chat.tools.done.createBudget' => '已创建预算',
 			'chat.tools.done.getCashFlowAnalysis' => '已分析现金流',
@@ -5689,12 +5705,12 @@ extension on Translations {
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暂无通知',
 			'sharedSpace.notifications.emptyHint' => '当你收到新的邀请或动态时，\n通知将显示在这里',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.notifications.incompleteInfo' => '邀请信息不完整',
 			'sharedSpace.notifications.inviteAccepted' => '已接受邀请！',
 			'sharedSpace.notifications.inviteRejected' => '已拒绝邀请',
 			'sharedSpace.notifications.allMarkedRead' => '全部标记为已读',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.inviteCard.title' => '邀请码',
 			'sharedSpace.inviteCard.subtitle' => '分享给朋友以加入空间',
 			'sharedSpace.inviteCard.copyCode' => '复制邀请码',

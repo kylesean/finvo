@@ -239,6 +239,9 @@ class _Translations$transaction$en extends Translations$transaction$zh {
 	@override String get linkFailed => 'Link failed';
 	@override String get rawInput => 'Message';
 	@override String get noRawInput => 'No message';
+	@override String attachments({required Object count}) => '${count} attachments';
+	@override String get viewInConversation => 'View more in conversation';
+	@override String get statusPending => 'Pending';
 }
 
 // Path: home
@@ -273,6 +276,7 @@ class _Translations$comment$en extends Translations$comment$zh {
 	@override String replyToPrefix({required Object name}) => 'Reply to @${name}:';
 	@override String get reply => 'Reply';
 	@override String get addNote => 'Add a note...';
+	@override String get addNoteWithMention => 'Comment or @mention members...';
 	@override String get confirmDeleteTitle => 'Confirm Delete';
 	@override String get confirmDeleteContent => 'Are you sure you want to delete this comment? This action cannot be undone.';
 	@override String get success => 'Success';
@@ -2455,6 +2459,9 @@ extension on TranslationsEn {
 			'transaction.linkFailed' => 'Link failed',
 			'transaction.rawInput' => 'Message',
 			'transaction.noRawInput' => 'No message',
+			'transaction.attachments' => ({required Object count}) => '${count} attachments',
+			'transaction.viewInConversation' => 'View more in conversation',
+			'transaction.statusPending' => 'Pending',
 			'home.totalExpense' => 'Total Expense',
 			'home.todayExpense' => 'Today\'s',
 			'home.monthExpense' => 'This Month\'s',
@@ -2471,6 +2478,7 @@ extension on TranslationsEn {
 			'comment.replyToPrefix' => ({required Object name}) => 'Reply to @${name}:',
 			'comment.reply' => 'Reply',
 			'comment.addNote' => 'Add a note...',
+			'comment.addNoteWithMention' => 'Comment or @mention members...',
 			'comment.confirmDeleteTitle' => 'Confirm Delete',
 			'comment.confirmDeleteContent' => 'Are you sure you want to delete this comment? This action cannot be undone.',
 			'comment.success' => 'Success',
@@ -2836,12 +2844,12 @@ extension on TranslationsEn {
 			'chat.tools.suggestBudget' => 'Suggesting budget...',
 			'chat.tools.listSpaces' => 'Loading shared spaces...',
 			'chat.tools.querySpaceSummary' => 'Querying space summary...',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.prepareTransfer' => 'Preparing transfer...',
 			'chat.tools.unknown' => 'Processing request...',
 			'chat.tools.done.readFile' => 'Read file',
 			'chat.tools.done.searchTransactions' => 'Searched transactions',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.queryBudgetStatus' => 'Checked budget',
 			'chat.tools.done.createBudget' => 'Created budget',
 			'chat.tools.done.getCashFlowAnalysis' => 'Analyzed cash flow',
@@ -3350,12 +3358,12 @@ extension on TranslationsEn {
 			'sharedSpace.notifications.title' => 'Notifications',
 			'sharedSpace.notifications.empty' => 'No notifications',
 			'sharedSpace.notifications.emptyHint' => 'When you have new invites or activities,\nyou will receive notifications here',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.notifications.incompleteInfo' => 'Incomplete invite info',
 			'sharedSpace.notifications.inviteAccepted' => 'Invite accepted!',
 			'sharedSpace.notifications.inviteRejected' => 'Invite rejected',
 			'sharedSpace.notifications.allMarkedRead' => 'All notifications marked as read',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.inviteCard.title' => 'Invite Code',
 			'sharedSpace.inviteCard.subtitle' => 'Share with friends to join the space',
 			'sharedSpace.inviteCard.copyCode' => 'Copy Invite Code',

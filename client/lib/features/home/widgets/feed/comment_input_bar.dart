@@ -9,11 +9,18 @@ import 'package:finvo/i18n/strings.g.dart';
 // Assuming these Providers are imported from outside
 // Core logic migrated to transactionCommentsProvider
 import '../../providers/comment_providers.dart';
+import '../../models/transaction_model.dart';
+import 'mention_picker_widget.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class CommentInputBar extends ConsumerStatefulWidget {
   final String transactionId;
-  const CommentInputBar({super.key, required this.transactionId});
+  final List<SpaceInfo> spaces;
+  const CommentInputBar({
+    super.key,
+    required this.transactionId,
+    this.spaces = const [],
+  });
 
   @override
   ConsumerState<CommentInputBar> createState() => _CommentInputBarState();
@@ -24,9 +31,15 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
   final FocusNode _commentFocusNode = FocusNode();
   bool _isSubmitting = false;
 
+  // @ mention state
+  bool _isMentionMode = false;
+  String _mentionFilter = '';
+  int _mentionStartIndex = -1;
+
   @override
   void initState() {
     super.initState();
+    _commentController.addListener(_onTextChanged);
     ref.listenManual<String?>(replyingToCommentIdProvider, (previous, next) {
       if (next != null && (previous == null || previous != next)) {
         if (!_commentFocusNode.hasFocus) {
@@ -55,6 +68,66 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
         }
       }
     });
+  }
+
+  /// Detect @ character to trigger mention mode
+  void _onTextChanged() {
+    if (widget.spaces.isEmpty) return;
+
+    final text = _commentController.text;
+    final cursorPos = _commentController.selection.baseOffset;
+
+    if (cursorPos < 0) {
+      _closeMentionMode();
+      return;
+    }
+
+    // Look backwards from cursor for an unmatched @
+    final textBeforeCursor = text.substring(0, cursorPos);
+    final lastAt = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAt >= 0) {
+      // Check there's no space between @ and cursor (still typing the name)
+      final afterAt = textBeforeCursor.substring(lastAt + 1);
+      if (!afterAt.contains(' ') || afterAt.isEmpty) {
+        setState(() {
+          _isMentionMode = true;
+          _mentionStartIndex = lastAt;
+          _mentionFilter = afterAt;
+        });
+        return;
+      }
+    }
+
+    _closeMentionMode();
+  }
+
+  void _closeMentionMode() {
+    if (_isMentionMode) {
+      setState(() {
+        _isMentionMode = false;
+        _mentionFilter = '';
+        _mentionStartIndex = -1;
+      });
+    }
+  }
+
+  void _onMentionSelected(SpaceMemberItem member) {
+    final text = _commentController.text;
+    final cursorPos = _commentController.selection.baseOffset;
+
+    // Replace from @ position to cursor with @username
+    final before = text.substring(0, _mentionStartIndex);
+    final after = text.substring(cursorPos);
+    final newText = '$before@${member.username} $after';
+    final newCursor =
+        before.length + member.username.length + 2; // @name + space
+
+    _commentController.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newCursor),
+    );
+    _closeMentionMode();
   }
 
   Future<void> _submitComment() async {
@@ -124,6 +197,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
   // ... dispose and build methods ...
   @override
   void dispose() {
+    _commentController.removeListener(_onTextChanged);
     _commentController.dispose();
     _commentFocusNode.dispose();
     super.dispose();
@@ -177,6 +251,16 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                 ],
               ),
             ),
+          // @ Mention picker (shown above input when active)
+          if (_isMentionMode && widget.spaces.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: MentionPickerWidget(
+                spaceId: widget.spaces.first.id,
+                filter: _mentionFilter,
+                onSelected: _onMentionSelected,
+              ),
+            ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -184,7 +268,9 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                 child: FTextField(
                   control: .managed(controller: _commentController),
                   focusNode: _commentFocusNode,
-                  hint: t.comment.addNote,
+                  hint: widget.spaces.isNotEmpty
+                      ? t.comment.addNoteWithMention
+                      : t.comment.addNote,
                   onTap: () {
                     // Logic here ensures existing reply state is cleared when user clicks input directly
                     // If focused via "Reply" button, replyingToCommentIdProvider already has value
@@ -217,9 +303,21 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                         ),
                       ),
                     )
-                  : FButton.icon(
-                      onPress: _submitComment,
-                      child: const Icon(FLucideIcons.send),
+                  : GestureDetector(
+                      onTap: _submitComment,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          FLucideIcons.send,
+                          size: 16,
+                          color: colors.primaryForeground,
+                        ),
+                      ),
                     ),
             ],
           ),

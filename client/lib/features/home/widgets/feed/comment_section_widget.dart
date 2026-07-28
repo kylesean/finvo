@@ -29,8 +29,8 @@ class CommentSectionWidget extends ConsumerWidget {
           padding: const EdgeInsets.only(
             left: 16.0,
             right: 16.0,
-            top: 24.0,
-            bottom: 12.0,
+            top: 20.0,
+            bottom: 8.0,
           ),
           child: Text(
             t.comment.note,
@@ -81,7 +81,7 @@ class CommentSectionWidget extends ConsumerWidget {
                   // Padding for parent comment
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
-                    vertical: 4.0,
+                    vertical: 2.0,
                   ),
                   child: CommentItemWidget(
                     comment: parent,
@@ -115,7 +115,7 @@ class CommentSectionWidget extends ConsumerWidget {
                   const Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.0,
-                      vertical: 8.0,
+                      vertical: 4.0,
                     ),
                     child: FDivider(),
                   ),

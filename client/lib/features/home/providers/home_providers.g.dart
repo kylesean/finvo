@@ -397,7 +397,7 @@ final class TransactionFeedProvider
   }
 }
 
-String _$transactionFeedHash() => r'48d69037720f2410ad1f988f67536822538a44ee';
+String _$transactionFeedHash() => r'b12394cd03dd927e4e8ff1df8a6ca73892475e06';
 
 abstract class _$TransactionFeed extends $Notifier<TransactionFeedState> {
   TransactionFeedState build();

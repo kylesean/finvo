@@ -19,6 +19,7 @@ import '../../../shared/models/action_item_model.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/app/router/app_routes.dart';
 
 class SharedSpaceDetailPage extends ConsumerStatefulWidget {
   final String spaceId;
@@ -638,74 +639,85 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
       }
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colors.border.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          // Icon
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: amountColor.withValues(alpha: 0.1),
-            ),
-            child: Icon(
-              tx.categoryKey != null
-                  ? CategoryConfig.getCategoryIcon(tx.categoryKey)
-                  : (isExpense
-                        ? FLucideIcons.trendingDown
-                        : FLucideIcons.trendingUp),
-              size: 18,
-              color: amountColor,
-            ),
+    return GestureDetector(
+      onTap: () {
+        unawaited(
+          context.pushNamed(
+            AppRouteNames.transactionDetail,
+            pathParameters: {'transactionId': tx.id},
           ),
-          const SizedBox(width: 12),
-          // Description and added by
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tx.description != null && tx.description!.isNotEmpty
-                      ? tx.description!
-                      : (tx.categoryKey != null
-                            ? TransactionCategory.fromKey(
-                                tx.categoryKey,
-                              ).displayText
-                            : t.category.other),
-                  style: AppTextStyles.listTitle(theme),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${tx.addedByUsername ?? "Unknown"} · $timeDisplay',
-                  style: AppTextStyles.detailLabel(theme),
-                ),
-              ],
+        );
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colors.border.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: amountColor.withValues(alpha: 0.1),
+              ),
+              child: Icon(
+                tx.categoryKey != null
+                    ? CategoryConfig.getCategoryIcon(tx.categoryKey)
+                    : (isExpense
+                          ? FLucideIcons.trendingDown
+                          : FLucideIcons.trendingUp),
+                size: 18,
+                color: amountColor,
+              ),
             ),
-          ),
-          // Amount - using unified AmountText component
-          tx.display != null
-              ? AmountText.fromDisplay(
-                  display: tx.display!,
-                  type: transactionType,
-                  style: AppTextStyles.listTitle(theme),
-                )
-              : AmountText(
-                  amount: double.tryParse(tx.amount) ?? 0.0,
-                  type: transactionType,
-                  currency: tx.currency,
-                  style: AppTextStyles.listTitle(theme),
-                ),
-        ],
+            const SizedBox(width: 12),
+            // Description and added by
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tx.description != null && tx.description!.isNotEmpty
+                        ? tx.description!
+                        : (tx.categoryKey != null
+                              ? TransactionCategory.fromKey(
+                                  tx.categoryKey,
+                                ).displayText
+                              : t.category.other),
+                    style: AppTextStyles.listTitle(theme),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${tx.addedByUsername ?? "Unknown"} · $timeDisplay',
+                    style: AppTextStyles.detailLabel(theme),
+                  ),
+                ],
+              ),
+            ),
+            // Amount - using unified AmountText component
+            tx.display != null
+                ? AmountText.fromDisplay(
+                    display: tx.display!,
+                    type: transactionType,
+                    style: AppTextStyles.listTitle(theme),
+                  )
+                : AmountText(
+                    amount: double.tryParse(tx.amount) ?? 0.0,
+                    type: transactionType,
+                    currency: tx.currency,
+                    style: AppTextStyles.listTitle(theme),
+                  ),
+          ],
+        ),
       ),
     );
   }

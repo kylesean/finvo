@@ -173,117 +173,72 @@ class CommentItemWidget extends ConsumerWidget {
       return Row(mainAxisSize: MainAxisSize.min, children: nameParts);
     }
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: isSubComment ? 32.0 : 0, // Indentation for child comments
-        top: isSubComment
-            ? 6.0
-            : 10.0, // Top padding for child comments can be smaller
-        bottom: 6.0, // Unified bottom padding
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              UserAvatar(userId: comment.userId, size: 40),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(child: buildUserNameDisplay()),
-                        const SizedBox(width: 6),
-                        Text(
-                          timeago.format(comment.createdAt, locale: 'zh_CN'),
-                          style: theme.typography.body.sm.copyWith(
-                            fontSize: 11,
-                            color: colorScheme.mutedForeground,
+    return GestureDetector(
+      onTap: () {
+        // Tap entire comment to trigger reply
+        final currentReplyingTo = ref.read(replyingToCommentIdProvider);
+        if (currentReplyingTo == comment.id) {
+          ref.read(replyingToCommentIdProvider.notifier).set(null);
+          ref.read(replyingToUserNameProvider.notifier).set(null);
+        } else {
+          ref.read(replyingToCommentIdProvider.notifier).set(comment.id);
+          ref.read(replyingToUserNameProvider.notifier).set(comment.userName);
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: isSubComment ? 28.0 : 0,
+          top: isSubComment ? 4.0 : 8.0,
+          bottom: 4.0,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            UserAvatar(userId: comment.userId, size: 28),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: buildUserNameDisplay()),
+                      const SizedBox(width: 6),
+                      Text(
+                        timeago.format(comment.createdAt, locale: 'zh_CN'),
+                        style: theme.typography.body.xs.copyWith(
+                          color: colorScheme.mutedForeground,
+                        ),
+                      ),
+                      if (canDelete)
+                        FButton.icon(
+                          onPress: () => _showCommentActions(context, ref),
+                          child: Padding(
+                            padding: const EdgeInsets.all(2),
+                            child: Icon(
+                              FLucideIcons.ellipsis,
+                              color: colorScheme.mutedForeground,
+                              size: 14,
+                            ),
                           ),
                         ),
-                        if (canDelete)
-                          FButton.icon(
-                            onPress: () => _showCommentActions(context, ref),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(
-                                FLucideIcons.ellipsis,
-                                color: colorScheme.mutedForeground,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    comment.commentText,
+                    style: theme.typography.body.sm.copyWith(
+                      color: colorScheme.foreground,
+                      height: 1.3,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      comment.commentText,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colorScheme.foreground,
-                        height: 1.4,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 4.0,
-                      ), // Reduce top padding for reply button
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .end, // Align reply button to the right
-                        children: [
-                          FButton(
-                            variant: .ghost,
-                            onPress: () {
-                              final currentReplyingTo = ref.read(
-                                replyingToCommentIdProvider,
-                              );
-                              if (currentReplyingTo == comment.id) {
-                                ref
-                                    .read(replyingToCommentIdProvider.notifier)
-                                    .set(null);
-                                ref
-                                    .read(replyingToUserNameProvider.notifier)
-                                    .set(null);
-                              } else {
-                                ref
-                                    .read(replyingToCommentIdProvider.notifier)
-                                    .set(comment.id);
-                                // When replying to a parent comment, the person being replied to is its author
-                                // When replying to a child comment, the person being replied to is the author of that child comment
-                                ref
-                                    .read(replyingToUserNameProvider.notifier)
-                                    .set(comment.userName);
-                              }
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 0,
-                              ), // Adjust padding
-                              child: SizedBox(
-                                height:
-                                    24, // Give the link button a clear height
-                                child: Text(
-                                  t.comment.reply,
-                                  style: AppTextStyles.sectionHeader(theme),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          // Child comments are no longer rendered recursively by this Widget
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
