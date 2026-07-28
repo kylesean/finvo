@@ -1,0 +1,94 @@
+# Android Release CI/CD Pipeline
+# Automatically builds Android APK binaries and attaches them to GitHub Releases upon tag push (v*) or manual dispatch.
+
+name: Android Release Build
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_CHANNEL: 'stable'
+
+jobs:
+  build-android-release:
+    name: Build & Publish Android Release APK
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Universal Release APK
+        run: flutter build apk --release
+
+      - name: Prepare Release Artifacts and Changelog
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME:-v0.0.0}"
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          OUTPUT_APK="finvo-${TAG_NAME}-android.apk"
+
+          mkdir -p release_artifacts
+          cp "$APK_PATH" "release_artifacts/$OUTPUT_APK"
+
+          # Extract version changelog from root CHANGELOG.md if available
+          python3 -c "
+          import re, os
+          changelog_path = '../CHANGELOG.md'
+          tag = '${TAG_NAME}'.lstrip('v')
+          notes = ''
+          if os.path.exists(changelog_path):
+              with open(changelog_path, 'r', encoding='utf-8') as f:
+                  content = f.read()
+              match = re.search(r'## \[' + re.escape(tag) + r'\][^\n]*\n(.*?)(?=\n## \[|\Z)', content, re.DOTALL)
+              if match:
+                  notes = match.group(1).strip()
+          with open('release_artifacts/RELEASE_NOTES.md', 'w', encoding='utf-8') as f:
+              f.write(notes)
+          "
+
+          echo "RELEASE_APK=client/release_artifacts/$OUTPUT_APK" >> $GITHUB_ENV
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
+      - name: Create or Update GitHub Release with APK Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: client/release_artifacts/*.apk
+          tag_name: ${{ env.TAG_NAME }}
+          name: Release ${{ env.TAG_NAME }}
+          body_path: client/release_artifacts/RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(env.TAG_NAME, 'alpha') || contains(env.TAG_NAME, 'beta') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
