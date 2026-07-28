@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:image_picker/image_picker.dart';
@@ -291,9 +292,10 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       return;
     }
 
-    // Play start sound immediately to give user instant feedback
+    // Play start sound / haptic feedback immediately to give user instant feedback
     // Regardless of the service connection status, the user should be informed
     // that the system has responded.
+    unawaited(HapticFeedback.lightImpact());
     if (_serviceType == SpeechServiceType.websocket) {
       await SoundFeedbackService.instance.playStartSound();
     }

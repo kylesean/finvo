@@ -13,22 +13,68 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            if (call.method == "isSystemSpeechAvailable") {
-                try {
-                    val isAvailable = SpeechRecognizer.isRecognitionAvailable(context)
-                    if (isAvailable) {
-                        result.success(true)
-                    } else {
-                        val intent = Intent(RecognitionService.SERVICE_INTERFACE)
-                        val resolveInfos = packageManager.queryIntentServices(intent, 0)
-                        result.success(resolveInfos.isNotEmpty())
+            when (call.method) {
+                "isSystemSpeechAvailable" -> {
+                    try {
+                        val isAvailable = SpeechRecognizer.isRecognitionAvailable(context)
+                        if (isAvailable) {
+                            result.success(true)
+                        } else {
+                            val intent = Intent(RecognitionService.SERVICE_INTERFACE)
+                            val resolveInfos = packageManager.queryIntentServices(intent, 0)
+                            result.success(resolveInfos.isNotEmpty())
+                        }
+                    } catch (e: Exception) {
+                        result.success(false)
                     }
-                } catch (e: Exception) {
-                    result.success(false)
                 }
-            } else {
-                result.notImplemented()
+                "getBestSpeechComponent" -> {
+                    try {
+                        val component = findBestSpeechComponent()
+                        if (component != null) {
+                            result.success(mapOf(
+                                "packageName" to component.packageName,
+                                "className" to component.className
+                            ))
+                        } else {
+                            result.success(null)
+                        }
+                    } catch (e: Exception) {
+                        result.success(null)
+                    }
+                }
+                else -> result.notImplemented()
             }
         }
+    }
+
+    private fun findBestSpeechComponent(): android.content.ComponentName? {
+        val intent = Intent(RecognitionService.SERVICE_INTERFACE)
+        val resolveInfos = packageManager.queryIntentServices(intent, 0)
+        if (resolveInfos.isEmpty()) return null
+
+        val priorityPackages = listOf(
+            "com.google.android.googlequicksearchbox", // Google GMS
+            "com.xiaomi.speech",                       // Xiaomi / HyperOS / MIUI
+            "com.miui.voiceassist",
+            "com.huawei.vassistant",                    // Huawei / HarmonyOS
+            "com.hihonor.vassistant",                   // Honor
+            "com.coloros.speech",                       // OPPO / ColorOS
+            "com.heytap.speech",
+            "com.vivo.speech",                          // Vivo / OriginOS
+            "com.vivo.vba",
+            "com.iflytek.speechcloud",                  // iFlytek
+            "com.baidu.speech"                          // Baidu
+        )
+
+        for (pkg in priorityPackages) {
+            val match = resolveInfos.firstOrNull { it.serviceInfo.packageName == pkg }
+            if (match != null) {
+                return android.content.ComponentName(match.serviceInfo.packageName, match.serviceInfo.name)
+            }
+        }
+
+        val first = resolveInfos.first()
+        return android.content.ComponentName(first.serviceInfo.packageName, first.serviceInfo.name)
     }
 }
