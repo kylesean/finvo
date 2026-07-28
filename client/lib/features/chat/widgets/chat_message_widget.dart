@@ -229,7 +229,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
       curve: Curves.easeOut,
       alignment: Alignment.topLeft,
       child: GptMarkdownTheme(
-        gptThemeData: _gptThemeData(context, theme),
+        gptThemeData: _gptThemeData(theme),
         child: GptMarkdown(
           _processContent(text),
           style: TextStyle(
@@ -436,14 +436,14 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   }
 
   /// Get Markdown theme configuration
-  GptMarkdownThemeData _gptThemeData(BuildContext context, FThemeData theme) {
+  GptMarkdownThemeData _gptThemeData(FThemeData theme) {
     final fallbacks = AppFontConfig.getGlobalFontFallbacks();
     final family = AppFontConfig.primaryFontFamily;
     // MiSansVF is a variable font; the wght axis faithfully applies font weight.
     // Headings already differentiate hierarchy via font size + color; weight stays
     // lightweight to match the harmonious feel of MiSans-L3 (static light).
     return GptMarkdownThemeData(
-      brightness: Theme.of(context).brightness,
+      brightness: theme.colors.brightness,
       h1: TextStyle(
         fontSize: 28,
         color: theme.colors.primary,

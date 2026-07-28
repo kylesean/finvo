@@ -1,6 +1,7 @@
 // features/chat/widgets/ai_thinking_indicator.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 class AiThinkingIndicator extends StatefulWidget {
   final double dotSize;
@@ -69,9 +70,9 @@ class _AiThinkingIndicatorState extends State<AiThinkingIndicator>
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     final color =
-        widget.dotColor ??
-        Theme.of(context).colorScheme.primary.withValues(alpha: 0.8);
+        widget.dotColor ?? theme.colors.primary.withValues(alpha: 0.8);
 
     // If there is thinking text, display text + animation dots
     if (widget.thinkingText.isNotEmpty) {
@@ -81,11 +82,8 @@ class _AiThinkingIndicatorState extends State<AiThinkingIndicator>
         children: [
           Text(
             widget.thinkingText,
-            style: TextStyle(
-              fontSize: 13, // Slightly smaller font
-              color: Theme.of(
-                context,
-              ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+            style: theme.typography.body.xs.copyWith(
+              color: theme.colors.mutedForeground.withValues(alpha: 0.7),
               fontStyle: FontStyle.italic,
             ),
           ),

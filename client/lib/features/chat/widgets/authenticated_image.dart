@@ -1,6 +1,7 @@
 // features/chat/widgets/authenticated_image.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forui/forui.dart';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'dart:async';
@@ -111,7 +112,7 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
       return Center(
         child: Icon(
           Icons.error_outline,
-          color: Theme.of(context).colorScheme.error,
+          color: context.theme.colors.destructive,
         ),
       );
     }
