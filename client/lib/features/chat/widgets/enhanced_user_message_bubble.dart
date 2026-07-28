@@ -16,6 +16,7 @@ import '../providers/chat_history_provider.dart';
 import '../services/data_uri_service.dart';
 import 'authenticated_image.dart';
 import '../services/genui_cache_service.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// User message bubble widget
 /// Supports displaying text and multimedia attachments
@@ -74,7 +75,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = context.theme;
     final attachments = widget.message.attachments;
     final hasMediaFiles = widget.message.mediaFiles.isNotEmpty;
     final hasText = widget.message.content.isNotEmpty;
@@ -136,7 +137,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     );
   }
 
-  Widget _buildAttachmentsSection(ThemeData theme) {
+  Widget _buildAttachmentsSection(FThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -148,7 +149,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
 
   Widget _buildAttachmentItem(
     ChatMessageAttachment attachment,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     if (attachment.isPreviewable) {
       return _buildAttachmentImage(attachment, theme);
@@ -158,7 +159,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
 
   Widget _buildAttachmentImage(
     ChatMessageAttachment attachment,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -182,7 +183,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   /// - Only show skeleton or error based on status when no data is available
   Widget _buildAttachmentImageContent(
     ChatMessageAttachment attachment,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     final url = attachment.signedUrl;
 
@@ -214,7 +215,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   Widget _renderBase64Image(
     ChatMessageAttachment attachment,
     String dataUri,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     try {
       final bytes = _getImageBytesFromDataUri(dataUri);
@@ -240,7 +241,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   /// Render network image (with authentication)
   Widget _renderNetworkImage(
     ChatMessageAttachment attachment,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     return Hero(
       tag: 'history_attachment_${attachment.id}',
@@ -279,7 +280,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
 
   Widget _buildAttachmentFileTile(
     ChatMessageAttachment attachment,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     switch (attachment.status) {
       case AttachmentLoadStatus.initial:
@@ -288,9 +289,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
           margin: const EdgeInsets.only(bottom: 8),
           height: 60,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.3,
-            ),
+            color: theme.colors.muted.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
           ),
           child: _buildAttachmentSkeleton(theme),
@@ -311,9 +310,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.3,
-              ),
+              color: theme.colors.muted.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -336,9 +333,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
                     children: [
                       Text(
                         attachment.filename,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTitle(theme),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -347,9 +342,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
                         attachment.fileExtension.isEmpty
                             ? ''
                             : attachment.fileExtension.toUpperCase(),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontSize: 11,
-                        ),
+                        style: theme.typography.body.sm.copyWith(fontSize: 11),
                       ),
                     ],
                   ),
@@ -359,7 +352,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
                   Icon(
                     FLucideIcons.externalLink,
                     size: 18,
-                    color: theme.colorScheme.primary,
+                    color: theme.colors.primary,
                   ),
                 ],
               ],
@@ -369,11 +362,9 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     }
   }
 
-  Widget _buildAttachmentSkeleton(ThemeData theme) {
-    final baseColor = theme.colorScheme.surfaceContainerHighest.withValues(
-      alpha: 0.35,
-    );
-    final highlightColor = theme.colorScheme.surface.withValues(alpha: 0.6);
+  Widget _buildAttachmentSkeleton(FThemeData theme) {
+    final baseColor = theme.colors.muted.withValues(alpha: 0.35);
+    final highlightColor = theme.colors.background.withValues(alpha: 0.6);
 
     return Shimmer.fromColors(
       baseColor: baseColor,
@@ -381,9 +372,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
       child: SizedBox.expand(
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.5,
-            ),
+            color: theme.colors.muted.withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -391,7 +380,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   }
 
   Widget _buildAttachmentError(
-    ThemeData theme,
+    FThemeData theme,
     ChatMessageAttachment attachment,
   ) {
     final message =
@@ -402,7 +391,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.errorContainer,
+          color: theme.colors.destructive.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -410,17 +399,12 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
           children: [
             Icon(
               FLucideIcons.refreshCcw,
-              color: theme.colorScheme.onErrorContainer,
+              color: theme.colors.destructive,
               size: 18,
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                message,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onErrorContainer,
-                ),
-              ),
+              child: Text(message, style: AppTextStyles.destructiveText(theme)),
             ),
           ],
         ),
@@ -428,11 +412,11 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     );
   }
 
-  Widget _buildTextBubble(ThemeData theme) {
+  Widget _buildTextBubble(FThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
+        color: theme.colors.primary,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(4),
@@ -441,7 +425,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+            color: theme.colors.foreground.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -449,8 +433,8 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
       ),
       child: Text(
         widget.message.content,
-        style: theme.textTheme.bodyLarge?.copyWith(
-          color: theme.colorScheme.onPrimary,
+        style: AppTextStyles.formValue(theme).copyWith(
+          color: theme.colors.primaryForeground,
           fontSize: 15,
           height: 1.4,
         ),
@@ -458,7 +442,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     );
   }
 
-  Widget _buildMediaFilesPreview(BuildContext context, ThemeData theme) {
+  Widget _buildMediaFilesPreview(BuildContext context, FThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -469,7 +453,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               '${widget.message.mediaFiles.length} files total',
-              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+              style: AppTextStyles.detailLabel(theme).copyWith(fontSize: 11),
             ),
           ),
       ],
@@ -479,7 +463,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   Widget _buildMediaFileItem(
     BuildContext context,
     DataUriFile file,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     final fileCategory = DataUriService.getFileCategory(file.originalName);
 
@@ -493,7 +477,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   Widget _buildImagePreview(
     BuildContext context,
     DataUriFile file,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     final cacheKey = _mediaCacheKey(file);
 
@@ -535,7 +519,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     BuildContext context,
     DataUriFile file,
     String fileCategory,
-    ThemeData theme,
+    FThemeData theme,
   ) {
     final formattedSize = DataUriService.formatFileSize(file.size);
 
@@ -564,16 +548,16 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
               children: [
                 Text(
                   file.originalName,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.listTitle(theme),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '$formattedSize · ${fileCategory.toUpperCase()}',
-                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                  style: AppTextStyles.detailLabel(
+                    theme,
+                  ).copyWith(fontSize: 11),
                 ),
               ],
             ),
@@ -666,7 +650,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     return base64Decode(base64String);
   }
 
-  Color _getFileTypeColor(String fileCategory, ThemeData theme) {
+  Color _getFileTypeColor(String fileCategory, FThemeData theme) {
     switch (fileCategory) {
       case 'image':
         return Colors.blue;
@@ -677,7 +661,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
       case 'audio':
         return Colors.orange;
       default:
-        return theme.colorScheme.onSurfaceVariant;
+        return theme.colors.mutedForeground;
     }
   }
 

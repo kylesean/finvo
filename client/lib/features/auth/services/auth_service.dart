@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/network/network_client.dart';
 import 'package:finvo/features/auth/models/user.dart';
 import 'package:finvo/core/utils/map_require.dart';
-import '../../../core/services/timezone_service.dart';
+import '../../../shared/services/timezone_service.dart';
 
 class AuthService {
   final NetworkClient _networkClient;
@@ -154,7 +154,7 @@ class AuthService {
       method: HttpMethod.post,
       data: {'account': account, 'type': 'email'},
     );
-    _logger.info("Verification code sent to $account (API call successful)");
+    _logger.info('Verification code sent to $account (API call successful)');
   }
 
   // User registration

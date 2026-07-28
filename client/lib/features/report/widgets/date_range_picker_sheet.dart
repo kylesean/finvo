@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
-import '../../../core/widgets/app_calendar.dart';
+import '../../../shared/widgets/app_calendar.dart';
 import '../../../i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 

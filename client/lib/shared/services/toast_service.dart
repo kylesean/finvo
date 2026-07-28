@@ -1,7 +1,7 @@
 // shared/services/toast_service.dart
 import 'package:flutter/material.dart';
 import '../../app/router/app_router.dart';
-import '../../core/widgets/top_toast.dart';
+import '../widgets/top_toast.dart';
 
 class ToastService {
   ToastService._(); // Private constructor
@@ -21,7 +21,7 @@ class ToastService {
     if (context == null) return;
 
     final String message =
-        _extractText(description) ?? _extractText(title) ?? "Success";
+        _extractText(description) ?? _extractText(title) ?? 'Success';
     TopToast.info(context, message, overlay: _overlay);
   }
 
@@ -35,7 +35,7 @@ class ToastService {
     if (context == null) return;
 
     final String message =
-        _extractText(description) ?? _extractText(title) ?? "Success";
+        _extractText(description) ?? _extractText(title) ?? 'Success';
     TopToast.success(context, message, overlay: _overlay);
   }
 
@@ -49,7 +49,7 @@ class ToastService {
     if (context == null) return;
 
     final String message =
-        _extractText(description) ?? _extractText(title) ?? "Error";
+        _extractText(description) ?? _extractText(title) ?? 'Error';
     TopToast.error(context, message, overlay: _overlay);
   }
 
@@ -63,7 +63,7 @@ class ToastService {
     if (context == null) return;
 
     final String message =
-        _extractText(description) ?? _extractText(title) ?? "Warning";
+        _extractText(description) ?? _extractText(title) ?? 'Warning';
     TopToast.warning(context, message, overlay: _overlay);
   }
 
@@ -77,10 +77,10 @@ class ToastService {
     if (widget is Center) return _extractText(widget.child);
     if (widget is Padding) return _extractText(widget.child);
     if (widget is Column) {
-      return widget.children.map(_extractText).whereType<String>().join(" ");
+      return widget.children.map(_extractText).whereType<String>().join(' ');
     }
     if (widget is Row) {
-      return widget.children.map(_extractText).whereType<String>().join(" ");
+      return widget.children.map(_extractText).whereType<String>().join(' ');
     }
     return null;
   }

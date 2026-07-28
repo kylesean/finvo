@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:finvo/core/widgets/top_toast.dart'; // Import forui
+import 'package:finvo/shared/widgets/top_toast.dart'; // Import forui
 import 'package:finvo/i18n/strings.g.dart';
 
 // Assuming these Providers are imported from outside
@@ -47,7 +47,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
         if (currentReplyingToName != null && repliedToComment != null) {
           // When pre-filling, could consider showing reply chain, e.g., "@UserA > @UserB"
           // But for simplicity, we still only show the directly replied username
-          final newText = "@$currentReplyingToName ";
+          final newText = '@$currentReplyingToName ';
           _commentController.value = TextEditingValue(
             text: newText,
             selection: TextSelection.collapsed(offset: newText.length),

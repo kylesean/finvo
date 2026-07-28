@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:rrule/rrule.dart' as rrule_lib;
-import 'package:finvo/core/widgets/app_calendar.dart';
+import 'package:finvo/shared/widgets/app_calendar.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
