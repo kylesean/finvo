@@ -71,8 +71,8 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       _cleanupCurrentService();
     }
 
-    // Only create new service on first init or service type change
-    if (isFirstInit || serviceTypeChanged) {
+    // Only create new service if not created yet or service type changed
+    if (_speechService == null || serviceTypeChanged) {
       _serviceType = newServiceType;
       _speechService = SpeechServiceFactory.create(
         newServiceType,

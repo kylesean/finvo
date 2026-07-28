@@ -53,9 +53,13 @@ class UserAvatar extends ConsumerWidget {
     );
 
     final baseUrl = ref.read(apiConstantsProvider).baseUrl;
+    final isUuid = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    ).hasMatch(userId);
+
     final Widget content;
-    if (baseUrl.isEmpty) {
-      // Server not configured yet (setup screen) — show the local identicon.
+    if (baseUrl.isEmpty || !isUuid) {
+      // Server not configured yet or non-UUID seed (e.g. bot avatar) — show the local identicon.
       content = fallback;
     } else {
       var url = '$baseUrl/avatars/$userId';
