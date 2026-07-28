@@ -148,7 +148,6 @@ class _FinancialAccountAddPageState
               controller: _nameController,
               style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
-                fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 hintText: _getDefaultName(definition),
@@ -202,7 +201,6 @@ class _FinancialAccountAddPageState
               ],
               style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
-                fontWeight: FontWeight.w500,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
               decoration: InputDecoration(
@@ -342,7 +340,6 @@ class _FinancialAccountAddPageState
                     value,
                     style: theme.typography.body.md.copyWith(
                       color: colors.foreground,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

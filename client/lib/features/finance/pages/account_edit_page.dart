@@ -157,7 +157,6 @@ class _FinancialAccountEditPageState
               controller: _nameController,
               style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
-                fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 hintText: t.account.nameHint,
@@ -211,7 +210,6 @@ class _FinancialAccountEditPageState
               ],
               style: theme.typography.body.md.copyWith(
                 color: colors.foreground,
-                fontWeight: FontWeight.w500,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
               decoration: InputDecoration(
@@ -347,7 +345,6 @@ class _FinancialAccountEditPageState
                     value,
                     style: theme.typography.body.md.copyWith(
                       color: colors.foreground,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
