@@ -6,6 +6,7 @@ import 'package:forui/forui.dart';
 import '../models/account_type_definition.dart';
 import 'account_add_page.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class AccountTypePickerPage extends ConsumerWidget {
   const AccountTypePickerPage({super.key});
@@ -35,10 +36,7 @@ class AccountTypePickerPage extends ConsumerWidget {
         centerTitle: true,
         title: Text(
           t.account.selectTypeTitle,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
+          style: AppTextStyles.pageTitle(theme),
         ),
       ),
       body: ListView(
@@ -50,10 +48,7 @@ class AccountTypePickerPage extends ConsumerWidget {
               padding: const EdgeInsets.only(top: 16, bottom: 12),
               child: Text(
                 entry.key.displayName,
-                style: theme.typography.body.sm.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.mutedForeground,
-                ),
+                style: AppTextStyles.sectionHeader(theme),
               ),
             ),
             // Grid of account types
@@ -172,10 +167,7 @@ class _AccountTypeCard extends StatelessWidget {
             // Title - use Flexible to prevent overflow
             Text(
               title,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTitle(theme),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -184,10 +176,7 @@ class _AccountTypeCard extends StatelessWidget {
             Expanded(
               child: Text(
                 subtitle,
-                style: theme.typography.body.xs.copyWith(
-                  color: colors.mutedForeground,
-                  height: 1.3,
-                ),
+                style: AppTextStyles.detailLabel(theme).copyWith(height: 1.3),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

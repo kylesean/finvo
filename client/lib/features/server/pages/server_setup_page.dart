@@ -10,6 +10,7 @@ import 'dart:async';
 import '../providers/server_config_provider.dart';
 import '../../../core/services/server_config_service.dart';
 import '../../../i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 final _logger = Logger('ServerSetupPage');
 
@@ -145,10 +146,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
               centerTitle: true,
               title: Text(
                 t.server.title,
-                style: theme.typography.body.xl.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: theme.colors.foreground,
-                ),
+                style: AppTextStyles.pageTitleLarge(theme),
               ),
             )
           : null,
@@ -177,9 +175,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
                   // Title
                   Text(
                     t.server.title,
-                    style: theme.typography.body.xl2.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTextStyles.listTitle(theme),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
@@ -329,12 +325,7 @@ class _ConnectionStatusCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: theme.typography.body.sm.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text(title, style: AppTextStyles.listTrailing(theme)),
                 if (subtitle != null)
                   Text(
                     subtitle!,

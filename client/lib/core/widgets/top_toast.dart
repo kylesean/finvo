@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Toast type
 enum ToastType { success, error, warning, info }
@@ -258,10 +259,7 @@ class _TopToastWidgetState extends State<_TopToastWidget>
                     Expanded(
                       child: Text(
                         widget.message,
-                        style: widget.theme.typography.body.sm.copyWith(
-                          color: colors.foreground,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTrailing(widget.theme),
                       ),
                     ),
                     Icon(

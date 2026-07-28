@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ThemePreview extends StatelessWidget {
   final bool isDark;
@@ -118,8 +119,7 @@ class ThemePreview extends StatelessWidget {
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: theme.typography.body.sm.copyWith(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  style: AppTextStyles.listTrailing(theme).copyWith(
                     color: isSelected
                         ? colorScheme.primary
                         : colorScheme.foreground,

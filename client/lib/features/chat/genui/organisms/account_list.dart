@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../molecules/molecules.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A container widget for displaying a list of accounts
 ///
@@ -53,20 +54,12 @@ class AccountList extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title!,
-                style: theme.typography.body.sm.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.foreground,
-                ),
-              ),
+              Text(title!, style: AppTextStyles.listTrailing(theme)),
               Text(
                 t.chat.genui.transactionGroupReceipt.count(
                   count: accounts.length.toString(),
                 ),
-                style: theme.typography.body.xs.copyWith(
-                  color: colors.mutedForeground,
-                ),
+                style: AppTextStyles.detailLabel(theme),
               ),
             ],
           ),

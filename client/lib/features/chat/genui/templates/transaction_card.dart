@@ -18,6 +18,7 @@ import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class TransactionCard extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
@@ -168,10 +169,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           const SizedBox(width: 8),
           Text(
             t.chat.genui.transactionCard.title,
-            style: theme.typography.body.md.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.actionText(theme),
           ),
           const Spacer(),
           Text(
@@ -210,9 +208,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           const SizedBox(height: 8),
           Text(
             category,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
             textAlign: TextAlign.center,
           ),
 
@@ -327,10 +323,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             Flexible(
               child: Text(
                 label,
-                style: theme.typography.body.sm.copyWith(
-                  color: isActive ? activeColor : colors.mutedForeground,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                ),
+                style: AppTextStyles.sectionHeader(theme),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -525,9 +518,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           children: [
             Text(
               t.chat.genui.transactionCard.selectSpace,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
             const SizedBox(height: 16),
             Flexible(

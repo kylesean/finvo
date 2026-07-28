@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 final _logger = Logger('GenUiErrorBoundary');
 
@@ -126,16 +127,11 @@ class _FallbackWidget extends StatelessWidget {
                   children: [
                     Text(
                       'Component failed to load',
-                      style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colors.destructive,
-                      ),
+                      style: AppTextStyles.destructiveText(theme),
                     ),
                     Text(
                       componentName,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.detailLabel(theme),
                     ),
                   ],
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Budget creation success receipt card
 ///
@@ -106,10 +107,7 @@ class BudgetReceipt extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             t.chat.genui.budgetReceipt.budgetCreated,
-            style: theme.typography.body.md.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.actionText(theme),
           ),
           const Spacer(),
           Text(
@@ -168,9 +166,7 @@ class BudgetReceipt extends StatelessWidget {
           // Budget name
           Text(
             name,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
             textAlign: TextAlign.center,
           ),
 
@@ -183,13 +179,7 @@ class BudgetReceipt extends StatelessWidget {
                 color: colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
-                categoryKey,
-                style: theme.typography.body.xs.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text(categoryKey, style: AppTextStyles.badge(theme)),
             ),
           ],
         ],
@@ -216,12 +206,7 @@ class BudgetReceipt extends StatelessWidget {
           Icon(FLucideIcons.calendar, size: 14, color: colors.mutedForeground),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
-              periodText,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
-            ),
+            child: Text(periodText, style: AppTextStyles.listSubtitle(theme)),
           ),
           if (rolloverEnabled) ...[
             Container(
@@ -241,10 +226,7 @@ class BudgetReceipt extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     t.chat.genui.budgetReceipt.rolloverBudget,
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyles.badge(theme),
                   ),
                 ],
               ),

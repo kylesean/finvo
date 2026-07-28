@@ -13,6 +13,7 @@ import '../providers/budget_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class BudgetOverviewPage extends ConsumerStatefulWidget {
   const BudgetOverviewPage({super.key});
@@ -47,13 +48,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text(
-          t.budget.title,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
-        ),
+        title: Text(t.budget.title, style: AppTextStyles.pageTitle(theme)),
         centerTitle: true,
         backgroundColor: colors.background,
         elevation: 0,
@@ -208,20 +203,12 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
               color: colors.destructive,
             ),
             const SizedBox(height: 16),
-            Text(
-              t.budget.loadFailed,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
-            ),
+            Text(t.budget.loadFailed, style: AppTextStyles.pageTitle(theme)),
             const SizedBox(height: 8),
             Text(
               error,
               textAlign: TextAlign.center,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -307,10 +294,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
             children: [
               Text(
                 budget.displayName,
-                style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.primaryForeground,
-                ),
+                style: AppTextStyles.statValueOnDark(theme),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -347,10 +331,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                     const SizedBox(height: 4),
                     Text(
                       '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
-                      style: theme.typography.body.xl2.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colors.primaryForeground,
-                      ),
+                      style: AppTextStyles.statValueOnDark(theme),
                     ),
                   ],
                 ),
@@ -367,10 +348,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   const SizedBox(height: 4),
                   Text(
                     '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount)}',
-                    style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.primaryForeground,
-                    ),
+                    style: AppTextStyles.statValueOnDark(theme),
                   ),
                 ],
               ),
@@ -437,10 +415,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
             children: [
               Text(
                 t.budget.monthlySummary,
-                style: theme.typography.body.md.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.foreground,
-                ),
+                style: AppTextStyles.listTitle(theme),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -452,10 +427,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                 ),
                 child: Text(
                   '${usagePercent.toStringAsFixed(0)}%',
-                  style: theme.typography.body.sm.copyWith(
-                    color: isExceeded ? colors.destructive : colors.primary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.actionText(theme),
                 ),
               ),
             ],
@@ -509,19 +481,11 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: theme.typography.body.xs.copyWith(
-            color: colors.mutedForeground,
-          ),
-        ),
+        Text(label, style: AppTextStyles.detailLabel(theme)),
         const SizedBox(height: 4),
         Text(
           value,
-          style: theme.typography.body.md.copyWith(
-            fontWeight: FontWeight.w500,
-            color: valueColor,
-          ),
+          style: AppTextStyles.listTitle(theme).copyWith(color: valueColor),
         ),
       ],
     );
@@ -529,13 +493,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
 
   /// section header
   Widget _buildSectionHeader(FThemeData theme, FColors colors, String title) {
-    return Text(
-      title,
-      style: theme.typography.body.sm.copyWith(
-        fontWeight: FontWeight.w500,
-        color: colors.mutedForeground,
-      ),
-    );
+    return Text(title, style: AppTextStyles.sectionHeader(theme));
   }
 
   /// budget card
@@ -595,8 +553,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                           Flexible(
                             child: Text(
                               budget.displayName,
-                              style: theme.typography.body.md.copyWith(
-                                fontWeight: FontWeight.w500,
+                              style: AppTextStyles.listTitle(theme).copyWith(
                                 color: isPaused
                                     ? colors.mutedForeground
                                     : colors.foreground,
@@ -628,9 +585,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                       ),
                       Text(
                         _getCategoryDisplayName(budget.categoryKey),
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.detailLabel(theme),
                       ),
                     ],
                   ),
@@ -641,16 +596,13 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   children: [
                     Text(
                       '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
-                      style: theme.typography.body.md.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: statusColor,
-                      ),
+                      style: AppTextStyles.listTitle(
+                        theme,
+                      ).copyWith(color: statusColor),
                     ),
                     Text(
                       '$_currencySymbol${_formatAmount(budget.amount)}',
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.detailLabel(theme),
                     ),
                   ],
                 ),
@@ -680,9 +632,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   t.budget.usedPercent(
                     percent: usagePercent.toStringAsFixed(0),
                   ),
-                  style: theme.typography.body.xs.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.detailLabel(theme),
                 ),
                 Text(
                   budgetWithUsage.remainingAmount >= Decimal.zero
@@ -694,10 +644,9 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                           amount:
                               '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount.abs())}',
                         ),
-                  style: theme.typography.body.xs.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.statLabel(
+                    theme,
+                  ).copyWith(color: statusColor),
                 ),
               ],
             ),

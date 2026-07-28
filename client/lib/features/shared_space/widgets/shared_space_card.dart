@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import '../models/shared_space_models.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class SharedSpaceCard extends ConsumerWidget {
   final SharedSpace space;
@@ -95,10 +96,7 @@ class SharedSpaceCard extends ConsumerWidget {
                             children: [
                               Text(
                                 space.name,
-                                style: theme.typography.body.lg.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.foreground,
-                                ),
+                                style: AppTextStyles.pageTitle(theme),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -180,13 +178,7 @@ class SharedSpaceCard extends ConsumerWidget {
       children: [
         Icon(icon, size: 14, color: colorScheme.mutedForeground),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: theme.typography.body.xs.copyWith(
-            color: colorScheme.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(label, style: AppTextStyles.statLabel(theme)),
       ],
     );
   }
@@ -236,10 +228,7 @@ class SharedSpaceCard extends ConsumerWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: theme.typography.body.sm.copyWith(
-              color: fgColor,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.listTrailing(theme).copyWith(color: fgColor),
           ),
         ],
       ),

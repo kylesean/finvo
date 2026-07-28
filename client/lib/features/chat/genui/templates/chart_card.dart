@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Chart card Widget implementation
 class ChartCard extends StatelessWidget {
@@ -23,12 +24,7 @@ class ChartCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            data['title'] as String,
-            style: theme.typography.body.md.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(data['title'] as String, style: AppTextStyles.listTitle(theme)),
           const SizedBox(height: 16),
           Container(
             height: 200,
@@ -36,9 +32,7 @@ class ChartCard extends StatelessWidget {
             child: Text(
               'Chart type: ${data['chartType']}\n(Requires full fl_chart library implementation)',
               textAlign: TextAlign.center,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
           ),
         ],

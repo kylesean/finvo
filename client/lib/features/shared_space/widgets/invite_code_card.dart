@@ -7,6 +7,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import '../models/shared_space_models.dart';
 import '../../../shared/services/toast_service.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class InviteCodeCard extends StatelessWidget {
   final InviteCode inviteCode;
@@ -83,11 +84,9 @@ class InviteCodeCard extends StatelessWidget {
                   // Invite code
                   Text(
                     inviteCode.code,
-                    style: theme.typography.body.xl2.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                      fontFamily: 'monospace',
-                    ),
+                    style: AppTextStyles.listTitle(
+                      theme,
+                    ).copyWith(letterSpacing: 2),
                   ),
                   const SizedBox(height: 8),
 

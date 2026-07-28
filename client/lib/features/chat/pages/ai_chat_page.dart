@@ -20,6 +20,7 @@ import '../widgets/enhanced_user_message_bubble.dart';
 import '../widgets/chat_conversation_drawer.dart';
 import '../widgets/welcome/welcome_guide_widget.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class AIChatPage extends ConsumerStatefulWidget {
   final String? conversationId; // From GoRouter
@@ -368,10 +369,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
               Flexible(
                 child: Text(
                   ref.watch(conversationExpenseTitleProvider),
-                  style: theme.typography.body.xl.copyWith(
-                    // Since 3.44, Skia fallback selects NotoSansCJK (heavier strokes), reduce font weight by one level.
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.pageTitleLarge(theme),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

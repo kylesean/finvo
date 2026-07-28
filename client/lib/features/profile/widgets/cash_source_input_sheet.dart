@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
+import '../../../shared/theme/form_text_styles.dart';
 import '../models/financial_account.dart';
 import '../../finance/models/account_type_definition.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -99,9 +100,7 @@ class _FinancialAccountInputSheetState
                     const SizedBox(height: 6),
                     Text(
                       _getLocalizedSubtitle(definition),
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.listSubtitle(theme),
                     ),
                     if (_hasHelper(definition)) ...[
                       const SizedBox(height: 10),
@@ -116,10 +115,7 @@ class _FinancialAccountInputSheetState
                         ),
                         child: Text(
                           _getLocalizedHelper(definition),
-                          style: theme.typography.body.xs.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: colors.primary,
-                          ),
+                          style: AppTextStyles.badge(theme),
                         ),
                       ),
                     ],
@@ -142,9 +138,7 @@ class _FinancialAccountInputSheetState
                     if (showNameField) ...[
                       Text(
                         'Account Name',
-                        style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.formFieldLabel(theme),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
@@ -168,9 +162,7 @@ class _FinancialAccountInputSheetState
                     ],
                     Text(
                       'Current Balance',
-                      style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.formFieldLabel(theme),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -184,9 +176,7 @@ class _FinancialAccountInputSheetState
                           ),
                           child: Text(
                             '¥',
-                            style: theme.typography.body.sm.copyWith(
-                              color: colors.mutedForeground,
-                            ),
+                            style: AppTextStyles.listSubtitle(theme),
                           ),
                         ),
                       ),

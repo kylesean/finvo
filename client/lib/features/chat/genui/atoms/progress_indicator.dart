@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A progress indicator bar with themed styling
 ///
@@ -54,12 +55,7 @@ class ProgressIndicatorBar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (label != null) ...[
-          Text(
-            label!,
-            style: context.theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-            ),
-          ),
+          Text(label!, style: AppTextStyles.detailLabel(context.theme)),
           const SizedBox(height: 4),
         ],
         Container(

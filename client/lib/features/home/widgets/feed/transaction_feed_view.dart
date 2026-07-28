@@ -7,6 +7,7 @@ import 'package:finvo/features/home/widgets/feed/transaction_card.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class TransactionFeedView extends ConsumerStatefulWidget {
   final TransactionFeedType intendedFeedType;
@@ -243,9 +244,7 @@ class _TransactionFeedViewState extends ConsumerState<TransactionFeedView> {
               child: Center(
                 child: Text(
                   t.home.noMoreData,
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.listSubtitle(theme),
                 ),
               ),
             );

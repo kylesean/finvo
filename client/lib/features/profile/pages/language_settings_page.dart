@@ -5,6 +5,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 class LanguageSettingsPage extends ConsumerWidget {
@@ -33,10 +34,7 @@ class LanguageSettingsPage extends ConsumerWidget {
         ),
         title: Text(
           t.settings.languageSettings,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
+          style: AppTextStyles.pageTitle(theme),
         ),
         centerTitle: true,
       ),
@@ -52,10 +50,7 @@ class LanguageSettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
               child: Text(
                 t.settings.selectLanguage,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.mutedForeground,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.sectionHeader(theme),
               ),
             ),
 

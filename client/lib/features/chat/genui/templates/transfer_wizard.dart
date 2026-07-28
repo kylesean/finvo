@@ -9,6 +9,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
 import '../events/interaction_events.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Transfer wizard data model (Data Layer)
 class TransferWizardData {
@@ -258,9 +259,7 @@ class _TransferWizardState extends State<TransferWizard> {
         children: [
           Text(
             t.chat.transferWizard.amount,
-            style: theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.detailLabel(theme),
           ),
           const SizedBox(height: 4),
           Row(
@@ -449,12 +448,7 @@ class _TransferWizardState extends State<TransferWizard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          label,
-                          style: theme.typography.body.xs.copyWith(
-                            color: colors.mutedForeground,
-                          ),
-                        ),
+                        Text(label, style: AppTextStyles.detailLabel(theme)),
                         const SizedBox(height: 2),
                         Text(
                           account?['name'] as String? ??

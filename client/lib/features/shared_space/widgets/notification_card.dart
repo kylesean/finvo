@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../models/shared_space_models.dart';
 import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationModel notification;
@@ -66,8 +67,7 @@ class NotificationCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 notification.title,
-                                style: theme.typography.body.md.copyWith(
-                                  fontWeight: FontWeight.w500,
+                                style: AppTextStyles.listTitle(theme).copyWith(
                                   color: notification.isRead
                                       ? colors.mutedForeground
                                       : colors.foreground,
@@ -129,9 +129,7 @@ class NotificationCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     _formatDateTime(notification.createdAt),
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.listSubtitle(theme),
                   ),
                 ],
               ),

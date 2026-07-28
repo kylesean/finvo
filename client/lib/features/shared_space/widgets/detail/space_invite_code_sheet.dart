@@ -11,6 +11,7 @@ import '../../providers/shared_space_provider.dart';
 import '../../../notification/providers/notification_provider.dart';
 import '../../../../shared/services/toast_service.dart';
 import '../../../../core/network/exceptions/app_exception.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Bottom sheet that shows invite code for current space AND allows joining
 /// another space via invite code.
@@ -182,16 +183,12 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
               // ===== Section 1: Current space invite code =====
               Text(
                 t.sharedSpace.detail.inviteCode,
-                style: theme.typography.body.xl.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTextStyles.pageTitleLarge(theme),
               ),
               const SizedBox(height: 8),
               Text(
                 t.sharedSpace.inviteCard.subtitle,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.mutedForeground,
-                ),
+                style: AppTextStyles.listSubtitle(theme),
               ),
               const SizedBox(height: 20),
 
@@ -210,12 +207,7 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
                       color: colors.mutedForeground,
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      _error!,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.mutedForeground,
-                      ),
-                    ),
+                    Text(_error!, style: AppTextStyles.listSubtitle(theme)),
                     const SizedBox(height: 12),
                     FButton(
                       variant: .outline,
@@ -248,18 +240,14 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
                         children: [
                           Text(
                             _inviteCode!.code,
-                            style: theme.typography.body.xl3.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 4,
-                              color: colors.primary,
-                            ),
+                            style: AppTextStyles.actionText(
+                              theme,
+                            ).copyWith(letterSpacing: 4),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             t.sharedSpace.detail.validFor24h,
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.mutedForeground,
-                            ),
+                            style: AppTextStyles.detailLabel(theme),
                           ),
                         ],
                       ),
@@ -334,9 +322,7 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       t.sharedSpace.detail.joinOtherSpace,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.detailLabel(theme),
                     ),
                   ),
                   Expanded(child: Divider(color: colors.border)),

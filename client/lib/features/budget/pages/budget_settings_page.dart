@@ -9,6 +9,7 @@ import '../../../app/theme/app_semantic_colors.dart';
 import '../services/budget_service.dart';
 import '../models/budget_models.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class BudgetSettingsPage extends ConsumerStatefulWidget {
   const BudgetSettingsPage({super.key});
@@ -94,13 +95,7 @@ class _BudgetSettingsPageState extends ConsumerState<BudgetSettingsPage> {
             size: 20,
           ),
         ),
-        title: Text(
-          t.budget.settings,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
-        ),
+        title: Text(t.budget.settings, style: AppTextStyles.pageTitle(theme)),
         centerTitle: true,
       ),
       body: _isLoading
@@ -169,13 +164,7 @@ class _BudgetSettingsPageState extends ConsumerState<BudgetSettingsPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
-            ),
+            Text(label, style: AppTextStyles.listTitle(theme)),
             Text(
               '$value%',
               style: theme.typography.body.lg.copyWith(
@@ -186,12 +175,7 @@ class _BudgetSettingsPageState extends ConsumerState<BudgetSettingsPage> {
           ],
         ),
         const SizedBox(height: 4),
-        Text(
-          description,
-          style: theme.typography.body.xs.copyWith(
-            color: colors.mutedForeground,
-          ),
-        ),
+        Text(description, style: AppTextStyles.detailLabel(theme)),
         const SizedBox(height: 12),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(

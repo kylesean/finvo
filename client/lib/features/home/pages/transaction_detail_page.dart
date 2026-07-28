@@ -26,6 +26,7 @@ import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class TransactionDetailPage extends ConsumerWidget {
   final String transactionId;
@@ -81,9 +82,7 @@ class TransactionDetailPage extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Text(
                         detailState.errorMessage!,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.listSubtitle(theme),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
@@ -378,9 +377,7 @@ class TransactionDetailPage extends ConsumerWidget {
           Expanded(
             child: Text(
               t.transaction.transactionDetail,
-              style: theme.typography.body.xl2.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.listTitle(theme),
               textAlign: TextAlign.center, // Center the title
             ),
           ),
@@ -417,10 +414,7 @@ class TransactionDetailPage extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyles.sectionHeader(theme),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -532,10 +526,7 @@ class TransactionDetailPage extends ConsumerWidget {
             Flexible(
               child: Text(
                 label,
-                style: theme.typography.body.sm.copyWith(
-                  color: isActive ? activeColor : colors.mutedForeground,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                ),
+                style: AppTextStyles.sectionHeader(theme),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -708,9 +699,7 @@ class TransactionDetailPage extends ConsumerWidget {
             children: [
               Text(
                 t.transaction.selectLinkedSpace,
-                style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.listTitle(theme),
               ),
               const SizedBox(height: 16),
               Flexible(

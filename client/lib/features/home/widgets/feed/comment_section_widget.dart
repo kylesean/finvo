@@ -7,6 +7,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import '../../models/comment_model.dart';
 import '../../providers/comment_providers.dart';
 import 'comment_item_widget.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class CommentSectionWidget extends ConsumerWidget {
   final String transactionId;
@@ -33,9 +34,7 @@ class CommentSectionWidget extends ConsumerWidget {
           ),
           child: Text(
             t.comment.note,
-            style: theme.typography.body.xl.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.pageTitleLarge(theme),
           ),
         ),
         commentsAsyncValue.when(

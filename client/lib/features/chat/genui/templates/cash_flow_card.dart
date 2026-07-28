@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Cash Flow Analysis Card - GenUI Template
 ///
@@ -99,10 +100,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               Text(
                                 widget.data['title'] as String? ??
                                     t.chat.genui.cashFlowCard.title,
-                                style: theme.typography.body.md.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: colors.foreground,
-                                ),
+                                style: AppTextStyles.listTitle(theme),
                               ),
                               const SizedBox(height: 2),
                               Row(
@@ -135,12 +133,12 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                                       t.chat.genui.cashFlowCard.savingsRate(
                                         rate: savingsRate.toStringAsFixed(0),
                                       ),
-                                      style: theme.typography.body.xs.copyWith(
-                                        color: isPositive
-                                            ? amountTheme.incomeColor
-                                            : amountTheme.expenseColor,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      style: AppTextStyles.statLabel(theme)
+                                          .copyWith(
+                                            color: isPositive
+                                                ? amountTheme.incomeColor
+                                                : amountTheme.expenseColor,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -252,10 +250,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                                   const SizedBox(width: 6),
                                   Text(
                                     t.chat.genui.cashFlowCard.aiInsight,
-                                    style: theme.typography.body.xs.copyWith(
-                                      color: colors.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: AppTextStyles.badge(theme),
                                   ),
                                 ],
                               ),
@@ -306,22 +301,14 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-            ),
-          ),
+          Text(label, style: AppTextStyles.detailLabel(theme)),
           const SizedBox(height: 4),
           Row(
             children: [
               Flexible(
                 child: Text(
                   value,
-                  style: theme.typography.body.sm.copyWith(
-                    color: valueColor ?? colors.foreground,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.listTrailing(theme),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),

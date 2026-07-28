@@ -7,6 +7,7 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../../services/genui_cache_service.dart';
 import '../events/interaction_events.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// SpaceSelectorCard Data Layer
 class SpaceSelectorData {
@@ -218,9 +219,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
           Expanded(
             child: Text(
               _model.message!,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
           ),
         ],
@@ -241,9 +240,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
         child: Center(
           child: Text(
             t.chat.genui.transactionCard.noSpace,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
         ),
       );
@@ -362,13 +359,12 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
                           ),
                           child: Text(
                             _getRoleLabel(role),
-                            style: theme.typography.body.xs.copyWith(
+                            style: AppTextStyles.statLabel(theme).copyWith(
                               color: _getRoleColor(
                                 role,
                                 colors,
                                 theme.semantic,
                               ),
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -379,9 +375,7 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.detailLabel(theme),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

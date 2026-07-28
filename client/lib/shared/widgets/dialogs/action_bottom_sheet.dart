@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../models/action_item_model.dart';
 import 'package:forui/forui.dart'; // 1. Import forui
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ActionBottomSheet extends StatelessWidget {
   final List<ActionItem> actions;
@@ -57,11 +58,10 @@ class ActionBottomSheet extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.title,
-                    style: theme.typography.body.md.copyWith(
+                    style: AppTextStyles.listTitle(theme).copyWith(
                       color: isDestructive
                           ? destructiveItemColor
                           : (item.color ?? itemTextColor),
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),

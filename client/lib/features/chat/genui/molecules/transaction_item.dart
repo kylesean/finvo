@@ -5,6 +5,7 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import '../atoms/atoms.dart';
 import '../utils/formatters.dart';
 import '../utils/theme_helpers.dart' as helpers;
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A compact transaction item for lists
 ///
@@ -87,19 +88,14 @@ class TransactionItem extends ConsumerWidget {
                 children: [
                   Text(
                     description,
-                    style: theme.typography.body.md.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.foreground,
-                    ),
+                    style: AppTextStyles.listTitle(theme),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (showTime && timestamp != null)
                     Text(
                       formatRelativeTime(timestamp),
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.detailLabel(theme),
                     ),
                 ],
               ),

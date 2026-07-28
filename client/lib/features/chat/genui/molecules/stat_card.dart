@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import '../atoms/atoms.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class StatCard extends ConsumerWidget {
   /// Card title
@@ -70,12 +71,7 @@ class StatCard extends ConsumerWidget {
               if (icon != null) IconBadge(icon: icon!, size: 36),
               if (icon != null) const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  title,
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
-                ),
+                child: Text(title, style: AppTextStyles.listSubtitle(theme)),
               ),
               if (trendUp != null)
                 Icon(
@@ -94,19 +90,10 @@ class StatCard extends ConsumerWidget {
             AmountDisplay(
               amount: value,
               currency: displayCurrency,
-              style: theme.typography.body.xl2.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.statValue(theme),
             )
           else
-            Text(
-              value.toString(),
-              style: theme.typography.body.xl2.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colors.foreground,
-              ),
-            ),
+            Text(value.toString(), style: AppTextStyles.statValue(theme)),
 
           // Subtitle
           if (subtitle != null) ...[

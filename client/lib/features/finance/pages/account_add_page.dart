@@ -8,6 +8,7 @@ import 'package:forui/forui.dart';
 import '../../profile/models/financial_account.dart';
 import '../models/account_type_definition.dart';
 import '../../../shared/models/currency.dart';
+import '../../../shared/theme/form_text_styles.dart';
 import '../widgets/currency_selection_sheet.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
@@ -88,13 +89,7 @@ class _FinancialAccountAddPageState
         ),
         titleSpacing: 0,
         centerTitle: true,
-        title: Text(
-          t.account.addTitle,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
-        ),
+        title: Text(t.account.addTitle, style: AppTextStyles.pageTitle(theme)),
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -146,9 +141,7 @@ class _FinancialAccountAddPageState
             label: t.account.nameLabel,
             child: TextField(
               controller: _nameController,
-              style: theme.typography.body.md.copyWith(
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.formValue(theme),
               decoration: InputDecoration(
                 hintText: _getDefaultName(definition),
                 hintStyle: theme.typography.body.md.copyWith(
@@ -182,11 +175,7 @@ class _FinancialAccountAddPageState
                 fit: BoxFit.contain,
                 child: Text(
                   _selectedCurrency.symbol,
-                  style: theme.typography.body.xl2.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: colors.primary,
-                    height: 1.0,
-                  ),
+                  style: AppTextStyles.actionText(theme).copyWith(height: 1.0),
                 ),
               ),
             ),
@@ -199,10 +188,7 @@ class _FinancialAccountAddPageState
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
               ],
-              style: theme.typography.body.md.copyWith(
-                color: colors.foreground,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+              style: AppTextStyles.formValueNumeric(theme),
               decoration: InputDecoration(
                 hintText: '0.00',
                 hintStyle: theme.typography.body.md.copyWith(
@@ -290,12 +276,7 @@ class _FinancialAccountAddPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  label,
-                  style: theme.typography.body.xs.copyWith(
-                    color: colors.mutedForeground,
-                  ),
-                ),
+                Text(label, style: AppTextStyles.formLabel(theme)),
                 const SizedBox(height: 2),
                 child,
               ],
@@ -329,19 +310,9 @@ class _FinancialAccountAddPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    label,
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.mutedForeground,
-                    ),
-                  ),
+                  Text(label, style: AppTextStyles.formLabel(theme)),
                   const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: theme.typography.body.md.copyWith(
-                      color: colors.foreground,
-                    ),
-                  ),
+                  Text(value, style: AppTextStyles.formValue(theme)),
                 ],
               ),
             ),
@@ -381,19 +352,8 @@ class _FinancialAccountAddPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    title,
-                    style: theme.typography.body.md.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.foreground,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.mutedForeground,
-                    ),
-                  ),
+                  Text(title, style: AppTextStyles.switchTitle(theme)),
+                  Text(subtitle, style: AppTextStyles.switchSubtitle(theme)),
                 ],
               ),
             ),

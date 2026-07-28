@@ -16,6 +16,7 @@ import 'package:finvo/core/constants/category_constants.dart';
 
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// TransactionCard
 class TransactionCard extends ConsumerWidget {
@@ -210,9 +211,7 @@ class TransactionCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             _getCategoryDisplayName(transaction),
-                            style: theme.typography.body.md.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppTextStyles.listTitle(theme),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -242,17 +241,13 @@ class TransactionCard extends ConsumerWidget {
                               : Text(
                                   transaction.paymentMethod ??
                                       t.transaction.expense,
-                                  style: theme.typography.body.sm.copyWith(
-                                    color: colors.mutedForeground,
-                                  ),
+                                  style: AppTextStyles.listSubtitle(theme),
                                 ),
                         ),
                         // Time display
                         Text(
                           _getTimeDisplay(transaction.timestamp),
-                          style: theme.typography.body.xs.copyWith(
-                            color: colors.mutedForeground,
-                          ),
+                          style: AppTextStyles.detailLabel(theme),
                         ),
                       ],
                     ),
@@ -283,23 +278,12 @@ class TransactionCard extends ConsumerWidget {
                 color: colors.secondary,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Text(
-                tag,
-                style: theme.typography.body.xs.copyWith(
-                  color: colors.foreground,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text(tag, style: AppTextStyles.detailLabel(theme)),
             ),
           ),
         ),
         if (extraCount > 0)
-          Text(
-            '+$extraCount',
-            style: theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-            ),
-          ),
+          Text('+$extraCount', style: AppTextStyles.detailLabel(theme)),
       ],
     );
   }

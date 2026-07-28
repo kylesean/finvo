@@ -8,6 +8,7 @@ import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../models/notification_item.dart';
 import '../providers/notification_provider.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class NotificationCenterPage extends ConsumerStatefulWidget {
   const NotificationCenterPage({super.key});
@@ -105,9 +106,7 @@ class _NotificationCenterPageState
             const SizedBox(height: 12),
             Text(
               '${t.notification.loadFailed}: ${state.error}',
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
             const SizedBox(height: 16),
             FButton(
@@ -136,9 +135,7 @@ class _NotificationCenterPageState
                 const SizedBox(height: 16),
                 Text(
                   t.notification.empty,
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.listSubtitle(theme),
                 ),
               ],
             ),
@@ -260,9 +257,7 @@ class _NotificationTile extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         _formatTime(item.createdAt),
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.detailLabel(theme),
                       ),
                     ],
                   ),

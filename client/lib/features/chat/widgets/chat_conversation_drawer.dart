@@ -17,6 +17,7 @@ import '../../../../shared/services/toast_service.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../../../shared/widgets/themed_icon.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ChatConversationDrawer extends ConsumerStatefulWidget {
   const ChatConversationDrawer({super.key});
@@ -68,13 +69,7 @@ class _ChatConversationDrawerState
               backgroundColor: theme.colors.secondary,
             ),
             const SizedBox(height: 16),
-            Text(
-              t.chat.noHistory,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: theme.colors.foreground,
-              ),
-            ),
+            Text(t.chat.noHistory, style: AppTextStyles.listTitle(theme)),
             const SizedBox(height: 8),
             Text(
               t.chat.startNewChat,
@@ -106,10 +101,7 @@ class _ChatConversationDrawerState
             const SizedBox(height: 16),
             Text(
               t.common.loadFailed,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: theme.colors.destructive,
-              ),
+              style: AppTextStyles.destructiveText(theme),
             ),
             const SizedBox(height: 8),
             Text(
@@ -141,10 +133,7 @@ class _ChatConversationDrawerState
                     ),
                     child: Text(
                       t.common.retry,
-                      style: theme.typography.body.sm.copyWith(
-                        color: theme.colors.foreground,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTrailing(theme),
                     ),
                   ),
                 ),
@@ -221,8 +210,7 @@ class _ChatConversationDrawerState
                         children: [
                           Text(
                             (conversation as dynamic).title as String,
-                            style: theme.typography.body.sm.copyWith(
-                              fontWeight: FontWeight.w500,
+                            style: AppTextStyles.listTrailing(theme).copyWith(
                               color: isSelected
                                   ? theme.colors.primary
                                   : theme.colors.foreground,
@@ -449,9 +437,7 @@ class _ChatConversationDrawerState
                     children: [
                       Text(
                         user?.username ?? '...',
-                        style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTrailing(theme),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -499,13 +485,7 @@ class _ChatConversationDrawerState
             Icon(icon, size: 16, color: theme.colors.foreground),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                title,
-                style: theme.typography.body.sm.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: theme.colors.foreground,
-                ),
-              ),
+              child: Text(title, style: AppTextStyles.listTrailing(theme)),
             ),
           ],
         ),
@@ -631,8 +611,7 @@ class _ChatConversationDrawerState
                     children: [
                       Text(
                         conversation.title,
-                        style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w500,
+                        style: AppTextStyles.listTrailing(theme).copyWith(
                           color: isSelected
                               ? theme.colors.primary
                               : theme.colors.foreground,
@@ -807,10 +786,7 @@ class _ChatConversationDrawerState
                 },
                 child: Text(
                   t.common.cancel,
-                  style: theme.typography.body.sm.copyWith(
-                    color: theme.colors.primary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.actionText(theme),
                 ),
               ),
             ],
@@ -861,10 +837,7 @@ class _ChatConversationDrawerState
               const SizedBox(height: 16),
               Text(
                 t.chat.searchFailed,
-                style: theme.typography.body.md.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: theme.colors.destructive,
-                ),
+                style: AppTextStyles.destructiveText(theme),
               ),
               const SizedBox(height: 8),
               Text(
@@ -1031,11 +1004,7 @@ class _ChatConversationDrawerState
                 result.title,
                 query,
                 result.highlights.where((h) => h.field == 'title').toList(),
-                theme.typography.body.sm.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: theme.colors.foreground,
-                  height: 1.3,
-                ),
+                AppTextStyles.listTrailing(theme).copyWith(height: 1.3),
                 theme.colors.secondary,
                 maxLines: 1,
               ),
@@ -1191,10 +1160,7 @@ class _ChatConversationDrawerState
                 },
                 child: Text(
                   t.common.cancel,
-                  style: theme.typography.body.sm.copyWith(
-                    color: theme.colors.primary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.actionText(theme),
                 ),
               ),
             ],
@@ -1271,8 +1237,7 @@ class _ChatConversationDrawerState
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   conversation.title,
-                  style: theme.typography.body.sm.copyWith(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  style: AppTextStyles.listTrailing(theme).copyWith(
                     color: isSelected
                         ? theme.colors.primary
                         : theme.colors.foreground,

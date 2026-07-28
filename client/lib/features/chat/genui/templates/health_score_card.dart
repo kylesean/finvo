@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Financial health score card - GenUI Template
 ///
@@ -116,16 +117,12 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                       const SizedBox(width: 8),
                       Text(
                         t.chat.genui.healthScore.title,
-                        style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTrailing(theme),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         _getGradeSummary(grade),
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.detailLabel(theme),
                       ),
                     ],
                   ),
@@ -190,9 +187,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                   const SizedBox(height: 8),
                   Text(
                     t.chat.genui.healthScore.suggestions,
-                    style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyles.listTrailing(theme),
                   ),
                   const SizedBox(height: 8),
                   ...suggestions.map(
@@ -210,9 +205,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                           Expanded(
                             child: Text(
                               suggestion.toString(),
-                              style: theme.typography.body.xs.copyWith(
-                                color: colors.mutedForeground,
-                              ),
+                              style: AppTextStyles.detailLabel(theme),
                             ),
                           ),
                         ],
@@ -251,10 +244,9 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
             Text(name, style: theme.typography.body.sm),
             Text(
               t.chat.genui.healthScore.scorePoint(score: score),
-              style: theme.typography.body.sm.copyWith(
-                fontWeight: FontWeight.w500,
-                color: statusColor,
-              ),
+              style: AppTextStyles.listTrailing(
+                theme,
+              ).copyWith(color: statusColor),
             ),
           ],
         ),
@@ -281,12 +273,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
           ],
         ),
         const SizedBox(height: 2),
-        Text(
-          description,
-          style: theme.typography.body.xs.copyWith(
-            color: colors.mutedForeground,
-          ),
-        ),
+        Text(description, style: AppTextStyles.detailLabel(theme)),
       ],
     );
   }

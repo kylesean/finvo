@@ -19,6 +19,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../../core/services/server_config_service.dart';
 import '../../version/providers/version_provider.dart';
 import '../../version/services/app_version_service.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -396,9 +397,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           else
             Text(
               user?.username ?? t.user.username,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
           const SizedBox(width: 6),
           Icon(FLucideIcons.squarePen, size: 16, color: colors.mutedForeground),

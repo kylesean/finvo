@@ -8,6 +8,7 @@ import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class AmountSettingsPage extends ConsumerWidget {
   const AmountSettingsPage({super.key});
@@ -34,10 +35,7 @@ class AmountSettingsPage extends ConsumerWidget {
         ),
         title: Text(
           t.settings.amountDisplayStyle,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
+          style: AppTextStyles.pageTitle(theme),
         ),
         centerTitle: true,
       ),
@@ -53,10 +51,7 @@ class AmountSettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
               child: Text(
                 t.settings.selectAmountStyle,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.mutedForeground,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.sectionHeader(theme),
               ),
             ),
 
@@ -95,9 +90,7 @@ class AmountSettingsPage extends ConsumerWidget {
                   ),
                   subtitle: Text(
                     subtitle,
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.listSubtitle(theme),
                   ),
                   suffix: isSelected
                       ? Icon(

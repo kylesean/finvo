@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
 import '../../../core/widgets/app_calendar.dart';
 import '../../../i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class DateRangePickerSheet extends StatefulWidget {
   final DateTime? initialStart;
@@ -113,10 +114,7 @@ class _DateRangePickerSheetState extends State<DateRangePickerSheet> {
                               const SizedBox(width: 6),
                               Text(
                                 _formatDateRange(_selectedRange),
-                                style: theme.typography.body.sm.copyWith(
-                                  color: colors.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: AppTextStyles.actionText(theme),
                               ),
                             ],
                           ),

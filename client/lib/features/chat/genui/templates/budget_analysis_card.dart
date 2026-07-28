@@ -11,6 +11,7 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 import '../../../../core/constants/category_constants.dart';
 import '../utils/genui_num_utils.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Budget analysis card (Layer 4: Template)
 ///
@@ -158,10 +159,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             ),
             child: Text(
               t.chat.genui.budgetAnalysis.periodDays(days: periodDays),
-              style: theme.typography.body.xs.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.badge(theme),
             ),
           ),
         ],
@@ -193,9 +191,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
               children: [
                 Text(
                   t.chat.genui.budgetAnalysis.totalExpense,
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.listSubtitle(theme),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -261,10 +257,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
             t.chat.genui.budgetAnalysis.momChange(
               change: '$prefix${changePercent.toStringAsFixed(1)}',
             ),
-            style: theme.typography.body.xs.copyWith(
-              color: trendColor,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.statLabel(theme).copyWith(color: trendColor),
           ),
         ],
       ),
@@ -293,10 +286,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
         children: [
           Text(
             t.chat.genui.budgetAnalysis.categoryDistribution,
-            style: theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.statLabel(theme),
           ),
           const SizedBox(height: 12),
           // Combined progress bar
@@ -353,16 +343,12 @@ class BudgetAnalysisCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       category.displayText,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.foreground,
-                      ),
+                      style: AppTextStyles.listTrailing(theme),
                     ),
                   ),
                   Text(
                     '$currencySymbol${_formatAmount(total)}',
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.listSubtitle(theme),
                   ),
                   const SizedBox(width: 8),
                   SizedBox(
@@ -370,10 +356,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                     child: Text(
                       '${percentage.toStringAsFixed(0)}%',
                       textAlign: TextAlign.right,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.foreground,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTrailing(theme),
                     ),
                   ),
                 ],
@@ -401,10 +384,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
           const SizedBox(height: 12),
           Text(
             t.chat.genui.budgetAnalysis.topSpenders,
-            style: theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.statLabel(theme),
           ),
           const SizedBox(height: 8),
           ...topSpenders.take(3).toList().asMap().entries.map((mapEntry) {
@@ -440,19 +420,12 @@ class BudgetAnalysisCard extends ConsumerWidget {
                           description.isNotEmpty
                               ? description
                               : category.displayText,
-                          style: theme.typography.body.sm.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.listTrailing(theme),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         if (date.isNotEmpty)
-                          Text(
-                            date,
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.mutedForeground,
-                            ),
-                          ),
+                          Text(date, style: AppTextStyles.detailLabel(theme)),
                       ],
                     ),
                   ),

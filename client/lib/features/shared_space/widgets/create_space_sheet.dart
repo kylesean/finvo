@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../providers/shared_space_provider.dart';
 import '../models/shared_space_models.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class CreateSpaceSheet extends ConsumerStatefulWidget {
   final void Function(SharedSpace) onSpaceCreated;
@@ -75,18 +76,13 @@ class _CreateSpaceSheetState extends ConsumerState<CreateSpaceSheet> {
               // Title area
               Text(
                 t.sharedSpace.create.title,
-                style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.foreground,
-                ),
+                style: AppTextStyles.pageTitle(theme),
               ),
               const SizedBox(height: 8),
               Text(
                 t.sharedSpace.create.subtitle,
                 textAlign: TextAlign.center,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.mutedForeground,
-                ),
+                style: AppTextStyles.listSubtitle(theme),
               ),
               const SizedBox(height: 32),
 

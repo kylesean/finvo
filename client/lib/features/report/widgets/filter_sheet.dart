@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import '../../../i18n/strings.g.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Filter bottom sheet for account type selection
 class FilterSheet extends StatefulWidget {
@@ -108,12 +109,7 @@ class _FilterSheetState extends State<FilterSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    t.common.filter,
-                    style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  Text(t.common.filter, style: AppTextStyles.listTitle(theme)),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Icon(
@@ -134,9 +130,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 children: [
                   Text(
                     t.statistics.filter.accountType,
-                    style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyles.listTrailing(theme),
                   ),
                   const SizedBox(height: 12),
                   Wrap(

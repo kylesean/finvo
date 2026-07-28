@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../../i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ForecastToolbar extends ConsumerWidget {
   const ForecastToolbar({super.key});
@@ -19,13 +20,7 @@ class ForecastToolbar extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              t.forecast.title,
-              style: theme.typography.body.xl2.copyWith(
-                color: colorScheme.foreground,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(t.forecast.title, style: AppTextStyles.statValue(theme)),
             Text(
               t.forecast.subtitle,
               style: theme.typography.body.md.copyWith(

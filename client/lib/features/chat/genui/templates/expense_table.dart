@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Data table Widget implementation
 class ExpenseTable extends StatelessWidget {
@@ -25,12 +26,7 @@ class ExpenseTable extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            data['title'] as String,
-            style: theme.typography.body.md.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(data['title'] as String, style: AppTextStyles.listTitle(theme)),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -40,9 +36,7 @@ class ExpenseTable extends StatelessWidget {
                     (h) => DataColumn(
                       label: Text(
                         h as String,
-                        style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTrailing(theme),
                       ),
                     ),
                   )

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Account tile selector
 ///
@@ -82,9 +83,7 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
         FSelectTile<String>(
           title: Text(
             widget.noAccountText ?? t.chat.genui.transactionCard.noAccount,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
           suffix: Icon(FLucideIcons.x, size: 14, color: colors.mutedForeground),
           value: '',
@@ -101,19 +100,11 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
 
       tiles.add(
         FSelectTile<String>(
-          title: Text(
-            name,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.foreground,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          title: Text(name, style: AppTextStyles.listTrailing(theme)),
           subtitle: type != null
               ? Text(
                   _getAccountTypeDisplay(type),
-                  style: theme.typography.body.xs.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.detailLabel(theme),
                 )
               : null,
           suffix: _buildAccountIcon(colors, type),

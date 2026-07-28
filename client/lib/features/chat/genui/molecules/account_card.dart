@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import '../atoms/atoms.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class AccountCard extends ConsumerWidget {
   /// Account data map containing id, name, balance, type, currency, subtitle
@@ -79,20 +80,9 @@ class AccountCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: theme.typography.body.md.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: selected ? colors.primary : colors.foreground,
-                    ),
-                  ),
+                  Text(name, style: AppTextStyles.actionText(theme)),
                   if (subtitle != null && subtitle.isNotEmpty)
-                    Text(
-                      subtitle,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
-                    ),
+                    Text(subtitle, style: AppTextStyles.detailLabel(theme)),
                 ],
               ),
             ),
@@ -107,10 +97,7 @@ class AccountCard extends ConsumerWidget {
                         ? balance
                         : num.tryParse(balance.toString()) ?? 0,
                     currency: currency,
-                    style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: selected ? colors.primary : colors.foreground,
-                    ),
+                    style: AppTextStyles.actionText(theme),
                   ),
                   if (currency != primaryCurrency)
                     Container(
@@ -123,13 +110,7 @@ class AccountCard extends ConsumerWidget {
                         color: colors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
-                        currency,
-                        style: theme.typography.body.xs.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colors.primary,
-                        ),
-                      ),
+                      child: Text(currency, style: AppTextStyles.badge(theme)),
                     ),
                 ],
               ),
@@ -192,10 +173,7 @@ class CompactAccountCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               name,
-              style: theme.typography.body.xs.copyWith(
-                fontWeight: FontWeight.w500,
-                color: selected ? colors.primary : colors.foreground,
-              ),
+              style: AppTextStyles.badge(theme),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

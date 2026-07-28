@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../models/recurring_transaction.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Category selection result
 class CategorySelectionResult {
@@ -141,10 +142,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
             child: Text(
               t.transaction.category,
               textAlign: TextAlign.center,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
           ),
           const SizedBox(width: 48),
@@ -173,10 +171,7 @@ class _CategorySelectionSheetState extends State<CategorySelectionSheet> {
                   const SizedBox(width: 12),
                   Text(
                     category.displayText,
-                    style: theme.typography.body.md.copyWith(
-                      color: colors.foreground,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyles.listTitle(theme),
                   ),
                 ],
               ),

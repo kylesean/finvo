@@ -15,6 +15,7 @@ import '../services/budget_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class BudgetDetailPage extends ConsumerStatefulWidget {
   final String budgetId;
@@ -97,13 +98,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           size: 20,
         ),
       ),
-      title: Text(
-        t.budget.detail,
-        style: theme.typography.body.lg.copyWith(
-          fontWeight: FontWeight.w500,
-          color: colors.foreground,
-        ),
-      ),
+      title: Text(t.budget.detail, style: AppTextStyles.pageTitle(theme)),
       centerTitle: true,
       actions: [
         if (_budgetWithUsage != null) ...[
@@ -243,10 +238,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           // Budget name
           Text(
             budgetWithUsage.budget.displayName,
-            style: theme.typography.body.lg.copyWith(
-              fontWeight: FontWeight.w500,
-              color: colors.primaryForeground,
-            ),
+            style: AppTextStyles.statValueOnDark(theme),
           ),
           const SizedBox(height: 24),
 
@@ -276,10 +268,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
                   children: [
                     Text(
                       '${usagePercent.toStringAsFixed(0)}%',
-                      style: theme.typography.body.xl2.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colors.primaryForeground,
-                      ),
+                      style: AppTextStyles.statValueOnDark(theme),
                     ),
                     Text(
                       t.budget.used,
@@ -349,10 +338,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
         const SizedBox(height: 4),
         Text(
           '$_currencySymbol${_formatAmount(amount)}',
-          style: theme.typography.body.md.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.primaryForeground,
-          ),
+          style: AppTextStyles.statValueOnDarkSecondary(theme),
         ),
       ],
     );
@@ -362,13 +348,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          t.budget.info,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(t.budget.info, style: AppTextStyles.sectionHeader(theme)),
         const SizedBox(height: 8),
         AppCard(
           child: Column(
@@ -446,20 +426,9 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
             Icon(icon, size: 20, color: iconColor ?? colors.mutedForeground),
             const SizedBox(width: 12),
           ],
-          Text(
-            label,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
-          ),
+          Text(label, style: AppTextStyles.listSubtitle(theme)),
           const Spacer(),
-          Text(
-            value,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.foreground,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(value, style: AppTextStyles.listTrailing(theme)),
         ],
       ),
     );
@@ -515,16 +484,13 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
               children: [
                 Text(
                   statusText,
-                  style: theme.typography.body.md.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: statusColor,
-                  ),
+                  style: AppTextStyles.listTitle(
+                    theme,
+                  ).copyWith(color: statusColor),
                 ),
                 Text(
                   _getStatusDescription(periodStatus, budgetWithUsage),
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.listSubtitle(theme),
                 ),
               ],
             ),

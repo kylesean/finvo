@@ -13,6 +13,7 @@ import '../../../shared/widgets/user_avatar.dart';
 import '../../../shared/models/action_item_model.dart';
 import '../../../shared/widgets/dialogs/action_bottom_sheet.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class SharedSpaceSettingsPage extends ConsumerStatefulWidget {
   final String spaceId;
@@ -191,9 +192,7 @@ class _SharedSpaceSettingsPageState
           // Name field
           Text(
             t.sharedSpace.settings.nameLabel,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
           const SizedBox(height: 8),
           FTextField(
@@ -206,9 +205,7 @@ class _SharedSpaceSettingsPageState
           // Description field
           Text(
             t.sharedSpace.settings.descLabel,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
           const SizedBox(height: 8),
           FTextField(
@@ -223,9 +220,7 @@ class _SharedSpaceSettingsPageState
           if (!canEdit)
             Text(
               t.sharedSpace.settings.editHint,
-              style: theme.typography.body.xs.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.detailLabel(theme),
             )
           else if (_isEditing)
             Row(
@@ -342,9 +337,7 @@ class _SharedSpaceSettingsPageState
                     .where((m) => m.status == InviteStatus.accepted)
                     .length,
               ),
-              style: theme.typography.body.xs.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.detailLabel(theme),
             ),
           ),
           // Member list
@@ -404,9 +397,7 @@ class _SharedSpaceSettingsPageState
                     Flexible(
                       child: Text(
                         member.username,
-                        style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTrailing(theme),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -676,10 +667,7 @@ class _SharedSpaceSettingsPageState
                     Expanded(
                       child: Text(
                         t.sharedSpace.detail.leaveSpace,
-                        style: theme.typography.body.md.copyWith(
-                          color: colors.destructive,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.destructiveText(theme),
                       ),
                     ),
                     Icon(
@@ -708,10 +696,7 @@ class _SharedSpaceSettingsPageState
                     Expanded(
                       child: Text(
                         t.sharedSpace.detail.deleteSpace,
-                        style: theme.typography.body.md.copyWith(
-                          color: colors.destructive,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.destructiveText(theme),
                       ),
                     ),
                     Icon(

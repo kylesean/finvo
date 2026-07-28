@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
 import '../../../i18n/strings.g.dart';
 import '../models/statistics_models.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Category detail bottom sheet showing all categories
 class CategoryDetailSheet extends StatelessWidget {
@@ -71,9 +72,7 @@ class CategoryDetailSheet extends StatelessWidget {
                   children: [
                     Text(
                       t.statistics.analysis.breakdown,
-                      style: theme.typography.body.lg.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTitle(theme),
                     ),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
@@ -93,9 +92,7 @@ class CategoryDetailSheet extends StatelessWidget {
                     ? Center(
                         child: Text(
                           t.statistics.noData,
-                          style: theme.typography.body.sm.copyWith(
-                            color: colors.mutedForeground,
-                          ),
+                          style: AppTextStyles.listSubtitle(theme),
                         ),
                       )
                     : ListView.separated(
@@ -162,9 +159,7 @@ class _CategoryDetailItem extends StatelessWidget {
             Expanded(
               child: Text(
                 item.categoryName,
-                style: theme.typography.body.sm.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.listTrailing(theme),
               ),
             ),
             // Amount and percentage
@@ -173,15 +168,11 @@ class _CategoryDetailItem extends StatelessWidget {
               children: [
                 Text(
                   '¥${formatAmount(item.amount)}',
-                  style: theme.typography.body.sm.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.listTrailing(theme),
                 ),
                 Text(
                   '${item.percentage.toStringAsFixed(1)}%',
-                  style: theme.typography.body.xs.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.detailLabel(theme),
                 ),
               ],
             ),

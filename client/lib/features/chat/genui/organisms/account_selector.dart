@@ -6,6 +6,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import '../molecules/molecules.dart';
 import '../events/interaction_events.dart';
 import '../../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A complete account selection widget with search functionality
 ///
@@ -50,7 +51,6 @@ class AccountSelector extends ConsumerStatefulWidget {
     if (accounts.isEmpty) return null;
 
     final theme = context.theme;
-    final colors = theme.colors;
     final displayTitle = title ?? t.transaction.selectLinkedAccount;
     final displayCancel = cancelText ?? t.common.cancel;
     final displayConfirm = confirmText ?? t.common.confirm;
@@ -78,13 +78,7 @@ class AccountSelector extends ConsumerStatefulWidget {
             // Title
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(
-                displayTitle,
-                style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.foreground,
-                ),
-              ),
+              child: Text(displayTitle, style: AppTextStyles.pageTitle(theme)),
             ),
             // Picker
             SizedBox(
@@ -101,9 +95,7 @@ class AccountSelector extends ConsumerStatefulWidget {
                       return Center(
                         child: Text(
                           accType.isNotEmpty ? '$accName ($accType)' : accName,
-                          style: theme.typography.body.md.copyWith(
-                            color: colors.foreground,
-                          ),
+                          style: AppTextStyles.listTitle(theme),
                         ),
                       );
                     }).toList(),
@@ -242,12 +234,7 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Title
-            Text(
-              title,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Text(title, style: AppTextStyles.listTitle(theme)),
 
             const SizedBox(height: 16),
 

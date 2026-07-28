@@ -9,6 +9,7 @@ import '../../../home/services/home_service.dart';
 import '../../../home/models/transaction_model.dart';
 import '../../../../core/constants/category_constants.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Transaction list view component
 ///
@@ -171,10 +172,7 @@ class _TransactionListViewState extends ConsumerState<TransactionListView> {
             t.chat.genui.transactionList.searchResults(
               count: _total.toString(),
             ),
-            style: theme.typography.body.md.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.actionText(theme),
           ),
           const Spacer(),
           Text(
@@ -227,9 +225,7 @@ class _TransactionListViewState extends ConsumerState<TransactionListView> {
             )
           : Text(
               t.chat.genui.transactionList.loadMore,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
     );
   }
@@ -283,9 +279,7 @@ class _TransactionListItem extends StatelessWidget {
                     children: [
                       Text(
                         categoryEnum.displayText,
-                        style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTitle(theme),
                       ),
                       // Prefer backend display, otherwise fallback to client-side calculation
                       data['display'] != null
@@ -317,18 +311,14 @@ class _TransactionListItem extends StatelessWidget {
                           tags.isNotEmpty
                               ? tags.join(' · ')
                               : (data['description'] as String? ?? ''),
-                          style: theme.typography.body.sm.copyWith(
-                            color: colors.mutedForeground,
-                          ),
+                          style: AppTextStyles.listSubtitle(theme),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Text(
                         _formatDate(time),
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.listSubtitle(theme),
                       ),
                     ],
                   ),

@@ -10,6 +10,7 @@ import '../../profile/models/financial_account.dart';
 import '../../profile/providers/financial_account_provider.dart';
 import '../models/account_type_definition.dart';
 import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Account selection result
 class AccountSelectionResult {
@@ -132,10 +133,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
             child: Text(
               widget.title,
               textAlign: TextAlign.center,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
           ),
           const SizedBox(width: 48), // Balance cancel button
@@ -166,9 +164,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
             const SizedBox(height: 12),
             Text(
               isZh ? '暂无资产账户' : 'No asset accounts',
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
             const SizedBox(height: 8),
             Text(
@@ -199,13 +195,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
   Widget _buildSectionHeader(FThemeData theme, FColors colors, String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Text(
-        title,
-        style: theme.typography.body.sm.copyWith(
-          color: colors.mutedForeground,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
+      child: Text(title, style: AppTextStyles.sectionHeader(theme)),
     );
   }
 
@@ -275,10 +265,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                       children: [
                         Text(
                           account.name,
-                          style: theme.typography.body.md.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: colors.foreground,
-                          ),
+                          style: AppTextStyles.listTitle(theme),
                         ),
                         Text(
                           definition != null
@@ -286,9 +273,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                               : (isLiabilityAccount
                                     ? (isZh ? '负债账户' : 'Liability Account')
                                     : (isZh ? '资产账户' : 'Asset Account')),
-                          style: theme.typography.body.sm.copyWith(
-                            color: colors.mutedForeground,
-                          ),
+                          style: AppTextStyles.listSubtitle(theme),
                         ),
                       ],
                     ),
@@ -300,17 +285,13 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                     children: [
                       Text(
                         '${isLiabilityAccount ? '-' : ''}${_formatAmount(account.currentBalance ?? account.initialBalance)}',
-                        style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colors.foreground,
+                        style: AppTextStyles.listTitle(theme).copyWith(
                           fontFeatures: [const FontFeature.tabularFigures()],
                         ),
                       ),
                       Text(
                         account.currencyCode,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.listSubtitle(theme),
                       ),
                     ],
                   ),

@@ -17,6 +17,7 @@ import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Recurring transaction list page
 class RecurringTransactionListPage extends ConsumerStatefulWidget {
@@ -104,10 +105,7 @@ class _RecurringTransactionListPageState
         ),
         title: Text(
           t.forecast.recurringTransaction.title,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
+          style: AppTextStyles.pageTitle(theme),
         ),
         centerTitle: true,
       ),
@@ -226,9 +224,7 @@ class _RecurringTransactionListPageState
           Expanded(
             child: Text(
               '$desc  $currencySymbol${tx.amount.toDouble().toStringAsFixed(2)}',
-              style: theme.typography.body.sm.copyWith(
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTrailing(theme),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -238,9 +234,7 @@ class _RecurringTransactionListPageState
             onTap: () => _skipPending(tx.id),
             child: Text(
               t.forecast.recurringTransaction.skip,
-              style: theme.typography.body.xs.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.detailLabel(theme),
             ),
           ),
           const SizedBox(width: 12),
@@ -255,10 +249,7 @@ class _RecurringTransactionListPageState
               ),
               child: Text(
                 t.forecast.recurringTransaction.confirm,
-                style: theme.typography.body.xs.copyWith(
-                  color: colors.primaryForeground,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.statLabelOnDark(theme),
               ),
             ),
           ),
@@ -370,9 +361,7 @@ class _RecurringTransactionListPageState
             type: typeLabel,
             count: count.toString(),
           ),
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-          ),
+          style: AppTextStyles.listSubtitle(theme),
         ),
         const Spacer(),
         GestureDetector(
@@ -388,10 +377,7 @@ class _RecurringTransactionListPageState
               const SizedBox(width: 4),
               Text(
                 t.forecast.recurringTransaction.sortByTime,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.actionText(theme),
               ),
             ],
           ),
@@ -411,17 +397,12 @@ class _RecurringTransactionListPageState
             const SizedBox(height: 16),
             Text(
               t.forecast.recurringTransaction.noRecurring,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.pageTitle(theme),
             ),
             const SizedBox(height: 8),
             Text(
               t.forecast.recurringTransaction.createHint,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -539,10 +520,7 @@ class _RecurringTransactionListPageState
                     children: [
                       Text(
                         _getDisplayName(transaction),
-                        style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colors.foreground,
-                        ),
+                        style: AppTextStyles.listTitle(theme),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -565,10 +543,7 @@ class _RecurringTransactionListPageState
                               _getShortFrequencyLabel(
                                 transaction.recurrenceRule,
                               ),
-                              style: theme.typography.body.xs.copyWith(
-                                color: colors.mutedForeground,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: AppTextStyles.statLabel(theme),
                             ),
                           ),
                           // Dynamic amount tag
@@ -596,10 +571,7 @@ class _RecurringTransactionListPageState
                                         .forecast
                                         .recurringTransaction
                                         .dynamicAmount,
-                                    style: theme.typography.body.xs.copyWith(
-                                      color: colors.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: AppTextStyles.badge(theme),
                                   ),
                                 ],
                               ),
@@ -615,10 +587,9 @@ class _RecurringTransactionListPageState
                   children: [
                     Text(
                       '$amountSign${Currency.fromCode(ref.watch(financialSettingsProvider).primaryCurrency)?.symbol ?? '¥'}${transaction.amount.toDouble().toStringAsFixed(2)}',
-                      style: theme.typography.body.md.copyWith(
-                        color: typeColor,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTitle(
+                        theme,
+                      ).copyWith(color: typeColor),
                     ),
                     const SizedBox(height: 4),
                     Text(

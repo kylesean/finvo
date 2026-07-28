@@ -9,6 +9,7 @@ import '../atoms/budget_progress_bar.dart';
 import '../atoms/empty_state_alert.dart';
 import '../molecules/budget_item_card.dart';
 import '../utils/genui_num_utils.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Budget status card template
 ///
@@ -234,10 +235,7 @@ class BudgetStatusCard extends StatelessWidget {
                   children: [
                     Text(
                       t.chat.genui.budgetStatusCard.totalBudget,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.foreground,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTrailing(theme),
                     ),
                     if (budgetId != null) ...[
                       const SizedBox(width: 4),
@@ -276,18 +274,13 @@ class BudgetStatusCard extends StatelessWidget {
                   t.chat.genui.budgetStatusCard.spent(
                     amount: _formatAmount(spent),
                   ),
-                  style: theme.typography.body.xs.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.detailLabel(theme),
                 ),
                 Text(
                   t.chat.genui.budgetStatusCard.remaining(
                     amount: _formatAmount(remaining),
                   ),
-                  style: theme.typography.body.xs.copyWith(
-                    color: remaining >= 0 ? colors.primary : colors.destructive,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.badge(theme),
                 ),
               ],
             ),
@@ -358,18 +351,14 @@ class BudgetStatusCard extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: theme.typography.body.md.copyWith(
-                color: statusColor,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.listTitle(
+                theme,
+              ).copyWith(color: statusColor),
             ),
           ),
           Text(
             _getStatusText(status),
-            style: theme.typography.body.xs.copyWith(
-              color: statusColor,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.statLabel(theme).copyWith(color: statusColor),
           ),
         ],
       ),

@@ -18,6 +18,7 @@ import '../../../shared/widgets/dialogs/action_bottom_sheet.dart';
 import '../../../shared/models/action_item_model.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class SharedSpaceDetailPage extends ConsumerStatefulWidget {
   final String spaceId;
@@ -128,17 +129,12 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
               const SizedBox(height: 16),
               Text(
                 t.sharedSpace.detail.loadFailed,
-                style: theme.typography.body.lg.copyWith(
-                  color: colors.foreground,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.pageTitle(theme),
               ),
               const SizedBox(height: 8),
               Text(
                 error,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.mutedForeground,
-                ),
+                style: AppTextStyles.listSubtitle(theme),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -178,13 +174,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
           stretch: true,
           flexibleSpace: FlexibleSpaceBar(
             titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
-            title: Text(
-              space.name,
-              style: theme.typography.body.xl.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colors.foreground,
-              ),
-            ),
+            title: Text(space.name, style: AppTextStyles.pageTitleLarge(theme)),
             background: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -248,11 +238,9 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
                     const SizedBox(width: 8),
                     Text(
                       t.sharedSpace.dashboard.sectionTitle,
-                      style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colors.primary,
-                        letterSpacing: 1.2,
-                      ),
+                      style: AppTextStyles.actionText(
+                        theme,
+                      ).copyWith(letterSpacing: 1.2),
                     ),
                   ],
                 ),
@@ -281,11 +269,9 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
                     const SizedBox(width: 8),
                     Text(
                       t.sharedSpace.detail.transactions,
-                      style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colors.foreground,
-                        letterSpacing: 1.2,
-                      ),
+                      style: AppTextStyles.listTrailing(
+                        theme,
+                      ).copyWith(letterSpacing: 1.2),
                     ),
                     const Spacer(),
                     Container(
@@ -301,10 +287,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
                         t.sharedSpace.detail.recordsCount(
                           count: space.transactionCount,
                         ),
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.statLabel(theme),
                       ),
                     ),
                   ],
@@ -450,9 +433,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
           const SizedBox(height: 12),
           Text(
             t.sharedSpace.detail.loadFailed,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
           const SizedBox(height: 16),
           FButton(
@@ -561,9 +542,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
           const SizedBox(height: 12),
           Text(
             t.sharedSpace.detail.loadFailed,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
           const SizedBox(height: 16),
           FButton(
@@ -603,10 +582,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
             const SizedBox(height: 16),
             Text(
               t.sharedSpace.detail.noTransactions,
-              style: theme.typography.body.md.copyWith(
-                color: colors.mutedForeground,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
             const SizedBox(height: 4),
             Text(
@@ -704,18 +680,14 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
                                 tx.categoryKey,
                               ).displayText
                             : t.category.other),
-                  style: theme.typography.body.md.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.listTitle(theme),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${tx.addedByUsername ?? "Unknown"} · $timeDisplay',
-                  style: theme.typography.body.xs.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.detailLabel(theme),
                 ),
               ],
             ),
@@ -725,17 +697,13 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
               ? AmountText.fromDisplay(
                   display: tx.display!,
                   type: transactionType,
-                  style: theme.typography.body.md.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.listTitle(theme),
                 )
               : AmountText(
                   amount: double.tryParse(tx.amount) ?? 0.0,
                   type: transactionType,
                   currency: tx.currency,
-                  style: theme.typography.body.md.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.listTitle(theme),
                 ),
         ],
       ),

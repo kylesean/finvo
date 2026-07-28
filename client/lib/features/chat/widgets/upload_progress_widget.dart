@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Upload progress status
 enum UploadStatus { uploading, success, failed, cancelled }
@@ -101,10 +102,7 @@ class UploadProgressWidget extends StatelessWidget {
                 // File name
                 Text(
                   uploadData.file.name,
-                  style: theme.typography.body.sm.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: colors.foreground,
-                  ),
+                  style: AppTextStyles.listTrailing(theme),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -218,9 +216,7 @@ class UploadProgressWidget extends StatelessWidget {
             // Progress text
             Text(
               'Uploading... ${(uploadData.progress * 100).toInt()}%',
-              style: theme.typography.body.xs.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.detailLabel(theme),
             ),
           ],
         );
@@ -272,12 +268,7 @@ class UploadProgressWidget extends StatelessWidget {
           children: [
             Icon(FLucideIcons.ban, size: 16, color: colors.mutedForeground),
             const SizedBox(width: 4),
-            Text(
-              'Cancelled',
-              style: theme.typography.body.xs.copyWith(
-                color: colors.mutedForeground,
-              ),
-            ),
+            Text('Cancelled', style: AppTextStyles.detailLabel(theme)),
           ],
         );
     }
@@ -359,7 +350,6 @@ class BatchUploadProgressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final colors = theme.colors;
 
     if (uploadList.isEmpty) {
       return const SizedBox.shrink();
@@ -375,10 +365,7 @@ class BatchUploadProgressWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Text(
               'Upload progress (${_getCompletedCount()}/${uploadList.length})',
-              style: theme.typography.body.sm.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTrailing(theme),
             ),
           ),
 

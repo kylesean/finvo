@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import '../utils/formatters.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A formatted currency amount display
 ///
@@ -83,16 +84,12 @@ class LargeAmountDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final colors = theme.colors;
 
     return AmountDisplay(
       amount: amount,
       currency: currency,
       showSign: showSign,
-      style: theme.typography.body.xl2.copyWith(
-        fontWeight: FontWeight.bold,
-        color: color ?? colors.foreground,
-      ),
+      style: AppTextStyles.statValue(theme),
     );
   }
 }

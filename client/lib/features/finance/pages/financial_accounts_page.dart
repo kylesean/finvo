@@ -21,6 +21,7 @@ import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import '../widgets/currency_selection_sheet.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class FinancialAccountsPage extends ConsumerStatefulWidget {
   const FinancialAccountsPage({super.key});
@@ -78,7 +79,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
         ),
         title: Text(
           t.financial.title,
-          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w500),
+          style: AppTextStyles.pageTitleLarge(theme),
         ),
       ),
       body: SafeArea(
@@ -298,10 +299,9 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             children: [
               Text(
                 t.financial.netWorth.toUpperCase(),
-                style: theme.typography.body.xs.copyWith(
-                  color: colors.primaryForeground.withValues(alpha: 0.6),
+                style: AppTextStyles.statLabelOnDarkSecondary(theme).copyWith(
+                  color: theme.colors.primaryForeground.withValues(alpha: 0.6),
                   letterSpacing: 1.2,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
               Row(
@@ -343,10 +343,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                         children: [
                           Text(
                             viewCurrency,
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.primaryForeground,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppTextStyles.statLabelOnDark(theme),
                           ),
                           const SizedBox(width: 4),
                           Icon(
@@ -449,10 +446,9 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
       children: [
         Text(
           label.toUpperCase(),
-          style: theme.typography.body.xs.copyWith(
-            color: colors.primaryForeground.withValues(alpha: 0.5),
+          style: AppTextStyles.statLabelOnDarkSecondary(theme).copyWith(
+            color: theme.colors.primaryForeground.withValues(alpha: 0.5),
             letterSpacing: 1,
-            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 2),
@@ -461,9 +457,10 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
           child: hidden
               ? Text(
                   '****',
-                  style: theme.typography.body.md.copyWith(
-                    color: colors.primaryForeground.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w500,
+                  style: AppTextStyles.statValueOnDarkSecondary(theme).copyWith(
+                    color: theme.colors.primaryForeground.withValues(
+                      alpha: 0.8,
+                    ),
                   ),
                 )
               : AmountText(
@@ -485,13 +482,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   Widget _buildSectionHeader(FThemeData theme, FColors colors, String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Text(
-        title,
-        style: theme.typography.body.sm.copyWith(
-          color: colors.mutedForeground,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
+      child: Text(title, style: AppTextStyles.sectionHeader(theme)),
     );
   }
 
@@ -535,11 +526,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                       children: [
                         Text(
                           account.name,
-                          style: theme.typography.body.md.copyWith(
-                            // Revert to base
-                            fontWeight: FontWeight.w500,
-                            color: colors.foreground,
-                          ),
+                          style: AppTextStyles.listTitle(theme),
                         ),
                         Text(
                           definition != null
@@ -572,16 +559,11 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                                   : TransactionType.income,
                               semantic: AmountSemantic.status,
                               currency: account.currencyCode,
-                              style: theme.typography.body.md.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: colors.foreground,
-                              ),
+                              style: AppTextStyles.listTitle(theme),
                             ),
                       Text(
                         account.currencyCode,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.listSubtitle(theme),
                       ),
                       if (!_hideAmounts) ...[
                         Builder(
@@ -763,10 +745,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                   Expanded(
                     child: Text(
                       t.financial.management,
-                      style: theme.typography.body.lg.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.foreground,
-                      ),
+                      style: AppTextStyles.pageTitle(theme),
                     ),
                   ),
                 ],
@@ -783,10 +762,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                     // Financial settings group
                     Text(
                       t.financial.settings,
-                      style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.mutedForeground,
-                      ),
+                      style: AppTextStyles.sectionHeader(theme),
                     ),
                     const SizedBox(height: 8),
                     FItemGroup(
@@ -901,9 +877,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                             children: [
                               Text(
                                 t.financial.financialAssistant,
-                                style: theme.typography.body.sm.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: AppTextStyles.listTrailing(theme),
                               ),
                               Text(
                                 t.financial.manageFinancialSettings,
@@ -1051,10 +1025,7 @@ class _SafetyThresholdBottomSheetState
                   children: [
                     Text(
                       t.financial.safetyThresholdSettings,
-                      style: theme.typography.body.lg.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.foreground,
-                      ),
+                      style: AppTextStyles.pageTitle(theme),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -1076,13 +1047,7 @@ class _SafetyThresholdBottomSheetState
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      symbol,
-                      style: theme.typography.body.lg.copyWith(
-                        color: theme.colors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text(symbol, style: AppTextStyles.actionText(theme)),
                     const SizedBox(width: 8),
                     SizedBox(
                       width: 140,
@@ -1092,10 +1057,7 @@ class _SafetyThresholdBottomSheetState
                           decimal: false,
                         ),
                         textAlign: TextAlign.center,
-                        style: theme.typography.body.xl2.copyWith(
-                          color: colorScheme.foreground,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyles.statValue(theme),
                         decoration: InputDecoration(
                           isDense: true,
                           contentPadding: const EdgeInsets.only(bottom: 4),
@@ -1289,17 +1251,12 @@ class _DailySpendingBottomSheetState
                   children: [
                     Text(
                       t.financial.dailyBurnRateSettings,
-                      style: theme.typography.body.lg.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colors.foreground,
-                      ),
+                      style: AppTextStyles.pageTitle(theme),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       t.financial.setDailyBurnRate,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.listSubtitle(theme),
                     ),
                   ],
                 ),
@@ -1314,13 +1271,7 @@ class _DailySpendingBottomSheetState
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      symbol,
-                      style: theme.typography.body.lg.copyWith(
-                        color: theme.colors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text(symbol, style: AppTextStyles.actionText(theme)),
                     const SizedBox(width: 8),
                     SizedBox(
                       width: 130,
@@ -1330,10 +1281,7 @@ class _DailySpendingBottomSheetState
                           decimal: false,
                         ),
                         textAlign: TextAlign.center,
-                        style: theme.typography.body.xl2.copyWith(
-                          color: colors.foreground,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyles.statValue(theme),
                         decoration: InputDecoration(
                           isDense: true,
                           contentPadding: const EdgeInsets.only(bottom: 4),
@@ -1356,10 +1304,7 @@ class _DailySpendingBottomSheetState
                     const SizedBox(width: 8),
                     Text(
                       t.financial.dayUnit,
-                      style: theme.typography.body.md.copyWith(
-                        color: colors.mutedForeground,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTitle(theme),
                     ),
                   ],
                 ),

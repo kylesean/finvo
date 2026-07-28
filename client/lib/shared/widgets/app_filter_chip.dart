@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class AppFilterChip extends StatelessWidget {
   final String? label;
@@ -66,11 +67,7 @@ class AppFilterChip extends StatelessWidget {
                   Flexible(
                     child: Text(
                       label!,
-                      style: theme.typography.body.sm.copyWith(
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                        fontSize: 14,
+                      style: AppTextStyles.listTrailing(theme).copyWith(
                         color: isSelected
                             ? colors.primaryForeground
                             : colors.mutedForeground,

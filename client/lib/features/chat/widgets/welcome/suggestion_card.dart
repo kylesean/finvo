@@ -1,6 +1,7 @@
 // features/chat/widgets/welcome/suggestion_card.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Suggestion card component
 /// Compact design, sends prompt to AI on tap
@@ -61,10 +62,7 @@ class SuggestionCard extends StatelessWidget {
                     // Title
                     Text(
                       title,
-                      style: theme.typography.body.sm.copyWith(
-                        // Since 3.44, Skia fallback selects NotoSansCJK (heavier strokes), reduce font weight one level.
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTrailing(theme),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

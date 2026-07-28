@@ -8,6 +8,7 @@ import '../../../app/theme/theme_notifier.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import '../widgets/theme_preview.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class AppearanceSettingsPage extends ConsumerWidget {
   const AppearanceSettingsPage({super.key});
@@ -30,10 +31,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
         ),
         title: Text(
           t.appearance.title,
-          style: theme.typography.body.xl.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
+          style: AppTextStyles.pageTitleLarge(theme),
         ),
       ),
       body: SingleChildScrollView(
@@ -41,13 +39,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              t.appearance.themeMode,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
-            ),
+            Text(t.appearance.themeMode, style: AppTextStyles.listTitle(theme)),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -99,10 +91,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               t.appearance.colorScheme,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
             const SizedBox(height: 12),
             LayoutBuilder(
@@ -200,10 +189,7 @@ class _PaletteOption extends StatelessWidget {
                 Expanded(
                   child: Text(
                     palette.label,
-                    style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.foreground,
-                    ),
+                    style: AppTextStyles.listTrailing(theme),
                   ),
                 ),
                 if (isSelected)
@@ -226,12 +212,7 @@ class _PaletteOption extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Text(
-              'Light / Dark',
-              style: theme.typography.body.xs.copyWith(
-                color: colors.mutedForeground,
-              ),
-            ),
+            Text('Light / Dark', style: AppTextStyles.detailLabel(theme)),
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import '../../../../i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Error and loading state widgets for GenUI components
 ///
@@ -43,10 +44,7 @@ class GenUiErrorWidget extends StatelessWidget {
               Expanded(
                 child: Text(
                   t.error.genui.loadingFailed,
-                  style: theme.typography.body.md.copyWith(
-                    color: theme.colors.destructive,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.destructiveText(theme),
                 ),
               ),
             ],
@@ -220,10 +218,7 @@ class GenUiSchemaErrorWidget extends StatelessWidget {
               Expanded(
                 child: Text(
                   t.error.genui.schemaFailed,
-                  style: theme.typography.body.md.copyWith(
-                    color: theme.colors.destructive,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.destructiveText(theme),
                 ),
               ),
             ],
@@ -308,10 +303,7 @@ class GenUiNetworkErrorWidget extends StatelessWidget {
               Expanded(
                 child: Text(
                   t.error.genui.networkError,
-                  style: theme.typography.body.md.copyWith(
-                    color: theme.colors.destructive,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.destructiveText(theme),
                 ),
               ),
             ],

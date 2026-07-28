@@ -9,6 +9,7 @@ import 'package:finvo/i18n/strings.g.dart';
 // Assuming these Providers are imported from outside
 // Core logic migrated to transactionCommentsProvider
 import '../../providers/comment_providers.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class CommentInputBar extends ConsumerStatefulWidget {
   final String transactionId;
@@ -157,9 +158,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                     t.comment.replyToPrefix(
                       name: replyingToName,
                     ), // Displays the author name of the comment being replied to
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.listSubtitle(theme),
                   ),
                   const Spacer(),
                   FButton.icon(

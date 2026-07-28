@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Summary card Widget implementation
 class SummaryCard extends StatelessWidget {
@@ -24,12 +25,7 @@ class SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            data['title'] as String,
-            style: theme.typography.body.md.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(data['title'] as String, style: AppTextStyles.listTitle(theme)),
           const SizedBox(height: 12),
           Text(
             data['summary'] as String,
@@ -50,18 +46,14 @@ class SummaryCard extends StatelessWidget {
                       width: 100,
                       child: Text(
                         i['label'] as String,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.listSubtitle(theme),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
                         i['value'] as String,
-                        style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTrailing(theme),
                       ),
                     ),
                   ],

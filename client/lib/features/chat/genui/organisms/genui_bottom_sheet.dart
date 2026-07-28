@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// GenUI reusable bottom sheet container
 ///
@@ -79,12 +80,7 @@ class GenUIBottomSheet extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    title,
-                    style: theme.typography.body.lg.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  child: Text(title, style: AppTextStyles.listTitle(theme)),
                 ),
                 if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
                 FButton.icon(

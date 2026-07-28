@@ -9,6 +9,7 @@ import 'package:forui/forui.dart'; // Import forui
 import 'package:intl/intl.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 
 class MonthlyCalendarView extends ConsumerWidget {
@@ -119,10 +120,7 @@ class MonthlyCalendarView extends ConsumerWidget {
               children: [
                 Text(
                   t.calendar.title,
-                  style: theme.typography.body.xl.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: colors.foreground,
-                  ),
+                  style: AppTextStyles.calendarTitle(theme),
                 ),
                 Row(
                   children: [
@@ -142,26 +140,20 @@ class MonthlyCalendarView extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      () {
-                        final locale = LocaleSettings.currentLocale;
-                        final (dateFormatLocale, pattern) = switch (locale) {
-                          AppLocale.zh => ('zh_CN', 'yyyy年M月'),
-                          AppLocale.en => ('en', 'yyyy MMM'),
-                          AppLocale.ja => ('ja', 'yyyy年M月'),
-                          AppLocale.ko => ('ko', 'yyyy년 M월'),
-                          AppLocale.zhHant => ('zh_TW', 'yyyy年M月'),
-                        };
-                        return DateFormat(
-                          pattern,
-                          dateFormatLocale,
-                        ).format(displayMonth);
-                      }(),
-                      style: theme.typography.body.sm.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colors.foreground,
-                      ),
-                    ),
+                    Text(() {
+                      final locale = LocaleSettings.currentLocale;
+                      final (dateFormatLocale, pattern) = switch (locale) {
+                        AppLocale.zh => ('zh_CN', 'yyyy年M月'),
+                        AppLocale.en => ('en', 'yyyy MMM'),
+                        AppLocale.ja => ('ja', 'yyyy年M月'),
+                        AppLocale.ko => ('ko', 'yyyy년 M월'),
+                        AppLocale.zhHant => ('zh_TW', 'yyyy年M月'),
+                      };
+                      return DateFormat(
+                        pattern,
+                        dateFormatLocale,
+                      ).format(displayMonth);
+                    }(), style: AppTextStyles.listTrailing(theme)),
                     const SizedBox(width: 4),
                     FButton.icon(
                       variant: .ghost,
@@ -204,12 +196,8 @@ class MonthlyCalendarView extends ConsumerWidget {
                         t.calendar.weekdays.sun,
                       ]
                       .map(
-                        (day) => Text(
-                          day,
-                          style: theme.typography.body.sm.copyWith(
-                            color: colors.mutedForeground,
-                          ),
-                        ),
+                        (day) =>
+                            Text(day, style: AppTextStyles.listSubtitle(theme)),
                       )
                       .toList(),
             ),
@@ -322,9 +310,7 @@ class MonthlyCalendarView extends ConsumerWidget {
               child: Center(
                 child: Text(
                   t.calendar.loadFailed,
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.listSubtitle(theme),
                 ),
               ),
             ),
@@ -397,23 +383,17 @@ class MonthlyCalendarView extends ConsumerWidget {
 
                       return Text(
                         '$dateLabel: ${currencyFormat.format(selectedSummary.totalExpense)}',
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.calendarFooter(theme),
                         overflow: TextOverflow.ellipsis,
                       );
                     },
                     loading: () => Text(
                       t.calendar.counting,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.calendarFooter(theme),
                     ),
                     error: (error, stacktrace) => Text(
                       t.calendar.unableToCount,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.calendarFooter(theme),
                     ),
                   ),
                 ),
@@ -423,9 +403,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                   children: [
                     Text(
                       t.calendar.trend,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.calendarFooter(theme),
                     ),
                     if (calendarDataAsyncValue.hasValue &&
                         calendarDataAsyncValue.value?.trendColors != null &&

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../providers/financial_settings_provider.dart';
 
@@ -32,13 +33,7 @@ class CurrencySettingsPage extends ConsumerWidget {
             size: 20,
           ),
         ),
-        title: Text(
-          t.settings.currency,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
-        ),
+        title: Text(t.settings.currency, style: AppTextStyles.pageTitle(theme)),
         centerTitle: true,
         actions: [
           if (state.hasChanges)
@@ -87,10 +82,7 @@ class CurrencySettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
               child: Text(
                 t.settings.currencyDescription,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.mutedForeground,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.sectionHeader(theme),
               ),
             ),
 

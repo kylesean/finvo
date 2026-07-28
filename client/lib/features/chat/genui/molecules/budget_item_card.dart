@@ -10,6 +10,7 @@ import '../atoms/budget_progress_bar.dart';
 import '../../../../shared/widgets/app_card.dart';
 
 import '../utils/genui_num_utils.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class BudgetItemCard extends ConsumerWidget {
   final String? budgetId;
@@ -88,9 +89,7 @@ class BudgetItemCard extends ConsumerWidget {
               width: 72,
               child: Text(
                 name,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.foreground,
-                ),
+                style: AppTextStyles.listTrailing(theme),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -141,13 +140,7 @@ class BudgetItemCard extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      name,
-                      style: theme.typography.body.md.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colors.foreground,
-                      ),
-                    ),
+                    child: Text(name, style: AppTextStyles.listTitle(theme)),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -160,10 +153,9 @@ class BudgetItemCard extends ConsumerWidget {
                     ),
                     child: Text(
                       _getStatusText(status),
-                      style: theme.typography.body.xs.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.statLabel(
+                        theme,
+                      ).copyWith(color: statusColor),
                     ),
                   ),
                 ],
@@ -191,9 +183,7 @@ class BudgetItemCard extends ConsumerWidget {
                   ),
                   Text(
                     '$currencySymbol${_formatAmount(spent)} / $currencySymbol${_formatAmount(amount)}',
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.listSubtitle(theme),
                   ),
                 ],
               ),

@@ -20,6 +20,7 @@ import 'package:finvo/shared/models/currency.dart';
 import '../../profile/providers/financial_account_provider.dart';
 import '../../profile/providers/financial_settings_provider.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
+import '../../../shared/theme/form_text_styles.dart';
 
 /// Recurring transaction create/edit page
 class RecurringTransactionPage extends ConsumerStatefulWidget {
@@ -325,10 +326,7 @@ class _RecurringTransactionPageState
         widget.editId != null
             ? t.forecast.recurringTransaction.edit
             : (isZh ? '新建周期交易' : 'New Recurring Transaction'),
-        style: theme.typography.body.lg.copyWith(
-          fontWeight: FontWeight.w500,
-          color: colors.foreground,
-        ),
+        style: AppTextStyles.pageTitle(theme),
       ),
       centerTitle: true,
     );
@@ -423,11 +421,9 @@ class _RecurringTransactionPageState
                       ref.watch(financialSettingsProvider).primaryCurrency,
                     )?.symbol ??
                     '¥',
-                style: TextStyle(
-                  fontSize: amountFontSize,
-                  color: colors.mutedForeground,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.statLabel(
+                  theme,
+                ).copyWith(fontSize: amountFontSize),
               ),
               const SizedBox(width: 8),
               // Amount input field
@@ -473,9 +469,7 @@ class _RecurringTransactionPageState
               isZh
                   ? '每次${_getTypeLabel(_selectedType)}金额不固定'
                   : 'Amount not fixed for each ${_getTypeLabel(_selectedType).toLowerCase()}',
-              style: theme.typography.body.sm.copyWith(
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTrailing(theme),
             ),
             FSwitch(
               value: _amountType == AmountType.estimate,
@@ -511,10 +505,7 @@ class _RecurringTransactionPageState
       children: [
         Text(
           t.budget.periodSettings,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
         Container(
@@ -564,10 +555,7 @@ class _RecurringTransactionPageState
       children: [
         Text(
           '${t.transaction.account} & ${t.transaction.category}',
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
         Container(
@@ -657,16 +645,12 @@ class _RecurringTransactionPageState
                   controller: _tagController,
                   decoration: InputDecoration(
                     hintText: t.transaction.tags,
-                    hintStyle: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    hintStyle: AppTextStyles.listSubtitle(theme),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.foreground,
-                  ),
+                  style: AppTextStyles.listTrailing(theme),
                   onChanged: (_) => setState(
                     () {},
                   ), // Trigger rebuild to show/hide add button
@@ -681,10 +665,7 @@ class _RecurringTransactionPageState
                   onTap: () => _addTag(_tagController.text),
                   child: Text(
                     t.common.add,
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyles.actionText(theme),
                   ),
                 ),
             ],
@@ -745,20 +726,9 @@ class _RecurringTransactionPageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.mutedForeground,
-                    ),
-                  ),
+                  Text(title, style: AppTextStyles.detailLabel(theme)),
                   const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.foreground,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  Text(subtitle, style: AppTextStyles.switchTitle(theme)),
                 ],
               ),
             ),
@@ -801,12 +771,7 @@ class _RecurringTransactionPageState
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        tag,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.foreground,
-                        ),
-                      ),
+                      Text(tag, style: AppTextStyles.listTrailing(theme)),
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: () => _removeTag(tag),
@@ -832,27 +797,17 @@ class _RecurringTransactionPageState
                 controller: _tagController,
                 decoration: InputDecoration(
                   hintText: t.transaction.tags,
-                  hintStyle: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  hintStyle: AppTextStyles.listSubtitle(theme),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
                 ),
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.foreground,
-                ),
+                style: AppTextStyles.listTrailing(theme),
                 onSubmitted: _addTag,
               ),
             ),
             GestureDetector(
               onTap: () => _addTag(_tagController.text),
-              child: Text(
-                t.common.add,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text(t.common.add, style: AppTextStyles.actionText(theme)),
             ),
           ],
         ),
@@ -883,10 +838,7 @@ class _RecurringTransactionPageState
       children: [
         Text(
           t.budget.advancedOptions,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
         Container(
@@ -914,19 +866,14 @@ class _RecurringTransactionPageState
                                 .forecast
                                 .recurringTransaction
                                 .confirmBeforeGeneration,
-                            style: theme.typography.body.sm.copyWith(
-                              color: colors.foreground,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppTextStyles.switchTitle(theme),
                           ),
                           Text(
                             t
                                 .forecast
                                 .recurringTransaction
                                 .confirmBeforeGenerationDesc,
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.mutedForeground,
-                            ),
+                            style: AppTextStyles.detailLabel(theme),
                           ),
                         ],
                       ),
@@ -955,18 +902,13 @@ class _RecurringTransactionPageState
                         children: [
                           Text(
                             t.budget.enabled,
-                            style: theme.typography.body.sm.copyWith(
-                              color: colors.foreground,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppTextStyles.switchTitle(theme),
                           ),
                           Text(
                             isZh
                                 ? '开启后按规则自动生成交易'
                                 : 'Automatically generate transactions by rule',
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.mutedForeground,
-                            ),
+                            style: AppTextStyles.detailLabel(theme),
                           ),
                         ],
                       ),

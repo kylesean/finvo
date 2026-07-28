@@ -9,6 +9,7 @@ import 'dart:async';
 
 import '../../models/comment_model.dart';
 import '../../providers/comment_providers.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 final currentUserIdProvider = Provider<String>(
   (ref) => '1',
@@ -140,10 +141,7 @@ class CommentItemWidget extends ConsumerWidget {
       final List<Widget> nameParts = [
         Text(
           comment.userName, // Current commenter
-          style: theme.typography.body.sm.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colorScheme.foreground,
-          ),
+          style: AppTextStyles.listTrailing(theme),
         ),
       ];
 
@@ -164,11 +162,9 @@ class CommentItemWidget extends ConsumerWidget {
             // Use Flexible to avoid overflow for long usernames
             child: Text(
               comment.repliedToUserName!, // Person being replied to
-              style: theme.typography.body.sm.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colorScheme
-                    .primary, // Highlight reply target with primary color
-              ),
+              style: AppTextStyles.listTrailing(
+                theme,
+              ).copyWith(color: colorScheme.primary),
               overflow: TextOverflow.ellipsis, // Ellipsis for overflow
             ),
           ),
@@ -273,11 +269,7 @@ class CommentItemWidget extends ConsumerWidget {
                                     24, // Give the link button a clear height
                                 child: Text(
                                   t.comment.reply,
-                                  style: theme.typography.body.sm.copyWith(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: colorScheme.mutedForeground,
-                                  ),
+                                  style: AppTextStyles.sectionHeader(theme),
                                 ),
                               ),
                             ),

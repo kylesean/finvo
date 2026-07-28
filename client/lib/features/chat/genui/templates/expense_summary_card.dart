@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/category_constants.dart';
 import '../organisms/organisms.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
@@ -104,9 +105,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
         children: [
           Text(
             t.chat.genui.expenseSummary.totalExpense,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
           const SizedBox(height: 4),
           // Use unified AmountText.large component
@@ -185,9 +184,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
                   const SizedBox(width: 4),
                   Text(
                     '${category.displayText} ${(percentage * 100).toStringAsFixed(0)}%',
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.detailLabel(theme),
                   ),
                 ],
               );
@@ -214,10 +211,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               t.chat.genui.expenseSummary.mainExpenses,
-              style: theme.typography.body.xs.copyWith(
-                color: colors.mutedForeground,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.chatMeta(theme),
             ),
           ),
           const SizedBox(height: 8),
@@ -245,9 +239,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
                 ),
                 title: Text(
                   tags.isNotEmpty ? tags : category.displayText,
-                  style: theme.typography.body.sm.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.chatTag(theme),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -289,10 +281,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
           children: [
             Text(
               t.chat.genui.expenseSummary.viewAll(count: totalCount),
-              style: theme.typography.body.sm.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.chatAction(theme),
             ),
             const SizedBox(width: 4),
             Icon(FLucideIcons.chevronRight, size: 14, color: colors.primary),

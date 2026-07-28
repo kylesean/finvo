@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import '../models/tool_call_info.dart';
 import '../../../i18n/strings.g.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A simplified row showing tool execution status
 /// Consistent with the semantic "Processing..." indicator
@@ -103,11 +104,10 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
         widget.toolCall.status != ToolExecutionStatus.pending) {
       return Text(
         label,
-        style: theme.typography.body.sm.copyWith(
+        style: AppTextStyles.listTrailing(theme).copyWith(
           color: widget.toolCall.status == ToolExecutionStatus.error
               ? colors.destructive
               : colors.mutedForeground,
-          fontWeight: FontWeight.w500,
         ),
       );
     }

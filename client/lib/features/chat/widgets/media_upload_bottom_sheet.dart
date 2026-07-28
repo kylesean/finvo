@@ -5,6 +5,7 @@ import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/media_picker_service.dart';
 import '../../../../i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Media upload bottom sheet interface
 /// Simplified three-option UI layout: camera, photos, files
@@ -129,13 +130,7 @@ class _MediaSelectionSheet extends StatelessWidget {
             children: [
               Icon(icon, size: 32, color: colors.foreground),
               const SizedBox(height: 8),
-              Text(
-                label,
-                style: theme.typography.body.md.copyWith(
-                  color: colors.foreground,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text(label, style: AppTextStyles.listTitle(theme)),
             ],
           ),
         ),

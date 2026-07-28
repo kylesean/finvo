@@ -4,6 +4,7 @@ import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
 import '../models/shared_space_models.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class SpaceDashboardCard extends StatelessWidget {
   final SharedSpace space;
@@ -94,10 +95,7 @@ class SpaceDashboardCard extends StatelessWidget {
               children: [
                 Text(
                   t.sharedSpace.dashboard.spendingDistribution,
-                  style: theme.typography.body.sm.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: colors.foreground,
-                  ),
+                  style: AppTextStyles.listTrailing(theme),
                 ),
                 const SizedBox(height: 20),
                 _buildDistributionBar(context),
@@ -124,13 +122,7 @@ class SpaceDashboardCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          value,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.primaryForeground,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(value, style: AppTextStyles.statLabelOnDark(theme)),
       ],
     );
   }

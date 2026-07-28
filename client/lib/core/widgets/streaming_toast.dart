@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Streaming Analysis Toast - Displays streaming text at the top when GenUI components are rendering.
 ///
@@ -192,9 +193,7 @@ class _StreamingToastState extends State<_StreamingToastWidget>
                               ),
                               child: Text(
                                 'Analyzing...',
-                                style: widget.theme.typography.body.sm.copyWith(
-                                  color: colors.mutedForeground,
-                                ),
+                                style: AppTextStyles.listSubtitle(widget.theme),
                               ),
                             )
                           : Text(

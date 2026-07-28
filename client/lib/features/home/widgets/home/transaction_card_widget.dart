@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class TransactionCardData {
   final String transactionLabel;
@@ -58,11 +59,7 @@ class TransactionCardWidget extends ConsumerWidget {
               children: [
                 Text(
                   data.transactionLabel,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
+                  style: AppTextStyles.listTitle(context.theme),
                 ),
                 const SizedBox(height: 4),
                 Text(

@@ -9,6 +9,7 @@ import 'package:forui/forui.dart';
 import '../../shared_space/widgets/notification_icon.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import '../models/total_expense_model.dart';
 import 'dart:async';
@@ -169,7 +170,6 @@ class _FixedTabBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
-    final colors = theme.colors;
     final currentSelectedType = ref.watch(currentTransactionFeedTypeProvider);
 
     return Container(
@@ -187,10 +187,7 @@ class _FixedTabBar extends ConsumerWidget {
                   onPress: () {}, // Empty function to keep button enabled
                   child: Text(
                     tabInfo.label,
-                    style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.primaryForeground,
-                    ),
+                    style: AppTextStyles.tabSelected(theme),
                   ),
                 ),
               ),
@@ -209,10 +206,7 @@ class _FixedTabBar extends ConsumerWidget {
                   },
                   child: Text(
                     tabInfo.label,
-                    style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.tabUnselected(theme),
                   ),
                 ),
               ),
@@ -300,12 +294,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                           children: [
                             Text(
                               t.home.totalExpense,
-                              style: theme.typography.body.sm.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: colors.primaryForeground.withValues(
-                                  alpha: 0.9,
-                                ),
-                              ),
+                              style: AppTextStyles.statLabelOnDark(theme),
                             ),
                             const SizedBox(width: 8),
                             FButton.icon(
@@ -339,10 +328,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                                 _isAmountVisible
                                     ? _formatAmount(data)
                                     : t.home.amountHidden,
-                                style: theme.typography.body.xl2.copyWith(
-                                  color: colors.primaryForeground,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: AppTextStyles.statValueOnDark(theme),
                               ),
                               const SizedBox(height: 16),
                               Row(
@@ -366,12 +352,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                           ),
                           loading: () => Text(
                             t.common.loading,
-                            style: theme.typography.body.xl2.copyWith(
-                              color: colors.primaryForeground.withValues(
-                                alpha: 0.6,
-                              ),
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyles.statValueOnDark(theme),
                           ),
                           error: (error, _) => Text(
                             _isAmountVisible
@@ -382,10 +363,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                                         .primaryCurrency,
                                   )
                                 : t.home.amountHidden,
-                            style: theme.typography.body.xl2.copyWith(
-                              color: colors.primaryForeground,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyles.statValueOnDark(theme),
                           ),
                         ),
 
@@ -411,10 +389,8 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                                       t.home.yearProgress(
                                         year: now.year.toString(),
                                       ),
-                                      style: theme.typography.body.xs.copyWith(
-                                        color: colors.primaryForeground
-                                            .withValues(alpha: 0.85),
-                                        fontWeight: FontWeight.w500,
+                                      style: AppTextStyles.statLabelOnDark(
+                                        theme,
                                       ),
                                     ),
                                   ],
@@ -426,13 +402,9 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                                     percent: yearRemaining.remainingPercentage
                                         .toString(),
                                   ),
-                                  style: theme.typography.body.xs.copyWith(
-                                    color: colors.primaryForeground.withValues(
-                                      alpha: 0.9,
-                                    ),
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: 0.2,
-                                  ),
+                                  style: AppTextStyles.statLabelOnDark(
+                                    theme,
+                                  ).copyWith(letterSpacing: 0.2),
                                 ),
                               ],
                             ),
@@ -501,7 +473,6 @@ class _QuickStatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final colors = theme.colors;
 
     final displayString = AmountFormatter.formatCommon(
       amount,
@@ -511,20 +482,11 @@ class _QuickStatItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: theme.typography.body.xs.copyWith(
-            color: colors.primaryForeground.withValues(alpha: 0.7),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(label, style: AppTextStyles.statLabelOnDarkSecondary(theme)),
         const SizedBox(height: 2),
         Text(
           isVisible ? displayString : '••••',
-          style: theme.typography.body.md.copyWith(
-            color: colors.primaryForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.statValueOnDarkSecondary(theme),
         ),
       ],
     );

@@ -9,6 +9,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import '../../../../core/constants/category_constants.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Transaction list component - supports waterfall pagination
 class TransactionList extends ConsumerStatefulWidget {
@@ -153,10 +154,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
           const SizedBox(width: 8),
           Text(
             t.chat.genui.transactionList.searchResults(count: _total),
-            style: theme.typography.body.md.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.actionText(theme),
           ),
           const Spacer(),
           if (_items.length < _total)
@@ -211,9 +209,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
               _hasMore
                   ? t.chat.genui.transactionList.loadMore
                   : t.chat.genui.transactionList.allLoaded,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
     );
   }
@@ -262,9 +258,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                     children: [
                       Text(
                         categoryEnum.displayText,
-                        style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.listTitle(theme),
                       ),
                       // Use unified AmountText component
                       item['display'] != null
@@ -296,18 +290,14 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                           tags.isNotEmpty
                               ? tags.join(' · ')
                               : (item['description'] as String? ?? ''),
-                          style: theme.typography.body.sm.copyWith(
-                            color: colors.mutedForeground,
-                          ),
+                          style: AppTextStyles.listSubtitle(theme),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Text(
                         _formatDate(time),
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.listSubtitle(theme),
                       ),
                     ],
                   ),

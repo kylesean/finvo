@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/core/widgets/app_calendar.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Date picker bottom sheet (uses FCalendar)
 class DatePickerSheet extends StatefulWidget {
@@ -127,21 +128,12 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
             child: Text(
               widget.title.isNotEmpty ? widget.title : t.time.selectDate,
               textAlign: TextAlign.center,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
           ),
           GestureDetector(
             onTap: () => Navigator.of(context).pop(_selectedDate),
-            child: Text(
-              t.common.ok,
-              style: theme.typography.body.md.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            child: Text(t.common.ok, style: AppTextStyles.actionText(theme)),
           ),
         ],
       ),

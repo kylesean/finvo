@@ -7,6 +7,7 @@ import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/config/speech_config.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 import '../models/speech_settings.dart';
 import '../providers/speech_settings_provider.dart';
 
@@ -77,13 +78,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
             size: 20,
           ),
         ),
-        title: Text(
-          t.speech.title,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
-        ),
+        title: Text(t.speech.title, style: AppTextStyles.pageTitle(theme)),
         centerTitle: true,
       ),
       body: state.isLoading
@@ -103,10 +98,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                     padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
                     child: Text(
                       t.speech.service,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.mutedForeground,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.sectionHeader(theme),
                     ),
                   ),
                   FTileGroup(
@@ -167,10 +159,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                       padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
                       child: Text(
                         t.speech.serverConfig,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.mutedForeground,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.sectionHeader(theme),
                       ),
                     ),
                     Container(
@@ -234,10 +223,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                         const SizedBox(width: 4),
                         Text(
                           t.speech.info,
-                          style: theme.typography.body.sm.copyWith(
-                            color: colors.mutedForeground,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.sectionHeader(theme),
                         ),
                       ],
                     ),

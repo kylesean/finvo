@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../profile/models/financial_account.dart';
 import '../models/account_type_definition.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class FinancialAccountDetailArgs {
   const FinancialAccountDetailArgs({
@@ -51,10 +52,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
         ),
         title: Text(
           args.definition.title,
-          style: theme.typography.body.lg.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
+          style: AppTextStyles.pageTitle(theme),
         ),
       ),
       body: Padding(
@@ -62,28 +60,15 @@ class FinancialAccountDetailPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Account Name',
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
-            ),
+            Text('Account Name', style: AppTextStyles.listSubtitle(theme)),
             const SizedBox(height: 8),
             Text(
               // Use name field
               args.account.name,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.pageTitle(theme),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Current Balance',
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
-            ),
+            Text('Current Balance', style: AppTextStyles.listSubtitle(theme)),
             const SizedBox(height: 8),
             Text(
               formattedAmount,
@@ -105,25 +90,18 @@ class FinancialAccountDetailPage extends ConsumerWidget {
                 children: [
                   Text(
                     'Account Type',
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.listSubtitle(theme),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     args.definition.title,
-                    style: theme.typography.body.md.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.foreground,
-                    ),
+                    style: AppTextStyles.listTitle(theme),
                   ),
                   if (args.definition.subtitle.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
                       args.definition.subtitle,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.detailLabel(theme),
                     ),
                   ],
                 ],
@@ -134,9 +112,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
               child: Center(
                 child: Text(
                   'Account details feature is under construction',
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.listSubtitle(theme),
                 ),
               ),
             ),

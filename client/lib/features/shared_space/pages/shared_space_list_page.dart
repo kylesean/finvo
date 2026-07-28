@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 import '../providers/shared_space_provider.dart';
 import '../models/shared_space_models.dart';
 import '../widgets/shared_space_card.dart';
@@ -94,7 +95,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
         centerTitle: true,
         title: Text(
           t.sharedSpace.title,
-          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w500),
+          style: AppTextStyles.pageTitleLarge(theme),
         ),
         backgroundColor: colorScheme.background,
         foregroundColor: colorScheme.foreground,
@@ -163,10 +164,7 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
             const SizedBox(height: 32),
             Text(
               t.sharedSpace.list.emptyTitle,
-              style: theme.typography.body.xl.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colorScheme.foreground,
-              ),
+              style: AppTextStyles.pageTitleLarge(theme),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),

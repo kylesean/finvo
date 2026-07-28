@@ -14,6 +14,7 @@ import 'account_edit_page.dart';
 import '../providers/financial_summary_provider.dart';
 import '../widgets/currency_selection_sheet.dart';
 import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Account management page - strictly following design spec
 class AccountSourcesPage extends ConsumerStatefulWidget {
@@ -65,7 +66,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
       header: FHeader(
         title: Text(
           'Account Management',
-          style: theme.typography.body.xl.copyWith(fontWeight: FontWeight.w500),
+          style: AppTextStyles.pageTitleLarge(theme),
         ),
         suffixes: [
           FHeaderAction(
@@ -122,9 +123,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
               Text(
                 state.error!,
                 textAlign: TextAlign.center,
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.mutedForeground,
-                ),
+                style: AppTextStyles.listSubtitle(theme),
               ),
               const SizedBox(height: 24),
               FButton(
@@ -348,10 +347,9 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                     const SizedBox(height: 4),
                     Text(
                       _hideAmounts ? '****' : '+${_formatAmount(assets)}',
-                      style: theme.typography.body.md.copyWith(
-                        color: const Color(0xFF4CAF50), // Keep semantic green
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTitle(
+                        theme,
+                      ).copyWith(color: const Color(0xFF4CAF50)),
                     ),
                   ],
                 ),
@@ -370,11 +368,9 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                     const SizedBox(height: 4),
                     Text(
                       _hideAmounts ? '****' : '-${_formatAmount(liabilities)}',
-                      style: theme.typography.body.md.copyWith(
-                        color: colors
-                            .destructive, // Use destructive for liability (red)
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTitle(
+                        theme,
+                      ).copyWith(color: colors.destructive),
                     ),
                   ],
                 ),
@@ -399,10 +395,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                     children: [
                       Text(
                         '${Currency.fromCode(_viewCurrency)?.localizedName ?? _viewCurrency} $currencySymbol',
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.primaryForeground,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.statLabelOnDark(theme),
                       ),
                       const SizedBox(width: 4),
                       Icon(
@@ -424,13 +417,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
   Widget _buildSectionHeader(FThemeData theme, FColors colors, String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Text(
-        title,
-        style: theme.typography.body.sm.copyWith(
-          color: colors.mutedForeground,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
+      child: Text(title, style: AppTextStyles.sectionHeader(theme)),
     );
   }
 
@@ -470,10 +457,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                       children: [
                         Text(
                           account.name,
-                          style: theme.typography.body.md.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: colors.foreground,
-                          ),
+                          style: AppTextStyles.listTitle(theme),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -482,9 +466,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                               : (isLiabilityAccount
                                     ? 'Liability Account'
                                     : 'Asset Account'),
-                          style: theme.typography.body.sm.copyWith(
-                            color: colors.mutedForeground,
-                          ),
+                          style: AppTextStyles.listSubtitle(theme),
                         ),
                       ],
                     ),
@@ -498,18 +480,14 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                         _hideAmounts
                             ? '****'
                             : '${isLiabilityAccount ? '-' : ''}${_formatAmount(account.initialBalance)}',
-                        style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colors.foreground,
+                        style: AppTextStyles.listTitle(theme).copyWith(
                           fontFeatures: [const FontFeature.tabularFigures()],
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         account.currencyCode,
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.detailLabel(theme),
                       ),
                     ],
                   ),

@@ -16,6 +16,7 @@ import '../providers/budget_provider.dart';
 import '../services/budget_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
+import '../../../shared/theme/form_text_styles.dart';
 
 class BudgetFormPage extends ConsumerStatefulWidget {
   final String? editId;
@@ -164,10 +165,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       ),
       title: Text(
         widget.editId != null ? t.budget.editBudget : t.budget.newBudget,
-        style: theme.typography.body.lg.copyWith(
-          fontWeight: FontWeight.w500,
-          color: colors.foreground,
-        ),
+        style: AppTextStyles.pageTitle(theme),
       ),
       centerTitle: true,
     );
@@ -196,10 +194,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
               _scope == BudgetScope.total
                   ? t.budget.totalBudget
                   : t.budget.categoryBudget,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
           ],
         ),
@@ -243,10 +238,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       children: [
         Text(
           t.budget.budgetAmountLabel,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
         Container(
@@ -263,11 +255,9 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                       ref.watch(financialSettingsProvider).primaryCurrency,
                     )?.symbol ??
                     '¥',
-                style: TextStyle(
-                  fontSize: amountFontSize,
-                  color: colors.mutedForeground,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.statLabel(
+                  theme,
+                ).copyWith(fontSize: amountFontSize),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -312,10 +302,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       children: [
         Text(
           t.budget.budgetCategory,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
         InkWell(
@@ -346,10 +333,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                 Expanded(
                   child: Text(
                     _category.displayText,
-                    style: theme.typography.body.md.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.foreground,
-                    ),
+                    style: AppTextStyles.formValue(theme),
                   ),
                 ),
                 Icon(FLucideIcons.chevronRight, color: colors.mutedForeground),
@@ -367,10 +351,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       children: [
         Text(
           t.budget.periodSettings,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
         Container(
@@ -402,17 +383,12 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                           children: [
                             Text(
                               t.budget.periodType,
-                              style: theme.typography.body.xs.copyWith(
-                                color: colors.mutedForeground,
-                              ),
+                              style: AppTextStyles.detailLabel(theme),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               _periodType.label,
-                              style: theme.typography.body.sm.copyWith(
-                                color: colors.foreground,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: AppTextStyles.switchTitle(theme),
                             ),
                           ],
                         ),
@@ -449,19 +425,14 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                             children: [
                               Text(
                                 t.budget.anchorDay,
-                                style: theme.typography.body.xs.copyWith(
-                                  color: colors.mutedForeground,
-                                ),
+                                style: AppTextStyles.detailLabel(theme),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 t.budget.everyMonthDay(
                                   day: _periodAnchorDay.toString(),
                                 ),
-                                style: theme.typography.body.sm.copyWith(
-                                  color: colors.foreground,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: AppTextStyles.switchTitle(theme),
                               ),
                             ],
                           ),
@@ -489,10 +460,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       children: [
         Text(
           t.budget.advancedOptions,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
         Container(
@@ -516,16 +484,11 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                     children: [
                       Text(
                         t.budget.rollover,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.foreground,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.switchTitle(theme),
                       ),
                       Text(
                         t.budget.rolloverDescription,
-                        style: theme.typography.body.xs.copyWith(
-                          color: colors.mutedForeground,
-                        ),
+                        style: AppTextStyles.detailLabel(theme),
                       ),
                     ],
                   ),
@@ -708,10 +671,7 @@ class _PeriodTypePicker extends StatelessWidget {
             ),
             Text(
               t.budget.selectPeriodType,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.dialogTitle(theme),
             ),
             const SizedBox(height: 16),
             ...BudgetPeriodType.values.map((type) {
@@ -789,10 +749,7 @@ class _AnchorDayPickerState extends State<_AnchorDayPicker> {
             ),
             Text(
               t.budget.selectAnchorDay,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.dialogTitle(theme),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -806,10 +763,7 @@ class _AnchorDayPickerState extends State<_AnchorDayPicker> {
                       return Center(
                         child: Text(
                           t.budget.dayOfMonth(day: day.toString()),
-                          style: theme.typography.body.md.copyWith(
-                            color: colors.foreground,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.pickerItem(theme),
                         ),
                       );
                     }),

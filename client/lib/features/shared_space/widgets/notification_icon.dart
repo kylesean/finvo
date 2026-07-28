@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import '../../notification/providers/notification_provider.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class NotificationIcon extends ConsumerWidget {
   const NotificationIcon({super.key});
@@ -36,10 +37,7 @@ class NotificationIcon extends ConsumerWidget {
                 child: Center(
                   child: Text(
                     unreadCount > 99 ? '99+' : unreadCount.toString(),
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.destructiveForeground,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTextStyles.destructiveText(theme),
                   ),
                 ),
               ),

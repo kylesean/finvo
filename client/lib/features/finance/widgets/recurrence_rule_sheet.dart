@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:rrule/rrule.dart' as rrule_lib;
 import 'package:finvo/core/widgets/app_calendar.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Recurrence rule result
 class RecurrenceRuleResult {
@@ -431,21 +432,12 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
             child: Text(
               t.budget.period,
               textAlign: TextAlign.center,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
           ),
           GestureDetector(
             onTap: _handleConfirm,
-            child: Text(
-              t.common.ok,
-              style: theme.typography.body.md.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            child: Text(t.common.ok, style: AppTextStyles.actionText(theme)),
           ),
         ],
       ),
@@ -512,10 +504,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           // Number + frequency unit
           Text(
             '$_interval ${isZh ? _frequency.label : (_frequency.label + (_interval > 1 ? 's' : ''))}',
-            style: theme.typography.body.md.copyWith(
-              fontWeight: FontWeight.w500,
-              color: colors.foreground,
-            ),
+            style: AppTextStyles.listTitle(theme),
           ),
           const SizedBox(width: 16),
           // Increase button
@@ -557,10 +546,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
       children: [
         Text(
           isZh ? '选择星期' : 'Select Days',
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
         Row(
@@ -587,11 +573,10 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 child: Center(
                   child: Text(
                     weekday.label,
-                    style: theme.typography.body.sm.copyWith(
+                    style: AppTextStyles.listTrailing(theme).copyWith(
                       color: isSelected
                           ? colors.primaryForeground
                           : colors.foreground,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -636,9 +621,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                           : (isZh
                                 ? '将在每月 ${_startDate.day} 号执行（短月份自动对齐月末）'
                                 : 'Will execute on the ${_startDate.day}${_getDaySuffix(_startDate.day)} of each month (clamped for short months)'),
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.foreground,
-                      ),
+                      style: AppTextStyles.listTrailing(theme),
                     ),
                   ),
                 ],
@@ -649,9 +632,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 children: [
                   Text(
                     isZh ? '固定在每月最后一天' : 'Always execute on last day',
-                    style: theme.typography.body.xs.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.detailLabel(theme),
                   ),
                   FSwitch(
                     value: isLastDaySelected,
@@ -675,13 +656,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          t.dateRange.endDate,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(t.dateRange.endDate, style: AppTextStyles.sectionHeader(theme)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -697,10 +672,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                   Expanded(
                     child: Text(
                       isZh ? '设置结束日期' : 'Set End Date',
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.foreground,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.listTrailing(theme),
                     ),
                   ),
                   FSwitch(
@@ -786,21 +758,12 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
               const SizedBox(width: 8),
               Text(
                 isZh ? '规则预览' : 'Preview',
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.actionText(theme),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            _buildDescription(),
-            style: theme.typography.body.md.copyWith(
-              color: colors.foreground,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(_buildDescription(), style: AppTextStyles.listTitle(theme)),
         ],
       ),
     );
@@ -845,10 +808,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                     children: [
                       Text(
                         t.dateRange.endDate,
-                        style: theme.typography.body.md.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colors.foreground,
-                        ),
+                        style: AppTextStyles.listTitle(theme),
                       ),
                       const Spacer(),
                       GestureDetector(

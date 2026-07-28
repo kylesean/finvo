@@ -16,6 +16,7 @@ import '../../../app/theme/app_font_config.dart';
 import '../../../app/theme/app_semantic_colors.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A premium overview that uses large typography and subtle depth
 class OverviewCard extends ConsumerWidget {
@@ -240,12 +241,7 @@ class MetricComparisonCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-            ),
-          ),
+          Text(label, style: AppTextStyles.detailLabel(theme)),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -623,9 +619,7 @@ class _CategoryAnalysisSectionState
               widget.chartType == ChartType.expense
                   ? t.statistics.analysis.expenseTitle
                   : t.statistics.analysis.incomeTitle,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.listTitle(theme),
             ),
             // Custom icon toggle (FTabs needs bounded width)
             Row(
@@ -849,10 +843,9 @@ class _CategoryAnalysisSectionState
                         const SizedBox(height: 2),
                         Text(
                           '${Currency.fromCode(ref.read(financialSettingsProvider).primaryCurrency)?.symbol ?? ""}${_formatAmount(total.toStringAsFixed(0))}',
-                          style: theme.typography.body.md.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                          ),
+                          style: AppTextStyles.listTitle(
+                            theme,
+                          ).copyWith(letterSpacing: -0.5),
                         ),
                       ],
                     ),
@@ -899,10 +892,7 @@ class _CategoryAnalysisSectionState
                           ),
                           Text(
                             '${item.percentage.toStringAsFixed(0)}%',
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.mutedForeground,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppTextStyles.statLabel(theme),
                           ),
                         ],
                       ),
@@ -926,9 +916,7 @@ class _CategoryAnalysisSectionState
         child: Center(
           child: Text(
             t.statistics.analysis.radarNeedMoreData,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
         ),
       );
@@ -1008,9 +996,7 @@ class _CategoryAnalysisSectionState
                       children: [
                         Text(
                           category.displayText,
-                          style: theme.typography.body.sm.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.listTrailing(theme),
                         ),
                         const SizedBox(height: 4),
                         ClipRRect(
@@ -1037,9 +1023,7 @@ class _CategoryAnalysisSectionState
                             .read(financialSettingsProvider)
                             .primaryCurrency,
                         showSign: false,
-                        style: theme.typography.body.sm.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyles.listTrailing(theme),
                       ),
                       Text(
                         '${item.percentage.toStringAsFixed(1)}%',
@@ -1094,9 +1078,7 @@ class TopTransactionCard extends ConsumerWidget {
                 children: [
                   Text(
                     category.displayText,
-                    style: theme.typography.body.sm.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyles.listTrailing(theme),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1122,11 +1104,9 @@ class TopTransactionCard extends ConsumerWidget {
               semantic: AmountSemantic.status,
               currency: currencyCode,
               showSign: false,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colors.foreground, // Statistics card uses neutral color
-                letterSpacing: -0.5,
-              ),
+              style: AppTextStyles.listTitle(
+                theme,
+              ).copyWith(letterSpacing: -0.5),
             ),
           ],
         ),
@@ -1239,10 +1219,7 @@ class PremiumEmptyState extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 t.statistics.emptyState.title,
-                style: theme.typography.body.xl.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.foreground,
-                ),
+                style: AppTextStyles.pageTitleLarge(theme),
               ),
               const SizedBox(height: 12),
               Text(

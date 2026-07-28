@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// SpaceAssociationReceipt Data Layer
 class SpaceAssociationReceiptData {
@@ -124,17 +125,12 @@ class SpaceAssociationReceipt extends StatelessWidget {
             children: [
               Text(
                 'Association Successful',
-                style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colors.foreground,
-                ),
+                style: AppTextStyles.pageTitle(theme),
               ),
               const SizedBox(height: 2),
               Text(
                 'Linked to "${model.spaceName}"',
-                style: theme.typography.body.sm.copyWith(
-                  color: colors.mutedForeground,
-                ),
+                style: AppTextStyles.listSubtitle(theme),
               ),
             ],
           ),
@@ -204,20 +200,9 @@ class SpaceAssociationReceipt extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Text(
-          value,
-          style: theme.typography.body.xl.copyWith(
-            fontWeight: FontWeight.bold,
-            color: valueColor ?? colors.foreground,
-          ),
-        ),
+        Text(value, style: AppTextStyles.pageTitleLarge(theme)),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: theme.typography.body.xs.copyWith(
-            color: colors.mutedForeground,
-          ),
-        ),
+        Text(label, style: AppTextStyles.detailLabel(theme)),
       ],
     );
   }

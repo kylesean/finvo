@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class CurrencySelectionSheet extends StatefulWidget {
   final String initialCurrency;
@@ -43,7 +44,6 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final colors = theme.colors;
 
     return FDialog(
       builder: (context, style) => Column(
@@ -54,10 +54,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
             padding: const EdgeInsets.all(16),
             child: Text(
               t.financial.selectCurrency,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.foreground,
-              ),
+              style: AppTextStyles.dialogTitle(theme),
             ),
           ),
 
@@ -76,10 +73,7 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
                       return Center(
                         child: Text(
                           '${currency.code}  ${currency.localizedName}',
-                          style: theme.typography.body.md.copyWith(
-                            color: colors.foreground,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.pickerItem(theme),
                         ),
                       );
                     }).toList(),

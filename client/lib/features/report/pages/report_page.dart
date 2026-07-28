@@ -12,6 +12,7 @@ import '../widgets/filter_sheet.dart';
 import '../widgets/date_range_picker_sheet.dart';
 import '../../../app/router/app_routes.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ReportPage extends ConsumerStatefulWidget {
   const ReportPage({super.key});
@@ -148,9 +149,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           Expanded(
             child: Text(
               t.statistics.title,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.listTitle(theme),
               textAlign: TextAlign.center,
             ),
           ),
@@ -212,12 +211,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
               color: theme.colors.mutedForeground,
             ),
             const SizedBox(height: 16),
-            Text(
-              t.common.loadFailed,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Text(t.common.loadFailed, style: AppTextStyles.listTitle(theme)),
             const SizedBox(height: 8),
             Text(
               error,
@@ -296,10 +290,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                       const SizedBox(width: 6),
                       Text(
                         state.dateRangeDisplayText!,
-                        style: theme.typography.body.sm.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.actionText(theme),
                       ),
                     ],
                   ),
@@ -398,12 +389,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              t.statistics.ranking,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Text(t.statistics.ranking, style: AppTextStyles.listTitle(theme)),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -477,9 +463,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
             child: Center(
               child: Text(
                 t.statistics.noMoreData,
-                style: theme.typography.body.xs.copyWith(
-                  color: colors.mutedForeground,
-                ),
+                style: AppTextStyles.detailLabel(theme),
               ),
             ),
           ),

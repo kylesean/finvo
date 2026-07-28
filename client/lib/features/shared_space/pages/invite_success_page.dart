@@ -9,6 +9,7 @@ import '../../../shared/services/toast_service.dart';
 import '../models/shared_space_models.dart';
 import '../services/shared_space_service.dart';
 import 'dart:async';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class InviteSuccessPage extends ConsumerStatefulWidget {
   final SharedSpace space;
@@ -110,15 +111,11 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                       children: [
                         Text(
                           t.sharedSpace.inviteSuccess.subtitle,
-                          style: theme.typography.body.lg.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: AppTextStyles.listTitle(theme),
                         ),
                         Text(
                           widget.space.name,
-                          style: theme.typography.body.sm.copyWith(
-                            color: colors.mutedForeground,
-                          ),
+                          style: AppTextStyles.listSubtitle(theme),
                         ),
                       ],
                     ),
@@ -181,9 +178,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
             const SizedBox(height: 16),
             Text(
               t.sharedSpace.inviteSuccess.generatingCode,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
           ],
         ),
@@ -203,9 +198,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
             const SizedBox(height: 16),
             Text(
               t.sharedSpace.inviteSuccess.generateFailed,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground,
-              ),
+              style: AppTextStyles.listSubtitle(theme),
             ),
             const SizedBox(height: 16),
             FButton(
@@ -265,9 +258,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
           // Invite Code
           Text(
             t.sharedSpace.inviteSuccess.codeLabel,
-            style: theme.typography.body.sm.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.listSubtitle(theme),
           ),
           const SizedBox(height: 8),
           GestureDetector(
@@ -283,10 +274,9 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
                 children: [
                   Text(
                     _inviteCode!.code,
-                    style: theme.typography.body.xl2.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 3,
-                    ),
+                    style: AppTextStyles.listTitle(
+                      theme,
+                    ).copyWith(letterSpacing: 3),
                   ),
                   const SizedBox(width: 12),
                   Icon(
@@ -302,9 +292,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
           const SizedBox(height: 8),
           Text(
             t.sharedSpace.inviteSuccess.validHint,
-            style: theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-            ),
+            style: AppTextStyles.detailLabel(theme),
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import '../molecules/molecules.dart';
 import '../../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class AccountPickerCard extends StatelessWidget {
   final List<Map<String, dynamic>> accounts;
@@ -40,13 +41,7 @@ class AccountPickerCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          displayTitle,
-          style: theme.typography.body.md.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.foreground,
-          ),
-        ),
+        Text(displayTitle, style: AppTextStyles.listTitle(theme)),
 
         if (subtitle != null) ...[
           const SizedBox(height: 2),
@@ -95,13 +90,7 @@ class AccountPickerCard extends StatelessWidget {
             children: [
               Icon(FLucideIcons.check, size: 16, color: colors.primary),
               const SizedBox(width: 8),
-              Text(
-                displayConfirm,
-                style: theme.typography.body.sm.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colors.primary,
-                ),
-              ),
+              Text(displayConfirm, style: AppTextStyles.actionText(theme)),
             ],
           ),
         ),

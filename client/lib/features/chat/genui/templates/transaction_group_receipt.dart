@@ -19,6 +19,7 @@ import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Batch transaction receipt component
 ///
@@ -204,10 +205,7 @@ class _TransactionGroupReceiptState
               // Category Name
               Text(
                 category.displayText,
-                style: theme.typography.body.md.copyWith(
-                  fontWeight: FontWeight.bold,
-                  height: 1.2,
-                ),
+                style: AppTextStyles.listTitle(theme).copyWith(height: 1.2),
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
@@ -234,11 +232,9 @@ class _TransactionGroupReceiptState
           amount,
           isExpense,
           currency: currency,
-          style: theme.typography.body.xl.copyWith(
-            fontWeight: FontWeight.bold,
-            height: 1.2,
-            letterSpacing: -0.5,
-          ),
+          style: AppTextStyles.pageTitleLarge(
+            theme,
+          ).copyWith(letterSpacing: -0.5, height: 1.2),
         ),
       ],
     );
@@ -273,9 +269,7 @@ class _TransactionGroupReceiptState
                 ),
                 child: Text(
                   tag,
-                  style: theme.typography.body.xs.copyWith(
-                    color: colors.mutedForeground,
-                  ),
+                  style: AppTextStyles.detailLabel(theme),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -283,12 +277,7 @@ class _TransactionGroupReceiptState
             ),
           ),
         if (extraCount > 0)
-          Text(
-            '+$extraCount',
-            style: theme.typography.body.xs.copyWith(
-              color: colors.mutedForeground,
-            ),
-          ),
+          Text('+$extraCount', style: AppTextStyles.detailLabel(theme)),
       ],
     );
   }
@@ -483,28 +472,20 @@ class _TransactionGroupReceiptState
               children: [
                 Text(
                   '${t.chat.genui.transactionGroupReceipt.title} ${t.chat.genui.transactionGroupReceipt.count(count: count)}',
-                  style: theme.typography.body.md.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: colors.primary,
-                  ),
+                  style: AppTextStyles.actionText(theme),
                 ),
                 Row(
                   children: [
                     Text(
                       '${t.chat.genui.transactionGroupReceipt.total} ',
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                      ),
+                      style: AppTextStyles.detailLabel(theme),
                     ),
                     AmountText(
                       amount: totalAmount,
                       type: TransactionType.expense,
                       semantic: AmountSemantic.status,
                       showSign: false,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.statLabel(theme),
                     ),
                   ],
                 ),
@@ -910,9 +891,7 @@ class _TransactionGroupReceiptState
                 children: [
                   Text(
                     t.chat.genui.transactionGroupReceipt.currencyMismatchDesc,
-                    style: theme.typography.body.sm.copyWith(
-                      color: colors.mutedForeground,
-                    ),
+                    style: AppTextStyles.listSubtitle(theme),
                   ),
                   const SizedBox(height: 16),
                   Container(
@@ -995,16 +974,8 @@ class _TransactionGroupReceiptState
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: theme.typography.body.sm.copyWith(
-            color: colors.mutedForeground,
-          ),
-        ),
-        Text(
-          value,
-          style: theme.typography.body.sm.copyWith(fontWeight: FontWeight.w500),
-        ),
+        Text(label, style: AppTextStyles.listSubtitle(theme)),
+        Text(value, style: AppTextStyles.listTrailing(theme)),
       ],
     );
   }
@@ -1131,9 +1102,7 @@ class _TransactionGroupReceiptState
             children: [
               Text(
                 t.chat.genui.transactionGroupReceipt.selectSpace,
-                style: theme.typography.body.lg.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTextStyles.listTitle(theme),
               ),
               const SizedBox(height: 16),
               ..._cachedSpaces!.map((space) {

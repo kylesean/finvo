@@ -7,6 +7,7 @@ import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 import '../atoms/atoms.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Transfer success receipt card widget - concise three-section design
 ///
@@ -109,10 +110,7 @@ class TransferReceipt extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             t.chat.transferWizard.transferSuccess,
-            style: theme.typography.body.md.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.actionText(theme),
           ),
           const Spacer(),
           Text(
@@ -300,11 +298,7 @@ class _TransferAnimationState extends State<_TransferAnimation>
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.typography.body.xs.copyWith(
-              color: colors.foreground,
-              fontWeight: FontWeight.w500,
-              height: 1.2,
-            ),
+            style: AppTextStyles.detailLabel(theme).copyWith(height: 1.2),
           ),
         ),
       ],
