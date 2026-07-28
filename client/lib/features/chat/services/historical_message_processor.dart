@@ -12,6 +12,8 @@ import 'package:logging/logging.dart';
 
 import '../models/chat_message.dart';
 import '../models/chat_message_attachment.dart';
+import '../models/message_content_part.dart';
+import '../models/tool_call_info.dart';
 
 /// Historical Message Processor
 ///
@@ -64,6 +66,10 @@ class HistoricalMessageProcessor {
         streamingStatus: StreamingStatus.completed,
         isTyping: false,
         attachments: normalizedAttachments,
+        toolCalls: _normalizeToolCallStatuses(processedMessage.toolCalls),
+        fullContent: _normalizeFullContentToolCalls(
+          processedMessage.fullContent,
+        ),
         // Preserve original surfaceIds (from real-time rendered surfaces)
         // uiComponents remain unchanged, for HistoricalComponentRenderer to use
       );
@@ -137,5 +143,36 @@ class HistoricalMessageProcessor {
 
     // Both have content, separate with newlines
     return '$c1\n\n$c2';
+  }
+
+  /// Normalize tool call statuses for historical messages.
+  /// Any pending/running tool calls are marked as success since the
+  /// conversation turn has already completed.
+  List<ToolCallInfo> _normalizeToolCallStatuses(List<ToolCallInfo> toolCalls) {
+    return toolCalls.map((tc) {
+      if (tc.status == ToolExecutionStatus.pending ||
+          tc.status == ToolExecutionStatus.running) {
+        return tc.copyWith(status: ToolExecutionStatus.success);
+      }
+      return tc;
+    }).toList();
+  }
+
+  /// Normalize tool call statuses within fullContent parts.
+  List<MessageContentPart> _normalizeFullContentToolCalls(
+    List<MessageContentPart> parts,
+  ) {
+    return parts.map((part) {
+      if (part is ToolCallPart) {
+        final tc = part.toolCall;
+        if (tc.status == ToolExecutionStatus.pending ||
+            tc.status == ToolExecutionStatus.running) {
+          return ToolCallPart(
+            toolCall: tc.copyWith(status: ToolExecutionStatus.success),
+          );
+        }
+      }
+      return part;
+    }).toList();
   }
 }

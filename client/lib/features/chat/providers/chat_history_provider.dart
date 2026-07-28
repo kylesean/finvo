@@ -525,6 +525,13 @@ class ChatHistory extends _$ChatHistory {
     );
     if (messageIndex == -1) return;
 
+    // Clean up any tool calls still in pending/running state.
+    // This handles the case where the server emitted tool_call_start but
+    // never sent the corresponding tool_call_end (e.g. internal skill file
+    // reads that bypass the standard tools node).
+    // Mark as success since the stream completed normally.
+    _messageRepository.completePendingToolCalls(_currentStreamingAiMessageId);
+
     if (finalTextOverride != null) {
       _updateAiMessageState(
         id: _currentStreamingAiMessageId,

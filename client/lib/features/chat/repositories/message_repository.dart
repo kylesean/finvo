@@ -509,4 +509,60 @@ class MessageRepository {
       'MessageRepository: Cancelled pending tool calls for message $messageId',
     );
   }
+
+  /// Complete all pending/running tool calls with success status
+  ///
+  /// Called when the SSE stream completes normally but some tool calls
+  /// never received their tool_call_end event (e.g. internal skill file
+  /// reads that bypass the standard tools node).
+  void completePendingToolCalls(String messageId) {
+    final messages = getCurrentMessages();
+    final messageIndex = messages.indexWhere((m) => m.id == messageId);
+
+    if (messageIndex == -1) return;
+
+    final message = messages[messageIndex];
+
+    final hasPendingTools = message.toolCalls.any(
+      (tc) =>
+          tc.status == ToolExecutionStatus.pending ||
+          tc.status == ToolExecutionStatus.running,
+    );
+
+    if (!hasPendingTools) return;
+
+    final updatedToolCalls = message.toolCalls.map((tc) {
+      if (tc.status == ToolExecutionStatus.pending ||
+          tc.status == ToolExecutionStatus.running) {
+        return tc.copyWith(status: ToolExecutionStatus.success);
+      }
+      return tc;
+    }).toList();
+
+    final updatedFullContent = message.fullContent.map((part) {
+      if (part is ToolCallPart) {
+        final tc = part.toolCall;
+        if (tc.status == ToolExecutionStatus.pending ||
+            tc.status == ToolExecutionStatus.running) {
+          return ToolCallPart(
+            toolCall: tc.copyWith(status: ToolExecutionStatus.success),
+          );
+        }
+      }
+      return part;
+    }).toList();
+
+    final updatedMessage = message.copyWith(
+      toolCalls: updatedToolCalls,
+      fullContent: updatedFullContent,
+    );
+
+    final updatedMessages = [...messages];
+    updatedMessages[messageIndex] = updatedMessage;
+    onMessagesChanged(updatedMessages);
+
+    _logger.info(
+      'MessageRepository: Completed pending tool calls for message $messageId',
+    );
+  }
 }

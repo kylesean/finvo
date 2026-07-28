@@ -19,6 +19,7 @@ from typing import Any
 from uuid import UUID
 
 from langchain_core.messages import AIMessage, ToolMessage
+from langgraph.types import Command
 
 from app.core.genui import SurfaceTracker
 from app.core.langgraph.stream.component_detector import ComponentDetector
@@ -227,17 +228,20 @@ class EventGenerator:
         node_output: Any,
         session_id: UUID,
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理 tools 节点输出"""
-        messages = []
-        if isinstance(node_output, dict):
-            messages = node_output.get("messages", [])
-        elif isinstance(node_output, list):
-            messages = node_output
+        """处理 tools 节点输出
+
+        LangGraph ToolNode._combine_tool_outputs 可能返回三种格式：
+        1. dict: {"messages": [ToolMessage, ...]} — 所有工具返回普通值
+        2. list[ToolMessage]: 直接的消息列表（input_type="list" 时）
+        3. list[Command | dict]: 混合列表 — 当任一工具返回 Command 时
+           例: [Command(update={"messages": [ToolMsg]}), {"messages": [ToolMsg]}]
+
+        格式 3 发生在 load_skill（返回 Command）与普通工具（如 search_personal_context）
+        在同一轮并行执行时。
+        """
+        messages = self._extract_tool_messages_from_node_output(node_output)
 
         for msg in messages:
-            if not self._is_tool_message(msg):
-                continue
-
             tool_name, tool_call_id = self._extract_tool_info(msg)
 
             # 计算执行时长
@@ -280,6 +284,35 @@ class EventGenerator:
                 tool_call_id=tool_call_id,
             ):
                 yield event
+
+    def _extract_tool_messages_from_node_output(self, node_output: Any) -> list[Any]:
+        """从 tools 节点输出中提取所有 ToolMessage。
+
+        处理 LangGraph _combine_tool_outputs 的三种返回格式。
+        """
+        messages: list[Any] = []
+
+        if isinstance(node_output, dict):
+            # 格式 1: {"messages": [ToolMessage, ...]}
+            messages = node_output.get("messages", [])
+
+        elif isinstance(node_output, list):
+            # 格式 2 或 3: 可能是纯 ToolMessage 列表，或 Command/dict 混合列表
+            for item in node_output:
+                if self._is_tool_message(item):
+                    # 格式 2: 直接是 ToolMessage
+                    messages.append(item)
+                elif isinstance(item, dict):
+                    # 格式 3 中的 dict 包装: {"messages": [ToolMessage]}
+                    messages.extend(item.get("messages", []))
+                elif isinstance(item, Command):
+                    # 格式 3 中的 Command: 从 update 中提取 messages
+                    update = item.update
+                    if isinstance(update, dict):
+                        cmd_messages = update.get("messages", [])
+                        messages.extend(cmd_messages)
+
+        return messages
 
     async def _emit_component_events(
         self,

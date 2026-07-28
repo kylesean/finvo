@@ -365,13 +365,14 @@ class MemoryService:
             # Build filters if categories specified
             # Mem0 filter format: {"AND": [{"category": "value"}]} for multiple conditions
             # or {"category": "value"} for single category
-            filters: dict[str, Any] | None = None
+            # NOTE: user_id must be inside filters (not top-level param) per Mem0 API
+            filters: dict[str, Any] = {"user_id": user_id}
             if categories:
                 if len(categories) == 1:
-                    filters = {"category": categories[0]}
+                    filters["category"] = categories[0]
                 else:
                     # Use OR logic for multiple categories
-                    filters = {"OR": [{"category": cat} for cat in categories]}
+                    filters["OR"] = [{"category": cat} for cat in categories]
 
                 logger.debug(
                     "memory_search_filters",
@@ -381,7 +382,6 @@ class MemoryService:
 
             result = await self.memory.search(
                 query=query,
-                user_id=user_id,
                 limit=limit,
                 filters=filters,
             )
