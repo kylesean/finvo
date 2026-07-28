@@ -37,9 +37,17 @@ class AuthService {
 
   // Helper to save authentication data
   Future<void> _saveAuthData(String token, UserModel user) async {
-    // Save sensitive data to secure storage
-    await _storage.write(key: _tokenKey, value: token);
-    await _storage.write(key: _userIdKey, value: user.id);
+    // Save sensitive data to secure storage with fallback for iOS Keychain sideloading errors
+    try {
+      await _storage.write(key: _tokenKey, value: token);
+      await _storage.write(key: _userIdKey, value: user.id);
+    } catch (e) {
+      _logger.warning(
+        'SecureStorage write failed (iOS Keychain sideload issue): $e',
+      );
+      await _prefs.setString(_tokenKey, token);
+      await _prefs.setString(_userIdKey, user.id);
+    }
 
     // Save non-sensitive data to shared preferences
     await _prefs.setString(_userNameKey, user.username?.toString() ?? '');
@@ -59,10 +67,16 @@ class AuthService {
   // Helper to delete authentication data
   Future<void> _deleteAuthData() async {
     // Clear sensitive data from secure storage
-    await _storage.delete(key: _tokenKey);
-    await _storage.delete(key: _userIdKey);
+    try {
+      await _storage.delete(key: _tokenKey);
+      await _storage.delete(key: _userIdKey);
+    } catch (e) {
+      _logger.warning('SecureStorage delete failed: $e');
+    }
 
     // Clear non-sensitive data from shared preferences
+    await _prefs.remove(_tokenKey);
+    await _prefs.remove(_userIdKey);
     await _prefs.remove(_userNameKey);
     await _prefs.remove(_userEmailKey);
     await _prefs.remove(_userPhoneKey);
@@ -73,8 +87,16 @@ class AuthService {
 
   // Method to retrieve stored authentication data
   Future<Map<String, dynamic>?> getStoredAuthData() async {
-    final token = await _storage.read(key: _tokenKey);
-    final userId = await _storage.read(key: _userIdKey);
+    String? token;
+    String? userId;
+    try {
+      token = await _storage.read(key: _tokenKey);
+      userId = await _storage.read(key: _userIdKey);
+    } catch (e) {
+      _logger.warning('SecureStorage read failed: $e');
+    }
+    token ??= _prefs.getString(_tokenKey);
+    userId ??= _prefs.getString(_userIdKey);
 
     if (token != null && userId != null) {
       // Retrieve non-sensitive data from shared preferences
