@@ -9,6 +9,9 @@ import '../../../core/storage/secure_storage_service.dart';
 import '../../../core/network/dio_provider.dart' show sseDioProvider;
 import 'genui_sse_parser.dart';
 
+import '../../../shared/providers/locale_provider.dart';
+import '../../../i18n/strings.g.dart';
+
 // Export ParsedSseEvent and SseEventType for other files to use
 export 'genui_sse_parser.dart' show ParsedSseEvent, SseEventType;
 
@@ -22,6 +25,7 @@ class AIService {
   final _logger = Logger('AIService');
   final SecureStorageService _storageService;
   final Dio _dio;
+  final Ref? ref;
   final String _sseBaseUrl;
   final String _baseUrl;
 
@@ -32,6 +36,7 @@ class AIService {
   AIService(
     this._storageService,
     this._dio, {
+    this.ref,
     required this._sseBaseUrl,
     required this._baseUrl,
   });
@@ -78,6 +83,13 @@ class AIService {
       "Authorization": "Bearer $token",
     };
 
+    String? appLanguage;
+    if (ref != null) {
+      final currentLocale = ref!.read(localeProvider);
+      headers["Accept-Language"] = _convertToAcceptLanguage(currentLocale);
+      appLanguage = _convertToLanguageCode(currentLocale);
+    }
+
     // Build request body - session_id in request body
     final Map<String, dynamic> message = {
       "role": "user",
@@ -95,6 +107,7 @@ class AIService {
     final Map<String, dynamic> requestBody = {
       "messages": [message],
       "session_id": sessionId, // null for new session, backend will create one
+      if (appLanguage != null) "app_language": appLanguage,
     };
 
     _logger.info("AIService: Starting SSE connection...");
@@ -305,6 +318,36 @@ class AIService {
       return false;
     }
   }
+
+  String _convertToAcceptLanguage(AppLocale locale) {
+    switch (locale) {
+      case AppLocale.zh:
+        return 'zh-CN,zh;q=0.9,en;q=0.8';
+      case AppLocale.en:
+        return 'en-US,en;q=0.9,zh;q=0.8';
+      case AppLocale.ja:
+        return 'ja-JP,ja;q=0.9,en;q=0.8';
+      case AppLocale.ko:
+        return 'ko-KR,ko;q=0.9,en;q=0.8';
+      case AppLocale.zhHant:
+        return 'zh-TW,zh;q=0.9,en;q=0.8';
+    }
+  }
+
+  String _convertToLanguageCode(AppLocale locale) {
+    switch (locale) {
+      case AppLocale.zh:
+        return 'zh';
+      case AppLocale.en:
+        return 'en';
+      case AppLocale.ja:
+        return 'ja';
+      case AppLocale.ko:
+        return 'ko';
+      case AppLocale.zhHant:
+        return 'zh-Hant';
+    }
+  }
 }
 
 // AIService Provider
@@ -316,6 +359,7 @@ final aiServiceProvider = Provider<AIService>((ref) {
   return AIService(
     storageService,
     dio,
+    ref: ref,
     sseBaseUrl: apiConstants.sseBaseUrl,
     baseUrl: apiConstants.baseUrl,
   );

@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/speech_recognition_service.dart';
+import '../services/system_speech_service.dart';
 import '../services/speech_service_factory.dart';
 import '../services/file_upload_service.dart';
 import '../services/sound_feedback_service.dart';
@@ -221,8 +222,10 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     }
 
     String userMessage = error;
-    if (error == 'system_speech_restricted') {
-      userMessage = 'system_speech_restricted';
+    if (error == 'system_speech_restricted' ||
+        error == 'dictation_disabled' ||
+        error == 'permission_denied') {
+      userMessage = error;
     } else if (error == 'speech_not_configured') {
       userMessage = 'speech_not_configured';
     } else if (error == 'speech_connection_failed' ||
@@ -302,9 +305,18 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
       if (!isReady) {
         _logger.warning("Speech service not ready");
-        final errMsg = _serviceType == SpeechServiceType.system
-            ? 'system_speech_restricted'
-            : 'Speech service connection failed, please check network';
+        String errMsg;
+        if (_serviceType == SpeechServiceType.system) {
+          if (_speechService is SystemSpeechService) {
+            errMsg =
+                (_speechService as SystemSpeechService).lastError ??
+                'system_speech_restricted';
+          } else {
+            errMsg = 'system_speech_restricted';
+          }
+        } else {
+          errMsg = 'Speech service connection failed, please check network';
+        }
         state = state.copyWith(
           showError: true,
           errorMessage: errMsg,

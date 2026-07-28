@@ -87,16 +87,26 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
         final errorMessage = currentState.errorMessage;
         if (errorMessage.isNotEmpty) {
           if (errorMessage == 'system_speech_restricted' ||
+              errorMessage == 'dictation_disabled' ||
+              errorMessage == 'permission_denied' ||
               errorMessage == 'speech_not_configured' ||
               errorMessage == 'speech_connection_failed') {
             final String dialogTitle =
                 errorMessage == 'system_speech_restricted'
                 ? t.speech.systemVoiceRestrictedTitle
+                : errorMessage == 'dictation_disabled'
+                ? t.speech.dictationDisabledTitle
+                : errorMessage == 'permission_denied'
+                ? t.speech.permissionDeniedTitle
                 : t.speech.connectionFailedTitle;
 
             final String dialogContent =
                 errorMessage == 'system_speech_restricted'
                 ? t.speech.systemVoiceRestrictedContent
+                : errorMessage == 'dictation_disabled'
+                ? t.speech.dictationDisabledContent
+                : errorMessage == 'permission_denied'
+                ? t.speech.permissionDeniedContent
                 : errorMessage == 'speech_not_configured'
                 ? t.speech.serviceNotConfigured
                 : t.speech.connectionFailed;

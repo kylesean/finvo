@@ -916,8 +916,20 @@ class Translations$speech$zh {
 	/// zh: '系统语音不可用'
 	String get systemVoiceRestrictedTitle => '系统语音不可用';
 
-	/// zh: '您的手机系统语音引擎受到厂商权限限制或服务未开启。建议配置并开启 WebSocket 自建语音服务。'
-	String get systemVoiceRestrictedContent => '您的手机系统语音引擎受到厂商权限限制或服务未开启。建议配置并开启 WebSocket 自建语音服务。';
+	/// zh: '您的手机系统语音引擎不可用或服务未开启。建议在设置中开启语音服务或配置 WebSocket 自建语音服务。'
+	String get systemVoiceRestrictedContent => '您的手机系统语音引擎不可用或服务未开启。建议在设置中开启语音服务或配置 WebSocket 自建语音服务。';
+
+	/// zh: '语音听写未开启'
+	String get dictationDisabledTitle => '语音听写未开启';
+
+	/// zh: '系统语音听写服务未开启。如果是 iOS 设备，请前往【设置 -> 通用 -> 键盘】开启【启用听写】。'
+	String get dictationDisabledContent => '系统语音听写服务未开启。如果是 iOS 设备，请前往【设置 -> 通用 -> 键盘】开启【启用听写】。';
+
+	/// zh: '缺少语音权限'
+	String get permissionDeniedTitle => '缺少语音权限';
+
+	/// zh: '应用需要麦克风和语音识别权限才能使用此功能。请在系统设置中允许权限。'
+	String get permissionDeniedContent => '应用需要麦克风和语音识别权限才能使用此功能。请在系统设置中允许权限。';
 
 	/// zh: '前往设置'
 	String get goToSettings => '前往设置';

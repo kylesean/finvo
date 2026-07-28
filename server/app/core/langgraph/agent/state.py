@@ -19,6 +19,13 @@ def _merge_skills(left: list[str] | None, right: list[str] | None) -> list[str]:
     return list(left_set | right_set)
 
 
+def _take_last_skill(left: str | None, right: str | None) -> str | None:
+    """Reducer for active_skill: take the last updated skill name (or right if non-none)."""
+    if right is not None:
+        return right
+    return left
+
+
 class AgentState(TypedDict):
     """LangGraph Agent State
 
@@ -51,8 +58,8 @@ class AgentState(TypedDict):
     # Loaded skills list (using reducer to merge)
     skills_loaded: Annotated[list[str], _merge_skills]
 
-    # Currently active skill (last loaded)
-    active_skill: str | None
+    # Currently active skill (using reducer to safely handle concurrent updates in a single step)
+    active_skill: Annotated[str | None, _take_last_skill]
 
 
 def create_initial_state() -> AgentState:

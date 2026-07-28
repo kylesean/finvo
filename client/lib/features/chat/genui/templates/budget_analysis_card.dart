@@ -10,6 +10,7 @@ import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 import '../../../../core/constants/category_constants.dart';
+import '../utils/genui_num_utils.dart';
 
 /// Budget analysis card (Layer 4: Template)
 ///
@@ -29,59 +30,96 @@ class BudgetAnalysisCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = context.theme;
-    final colors = theme.colors;
+    try {
+      final theme = context.theme;
+      final colors = theme.colors;
 
-    final totalExpense = (data['total_expense'] as num?)?.toDouble() ?? 0.0;
-    final currency =
-        data['currency'] as String? ??
-        ref.watch(financialSettingsProvider).primaryCurrency;
-    final currencySymbol = AmountFormatter.getCurrencySymbol(currency);
-    final periodDays = data['period_days'] as int? ?? 90;
-    final byCategory = data['by_category'] as Map<String, dynamic>? ?? {};
-    final trends = data['trends'] as Map<String, dynamic>? ?? {};
-    final topSpenders = data['top_spenders'] as List<dynamic>? ?? [];
-    final suggestions = data['suggestions'] as List<dynamic>? ?? [];
+      final totalExpense = GenUiNumUtils.toDouble(data['total_expense']);
+      final currency =
+          data['currency'] as String? ??
+          ref.watch(financialSettingsProvider).primaryCurrency;
+      final currencySymbol = AmountFormatter.getCurrencySymbol(currency);
+      final periodDays = GenUiNumUtils.toInt(data['period_days'], 90);
+      final byCategoryRaw = data['by_category'];
+      final byCategory = byCategoryRaw is Map
+          ? Map<String, dynamic>.from(byCategoryRaw)
+          : <String, dynamic>{};
+      final trendsRaw = data['trends'];
+      final trends = trendsRaw is Map
+          ? Map<String, dynamic>.from(trendsRaw)
+          : <String, dynamic>{};
+      final topSpendersRaw = data['top_spenders'];
+      final topSpenders = topSpendersRaw is List ? topSpendersRaw : <dynamic>[];
+      final suggestionsRaw = data['suggestions'];
+      final suggestions = suggestionsRaw is List ? suggestionsRaw : <dynamic>[];
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: colors.border.withValues(alpha: 0.5)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1. Header bar (dark blue tone, distinct from status card)
-          _buildHeader(theme, colors, periodDays),
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: colors.background,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(color: colors.border.withValues(alpha: 0.5)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Header bar (dark blue tone, distinct from status card)
+            _buildHeader(theme, colors, periodDays),
 
-          // 2. Total expense + trend indicators
-          _buildTotalSection(theme, colors, totalExpense, trends, currency),
+            // 2. Total expense + trend indicators
+            _buildTotalSection(theme, colors, totalExpense, trends, currency),
 
-          // 3. Category distribution
-          if (byCategory.isNotEmpty)
-            _buildCategorySection(theme, colors, byCategory, currencySymbol),
+            // 3. Category distribution
+            if (byCategory.isNotEmpty)
+              _buildCategorySection(theme, colors, byCategory, currencySymbol),
 
-          // 4. Top spenders
-          if (topSpenders.isNotEmpty)
-            _buildTopSpendersSection(theme, colors, topSpenders, currency),
+            // 4. Top spenders
+            if (topSpenders.isNotEmpty)
+              _buildTopSpendersSection(theme, colors, topSpenders, currency),
 
-          // 5. Suggestions (based on structured data)
-          if (suggestions.isNotEmpty)
-            _buildSuggestionsSection(theme, colors, suggestions),
-        ],
-      ),
-    );
+            // 5. Suggestions (based on structured data)
+            if (suggestions.isNotEmpty)
+              _buildSuggestionsSection(theme, colors, suggestions),
+          ],
+        ),
+      );
+    } catch (e) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: context.theme.colors.muted.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: context.theme.colors.mutedForeground,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Budget analysis format error: $e',
+                style: TextStyle(
+                  color: context.theme.colors.mutedForeground,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   /// Header bar - using dark blue tone to distinguish from regular status card
@@ -140,7 +178,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     String currency,
   ) {
     final mom = trends['month_over_month'] as Map<String, dynamic>?;
-    final changePercent = (mom?['change_percent'] as num?)?.toDouble() ?? 0;
+    final changePercent = GenUiNumUtils.toDouble(mom?['change_percent']);
     final direction = mom?['direction'] as String? ?? 'flat';
 
     return Padding(
@@ -276,8 +314,9 @@ class BudgetAnalysisCard extends ConsumerWidget {
               ) {
                 final index = mapEntry.key;
                 final entry = mapEntry.value;
-                final percentage =
-                    (entry.value['percentage'] as num?)?.toDouble() ?? 0;
+                final percentage = GenUiNumUtils.toDouble(
+                  entry.value['percentage'],
+                );
                 return Flexible(
                   flex: (percentage * 10).toInt().clamp(1, 100),
                   child: Container(color: theme.chartColorAt(index)),
@@ -290,9 +329,11 @@ class BudgetAnalysisCard extends ConsumerWidget {
           ...sortedCategories.take(4).toList().asMap().entries.map((mapEntry) {
             final index = mapEntry.key;
             final entry = mapEntry.value;
-            final catData = entry.value as Map<String, dynamic>;
-            final percentage = (catData['percentage'] as num?)?.toDouble() ?? 0;
-            final total = (catData['total'] as num?)?.toDouble() ?? 0;
+            final catData = entry.value is Map
+                ? Map<String, dynamic>.from(entry.value as Map)
+                : <String, dynamic>{};
+            final percentage = GenUiNumUtils.toDouble(catData['percentage']);
+            final total = GenUiNumUtils.toDouble(catData['total']);
             final category = TransactionCategory.fromKey(entry.key);
             final chartColor = theme.chartColorAt(index);
 
@@ -368,8 +409,10 @@ class BudgetAnalysisCard extends ConsumerWidget {
           const SizedBox(height: 8),
           ...topSpenders.take(3).toList().asMap().entries.map((mapEntry) {
             final index = mapEntry.key;
-            final spender = mapEntry.value as Map<String, dynamic>;
-            final amount = (spender['amount'] as num?)?.toDouble() ?? 0;
+            final spender = mapEntry.value is Map
+                ? Map<String, dynamic>.from(mapEntry.value as Map)
+                : <String, dynamic>{};
+            final amount = GenUiNumUtils.toDouble(spender['amount']);
             final categoryKey = spender['category'] as String? ?? 'OTHERS';
             final description = spender['description'] as String? ?? '';
             final date = spender['date'] as String? ?? '';

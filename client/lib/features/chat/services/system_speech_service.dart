@@ -28,13 +28,19 @@ class SystemSpeechService implements SpeechRecognitionService {
   final StreamController<String> _errorController =
       StreamController<String>.broadcast();
 
-  /// Recognition language, default Chinese
+  String? _lastError;
+
+  /// Recognition language, default Chinese (BCP 47 format 'zh-CN')
   final String localeId;
 
   /// Constructor
   ///
-  /// [localeId] Recognition language, default is 'zh_CN' (Chinese)
-  SystemSpeechService({this.localeId = 'zh_CN'});
+  /// [localeId] Recognition language, default is 'zh-CN' (Chinese)
+  SystemSpeechService({this.localeId = 'zh-CN'});
+
+  String get _formattedLocaleId => localeId.replaceAll('_', '-');
+
+  String? get lastError => _lastError;
 
   @override
   Stream<String> get onResult => _resultController.stream;
@@ -59,12 +65,9 @@ class SystemSpeechService implements SpeechRecognitionService {
 
   @override
   Future<bool> hasPermission() async {
-    // speech_to_text checks permissions during initialize
-    // Return initialization status as approximate permission check
     if (_isInitialized) return true;
 
     try {
-      // Try to initialize to check permissions
       final available = await _speech.initialize(
         onStatus: (_) {},
         onError: (_) {},
@@ -78,13 +81,11 @@ class SystemSpeechService implements SpeechRecognitionService {
 
   @override
   Future<bool> requestPermission() async {
-    // speech_to_text automatically requests permission during initialize
     return await hasPermission();
   }
 
   @override
   Future<bool> ensureReady() async {
-    // For system speech, just ensure initialized
     if (_isInitialized) return true;
     return await initialize();
   }
@@ -115,14 +116,16 @@ class SystemSpeechService implements SpeechRecognitionService {
     try {
       _logger.info('Initializing system speech recognition service...');
       _statusController.add('connecting');
+      _lastError = null;
 
       final isPlatformAvailable = await _isPlatformSpeechAvailable();
       if (!isPlatformAvailable) {
         _logger.warning(
           'Native Android speech service is restricted or unavailable',
         );
+        _lastError = 'system_speech_restricted';
         _statusController.add('error');
-        _errorController.add('system_speech_restricted');
+        _errorController.add(_lastError!);
         return false;
       }
 
@@ -146,7 +149,16 @@ class SystemSpeechService implements SpeechRecognitionService {
         );
       } else {
         _statusController.add('disconnected');
-        _logger.warning('System speech recognition service unavailable');
+        final hasPerm = await hasPermission();
+        if (!hasPerm) {
+          _lastError = 'permission_denied';
+        } else if (!kIsWeb && Platform.isIOS) {
+          _lastError = 'dictation_disabled';
+        } else {
+          _lastError = 'system_speech_restricted';
+        }
+        _logger.warning('System speech recognition unavailable: $_lastError');
+        _errorController.add(_lastError!);
       }
 
       return available;
@@ -155,7 +167,8 @@ class SystemSpeechService implements SpeechRecognitionService {
         'System speech recognition service initialization failed: $e',
       );
       _statusController.add('error');
-      _errorController.add('Initialization failed: $e');
+      _lastError = 'Initialization failed: $e';
+      _errorController.add(_lastError!);
       return false;
     }
   }
@@ -165,7 +178,7 @@ class SystemSpeechService implements SpeechRecognitionService {
     if (!_isInitialized) {
       _logger.warning('Service not initialized, cannot start listening');
       _statusController.add('error');
-      _errorController.add('system_speech_restricted');
+      _errorController.add(_lastError ?? 'system_speech_restricted');
       return;
     }
 
@@ -175,7 +188,9 @@ class SystemSpeechService implements SpeechRecognitionService {
     }
 
     try {
-      _logger.info('Starting system speech recognition...');
+      _logger.info(
+        'Starting system speech recognition (locale: $_formattedLocaleId)...',
+      );
       _isListening = true;
       _statusController.add('listening');
 
@@ -185,7 +200,7 @@ class SystemSpeechService implements SpeechRecognitionService {
           listenMode: ListenMode.dictation,
           cancelOnError: false,
           partialResults: true,
-          localeId: localeId,
+          localeId: _formattedLocaleId,
           listenFor: const Duration(
             seconds: 30,
           ), // Maximum listening time 30 seconds
@@ -201,7 +216,9 @@ class SystemSpeechService implements SpeechRecognitionService {
       _isListening = false;
       _statusController.add('error');
       final errStr = e.toString();
-      if (errStr.contains('SecurityException') ||
+      if (errStr.contains('permission') || errStr.contains('denied')) {
+        _errorController.add('permission_denied');
+      } else if (errStr.contains('SecurityException') ||
           errStr.contains('Not allowed to bind') ||
           errStr.contains('error_speech_restricted') ||
           errStr.contains('bindService')) {
@@ -293,14 +310,19 @@ class SystemSpeechService implements SpeechRecognitionService {
     }
 
     String userMessage;
-    if (error.errorMsg.contains('error_speech_restricted') ||
-        error.errorMsg.contains('SecurityException') ||
-        error.errorMsg.contains('Not allowed to bind') ||
-        error.errorMsg.contains('bindService')) {
-      userMessage = 'system_speech_restricted';
-    } else if (error.errorMsg.contains('audio')) {
-      userMessage = 'Audio capture error, please check microphone permissions';
-    } else if (error.errorMsg.contains('network')) {
+    final lowerMsg = error.errorMsg.toLowerCase();
+    if (lowerMsg.contains('permission') || lowerMsg.contains('denied')) {
+      userMessage = 'permission_denied';
+    } else if (lowerMsg.contains('error_speech_restricted') ||
+        lowerMsg.contains('securityexception') ||
+        lowerMsg.contains('not allowed to bind') ||
+        lowerMsg.contains('bindservice')) {
+      userMessage = (!kIsWeb && Platform.isIOS)
+          ? 'dictation_disabled'
+          : 'system_speech_restricted';
+    } else if (lowerMsg.contains('audio')) {
+      userMessage = 'permission_denied';
+    } else if (lowerMsg.contains('network')) {
       userMessage = 'Network error, please check network connection';
     } else {
       userMessage = 'Speech recognition error: ${error.errorMsg}';

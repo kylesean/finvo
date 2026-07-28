@@ -435,7 +435,11 @@ class _Translations$speech$en extends Translations$speech$zh {
 	@override String get enterValidPort => 'Please enter a valid port (1-65535)';
 	@override String get configSaved => 'Configuration saved';
 	@override String get systemVoiceRestrictedTitle => 'System Speech Unavailable';
-	@override String get systemVoiceRestrictedContent => 'Your device vendor restricts standard system speech services. We recommend configuring a custom WebSocket ASR in Speech Settings.';
+	@override String get systemVoiceRestrictedContent => 'System speech service is unavailable or disabled. You can check system settings or configure a custom WebSocket ASR in Speech Settings.';
+	@override String get dictationDisabledTitle => 'Dictation Disabled';
+	@override String get dictationDisabledContent => 'System speech dictation service is disabled. On iOS devices, please go to Settings -> General -> Keyboard and enable Dictation.';
+	@override String get permissionDeniedTitle => 'Permissions Required';
+	@override String get permissionDeniedContent => 'Microphone and speech recognition permissions are required for this feature. Please grant them in System Settings.';
 	@override String get goToSettings => 'Go to Settings';
 	@override String get systemVoiceStatusAvailable => 'System Speech Supported';
 	@override String get systemVoiceStatusRestricted => 'System Speech Restricted or Unavailable (Self-hosted ASR recommended)';

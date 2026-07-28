@@ -9,6 +9,8 @@ import 'package:finvo/i18n/strings.g.dart';
 import '../atoms/budget_progress_bar.dart';
 import '../../../../shared/widgets/app_card.dart';
 
+import '../utils/genui_num_utils.dart';
+
 class BudgetItemCard extends ConsumerWidget {
   final String? budgetId;
 
@@ -48,11 +50,11 @@ class BudgetItemCard extends ConsumerWidget {
     return BudgetItemCard(
       budgetId: json['id'] as String?,
       name: json['name'] as String? ?? t.budget.budget,
-      percentage: (json['percentage'] as num?)?.toDouble() ?? 0.0,
+      percentage: GenUiNumUtils.toDouble(json['percentage']),
       status: json['status'] as String? ?? 'ON_TRACK',
-      spent: (json['spent'] as num?)?.toDouble() ?? 0.0,
-      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      remaining: (json['remaining'] as num?)?.toDouble() ?? 0.0,
+      spent: GenUiNumUtils.toDouble(json['spent']),
+      amount: GenUiNumUtils.toDouble(json['amount']),
+      remaining: GenUiNumUtils.toDouble(json['remaining']),
       onTap: onTap,
     );
   }

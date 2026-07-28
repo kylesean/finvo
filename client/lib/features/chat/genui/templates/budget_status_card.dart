@@ -8,22 +8,12 @@ import '../../../../core/constants/category_constants.dart';
 import '../atoms/budget_progress_bar.dart';
 import '../atoms/empty_state_alert.dart';
 import '../molecules/budget_item_card.dart';
+import '../utils/genui_num_utils.dart';
 
 /// Budget status card template
 ///
 /// Layer 4 (Template) - Complete budget overview card
 /// Composed of atoms and molecules, following the GenUI four-layer architecture
-///
-/// Design layout:
-/// ┌─────────────────────────────────────────────────┐
-/// │ 📊 Budget Overview                     This Month │  ← Top header bar
-/// ├─────────────────────────────────────────────────┤
-/// │ Total   ████████░░░░░░  75%                     │  ← Total budget progress
-/// │ Spent ¥7,500 / Remaining ¥2,500                 │
-/// ├─────────────────────────────────────────────────┤
-/// │ Dining  ██████████░░  90%  >                    │  ← Category budget list
-/// │ Shopping ████████░░░░  50%  >                    │
-/// └─────────────────────────────────────────────────┘
 class BudgetStatusCard extends StatelessWidget {
   final Map<String, dynamic> data;
 
@@ -31,25 +21,55 @@ class BudgetStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
-    final colors = theme.colors;
+    try {
+      final theme = context.theme;
+      final colors = theme.colors;
 
-    final hasBudget = data['has_budget'] == true;
+      final hasBudget = data['has_budget'] == true;
 
-    if (!hasBudget) {
-      return _buildNoBudgetCard();
-    }
+      if (!hasBudget) {
+        return _buildNoBudgetCard();
+      }
 
-    // Check if it's a single budget or summary
-    if (data.containsKey('budget')) {
-      return _buildSingleBudgetCard(
-        context,
-        theme,
-        colors,
-        data['budget'] as Map<String, dynamic>,
+      // Check if it's a single budget or summary
+      final budgetData = data['budget'];
+      if (budgetData is Map) {
+        return _buildSingleBudgetCard(
+          context,
+          theme,
+          colors,
+          Map<String, dynamic>.from(budgetData),
+        );
+      } else {
+        return _buildBudgetSummaryCard(context, theme, colors);
+      }
+    } catch (e) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 8.0),
+        decoration: BoxDecoration(
+          color: context.theme.colors.muted.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: context.theme.colors.mutedForeground,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Budget status format error: $e',
+                style: TextStyle(
+                  color: context.theme.colors.mutedForeground,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
       );
-    } else {
-      return _buildBudgetSummaryCard(context, theme, colors);
     }
   }
 
@@ -70,11 +90,11 @@ class BudgetStatusCard extends StatelessWidget {
     return BudgetItemCard(
       budgetId: budgetId,
       name: budget['name'] as String? ?? t.chat.genui.budgetStatusCard.budget,
-      percentage: (budget['percentage'] as num?)?.toDouble() ?? 0.0,
+      percentage: GenUiNumUtils.toDouble(budget['percentage']),
       status: budget['status'] as String? ?? 'ON_TRACK',
-      spent: (budget['spent'] as num?)?.toDouble() ?? 0.0,
-      amount: (budget['amount'] as num?)?.toDouble() ?? 0.0,
-      remaining: (budget['remaining'] as num?)?.toDouble() ?? 0.0,
+      spent: GenUiNumUtils.toDouble(budget['spent']),
+      amount: GenUiNumUtils.toDouble(budget['amount']),
+      remaining: GenUiNumUtils.toDouble(budget['remaining']),
       compact: false,
       onTap: budgetId != null
           ? () => context.pushNamed(
@@ -91,14 +111,19 @@ class BudgetStatusCard extends StatelessWidget {
     FThemeData theme,
     FColors colors,
   ) {
-    final overallSpent = (data['overall_spent'] as num?)?.toDouble() ?? 0.0;
-    final overallRemaining =
-        (data['overall_remaining'] as num?)?.toDouble() ?? 0.0;
-    final overallPercentage =
-        (data['overall_percentage'] as num?)?.toDouble() ?? 0.0;
-    final budgets = data['budgets'] as List<dynamic>? ?? [];
-    final alerts = data['alerts'] as List<dynamic>? ?? [];
-    final totalBudget = data['total_budget'] as Map<String, dynamic>?;
+    final overallSpent = GenUiNumUtils.toDouble(data['overall_spent']);
+    final overallRemaining = GenUiNumUtils.toDouble(data['overall_remaining']);
+    final overallPercentage = GenUiNumUtils.toDouble(
+      data['overall_percentage'],
+    );
+    final budgetsRaw = data['budgets'];
+    final budgets = budgetsRaw is List ? budgetsRaw : <dynamic>[];
+    final alertsRaw = data['alerts'];
+    final alerts = alertsRaw is List ? alertsRaw : <dynamic>[];
+    final totalBudgetRaw = data['total_budget'];
+    final totalBudget = totalBudgetRaw is Map
+        ? Map<String, dynamic>.from(totalBudgetRaw)
+        : null;
 
     return Container(
       width: double.infinity,
@@ -284,7 +309,7 @@ class BudgetStatusCard extends StatelessWidget {
     final name = categoryKey != null
         ? _getCategoryDisplayName(categoryKey)
         : (budget['name'] as String? ?? '');
-    final percentage = (budget['percentage'] as num?)?.toDouble() ?? 0.0;
+    final percentage = GenUiNumUtils.toDouble(budget['percentage']);
     final status = budget['status'] as String? ?? 'ON_TRACK';
     final budgetId = budget['id'] as String?;
 
