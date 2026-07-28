@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Finvo - Self-Hosted AI Personal Financial Assistant">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Finvo - Self-Hosted AI Expense Tracker & Personal Finance Agent">
 </p>
 
 <p align="center">
@@ -17,8 +17,14 @@
 ---
 
 <p align="center">
-  Finvo is an open-source, <strong>self-hosted AI financial assistant</strong> designed to manage personal and family finances with complete data privacy. Operating on your own infrastructure, it retains conversation memory, connects seamlessly to both cloud LLMs and local models, and renders interactive UI components dynamically.
+  <strong>Finvo</strong> is an open-source, <strong>self-hosted AI expense tracker & personal finance agent</strong>.<br>
+  It leverages conversational LLMs and private speech recognition to effortlessly record expenses, visualize financial analytics, and manage household budgets with 100% data privacy.
 </p>
+
+> [!NOTE]
+> **The Story Behind Finvo**
+> **Finvo** = **Fin**ance + **Vo**ice / **Vo**ce / **Vo**lution
+> **Core Mission**: Voice & dialogue-driven AI expense tracking and personal finance assistant.
 
 ---
 
@@ -33,23 +39,24 @@
 
 ## Key Features
 
-- **Agent-Based Orchestration (LangGraph + Mem0)**
-  Goes far beyond static transaction logging. Finvo uses LangGraph for multi-step financial reasoning, automatic self-correction, long/short-term memory management via Mem0, and complex querying via natural conversation.
+### 1. Natural Language & Private Voice Bookkeeping
+- **Effortless Expense Logging**: Record expenses as simply as chatting or speaking. Say "Spent $45 on grocery shopping" or "Paid $800 for rent", and the AI agent automatically extracts amount, category, merchant, and timestamp.
+- **Privacy-First Voice ASR**: Integrated with self-hosted [asr_server](https://github.com/kylesean/asr_server). Speech-to-text processing happens entirely on your local infrastructure with zero audio data sent to commercial APIs.
 
-- **100% Self-Hosted & Privacy-First**
-  Keep your ledger and AI memories entirely within your local network. Supports private voice recognition via the customized [asr_server](https://github.com/kylesean/asr_server) project, ensuring voice data never leaks to third parties.
+### 2. Dynamic UI Streaming & Interactive Analytics (Google A2UI)
+- **Real-Time Dynamic Widgets**: Powered by Google A2UI protocol and [forui](https://github.com/duobaseio/forui). The AI agent dynamically renders interactive charts, breakdown cards, transaction confirmation dialogs, and edit forms inside the conversation stream.
+- **Multidimensional Insights**: Ask "How much did I spend on dining out this month?" or "Am I over budget compared to last month?" to receive instant visual breakdowns.
 
-- **Model-Agnostic LLM Connectivity**
-  No vendor lock-in. Connect seamlessly to cloud LLMs (**OpenAI**, **DeepSeek**, **Qwen**) or run 100% offline with local LLM frameworks like **Ollama**.
+### 3. 100% Self-Hosted & Model-Agnostic
+- **Complete Data Sovereignty**: Ledger databases, vector embeddings, and conversation memories remain strictly inside your local network.
+- **Model Agnostic**: Seamlessly connect cloud LLMs (DeepSeek, OpenAI, Qwen) or run 100% offline with local frameworks like Ollama.
 
-- **Dynamic UI Streaming (Google A2UI Protocol)**
-  Powered by the **Google A2UI** protocol and built with [forui](https://github.com/duobaseio/forui). The AI agent dynamically pushes custom interactive widgets (charts, breakdown cards, transaction confirmations) directly into the app stream based on context.
+### 4. Shared Ledgers & Multi-Member Collaboration
+- **Family & Team Workspaces**: Support for shared spaces allowing family members to log transactions jointly, assign budgets, and maintain granular access control.
 
-- **Extensible Anthropic-Style Skills**
-  Supports plugin skills following the **Anthropic Skills** standard. Add python-based skill modules for advanced capabilities like specialized budget planning, investment tracking, and custom expense analysis.
-
-- **NAS & Home Server Optimized**
-  Pre-packaged for one-click deployment on **Synology**, **QNAP**, Unraid, or standard Docker hosts. Includes multi-member family sharing support out of the box.
+### 5. Agentic Memory & Extensible Anthropic-Style Skills
+- **Mem0 Context Memory**: Retains user habits, frequent merchants, and personal budgeting preferences across sessions.
+- **Plugin Skill Engine**: Modular Python skills following Anthropic-style skill specifications. Easily add custom modules for financial forecasting, exchange rate conversion, fixed bill scheduling, and budget alerts.
 
 ---
 
@@ -57,8 +64,8 @@
 
 ```mermaid
 flowchart TD
-    subgraph Client ["Client Layer"]
-        A[Flutter Mobile App] <-->|Google A2UI Protocol| B[ForUI Components]
+    subgraph Client ["Client Layer (Cross-Platform)"]
+        A[Flutter Mobile App] <-->|Google A2UI Protocol| B[ForUI Dynamic Renderer]
     end
 
     subgraph Backend ["Server Layer (Python 3.13 / FastAPI)"]
@@ -67,9 +74,9 @@ flowchart TD
         D <--> F[Skill Engine]
     end
 
-    subgraph External ["Services & Storage"]
-        D <--> G[(PostgreSQL / pgvector)]
-        D <--> H[Cloud / Local LLM\nOpenAI / DeepSeek / Ollama]
+    subgraph Storage ["Storage & Models"]
+        D <--> G[(PostgreSQL + pgvector)]
+        D <--> H[Cloud / Local LLMs\nDeepSeek / OpenAI / Ollama]
         A <--> I[Self-Hosted ASR Server]
     end
 ```
@@ -78,12 +85,12 @@ flowchart TD
 
 ## Tech Stack
 
-| Component | Technology | Purpose |
+| Component | Technology | Purpose & Advantage |
 | :--- | :--- | :--- |
-| **Backend** | Python 3.13 + FastAPI + `uv` | High-performance API server & dependency management |
-| **AI Agent Core** | LangGraph + Mem0 | Multi-step reasoning, intent dispatching & memory |
+| **Backend API** | Python 3.13 + FastAPI + `uv` | Asynchronous API gateway with lightning-fast dependency management |
+| **AI Agent Core** | LangGraph + Mem0 | Multi-step reasoning, self-correction, and contextual memory management |
 | **Frontend App** | Flutter + ForUI | Cross-platform mobile UI with dynamic A2UI renderer |
-| **Database** | PostgreSQL + `pgvector` | Transaction records & vector embeddings |
+| **Database** | PostgreSQL + `pgvector` | Transaction storage and vector embeddings |
 | **Voice / ASR** | `asr_server` | Local, self-hosted Speech-to-Text processing |
 
 ---
@@ -92,27 +99,28 @@ flowchart TD
 
 ### Prerequisites
 - **Docker & Docker Compose** (Recommended)
-- **AI Model API Key** (e.g., DeepSeek, OpenAI, Qwen) OR a local **Ollama** endpoint
+- **AI Model Key** (DeepSeek, OpenAI, Qwen) or a local **Ollama** endpoint
 
-### Docker Deployment
+### Deployment Steps
 
-1. **Clone the Repository**:
+1. **Clone Repository**:
    ```bash
    git clone https://github.com/kylesean/Finvo.git
    cd Finvo
    ```
 
-2. **Configure Environment Variables**:
+2. **Configure Environment**:
    ```bash
    cp server/.env.example server/.env
-   # Edit server/.env with your preferred LLM provider credentials
+   # Edit server/.env with your LLM provider credentials or Ollama URL
    ```
 
-3. **Launch Containers**:
+3. **Launch Docker Services**:
    ```bash
    make docker-up
    ```
 
+> [!TIP]
 > Once started, scan the QR code displayed in the terminal using the Flutter Mobile App to pair immediately.
 
 ---
@@ -124,7 +132,7 @@ Finvo/
 ├── client/              # Flutter mobile application codebase
 │   └── assets/images/   # Screenshots and brand assets
 ├── server/              # FastAPI backend & LangGraph Agent service
-│   ├── app/             # Core application logic & API endpoints
+│   ├── app/             # Application core, services, and skills
 │   └── .env.example     # Environment template
 ├── docker-compose.yml   # Multi-container deployment configuration
 └── Makefile             # Developer shortcuts & lifecycle scripts
