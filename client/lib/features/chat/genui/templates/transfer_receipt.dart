@@ -5,6 +5,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/shared/constants/brand_constants.dart';
 
 import '../atoms/atoms.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -326,11 +327,11 @@ class _TransferAnimationState extends State<_TransferAnimation>
         break;
       case 'ALIPAY':
         icon = FLucideIcons.smartphone;
-        bgColor = const Color(0xFF1677FF); // Alipay brand color
+        bgColor = BrandColors.alipay;
         break;
       case 'WECHAT':
         icon = FLucideIcons.smartphone;
-        bgColor = const Color(0xFF07C160); // WeChat brand color
+        bgColor = BrandColors.wechatPay;
         break;
       default:
         icon = FLucideIcons.wallet;

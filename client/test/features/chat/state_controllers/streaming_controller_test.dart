@@ -41,9 +41,9 @@ void main() {
             bool? isTyping,
             StreamingStatus? streamingStatus,
           }) {},
-      getCurrentMessageContent: (id) => "Current Content",
+      getCurrentMessageContent: (id) => 'Current Content',
       onInitialDelayExceeded: () {
-        lastDelayExceededReceived = "Exceeded";
+        lastDelayExceededReceived = 'Exceeded';
       },
       onStreamComplete: (finalText) {
         lastStreamCompleteFinalText = finalText;
@@ -81,7 +81,7 @@ void main() {
         // Wait for delay + buffer
         await Future<void>.delayed(const Duration(milliseconds: 150));
 
-        expect(lastDelayExceededReceived, "Exceeded");
+        expect(lastDelayExceededReceived, 'Exceeded');
       },
     );
 
@@ -89,7 +89,7 @@ void main() {
       controller.startInitialDelayTimer();
 
       // Send first chunk immediately
-      final isFirst = controller.handleTextChunk("Hello");
+      final isFirst = controller.handleTextChunk('Hello');
 
       expect(isFirst, true);
       expect(controller.isFirstChunkReceived, true);
@@ -101,8 +101,8 @@ void main() {
     });
 
     test('handleTextChunk subsequent chunks should return false', () {
-      controller.handleTextChunk("Hello");
-      final isFirst = controller.handleTextChunk(" World");
+      controller.handleTextChunk('Hello');
+      final isFirst = controller.handleTextChunk(' World');
 
       expect(isFirst, false);
       // markFirstChunkReceived should still verify handled correctly internally,
@@ -111,20 +111,20 @@ void main() {
     });
 
     test('handleStreamComplete should update flags and notify', () {
-      controller.handleStreamComplete("Final Text");
+      controller.handleStreamComplete('Final Text');
 
       expect(controller.isStreamDone, true);
       expect(controller.isMessageCompleted, true);
-      expect(lastStreamCompleteFinalText, "Final Text");
+      expect(lastStreamCompleteFinalText, 'Final Text');
       verify(mockStreamState.markCompleted()).called(1);
     });
 
     test('handleStreamError should update flags and notify', () {
-      controller.handleStreamError("Error");
+      controller.handleStreamError('Error');
 
       expect(controller.isStreamDone, true);
       expect(controller.isMessageCompleted, true);
-      expect(lastStreamError, "Error");
+      expect(lastStreamError, 'Error');
       verify(mockStreamState.markError()).called(1);
     });
 

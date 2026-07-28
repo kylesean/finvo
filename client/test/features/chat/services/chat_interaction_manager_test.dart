@@ -86,7 +86,7 @@ void main() {
 
   group('ChatInteractionManager', () {
     test('addUserMessageAndGetResponse basic flow', () async {
-      const text = "Hello AI";
+      const text = 'Hello AI';
 
       await manager.addUserMessageAndGetResponse(text);
 
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('addUserMessageAndGetResponse with attachments', () async {
-      const text = "Check this file";
+      const text = 'Check this file';
       final fakeFile = FakeXFile('test.jpg', Uint8List.fromList([0, 1, 2, 3]));
 
       final attachment = PendingMessageAttachment(
@@ -169,7 +169,7 @@ void main() {
     });
 
     test('handleOptimisticUserMessage basic flow', () async {
-      const text = "Optimistic Msg";
+      const text = 'Optimistic Msg';
 
       await manager.handleOptimisticUserMessage(text);
 
@@ -193,7 +193,7 @@ void main() {
     test('Send logic respects current conversation ID', () async {
       currentConversationId = 'session-123';
 
-      await manager.addUserMessageAndGetResponse("Test");
+      await manager.addUserMessageAndGetResponse('Test');
 
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
@@ -203,7 +203,7 @@ void main() {
     test('Handles GenUI service uninitialized', () async {
       when(mockLifecycleManager.isInitialized).thenReturn(false);
 
-      await manager.addUserMessageAndGetResponse("Test");
+      await manager.addUserMessageAndGetResponse('Test');
 
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
