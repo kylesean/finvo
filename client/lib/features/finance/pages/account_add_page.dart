@@ -176,12 +176,19 @@ class _FinancialAccountAddPageState
           _buildInputRow(
             theme: theme,
             colors: colors,
-            icon: Text(
-              _selectedCurrency.symbol,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colors.primary,
-                height: 1.0,
+            icon: SizedBox(
+              width: 20,
+              height: 20,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  _selectedCurrency.symbol,
+                  style: theme.typography.body.xl2.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colors.primary,
+                    height: 1.0,
+                  ),
+                ),
               ),
             ),
             label: t.account.amountLabel,
@@ -498,11 +505,12 @@ class _FinancialAccountAddPageState
     switch (uiNature) {
       case AccountNature.liquidAssets:
       case AccountNature.investmentAssets:
-      case AccountNature.receivablesPayables:
+      case AccountNature.receivables:
       case AccountNature.otherAssets:
         return FinancialNature.asset;
       case AccountNature.creditAccounts:
       case AccountNature.longTermLiabilities:
+      case AccountNature.payables:
         return FinancialNature.liability;
     }
   }

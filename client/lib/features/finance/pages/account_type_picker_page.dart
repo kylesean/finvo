@@ -91,7 +91,7 @@ class AccountTypePickerPage extends ConsumerWidget {
     for (final definition in AccountTypeRegistry.definitions) {
       if (definition.nature == AccountNature.creditAccounts ||
           definition.nature == AccountNature.longTermLiabilities ||
-          definition.id == 'payable') {
+          definition.nature == AccountNature.payables) {
         liabilities.add(definition);
       } else {
         assets.add(definition);

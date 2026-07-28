@@ -185,12 +185,19 @@ class _FinancialAccountEditPageState
           _buildInputRow(
             theme: theme,
             colors: colors,
-            icon: Text(
-              _selectedCurrency.symbol,
-              style: theme.typography.body.lg.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colors.primary,
-                height: 1.0,
+            icon: SizedBox(
+              width: 20,
+              height: 20,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  _selectedCurrency.symbol,
+                  style: theme.typography.body.xl2.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colors.primary,
+                    height: 1.0,
+                  ),
+                ),
               ),
             ),
             label: t.account.amountLabel,

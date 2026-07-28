@@ -9,7 +9,8 @@ enum AccountNature {
   creditAccounts,
   investmentAssets,
   longTermLiabilities,
-  receivablesPayables,
+  receivables,
+  payables,
   otherAssets,
 }
 
@@ -25,8 +26,10 @@ extension AccountNatureX on AccountNature {
         return 'Investment Assets';
       case AccountNature.longTermLiabilities:
         return 'Long-term Liabilities';
-      case AccountNature.receivablesPayables:
-        return 'Receivables & Payables';
+      case AccountNature.receivables:
+        return 'Receivables';
+      case AccountNature.payables:
+        return 'Payables';
       case AccountNature.otherAssets:
         return 'Other Assets';
     }
@@ -43,8 +46,10 @@ extension AccountNatureX on AccountNature {
         return 'Assets aimed at appreciation, with values fluctuating by market.';
       case AccountNature.longTermLiabilities:
         return 'Structured long-term loans or financing debts.';
-      case AccountNature.receivablesPayables:
-        return 'Short-term receivables and payables from transactions.';
+      case AccountNature.receivables:
+        return 'Short-term amounts owed to you.';
+      case AccountNature.payables:
+        return 'Short-term amounts you owe to others.';
       case AccountNature.otherAssets:
         return 'Other special-purpose or less liquid assets.';
     }
@@ -164,7 +169,7 @@ class AccountTypeRegistry {
     AccountTypeDefinition(
       id: 'receivable',
       apiType: FinancialAccountType.receivable,
-      nature: AccountNature.receivablesPayables,
+      nature: AccountNature.receivables,
       title: 'Receivable',
       subtitle: 'Money others owe you or lent out.',
       helper: 'Others owe me',
@@ -203,7 +208,7 @@ class AccountTypeRegistry {
     AccountTypeDefinition(
       id: 'payable',
       apiType: FinancialAccountType.payable,
-      nature: AccountNature.receivablesPayables,
+      nature: AccountNature.payables,
       title: 'Payable',
       subtitle: 'Money you owe, pending installments, etc.',
       helper: 'I owe others',

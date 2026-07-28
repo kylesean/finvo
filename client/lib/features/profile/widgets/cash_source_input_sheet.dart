@@ -313,11 +313,12 @@ class _FinancialAccountInputSheetState
     switch (uiNature) {
       case AccountNature.liquidAssets:
       case AccountNature.investmentAssets:
-      case AccountNature.receivablesPayables:
+      case AccountNature.receivables:
       case AccountNature.otherAssets:
         return FinancialNature.asset;
       case AccountNature.creditAccounts:
       case AccountNature.longTermLiabilities:
+      case AccountNature.payables:
         return FinancialNature.liability;
     }
   }
