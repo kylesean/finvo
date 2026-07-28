@@ -934,6 +934,7 @@
     "validationError": "検証エラー",
     "unknownError": "不明なエラー",
     "unknownErrorHint": "予期せぬエラーが発生しました。",
+    "registrationMissingInfo": "登録フローエラー、必要な情報がありません。",
     "genui": {
       "loadingFailed": "読み込み失敗",
       "schemaFailed": "検証失敗",

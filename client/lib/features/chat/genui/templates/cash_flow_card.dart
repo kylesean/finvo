@@ -27,7 +27,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
   bool _isExpanded = false;
 
   String _formatAmount(dynamic amount) {
-    final numberFormat = NumberFormat("#,##0.00", "zh_CN");
+    final numberFormat = NumberFormat('#,##0.00', 'zh_CN');
     if (amount is String) {
       return numberFormat.format(double.tryParse(amount) ?? 0);
     }

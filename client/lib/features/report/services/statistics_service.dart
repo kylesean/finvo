@@ -211,16 +211,16 @@ class StatisticsService {
           return fromJson(data);
         } catch (e) {
           throw DataParsingException(
-            "Failed to parse statistics response ($endpoint): ${e.toString()}",
+            'Failed to parse statistics response ($endpoint): ${e.toString()}',
           );
         }
       }
       throw DataParsingException(
-        "API /statistics/$endpoint response data field format error, expected object, got ${data.runtimeType}",
+        'API /statistics/$endpoint response data field format error, expected object, got ${data.runtimeType}',
       );
     }
     throw DataParsingException(
-      "API /statistics/$endpoint expected an object response, but got ${json.runtimeType}",
+      'API /statistics/$endpoint expected an object response, but got ${json.runtimeType}',
     );
   }
 }

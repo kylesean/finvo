@@ -100,7 +100,7 @@ class MessageRepository {
         if (content != null) {
           // Calculate delta since last state
           // content is full aggregated text, msg.content is previous aggregated text
-          String delta = "";
+          String delta = '';
           if (content.startsWith(msg.content)) {
             delta = content.substring(msg.content.length);
           } else if (msg.content.isEmpty) {

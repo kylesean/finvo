@@ -293,7 +293,6 @@ class Translations$auth$zh {
 	String get pleaseTryAgain => '请稍后重试。';
 
 	/// zh: '登录以继续使用 AI 记账助理'
-	@Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
 	String get loginSubtitle => '登录以继续使用 AI 记账助理';
 
 	/// zh: '还没有账户？注册'
@@ -758,7 +757,7 @@ class Translations$settings$zh {
 	/// zh: '发现新版本'
 	String get newVersionTitle => '发现新版本';
 
-	/// zh: '静态更新'
+	/// zh: '立即更新'
 	String get updateNow => '立即更新';
 
 	/// zh: '暂不更新'
@@ -939,9 +938,17 @@ class Translations$speech$zh {
 
 	/// zh: '系统语音限制或不可用 (建议使用自建 ASR)'
 	String get systemVoiceStatusRestricted => '系统语音限制或不可用 (建议使用自建 ASR)';
+
+	/// zh: '语音服务未配置，请在【设置 -> 语音识别】中配置服务器地址'
 	String get serviceNotConfigured => '语音服务未配置，请在【设置 -> 语音识别】中配置服务器地址';
+
+	/// zh: '语音服务连接失败'
 	String get connectionFailedTitle => '语音服务连接失败';
+
+	/// zh: '无法连接到 WebSocket 语音识别服务，请检查服务器地址、端口或网络连通性。'
 	String get connectionFailed => '无法连接到 WebSocket 语音识别服务，请检查服务器地址、端口或网络连通性。';
+
+	/// zh: '未检测到语音输入，请重试'
 	String get noSpeechRecognized => '未检测到语音输入，请重试';
 }
 
@@ -1671,6 +1678,9 @@ class Translations$error$zh {
 
 	/// zh: '发生了意外错误，请重试或联系技术支持。'
 	String get unknownErrorHint => '发生了意外错误，请重试或联系技术支持。';
+
+	/// zh: '注册流程错误，缺少必要信息。'
+	String get registrationMissingInfo => '注册流程错误，缺少必要信息。';
 
 	late final Translations$error$genui$zh genui = Translations$error$genui$zh.internal(_root);
 }
@@ -2787,14 +2797,14 @@ class Translations$statistics$analysis$zh {
 	/// zh: '收入分析'
 	String get incomeTitle => '收入分析';
 
-	/// zh: '雷达图需要至少3个分类数据'
-	String get radarNeedMoreData => '雷达图需要至少3个分类数据';
-
 	/// zh: '总计'
 	String get total => '总计';
 
 	/// zh: '支出分类明细'
 	String get breakdown => '支出分类明细';
+
+	/// zh: '雷达图需要至少3个分类数据'
+	String get radarNeedMoreData => '雷达图需要至少3个分类数据';
 }
 
 // Path: statistics.filter
@@ -4788,6 +4798,7 @@ extension on Translations {
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
 			'home.yearProgress' => ({required Object year}) => '${year}年进度',
+			'home.yearRemainingInfo' => ({required Object days, required Object percent}) => '余 ${days} 天 · ${percent}%',
 			'home.amountHidden' => '••••••••',
 			'home.loadFailed' => '加载失败',
 			'home.noTransactions' => '暂无交易记录',
@@ -4929,7 +4940,11 @@ extension on Translations {
 			'speech.enterValidPort' => '请输入有效的端口 (1-65535)',
 			'speech.configSaved' => '配置已保存',
 			'speech.systemVoiceRestrictedTitle' => '系统语音不可用',
-			'speech.systemVoiceRestrictedContent' => '您的手机系统语音引擎受到厂商权限限制或服务未开启。建议配置并开启 WebSocket 自建语音服务。',
+			'speech.systemVoiceRestrictedContent' => '您的手机系统语音引擎不可用或服务未开启。建议在设置中开启语音服务或配置 WebSocket 自建语音服务。',
+			'speech.dictationDisabledTitle' => '语音听写未开启',
+			'speech.dictationDisabledContent' => '系统语音听写服务未开启。如果是 iOS 设备，请前往【设置 -> 通用 -> 键盘】开启【启用听写】。',
+			'speech.permissionDeniedTitle' => '缺少语音权限',
+			'speech.permissionDeniedContent' => '应用需要麦克风和语音识别权限才能使用此功能。请在系统设置中允许权限。',
 			'speech.goToSettings' => '前往设置',
 			'speech.systemVoiceStatusAvailable' => '系统语音服务支持正常',
 			'speech.systemVoiceStatusRestricted' => '系统语音限制或不可用 (建议使用自建 ASR)',
@@ -5164,6 +5179,8 @@ extension on Translations {
 			'chat.tools.unknown' => '正在处理请求...',
 			'chat.tools.done.readFile' => '已查看文件',
 			'chat.tools.done.searchTransactions' => '已查询交易',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.queryBudgetStatus' => '已检查预算',
 			'chat.tools.done.createBudget' => '已创建预算',
 			'chat.tools.done.getCashFlowAnalysis' => '已分析现金流',
@@ -5185,8 +5202,6 @@ extension on Translations {
 			'chat.tools.done.querySpaceSummary' => '空间摘要查询完成',
 			'chat.tools.done.prepareTransfer' => '转账准备完成',
 			'chat.tools.done.unknown' => '处理完成',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.analyzeFinance' => '財務分析完成',
 			'chat.tools.done.forecastFinance' => '財務預測完成',
 			'chat.tools.done.analyzeBudget' => '預算分析完成',
@@ -5452,6 +5467,7 @@ extension on Translations {
 			'error.validationError' => '文件验证失败',
 			'error.unknownError' => '未知错误',
 			'error.unknownErrorHint' => '发生了意外错误，请重试或联系技术支持。',
+			'error.registrationMissingInfo' => '注册流程错误，缺少必要信息。',
 			'error.genui.loadingFailed' => '组件加载失败',
 			'error.genui.schemaFailed' => '架构验证失败',
 			'error.genui.schemaDescription' => '组件定义不符合 GenUI 规范，降级为纯文本显示',
@@ -5557,8 +5573,11 @@ extension on Translations {
 			'statistics.trend.expense' => '支出',
 			'statistics.trend.income' => '收入',
 			'statistics.analysis.title' => '支出分析',
+			'statistics.analysis.expenseTitle' => '支出分析',
+			'statistics.analysis.incomeTitle' => '收入分析',
 			'statistics.analysis.total' => '总计',
 			'statistics.analysis.breakdown' => '支出分类明细',
+			'statistics.analysis.radarNeedMoreData' => '雷达图需要至少3个分类数据',
 			'statistics.filter.accountType' => '账户类型',
 			'statistics.filter.allAccounts' => '全部账户',
 			'statistics.filter.apply' => '确认应用',
@@ -5674,6 +5693,8 @@ extension on Translations {
 			'sharedSpace.notifications.inviteAccepted' => '已接受邀请！',
 			'sharedSpace.notifications.inviteRejected' => '已拒绝邀请',
 			'sharedSpace.notifications.allMarkedRead' => '全部标记为已读',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.inviteCard.title' => '邀请码',
 			'sharedSpace.inviteCard.subtitle' => '分享给朋友以加入空间',
 			'sharedSpace.inviteCard.copyCode' => '复制邀请码',
@@ -5700,8 +5721,6 @@ extension on Translations {
 			'sharedSpace.notificationCard.reject' => '拒绝',
 			'sharedSpace.notificationCard.unknownTime' => '未知时间',
 			'sharedSpace.notificationCard.justNow' => '刚刚',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.spaceCard.noDescription' => '暂无描述',
 			'sharedSpace.spaceCard.creator' => '创建者',
 			'sharedSpace.spaceCard.member' => '成员',

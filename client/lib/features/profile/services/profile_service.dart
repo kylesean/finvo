@@ -23,19 +23,19 @@ class ProfileService {
           try {
             final data = json['data'];
             if (data == null) {
-              throw DataParsingException("data field is null");
+              throw DataParsingException('data field is null');
             }
             if (data is Map<String, dynamic>) {
               return UserInfo.fromJson(data);
             }
-            throw DataParsingException("data field is not an object");
+            throw DataParsingException('data field is not an object');
           } catch (e) {
             throw DataParsingException(
-              "Failed to parse user info: ${e.toString()}",
+              'Failed to parse user info: ${e.toString()}',
             );
           }
         }
-        throw DataParsingException("API /user expects an object");
+        throw DataParsingException('API /user expects an object');
       },
     );
   }
@@ -55,19 +55,19 @@ class ProfileService {
           try {
             final respData = json['data'];
             if (respData == null) {
-              throw DataParsingException("data field is null");
+              throw DataParsingException('data field is null');
             }
             if (respData is Map<String, dynamic>) {
               return UserInfo.fromJson(respData);
             }
-            throw DataParsingException("data field is not an object");
+            throw DataParsingException('data field is not an object');
           } catch (e) {
             throw DataParsingException(
-              "Failed to parse profile update response: ${e.toString()}",
+              'Failed to parse profile update response: ${e.toString()}',
             );
           }
         }
-        throw DataParsingException("API /user PATCH expects an object");
+        throw DataParsingException('API /user PATCH expects an object');
       },
     );
   }
@@ -91,16 +91,16 @@ class ProfileService {
             }
 
             throw DataParsingException(
-              "data field is not an object, but ${data.runtimeType}",
+              'data field is not an object, but ${data.runtimeType}',
             );
           } catch (e) {
             throw DataParsingException(
-              "Failed to parse financial accounts response: ${e.toString()}",
+              'Failed to parse financial accounts response: ${e.toString()}',
             );
           }
         }
         throw DataParsingException(
-          "API /user/financial-accounts expects an object, but received ${json.runtimeType}",
+          'API /user/financial-accounts expects an object, but received ${json.runtimeType}',
         );
       },
     );
@@ -123,7 +123,7 @@ class ProfileService {
             final data = json['data'];
 
             if (data == null) {
-              throw DataParsingException("data field is null");
+              throw DataParsingException('data field is null');
             }
 
             if (data is Map<String, dynamic>) {
@@ -131,17 +131,17 @@ class ProfileService {
             }
 
             throw DataParsingException(
-              "data field is not an object, but ${data.runtimeType}",
+              'data field is not an object, but ${data.runtimeType}',
             );
           } catch (e) {
             _logger.severe('saveFinancialAccounts parsing error', e);
             throw DataParsingException(
-              "Failed to parse financial accounts response: ${e.toString()}",
+              'Failed to parse financial accounts response: ${e.toString()}',
             );
           }
         }
         throw DataParsingException(
-          "API /user/financial-accounts expects an object, but received ${json.runtimeType}",
+          'API /user/financial-accounts expects an object, but received ${json.runtimeType}',
         );
       },
     );
@@ -158,20 +158,20 @@ class ProfileService {
             // Response format is {code, message, data}, need to extract data field
             final data = json['data'];
             if (data == null) {
-              throw DataParsingException("data field is null");
+              throw DataParsingException('data field is null');
             }
             if (data is Map<String, dynamic>) {
               return FinancialSettingsResponse.fromJson(data);
             }
-            throw DataParsingException("data field is not an object");
+            throw DataParsingException('data field is not an object');
           } catch (e) {
             throw DataParsingException(
-              "Failed to parse financial settings response: ${e.toString()}",
+              'Failed to parse financial settings response: ${e.toString()}',
             );
           }
         }
         throw DataParsingException(
-          "API /financial-settings expects an object, but received ${json.runtimeType}",
+          'API /financial-settings expects an object, but received ${json.runtimeType}',
         );
       },
     );
@@ -191,20 +191,20 @@ class ProfileService {
             // Response format is {code, message, data}, need to extract data field
             final data = json['data'];
             if (data == null) {
-              throw DataParsingException("data field is null");
+              throw DataParsingException('data field is null');
             }
             if (data is Map<String, dynamic>) {
               return FinancialSettingsResponse.fromJson(data);
             }
-            throw DataParsingException("data field is not an object");
+            throw DataParsingException('data field is not an object');
           } catch (e) {
             throw DataParsingException(
-              "Failed to parse financial settings response: ${e.toString()}",
+              'Failed to parse financial settings response: ${e.toString()}',
             );
           }
         }
         throw DataParsingException(
-          "API /financial-settings expects an object, but received ${json.runtimeType}",
+          'API /financial-settings expects an object, but received ${json.runtimeType}',
         );
       },
     );
@@ -225,12 +225,12 @@ class ProfileService {
             return FinancialAccount.fromJson(json);
           } catch (e) {
             throw DataParsingException(
-              "Failed to parse update account response: ${e.toString()}",
+              'Failed to parse update account response: ${e.toString()}',
             );
           }
         }
         throw DataParsingException(
-          "API expects an object, but received ${json.runtimeType}",
+          'API expects an object, but received ${json.runtimeType}',
         );
       },
     );

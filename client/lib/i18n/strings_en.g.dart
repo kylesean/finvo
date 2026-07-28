@@ -176,8 +176,7 @@ class _Translations$auth$en extends Translations$auth$zh {
 	@override String get loginSuccess => 'Welcome back!';
 	@override String get loginFailed => 'Login Failed';
 	@override String get pleaseTryAgain => 'Please try again later.';
-	@override @Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
-	String get loginSubtitle => 'Log in to continue using Finvo';
+	@override String get loginSubtitle => 'Log in to continue using Finvo';
 	@override String get noAccount => 'Don\'t have an account? Sign Up';
 	@override String get createAccount => 'Create Your Account';
 	@override String get setPassword => 'Set Password';
@@ -746,6 +745,7 @@ class _Translations$error$en extends Translations$error$zh {
 	@override String get validationError => 'File Validation Error';
 	@override String get unknownError => 'Unknown Error';
 	@override String get unknownErrorHint => 'An unexpected error occurred. Please try again or contact support.';
+	@override String get registrationMissingInfo => 'Registration flow error, missing required information.';
 	@override late final _Translations$error$genui$en genui = _Translations$error$genui$en._(_root);
 }
 
@@ -1317,9 +1317,9 @@ class _Translations$statistics$analysis$en extends Translations$statistics$analy
 	@override String get title => 'Expense Analysis';
 	@override String get expenseTitle => 'Expense Analysis';
 	@override String get incomeTitle => 'Income Analysis';
-	@override String get radarNeedMoreData => 'Radar chart requires at least 3 categories';
 	@override String get total => 'Total';
-	@override String get breakdown => 'Category Breakdown';
+	@override String get breakdown => 'Expense Breakdown';
+	@override String get radarNeedMoreData => 'Radar chart requires at least 3 categories';
 }
 
 // Path: statistics.filter
@@ -2459,6 +2459,7 @@ extension on TranslationsEn {
 			'home.todayExpense' => 'Today\'s',
 			'home.monthExpense' => 'This Month\'s',
 			'home.yearProgress' => ({required Object year}) => '${year} Progress',
+			'home.yearRemainingInfo' => ({required Object days, required Object percent}) => 'Left ${days} days · ${percent}%',
 			'home.amountHidden' => '••••••••',
 			'home.loadFailed' => 'Load failed',
 			'home.noTransactions' => 'No transactions',
@@ -2600,7 +2601,11 @@ extension on TranslationsEn {
 			'speech.enterValidPort' => 'Please enter a valid port (1-65535)',
 			'speech.configSaved' => 'Configuration saved',
 			'speech.systemVoiceRestrictedTitle' => 'System Speech Unavailable',
-			'speech.systemVoiceRestrictedContent' => 'Your device vendor restricts standard system speech services. We recommend configuring a custom WebSocket ASR in Speech Settings.',
+			'speech.systemVoiceRestrictedContent' => 'System speech service is unavailable or disabled. You can check system settings or configure a custom WebSocket ASR in Speech Settings.',
+			'speech.dictationDisabledTitle' => 'Dictation Disabled',
+			'speech.dictationDisabledContent' => 'System speech dictation service is disabled. On iOS devices, please go to Settings -> General -> Keyboard and enable Dictation.',
+			'speech.permissionDeniedTitle' => 'Permissions Required',
+			'speech.permissionDeniedContent' => 'Microphone and speech recognition permissions are required for this feature. Please grant them in System Settings.',
 			'speech.goToSettings' => 'Go to Settings',
 			'speech.systemVoiceStatusAvailable' => 'System Speech Supported',
 			'speech.systemVoiceStatusRestricted' => 'System Speech Restricted or Unavailable (Self-hosted ASR recommended)',
@@ -2835,6 +2840,8 @@ extension on TranslationsEn {
 			'chat.tools.unknown' => 'Processing request...',
 			'chat.tools.done.readFile' => 'Read file',
 			'chat.tools.done.searchTransactions' => 'Searched transactions',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.done.queryBudgetStatus' => 'Checked budget',
 			'chat.tools.done.createBudget' => 'Created budget',
 			'chat.tools.done.getCashFlowAnalysis' => 'Analyzed cash flow',
@@ -2856,8 +2863,6 @@ extension on TranslationsEn {
 			'chat.tools.done.querySpaceSummary' => 'Space summary ready',
 			'chat.tools.done.prepareTransfer' => 'Transfer ready',
 			'chat.tools.done.unknown' => 'Processing complete',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.analyzeFinance' => '財務分析完成',
 			'chat.tools.done.forecastFinance' => '財務預測完成',
 			'chat.tools.done.analyzeBudget' => '預算分析完成',
@@ -3123,6 +3128,7 @@ extension on TranslationsEn {
 			'error.validationError' => 'File Validation Error',
 			'error.unknownError' => 'Unknown Error',
 			'error.unknownErrorHint' => 'An unexpected error occurred. Please try again or contact support.',
+			'error.registrationMissingInfo' => 'Registration flow error, missing required information.',
 			'error.genui.loadingFailed' => 'Component loading failed',
 			'error.genui.schemaFailed' => 'Schema validation failed',
 			'error.genui.schemaDescription' => 'Component definition does not comply with GenUI specifications, degraded to plain text display',
@@ -3227,9 +3233,12 @@ extension on TranslationsEn {
 			'statistics.trend.title' => 'Trends',
 			'statistics.trend.expense' => 'Expense',
 			'statistics.trend.income' => 'Income',
-			'statistics.analysis.title' => 'Analysis',
+			'statistics.analysis.title' => 'Expense Analysis',
+			'statistics.analysis.expenseTitle' => 'Expense Analysis',
+			'statistics.analysis.incomeTitle' => 'Income Analysis',
 			'statistics.analysis.total' => 'Total',
-			'statistics.analysis.breakdown' => 'Category Breakdown',
+			'statistics.analysis.breakdown' => 'Expense Breakdown',
+			'statistics.analysis.radarNeedMoreData' => 'Radar chart requires at least 3 categories',
 			'statistics.filter.accountType' => 'Account Type',
 			'statistics.filter.allAccounts' => 'All Accounts',
 			'statistics.filter.apply' => 'Apply',
@@ -3345,6 +3354,8 @@ extension on TranslationsEn {
 			'sharedSpace.notifications.inviteAccepted' => 'Invite accepted!',
 			'sharedSpace.notifications.inviteRejected' => 'Invite rejected',
 			'sharedSpace.notifications.allMarkedRead' => 'All notifications marked as read',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.inviteCard.title' => 'Invite Code',
 			'sharedSpace.inviteCard.subtitle' => 'Share with friends to join the space',
 			'sharedSpace.inviteCard.copyCode' => 'Copy Invite Code',
@@ -3371,8 +3382,6 @@ extension on TranslationsEn {
 			'sharedSpace.notificationCard.reject' => 'Reject',
 			'sharedSpace.notificationCard.unknownTime' => 'Unknown time',
 			'sharedSpace.notificationCard.justNow' => 'Just now',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.spaceCard.noDescription' => 'No description',
 			'sharedSpace.spaceCard.creator' => 'Creator',
 			'sharedSpace.spaceCard.member' => 'Member',

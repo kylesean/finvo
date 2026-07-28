@@ -934,6 +934,7 @@
     "validationError": "파일 검증 실패",
     "unknownError": "알 수 없는 오류",
     "unknownErrorHint": "예기치 않은 오류가 발생했습니다. 다시 시도하거나 고객 지원에 문의하세요.",
+    "registrationMissingInfo": "가입 절차 오류, 필수 정보가 없습니다.",
     "genui": {
       "loadingFailed": "컴포넌트 로드 실패",
       "schemaFailed": "스키마 검증 실패",

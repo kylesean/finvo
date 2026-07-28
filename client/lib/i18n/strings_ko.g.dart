@@ -173,8 +173,7 @@ class _Translations$auth$ko extends Translations$auth$zh {
 	@override String get loginSuccess => '반가워요!';
 	@override String get loginFailed => '로그인 실패';
 	@override String get pleaseTryAgain => '잠시 후 다시 시도해주세요.';
-	@override @Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
-	String get loginSubtitle => 'AI 가계부 도우미를 계속 사용하려면 로그인하세요';
+	@override String get loginSubtitle => 'AI 가계부 도우미를 계속 사용하려면 로그인하세요';
 	@override String get noAccount => '계정이 없으신가요? 가입하기';
 	@override String get createAccount => '계정 만들기';
 	@override String get setPassword => '비밀번호 설정';
@@ -253,6 +252,7 @@ class _Translations$home$ko extends Translations$home$zh {
 	@override String get todayExpense => '오늘 지출';
 	@override String get monthExpense => '이번 달 지출';
 	@override String yearProgress({required Object year}) => '${year}년 진행률';
+	@override String yearRemainingInfo({required Object days, required Object percent}) => '${days}일 남음 · ${percent}%';
 	@override String get amountHidden => '••••••••';
 	@override String get loadFailed => '불러오기 실패';
 	@override String get noTransactions => '거래 내역 없음';
@@ -442,6 +442,10 @@ class _Translations$speech$ko extends Translations$speech$zh {
 	@override String get goToSettings => '설정으로 이동';
 	@override String get systemVoiceStatusAvailable => '시스템 음성 지원됨';
 	@override String get systemVoiceStatusRestricted => '시스템 음성 제한됨 (자작 ASR 권장)';
+	@override String get serviceNotConfigured => '음성 서비스가 설정되지 않았습니다. 음성 설정에서 서버 주소를 설정해 주세요.';
+	@override String get connectionFailedTitle => '음성 서비스 연결 실패';
+	@override String get connectionFailed => 'WebSocket 음성 인식 서비스에 연결할 수 없습니다. 서버 주소, 포트 또는 네트워크 연결을 확인하세요.';
+	@override String get noSpeechRecognized => '음성 입력이 감지되지 않았습니다. 다시 시도해 주세요.';
 }
 
 // Path: amountTheme
@@ -741,6 +745,7 @@ class _Translations$error$ko extends Translations$error$zh {
 	@override String get validationError => '파일 검증 실패';
 	@override String get unknownError => '알 수 없는 오류';
 	@override String get unknownErrorHint => '예기치 않은 오류가 발생했습니다. 다시 시도하거나 고객 지원에 문의하세요.';
+	@override String get registrationMissingInfo => '가입 절차 오류, 필수 정보가 없습니다.';
 	@override late final _Translations$error$genui$ko genui = _Translations$error$genui$ko._(_root);
 }
 
@@ -852,7 +857,7 @@ class _Translations$financial$ko extends Translations$financial$zh {
 	@override String get safetyThresholdSaved => '재무 안전선 저장됨';
 	@override String get dailyBurnRateSettings => '일일 소비 추정';
 	@override String get setDailyBurnRate => '일일 예상 소비 금액 설정';
-	@override String get dailyBurnRateSaved => '일일 소비 추정 금액 저장됨';
+	@override String get dailyBurnRateSaved => '일일 지출 추정치 저장됨';
 	@override String get dayUnit => '일';
 	@override String get saveFailed => '저장 실패';
 }
@@ -1310,8 +1315,11 @@ class _Translations$statistics$analysis$ko extends Translations$statistics$analy
 
 	// Translations
 	@override String get title => '지출 분석';
+	@override String get expenseTitle => '지출 분석';
+	@override String get incomeTitle => '수입 분석';
 	@override String get total => '합계';
-	@override String get breakdown => '카테고리별 상세';
+	@override String get breakdown => '지출 카테고리 내역';
+	@override String get radarNeedMoreData => '레이더 차트는 3개 이상의 카테고리 데이터가 필요합니다';
 }
 
 // Path: statistics.filter
@@ -2451,6 +2459,7 @@ extension on TranslationsKo {
 			'home.todayExpense' => '오늘 지출',
 			'home.monthExpense' => '이번 달 지출',
 			'home.yearProgress' => ({required Object year}) => '${year}년 진행률',
+			'home.yearRemainingInfo' => ({required Object days, required Object percent}) => '${days}일 남음 · ${percent}%',
 			'home.amountHidden' => '••••••••',
 			'home.loadFailed' => '불러오기 실패',
 			'home.noTransactions' => '거래 내역 없음',
@@ -2592,10 +2601,18 @@ extension on TranslationsKo {
 			'speech.enterValidPort' => '유효한 포트 번호를 입력하세요 (1-65535)',
 			'speech.configSaved' => '구성이 저장되었습니다',
 			'speech.systemVoiceRestrictedTitle' => '시스템 음성을 사용할 수 없음',
-			'speech.systemVoiceRestrictedContent' => '기기 제조사 권한 제한으로 인해 시스템 음성을 사용할 수 없습니다. WebSocket 자작 ASR 설정을 권장합니다.',
+			'speech.systemVoiceRestrictedContent' => '기기 음성 인식 서비스를 사용할 수 없거나 비활성화되어 있습니다. 설정에서 활성화하거나 WebSocket 자체 ASR을 설정하세요.',
+			'speech.dictationDisabledTitle' => '음성 받아쓰기 비활성화됨',
+			'speech.dictationDisabledContent' => '시스템 음성 받아쓰기가 활성화되어 있지 않습니다. iOS 기기의 경우 [설정 -> 일반 -> 키보드]에서 [받아쓰기 활성화]를 켜주세요.',
+			'speech.permissionDeniedTitle' => '음성 권한 필요',
+			'speech.permissionDeniedContent' => '이 기능을 사용하려면 마이크 및 음성 인식 권한이 필요합니다. 시스템 설정에서 권한을 허용해 주세요.',
 			'speech.goToSettings' => '설정으로 이동',
 			'speech.systemVoiceStatusAvailable' => '시스템 음성 지원됨',
 			'speech.systemVoiceStatusRestricted' => '시스템 음성 제한됨 (자작 ASR 권장)',
+			'speech.serviceNotConfigured' => '음성 서비스가 설정되지 않았습니다. 음성 설정에서 서버 주소를 설정해 주세요.',
+			'speech.connectionFailedTitle' => '음성 서비스 연결 실패',
+			'speech.connectionFailed' => 'WebSocket 음성 인식 서비스에 연결할 수 없습니다. 서버 주소, 포트 또는 네트워크 연결을 확인하세요.',
+			'speech.noSpeechRecognized' => '음성 입력이 감지되지 않았습니다. 다시 시도해 주세요.',
 			'amountTheme.chinaMarket' => '중국 시장 관습',
 			'amountTheme.chinaMarketDesc' => '빨강 상승/초록 하락 (권장)',
 			'amountTheme.international' => '국제 표준',
@@ -2823,6 +2840,8 @@ extension on TranslationsKo {
 			'chat.tools.listSpaces' => '공유 공간 목록 불러오는 중...',
 			'chat.tools.querySpaceSummary' => '공간 요약 조회 중...',
 			'chat.tools.prepareTransfer' => '이체 준비 중...',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.unknown' => '요청 처리 중...',
 			'chat.tools.done.readFile' => '파일 확인 완료',
 			'chat.tools.done.searchTransactions' => '거래 조회 완료',
@@ -2844,8 +2863,6 @@ extension on TranslationsKo {
 			'chat.tools.done.forecastFinance' => '예측 완료',
 			'chat.tools.done.analyzeBudget' => '예산 분석 완료',
 			'chat.tools.done.auditAnalysis' => '감사 완료',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.budgetOps' => '처리 완료',
 			'chat.tools.done.createSharedTransaction' => '공유 가계부 생성 완료',
 			'chat.tools.done.listSpaces' => '공유 공간 조회 완료',
@@ -3111,6 +3128,7 @@ extension on TranslationsKo {
 			'error.validationError' => '파일 검증 실패',
 			'error.unknownError' => '알 수 없는 오류',
 			'error.unknownErrorHint' => '예기치 않은 오류가 발생했습니다. 다시 시도하거나 고객 지원에 문의하세요.',
+			'error.registrationMissingInfo' => '가입 절차 오류, 필수 정보가 없습니다.',
 			'error.genui.loadingFailed' => '컴포넌트 로드 실패',
 			'error.genui.schemaFailed' => '스키마 검증 실패',
 			'error.genui.schemaDescription' => '컴포넌트 정의가 GenUI 규격에 맞지 않아 텍스트로 표시합니다.',
@@ -3199,7 +3217,7 @@ extension on TranslationsKo {
 			'financial.safetyThresholdSaved' => '재무 안전선 저장됨',
 			'financial.dailyBurnRateSettings' => '일일 소비 추정',
 			'financial.setDailyBurnRate' => '일일 예상 소비 금액 설정',
-			'financial.dailyBurnRateSaved' => '일일 소비 추정 금액 저장됨',
+			'financial.dailyBurnRateSaved' => '일일 지출 추정치 저장됨',
 			'financial.dayUnit' => '일',
 			'financial.saveFailed' => '저장 실패',
 			'app.splashTitle' => '지혜로운 성장, 가치 있는 부.',
@@ -3216,8 +3234,11 @@ extension on TranslationsKo {
 			'statistics.trend.expense' => '지출',
 			'statistics.trend.income' => '수입',
 			'statistics.analysis.title' => '지출 분석',
+			'statistics.analysis.expenseTitle' => '지출 분석',
+			'statistics.analysis.incomeTitle' => '수입 분석',
 			'statistics.analysis.total' => '합계',
-			'statistics.analysis.breakdown' => '카테고리별 상세',
+			'statistics.analysis.breakdown' => '지출 카테고리 내역',
+			'statistics.analysis.radarNeedMoreData' => '레이더 차트는 3개 이상의 카테고리 데이터가 필요합니다',
 			'statistics.filter.accountType' => '계좌 유형',
 			'statistics.filter.allAccounts' => '모든 계좌',
 			'statistics.filter.apply' => '적용',
@@ -3333,6 +3354,8 @@ extension on TranslationsKo {
 			'sharedSpace.notificationCard.justNow' => '방금',
 			'sharedSpace.spaceCard.noDescription' => '설명 없음',
 			'sharedSpace.spaceCard.creator' => '생성자',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.spaceCard.member' => '멤버',
 			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count}명의 멤버',
 			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count}건의 거래',
@@ -3359,8 +3382,6 @@ extension on TranslationsKo {
 			'sharedSpace.settings.editHint' => '관리자만 편집 가능',
 			'sharedSpace.settings.edit' => '편집',
 			'sharedSpace.settings.you' => '나',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.settings.pending' => '대기 중',
 			'sharedSpace.settings.declined' => '거절됨',
 			'sharedSpace.settings.setAsAdmin' => '관리자로 설정',

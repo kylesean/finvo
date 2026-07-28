@@ -597,7 +597,7 @@ class _CategoryAnalysisSectionState
   CategoryViewMode _viewMode = CategoryViewMode.bar;
 
   String _formatAmount(String amount) {
-    final numberFormat = NumberFormat("#,##0", "zh_CN");
+    final numberFormat = NumberFormat('#,##0', 'zh_CN');
     return numberFormat.format(double.tryParse(amount) ?? 0);
   }
 

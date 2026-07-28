@@ -62,55 +62,55 @@ class AIService {
     bool isClosed = false;
 
     // Always use user's access token
-    _logger.info("AIService: ========== AUTHENTICATION ==========");
+    _logger.info('AIService: ========== AUTHENTICATION ==========');
     final token = await _storageService.getToken();
     if (token == null || token.isEmpty) {
-      _logger.info("AIService: ERROR - No auth token found!");
-      controller.addError("User not logged in or token invalid.");
+      _logger.info('AIService: ERROR - No auth token found!');
+      controller.addError('User not logged in or token invalid.');
       unawaited(controller.close());
       return controller.stream;
     }
-    _logger.info("AIService: Using access token for authentication");
+    _logger.info('AIService: Using access token for authentication');
     _logger.info("AIService: Session ID: ${sessionId ?? 'null (new session)'}");
-    _logger.info("AIService: =====================================");
+    _logger.info('AIService: =====================================');
 
-    final String sseUrl = "$_sseBaseUrl${ApiConstants.aiChatSseEndpoint}";
+    final String sseUrl = '$_sseBaseUrl${ApiConstants.aiChatSseEndpoint}';
 
     final Map<String, String> headers = {
-      "Accept": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
+      'Accept': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
     };
 
     String? appLanguage;
     if (ref != null) {
       final currentLocale = ref!.read(localeProvider);
-      headers["Accept-Language"] = _convertToAcceptLanguage(currentLocale);
+      headers['Accept-Language'] = _convertToAcceptLanguage(currentLocale);
       appLanguage = _convertToLanguageCode(currentLocale);
     }
 
     // Build request body - session_id in request body
     final Map<String, dynamic> message = {
-      "role": "user",
-      "content": userMessage,
+      'role': 'user',
+      'content': userMessage,
     };
 
     // If there are attachments, add them to the message
     if (attachments != null && attachments.isNotEmpty) {
-      message["attachments"] = attachments;
+      message['attachments'] = attachments;
       _logger.info(
-        "AIService: Including ${attachments.length} attachments in request",
+        'AIService: Including ${attachments.length} attachments in request',
       );
     }
 
     final Map<String, dynamic> requestBody = {
-      "messages": [message],
-      "session_id": sessionId, // null for new session, backend will create one
-      if (appLanguage != null) "app_language": appLanguage,
+      'messages': [message],
+      'session_id': sessionId, // null for new session, backend will create one
+      if (appLanguage != null) 'app_language': appLanguage,
     };
 
-    _logger.info("AIService: Starting SSE connection...");
+    _logger.info('AIService: Starting SSE connection...');
 
     controller.onCancel = () {
       if (!isClosed) {
@@ -119,7 +119,7 @@ class AIService {
         if (!controller.isClosed) {
           unawaited(controller.close());
         }
-        _logger.info("AIService: Stream cancelled by listener");
+        _logger.info('AIService: Stream cancelled by listener');
       }
     };
 
@@ -147,11 +147,11 @@ class AIService {
             // Handle error events
             if (parsedEvent.isError) {
               _logger.info(
-                "AIService: Received error event: ${parsedEvent.errorMessage}",
+                'AIService: Received error event: ${parsedEvent.errorMessage}',
               );
               if (!isClosed) {
                 controller.addError(
-                  parsedEvent.errorMessage ?? "Unknown SSE error",
+                  parsedEvent.errorMessage ?? 'Unknown SSE error',
                 );
               }
               return;
@@ -161,42 +161,42 @@ class AIService {
             switch (parsedEvent.type) {
               case SseEventType.text:
                 _logger.info(
-                  "AIService: Text event - content: ${parsedEvent.content}",
+                  'AIService: Text event - content: ${parsedEvent.content}',
                 );
                 controller.add(parsedEvent);
                 break;
 
               // A2UI protocol events
               case SseEventType.a2uiMessage:
-                _logger.info("AIService: A2UI message event");
+                _logger.info('AIService: A2UI message event');
                 controller.add(parsedEvent);
                 break;
 
               case SseEventType.sessionInit:
-                _logger.info("AIService: Session init event");
+                _logger.info('AIService: Session init event');
                 controller.add(parsedEvent);
                 break;
 
               case SseEventType.titleUpdate:
                 _logger.info(
-                  "AIService: Title update event - title: ${parsedEvent.title}",
+                  'AIService: Title update event - title: ${parsedEvent.title}',
                 );
                 controller.add(parsedEvent);
                 break;
 
               case SseEventType.done:
-                _logger.info("AIService: Done event received");
+                _logger.info('AIService: Done event received');
                 controller.add(parsedEvent);
                 if (!isClosed) {
                   isClosed = true;
                   unawaited(controller.close());
                   sseClient.close();
-                  _logger.info("AIService: Stream completed (done event)");
+                  _logger.info('AIService: Stream completed (done event)');
                 }
                 break;
 
               case SseEventType.unknown:
-                _logger.info("AIService: Unknown event type, skipping");
+                _logger.info('AIService: Unknown event type, skipping');
                 break;
 
               case SseEventType.error:
@@ -210,37 +210,37 @@ class AIService {
                 isClosed = true;
                 unawaited(controller.close());
                 sseClient.close();
-                _logger.info("AIService: Stream completed (done: true)");
+                _logger.info('AIService: Stream completed (done: true)');
               }
             }
           } catch (e) {
             if (!isClosed) {
-              _logger.info("AIService: Error processing SSE event data: $e");
-              controller.addError("SSE data parsing error: ${e.toString()}");
+              _logger.info('AIService: Error processing SSE event data: $e');
+              controller.addError('SSE data parsing error: ${e.toString()}');
             }
           }
         },
         onError: (Object error) {
-          _logger.info("AIService: ===== SSE ERROR =====");
-          _logger.info("AIService: Error: $error");
-          _logger.info("AIService: ====================");
+          _logger.info('AIService: ===== SSE ERROR =====');
+          _logger.info('AIService: Error: $error');
+          _logger.info('AIService: ====================');
           if (isClosed) return;
           isClosed = true;
           controller.addError(
-            NetworkException("SSE stream error: ${error.toString()}"),
+            NetworkException('SSE stream error: ${error.toString()}'),
           );
           if (!controller.isClosed) {
             unawaited(controller.close());
           }
         },
         onDone: () {
-          _logger.info("AIService: ===== SSE STREAM DONE =====");
+          _logger.info('AIService: ===== SSE STREAM DONE =====');
           if (!isClosed) {
             isClosed = true;
             if (!controller.isClosed) {
               unawaited(controller.close());
             }
-            _logger.info("AIService: Stream closed normally");
+            _logger.info('AIService: Stream closed normally');
           }
         },
       );
@@ -248,11 +248,11 @@ class AIService {
       // Start connection
       await sseClient.connect();
     } catch (e, stackTrace) {
-      _logger.info("AIService: ===== EXCEPTION CREATING SSE CONNECTION =====");
-      _logger.info("AIService: Exception: $e");
-      _logger.info("AIService: StackTrace: $stackTrace");
-      _logger.info("AIService: =============================================");
-      controller.addError("Failed to create SSE connection: ${e.toString()}");
+      _logger.info('AIService: ===== EXCEPTION CREATING SSE CONNECTION =====');
+      _logger.info('AIService: Exception: $e');
+      _logger.info('AIService: StackTrace: $stackTrace');
+      _logger.info('AIService: =============================================');
+      controller.addError('Failed to create SSE connection: ${e.toString()}');
       unawaited(controller.close());
       return controller.stream;
     }
@@ -263,13 +263,13 @@ class AIService {
   /// Public method to manually close connection
   Future<void> closeConnection() async {
     if (_currentSseClient != null) {
-      _logger.info("AIService: Closing existing SSE connection");
+      _logger.info('AIService: Closing existing SSE connection');
       _currentSseClient!.close();
       _currentSseClient = null;
     }
 
     if (_currentController != null && !_currentController!.isClosed) {
-      _logger.info("AIService: Closing existing controller");
+      _logger.info('AIService: Closing existing controller');
       unawaited(_currentController!.close());
       _currentController = null;
     }
@@ -280,14 +280,14 @@ class AIService {
     try {
       final token = await _storageService.getToken();
       if (token == null || token.isEmpty) {
-        _logger.info("AIService: cancelLastTurn - No auth token");
+        _logger.info('AIService: cancelLastTurn - No auth token');
         return false;
       }
 
-      final url = "$_baseUrl/chatbot/sessions/$sessionId/cancel";
+      final url = '$_baseUrl/chatbot/sessions/$sessionId/cancel';
 
       _logger.info(
-        "AIService: Calling cancel endpoint for session: $sessionId",
+        'AIService: Calling cancel endpoint for session: $sessionId',
       );
 
       final response = await _dio.post<Map<String, dynamic>>(
@@ -306,15 +306,15 @@ class AIService {
           final data = body['data'] as Map<String, dynamic>?;
           final removedCount = data?['removed_count'] ?? 0;
           _logger.info(
-            "AIService: Cancel successful, removed $removedCount messages",
+            'AIService: Cancel successful, removed $removedCount messages',
           );
           return true;
         }
       }
-      _logger.info("AIService: Cancel failed - ${response.statusMessage}");
+      _logger.info('AIService: Cancel failed - ${response.statusMessage}');
       return false;
     } catch (e) {
-      _logger.info("AIService: cancelLastTurn error - $e");
+      _logger.info('AIService: cancelLastTurn error - $e');
       return false;
     }
   }

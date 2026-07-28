@@ -86,10 +86,10 @@ class NetworkClient {
           try {
             return fromJsonT(response.data);
           } catch (e) {
-            _logger.severe("fromJsonT parsing failed", e);
+            _logger.severe('fromJsonT parsing failed', e);
             // Throw specific data parsing exception
             throw DataParsingException(
-              "Client data parsing failed: ${e.toString()}",
+              'Client data parsing failed: ${e.toString()}',
             );
           }
         } else {
@@ -100,7 +100,7 @@ class NetworkClient {
           } else {
             // Type mismatch is also a parsing error
             throw DataParsingException(
-              "Response data type mismatch. Received: ${response.data.runtimeType}, Expected: $T",
+              'Response data type mismatch. Received: ${response.data.runtimeType}, Expected: $T',
             );
           }
         }
@@ -114,7 +114,7 @@ class NetworkClient {
         }
 
         _logger.warning(
-          "Request failed, preparing retry ($attempts/$maxRetries): ${e.message}",
+          'Request failed, preparing retry ($attempts/$maxRetries): ${e.message}',
         );
 
         // Wait before retry (exponential backoff)
@@ -122,8 +122,8 @@ class NetworkClient {
         continue;
       } catch (e) {
         if (e is AppException) rethrow;
-        _logger.severe("Caught unknown error", e);
-        throw Exception("Unexpected client error: ${e.toString()}");
+        _logger.severe('Caught unknown error', e);
+        throw Exception('Unexpected client error: ${e.toString()}');
       }
     }
 
@@ -137,14 +137,14 @@ class NetworkClient {
         throw lastException.error as AppException;
       }
       _logger.severe(
-        "All retries failed, final error: ${lastException.type}, ${lastException.message}",
+        'All retries failed, final error: ${lastException.type}, ${lastException.message}',
       );
       throw NetworkException(
         "Network request failed, retried $maxRetries times: ${lastException.message ?? 'Unknown network error'}",
       );
     }
 
-    throw NetworkException("Request execution exception, unknown error");
+    throw NetworkException('Request execution exception, unknown error');
   }
 
   /// Determine if request should be retried
@@ -168,11 +168,11 @@ class NetworkClient {
   /// Handle final failure, log error details
   Future<void> _handleFinalFailure(DioException e, String path) async {
     try {
-      _logger.info("Final failure for path: $path");
-      _logger.info("Error type: ${e.type}, Message: ${e.message}");
+      _logger.info('Final failure for path: $path');
+      _logger.info('Error type: ${e.type}, Message: ${e.message}');
       // Note: Network diagnostics removed - requires dynamic baseUrl
     } catch (diagnosticError) {
-      _logger.warning("Error logging failure details", diagnosticError);
+      _logger.warning('Error logging failure details', diagnosticError);
     }
   }
 

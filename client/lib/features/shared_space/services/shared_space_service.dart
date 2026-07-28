@@ -144,7 +144,7 @@ class SharedSpaceService {
         );
       }
     }
-    throw DataParsingException("Failed to parse space transactions response");
+    throw DataParsingException('Failed to parse space transactions response');
   }
 
   /// Update space information
@@ -177,7 +177,7 @@ class SharedSpaceService {
         try {
           return fromJson(dataField);
         } catch (e) {
-          throw DataParsingException("Failed to parse item: ${e.toString()}");
+          throw DataParsingException('Failed to parse item: ${e.toString()}');
         }
       }
     }
@@ -195,7 +195,7 @@ class SharedSpaceService {
           return fromJson(dataField);
         } catch (e) {
           throw DataParsingException(
-            "Failed to parse paginated response: ${e.toString()}",
+            'Failed to parse paginated response: ${e.toString()}',
           );
         }
       }

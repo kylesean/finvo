@@ -56,7 +56,7 @@ class HistoricalMessageProcessor {
       // Log historical UI component info (for debugging only)
       if (processedMessage.uiComponents.isNotEmpty) {
         _logger.info(
-          "HistoricalMessageProcessor: Message ${processedMessage.id} has ${processedMessage.uiComponents.length} UI components (will be rendered by HistoricalComponentRenderer)",
+          'HistoricalMessageProcessor: Message ${processedMessage.id} has ${processedMessage.uiComponents.length} UI components (will be rendered by HistoricalComponentRenderer)',
         );
       }
 
@@ -85,7 +85,7 @@ class HistoricalMessageProcessor {
           processedMessages[processedMessages.length - 1] = mergedMessage;
 
           _logger.info(
-            "HistoricalMessageProcessor: Merged AI messages ${lastMessage.id} + ${finalMessage.id}",
+            'HistoricalMessageProcessor: Merged AI messages ${lastMessage.id} + ${finalMessage.id}',
           );
           continue; // Skip adding, already merged
         }
@@ -95,13 +95,13 @@ class HistoricalMessageProcessor {
 
       if (finalMessage.surfaceIds.isNotEmpty) {
         _logger.info(
-          "HistoricalMessageProcessor: Message ${finalMessage.id} has ${finalMessage.surfaceIds.length} GenUI surfaces",
+          'HistoricalMessageProcessor: Message ${finalMessage.id} has ${finalMessage.surfaceIds.length} GenUI surfaces',
         );
       }
     }
 
     _logger.info(
-      "HistoricalMessageProcessor: Processed ${rawMessages.length} raw messages into ${processedMessages.length} display messages",
+      'HistoricalMessageProcessor: Processed ${rawMessages.length} raw messages into ${processedMessages.length} display messages',
     );
     return processedMessages;
   }

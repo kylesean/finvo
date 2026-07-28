@@ -248,8 +248,8 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     // Check if there is actual data to display
     final hasNoData =
         state.overview == null ||
-        (state.overview!.totalIncome == "0.00" &&
-            state.overview!.totalExpense == "0.00" &&
+        (state.overview!.totalIncome == '0.00' &&
+            state.overview!.totalExpense == '0.00' &&
             (state.categoryBreakdown?.items.isEmpty ?? true));
 
     return RefreshIndicator(

@@ -20,7 +20,7 @@ class ChatService {
           return json;
         }
         throw Exception(
-          "API /transactions/search expected to return an object but received ${json.runtimeType}",
+          'API /transactions/search expected to return an object but received ${json.runtimeType}',
         );
       },
     );

@@ -55,7 +55,7 @@ class AttachmentManager {
 
     _messagesWithAttachmentFetchInFlight.add(messageId);
     _logger.info(
-      "AttachmentManager: Fetching signed URLs for message $messageId",
+      'AttachmentManager: Fetching signed URLs for message $messageId',
     );
 
     try {
@@ -115,7 +115,7 @@ class AttachmentManager {
       );
     } catch (e, stackTrace) {
       _logger.severe(
-        "AttachmentManager: Failed to fetch signed urls for $messageId",
+        'AttachmentManager: Failed to fetch signed urls for $messageId',
         e,
         stackTrace,
       );

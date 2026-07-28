@@ -132,7 +132,7 @@ class ConversationService {
           }
 
           throw DataParsingException(
-            "API /api/v1/auth/sessions expected object, but received ${json.runtimeType}",
+            'API /api/v1/auth/sessions expected object, but received ${json.runtimeType}',
           );
         },
       );
@@ -184,7 +184,7 @@ class ConversationService {
           );
         }
         throw DataParsingException(
-          "API response expected Map, but got ${json.runtimeType}",
+          'API response expected Map, but got ${json.runtimeType}',
         );
       },
     );
@@ -204,7 +204,7 @@ class ConversationService {
           return PaginatedMessages.fromJson(json);
         }
         throw DataParsingException(
-          "API .../messages expected Map, but received ${json.runtimeType}",
+          'API .../messages expected Map, but received ${json.runtimeType}',
         );
       },
     );
@@ -230,7 +230,7 @@ class ConversationService {
           );
         }
         throw DataParsingException(
-          "API resume-status expected Map, but got ${json.runtimeType}",
+          'API resume-status expected Map, but got ${json.runtimeType}',
         );
       },
     );

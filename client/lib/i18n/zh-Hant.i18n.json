@@ -934,6 +934,7 @@
     "validationError": "文件驗證失敗",
     "unknownError": "未知錯誤",
     "unknownErrorHint": "發生了意外錯誤，請重試或聯繫技術支持。",
+    "registrationMissingInfo": "註冊流程錯誤，缺少必要資訊。",
     "genui": {
       "loadingFailed": "組件載入失敗",
       "schemaFailed": "架構驗證失敗",

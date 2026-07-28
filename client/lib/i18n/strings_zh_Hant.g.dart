@@ -173,8 +173,7 @@ class _Translations$auth$zh_Hant extends Translations$auth$zh {
 	@override String get loginSuccess => '歡迎回來!';
 	@override String get loginFailed => '登錄失敗';
 	@override String get pleaseTryAgain => '請稍後重試。';
-	@override @Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
-	String get loginSubtitle => '登錄以繼續使用 AI 記帳助理';
+	@override String get loginSubtitle => '登錄以繼續使用 AI 記帳助理';
 	@override String get noAccount => '還沒有帳戶？註冊';
 	@override String get createAccount => '創建您的帳戶';
 	@override String get setPassword => '設置密碼';
@@ -253,6 +252,7 @@ class _Translations$home$zh_Hant extends Translations$home$zh {
 	@override String get todayExpense => '今日支出';
 	@override String get monthExpense => '本月支出';
 	@override String yearProgress({required Object year}) => '${year}年進度';
+	@override String yearRemainingInfo({required Object days, required Object percent}) => '餘 ${days} 天 · ${percent}%';
 	@override String get amountHidden => '••••••••';
 	@override String get loadFailed => '載入失敗';
 	@override String get noTransactions => '暫無交易記錄';
@@ -442,6 +442,10 @@ class _Translations$speech$zh_Hant extends Translations$speech$zh {
 	@override String get goToSettings => '前往設定';
 	@override String get systemVoiceStatusAvailable => '系統語音服務支援正常';
 	@override String get systemVoiceStatusRestricted => '系統語音限制或不可用 (建議使用自建 ASR)';
+	@override String get serviceNotConfigured => '語音服務未配置，請在【設定 -> 語音識別】中配置服務器地址';
+	@override String get connectionFailedTitle => '語音服務連接失敗';
+	@override String get connectionFailed => '無法連接到 WebSocket 語音識別服務，請檢查服務器地址、端口或網絡連通性。';
+	@override String get noSpeechRecognized => '未檢測到語音輸入，請重試';
 }
 
 // Path: amountTheme
@@ -741,6 +745,7 @@ class _Translations$error$zh_Hant extends Translations$error$zh {
 	@override String get validationError => '文件驗證失敗';
 	@override String get unknownError => '未知錯誤';
 	@override String get unknownErrorHint => '發生了意外錯誤，請重試或聯繫技術支持。';
+	@override String get registrationMissingInfo => '註冊流程錯誤，缺少必要資訊。';
 	@override late final _Translations$error$genui$zh_Hant genui = _Translations$error$genui$zh_Hant._(_root);
 }
 
@@ -1310,8 +1315,11 @@ class _Translations$statistics$analysis$zh_Hant extends Translations$statistics$
 
 	// Translations
 	@override String get title => '支出分析';
+	@override String get expenseTitle => '支出分析';
+	@override String get incomeTitle => '收入分析';
 	@override String get total => '總計';
 	@override String get breakdown => '支出分類明細';
+	@override String get radarNeedMoreData => '雷達圖需要至少3個分類資料';
 }
 
 // Path: statistics.filter
@@ -2451,6 +2459,7 @@ extension on TranslationsZhHant {
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
 			'home.yearProgress' => ({required Object year}) => '${year}年進度',
+			'home.yearRemainingInfo' => ({required Object days, required Object percent}) => '餘 ${days} 天 · ${percent}%',
 			'home.amountHidden' => '••••••••',
 			'home.loadFailed' => '載入失敗',
 			'home.noTransactions' => '暫無交易記錄',
@@ -2592,10 +2601,18 @@ extension on TranslationsZhHant {
 			'speech.enterValidPort' => '請輸入有效的端口 (1-65535)',
 			'speech.configSaved' => '配置已儲存',
 			'speech.systemVoiceRestrictedTitle' => '系統語音不可用',
-			'speech.systemVoiceRestrictedContent' => '您的手機系統語音引擎受到廠商權限限制或服務未開啟。建議配置並開啟 WebSocket 自建語音服務。',
+			'speech.systemVoiceRestrictedContent' => '您的手機系統語音引擎不可用或服務未開啟。建議在設定中開啟語音服務或配置 WebSocket 自建語音服務。',
+			'speech.dictationDisabledTitle' => '語音聽寫未開啟',
+			'speech.dictationDisabledContent' => '系統語音聽寫服務未開啟。如果是 iOS 設備，請前往【設定 -> 通用 -> 鍵盤】開啟【啟用聽寫】。',
+			'speech.permissionDeniedTitle' => '缺少語音權限',
+			'speech.permissionDeniedContent' => '應用需要麥克風和語音識別權限才能使用此功能。請在系統設定中允許權限。',
 			'speech.goToSettings' => '前往設定',
 			'speech.systemVoiceStatusAvailable' => '系統語音服務支援正常',
 			'speech.systemVoiceStatusRestricted' => '系統語音限制或不可用 (建議使用自建 ASR)',
+			'speech.serviceNotConfigured' => '語音服務未配置，請在【設定 -> 語音識別】中配置服務器地址',
+			'speech.connectionFailedTitle' => '語音服務連接失敗',
+			'speech.connectionFailed' => '無法連接到 WebSocket 語音識別服務，請檢查服務器地址、端口或網絡連通性。',
+			'speech.noSpeechRecognized' => '未檢測到語音輸入，請重試',
 			'amountTheme.chinaMarket' => '中國市場習慣',
 			'amountTheme.chinaMarketDesc' => '紅漲綠跌/黑跌 (推薦)',
 			'amountTheme.international' => '國際標準',
@@ -2823,6 +2840,8 @@ extension on TranslationsZhHant {
 			'chat.tools.listSpaces' => '正在獲取共享空間...',
 			'chat.tools.querySpaceSummary' => '正在查詢空間摘要...',
 			'chat.tools.prepareTransfer' => '正在準備轉帳...',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.unknown' => '正在處理請求...',
 			'chat.tools.done.readFile' => '已查看文件',
 			'chat.tools.done.searchTransactions' => '已查詢交易',
@@ -2844,8 +2863,6 @@ extension on TranslationsZhHant {
 			'chat.tools.done.forecastFinance' => '財務預測完成',
 			'chat.tools.done.analyzeBudget' => '預算分析完成',
 			'chat.tools.done.auditAnalysis' => '審計分析完成',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.budgetOps' => '預算處理完成',
 			'chat.tools.done.createSharedTransaction' => '共享帳單創建完成',
 			'chat.tools.done.listSpaces' => '共享空間獲取完成',
@@ -3111,6 +3128,7 @@ extension on TranslationsZhHant {
 			'error.validationError' => '文件驗證失敗',
 			'error.unknownError' => '未知錯誤',
 			'error.unknownErrorHint' => '發生了意外錯誤，請重試或聯繫技術支持。',
+			'error.registrationMissingInfo' => '註冊流程錯誤，缺少必要資訊。',
 			'error.genui.loadingFailed' => '組件載入失敗',
 			'error.genui.schemaFailed' => '架構驗證失敗',
 			'error.genui.schemaDescription' => '組件定義不符合 GenUI 規範，降級為純文本顯示',
@@ -3216,8 +3234,11 @@ extension on TranslationsZhHant {
 			'statistics.trend.expense' => '支出',
 			'statistics.trend.income' => '收入',
 			'statistics.analysis.title' => '支出分析',
+			'statistics.analysis.expenseTitle' => '支出分析',
+			'statistics.analysis.incomeTitle' => '收入分析',
 			'statistics.analysis.total' => '總計',
 			'statistics.analysis.breakdown' => '支出分類明細',
+			'statistics.analysis.radarNeedMoreData' => '雷達圖需要至少3個分類資料',
 			'statistics.filter.accountType' => '帳戶類型',
 			'statistics.filter.allAccounts' => '全部帳戶',
 			'statistics.filter.apply' => '確認應用',
@@ -3333,6 +3354,8 @@ extension on TranslationsZhHant {
 			'sharedSpace.notificationCard.justNow' => '剛剛',
 			'sharedSpace.spaceCard.noDescription' => '暫無描述',
 			'sharedSpace.spaceCard.creator' => '建立者',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.spaceCard.member' => '成員',
 			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count} 位成員',
 			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count} 筆帳單',
@@ -3359,8 +3382,6 @@ extension on TranslationsZhHant {
 			'sharedSpace.settings.editHint' => '僅管理員可編輯',
 			'sharedSpace.settings.edit' => '編輯',
 			'sharedSpace.settings.you' => '我',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.settings.pending' => '待接受',
 			'sharedSpace.settings.declined' => '已拒絕',
 			'sharedSpace.settings.setAsAdmin' => '設為管理員',

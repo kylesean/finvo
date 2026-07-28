@@ -159,4 +159,4 @@ Decimal _decimalFromJsonNullable(dynamic value) {
 }
 
 String _decimalToJson(Decimal value) => value.toString();
-String _decimalToJsonOrZero(Decimal? value) => value?.toString() ?? "0";
+String _decimalToJsonOrZero(Decimal? value) => value?.toString() ?? '0';

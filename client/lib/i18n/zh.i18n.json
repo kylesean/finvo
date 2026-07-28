@@ -934,6 +934,7 @@
     "validationError": "文件验证失败",
     "unknownError": "未知错误",
     "unknownErrorHint": "发生了意外错误，请重试或联系技术支持。",
+    "registrationMissingInfo": "注册流程错误，缺少必要信息。",
     "genui": {
       "loadingFailed": "组件加载失败",
       "schemaFailed": "架构验证失败",

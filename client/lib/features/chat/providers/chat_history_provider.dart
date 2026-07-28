@@ -394,7 +394,7 @@ class ChatHistory extends _$ChatHistory {
       messages: [],
       isLoadingHistory: true,
       historyError: null,
-      currentConversationTitle: "Loading...",
+      currentConversationTitle: 'Loading...',
       isStreamingResponse: false,
     );
 
@@ -427,7 +427,7 @@ class ChatHistory extends _$ChatHistory {
       state = state.copyWith(
         isLoadingHistory: false,
         historyError: e.toString(),
-        currentConversationTitle: "Load failed",
+        currentConversationTitle: 'Load failed',
       );
     }
   }
@@ -496,9 +496,9 @@ class ChatHistory extends _$ChatHistory {
   void _handleStreamError(dynamic error) {
     final errorMessageText = error is AppException
         ? error.message
-        : "An unknown error occurred: ${error.toString()}";
+        : 'An unknown error occurred: ${error.toString()}';
     final displayError =
-        "Sorry, AI assistant communication error: $errorMessageText";
+        'Sorry, AI assistant communication error: $errorMessageText';
 
     final currentText = state.messages
         .firstWhere(
@@ -511,7 +511,7 @@ class ChatHistory extends _$ChatHistory {
       id: _currentStreamingAiMessageId,
       content: currentText.isEmpty
           ? displayError
-          : "$currentText\n\n$displayError",
+          : '$currentText\n\n$displayError',
       isTyping: false,
       streamingStatus: StreamingStatus.error,
     );

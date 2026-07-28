@@ -127,7 +127,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     // Skip if subscriptions are already set up
     if (_resultSubscription != null) return;
 
-    _logger.info("Setting up speech service subscriptions...");
+    _logger.info('Setting up speech service subscriptions...');
     _resultSubscription = _speechService!.onResult.listen(_onSpeechResult);
     _statusSubscription = _speechService!.onStatus.listen(_onSpeechStatus);
     _errorSubscription = _speechService!.onError.listen(_onSpeechError);
@@ -141,21 +141,21 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   }
 
   void _onSpeechStatus(String status) {
-    _logger.info("Speech status: $status");
+    _logger.info('Speech status: $status');
     final isCurrentlyListening = status == 'listening';
 
     if (state.isListening && !isCurrentlyListening) {
       _noSpeechInputTimer?.cancel();
-      _logger.info("Stopped listening.");
+      _logger.info('Stopped listening.');
 
       if (state.isLoadingResponse) {
-        _logger.info("Sending message, ignoring speech status change");
+        _logger.info('Sending message, ignoring speech status change');
         return;
       }
 
       if (_isManualStop) {
         _logger.info(
-          "User manually stopped speech recognition, setting to normal state",
+          'User manually stopped speech recognition, setting to normal state',
         );
         _isManualStop = false;
         state = state.copyWith(isListening: false, hintType: HintType.normal);
@@ -168,7 +168,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
           .trim();
 
       if (recognizedNewContent.isEmpty && _textBeforeSpeechSession.isEmpty) {
-        _logger.info("Listening ended, no speech recognized.");
+        _logger.info('Listening ended, no speech recognized.');
         state = state.copyWith(
           isListening: false,
           text: '',
@@ -176,7 +176,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         );
       } else if (recognizedNewContent.isEmpty &&
           _textBeforeSpeechSession.isNotEmpty) {
-        _logger.info("Listening ended, no new content recognized.");
+        _logger.info('Listening ended, no new content recognized.');
         state = state.copyWith(
           isListening: false,
           text: _textBeforeSpeechSession,
@@ -202,22 +202,22 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         );
       }
     } else if (!state.isListening && isCurrentlyListening) {
-      _logger.info("Started listening.");
+      _logger.info('Started listening.');
       state = state.copyWith(isListening: true, hintType: HintType.listening);
     }
   }
 
   void _onSpeechError(String error) {
     _noSpeechInputTimer?.cancel();
-    _logger.severe("Speech error: $error");
+    _logger.severe('Speech error: $error');
 
     if (state.isLoadingResponse) {
-      _logger.info("Sending message, ignoring speech error: $error");
+      _logger.info('Sending message, ignoring speech error: $error');
       return;
     }
 
     if (_isManualStop) {
-      _logger.info("Error caused by user manual stop, ignoring: $error");
+      _logger.info('Error caused by user manual stop, ignoring: $error');
       _isManualStop = false;
       return;
     }
@@ -277,10 +277,10 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   }
 
   Future<void> _startNewSpeechSession() async {
-    _logger.info("Starting new speech recognition session");
+    _logger.info('Starting new speech recognition session');
 
     if (_speechService == null) {
-      _logger.warning("Speech service not configured");
+      _logger.warning('Speech service not configured');
       final errMsg = _serviceType == SpeechServiceType.system
           ? 'system_speech_restricted'
           : 'Speech service not configured';
@@ -306,7 +306,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       final isReady = await _speechService!.ensureReady();
 
       if (!isReady) {
-        _logger.warning("Speech service not ready");
+        _logger.warning('Speech service not ready');
         String errMsg;
         if (_serviceType == SpeechServiceType.system) {
           if (_speechService is SystemSpeechService) {
@@ -343,13 +343,13 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       _noSpeechInputTimer = Timer(const Duration(seconds: 30), () {
         if (state.isListening && state.text == _textBeforeSpeechSession) {
           _logger.info(
-            "No valid speech input after 30 seconds, stopping actively",
+            'No valid speech input after 30 seconds, stopping actively',
           );
           unawaited(_speechService?.stopListening());
         }
       });
     } catch (e) {
-      _logger.severe("Failed to start speech recognition session: $e");
+      _logger.severe('Failed to start speech recognition session: $e');
       state = state.copyWith(
         isListening: false,
         showError: true,
@@ -362,7 +362,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
   void onTextChanged(String newText) {
     if (state.isListening) {
-      _logger.info("User manually input, stopping current speech listening");
+      _logger.info('User manually input, stopping current speech listening');
       _noSpeechInputTimer?.cancel();
       unawaited(_speechService?.stopListening());
     }
@@ -430,7 +430,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         hintType: HintType.normal,
       );
     } catch (e, s) {
-      _logger.severe("Message send failed: $e\n$s");
+      _logger.severe('Message send failed: $e\n$s');
       state = state.copyWith(
         isLoadingResponse: false,
         showError: true,

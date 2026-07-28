@@ -38,13 +38,13 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
   void initState() {
     super.initState();
     _logger.info(
-      "DEBUG: AIChatPage initState called. conversationId: ${widget.conversationId}",
+      'DEBUG: AIChatPage initState called. conversationId: ${widget.conversationId}',
     );
     // When the Widget is first inserted into the tree, load initial data based on the passed conversationId.
     // Use addPostFrameCallback to safely interact with Provider after the first frame renders.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _logger.info(
-        "AIChatPage(initState): Initializing with conversationId: ${widget.conversationId}",
+        'AIChatPage(initState): Initializing with conversationId: ${widget.conversationId}',
       );
       _loadDataForCurrentRoute();
     });
@@ -54,7 +54,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
   void didUpdateWidget(covariant AIChatPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     _logger.info(
-      "DEBUG: AIChatPage didUpdateWidget called. oldConversationId: ${oldWidget.conversationId}, newConversationId: ${widget.conversationId}",
+      'DEBUG: AIChatPage didUpdateWidget called. oldConversationId: ${oldWidget.conversationId}, newConversationId: ${widget.conversationId}',
     );
     // Called when GoRouter changes route causing this Widget's parameters to change.
     // We compare old and new conversationId.
@@ -62,7 +62,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
     // reload data
     if (widget.conversationId != oldWidget.conversationId) {
       _logger.info(
-        "AIChatPage(didUpdateWidget): conversationId changed from ${oldWidget.conversationId} to ${widget.conversationId}. Reloading data.",
+        'AIChatPage(didUpdateWidget): conversationId changed from ${oldWidget.conversationId} to ${widget.conversationId}. Reloading data.',
       );
       _loadDataForCurrentRoute();
     }
@@ -70,7 +70,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
 
   void _loadDataForCurrentRoute() {
     _logger.info(
-      "DEBUG: _loadDataForCurrentRoute called. Current widget.conversationId: ${widget.conversationId}",
+      'DEBUG: _loadDataForCurrentRoute called. Current widget.conversationId: ${widget.conversationId}',
     );
     final notifier = ref.read(chatHistoryProvider.notifier);
     // If the route provides a conversationId, load it.
@@ -92,7 +92,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
 
   // Show native Drawer sidebar
   void _showSidebar() {
-    _logger.info("DEBUG: _showSidebar called, opening drawer");
+    _logger.info('DEBUG: _showSidebar called, opening drawer');
     _scaffoldKey.currentState?.openDrawer();
   }
 

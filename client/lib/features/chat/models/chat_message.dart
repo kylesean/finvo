@@ -34,7 +34,7 @@ abstract class ChatMessage with _$ChatMessage {
       toJson: _dateTimeNullableToJson,
     )
     DateTime? timestamp,
-    @Default("") String content,
+    @Default('') String content,
 
     @JsonKey(name: 'messageType')
     @Default(MessageType.text)

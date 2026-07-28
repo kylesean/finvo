@@ -54,7 +54,7 @@ class AppVersionService {
               hasUpdate: hasUpdate,
             );
           }
-          throw Exception("Invalid version response format");
+          throw Exception('Invalid version response format');
         },
       );
     } catch (e, stack) {

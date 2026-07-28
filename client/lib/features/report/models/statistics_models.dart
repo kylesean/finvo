@@ -73,7 +73,7 @@ abstract class StatisticsOverview with _$StatisticsOverview {
     required double incomeChangePercent,
     required double expenseChangePercent,
     required double netChangePercent,
-    @Default("") String balanceNote,
+    @Default('') String balanceNote,
     required DateTime periodStart,
     required DateTime periodEnd,
   }) = _StatisticsOverview;

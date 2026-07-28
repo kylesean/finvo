@@ -173,8 +173,7 @@ class _Translations$auth$ja extends Translations$auth$zh {
 	@override String get loginSuccess => 'おかえりなさい！';
 	@override String get loginFailed => 'ログイン失敗';
 	@override String get pleaseTryAgain => '後ほど再試行してください。';
-	@override @Deprecated('No longer used after BrandHeader refactor; will be removed in a future release.')
-	String get loginSubtitle => 'AI家計簿アシスタントを利用するにはログインしてください';
+	@override String get loginSubtitle => 'AI家計簿アシスタントを利用するにはログインしてください';
 	@override String get noAccount => 'アカウントをお持ちでないですか？ 登録';
 	@override String get createAccount => 'アカウントを作成';
 	@override String get setPassword => 'パスワード設定';
@@ -253,6 +252,7 @@ class _Translations$home$ja extends Translations$home$zh {
 	@override String get todayExpense => '今日の支出';
 	@override String get monthExpense => '今月の支出';
 	@override String yearProgress({required Object year}) => '${year}年の進捗';
+	@override String yearRemainingInfo({required Object days, required Object percent}) => '残り ${days} 日 · ${percent}%';
 	@override String get amountHidden => '••••••••';
 	@override String get loadFailed => '読み込み失敗';
 	@override String get noTransactions => '取引履歴なし';
@@ -442,6 +442,10 @@ class _Translations$speech$ja extends Translations$speech$zh {
 	@override String get goToSettings => '設定へ';
 	@override String get systemVoiceStatusAvailable => 'システム音声認識利用可能';
 	@override String get systemVoiceStatusRestricted => 'システム音声制限あり (自作 ASR 推奨)';
+	@override String get serviceNotConfigured => '音声サービスが設定されていません。音声設定でサーバーアドレスを設定してください。';
+	@override String get connectionFailedTitle => '音声サービス接続失敗';
+	@override String get connectionFailed => 'WebSocket音声認識サービスに接続できません。サーバーアドレス、ポート、またはネットワーク接続を確認してください。';
+	@override String get noSpeechRecognized => '音声入力が検出されませんでした。もう一度お試しください。';
 }
 
 // Path: amountTheme
@@ -741,6 +745,7 @@ class _Translations$error$ja extends Translations$error$zh {
 	@override String get validationError => '検証エラー';
 	@override String get unknownError => '不明なエラー';
 	@override String get unknownErrorHint => '予期せぬエラーが発生しました。';
+	@override String get registrationMissingInfo => '登録フローエラー、必要な情報がありません。';
 	@override late final _Translations$error$genui$ja genui = _Translations$error$genui$ja._(_root);
 }
 
@@ -854,7 +859,7 @@ class _Translations$financial$ja extends Translations$financial$zh {
 	@override String get setDailyBurnRate => '1日の支出見積もりを設定';
 	@override String get dailyBurnRateSaved => '支出見積もりを保存しました';
 	@override String get dayUnit => '日';
-	@override String get saveFailed => '保存失敗';
+	@override String get saveFailed => '保存に失敗しました';
 }
 
 // Path: app
@@ -1310,8 +1315,11 @@ class _Translations$statistics$analysis$ja extends Translations$statistics$analy
 
 	// Translations
 	@override String get title => '支出分析';
+	@override String get expenseTitle => '支出分析';
+	@override String get incomeTitle => '収入分析';
 	@override String get total => '合計';
-	@override String get breakdown => 'カテゴリー詳細';
+	@override String get breakdown => '支出カテゴリ内訳';
+	@override String get radarNeedMoreData => 'レーダーチャートには3つ以上のカテゴリデータが必要です';
 }
 
 // Path: statistics.filter
@@ -2451,6 +2459,7 @@ extension on TranslationsJa {
 			'home.todayExpense' => '今日の支出',
 			'home.monthExpense' => '今月の支出',
 			'home.yearProgress' => ({required Object year}) => '${year}年の進捗',
+			'home.yearRemainingInfo' => ({required Object days, required Object percent}) => '残り ${days} 日 · ${percent}%',
 			'home.amountHidden' => '••••••••',
 			'home.loadFailed' => '読み込み失敗',
 			'home.noTransactions' => '取引履歴なし',
@@ -2592,10 +2601,18 @@ extension on TranslationsJa {
 			'speech.enterValidPort' => '有効なポート番号(1-65535)を入力してください',
 			'speech.configSaved' => '設定を保存しました',
 			'speech.systemVoiceRestrictedTitle' => 'システム音声が利用できません',
-			'speech.systemVoiceRestrictedContent' => 'お使いの端末の音声認識エンジンが制限されているか利用できません。WebSocket自作ASRサービスの設定を推奨します。',
+			'speech.systemVoiceRestrictedContent' => '端末の音声認識サービスが無効または利用できません。設定を確認するかWebSocket自作ASRを設定してください。',
+			'speech.dictationDisabledTitle' => '音声入力（音声入力/音声聞き取り）が無効です',
+			'speech.dictationDisabledContent' => 'システム音声入力サービスが有効になっていません。iOS端末の場合、【設定 -> 一般 -> キーボード】から【音声入力を有効にする】をオンにしてください。',
+			'speech.permissionDeniedTitle' => '音声権限が必要です',
+			'speech.permissionDeniedContent' => 'この機能を使用するにはマイクと音声認識の権限が必要です。システム設定で権限を許可してください。',
 			'speech.goToSettings' => '設定へ',
 			'speech.systemVoiceStatusAvailable' => 'システム音声認識利用可能',
 			'speech.systemVoiceStatusRestricted' => 'システム音声制限あり (自作 ASR 推奨)',
+			'speech.serviceNotConfigured' => '音声サービスが設定されていません。音声設定でサーバーアドレスを設定してください。',
+			'speech.connectionFailedTitle' => '音声サービス接続失敗',
+			'speech.connectionFailed' => 'WebSocket音声認識サービスに接続できません。サーバーアドレス、ポート、またはネットワーク接続を確認してください。',
+			'speech.noSpeechRecognized' => '音声入力が検出されませんでした。もう一度お試しください。',
 			'amountTheme.chinaMarket' => '中国市場慣習',
 			'amountTheme.chinaMarketDesc' => '赤上昇/緑下落（推奨）',
 			'amountTheme.international' => '国際標準',
@@ -2823,6 +2840,8 @@ extension on TranslationsJa {
 			'chat.tools.listSpaces' => '共有スペースを取得中...',
 			'chat.tools.querySpaceSummary' => 'スペース概要を確認中...',
 			'chat.tools.prepareTransfer' => '振替を準備中...',
+			_ => null,
+		} ?? switch (path) {
 			'chat.tools.unknown' => 'リクエストを処理中...',
 			'chat.tools.done.readFile' => 'ファイルを確認しました',
 			'chat.tools.done.searchTransactions' => '取引を検索しました',
@@ -2844,8 +2863,6 @@ extension on TranslationsJa {
 			'chat.tools.done.forecastFinance' => '予測完了',
 			'chat.tools.done.analyzeBudget' => '予算分析完了',
 			'chat.tools.done.auditAnalysis' => '監査完了',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.done.budgetOps' => '予算処理完了',
 			'chat.tools.done.createSharedTransaction' => '共有帳簿作成完了',
 			'chat.tools.done.listSpaces' => '共有スペース取得完了',
@@ -3111,6 +3128,7 @@ extension on TranslationsJa {
 			'error.validationError' => '検証エラー',
 			'error.unknownError' => '不明なエラー',
 			'error.unknownErrorHint' => '予期せぬエラーが発生しました。',
+			'error.registrationMissingInfo' => '登録フローエラー、必要な情報がありません。',
 			'error.genui.loadingFailed' => '読み込み失敗',
 			'error.genui.schemaFailed' => '検証失敗',
 			'error.genui.schemaDescription' => '定義が仕様に適合していません',
@@ -3201,7 +3219,7 @@ extension on TranslationsJa {
 			'financial.setDailyBurnRate' => '1日の支出見積もりを設定',
 			'financial.dailyBurnRateSaved' => '支出見積もりを保存しました',
 			'financial.dayUnit' => '日',
-			'financial.saveFailed' => '保存失敗',
+			'financial.saveFailed' => '保存に失敗しました',
 			'app.splashTitle' => 'スマートに、豊かに。',
 			'app.splashSubtitle' => 'インテリジェント財務アシスタント',
 			'statistics.title' => '統計分析',
@@ -3216,8 +3234,11 @@ extension on TranslationsJa {
 			'statistics.trend.expense' => '支出',
 			'statistics.trend.income' => '収入',
 			'statistics.analysis.title' => '支出分析',
+			'statistics.analysis.expenseTitle' => '支出分析',
+			'statistics.analysis.incomeTitle' => '収入分析',
 			'statistics.analysis.total' => '合計',
-			'statistics.analysis.breakdown' => 'カテゴリー詳細',
+			'statistics.analysis.breakdown' => '支出カテゴリ内訳',
+			'statistics.analysis.radarNeedMoreData' => 'レーダーチャートには3つ以上のカテゴリデータが必要です',
 			'statistics.filter.accountType' => '口座タイプ',
 			'statistics.filter.allAccounts' => 'すべての口座',
 			'statistics.filter.apply' => '適用',
@@ -3333,6 +3354,8 @@ extension on TranslationsJa {
 			'sharedSpace.notificationCard.justNow' => 'たった今',
 			'sharedSpace.spaceCard.noDescription' => '説明なし',
 			'sharedSpace.spaceCard.creator' => '作成者',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.spaceCard.member' => 'メンバー',
 			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count} 人のメンバー',
 			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count} 件の取引',
@@ -3359,8 +3382,6 @@ extension on TranslationsJa {
 			'sharedSpace.settings.editHint' => '管理者のみ編集可能',
 			'sharedSpace.settings.edit' => '編集',
 			'sharedSpace.settings.you' => '自分',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.settings.pending' => '承認待ち',
 			'sharedSpace.settings.declined' => '拒否済み',
 			'sharedSpace.settings.setAsAdmin' => '管理者に設定',

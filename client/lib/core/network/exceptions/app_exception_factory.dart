@@ -18,7 +18,7 @@ class AppExceptionFactory {
         final code = responseData['code'];
         if (code is int && code != 0) {
           return BusinessException(
-            (responseData['message'] as String?) ?? "Unknown business error",
+            (responseData['message'] as String?) ?? 'Unknown business error',
             code,
           );
         }
@@ -54,7 +54,7 @@ class AppExceptionFactory {
       case 404:
         return NotFoundException(message);
       case 422:
-        return BadRequestException("${t.common.error}: $message");
+        return BadRequestException('${t.common.error}: $message');
       case 500:
       case 502:
       case 503:

@@ -58,7 +58,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
   }
 
   String _formatAmount(dynamic amount) {
-    final numberFormat = NumberFormat("#,##0", "zh_CN");
+    final numberFormat = NumberFormat('#,##0', 'zh_CN');
     if (amount is String) {
       return numberFormat.format(double.tryParse(amount) ?? 0);
     }

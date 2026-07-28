@@ -147,7 +147,7 @@ class TransactionFeed extends _$TransactionFeed {
       if (previous != null &&
           previous.primaryCurrency != next.primaryCurrency) {
         _logger.info(
-          "Currency changed from ${previous.primaryCurrency} to ${next.primaryCurrency}, refreshing feed",
+          'Currency changed from ${previous.primaryCurrency} to ${next.primaryCurrency}, refreshing feed',
         );
         unawaited(refreshFeed());
       }
@@ -176,7 +176,7 @@ class TransactionFeed extends _$TransactionFeed {
   Future<void> _fetchInitialTransactions({bool isRefresh = false}) async {
     // Check if provider is still valid
     if (!ref.mounted) {
-      _logger.warning("Provider disposed before fetch, aborting");
+      _logger.warning('Provider disposed before fetch, aborting');
       return;
     }
 
@@ -205,7 +205,7 @@ class TransactionFeed extends _$TransactionFeed {
 
       // Riverpod 3.0: use ref.mounted to check if provider is still valid
       if (!ref.mounted) {
-        _logger.info("Provider disposed during fetch, discarding result");
+        _logger.info('Provider disposed during fetch, discarding result');
         return;
       }
 
@@ -216,7 +216,7 @@ class TransactionFeed extends _$TransactionFeed {
         currentPage: 1,
       );
     } catch (e) {
-      _logger.severe("Error fetching initial transaction feed", e);
+      _logger.severe('Error fetching initial transaction feed', e);
 
       // Check if provider is still valid
       if (!ref.mounted) return;
@@ -266,7 +266,7 @@ class TransactionFeed extends _$TransactionFeed {
         );
       }
     } catch (e) {
-      _logger.severe("Error fetching more transactions", e);
+      _logger.severe('Error fetching more transactions', e);
 
       if (!ref.mounted) return;
 

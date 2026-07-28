@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../features/auth/pages/login_page.dart';
 import '../../features/auth/pages/register_step_1_page.dart';
 import '../../features/auth/pages/register_step_2_page.dart';
@@ -112,12 +113,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               final contact = args?['contact'] as String?;
               final verificationCode = args?['verificationCode'] as String?;
               if (contact == null || verificationCode == null) {
-                return const Scaffold(
-                  body: Center(
-                    child: Text(
-                      "Registration flow error, missing required information.",
-                    ),
-                  ),
+                return Scaffold(
+                  body: Center(child: Text(t.error.registrationMissingInfo)),
                 );
               }
               return RegisterStep2Page(

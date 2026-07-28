@@ -63,13 +63,13 @@ class ChatInteractionManager {
   }) async {
     final attachmentList = attachments ?? const <PendingMessageAttachment>[];
     if (text.trim().isEmpty && attachmentList.isEmpty) {
-      _logger.info("ChatInteractionManager: Empty message, returning");
+      _logger.info('ChatInteractionManager: Empty message, returning');
       return;
     }
 
     // 1. Cancel previous stream
     _logger.info(
-      "ChatInteractionManager: Cancelling previous stream and timers...",
+      'ChatInteractionManager: Cancelling previous stream and timers...',
     );
     await _streamingController.cancelStreamAndTimers();
 
@@ -196,9 +196,9 @@ class ChatInteractionManager {
 
       // Check service availability
       if (genUiService == null || !_genUiLifecycleManager.isInitialized) {
-        _logger.info("ChatInteractionManager: GenUI service not available");
+        _logger.info('ChatInteractionManager: GenUI service not available');
         _streamingController.handleStreamError(
-          "Service not initialized, please refresh and retry",
+          'Service not initialized, please refresh and retry',
         );
         _setStreamingStatus(false);
         return;
@@ -214,7 +214,7 @@ class ChatInteractionManager {
       List<Map<String, dynamic>>? attachmentPayload;
       if (attachments.isNotEmpty) {
         _logger.info(
-          "ChatInteractionManager: Processing ${attachments.length} attachments...",
+          'ChatInteractionManager: Processing ${attachments.length} attachments...',
         );
         // Convert to Data URI format using static method
         final dataUriFiles = await DataUriService.convertFilesToDataUri(
@@ -224,7 +224,7 @@ class ChatInteractionManager {
 
         if (dataUriFiles.length != attachments.length) {
           _logger.warning(
-            "ChatInteractionManager: Warning - Attachment count mismatch after conversion",
+            'ChatInteractionManager: Warning - Attachment count mismatch after conversion',
           );
         }
 
@@ -240,7 +240,7 @@ class ChatInteractionManager {
       }
 
       _logger.info(
-        "ChatInteractionManager: Calling GenUI service sendRequest...",
+        'ChatInteractionManager: Calling GenUI service sendRequest...',
       );
 
       await genUiService.conversation.sendRequestWithAttachments(
@@ -248,10 +248,10 @@ class ChatInteractionManager {
         attachments: attachmentPayload,
       );
 
-      _logger.info("ChatInteractionManager: Request sent successfully");
+      _logger.info('ChatInteractionManager: Request sent successfully');
     } catch (e, stackTrace) {
       _logger.severe(
-        "ChatInteractionManager: Error sending request",
+        'ChatInteractionManager: Error sending request',
         e,
         stackTrace,
       );

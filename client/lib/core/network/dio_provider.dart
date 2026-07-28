@@ -80,7 +80,7 @@ final sseDioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(AuthInterceptor(storageService));
   // Note: SSE does not need ErrorInterceptor and BusinessInterceptor, because the streaming response handling is different
 
-  _logger.info("SSE Dio instance created (baseUrl will be set dynamically)");
+  _logger.info('SSE Dio instance created (baseUrl will be set dynamically)');
   return dio;
 });
 
@@ -111,6 +111,6 @@ final dioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(AuthInterceptor(storageService)); // Auth interceptor
   dio.interceptors.add(ErrorInterceptor()); // Error handling interceptor
   dio.interceptors.add(BusinessInterceptor()); // Business logic interceptor
-  _logger.info("Dio instance created (baseUrl will be set dynamically)");
+  _logger.info('Dio instance created (baseUrl will be set dynamically)');
   return dio;
 });

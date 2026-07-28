@@ -35,7 +35,7 @@ class CommentService {
               .toList();
         }
         throw DataParsingException(
-          "API /transactions/$transactionId/comments: expected a list or an object containing a list, but received ${json.runtimeType}",
+          'API /transactions/$transactionId/comments: expected a list or an object containing a list, but received ${json.runtimeType}',
         );
       },
     );

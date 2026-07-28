@@ -934,6 +934,7 @@
     "validationError": "File Validation Error",
     "unknownError": "Unknown Error",
     "unknownErrorHint": "An unexpected error occurred. Please try again or contact support.",
+    "registrationMissingInfo": "Registration flow error, missing required information.",
     "genui": {
       "loadingFailed": "Component loading failed",
       "schemaFailed": "Schema validation failed",

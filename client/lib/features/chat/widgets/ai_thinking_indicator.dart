@@ -13,7 +13,7 @@ class AiThinkingIndicator extends StatefulWidget {
     this.dotSize = 7.0,
     this.dotColor,
     this.duration = const Duration(milliseconds: 1400),
-    this.thinkingText = "AI is thinking...", // Can customize thinking text
+    this.thinkingText = 'AI is thinking...', // Can customize thinking text
   });
 
   @override

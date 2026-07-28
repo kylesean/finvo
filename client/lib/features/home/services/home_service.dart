@@ -158,10 +158,10 @@ class HomeService {
       try {
         return fromJson(json);
       } catch (e) {
-        throw DataParsingException("Failed to parse item response: $json");
+        throw DataParsingException('Failed to parse item response: $json');
       }
     }
-    throw DataParsingException("Expected JSON Object, got ${json.runtimeType}");
+    throw DataParsingException('Expected JSON Object, got ${json.runtimeType}');
   }
 
   /// Helper to parse a list response { code: 0, data: { items: [...] } }
@@ -184,7 +184,7 @@ class HomeService {
               return fromJson(item);
             }
             throw DataParsingException(
-              "Item in list is not a Map: ${item.runtimeType}",
+              'Item in list is not a Map: ${item.runtimeType}',
             );
           }).toList();
         }
@@ -198,7 +198,7 @@ class HomeService {
             return fromJson(item);
           }
           throw DataParsingException(
-            "Item in list is not a Map: ${item.runtimeType}",
+            'Item in list is not a Map: ${item.runtimeType}',
           );
         }).toList();
       }

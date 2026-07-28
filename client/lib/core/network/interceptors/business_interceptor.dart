@@ -30,7 +30,7 @@ class BusinessInterceptor extends Interceptor {
           DioException(
             requestOptions: response.requestOptions,
             error: DataParsingException(
-              "Response format error: expected JSON object, but received ${response.data.runtimeType}",
+              'Response format error: expected JSON object, but received ${response.data.runtimeType}',
             ),
             type: DioExceptionType.badResponse,
           ),
@@ -53,7 +53,7 @@ class BusinessInterceptor extends Interceptor {
       }
 
       final code = data['code'];
-      final message = data['message'] ?? "Unknown error";
+      final message = data['message'] ?? 'Unknown error';
       final bool isSuccess = code == 0;
       // If code is not 0, it's a business error
       // Step 3: If it's a business error, throw directly
