@@ -61,27 +61,31 @@ class _CurrencySelectionSheetState extends State<CurrencySelectionSheet> {
             ),
           ),
 
-          // Picker
-          SizedBox(
-            height: 200,
-            child: FPicker(
-              control: .managed(controller: _controller),
-              children: [
-                FPickerWheel(
-                  loop: true,
-                  children: Currency.values.map((currency) {
-                    return Center(
-                      child: Text(
-                        '${currency.code}  ${currency.localizedName}',
-                        style: theme.typography.body.md.copyWith(
-                          color: colors.foreground,
-                          fontWeight: FontWeight.w500,
+          // Picker - use Flexible to allow shrinking when viewport is
+          // constrained (e.g. keyboard visible during dismiss animation),
+          // preventing RenderFlex overflow.
+          Flexible(
+            child: SizedBox(
+              height: 200,
+              child: FPicker(
+                control: .managed(controller: _controller),
+                children: [
+                  FPickerWheel(
+                    loop: true,
+                    children: Currency.values.map((currency) {
+                      return Center(
+                        child: Text(
+                          '${currency.code}  ${currency.localizedName}',
+                          style: theme.typography.body.md.copyWith(
+                            color: colors.foreground,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
 

@@ -144,7 +144,14 @@ class _FinancialAccountEditPageState
           _buildInputRow(
             theme: theme,
             colors: colors,
-            icon: definition.iconBuilder(colors.foreground),
+            icon: SizedBox(
+              width: 20,
+              height: 20,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: definition.iconBuilder(colors.primary),
+              ),
+            ),
             label: t.account.nameLabel,
             child: TextField(
               controller: _nameController,
@@ -180,9 +187,10 @@ class _FinancialAccountEditPageState
             colors: colors,
             icon: Text(
               _selectedCurrency.symbol,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.bold,
                 color: colors.primary,
+                height: 1.0,
               ),
             ),
             label: t.account.amountLabel,

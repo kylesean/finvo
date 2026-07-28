@@ -135,9 +135,14 @@ class _FinancialAccountAddPageState
           _buildInputRow(
             theme: theme,
             colors: colors,
-            icon: definition.iconBuilder(
-              colors.foreground,
-            ), // Use foreground color for consistency
+            icon: SizedBox(
+              width: 20,
+              height: 20,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: definition.iconBuilder(colors.primary),
+              ),
+            ),
             label: t.account.nameLabel,
             child: TextField(
               controller: _nameController,
@@ -173,9 +178,10 @@ class _FinancialAccountAddPageState
             colors: colors,
             icon: Text(
               _selectedCurrency.symbol,
-              style: theme.typography.body.md.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.primary, // Use theme color
+              style: theme.typography.body.lg.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colors.primary,
+                height: 1.0,
               ),
             ),
             label: t.account.amountLabel,
