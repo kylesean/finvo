@@ -9,6 +9,7 @@ import 'package:genui/genui.dart' as genui;
 import 'package:gpt_markdown/gpt_markdown.dart';
 import '../models/chat_message.dart' as app;
 import '../genui/components/historical_component_renderer.dart';
+import '../genui/utils/genui_error_boundary.dart';
 import 'authenticated_image.dart';
 import 'tool_execution_block.dart';
 import '../models/tool_call_info.dart';
@@ -151,8 +152,14 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
           return Container(
             key: ValueKey('live_${component.surfaceId}'),
             margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
-            child: genui.Surface(
-              surfaceContext: widget.genUiHost.contextFor(component.surfaceId),
+            child: GenUiErrorBoundary(
+              componentName: 'LiveSurface_${component.surfaceId}',
+              data: component.data,
+              child: genui.Surface(
+                surfaceContext: widget.genUiHost.contextFor(
+                  component.surfaceId,
+                ),
+              ),
             ),
           );
         } else {
@@ -160,9 +167,13 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
           return Container(
             key: ValueKey('historical_${component.surfaceId}'),
             margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
-            child: HistoricalComponentRenderer(
-              componentType: component.componentType,
+            child: GenUiErrorBoundary(
+              componentName: component.componentType,
               data: component.data,
+              child: HistoricalComponentRenderer(
+                componentType: component.componentType,
+                data: component.data,
+              ),
             ),
           );
         }

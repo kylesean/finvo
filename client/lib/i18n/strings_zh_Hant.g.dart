@@ -434,7 +434,11 @@ class _Translations$speech$zh_Hant extends Translations$speech$zh {
 	@override String get enterValidPort => '請輸入有效的端口 (1-65535)';
 	@override String get configSaved => '配置已儲存';
 	@override String get systemVoiceRestrictedTitle => '系統語音不可用';
-	@override String get systemVoiceRestrictedContent => '您的手機系統語音引擎受到廠商權限限制或服務未開啟。建議配置並開啟 WebSocket 自建語音服務。';
+	@override String get systemVoiceRestrictedContent => '您的手機系統語音引擎不可用或服務未開啟。建議在設定中開啟語音服務或配置 WebSocket 自建語音服務。';
+	@override String get dictationDisabledTitle => '語音聽寫未開啟';
+	@override String get dictationDisabledContent => '系統語音聽寫服務未開啟。如果是 iOS 設備，請前往【設定 -> 通用 -> 鍵盤】開啟【啟用聽寫】。';
+	@override String get permissionDeniedTitle => '缺少語音權限';
+	@override String get permissionDeniedContent => '應用需要麥克風和語音識別權限才能使用此功能。請在系統設定中允許權限。';
 	@override String get goToSettings => '前往設定';
 	@override String get systemVoiceStatusAvailable => '系統語音服務支援正常';
 	@override String get systemVoiceStatusRestricted => '系統語音限制或不可用 (建議使用自建 ASR)';

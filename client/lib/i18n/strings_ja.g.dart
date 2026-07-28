@@ -434,7 +434,11 @@ class _Translations$speech$ja extends Translations$speech$zh {
 	@override String get enterValidPort => '有効なポート番号(1-65535)を入力してください';
 	@override String get configSaved => '設定を保存しました';
 	@override String get systemVoiceRestrictedTitle => 'システム音声が利用できません';
-	@override String get systemVoiceRestrictedContent => 'お使いの端末の音声認識エンジンが制限されているか利用できません。WebSocket自作ASRサービスの設定を推奨します。';
+	@override String get systemVoiceRestrictedContent => '端末の音声認識サービスが無効または利用できません。設定を確認するかWebSocket自作ASRを設定してください。';
+	@override String get dictationDisabledTitle => '音声入力（音声入力/音声聞き取り）が無効です';
+	@override String get dictationDisabledContent => 'システム音声入力サービスが有効になっていません。iOS端末の場合、【設定 -> 一般 -> キーボード】から【音声入力を有効にする】をオンにしてください。';
+	@override String get permissionDeniedTitle => '音声権限が必要です';
+	@override String get permissionDeniedContent => 'この機能を使用するにはマイクと音声認識の権限が必要です。システム設定で権限を許可してください。';
 	@override String get goToSettings => '設定へ';
 	@override String get systemVoiceStatusAvailable => 'システム音声認識利用可能';
 	@override String get systemVoiceStatusRestricted => 'システム音声制限あり (自作 ASR 推奨)';

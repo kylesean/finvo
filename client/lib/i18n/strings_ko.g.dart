@@ -434,7 +434,11 @@ class _Translations$speech$ko extends Translations$speech$zh {
 	@override String get enterValidPort => '유효한 포트 번호를 입력하세요 (1-65535)';
 	@override String get configSaved => '구성이 저장되었습니다';
 	@override String get systemVoiceRestrictedTitle => '시스템 음성을 사용할 수 없음';
-	@override String get systemVoiceRestrictedContent => '기기 제조사 권한 제한으로 인해 시스템 음성을 사용할 수 없습니다. WebSocket 자작 ASR 설정을 권장합니다.';
+	@override String get systemVoiceRestrictedContent => '기기 음성 인식 서비스를 사용할 수 없거나 비활성화되어 있습니다. 설정에서 활성화하거나 WebSocket 자체 ASR을 설정하세요.';
+	@override String get dictationDisabledTitle => '음성 받아쓰기 비활성화됨';
+	@override String get dictationDisabledContent => '시스템 음성 받아쓰기가 활성화되어 있지 않습니다. iOS 기기의 경우 [설정 -> 일반 -> 키보드]에서 [받아쓰기 활성화]를 켜주세요.';
+	@override String get permissionDeniedTitle => '음성 권한 필요';
+	@override String get permissionDeniedContent => '이 기능을 사용하려면 마이크 및 음성 인식 권한이 필요합니다. 시스템 설정에서 권한을 허용해 주세요.';
 	@override String get goToSettings => '설정으로 이동';
 	@override String get systemVoiceStatusAvailable => '시스템 음성 지원됨';
 	@override String get systemVoiceStatusRestricted => '시스템 음성 제한됨 (자작 ASR 권장)';

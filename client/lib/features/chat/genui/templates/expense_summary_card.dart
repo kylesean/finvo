@@ -9,13 +9,9 @@ import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
-/// Smart expense overview card (Layer 4: Template)
-///
-/// Displays total expense, category distribution, and Top 3 transactions.
-/// Uses GenUI four-layer architecture:
-/// - atoms: IconBadge, AmountDisplay
-/// - molecules: StatCard, TransactionItem
-/// - organisms: GenUIBottomSheet, TransactionListView
+import '../utils/genui_num_utils.dart';
+
+/// Smart Expense Summary Card
 class ExpenseSummaryCard extends ConsumerWidget {
   final Map<String, dynamic> data;
 
@@ -23,50 +19,75 @@ class ExpenseSummaryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = context.theme;
-    final colors = theme.colors;
+    try {
+      final theme = context.theme;
+      final colors = theme.colors;
 
-    final summary = data['summary'] as Map<String, dynamic>? ?? {};
-    final totalExpense = (summary['total_expense'] as num?)?.toDouble() ?? 0.0;
-    final distribution = (summary['distribution'] as List<dynamic>?) ?? [];
-    final topItems = (summary['top_items'] as List<dynamic>?) ?? [];
-    final totalCount = (summary['count'] as num?)?.toInt() ?? 0;
+      final summaryRaw = data['summary'];
+      final summary = summaryRaw is Map
+          ? Map<String, dynamic>.from(summaryRaw)
+          : <String, dynamic>{};
+      final totalExpense = GenUiNumUtils.toDouble(summary['total_expense']);
+      final distributionRaw = summary['distribution'];
+      final distribution = distributionRaw is List
+          ? distributionRaw
+          : <dynamic>[];
+      final topItemsRaw = summary['top_items'];
+      final topItems = topItemsRaw is List ? topItemsRaw : <dynamic>[];
+      final totalCount = GenUiNumUtils.toInt(summary['count']);
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: colors.background,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(color: colors.border.withValues(alpha: 0.5)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Top total section
+            _buildTotalSection(context, theme, colors, totalExpense),
+
+            // 2. Category distribution progress bar
+            if (distribution.isNotEmpty)
+              _buildDistributionSection(context, theme, colors, distribution),
+
+            // 3. Top 3 transaction list
+            if (topItems.isNotEmpty)
+              _buildTopItemsSection(context, theme, colors, topItems),
+
+            // 4. Bottom view-all button
+            _buildViewAllButton(context, theme, colors, totalCount),
+          ],
+        ),
+      );
+    } catch (e) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: context.theme.colors.muted.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          'Expense summary format error: $e',
+          style: TextStyle(
+            color: context.theme.colors.mutedForeground,
+            fontSize: 13,
           ),
-        ],
-        border: Border.all(color: colors.border.withValues(alpha: 0.5)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1. Top total section
-          _buildTotalSection(context, theme, colors, totalExpense),
-
-          // 2. Category distribution progress bar
-          if (distribution.isNotEmpty)
-            _buildDistributionSection(context, theme, colors, distribution),
-
-          // 3. Top 3 transaction list
-          if (topItems.isNotEmpty)
-            _buildTopItemsSection(context, theme, colors, topItems),
-
-          // 4. Bottom view-all button
-          _buildViewAllButton(context, theme, colors, totalCount),
-        ],
-      ),
-    );
+        ),
+      );
+    }
   }
 
   Widget _buildTotalSection(
