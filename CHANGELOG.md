@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note**: During alpha development, this changelog is updated only at version releases.
 > For detailed changes between releases, see the [Git commit history](https://github.com/kylesean/Finvo/commits/main).
 
+## [0.2.1-alpha] - 2026-07-28
+
+### Added
+- Multi-OEM speech engine auto-selector for Android natively matching Xiaomi, Huawei, Honor, OPPO, Vivo, iFlytek, and Google engines.
+- Tactile haptic feedback (`HapticFeedback.lightImpact()`) upon initiating voice recognition sessions.
+- `GenUiNumUtils` utility for robust string-to-number parsing across GenUI component cards.
+
+### Fixed
+- Fixed SSE chat request missing `Accept-Language` headers and `app_language` parameters, ensuring correct locale responses.
+- Fixed GenUI component layout and type-casting exceptions (`BudgetStatusCard`, `BudgetAnalysisCard`, `ExpenseSummaryCard`) by wrapping rendering in `GenUiErrorBoundary`.
+- Fixed Docker runtime image missing `uv` package manager binary causing skill script execution loops.
+- Fixed LangGraph `InvalidUpdateError` for `active_skill` concurrent updates in single execution step via `_take_last_skill` reducer.
+
 ## [0.2.0-alpha] - 2026-07-27
 
 ### Added
