@@ -11,6 +11,7 @@ import '../app/theme/forui_theme_config.dart';
 import '../app/theme/theme_palette_provider.dart';
 import '../app/theme/theme_provider.dart';
 import '../features/auth/providers/auth_provider.dart';
+import '../features/notification/providers/notification_provider.dart';
 import '../i18n/strings.g.dart';
 
 class MyApp extends ConsumerWidget {
@@ -20,6 +21,9 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appThemeMode = ref.watch(themeProvider);
     final palette = ref.watch(themePaletteProvider);
+
+    // Initialize WebSocket notification service (connects if token available)
+    ref.read(notificationWsProvider);
 
     final foruiLightTheme = ForuiThemeConfig.resolve(
       palette: palette,

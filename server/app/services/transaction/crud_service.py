@@ -177,6 +177,10 @@ class TransactionCRUDService:
     async def get_transaction_detail(self, transaction_id: UUID, user_uuid: UUID) -> dict[str, Any] | None:
         """Get transaction details (including comments)
 
+        Access is granted if:
+        1. User is the transaction owner, OR
+        2. Transaction is linked to a space the user is a member of.
+
         Args:
             transaction_id: Transaction ID
             user_uuid: User UUID
@@ -184,23 +188,35 @@ class TransactionCRUDService:
         Returns:
             Transaction details dictionary (including comments), returns None if not found
         """
-        from app.models.shared_space import SharedSpace, SpaceTransaction
+        from app.models.shared_space import SharedSpace, SpaceMember, SpaceTransaction
 
+        # First, load the transaction by ID (no owner filter)
         query = (
             select(Transaction)
             .options(selectinload(cast(Any, Transaction.comments)))
-            .where(
-                cast(
-                    Any,
-                    and_(cast(Any, Transaction.id == transaction_id), cast(Any, Transaction.user_uuid == user_uuid)),
-                )
-            )
+            .where(cast(Any, Transaction.id == transaction_id))
         )
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
         if not transaction:
             return None
+
+        # Check access: owner or space member
+        if transaction.user_uuid != user_uuid:
+            space_access_query = (
+                select(SpaceTransaction.id)
+                .join(SpaceMember, cast(Any, SpaceMember.space_id == SpaceTransaction.space_id))
+                .where(
+                    cast(Any, SpaceTransaction.transaction_id == transaction_id),
+                    cast(Any, SpaceMember.user_uuid == user_uuid),
+                    cast(Any, SpaceMember.status == "ACCEPTED"),
+                )
+                .limit(1)
+            )
+            space_result = await self.db.execute(space_access_query)
+            if space_result.scalar_one_or_none() is None:
+                return None
 
         # Get user preferred currency (base currency)
         display_currency = await get_user_display_currency(self.db, user_uuid)
@@ -891,6 +907,8 @@ class TransactionCRUDService:
         user_uuid: UUID,
         comment_text: str,
         parent_comment_id: int | None = None,
+        mentioned_user_ids: list[str] | None = None,
+        commenter_username: str = "Unknown",
     ) -> dict[str, Any]:
         """Add transaction comment
 
@@ -899,6 +917,8 @@ class TransactionCRUDService:
             user_uuid: User ID
             comment_text: Comment content
             parent_comment_id: Optional parent comment ID
+            mentioned_user_ids: Optional list of mentioned user UUIDs
+            commenter_username: Username of the commenter for notification
 
         Returns:
             New comment dictionary
@@ -953,6 +973,15 @@ class TransactionCRUDService:
             is_reply=bool(parent_comment_id),
         )
 
+        # Notify mentioned users (async, best effort)
+        if mentioned_user_ids:
+            await self._notify_mentioned_users(
+                mentioned_user_ids=mentioned_user_ids,
+                transaction_id=transaction_id,
+                commenter_username=commenter_username,
+                comment_text=comment_text,
+            )
+
         # Get complete comment information (including user information)
         query = (
             select(
@@ -1003,6 +1032,50 @@ class TransactionCRUDService:
             "createdAt": comment.created_at.isoformat(),
             "updatedAt": comment.updated_at.isoformat() if comment.updated_at else None,
         }
+
+    async def _notify_mentioned_users(
+        self,
+        mentioned_user_ids: list[str],
+        transaction_id: UUID,
+        commenter_username: str,
+        comment_text: str,
+    ) -> None:
+        """Create notifications for mentioned users and push via WebSocket."""
+        from app.core.ws_manager import ws_manager
+        from app.models.notification import Notification
+
+        for mentioned_id in mentioned_user_ids:
+            try:
+                mentioned_uuid = UUID(mentioned_id)
+            except ValueError:
+                continue
+
+            # Create notification record
+            notification = Notification(
+                user_uuid=mentioned_uuid,
+                type="bill_comment",
+                title=f"{commenter_username} 提及了你",
+                content=comment_text[:100],
+                data={"transactionId": str(transaction_id), "commenter": commenter_username},
+            )
+            self.db.add(notification)
+
+        await self.db.commit()
+
+        # Push via WebSocket (best effort, don't fail the comment)
+        for mentioned_id in mentioned_user_ids:
+            try:
+                await ws_manager.send_notification(
+                    mentioned_id,
+                    {
+                        "type": "bill_comment",
+                        "title": f"{commenter_username} 提及了你",
+                        "message": comment_text[:100],
+                        "data": {"transactionId": str(transaction_id)},
+                    },
+                )
+            except Exception:  # noqa: BLE001
+                pass
 
     async def delete_comment(self, comment_id: int, user_uuid: UUID) -> bool:
         """Delete comment

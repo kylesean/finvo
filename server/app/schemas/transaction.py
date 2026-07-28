@@ -304,6 +304,7 @@ class CommentCreateRequest(BaseModel):
 
     comment_text: str = Field(min_length=1)
     parent_comment_id: int | None = None
+    mentioned_user_ids: list[str] | None = None  # UUIDs of mentioned users
 
 
 # Response schemas

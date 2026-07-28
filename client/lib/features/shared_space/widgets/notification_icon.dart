@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import '../../notification/providers/notification_provider.dart';
 import 'dart:async';
-import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class NotificationIcon extends ConsumerWidget {
   const NotificationIcon({super.key});
@@ -24,20 +23,25 @@ class NotificationIcon extends ConsumerWidget {
           Icon(FLucideIcons.bell, color: colors.primaryForeground, size: 20),
           if (unreadCount > 0)
             Positioned(
-              right: -2,
-              top: -2,
+              right: -3,
+              top: -3,
               child: Container(
-                constraints: const BoxConstraints(minWidth: 16),
-                height: 16,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 14),
+                height: 14,
+                padding: const EdgeInsets.symmetric(horizontal: 3),
                 decoration: BoxDecoration(
                   color: colors.destructive,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(7),
                 ),
                 child: Center(
                   child: Text(
                     unreadCount > 99 ? '99+' : unreadCount.toString(),
-                    style: AppTextStyles.destructiveText(theme),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w600,
+                      height: 1.0,
+                    ),
                   ),
                 ),
               ),

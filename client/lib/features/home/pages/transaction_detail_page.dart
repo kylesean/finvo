@@ -381,7 +381,6 @@ class TransactionDetailPage extends ConsumerWidget {
                         ),
                         child: AttachmentSectionWidget(
                           attachments: transaction.attachments,
-                          sourceThreadId: transaction.sourceThreadId,
                         ),
                       ),
                     ),

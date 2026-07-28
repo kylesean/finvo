@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
-import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -12,18 +11,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Displays attachments linked to a transaction via its AI conversation thread.
 ///
-/// - Images: thumbnail grid, tap for full-screen preview
-/// - Documents: file icon + filename + size
+/// Horizontal scrollable list of attachment cards:
+/// - Images: rounded thumbnail (72x72), tap for full-screen preview
+/// - Documents: file icon + truncated filename
 /// - Empty state: entire section is hidden
 class AttachmentSectionWidget extends ConsumerWidget {
   final List<TransactionAttachment> attachments;
-  final String? sourceThreadId;
 
-  const AttachmentSectionWidget({
-    super.key,
-    required this.attachments,
-    this.sourceThreadId,
-  });
+  const AttachmentSectionWidget({super.key, required this.attachments});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,9 +27,6 @@ class AttachmentSectionWidget extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
     final baseUrl = ref.read(apiConstantsProvider).baseUrl;
-
-    final images = attachments.where((a) => a.isImage).toList();
-    final documents = attachments.where((a) => !a.isImage).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,126 +50,109 @@ class AttachmentSectionWidget extends ConsumerWidget {
           ),
         ),
 
-        // Image grid
-        if (images.isNotEmpty)
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1,
-            ),
-            itemCount: images.length,
+        // Horizontal scrollable attachment cards
+        SizedBox(
+          height: 80,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: attachments.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
-              final attachment = images[index];
-              return GestureDetector(
-                onTap: () {
-                  unawaited(HapticFeedback.lightImpact());
-                  _showFullScreenImage(context, baseUrl, attachment);
-                },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    '$baseUrl${attachment.url}',
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        color: colors.muted,
-                        child: const Center(
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: colors.muted,
-                        child: Icon(
-                          FLucideIcons.imageOff,
-                          color: colors.mutedForeground,
-                          size: 24,
-                        ),
-                      );
-                    },
+              final attachment = attachments[index];
+              if (attachment.isImage) {
+                return _buildImageCard(context, baseUrl, attachment, colors);
+              }
+              return _buildDocumentCard(context, theme, colors, attachment);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageCard(
+    BuildContext context,
+    String baseUrl,
+    TransactionAttachment attachment,
+    FColors colors,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        unawaited(HapticFeedback.lightImpact());
+        _showFullScreenImage(context, baseUrl, attachment);
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: SizedBox(
+          width: 72,
+          height: 72,
+          child: Image.network(
+            '$baseUrl${attachment.url}',
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return Container(
+                color: colors.muted,
+                child: Center(
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.primary,
+                    ),
                   ),
                 ),
               );
             },
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: colors.muted,
+                child: Icon(
+                  FLucideIcons.imageOff,
+                  color: colors.mutedForeground,
+                  size: 20,
+                ),
+              );
+            },
           ),
+        ),
+      ),
+    );
+  }
 
-        // Document list
-        if (documents.isNotEmpty) ...[
-          if (images.isNotEmpty) const SizedBox(height: 8),
-          ...documents.map(
-            (doc) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: colors.secondary,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      _getFileIcon(doc.mimeType),
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      doc.filename,
-                      style: AppTextStyles.listSubtitle(theme),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (doc.size != null)
-                    Text(
-                      _formatFileSize(doc.size!),
-                      style: AppTextStyles.detailLabel(theme),
-                    ),
-                ],
-              ),
-            ),
+  Widget _buildDocumentCard(
+    BuildContext context,
+    FThemeData theme,
+    FColors colors,
+    TransactionAttachment attachment,
+  ) {
+    return Container(
+      width: 120,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: colors.muted.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: colors.border.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            _getFileIcon(attachment.mimeType),
+            size: 20,
+            color: colors.mutedForeground,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            attachment.filename,
+            style: AppTextStyles.detailLabel(theme),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
           ),
         ],
-
-        // Link to source conversation
-        if (sourceThreadId != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: GestureDetector(
-              onTap: () {
-                unawaited(HapticFeedback.lightImpact());
-                context.go('/ai/$sourceThreadId');
-              },
-              child: Row(
-                children: [
-                  Icon(
-                    FLucideIcons.externalLink,
-                    size: 12,
-                    color: colors.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    t.transaction.viewInConversation,
-                    style: AppTextStyles.actionText(theme),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 
@@ -218,11 +193,5 @@ class AttachmentSectionWidget extends ConsumerWidget {
       return FLucideIcons.fileText;
     }
     return FLucideIcons.file;
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 }

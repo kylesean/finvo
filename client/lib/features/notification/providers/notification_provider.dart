@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import '../../../core/network/network_client.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/services/notification_ws_service.dart';
+import '../../../core/storage/secure_storage_service.dart';
+import '../../../core/constants/api_constants.dart';
 import '../models/notification_item.dart';
 import '../repositories/notification_repository.dart';
 
@@ -171,4 +175,53 @@ class NotificationNotifier extends _$NotificationNotifier {
       );
     }
   }
+
+  /// Add a real-time notification received via WebSocket.
+  void addRealtimeNotification(NotificationItem item) {
+    state = state.copyWith(
+      items: [item, ...state.items],
+      total: state.total + 1,
+      unreadCount: state.unreadCount + 1,
+    );
+  }
 }
+
+/// WebSocket service provider for real-time notifications.
+///
+/// Initializes connection on first read and wires incoming
+/// notifications to the central NotificationNotifier.
+final notificationWsProvider = Provider<NotificationWsService>((ref) {
+  final wsService = NotificationWsService();
+  final apiConstants = ref.read(apiConstantsProvider);
+  final storageService = ref.read(secureStorageServiceProvider);
+
+  // Wire incoming notifications to the provider
+  wsService.onNotification = (payload) {
+    final item = NotificationItem(
+      id: 'rt_${DateTime.now().millisecondsSinceEpoch}',
+      userId: '',
+      type: payload['type']?.toString() ?? 'system',
+      title: payload['title']?.toString() ?? '',
+      message: payload['message']?.toString() ?? '',
+      data: payload['data'] is Map<String, dynamic>
+          ? payload['data'] as Map<String, dynamic>
+          : null,
+      isRead: false,
+      createdAt: DateTime.now(),
+    );
+    ref.read(notificationProvider.notifier).addRealtimeNotification(item);
+  };
+
+  // Connect
+  unawaited(
+    wsService.connect(
+      baseUrl: apiConstants.baseUrl,
+      storageService: storageService,
+    ),
+  );
+
+  // Dispose on provider disposal
+  ref.onDispose(() => wsService.dispose());
+
+  return wsService;
+});
