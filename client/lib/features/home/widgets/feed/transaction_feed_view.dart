@@ -143,6 +143,8 @@ class _TransactionFeedViewState extends ConsumerState<TransactionFeedView> {
         widget.intendedFeedType != globalCurrentFeedType;
 
     if (shouldShowSkeletonDueToTypeMismatch ||
+        (feedState.isLoading &&
+            widget.intendedFeedType == globalCurrentFeedType) ||
         (feedState.isLoadingMore &&
             transactions.isEmpty &&
             !feedState.hasReachedMax)) {

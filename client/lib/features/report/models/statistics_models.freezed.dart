@@ -217,7 +217,7 @@ return $default(_that.totalBalance,_that.totalIncome,_that.totalExpense,_that.in
 @JsonSerializable()
 
 class _StatisticsOverview implements StatisticsOverview {
-  const _StatisticsOverview({required this.totalBalance, required this.totalIncome, required this.totalExpense, required this.incomeChangePercent, required this.expenseChangePercent, required this.netChangePercent, this.balanceNote = "", required this.periodStart, required this.periodEnd});
+  const _StatisticsOverview({required this.totalBalance, required this.totalIncome, required this.totalExpense, required this.incomeChangePercent, required this.expenseChangePercent, required this.netChangePercent, this.balanceNote = '', required this.periodStart, required this.periodEnd});
   factory _StatisticsOverview.fromJson(Map<String, dynamic> json) => _$StatisticsOverviewFromJson(json);
 
 @override final  String totalBalance;

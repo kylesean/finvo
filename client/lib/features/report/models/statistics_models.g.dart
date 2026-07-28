@@ -14,7 +14,7 @@ _StatisticsOverview _$StatisticsOverviewFromJson(Map<String, dynamic> json) =>
       incomeChangePercent: (json['incomeChangePercent'] as num).toDouble(),
       expenseChangePercent: (json['expenseChangePercent'] as num).toDouble(),
       netChangePercent: (json['netChangePercent'] as num).toDouble(),
-      balanceNote: json['balanceNote'] as String? ?? "",
+      balanceNote: json['balanceNote'] as String? ?? '',
       periodStart: DateTime.parse(json['periodStart'] as String),
       periodEnd: DateTime.parse(json['periodEnd'] as String),
     );

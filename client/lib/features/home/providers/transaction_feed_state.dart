@@ -9,6 +9,7 @@ part 'transaction_feed_state.freezed.dart';
 abstract class TransactionFeedState with _$TransactionFeedState {
   const factory TransactionFeedState({
     @Default([]) List<TransactionModel> transactions,
+    @Default(false) bool isLoading,
     @Default(false) bool isLoadingMore,
     @Default(false) bool hasReachedMax,
     @Default(1) int currentPage,

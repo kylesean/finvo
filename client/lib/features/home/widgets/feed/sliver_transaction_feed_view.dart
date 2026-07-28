@@ -130,6 +130,7 @@ class SliverTransactionFeedView extends ConsumerWidget {
 
     // Skeleton state
     if (shouldShowSkeletonDueToTypeMismatch ||
+        (feedState.isLoading && intendedFeedType == globalCurrentFeedType) ||
         (feedState.isLoadingMore &&
             transactions.isEmpty &&
             !feedState.hasReachedMax)) {

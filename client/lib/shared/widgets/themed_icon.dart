@@ -86,7 +86,7 @@ class ThemedIcon extends StatelessWidget {
       height: containerSize,
       decoration: BoxDecoration(
         color: backgroundColor ?? colors.secondary,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(containerSize / 2),
       ),
       child: Icon(icon, size: iconSize, color: iconColor ?? colors.foreground),
     );

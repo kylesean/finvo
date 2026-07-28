@@ -10,7 +10,7 @@ _ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) => _ChatMessage(
   id: json['id'] as String? ?? '',
   sender: _senderFromJson(_readSenderValue(json, 'sender')),
   timestamp: _dateTimeNullableFromJson(json['timestamp']),
-  content: json['content'] as String? ?? "",
+  content: json['content'] as String? ?? '',
   messageType:
       $enumDecodeNullable(_$MessageTypeEnumMap, json['messageType']) ??
       MessageType.text,

@@ -5,7 +5,6 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
-import 'package:finvo/shared/constants/brand_constants.dart';
 
 import '../atoms/atoms.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -16,17 +15,6 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 /// - Electric current animation line (from source to target)
 /// - Only shows account icons (labels already have names)
 /// - Compact horizontal layout
-///
-/// Reference design:
-/// ┌─────────────────────────────────────────────────┐
-/// │ ✓ Transfer Success                      14:30   │
-/// ├─────────────────────────────────────────────────┤
-/// │                    🔄                           │
-/// │                 ¥1,000.00                       │
-/// │            #transfer #debit-card #cash           │
-/// ├─────────────────────────────────────────────────┤
-/// │         💳  ~~~⚡~~~>  💵                       │  ← Electric animation
-/// └─────────────────────────────────────────────────┘
 class TransferReceipt extends StatelessWidget {
   final Map<String, dynamic> data;
 
@@ -326,12 +314,10 @@ class _TransferAnimationState extends State<_TransferAnimation>
         bgColor = semantic.warningAccent;
         break;
       case 'ALIPAY':
-        icon = FLucideIcons.smartphone;
-        bgColor = BrandColors.alipay;
-        break;
       case 'WECHAT':
+      case 'EWALLET':
         icon = FLucideIcons.smartphone;
-        bgColor = BrandColors.wechatPay;
+        bgColor = colors.primary;
         break;
       default:
         icon = FLucideIcons.wallet;

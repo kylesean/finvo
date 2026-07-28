@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
 import 'package:finvo/features/home/models/total_expense_model.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/providers/transaction_feed_state.dart';
+export 'package:finvo/features/home/providers/transaction_feed_state.dart';
 import 'package:finvo/features/home/services/home_service.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/features/profile/models/financial_settings.dart';
@@ -78,41 +80,6 @@ Future<List<TransactionModel>> transactionsForSelectedDate(
   return homeService.getTransactionsForDate(date);
 }
 
-class TransactionFeedState {
-  final List<TransactionModel> transactions;
-  final bool isLoadingMore;
-  final bool hasReachedMax;
-  final int currentPage;
-  final String? errorMessage;
-
-  TransactionFeedState({
-    this.transactions = const [],
-    this.isLoadingMore = false,
-    this.hasReachedMax = false,
-    this.currentPage = 1,
-    this.errorMessage,
-  });
-
-  TransactionFeedState copyWith({
-    List<TransactionModel>? transactions,
-    bool? isLoadingMore,
-    bool? hasReachedMax,
-    int? currentPage,
-    String? errorMessage,
-    bool clearErrorMessage = false,
-  }) {
-    return TransactionFeedState(
-      transactions: transactions ?? this.transactions,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      currentPage: currentPage ?? this.currentPage,
-      errorMessage: clearErrorMessage
-          ? null
-          : errorMessage ?? this.errorMessage,
-    );
-  }
-}
-
 @riverpod
 class TransactionFeed extends _$TransactionFeed {
   final _logger = Logger('TransactionFeed');
@@ -139,7 +106,6 @@ class TransactionFeed extends _$TransactionFeed {
     });
 
     // Listen to currency/financial setting changes
-    // Automatically trigger feed refresh when primaryCurrency changes
     ref.listen<FinancialSettingsState>(financialSettingsProvider, (
       previous,
       next,
@@ -153,13 +119,25 @@ class TransactionFeed extends _$TransactionFeed {
       }
     });
 
-    // Watch auth token to trigger initial load
-    final token = ref.watch(authTokenProvider);
-    if (token != null) {
-      unawaited(refreshFeed());
+    // Listen to auth token (NOT watch!) to trigger initial load.
+    // Using listen instead of watch prevents build() from re-executing
+    // when token changes, which would reset state and cause render conflicts.
+    ref.listen<String?>(authTokenProvider, (previous, next) {
+      if (next != null && previous == null) {
+        unawaited(refreshFeed());
+      }
+    });
+
+    // If token already exists at creation time (user already logged in),
+    // trigger initial load via microtask (safe: build() only runs once now).
+    final hasToken = ref.read(authTokenProvider) != null;
+    if (hasToken) {
+      unawaited(Future.microtask(() => refreshFeed()));
     }
 
-    return TransactionFeedState();
+    // build() only runs ONCE (no ref.watch dependencies).
+    // Return loading state if token exists so UI shows skeleton immediately.
+    return TransactionFeedState(isLoading: hasToken);
   }
 
   String? _mapFeedTypeToApiString(TransactionFeedType feedType) {
@@ -188,11 +166,12 @@ class TransactionFeed extends _$TransactionFeed {
         : null;
 
     state = state.copyWith(
+      isLoading: true,
       isLoadingMore: true,
       currentPage: 1,
       transactions: isRefresh ? [] : state.transactions,
       hasReachedMax: false,
-      clearErrorMessage: true,
+      errorMessage: null,
     );
 
     try {
@@ -211,6 +190,7 @@ class TransactionFeed extends _$TransactionFeed {
 
       state = state.copyWith(
         transactions: newTransactions,
+        isLoading: false,
         isLoadingMore: false,
         hasReachedMax: newTransactions.length < _pageSize,
         currentPage: 1,
@@ -222,6 +202,7 @@ class TransactionFeed extends _$TransactionFeed {
       if (!ref.mounted) return;
 
       state = state.copyWith(
+        isLoading: false,
         isLoadingMore: false,
         hasReachedMax: true,
         errorMessage: e.toString(),
@@ -242,7 +223,7 @@ class TransactionFeed extends _$TransactionFeed {
         ? DateFormat('yyyy-MM-dd').format(selectedDate)
         : null;
 
-    state = state.copyWith(isLoadingMore: true, clearErrorMessage: true);
+    state = state.copyWith(isLoadingMore: true, errorMessage: null);
     final nextPage = state.currentPage + 1;
     try {
       final homeService = ref.read(homeServiceProvider);
