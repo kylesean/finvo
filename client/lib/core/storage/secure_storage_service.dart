@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const String _authTokenKey = 'auth_token';
 // Note: _userIdKey and _userDataKey removed - add back when implementing user data storage
@@ -18,13 +19,21 @@ class SecureStorageService {
   Future<void> saveToken(String token) async {
     try {
       await _secureStorage.write(key: _authTokenKey, value: token);
-      // Update cache
       _cachedToken = token;
       _tokenCacheInitialized = true;
       _logger.fine('SecureStorageService: Token saved (${token.length} chars)');
     } catch (e) {
-      _logger.info('SecureStorageService: Failed to save token: $e');
-      rethrow;
+      _logger.warning(
+        'SecureStorageService: Failed to save token to Keychain, falling back to SharedPreferences: $e',
+      );
+      _cachedToken = token;
+      _tokenCacheInitialized = true;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_authTokenKey, token);
+      } catch (err) {
+        _logger.warning('SharedPreferences fallback failed: $err');
+      }
     }
   }
 
@@ -37,7 +46,6 @@ class SecureStorageService {
 
     try {
       final token = await _secureStorage.read(key: _authTokenKey);
-      // Initialize cache
       _cachedToken = token;
       _tokenCacheInitialized = true;
       _logger.fine(
@@ -45,11 +53,20 @@ class SecureStorageService {
       );
       return token;
     } catch (e) {
-      _logger.info('SecureStorageService: Failed to read token: $e');
-      // Mark cache as initialized (even if failed, do not try again)
-      _tokenCacheInitialized = true;
-      _cachedToken = null;
-      return null;
+      _logger.warning(
+        'SecureStorageService: Failed to read token from Keychain, trying SharedPreferences: $e',
+      );
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString(_authTokenKey);
+        _cachedToken = token;
+        _tokenCacheInitialized = true;
+        return token;
+      } catch (err) {
+        _tokenCacheInitialized = true;
+        _cachedToken = null;
+        return null;
+      }
     }
   }
 
