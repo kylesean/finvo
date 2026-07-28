@@ -44,6 +44,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
+# Copy uv package manager binary for runtime skill script execution (uv run ...)
+COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /usr/local/bin/uv
+
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser
 
