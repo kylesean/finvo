@@ -34,6 +34,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
+    // Dismiss keyboard immediately to prevent iOS keyboard persisting
+    // across route transitions. On iOS, the keyboard dismiss animation
+    // is independent of route navigation, so we must explicitly release
+    // focus before navigating to avoid the keyboard overlapping the
+    // home page content.
+    FocusManager.instance.primaryFocus?.unfocus();
+
     setState(() {
       _isLoading = true;
     });

@@ -38,6 +38,11 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
 
   Future<void> _onRegisterPressed() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Dismiss keyboard before navigation to prevent iOS keyboard
+    // persisting across route transitions.
+    FocusManager.instance.primaryFocus?.unfocus();
+
     setState(() => _isLoading = true);
     try {
       await ref

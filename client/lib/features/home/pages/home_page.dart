@@ -1,4 +1,5 @@
 // features/home/pages/home_page.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/calendar/monthly_calendar_view.dart';
@@ -55,6 +56,13 @@ class HomePage extends ConsumerWidget {
                 await ref.read(transactionFeedProvider.notifier).refreshFeed();
               },
               child: CustomScrollView(
+                // On iOS, use ClampingScrollPhysics to prevent excessive
+                // bouncing overscroll that causes large visual gaps.
+                // RefreshIndicator still works because it detects pull-down
+                // via dragDetails in ScrollUpdateNotification, not via
+                // negative scroll pixels.
+                // Android keeps default ClampingScrollPhysics (no change).
+                physics: Platform.isIOS ? const ClampingScrollPhysics() : null,
                 slivers: [
                   // Header - SliverAppBar (black)
                   SliverAppBar(
