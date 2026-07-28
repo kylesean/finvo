@@ -184,7 +184,7 @@ class _FinancialAccountAddPageState
                 child: Text(
                   _selectedCurrency.symbol,
                   style: theme.typography.body.xl2.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     color: colors.primary,
                     height: 1.0,
                   ),
