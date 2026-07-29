@@ -50,3 +50,6 @@ storage/data/
 prometheus/data/
 grafana/data/
 evals/reports/
+
+# 6. CodeGraph
+.codegraph/

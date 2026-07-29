@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 from typing import (
     Any,
     cast,
@@ -39,6 +40,8 @@ class LLMRegistry:
     flags such as ``vision`` (multimodal image understanding).  Use
     :meth:`supports_vision` to query the current default model's capability.
     """
+
+    _registry_lock = threading.Lock()
 
     # Class-level variable containing all available LLM models
     LLMS: list[dict[str, Any]] = [
@@ -229,8 +232,11 @@ class LLMRegistry:
                 "provider": "ollama" if is_ollama else "openai",
                 "llm": dynamic_llm,
             }
-            # Add to registry so it can be used in fallback loop
-            cls.LLMS.append(model_entry)
+            # Add to registry so it can be used in fallback loop safely
+            with cls._registry_lock:
+                # Double-check inside lock to avoid race conditions
+                if not any(e["name"] in (model_name, clean_model_name) for e in cls.LLMS):
+                    cls.LLMS.append(model_entry)
 
         # If user provides kwargs, create a new instance with those args
         if kwargs:
@@ -319,28 +325,30 @@ class LLMService:
 
     This service handles all LLM interactions with automatic retry logic,
     rate limit handling, and circular fallback through all available models.
+    Execution is request-scoped and thread-safe without mutating shared service state.
     """
 
     def __init__(self) -> None:
         """Initialize the LLM service."""
+        self._default_model_index: int = 0
+        self._bound_tools: list[Any] = []
         self._llm: BaseChatModel | None = None
-        self._current_model_index: int = 0
 
         # Find index of default model in registry
         all_names = LLMRegistry.get_all_names()
         try:
-            self._current_model_index = all_names.index(settings.DEFAULT_LLM_MODEL)
+            self._default_model_index = all_names.index(settings.DEFAULT_LLM_MODEL)
             self._llm = LLMRegistry.get(settings.DEFAULT_LLM_MODEL)
             logger.info(
                 "llm_service_initialized",
                 default_model=settings.DEFAULT_LLM_MODEL,
-                model_index=self._current_model_index,
+                model_index=self._default_model_index,
                 total_models=len(all_names),
                 environment=settings.ENVIRONMENT.value,
             )
         except (ValueError, Exception) as e:
             # Default model not found, use first model
-            self._current_model_index = 0
+            self._default_model_index = 0
             self._llm = LLMRegistry.LLMS[0]["llm"]
             logger.warning(
                 "default_model_not_found_using_first",
@@ -349,42 +357,6 @@ class LLMService:
                 error=str(e),
             )
 
-    def _get_next_model_index(self) -> int:
-        """Get the next model index in circular fashion.
-
-        Returns:
-            Next model index (wraps around to 0 if at end)
-        """
-        total_models = len(LLMRegistry.LLMS)
-        next_index = (self._current_model_index + 1) % total_models
-        return next_index
-
-    def _switch_to_next_model(self) -> bool:
-        """Switch to the next model in the registry (circular).
-
-        Returns:
-            True if successfully switched, False otherwise
-        """
-        try:
-            next_index = self._get_next_model_index()
-            next_model_entry = LLMRegistry.get_model_at_index(next_index)
-
-            logger.warning(
-                "switching_to_next_model",
-                from_index=self._current_model_index,
-                to_index=next_index,
-                to_model=next_model_entry["name"],
-            )
-
-            self._current_model_index = next_index
-            self._llm = next_model_entry["llm"]
-
-            logger.info("model_switched", new_model=next_model_entry["name"], new_index=next_index)
-            return True
-        except Exception as e:
-            logger.error("model_switch_failed", error=str(e))
-            return False
-
     @retry(
         stop=stop_after_attempt(settings.MAX_LLM_CALL_RETRIES),
         wait=wait_exponential(multiplier=1, min=2, max=10),
@@ -392,23 +364,25 @@ class LLMService:
         before_sleep=before_sleep_log(logger, logging.WARNING),
         reraise=True,
     )
-    async def _call_llm_with_retry(self, messages: list[BaseMessage]) -> BaseMessage:
-        """Call the LLM with automatic retry logic.
+    async def _call_llm_with_retry(
+        self,
+        llm: BaseChatModel,
+        messages: list[BaseMessage],
+    ) -> BaseMessage:
+        """Call a specific LLM instance with automatic retry logic.
 
         Args:
+            llm: The LLM model instance for this attempt
             messages: List of messages to send to the LLM
 
         Returns:
             BaseMessage response from the LLM
 
         Raises:
-            OpenAIError: If all retries fail
+            OpenAIError: If all retries for this model fail
         """
-        if not self._llm:
-            raise RuntimeError("llm not initialized")
-
         try:
-            response = await self._llm.ainvoke(messages)
+            response = await llm.ainvoke(messages)
             logger.debug("llm_call_successful", message_count=len(messages))
             return response
         except (RateLimitError, APITimeoutError, APIError) as e:
@@ -435,9 +409,11 @@ class LLMService:
     ) -> BaseMessage:
         """Call the LLM with the specified messages and circular fallback.
 
+        Execution is request-scoped and thread-safe without mutating shared service state.
+
         Args:
             messages: List of messages to send to the LLM
-            model_name: Optional specific model to use. If None, uses current model.
+            model_name: Optional specific model to use. If None, uses default model.
             **model_kwargs: Optional kwargs to override default model configuration
 
         Returns:
@@ -446,49 +422,60 @@ class LLMService:
         Raises:
             RuntimeError: If all models fail after retries
         """
-        # If user specifies a model, get it from registry
+        all_names = LLMRegistry.get_all_names()
+        total_models = len(LLMRegistry.LLMS)
+
+        # Determine initial model index
+        starting_index = self._default_model_index
         if model_name:
             try:
-                self._llm = LLMRegistry.get(model_name, **model_kwargs)
-                # Update index to match the requested model
-                all_names = LLMRegistry.get_all_names()
-                try:
-                    self._current_model_index = all_names.index(model_name)
-                except ValueError:
-                    pass  # Keep current index if model name not in list
-                logger.info("using_requested_model", model_name=model_name, has_custom_kwargs=bool(model_kwargs))
-            except ValueError as e:
-                logger.error("requested_model_not_found", model_name=model_name, error=str(e))
-                raise
+                starting_index = all_names.index(model_name)
+            except ValueError:
+                starting_index = self._default_model_index
 
-        # Track which models we've tried to prevent infinite loops
-        total_models = len(LLMRegistry.LLMS)
         models_tried = 0
-        starting_index = self._current_model_index
-        last_error = None
+        last_error: Exception | None = None
 
         while models_tried < total_models:
-            try:
-                # Log current model details for debugging
-                if self._llm and hasattr(self._llm, "model_name"):
-                    base_url = getattr(self._llm, "base_url", "default")
-                    api_key = getattr(self._llm, "api_key", "")
-                    masked_key = f"{api_key[:8]}..." if api_key else "None"
-                    logger.info(
-                        "attempting_llm_call",
-                        model=self._llm.model_name,
-                        base_url=base_url,
-                        api_key_prefix=masked_key,
-                        attempt=models_tried + 1,
-                    )
+            current_index = (starting_index + models_tried) % total_models
+            current_model_entry = LLMRegistry.get_model_at_index(current_index)
+            current_model_name = current_model_entry["name"]
 
-                response = await self._call_llm_with_retry(messages)
+            try:
+                if models_tried == 0 and model_name:
+                    target_llm = LLMRegistry.get(model_name, **model_kwargs)
+                else:
+                    target_llm = LLMRegistry.get(current_model_name)
+
+                if self._bound_tools:
+                    target_llm = cast(BaseChatModel, target_llm.bind_tools(self._bound_tools))
+            except Exception as e:
+                logger.error("failed_to_resolve_model_instance", model=current_model_name, error=str(e))
+                models_tried += 1
+                last_error = e
+                continue
+
+            # Log attempt details
+            model_id = getattr(target_llm, "model_name", None) or getattr(target_llm, "model", current_model_name)
+            base_url = getattr(target_llm, "base_url", "default")
+            api_key = getattr(target_llm, "api_key", "")
+            masked_key = f"{api_key[:8]}..." if (isinstance(api_key, str) and api_key) else "None"
+
+            logger.info(
+                "attempting_llm_call",
+                model=model_id,
+                base_url=str(base_url),
+                api_key_prefix=masked_key,
+                attempt=models_tried + 1,
+            )
+
+            try:
+                response = await self._call_llm_with_retry(target_llm, messages)
                 return response
             except OpenAIError as e:
                 last_error = e
                 models_tried += 1
 
-                current_model_name = LLMRegistry.LLMS[self._current_model_index]["name"]
                 logger.error(
                     "llm_call_failed_after_retries",
                     model=current_model_name,
@@ -497,7 +484,6 @@ class LLMService:
                     error=str(e),
                 )
 
-                # If we've tried all models, give up
                 if models_tried >= total_models:
                     logger.error(
                         "all_models_failed",
@@ -506,40 +492,49 @@ class LLMService:
                     )
                     break
 
-                # Switch to next model in circular fashion
-                if not self._switch_to_next_model():
-                    logger.error("failed_to_switch_to_next_model")
-                    break
-
-                # Continue loop to try next model
-
-        # All models failed
         raise RuntimeError(
             f"failed to get response from llm after trying {models_tried} models. last error: {str(last_error)}"
         )
 
-    def get_llm(self) -> BaseChatModel | None:
-        """Get the current LLM instance.
+    def get_llm(self, model_name: str | None = None) -> BaseChatModel | None:
+        """Get an LLM instance.
+
+        Args:
+            model_name: Optional model name. If None, returns default LLM instance.
 
         Returns:
-            Current BaseChatModel instance or None if not initialized
+            BaseChatModel instance or None if default is not initialized
         """
-        return self._llm
+        if model_name:
+            target = LLMRegistry.get(model_name)
+            if self._bound_tools:
+                return cast(BaseChatModel, target.bind_tools(self._bound_tools))
+            return target
+
+        if self._llm:
+            if self._bound_tools:
+                return cast(BaseChatModel, self._llm.bind_tools(self._bound_tools))
+            return self._llm
+
+        return None
 
     def bind_tools(self, tools: list[Any]) -> LLMService:
-        """Bind tools to the current LLM.
+        """Bind tools to the LLM service in a thread and task-safe, immutable manner.
 
         Args:
             tools: List of tools to bind
 
         Returns:
-            Self for method chaining
+            A new LLMService instance with tools bound without mutating self.
         """
+        new_service = LLMService.__new__(LLMService)
+        new_service._default_model_index = self._default_model_index
+        new_service._bound_tools = list(tools)
         if self._llm:
-            from langchain_core.language_models import BaseChatModel
-
-            self._llm = cast(BaseChatModel, self._llm.bind_tools(tools))
-        return self
+            new_service._llm = cast(BaseChatModel, self._llm.bind_tools(tools))
+        else:
+            new_service._llm = None
+        return new_service
 
 
 # Create global LLM service instance

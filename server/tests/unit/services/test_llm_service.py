@@ -53,3 +53,64 @@ class TestLLMRegistryOllama:
         is_ollama, clean_name = LLMRegistry._is_ollama_model("gpt-5.6-sol")
         assert is_ollama is False
         assert clean_name == "gpt-5.6-sol"
+
+
+class TestLLMServiceConcurrency:
+    """Test cases for LLMService concurrency safety and request isolation."""
+
+    @pytest.mark.asyncio
+    async def test_request_scoped_fallback_isolation(self, monkeypatch):
+        """Test that model fallback in one task does not mutate shared LLMService state."""
+        import asyncio
+        from unittest.mock import AsyncMock
+
+        from langchain_core.messages import AIMessage, HumanMessage
+        from openai import OpenAIError
+
+        from app.services.llm import LLMService
+
+        service = LLMService()
+        initial_llm = service.get_llm()
+
+        fail_count = 0
+
+        async def mock_call_llm_with_retry(llm_inst, messages):
+            nonlocal fail_count
+            # First model call fails with OpenAIError to trigger fallback
+            if "gpt-5.6-sol" in getattr(llm_inst, "model", "") or getattr(llm_inst, "model_name", "") == "gpt-5.6-sol":
+                fail_count += 1
+                raise OpenAIError("Simulated provider failure")
+            return AIMessage(content="Fallback model response")
+
+        monkeypatch.setattr(service, "_call_llm_with_retry", mock_call_llm_with_retry)
+
+        # Task A: triggers fallback
+        res_a = await service.call([HumanMessage(content="hello")])
+        assert res_a.content == "Fallback model response"
+        assert fail_count > 0
+
+        # Verify shared service state was NOT mutated
+        after_llm = service.get_llm()
+        assert initial_llm == after_llm
+
+    def test_bind_tools_immutability(self):
+        """Test that calling bind_tools returns a new LLMService instance without mutating the original instance."""
+        from langchain_core.tools import tool
+
+        from app.services.llm import LLMService
+
+        @tool
+        def dummy_tool(x: int) -> int:
+            """Dummy tool."""
+            return x
+
+        service = LLMService()
+        assert service._bound_tools == []
+
+        bound_service = service.bind_tools([dummy_tool])
+
+        # Original service must remain unmutated
+        assert service._bound_tools == []
+        assert bound_service is not service
+        assert len(bound_service._bound_tools) == 1
+        assert bound_service._bound_tools[0] == dummy_tool
