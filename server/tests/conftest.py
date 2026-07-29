@@ -1,3 +1,10 @@
+import os
+
+os.environ.setdefault("APP_ENV", "test")
+os.environ.setdefault("OPENAI_API_KEY", "sk-test-key-for-unit-tests")
+os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key")
+os.environ.setdefault("ENCRYPTION_KEY", "v3u8eA7-R5i_oX6DozID8lH_l6ApxfGqI8Xh-8o9mG4=")
+
 from collections.abc import AsyncGenerator, Generator
 from uuid import uuid4
 

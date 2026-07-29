@@ -1,0 +1,168 @@
+# Client Release CI/CD Pipeline
+# Automatically builds Android APK and iOS IPA in parallel upon tag push (v*) or manual dispatch,
+# and attaches both binaries to a unified GitHub Release.
+
+name: Client Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_CHANNEL: 'stable'
+
+jobs:
+  # ============================================================================
+  # Android Release Build
+  # ============================================================================
+  android:
+    name: Android Release
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Universal Release APK
+        run: flutter build apk --release
+
+      - name: Prepare Android Release Artifact
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME:-v0.0.0}"
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          OUTPUT_APK="finvo-${TAG_NAME}-android.apk"
+
+          mkdir -p release_artifacts
+          cp "$APK_PATH" "release_artifacts/$OUTPUT_APK"
+
+          # Extract version changelog from root CHANGELOG.md if available
+          python3 -c "
+          import re, os
+          changelog_path = '../CHANGELOG.md'
+          tag = '${TAG_NAME}'.lstrip('v')
+          notes = ''
+          if os.path.exists(changelog_path):
+              with open(changelog_path, 'r', encoding='utf-8') as f:
+                  content = f.read()
+              match = re.search(r'## \[' + re.escape(tag) + r'\][^\n]*\n(.*?)(?=\n## \[|\Z)', content, re.DOTALL)
+              if match:
+                  notes = match.group(1).strip()
+          with open('release_artifacts/RELEASE_NOTES.md', 'w', encoding='utf-8') as f:
+              f.write(notes)
+          "
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-apk
+          path: client/release_artifacts/
+
+  # ============================================================================
+  # iOS Release Build (Sideload IPA)
+  # ============================================================================
+  ios:
+    name: iOS Release (Sideload IPA)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Create IPA for Sideloading
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME:-v0.0.0}"
+          OUTPUT_IPA="finvo-${TAG_NAME}-ios-sideload.ipa"
+
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r "../../$OUTPUT_IPA" Payload
+
+          mkdir -p ../../../release_artifacts
+          cp "../../$OUTPUT_IPA" "../../../release_artifacts/$OUTPUT_IPA"
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-ipa
+          path: client/release_artifacts/
+
+  # ============================================================================
+  # Unified Release Publishing Step
+  # ============================================================================
+  publish-release:
+    name: Publish Unified GitHub Release
+    needs: [android, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release-apk
+          path: release_artifacts
+
+      - name: Download iOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-release-ipa
+          path: release_artifacts
+
+      - name: Create or Update GitHub Release with both Android & iOS Binaries
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release_artifacts/*
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body_path: release_artifacts/RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

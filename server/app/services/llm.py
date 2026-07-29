@@ -50,7 +50,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="gpt-5.6-sol",
-                api_key=settings.OPENAI_API_KEY,
+                api_key=settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
                 base_url=settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
                 reasoning_effort="medium",
@@ -62,7 +62,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="gpt-5.6-terra",
-                api_key=settings.OPENAI_API_KEY,
+                api_key=settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
                 base_url=settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
                 reasoning_effort="low",
@@ -74,7 +74,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="gpt-5.6-luna",
-                api_key=settings.OPENAI_API_KEY,
+                api_key=settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
                 base_url=settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
                 reasoning_effort="low",
@@ -86,7 +86,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="qwen3.8-max-preview",
-                api_key=settings.QWEN_API_KEY or settings.OPENAI_API_KEY,
+                api_key=settings.QWEN_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
                 base_url=settings.QWEN_BASE_URL or settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
                 reasoning_effort="low",
@@ -98,7 +98,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="doubao-seed-1-6-251015",
-                api_key=settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY,
+                api_key=settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
                 base_url=settings.DOUBAO_BASE_URL or settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
                 temperature=settings.DEFAULT_LLM_TEMPERATURE,
@@ -110,7 +110,7 @@ class LLMRegistry:
             "capabilities": {"vision": False},
             "llm": ChatOpenAI(
                 model="deepseek-v4-flash",
-                api_key=settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY,
+                api_key=settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
                 base_url=settings.DEEPSEEK_BASE_URL or settings.OPENAI_BASE_URL,
                 max_tokens=settings.MAX_TOKENS,
                 temperature=settings.DEFAULT_LLM_TEMPERATURE,
@@ -122,7 +122,7 @@ class LLMRegistry:
             "capabilities": {"vision": False},
             "llm": ChatOpenAI(
                 model="qwen3.6-genesis-35b",
-                api_key=settings.OLLAMA_API_KEY,
+                api_key=settings.OLLAMA_API_KEY or "ollama",
                 base_url=settings.OLLAMA_BASE_URL,
                 max_tokens=512,
                 temperature=0.1,
@@ -141,7 +141,7 @@ class LLMRegistry:
             "capabilities": {"vision": False},
             "llm": ChatOpenAI(
                 model="translategemma:4b-it",
-                api_key=settings.OLLAMA_API_KEY,
+                api_key=settings.OLLAMA_API_KEY or "ollama",
                 base_url=settings.OLLAMA_BASE_URL,
                 max_tokens=512,
                 temperature=0.1,

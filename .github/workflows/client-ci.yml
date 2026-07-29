@@ -1,19 +1,19 @@
-# Frontend CI/CD Pipeline
-# Triggers on push/PR to main branch for client/ directory changes
+# Client CI/CD Pipeline
+# Triggers on push/PR to main/develop branches for client/ directory changes
 
-name: Frontend CI
+name: Client CI
 
 on:
   push:
     branches: [main, develop]
     paths:
       - 'client/**'
-      - '.github/workflows/frontend-ci.yml'
+      - '.github/workflows/client-ci.yml'
   pull_request:
     branches: [main, develop]
     paths:
       - 'client/**'
-      - '.github/workflows/frontend-ci.yml'
+      - '.github/workflows/client-ci.yml'
 
 permissions:
   contents: read
@@ -104,3 +104,30 @@ jobs:
           name: android-apk-debug
           path: client/build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 7
+
+  # ============================================================================
+  # Build iOS (for PR validation)
+  # ============================================================================
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+    needs: analyze
+    if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --debug --no-codesign
