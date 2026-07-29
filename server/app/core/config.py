@@ -193,6 +193,8 @@ class Settings(BaseSettings):
     # Long term memory Configuration (Mem0)
     # Supported Embedder Providers: "openai", "ollama", "huggingface", "azure_openai"
     LONG_TERM_MEMORY_MODEL: str = "deepseek-v4-flash"  # LLM for memory extraction
+    LONG_TERM_MEMORY_MODEL_API_KEY: str | None = None  # API key for memory LLM (falls back to OPENAI_API_KEY)
+    LONG_TERM_MEMORY_MODEL_BASE_URL: str | None = None  # Base URL for memory LLM (e.g. https://api.siliconflow.cn/v1)
     LONG_TERM_MEMORY_EMBEDDER_PROVIDER: str = "openai"  # openai, ollama, huggingface
     LONG_TERM_MEMORY_EMBEDDER_MODEL: str = "text-embedding-3-small"
     LONG_TERM_MEMORY_EMBEDDER_DIMS: int = 1024  # Embedding dimensions

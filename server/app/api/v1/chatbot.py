@@ -7,6 +7,7 @@ Authentication: All endpoints use access token (user authentication).
 Authorization: Session ownership is verified via get_authorized_session.
 """
 
+import asyncio
 import json
 from collections.abc import AsyncGenerator
 from typing import Any
@@ -43,6 +44,7 @@ from app.schemas.genui import GenUIEvent
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 agent = LangGraphAgent()
+_background_memory_tasks: set[asyncio.Task[Any]] = set()
 
 
 async def _update_memory_background(
@@ -56,12 +58,23 @@ async def _update_memory_background(
     This function runs as a background task to avoid blocking
     the HTTP response after streaming completes.
     """
+    logger.info(
+        "background_memory_update_started",
+        user_uuid=str(user_uuid),
+        session_id=str(session_id),
+        message_count=len(messages),
+    )
     try:
         await agent._update_long_term_memory(
             user_uuid=user_uuid,
             messages=messages,
             session_id=session_id,
             category="conversation",
+        )
+        logger.info(
+            "background_memory_update_completed",
+            user_uuid=str(user_uuid),
+            session_id=str(session_id),
         )
     except Exception as e:
         logger.warning(
@@ -319,7 +332,7 @@ async def chat_stream(
                         memory_messages.append({"role": "assistant", "content": ai_response})
 
                     # Create background task - this won't block the response
-                    asyncio.create_task(
+                    bg_task = asyncio.create_task(
                         _update_memory_background(
                             agent=agent,
                             user_uuid=session.user_uuid,
@@ -327,6 +340,8 @@ async def chat_stream(
                             session_id=session.id,
                         )
                     )
+                    _background_memory_tasks.add(bg_task)
+                    bg_task.add_done_callback(_background_memory_tasks.discard)
 
         except Exception as e:
             logger.error(f"Stream error: {e}", exc_info=True)

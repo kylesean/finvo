@@ -15,10 +15,11 @@ from .context import current_user_id
 
 @tool
 async def search_personal_context(query: str) -> str:
-    """Search for the user's historical personal context, including financial goals, budget limits,
-    risk tolerance, and household information.
+    """Search for the user's historical personal context, including identity/name, preferences, financial goals,
+    budget limits, risk tolerance, and household information.
 
     CRITICAL: Use this tool PROACTIVELY when:
+    - The user asks about their identity, name, or stored preferences (e.g., "What is my name?", "What do you remember about me?").
     - The user asks for planning, advice, or strategy (e.g., "Suggest a budget", "How am I doing?").
     - The user refers to persistent goals, targets, or "the plan" which is not in current chat.
     - You need to know user preferences (e.g., categorization habits, family context).
@@ -26,7 +27,7 @@ async def search_personal_context(query: str) -> str:
     DO NOT use for simple balance checks or single transaction lookups.
 
     Args:
-        query: Search keywords for the context needed (e.g., 'retirement goal', 'budget limits', 'family').
+        query: Search keywords for the context needed (e.g., 'name', 'identity', 'retirement goal', 'budget limits', 'family').
     """
     user_id = current_user_id.get()
     if not user_id:
@@ -38,7 +39,6 @@ async def search_personal_context(query: str) -> str:
             user_uuid=UUID(user_id),
             query=query,
             limit=5,
-            categories=["financial_profile", "preference", "household", "conversation"],
         )
 
         if not memories:

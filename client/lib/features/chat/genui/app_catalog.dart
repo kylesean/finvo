@@ -38,6 +38,8 @@ class AppCatalog {
         _buildExpenseSummaryCard(),
         _buildSpaceSelectorCard(),
         _buildSpaceAssociationReceipt(),
+        _buildArtifactLink(),
+        _buildArtifactLinkCard(),
       ],
     );
   }
@@ -1551,6 +1553,99 @@ class AppCatalog {
       return _buildErrorWidget(
         context.buildContext,
         'Failed to load association confirmation: $e',
+      );
+    }
+  }
+
+  static CatalogItem _buildArtifactLink() {
+    return CatalogItem(
+      name: 'artifact_link',
+      dataSchema: ObjectSchema(
+        properties: {
+          'url': StringSchema(description: 'File URL'),
+          'path': StringSchema(description: 'File path'),
+          'artifactName': StringSchema(description: 'Artifact name'),
+          'artifactUrl': StringSchema(description: 'Artifact URL'),
+          'message': StringSchema(description: 'Message'),
+        },
+      ),
+      widgetBuilder: _buildArtifactLinkWidget,
+    );
+  }
+
+  static CatalogItem _buildArtifactLinkCard() {
+    return CatalogItem(
+      name: 'ArtifactLinkCard',
+      dataSchema: ObjectSchema(
+        properties: {
+          'url': StringSchema(description: 'File URL'),
+          'path': StringSchema(description: 'File path'),
+          'artifactName': StringSchema(description: 'Artifact name'),
+          'artifactUrl': StringSchema(description: 'Artifact URL'),
+          'message': StringSchema(description: 'Message'),
+        },
+      ),
+      widgetBuilder: _buildArtifactLinkWidget,
+    );
+  }
+
+  static Widget _buildArtifactLinkWidget(CatalogItemContext context) {
+    try {
+      final data = context.data as Map<String, dynamic>;
+      final artifactName =
+          data['artifactName'] as String? ??
+          data['path'] as String? ??
+          'Artifact File';
+      final url =
+          data['artifactUrl'] as String? ?? data['url'] as String? ?? '';
+
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 6.0),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context.buildContext).cardColor,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: Theme.of(
+              context.buildContext,
+            ).dividerColor.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.insert_drive_file_outlined, size: 24.0),
+            const SizedBox(width: 12.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    artifactName,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (url.isNotEmpty)
+                    Text(
+                      url,
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        color: Theme.of(context.buildContext).hintColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      return _buildErrorWidget(
+        context.buildContext,
+        'Failed to load artifact link: $e',
       );
     }
   }

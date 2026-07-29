@@ -93,6 +93,15 @@ class MemoryService:
             # Build embedder configuration based on provider
             embedder_config = self._build_embedder_config()
 
+            # Build Mem0 LLM config — must point at the same endpoint as the
+            # memory model (e.g. SiliconFlow) rather than api.openai.com.
+            llm_config: dict[str, Any] = {
+                "model": settings.LONG_TERM_MEMORY_MODEL,
+                "api_key": settings.LONG_TERM_MEMORY_MODEL_API_KEY or settings.OPENAI_API_KEY,
+            }
+            if settings.LONG_TERM_MEMORY_MODEL_BASE_URL:
+                llm_config["openai_base_url"] = settings.LONG_TERM_MEMORY_MODEL_BASE_URL
+
             self._memory = AsyncMemory.from_config(
                 config_dict={
                     "vector_store": {
@@ -109,7 +118,7 @@ class MemoryService:
                     },
                     "llm": {
                         "provider": "openai",
-                        "config": {"model": settings.LONG_TERM_MEMORY_MODEL},
+                        "config": llm_config,
                     },
                     "embedder": embedder_config,
                 }
@@ -204,10 +213,12 @@ class MemoryService:
         category: str = "conversation",
         additional_metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Add memories from a conversation with proactive fact extraction.
+        """Add memories from a conversation using Mem0's native fact extraction.
 
-        Instead of storing the raw conversation, this method extracts salient
-        facts and preferences to maintain a clean and valuable memory base.
+        Delegates extraction entirely to Mem0's internal LLM (LONG_TERM_MEMORY_MODEL),
+        which is a standard chat model unaffected by reasoning-mode output quirks.
+        This avoids the brittle custom extract_salient_facts pipeline that failed
+        when the main llm_service used reasoning models with use_responses_api=True.
 
         Args:
             user_uuid: User identifier
@@ -224,17 +235,7 @@ class MemoryService:
 
         user_id = str(user_uuid)
 
-        # 1. Extract salient facts from the messages
-        # We only care about the latest exchange usually, but can look at context
-        full_text = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
-        facts = await self.extract_salient_facts(full_text)
-
-        if not facts:
-            logger.debug("no_salient_facts_extracted", user_uuid=user_id)
-            return {"success": True, "extracted": False}
-
-        # 2. Build rich metadata
-        metadata = {
+        metadata: dict[str, Any] = {
             "category": category,
             "timestamp": datetime.now(UTC).isoformat(),
             "original_message_count": len(messages),
@@ -248,27 +249,26 @@ class MemoryService:
             metadata.update(additional_metadata)
 
         try:
-            # 3. Store consolidated facts in Mem0
-            # Join facts into one block so Mem0 only calls its internal LLM once.
-            consolidated_text = "\n".join(facts)
-            # Use infer=False to skip Mem0's internal LLM processing
-            # We've already extracted facts via extract_salient_facts()
-            # This saves ~50% token cost and reduces latency
+            # Mem0 native infer=True: passes messages to its own LLM for fact
+            # extraction using its built-in FACT_RETRIEVAL_PROMPT.
+            # This is the canonical Mem0 usage pattern and avoids any issues
+            # with our main llm_service's reasoning model output format.
             result = await self.memory.add(
-                consolidated_text,
+                messages,
                 user_id=user_id,
                 metadata=metadata,
-                infer=False,
+                infer=True,
             )
 
+            fact_count = len(result.get("results", [])) if isinstance(result, dict) else 0
             logger.info(
                 "salient_memories_added",
                 user_uuid=user_id,
-                fact_count=len(facts),
+                fact_count=fact_count,
                 session_id=str(session_id) if session_id else None,
             )
 
-            return {"success": True, "extracted": True, "fact_count": len(facts), "result": result}
+            return {"success": True, "extracted": fact_count > 0, "fact_count": fact_count, "result": result}
 
         except Exception as e:
             logger.warning(
@@ -276,85 +276,25 @@ class MemoryService:
                 user_uuid=user_id,
                 error=str(e),
             )
-            return {
-                "success": False,
-                "error": str(e),
-            }
-
-    async def extract_salient_facts(self, text: str) -> list[str]:
-        """Extract important financial facts and preferences from text.
-
-        Uses LLM to filter noise and retain only long-term valuable information.
-
-        Args:
-            text: Single string or conversation transcript
-
-        Returns:
-            List of extracted fact strings
-        """
-        try:
-            from app.services.llm import llm_service
-
-            prompt = (
-                "You are a Senior Financial Memory Analyst for an AI Personal Finance Agent. "
-                "Your task is to analyze the conversation and extract ONLY high-value, long-term salient facts. "
-                "\n\n--- CRITYERIA FOR RETENTION ---"
-                "\n1. Personal Identity & Context: 'I have 2 kids', 'I work at Google', 'My partner is Alice'."
-                "\n2. Financial Goals: 'I want to save for a house', 'Retirement goal is 2M by 2040'."
-                "\n3. Persistent Preferences: 'Always categorize Meituan as Dining', 'I prefer conservative investments'."
-                "\n4. Account/Asset Info: 'My mortgage is with HSBC', 'I have a hidden savings account'."
-                "\n5. Explicit Decisions & Overrides: 'Set my monthly food budget to $500 from now on', 'I no longer work at Google, I moved to Tesla'."
-                "\n- AI SELF-DESCRIPTION: Descriptions about your own capabilities, 'I have memory function', 'My principles are...', 'How can I help'."
-                "\n- AI INSTRUCTIONS: Directions given to the AI, or AI explaining its own code/logic."
-                "\n- Temporary queries: 'How much did I spend yesterday?'"
-                "\n- Generic small talk: 'Hello', 'Thanks'."
-                "\n- Technical instructions: 'Show me the chart', 'Open settings'."
-                "\n- Individual transaction details unless they imply a pattern."
-                "\n--- FORMAT & CONFLICTS ---"
-                "\n- Logic: If the user explicitly changes a previous fact (e.g., a new job or a new budget goal), extract the NEW fact as a standalone statement."
-                "\n- Language: MUST match the user's primary language."
-                "\n- Output: List of standalone concise facts. If nothing found, return exactly 'NONE'."
-                "\n\nConversation Content:\n"
-                f"{text}\n\n"
-                "Extracted Facts:"
-            )
-
-            # Use the default LLM (typically a capable one for reasoning)
-            from langchain_core.messages import HumanMessage
-
-            response = await llm_service.call(messages=[HumanMessage(content=prompt)])
-
-            if not response or not isinstance(response.content, str):
-                return []
-
-            content = response.content.strip()
-            if content.upper() == "NONE":
-                return []
-
-            # Split lines and clean up
-            facts = [f.strip("* ").strip("- ").strip() for f in content.split("\n") if f.strip()]
-            return [f for f in facts if len(f) > 5]  # Basic filter for noise
-
-        except Exception as e:
-            logger.error("fact_extraction_failed", error=str(e))
-            return []
+            return {"success": False, "error": str(e)}
 
     async def search_memories(
         self,
         user_uuid: UUID,
         query: str,
         limit: int = 5,
-        rerank: bool = True,
-        categories: list[str] | None = None,
     ) -> list[dict[str, Any]]:
-        """Search for relevant memories with optional category filtering.
+        """Search for relevant memories by vector similarity.
+
+        Searches across all of the user's memories without category filtering.
+        Category filtering is intentionally omitted: Mem0's infer=True pipeline
+        assigns its own internal categories, which may not match the metadata
+        category written at add time. Filtering by category would cause misses.
 
         Args:
             user_uuid: User identifier
             query: Search query string
             limit: Maximum number of results to return
-            rerank: Whether to apply reranking for better relevance
-            categories: Optional list of categories to filter by (e.g., ['financial', 'preference'])
 
         Returns:
             List of memory dicts with 'memory', 'score', and 'metadata'
@@ -362,28 +302,13 @@ class MemoryService:
         user_id = str(user_uuid)
 
         try:
-            # Build filters if categories specified
-            # Mem0 filter format: {"AND": [{"category": "value"}]} for multiple conditions
-            # or {"category": "value"} for single category
-            # NOTE: user_id must be inside filters (not top-level param) per Mem0 API
             filters: dict[str, Any] = {"user_id": user_id}
-            if categories:
-                if len(categories) == 1:
-                    filters["category"] = categories[0]
-                else:
-                    # Use OR logic for multiple categories
-                    filters["OR"] = [{"category": cat} for cat in categories]
-
-                logger.debug(
-                    "memory_search_filters",
-                    categories=categories,
-                    filters=filters,
-                )
 
             result = await self.memory.search(
                 query=query,
-                limit=limit,
+                top_k=limit,
                 filters=filters,
+                threshold=0.0,
             )
 
             memories = []

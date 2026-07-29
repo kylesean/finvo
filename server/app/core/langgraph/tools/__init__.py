@@ -1,14 +1,15 @@
-"""工具模块 - LangGraph Agent 工具集
+"""Tools Module - LangGraph Agent Toolset
 
-架构设计：
-- LLM 可见工具：record_transactions, search_transactions, 预算, 文件系统, load_skill
-- 内部工具：execute_transfer（仅 GenUI 回调使用，不暴露给 LLM）
+Architecture Design:
+- LLM Visible Tools: record_transactions, search_transactions, budget, memory, load_skill
+- Internal Tools: execute_transfer (GenUI callback execution only, not exposed to LLM)
+- Privileged Tools: filesystem_tools (dynamically injected via state["filtered_tools"] when required)
 
-设计原则：
-- 工具语义清晰，LLM 无需额外提示即可正确选择
-- 统一入口：record_transactions 支持混合类型批量记录
-- 转账通过 executing-transfers 技能触发，由 UI 收集账户信息
-- Skills 通过 load_skill 工具按需加载（官方 Progressive Disclosure 模式）
+Design Principles:
+- Clear tool semantics for autonomous LLM selection
+- Unified entry point: record_transactions supports batch mixed-type bookkeeping
+- Transfers triggered via executing-transfers skill; UI collects account parameters
+- Skills loaded on-demand via load_skill (official Progressive Disclosure pattern)
 """
 
 from __future__ import annotations
@@ -22,7 +23,7 @@ from app.core.logging import logger
 
 from .budget_tools import budget_tools
 
-# 用于在请求生命周期内存储用户身份和语言
+# User identity and session language storage for request lifecycle
 from .context import current_session_language, current_user_id
 
 __all__ = [
@@ -39,38 +40,38 @@ from .memory_tools import memory_tools
 # Skills: load_skill tool for progressive disclosure
 from .skill_tools import skill_tools
 
-# 统一的交易工具（记录 + 查询）
+# Unified transaction tools (bookkeeping + queries)
 from .transaction_tools import transaction_tools as record_tools
-from .transfer_tools import execute_transfer, transfer_tools  # execute_transfer 单独导出供内部使用
+from .transfer_tools import execute_transfer, transfer_tools  # execute_transfer exported for internal execution
 
-# 1. LLM 可见的业务工具
-# - record_transactions: 记录交易（支持混合类型批量）
-# - search_transactions: 查询交易
-# 注意：execute_transfer 不在此列表中，LLM 看不到它
+# 1. LLM-visible business tools
+# - record_transactions: record transactions (supports mixed-type batch)
+# - search_transactions: query transactions
+# Note: execute_transfer is excluded from this list; hidden from LLM
 transaction_semantic_tools: list[BaseTool] = record_tools
 
-# 业务工具
+# Business tools
 business_tools: list[BaseTool] = transaction_semantic_tools + budget_tools
 
-# 2. 通用工具
+# 2. General utility tools
 utility_tools: list[BaseTool] = [
     duckduckgo_search_tool,
 ]
 
-# 3. DeepAgents 文件系统工具（用于 Skills 执行）
-# 包含 read_file, ls, execute
+# 3. DeepAgents filesystem tools (Privileged tools, dynamically injected via state["filtered_tools"] when required)
+# Includes read_file, write_file, ls, execute
 
-# 4. 最终暴露给 LLM 的工具集（日常对话）
-# 包含 load_skill 用于按需加载技能内容
-tools: list[BaseTool] = utility_tools + business_tools + filesystem_tools + memory_tools + skill_tools
+# 4. Default toolset exposed to LLM (for standard chat and bookkeeping)
+# Includes load_skill for on-demand skill content loading
+tools: list[BaseTool] = utility_tools + business_tools + memory_tools + skill_tools
 
-# 5. 技能专属工具（已迁移到脚本模式，不再需要）
-# - reviewing-finances: 通过 analyze_spending.py, analyze_cashflow.py 脚本
-# - managing-shared-ledgers: 通过 list_spaces.py, query_space_summary.py 脚本
+# 5. Skill-exclusive tools (migrated to script mode, no longer needed)
+# - reviewing-finances: via analyze_spending.py, analyze_cashflow.py scripts
+# - managing-shared-ledgers: via list_spaces.py, query_space_summary.py scripts
 skill_exclusive_tools: dict[str, list[BaseTool]] = {}
 
-# 6. 内部工具（不暴露给 LLM，仅供 GenUI 回调等内部使用）
-# execute_transfer 已通过上面的 import 导出，供需要时调用
+# 6. Internal tools (hidden from LLM, used for GenUI callbacks only)
+# execute_transfer is exported above for direct execution
 
 logger.info(
     "tools_loaded",
