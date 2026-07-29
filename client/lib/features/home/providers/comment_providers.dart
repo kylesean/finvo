@@ -14,18 +14,19 @@ class TransactionComments extends _$TransactionComments {
     return comments;
   }
 
-  Future<void> addComment(String text, String? parentId) async {
+  Future<void> addComment(
+    String text,
+    String? parentId,
+    List<String>? mentionedUserIds,
+  ) async {
     final service = ref.read(commentServiceProvider);
-
-    // Temporarily not manually setting loading state, let AsyncValue.guard handle it
-    // Or if immediate feedback is wanted, uncomment below
-    // state = const AsyncLoading();
 
     state = await AsyncValue.guard(() async {
       await service.addComment(
         transactionId: transactionId,
         commentText: text,
         parentCommentId: parentId,
+        mentionedUserIds: mentionedUserIds,
       );
       return await service.getComments(transactionId);
     });

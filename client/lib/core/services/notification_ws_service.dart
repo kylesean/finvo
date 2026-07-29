@@ -44,7 +44,7 @@ class NotificationWsService {
     final wsUrl = baseUrl
         .replaceFirst('https://', 'wss://')
         .replaceFirst('http://', 'ws://');
-    final uri = Uri.parse('$wsUrl/api/ws/notifications?token=$token');
+    final uri = Uri.parse('$wsUrl/ws/notifications?token=$token');
 
     try {
       _channel = WebSocketChannel.connect(uri);

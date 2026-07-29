@@ -10,10 +10,12 @@ import 'dart:async';
 import '../../models/comment_model.dart';
 import '../../providers/comment_providers.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 
-final currentUserIdProvider = Provider<String>(
-  (ref) => '1',
-); // Dummy current user ID
+/// Current logged-in user's ID (from auth state)
+final currentUserIdProvider = Provider<String>((ref) {
+  return ref.watch(currentUserProvider)?.id ?? '';
+});
 
 class CommentItemWidget extends ConsumerWidget {
   final CommentModel comment;
@@ -175,6 +177,9 @@ class CommentItemWidget extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () {
+        // Cannot reply to your own comment
+        if (comment.userId == currentLoggedInUserId) return;
+
         // Tap entire comment to trigger reply
         final currentReplyingTo = ref.read(replyingToCommentIdProvider);
         if (currentReplyingTo == comment.id) {

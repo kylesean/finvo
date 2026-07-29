@@ -193,6 +193,7 @@ const _$NotificationTypeEnumMap = {
   NotificationType.settlementUpdate: 'settlement_update',
   NotificationType.memberJoined: 'member_joined',
   NotificationType.memberLeft: 'member_left',
+  NotificationType.billComment: 'bill_comment',
 };
 
 _SpaceTransaction _$SpaceTransactionFromJson(Map<String, dynamic> json) =>

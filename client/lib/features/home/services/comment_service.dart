@@ -45,10 +45,14 @@ class CommentService {
     required String transactionId,
     required String commentText,
     String? parentCommentId,
+    List<String>? mentionedUserIds,
   }) async {
     final Map<String, dynamic> requestData = {'comment_text': commentText};
     if (parentCommentId != null) {
       requestData['parent_comment_id'] = parentCommentId;
+    }
+    if (mentionedUserIds != null && mentionedUserIds.isNotEmpty) {
+      requestData['mentioned_user_ids'] = mentionedUserIds;
     }
 
     return await _networkClient.request<CommentModel>(

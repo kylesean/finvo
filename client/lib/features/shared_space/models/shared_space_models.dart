@@ -33,6 +33,8 @@ enum NotificationType {
   memberJoined,
   @JsonValue('member_left')
   memberLeft,
+  @JsonValue('bill_comment')
+  billComment,
 }
 
 @freezed

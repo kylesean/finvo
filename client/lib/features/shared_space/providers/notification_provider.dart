@@ -225,6 +225,7 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
     return switch (type) {
       'space_invite' => NotificationType.spaceInvite,
       'new_transaction' || 'transaction' => NotificationType.newTransaction,
+      'bill_comment' => NotificationType.billComment,
       'settlement_update' => NotificationType.settlementUpdate,
       'member_joined' || 'space_activity' => NotificationType.memberJoined,
       'member_left' => NotificationType.memberLeft,

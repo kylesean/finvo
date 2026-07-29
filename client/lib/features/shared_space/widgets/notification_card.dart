@@ -171,6 +171,8 @@ class NotificationCard extends StatelessWidget {
         return FLucideIcons.userPlus;
       case NotificationType.newTransaction:
         return FLucideIcons.receipt;
+      case NotificationType.billComment:
+        return FLucideIcons.messageSquareText;
       case NotificationType.settlementUpdate:
         return FLucideIcons.calculator;
       case NotificationType.memberJoined:
@@ -186,6 +188,8 @@ class NotificationCard extends StatelessWidget {
         return Colors.blue;
       case NotificationType.newTransaction:
         return Colors.green;
+      case NotificationType.billComment:
+        return Colors.indigo;
       case NotificationType.settlementUpdate:
         return Colors.orange;
       case NotificationType.memberJoined:

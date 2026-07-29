@@ -173,9 +173,25 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
     }
 
     try {
+      // Parse @mentions from text to extract mentioned user IDs
+      List<String>? mentionedUserIds;
+      if (widget.spaces.isNotEmpty) {
+        final membersAsync = ref.read(
+          spaceMembersProvider(widget.spaces.first.id),
+        );
+        final members = membersAsync.asData?.value ?? [];
+        final mentioned = members
+            .where((m) => commentText.contains('@${m.username}'))
+            .map((m) => m.userId)
+            .toList();
+        if (mentioned.isNotEmpty) {
+          mentionedUserIds = mentioned;
+        }
+      }
+
       await ref
           .read(transactionCommentsProvider(widget.transactionId).notifier)
-          .addComment(commentText, effectiveParentCommentId);
+          .addComment(commentText, effectiveParentCommentId, mentionedUserIds);
 
       _commentController.clear();
       ref.read(replyingToCommentIdProvider.notifier).set(null);

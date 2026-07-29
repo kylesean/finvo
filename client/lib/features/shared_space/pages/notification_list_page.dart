@@ -189,7 +189,8 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
         // Invite notification, no extra navigation, user can act directly on card
         break;
       case NotificationType.newTransaction:
-        // New transaction notification, navigate to transaction detail
+      case NotificationType.billComment:
+        // Transaction/comment notification, navigate to transaction detail
         final transactionId = notification.data?['transactionId'] as String?;
         if (transactionId != null) {
           unawaited(context.push('/home/transaction/$transactionId'));

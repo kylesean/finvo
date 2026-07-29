@@ -973,10 +973,24 @@ class TransactionCRUDService:
             is_reply=bool(parent_comment_id),
         )
 
-        # Notify mentioned users (async, best effort)
-        if mentioned_user_ids:
+        # Collect users to notify: mentioned + parent comment author (on reply)
+        users_to_notify: set[str] = set(mentioned_user_ids or [])
+        if parent_comment_id is not None:
+            # Notify the parent comment's author that someone replied
+            parent_author_query = select(TransactionComment.user_uuid).where(
+                cast(Any, TransactionComment.id == parent_comment_id)
+            )
+            parent_author_result = await self.db.execute(parent_author_query)
+            parent_author_uuid = parent_author_result.scalar_one_or_none()
+            if parent_author_uuid:
+                users_to_notify.add(str(parent_author_uuid))
+
+        # Don't notify the commenter themselves
+        users_to_notify.discard(str(user_uuid))
+
+        if users_to_notify:
             await self._notify_mentioned_users(
-                mentioned_user_ids=mentioned_user_ids,
+                mentioned_user_ids=list(users_to_notify),
                 transaction_id=transaction_id,
                 commenter_username=commenter_username,
                 comment_text=comment_text,
