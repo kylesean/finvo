@@ -952,6 +952,8 @@ class _Translations$server$en extends Translations$server$zh {
 	@override String get connectionFailed => 'Connection Failed';
 	@override String get continueToLogin => 'Continue to Login';
 	@override String get saveAndReturn => 'Save and Return';
+	@override String get saveAndReLogin => 'Save and Re-login';
+	@override String get serverUrlSavedRedirectLogin => 'Server configuration updated, please log in again';
 	@override String get serverSettings => 'Server Settings';
 	@override String get currentServer => 'Current Server';
 	@override String get version => 'Version';
@@ -3285,6 +3287,8 @@ extension on TranslationsEn {
 			'server.connectionFailed' => 'Connection Failed',
 			'server.continueToLogin' => 'Continue to Login',
 			'server.saveAndReturn' => 'Save and Return',
+			'server.saveAndReLogin' => 'Save and Re-login',
+			'server.serverUrlSavedRedirectLogin' => 'Server configuration updated, please log in again',
 			'server.serverSettings' => 'Server Settings',
 			'server.currentServer' => 'Current Server',
 			'server.version' => 'Version',

@@ -1273,6 +1273,8 @@
     "connectionFailed": "Connection Failed",
     "continueToLogin": "Continue to Login",
     "saveAndReturn": "Save and Return",
+    "saveAndReLogin": "저장 및 다시 로그인",
+    "serverUrlSavedRedirectLogin": "서버 설정이 업데이트되었습니다. 다시 로그인해 주세요",
     "serverSettings": "Server Settings",
     "currentServer": "Current Server",
     "version": "Version",

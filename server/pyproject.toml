@@ -7,7 +7,7 @@ packages = ["app", "evals"]
 
 [project]
 name = "Finvo-api"
-version = "0.2.1-alpha"
+version = "0.2.2-alpha"
 description = "Finvo: Self-Hosted & Privacy-First AI Financial Assistant"
 requires-python = ">=3.13"
 dependencies = [

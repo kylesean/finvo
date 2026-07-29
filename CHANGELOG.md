@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note**: During alpha development, this changelog is updated only at version releases.
 > For detailed changes between releases, see the [Git commit history](https://github.com/kylesean/Finvo/commits/main).
 
+## [0.2.2-alpha] - 2026-07-29
+
+### Added
+- Real-time comment WebSocket synchronization (`comment_updated`) across shared space members for live creation & deletion updates.
+- Interactive PhotoView gallery (`PhotoViewGallery`) for transaction image attachments with swipe gestures, pinch-to-zoom, and index count indicator (`1 / N`).
+- Progressive blur loading placeholder effect (`ImageFilter.blur`) for transaction image thumbnails and full-screen view.
+- Distinct badge for transaction recorder/creator in `@` mention selection popover.
+
+### Changed
+- **UI/UX**: Redesigned comment reply banner to compact left-anchored Reply Chip Badge, eliminating misclick issues.
+- **UI/UX**: Simplified AI Chat drawer bottom user profile widget to clean avatar + username layout, matching Shared Space drawer.
+- **UI/UX**: Updated Server Settings page save action to clear auth session and redirect to Login screen with full i18n support across 5 languages.
+- **Design System Alignment**: Replaced delete confirmation modal with Forui `showFDialog` + `FDialog` and upgraded action sheets to `ActionBottomSheet`.
+
+### Fixed
+- Fixed permission isolation issue where shared space members could not access or view transaction image attachments.
+- Fixed notification deep-linking to transaction detail with 600ms smooth scroll & highlight animation.
+- Guarded self-reply interactions in comment threads and optimized 2-tier sub-reply expand/collapse touch targets.
+
 ## [0.2.1-alpha] - 2026-07-28
 
 ### Added

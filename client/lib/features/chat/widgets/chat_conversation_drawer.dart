@@ -431,23 +431,11 @@ class _ChatConversationDrawerState
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        user?.username ?? '...',
-                        style: AppTextStyles.listTrailing(theme),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        t.chat.viewProfile,
-                        style: theme.typography.body.xs.copyWith(
-                          color: theme.colors.mutedForeground,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    user?.username ?? '...',
+                    style: AppTextStyles.listTrailing(theme),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Icon(

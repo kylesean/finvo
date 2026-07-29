@@ -1273,6 +1273,8 @@
     "connectionFailed": "Connection Failed",
     "continueToLogin": "Continue to Login",
     "saveAndReturn": "Save and Return",
+    "saveAndReLogin": "保存して再ログイン",
+    "serverUrlSavedRedirectLogin": "サーバー設定が更新されました。再度ログインしてください",
     "serverSettings": "Server Settings",
     "currentServer": "Current Server",
     "version": "Version",

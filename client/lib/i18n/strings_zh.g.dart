@@ -2108,6 +2108,12 @@ class Translations$server$zh {
 	/// zh: '保存并返回'
 	String get saveAndReturn => '保存并返回';
 
+	/// zh: '保存并重新登录'
+	String get saveAndReLogin => '保存并重新登录';
+
+	/// zh: '服务器配置已更新，请重新登录'
+	String get serverUrlSavedRedirectLogin => '服务器配置已更新，请重新登录';
+
 	/// zh: '服务器设置'
 	String get serverSettings => '服务器设置';
 
@@ -5632,6 +5638,8 @@ extension on Translations {
 			'server.connectionFailed' => '连接失败',
 			'server.continueToLogin' => '继续登录',
 			'server.saveAndReturn' => '保存并返回',
+			'server.saveAndReLogin' => '保存并重新登录',
+			'server.serverUrlSavedRedirectLogin' => '服务器配置已更新，请重新登录',
 			'server.serverSettings' => '服务器设置',
 			'server.currentServer' => '当前服务器',
 			'server.version' => '版本',

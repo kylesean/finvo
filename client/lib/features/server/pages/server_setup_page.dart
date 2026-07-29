@@ -11,6 +11,8 @@ import '../providers/server_config_provider.dart';
 import '../../../core/services/server_config_service.dart';
 import '../../../i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/widgets/top_toast.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 
 final _logger = Logger('ServerSetupPage');
 
@@ -88,8 +90,12 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
     if (!mounted) return;
 
     if (widget.isReconfiguring) {
-      // Go back to settings
-      context.pop();
+      // Clear login session and force redirect to login
+      await ref.read(authProvider.notifier).logout();
+      if (!mounted) return;
+
+      TopToast.success(context, t.server.serverUrlSavedRedirectLogin);
+      context.go('/login');
     } else {
       // Navigate to login
       context.go('/login');
@@ -267,7 +273,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
                       : null,
                   child: Text(
                     widget.isReconfiguring
-                        ? t.server.saveAndReturn
+                        ? t.server.saveAndReLogin
                         : t.server.continueToLogin,
                   ),
                 ),

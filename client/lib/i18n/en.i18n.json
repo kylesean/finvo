@@ -1123,6 +1123,8 @@
     "connectionFailed": "Connection Failed",
     "continueToLogin": "Continue to Login",
     "saveAndReturn": "Save and Return",
+    "saveAndReLogin": "Save and Re-login",
+    "serverUrlSavedRedirectLogin": "Server configuration updated, please log in again",
     "serverSettings": "Server Settings",
     "currentServer": "Current Server",
     "version": "Version",

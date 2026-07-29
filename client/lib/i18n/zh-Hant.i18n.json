@@ -1273,6 +1273,8 @@
     "connectionFailed": "Connection Failed",
     "continueToLogin": "Continue to Login",
     "saveAndReturn": "Save and Return",
+    "saveAndReLogin": "儲存並重新登入",
+    "serverUrlSavedRedirectLogin": "伺服器設定已更新，請重新登入",
     "serverSettings": "Server Settings",
     "currentServer": "Current Server",
     "version": "Version",
