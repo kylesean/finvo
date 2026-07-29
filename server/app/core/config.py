@@ -190,6 +190,14 @@ class Settings(BaseSettings):
         description="e.g. https://ark.cn-beijing.volces.com/api/v3",
     )
 
+    # Ollama - 本地模型
+    OLLAMA_API_KEY: str = Field("ollama", validation_alias="OLLAMA_API_KEY")
+    OLLAMA_BASE_URL: str = Field(
+        "http://localhost:11434/v1",
+        validation_alias="OLLAMA_BASE_URL",
+        description="e.g. http://localhost:11434/v1",
+    )
+
     # Long term memory Configuration (Mem0)
     # Supported Embedder Providers: "openai", "ollama", "huggingface", "azure_openai"
     LONG_TERM_MEMORY_MODEL: str = "deepseek-v4-flash"  # LLM for memory extraction

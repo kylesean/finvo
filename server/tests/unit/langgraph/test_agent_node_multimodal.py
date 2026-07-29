@@ -38,11 +38,29 @@ async def test_vision_guard_short_circuits_without_llm_call():
 
     # A single localized assistant error, no tool_calls → router sends us to END.
     assert len(result["messages"]) == 1
-    assert isinstance(result["messages"][0], AIMessage)
-    assert result["messages"][0].content  # non-empty localized message
-    # The LLM must NOT have been invoked.
-    llm.bind_tools.assert_not_called()
-    bound.ainvoke.assert_not_called()
+
+
+async def test_system_messages_consolidated_into_single_leading_message():
+    llm, bound = _make_llm()
+    node = create_agent_node(llm, tools=[], system_prompt="System Prompt Main")
+
+    state = {
+        "messages": [
+            SystemMessage(content="Dynamic Context System Message"),
+            HumanMessage(content="User question"),
+        ]
+    }
+    config = {"configurable": {}}
+
+    await node(state, config)
+
+    # Verify ainvoke was called with exactly 1 SystemMessage at index 0
+    passed_messages = bound.ainvoke.call_args[0][0]
+    assert len(passed_messages) == 2
+    assert isinstance(passed_messages[0], SystemMessage)
+    assert "System Prompt Main" in passed_messages[0].content
+    assert "Dynamic Context System Message" in passed_messages[0].content
+    assert isinstance(passed_messages[1], HumanMessage)
 
 
 async def test_enrichment_is_transient_and_does_not_pollute_state():

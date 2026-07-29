@@ -113,7 +113,65 @@ class LLMRegistry:
                 temperature=settings.DEFAULT_LLM_TEMPERATURE,
             ),
         },
+        {
+            "name": "qwen3.6-genesis-35b",
+            "provider": "ollama",
+            "capabilities": {"vision": False},
+            "llm": ChatOpenAI(
+                model="qwen3.6-genesis-35b",
+                api_key=settings.OLLAMA_API_KEY,
+                base_url=settings.OLLAMA_BASE_URL,
+                max_tokens=512,
+                temperature=0.1,
+                reasoning_effort="low",
+                extra_body={
+                    "options": {
+                        "num_predict": 512,
+                        "num_ctx": 4096,
+                    }
+                },
+            ),
+        },
+        {
+            "name": "translategemma:4b-it",
+            "provider": "ollama",
+            "capabilities": {"vision": False},
+            "llm": ChatOpenAI(
+                model="translategemma:4b-it",
+                api_key=settings.OLLAMA_API_KEY,
+                base_url=settings.OLLAMA_BASE_URL,
+                max_tokens=512,
+                temperature=0.1,
+                extra_body={
+                    "options": {
+                        "num_predict": 512,
+                        "num_ctx": 4096,
+                    }
+                },
+            ),
+        },
     ]
+
+    @classmethod
+    def _is_ollama_model(cls, model_name: str) -> tuple[bool, str]:
+        """Check if a model name refers to an Ollama model and return the clean model name.
+
+        Args:
+            model_name: Model name, possibly prefixed with 'ollama:' or 'ollama/'
+
+        Returns:
+            Tuple of (is_ollama, clean_model_name)
+        """
+        if model_name.startswith("ollama:"):
+            return True, model_name[7:]
+        if model_name.startswith("ollama/"):
+            return True, model_name[7:]
+
+        for entry in cls.LLMS:
+            if entry["name"] == model_name and entry.get("provider") == "ollama":
+                return True, model_name
+
+        return False, model_name
 
     @classmethod
     def get(cls, model_name: str, **kwargs: Any) -> BaseChatModel:
@@ -129,36 +187,73 @@ class LLMRegistry:
         Raises:
             ValueError: If model_name is not found in LLMS
         """
+        is_ollama, clean_model_name = cls._is_ollama_model(model_name)
+
         # Find the model in the registry
         model_entry = None
         for entry in cls.LLMS:
-            if entry["name"] == model_name:
+            if entry["name"] in (model_name, clean_model_name):
                 model_entry = entry
                 break
 
         # If model not found in registry, create a dynamic entry
         if not model_entry:
-            logger.info("model_not_found_in_registry_creating_dynamic", model_name=model_name)
-            # Create a new dynamic entry
-            dynamic_llm = ChatOpenAI(
-                model=model_name,
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,  # Support custom base URL
-                max_tokens=settings.MAX_TOKENS,
-                temperature=settings.DEFAULT_LLM_TEMPERATURE,
+            logger.info(
+                "model_not_found_in_registry_creating_dynamic", model_name=model_name, clean_name=clean_model_name
             )
-            model_entry = {"name": model_name, "llm": dynamic_llm}
+            api_key = settings.OLLAMA_API_KEY if is_ollama else settings.OPENAI_API_KEY
+            base_url = settings.OLLAMA_BASE_URL if is_ollama else settings.OPENAI_BASE_URL
+
+            extra_kwargs: dict[str, Any] = {}
+            if is_ollama:
+                extra_kwargs = {
+                    "max_tokens": 512,
+                    "temperature": 0.1,
+                    "reasoning_effort": "low",
+                    "extra_body": {"options": {"num_predict": 512, "num_ctx": 4096}},
+                }
+            else:
+                extra_kwargs = {
+                    "max_tokens": settings.MAX_TOKENS,
+                    "temperature": settings.DEFAULT_LLM_TEMPERATURE,
+                }
+
+            dynamic_llm = ChatOpenAI(
+                model=clean_model_name,
+                api_key=api_key,
+                base_url=base_url,
+                **extra_kwargs,
+            )
+            model_entry = {
+                "name": model_name,
+                "provider": "ollama" if is_ollama else "openai",
+                "llm": dynamic_llm,
+            }
             # Add to registry so it can be used in fallback loop
             cls.LLMS.append(model_entry)
 
         # If user provides kwargs, create a new instance with those args
         if kwargs:
             logger.debug("creating_llm_with_custom_args", model_name=model_name, custom_args=list(kwargs.keys()))
-            return ChatOpenAI(
-                model=model_name,
-                api_key=settings.OPENAI_API_KEY,
-                base_url=settings.OPENAI_BASE_URL,
+            default_api_key = (
+                settings.OLLAMA_API_KEY
+                if (is_ollama or model_entry.get("provider") == "ollama")
+                else settings.OPENAI_API_KEY
+            )
+            default_base_url = (
+                settings.OLLAMA_BASE_URL
+                if (is_ollama or model_entry.get("provider") == "ollama")
+                else settings.OPENAI_BASE_URL
+            )
+
+            merged_kwargs = {
+                "api_key": default_api_key,
+                "base_url": default_base_url,
                 **kwargs,
+            }
+            return ChatOpenAI(
+                model=clean_model_name,
+                **merged_kwargs,
             )
 
         # Return the default instance
