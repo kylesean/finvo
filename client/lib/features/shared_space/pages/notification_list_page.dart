@@ -191,9 +191,19 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
       case NotificationType.newTransaction:
       case NotificationType.billComment:
         // Transaction/comment notification, navigate to transaction detail
-        final transactionId = notification.data?['transactionId'] as String?;
+        final transactionId =
+            (notification.data?['transactionId'] ??
+                    notification.data?['transaction_id'])
+                as String?;
+        final commentId =
+            (notification.data?['commentId'] ??
+                    notification.data?['comment_id'])
+                as String?;
         if (transactionId != null) {
-          unawaited(context.push('/home/transaction/$transactionId'));
+          final path = commentId != null && commentId.isNotEmpty
+              ? '/home/transaction/$transactionId?commentId=$commentId'
+              : '/home/transaction/$transactionId';
+          unawaited(context.push(path));
         }
         break;
       case NotificationType.settlementUpdate:

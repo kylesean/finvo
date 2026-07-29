@@ -1,25 +1,25 @@
-// features/transaction_detail/widgets/comment_input_bar.dart
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:finvo/shared/widgets/top_toast.dart'; // Import forui
+import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
+import 'dart:async';
 
-// Assuming these Providers are imported from outside
-// Core logic migrated to transactionCommentsProvider
 import '../../providers/comment_providers.dart';
 import '../../models/transaction_model.dart';
 import 'mention_picker_widget.dart';
-import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class CommentInputBar extends ConsumerStatefulWidget {
   final String transactionId;
   final List<SpaceInfo> spaces;
+  final String? recorderUserId;
   const CommentInputBar({
     super.key,
     required this.transactionId,
     this.spaces = const [],
+    this.recorderUserId,
   });
 
   @override
@@ -40,13 +40,22 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
   void initState() {
     super.initState();
     _commentController.addListener(_onTextChanged);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.spaces.isEmpty) {
+        final spaceState = ref.read(sharedSpaceProvider);
+        if (spaceState.spaces.isEmpty && !spaceState.isLoading) {
+          unawaited(ref.read(sharedSpaceProvider.notifier).loadSpaces());
+        }
+      }
+    });
+
     ref.listenManual<String?>(replyingToCommentIdProvider, (previous, next) {
       if (next != null && (previous == null || previous != next)) {
         if (!_commentFocusNode.hasFocus) {
           _commentFocusNode.requestFocus();
         }
         final currentReplyingToName = ref.read(replyingToUserNameProvider);
-        // Get the comment being replied to, to determine its parentCommentId later
         final allComments =
             ref
                 .read(transactionCommentsProvider(widget.transactionId))
@@ -58,8 +67,6 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
         );
 
         if (currentReplyingToName != null && repliedToComment != null) {
-          // When pre-filling, could consider showing reply chain, e.g., "@UserA > @UserB"
-          // But for simplicity, we still only show the directly replied username
           final newText = '@$currentReplyingToName ';
           _commentController.value = TextEditingValue(
             text: newText,
@@ -70,9 +77,23 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
     });
   }
 
+  String? _getEffectiveSpaceId({bool isRead = false}) {
+    if (widget.spaces.isNotEmpty) {
+      return widget.spaces.first.id;
+    }
+    final sharedSpaceState = isRead
+        ? ref.read(sharedSpaceProvider)
+        : ref.watch(sharedSpaceProvider);
+    if (sharedSpaceState.spaces.isNotEmpty) {
+      return sharedSpaceState.spaces.first.id;
+    }
+    return null;
+  }
+
   /// Detect @ character to trigger mention mode
   void _onTextChanged() {
-    if (widget.spaces.isEmpty) return;
+    final effectiveSpaceId = _getEffectiveSpaceId(isRead: true);
+    if (effectiveSpaceId == null) return;
 
     final text = _commentController.text;
     final cursorPos = _commentController.selection.baseOffset;
@@ -134,16 +155,23 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
     final commentText = _commentController.text.trim();
     if (commentText.isEmpty) return;
 
+    // Remove all @mention tokens to check if there is actual comment content
+    final bodyWithoutMentions = commentText
+        .replaceAll(RegExp(r'@[^\s]+'), '')
+        .trim();
+    if (bodyWithoutMentions.isEmpty) {
+      TopToast.error(context, '评论内容不能为空');
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
     });
 
     final directlyRepliedToCommentId = ref.read(replyingToCommentIdProvider);
-    String?
-    effectiveParentCommentId; // This is the parentCommentId to pass to backend
+    String? effectiveParentCommentId;
 
     if (directlyRepliedToCommentId != null) {
-      // Need to get all comments to find the one being replied to, and determine its parentCommentId
       final allComments =
           ref
               .read(transactionCommentsProvider(widget.transactionId))
@@ -156,29 +184,23 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
 
       if (repliedToComment != null) {
         if (repliedToComment.parentCommentId == null) {
-          // If replying directly to a parent comment, parentCommentId is this parent comment's id
           effectiveParentCommentId = repliedToComment.id;
         } else {
-          // If replying to a child comment, parentCommentId should be its parentCommentId (top-level id)
           effectiveParentCommentId = repliedToComment.parentCommentId;
         }
       } else {
-        // Theoretically shouldn't happen as replyingToCommentIdProvider should match an existing comment
-        // But as fallback, don't set parentCommentId, making it a new parent comment
         effectiveParentCommentId = null;
       }
     } else {
-      // No reply target, this is a new parent comment
       effectiveParentCommentId = null;
     }
 
     try {
       // Parse @mentions from text to extract mentioned user IDs
       List<String>? mentionedUserIds;
-      if (widget.spaces.isNotEmpty) {
-        final membersAsync = ref.read(
-          spaceMembersProvider(widget.spaces.first.id),
-        );
+      final effectiveSpaceId = _getEffectiveSpaceId(isRead: true);
+      if (effectiveSpaceId != null) {
+        final membersAsync = ref.read(spaceMembersProvider(effectiveSpaceId));
         final members = membersAsync.asData?.value ?? [];
         final mentioned = members
             .where((m) => commentText.contains('@${m.username}'))
@@ -210,7 +232,6 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
     }
   }
 
-  // ... dispose and build methods ...
   @override
   void dispose() {
     _commentController.removeListener(_onTextChanged);
@@ -224,6 +245,8 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
     final theme = context.theme;
     final colors = theme.colors;
     final replyingToName = ref.watch(replyingToUserNameProvider);
+    final effectiveSpaceId = _getEffectiveSpaceId();
+    final canMention = effectiveSpaceId != null;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -237,43 +260,60 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
         children: [
           if (replyingToName != null)
             Padding(
-              padding: const EdgeInsets.only(
-                bottom: 6.0,
-                left: 4.0,
-                right: 4.0,
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    t.comment.replyToPrefix(
-                      name: replyingToName,
-                    ), // Displays the author name of the comment being replied to
-                    style: AppTextStyles.listSubtitle(theme),
-                  ),
-                  const Spacer(),
-                  FButton.icon(
-                    onPress: () {
-                      ref.read(replyingToCommentIdProvider.notifier).set(null);
-                      ref.read(replyingToUserNameProvider.notifier).set(null);
-                      _commentFocusNode.unfocus();
-                      _commentController.clear();
-                    },
-                    child: Icon(
-                      FLucideIcons.x,
-                      color: colors.mutedForeground,
-                      size: 16,
+              padding: const EdgeInsets.only(bottom: 8.0, left: 2.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(FLucideIcons.reply, size: 13, color: colors.primary),
+                    const SizedBox(width: 6),
+                    Text(
+                      '回复 @$replyingToName',
+                      style: theme.typography.body.xs.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        ref
+                            .read(replyingToCommentIdProvider.notifier)
+                            .set(null);
+                        ref.read(replyingToUserNameProvider.notifier).set(null);
+                        _commentController.clear();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Icon(
+                          FLucideIcons.x,
+                          size: 14,
+                          color: colors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           // @ Mention picker (shown above input when active)
-          if (_isMentionMode && widget.spaces.isNotEmpty)
+          if (_isMentionMode && effectiveSpaceId != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: MentionPickerWidget(
-                spaceId: widget.spaces.first.id,
+                spaceId: effectiveSpaceId,
                 filter: _mentionFilter,
+                replyingToUserName: replyingToName,
+                recorderUserId: widget.recorderUserId,
                 onSelected: _onMentionSelected,
               ),
             ),
@@ -284,22 +324,16 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                 child: FTextField(
                   control: .managed(controller: _commentController),
                   focusNode: _commentFocusNode,
-                  hint: widget.spaces.isNotEmpty
+                  hint: canMention
                       ? t.comment.addNoteWithMention
                       : t.comment.addNote,
                   onTap: () {
-                    // Logic here ensures existing reply state is cleared when user clicks input directly
-                    // If focused via "Reply" button, replyingToCommentIdProvider already has value
                     if (ref.read(replyingToCommentIdProvider) == null &&
                         _commentFocusNode.hasFocus) {
-                      // If no reply target and focus is in input, user might want to start new comment, no action
                     } else if (ref.read(replyingToCommentIdProvider) != null &&
                         !_commentFocusNode.hasFocus) {
-                      // If reply target exists but no focus, focus it on click
-                      // (Usually handled internally by ShadInput)
                     } else if (ref.read(replyingToCommentIdProvider) == null &&
                         !_commentFocusNode.hasFocus) {
-                      // User clicks empty input direktly, clear any lingering reply state
                       ref.read(replyingToCommentIdProvider.notifier).set(null);
                       ref.read(replyingToUserNameProvider.notifier).set(null);
                     }

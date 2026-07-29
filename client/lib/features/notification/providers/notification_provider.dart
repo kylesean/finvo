@@ -7,6 +7,7 @@ import '../../../core/network/dio_provider.dart';
 import '../../../core/services/notification_ws_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../home/providers/comment_providers.dart';
 import '../models/notification_item.dart';
 import '../repositories/notification_repository.dart';
 
@@ -197,10 +198,24 @@ final notificationWsProvider = Provider<NotificationWsService>((ref) {
 
   // Wire incoming notifications to the provider
   wsService.onNotification = (payload) {
+    final type = payload['type']?.toString() ?? 'system';
+
+    if (type == 'comment_updated' || type == 'bill_comment') {
+      final dataMap = payload['data'] is Map<String, dynamic>
+          ? payload['data'] as Map<String, dynamic>
+          : null;
+      final transactionId =
+          (dataMap?['transactionId'] ?? dataMap?['transaction_id'])?.toString();
+      if (transactionId != null && transactionId.isNotEmpty) {
+        ref.invalidate(transactionCommentsProvider(transactionId));
+      }
+      if (type == 'comment_updated') return;
+    }
+
     final item = NotificationItem(
       id: 'rt_${DateTime.now().millisecondsSinceEpoch}',
       userId: '',
-      type: payload['type']?.toString() ?? 'system',
+      type: type,
       title: payload['title']?.toString() ?? '',
       message: payload['message']?.toString() ?? '',
       data: payload['data'] is Map<String, dynamic>

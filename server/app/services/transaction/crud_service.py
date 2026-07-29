@@ -264,7 +264,6 @@ class TransactionCRUDService:
             # thread_id is text in DB but UUID in model; cast column to String for comparison
             att_query = select(Attachment).where(
                 cast(Any, sa_cast(Attachment.thread_id, String) == str(transaction.source_thread_id)),
-                cast(Any, Attachment.user_uuid == user_uuid),
             )
             att_result = await self.db.execute(att_query)
             attachments = att_result.scalars().all()
@@ -988,13 +987,27 @@ class TransactionCRUDService:
         # Don't notify the commenter themselves
         users_to_notify.discard(str(user_uuid))
 
+        assert new_comment.id is not None
+        comment_id_int = int(new_comment.id)
+
         if users_to_notify:
             await self._notify_mentioned_users(
                 mentioned_user_ids=list(users_to_notify),
                 transaction_id=transaction_id,
+                comment_id=comment_id_int,
                 commenter_username=commenter_username,
                 comment_text=comment_text,
+                parent_author_uuid=str(parent_author_uuid)
+                if parent_comment_id is not None and parent_author_uuid
+                else None,
             )
+
+        # Broadcast real-time comment created event
+        await self._broadcast_comment_event(
+            transaction_id=transaction_id,
+            comment_id=comment_id_int,
+            action="created",
+        )
 
         # Get complete comment information (including user information)
         query = (
@@ -1051,12 +1064,16 @@ class TransactionCRUDService:
         self,
         mentioned_user_ids: list[str],
         transaction_id: UUID,
+        comment_id: int,
         commenter_username: str,
         comment_text: str,
+        parent_author_uuid: str | None = None,
     ) -> None:
         """Create notifications for mentioned users and push via WebSocket."""
         from app.core.ws_manager import ws_manager
         from app.models.notification import Notification
+
+        target_path = f"/home/transaction/{transaction_id}?commentId={comment_id}"
 
         for mentioned_id in mentioned_user_ids:
             try:
@@ -1064,13 +1081,27 @@ class TransactionCRUDService:
             except ValueError:
                 continue
 
+            is_parent_author_reply = parent_author_uuid is not None and str(mentioned_uuid) == parent_author_uuid
+            title = (
+                f"{commenter_username} 回复了你的评论" if is_parent_author_reply else f"{commenter_username} 提及了你"
+            )
+
+            notification_data = {
+                "transactionId": str(transaction_id),
+                "transaction_id": str(transaction_id),
+                "commentId": str(comment_id),
+                "comment_id": str(comment_id),
+                "target_path": target_path,
+                "commenter": commenter_username,
+            }
+
             # Create notification record
             notification = Notification(
                 user_uuid=mentioned_uuid,
                 type="bill_comment",
-                title=f"{commenter_username} 提及了你",
+                title=title,
                 content=comment_text[:100],
-                data={"transactionId": str(transaction_id), "commenter": commenter_username},
+                data=notification_data,
             )
             self.db.add(notification)
 
@@ -1079,13 +1110,24 @@ class TransactionCRUDService:
         # Push via WebSocket (best effort, don't fail the comment)
         for mentioned_id in mentioned_user_ids:
             try:
+                is_parent_author_reply = parent_author_uuid is not None and mentioned_id == parent_author_uuid
+                title = (
+                    f"{commenter_username} 回复了你的评论"
+                    if is_parent_author_reply
+                    else f"{commenter_username} 提及了你"
+                )
+
                 await ws_manager.send_notification(
                     mentioned_id,
                     {
                         "type": "bill_comment",
-                        "title": f"{commenter_username} 提及了你",
+                        "title": title,
                         "message": comment_text[:100],
-                        "data": {"transactionId": str(transaction_id)},
+                        "data": {
+                            "transactionId": str(transaction_id),
+                            "commentId": str(comment_id),
+                            "target_path": target_path,
+                        },
                     },
                 )
             except Exception:  # noqa: BLE001
@@ -1113,8 +1155,61 @@ class TransactionCRUDService:
         if comment.user_uuid != user_uuid:
             raise BusinessError("You do not have permission to delete this comment", "PERMISSION_DENIED")
 
+        target_tx_id = comment.transaction_id
+
         # Delete comment (if foreign key cascade delete, child comments will be automatically deleted)
         await self.db.delete(comment)
         await self.db.commit()
 
+        # Broadcast real-time comment deleted event
+        await self._broadcast_comment_event(
+            transaction_id=target_tx_id,
+            comment_id=comment_id,
+            action="deleted",
+        )
+
         return True
+
+    async def _broadcast_comment_event(
+        self,
+        transaction_id: UUID,
+        comment_id: int,
+        action: str,
+    ) -> None:
+        """Broadcast real-time comment created/deleted event to all space members / transaction participants."""
+        from app.core.ws_manager import ws_manager
+        from app.models.shared_space import SpaceMember, SpaceTransaction
+        from app.models.transaction import Transaction
+
+        user_uuids: set[str] = set()
+
+        # 1. Add transaction owner
+        tx_query = select(Transaction.user_uuid).where(cast(Any, Transaction.id == transaction_id))
+        tx_res = await self.db.execute(tx_query)
+        tx_user_uuid = tx_res.scalar_one_or_none()
+        if tx_user_uuid:
+            user_uuids.add(str(tx_user_uuid))
+
+        # 2. Add all space members for spaces linked to this transaction
+        space_members_query = (
+            select(SpaceMember.user_uuid)
+            .join(SpaceTransaction, cast(Any, SpaceMember.space_id == SpaceTransaction.space_id))
+            .where(cast(Any, SpaceTransaction.transaction_id == transaction_id))
+        )
+        sm_res = await self.db.execute(space_members_query)
+        for uid in sm_res.scalars():
+            if uid:
+                user_uuids.add(str(uid))
+
+        if user_uuids:
+            event_payload = {
+                "type": "comment_updated",
+                "data": {
+                    "action": action,
+                    "transactionId": str(transaction_id),
+                    "transaction_id": str(transaction_id),
+                    "commentId": str(comment_id),
+                    "comment_id": str(comment_id),
+                },
+            }
+            await ws_manager.broadcast(list(user_uuids), event_payload)

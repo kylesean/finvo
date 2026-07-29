@@ -72,6 +72,8 @@ class NotificationWsService {
             if (payload != null) {
               onNotification?.call(payload);
             }
+          } else if (type == 'comment_updated') {
+            onNotification?.call(data);
           }
           // Ignore 'pong' responses
         } catch (e) {

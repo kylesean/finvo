@@ -26,12 +26,18 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class TransactionDetailPage extends ConsumerWidget {
   final String transactionId;
+  final String? targetCommentId;
 
-  const TransactionDetailPage({super.key, required this.transactionId});
+  const TransactionDetailPage({
+    super.key,
+    required this.transactionId,
+    this.targetCommentId,
+  });
 
   /// Get category display name
   String _getCategoryDisplayName(TransactionModel transaction) {
@@ -50,6 +56,9 @@ class TransactionDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Ensure real-time WebSocket connection is active for live comment sync
+    ref.watch(notificationWsProvider);
+
     final detailState = ref.watch(transactionDetailProvider(transactionId));
     final theme = context.theme;
     final colors = theme.colors;
@@ -386,7 +395,10 @@ class TransactionDetailPage extends ConsumerWidget {
                     ),
                   // --- Comment section ---
                   SliverToBoxAdapter(
-                    child: CommentSectionWidget(transactionId: transaction.id),
+                    child: CommentSectionWidget(
+                      transactionId: transaction.id,
+                      targetCommentId: targetCommentId,
+                    ),
                   ),
                   const SliverToBoxAdapter(
                     child: SizedBox(
@@ -403,6 +415,9 @@ class TransactionDetailPage extends ConsumerWidget {
       bottomNavigationBar: CommentInputBar(
         transactionId: transaction.id,
         spaces: transaction.spaces,
+        recorderUserId: transaction.sharedWith.isNotEmpty
+            ? transaction.sharedWith.first.userId
+            : null,
       ),
     );
   }

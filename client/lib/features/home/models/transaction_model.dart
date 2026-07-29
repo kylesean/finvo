@@ -274,7 +274,14 @@ abstract class TransactionModel with _$TransactionModel {
       updatedAt: null, // Keep default null
       photoPath: null, // Keep default null
       geoLocation: null, // Keep default null
-      sharedWith: [], // Keep default empty list
+      sharedWith: (json['userUuid'] ?? json['userId']) != null
+          ? [
+              SharedUserInfo(
+                userId: (json['userUuid'] ?? json['userId']).toString(),
+                avatarUrl: '',
+              ),
+            ]
+          : [],
       comments: comments,
       // Associated account and space
       sourceAccountId: json['sourceAccountId']?.toString(),

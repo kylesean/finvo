@@ -190,7 +190,21 @@ class _NotificationCenterPageState
   }
 
   void _handleNavigation(BuildContext context, NotificationItem item) {
-    final targetPath = item.data?['target_path'] as String?;
+    var targetPath = item.data?['target_path'] as String?;
+    if (targetPath == null || targetPath.isEmpty) {
+      final transactionId =
+          (item.data?['transactionId'] ?? item.data?['transaction_id'])
+              as String?;
+      final commentId =
+          (item.data?['commentId'] ?? item.data?['comment_id']) as String?;
+      if (transactionId != null && transactionId.isNotEmpty) {
+        if (commentId != null && commentId.isNotEmpty) {
+          targetPath = '/home/transaction/$transactionId?commentId=$commentId';
+        } else {
+          targetPath = '/home/transaction/$transactionId';
+        }
+      }
+    }
     if (targetPath != null && targetPath.isNotEmpty) {
       unawaited(context.push(targetPath));
     }

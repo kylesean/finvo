@@ -142,8 +142,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) {
                       final transactionId =
                           state.pathParameters['transactionId']!;
+                      final targetCommentId =
+                          state.uri.queryParameters['commentId'];
                       return TransactionDetailPage(
                         transactionId: transactionId,
+                        targetCommentId: targetCommentId,
                       );
                     },
                   ),

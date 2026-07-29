@@ -22,7 +22,7 @@ import aiofiles
 import aiofiles.os
 from fastapi import UploadFile
 from PIL import Image
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
@@ -30,6 +30,7 @@ from app.core.config import settings
 from app.core.exceptions import BusinessException
 from app.core.logging import logger
 from app.models.attachment import Attachment
+from app.models.shared_space import SpaceMember
 from app.models.storage_config import ProviderType, StorageConfig
 from app.services.storage.adapters.base import StorageAdapter
 from app.services.storage.adapters.factory import StorageAdapterFactory
@@ -382,14 +383,13 @@ class UploadService:
     async def get_file_path(self, attachment_id: UUID, user_uuid: UUID) -> tuple[Path, Attachment]:
         """获取附件的本地文件路径。
 
+        支持所有者本人以及同一共享空间成员查看访问。
+
         Args:
             attachment_id: 附件 ID
             user_uuid: 用户 UUID
         """
-        stmt = select(Attachment).where(
-            cast(Any, Attachment.id == attachment_id),
-            cast(Any, Attachment.user_uuid == user_uuid),
-        )
+        stmt = select(Attachment).where(cast(Any, Attachment.id == attachment_id))
         result = await self.db.execute(stmt)
         attachment = result.scalar_one_or_none()
 
@@ -399,6 +399,33 @@ class UploadService:
                 status_code=404,
                 error_code="FILE_NOT_FOUND",
             )
+
+        # 校验访问权限：所有者本人，或者与所有者属于同一生效共享空间的成员
+        if attachment.user_uuid != user_uuid:
+            shared_space_stmt = (
+                select(SpaceMember.space_id)
+                .where(
+                    and_(
+                        cast(Any, SpaceMember.user_uuid == user_uuid),
+                        cast(Any, SpaceMember.status == "ACCEPTED"),
+                    )
+                )
+                .intersect(
+                    select(SpaceMember.space_id).where(
+                        and_(
+                            cast(Any, SpaceMember.user_uuid == attachment.user_uuid),
+                            cast(Any, SpaceMember.status == "ACCEPTED"),
+                        )
+                    )
+                )
+            )
+            shared_space_res = await self.db.execute(shared_space_stmt)
+            if not shared_space_res.first():
+                raise BusinessException(
+                    message="附件不存在或无权访问",
+                    status_code=404,
+                    error_code="FILE_NOT_FOUND",
+                )
 
         # 构建绝对文件路径（FileResponse 需要绝对路径）
         file_path = (self.UPLOAD_DIR / attachment.object_key).resolve()
