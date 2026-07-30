@@ -1,37 +1,48 @@
 from unittest.mock import AsyncMock, patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
 from app.core.langgraph.tools.context import current_user_id
-from app.services.memory import get_memory_service
+from app.services.memory.memory_service import MemoryService
 
 
 @pytest.mark.asyncio
 async def test_memory_extraction_boundary():
-    """验证事实提取的边界感：有价值记录，无价值忽略"""
-    service = await get_memory_service()
-    user_id = str(uuid4())
+    """Verify fact extraction boundary: valuable messages get extracted, noise is ignored.
 
-    # 模拟 LLM 响应 (BaseMessage 类型)
-    from langchain_core.messages import AIMessage
+    With the new MemoryService API (memory_service.py:208-279), fact extraction is
+    delegated to Mem0's internal LLM via `infer=True`. We mock the Mem0 `add()`
+    method to simulate the extraction outcome:
+      - valuable chat  → Mem0 returns extracted facts  → `extracted` is True
+      - noise (lookup) → Mem0 returns no facts          → `extracted` is False
 
-    with patch("app.services.llm.llm_service.call", new_callable=AsyncMock) as mock_call:
-        # 场景 1: 包含长期价值的事实
-        mock_call.return_value = AIMessage(content="User has a mortgage with ICBC paying 8000 per month.")
+    This avoids hitting a real LLM or pgvector backend during integration testing.
+    """
+    service = MemoryService()
+    service._memory = AsyncMock()
 
-        valuable_chat = [
-            {"role": "user", "content": "我的房贷是在工行办的，每个月要还 8000 元。"},
-            {"role": "assistant", "content": "好的，我已经记下了您的房贷信息。"},
-        ]
-        result = await service.add_conversation_memory(user_id, valuable_chat)
-        assert result["success"] is True
-        assert result.get("extracted") is not False
+    # Scenario 1: conversation with long-term value → Mem0 extracts a fact
+    service._memory.add = AsyncMock(
+        return_value={"results": [{"id": "mem_1", "memory": "Has a mortgage with ICBC paying 8000 per month"}]}
+    )
+    valuable_chat = [
+        {"role": "user", "content": "我的房贷是在工行办的，每个月要还 8000 元。"},
+        {"role": "assistant", "content": "好的，我已经记下了您的房贷信息。"},
+    ]
+    result = await service.add_conversation_memory(UUID(int=0), valuable_chat)
+    assert result["success"] is True
+    assert result["extracted"] is True
+    assert result["fact_count"] == 1
+    # Verify infer=True is passed (Mem0 native extraction, not the removed custom pipeline)
+    assert service._memory.add.call_args[1].get("infer") is True
 
-        # 场景 2: 纯临时指令（噪音）
-        mock_call.return_value = AIMessage(content="NONE")
-        result_noise = await service.add_conversation_memory(user_id, [{"role": "user", "content": "查查余额"}])
-        assert result_noise.get("extracted") is False
+    # Scenario 2: pure transient command (noise) → Mem0 extracts nothing
+    service._memory.add = AsyncMock(return_value={"results": []})
+    result_noise = await service.add_conversation_memory(UUID(int=1), [{"role": "user", "content": "查查余额"}])
+    assert result_noise["success"] is True
+    assert result_noise["extracted"] is False
+    assert result_noise["fact_count"] == 0
 
 
 @pytest.mark.asyncio

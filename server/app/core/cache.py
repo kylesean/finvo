@@ -6,7 +6,6 @@ and cache invalidation strategies for the application.
 
 import functools
 import json
-import pickle  # nosec B403
 from collections.abc import Callable
 from typing import Any, cast
 
@@ -110,13 +109,16 @@ class CacheManager:
 
             if deserialize:
                 try:
-                    # Try JSON first (for simple types)
+                    # JSON-only deserialization (pickle removed: RCE risk via untrusted Redis data)
                     return json.loads(value)
-                except (json.JSONDecodeError, TypeError):
-                    # Fall back to pickle for complex objects
-                    # Narrow bytes | str to bytes (latin-1 round-trips raw bytes losslessly)
-                    data = value if isinstance(value, bytes) else value.encode("latin-1")
-                    return pickle.loads(data)  # nosec B301
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.warning(
+                        "cache_deserialize_failed",
+                        key=key,
+                        error=str(e),
+                        hint="value is not JSON-serializable; pickle fallback removed for security",
+                    )
+                    return None
 
             return value
 
@@ -147,11 +149,16 @@ class CacheManager:
 
             if serialize:
                 try:
-                    # Try JSON first (for simple types)
+                    # JSON-only serialization (pickle removed: RCE risk)
                     serialized_value: str | bytes = json.dumps(value)
-                except (TypeError, ValueError):
-                    # Fall back to pickle for complex objects
-                    serialized_value = pickle.dumps(value)
+                except (TypeError, ValueError) as e:
+                    logger.warning(
+                        "cache_serialize_failed",
+                        key=key,
+                        error=str(e),
+                        hint="value is not JSON-serializable; pickle fallback removed for security",
+                    )
+                    return False
             else:
                 serialized_value = value
 

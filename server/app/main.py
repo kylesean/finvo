@@ -375,12 +375,24 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 
 
 # Set up CORS middleware
+# Security: never combine `allow_credentials=True` with a wildcard origin.
+# - If origins are restricted to an explicit list → credentials are safe.
+# - If origins contain "*" (e.g. dev default) → credentials must be disabled
+#   (browsers reject the combination anyway, and silently disabling prevents
+#   accidental credential leakage if a wildcard slips into production config).
+_allowed_origins = settings.allowed_origins_list
+_allow_credentials = not (len(_allowed_origins) == 1 and _allowed_origins[0] == "*")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins_list,
-    allow_credentials=True,
+    allow_origins=_allowed_origins,
+    allow_credentials=_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+logger.info(
+    "cors_configured",
+    origins=_allowed_origins,
+    allow_credentials=_allow_credentials,
 )
 
 # Add security headers middleware (XSS protection, clickjacking, etc.)

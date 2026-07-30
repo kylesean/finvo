@@ -240,7 +240,11 @@ async def view_attachment(
 
         # 确定 Content-Disposition
         mime_type = attachment.mime_type or "application/octet-stream"
-        if mime_type.startswith("image/") or mime_type == "application/pdf":
+        if mime_type == "image/svg+xml":
+            # Security: SVG can embed <script> → store-and-reflect XSS when served inline.
+            # Force download; never render SVG inline in the browser.
+            disposition = "attachment"
+        elif mime_type.startswith("image/") or mime_type == "application/pdf":
             disposition = "inline"
         else:
             disposition = "attachment"

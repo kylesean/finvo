@@ -42,7 +42,13 @@ async def test_register_invalid_code(db_session):
     password = "securepassword"
     code = "000000"
 
-    with patch("app.services.code_manager.code_manager.verify_code", new_callable=AsyncMock) as mock_verify:
+    # EMAIL_PROVIDER defaults to "mock", which short-circuits the code check
+    # (see auth_service.py:139-141). Force a non-mock provider so the invalid-code
+    # branch is actually exercised.
+    with (
+        patch("app.services.auth_service.settings.EMAIL_PROVIDER", "smtp"),
+        patch("app.services.code_manager.code_manager.verify_code", new_callable=AsyncMock) as mock_verify,
+    ):
         mock_verify.return_value = False
 
         # Action & Assert

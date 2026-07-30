@@ -232,5 +232,8 @@ async def test_budget_summary_deduplication(db_session):
 
     summary = await service.get_budget_summary(user_uuid)
     assert summary.total_budget is not None
-    assert summary.overall_spent == "0"
-    assert summary.overall_remaining == "5000"
+    # Compare as Decimal: SQLite renders NUMERIC with trailing zeros
+    # (e.g. "5000.00000000") while PostgreSQL renders "5000". Decimal comparison
+    # normalizes the cross-backend precision difference.
+    assert Decimal(summary.overall_spent) == Decimal("0")
+    assert Decimal(summary.overall_remaining) == Decimal("5000")

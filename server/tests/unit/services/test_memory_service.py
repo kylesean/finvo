@@ -1,13 +1,20 @@
 """Tests for MemoryService filters and cleanup functionality."""
 
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
 
 class TestMemoryServiceFilters:
-    """Test cases for memory search filter functionality."""
+    """Test cases for memory search filter functionality.
+
+    NOTE: The legacy `categories` filter parameter was intentionally removed from
+    `search_memories` (see memory_service.py:281-292) because Mem0's infer=True
+    pipeline assigns its own internal categories that may not match the metadata
+    category written at add time. These tests now verify the current API:
+    user-scoped search with no category filtering.
+    """
 
     @pytest.fixture
     def mock_memory(self):
@@ -19,8 +26,8 @@ class TestMemoryServiceFilters:
         return mock
 
     @pytest.mark.asyncio
-    async def test_single_category_filter_format(self, mock_memory):
-        """Verify single category filter uses correct Mem0 format."""
+    async def test_search_passes_user_id_filter(self, mock_memory):
+        """Verify search passes a user_id-scoped filter to Mem0."""
         from app.services.memory.memory_service import MemoryService
 
         # Setup
@@ -32,19 +39,18 @@ class TestMemoryServiceFilters:
         await service.search_memories(
             user_uuid="user-123",
             query="test query",
-            categories=["financial_profile"],
         )
 
-        # Verify filter format
+        # Verify Mem0 search called with user_id filter (no category filtering)
         mock_memory.search.assert_called_once()
         call_kwargs = mock_memory.search.call_args[1]
-
-        # Single category should use simple format: {"category": "value"}
-        assert call_kwargs["filters"] == {"category": "financial_profile"}
+        assert call_kwargs["filters"] == {"user_id": "user-123"}
+        assert call_kwargs["query"] == "test query"
+        assert call_kwargs["threshold"] == 0.0
 
     @pytest.mark.asyncio
-    async def test_multiple_category_filter_format(self, mock_memory):
-        """Verify multiple categories filter uses OR logic."""
+    async def test_search_respects_limit(self, mock_memory):
+        """Verify search passes the limit as top_k to Mem0."""
         from app.services.memory.memory_service import MemoryService
 
         # Setup
@@ -52,29 +58,21 @@ class TestMemoryServiceFilters:
         service._memory = mock_memory
         mock_memory.search.return_value = {"results": []}
 
-        # Execute with multiple categories
+        # Execute with custom limit
         await service.search_memories(
             user_uuid="user-123",
             query="test query",
-            categories=["financial_profile", "preference", "household"],
+            limit=10,
         )
 
-        # Verify filter format uses OR logic
+        # Verify top_k is forwarded
         mock_memory.search.assert_called_once()
         call_kwargs = mock_memory.search.call_args[1]
-
-        expected_filters = {
-            "OR": [
-                {"category": "financial_profile"},
-                {"category": "preference"},
-                {"category": "household"},
-            ]
-        }
-        assert call_kwargs["filters"] == expected_filters
+        assert call_kwargs["top_k"] == 10
 
     @pytest.mark.asyncio
-    async def test_no_category_filter_when_none(self, mock_memory):
-        """Verify no filters applied when categories is None."""
+    async def test_search_no_category_filter_applied(self, mock_memory):
+        """Verify no category-based filtering is applied (intentionally omitted)."""
         from app.services.memory.memory_service import MemoryService
 
         # Setup
@@ -82,42 +80,46 @@ class TestMemoryServiceFilters:
         service._memory = mock_memory
         mock_memory.search.return_value = {"results": []}
 
-        # Execute without categories
+        # Execute
         await service.search_memories(
             user_uuid="user-123",
             query="test query",
-            categories=None,
         )
 
-        # Verify no filters
+        # Verify filters only contain user_id, no category/OR logic
         mock_memory.search.assert_called_once()
         call_kwargs = mock_memory.search.call_args[1]
-        assert call_kwargs["filters"] is None
+        filters = call_kwargs["filters"]
+        assert "category" not in filters
+        assert "OR" not in filters
+        assert filters == {"user_id": "user-123"}
 
     @pytest.mark.asyncio
-    async def test_infer_false_in_add(self, mock_memory):
-        """Verify infer=False is passed to Mem0 add() to skip internal LLM."""
+    async def test_infer_true_in_add(self, mock_memory):
+        """Verify infer=True is passed to Mem0 add() for native fact extraction.
+
+        The legacy custom extract_salient_facts pipeline was removed (see
+        memory_service.py:220-221); Mem0's internal LLM now handles extraction
+        via infer=True, which is the canonical Mem0 usage pattern.
+        """
         from app.services.memory.memory_service import MemoryService
 
         # Setup
         service = MemoryService()
         service._memory = mock_memory
-        mock_memory.add = AsyncMock(return_value={"results": []})
+        mock_memory.add = AsyncMock(return_value={"results": [{"id": "mem_1", "memory": "fact"}]})
 
-        # Mock extract_salient_facts to return some facts
-        with patch.object(service, "extract_salient_facts", new_callable=AsyncMock) as mock_extract:
-            mock_extract.return_value = ["User has a budget goal of 5000 per month"]
+        # Execute
+        await service.add_conversation_memory(
+            user_uuid="user-123",
+            messages=[{"role": "user", "content": "My budget is 5000"}],
+        )
 
-            # Execute
-            await service.add_conversation_memory(
-                user_uuid="user-123",
-                messages=[{"role": "user", "content": "My budget is 5000"}],
-            )
-
-        # Verify infer=False was passed
+        # Verify infer=True was passed (native Mem0 extraction, not the removed
+        # custom extract_salient_facts pipeline)
         mock_memory.add.assert_called_once()
         call_kwargs = mock_memory.add.call_args[1]
-        assert call_kwargs.get("infer") is False
+        assert call_kwargs.get("infer") is True
 
 
 class TestMemoryServiceCleanup:

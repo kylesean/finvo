@@ -7,6 +7,7 @@ configuration value parsing using Pydantic Settings.
 
 from __future__ import annotations
 
+import logging
 import os
 from enum import Enum
 from pathlib import Path
@@ -16,6 +17,9 @@ from urllib.parse import quote_plus
 from dotenv import load_dotenv
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Use stdlib logger here to avoid circular import with app.core.logging (which imports settings)
+_logger = logging.getLogger("config")
 
 
 # Define environment types
@@ -162,38 +166,38 @@ class Settings(BaseSettings):
     LLM_SUPPORTS_VISION: bool | None = None
 
     # --- Per-Provider Credentials ---
-    # OpenAI (GPT-5.6 系列)
-    OPENAI_API_KEY: str = Field("", validation_alias="OPENAI_API_KEY")
-    OPENAI_BASE_URL: str | None = Field(None, validation_alias="OPENAI_BASE_URL")
+    # OpenAI
+    OPENAI_API_KEY: str = Field(default="", validation_alias="OPENAI_API_KEY")
+    OPENAI_BASE_URL: str | None = Field(default=None, validation_alias="OPENAI_BASE_URL")
 
     # DeepSeek
-    DEEPSEEK_API_KEY: str | None = Field(None, validation_alias="DEEPSEEK_API_KEY")
+    DEEPSEEK_API_KEY: str | None = Field(default=None, validation_alias="DEEPSEEK_API_KEY")
     DEEPSEEK_BASE_URL: str | None = Field(
-        None,
+        default=None,
         validation_alias="DEEPSEEK_BASE_URL",
         description="e.g. https://api.deepseek.com/v1",
     )
 
-    # Qwen - 阿里云百炼
-    QWEN_API_KEY: str | None = Field(None, validation_alias="QWEN_API_KEY")
+    # Qwen
+    QWEN_API_KEY: str | None = Field(default=None, validation_alias="QWEN_API_KEY")
     QWEN_BASE_URL: str | None = Field(
-        None,
+        default=None,
         validation_alias="QWEN_BASE_URL",
         description="e.g. https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
     )
 
-    # Doubao - 火山方舟
-    DOUBAO_API_KEY: str | None = Field(None, validation_alias="DOUBAO_API_KEY")
+    # Doubao
+    DOUBAO_API_KEY: str | None = Field(default=None, validation_alias="DOUBAO_API_KEY")
     DOUBAO_BASE_URL: str | None = Field(
-        None,
+        default=None,
         validation_alias="DOUBAO_BASE_URL",
         description="e.g. https://ark.cn-beijing.volces.com/api/v3",
     )
 
-    # Ollama - 本地模型
-    OLLAMA_API_KEY: str = Field("ollama", validation_alias="OLLAMA_API_KEY")
+    # Ollama
+    OLLAMA_API_KEY: str = Field(default="ollama", validation_alias="OLLAMA_API_KEY")
     OLLAMA_BASE_URL: str = Field(
-        "http://localhost:11434/v1",
+        default="http://localhost:11434/v1",
         validation_alias="OLLAMA_BASE_URL",
         description="e.g. http://localhost:11434/v1",
     )
@@ -212,6 +216,8 @@ class Settings(BaseSettings):
     LONG_TERM_MEMORY_OLLAMA_BASE_URL: str | None = None  # For ollama: http://localhost:11434
 
     # JWT Configuration
+    # NOTE: default is an insecure placeholder; production must override via env var
+    # (enforced in model_post_init — see fail-fast check below)
     JWT_SECRET_KEY: str = Field(default="change-this-secret-key-in-production")
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 30
@@ -404,7 +410,7 @@ class Settings(BaseSettings):
             return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
-    def model_post_init(self, __context: dict[str, Any] | None) -> None:
+    def model_post_init(self, _: Any, /) -> None:
         """Apply environment-specific settings after initialization."""
         # Handle aliases for LLM settings if not established by Pydantic
         # This provides a fallback if the user uses legacy naming like OPENAI_API_BASE
@@ -436,6 +442,23 @@ class Settings(BaseSettings):
         # Ensure directories exist
         self.LOG_DIR.mkdir(parents=True, exist_ok=True)
         self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+        # JWT secret fail-fast: production must not use the insecure default placeholder.
+        # Mirrors the ENCRYPTION_KEY guard in app/utils/encryption.py:_initialize().
+        _JWT_INSECURE_DEFAULT = "change-this-secret-key-in-production"
+        if self.ENVIRONMENT in (Environment.PRODUCTION, Environment.STAGING):
+            if self.JWT_SECRET_KEY == _JWT_INSECURE_DEFAULT:
+                raise RuntimeError(
+                    "CRITICAL: JWT_SECRET_KEY must be set to a strong, unique value in "
+                    f"{self.ENVIRONMENT.value}! Generate one using: "
+                    'python -c "import secrets; print(secrets.token_urlsafe(32))"'
+                )
+        else:
+            if self.JWT_SECRET_KEY == _JWT_INSECURE_DEFAULT:
+                _logger.warning(
+                    "JWT_SECRET_KEY is using insecure default. "
+                    "Set a strong value via env var — NEVER use the default in production!"
+                )
 
         # Sanitize proxy environment variables to prevent Pydantic validation errors
         # Change socks:// to socks5:// as "socks" is not a recognized scheme by httpx/pydantic
