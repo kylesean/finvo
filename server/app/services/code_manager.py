@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 
 from app.core.cache import cache_manager
 from app.core.config import settings
-from app.core.exceptions import BusinessError, ErrorCode
+from app.core.exceptions import AuthErrorCode, BusinessError
 from app.core.logging import logger
 
 
@@ -121,7 +121,7 @@ class CodeManager:
         if not await self._check_rate_limit(account):
             raise BusinessError(
                 message="Verification code sent too frequently, please try again later",
-                error_code=ErrorCode.CODE_SEND_TOO_FREQUENTLY,
+                error_code=AuthErrorCode.CODE_SEND_TOO_FREQUENTLY,
             )
 
         # 生成验证码
@@ -132,7 +132,7 @@ class CodeManager:
         if not sender:
             raise BusinessError(
                 message=f"Unsupported verification code type: {code_type}",
-                error_code=ErrorCode.UNSUPPORTED_CODE_TYPE,
+                error_code=AuthErrorCode.UNSUPPORTED_CODE_TYPE,
             )
 
         # 发送验证码
@@ -162,7 +162,7 @@ class CodeManager:
             )
             raise BusinessError(
                 message="Failed to send verification code",
-                error_code=ErrorCode.SEND_CODE_FAILED,
+                error_code=AuthErrorCode.SEND_CODE_FAILED,
             )
 
     async def verify_code(self, account: str, code: str) -> bool:

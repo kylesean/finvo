@@ -1336,7 +1336,8 @@
       "notMember": "User is not a member of this space",
       "ownerCantLeave": "Owner cannot leave directly, please transfer ownership first",
       "invalidCode": "Invalid invitation code",
-      "codeExpired": "Invitation code expired or usage limit reached"
+      "codeExpired": "Invitation code expired or usage limit reached",
+      "transactionAlreadyInSpace": "交易已在此共享空間中"
     },
     "recurring": {
       "invalidRule": "Invalid recurrence rule",
@@ -1347,6 +1348,11 @@
       "tooLarge": "File too large",
       "unsupportedType": "Unsupported file type",
       "tooManyFiles": "Too many files"
+    },
+    "storage": {
+      "configNotFound": "儲存設定不存在或無存取權限",
+      "configInUse": "無法刪除：儲存設定仍被附件使用中",
+      "invalidProviderType": "無效的儲存提供商類型"
     },
     "ai": {
       "contextLimit": "Context limit exceeded",

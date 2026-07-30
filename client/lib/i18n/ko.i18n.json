@@ -1336,7 +1336,8 @@
       "notMember": "User is not a member of this space",
       "ownerCantLeave": "Owner cannot leave directly, please transfer ownership first",
       "invalidCode": "Invalid invitation code",
-      "codeExpired": "Invitation code expired or usage limit reached"
+      "codeExpired": "Invitation code expired or usage limit reached",
+      "transactionAlreadyInSpace": "거래가 이미 이 공간에 있습니다"
     },
     "recurring": {
       "invalidRule": "Invalid recurrence rule",
@@ -1347,6 +1348,11 @@
       "tooLarge": "File too large",
       "unsupportedType": "Unsupported file type",
       "tooManyFiles": "Too many files"
+    },
+    "storage": {
+      "configNotFound": "저장소 설정이 없거나 접근 권한이 없습니다",
+      "configInUse": "삭제할 수 없습니다: 저장소 설정이 첨부파일에서 사용 중입니다",
+      "invalidProviderType": "잘못된 저장소 제공자 유형"
     },
     "ai": {
       "contextLimit": "Context limit exceeded",

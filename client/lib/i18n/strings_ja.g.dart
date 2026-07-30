@@ -970,6 +970,8 @@ class _Translations$server$ja extends Translations$server$zh {
 	@override String get connectionFailed => 'Connection Failed';
 	@override String get continueToLogin => 'Continue to Login';
 	@override String get saveAndReturn => 'Save and Return';
+	@override String get saveAndReLogin => '保存して再ログイン';
+	@override String get serverUrlSavedRedirectLogin => 'サーバー設定が更新されました。再度ログインしてください';
 	@override String get serverSettings => 'Server Settings';
 	@override String get currentServer => 'Current Server';
 	@override String get version => 'Version';
@@ -992,6 +994,7 @@ class _Translations$errorMapping$ja extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$space$ja space = _Translations$errorMapping$space$ja._(_root);
 	@override late final _Translations$errorMapping$recurring$ja recurring = _Translations$errorMapping$recurring$ja._(_root);
 	@override late final _Translations$errorMapping$upload$ja upload = _Translations$errorMapping$upload$ja._(_root);
+	@override late final _Translations$errorMapping$storage$ja storage = _Translations$errorMapping$storage$ja._(_root);
 	@override late final _Translations$errorMapping$ai$ja ai = _Translations$errorMapping$ai$ja._(_root);
 }
 
@@ -1680,6 +1683,7 @@ class _Translations$errorMapping$space$ja extends Translations$errorMapping$spac
 	@override String get ownerCantLeave => 'Owner cannot leave directly, please transfer ownership first';
 	@override String get invalidCode => 'Invalid invitation code';
 	@override String get codeExpired => 'Invitation code expired or usage limit reached';
+	@override String get transactionAlreadyInSpace => '取引は既にこのスペースにあります';
 }
 
 // Path: errorMapping.recurring
@@ -1704,6 +1708,18 @@ class _Translations$errorMapping$upload$ja extends Translations$errorMapping$upl
 	@override String get tooLarge => 'File too large';
 	@override String get unsupportedType => 'Unsupported file type';
 	@override String get tooManyFiles => 'Too many files';
+}
+
+// Path: errorMapping.storage
+class _Translations$errorMapping$storage$ja extends Translations$errorMapping$storage$zh {
+	_Translations$errorMapping$storage$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get configNotFound => 'ストレージ設定が見つからないかアクセス権限がありません';
+	@override String get configInUse => '削除できません：ストレージ設定は添付ファイルで使用中です';
+	@override String get invalidProviderType => '無効なストレージプロバイダータイプ';
 }
 
 // Path: errorMapping.ai
@@ -3407,6 +3423,8 @@ extension on TranslationsJa {
 			'server.connectionFailed' => 'Connection Failed',
 			'server.continueToLogin' => 'Continue to Login',
 			'server.saveAndReturn' => 'Save and Return',
+			'server.saveAndReLogin' => '保存して再ログイン',
+			'server.serverUrlSavedRedirectLogin' => 'サーバー設定が更新されました。再度ログインしてください',
 			'server.serverSettings' => 'Server Settings',
 			'server.currentServer' => 'Current Server',
 			'server.version' => 'Version',
@@ -3458,12 +3476,16 @@ extension on TranslationsJa {
 			'errorMapping.space.ownerCantLeave' => 'Owner cannot leave directly, please transfer ownership first',
 			'errorMapping.space.invalidCode' => 'Invalid invitation code',
 			'errorMapping.space.codeExpired' => 'Invitation code expired or usage limit reached',
+			'errorMapping.space.transactionAlreadyInSpace' => '取引は既にこのスペースにあります',
 			'errorMapping.recurring.invalidRule' => 'Invalid recurrence rule',
 			'errorMapping.recurring.ruleNotFound' => 'Recurrence rule not found',
 			'errorMapping.upload.noFile' => 'No file uploaded',
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
 			'errorMapping.upload.tooManyFiles' => 'Too many files',
+			'errorMapping.storage.configNotFound' => 'ストレージ設定が見つからないかアクセス権限がありません',
+			'errorMapping.storage.configInUse' => '削除できません：ストレージ設定は添付ファイルで使用中です',
+			'errorMapping.storage.invalidProviderType' => '無効なストレージプロバイダータイプ',
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',

@@ -116,97 +116,28 @@ class AIErrorCode(_AutoName):
     NO_USER_MESSAGE = auto()
 
 
+class StorageErrorCode(_AutoName):
+    """Storage configuration error codes."""
+
+    INVALID_PROVIDER_TYPE = auto()
+    CONFIG_NOT_FOUND = auto()
+    CONFIG_IN_USE = auto()
+
+
 # ============================================================================
-# Backward Compatibility: Unified ErrorCode Type Alias
+# Type Aliases
 # ============================================================================
 
-# Type alias for any error code (for type hints)
-ErrorCodeType = CommonErrorCode | AuthErrorCode | FileErrorCode | TransactionErrorCode | SpaceErrorCode | AIErrorCode
-
-
-# Legacy class for backward compatibility - aggregates all codes
-class ErrorCode:
-    """Legacy compatibility class that exposes all error codes as attributes.
-
-    DEPRECATED: Use domain-specific enums (AuthErrorCode, FileErrorCode, etc.) instead.
-    """
-
-    # Common
-    SUCCESS = CommonErrorCode.SUCCESS
-    SERVER_ERROR = CommonErrorCode.SERVER_ERROR
-    SYSTEM_INVALID = CommonErrorCode.SYSTEM_INVALID
-    INTERNAL_ERROR = CommonErrorCode.INTERNAL_ERROR
-    VALIDATION_ERROR = CommonErrorCode.VALIDATION_ERROR
-    NOT_FOUND = CommonErrorCode.NOT_FOUND
-    PERMISSION_DENIED = CommonErrorCode.PERMISSION_DENIED
-
-    # Auth
-    AUTHENTICATE_FAILED = AuthErrorCode.AUTHENTICATE_FAILED
-    AUTH_FAILED = AuthErrorCode.AUTH_FAILED
-    EMAIL_WRONG = AuthErrorCode.EMAIL_WRONG
-    PHONE_NUMBER_WRONG = AuthErrorCode.PHONE_NUMBER_WRONG
-    PHONE_NUMBER_REGISTERED = AuthErrorCode.PHONE_NUMBER_REGISTERED
-    EMAIL_REGISTERED = AuthErrorCode.EMAIL_REGISTERED
-    SEND_CODE_FAILED = AuthErrorCode.SEND_CODE_FAILED
-    CODE_EXPIRED = AuthErrorCode.CODE_EXPIRED
-    CODE_SEND_TOO_FREQUENTLY = AuthErrorCode.CODE_SEND_TOO_FREQUENTLY
-    UNSUPPORTED_CODE_TYPE = AuthErrorCode.UNSUPPORTED_CODE_TYPE
-    USER_NOT_MATCH_PASSWORD = AuthErrorCode.USER_NOT_MATCH_PASSWORD
-    USER_NOT_EXIST = AuthErrorCode.USER_NOT_EXIST
-    NO_PREFERENCES_PARAMS = AuthErrorCode.NO_PREFERENCES_PARAMS
-    INVALID_CLIENT_TIMEZONE = AuthErrorCode.INVALID_CLIENT_TIMEZONE
-
-    # File
-    NO_FILE_UPLOADED = FileErrorCode.NO_FILE_UPLOADED
-    INVALID_FILE_UPLOADED = FileErrorCode.INVALID_FILE_UPLOADED
-    FILE_TOO_LARGE = FileErrorCode.FILE_TOO_LARGE
-    INVALID_FILE_TYPE = FileErrorCode.INVALID_FILE_TYPE
-    INVALID_MIME_TYPE = FileErrorCode.INVALID_MIME_TYPE
-    INVALID_IMAGE_CONTENT = FileErrorCode.INVALID_IMAGE_CONTENT
-    IMAGE_TOO_WIDE = FileErrorCode.IMAGE_TOO_WIDE
-    IMAGE_TOO_HIGH = FileErrorCode.IMAGE_TOO_HIGH
-    TOO_MANY_FILES = FileErrorCode.TOO_MANY_FILES
-    TOTAL_SIZE_TOO_LARGE = FileErrorCode.TOTAL_SIZE_TOO_LARGE
-    FILE_READ_ERROR = FileErrorCode.FILE_READ_ERROR
-    FILESYSTEM_ERROR = FileErrorCode.FILESYSTEM_ERROR
-    UPLOAD_VERIFICATION_FAILED = FileErrorCode.UPLOAD_VERIFICATION_FAILED
-    UPLOAD_ALL_FAILED = FileErrorCode.UPLOAD_ALL_FAILED
-    INVALID_IMAGE_URLS = FileErrorCode.INVALID_IMAGE_URLS
-    FILE_NOT_FOUND = FileErrorCode.FILE_NOT_FOUND
-    IMAGE_COMPRESSION_FAILED = FileErrorCode.IMAGE_COMPRESSION_FAILED
-
-    # Transaction
-    TRANSACTION_COMMENT_NULL = TransactionErrorCode.TRANSACTION_COMMENT_NULL
-    INVALID_PARENT_COMMENT_ID = TransactionErrorCode.INVALID_PARENT_COMMENT_ID
-    STORE_COMMENT_FAILED = TransactionErrorCode.STORE_COMMENT_FAILED
-    DELETE_COMMENT_FAILED = TransactionErrorCode.DELETE_COMMENT_FAILED
-    TRANSACTION_NOT_EXISTS = TransactionErrorCode.TRANSACTION_NOT_EXISTS
-    INVALID_RECURRENCE_RULE = TransactionErrorCode.INVALID_RECURRENCE_RULE
-    RECURRENCE_RULE_NOT_FOUND = TransactionErrorCode.RECURRENCE_RULE_NOT_FOUND
-
-    # Space
-    SHARED_SPACE_NOT_EXISTS_OR_NO_ACCESS = SpaceErrorCode.SHARED_SPACE_NOT_EXISTS_OR_NO_ACCESS
-    NO_PERMISSION_TO_INVITE_MEMBERS = SpaceErrorCode.NO_PERMISSION_TO_INVITE_MEMBERS
-    CANNOT_INVITE_YOURSELF = SpaceErrorCode.CANNOT_INVITE_YOURSELF
-    INVITATION_SENT = SpaceErrorCode.INVITATION_SENT
-    ALREADY_MEMBER_OR_HAS_BEEN_INVITED = SpaceErrorCode.ALREADY_MEMBER_OR_HAS_BEEN_INVITED
-    INVALID_ACTION = SpaceErrorCode.INVALID_ACTION
-    INVITATION_NOT_EXISTS = SpaceErrorCode.INVITATION_NOT_EXISTS
-    ONLY_OWNER_CAN_DO = SpaceErrorCode.ONLY_OWNER_CAN_DO
-    OWNER_CANNOT_BE_REMOVED = SpaceErrorCode.OWNER_CANNOT_BE_REMOVED
-    MEMBER_NOT_EXIST = SpaceErrorCode.MEMBER_NOT_EXIST
-    NOT_MEMBER_IN_THIS_SPACE = SpaceErrorCode.NOT_MEMBER_IN_THIS_SPACE
-    OWNER_CANNOT_LEAVE_DIRECTLY = SpaceErrorCode.OWNER_CANNOT_LEAVE_DIRECTLY
-    INVALID_INVITATION_CODE = SpaceErrorCode.INVALID_INVITATION_CODE
-    INVITATION_CODE_EXPIRED_OR_LIMITED = SpaceErrorCode.INVITATION_CODE_EXPIRED_OR_LIMITED
-    TRANSACTION_ALREADY_IN_SPACE = SpaceErrorCode.TRANSACTION_ALREADY_IN_SPACE
-
-    # AI
-    AI_CONTEXT_LIMIT_EXCEEDED = AIErrorCode.AI_CONTEXT_LIMIT_EXCEEDED
-    CONVERSATION_ID_INVALID = AIErrorCode.CONVERSATION_ID_INVALID
-    CONVERSATION_ID_NOT_OWNER = AIErrorCode.CONVERSATION_ID_NOT_OWNER
-    TOKENS_LIMITED = AIErrorCode.TOKENS_LIMITED
-    NO_USER_MESSAGE = AIErrorCode.NO_USER_MESSAGE
+# Union of all domain error code enums (for type hints on exception constructors)
+ErrorCodeType = (
+    CommonErrorCode
+    | AuthErrorCode
+    | FileErrorCode
+    | TransactionErrorCode
+    | SpaceErrorCode
+    | AIErrorCode
+    | StorageErrorCode
+)
 
 
 # ============================================================================
@@ -348,10 +279,3 @@ class DatabaseError(AppException):
         details: dict[str, Any] | None = None,
     ):
         super().__init__(message, status_code=500, error_code=error_code, details=details)
-
-
-# ============================================================================
-# Backward Compatibility Alias
-# ============================================================================
-
-BusinessException = BusinessError

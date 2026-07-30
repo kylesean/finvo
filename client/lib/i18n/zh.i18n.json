@@ -1341,7 +1341,8 @@
       "notMember": "该用户不是此空间的成员",
       "ownerCantLeave": "拥有者不能直接退出，请先转让所有权",
       "invalidCode": "无效的邀请码",
-      "codeExpired": "邀请码已过期或达到上限"
+      "codeExpired": "邀请码已过期或达到上限",
+      "transactionAlreadyInSpace": "交易已在此共享空间中"
     },
     "recurring": {
       "invalidRule": "无效的重复规则",
@@ -1352,6 +1353,11 @@
       "tooLarge": "文件过大",
       "unsupportedType": "不支持的文件类型",
       "tooManyFiles": "文件数量过多"
+    },
+    "storage": {
+      "configNotFound": "存储配置不存在或无权访问",
+      "configInUse": "无法删除：存储配置仍被附件使用",
+      "invalidProviderType": "无效的存储提供商类型"
     },
     "ai": {
       "contextLimit": "上下文长度超出限制",

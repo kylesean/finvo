@@ -970,6 +970,8 @@ class _Translations$server$zh_Hant extends Translations$server$zh {
 	@override String get connectionFailed => 'Connection Failed';
 	@override String get continueToLogin => 'Continue to Login';
 	@override String get saveAndReturn => 'Save and Return';
+	@override String get saveAndReLogin => '儲存並重新登入';
+	@override String get serverUrlSavedRedirectLogin => '伺服器設定已更新，請重新登入';
 	@override String get serverSettings => 'Server Settings';
 	@override String get currentServer => 'Current Server';
 	@override String get version => 'Version';
@@ -992,6 +994,7 @@ class _Translations$errorMapping$zh_Hant extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$space$zh_Hant space = _Translations$errorMapping$space$zh_Hant._(_root);
 	@override late final _Translations$errorMapping$recurring$zh_Hant recurring = _Translations$errorMapping$recurring$zh_Hant._(_root);
 	@override late final _Translations$errorMapping$upload$zh_Hant upload = _Translations$errorMapping$upload$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$storage$zh_Hant storage = _Translations$errorMapping$storage$zh_Hant._(_root);
 	@override late final _Translations$errorMapping$ai$zh_Hant ai = _Translations$errorMapping$ai$zh_Hant._(_root);
 }
 
@@ -1680,6 +1683,7 @@ class _Translations$errorMapping$space$zh_Hant extends Translations$errorMapping
 	@override String get ownerCantLeave => 'Owner cannot leave directly, please transfer ownership first';
 	@override String get invalidCode => 'Invalid invitation code';
 	@override String get codeExpired => 'Invitation code expired or usage limit reached';
+	@override String get transactionAlreadyInSpace => '交易已在此共享空間中';
 }
 
 // Path: errorMapping.recurring
@@ -1704,6 +1708,18 @@ class _Translations$errorMapping$upload$zh_Hant extends Translations$errorMappin
 	@override String get tooLarge => 'File too large';
 	@override String get unsupportedType => 'Unsupported file type';
 	@override String get tooManyFiles => 'Too many files';
+}
+
+// Path: errorMapping.storage
+class _Translations$errorMapping$storage$zh_Hant extends Translations$errorMapping$storage$zh {
+	_Translations$errorMapping$storage$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get configNotFound => '儲存設定不存在或無存取權限';
+	@override String get configInUse => '無法刪除：儲存設定仍被附件使用中';
+	@override String get invalidProviderType => '無效的儲存提供商類型';
 }
 
 // Path: errorMapping.ai
@@ -3407,6 +3423,8 @@ extension on TranslationsZhHant {
 			'server.connectionFailed' => 'Connection Failed',
 			'server.continueToLogin' => 'Continue to Login',
 			'server.saveAndReturn' => 'Save and Return',
+			'server.saveAndReLogin' => '儲存並重新登入',
+			'server.serverUrlSavedRedirectLogin' => '伺服器設定已更新，請重新登入',
 			'server.serverSettings' => 'Server Settings',
 			'server.currentServer' => 'Current Server',
 			'server.version' => 'Version',
@@ -3458,12 +3476,16 @@ extension on TranslationsZhHant {
 			'errorMapping.space.ownerCantLeave' => 'Owner cannot leave directly, please transfer ownership first',
 			'errorMapping.space.invalidCode' => 'Invalid invitation code',
 			'errorMapping.space.codeExpired' => 'Invitation code expired or usage limit reached',
+			'errorMapping.space.transactionAlreadyInSpace' => '交易已在此共享空間中',
 			'errorMapping.recurring.invalidRule' => 'Invalid recurrence rule',
 			'errorMapping.recurring.ruleNotFound' => 'Recurrence rule not found',
 			'errorMapping.upload.noFile' => 'No file uploaded',
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
 			'errorMapping.upload.tooManyFiles' => 'Too many files',
+			'errorMapping.storage.configNotFound' => '儲存設定不存在或無存取權限',
+			'errorMapping.storage.configInUse' => '無法刪除：儲存設定仍被附件使用中',
+			'errorMapping.storage.invalidProviderType' => '無效的儲存提供商類型',
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',

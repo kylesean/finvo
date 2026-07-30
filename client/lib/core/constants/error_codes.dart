@@ -47,6 +47,7 @@ class ErrorCodes {
   static const int ownerCannotLeaveDirectly = 3111;
   static const int invalidInvitationCode = 3112;
   static const int invitationCodeExpiredOrLimited = 3113;
+  static const int transactionAlreadyInSpace = 3114;
 
   // Recurring transaction errors (3200-3201)
   static const int invalidRecurrenceRule = 3200;
@@ -70,6 +71,11 @@ class ErrorCodes {
   static const int invalidImageUrls = 4015;
   static const int fileNotFound = 4016;
   static const int imageCompressionFailed = 4017;
+
+  // Storage config errors (4500-4502)
+  static const int invalidProviderType = 4500;
+  static const int configNotFound = 4501;
+  static const int configInUse = 4502;
 
   // AI/LLM errors (9000-9004)
   static const int aiContextLimitExceeded = 9000;

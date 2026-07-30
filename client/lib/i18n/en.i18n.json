@@ -1340,7 +1340,8 @@
       "notMember": "User is not a member of this space",
       "ownerCantLeave": "Owner cannot leave directly, please transfer ownership first",
       "invalidCode": "Invalid invitation code",
-      "codeExpired": "Invitation code expired or usage limit reached"
+      "codeExpired": "Invitation code expired or usage limit reached",
+      "transactionAlreadyInSpace": "Transaction already in this space"
     },
     "recurring": {
       "invalidRule": "Invalid recurrence rule",
@@ -1351,6 +1352,11 @@
       "tooLarge": "File too large",
       "unsupportedType": "Unsupported file type",
       "tooManyFiles": "Too many files"
+    },
+    "storage": {
+      "configNotFound": "Storage config not found or access denied",
+      "configInUse": "Cannot delete: storage config is still in use by attachments",
+      "invalidProviderType": "Invalid storage provider type"
     },
     "ai": {
       "contextLimit": "Context limit exceeded",

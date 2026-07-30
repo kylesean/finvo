@@ -99,6 +99,8 @@ class ErrorTranslator {
         return e.space.invalidCode;
       case ErrorCodes.invitationCodeExpiredOrLimited:
         return e.space.codeExpired;
+      case ErrorCodes.transactionAlreadyInSpace:
+        return e.space.transactionAlreadyInSpace;
 
       // Recurring (3200-3201)
       case ErrorCodes.invalidRecurrenceRule:
@@ -115,6 +117,14 @@ class ErrorTranslator {
         return e.upload.unsupportedType;
       case ErrorCodes.tooManyFiles:
         return e.upload.tooManyFiles;
+
+      // Storage config (4500-4502)
+      case ErrorCodes.invalidProviderType:
+        return e.storage.invalidProviderType;
+      case ErrorCodes.configNotFound:
+        return e.storage.configNotFound;
+      case ErrorCodes.configInUse:
+        return e.storage.configInUse;
 
       // AI/LLM (9000-9004)
       case ErrorCodes.aiContextLimitExceeded:

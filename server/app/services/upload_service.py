@@ -27,7 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
 from app.core.config import settings
-from app.core.exceptions import BusinessException
+from app.core.exceptions import BusinessError
 from app.core.logging import logger
 from app.models.attachment import Attachment
 from app.models.shared_space import SpaceMember
@@ -156,7 +156,7 @@ class UploadService:
                     compress=compress,
                 )
                 processed.append(file_info)
-            except BusinessException as e:
+            except BusinessError as e:
                 failed.append(
                     {
                         "filename": file.filename,
@@ -394,7 +394,7 @@ class UploadService:
         attachment = result.scalar_one_or_none()
 
         if not attachment:
-            raise BusinessException(
+            raise BusinessError(
                 message="Attachment not found or access denied",
                 status_code=404,
                 error_code="FILE_NOT_FOUND",
@@ -421,7 +421,7 @@ class UploadService:
             )
             shared_space_res = await self.db.execute(shared_space_stmt)
             if not shared_space_res.first():
-                raise BusinessException(
+                raise BusinessError(
                     message="Attachment not found or access denied",
                     status_code=404,
                     error_code="FILE_NOT_FOUND",
@@ -431,7 +431,7 @@ class UploadService:
         file_path = (self.UPLOAD_DIR / attachment.object_key).resolve()
 
         if not file_path.exists():
-            raise BusinessException(
+            raise BusinessError(
                 message="File not found",
                 status_code=404,
                 error_code="FILE_NOT_FOUND",
@@ -457,7 +457,7 @@ class UploadService:
     async def _validate_and_read(self, file: UploadFile) -> bytes:
         """校验并读取文件。"""
         if not file.filename:
-            raise BusinessException(
+            raise BusinessError(
                 message="Filename must not be empty",
                 status_code=400,
                 error_code="INVALID_FILENAME",
@@ -465,7 +465,7 @@ class UploadService:
 
         extension = self._get_extension(file.filename)
         if extension.lower() not in ALLOWED_EXTENSIONS:
-            raise BusinessException(
+            raise BusinessError(
                 message=f"Unsupported file type: .{extension}",
                 status_code=400,
                 error_code="INVALID_FILE_TYPE",
@@ -475,14 +475,14 @@ class UploadService:
 
         if len(content) > self.MAX_FILE_SIZE:
             size_mb = self.MAX_FILE_SIZE / (1024 * 1024)
-            raise BusinessException(
+            raise BusinessError(
                 message=f"File size exceeds limit ({size_mb:.1f}MB)",
                 status_code=400,
                 error_code="FILE_TOO_LARGE",
             )
 
         if len(content) == 0:
-            raise BusinessException(
+            raise BusinessError(
                 message="File content is empty",
                 status_code=400,
                 error_code="FILE_EMPTY",

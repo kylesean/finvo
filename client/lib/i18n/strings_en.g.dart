@@ -998,6 +998,7 @@ class _Translations$errorMapping$en extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$space$en space = _Translations$errorMapping$space$en._(_root);
 	@override late final _Translations$errorMapping$recurring$en recurring = _Translations$errorMapping$recurring$en._(_root);
 	@override late final _Translations$errorMapping$upload$en upload = _Translations$errorMapping$upload$en._(_root);
+	@override late final _Translations$errorMapping$storage$en storage = _Translations$errorMapping$storage$en._(_root);
 	@override late final _Translations$errorMapping$ai$en ai = _Translations$errorMapping$ai$en._(_root);
 }
 
@@ -1686,6 +1687,7 @@ class _Translations$errorMapping$space$en extends Translations$errorMapping$spac
 	@override String get ownerCantLeave => 'Owner cannot leave directly, please transfer ownership first';
 	@override String get invalidCode => 'Invalid invitation code';
 	@override String get codeExpired => 'Invitation code expired or usage limit reached';
+	@override String get transactionAlreadyInSpace => 'Transaction already in this space';
 }
 
 // Path: errorMapping.recurring
@@ -1710,6 +1712,18 @@ class _Translations$errorMapping$upload$en extends Translations$errorMapping$upl
 	@override String get tooLarge => 'File too large';
 	@override String get unsupportedType => 'Unsupported file type';
 	@override String get tooManyFiles => 'Too many files';
+}
+
+// Path: errorMapping.storage
+class _Translations$errorMapping$storage$en extends Translations$errorMapping$storage$zh {
+	_Translations$errorMapping$storage$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get configNotFound => 'Storage config not found or access denied';
+	@override String get configInUse => 'Cannot delete: storage config is still in use by attachments';
+	@override String get invalidProviderType => 'Invalid storage provider type';
 }
 
 // Path: errorMapping.ai
@@ -3360,10 +3374,10 @@ extension on TranslationsEn {
 			'sharedSpace.detail.refreshCode' => 'Refresh Code',
 			'sharedSpace.detail.joinOtherSpace' => 'Join Another Space',
 			'sharedSpace.notifications.title' => 'Notifications',
-			'sharedSpace.notifications.empty' => 'No notifications',
-			'sharedSpace.notifications.emptyHint' => 'When you have new invites or activities,\nyou will receive notifications here',
 			_ => null,
 		} ?? switch (path) {
+			'sharedSpace.notifications.empty' => 'No notifications',
+			'sharedSpace.notifications.emptyHint' => 'When you have new invites or activities,\nyou will receive notifications here',
 			'sharedSpace.notifications.incompleteInfo' => 'Incomplete invite info',
 			'sharedSpace.notifications.inviteAccepted' => 'Invite accepted!',
 			'sharedSpace.notifications.inviteRejected' => 'Invite rejected',
@@ -3470,12 +3484,16 @@ extension on TranslationsEn {
 			'errorMapping.space.ownerCantLeave' => 'Owner cannot leave directly, please transfer ownership first',
 			'errorMapping.space.invalidCode' => 'Invalid invitation code',
 			'errorMapping.space.codeExpired' => 'Invitation code expired or usage limit reached',
+			'errorMapping.space.transactionAlreadyInSpace' => 'Transaction already in this space',
 			'errorMapping.recurring.invalidRule' => 'Invalid recurrence rule',
 			'errorMapping.recurring.ruleNotFound' => 'Recurrence rule not found',
 			'errorMapping.upload.noFile' => 'No file uploaded',
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
 			'errorMapping.upload.tooManyFiles' => 'Too many files',
+			'errorMapping.storage.configNotFound' => 'Storage config not found or access denied',
+			'errorMapping.storage.configInUse' => 'Cannot delete: storage config is still in use by attachments',
+			'errorMapping.storage.invalidProviderType' => 'Invalid storage provider type',
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',

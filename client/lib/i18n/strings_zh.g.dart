@@ -395,6 +395,9 @@ class Translations$transaction$zh {
 	/// zh: '地点'
 	String get location => '地点';
 
+	/// zh: '记录人'
+	String get recorder => '记录人';
+
 	/// zh: '交易详情'
 	String get transactionDetail => '交易详情';
 
@@ -2173,6 +2176,7 @@ class Translations$errorMapping$zh {
 	late final Translations$errorMapping$space$zh space = Translations$errorMapping$space$zh.internal(_root);
 	late final Translations$errorMapping$recurring$zh recurring = Translations$errorMapping$recurring$zh.internal(_root);
 	late final Translations$errorMapping$upload$zh upload = Translations$errorMapping$upload$zh.internal(_root);
+	late final Translations$errorMapping$storage$zh storage = Translations$errorMapping$storage$zh.internal(_root);
 	late final Translations$errorMapping$ai$zh ai = Translations$errorMapping$ai$zh.internal(_root);
 }
 
@@ -3543,6 +3547,9 @@ class Translations$errorMapping$space$zh {
 
 	/// zh: '邀请码已过期或达到上限'
 	String get codeExpired => '邀请码已过期或达到上限';
+
+	/// zh: '交易已在此共享空间中'
+	String get transactionAlreadyInSpace => '交易已在此共享空间中';
 }
 
 // Path: errorMapping.recurring
@@ -3579,6 +3586,24 @@ class Translations$errorMapping$upload$zh {
 
 	/// zh: '文件数量过多'
 	String get tooManyFiles => '文件数量过多';
+}
+
+// Path: errorMapping.storage
+class Translations$errorMapping$storage$zh {
+	Translations$errorMapping$storage$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '存储配置不存在或无权访问'
+	String get configNotFound => '存储配置不存在或无权访问';
+
+	/// zh: '无法删除：存储配置仍被附件使用'
+	String get configInUse => '无法删除：存储配置仍被附件使用';
+
+	/// zh: '无效的存储提供商类型'
+	String get invalidProviderType => '无效的存储提供商类型';
 }
 
 // Path: errorMapping.ai
@@ -4791,6 +4816,7 @@ extension on Translations {
 			'transaction.account' => '账户',
 			'transaction.time' => '时间',
 			'transaction.location' => '地点',
+			'transaction.recorder' => '记录人',
 			'transaction.transactionDetail' => '交易详情',
 			'transaction.favorite' => '收藏',
 			'transaction.confirmDelete' => '确认删除',
@@ -5196,9 +5222,9 @@ extension on Translations {
 			'chat.tools.forecastBalance' => '正在预测未来余额...',
 			'chat.tools.suggestBudget' => '正在推荐预算...',
 			'chat.tools.listSpaces' => '正在获取共享空间...',
-			'chat.tools.querySpaceSummary' => '正在查询空间摘要...',
 			_ => null,
 		} ?? switch (path) {
+			'chat.tools.querySpaceSummary' => '正在查询空间摘要...',
 			'chat.tools.prepareTransfer' => '正在准备转账...',
 			'chat.tools.unknown' => '正在处理请求...',
 			'chat.tools.done.readFile' => '已查看文件',
@@ -5710,11 +5736,11 @@ extension on Translations {
 			'sharedSpace.detail.noTransactionsHint' => '空间内的交易将显示在这里',
 			'sharedSpace.detail.refreshCode' => '刷新生成新码',
 			'sharedSpace.detail.joinOtherSpace' => '加入其他空间',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暂无通知',
 			'sharedSpace.notifications.emptyHint' => '当你收到新的邀请或动态时，\n通知将显示在这里',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.notifications.incompleteInfo' => '邀请信息不完整',
 			'sharedSpace.notifications.inviteAccepted' => '已接受邀请！',
 			'sharedSpace.notifications.inviteRejected' => '已拒绝邀请',
@@ -5821,12 +5847,16 @@ extension on Translations {
 			'errorMapping.space.ownerCantLeave' => '拥有者不能直接退出，请先转让所有权',
 			'errorMapping.space.invalidCode' => '无效的邀请码',
 			'errorMapping.space.codeExpired' => '邀请码已过期或达到上限',
+			'errorMapping.space.transactionAlreadyInSpace' => '交易已在此共享空间中',
 			'errorMapping.recurring.invalidRule' => '无效的重复规则',
 			'errorMapping.recurring.ruleNotFound' => '未找到重复规则',
 			'errorMapping.upload.noFile' => '未上传文件',
 			'errorMapping.upload.tooLarge' => '文件过大',
 			'errorMapping.upload.unsupportedType' => '不支持的文件类型',
 			'errorMapping.upload.tooManyFiles' => '文件数量过多',
+			'errorMapping.storage.configNotFound' => '存储配置不存在或无权访问',
+			'errorMapping.storage.configInUse' => '无法删除：存储配置仍被附件使用',
+			'errorMapping.storage.invalidProviderType' => '无效的存储提供商类型',
 			'errorMapping.ai.contextLimit' => '上下文长度超出限制',
 			'errorMapping.ai.tokenLimit' => 'Token配额不足',
 			'errorMapping.ai.emptyMessage' => '用户消息为空',

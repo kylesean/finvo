@@ -19,6 +19,7 @@ from sqlmodel import select
 from uuid_utils import uuid7
 
 from app.core.config import settings
+from app.core.exceptions import AuthenticationError, AuthErrorCode, BusinessError
 from app.core.logging import logger
 from app.models.base import utc_now
 from app.models.user import User
@@ -62,15 +63,14 @@ class AuthService:
             BusinessError: If account already exists
         """
         from app.core.background_tasks import background_task_manager
-        from app.core.exceptions import BusinessError, ErrorCode
         from app.services.code_manager import code_manager
 
         if await self.is_account_exists(account_type, account):
             if account_type == "email":
-                raise BusinessError(message="Email already registered", error_code=ErrorCode.EMAIL_REGISTERED)
+                raise BusinessError(message="Email already registered", error_code=AuthErrorCode.EMAIL_REGISTERED)
             else:
                 raise BusinessError(
-                    message="Mobile number already registered", error_code=ErrorCode.PHONE_NUMBER_REGISTERED
+                    message="Mobile number already registered", error_code=AuthErrorCode.PHONE_NUMBER_REGISTERED
                 )
 
         await background_task_manager.run_in_background(code_manager.send_code, account_type, account)
@@ -124,21 +124,19 @@ class AuthService:
         Raises:
             ValueError: If verification code is invalid or account already exists
         """
-        from app.core.exceptions import BusinessError, ErrorCode
-
         # Check if account already exists first (before verifying code)
         if await self.is_account_exists(account_type, account):
             if account_type == "email":
-                raise BusinessError(message="Email already registered", error_code=ErrorCode.EMAIL_REGISTERED)
+                raise BusinessError(message="Email already registered", error_code=AuthErrorCode.EMAIL_REGISTERED)
             else:
                 raise BusinessError(
-                    message="Mobile number already registered", error_code=ErrorCode.PHONE_NUMBER_REGISTERED
+                    message="Mobile number already registered", error_code=AuthErrorCode.PHONE_NUMBER_REGISTERED
                 )
 
         # Verify the code (skip when provider is mock — no real code is sent)
         provider = settings.EMAIL_PROVIDER if account_type == "email" else settings.SMS_PROVIDER
         if provider != "mock" and not await self.verify_code(account, code):
-            raise BusinessError("Verification code is invalid or expired", error_code=ErrorCode.CODE_EXPIRED)
+            raise BusinessError("Verification code is invalid or expired", error_code=AuthErrorCode.CODE_EXPIRED)
 
         # Generate unique UUID
         user_uuid = self._generate_uuid()
@@ -231,8 +229,6 @@ class AuthService:
         Raises:
             ValueError: If credentials are invalid
         """
-        from app.core.exceptions import AuthenticationError, ErrorCode
-
         # Find user by account
         query = select(User)
         if account_type == "email":
@@ -244,11 +240,11 @@ class AuthService:
         user = result.scalar_one_or_none()
 
         if not user:
-            raise AuthenticationError(message="User does not exist", error_code=ErrorCode.USER_NOT_EXIST)
+            raise AuthenticationError(message="User does not exist", error_code=AuthErrorCode.USER_NOT_EXIST)
 
         # Verify password
         if not user.verify_password(password):
-            raise AuthenticationError(message="Invalid password", error_code=ErrorCode.USER_NOT_MATCH_PASSWORD)
+            raise AuthenticationError(message="Invalid password", error_code=AuthErrorCode.USER_NOT_MATCH_PASSWORD)
 
         # Update user login information
         needs_update = False

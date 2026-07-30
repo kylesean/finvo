@@ -14,7 +14,14 @@ from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.exceptions import AuthorizationError, BusinessError, ErrorCode, NotFoundError
+from app.core.exceptions import (
+    AuthorizationError,
+    BusinessError,
+    CommonErrorCode,
+    NotFoundError,
+    SpaceErrorCode,
+    TransactionErrorCode,
+)
 from app.models.shared_space import (
     SharedSpace,
     SpaceMember,
@@ -335,7 +342,7 @@ class SharedSpaceService:
 
         # Check expiration
         if space.invite_code_expires_at and space.invite_code_expires_at < datetime.now(UTC):
-            raise BusinessError("invitation code expired", error_code=ErrorCode.VALIDATION_ERROR)
+            raise BusinessError("invitation code expired", error_code=CommonErrorCode.VALIDATION_ERROR)
 
         # Check if already a member
         member_query = select(SpaceMember).where(
@@ -347,7 +354,7 @@ class SharedSpaceService:
         if existing_member:
             if existing_member.status == "ACCEPTED":
                 raise BusinessError(
-                    "you are already a member", error_code=ErrorCode.ALREADY_MEMBER_OR_HAS_BEEN_INVITED
+                    "you are already a member", error_code=SpaceErrorCode.ALREADY_MEMBER_OR_HAS_BEEN_INVITED
                 )
             else:
                 # Update existing pending membership
@@ -409,7 +416,7 @@ class SharedSpaceService:
         if member.role == "OWNER":
             raise BusinessError(
                 "space owner cannot leave space, please transfer or delete space first",
-                error_code=ErrorCode.PERMISSION_DENIED,
+                error_code=CommonErrorCode.PERMISSION_DENIED,
             )
 
         await self.db.delete(member)
@@ -437,7 +444,7 @@ class SharedSpaceService:
 
         # Cannot remove self via this method
         if user_uuid == target_user_uuid:
-            raise BusinessError("please use leave space function", error_code=ErrorCode.INVALID_ACTION)
+            raise BusinessError("please use leave space function", error_code=SpaceErrorCode.INVALID_ACTION)
 
         # Find target member
         query = select(SpaceMember).where(
@@ -453,7 +460,7 @@ class SharedSpaceService:
             raise NotFoundError("user is not a member of this space")
 
         if member.role == "OWNER":
-            raise BusinessError("cannot remove space owner", error_code=ErrorCode.PERMISSION_DENIED)
+            raise BusinessError("cannot remove space owner", error_code=CommonErrorCode.PERMISSION_DENIED)
 
         await self.db.delete(member)
         await self.db.commit()
@@ -479,16 +486,14 @@ class SharedSpaceService:
             AuthorizationError: Not owner
             BusinessError: Invalid role change
         """
-        from app.core.exceptions import ErrorCode
-
         await self._verify_owner(space_id, user_uuid)
 
         if new_role not in ("ADMIN", "MEMBER"):
-            raise BusinessError("role must be ADMIN or MEMBER", error_code=ErrorCode.INVALID_ACTION)
+            raise BusinessError("role must be ADMIN or MEMBER", error_code=SpaceErrorCode.INVALID_ACTION)
 
         # Cannot change own role
         if user_uuid == target_user_uuid:
-            raise BusinessError("cannot change your own role", error_code=ErrorCode.INVALID_ACTION)
+            raise BusinessError("cannot change your own role", error_code=SpaceErrorCode.INVALID_ACTION)
 
         query = select(SpaceMember).where(
             cast(
@@ -506,7 +511,7 @@ class SharedSpaceService:
             raise NotFoundError("user is not a member of this space")
 
         if member.role == "OWNER":
-            raise BusinessError("cannot change owner role", error_code=ErrorCode.PERMISSION_DENIED)
+            raise BusinessError("cannot change owner role", error_code=CommonErrorCode.PERMISSION_DENIED)
 
         member.role = new_role
         await self.db.commit()
@@ -545,8 +550,6 @@ class SharedSpaceService:
             AuthorizationError: Not a member
             BusinessError: Transaction already in space
         """
-        from app.core.exceptions import ErrorCode
-
         await self._verify_membership(space_id, user_uuid)
 
         # Verify transaction exists and belongs to user
@@ -555,7 +558,7 @@ class SharedSpaceService:
         transaction = tx_result.scalar_one_or_none()
 
         if not transaction:
-            raise NotFoundError("transaction", error_code=ErrorCode.TRANSACTION_NOT_EXISTS)
+            raise NotFoundError("transaction", error_code=TransactionErrorCode.TRANSACTION_NOT_EXISTS)
 
         if transaction.user_uuid != user_uuid:
             raise AuthorizationError("can only add your own transactions to shared space")

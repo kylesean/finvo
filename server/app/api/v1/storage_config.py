@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
-from app.core.exceptions import BusinessException
+from app.core.exceptions import BusinessError, StorageErrorCode
 from app.core.responses import success_response
 from app.models.storage_config import ProviderType
 from app.models.user import User
@@ -97,7 +97,7 @@ async def create_storage_config(
             is_readonly=data.is_readonly,
         )
     except ValueError as e:
-        raise BusinessException(message=str(e), status_code=400, error_code="INVALID_PROVIDER_TYPE")
+        raise BusinessError(message=str(e), status_code=400, error_code=StorageErrorCode.INVALID_PROVIDER_TYPE)
 
     return success_response(
         data={
@@ -170,8 +170,10 @@ async def get_storage_config(
     config = await service.get_by_id(config_id, current_user.uuid)
 
     if not config:
-        raise BusinessException(
-            message="Storage config not found or access denied", status_code=404, error_code="CONFIG_NOT_FOUND"
+        raise BusinessError(
+            message="Storage config not found or access denied",
+            status_code=404,
+            error_code=StorageErrorCode.CONFIG_NOT_FOUND,
         )
 
     return success_response(
@@ -217,8 +219,10 @@ async def update_storage_config(
     )
 
     if not config:
-        raise BusinessException(
-            message="Storage config not found or access denied", status_code=404, error_code="CONFIG_NOT_FOUND"
+        raise BusinessError(
+            message="Storage config not found or access denied",
+            status_code=404,
+            error_code=StorageErrorCode.CONFIG_NOT_FOUND,
         )
 
     return success_response(
@@ -260,16 +264,18 @@ async def delete_storage_config(
         deleted = await service.delete(config_id, current_user.uuid)
     except Exception as e:
         if "foreign key" in str(e).lower():
-            raise BusinessException(
+            raise BusinessError(
                 message="Cannot delete: storage config is still in use by attachments",
                 status_code=400,
-                error_code="CONFIG_IN_USE",
+                error_code=StorageErrorCode.CONFIG_IN_USE,
             )
         raise
 
     if not deleted:
-        raise BusinessException(
-            message="Storage config not found or access denied", status_code=404, error_code="CONFIG_NOT_FOUND"
+        raise BusinessError(
+            message="Storage config not found or access denied",
+            status_code=404,
+            error_code=StorageErrorCode.CONFIG_NOT_FOUND,
         )
 
     return success_response(data=None, message="Storage configuration deleted successfully")

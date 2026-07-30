@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
-from app.core.exceptions import BusinessException
+from app.core.exceptions import BusinessError
 from app.core.logging import logger
 from app.core.responses import success_response
 from app.models.user import User
@@ -158,14 +158,14 @@ async def upload_files(
     """
     # 校验文件数量
     if not files:
-        raise BusinessException(
+        raise BusinessError(
             message="Please select at least one file",
             status_code=400,
             error_code="NO_FILES",
         )
 
     if len(files) > 20:
-        raise BusinessException(
+        raise BusinessError(
             message="Maximum 20 files per upload",
             status_code=400,
             error_code="TOO_MANY_FILES",
@@ -182,7 +182,7 @@ async def upload_files(
 
     # 检查是否全部失败
     if not successful and failed:
-        raise BusinessException(
+        raise BusinessError(
             message="All file uploads failed",
             status_code=400,
             error_code="UPLOAD_ALL_FAILED",
@@ -271,7 +271,7 @@ async def view_attachment(
             headers={"Content-Disposition": content_disposition},
         )
 
-    except BusinessException:
+    except BusinessError:
         raise
     except Exception as e:
         logger.error(
@@ -280,7 +280,7 @@ async def view_attachment(
             error=str(e),
             error_type=type(e).__name__,
         )
-        raise BusinessException(
+        raise BusinessError(
             message="File access failed",
             status_code=500,
             error_code="FILE_ACCESS_ERROR",
@@ -326,10 +326,10 @@ async def delete_file(
             message="File deleted successfully",
         )
 
-    except BusinessException:
+    except BusinessError:
         raise
     except Exception:
-        raise BusinessException(
+        raise BusinessError(
             message="File deletion failed",
             status_code=500,
             error_code="FILE_DELETE_ERROR",

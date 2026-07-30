@@ -22,7 +22,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.exceptions import BusinessError, ErrorCode
+from app.core.exceptions import AuthenticationError, AuthErrorCode, BusinessError
 from app.models.user import User
 from app.services.auth_service import AuthService
 from app.utils.auth import create_access_token, verify_token
@@ -225,7 +225,7 @@ class TestAccountEnumeration:
             with pytest.raises(BusinessError) as exc_info:
                 await service.register("email", email, "Password123!", code="123456")
 
-            assert exc_info.value.error_code == ErrorCode.EMAIL_REGISTERED
+            assert exc_info.value.error_code == AuthErrorCode.EMAIL_REGISTERED
 
     @pytest.mark.asyncio
     async def test_login_no_user_leak(self, db_session: AsyncSession) -> None:
@@ -236,14 +236,12 @@ class TestAccountEnumeration:
         they mistyped the email vs the password). The test pins both error
         codes so changes are deliberate.
         """
-        from app.core.exceptions import AuthenticationError
-
         service = AuthService(db_session)
 
         # Nonexistent user → USER_NOT_EXIST.
         with pytest.raises(AuthenticationError) as exc:
             await service.login("email", "nobody@example.com", "whatever", "Asia/Shanghai")
-        assert exc.value.error_code == ErrorCode.USER_NOT_EXIST
+        assert exc.value.error_code == AuthErrorCode.USER_NOT_EXIST
 
         # Create a user, then wrong password → USER_NOT_MATCH_PASSWORD.
         email = f"login_{uuid4().hex[:8]}@example.com"
@@ -255,11 +253,11 @@ class TestAccountEnumeration:
 
         with pytest.raises(AuthenticationError) as exc:
             await service.login("email", email, "WrongPass1!", "Asia/Shanghai")
-        assert exc.value.error_code == ErrorCode.USER_NOT_MATCH_PASSWORD
+        assert exc.value.error_code == AuthErrorCode.USER_NOT_MATCH_PASSWORD
 
         # Distinct codes confirm the current design leaks existence — documented,
         # not enforced, per the self-hosted product decision.
-        assert ErrorCode.USER_NOT_EXIST != ErrorCode.USER_NOT_MATCH_PASSWORD
+        assert AuthErrorCode.USER_NOT_EXIST != AuthErrorCode.USER_NOT_MATCH_PASSWORD
 
     @pytest.mark.skip(
         reason=(
