@@ -8,7 +8,7 @@ from datetime import (
     datetime,
     timedelta,
 )
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 from jose import (
@@ -127,27 +127,6 @@ def refresh_token(old_token: str) -> Token | None:
     return new_token
 
 
-def decode_token_payload(token: str) -> dict[str, Any] | None:
-    """Decode a JWT token and return its payload without verification.
-
-    This is useful for extracting information from expired tokens or for debugging.
-    WARNING: Do not use this for authentication - always use verify_token() instead.
-
-    Args:
-        token: The JWT token to decode.
-
-    Returns:
-        dict | None: The token payload if decodable, None otherwise.
-    """
-    try:
-        # Decode without verification (for inspection only)
-        payload = jwt.decode(
-            token,
-            settings.JWT_SECRET_KEY,
-            algorithms=[settings.JWT_ALGORITHM],
-            options={"verify_signature": False, "verify_exp": False},
-        )
-        return cast(dict[Any, Any] | None, payload)
-    except Exception as e:
-        logger.error("token_decode_failed", error=str(e))
-        return None
+# NOTE: The unsafe `decode_token_payload` (signature verification bypass) was
+# removed — it had zero call sites and invited misuse. Use `verify_token` for
+# all authentication paths; for debugging, decode with jose directly in a REPL.

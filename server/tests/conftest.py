@@ -137,12 +137,6 @@ def setup_test_env(monkeypatch):
     return mock_mem0
 
 
-@pytest.fixture(autouse=True)
-def mock_settings():
-    """Mock settings if needed."""
-    pass
-
-
 @pytest_asyncio.fixture(scope="function")
 async def test_user(db_session: AsyncSession) -> User:
     """Create a test user in the database."""

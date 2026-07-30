@@ -1,8 +1,21 @@
-"""Transaction Query Service - Shared business logic for transaction queries.
+"""Transaction Query Service — full-featured query implementation.
 
-This service provides a unified interface for querying transactions, used by both:
-- FastAPI endpoints (/api/v1/transactions)
-- LangGraph tools (@tool search_transactions)
+This module hosts the canonical ``TransactionQueryService`` used directly by
+API endpoints (``api/v1/transaction.py``), LangGraph tools
+(``transaction_tools.py``), ``service_deps.py`` and the skills layer
+(``analyze_spending.py``). Its API centers on ``search()`` +
+``TransactionQueryParams``.
+
+NOTE: A separate, slimmer ``TransactionQueryService`` exists at
+``app/services/transaction/query_service.py`` exposing
+``get_transaction_feed`` / ``search_transactions``. That one is consumed
+only by the ``TransactionService`` Facade (``transaction_service.py``) and
+is re-exported from ``app/services/transaction/__init__.py``. The two classes
+have **different APIs and responsibilities** (full query vs. facade-internal
+helper) and are intentionally not merged — merging would force a wide rewrite
+of callers for little benefit in a self-hosted app. When you need the full
+query API, import from here; when extending the Facade, use the
+``transaction.query_service`` version.
 
 Best practice: Business logic lives here, not in API routes or tool definitions.
 """

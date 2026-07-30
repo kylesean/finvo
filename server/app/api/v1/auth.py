@@ -13,26 +13,34 @@ import uuid
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import JSONResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPBearer
 from fastapi_pagination import Params
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import SessionRepository, get_session, get_session_context
+from app.core.dependencies import get_current_user
 from app.core.exceptions import AppException
 from app.core.logging import bind_context, logger
 from app.models.session import Session
 from app.models.user import User
 from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, SendCodeRequest, SessionResponse, UserInfo
 from app.services.auth_service import AuthService
-from app.utils.auth import verify_token
 from app.utils.sanitization import sanitize_string
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
+
+
+# `get_current_user` is re-exported from `app.core.dependencies` to keep this
+# module as the historical import site for the 13 API routers that already
+# import it from here. The canonical implementation lives in
+# `app.core.dependencies.get_current_user` (split into `get_current_user_uuid`
+# + `get_current_user`, with `bind_context` and a 500 fallback).
+__all__ = ["get_current_user"]
 
 
 class SessionItem(BaseModel):
@@ -51,53 +59,6 @@ class SessionItem(BaseModel):
     token: str = Field(..., description="The authentication token for the session")
     created_at: str = Field(..., description="When the session was created")
     updated_at: str = Field(..., description="When the session was last updated")
-
-
-async def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated[AsyncSession, Depends(get_session)],
-) -> User:
-    """Get the current user from JWT token.
-
-    Args:
-        credentials: HTTP authorization credentials
-        db: Database session
-
-    Returns:
-        User: The authenticated user
-
-    Raises:
-        HTTPException: If token is invalid or user not found
-    """
-    try:
-        token = credentials.credentials
-        user_uuid = verify_token(token)
-
-        if user_uuid is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        # Get user from database by UUID
-        result = await db.execute(select(User).where(User.uuid == user_uuid))
-        user = result.scalar_one_or_none()
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        return user
-
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Invalid token format",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
 
 async def get_authorized_session(
@@ -255,20 +216,9 @@ async def register(
         return success_response(data=auth_response.model_dump(), message="Registration successful")
 
     except AppException:
+        # BusinessError / AuthenticationError carry structured error_code + message;
+        # let the global app_exception_handler (main.py) format the unified response.
         raise
-    except ValueError as e:
-        logger.error("registration_failed", error=str(e), account_type=data.type)
-        # Parse error code from ValueError message (format: "ERROR_CODE: message")
-        error_msg = str(e)
-        if ":" in error_msg:
-            error_code_str, message = error_msg.split(":", 1)
-            error_code_str = error_code_str.strip()
-            message = message.strip()
-        else:
-            error_code_str = "VALIDATION_ERROR"
-            message = error_msg
-
-        return error_response(code=get_error_code_int(error_code_str), message=message, http_status=400)
     except Exception as e:
         logger.exception("registration_unexpected_error", error=str(e))
         return error_response(
@@ -336,28 +286,10 @@ async def login(
         return success_response(data=auth_response.model_dump(), message="Login successful")
 
     except AppException:
+        # AuthenticationError (subclass) carries structured error_code + message;
+        # let the global app_exception_handler (main.py) format the 401 response.
         raise
-    except ValueError as e:
-        logger.error("login_failed", error=str(e), account_type=data.type)
-        # Parse error code from ValueError message (format: "ERROR_CODE: message")
-        error_msg = str(e)
-        if ":" in error_msg:
-            error_code_str, message = error_msg.split(":", 1)
-            error_code_str = error_code_str.strip()
-            message = message.strip()
-        else:
-            error_code_str = "AUTH_FAILED"
-            message = error_msg
-
-        return error_response(code=get_error_code_int(error_code_str), message=message, http_status=401)
     except Exception as e:
-        # Check if it's an AuthenticationError (custom exception with error_code)
-        from app.core.exceptions import AuthenticationError
-
-        if isinstance(e, AuthenticationError):
-            logger.warning("login_auth_error", error=e.message, error_code=e.error_code, account_type=data.type)
-            return error_response(code=get_error_code_int(e.error_code), message=e.message, http_status=401)
-
         logger.exception("login_unexpected_error", error=str(e))
         return error_response(code=get_error_code_int("INTERNAL_ERROR"), message="Login failed", http_status=500)
 

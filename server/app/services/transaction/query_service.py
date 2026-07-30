@@ -1,4 +1,16 @@
-"""Transaction query service for search and feed operations."""
+"""Transaction query service — Facade-internal query helper.
+
+This slim ``TransactionQueryService`` exposes ``get_transaction_feed`` /
+``search_transactions`` and is consumed **only** by the ``TransactionService``
+Facade (``transaction_service.py``) and re-exported from
+``app/services/transaction/__init__.py``.
+
+A fuller-featured ``TransactionQueryService`` (``search()`` +
+``TransactionQueryParams``) lives at
+``app/services/transaction_query_service.py`` and is used directly by API
+endpoints, LangGraph tools and skills. The two have different APIs and are
+intentionally not merged; see the docstring there for rationale.
+"""
 
 from datetime import datetime
 from typing import Any, cast as type_cast

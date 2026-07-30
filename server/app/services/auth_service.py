@@ -336,12 +336,14 @@ class AuthService:
         # Mock sending based on provider setting
         if account_type == "email":
             if settings.EMAIL_PROVIDER == "mock":
-                logger.info("mock_email_sent", to=account, code=code)
+                # debug-level only: never log the code at info (log hygiene)
+                logger.debug("mock_email_sent", to=account)
                 return True
             # Integration with actual email service (SMTP, SendGrid, etc.) should be implemented for production
         else:
             if settings.SMS_PROVIDER == "mock":
-                logger.info("mock_sms_sent", to=account, code=code)
+                # debug-level only: never log the code at info (log hygiene)
+                logger.debug("mock_sms_sent", to=account)
                 return True
             # Integration with actual SMS service (Twilio, Aliyun, etc.) should be implemented for production
 

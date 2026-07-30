@@ -84,10 +84,12 @@ async def get_current_user_uuid(
         return user_uuid
 
     except ValueError as ve:
+        # A malformed token is an auth failure, not a validation/422 issue —
+        # return 401 so callers treat it uniformly with other auth rejections.
         logger.error("token_validation_failed", error=str(ve), exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Invalid token format",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
