@@ -7,7 +7,7 @@ Handlers are registered at app startup and execute asynchronously.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import and_, select
@@ -56,16 +56,16 @@ async def handle_member_joined(event: MemberJoinedEvent) -> None:
 
     async with db_manager.session_factory() as db:
         # Get joining user's display name
-        user_query = select(User.username).where(cast(Any, User.uuid == event.joined_user_uuid))
+        user_query = select(User.username).where(User.uuid == event.joined_user_uuid)
         user_result = await db.execute(user_query)
         username = user_result.scalar_one_or_none() or "Someone"
 
         # Get other ACCEPTED members
         members_query = select(SpaceMember.user_uuid).where(
             and_(
-                cast(Any, SpaceMember.space_id == event.space_id),
-                cast(Any, SpaceMember.status == "ACCEPTED"),
-                cast(Any, SpaceMember.user_uuid != event.joined_user_uuid),
+                SpaceMember.space_id == event.space_id,
+                SpaceMember.status == "ACCEPTED",
+                SpaceMember.user_uuid != event.joined_user_uuid,
             )
         )
         members_result = await db.execute(members_query)
@@ -114,16 +114,16 @@ async def handle_transaction_added(event: TransactionAddedEvent) -> None:
 
     async with db_manager.session_factory() as db:
         # Get recording user's display name
-        user_query = select(User.username).where(cast(Any, User.uuid == event.added_by_user_uuid))
+        user_query = select(User.username).where(User.uuid == event.added_by_user_uuid)
         user_result = await db.execute(user_query)
         username = user_result.scalar_one_or_none() or "Someone"
 
         # Get other ACCEPTED members
         members_query = select(SpaceMember.user_uuid).where(
             and_(
-                cast(Any, SpaceMember.space_id == event.space_id),
-                cast(Any, SpaceMember.status == "ACCEPTED"),
-                cast(Any, SpaceMember.user_uuid != event.added_by_user_uuid),
+                SpaceMember.space_id == event.space_id,
+                SpaceMember.status == "ACCEPTED",
+                SpaceMember.user_uuid != event.added_by_user_uuid,
             )
         )
         members_result = await db.execute(members_query)

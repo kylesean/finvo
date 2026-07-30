@@ -15,7 +15,7 @@ import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 import aiofiles
@@ -252,8 +252,8 @@ class UploadService:
         target_provider = settings.STORAGE_PROVIDER
 
         stmt = select(StorageConfig).where(
-            cast(Any, StorageConfig.user_uuid == user_uuid),
-            cast(Any, StorageConfig.provider_type == target_provider),
+            StorageConfig.user_uuid == user_uuid,
+            StorageConfig.provider_type == target_provider,
         )
         result = await self.db.execute(stmt)
         config = result.scalar_one_or_none()
@@ -389,7 +389,7 @@ class UploadService:
             attachment_id: 附件 ID
             user_uuid: 用户 UUID
         """
-        stmt = select(Attachment).where(cast(Any, Attachment.id == attachment_id))
+        stmt = select(Attachment).where(Attachment.id == attachment_id)
         result = await self.db.execute(stmt)
         attachment = result.scalar_one_or_none()
 
@@ -406,15 +406,15 @@ class UploadService:
                 select(SpaceMember.space_id)
                 .where(
                     and_(
-                        cast(Any, SpaceMember.user_uuid == user_uuid),
-                        cast(Any, SpaceMember.status == "ACCEPTED"),
+                        SpaceMember.user_uuid == user_uuid,
+                        SpaceMember.status == "ACCEPTED",
                     )
                 )
                 .intersect(
                     select(SpaceMember.space_id).where(
                         and_(
-                            cast(Any, SpaceMember.user_uuid == attachment.user_uuid),
-                            cast(Any, SpaceMember.status == "ACCEPTED"),
+                            SpaceMember.user_uuid == attachment.user_uuid,
+                            SpaceMember.status == "ACCEPTED",
                         )
                     )
                 )
@@ -506,7 +506,7 @@ class UploadService:
     def _compress_image(self, content: bytes, extension: str) -> tuple[bytes, int]:
         """压缩图片（同步方法）。"""
         try:
-            image = Image.open(io.BytesIO(content))
+            image: Image.Image = Image.open(io.BytesIO(content))
             original_width, original_height = image.size
 
             # 调整尺寸
@@ -518,13 +518,13 @@ class UploadService:
                 else:
                     new_height = self.IMAGE_MAX_HEIGHT
                     new_width = int(new_height * ratio)
-                image = cast(Any, image).resize((new_width, new_height), Image.Resampling.LANCZOS)
+                image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
             # RGBA -> RGB
             if image.mode == "RGBA" and extension.lower() in ("jpg", "jpeg"):
                 background = Image.new("RGB", image.size, (255, 255, 255))
                 background.paste(image, mask=image.split()[3])
-                image = cast(Any, background)
+                image = background
 
             # 保存
             buffer = io.BytesIO()

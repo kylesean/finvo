@@ -93,7 +93,7 @@ class UserService:
         Raises:
             NotFoundError: If user is not found
         """
-        result = await self.db.execute(select(User).where(type_cast(Any, User.id == user_id)))
+        result = await self.db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
 
         if not user:
@@ -113,7 +113,7 @@ class UserService:
         Raises:
             NotFoundError: If user is not found
         """
-        result = await self.db.execute(select(User).where(type_cast(Any, User.uuid == user_uuid)))
+        result = await self.db.execute(select(User).where(User.uuid == user_uuid))
         user = result.scalar_one_or_none()
 
         if not user:
@@ -137,7 +137,7 @@ class UserService:
         Raises:
             NotFoundError: If user is not found
         """
-        result = await self.db.execute(select(User).where(type_cast(Any, User.uuid == user_uuid)))
+        result = await self.db.execute(select(User).where(User.uuid == user_uuid))
         user = result.scalar_one_or_none()
 
         if not user:
@@ -198,7 +198,7 @@ class UserService:
         """
         # Delete existing financial accounts
         existing_accounts = await self.db.execute(
-            select(FinancialAccount).where(type_cast(Any, FinancialAccount.user_uuid == user_uuid))
+            select(FinancialAccount).where(FinancialAccount.user_uuid == user_uuid)
         )
         for account in existing_accounts.scalars().all():
             await self.db.delete(account)
@@ -249,9 +249,9 @@ class UserService:
         # note: here we need to consider each account's own currency_code
         result = await self.db.execute(
             select(FinancialAccount)
-            .where(type_cast(Any, FinancialAccount.user_uuid == user_uuid))
-            .where(type_cast(Any, FinancialAccount.status == "ACTIVE"))
-            .where(type_cast(Any, FinancialAccount.include_in_net_worth == True))  # noqa: E712
+            .where(FinancialAccount.user_uuid == user_uuid)
+            .where(FinancialAccount.status == "ACTIVE")
+            .where(FinancialAccount.include_in_net_worth == True)  # noqa: E712
         )
         active_accounts = result.scalars().all()
 
@@ -280,8 +280,8 @@ class UserService:
         """
         result = await self.db.execute(
             select(FinancialAccount)
-            .where(type_cast(Any, FinancialAccount.user_uuid == user_uuid))
-            .order_by(type_cast(Any, FinancialAccount.created_at))
+            .where(FinancialAccount.user_uuid == user_uuid)
+            .order_by(FinancialAccount.created_at)
         )
         accounts = result.scalars().all()
 
@@ -400,8 +400,8 @@ class UserService:
         """
         result = await self.db.execute(
             select(FinancialAccount).where(
-                type_cast(Any, FinancialAccount.id == account_id),
-                type_cast(Any, FinancialAccount.user_uuid == user_uuid),
+                FinancialAccount.id == account_id,
+                FinancialAccount.user_uuid == user_uuid,
             )
         )
         account = result.scalar_one_or_none()
@@ -459,8 +459,8 @@ class UserService:
         """
         result = await self.db.execute(
             select(FinancialAccount).where(
-                type_cast(Any, FinancialAccount.id == account_id),
-                type_cast(Any, FinancialAccount.user_uuid == user_uuid),
+                FinancialAccount.id == account_id,
+                FinancialAccount.user_uuid == user_uuid,
             )
         )
         account = result.scalar_one_or_none()
@@ -491,7 +491,7 @@ class UserService:
             NotFoundError: If user is not found
         """
         # Get or create user settings
-        result = await self.db.execute(select(UserSettings).where(type_cast(Any, UserSettings.user_uuid == user_uuid)))
+        result = await self.db.execute(select(UserSettings).where(UserSettings.user_uuid == user_uuid))
         settings = result.scalar_one_or_none()
 
         now = utc_now()
@@ -531,15 +531,15 @@ class UserService:
         """
         # Check if user has at least one financial account
         account_result = await self.db.execute(
-            select(FinancialAccount).where(type_cast(Any, FinancialAccount.user_uuid == user_uuid)).limit(1)
+            select(FinancialAccount).where(FinancialAccount.user_uuid == user_uuid).limit(1)
         )
         has_financial_account = account_result.scalar_one_or_none() is not None
 
         # Check if user has at least one recurring income (amount > 0)
         income_result = await self.db.execute(
             select(RecurringTransaction)
-            .where(type_cast(Any, RecurringTransaction.user_uuid == user_uuid))
-            .where(type_cast(Any, RecurringTransaction.amount > 0))
+            .where(RecurringTransaction.user_uuid == user_uuid)
+            .where(RecurringTransaction.amount > 0)
             .limit(1)
         )
         has_recurring_income = income_result.scalar_one_or_none() is not None
@@ -547,8 +547,8 @@ class UserService:
         # Check if user has at least one recurring expense (amount < 0)
         expense_result = await self.db.execute(
             select(RecurringTransaction)
-            .where(type_cast(Any, RecurringTransaction.user_uuid == user_uuid))
-            .where(type_cast(Any, RecurringTransaction.amount < 0))
+            .where(RecurringTransaction.user_uuid == user_uuid)
+            .where(RecurringTransaction.amount < 0)
             .limit(1)
         )
         has_recurring_expense = expense_result.scalar_one_or_none() is not None
@@ -586,7 +586,7 @@ class UserService:
             NotFoundError: If user is not found
         """
         # Get or create user settings
-        result = await self.db.execute(select(UserSettings).where(type_cast(Any, UserSettings.user_uuid == user_uuid)))
+        result = await self.db.execute(select(UserSettings).where(UserSettings.user_uuid == user_uuid))
         settings = result.scalar_one_or_none()
 
         now = utc_now()
@@ -636,9 +636,7 @@ class UserService:
         Returns:
             FinancialSettings: The settings object
         """
-        result = await self.db.execute(
-            select(FinancialSettings).where(type_cast(Any, FinancialSettings.user_uuid == user_uuid))
-        )
+        result = await self.db.execute(select(FinancialSettings).where(FinancialSettings.user_uuid == user_uuid))
         settings = result.scalar_one_or_none()
 
         if settings is None:
@@ -717,9 +715,7 @@ class UserService:
         Returns:
             FinancialSettings: The updated settings object
         """
-        result = await self.db.execute(
-            select(FinancialSettings).where(type_cast(Any, FinancialSettings.user_uuid == user_uuid))
-        )
+        result = await self.db.execute(select(FinancialSettings).where(FinancialSettings.user_uuid == user_uuid))
         settings = result.scalar_one_or_none()
 
         now = utc_now()
@@ -784,7 +780,7 @@ class UserService:
         from app.models.transaction import Transaction
 
         # Fetch all transactions for this user
-        result = await self.db.execute(select(Transaction).where(type_cast(Any, Transaction.user_uuid == user_uuid)))
+        result = await self.db.execute(select(Transaction).where(Transaction.user_uuid == user_uuid))
         transactions = result.scalars().all()
 
         if not transactions:

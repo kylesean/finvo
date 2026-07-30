@@ -260,18 +260,18 @@ class RecurringTransactionService:
             周期性交易列表
         """
         # 构建查询
-        query = select(RecurringTransaction).where(cast(Any, RecurringTransaction.user_uuid == user_uuid))
+        query = select(RecurringTransaction).where(RecurringTransaction.user_uuid == user_uuid)
 
         # 类型过滤
         if type_filter:
-            query = query.where(cast(Any, RecurringTransaction.type == type_filter.upper()))
+            query = query.where(RecurringTransaction.type == type_filter.upper())
 
         # 激活状态过滤
         if is_active is not None:
-            query = query.where(cast(Any, RecurringTransaction.is_active == is_active))
+            query = query.where(RecurringTransaction.is_active == is_active)
 
         # 按创建时间降序排列
-        query = query.order_by(cast(Any, RecurringTransaction.created_at).desc())
+        query = query.order_by(RecurringTransaction.created_at.desc())
 
         result = await self.db.execute(query)
         recurring_txs = result.scalars().all()
@@ -292,8 +292,8 @@ class RecurringTransactionService:
             cast(
                 Any,
                 and_(
-                    cast(Any, RecurringTransaction.id == recurring_id),
-                    cast(Any, RecurringTransaction.user_uuid == user_uuid),
+                    RecurringTransaction.id == recurring_id,
+                    RecurringTransaction.user_uuid == user_uuid,
                 ),
             )
         )
@@ -322,8 +322,8 @@ class RecurringTransactionService:
             cast(
                 Any,
                 and_(
-                    cast(Any, RecurringTransaction.id == recurring_id),
-                    cast(Any, RecurringTransaction.user_uuid == user_uuid),
+                    RecurringTransaction.id == recurring_id,
+                    RecurringTransaction.user_uuid == user_uuid,
                 ),
             )
         )
@@ -410,8 +410,8 @@ class RecurringTransactionService:
             cast(
                 Any,
                 and_(
-                    cast(Any, RecurringTransaction.id == recurring_id),
-                    cast(Any, RecurringTransaction.user_uuid == user_uuid),
+                    RecurringTransaction.id == recurring_id,
+                    RecurringTransaction.user_uuid == user_uuid,
                 ),
             )
         )

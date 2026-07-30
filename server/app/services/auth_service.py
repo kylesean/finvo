@@ -204,7 +204,9 @@ class AuthService:
         from app.services.user_service import UserService
 
         try:
-            user_service = UserService(type_cast(Any, self.db))
+            # sqlmodel.AsyncSession is a thin subclass of sqlalchemy.AsyncSession;
+            # the type mismatch is only in the stubs, not at runtime.
+            user_service = UserService(self.db)  # type: ignore[arg-type]
             await user_service.create_default_financial_settings(user_uuid, locale=locale, timezone=timezone)
             logger.info("default_financial_settings_created", user_uuid=str(user_uuid))
         except Exception as e:
@@ -234,9 +236,9 @@ class AuthService:
         # Find user by account
         query = select(User)
         if account_type == "email":
-            query = query.where(type_cast(Any, User.email == account))
+            query = query.where(User.email == account)
         else:
-            query = query.where(type_cast(Any, User.mobile == account))
+            query = query.where(User.mobile == account)
 
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
@@ -287,9 +289,9 @@ class AuthService:
         """
         query = select(User)
         if account_type == "email":
-            query = query.where(type_cast(Any, User.email == account))
+            query = query.where(User.email == account)
         else:
-            query = query.where(type_cast(Any, User.mobile == account))
+            query = query.where(User.mobile == account)
 
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()

@@ -24,13 +24,13 @@ class AccountService:
         self, user_uuid: UUID, account_type: str | None = None, include_inactive: bool = False
     ) -> list[FinancialAccount]:
         """Get user's financial account list."""
-        query = select(FinancialAccount).where(cast(Any, FinancialAccount.user_uuid == user_uuid))
+        query = select(FinancialAccount).where(FinancialAccount.user_uuid == user_uuid)
 
         if not include_inactive:
-            query = query.where(cast(Any, FinancialAccount.status == "ACTIVE"))
+            query = query.where(FinancialAccount.status == "ACTIVE")
 
         if account_type:
-            query = query.where(cast(Any, FinancialAccount.type == account_type.upper()))
+            query = query.where(FinancialAccount.type == account_type.upper())
 
         # Nature (ASSET < LIABILITY), then name
         query = query.order_by(asc(FinancialAccount.nature), asc(FinancialAccount.name))
@@ -43,7 +43,7 @@ class AccountService:
         query = select(FinancialAccount).where(
             cast(
                 Any,
-                and_(cast(Any, FinancialAccount.id == account_id), cast(Any, FinancialAccount.user_uuid == user_uuid)),
+                and_(FinancialAccount.id == account_id, FinancialAccount.user_uuid == user_uuid),
             )
         )
         result = await self.db.execute(query)

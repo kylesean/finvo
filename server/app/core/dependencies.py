@@ -36,7 +36,7 @@ async def get_redis_client() -> AsyncGenerator[Any]:
 
         from app.core.config import settings
 
-        redis_client = await cast(Any, redis_async).from_url(
+        redis_client = await redis_async.from_url(
             settings.redis_url,
             encoding="utf-8",
             decode_responses=False,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import base64
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
@@ -41,9 +41,7 @@ class AttachmentProcessor:
 
         try:
             result = await self.db_session.execute(
-                select(Attachment)
-                .where(cast(Any, Attachment.id).in_(attachment_ids))
-                .where(cast(Any, Attachment.user_uuid == user_uuid))
+                select(Attachment).where(Attachment.id.in_(attachment_ids)).where(Attachment.user_uuid == user_uuid)
             )
             attachments = result.scalars().all()
 

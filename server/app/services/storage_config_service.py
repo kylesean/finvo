@@ -6,7 +6,7 @@ and user default storage initialization.
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import asc, desc, select
@@ -102,10 +102,10 @@ class StorageConfigService:
         Returns:
             StorageConfig or None
         """
-        query = select(StorageConfig).where(cast(Any, StorageConfig.id == config_id))
+        query = select(StorageConfig).where(StorageConfig.id == config_id)
 
         if user_uuid is not None:
-            query = query.where(cast(Any, StorageConfig.user_uuid == user_uuid))
+            query = query.where(StorageConfig.user_uuid == user_uuid)
 
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
@@ -124,12 +124,12 @@ class StorageConfigService:
         Returns:
             List of StorageConfig models
         """
-        query = select(StorageConfig).where(cast(Any, StorageConfig.user_uuid == user_uuid))
+        query = select(StorageConfig).where(StorageConfig.user_uuid == user_uuid)
 
         if provider_type:
-            query = query.where(cast(Any, StorageConfig.provider_type == provider_type))
+            query = query.where(StorageConfig.provider_type == provider_type)
 
-        query = query.order_by(desc(cast(Any, StorageConfig.created_at)))
+        query = query.order_by(desc(StorageConfig.created_at))
 
         result = await self.db.execute(query)
         return list(result.scalars().all())
@@ -146,10 +146,10 @@ class StorageConfigService:
         query = (
             select(StorageConfig)
             .where(
-                cast(Any, StorageConfig.user_uuid == user_uuid),
-                cast(Any, StorageConfig.provider_type == ProviderType.LOCAL_UPLOADS.value),
+                StorageConfig.user_uuid == user_uuid,
+                StorageConfig.provider_type == ProviderType.LOCAL_UPLOADS.value,
             )
-            .order_by(asc(cast(Any, StorageConfig.created_at)))
+            .order_by(asc(StorageConfig.created_at))
             .limit(1)
         )
 

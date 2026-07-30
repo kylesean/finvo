@@ -39,7 +39,7 @@ class TransactionCRUDService:
         query = select(FinancialAccount).where(
             cast(
                 Any,
-                and_(cast(Any, FinancialAccount.id == account_id), cast(Any, FinancialAccount.user_uuid == user_uuid)),
+                and_(FinancialAccount.id == account_id, FinancialAccount.user_uuid == user_uuid),
             )
         )
         result = await self.db.execute(query)
@@ -154,21 +154,21 @@ class TransactionCRUDService:
             if linked_acc:
                 result["linked_account"] = {
                     "id": str(linked_acc.id),
-                    "name": cast(Any, linked_acc.name),
-                    "type": cast(Any, linked_acc.type),
+                    "name": linked_acc.name,
+                    "type": linked_acc.type,
                 }
         else:
             if source_acc and target_acc:
                 result["transfer_info"] = {
                     "source_account": {
                         "id": str(source_acc.id),
-                        "name": cast(Any, source_acc.name),
-                        "type": cast(Any, source_acc.type),
+                        "name": source_acc.name,
+                        "type": source_acc.type,
                     },
                     "target_account": {
                         "id": str(target_acc.id),
-                        "name": cast(Any, target_acc.name),
-                        "type": cast(Any, target_acc.type),
+                        "name": target_acc.name,
+                        "type": target_acc.type,
                     },
                 }
 
@@ -191,11 +191,7 @@ class TransactionCRUDService:
         from app.models.shared_space import SharedSpace, SpaceMember, SpaceTransaction
 
         # First, load the transaction by ID (no owner filter)
-        query = (
-            select(Transaction)
-            .options(selectinload(cast(Any, Transaction.comments)))
-            .where(cast(Any, Transaction.id == transaction_id))
-        )
+        query = select(Transaction).options(selectinload(Transaction.comments)).where(Transaction.id == transaction_id)
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
@@ -206,11 +202,11 @@ class TransactionCRUDService:
         if transaction.user_uuid != user_uuid:
             space_access_query = (
                 select(SpaceTransaction.id)
-                .join(SpaceMember, cast(Any, SpaceMember.space_id == SpaceTransaction.space_id))
+                .join(SpaceMember, SpaceMember.space_id == SpaceTransaction.space_id)
                 .where(
-                    cast(Any, SpaceTransaction.transaction_id == transaction_id),
-                    cast(Any, SpaceMember.user_uuid == user_uuid),
-                    cast(Any, SpaceMember.status == "ACCEPTED"),
+                    SpaceTransaction.transaction_id == transaction_id,
+                    SpaceMember.user_uuid == user_uuid,
+                    SpaceMember.status == "ACCEPTED",
                 )
                 .limit(1)
             )
@@ -224,8 +220,8 @@ class TransactionCRUDService:
         # Get associated shared spaces
         spaces_query = (
             select(SharedSpace)
-            .join(SpaceTransaction, cast(Any, SpaceTransaction.space_id == SharedSpace.id))
-            .where(cast(Any, SpaceTransaction.transaction_id == transaction_id))
+            .join(SpaceTransaction, SpaceTransaction.space_id == SharedSpace.id)
+            .where(SpaceTransaction.transaction_id == transaction_id)
         )
         spaces_result = await self.db.execute(spaces_query)
         associated_spaces = spaces_result.scalars().all()
@@ -235,7 +231,7 @@ class TransactionCRUDService:
         comments_data = []
         for comment in transaction.comments:
             # Query comment author information
-            user_query = select(User).where(cast(Any, User.uuid == comment.user_uuid))
+            user_query = select(User).where(User.uuid == comment.user_uuid)
             user_result = await self.db.execute(user_query)
             user = user_result.scalar_one_or_none()
 
@@ -263,7 +259,7 @@ class TransactionCRUDService:
         if transaction.source_thread_id:
             # thread_id is text in DB but UUID in model; cast column to String for comparison
             att_query = select(Attachment).where(
-                cast(Any, sa_cast(Attachment.thread_id, String) == str(transaction.source_thread_id)),
+                sa_cast(Attachment.thread_id, String) == str(transaction.source_thread_id),
             )
             att_result = await self.db.execute(att_query)
             attachments = att_result.scalars().all()
@@ -348,7 +344,7 @@ class TransactionCRUDService:
             BusinessError: Permission denied
         """
         # Query transaction
-        query = select(Transaction).where(cast(Any, Transaction.id == transaction_id))
+        query = select(Transaction).where(Transaction.id == transaction_id)
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
@@ -384,7 +380,7 @@ class TransactionCRUDService:
                 transaction.source_account_id if transaction.type == "EXPENSE" else transaction.target_account_id
             )
             if linked_account_id:
-                account_query = select(FinancialAccount).where(cast(Any, FinancialAccount.id == linked_account_id))
+                account_query = select(FinancialAccount).where(FinancialAccount.id == linked_account_id)
                 account_result = await self.db.execute(account_query)
                 account = account_result.scalar_one_or_none()
                 if account:
@@ -472,7 +468,7 @@ class TransactionCRUDService:
             BusinessError: Permission denied
         """
         # Query transaction record
-        query = select(Transaction).where(cast(Any, Transaction.id == transaction_id))
+        query = select(Transaction).where(Transaction.id == transaction_id)
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
@@ -623,7 +619,7 @@ class TransactionCRUDService:
         """
         from app.services.exchange_rate_service import ExchangeRateService
 
-        query = select(Transaction).where(cast(Any, Transaction.id == transaction_id))
+        query = select(Transaction).where(Transaction.id == transaction_id)
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
@@ -669,8 +665,8 @@ class TransactionCRUDService:
                 cast(
                     Any,
                     and_(
-                        cast(Any, FinancialAccount.id == old_account_id),
-                        cast(Any, FinancialAccount.user_uuid == user_uuid),
+                        FinancialAccount.id == old_account_id,
+                        FinancialAccount.user_uuid == user_uuid,
                     ),
                 )
             )
@@ -722,8 +718,8 @@ class TransactionCRUDService:
                 cast(
                     Any,
                     and_(
-                        cast(Any, FinancialAccount.id == new_account_id),
-                        cast(Any, FinancialAccount.user_uuid == user_uuid),
+                        FinancialAccount.id == new_account_id,
+                        FinancialAccount.user_uuid == user_uuid,
                     ),
                 )
             )
@@ -803,7 +799,7 @@ class TransactionCRUDService:
         from app.models.shared_space import SpaceMember, SpaceTransaction
 
         # Check ownership first (fast path)
-        tx_query = select(Transaction).where(cast(Any, Transaction.id == transaction_id))
+        tx_query = select(Transaction).where(Transaction.id == transaction_id)
         tx_result = await self.db.execute(tx_query)
         transaction = tx_result.scalar_one_or_none()
 
@@ -816,11 +812,11 @@ class TransactionCRUDService:
         # Check space membership: is the transaction linked to any space the user belongs to?
         space_access_query = (
             select(SpaceTransaction.id)
-            .join(SpaceMember, cast(Any, SpaceMember.space_id == SpaceTransaction.space_id))
+            .join(SpaceMember, SpaceMember.space_id == SpaceTransaction.space_id)
             .where(
-                cast(Any, SpaceTransaction.transaction_id == transaction_id),
-                cast(Any, SpaceMember.user_uuid == user_uuid),
-                cast(Any, SpaceMember.status == "ACCEPTED"),
+                SpaceTransaction.transaction_id == transaction_id,
+                SpaceMember.user_uuid == user_uuid,
+                SpaceMember.status == "ACCEPTED",
             )
             .limit(1)
         )
@@ -850,9 +846,9 @@ class TransactionCRUDService:
                 User.username.label("user_name"),
                 User.avatar_url.label("user_avatar_url"),
             )
-            .join(User, cast(Any, TransactionComment.user_uuid == User.uuid))
-            .where(cast(Any, TransactionComment.transaction_id == transaction_id))
-            .order_by(cast(Any, TransactionComment.created_at).asc())
+            .join(User, TransactionComment.user_uuid == User.uuid)
+            .where(TransactionComment.transaction_id == transaction_id)
+            .order_by(TransactionComment.created_at.asc())
         )
 
         result = await self.db.execute(query)
@@ -870,9 +866,9 @@ class TransactionCRUDService:
 
             if comment.parent_comment_id:
                 parent_query = (
-                    select(TransactionComment, cast(Any, User.username))
-                    .join(User, cast(Any, TransactionComment.user_uuid == User.uuid))
-                    .where(cast(Any, TransactionComment.id == comment.parent_comment_id))
+                    select(TransactionComment, User.username)
+                    .join(User, TransactionComment.user_uuid == User.uuid)
+                    .where(TransactionComment.id == comment.parent_comment_id)
                 )
                 parent_result = await self.db.execute(parent_query)
                 parent_data = parent_result.first()
@@ -938,8 +934,8 @@ class TransactionCRUDService:
         if parent_comment_id is not None:
             parent_comment_query = select(TransactionComment).where(
                 and_(
-                    cast(Any, TransactionComment.id == parent_comment_id),
-                    cast(Any, TransactionComment.transaction_id == transaction_id),
+                    TransactionComment.id == parent_comment_id,
+                    TransactionComment.transaction_id == transaction_id,
                 )
             )
             parent_comment_result = await self.db.execute(parent_comment_query)
@@ -977,7 +973,7 @@ class TransactionCRUDService:
         if parent_comment_id is not None:
             # Notify the parent comment's author that someone replied
             parent_author_query = select(TransactionComment.user_uuid).where(
-                cast(Any, TransactionComment.id == parent_comment_id)
+                TransactionComment.id == parent_comment_id
             )
             parent_author_result = await self.db.execute(parent_author_query)
             parent_author_uuid = parent_author_result.scalar_one_or_none()
@@ -1016,8 +1012,8 @@ class TransactionCRUDService:
                 User.username.label("user_name"),
                 User.avatar_url.label("user_avatar_url"),
             )
-            .join(User, cast(Any, TransactionComment.user_uuid == User.uuid))
-            .where(cast(Any, TransactionComment.id == new_comment.id))
+            .join(User, TransactionComment.user_uuid == User.uuid)
+            .where(TransactionComment.id == new_comment.id)
         )
 
         result = await self.db.execute(query)
@@ -1034,9 +1030,9 @@ class TransactionCRUDService:
 
         if parent_comment_id:
             reply_context_query: Select[Any] = (
-                select(TransactionComment, cast(Any, User.username))
-                .join(User, cast(Any, TransactionComment.user_uuid == User.uuid))
-                .where(cast(Any, TransactionComment.id == parent_comment_id))
+                select(TransactionComment, User.username)
+                .join(User, TransactionComment.user_uuid == User.uuid)
+                .where(TransactionComment.id == parent_comment_id)
             )
             reply_context_result = await self.db.execute(reply_context_query)
             reply_context_data = reply_context_result.first()
@@ -1144,7 +1140,7 @@ class TransactionCRUDService:
             Whether the comment was deleted successfully
         """
         # Query comment
-        query = select(TransactionComment).where(cast(Any, TransactionComment.id == comment_id))
+        query = select(TransactionComment).where(TransactionComment.id == comment_id)
         result = await self.db.execute(query)
         comment = result.scalar_one_or_none()
 
@@ -1184,7 +1180,7 @@ class TransactionCRUDService:
         user_uuids: set[str] = set()
 
         # 1. Add transaction owner
-        tx_query = select(Transaction.user_uuid).where(cast(Any, Transaction.id == transaction_id))
+        tx_query = select(Transaction.user_uuid).where(Transaction.id == transaction_id)
         tx_res = await self.db.execute(tx_query)
         tx_user_uuid = tx_res.scalar_one_or_none()
         if tx_user_uuid:
@@ -1193,8 +1189,8 @@ class TransactionCRUDService:
         # 2. Add all space members for spaces linked to this transaction
         space_members_query = (
             select(SpaceMember.user_uuid)
-            .join(SpaceTransaction, cast(Any, SpaceMember.space_id == SpaceTransaction.space_id))
-            .where(cast(Any, SpaceTransaction.transaction_id == transaction_id))
+            .join(SpaceTransaction, SpaceMember.space_id == SpaceTransaction.space_id)
+            .where(SpaceTransaction.transaction_id == transaction_id)
         )
         sm_res = await self.db.execute(space_members_query)
         for uid in sm_res.scalars():

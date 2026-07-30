@@ -241,7 +241,7 @@ class TransactionQueryService:
         """
         try:
             # Build base query conditions
-            conditions = [type_cast(Any, Transaction.user_uuid == UUID(user_uuid))]
+            conditions = [Transaction.user_uuid == UUID(user_uuid)]
 
             # Keyword search: match description, location, category_key, and tags
             if params.keyword:
@@ -250,9 +250,9 @@ class TransactionQueryService:
                     type_cast(
                         Any,
                         or_(
-                            type_cast(Any, Transaction.description).ilike(keyword_pattern),
-                            type_cast(Any, Transaction.location).ilike(keyword_pattern),
-                            type_cast(Any, Transaction.category_key).ilike(keyword_pattern),
+                            Transaction.description.ilike(keyword_pattern),
+                            Transaction.location.ilike(keyword_pattern),
+                            Transaction.category_key.ilike(keyword_pattern),
                             sql_cast(Transaction.tags, String).ilike(keyword_pattern),
                         ),
                     )
@@ -260,46 +260,46 @@ class TransactionQueryService:
 
             # Amount range filter - func.abs returns ColumnElement which may need cast or ignore
             if params.min_amount is not None:
-                conditions.append(type_cast(Any, func.abs(Transaction.amount) >= params.min_amount))
+                conditions.append(func.abs(Transaction.amount) >= params.min_amount)
             if params.max_amount is not None:
-                conditions.append(type_cast(Any, func.abs(Transaction.amount) <= params.max_amount))
+                conditions.append(func.abs(Transaction.amount) <= params.max_amount)
 
             # Transaction type filter
             if params.transaction_types:
                 type_values = [t.value for t in params.transaction_types]
-                conditions.append(type_cast(Any, Transaction.type).in_(type_values))
+                conditions.append(Transaction.type.in_(type_values))
 
             # Category filter
             if params.category_keys:
-                conditions.append(type_cast(Any, Transaction.category_key).in_(params.category_keys))
+                conditions.append(Transaction.category_key.in_(params.category_keys))
 
             # Tags filter (JSONB contains)
             if params.tags:
                 for tag in params.tags:
-                    conditions.append(type_cast(Any, Transaction.tags).contains([tag]))
+                    conditions.append(Transaction.tags.contains([tag]))
 
             # Date range filter
             if params.start_date:
                 start_dt = _parse_date_to_utc(params.start_date, end_of_day=False)
                 if start_dt:
-                    conditions.append(type_cast(Any, Transaction.transaction_at >= start_dt))
+                    conditions.append(Transaction.transaction_at >= start_dt)
 
             if params.end_date:
                 end_dt = _parse_date_to_utc(params.end_date, end_of_day=True)
                 if end_dt:
-                    conditions.append(type_cast(Any, Transaction.transaction_at <= end_dt))
+                    conditions.append(Transaction.transaction_at <= end_dt)
 
             # Specific date filter (used for home calendar)
             if params.date:
                 day_start = _parse_date_to_utc(params.date, end_of_day=False)
                 day_end = _parse_date_to_utc(params.date, end_of_day=True)
                 if day_start and day_end:
-                    conditions.append(type_cast(Any, Transaction.transaction_at >= day_start))
-                    conditions.append(type_cast(Any, Transaction.transaction_at <= day_end))
+                    conditions.append(Transaction.transaction_at >= day_start)
+                    conditions.append(Transaction.transaction_at <= day_end)
 
             # Build query statement
             # Mypy cannot handle the *conditions expansion with SQLModel fields correctly
-            stmt = select(Transaction).where(type_cast(Any, and_(True, *conditions)))
+            stmt = select(Transaction).where(and_(True, *conditions))
 
             # Count total matching items
             count_stmt = select(func.count()).select_from(stmt.subquery())
@@ -312,7 +312,7 @@ class TransactionQueryService:
 
             # Ordering and pagination
             # Transaction.transaction_at is seen as a datetime instance, not a column by Mypy
-            stmt = stmt.order_by(desc(type_cast(Any, Transaction.transaction_at)))
+            stmt = stmt.order_by(desc(Transaction.transaction_at))
             stmt = stmt.offset((params.page - 1) * params.per_page).limit(params.per_page)
 
             # Execute query

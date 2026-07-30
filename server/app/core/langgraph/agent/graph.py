@@ -12,7 +12,7 @@ Reference: docs/ROUTE_AFTER_AGENT.md
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.tools import BaseTool
@@ -52,12 +52,14 @@ def build_agent_graph(
         Compiled StateGraph
     """
     # Create StateGraph
-    workflow = StateGraph(cast(Any, AgentState))
+    workflow = StateGraph(AgentState)
 
     # Add nodes
-    workflow.add_node("agent", cast(Any, create_agent_node(llm, tools, system_prompt)))
+    # LangGraph's add_node overload set is extremely narrow; our async callable
+    # shape is valid at runtime but not matched by the typed overloads.
+    workflow.add_node("agent", create_agent_node(llm, tools, system_prompt))  # type: ignore[call-overload]
     workflow.add_node("tools", ToolNode(tools))
-    workflow.add_node("direct_execute", cast(Any, create_direct_execute_node(tools)))
+    workflow.add_node("direct_execute", create_direct_execute_node(tools))  # type: ignore[call-overload]
 
     # Add edges
     # 1. Entry conditional edge: Check if direct execution is needed

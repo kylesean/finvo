@@ -242,8 +242,8 @@ class ForecastService:
             func.coalesce(
                 func.sum(
                     case(
-                        (cast(Any, FinancialAccount.nature == "ASSET"), FinancialAccount.current_balance),
-                        (cast(Any, FinancialAccount.nature == "LIABILITY"), -FinancialAccount.current_balance),
+                        (FinancialAccount.nature == "ASSET", FinancialAccount.current_balance),
+                        (FinancialAccount.nature == "LIABILITY", -FinancialAccount.current_balance),
                         else_=Decimal("0"),
                     )
                 ),
@@ -253,9 +253,9 @@ class ForecastService:
             cast(
                 Any,
                 and_(
-                    cast(Any, FinancialAccount.user_uuid == user_uuid),
-                    cast(Any, FinancialAccount.status == "ACTIVE"),
-                    cast(Any, FinancialAccount.include_in_net_worth == True),  # noqa: E712
+                    FinancialAccount.user_uuid == user_uuid,
+                    FinancialAccount.status == "ACTIVE",
+                    FinancialAccount.include_in_net_worth == True,  # noqa: E712
                 ),
             )
         )
@@ -276,13 +276,13 @@ class ForecastService:
             cast(
                 Any,
                 and_(
-                    cast(Any, RecurringTransaction.user_uuid == user_uuid),
-                    cast(Any, RecurringTransaction.is_active == True),  # noqa: E712
+                    RecurringTransaction.user_uuid == user_uuid,
+                    RecurringTransaction.is_active == True,  # noqa: E712
                     cast(
                         Any,
                         or_(
-                            cast(Any, RecurringTransaction.end_date == None),  # noqa: E711
-                            cast(Any, RecurringTransaction.end_date) >= start_date,
+                            RecurringTransaction.end_date == None,  # noqa: E711
+                            RecurringTransaction.end_date >= start_date,
                         ),
                     ),
                 ),
@@ -378,13 +378,13 @@ class ForecastService:
 
         # 获取周期性交易的金额集合（用于排除）
         recurring_amounts = set()
-        recurring_query = select(cast(Any, RecurringTransaction.amount)).where(
+        recurring_query = select(RecurringTransaction.amount).where(
             cast(
                 Any,
                 and_(
-                    cast(Any, RecurringTransaction.user_uuid == user_uuid),
-                    cast(Any, RecurringTransaction.is_active == True),  # noqa: E712
-                    cast(Any, RecurringTransaction.type == "EXPENSE"),
+                    RecurringTransaction.user_uuid == user_uuid,
+                    RecurringTransaction.is_active == True,  # noqa: E712
+                    RecurringTransaction.type == "EXPENSE",
                 ),
             )
         )
@@ -399,21 +399,21 @@ class ForecastService:
         # 查询每笔支出交易（而非每日汇总）
         query = (
             select(
-                cast(Any, Transaction.amount),
-                cast(Any, Transaction.transaction_at),
+                Transaction.amount,
+                Transaction.transaction_at,
             )
             .where(
                 cast(
                     Any,
                     and_(
-                        cast(Any, Transaction.user_uuid == user_uuid),
-                        cast(Any, Transaction.type == "EXPENSE"),
-                        cast(Any, Transaction.status == "CLEARED"),
-                        cast(Any, Transaction.transaction_at >= lookback_start),
+                        Transaction.user_uuid == user_uuid,
+                        Transaction.type == "EXPENSE",
+                        Transaction.status == "CLEARED",
+                        Transaction.transaction_at >= lookback_start,
                     ),
                 )
             )
-            .order_by(cast(Any, Transaction.transaction_at))
+            .order_by(Transaction.transaction_at)
         )
 
         result = await self.db.execute(query)
@@ -522,12 +522,12 @@ class ForecastService:
                 cast(
                     Any,
                     and_(
-                        cast(Any, AIFeedbackMemory.user_uuid == user_uuid),
-                        cast(Any, AIFeedbackMemory.insight_type == insight_type),
+                        AIFeedbackMemory.user_uuid == user_uuid,
+                        AIFeedbackMemory.insight_type == insight_type,
                     ),
                 )
             )
-            .order_by(desc(cast(Any, AIFeedbackMemory.created_at)))
+            .order_by(desc(AIFeedbackMemory.created_at))
             .limit(limit)
         )
 
@@ -555,9 +555,9 @@ class ForecastService:
         """Get user's financial settings (safety_threshold, daily_burn_rate)."""
         from app.models.financial_settings import FinancialSettings
 
-        query = select(
-            cast(Any, FinancialSettings.safety_threshold), cast(Any, FinancialSettings.daily_burn_rate)
-        ).where(cast(Any, FinancialSettings.user_uuid == user_uuid))
+        query = select(FinancialSettings.safety_threshold, FinancialSettings.daily_burn_rate).where(
+            FinancialSettings.user_uuid == user_uuid
+        )
 
         try:
             result = await self.db.execute(query)

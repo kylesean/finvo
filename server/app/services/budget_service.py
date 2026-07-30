@@ -12,7 +12,7 @@ from datetime import (
     timezone,
 )
 from decimal import Decimal
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import asc, desc, func, select
@@ -165,8 +165,8 @@ class BudgetService:
         """
         result = await self.session.execute(
             select(Budget)
-            .options(selectinload(cast(Any, Budget.periods)))
-            .where(cast(Any, Budget.id == budget_id), cast(Any, Budget.owner_uuid == user_uuid))
+            .options(selectinload(Budget.periods))
+            .where(Budget.id == budget_id, Budget.owner_uuid == user_uuid)
         )
         return result.scalar_one_or_none()
 
@@ -186,18 +186,14 @@ class BudgetService:
         Returns:
             List of budgets
         """
-        query = (
-            select(Budget)
-            .options(selectinload(cast(Any, Budget.periods)))
-            .where(cast(Any, Budget.owner_uuid == user_uuid))
-        )
+        query = select(Budget).options(selectinload(Budget.periods)).where(Budget.owner_uuid == user_uuid)
 
         if status:
-            query = query.where(cast(Any, Budget.status == status.value))
+            query = query.where(Budget.status == status.value)
         if scope:
-            query = query.where(cast(Any, Budget.scope == scope.value))
+            query = query.where(Budget.scope == scope.value)
 
-        query = query.order_by(asc(cast(Any, Budget.scope)), asc(cast(Any, Budget.category_key)))
+        query = query.order_by(asc(Budget.scope), asc(Budget.category_key))
 
         result = await self.session.execute(query)
         return list(result.scalars().all())
@@ -347,9 +343,9 @@ class BudgetService:
 
         result = await self.session.execute(
             select(BudgetPeriod).where(
-                cast(Any, BudgetPeriod.budget_id == budget.id),
-                cast(Any, BudgetPeriod.period_start <= today),
-                cast(Any, BudgetPeriod.period_end >= today),
+                BudgetPeriod.budget_id == budget.id,
+                BudgetPeriod.period_start <= today,
+                BudgetPeriod.period_end >= today,
             )
         )
         return result.scalar_one_or_none()
@@ -371,8 +367,8 @@ class BudgetService:
         # Get latest existing period for rollover
         result = await self.session.execute(
             select(BudgetPeriod)
-            .where(cast(Any, BudgetPeriod.budget_id == budget.id))
-            .order_by(desc(cast(Any, BudgetPeriod.period_end)))
+            .where(BudgetPeriod.budget_id == budget.id)
+            .order_by(desc(BudgetPeriod.period_end))
             .limit(1)
         )
         prev_period = result.scalar_one_or_none()
@@ -388,8 +384,8 @@ class BudgetService:
                 # Check if intermediate period exists
                 check_res = await self.session.execute(
                     select(BudgetPeriod).where(
-                        cast(Any, BudgetPeriod.budget_id == budget.id),
-                        cast(Any, BudgetPeriod.period_start == p_start),
+                        BudgetPeriod.budget_id == budget.id,
+                        BudgetPeriod.period_start == p_start,
                     )
                 )
                 existing_p = check_res.scalar_one_or_none()
@@ -426,8 +422,8 @@ class BudgetService:
                     await self.session.rollback()
                     ex_res = await self.session.execute(
                         select(BudgetPeriod).where(
-                            cast(Any, BudgetPeriod.budget_id == budget.id),
-                            cast(Any, BudgetPeriod.period_start == p_start),
+                            BudgetPeriod.budget_id == budget.id,
+                            BudgetPeriod.period_start == p_start,
                         )
                     )
                     prev_period = ex_res.scalar_one_or_none() or prev_period
@@ -564,15 +560,15 @@ class BudgetService:
         """
         start_dt, end_dt = _date_range_to_dt(period_start, period_end)
         query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            cast(Any, Transaction.user_uuid == user_uuid),
-            cast(Any, Transaction.type == "EXPENSE"),
-            cast(Any, Transaction.status == "CLEARED"),
-            cast(Any, Transaction.transaction_at >= start_dt),
-            cast(Any, Transaction.transaction_at < end_dt),
+            Transaction.user_uuid == user_uuid,
+            Transaction.type == "EXPENSE",
+            Transaction.status == "CLEARED",
+            Transaction.transaction_at >= start_dt,
+            Transaction.transaction_at < end_dt,
         )
 
         if category_key:
-            query = query.where(cast(Any, Transaction.category_key == category_key))
+            query = query.where(Transaction.category_key == category_key)
 
         result = await self.session.execute(query)
         spent = result.scalar_one()
@@ -784,18 +780,18 @@ class BudgetService:
         # Get historical spending
         query = select(
             func.sum(Transaction.amount).label("total"),
-            func.count(cast(Any, Transaction.id)).label("tx_count"),
+            func.count(Transaction.id).label("tx_count"),
             func.avg(Transaction.amount).label("avg"),
         ).where(
-            cast(Any, Transaction.user_uuid == user_uuid),
-            cast(Any, Transaction.type == "EXPENSE"),
-            cast(Any, Transaction.status == "CLEARED"),
-            cast(Any, Transaction.transaction_at >= start_dt),
-            cast(Any, Transaction.transaction_at < end_dt),
+            Transaction.user_uuid == user_uuid,
+            Transaction.type == "EXPENSE",
+            Transaction.status == "CLEARED",
+            Transaction.transaction_at >= start_dt,
+            Transaction.transaction_at < end_dt,
         )
 
         if category_key:
-            query = query.where(cast(Any, Transaction.category_key == category_key))
+            query = query.where(Transaction.category_key == category_key)
 
         result = await self.session.execute(query)
         row = result.one()
@@ -862,19 +858,19 @@ class BudgetService:
         # Get spending by category and month
         query = (
             select(
-                cast(Any, Transaction.category_key),
+                Transaction.category_key,
                 func.sum(Transaction.amount).label("total"),
-                func.count(cast(Any, Transaction.id)).label("count"),
+                func.count(Transaction.id).label("count"),
             )
             .where(
-                cast(Any, Transaction.user_uuid == user_uuid),
-                cast(Any, Transaction.type == "EXPENSE"),
-                cast(Any, Transaction.status == "CLEARED"),
-                cast(Any, Transaction.transaction_at >= start_dt),
-                cast(Any, Transaction.transaction_at < end_dt),
+                Transaction.user_uuid == user_uuid,
+                Transaction.type == "EXPENSE",
+                Transaction.status == "CLEARED",
+                Transaction.transaction_at >= start_dt,
+                Transaction.transaction_at < end_dt,
             )
             .group_by(Transaction.category_key)
-            .having(cast(Any, func.count(cast(Any, Transaction.id)) >= 5))  # At least 5 transactions
+            .having(func.count(Transaction.id) >= 5)  # At least 5 transactions
             .order_by(desc(func.sum(Transaction.amount)))
         )
 
@@ -899,9 +895,7 @@ class BudgetService:
         Used on the hot read path (update_period_spent_amount) to avoid
         triggering an implicit write/commit when the settings row is absent.
         """
-        result = await self.session.execute(
-            select(BudgetSettings).where(cast(Any, BudgetSettings.user_uuid == user_uuid))
-        )
+        result = await self.session.execute(select(BudgetSettings).where(BudgetSettings.user_uuid == user_uuid))
         return result.scalar_one_or_none()
 
     async def _ensure_settings_exists(self, user_uuid: UUID) -> BudgetSettings:

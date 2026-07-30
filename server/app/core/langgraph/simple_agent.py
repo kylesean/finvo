@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncGenerator, Sequence
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 from langchain_core.messages import AIMessage, HumanMessage
@@ -998,7 +998,7 @@ class SimpleLangChainAgent:
             # 直接初始化，SDK 会自动从环境变量读取密钥和 HOST
             handler = CallbackHandler()
             # 设置额外的 metadata
-            cast(Any, handler).metadata = {"thread_id": str(thread_id), "user_id": str(user_id) if user_id else None}
+            handler.metadata = {"thread_id": str(thread_id), "user_id": str(user_id) if user_id else None}  # type: ignore[attr-defined]  # langfuse CallbackHandler accepts metadata at runtime
             return handler
         except Exception as e:
             logger.error("failed_to_initialize_langfuse_callback", error=str(e))

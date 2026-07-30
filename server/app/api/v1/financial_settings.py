@@ -1,6 +1,6 @@
 """Financial settings API endpoints."""
 
-from typing import Annotated, Any, cast
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
@@ -33,7 +33,7 @@ async def get_financial_settings(
     Returns:
         Unified response with financial settings
     """
-    user_service = UserService(cast(Any, db))
+    user_service = UserService(db)  # type: ignore[arg-type]  # sqlmodel vs sqlalchemy AsyncSession stubs
     settings = await user_service.get_financial_settings(current_user.uuid)
 
     return success_response(
@@ -67,7 +67,7 @@ async def update_financial_settings(
     Returns:
         Unified response with updated financial settings
     """
-    user_service = UserService(cast(Any, db))
+    user_service = UserService(db)  # type: ignore[arg-type]  # sqlmodel vs sqlalchemy AsyncSession stubs
     settings = await user_service.update_financial_settings(
         user_uuid=current_user.uuid,
         safety_threshold=request.safetyThreshold,

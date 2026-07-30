@@ -16,7 +16,7 @@ Based on LangChain 1.0 middleware best practices.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 import aiofiles
@@ -172,8 +172,8 @@ class AttachmentMiddleware(BaseMiddleware):
 
             # Query by user_uuid (string)
             stmt = select(Attachment).where(
-                cast(Any, Attachment.id).in_(uuids),
-                cast(Any, Attachment.user_uuid == user_uuid),
+                Attachment.id.in_(uuids),
+                Attachment.user_uuid == user_uuid,
             )
             result = await session.execute(stmt)
             attachments = list(result.scalars().all())

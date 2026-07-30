@@ -7,7 +7,7 @@ and cache invalidation strategies for the application.
 import functools
 import json
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any
 
 from redis.asyncio import Redis
 from redis.asyncio.connection import ConnectionPool
@@ -84,7 +84,7 @@ class CacheManager:
         """
         try:
             client = self.get_client()
-            await cast(Any, client.ping())
+            await client.ping()
             return True
         except Exception as e:
             logger.error("redis_health_check_failed", error=str(e))

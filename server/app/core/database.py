@@ -14,7 +14,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import (
@@ -370,9 +370,7 @@ class SessionRepository:
         from app.models.session import Session as ChatSession
 
         result = await self.db.execute(
-            select(ChatSession)
-            .where(cast(Any, ChatSession.user_uuid == user_uuid))
-            .order_by(cast(Any, ChatSession.created_at).desc())
+            select(ChatSession).where(ChatSession.user_uuid == user_uuid).order_by(ChatSession.created_at.desc())
         )
         return list(result.scalars().all())
 
@@ -392,7 +390,7 @@ class SessionRepository:
         """
         from app.models.session import Session as ChatSession
 
-        result = await self.db.execute(select(ChatSession).where(cast(Any, ChatSession.id == session_id)))
+        result = await self.db.execute(select(ChatSession).where(ChatSession.id == session_id))
         chat_session = result.scalar_one_or_none()
 
         if chat_session:
@@ -422,7 +420,7 @@ class SessionRepository:
         """
         from app.models.session import Session as ChatSession
 
-        result = await self.db.execute(delete(ChatSession).where(cast(Any, ChatSession.id == session_id)))
+        result = await self.db.execute(delete(ChatSession).where(ChatSession.id == session_id))
         await self.db.commit()
 
         deleted = bool(getattr(result, "rowcount", 0) > 0)

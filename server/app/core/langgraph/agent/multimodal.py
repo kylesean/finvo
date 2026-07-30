@@ -130,9 +130,9 @@ async def load_image_parts(
     async with get_session_context() as session:
         uuids = [UUID(aid) for aid in attachment_ids]
         # NB: cast() is typing.cast (runtime no-op) — matches the rest of the code.
-        conditions: list[Any] = [cast(Any, Attachment.id).in_(uuids)]
+        conditions: list[Any] = [Attachment.id.in_(uuids)]
         if user_uuid:
-            conditions.append(cast(Any, Attachment.user_uuid == user_uuid))
+            conditions.append(Attachment.user_uuid == user_uuid)
         rows = (await session.execute(select(Attachment).where(*conditions))).scalars().all()
 
     images = [att for att in rows if att.mime_type in IMAGE_MIME_TYPES]

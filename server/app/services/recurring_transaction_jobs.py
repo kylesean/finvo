@@ -42,9 +42,9 @@ async def process_due_transactions() -> None:
                 type_cast(
                     Any,
                     and_(
-                        type_cast(Any, RecurringTransaction.is_active) == True,  # noqa: E712
-                        type_cast(Any, RecurringTransaction.next_execution_at) != None,  # noqa: E711
-                        type_cast(Any, RecurringTransaction.next_execution_at) <= now,
+                        RecurringTransaction.is_active == True,  # noqa: E712
+                        RecurringTransaction.next_execution_at != None,  # noqa: E711
+                        RecurringTransaction.next_execution_at <= now,
                     ),
                 )
             )
@@ -114,8 +114,8 @@ async def _already_generated(
         type_cast(
             Any,
             and_(
-                type_cast(Any, Transaction.recurring_transaction_id) == recurring_tx.id,
-                type_cast(Any, Transaction.transaction_at) == recurring_tx.next_execution_at,
+                Transaction.recurring_transaction_id == recurring_tx.id,
+                Transaction.transaction_at == recurring_tx.next_execution_at,
             ),
         )
     )

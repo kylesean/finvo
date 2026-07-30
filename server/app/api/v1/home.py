@@ -7,7 +7,7 @@ Provides endpoints for home page data including:
 
 from calendar import monthrange
 from datetime import datetime
-from typing import Any, cast
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
@@ -62,29 +62,23 @@ async def get_total_expense(
         result = await db.execute(
             select(
                 func.coalesce(
-                    func.sum(
-                        case((cast(Any, Transaction.transaction_at >= start_of_day), Transaction.amount), else_=0)
-                    ),
+                    func.sum(case((Transaction.transaction_at >= start_of_day, Transaction.amount), else_=0)),
                     0,
                 ).label("today"),
                 func.coalesce(
-                    func.sum(
-                        case((cast(Any, Transaction.transaction_at >= start_of_month), Transaction.amount), else_=0)
-                    ),
+                    func.sum(case((Transaction.transaction_at >= start_of_month, Transaction.amount), else_=0)),
                     0,
                 ).label("month"),
                 func.coalesce(
-                    func.sum(
-                        case((cast(Any, Transaction.transaction_at >= start_of_year), Transaction.amount), else_=0)
-                    ),
+                    func.sum(case((Transaction.transaction_at >= start_of_year, Transaction.amount), else_=0)),
                     0,
                 ).label("year"),
                 # Total expense history
                 func.coalesce(func.sum(Transaction.amount), 0).label("total"),
             ).where(
                 and_(
-                    cast(Any, Transaction.user_uuid == user_id),
-                    cast(Any, Transaction.type == "EXPENSE"),
+                    Transaction.user_uuid == user_id,
+                    Transaction.type == "EXPENSE",
                 )
             )
         )
@@ -171,10 +165,10 @@ async def get_calendar_month_details(
             )
             .where(
                 and_(
-                    cast(Any, Transaction.user_uuid == str(current_user.uuid)),
-                    cast(Any, Transaction.type == "EXPENSE"),
-                    cast(Any, Transaction.transaction_at >= start_date),
-                    cast(Any, Transaction.transaction_at < end_date),
+                    Transaction.user_uuid == str(current_user.uuid),
+                    Transaction.type == "EXPENSE",
+                    Transaction.transaction_at >= start_date,
+                    Transaction.transaction_at < end_date,
                 )
             )
             .group_by(func.date(Transaction.transaction_at))

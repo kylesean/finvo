@@ -85,20 +85,20 @@ class SharedSpaceService:
 
         # Base query for filtering
         base_filter: Any = and_(
-            cast(Any, SpaceMember.user_uuid == user_uuid),
-            cast(Any, SpaceMember.status == "ACCEPTED"),
-            cast(Any, SharedSpace.status == "active"),
+            SpaceMember.user_uuid == user_uuid,
+            SpaceMember.status == "ACCEPTED",
+            SharedSpace.status == "active",
         )
 
         # Count total
-        count_query = select(func.count(cast(Any, SharedSpace.id))).join(SpaceMember).where(base_filter)
+        count_query = select(func.count(SharedSpace.id)).join(SpaceMember).where(base_filter)
         count_result = await self.db.execute(count_query)
         total = count_result.scalar() or 0
 
         # Query spaces
         query = (
-            select(SharedSpace, cast(Any, SpaceMember.role))
-            .join(SpaceMember, cast(Any, SharedSpace.id == SpaceMember.space_id))
+            select(SharedSpace, SpaceMember.role)
+            .join(SpaceMember, SharedSpace.id == SpaceMember.space_id)
             .where(base_filter)
             .options(selectinload(SharedSpace.creator))
             .order_by(desc(SharedSpace.created_at))
@@ -144,12 +144,12 @@ class SharedSpaceService:
 
         query = (
             select(SharedSpace)
-            .join(SpaceMember, cast(Any, SharedSpace.id == SpaceMember.space_id))
+            .join(SpaceMember, SharedSpace.id == SpaceMember.space_id)
             .where(
                 and_(
-                    cast(Any, SpaceMember.user_uuid == user_uuid),
-                    cast(Any, SharedSpace.id == space_id),
-                    cast(Any, SpaceMember.status == "ACCEPTED"),
+                    SpaceMember.user_uuid == user_uuid,
+                    SharedSpace.id == space_id,
+                    SpaceMember.status == "ACCEPTED",
                 )
             )
             .options(
@@ -163,7 +163,7 @@ class SharedSpaceService:
             raise NotFoundError("shared space not found")
 
         # Load creator separately to ensure it's loaded
-        creator_query = select(User).where(cast(Any, User.uuid == space.creator_uuid))
+        creator_query = select(User).where(User.uuid == space.creator_uuid)
         creator_result = await self.db.execute(creator_query)
         creator = creator_result.scalar_one_or_none()
 
@@ -206,7 +206,7 @@ class SharedSpaceService:
         """
         await self._verify_admin(space_id, user_uuid)
 
-        query = select(SharedSpace).where(cast(Any, SharedSpace.id == space_id))
+        query = select(SharedSpace).where(SharedSpace.id == space_id)
         result = await self.db.execute(query)
         space = result.scalar_one_or_none()
 
@@ -224,7 +224,7 @@ class SharedSpaceService:
         await self.db.refresh(space)
 
         # Load creator separately to avoid lazy-load in async context
-        creator_query = select(User).where(cast(Any, User.uuid == space.creator_uuid))
+        creator_query = select(User).where(User.uuid == space.creator_uuid)
         creator_result = await self.db.execute(creator_query)
         creator = creator_result.scalar_one_or_none()
 
@@ -252,7 +252,7 @@ class SharedSpaceService:
         """
         await self._verify_owner(space_id, user_uuid)
 
-        query = select(SharedSpace).where(cast(Any, SharedSpace.id == space_id))
+        query = select(SharedSpace).where(SharedSpace.id == space_id)
         result = await self.db.execute(query)
         space = result.scalar_one_or_none()
 
@@ -287,7 +287,7 @@ class SharedSpaceService:
         await self._verify_admin(space_id, user_uuid)
 
         # Get space
-        query = select(SharedSpace).where(cast(Any, SharedSpace.id == space_id))
+        query = select(SharedSpace).where(SharedSpace.id == space_id)
         result = await self.db.execute(query)
         space = result.scalar_one_or_none()
 
@@ -326,7 +326,7 @@ class SharedSpaceService:
             BusinessError: Code expired or already a member
         """
         # Find space by invite code
-        query = select(SharedSpace).where(cast(Any, SharedSpace.invite_code == code))
+        query = select(SharedSpace).where(SharedSpace.invite_code == code)
         result = await self.db.execute(query)
         space = result.scalar_one_or_none()
 
@@ -339,7 +339,7 @@ class SharedSpaceService:
 
         # Check if already a member
         member_query = select(SpaceMember).where(
-            cast(Any, and_(cast(Any, SpaceMember.space_id == space.id), cast(Any, SpaceMember.user_uuid == user_uuid)))
+            and_(SpaceMember.space_id == space.id, SpaceMember.user_uuid == user_uuid)
         )
         member_result = await self.db.execute(member_query)
         existing_member = member_result.scalar_one_or_none()
@@ -399,9 +399,7 @@ class SharedSpaceService:
             BusinessError: Owner cannot leave
         """
         # Check if user is owner
-        query = select(SpaceMember).where(
-            cast(Any, and_(cast(Any, SpaceMember.space_id == space_id), cast(Any, SpaceMember.user_uuid == user_uuid)))
-        )
+        query = select(SpaceMember).where(and_(SpaceMember.space_id == space_id, SpaceMember.user_uuid == user_uuid))
         result = await self.db.execute(query)
         member = result.scalar_one_or_none()
 
@@ -445,9 +443,7 @@ class SharedSpaceService:
         query = select(SpaceMember).where(
             cast(
                 Any,
-                and_(
-                    cast(Any, SpaceMember.space_id == space_id), cast(Any, SpaceMember.user_uuid == target_user_uuid)
-                ),
+                and_(SpaceMember.space_id == space_id, SpaceMember.user_uuid == target_user_uuid),
             )
         )
         result = await self.db.execute(query)
@@ -498,8 +494,8 @@ class SharedSpaceService:
             cast(
                 Any,
                 and_(
-                    cast(Any, SpaceMember.space_id == space_id),
-                    cast(Any, SpaceMember.user_uuid == target_user_uuid),
+                    SpaceMember.space_id == space_id,
+                    SpaceMember.user_uuid == target_user_uuid,
                 ),
             )
         )
@@ -554,7 +550,7 @@ class SharedSpaceService:
         await self._verify_membership(space_id, user_uuid)
 
         # Verify transaction exists and belongs to user
-        tx_query = select(Transaction).where(cast(Any, Transaction.id == transaction_id))
+        tx_query = select(Transaction).where(Transaction.id == transaction_id)
         tx_result = await self.db.execute(tx_query)
         transaction = tx_result.scalar_one_or_none()
 
@@ -569,8 +565,8 @@ class SharedSpaceService:
             cast(
                 Any,
                 and_(
-                    cast(Any, SpaceTransaction.space_id == space_id),
-                    cast(Any, SpaceTransaction.transaction_id == transaction_id),
+                    SpaceTransaction.space_id == space_id,
+                    SpaceTransaction.transaction_id == transaction_id,
                 ),
             )
         )
@@ -592,7 +588,7 @@ class SharedSpaceService:
         from app.services.notification_handlers import TransactionAddedEvent
 
         # Get space name for notification content
-        space_name_query = select(SharedSpace.name).where(cast(Any, SharedSpace.id == space_id))
+        space_name_query = select(SharedSpace.name).where(SharedSpace.id == space_id)
         space_name_result = await self.db.execute(space_name_query)
         space_name = space_name_result.scalar_one_or_none() or "Shared Space"
 
@@ -699,12 +695,12 @@ class SharedSpaceService:
 
         query = (
             select(SpaceTransaction)
-            .where(cast(Any, SpaceTransaction.space_id == space_id))
+            .where(SpaceTransaction.space_id == space_id)
             .options(
                 selectinload(SpaceTransaction.transaction),
                 selectinload(SpaceTransaction.added_by),
             )
-            .order_by(desc(cast(Any, SpaceTransaction.created_at)))
+            .order_by(desc(SpaceTransaction.created_at))
             .offset(offset)
             .limit(limit)
         )
@@ -735,7 +731,7 @@ class SharedSpaceService:
         # Get all transactions in space
         query = (
             select(SpaceTransaction)
-            .where(cast(Any, SpaceTransaction.space_id == space_id))
+            .where(SpaceTransaction.space_id == space_id)
             .options(
                 selectinload(SpaceTransaction.transaction),
                 selectinload(SpaceTransaction.added_by),
@@ -750,7 +746,7 @@ class SharedSpaceService:
             .where(
                 cast(
                     Any,
-                    and_(cast(Any, SpaceMember.space_id == space_id), cast(Any, SpaceMember.status == "ACCEPTED")),
+                    and_(SpaceMember.space_id == space_id, SpaceMember.status == "ACCEPTED"),
                 )
             )
             .options(selectinload(SpaceMember.user))
@@ -838,9 +834,9 @@ class SharedSpaceService:
         # Query members
         query = select(SpaceMember).where(
             and_(
-                cast(Any, SpaceMember.space_id == space_id),
-                cast(Any, SpaceMember.user_uuid == user_uuid),
-                cast(Any, SpaceMember.status == "ACCEPTED"),
+                SpaceMember.space_id == space_id,
+                SpaceMember.user_uuid == user_uuid,
+                SpaceMember.status == "ACCEPTED",
             )
         )
         result = await self.db.execute(query)
@@ -867,18 +863,18 @@ class SharedSpaceService:
     async def _get_space_financial_stats(self, space_id: UUID) -> dict[str, Any]:
         """Retrieve aggregated financial statistics data across spatial dimensions."""
         # 1. Total count (including all types)
-        count_query = select(func.count()).where(cast(Any, SpaceTransaction.space_id == space_id))
+        count_query = select(func.count()).where(SpaceTransaction.space_id == space_id)
         count_result = await self.db.execute(count_query)
         tx_count = count_result.scalar() or 0
 
         # 2. Total expense (only EXPENSE type)
         expense_query = (
             select(func.sum(Transaction.amount))
-            .join(SpaceTransaction, cast(Any, Transaction.id == SpaceTransaction.transaction_id))
+            .join(SpaceTransaction, Transaction.id == SpaceTransaction.transaction_id)
             .where(
                 cast(
                     Any,
-                    and_(cast(Any, SpaceTransaction.space_id == space_id), cast(Any, Transaction.type == "EXPENSE")),
+                    and_(SpaceTransaction.space_id == space_id, Transaction.type == "EXPENSE"),
                 )
             )
         )
@@ -887,12 +883,12 @@ class SharedSpaceService:
 
         # 3. Total contributions by each member (only EXPENSE type)
         contribution_query = (
-            select(cast(Any, SpaceTransaction.added_by_user_uuid), cast(Any, func.sum(Transaction.amount)))
-            .join(Transaction, cast(Any, Transaction.id == SpaceTransaction.transaction_id))
+            select(SpaceTransaction.added_by_user_uuid, func.sum(Transaction.amount))
+            .join(Transaction, Transaction.id == SpaceTransaction.transaction_id)
             .where(
                 cast(
                     Any,
-                    and_(cast(Any, SpaceTransaction.space_id == space_id), cast(Any, Transaction.type == "EXPENSE")),
+                    and_(SpaceTransaction.space_id == space_id, Transaction.type == "EXPENSE"),
                 )
             )
             .group_by(SpaceTransaction.added_by_user_uuid)

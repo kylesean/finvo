@@ -46,24 +46,24 @@ class TransactionQueryService:
         display_currency = await get_user_display_currency(self.db, user_uuid)
 
         # 2. 构建查询
-        query = select(Transaction).where(type_cast(Any, Transaction.user_uuid == user_uuid))
+        query = select(Transaction).where(Transaction.user_uuid == user_uuid)
 
         # 日期过滤
         if date_filter:
             try:
                 filter_date = datetime.strptime(date_filter, "%Y-%m-%d").date()
-                query = query.where(type_cast(Any, func.date(Transaction.transaction_at) == filter_date))
+                query = query.where(func.date(Transaction.transaction_at) == filter_date)
             except ValueError:
                 logger.warning(f"Invalid date format: {date_filter}")
 
         # 类型过滤
         if type_filter == "income":
-            query = query.where(type_cast(Any, Transaction.type == "INCOME"))
+            query = query.where(Transaction.type == "INCOME")
         elif type_filter == "expense":
-            query = query.where(type_cast(Any, Transaction.type == "EXPENSE"))
+            query = query.where(Transaction.type == "EXPENSE")
 
         # 排序
-        query = query.order_by(desc(type_cast(Any, Transaction.transaction_at)), desc(type_cast(Any, Transaction.id)))
+        query = query.order_by(desc(Transaction.transaction_at), desc(Transaction.id))
 
         # 计算总数
         count_query = select(func.count()).select_from(query.subquery())
@@ -129,7 +129,7 @@ class TransactionQueryService:
             包含搜索结果和分页信息的字典
         """
         # 构建基础查询
-        query = select(Transaction).where(type_cast(Any, Transaction.user_uuid == user_uuid))
+        query = select(Transaction).where(Transaction.user_uuid == user_uuid)
 
         # 关键字搜索
         if keyword := filters.get("keyword"):
@@ -137,51 +137,51 @@ class TransactionQueryService:
                 type_cast(
                     Any,
                     or_(
-                        type_cast(Any, Transaction.description).ilike(f"%{keyword}%"),
-                        type_cast(Any, Transaction.location).ilike(f"%{keyword}%"),
+                        Transaction.description.ilike(f"%{keyword}%"),
+                        Transaction.location.ilike(f"%{keyword}%"),
                     ),
                 )
             )
 
         # 金额范围
         if min_amount := filters.get("min_amount"):
-            query = query.where(type_cast(Any, Transaction.amount >= min_amount))
+            query = query.where(Transaction.amount >= min_amount)
         if max_amount := filters.get("max_amount"):
-            query = query.where(type_cast(Any, Transaction.amount <= max_amount))
+            query = query.where(Transaction.amount <= max_amount)
 
         # 分类筛选
         if categories := filters.get("categories"):
-            query = query.where(type_cast(Any, Transaction.category_key).in_(categories))
+            query = query.where(Transaction.category_key.in_(categories))
 
         # 标签筛选
         if tags := filters.get("tags"):
             for tag in tags:
-                query = query.where(type_cast(Any, Transaction.tags).contains([tag]))
+                query = query.where(Transaction.tags.contains([tag]))
 
         # 日期范围
         if start_date := filters.get("start_date"):
             try:
                 start_dt = datetime.strptime(start_date, "%Y-%m-%d")
-                query = query.where(type_cast(Any, Transaction.transaction_at >= start_dt))
+                query = query.where(Transaction.transaction_at >= start_dt)
             except ValueError:
                 logger.warning(f"Invalid start_date format: {start_date}")
 
         if end_date := filters.get("end_date"):
             try:
                 end_dt = datetime.strptime(end_date, "%Y-%m-%d")
-                query = query.where(type_cast(Any, Transaction.transaction_at <= end_dt))
+                query = query.where(Transaction.transaction_at <= end_dt)
             except ValueError:
                 logger.warning(f"Invalid end_date format: {end_date}")
 
         # 收入/支出筛选
         if type_val := filters.get("type"):
             if type_val:
-                query = query.where(type_cast(Any, Transaction.amount > 0))
+                query = query.where(Transaction.amount > 0)
             else:
-                query = query.where(type_cast(Any, Transaction.amount < 0))
+                query = query.where(Transaction.amount < 0)
 
         # 排序
-        query = query.order_by(desc(type_cast(Any, Transaction.transaction_at)))
+        query = query.order_by(desc(Transaction.transaction_at))
 
         # 分页
         page = filters.get("page", 1)

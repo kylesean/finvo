@@ -38,9 +38,9 @@ class StatisticsService:
         if not account_types:
             return None
         # Return a subquery for filtering by account type
-        return select(type_cast(Any, FinancialAccount.id)).where(
-            type_cast(Any, FinancialAccount.user_uuid == user_uuid),
-            type_cast(Any, type_cast(Any, FinancialAccount.type).in_(account_types)),
+        return select(FinancialAccount.id).where(
+            FinancialAccount.user_uuid == user_uuid,
+            FinancialAccount.type.in_(account_types),
         )
 
     def _calc_change_percent(self, prev: Decimal, current: Decimal) -> float:
@@ -138,21 +138,19 @@ class StatisticsService:
         # Apply account type filter if specified
         account_filter = self._build_account_filter(user_uuid, account_types)
         if account_filter is not None:
-            base_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
+            base_conditions.append(Transaction.source_account_id.in_(account_filter))
 
         # Single-query conditional aggregation for income and expense
         totals_query = select(
             func.coalesce(
-                func.sum(case((type_cast(Any, Transaction.type == "INCOME"), Transaction.amount), else_=Decimal("0"))),
+                func.sum(case((Transaction.type == "INCOME", Transaction.amount), else_=Decimal("0"))),
                 Decimal("0"),
             ).label("income"),
             func.coalesce(
-                func.sum(
-                    case((type_cast(Any, Transaction.type == "EXPENSE"), Transaction.amount), else_=Decimal("0"))
-                ),
+                func.sum(case((Transaction.type == "EXPENSE", Transaction.amount), else_=Decimal("0"))),
                 Decimal("0"),
             ).label("expense"),
-        ).where(and_(*[type_cast(Any, c) for c in base_conditions]))
+        ).where(and_(*[c for c in base_conditions]))
 
         totals_result = await self.db.execute(totals_query)
         totals_row = totals_result.one()
@@ -168,19 +166,19 @@ class StatisticsService:
         ]
         # Also filter balance by account types if specified
         if account_types:
-            balance_conditions.append(type_cast(Any, FinancialAccount.type).in_(account_types))
+            balance_conditions.append(FinancialAccount.type.in_(account_types))
 
         balance_query = select(
             func.coalesce(
                 func.sum(
                     case(
-                        (type_cast(Any, FinancialAccount.nature == "ASSET"), FinancialAccount.current_balance),
+                        (FinancialAccount.nature == "ASSET", FinancialAccount.current_balance),
                         else_=-FinancialAccount.current_balance,
                     )
                 ),
                 0,
             )
-        ).where(and_(*[type_cast(Any, cond) for cond in balance_conditions]))
+        ).where(and_(*[cond for cond in balance_conditions]))
         balance_result = await self.db.execute(balance_query)
         total_balance = Decimal(str(balance_result.scalar() or 0))
 
@@ -191,20 +189,18 @@ class StatisticsService:
             Transaction.transaction_at <= prev_end,
         ]
         if account_filter is not None:
-            prev_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
+            prev_conditions.append(Transaction.source_account_id.in_(account_filter))
 
         prev_totals_query = select(
             func.coalesce(
-                func.sum(case((type_cast(Any, Transaction.type == "INCOME"), Transaction.amount), else_=Decimal("0"))),
+                func.sum(case((Transaction.type == "INCOME", Transaction.amount), else_=Decimal("0"))),
                 Decimal("0"),
             ).label("income"),
             func.coalesce(
-                func.sum(
-                    case((type_cast(Any, Transaction.type == "EXPENSE"), Transaction.amount), else_=Decimal("0"))
-                ),
+                func.sum(case((Transaction.type == "EXPENSE", Transaction.amount), else_=Decimal("0"))),
                 Decimal("0"),
             ).label("expense"),
-        ).where(and_(*[type_cast(Any, c) for c in prev_conditions]))
+        ).where(and_(*[c for c in prev_conditions]))
 
         prev_totals_result = await self.db.execute(prev_totals_query)
         prev_totals_row = prev_totals_result.one()
@@ -271,12 +267,12 @@ class StatisticsService:
         # Apply account type filter if specified
         account_filter = self._build_account_filter(user_uuid, account_types)
         if account_filter is not None:
-            base_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
+            base_conditions.append(Transaction.source_account_id.in_(account_filter))
 
         # Query aggregated data
         query = (
-            select(type_cast(Any, date_trunc).label("point_date"), func.sum(Transaction.amount).label("total"))
-            .where(type_cast(Any, and_(*[type_cast(Any, c) for c in base_conditions])))
+            select(date_trunc.label("point_date"), func.sum(Transaction.amount).label("total"))
+            .where(and_(*[c for c in base_conditions]))
             .group_by(date_trunc)
             .order_by(date_trunc)
         )
@@ -363,14 +359,14 @@ class StatisticsService:
         # Apply account type filter if specified
         account_filter = self._build_account_filter(user_uuid, account_types)
         if account_filter is not None:
-            base_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
+            base_conditions.append(Transaction.source_account_id.in_(account_filter))
 
         # Query category totals for expenses
         query = (
-            select(type_cast(Any, Transaction.category_key), func.sum(Transaction.amount).label("total"))
-            .where(type_cast(Any, and_(*[type_cast(Any, c) for c in base_conditions])))
+            select(Transaction.category_key, func.sum(Transaction.amount).label("total"))
+            .where(and_(*[c for c in base_conditions]))
             .group_by(Transaction.category_key)
-            .order_by(desc(type_cast(Any, func.sum(Transaction.amount))))
+            .order_by(desc(func.sum(Transaction.amount)))
             .limit(limit)
         )
 
@@ -432,16 +428,16 @@ class StatisticsService:
         # Apply account type filter if specified
         account_filter = self._build_account_filter(user_uuid, account_types)
         if account_filter is not None:
-            base_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
+            base_conditions.append(Transaction.source_account_id.in_(account_filter))
 
         # Build query
-        query = select(Transaction).where(type_cast(Any, and_(*[type_cast(Any, c) for c in base_conditions])))
+        query = select(Transaction).where(and_(*[c for c in base_conditions]))
 
         # Apply sorting
         if sort_by == "date":
-            query = query.order_by(desc(type_cast(Any, Transaction.transaction_at)))
+            query = query.order_by(desc(Transaction.transaction_at))
         else:  # default to amount
-            query = query.order_by(desc(type_cast(Any, Transaction.amount)))
+            query = query.order_by(desc(Transaction.amount))
 
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
@@ -507,21 +503,19 @@ class StatisticsService:
         # Apply account type filter if specified
         account_filter = self._build_account_filter(user_uuid, account_types)
         if account_filter is not None:
-            base_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
+            base_conditions.append(Transaction.source_account_id.in_(account_filter))
 
         # Single-query conditional aggregation for current period totals
         totals_query = select(
             func.coalesce(
-                func.sum(case((type_cast(Any, Transaction.type == "INCOME"), Transaction.amount), else_=Decimal("0"))),
+                func.sum(case((Transaction.type == "INCOME", Transaction.amount), else_=Decimal("0"))),
                 Decimal("0"),
             ).label("income"),
             func.coalesce(
-                func.sum(
-                    case((type_cast(Any, Transaction.type == "EXPENSE"), Transaction.amount), else_=Decimal("0"))
-                ),
+                func.sum(case((Transaction.type == "EXPENSE", Transaction.amount), else_=Decimal("0"))),
                 Decimal("0"),
             ).label("expense"),
-        ).where(and_(*[type_cast(Any, c) for c in base_conditions]))
+        ).where(and_(*[c for c in base_conditions]))
 
         totals_result = await self.db.execute(totals_query)
         totals_row = totals_result.one()
@@ -536,20 +530,18 @@ class StatisticsService:
             Transaction.transaction_at <= prev_end,
         ]
         if account_filter is not None:
-            prev_conditions.append(type_cast(Any, Transaction.source_account_id).in_(account_filter))
+            prev_conditions.append(Transaction.source_account_id.in_(account_filter))
 
         prev_totals_query = select(
             func.coalesce(
-                func.sum(case((type_cast(Any, Transaction.type == "INCOME"), Transaction.amount), else_=Decimal("0"))),
+                func.sum(case((Transaction.type == "INCOME", Transaction.amount), else_=Decimal("0"))),
                 Decimal("0"),
             ).label("income"),
             func.coalesce(
-                func.sum(
-                    case((type_cast(Any, Transaction.type == "EXPENSE"), Transaction.amount), else_=Decimal("0"))
-                ),
+                func.sum(case((Transaction.type == "EXPENSE", Transaction.amount), else_=Decimal("0"))),
                 Decimal("0"),
             ).label("expense"),
-        ).where(and_(*[type_cast(Any, c) for c in prev_conditions]))
+        ).where(and_(*[c for c in prev_conditions]))
 
         prev_totals_result = await self.db.execute(prev_totals_query)
         prev_totals_row = prev_totals_result.one()
@@ -577,9 +569,9 @@ class StatisticsService:
                 type_cast(
                     Any,
                     and_(
-                        *[type_cast(Any, c) for c in base_conditions],
-                        type_cast(Any, Transaction.type == "EXPENSE"),
-                        type_cast(Any, Transaction.category_key).in_(self.ESSENTIAL_CATEGORIES),
+                        *[c for c in base_conditions],
+                        Transaction.type == "EXPENSE",
+                        Transaction.category_key.in_(self.ESSENTIAL_CATEGORIES),
                     ),
                 )
             )
@@ -591,9 +583,9 @@ class StatisticsService:
                 type_cast(
                     Any,
                     and_(
-                        *[type_cast(Any, c) for c in base_conditions],
-                        type_cast(Any, Transaction.type == "EXPENSE"),
-                        type_cast(Any, Transaction.category_key).in_(self.DISCRETIONARY_CATEGORIES),
+                        *[c for c in base_conditions],
+                        Transaction.type == "EXPENSE",
+                        Transaction.category_key.in_(self.DISCRETIONARY_CATEGORIES),
                     ),
                 )
             )

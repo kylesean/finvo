@@ -1,6 +1,6 @@
 """Transaction management API endpoints."""
 
-from typing import Annotated, Any, cast
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -286,8 +286,8 @@ async def search_transactions(
             # when accessing them directly. We use type: ignore for ilike/in_ etc.
             conditions.append(
                 or_(
-                    cast(Any, Transaction.description).ilike(f"%{keyword}%"),
-                    cast(Any, Transaction.location).ilike(f"%{keyword}%"),
+                    Transaction.description.ilike(f"%{keyword}%"),
+                    Transaction.location.ilike(f"%{keyword}%"),
                 )
             )
 
@@ -307,13 +307,13 @@ async def search_transactions(
 
         if category_keys:
             keys = [k.strip() for k in category_keys.split(",")]
-            conditions.append(cast(Any, Transaction.category_key).in_(keys))
+            conditions.append(Transaction.category_key.in_(keys))
 
         if tags:
             tag_list = [t.strip() for t in tags.split(",")]
             # PostgreSQL JSONB contains check
             for tag in tag_list:
-                conditions.append(cast(Any, Transaction.tags).contains([tag]))
+                conditions.append(Transaction.tags.contains([tag]))
 
         if start_date:
             try:
@@ -713,10 +713,10 @@ async def get_pending_transactions(
     query = (
         select(Transaction)
         .where(
-            cast(Any, Transaction.user_uuid == current_user.uuid),
-            cast(Any, Transaction.status == "PENDING"),
+            Transaction.user_uuid == current_user.uuid,
+            Transaction.status == "PENDING",
         )
-        .order_by(cast(Any, Transaction.transaction_at).desc())
+        .order_by(Transaction.transaction_at.desc())
     )
     result = await db.execute(query)
     transactions = result.scalars().all()
@@ -747,7 +747,7 @@ async def confirm_pending_transaction(
 ) -> JSONResponse:
     """Confirm a PENDING transaction, changing its status to CONFIRMED."""
     query = select(Transaction).where(
-        cast(Any, and_(Transaction.id == transaction_id, Transaction.user_uuid == current_user.uuid))
+        and_(Transaction.id == transaction_id, Transaction.user_uuid == current_user.uuid)
     )
     result = await db.execute(query)
     tx = result.scalar_one_or_none()
@@ -773,7 +773,7 @@ async def skip_pending_transaction(
 ) -> JSONResponse:
     """Skip (delete) a PENDING transaction."""
     query = select(Transaction).where(
-        cast(Any, and_(Transaction.id == transaction_id, Transaction.user_uuid == current_user.uuid))
+        and_(Transaction.id == transaction_id, Transaction.user_uuid == current_user.uuid)
     )
     result = await db.execute(query)
     tx = result.scalar_one_or_none()
@@ -798,10 +798,10 @@ async def _mark_recurring_notification_read(db: AsyncSession, user_uuid: UUID, t
     stmt = (
         sa_update(Notification)
         .where(
-            cast(Any, Notification.user_uuid == user_uuid),
-            cast(Any, Notification.type == "recurring_pending"),
-            cast(Any, Notification.is_read == False),  # noqa: E712
-            cast(Any, Notification.data["transaction_id"].as_string() == str(transaction_id)),
+            Notification.user_uuid == user_uuid,
+            Notification.type == "recurring_pending",
+            Notification.is_read == False,  # noqa: E712
+            Notification.data["transaction_id"].as_string() == str(transaction_id),
         )
         .values(is_read=True, read_at=func.now())
     )

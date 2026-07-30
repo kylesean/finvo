@@ -8,7 +8,7 @@ This module provides utilities for:
 
 from __future__ import annotations
 
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar
 
 from sqlalchemy import Select, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -51,7 +51,9 @@ class QueryOptimizer:
             ```
         """
         for relationship in relationships:
-            query = query.options(selectinload(cast(Any, relationship)))
+            # selectinload accepts relationship names as str at runtime;
+            # mypy's stubs only declare the QueryableAttribute overload.
+            query = query.options(selectinload(relationship))  # type: ignore[arg-type]
         return query
 
     @staticmethod
@@ -81,7 +83,7 @@ class QueryOptimizer:
             ```
         """
         for relationship in relationships:
-            query = query.options(joinedload(cast(Any, relationship)))
+            query = query.options(joinedload(relationship))  # type: ignore[arg-type]
         return query
 
     @staticmethod
@@ -127,12 +129,13 @@ class QueryOptimizer:
         # Cache miss - query database
         logger.debug("query_cache_miss", model=model.__name__, id=id_value)
 
-        query = select(model).where(cast(Any, model).id == id_value)
+        # model.id is a SQLAlchemy class-level attribute not in SQLModel's type stubs.
+        query = select(model).where(model.id == id_value)  # type: ignore[attr-defined]
 
         # Add eager loading if specified
         if relationships:
             for rel in relationships:
-                query = query.options(selectinload(cast(Any, rel)))
+                query = query.options(selectinload(rel))  # type: ignore[arg-type]
 
         result = await session.execute(query)
         instance = result.scalar_one_or_none()
@@ -197,12 +200,13 @@ class QueryOptimizer:
         if not ids:
             return []
 
-        query = select(model).where(cast(Any, model).id.in_(ids))
+        # model.id is a SQLAlchemy class-level attribute not in SQLModel's type stubs.
+        query = select(model).where(model.id.in_(ids))  # type: ignore[attr-defined]
 
         # Add eager loading if specified
         if relationships:
             for rel in relationships:
-                query = query.options(selectinload(cast(Any, rel)))
+                query = query.options(selectinload(rel))  # type: ignore[arg-type]
 
         result = await session.execute(query)
         return list(result.scalars().all())
@@ -351,9 +355,7 @@ async def get_user_conversations_optimized(
     """
     from app.models.session import Session as ChatSession
 
-    query = (
-        select(ChatSession).where(ChatSession.user_uuid == user_uuid).order_by(desc(cast(Any, ChatSession.updated_at)))
-    )
+    query = select(ChatSession).where(ChatSession.user_uuid == user_uuid).order_by(desc(ChatSession.updated_at))
 
     # Add eager loading for messages (optional, depending on use case)
 
@@ -405,11 +407,7 @@ async def get_transactions_with_comments_optimized(
     """
     from app.models.transaction import Transaction
 
-    query = (
-        select(Transaction)
-        .where(Transaction.user_uuid == user_uuid)
-        .order_by(desc(cast(Any, Transaction.transaction_at)))
-    )
+    query = select(Transaction).where(Transaction.user_uuid == user_uuid).order_by(desc(Transaction.transaction_at))
 
     # Eager load comments
     query = QueryOptimizer.with_relationships(query, "comments")
