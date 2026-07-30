@@ -187,7 +187,7 @@ class TransactionService:
             rrule_string, start_date, end_date, forecast_start, forecast_end
         )
 
-    def _calculate_next_execution(
+    def calculate_next_execution(
         self,
         rrule_str: str,
         start_date: date,
@@ -195,7 +195,7 @@ class TransactionService:
         exception_dates: list[str] | None = None,
     ) -> datetime | None:
         """Calculate the next execution date for a recurring transaction."""
-        return self._recurring._calculate_next_execution(rrule_str, start_date, end_date, exception_dates)
+        return self._recurring.calculate_next_execution(rrule_str, start_date, end_date, exception_dates)
 
     # ===== Cash Flow Operations (delegated to CashFlowService) =====
 

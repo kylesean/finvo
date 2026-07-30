@@ -99,7 +99,7 @@ class RecurringTransactionService:
         exception_dates = data.get("exception_dates", [])
 
         # 计算下次执行日期
-        next_execution = self._calculate_next_execution(
+        next_execution = self.calculate_next_execution(
             data["recurrence_rule"],
             start_date,
             end_date,
@@ -133,7 +133,7 @@ class RecurringTransactionService:
 
         return self._recurring_tx_to_dict(recurring_tx)
 
-    def _calculate_next_execution(
+    def calculate_next_execution(
         self,
         rrule_str: str,
         start_date: date,
@@ -143,7 +143,7 @@ class RecurringTransactionService:
         """计算下次执行日期
 
         Args:
-            rrule_str: RRULE 字符串（UNTIL 必须带 UTC 时区标记 Z）
+            rrule_str: RRULE 字符串（UNTIL 必须带 utc 时区标记 Z）
             start_date: 规则开始日期
             end_date: 规则结束日期
             exception_dates: 排除日期列表
@@ -208,7 +208,7 @@ class RecurringTransactionService:
 
             if next_occ.date().isoformat() in exception_set:
                 # 排除日跳过，递归查找下一个可用时间
-                return self._calculate_next_execution(rrule_str, next_occ.date(), end_date, exception_dates)
+                return self.calculate_next_execution(rrule_str, next_occ.date(), end_date, exception_dates)
 
             return next_occ
         except Exception as e:
@@ -379,7 +379,7 @@ class RecurringTransactionService:
         )
 
         if should_recalculate and recurring_tx.is_active:
-            recurring_tx.next_execution_at = self._calculate_next_execution(
+            recurring_tx.next_execution_at = self.calculate_next_execution(
                 recurring_tx.recurrence_rule,
                 recurring_tx.start_date,
                 recurring_tx.end_date,

@@ -289,7 +289,7 @@ async def _update_next_execution(
     """Update the next execution date for a recurring transaction."""
     service = RecurringTransactionService(db)
 
-    next_execution = service._calculate_next_execution(
+    next_execution = service.calculate_next_execution(
         recurring_tx.recurrence_rule,
         recurring_tx.start_date,
         recurring_tx.end_date,

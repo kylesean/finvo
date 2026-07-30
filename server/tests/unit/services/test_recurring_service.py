@@ -31,7 +31,7 @@ def test_calculate_next_execution_historical_start_date(db_session):
     # Start date 3 years ago (approx 1095 days)
     start_date = date(2023, 1, 1)
 
-    next_exec = service._calculate_next_execution(
+    next_exec = service.calculate_next_execution(
         rrule_str="FREQ=DAILY",
         start_date=start_date,
     )
@@ -44,7 +44,7 @@ def test_calculate_next_execution_month_end_31(db_session):
     service = RecurringTransactionService(db_session)
     start_date = date(2026, 1, 31)
 
-    next_exec = service._calculate_next_execution(
+    next_exec = service.calculate_next_execution(
         rrule_str="FREQ=MONTHLY;BYMONTHDAY=31",
         start_date=start_date,
     )
@@ -57,7 +57,7 @@ def test_calculate_next_execution_last_day_of_month(db_session):
     service = RecurringTransactionService(db_session)
     start_date = date(2026, 1, 1)
 
-    next_exec = service._calculate_next_execution(
+    next_exec = service.calculate_next_execution(
         rrule_str="FREQ=MONTHLY;BYMONTHDAY=-1",
         start_date=start_date,
     )
