@@ -29,6 +29,7 @@ obj/
 Thumbs.db
 .vscode/
 .idea/
+.trae/
 *.swp
 *.swo
 .history
