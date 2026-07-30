@@ -110,7 +110,7 @@ async def create_storage_config(
             "createdAt": config.created_at.isoformat().replace("+00:00", "Z"),
             "updatedAt": config.updated_at.isoformat().replace("+00:00", "Z") if config.updated_at else None,
         },
-        message="存储配置创建成功",
+        message="Storage configuration created successfully",
     )
 
 
@@ -170,7 +170,9 @@ async def get_storage_config(
     config = await service.get_by_id(config_id, current_user.uuid)
 
     if not config:
-        raise BusinessException(message="存储配置不存在或无权访问", status_code=404, error_code="CONFIG_NOT_FOUND")
+        raise BusinessException(
+            message="Storage config not found or access denied", status_code=404, error_code="CONFIG_NOT_FOUND"
+        )
 
     return success_response(
         data={
@@ -215,7 +217,9 @@ async def update_storage_config(
     )
 
     if not config:
-        raise BusinessException(message="存储配置不存在或无权访问", status_code=404, error_code="CONFIG_NOT_FOUND")
+        raise BusinessException(
+            message="Storage config not found or access denied", status_code=404, error_code="CONFIG_NOT_FOUND"
+        )
 
     return success_response(
         data={
@@ -228,7 +232,7 @@ async def update_storage_config(
             "createdAt": config.created_at.isoformat().replace("+00:00", "Z"),
             "updatedAt": config.updated_at.isoformat().replace("+00:00", "Z") if config.updated_at else None,
         },
-        message="存储配置更新成功",
+        message="Storage configuration updated successfully",
     )
 
 
@@ -257,14 +261,18 @@ async def delete_storage_config(
     except Exception as e:
         if "foreign key" in str(e).lower():
             raise BusinessException(
-                message="无法删除：仍有文件使用此存储配置", status_code=400, error_code="CONFIG_IN_USE"
+                message="Cannot delete: storage config is still in use by attachments",
+                status_code=400,
+                error_code="CONFIG_IN_USE",
             )
         raise
 
     if not deleted:
-        raise BusinessException(message="存储配置不存在或无权访问", status_code=404, error_code="CONFIG_NOT_FOUND")
+        raise BusinessException(
+            message="Storage config not found or access denied", status_code=404, error_code="CONFIG_NOT_FOUND"
+        )
 
-    return success_response(data=None, message="存储配置删除成功")
+    return success_response(data=None, message="Storage configuration deleted successfully")
 
 
 @router.get("/providers/list")

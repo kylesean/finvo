@@ -159,14 +159,14 @@ async def upload_files(
     # 校验文件数量
     if not files:
         raise BusinessException(
-            message="请选择至少一个文件",
+            message="Please select at least one file",
             status_code=400,
             error_code="NO_FILES",
         )
 
     if len(files) > 20:
         raise BusinessException(
-            message="单次最多上传 20 个文件",
+            message="Maximum 20 files per upload",
             status_code=400,
             error_code="TOO_MANY_FILES",
         )
@@ -183,7 +183,7 @@ async def upload_files(
     # 检查是否全部失败
     if not successful and failed:
         raise BusinessException(
-            message="所有文件上传失败",
+            message="All file uploads failed",
             status_code=400,
             error_code="UPLOAD_ALL_FAILED",
         )
@@ -198,7 +198,7 @@ async def upload_files(
             "uploads": successful,
             "failures": failed,
         },
-        message="上传完成",
+        message="Upload completed",
     )
 
 
@@ -281,7 +281,7 @@ async def view_attachment(
             error_type=type(e).__name__,
         )
         raise BusinessException(
-            message="文件访问失败",
+            message="File access failed",
             status_code=500,
             error_code="FILE_ACCESS_ERROR",
         )
@@ -323,14 +323,14 @@ async def delete_file(
 
         return success_response(
             data=None,
-            message="文件删除成功",
+            message="File deleted successfully",
         )
 
     except BusinessException:
         raise
     except Exception:
         raise BusinessException(
-            message="文件删除失败",
+            message="File deletion failed",
             status_code=500,
             error_code="FILE_DELETE_ERROR",
         )
@@ -354,5 +354,5 @@ async def get_supported_types() -> JSONResponse:
             "documentExtensions": sorted(DOCUMENT_EXTENSIONS),
             "allExtensions": sorted(ALLOWED_EXTENSIONS),
         },
-        message="支持的文件类型",
+        message="Supported file types",
     )

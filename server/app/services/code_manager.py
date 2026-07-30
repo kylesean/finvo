@@ -50,7 +50,9 @@ class EmailCodeSender(CodeSenderInterface):
 
         # 开发环境：直接打印验证码
         if settings.DEBUG:
-            logger.debug("email_verification_code_debug", email=account, code=code, message="验证码已生成（开发环境）")
+            logger.debug(
+                "email_verification_code_debug", email=account, code=code, message="verification_code_generated_dev"
+            )
 
         return True
 
@@ -75,7 +77,9 @@ class SMSCodeSender(CodeSenderInterface):
 
         # 开发环境：直接打印验证码
         if settings.DEBUG:
-            logger.debug("sms_verification_code_debug", mobile=account, code=code, message="验证码已生成（开发环境）")
+            logger.debug(
+                "sms_verification_code_debug", mobile=account, code=code, message="verification_code_generated_dev"
+            )
 
         return True
 

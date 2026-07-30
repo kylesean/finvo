@@ -395,7 +395,7 @@ class UploadService:
 
         if not attachment:
             raise BusinessException(
-                message="附件不存在或无权访问",
+                message="Attachment not found or access denied",
                 status_code=404,
                 error_code="FILE_NOT_FOUND",
             )
@@ -422,7 +422,7 @@ class UploadService:
             shared_space_res = await self.db.execute(shared_space_stmt)
             if not shared_space_res.first():
                 raise BusinessException(
-                    message="附件不存在或无权访问",
+                    message="Attachment not found or access denied",
                     status_code=404,
                     error_code="FILE_NOT_FOUND",
                 )
@@ -432,7 +432,7 @@ class UploadService:
 
         if not file_path.exists():
             raise BusinessException(
-                message="文件不存在",
+                message="File not found",
                 status_code=404,
                 error_code="FILE_NOT_FOUND",
             )
@@ -458,7 +458,7 @@ class UploadService:
         """校验并读取文件。"""
         if not file.filename:
             raise BusinessException(
-                message="文件名不能为空",
+                message="Filename must not be empty",
                 status_code=400,
                 error_code="INVALID_FILENAME",
             )
@@ -466,7 +466,7 @@ class UploadService:
         extension = self._get_extension(file.filename)
         if extension.lower() not in ALLOWED_EXTENSIONS:
             raise BusinessException(
-                message=f"不支持的文件类型: .{extension}",
+                message=f"Unsupported file type: .{extension}",
                 status_code=400,
                 error_code="INVALID_FILE_TYPE",
             )
@@ -476,14 +476,14 @@ class UploadService:
         if len(content) > self.MAX_FILE_SIZE:
             size_mb = self.MAX_FILE_SIZE / (1024 * 1024)
             raise BusinessException(
-                message=f"文件大小超过限制 ({size_mb:.1f}MB)",
+                message=f"File size exceeds limit ({size_mb:.1f}MB)",
                 status_code=400,
                 error_code="FILE_TOO_LARGE",
             )
 
         if len(content) == 0:
             raise BusinessException(
-                message="文件内容为空",
+                message="File content is empty",
                 status_code=400,
                 error_code="FILE_EMPTY",
             )
