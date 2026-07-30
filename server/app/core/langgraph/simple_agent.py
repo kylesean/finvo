@@ -57,20 +57,19 @@ class SimpleLangChainAgent:
             checkpointer: Optional LangGraph checkpointer. When not provided,
                 it is lazily obtained from app.core.checkpointer.checkpointer_manager
                 on first use (the pool is eagerly warmed up in the app lifespan).
+
+        Note:
+            Construction is side-effect free. The LLM tool binding happens inside
+            create_agent_node at graph-build time (see get_agent), and the
+            "simple_agent_initialized" log is emitted on the first get_agent()
+            call — so importing this module never triggers I/O or log noise.
         """
         self.llm_service = llm_service
-        self.llm_service.bind_tools(tools)
-
         self._agent: MiddlewareAgent | None = None
         self._checkpointer: AsyncPostgresSaver | None = checkpointer
         self._memory_service: MemoryService | None = None
         self._middlewares: list[Any] | None = None
         self._stream_processor = StreamProcessor()
-
-        logger.info(
-            "simple_agent_initialized",
-            model=settings.DEFAULT_LLM_MODEL,
-        )
 
     # =========================================================================
     # 内部组件初始化
@@ -139,6 +138,11 @@ class SimpleLangChainAgent:
         """
         if self._agent is not None:
             return self._agent
+
+        logger.info(
+            "simple_agent_initialized",
+            model=settings.DEFAULT_LLM_MODEL,
+        )
 
         # 使用自定义图构建（支持 direct_execute 节点）
         checkpointer = await self._get_checkpointer()

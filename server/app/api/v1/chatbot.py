@@ -10,6 +10,7 @@ Authorization: Session ownership is verified via get_authorized_session.
 import asyncio
 import json
 from collections.abc import AsyncGenerator
+from functools import lru_cache
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -43,7 +44,22 @@ from app.schemas.chat import (
 from app.schemas.genui import GenUIEvent
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
-agent = LangGraphAgent()
+
+
+@lru_cache(maxsize=1)
+def get_agent() -> LangGraphAgent:
+    """Get the singleton LangGraph agent instance (lazily initialized).
+
+    Uses lru_cache to ensure a single instance is created and reused across
+    requests. Construction is side-effect free (see SimpleLangChainAgent.__init__),
+    so importing this module never triggers LLM/graph initialization.
+
+    Test isolation: call get_agent.cache_clear() to reset, or monkeypatch
+    chatbot.get_agent to inject a mock.
+    """
+    return LangGraphAgent()
+
+
 _background_memory_tasks: set[asyncio.Task[Any]] = set()
 
 
@@ -152,6 +168,7 @@ async def chat(
         session_id = getattr(chat_request, "session_id", None)
         session, is_new = await resolve_chat_session(session_id, current_user)
 
+        agent = get_agent()
         result = await agent.get_response(chat_request.messages, session.id, user_uuid=session.user_uuid)
 
         response = ChatResponse(messages=result)
@@ -267,6 +284,8 @@ async def chat_stream(
                 await repo.update_name(session.id, title)
             logger.info("session_title_set", session_id=session.id, title=title)
 
+    agent = get_agent()
+
     async def event_generator() -> AsyncGenerator[str]:
         try:
             # 1. Session init event (only for new sessions)
@@ -374,6 +393,7 @@ async def update_session_state(
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)
+    agent = get_agent()
 
     logger.info(
         "update_state_request_received",
@@ -427,6 +447,7 @@ async def get_session_messages(
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)
+    agent = get_agent()
 
     try:
         # Use new detailed history method
@@ -478,6 +499,7 @@ async def clear_session_messages(
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)
+    agent = get_agent()
 
     try:
         await agent.clear_chat_history(session.id)
@@ -528,6 +550,7 @@ async def cancel_last_turn(
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)
+    agent = get_agent()
 
     try:
         result = await agent.cancel_last_turn(session.id)
@@ -579,6 +602,7 @@ async def get_resume_status(
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)
+    agent = get_agent()
 
     try:
         state = await agent.get_session_state(session.id)
@@ -638,6 +662,7 @@ async def resume_session(
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)
+    agent = get_agent()
 
     async def event_generator() -> AsyncGenerator[str]:
         try:

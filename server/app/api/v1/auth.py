@@ -403,7 +403,7 @@ async def delete_session(
     Returns:
         Success response
     """
-    from app.api.v1.chatbot import agent as chatbot_agent
+    from app.api.v1.chatbot import get_agent
     from app.core.responses import error_response, get_error_code_int, success_response
 
     # Verify session ownership
@@ -425,6 +425,7 @@ async def delete_session(
     try:
         # 1. Use the chatbot agent to cascade delete history
         # This handles LangGraph checkpoints (via official API) and searchable_messages
+        chatbot_agent = get_agent()
         await chatbot_agent.delete_session_history(session.id)
 
         # 2. Delete the session metadata
