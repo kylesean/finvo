@@ -281,7 +281,7 @@ class UserInfo(BaseModel):
     username: str = Field(..., description="User's username")
     avatarUrl: str | None = Field(None, description="User's avatar URL")
     createdAt: str = Field(..., description="Account creation timestamp (ISO 8601)")
-    updatedAt: str = Field(..., description="Last update timestamp (ISO 8601)")
+    updatedAt: str | None = Field(None, description="Last update timestamp (ISO 8601)")
     clientLastLoginAt: str | None = Field(None, description="Last login timestamp (ISO 8601)")
 
 
