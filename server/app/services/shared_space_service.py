@@ -116,10 +116,16 @@ class SharedSpaceService:
         result = await self.db.execute(query)
         rows = result.all()
 
-        # Build response with transaction counts
+        # Build response with transaction counts in batch
+        space_ids = [space.id for space, _ in rows]
+        stats_map = await self._batch_get_space_financial_stats(space_ids)
+
         items = []
         for space, role in rows:
-            stats = await self._get_space_financial_stats(space.id)
+            stats = stats_map.get(
+                space.id,
+                {"transaction_count": 0, "total_expense": Decimal("0"), "member_contributions": {}},
+            )
             items.append(
                 self._space_to_dict(
                     space,
@@ -898,6 +904,70 @@ class SharedSpaceService:
         contributions = {row[0]: row[1] for row in contribution_result.all()}
 
         return {"transaction_count": tx_count, "total_expense": total_expense, "member_contributions": contributions}
+
+    async def _batch_get_space_financial_stats(self, space_ids: list[UUID]) -> dict[UUID, dict[str, Any]]:
+        """Retrieve aggregated financial statistics across multiple spaces in batch queries.
+
+        Args:
+            space_ids: List of space IDs
+
+        Returns:
+            Dictionary mapping space_id to stats dict (transaction_count, total_expense, member_contributions)
+        """
+        if not space_ids:
+            return {}
+
+        stats_by_space: dict[UUID, dict[str, Any]] = {
+            sid: {"transaction_count": 0, "total_expense": Decimal("0"), "member_contributions": {}}
+            for sid in space_ids
+        }
+
+        # 1. Batch total transaction counts
+        count_query = (
+            select(SpaceTransaction.space_id, func.count(SpaceTransaction.id))
+            .where(SpaceTransaction.space_id.in_(space_ids))
+            .group_by(SpaceTransaction.space_id)
+        )
+        count_result = await self.db.execute(count_query)
+        for space_id, count in count_result.all():
+            if space_id in stats_by_space:
+                stats_by_space[space_id]["transaction_count"] = count or 0
+
+        # 2. Batch total expenses
+        expense_query = (
+            select(SpaceTransaction.space_id, func.sum(Transaction.amount))
+            .join(Transaction, Transaction.id == SpaceTransaction.transaction_id)
+            .where(
+                cast(
+                    Any,
+                    and_(SpaceTransaction.space_id.in_(space_ids), Transaction.type == "EXPENSE"),
+                )
+            )
+            .group_by(SpaceTransaction.space_id)
+        )
+        expense_result = await self.db.execute(expense_query)
+        for space_id, total_exp in expense_result.all():
+            if space_id in stats_by_space:
+                stats_by_space[space_id]["total_expense"] = total_exp or Decimal("0")
+
+        # 3. Batch member contributions
+        contribution_query = (
+            select(SpaceTransaction.space_id, SpaceTransaction.added_by_user_uuid, func.sum(Transaction.amount))
+            .join(Transaction, Transaction.id == SpaceTransaction.transaction_id)
+            .where(
+                cast(
+                    Any,
+                    and_(SpaceTransaction.space_id.in_(space_ids), Transaction.type == "EXPENSE"),
+                )
+            )
+            .group_by(SpaceTransaction.space_id, SpaceTransaction.added_by_user_uuid)
+        )
+        contribution_result = await self.db.execute(contribution_query)
+        for space_id, user_uuid, contrib in contribution_result.all():
+            if space_id in stats_by_space:
+                stats_by_space[space_id]["member_contributions"][user_uuid] = contrib or Decimal("0")
+
+        return stats_by_space
 
     def _space_to_dict(
         self,

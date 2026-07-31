@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncGenerator
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import db_manager
 from app.core.dependencies import get_current_user
 from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError
 from app.core.responses import success_response
+from app.core.service_deps import get_budget_service
 from app.models.budget import BudgetScope, BudgetStatus
 from app.models.user import User
 from app.schemas.budget import (
@@ -30,12 +28,6 @@ from app.services.budget_service import BudgetService
 router = APIRouter(prefix="/budgets", tags=["Budget"])
 
 
-async def get_db() -> AsyncGenerator[AsyncSession]:
-    """Get database session."""
-    async with db_manager.session_factory() as session:
-        yield session
-
-
 # ============================================================================
 # Budget CRUD
 # ============================================================================
@@ -45,7 +37,7 @@ async def get_db() -> AsyncGenerator[AsyncSession]:
 async def create_budget(
     request: BudgetCreateRequest,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Create a new budget.
 
@@ -55,8 +47,6 @@ async def create_budget(
     Only one active total budget and one active category budget per category
     are allowed for each user.
     """
-    service = BudgetService(db)
-
     # Check for duplicate
     existing = await service.get_user_budgets(
         current_user.uuid,
@@ -92,11 +82,9 @@ async def get_budgets(
     scope: str | None = None,
     status_filter: str | None = None,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get all budgets for the current user."""
-    service = BudgetService(db)
-
     scope_enum = BudgetScope(scope) if scope else None
     status_enum = BudgetStatus(status_filter) if status_filter else None
 
@@ -112,7 +100,7 @@ async def get_budgets(
         period = await service.update_period_spent_amount(budget, period, auto_commit=False)
         responses.append(await service.build_budget_response(budget, period))
 
-    await db.commit()
+    await service.session.commit()
     return success_response(data=responses)
 
 
@@ -120,21 +108,18 @@ async def get_budgets(
 async def get_budget_summary(
     include_paused: bool = False,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get budget summary with budgets and alerts."""
-    service = BudgetService(db)
     return success_response(data=await service.get_budget_summary(current_user.uuid, include_paused=include_paused))
 
 
 @router.get("/suggestions", response_model=list[BudgetSuggestion])
 async def get_budget_suggestions(
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get AI-generated budget suggestions based on historical spending."""
-    service = BudgetService(db)
-
     suggestions = []
 
     # Total budget suggestion
@@ -154,11 +139,9 @@ async def get_budget_suggestions(
 async def get_budget(
     budget_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get a specific budget by ID."""
-    service = BudgetService(db)
-
     budget = await service.get_budget(budget_id, current_user.uuid)
     if not budget:
         raise NotFoundError("Budget")
@@ -174,11 +157,9 @@ async def update_budget(
     budget_id: UUID,
     request: BudgetUpdateRequest,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Update a budget."""
-    service = BudgetService(db)
-
     budget = await service.update_budget(budget_id, current_user.uuid, request)
     if not budget:
         raise NotFoundError("Budget")
@@ -193,11 +174,9 @@ async def update_budget(
 async def delete_budget(
     budget_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> None:
     """Delete a budget."""
-    service = BudgetService(db)
-
     success = await service.delete_budget(budget_id, current_user.uuid)
     if not success:
         raise NotFoundError("Budget")
@@ -212,11 +191,9 @@ async def delete_budget(
 async def rebalance_budgets(
     request: BudgetRebalanceRequest,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Rebalance amount between two budgets."""
-    service = BudgetService(db)
-
     result_code = await service.rebalance_with_status(
         request.from_budget_id,
         request.to_budget_id,
@@ -248,10 +225,9 @@ async def rebalance_budgets(
 @router.get("/settings/me", response_model=BudgetSettingsResponse)
 async def get_budget_settings(
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get current user's budget settings."""
-    service = BudgetService(db)
     settings = await service.get_or_create_settings(current_user.uuid)
 
     return success_response(
@@ -267,10 +243,9 @@ async def get_budget_settings(
 async def update_budget_settings(
     request: BudgetSettingsUpdateRequest,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Update current user's budget settings."""
-    service = BudgetService(db)
     settings = await service.update_settings(current_user.uuid, request)
 
     return success_response(

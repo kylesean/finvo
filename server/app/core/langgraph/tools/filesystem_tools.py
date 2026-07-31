@@ -175,4 +175,4 @@ filesystem_tools: list[BaseTool] = [
 ]
 
 tool_names = [t.name for t in filesystem_tools]
-logger.info("filesystem_tools_initialized", tools=tool_names)
+logger.debug("filesystem_tools_initialized", tools=tool_names)

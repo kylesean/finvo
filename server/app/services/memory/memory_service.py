@@ -157,7 +157,7 @@ class MemoryService:
             if settings.LONG_TERM_MEMORY_OLLAMA_BASE_URL:
                 config["config"]["ollama_base_url"] = settings.LONG_TERM_MEMORY_OLLAMA_BASE_URL
 
-            logger.info(
+            logger.debug(
                 "using_ollama_embedder",
                 model=settings.LONG_TERM_MEMORY_EMBEDDER_MODEL,
                 base_url=settings.LONG_TERM_MEMORY_OLLAMA_BASE_URL,
@@ -174,7 +174,7 @@ class MemoryService:
             if settings.LONG_TERM_MEMORY_EMBEDDER_API_KEY:
                 config["config"]["api_key"] = settings.LONG_TERM_MEMORY_EMBEDDER_API_KEY
 
-            logger.info(
+            logger.debug(
                 "using_huggingface_embedder",
                 model=settings.LONG_TERM_MEMORY_EMBEDDER_MODEL,
             )
@@ -194,7 +194,7 @@ class MemoryService:
             if base_url:
                 config["config"]["openai_base_url"] = base_url
 
-            logger.info(
+            logger.debug(
                 "using_openai_embedder",
                 model=settings.LONG_TERM_MEMORY_EMBEDDER_MODEL,
                 base_url=base_url or "https://api.openai.com/v1",
@@ -261,12 +261,19 @@ class MemoryService:
             )
 
             fact_count = len(result.get("results", [])) if isinstance(result, dict) else 0
-            logger.info(
-                "salient_memories_added",
-                user_uuid=user_id,
-                fact_count=fact_count,
-                session_id=str(session_id) if session_id else None,
-            )
+            if fact_count > 0:
+                logger.info(
+                    "salient_memories_added",
+                    user_uuid=user_id,
+                    fact_count=fact_count,
+                    session_id=str(session_id) if session_id else None,
+                )
+            else:
+                logger.debug(
+                    "no_salient_memories_extracted",
+                    user_uuid=user_id,
+                    session_id=str(session_id) if session_id else None,
+                )
 
             return {"success": True, "extracted": fact_count > 0, "fact_count": fact_count, "result": result}
 

@@ -75,7 +75,7 @@ async def _update_memory_background(
     This function runs as a background task to avoid blocking
     the HTTP response after streaming completes.
     """
-    logger.info(
+    logger.debug(
         "background_memory_update_started",
         user_uuid=str(user_uuid),
         session_id=str(session_id),
@@ -88,7 +88,7 @@ async def _update_memory_background(
             session_id=session_id,
             category="conversation",
         )
-        logger.info(
+        logger.debug(
             "background_memory_update_completed",
             user_uuid=str(user_uuid),
             session_id=str(session_id),

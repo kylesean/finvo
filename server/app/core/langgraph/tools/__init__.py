@@ -73,7 +73,7 @@ skill_exclusive_tools: dict[str, list[BaseTool]] = {}
 # 6. Internal tools (hidden from LLM, used for GenUI callbacks only)
 # execute_transfer is exported above for direct execution
 
-logger.info(
+logger.debug(
     "tools_loaded",
     llm_visible=len(tools),
     skill_exclusive=sum(len(v) for v in skill_exclusive_tools.values()),

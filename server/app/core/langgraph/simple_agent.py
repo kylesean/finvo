@@ -81,7 +81,6 @@ class SimpleLangChainAgent:
         """获取 MemoryService 实例（集中化的长期记忆管理）"""
         if self._memory_service is None:
             self._memory_service = await get_memory_service()
-            logger.info("memory_service_initialized")
         return self._memory_service
 
     async def _get_checkpointer(self) -> AsyncPostgresSaver:
@@ -978,8 +977,7 @@ class SimpleLangChainAgent:
 
     def _get_langfuse_callback(self, thread_id: UUID, user_id: UUID | None = None) -> Any:
         """获取 Langfuse Callback Handler 用于追踪执行过程。"""
-        # 深度诊断日志
-        logger.info(
+        logger.debug(
             "langfuse_check",
             has_pub=bool(settings.LANGFUSE_PUBLIC_KEY),
             has_sec=bool(settings.LANGFUSE_SECRET_KEY),
@@ -987,7 +985,7 @@ class SimpleLangChainAgent:
         )
 
         if not settings.LANGFUSE_PUBLIC_KEY or not settings.LANGFUSE_SECRET_KEY:
-            logger.info("langfuse_config_missing_skipping_callback")
+            logger.debug("langfuse_config_missing_skipping_callback")
             return None
 
         try:
@@ -1002,7 +1000,7 @@ class SimpleLangChainAgent:
             handler.metadata = {"thread_id": str(thread_id), "user_id": str(user_id) if user_id else None}  # type: ignore[attr-defined]  # langfuse CallbackHandler accepts metadata at runtime
             return handler
         except Exception as e:
-            logger.error("failed_to_initialize_langfuse_callback", error=str(e))
+            logger.warning("failed_to_initialize_langfuse_callback", error=str(e))
             return None
 
     async def get_response(

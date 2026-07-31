@@ -321,7 +321,7 @@ class TransactionQueryService:
             # Convert to response models (display original currency amount)
             items = [TransactionItem.from_transaction(tx, display_currency=display_currency) for tx in transactions]
 
-            logger.info(
+            logger.debug(
                 "transaction_query_complete",
                 user_uuid=user_uuid,
                 total=total,

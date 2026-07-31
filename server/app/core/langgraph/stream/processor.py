@@ -231,13 +231,6 @@ class StreamProcessor:
                     content=ai_response,
                 )
 
-            logger.debug(
-                "messages_indexed",
-                session_id=session_id,
-                user_message_length=len(user_message) if user_message else 0,
-                ai_response_length=len(ai_response) if ai_response else 0,
-            )
-
         except Exception as e:
             # 索引失败不应影响主流程
             logger.warning(

@@ -14,10 +14,9 @@ from uuid import UUID
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.logging import logger
 from app.models.notification import Notification
 from app.models.user_device import UserDevice
-
-logger = logging.getLogger("Finvo.push_service")
 
 # Global flag to track if Firebase Admin is initialized
 _firebase_initialized = False
@@ -199,8 +198,8 @@ class PushService:
                         )
                         await db.commit()
             except Exception as exc:
-                logger.error("fcm_push_failed: %s", exc)
+                logger.error("fcm_push_failed", error=str(exc))
         else:
-            logger.info("[Mock Push] title=%s content=%s tokens=%d", title, content, len(tokens))
+            logger.info("mock_push_sent", title=title, content=content, token_count=len(tokens))
 
         return notification

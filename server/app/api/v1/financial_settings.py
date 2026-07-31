@@ -1,14 +1,13 @@
 """Financial settings API endpoints."""
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.responses import success_response
+from app.core.service_deps import get_user_service
 from app.models.user import User
 from app.schemas.user import (
     FinancialSettingsResponseSchema,
@@ -22,18 +21,17 @@ router = APIRouter(prefix="/financial-settings", tags=["financial-settings"])
 @router.get("")
 async def get_financial_settings(
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Get current user's financial settings.
 
     Args:
         current_user: The authenticated user
-        db: Database session
+        user_service: Injected user service
 
     Returns:
         Unified response with financial settings
     """
-    user_service = UserService(db)  # type: ignore[arg-type]  # sqlmodel vs sqlalchemy AsyncSession stubs
     settings = await user_service.get_financial_settings(current_user.uuid)
 
     return success_response(
@@ -53,7 +51,7 @@ async def get_financial_settings(
 async def update_financial_settings(
     request: UpdateFinancialSettingsRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update current user's financial settings.
 
@@ -62,12 +60,11 @@ async def update_financial_settings(
     Args:
         request: Settings update data
         current_user: The authenticated user
-        db: Database session
+        user_service: Injected user service
 
     Returns:
         Unified response with updated financial settings
     """
-    user_service = UserService(db)  # type: ignore[arg-type]  # sqlmodel vs sqlalchemy AsyncSession stubs
     settings = await user_service.update_financial_settings(
         user_uuid=current_user.uuid,
         safety_threshold=request.safetyThreshold,

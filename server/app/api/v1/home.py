@@ -11,8 +11,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from app.core.dependencies import get_current_user
-from app.core.logging import logger
-from app.core.responses import error_response, get_error_code_int, success_response
+from app.core.responses import success_response
 from app.core.service_deps import get_statistics_service
 from app.models.user import User
 from app.services.statistics_service import StatisticsService
@@ -33,19 +32,11 @@ async def get_total_expense(
     Returns:
        Unified response format, containing detailed expense statistics
     """
-    try:
-        data = await service.get_total_expense_summary(current_user.uuid)
-        return success_response(
-            data=data,
-            message="Expense statistics retrieved successfully",
-        )
-    except Exception as e:
-        logger.error("expense_statistics_failed", user_uuid=str(current_user.uuid), error=str(e), exc_info=True)
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to retrieve expense statistics",
-            http_status=500,
-        )
+    data = await service.get_total_expense_summary(current_user.uuid)
+    return success_response(
+        data=data,
+        message="Expense statistics retrieved successfully",
+    )
 
 
 @router.get("/calendar-month-details")
@@ -66,23 +57,8 @@ async def get_calendar_month_details(
     Returns:
         Unified response format, containing daily expense summary and heat level
     """
-    try:
-        data = await service.get_calendar_month_details(current_user.uuid, year, month)
-        return success_response(
-            data=data,
-            message="Calendar month details retrieved successfully",
-        )
-    except Exception as e:
-        logger.error(
-            "calendar_month_details_failed",
-            user_uuid=str(current_user.uuid),
-            year=year,
-            month=month,
-            error=str(e),
-            exc_info=True,
-        )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to retrieve calendar month details",
-            http_status=500,
-        )
+    data = await service.get_calendar_month_details(current_user.uuid, year, month)
+    return success_response(
+        data=data,
+        message="Calendar month details retrieved successfully",
+    )

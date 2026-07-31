@@ -5,13 +5,12 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Path
 from fastapi.responses import JSONResponse
-from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.exceptions import NotFoundError
 from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, success_response
+from app.core.service_deps import get_user_service
 from app.models.user import User
 from app.schemas.user import (
     CreateFinancialAccountRequest,
@@ -37,13 +36,11 @@ router = APIRouter(prefix="/user", tags=["user"])
 @router.get("", response_model=ResponseEnvelope[UserInfoResponse])
 async def get_current_user_info(
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
 ) -> JSONResponse:
     """Get current user information.
 
     Args:
         current_user: The authenticated user
-        db: Database session
 
     Returns:
         Unified response with user information
@@ -68,19 +65,18 @@ async def get_current_user_info(
 async def update_user_profile(
     request: UpdateUserProfileRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update current user's profile.
 
     Args:
         request: Profile update data (username and/or avatarUrl)
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with updated user information
     """
-    service = UserService(db)
     result = await service.update_user_profile(
         current_user.uuid, username=request.username, avatar_url=request.avatarUrl
     )
@@ -92,7 +88,7 @@ async def update_user_profile(
 async def save_financial_accounts(
     request: SaveFinancialAccountsRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Save or update user's financial accounts.
 
@@ -101,13 +97,11 @@ async def save_financial_accounts(
     Args:
         request: Financial accounts data
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with total balance and update timestamp
     """
-    service = UserService(db)
-
     # Convert Pydantic models to dicts
     accounts_data = [account.model_dump() for account in request.accounts]
 
@@ -121,18 +115,17 @@ async def save_financial_accounts(
 @router.get("/financial-accounts", response_model=ResponseEnvelope[FinancialAccountsResponse])
 async def get_financial_accounts(
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Get user's financial accounts.
 
     Args:
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with list of financial accounts and total balance
     """
-    service = UserService(db)
     result = await service.get_user_financial_accounts(current_user.uuid)
 
     # Convert to response format
@@ -166,19 +159,18 @@ async def get_financial_accounts(
 async def create_financial_account(
     request: CreateFinancialAccountRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Create a single financial account.
 
     Args:
         request: Financial account data
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with created account
     """
-    service = UserService(db)
     result = await service.create_financial_account(current_user.uuid, request.model_dump())
 
     return success_response(
@@ -203,7 +195,7 @@ async def update_financial_account(
     account_id: Annotated[UUID, Path(description="Account ID (UUID)")],
     request: UpdateFinancialAccountRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update a financial account.
 
@@ -211,12 +203,11 @@ async def update_financial_account(
         account_id: The account ID to update
         request: Updated account data
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with updated account
     """
-    service = UserService(db)
     result = await service.update_financial_account(
         current_user.uuid, account_id, request.model_dump(exclude_unset=True)
     )
@@ -245,19 +236,18 @@ async def update_financial_account(
 async def delete_financial_account(
     account_id: Annotated[UUID, Path(description="Account ID (UUID)")],
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Delete a financial account.
 
     Args:
         account_id: The account ID to delete
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with success message
     """
-    service = UserService(db)
     deleted = await service.delete_financial_account(current_user.uuid, account_id)
 
     if not deleted:
@@ -270,14 +260,14 @@ async def delete_financial_account(
 async def update_financial_safety_line(
     request: FinancialSafetyLineRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update user's financial safety line threshold.
 
     Args:
         request: Safety threshold data
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with updated threshold and timestamp
@@ -286,7 +276,6 @@ async def update_financial_safety_line(
         "update_financial_safety_line", user_uuid=str(current_user.uuid), threshold=request.safetyBalanceThreshold
     )
 
-    service = UserService(db)
     result = await service.update_financial_safety_line(current_user.uuid, request.safetyBalanceThreshold)
 
     return success_response(
@@ -297,7 +286,7 @@ async def update_financial_safety_line(
 @router.get("/onboarding/status", response_model=ResponseEnvelope[OnboardingStatusResponse])
 async def check_onboarding_status(
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Check if user has completed onboarding.
 
@@ -308,12 +297,11 @@ async def check_onboarding_status(
 
     Args:
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with onboarding completion status
     """
-    service = UserService(db)
     result = await service.check_onboarding_status(current_user.uuid)
 
     return success_response(data=OnboardingStatusResponse(**result))
@@ -323,19 +311,18 @@ async def check_onboarding_status(
 async def update_user_settings(
     request: UserSettingsRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update user settings.
 
     Args:
         request: Settings data
         current_user: The authenticated user
-        db: Database session
+        service: Injected user service
 
     Returns:
         Unified response with updated settings
     """
-    service = UserService(db)
     settings = await service.update_user_settings(
         current_user.uuid,
         safety_balance_threshold=request.safetyBalanceThreshold,
@@ -343,7 +330,7 @@ async def update_user_settings(
     )
 
     # Read actual currency from financial_settings (Single Source of Truth)
-    display_currency = await get_user_display_currency(db, current_user.uuid)
+    display_currency = await get_user_display_currency(service.db, current_user.uuid)
 
     settings_response = UserSettingsResponse(
         defaultCurrency=display_currency,

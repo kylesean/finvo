@@ -273,29 +273,50 @@ def setup_logging() -> None:
     }
     log_level = log_level_map.get(settings.LOG_LEVEL.upper(), logging.INFO)
 
-    # Create file handler for JSON logs
-    file_handler = JsonlFileHandler(get_log_file_path())
-    file_handler.setLevel(log_level)
-
     # Create console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(log_level)
 
-    # Get shared processors
+    # Get shared processors for structlog loggers
     shared_processors = get_structlog_processors(
         # Include detailed file info only in development and test
         include_file_info=settings.ENVIRONMENT in [Environment.DEVELOPMENT, Environment.TEST]
     )
 
-    # Configure standard logging
-    logging.basicConfig(
-        format="%(message)s",
-        level=log_level,
-        handlers=[file_handler, console_handler],
+    # Processors pre-chain for foreign (standard library) logs.
+    # Excludes filter_by_level because foreign records pass logger=None.
+    foreign_pre_chain = [p for p in shared_processors if p is not structlog.stdlib.filter_by_level]
+
+    # Configure ProcessorFormatter for standard library logging
+    console_formatter = structlog.stdlib.ProcessorFormatter(
+        foreign_pre_chain=foreign_pre_chain,
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            structlog.dev.ConsoleRenderer(colors=True)
+            if settings.LOG_FORMAT == "console"
+            else structlog.processors.JSONRenderer(),
+        ],
     )
+    console_handler.setFormatter(console_formatter)
+
+    # Create file handler for JSON logs
+    file_handler = JsonlFileHandler(get_log_file_path())
+    file_handler.setLevel(log_level)
+
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    root_logger.handlers.clear()
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+
+    # Route uvicorn loggers through structlog handler
+    for uvicorn_logger_name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
+        u_logger = logging.getLogger(uvicorn_logger_name)
+        u_logger.handlers.clear()
+        u_logger.propagate = True
 
     # Suppress verbose logs from third-party libraries
-    # These libraries produce excessive DEBUG/TRACE logs
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("duckduckgo_search").setLevel(logging.WARNING)
@@ -303,31 +324,29 @@ def setup_logging() -> None:
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("mem0").setLevel(logging.WARNING)
     logging.getLogger("openai").setLevel(logging.WARNING)
+    logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
+    logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
+    logging.getLogger("tzlocal").setLevel(logging.WARNING)
 
     # Configure structlog with separate formatters for console and file
-    # File always uses JSON, console uses colors in development
     if settings.LOG_FORMAT == "console":
-        # Development: Console with colors, File with JSON
-        # We need to use a custom processor that routes to different renderers
         structlog.configure(
             processors=[
                 *shared_processors,
-                # Use ConsoleRenderer for pretty output (only affects console)
-                structlog.dev.ConsoleRenderer(colors=True),
+                structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
             ],
-            wrapper_class=structlog.stdlib.BoundLogger,
             logger_factory=structlog.stdlib.LoggerFactory(),
+            wrapper_class=structlog.stdlib.BoundLogger,
             cache_logger_on_first_use=True,
         )
     else:
-        # Production: JSON logging everywhere
         structlog.configure(
             processors=[
                 *shared_processors,
                 structlog.processors.JSONRenderer(),
             ],
-            wrapper_class=structlog.stdlib.BoundLogger,
             logger_factory=structlog.stdlib.LoggerFactory(),
+            wrapper_class=structlog.stdlib.BoundLogger,
             cache_logger_on_first_use=True,
         )
 

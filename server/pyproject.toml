@@ -31,6 +31,7 @@ dependencies = [
     "bcrypt>=4.3.0",
     "cryptography>=48.0.1",
     # LLM / agent framework
+    "langchain>=0.3.0",
     "langchain-core>=1.2.5",
     "langchain-openai>=1.0.2",
     "langchain-community>=0.4.1",

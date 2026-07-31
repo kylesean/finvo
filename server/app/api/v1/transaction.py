@@ -17,7 +17,7 @@ from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError
 from app.core.responses import success_response
-from app.core.service_deps import get_transaction_service
+from app.core.service_deps import get_transaction_query_service, get_transaction_service
 from app.models.notification import Notification
 from app.models.transaction import Transaction
 from app.models.user import User
@@ -32,6 +32,7 @@ from app.schemas.transaction import (
     UpdateAccountRequest,
     UpdateBatchAccountRequest,
 )
+from app.services.transaction_query_service import TransactionQueryService
 from app.services.transaction_service import TransactionService
 from app.utils.currency_utils import get_user_display_currency
 
@@ -166,6 +167,7 @@ def _transaction_to_dict(tx: Any, display_currency: str = PROJECT_DEFAULT_CURREN
 async def get_transactions(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
+    query_service: Annotated[TransactionQueryService, Depends(get_transaction_query_service)],
     page: int = 1,
     size: int = 20,
     date: str | None = None,  # YYYY-MM-DD format
@@ -175,19 +177,19 @@ async def get_transactions(
        Supports filtering by date and transaction type, returns a list of transactions with display calculated fields.
 
     Args:
+        current_user: Current user
+        db: Database session
+        query_service: Transaction query service
         page: Page number, default is 1
         size: Number of items per page, default is 20
         date: Optional, date in YYYY-MM-DD format for filtering
         transaction_type: Optional, transaction type (EXPENSE, INCOME, TRANSFER)
-        current_user: Current user
-        db: Database session
 
     Returns:
         Unified format pagination response, containing display fields
     """
     from app.services.transaction_query_service import (
         TransactionQueryParams,
-        TransactionQueryService,
         TransactionType,
     )
 
@@ -200,8 +202,7 @@ async def get_transactions(
     )
 
     # 使用共享服务执行查询
-    service = TransactionQueryService(db)
-    result = await service.search(str(current_user.uuid), params)
+    result = await query_service.search(str(current_user.uuid), params)
 
     # 获取用户本位币
     display_currency = await get_user_display_currency(db, current_user.uuid)
@@ -416,10 +417,9 @@ async def update_batch_transactions_account(
 async def get_transaction_comments(
     transaction_id: UUID,  # UUID from path
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
 ) -> JSONResponse:
     """获取交易评论列表"""
-    service = TransactionService(db)
     comments = await service.get_comments_for_transaction(transaction_id, current_user.uuid)
     return success_response(
         data=comments,
@@ -432,10 +432,9 @@ async def add_transaction_comment(
     transaction_id: UUID,  # UUID from path
     request: CommentCreateRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
 ) -> JSONResponse:
     """添加交易评论"""
-    service = TransactionService(db)
     comment = await service.add_comment(
         transaction_id=transaction_id,
         user_uuid=current_user.uuid,
@@ -454,10 +453,9 @@ async def add_transaction_comment(
 async def delete_transaction_comment(
     comment_id: int,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
 ) -> JSONResponse:
     """删除交易评论"""
-    service = TransactionService(db)
     success = await service.delete_comment(comment_id, current_user.uuid)
 
     if not success:
@@ -472,7 +470,7 @@ async def delete_transaction_comment(
 @router.get("/recurring")
 async def list_recurring_transactions(
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
     type: str | None = None,  # EXPENSE, INCOME, TRANSFER
     is_active: bool | None = None,
 ) -> JSONResponse:
@@ -482,12 +480,11 @@ async def list_recurring_transactions(
         type: 可选，交易类型过滤 (EXPENSE, INCOME, TRANSFER)
         is_active: 可选，激活状态过滤
         current_user: 当前用户
-        db: 数据库会话
+        service: Injected transaction service
 
     Returns:
         周期性交易列表
     """
-    service = TransactionService(db)
     recurring_txs = await service.list_recurring_transactions(
         current_user.uuid,
         type_filter=type,
@@ -503,10 +500,9 @@ async def list_recurring_transactions(
 async def create_recurring_transaction(
     request: RecurringTransactionCreateRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
 ) -> JSONResponse:
     """创建周期性交易"""
-    service = TransactionService(db)
     recurring_tx = await service.create_recurring_transaction(current_user.uuid, request.model_dump())
     return success_response(
         data=recurring_tx,
@@ -518,10 +514,9 @@ async def create_recurring_transaction(
 async def get_recurring_transaction(
     recurring_id: UUID,  # UUID from path
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
 ) -> JSONResponse:
     """获取周期性交易详情"""
-    service = TransactionService(db)
     recurring_tx = await service.get_recurring_transaction(recurring_id, current_user.uuid)
 
     if not recurring_tx:
@@ -538,10 +533,9 @@ async def update_recurring_transaction(
     recurring_id: UUID,  # UUID from path
     request: RecurringTransactionUpdateRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
 ) -> JSONResponse:
     """更新周期性交易"""
-    service = TransactionService(db)
     recurring_tx = await service.update_recurring_transaction(
         recurring_id, current_user.uuid, request.model_dump(exclude_unset=True)
     )
@@ -559,10 +553,9 @@ async def update_recurring_transaction(
 async def delete_recurring_transaction(
     recurring_id: UUID,  # UUID from path
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
 ) -> JSONResponse:
     """删除周期性交易"""
-    service = TransactionService(db)
     success = await service.delete_recurring_transaction(recurring_id, current_user.uuid)
 
     if not success:
@@ -578,10 +571,9 @@ async def delete_recurring_transaction(
 async def forecast_cash_flow(
     request: CashFlowForecastRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
 ) -> JSONResponse:
     """现金流预测"""
-    service = TransactionService(db)
     forecast = await service.forecast_cash_flow(
         user_uuid=current_user.uuid,
         forecast_days=request.forecast_days,

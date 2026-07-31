@@ -93,7 +93,7 @@ def verify_token(token: str) -> str | None:
             logger.warning("token_missing_subject")
             return None
 
-        logger.info("token_verified", subject=subject_id)
+        logger.debug("token_verified", subject=subject_id)
         return subject_id
 
     except JWTError as e:

@@ -258,6 +258,11 @@ class EventGenerator:
                 tool_call_id=tool_call_id,
                 duration_ms=duration_ms,
                 is_success=is_success,
+            )
+            logger.debug(
+                "langgraph_tool_result_preview",
+                tool_name=tool_name,
+                tool_call_id=tool_call_id,
                 tool_result_preview=json.dumps(tool_result, ensure_ascii=False)[:300]
                 if isinstance(tool_result, dict)
                 else str(tool_result)[:300],

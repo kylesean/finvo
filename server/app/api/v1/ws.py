@@ -62,8 +62,8 @@ async def notification_websocket(websocket: WebSocket, token: str = "") -> None:
                 logger.info("ws_heartbeat_timeout", user_uuid=user_uuid)
                 break
     except WebSocketDisconnect:
-        pass
-    except Exception:  # noqa: BLE001
-        pass
+        logger.info("ws_client_disconnected", user_uuid=user_uuid)
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("ws_connection_error", user_uuid=user_uuid, error=str(exc))
     finally:
         await ws_manager.disconnect(user_uuid)
