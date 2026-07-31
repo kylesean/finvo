@@ -13,7 +13,7 @@ import uuid
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from fastapi_pagination import Params
@@ -24,8 +24,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import SessionRepository, get_session, get_session_context
 from app.core.dependencies import get_current_user
+from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.logging import bind_context, logger
-from app.core.responses import error_response, get_error_code_int, success_response
+from app.core.responses import success_response
 from app.models.session import Session
 from app.models.user import User
 from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, SendCodeRequest, UserInfo
@@ -83,17 +84,15 @@ async def get_authorized_session(
         ChatSession: The verified session
 
     Raises:
-        HTTPException: 404 if session not found, 403 if access denied
+        NotFoundError: 404 if session not found
+        AuthorizationError: 403 if access denied
     """
     # Verify session exists using repository
     repo = SessionRepository(db)
     session = await repo.get(session_id)
     if session is None:
         logger.error("session_not_found", session_id=session_id)
-        raise HTTPException(
-            status_code=404,
-            detail="Session not found",
-        )
+        raise NotFoundError("Session")
 
     # Verify ownership
     if session.user_uuid != current_user.uuid:
@@ -103,10 +102,7 @@ async def get_authorized_session(
             session_owner=session.user_uuid,
             requesting_user=current_user.uuid,
         )
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied to this session",
-        )
+        raise AuthorizationError("Access denied to this session")
 
     # Bind user_uuid to logging context
     bind_context(user_uuid=session.user_uuid)
@@ -306,7 +302,7 @@ async def create_session(
         )
     except ValueError as ve:
         logger.error("session_creation_validation_failed", error=str(ve), user_uuid=user.uuid, exc_info=True)
-        return error_response(code=get_error_code_int("VALIDATION_ERROR"), message=str(ve), http_status=422)
+        raise ValidationError(str(ve))
 
 
 @router.patch("/session/{session_id}/name")
@@ -337,7 +333,7 @@ async def update_session_name(
     repo = SessionRepository(db)
     updated_session = await repo.update_name(session.id, sanitized_name)
     if updated_session is None:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise NotFoundError("Session")
 
     logger.info(
         "session_name_updated",
@@ -384,7 +380,7 @@ async def delete_session(
     repo = SessionRepository(db)
     session = await repo.get(session_id)
     if session is None:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise NotFoundError("Session")
 
     if session.user_uuid != current_user.uuid:
         logger.warning(
@@ -393,7 +389,7 @@ async def delete_session(
             user_uuid=current_user.uuid,
             owner_uuid=session.user_uuid,
         )
-        raise HTTPException(status_code=403, detail="Access denied to this session")
+        raise AuthorizationError("Access denied to this session")
 
     # 1. Use the chatbot agent to cascade delete history
     # This handles LangGraph checkpoints (via official API) and searchable_messages

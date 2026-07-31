@@ -31,6 +31,7 @@ class CommonErrorCode(_AutoName):
     VALIDATION_ERROR = auto()
     NOT_FOUND = auto()
     PERMISSION_DENIED = auto()
+    CONFLICT = auto()
 
 
 class AuthErrorCode(_AutoName):

@@ -17,7 +17,6 @@ from uuid import UUID, uuid4
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException,
     Query,
     Request,
 )
@@ -30,6 +29,7 @@ from app.api.v1.auth import (
 )
 from app.core.config import settings
 from app.core.database import SessionRepository, get_session, get_session_context
+from app.core.exceptions import AppException, CommonErrorCode
 from app.core.langgraph.simple_agent import SimpleLangChainAgent as LangGraphAgent
 from app.core.limiter import limiter
 from app.core.logging import logger
@@ -118,7 +118,8 @@ async def resolve_chat_session(
         tuple[Session, bool]: (Session object, is_new_session flag)
 
     Raises:
-        HTTPException: If session not found or access denied
+        NotFoundError: If session not found
+        AuthorizationError: If access denied
     """
     async with get_session_context() as db:
         if session_id:
@@ -161,7 +162,7 @@ async def chat(
         ChatResponse: The processed chat response.
 
     Raises:
-        HTTPException: If there's an error processing the request.
+        AppException: If there's an error processing the request.
     """
     try:
         # Get session_id from request if available
@@ -182,7 +183,7 @@ async def chat(
             )
 
         return response
-    except HTTPException:
+    except AppException:
         raise
     except Exception as e:
         logger.error(
@@ -191,7 +192,11 @@ async def chat(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=500, detail=str(e))
+        raise AppException(
+            "Failed to process chat request",
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_ERROR,
+        )
 
 
 @router.post("/chat/stream")
@@ -495,7 +500,9 @@ async def clear_session_messages(
         dict: A message indicating the chat history was cleared.
 
     Raises:
-        HTTPException: If session not found, access denied, or error clearing messages.
+        NotFoundError: If session not found.
+        AuthorizationError: If access denied.
+        AppException: If clearing chat history fails.
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)

@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
@@ -15,7 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
-from app.core.responses import error_response, get_error_code_int, success_response
+from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError
+from app.core.responses import success_response
 from app.core.service_deps import get_transaction_service
 from app.models.notification import Notification
 from app.models.transaction import Transaction
@@ -358,11 +359,7 @@ async def get_transaction_detail(
     transaction_data = await service.get_transaction_detail(transaction_id, current_user.uuid)
 
     if not transaction_data:
-        return error_response(
-            code=get_error_code_int("NOT_FOUND"),
-            message="Transaction not found",
-            http_status=status.HTTP_404_NOT_FOUND,
-        )
+        raise NotFoundError("Transaction")
 
     return success_response(
         data=transaction_data,
@@ -377,26 +374,11 @@ async def delete_transaction(
     service: TxService,
 ) -> JSONResponse:
     """Delete transaction."""
-    from app.core.exceptions import BusinessError, NotFoundError
-
-    try:
-        await service.delete_transaction(transaction_id, current_user.uuid)
-        return success_response(
-            data=None,
-            message="Transaction deleted successfully",
-        )
-    except NotFoundError:
-        return error_response(
-            code=get_error_code_int("NOT_FOUND"),
-            message="Transaction not found",
-            http_status=status.HTTP_404_NOT_FOUND,
-        )
-    except BusinessError as e:
-        return error_response(
-            code=get_error_code_int("FORBIDDEN"),
-            message=str(e),
-            http_status=status.HTTP_403_FORBIDDEN,
-        )
+    await service.delete_transaction(transaction_id, current_user.uuid)
+    return success_response(
+        data=None,
+        message="Transaction deleted successfully",
+    )
 
 
 @router.patch("/{transaction_id:uuid}/account")
@@ -413,31 +395,16 @@ async def update_transaction_account(
     - 取消关联：传入 null
     - 更换账户：传入新的 account_id（会自动回滚旧账户余额并更新新账户）
     """
-    from app.core.exceptions import BusinessError, NotFoundError
-
     service = TransactionService(db)
-    try:
-        result = await service.update_transaction_account(
-            transaction_id=transaction_id,
-            user_uuid=current_user.uuid,
-            account_id=UUID(request.account_id) if request.account_id else None,
-        )
-        return success_response(
-            data=result,
-            message="Transaction account updated successfully",
-        )
-    except NotFoundError:
-        return error_response(
-            code=get_error_code_int("NOT_FOUND"),
-            message="Transaction or account not found",
-            http_status=status.HTTP_404_NOT_FOUND,
-        )
-    except BusinessError as e:
-        return error_response(
-            code=get_error_code_int("FORBIDDEN"),
-            message=str(e),
-            http_status=status.HTTP_403_FORBIDDEN,
-        )
+    result = await service.update_transaction_account(
+        transaction_id=transaction_id,
+        user_uuid=current_user.uuid,
+        account_id=UUID(request.account_id) if request.account_id else None,
+    )
+    return success_response(
+        data=result,
+        message="Transaction account updated successfully",
+    )
 
 
 @router.post("/batch")
@@ -464,24 +431,15 @@ async def update_batch_transactions_account(
     service: TxService,
 ) -> JSONResponse:
     """Batch update transactions account."""
-    from app.core.exceptions import BusinessError, NotFoundError
-
-    try:
-        result = await service.update_batch_transactions_account(
-            user_uuid=current_user.uuid,
-            transaction_ids=[UUID(tid) for tid in request.transaction_ids],
-            account_id=UUID(request.account_id) if request.account_id else None,
-        )
-        return success_response(
-            data=result,
-            message="Batch transactions account updated successfully",
-        )
-    except (NotFoundError, BusinessError) as e:
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message=str(e),
-            http_status=status.HTTP_400_BAD_REQUEST,
-        )
+    result = await service.update_batch_transactions_account(
+        user_uuid=current_user.uuid,
+        transaction_ids=[UUID(tid) for tid in request.transaction_ids],
+        account_id=UUID(request.account_id) if request.account_id else None,
+    )
+    return success_response(
+        data=result,
+        message="Batch transactions account updated successfully",
+    )
 
 
 @router.get("/{transaction_id:uuid}/comments")
@@ -533,10 +491,7 @@ async def delete_transaction_comment(
     success = await service.delete_comment(comment_id, current_user.uuid)
 
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Comment not found",
-        )
+        raise NotFoundError("Comment")
 
     return success_response(
         data=None,
@@ -600,10 +555,7 @@ async def get_recurring_transaction(
     recurring_tx = await service.get_recurring_transaction(recurring_id, current_user.uuid)
 
     if not recurring_tx:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recurring transaction not found",
-        )
+        raise NotFoundError("Recurring transaction")
 
     return success_response(
         data=recurring_tx,
@@ -625,10 +577,7 @@ async def update_recurring_transaction(
     )
 
     if not recurring_tx:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recurring transaction not found",
-        )
+        raise NotFoundError("Recurring transaction")
 
     return success_response(
         data=recurring_tx,
@@ -647,10 +596,7 @@ async def delete_recurring_transaction(
     success = await service.delete_recurring_transaction(recurring_id, current_user.uuid)
 
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recurring transaction not found",
-        )
+        raise NotFoundError("Recurring transaction")
 
     return success_response(
         data=None,
@@ -735,9 +681,12 @@ async def confirm_pending_transaction(
     tx = result.scalar_one_or_none()
 
     if not tx:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+        raise NotFoundError("Transaction")
     if tx.status != "PENDING":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Transaction is not in PENDING status")
+        raise BusinessError(
+            "Transaction is not in PENDING status",
+            error_code=CommonErrorCode.VALIDATION_ERROR,
+        )
 
     tx.status = "CONFIRMED"
     # Auto-mark associated notification as read
@@ -761,9 +710,12 @@ async def skip_pending_transaction(
     tx = result.scalar_one_or_none()
 
     if not tx:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+        raise NotFoundError("Transaction")
     if tx.status != "PENDING":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Transaction is not in PENDING status")
+        raise BusinessError(
+            "Transaction is not in PENDING status",
+            error_code=CommonErrorCode.VALIDATION_ERROR,
+        )
 
     # Auto-mark associated notification as read before deleting the transaction
     await _mark_recurring_notification_read(db, current_user.uuid, transaction_id)

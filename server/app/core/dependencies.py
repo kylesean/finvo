@@ -12,19 +12,32 @@ import json
 from collections.abc import AsyncGenerator
 from typing import Annotated, Any, cast
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.database import get_session
+from app.core.exceptions import (
+    AppException,
+    AuthenticationError,
+    CommonErrorCode,
+    NotFoundError,
+)
 from app.core.logging import bind_context, logger
 from app.models.user import User
 from app.utils.auth import verify_token
 
 # Security scheme for JWT authentication
 security = HTTPBearer()
+
+
+async def _fetch_user(db: AsyncSession, user_uuid: str) -> User | None:
+    """Fetch a user by UUID. Returns None if not found."""
+    query = select(User).where(User.uuid == user_uuid)
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 async def get_redis_client() -> AsyncGenerator[Any]:
@@ -59,7 +72,7 @@ async def get_current_user_uuid(
         str: User UUID from token
 
     Raises:
-        HTTPException: If token is invalid or missing
+        AuthenticationError: If token is invalid or malformed
     """
     try:
         token = credentials.credentials
@@ -72,11 +85,7 @@ async def get_current_user_uuid(
             # the payload can carry sensitive claims.
             token_fingerprint = hashlib.sha256(token.encode()).hexdigest()[:12]
             logger.error("invalid_token", token_fingerprint=token_fingerprint, token_length=len(token))
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise AuthenticationError("Invalid authentication credentials")
 
         return user_uuid
 
@@ -84,11 +93,7 @@ async def get_current_user_uuid(
         # A malformed token is an auth failure, not a validation/422 issue —
         # return 401 so callers treat it uniformly with other auth rejections.
         logger.error("token_validation_failed", error=str(ve), exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise AuthenticationError("Invalid authentication credentials")
 
 
 async def get_current_user(
@@ -105,33 +110,29 @@ async def get_current_user(
         User: The authenticated user object
 
     Raises:
-        HTTPException: If user not found in database
+        NotFoundError: If user not found in database
+        AppException: If the database query fails unexpectedly
     """
     try:
-        # Query user by UUID
-        query = select(User).where(User.uuid == user_uuid)
-        result = await db.execute(query)
-        user = result.scalar_one_or_none()
+        user = await _fetch_user(db, user_uuid)
 
         if user is None:
             logger.error("user_not_found", user_uuid=user_uuid)
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise NotFoundError("User")
 
         # Bind user context for logging
         bind_context(user_uuid=user.uuid)
 
         return user
 
-    except HTTPException:
+    except AppException:
         raise
     except Exception as e:
         logger.error("get_current_user_failed", error=str(e), exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve user information"
+        raise AppException(
+            "Failed to retrieve user information",
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_ERROR,
         )
 
 
@@ -183,10 +184,7 @@ class OptionalAuth:
             if user_uuid is None:
                 return None
 
-            # Query user by UUID
-            query = select(User).where(User.uuid == user_uuid)
-            result = await db.execute(query)
-            user = result.scalar_one_or_none()
+            user = await _fetch_user(db, user_uuid)
 
             if user:
                 bind_context(user_uuid=user.uuid)

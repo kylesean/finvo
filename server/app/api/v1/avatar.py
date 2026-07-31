@@ -20,13 +20,14 @@ through this route — they remain behind the authenticated ``/files/view``.
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_session
+from app.core.exceptions import NotFoundError
 from app.core.limiter import limiter
 from app.core.logging import logger
 from app.models.user import User
@@ -59,7 +60,7 @@ async def _resolve_user(db: AsyncSession, user_uuid: UUID) -> User:
     result = await db.execute(select(User).where(User.uuid == user_uuid))
     user = result.scalar_one_or_none()
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise NotFoundError("User")
     return user
 
 

@@ -5,12 +5,13 @@ from __future__ import annotations
 from collections.abc import AsyncGenerator
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import db_manager
 from app.core.dependencies import get_current_user
+from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError
 from app.core.responses import success_response
 from app.models.budget import BudgetScope, BudgetStatus
 from app.models.user import User
@@ -65,14 +66,16 @@ async def create_budget(
 
     for budget in existing:
         if request.scope == BudgetScope.TOTAL and budget.is_total_budget:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Active total budget already exists. Please pause or archive it first.",
+            raise BusinessError(
+                "Active total budget already exists. Please pause or archive it first.",
+                error_code=CommonErrorCode.CONFLICT,
+                status_code=409,
             )
         if request.scope == BudgetScope.CATEGORY and budget.category_key == request.category_key:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"Active budget for category '{request.category_key}' already exists.",
+            raise BusinessError(
+                f"Active budget for category '{request.category_key}' already exists.",
+                error_code=CommonErrorCode.CONFLICT,
+                status_code=409,
             )
 
     budget = await service.create_budget(current_user.uuid, request)
@@ -158,7 +161,7 @@ async def get_budget(
 
     budget = await service.get_budget(budget_id, current_user.uuid)
     if not budget:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Budget not found")
+        raise NotFoundError("Budget")
 
     period = await service.get_or_create_current_period(budget)
     period = await service.update_period_spent_amount(budget, period)
@@ -178,7 +181,7 @@ async def update_budget(
 
     budget = await service.update_budget(budget_id, current_user.uuid, request)
     if not budget:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Budget not found")
+        raise NotFoundError("Budget")
 
     period = await service.get_or_create_current_period(budget)
     period = await service.update_period_spent_amount(budget, period)
@@ -197,7 +200,7 @@ async def delete_budget(
 
     success = await service.delete_budget(budget_id, current_user.uuid)
     if not success:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Budget not found")
+        raise NotFoundError("Budget")
 
 
 # ============================================================================
@@ -222,13 +225,17 @@ async def rebalance_budgets(
     )
 
     if result_code == "INVALID_AMOUNT":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Transfer amount must be greater than zero"
+        raise BusinessError(
+            "Transfer amount must be greater than zero",
+            error_code=CommonErrorCode.VALIDATION_ERROR,
         )
     if result_code == "NOT_FOUND":
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="One or more budgets not found")
+        raise NotFoundError("One or more budgets")
     if result_code == "INSUFFICIENT_FUNDS":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient budget amount to rebalance")
+        raise BusinessError(
+            "Insufficient budget amount to rebalance",
+            error_code=CommonErrorCode.VALIDATION_ERROR,
+        )
 
     return success_response(message="Budget rebalanced successfully")
 
