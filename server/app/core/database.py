@@ -28,7 +28,6 @@ from sqlmodel import SQLModel
 
 from app.core.config import settings
 from app.core.logging import logger
-from app.repositories.session_repository import SessionRepository
 
 
 class DatabaseManager:
@@ -276,7 +275,6 @@ async def close_db() -> None:
     await db_manager.close()
 
 
-# Re-export SessionRepository for backward compatibility
 __all__ = [
     "DatabaseManager",
     "db_manager",
@@ -284,5 +282,4 @@ __all__ = [
     "get_session_context",
     "init_db",
     "close_db",
-    "SessionRepository",
 ]

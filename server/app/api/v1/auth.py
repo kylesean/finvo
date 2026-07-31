@@ -22,13 +22,14 @@ from pydantic import BaseModel, Field
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import SessionRepository, get_session, get_session_context
+from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.logging import bind_context, logger
 from app.core.responses import success_response
 from app.models.session import Session
 from app.models.user import User
+from app.repositories.session_repository import SessionRepository
 from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, SendCodeRequest, UserInfo
 from app.services.auth_service import AuthService
 from app.utils.auth import create_access_token

@@ -1,40 +1,37 @@
 """Error code consistency tests.
 
-Guards the contract between domain error code enums (app.core.exceptions) and
-the integer error code map consumed by the API response layer
-(app.core.responses.ERROR_CODE_MAP).
+Guards the single-source invariant for error codes: ``ERROR_CODE_MAP`` is
+derived from the domain error code enums in ``app.core.exceptions``, so the
+string code (enum member name) and integer code (enum member value) can never
+drift apart. Adding an enum member is the only change needed to register a
+new code.
 
-Every domain enum member's string value MUST have a corresponding int entry in
-ERROR_CODE_MAP; otherwise the exception handler would fall back to 500 and the
-frontend (which keys translations off the int code) could not localize it.
-
-The cross-language contract with the Flutter client (client/lib/core/constants/
-error_codes.dart) is intentionally NOT asserted here — Dart and Python cannot
-share a source of truth, so it is guarded by integration tests and the
-ErrorCodes int-value stability convention instead.
+The int-value range contract with the Flutter client
+(client/lib/core/constants/error_codes.dart) is asserted here because Dart
+and Python cannot share a source of truth — the int values are a stable
+cross-language contract that must not silently move outside its documented
+domain range.
 """
 
 from __future__ import annotations
 
-from enum import StrEnum
-
 from app.core import exceptions
-from app.core.responses import ERROR_CODE_MAP
+from app.core.exceptions import ERROR_CODE_MAP
 
 
-def _domain_error_enum_classes() -> list[type[StrEnum]]:
+def _domain_error_enum_classes() -> list[type[exceptions._ErrorCode]]:
     """Discover all domain error code enum classes defined in exceptions.py.
 
-    These are the StrEnum subclasses that produce member names as their values
-    via the shared _AutoName base. _AutoName itself is excluded (it is the
-    shared base, not a domain enum).
+    A domain enum is an ``_ErrorCode`` subclass defined in this module
+    (excluding the shared ``_ErrorCode`` base itself).
     """
-    classes: list[type[StrEnum]] = []
+    base = exceptions._ErrorCode
+    classes: list[type[exceptions._ErrorCode]] = []
     for name, obj in vars(exceptions).items():
         if (
             isinstance(obj, type)
-            and issubclass(obj, StrEnum)
-            and obj is not StrEnum
+            and issubclass(obj, base)
+            and obj is not base
             and obj.__module__ == exceptions.__name__
             and not name.startswith("_")
         ):
@@ -42,49 +39,29 @@ def _domain_error_enum_classes() -> list[type[StrEnum]]:
     return classes
 
 
-def _all_enum_member_values() -> set[str]:
-    """Collect the string values of every domain error code enum member."""
-    values: set[str] = set()
+def _all_enum_members() -> list[tuple[str, int]]:
+    """Collect (name, int_value) for every domain error code enum member."""
+    members: list[tuple[str, int]] = []
     for enum_cls in _domain_error_enum_classes():
         for member in enum_cls:
-            values.add(member.value)
-    return values
+            members.append((member.name, member.int_code))
+    return members
 
 
 class TestErrorCodeConsistency:
-    """Assert ERROR_CODE_MAP stays in sync with domain error code enums."""
+    """Assert ERROR_CODE_MAP stays the single-source derivation of the enums."""
 
-    def test_every_enum_member_has_int_mapping(self) -> None:
-        """Each domain enum member value must exist in ERROR_CODE_MAP.
+    def test_error_code_map_is_derived_from_enums(self) -> None:
+        """ERROR_CODE_MAP must equal {member.name: member.value} over all enums.
 
-        A missing entry means the exception handler would return the default
-        500 code, breaking frontend translation lookups.
+        This is the single-source invariant: the map is derived, not
+        hand-maintained. A mismatch means someone hand-edited the map or
+        bypassed the enum registration.
         """
-        enum_values = _all_enum_member_values()
-        map_keys = set(ERROR_CODE_MAP.keys())
-
-        missing = enum_values - map_keys
-        assert not missing, (
-            f"Domain enum members without an int mapping in ERROR_CODE_MAP: {sorted(missing)}. "
-            "Add them to app.core.responses.ERROR_CODE_MAP."
-        )
-
-    def test_error_code_map_keys_are_known_enum_members(self) -> None:
-        """ERROR_CODE_MAP keys must correspond to a domain enum member.
-
-        Unknown keys are Legacy aliases that should be removed to keep the
-        error code surface area single-sourced from the domain enums.
-        """
-        enum_values = _all_enum_member_values()
-        map_keys = set(ERROR_CODE_MAP.keys())
-
-        # Keys present in ERROR_CODE_MAP that are not domain enum members.
-        # These are Legacy aliases pending cleanup; asserting they are empty
-        # drives the Legacy removal to completion.
-        legacy_aliases = map_keys - enum_values
-        assert not legacy_aliases, (
-            f"ERROR_CODE_MAP contains keys that are not domain enum members: {sorted(legacy_aliases)}. "
-            "These are Legacy aliases — remove them once callers migrate to domain enums."
+        expected = {member_name: member_value for member_name, member_value in _all_enum_members()}
+        assert ERROR_CODE_MAP == expected, (
+            "ERROR_CODE_MAP is not in sync with the domain error code enums. "
+            "The map must be derived from the enums via _ALL_ERROR_CODE_ENUMS."
         )
 
     def test_int_code_values_match_frontend_contract_ranges(self) -> None:
@@ -111,7 +88,7 @@ class TestErrorCodeConsistency:
             (4500, 4599, "storage config"),
             (9000, 9099, "ai/llm"),
         ]
-        for member_name, int_value in ERROR_CODE_MAP.items():
+        for member_name, int_value in _all_enum_members():
             in_some_range = any(low <= int_value <= high for low, high, _ in ranges)
             assert in_some_range, (
                 f"Error code '{member_name}'={int_value} falls outside all documented "

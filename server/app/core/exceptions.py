@@ -1,11 +1,16 @@
 """Custom exception classes for the application.
 
 This module provides a comprehensive exception hierarchy for handling
-various error scenarios in the application. Uses modular StrEnum classes
-for type-safe error codes organized by domain.
+various error scenarios in the application. Error codes are organized by
+domain as ``_ErrorCode`` enums: each member's string value is the
+machine-readable code (its name) and it carries the client-facing integer
+code as ``int_code``. ``ERROR_CODE_MAP`` is derived from these enums, so
+adding a member is the only change needed to register a new code.
 """
 
-from enum import StrEnum, auto
+from __future__ import annotations
+
+from enum import Enum
 from typing import Any
 
 # ============================================================================
@@ -13,116 +18,150 @@ from typing import Any
 # ============================================================================
 
 
-class _AutoName(StrEnum):
-    """Base class for auto-generating enum values from member names."""
+class _ErrorCode(str, Enum):
+    """Base for domain error code enums.
 
-    @staticmethod
-    def _generate_next_value_(name: str, start: int, count: int, last_values: list[str]) -> str:
-        return name
+    Each member is defined as ``NAME = ("NAME", int_code)``. The member
+    behaves as a string equal to its name (so it works as an
+    ``ERROR_CODE_MAP`` key and compares equal to itself) and exposes the
+    numeric code via ``int_code``. This makes the enums the single source
+    of truth for both the string and integer codes.
+    """
+
+    int_code: int
+
+    def __new__(cls, value: str, int_code: int) -> _ErrorCode:
+        obj = str.__new__(cls, value)
+        obj._value_ = value
+        obj.int_code = int_code
+        return obj
+
+    def __str__(self) -> str:
+        return str(self._value_)
 
 
-class CommonErrorCode(_AutoName):
+class CommonErrorCode(_ErrorCode):
     """Common/generic error codes."""
 
-    SUCCESS = auto()
-    SERVER_ERROR = auto()
-    SYSTEM_INVALID = auto()
-    INTERNAL_ERROR = auto()
-    VALIDATION_ERROR = auto()
-    NOT_FOUND = auto()
-    PERMISSION_DENIED = auto()
-    CONFLICT = auto()
+    SUCCESS = ("SUCCESS", 0)
+    SERVER_ERROR = ("SERVER_ERROR", 500)
+    SYSTEM_INVALID = ("SYSTEM_INVALID", 501)
+    INTERNAL_ERROR = ("INTERNAL_ERROR", 500)
+    VALIDATION_ERROR = ("VALIDATION_ERROR", 999)
+    NOT_FOUND = ("NOT_FOUND", 404)
+    PERMISSION_DENIED = ("PERMISSION_DENIED", 403)
+    CONFLICT = ("CONFLICT", 409)
 
 
-class AuthErrorCode(_AutoName):
+class AuthErrorCode(_ErrorCode):
     """Authentication and authorization error codes."""
 
-    AUTHENTICATE_FAILED = auto()
-    AUTH_FAILED = auto()
-    EMAIL_WRONG = auto()
-    PHONE_NUMBER_WRONG = auto()
-    PHONE_NUMBER_REGISTERED = auto()
-    EMAIL_REGISTERED = auto()
-    SEND_CODE_FAILED = auto()
-    CODE_EXPIRED = auto()
-    CODE_SEND_TOO_FREQUENTLY = auto()
-    UNSUPPORTED_CODE_TYPE = auto()
-    USER_NOT_MATCH_PASSWORD = auto()
-    USER_NOT_EXIST = auto()
-    NO_PREFERENCES_PARAMS = auto()
-    INVALID_CLIENT_TIMEZONE = auto()
+    AUTHENTICATE_FAILED = ("AUTHENTICATE_FAILED", 1000)
+    AUTH_FAILED = ("AUTH_FAILED", 401)
+    EMAIL_WRONG = ("EMAIL_WRONG", 1001)
+    PHONE_NUMBER_WRONG = ("PHONE_NUMBER_WRONG", 1002)
+    PHONE_NUMBER_REGISTERED = ("PHONE_NUMBER_REGISTERED", 1003)
+    EMAIL_REGISTERED = ("EMAIL_REGISTERED", 1004)
+    SEND_CODE_FAILED = ("SEND_CODE_FAILED", 1005)
+    CODE_EXPIRED = ("CODE_EXPIRED", 1006)
+    CODE_SEND_TOO_FREQUENTLY = ("CODE_SEND_TOO_FREQUENTLY", 1007)
+    UNSUPPORTED_CODE_TYPE = ("UNSUPPORTED_CODE_TYPE", 1008)
+    USER_NOT_MATCH_PASSWORD = ("USER_NOT_MATCH_PASSWORD", 1009)
+    USER_NOT_EXIST = ("USER_NOT_EXIST", 1010)
+    NO_PREFERENCES_PARAMS = ("NO_PREFERENCES_PARAMS", 1011)
+    INVALID_CLIENT_TIMEZONE = ("INVALID_CLIENT_TIMEZONE", 1012)
 
 
-class FileErrorCode(_AutoName):
+class FileErrorCode(_ErrorCode):
     """File upload and storage error codes."""
 
-    NO_FILE_UPLOADED = auto()
-    INVALID_FILE_UPLOADED = auto()
-    FILE_TOO_LARGE = auto()
-    INVALID_FILE_TYPE = auto()
-    INVALID_MIME_TYPE = auto()
-    INVALID_IMAGE_CONTENT = auto()
-    IMAGE_TOO_WIDE = auto()
-    IMAGE_TOO_HIGH = auto()
-    TOO_MANY_FILES = auto()
-    TOTAL_SIZE_TOO_LARGE = auto()
-    FILE_READ_ERROR = auto()
-    FILESYSTEM_ERROR = auto()
-    UPLOAD_VERIFICATION_FAILED = auto()
-    UPLOAD_ALL_FAILED = auto()
-    INVALID_IMAGE_URLS = auto()
-    FILE_NOT_FOUND = auto()
-    IMAGE_COMPRESSION_FAILED = auto()
+    NO_FILE_UPLOADED = ("NO_FILE_UPLOADED", 4001)
+    INVALID_FILE_UPLOADED = ("INVALID_FILE_UPLOADED", 4002)
+    FILE_TOO_LARGE = ("FILE_TOO_LARGE", 4003)
+    INVALID_FILE_TYPE = ("INVALID_FILE_TYPE", 4004)
+    INVALID_MIME_TYPE = ("INVALID_MIME_TYPE", 4005)
+    INVALID_IMAGE_CONTENT = ("INVALID_IMAGE_CONTENT", 4006)
+    IMAGE_TOO_WIDE = ("IMAGE_TOO_WIDE", 4007)
+    IMAGE_TOO_HIGH = ("IMAGE_TOO_HIGH", 4008)
+    TOO_MANY_FILES = ("TOO_MANY_FILES", 4009)
+    TOTAL_SIZE_TOO_LARGE = ("TOTAL_SIZE_TOO_LARGE", 4010)
+    FILE_READ_ERROR = ("FILE_READ_ERROR", 4011)
+    FILESYSTEM_ERROR = ("FILESYSTEM_ERROR", 4012)
+    UPLOAD_VERIFICATION_FAILED = ("UPLOAD_VERIFICATION_FAILED", 4013)
+    UPLOAD_ALL_FAILED = ("UPLOAD_ALL_FAILED", 4014)
+    INVALID_IMAGE_URLS = ("INVALID_IMAGE_URLS", 4015)
+    FILE_NOT_FOUND = ("FILE_NOT_FOUND", 4016)
+    IMAGE_COMPRESSION_FAILED = ("IMAGE_COMPRESSION_FAILED", 4017)
 
 
-class TransactionErrorCode(_AutoName):
+class TransactionErrorCode(_ErrorCode):
     """Transaction-related error codes."""
 
-    TRANSACTION_COMMENT_NULL = auto()
-    INVALID_PARENT_COMMENT_ID = auto()
-    STORE_COMMENT_FAILED = auto()
-    DELETE_COMMENT_FAILED = auto()
-    TRANSACTION_NOT_EXISTS = auto()
-    INVALID_RECURRENCE_RULE = auto()
-    RECURRENCE_RULE_NOT_FOUND = auto()
+    TRANSACTION_COMMENT_NULL = ("TRANSACTION_COMMENT_NULL", 3000)
+    INVALID_PARENT_COMMENT_ID = ("INVALID_PARENT_COMMENT_ID", 3001)
+    STORE_COMMENT_FAILED = ("STORE_COMMENT_FAILED", 3002)
+    DELETE_COMMENT_FAILED = ("DELETE_COMMENT_FAILED", 3003)
+    TRANSACTION_NOT_EXISTS = ("TRANSACTION_NOT_EXISTS", 3004)
+    INVALID_RECURRENCE_RULE = ("INVALID_RECURRENCE_RULE", 3200)
+    RECURRENCE_RULE_NOT_FOUND = ("RECURRENCE_RULE_NOT_FOUND", 3201)
 
 
-class SpaceErrorCode(_AutoName):
+class SpaceErrorCode(_ErrorCode):
     """Shared space error codes."""
 
-    SHARED_SPACE_NOT_EXISTS_OR_NO_ACCESS = auto()
-    NO_PERMISSION_TO_INVITE_MEMBERS = auto()
-    CANNOT_INVITE_YOURSELF = auto()
-    INVITATION_SENT = auto()
-    ALREADY_MEMBER_OR_HAS_BEEN_INVITED = auto()
-    INVALID_ACTION = auto()
-    INVITATION_NOT_EXISTS = auto()
-    ONLY_OWNER_CAN_DO = auto()
-    OWNER_CANNOT_BE_REMOVED = auto()
-    MEMBER_NOT_EXIST = auto()
-    NOT_MEMBER_IN_THIS_SPACE = auto()
-    OWNER_CANNOT_LEAVE_DIRECTLY = auto()
-    INVALID_INVITATION_CODE = auto()
-    INVITATION_CODE_EXPIRED_OR_LIMITED = auto()
-    TRANSACTION_ALREADY_IN_SPACE = auto()
+    SHARED_SPACE_NOT_EXISTS_OR_NO_ACCESS = ("SHARED_SPACE_NOT_EXISTS_OR_NO_ACCESS", 3100)
+    NO_PERMISSION_TO_INVITE_MEMBERS = ("NO_PERMISSION_TO_INVITE_MEMBERS", 3101)
+    CANNOT_INVITE_YOURSELF = ("CANNOT_INVITE_YOURSELF", 3102)
+    INVITATION_SENT = ("INVITATION_SENT", 3103)
+    ALREADY_MEMBER_OR_HAS_BEEN_INVITED = ("ALREADY_MEMBER_OR_HAS_BEEN_INVITED", 3104)
+    INVALID_ACTION = ("INVALID_ACTION", 3105)
+    INVITATION_NOT_EXISTS = ("INVITATION_NOT_EXISTS", 3106)
+    ONLY_OWNER_CAN_DO = ("ONLY_OWNER_CAN_DO", 3107)
+    OWNER_CANNOT_BE_REMOVED = ("OWNER_CANNOT_BE_REMOVED", 3108)
+    MEMBER_NOT_EXIST = ("MEMBER_NOT_EXIST", 3109)
+    NOT_MEMBER_IN_THIS_SPACE = ("NOT_MEMBER_IN_THIS_SPACE", 3110)
+    OWNER_CANNOT_LEAVE_DIRECTLY = ("OWNER_CANNOT_LEAVE_DIRECTLY", 3111)
+    INVALID_INVITATION_CODE = ("INVALID_INVITATION_CODE", 3112)
+    INVITATION_CODE_EXPIRED_OR_LIMITED = ("INVITATION_CODE_EXPIRED_OR_LIMITED", 3113)
+    TRANSACTION_ALREADY_IN_SPACE = ("TRANSACTION_ALREADY_IN_SPACE", 3114)
 
 
-class AIErrorCode(_AutoName):
+class AIErrorCode(_ErrorCode):
     """AI/LLM service error codes."""
 
-    AI_CONTEXT_LIMIT_EXCEEDED = auto()
-    CONVERSATION_ID_INVALID = auto()
-    CONVERSATION_ID_NOT_OWNER = auto()
-    TOKENS_LIMITED = auto()
-    NO_USER_MESSAGE = auto()
+    AI_CONTEXT_LIMIT_EXCEEDED = ("AI_CONTEXT_LIMIT_EXCEEDED", 9000)
+    CONVERSATION_ID_INVALID = ("CONVERSATION_ID_INVALID", 9001)
+    CONVERSATION_ID_NOT_OWNER = ("CONVERSATION_ID_NOT_OWNER", 9002)
+    TOKENS_LIMITED = ("TOKENS_LIMITED", 9003)
+    NO_USER_MESSAGE = ("NO_USER_MESSAGE", 9004)
 
 
-class StorageErrorCode(_AutoName):
+class StorageErrorCode(_ErrorCode):
     """Storage configuration error codes."""
 
-    INVALID_PROVIDER_TYPE = auto()
-    CONFIG_NOT_FOUND = auto()
-    CONFIG_IN_USE = auto()
+    INVALID_PROVIDER_TYPE = ("INVALID_PROVIDER_TYPE", 4500)
+    CONFIG_NOT_FOUND = ("CONFIG_NOT_FOUND", 4501)
+    CONFIG_IN_USE = ("CONFIG_IN_USE", 4502)
+
+
+# Source-of-truth tuple for deriving ERROR_CODE_MAP; keep in sync with the
+# ErrorCodeType union below.
+_ALL_ERROR_CODE_ENUMS = (
+    CommonErrorCode,
+    AuthErrorCode,
+    FileErrorCode,
+    TransactionErrorCode,
+    SpaceErrorCode,
+    AIErrorCode,
+    StorageErrorCode,
+)
+
+# Derived single-source mapping from the string code (member name) to the
+# client-facing integer code (member int_code). Adding an enum member is the
+# only change needed to register a new code.
+ERROR_CODE_MAP: dict[str, int] = {
+    member.name: member.int_code for enum_cls in _ALL_ERROR_CODE_ENUMS for member in enum_cls
+}
 
 
 # ============================================================================

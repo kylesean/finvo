@@ -28,7 +28,7 @@ from app.api.v1.auth import (
     get_current_user,
 )
 from app.core.config import settings
-from app.core.database import SessionRepository, get_session, get_session_context
+from app.core.database import get_session, get_session_context
 from app.core.exceptions import AppException, CommonErrorCode
 from app.core.langgraph.simple_agent import SimpleLangChainAgent as LangGraphAgent
 from app.core.limiter import limiter
@@ -36,6 +36,7 @@ from app.core.logging import logger
 from app.core.responses import error_response, get_error_code_int, success_response
 from app.models.session import Session
 from app.models.user import User
+from app.repositories.session_repository import SessionRepository
 from app.schemas.chat import (
     ChatRequest,
     ChatRequestWithAttachments,
