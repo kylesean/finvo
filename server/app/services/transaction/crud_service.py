@@ -1,8 +1,10 @@
 """Transaction CRUD service for basic transaction operations."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 import structlog
@@ -25,6 +27,9 @@ from app.utils.currency_utils import (
     get_user_display_currency,
 )
 from app.utils.identicon import default_avatar_url
+
+if TYPE_CHECKING:
+    from app.services.exchange_rate_service import ExchangeRateService
 
 logger = structlog.get_logger(__name__)
 
@@ -619,23 +624,24 @@ class TransactionCRUDService:
         user_uuid: UUID,
         account_id: UUID | None,
     ) -> dict[str, Any] | None:
-        """Update transaction account
+        """Update transaction account association.
 
-        Support cross-currency account association:
-        - If the transaction currency is different from the account currency, use real-time exchange rate to convert
-        - Account balance is deducted/increased in the account's local currency"
+        Supports cross-currency account association: if the transaction
+        currency differs from the account currency, a real-time exchange
+        rate is used to convert the amount. Account balance is adjusted
+        in the account's local currency.
 
         Args:
             transaction_id: Transaction ID
             user_uuid: User UUID
-            account_id: New account ID, pass None to cancel association
+            account_id: New account ID, or None to cancel association
 
         Returns:
             Updated transaction details
 
         Raises:
             NotFoundError: Transaction or account not found
-            BusinessError: Permission denied
+            BusinessError: Permission denied or exchange rate unavailable
         """
         from app.services.exchange_rate_service import ExchangeRateService
 
@@ -646,147 +652,53 @@ class TransactionCRUDService:
         if not transaction:
             raise NotFoundError("Transaction")
 
-        # Verify ownership
         if transaction.user_uuid != user_uuid:
             raise BusinessError("Permission denied to modify this transaction", "PERMISSION_DENIED")
 
-        # Get transaction type
         is_expense = transaction.type == "EXPENSE"
         is_income = transaction.type == "INCOME"
 
-        # Determine which account field to use based on transaction type
-        # Expense → source_account_id (payment account)
-        # Income → target_account_id (receipt account)
-        if is_expense:
-            old_account_id = transaction.source_account_id
-        elif is_income:
+        # Expense → source_account_id; Income → target_account_id
+        if is_income:
             old_account_id = transaction.target_account_id
         else:
-            # Transfer type does not support single account association
+            # Expense and Transfer both use source_account_id
             old_account_id = transaction.source_account_id
 
         new_account_id = account_id
 
-        # If the account has not changed, return directly
         if old_account_id == new_account_id:
             return await self.get_transaction_detail(transaction_id, user_uuid)
 
-        # Get transaction original amount and currency (for cross-currency conversion)
-        # Prioritize using original amount/currency, fallback to amount/currency
         tx_original_amount = transaction.amount_original or transaction.amount
         tx_currency = (transaction.currency or BASE_CURRENCY).upper()
-
-        # Initialize exchange rate service
         exchange_rate_svc = ExchangeRateService()
 
-        # Rollback old account balance
         if old_account_id:
-            old_account_query = select(FinancialAccount).where(
-                and_(
-                    FinancialAccount.id == old_account_id,
-                    FinancialAccount.user_uuid == user_uuid,
-                )
-            )
-            old_account_result = await self.db.execute(old_account_query)
-            old_account = old_account_result.scalar_one_or_none()
-
-            if old_account:
-                old_account_currency = (old_account.currency_code or BASE_CURRENCY).upper()
-
-                # Calculate amount in old account currency
-                if tx_currency == old_account_currency:
-                    rollback_amount = abs(Decimal(str(tx_original_amount)))
-                else:
-                    # Need exchange rate conversion
-                    converted = await exchange_rate_svc.convert(
-                        amount=float(abs(Decimal(str(tx_original_amount)))),
-                        from_currency=tx_currency,
-                        to_currency=old_account_currency,
-                    )
-                    if converted is None:
-                        logger.warning(
-                            "exchange_rate_conversion_failed_rollback",
-                            tx_currency=tx_currency,
-                            account_currency=old_account_currency,
-                        )
-                        # Exchange rate conversion failed, use original amount as approximate value
-                        rollback_amount = abs(Decimal(str(tx_original_amount)))
-                    else:
-                        rollback_amount = Decimal(str(converted))
-
-                # Rollback: add back for expense, subtract for income
-                if is_expense:
-                    old_account.current_balance += rollback_amount
-                elif is_income:
-                    old_account.current_balance -= rollback_amount
-                old_account.updated_at = utc_now()
-
-                logger.info(
-                    "account_balance_rollback",
-                    account_id=str(old_account_id),
-                    tx_currency=tx_currency,
-                    account_currency=old_account_currency,
-                    rollback_amount=str(rollback_amount),
-                )
-
-        # 2. Update new account balance
-        if new_account_id:
-            new_account_query = select(FinancialAccount).where(
-                and_(
-                    FinancialAccount.id == new_account_id,
-                    FinancialAccount.user_uuid == user_uuid,
-                )
-            )
-            new_account_result = await self.db.execute(new_account_query)
-            new_account = new_account_result.scalar_one_or_none()
-
-            if not new_account:
-                raise NotFoundError("Account")
-
-            new_account_currency = (new_account.currency_code or BASE_CURRENCY).upper()
-
-            # Calculate amount in new account currency
-            if tx_currency == new_account_currency:
-                deduct_amount = abs(Decimal(str(tx_original_amount)))
-            else:
-                # Need exchange rate conversion: convert from transaction currency to account currency
-                converted = await exchange_rate_svc.convert(
-                    amount=float(abs(Decimal(str(tx_original_amount)))),
-                    from_currency=tx_currency,
-                    to_currency=new_account_currency,
-                )
-                if converted is None:
-                    raise BusinessError(
-                        f"Unable to get exchange rate from {tx_currency} to {new_account_currency}, please try again later",
-                        "EXCHANGE_RATE_UNAVAILABLE",
-                    )
-                deduct_amount = Decimal(str(converted))
-
-            # Update balance: deduct for expense, add for income
-            if is_expense:
-                new_account.current_balance -= deduct_amount
-            elif is_income:
-                new_account.current_balance += deduct_amount
-            new_account.updated_at = utc_now()
-
-            logger.info(
-                "account_balance_updated",
-                account_id=str(new_account_id),
+            await self._rollback_old_account_balance(
+                transaction_id=transaction_id,
+                old_account_id=old_account_id,
+                user_uuid=user_uuid,
+                tx_original_amount=tx_original_amount,
                 tx_currency=tx_currency,
-                account_currency=new_account_currency,
-                original_amount=str(tx_original_amount),
-                deduct_amount=str(deduct_amount),
+                is_expense=is_expense,
+                is_income=is_income,
+                exchange_rate_svc=exchange_rate_svc,
             )
 
-        # 3. Update transaction account association (set correct field based on type)
-        if is_expense:
-            transaction.source_account_id = new_account_id
-        elif is_income:
-            transaction.target_account_id = new_account_id
-        else:
-            # Transfer default sets source_account_id
-            transaction.source_account_id = new_account_id
-        transaction.updated_at = utc_now()
+        if new_account_id:
+            await self._apply_new_account_balance(
+                transaction_id=transaction_id,
+                new_account_id=new_account_id,
+                user_uuid=user_uuid,
+                tx_original_amount=tx_original_amount,
+                tx_currency=tx_currency,
+                is_expense=is_expense,
+                is_income=is_income,
+                exchange_rate_svc=exchange_rate_svc,
+            )
+
+        self._update_account_association(transaction, new_account_id, is_income)
 
         await self.db.commit()
 
@@ -798,6 +710,140 @@ class TransactionCRUDService:
         )
 
         return await self.get_transaction_detail(transaction_id, user_uuid)
+
+    async def _convert_tx_amount(
+        self,
+        tx_original_amount: Decimal,
+        tx_currency: str,
+        target_currency: str,
+        exchange_rate_svc: ExchangeRateService,
+    ) -> Decimal | None:
+        """Convert transaction amount to target currency.
+
+        Returns the absolute amount directly if currencies match.
+        Returns None if exchange rate conversion fails.
+        """
+        abs_amount = abs(Decimal(str(tx_original_amount)))
+        if tx_currency == target_currency:
+            return abs_amount
+        converted = await exchange_rate_svc.convert(
+            amount=float(abs_amount),
+            from_currency=tx_currency,
+            to_currency=target_currency,
+        )
+        if converted is None:
+            return None
+        return Decimal(str(converted))
+
+    async def _rollback_old_account_balance(
+        self,
+        transaction_id: UUID,
+        old_account_id: UUID,
+        user_uuid: UUID,
+        tx_original_amount: Decimal,
+        tx_currency: str,
+        is_expense: bool,
+        is_income: bool,
+        exchange_rate_svc: ExchangeRateService,
+    ) -> None:
+        """Reverse a transaction's effect on the old account balance.
+
+        Expense → add back; Income → subtract. If the account is not found
+        (e.g. deleted), the rollback is silently skipped.
+        """
+        old_account = await self.get_financial_account(old_account_id, user_uuid)
+        if not old_account:
+            return
+
+        old_account_currency = (old_account.currency_code or BASE_CURRENCY).upper()
+        rollback_amount = await self._convert_tx_amount(
+            tx_original_amount, tx_currency, old_account_currency, exchange_rate_svc
+        )
+        if rollback_amount is None:
+            logger.warning(
+                "exchange_rate_conversion_failed_rollback",
+                transaction_id=str(transaction_id),
+                tx_currency=tx_currency,
+                account_currency=old_account_currency,
+            )
+            rollback_amount = abs(Decimal(str(tx_original_amount)))
+
+        if is_expense:
+            old_account.current_balance += rollback_amount
+        elif is_income:
+            old_account.current_balance -= rollback_amount
+        old_account.updated_at = utc_now()
+
+        logger.info(
+            "account_balance_rollback",
+            transaction_id=str(transaction_id),
+            account_id=str(old_account_id),
+            tx_currency=tx_currency,
+            account_currency=old_account_currency,
+            rollback_amount=str(rollback_amount),
+        )
+
+    async def _apply_new_account_balance(
+        self,
+        transaction_id: UUID,
+        new_account_id: UUID,
+        user_uuid: UUID,
+        tx_original_amount: Decimal,
+        tx_currency: str,
+        is_expense: bool,
+        is_income: bool,
+        exchange_rate_svc: ExchangeRateService,
+    ) -> None:
+        """Apply a transaction's effect to the new account balance.
+
+        Expense → deduct; Income → add. Raises NotFoundError if the account
+        does not exist, or BusinessError if exchange rate conversion fails.
+        """
+        new_account = await self.get_financial_account(new_account_id, user_uuid)
+        if not new_account:
+            raise NotFoundError("Account")
+
+        new_account_currency = (new_account.currency_code or BASE_CURRENCY).upper()
+        deduct_amount = await self._convert_tx_amount(
+            tx_original_amount, tx_currency, new_account_currency, exchange_rate_svc
+        )
+        if deduct_amount is None:
+            raise BusinessError(
+                f"Unable to get exchange rate from {tx_currency} to {new_account_currency}, please try again later",
+                "EXCHANGE_RATE_UNAVAILABLE",
+            )
+
+        if is_expense:
+            new_account.current_balance -= deduct_amount
+        elif is_income:
+            new_account.current_balance += deduct_amount
+        new_account.updated_at = utc_now()
+
+        logger.info(
+            "account_balance_updated",
+            transaction_id=str(transaction_id),
+            account_id=str(new_account_id),
+            tx_currency=tx_currency,
+            account_currency=new_account_currency,
+            original_amount=str(tx_original_amount),
+            deduct_amount=str(deduct_amount),
+        )
+
+    @staticmethod
+    def _update_account_association(
+        transaction: Transaction,
+        new_account_id: UUID | None,
+        is_income: bool,
+    ) -> None:
+        """Set the transaction's account field based on transaction type.
+
+        Income → target_account_id; Expense/Transfer → source_account_id.
+        """
+        if is_income:
+            transaction.target_account_id = new_account_id
+        else:
+            transaction.source_account_id = new_account_id
+        transaction.updated_at = utc_now()
 
     # ===== Comment Operations =====
 
