@@ -119,7 +119,7 @@ class TransactionItem(BaseModel):
             created_at=tx.created_at.isoformat() if tx.created_at else None,
             updated_at=tx.updated_at.isoformat() if tx.updated_at else None,
             display=TransactionDisplayValue.from_params(
-                amount=amount_val, tx_type=tx.type, currency=original_currency
+                amount=tx.amount_original, tx_type=tx.type, currency=original_currency
             ),
         )
 

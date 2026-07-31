@@ -1010,7 +1010,7 @@ class SharedSpaceService:
         from app.schemas.transaction import TransactionDisplayValue
 
         tx = st.transaction
-        amount = float(tx.amount) if tx else 0.0
+        amount = tx.amount if tx else Decimal("0")
         tx_type = tx.type if tx else "EXPENSE"
         currency = tx.currency if tx else "CNY"
 

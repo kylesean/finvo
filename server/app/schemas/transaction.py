@@ -31,9 +31,7 @@ class TransactionDisplayValue(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
-    def from_params(
-        cls, amount: float | str | Decimal, tx_type: str, currency: str = "CNY"
-    ) -> "TransactionDisplayValue":
+    def from_params(cls, amount: Decimal, tx_type: str, currency: str = "CNY") -> "TransactionDisplayValue":
         """Factory method to create display value from raw parameters."""
         # 1. Determine Sign
         tx_type_upper = tx_type.upper()
@@ -45,7 +43,7 @@ class TransactionDisplayValue(BaseModel):
             sign = ""
 
         # 2. Format Value (plain)
-        abs_amount = abs(Decimal(str(amount)))
+        abs_amount = abs(amount)
         value_str = f"{abs_amount:.2f}"
 
         # 3. Format Value with thousand separators

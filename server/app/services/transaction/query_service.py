@@ -102,7 +102,7 @@ class TransactionQueryService:
                     "createdAt": tx.created_at.isoformat(),
                     "updatedAt": tx.updated_at.isoformat() if tx.updated_at else None,
                     "display": TransactionDisplayValue.from_params(
-                        amount=amount_val, tx_type=tx.type, currency=original_currency
+                        amount=tx.amount_original, tx_type=tx.type, currency=original_currency
                     ).model_dump(),
                 }
             )

@@ -305,7 +305,7 @@ class TransactionCRUDService:
             "sourceThreadId": str(transaction.source_thread_id) if transaction.source_thread_id else None,
             "attachments": attachments_data,
             "display": TransactionDisplayValue.from_params(
-                amount=amount_val, tx_type=transaction.type, currency=original_currency
+                amount=transaction.amount_original, tx_type=transaction.type, currency=original_currency
             ).model_dump(),
         }
 
@@ -573,7 +573,7 @@ class TransactionCRUDService:
                     "originalAmount": str(tx.amount_original),
                     "originalCurrency": tx.currency,
                     "display": TransactionDisplayValue.from_params(
-                        amount=float(tx.amount_original), tx_type=tx.type, currency=tx.currency
+                        amount=tx.amount_original, tx_type=tx.type, currency=tx.currency
                     ).model_dump(),
                 }
                 for tx in created_transactions

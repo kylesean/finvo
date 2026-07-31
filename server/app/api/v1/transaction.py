@@ -167,7 +167,7 @@ def _transaction_to_dict(
         "targetAccountId": str(_get_attr(tx, "target_account_id")) if _get_attr(tx, "target_account_id") else None,
         # Display value for UI (uses original currency)
         "display": TransactionDisplayValue.from_params(
-            amount=amount_val, tx_type=tx_type, currency=original_currency
+            amount=Decimal(str(amount_val)), tx_type=tx_type, currency=original_currency
         ).model_dump(by_alias=False),
     }
 
