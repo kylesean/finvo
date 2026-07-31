@@ -239,7 +239,7 @@ async def record_transactions(
             return {"success": False, "message": ae.message, "code": ae.error_code}
         except Exception as e:
             logger.error("record_transactions_failed", error=str(e), exc_info=True)
-            return {"success": False, "message": "记录交易失败，系统发生内部错误"}
+            return {"success": False, "message": "Failed to record transactions due to an internal error"}
 
 
 # ============================================================================
@@ -434,8 +434,8 @@ async def search_transactions(
             "total": 0,
         }
     except Exception as e:
-        logger.error(f"Search failed for user {user_uuid_str}: {str(e)}", exc_info=True)
-        return {"success": False, "message": f"System error: {str(e)}", "items": [], "total": 0}
+        logger.error("search_transactions_failed", user_uuid=user_uuid_str, error=str(e), exc_info=True)
+        return {"success": False, "message": "An internal error occurred during search", "items": [], "total": 0}
 
 
 # ============================================================================

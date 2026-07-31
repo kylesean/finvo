@@ -227,7 +227,7 @@ class RecurringTransactionService:
 
             return next_occ
         except Exception as e:
-            logger.warning(f"Failed to calculate next execution: {e}")
+            logger.warning("next_execution_calculation_failed", error=str(e))
             return None
 
     def _recurring_tx_to_dict(self, recurring_tx: RecurringTransaction) -> dict[str, Any]:
@@ -492,5 +492,5 @@ class RecurringTransactionService:
 
             return occurrences
         except Exception as e:
-            logger.error(f"Error parsing RRULE: {rrule_string}, error: {e}")
+            logger.error("rrule_parse_failed", rrule=rrule_string, error=str(e))
             return []

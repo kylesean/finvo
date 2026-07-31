@@ -368,7 +368,7 @@ async def chat_stream(
                     bg_task.add_done_callback(_background_memory_tasks.discard)
 
         except Exception as e:
-            logger.error(f"Stream error: {e}", exc_info=True)
+            logger.error("stream_error", error=str(e), exc_info=True)
             error_event = GenUIEvent(type="error", content=str(e))
             yield f"data: {json.dumps(error_event.model_dump(mode='json'), ensure_ascii=False)}\n\n"
 
@@ -679,7 +679,7 @@ async def resume_session(
             ):
                 yield f"data: {json.dumps(event.model_dump(mode='json', exclude_none=True), ensure_ascii=False)}\n\n"
         except Exception as e:
-            logger.error(f"Resume stream error: {e}", exc_info=True)
+            logger.error("resume_stream_error", error=str(e), exc_info=True)
             error_event = GenUIEvent(type="error", content=str(e))
             yield f"data: {json.dumps(error_event.model_dump(mode='json'), ensure_ascii=False)}\n\n"
 

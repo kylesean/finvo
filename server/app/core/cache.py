@@ -11,6 +11,7 @@ from typing import Any
 
 from redis.asyncio import Redis
 from redis.asyncio.connection import ConnectionPool
+from redis.exceptions import RedisError
 
 from app.core.config import settings
 from app.core.logging import logger
@@ -86,7 +87,7 @@ class CacheManager:
             client = self.get_client()
             await client.ping()
             return True
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("redis_health_check_failed", error=str(e))
             return False
 
@@ -122,7 +123,7 @@ class CacheManager:
 
             return value
 
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("cache_get_failed", key=key, error=str(e))
             return None
 
@@ -170,7 +171,7 @@ class CacheManager:
             logger.debug("cache_set", key=key, ttl=ttl)
             return True
 
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("cache_set_failed", key=key, error=str(e))
             return False
 
@@ -201,7 +202,7 @@ class CacheManager:
 
             result = await client.set(key, serialized_value, nx=True, ex=ttl)
             return bool(result)
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("cache_set_nx_failed", key=key, error=str(e))
             return False
 
@@ -219,7 +220,7 @@ class CacheManager:
             result = await client.delete(key)
             logger.debug("cache_delete", key=key, deleted=bool(result))
             return bool(result)
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("cache_delete_failed", key=key, error=str(e))
             return False
 
@@ -245,7 +246,7 @@ class CacheManager:
 
             return 0
 
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("cache_pattern_delete_failed", pattern=pattern, error=str(e))
             return 0
 
@@ -262,7 +263,7 @@ class CacheManager:
             client = self.get_client()
             result = await client.exists(key)
             return bool(result)
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("cache_exists_failed", key=key, error=str(e))
             return False
 
@@ -280,7 +281,7 @@ class CacheManager:
             client = self.get_client()
             result = await client.incrby(key, amount)
             return int(result)
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("cache_increment_failed", key=key, error=str(e))
             return None
 
@@ -298,7 +299,7 @@ class CacheManager:
             client = self.get_client()
             result = await client.expire(key, ttl)
             return bool(result)
-        except Exception as e:
+        except (RedisError, OSError) as e:
             logger.error("cache_expire_failed", key=key, error=str(e))
             return False
 

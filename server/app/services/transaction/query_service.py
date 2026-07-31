@@ -54,7 +54,7 @@ class TransactionQueryService:
                 filter_date = datetime.strptime(date_filter, "%Y-%m-%d").date()
                 query = query.where(func.date(Transaction.transaction_at) == filter_date)
             except ValueError:
-                logger.warning(f"Invalid date format: {date_filter}")
+                logger.warning("invalid_date_format", date_filter=date_filter)
 
         # 类型过滤
         if type_filter == "income":
@@ -164,14 +164,14 @@ class TransactionQueryService:
                 start_dt = datetime.strptime(start_date, "%Y-%m-%d")
                 query = query.where(Transaction.transaction_at >= start_dt)
             except ValueError:
-                logger.warning(f"Invalid start_date format: {start_date}")
+                logger.warning("invalid_start_date_format", start_date=start_date)
 
         if end_date := filters.get("end_date"):
             try:
                 end_dt = datetime.strptime(end_date, "%Y-%m-%d")
                 query = query.where(Transaction.transaction_at <= end_dt)
             except ValueError:
-                logger.warning(f"Invalid end_date format: {end_date}")
+                logger.warning("invalid_end_date_format", end_date=end_date)
 
         # 收入/支出筛选
         if type_val := filters.get("type"):

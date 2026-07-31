@@ -653,7 +653,7 @@ class ForecastService:
                     ForecastWarning(
                         date=dp.date,
                         warning_type="NEGATIVE_BALANCE",
-                        message=f"预计在 {dp.date.month}月{dp.date.day}日 余额将变为负数",
+                        message=f"Balance is projected to go negative on {dp.date.month}/{dp.date.day}",
                     )
                 )
                 warned_negative = True
@@ -664,7 +664,7 @@ class ForecastService:
                     ForecastWarning(
                         date=dp.date,
                         warning_type="BELOW_SAFETY",
-                        message=f"预计在 {dp.date.month}月{dp.date.day}日 余额将低于安心线",
+                        message=f"Balance is projected to drop below the safety threshold on {dp.date.month}/{dp.date.day}",
                     )
                 )
                 warned_below_safety = True

@@ -107,7 +107,7 @@ async def get_total_expense(
             message="Expense statistics retrieved successfully",
         )
     except Exception as e:
-        logger.error(f"Failed to retrieve expense statistics: {str(e)}")
+        logger.error("expense_statistics_failed", error=str(e))
         return error_response(
             code=get_error_code_int("INTERNAL_ERROR"),
             message="Failed to retrieve expense statistics",

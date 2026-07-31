@@ -47,15 +47,15 @@ class AuthService:
     async def send_verification_code(self, account_type: str, account: str) -> bool:
         """Send verification code to the specified account.
 
-        1. 检查账号是否已存在
-        2. 异步发送验证码（使用后台任务）
+        1. Check if the account already exists.
+        2. Send the verification code asynchronously via a background task.
 
         Args:
             account_type: Type of account ('email' or 'mobile')
             account: Email address or mobile number
 
         Returns:
-            bool: True (立即返回，验证码在后台发送)
+            bool: True (returns immediately; the code is sent in the background)
 
         Raises:
             BusinessError: If account already exists

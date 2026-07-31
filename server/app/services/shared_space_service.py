@@ -575,8 +575,7 @@ class SharedSpaceService:
         )
         existing_result = await self.db.execute(existing_query)
         if existing_result.scalar_one_or_none():
-            # 优化：不再抛出异常，而是返回友好信息告知已关联
-            return {"message": "交易已在该空间中", "already_exists": True}
+            return {"message": "Transaction already in this space", "already_exists": True}
 
         space_tx = SpaceTransaction(
             space_id=space_id,

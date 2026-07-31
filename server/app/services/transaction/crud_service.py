@@ -446,7 +446,7 @@ class TransactionCRUDService:
             # KEY: This flag tells frontend to use DataModelUpdate instead of creating new surface
             "_intent": "update",
             "_changed_fields": changed_fields,
-            "message": "已更新交易记录",
+            "message": "Transaction updated",
         }
 
     async def delete_transaction(
@@ -1127,9 +1127,9 @@ class TransactionCRUDService:
             try:
                 is_parent_author_reply = parent_author_uuid is not None and mentioned_id == parent_author_uuid
                 title = (
-                    f"{commenter_username} 回复了你的评论"
+                    f"{commenter_username} replied to your comment"
                     if is_parent_author_reply
-                    else f"{commenter_username} 提及了你"
+                    else f"{commenter_username} mentioned you"
                 )
 
                 await ws_manager.send_notification(
@@ -1145,8 +1145,8 @@ class TransactionCRUDService:
                         },
                     },
                 )
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as e:  # noqa: BLE001 - best-effort push, don't fail the comment
+                logger.warning("ws_push_failed", user_uuid=str(mentioned_id), error=str(e))
 
     async def delete_comment(self, comment_id: int, user_uuid: UUID) -> bool:
         """Delete comment

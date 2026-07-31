@@ -134,7 +134,7 @@ def create_agent_node(
             response = await bound_llm.ainvoke(prompt_messages, config)
         except Exception as e:
             logger.error("agent_node_llm_invoke_failed", error=str(e), exc_info=True)
-            fallback_response = AIMessage(content="抱歉，AI 服务响应超时或暂时不可用，请稍后再试。")
+            fallback_response = AIMessage(content="AI service is temporarily unavailable. Please try again later.")
             return {"messages": [fallback_response]}
 
         logger.debug(
@@ -184,7 +184,7 @@ def create_direct_execute_node(
         if not tool_name or not tool_params:
             logger.warning("direct_execute_missing_params", tool_name=tool_name, has_params=bool(tool_params))
             return {
-                "messages": [AIMessage(content="错误：未指定要执行的操作。")],
+                "messages": [AIMessage(content="Error: no action specified.")],
                 "ui_mode": "idle",
             }
 
@@ -192,7 +192,7 @@ def create_direct_execute_node(
         if not tool:
             logger.error("direct_execute_tool_not_found", tool_name=tool_name, available=list(internal_tools.keys()))
             return {
-                "messages": [AIMessage(content=f"系统错误：工具 {tool_name} 未注册。")],
+                "messages": [AIMessage(content=f"System error: tool {tool_name} is not registered.")],
                 "ui_mode": "idle",
             }
 
@@ -222,7 +222,7 @@ def create_direct_execute_node(
         except Exception as e:
             logger.error("direct_execute_error", tool_name=tool_name, error=str(e))
             return {
-                "messages": [AIMessage(content=f"⚠️ 操作执行失败：{str(e)}")],
+                "messages": [AIMessage(content=f"Action failed: {str(e)}")],
                 "ui_mode": "idle",
                 "tool_name": None,
                 "tool_params": None,

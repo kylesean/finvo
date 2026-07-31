@@ -141,7 +141,7 @@ class PushService:
             await db.refresh(notification)
         except Exception as exc:
             await db.rollback()
-            logger.error(f"Failed to save notification to DB: {exc}")
+            logger.error("notification_save_failed: %s", exc)
             raise
 
         # 2. Fetch active device tokens (non-critical: skip push if query fails)
@@ -152,11 +152,11 @@ class PushService:
             result = await db.execute(query)
             tokens = list(result.scalars().all())
         except Exception as exc:
-            logger.warning(f"Failed to query device tokens, push skipped: {exc}")
+            logger.warning("device_tokens_query_failed, push skipped: %s", exc)
             return notification
 
         if not tokens:
-            logger.debug(f"No active tokens for user {user_uuid}. Push skipped.")
+            logger.debug("no_active_tokens for user %s, push skipped", user_uuid)
             return notification
 
         # 3. Dispatch via FCM if initialized
@@ -177,7 +177,10 @@ class PushService:
 
                 batch_response = await asyncio.to_thread(messaging.send_each_for_multicast, message)
                 logger.info(
-                    f"FCM Multicast sent to user {user_uuid}. Success: {batch_response.success_count}, Fail: {batch_response.failure_count}"
+                    "fcm_multicast_sent user=%s success=%d fail=%d",
+                    user_uuid,
+                    batch_response.success_count,
+                    batch_response.failure_count,
                 )
 
                 # Process failed tokens for deactivation
@@ -196,8 +199,8 @@ class PushService:
                         )
                         await db.commit()
             except Exception as exc:
-                logger.error(f"Failed to send FCM push notification: {exc}")
+                logger.error("fcm_push_failed: %s", exc)
         else:
-            logger.info(f"[Mock Push Notification] Title: {title} | Content: {content} | Tokens Count: {len(tokens)}")
+            logger.info("[Mock Push] title=%s content=%s tokens=%d", title, content, len(tokens))
 
         return notification

@@ -9,40 +9,40 @@ from pydantic import BaseModel
 
 
 def map_to_genui(data: Any) -> Any:
-    """递归转换数据为 GenUI 兼容格式。
+    """Recursively convert data to a GenUI-compatible format.
 
-    1. Pydantic 模型自动转为字典 (mode='json')，保持原始命名风格（应该是 camelCase）。
-    2. 日期对象转为 ISO 字符串。
+    1. Pydantic models are converted to dicts (mode='json'), preserving
+       the original naming style (camelCase).
+    2. Date objects are converted to ISO strings.
     """
-    # 处理 Pydantic 模型
+    # Pydantic models
     if isinstance(data, BaseModel):
-        # 保持原始 key (camelCase)
         return data.model_dump(mode="json")
 
-    # 递归处理字典
+    # Recurse into dicts
     if isinstance(data, dict):
         new_dict = {}
         for k, v in data.items():
-            # 不再进行 camel_to_snake 转换，保持原样
             new_dict[k] = map_to_genui(v)
         return new_dict
 
-    # 递归处理列表
+    # Recurse into lists
     elif isinstance(data, list):
         return [map_to_genui(i) for i in data]
 
-    # 处理日期
+    # Date objects
     elif isinstance(data, (datetime, date)):
         return data.isoformat()
 
-    # 基本类型直接返回
+    # Primitives: return as-is
     return data
 
 
 def genui_response(data: Any, type: str, success: bool = True, message: str | None = None) -> dict[str, Any]:
-    """生成统一的扁平化 GenUI 响应字典。
+    """Build a flat GenUI response dictionary.
 
-    保持后端原始的 camelCase 命名风格，与 RESTful API 保持一致。
+    Preserves the backend's camelCase naming style for consistency with
+    the RESTful API.
     """
     result = {
         "success": success,
@@ -55,7 +55,7 @@ def genui_response(data: Any, type: str, success: bool = True, message: str | No
     if success and data is not None:
         formatted_data = map_to_genui(data)
         if isinstance(formatted_data, dict):
-            # 扁平化合并到根部
+            # Flatten into the root
             result.update(formatted_data)
         else:
             result["data"] = formatted_data

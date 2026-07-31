@@ -67,7 +67,7 @@ async def associate_transactions_to_space(
 
             # Get space details first
             space_detail = await service.get_space_detail(UUID(space_id), user_uuid)
-            space_name = space_detail.get("name", f"空间 {space_id}")
+            space_name = space_detail.get("name", f"Space {space_id}")
 
             # Associate each transaction
             success_count = 0
@@ -103,7 +103,9 @@ async def associate_transactions_to_space(
                     "success_count": success_count,
                     "failed_count": len(failed_ids),
                 },
-                "message": f"成功将 {success_count} 笔交易关联到「{space_name}」" if success_count > 0 else "关联失败",
+                "message": f"Successfully associated {success_count} transaction(s) to '{space_name}'"
+                if success_count > 0
+                else "Association failed",
             }
 
             if surface_id:
@@ -128,7 +130,7 @@ async def associate_transactions_to_space(
         )
         return {
             "success": False,
-            "message": f"关联失败: {str(e)}",
+            "message": "Failed to associate transactions due to an internal error",
         }
 
 

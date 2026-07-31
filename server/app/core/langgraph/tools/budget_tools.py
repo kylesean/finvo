@@ -77,7 +77,7 @@ async def query_budget_status(
     if not user_uuid:
         return {
             "success": False,
-            "message": "用户上下文缺失",
+            "message": "User context missing",
         }
 
     try:
@@ -97,7 +97,7 @@ async def query_budget_status(
                 if not target_budget:
                     return {
                         "success": False,
-                        "message": f"未找到 {category_key} 分类的预算。你可以说'帮我设一个{category_key}预算'来创建。",
+                        "message": f"No budget found for category {category_key}. You can say 'set a {category_key} budget' to create one.",
                         "has_budget": False,
                     }
 
@@ -128,7 +128,7 @@ async def query_budget_status(
                 if not summary.total_budget and not summary.category_budgets:
                     return {
                         "success": True,
-                        "message": "你还没有设置任何预算。要我帮你分析消费记录并建议预算吗？",
+                        "message": "You haven't set any budgets yet. Would you like me to analyze your spending and suggest a budget?",
                         "has_budget": False,
                         "budgets": [],
                     }
@@ -187,7 +187,7 @@ async def query_budget_status(
         logger.error("query_budget_status_failed", error=str(e), exc_info=True)
         return {
             "success": False,
-            "message": f"查询预算状态失败: {str(e)}",
+            "message": "Failed to query budget status due to an internal error",
         }
 
 

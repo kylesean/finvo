@@ -131,12 +131,12 @@ class CashFlowService:
                         events_by_date[date_str] = []
                     events_by_date[date_str].append(
                         {
-                            "description": tx.description or "周期性交易",
+                            "description": tx.description or "Recurring transaction",
                             "amount": str(tx.amount),
                         }
                     )
             except Exception as e:
-                logger.error(f"Error processing recurring transaction {tx.id}: {e}")
+                logger.error("recurring_tx_processing_failed", tx_id=str(tx.id), error=str(e))
                 continue
 
         # b. Process scenario events
@@ -270,7 +270,7 @@ class CashFlowService:
                 date_str = day["date"]
                 warnings[date_str] = {
                     "date": date_str,
-                    "message": f"在 {date_obj.month}月{date_obj.day}日后, 您的余额将低于安心线。",
+                    "message": f"After {date_obj.month}/{date_obj.day}, your balance will drop below the safety threshold.",
                 }
 
         return list(warnings.values())
