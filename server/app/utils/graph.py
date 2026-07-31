@@ -10,10 +10,24 @@ from langchain_core.messages import (
     BaseMessage,
     trim_messages as _trim_messages,
 )
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.core.logging import logger
 from app.schemas import Message
+
+
+def _dump_message(message: Any) -> dict[str, Any]:
+    """Serialize a single message to a dict.
+
+    Accepts Pydantic models (app ``Message`` or LangChain ``BaseMessage``),
+    plain dicts, or any other value (coerced to a user-role text message).
+    """
+    if isinstance(message, BaseModel):
+        return message.model_dump()
+    if isinstance(message, dict):
+        return message
+    return {"role": "user", "content": str(message)}
 
 
 def dump_messages(messages: list[Message | dict[str, Any]]) -> list[dict[str, Any]]:
@@ -25,15 +39,7 @@ def dump_messages(messages: list[Message | dict[str, Any]]) -> list[dict[str, An
     Returns:
         list[dict]: The dumped messages.
     """
-    result = []
-    for message in messages:
-        if hasattr(message, "model_dump"):
-            result.append(message.model_dump())
-        elif isinstance(message, dict):
-            result.append(message)
-        else:
-            result.append({"role": "user", "content": str(message)})
-    return result
+    return [_dump_message(message) for message in messages]
 
 
 def process_llm_response(response: BaseMessage) -> BaseMessage:

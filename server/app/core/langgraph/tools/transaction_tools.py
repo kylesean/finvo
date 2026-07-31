@@ -70,6 +70,19 @@ def _get_default_category(tx_type: str) -> str:
     return TransactionCategory.OTHERS.value
 
 
+def _to_transaction_dict(tx: Any) -> dict[str, Any]:
+    """Normalize a transaction input to a plain dict.
+
+    LangChain may pass each transaction as a parsed Pydantic model or as a
+    plain dict depending on the invocation path.
+    """
+    if isinstance(tx, BaseModel):
+        return tx.model_dump()
+    if isinstance(tx, dict):
+        return tx
+    return dict(tx)
+
+
 # ============================================================================
 # Record Transactions Tool
 # ============================================================================
@@ -127,7 +140,7 @@ class RecordTransactionsInput(BaseModel):
 
 @tool("record_transactions", args_schema=RecordTransactionsInput)
 async def record_transactions(
-    transactions: list[dict[str, Any]],
+    transactions: list[dict[str, Any] | BaseModel],
     transaction_at: str | None = None,
     source_account_id: str | None = None,
     target_account_id: str | None = None,
@@ -167,14 +180,7 @@ async def record_transactions(
             income_items = []
 
             for tx in transactions:
-                if hasattr(tx, "model_dump"):
-                    tx_dict = tx.model_dump()
-                elif hasattr(tx, "dict"):
-                    tx_dict = tx.dict()
-                elif isinstance(tx, dict):
-                    tx_dict = tx
-                else:
-                    tx_dict = dict(tx)
+                tx_dict = _to_transaction_dict(tx)
 
                 tx_type = tx_dict.get("type", "expense")
                 amount = tx_dict.get("amount")
