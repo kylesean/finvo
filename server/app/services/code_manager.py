@@ -39,11 +39,10 @@ class EmailCodeSender(CodeSenderInterface):
 
         # Integration with actual email service (e.g., SendGrid, AWS SES) should be implemented here
         """
+        # Never log the verification code — it is a secret.
         logger.info(
             "sending_email_verification_code",
             email=account,
-            code=code,
-            # Do NOT log the code in production!
         )
 
         # TODO: Integration with actual email service (e.g., SendGrid, AWS SES)
