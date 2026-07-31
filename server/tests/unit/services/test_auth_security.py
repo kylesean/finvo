@@ -142,10 +142,10 @@ class TestVerificationCodeSecurity:
         with (
             patch.object(
                 code_manager,
-                "_check_rate_limit",
+                "_acquire_rate_limit_lock",
                 new=AsyncMock(return_value=True),
             ),
-            patch.object(code_manager, "_record_send_time", new=AsyncMock()),
+            patch.object(code_manager, "_release_rate_limit_lock", new=AsyncMock()),
             patch("app.services.code_manager.cache_manager") as mock_cache,
         ):
             # First call: code stored, then TTL elapses → get returns None.
@@ -297,7 +297,7 @@ class TestRateLimiting:
         reason=(
             "Self-hosted app: verification-code request rate limiting is out of "
             "scope. Code sending is already infrequent; the existing 60s "
-            "code_manager._check_rate_limit is sufficient."
+            "code_manager._acquire_rate_limit_lock is sufficient."
         )
     )
     @pytest.mark.asyncio

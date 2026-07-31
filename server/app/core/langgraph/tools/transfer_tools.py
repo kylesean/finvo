@@ -99,8 +99,7 @@ async def execute_transfer(
                 tags=tags,
             )
 
-            if isinstance(result, dict) and result.get("success"):
-                result["componentType"] = "TransferReceipt"
+            result["componentType"] = "TransferReceipt"
             return result
 
         except Exception as e:

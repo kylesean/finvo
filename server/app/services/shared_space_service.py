@@ -645,9 +645,8 @@ class SharedSpaceService:
             tags=tags,
         )
 
-        if result.get("success"):
-            tx_id = UUID(result["transaction_id"])
-            await self.add_transaction_to_space(space_id=space_id, user_uuid=user_uuid, transaction_id=tx_id)
+        tx_id = UUID(result["transaction_id"])
+        await self.add_transaction_to_space(space_id=space_id, user_uuid=user_uuid, transaction_id=tx_id)
 
         return result
 

@@ -73,18 +73,18 @@ class TransactionCRUDService:
         if source_account_id:
             source_acc = await self.get_financial_account(source_account_id, user_uuid)
             if not source_acc:
-                return {
-                    "success": False,
-                    "message": f"Source account not found: {source_account_id}",
-                }
+                raise NotFoundError(
+                    "Source account",
+                    details={"account_id": str(source_account_id)},
+                )
 
         if target_account_id:
             target_acc = await self.get_financial_account(target_account_id, user_uuid)
             if not target_acc:
-                return {
-                    "success": False,
-                    "message": f"Target account not found: {target_account_id}",
-                }
+                raise NotFoundError(
+                    "Target account",
+                    details={"account_id": str(target_account_id)},
+                )
 
         tx_currency = currency.upper()
         amount_original = transfer_amount

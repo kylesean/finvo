@@ -76,8 +76,9 @@ class TestLLMServiceConcurrency:
 
         async def mock_call_llm_with_retry(llm_inst, messages):
             nonlocal fail_count
-            # First model call fails with OpenAIError to trigger fallback
-            if "gpt-5.6-sol" in getattr(llm_inst, "model", "") or getattr(llm_inst, "model_name", "") == "gpt-5.6-sol":
+            # The default model call fails with OpenAIError to trigger fallback
+            model_id = getattr(llm_inst, "model_name", None) or getattr(llm_inst, "model", "")
+            if model_id == settings.DEFAULT_LLM_MODEL:
                 fail_count += 1
                 raise OpenAIError("Simulated provider failure")
             return AIMessage(content="Fallback model response")

@@ -1,6 +1,6 @@
-"""Node 函数定义
+"""LangGraph node functions.
 
-LangGraph 节点函数，每个节点专注于单一职责。
+Each node focuses on a single responsibility.
 """
 
 from __future__ import annotations
@@ -21,10 +21,10 @@ from app.core.langgraph.agent.multimodal import (
 from app.core.langgraph.agent.state import AgentState
 from app.core.logging import logger
 
-# DuckDuckGo 工具名称常量（用于搜索策略路由）
+# DuckDuckGo tool name constant (used for search strategy routing)
 _DDG_TOOL_NAME = "duckduckgo_results_json"
 
-# Responses API 内置搜索工具声明
+# Responses API built-in web search tool declaration
 _BUILTIN_WEB_SEARCH: dict[str, str] = {"type": "web_search"}
 
 
@@ -32,21 +32,21 @@ def _resolve_search_tools(
     llm: BaseChatModel,
     tools: list[BaseTool],
 ) -> list[BaseTool | dict[str, Any]]:
-    """根据模型 API 协议动态选择搜索工具。
+    """Dynamically select search tools based on the model's API protocol.
 
-    策略:
-    - Responses API 模型: 使用厂商内置 web_search（服务端执行，无需 ToolNode）
-    - Chat Completions 模型 (如 DeepSeek): 保留 DuckDuckGo 工具（ToolNode 执行）
+    Strategy:
+    - Responses API models: use the vendor built-in web_search (server-side, no ToolNode needed)
+    - Chat Completions models (e.g. DeepSeek): keep the DuckDuckGo tool (ToolNode execution)
     """
     uses_responses_api = getattr(llm, "use_responses_api", False)
 
     if uses_responses_api:
-        # 移除 ddg，替换为内置 web_search
+        # Remove ddg, replace with built-in web_search
         resolved: list[BaseTool | dict[str, Any]] = [t for t in tools if getattr(t, "name", None) != _DDG_TOOL_NAME]
         resolved.append(_BUILTIN_WEB_SEARCH)
         return resolved
 
-    # Chat Completions 模型保持 ddg 不变
+    # Chat Completions models keep ddg unchanged
     return list(tools)
 
 
@@ -55,9 +55,10 @@ def create_agent_node(
     tools: list[BaseTool],
     system_prompt: str,
 ) -> Callable[[AgentState, RunnableConfig], Any]:
-    """创建 Agent 节点
+    """Create the Agent node.
 
-    Agent 节点调用 LLM 生成响应，支持动态工具过滤和搜索策略路由。
+    The agent node invokes the LLM to generate a response, supporting
+    dynamic tool filtering and search strategy routing.
     """
 
     async def agent_node(state: AgentState, config: RunnableConfig) -> dict[str, list[BaseMessage]]:
@@ -121,11 +122,11 @@ def create_agent_node(
                 additional_kwargs=getattr(original, "additional_kwargs", {}),
             )
 
-        # 支持 SkillConstraintMiddleware 动态过滤工具
+        # Support dynamic tool filtering via SkillConstraintMiddleware
         filtered_tools = cfg.get("filtered_tools")
         current_tools = cast(list[BaseTool], filtered_tools or state.get("filtered_tools") or tools)
 
-        # 搜索策略路由: Responses API → 内置 web_search, Chat Completions → ddg
+        # Search strategy routing: Responses API → built-in web_search, Chat Completions → ddg
         resolved_tools = _resolve_search_tools(llm, current_tools)
 
         bound_llm = llm.bind_tools(resolved_tools)
@@ -148,11 +149,11 @@ def create_agent_node(
     return agent_node
 
 
-# === 内部工具注册表 ===
-# GenUI 直接执行的工具，不暴露给 LLM
-# 新增工具只需在此添加
+# === Internal tool registry ===
+# Tools executed directly by GenUI, not exposed to the LLM.
+# Add new tools here.
 def _get_internal_tools() -> dict[str, BaseTool]:
-    """延迟加载内部工具，避免循环导入"""
+    """Lazily load internal tools to avoid circular imports."""
     from app.core.langgraph.tools.space_association_tools import associate_transactions_to_space
     from app.core.langgraph.tools.transfer_tools import execute_transfer
 
@@ -163,17 +164,18 @@ def _get_internal_tools() -> dict[str, BaseTool]:
 
 
 def create_direct_execute_node(
-    tools: list[BaseTool],  # 保留参数以兼容图构建接口
+    tools: list[BaseTool],  # Kept for graph-building interface compatibility
 ) -> Callable[[AgentState, RunnableConfig], Any]:
-    """创建直接执行节点
+    """Create the direct-execute node.
 
-    用于 GenUI 场景：用户在 UI 上操作完成后，跳过 LLM 直接执行工具。
+    Used in GenUI scenarios: after the user completes a UI action, skip the
+    LLM and execute the tool directly.
 
-    协议:
-        - state.tool_name: 要执行的工具名（需在 INTERNAL_TOOLS 注册）
-        - state.tool_params: 工具参数
+    Protocol:
+        - state.tool_name: name of the tool to execute (must be registered in internal_tools)
+        - state.tool_params: tool parameters
     """
-    INTERNAL_TOOLS = _get_internal_tools()
+    internal_tools = _get_internal_tools()
 
     async def direct_execute_node(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
         tool_name = state.get("tool_name")
@@ -186,9 +188,9 @@ def create_direct_execute_node(
                 "ui_mode": "idle",
             }
 
-        tool = INTERNAL_TOOLS.get(tool_name)
+        tool = internal_tools.get(tool_name)
         if not tool:
-            logger.error("direct_execute_tool_not_found", tool_name=tool_name, available=list(INTERNAL_TOOLS.keys()))
+            logger.error("direct_execute_tool_not_found", tool_name=tool_name, available=list(internal_tools.keys()))
             return {
                 "messages": [AIMessage(content=f"系统错误：工具 {tool_name} 未注册。")],
                 "ui_mode": "idle",
@@ -206,7 +208,7 @@ def create_direct_execute_node(
             logger.info("direct_execute_success", tool_name=tool_name)
 
             return {
-                "messages": [AIMessage(content="")],  # 静默，让 UI 组件展示结果
+                "messages": [AIMessage(content="")],  # Silent — let the UI component show the result
                 "ui_mode": "idle",
                 "tool_name": None,
                 "tool_params": None,

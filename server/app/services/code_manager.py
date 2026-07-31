@@ -1,11 +1,10 @@
-"""验证码管理服务
+"""Verification code management service.
 
-提供验证码生成、发送、验证和频率限制功能。
+Provides code generation, sending, verification, and rate-limiting.
 """
 
 import hmac
 import secrets
-import time
 from abc import ABC, abstractmethod
 
 from app.core.cache import cache_manager
@@ -15,28 +14,28 @@ from app.core.logging import logger
 
 
 class CodeSenderInterface(ABC):
-    """验证码发送器接口"""
+    """Interface for verification code senders."""
 
     @abstractmethod
     def supports(self, code_type: str) -> bool:
-        """检查是否支持指定类型的验证码发送"""
+        """Check whether this sender supports the given code type."""
         pass
 
     @abstractmethod
     async def send(self, account: str, code: str) -> bool:
-        """发送验证码"""
+        """Send the verification code to the given account."""
         pass
 
 
 class EmailCodeSender(CodeSenderInterface):
-    """邮箱验证码发送器"""
+    """Email verification code sender."""
 
     def supports(self, code_type: str) -> bool:
         """Check if this sender supports the specified code type (email)."""
         return code_type == "email"
 
     async def send(self, account: str, code: str) -> bool:
-        """发送邮箱验证码
+        """Send a verification code via email.
 
         # Integration with actual email service (e.g., SendGrid, AWS SES) should be implemented here
         """
@@ -44,12 +43,12 @@ class EmailCodeSender(CodeSenderInterface):
             "sending_email_verification_code",
             email=account,
             code=code,
-            # 生产环境不要记录验证码！
+            # Do NOT log the code in production!
         )
 
         # TODO: Integration with actual email service (e.g., SendGrid, AWS SES)
 
-        # 开发环境：直接打印验证码
+        # Dev environment: print the code directly
         if settings.DEBUG:
             logger.debug(
                 "email_verification_code_debug", email=account, code=code, message="verification_code_generated_dev"
@@ -59,24 +58,24 @@ class EmailCodeSender(CodeSenderInterface):
 
 
 class SMSCodeSender(CodeSenderInterface):
-    """短信验证码发送器"""
+    """SMS verification code sender."""
 
     def supports(self, code_type: str) -> bool:
         """Check if this sender supports the specified code type (mobile)."""
         return code_type == "mobile"
 
     async def send(self, account: str, code: str) -> bool:
-        """发送短信验证码
+        """Send a verification code via SMS.
 
         # Integration with actual SMS service (e.g., Twilio, Aliyun) should be implemented here
         """
         logger.info(
             "sending_sms_verification_code",
             mobile=account,
-            # 生产环境不要记录验证码！
+            # Do NOT log the code in production!
         )
 
-        # 开发环境：直接打印验证码
+        # Dev environment: print the code directly
         if settings.DEBUG:
             logger.debug(
                 "sms_verification_code_debug", mobile=account, code=code, message="verification_code_generated_dev"
@@ -86,39 +85,39 @@ class SMSCodeSender(CodeSenderInterface):
 
 
 class CodeManager:
-    """验证码管理器
+    """Verification code manager.
 
-    负责验证码的生成、存储、验证和频率限制。
+    Responsible for code generation, storage, verification, and rate-limiting.
     """
 
     def __init__(self) -> None:
-        # 配置
+        # Configuration
         self.code_length = 6
-        self.expire_seconds = 300  # 5分钟
-        self.rate_limit_seconds = 60  # 60秒内只能发送一次
+        self.expire_seconds = 300  # 5 minutes
+        self.rate_limit_seconds = 60  # Only one send per 60 seconds
         self.redis_code_key_prefix = "verification_code:"
         self.redis_rate_limit_key_prefix = "code_rate_limit:"
 
-        # 注册发送器
+        # Register senders
         self.senders = [
             EmailCodeSender(),
             SMSCodeSender(),
         ]
 
     async def send_code(self, code_type: str, account: str) -> bool:
-        """发送验证码
+        """Send a verification code.
 
         Args:
-            code_type: 验证码类型 (email/mobile)
-            account: 接收账号
+            code_type: Code type (email/mobile)
+            account: Recipient account
 
         Returns:
-            是否发送成功
+            Whether the code was sent successfully
 
         Raises:
-            BusinessError: 发送频率过快或不支持的类型
+            BusinessError: If sent too frequently or the type is unsupported
         """
-        # 查找对应的发送器
+        # Find the corresponding sender
         sender = self._find_sender(code_type)
         if not sender:
             raise BusinessError(
@@ -133,15 +132,15 @@ class CodeManager:
                 error_code=AuthErrorCode.CODE_SEND_TOO_FREQUENTLY,
             )
 
-        # 生成密码学安全的验证码
+        # Generate a cryptographically secure code
         code = self._generate_code()
 
-        # 发送验证码
+        # Send the verification code
         try:
             success = await sender.send(account, code)
 
             if success:
-                # 存储验证码
+                # Store the code
                 await self._store_code(account, code)
 
                 logger.info(
@@ -150,13 +149,13 @@ class CodeManager:
                     account=account,
                 )
             else:
-                # 发送失败时释放频率限制锁
+                # Release the rate-limit lock on send failure
                 await self._release_rate_limit_lock(account)
 
             return success
 
         except Exception as e:
-            # 发送异常时释放频率限制锁
+            # Release the rate-limit lock on send exception
             await self._release_rate_limit_lock(account)
             logger.error(
                 "verification_code_send_failed",
@@ -170,21 +169,21 @@ class CodeManager:
             )
 
     async def verify_code(self, account: str, code: str) -> bool:
-        """验证验证码
+        """Verify a verification code.
 
         Args:
-            account: 账号
-            code: 验证码
+            account: Account identifier
+            code: Verification code to check
 
         Returns:
-            验证是否成功
+            Whether verification succeeded
         """
         key = self._get_code_key(account)
 
-        # 从 Redis 获取存储的验证码（不反序列化，因为存的是字符串）
+        # Fetch the stored code from Redis (no deserialization — stored as raw string)
         stored_code = await cache_manager.get(key, deserialize=False)
 
-        # 如果是 bytes，转换为字符串
+        # Convert bytes to str if needed
         if isinstance(stored_code, bytes):
             stored_code = stored_code.decode("utf-8")
 
@@ -197,7 +196,7 @@ class CodeManager:
             provided_code=code if settings.DEBUG else "***",
         )
 
-        # 使用恒定时间比较 hmac.compare_digest 防范 Timing Attack 侧信道攻击
+        # Constant-time comparison via hmac.compare_digest to mitigate timing attacks
         if not stored_code or not hmac.compare_digest(stored_code, code):
             logger.warning(
                 "verification_code_invalid",
@@ -207,7 +206,7 @@ class CodeManager:
             )
             return False
 
-        # 验证成功后立即删除验证码，防止重复使用
+        # Delete the code immediately after successful verification to prevent reuse
         await cache_manager.delete(key)
 
         logger.info(
@@ -218,41 +217,41 @@ class CodeManager:
         return True
 
     def _generate_code(self) -> str:
-        """生成密码学安全的随机验证码 (CSPRNG)"""
+        """Generate a cryptographically secure random code (CSPRNG)."""
         val = secrets.randbelow(10**self.code_length)
         return f"{val:0{self.code_length}d}"
 
     def _find_sender(self, code_type: str) -> CodeSenderInterface | None:
-        """根据类型查找对应的发送器"""
+        """Find the sender matching the given code type."""
         for sender in self.senders:
             if sender.supports(code_type):
                 return sender
         return None
 
     async def _store_code(self, account: str, code: str) -> None:
-        """将验证码存入 Redis"""
+        """Store the verification code in Redis."""
         key = self._get_code_key(account)
-        # 注意：使用 ttl 参数，不是 expire
+        # Note: use the ttl parameter, not expire
         await cache_manager.set(key, code, ttl=self.expire_seconds, serialize=False)
 
     async def _acquire_rate_limit_lock(self, account: str) -> bool:
-        """原子地检查并获取发送频率限制锁 (SETNX)"""
+        """Atomically check and acquire the send rate-limit lock (SETNX)."""
         key = self._get_rate_limit_key(account)
         return await cache_manager.set_nx(key, "1", ttl=self.rate_limit_seconds, serialize=False)
 
     async def _release_rate_limit_lock(self, account: str) -> None:
-        """释放发送频率限制锁"""
+        """Release the send rate-limit lock."""
         key = self._get_rate_limit_key(account)
         await cache_manager.delete(key)
 
     def _get_code_key(self, account: str) -> str:
-        """获取验证码在 Redis 中的存储键"""
+        """Build the Redis storage key for a verification code."""
         return f"{self.redis_code_key_prefix}{account}"
 
     def _get_rate_limit_key(self, account: str) -> str:
-        """获取频率限制在 Redis 中的存储键"""
+        """Build the Redis storage key for the rate-limit lock."""
         return f"{self.redis_rate_limit_key_prefix}{account}"
 
 
-# 全局单例
+# Global singleton
 code_manager = CodeManager()

@@ -114,15 +114,15 @@ def refresh_token(old_token: str) -> Token | None:
         ValueError: If the token format is invalid
     """
     # Verify the old token first
-    thread_id = verify_token(old_token)
-    if thread_id is None:
+    user_uuid = verify_token(old_token)
+    if user_uuid is None:
         logger.warning("token_refresh_failed_invalid_token")
         return None
 
-    # Create a new token with the same thread_id
-    new_token = create_access_token(thread_id)
+    # Create a new token with the same user UUID as subject
+    new_token = create_access_token(user_uuid)
 
-    logger.info("token_refreshed", thread_id=thread_id, expires_at=new_token.expires_at.isoformat())
+    logger.info("token_refreshed", user_uuid=user_uuid, expires_at=new_token.expires_at.isoformat())
 
     return new_token
 

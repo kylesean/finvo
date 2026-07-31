@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 import secrets
 import uuid
-from typing import Any, cast as type_cast
+from typing import Any, cast
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
@@ -320,7 +320,7 @@ class AuthService:
         Returns:
             uuid.UUID: UUID v7 object
         """
-        return type_cast(uuid.UUID, uuid7())
+        return cast(uuid.UUID, uuid7())
 
     def _generate_username(self, account: str, account_type: str) -> str:
         """Generate a user-friendly username derived from the account.
