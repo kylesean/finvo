@@ -129,7 +129,12 @@ def create_agent_node(
         resolved_tools = _resolve_search_tools(llm, current_tools)
 
         bound_llm = llm.bind_tools(resolved_tools)
-        response = await bound_llm.ainvoke(prompt_messages, config)
+        try:
+            response = await bound_llm.ainvoke(prompt_messages, config)
+        except Exception as e:
+            logger.error("agent_node_llm_invoke_failed", error=str(e), exc_info=True)
+            fallback_response = AIMessage(content="抱歉，AI 服务响应超时或暂时不可用，请稍后再试。")
+            return {"messages": [fallback_response]}
 
         logger.debug(
             "agent_node_response",

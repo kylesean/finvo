@@ -7,9 +7,11 @@ from app.schemas.chat import (
     Message,
     StreamResponse,
 )
+from app.schemas.common import BaseResponse
 from app.schemas.graph import GraphState
 
 __all__ = [
+    "BaseResponse",
     "Token",
     "ChatRequest",
     "ChatResponse",

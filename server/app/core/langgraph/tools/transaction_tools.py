@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.core.constants.transaction_constants import TransactionCategory
 from app.core.database import db_manager
+from app.core.exceptions import AppException
 from app.core.logging import logger
 from app.services.transaction_service import TransactionService
 
@@ -221,9 +222,12 @@ async def record_transactions(
 
             return result
 
+        except AppException as ae:
+            logger.warning("record_transactions_business_error", error=ae.message)
+            return {"success": False, "message": ae.message, "code": ae.error_code}
         except Exception as e:
             logger.error("record_transactions_failed", error=str(e), exc_info=True)
-            return {"success": False, "message": f"记录失败: {str(e)}"}
+            return {"success": False, "message": "记录交易失败，系统发生内部错误"}
 
 
 # ============================================================================

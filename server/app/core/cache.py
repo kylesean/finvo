@@ -174,6 +174,37 @@ class CacheManager:
             logger.error("cache_set_failed", key=key, error=str(e))
             return False
 
+    async def set_nx(
+        self,
+        key: str,
+        value: Any,
+        ttl: int | None = None,
+        serialize: bool = True,
+    ) -> bool:
+        """Set key value in cache only if it does not exist (SETNX).
+
+        Args:
+            key: Cache key
+            value: Value to cache
+            ttl: Time to live in seconds
+            serialize: Whether to serialize value to JSON
+
+        Returns:
+            bool: True if key was set (did not exist), False if key already existed or error.
+        """
+        try:
+            client = self.get_client()
+            if serialize:
+                serialized_value: str | bytes = json.dumps(value)
+            else:
+                serialized_value = value
+
+            result = await client.set(key, serialized_value, nx=True, ex=ttl)
+            return bool(result)
+        except Exception as e:
+            logger.error("cache_set_nx_failed", key=key, error=str(e))
+            return False
+
     async def delete(self, key: str) -> bool:
         """Delete key from cache.
 

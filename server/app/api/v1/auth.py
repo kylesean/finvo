@@ -274,11 +274,15 @@ async def login(
 
 
 @router.post("/session")
-async def create_session(user: Annotated[User, Depends(get_current_user)]) -> JSONResponse:
+async def create_session(
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> JSONResponse:
     """Create a new chat session for the authenticated user.
 
     Args:
         user: The authenticated user
+        db: Database session
 
     Returns:
         Unified response with session data
@@ -289,10 +293,9 @@ async def create_session(user: Annotated[User, Depends(get_current_user)]) -> JS
         # Generate a unique session ID
         session_id = uuid.uuid4()
 
-        # Create session in database with default name "New Chat"
-        async with get_session_context() as db:
-            repo = SessionRepository(db)
-            session = await repo.create(session_id, user.uuid, name="New Chat")
+        # Create session in database with default name "New Chat" within request transaction
+        repo = SessionRepository(db)
+        session = await repo.create(session_id, user.uuid, name="New Chat")
 
         logger.info(
             "session_created",
@@ -365,11 +368,12 @@ async def update_session_name(
 async def delete_session(
     session_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_session)],
 ) -> JSONResponse:
     """Delete a session for the authenticated user.
 
-    This endpoint performs cascade deletion:
-    1. Delete session metadata from sessions table
+    This endpoint performs cascade deletion within a single database transaction:
+    1. Verify ownership and delete session metadata from sessions table
     2. Delete LangGraph checkpoints (checkpoint_blobs, checkpoint_writes, checkpoints)
     3. Delete searchable_messages for the thread
 
@@ -378,6 +382,7 @@ async def delete_session(
     Args:
         session_id: The ID of the session to delete
         current_user: The authenticated user
+        db: Request-scoped database session
 
     Returns:
         Success response
@@ -385,31 +390,28 @@ async def delete_session(
     from app.api.v1.chatbot import get_agent
     from app.core.responses import success_response
 
-    # Verify session ownership
-    async with get_session_context() as db:
-        repo = SessionRepository(db)
-        session = await repo.get(session_id)
-        if session is None:
-            raise HTTPException(status_code=404, detail="Session not found")
+    # Verify session ownership using the request-scoped db session
+    repo = SessionRepository(db)
+    session = await repo.get(session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
 
-        if session.user_uuid != current_user.uuid:
-            logger.warning(
-                "session_delete_unauthorized",
-                session_id=session_id,
-                user_uuid=current_user.uuid,
-                owner_uuid=session.user_uuid,
-            )
-            raise HTTPException(status_code=403, detail="Access denied to this session")
+    if session.user_uuid != current_user.uuid:
+        logger.warning(
+            "session_delete_unauthorized",
+            session_id=session_id,
+            user_uuid=current_user.uuid,
+            owner_uuid=session.user_uuid,
+        )
+        raise HTTPException(status_code=403, detail="Access denied to this session")
 
     # 1. Use the chatbot agent to cascade delete history
     # This handles LangGraph checkpoints (via official API) and searchable_messages
     chatbot_agent = get_agent()
     await chatbot_agent.delete_session_history(session.id)
 
-    # 2. Delete the session metadata
-    async with get_session_context() as db:
-        repo = SessionRepository(db)
-        await repo.delete(session.id)
+    # 2. Delete the session metadata within the same atomic transaction
+    await repo.delete(session.id)
 
     logger.info(
         "session_deleted_with_history",

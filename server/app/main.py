@@ -133,8 +133,8 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
     """Handle custom application exceptions.
 
     Returns unified {code, message, data} format.
-    For business errors, HTTP status is 200 and code indicates the error.
-    For system/auth errors, HTTP status reflects the error type.
+    HTTP status code reflects the specific error type (4xx/5xx), while
+    the response body contains structured business `code`, `message`, and `data`.
 
     Args:
         request: The request that caused the exception

@@ -3,7 +3,8 @@
 提供验证码生成、发送、验证和频率限制功能。
 """
 
-import random
+import hmac
+import secrets
 import time
 from abc import ABC, abstractmethod
 
@@ -117,16 +118,6 @@ class CodeManager:
         Raises:
             BusinessError: 发送频率过快或不支持的类型
         """
-        # 检查发送频率
-        if not await self._check_rate_limit(account):
-            raise BusinessError(
-                message="Verification code sent too frequently, please try again later",
-                error_code=AuthErrorCode.CODE_SEND_TOO_FREQUENTLY,
-            )
-
-        # 生成验证码
-        code = self._generate_code()
-
         # 查找对应的发送器
         sender = self._find_sender(code_type)
         if not sender:
@@ -135,6 +126,16 @@ class CodeManager:
                 error_code=AuthErrorCode.UNSUPPORTED_CODE_TYPE,
             )
 
+        # Check and lock sending rate limit atomically
+        if not await self._acquire_rate_limit_lock(account):
+            raise BusinessError(
+                message="Verification code sent too frequently, please try again later",
+                error_code=AuthErrorCode.CODE_SEND_TOO_FREQUENTLY,
+            )
+
+        # 生成密码学安全的验证码
+        code = self._generate_code()
+
         # 发送验证码
         try:
             success = await sender.send(account, code)
@@ -142,18 +143,21 @@ class CodeManager:
             if success:
                 # 存储验证码
                 await self._store_code(account, code)
-                # 记录发送时间
-                await self._record_send_time(account)
 
                 logger.info(
                     "verification_code_sent",
                     type=code_type,
                     account=account,
                 )
+            else:
+                # 发送失败时释放频率限制锁
+                await self._release_rate_limit_lock(account)
 
             return success
 
         except Exception as e:
+            # 发送异常时释放频率限制锁
+            await self._release_rate_limit_lock(account)
             logger.error(
                 "verification_code_send_failed",
                 type=code_type,
@@ -193,7 +197,8 @@ class CodeManager:
             provided_code=code if settings.DEBUG else "***",
         )
 
-        if not stored_code or stored_code != code:
+        # 使用恒定时间比较 hmac.compare_digest 防范 Timing Attack 侧信道攻击
+        if not stored_code or not hmac.compare_digest(stored_code, code):
             logger.warning(
                 "verification_code_invalid",
                 account=account,
@@ -213,10 +218,9 @@ class CodeManager:
         return True
 
     def _generate_code(self) -> str:
-        """生成随机验证码"""
-        min_value = 10 ** (self.code_length - 1)
-        max_value = 10**self.code_length - 1
-        return str(random.randint(min_value, max_value))
+        """生成密码学安全的随机验证码 (CSPRNG)"""
+        val = secrets.randbelow(10**self.code_length)
+        return f"{val:0{self.code_length}d}"
 
     def _find_sender(self, code_type: str) -> CodeSenderInterface | None:
         """根据类型查找对应的发送器"""
@@ -231,21 +235,15 @@ class CodeManager:
         # 注意：使用 ttl 参数，不是 expire
         await cache_manager.set(key, code, ttl=self.expire_seconds, serialize=False)
 
-    async def _check_rate_limit(self, account: str) -> bool:
-        """检查发送频率限制"""
+    async def _acquire_rate_limit_lock(self, account: str) -> bool:
+        """原子地检查并获取发送频率限制锁 (SETNX)"""
         key = self._get_rate_limit_key(account)
-        last_send_time = await cache_manager.get(key)
+        return await cache_manager.set_nx(key, "1", ttl=self.rate_limit_seconds, serialize=False)
 
-        if not last_send_time:
-            return True
-
-        elapsed = time.time() - float(last_send_time)
-        return elapsed >= self.rate_limit_seconds
-
-    async def _record_send_time(self, account: str) -> None:
-        """记录验证码发送时间"""
+    async def _release_rate_limit_lock(self, account: str) -> None:
+        """释放发送频率限制锁"""
         key = self._get_rate_limit_key(account)
-        await cache_manager.set(key, str(time.time()), ttl=self.rate_limit_seconds, serialize=False)
+        await cache_manager.delete(key)
 
     def _get_code_key(self, account: str) -> str:
         """获取验证码在 Redis 中的存储键"""

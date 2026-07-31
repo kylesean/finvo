@@ -13,7 +13,8 @@ from pydantic import BaseModel, Field
 
 from app.core.dependencies import get_current_user
 from app.core.logging import logger
-from app.core.responses import error_response, success_response
+from app.core.responses import error_response, get_error_code_int, success_response
+from app.schemas.common import BaseResponse
 from app.services.exchange_rate_service import exchange_rate_service
 
 router = APIRouter(prefix="/exchange-rates", tags=["Exchange Rates"])
@@ -46,7 +47,7 @@ class ConversionResponse(BaseModel):
     rate: float = Field(description="Exchange rate used for conversion")
 
 
-@router.get("", response_model=dict[str, Any])
+@router.get("", response_model=BaseResponse[ExchangeRateResponse])
 async def get_exchange_rates(
     _: Any = Depends(get_current_user),
 ) -> JSONResponse:
@@ -70,7 +71,7 @@ async def get_exchange_rates(
 
     if data is None:
         return error_response(
-            code=50001,
+            code=get_error_code_int("SERVER_ERROR"),
             message="Exchange rate data is not available",
             data=None,
             http_status=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -79,7 +80,7 @@ async def get_exchange_rates(
     return success_response(data=data)
 
 
-@router.get("/rate/{currency}", response_model=dict[str, Any])
+@router.get("/rate/{currency}", response_model=BaseResponse[dict[str, Any]])
 async def get_single_rate(
     currency: str,
     _: Any = Depends(get_current_user),
@@ -99,7 +100,7 @@ async def get_single_rate(
 
     if rate is None:
         return error_response(
-            code=40004,
+            code=get_error_code_int("NOT_FOUND"),
             message=f"Exchange rate for {currency} is not available",
             data=None,
             http_status=status.HTTP_404_NOT_FOUND,
@@ -114,7 +115,7 @@ async def get_single_rate(
     )
 
 
-@router.post("/convert", response_model=dict[str, Any])
+@router.post("/convert", response_model=BaseResponse[ConversionResponse])
 async def convert_currency(
     request: ConversionRequest,
     _: Any = Depends(get_current_user),
@@ -142,7 +143,7 @@ async def convert_currency(
 
     if converted_amount is None:
         return error_response(
-            code=40004,
+            code=get_error_code_int("VALIDATION_ERROR"),
             message=f"Unable to convert from {request.from_currency} to {request.to_currency}",
             data=None,
             http_status=status.HTTP_400_BAD_REQUEST,
@@ -165,7 +166,7 @@ async def convert_currency(
     )
 
 
-@router.post("/refresh", response_model=dict[str, Any])
+@router.post("/refresh", response_model=BaseResponse[ExchangeRateResponse])
 async def refresh_exchange_rates(
     _: Any = Depends(get_current_user),
 ) -> JSONResponse:
@@ -188,7 +189,7 @@ async def refresh_exchange_rates(
         )
     else:
         return error_response(
-            code=50002,
+            code=get_error_code_int("SERVER_ERROR"),
             message="Failed to refresh exchange rates",
             data=None,
             http_status=status.HTTP_500_INTERNAL_SERVER_ERROR,
