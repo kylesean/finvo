@@ -23,10 +23,12 @@ Best practice: Business logic lives here, not in API routes or tool definitions.
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from enum import Enum
 from typing import Any, cast as type_cast
 from uuid import UUID
 
+from dateutil import parser as dateutil_parser, tz
 from pydantic import BaseModel, Field
 from sqlalchemy import String, and_, cast as sql_cast, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -63,8 +65,8 @@ class TransactionItem(BaseModel):
     id: str
     user_uuid: str
     type: str
-    amount: float
-    amount_original: str
+    amount: Decimal
+    amount_original: Decimal
     currency: str
     category_key: str | None = None
     description: str | None = None
@@ -82,28 +84,27 @@ class TransactionItem(BaseModel):
     display: TransactionDisplayValue
 
     @classmethod
-    def from_transaction(
-        cls, tx: Transaction, display_currency: str = "CNY", exchange_rate: float = 1.0
-    ) -> TransactionItem:
+    def from_transaction(cls, tx: Transaction, display_currency: str = "CNY") -> TransactionItem:
         """Create a response model instance from a Transaction model.
 
         Displays original currency amount while preserving currency context.
 
         Args:
             tx: Transaction model instance.
-            display_currency: User primary currency (used for baseCurrency field).
-            exchange_rate: Deprecated, kept for backward compatibility.
+            display_currency: User primary currency.
         """
-        # Display original currency amount directly
-        amount_val = float(tx.amount_original)
         original_currency = (tx.currency or display_currency).upper()
+        amount_orig = (
+            tx.amount_original if isinstance(tx.amount_original, Decimal) else Decimal(str(tx.amount_original))
+        )
+        amount_val = tx.amount if isinstance(tx.amount, Decimal) else Decimal(str(tx.amount or "0.0"))
 
         return cls(
             id=str(tx.id),
             user_uuid=str(tx.user_uuid),
             type=tx.type,
-            amount=round(amount_val, 2),
-            amount_original=str(tx.amount_original),
+            amount=amount_val,
+            amount_original=amount_orig,
             currency=original_currency,
             category_key=tx.category_key,
             description=tx.description or "",
@@ -119,7 +120,7 @@ class TransactionItem(BaseModel):
             created_at=tx.created_at.isoformat() if tx.created_at else None,
             updated_at=tx.updated_at.isoformat() if tx.updated_at else None,
             display=TransactionDisplayValue.from_params(
-                amount=tx.amount_original, tx_type=tx.type, currency=original_currency
+                amount=amount_orig, tx_type=tx.type, currency=original_currency
             ),
         )
 
@@ -146,8 +147,8 @@ class TransactionQueryParams(BaseModel):
     keyword: str | None = Field(
         default=None, description="Keyword search across description, location, category_key, and tags"
     )
-    min_amount: float | None = Field(default=None, description="Minimum amount (absolute value)")
-    max_amount: float | None = Field(default=None, description="Maximum amount (absolute value)")
+    min_amount: Decimal | None = Field(default=None, description="Minimum amount (absolute value)")
+    max_amount: Decimal | None = Field(default=None, description="Maximum amount (absolute value)")
     transaction_types: list[TransactionType] | None = Field(default=None, description="List of transaction types")
     category_keys: list[str] | None = Field(default=None, description="List of category keys")
     tags: list[str] | None = Field(default=None, description="List of tags")
@@ -182,11 +183,6 @@ def _parse_date_to_utc(date_str: str, end_of_day: bool = False) -> datetime | No
         return None
 
     try:
-        from dateutil import (
-            parser as dateutil_parser,
-            tz,
-        )
-
         # dateutil automatically handles various formats including 'Z' suffix
         dt = dateutil_parser.parse(date_str)
 

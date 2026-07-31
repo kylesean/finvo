@@ -600,7 +600,7 @@ class SharedSpaceService:
                 space_name=space_name,
                 transaction_id=cast(UUID, transaction.id),
                 added_by_user_uuid=user_uuid,
-                amount=float(transaction.amount),
+                amount=transaction.amount,
                 currency=(transaction.currency or "CNY").upper(),
                 tx_type=transaction.type.lower() if transaction.type else "expense",
                 description=transaction.description or transaction.category_key or "",

@@ -257,8 +257,8 @@ class SearchTransactionInput(BaseModel):
     """Search transaction input schema"""
 
     keyword: str | None = Field(None, description="Keyword, match description/merchant/tags")
-    min_amount: float | None = Field(None, description="Minimum amount")
-    max_amount: float | None = Field(None, description="Maximum amount")
+    min_amount: Decimal | None = Field(None, description="Minimum amount")
+    max_amount: Decimal | None = Field(None, description="Maximum amount")
     transaction_types: list[str] | None = Field(None, description="Type: EXPENSE/INCOME/TRANSFER")
 
     @field_validator("transaction_types", mode="before")
@@ -294,8 +294,8 @@ class SearchTransactionInput(BaseModel):
 @tool("search_transactions", args_schema=SearchTransactionInput)
 async def search_transactions(
     keyword: str | None = None,
-    min_amount: float | None = None,
-    max_amount: float | None = None,
+    min_amount: Decimal | None = None,
+    max_amount: Decimal | None = None,
     transaction_types: list[str] | None = None,
     start_date: str | None = None,
     end_date: str | None = None,

@@ -28,6 +28,7 @@ from app.schemas.transaction import (
     RecurringTransactionCreateRequest,
     RecurringTransactionUpdateRequest,
     TransactionDisplayValue,
+    TransactionResponse,
     UpdateAccountRequest,
     UpdateBatchAccountRequest,
 )
@@ -74,8 +75,17 @@ def _format_datetime(value: Any) -> Any:
     return value
 
 
-def _extract_amounts(tx: Any) -> tuple[float, float, str, Any]:
-    """Extract amount-related fields from transaction.
+def _to_decimal(val: Any) -> Decimal:
+    """Helper to convert float, int, str, or Decimal to Decimal safely."""
+    if val is None:
+        return Decimal("0.0")
+    if isinstance(val, Decimal):
+        return val
+    return Decimal(str(val))
+
+
+def _extract_amounts(tx: Any) -> tuple[Decimal, Decimal, str, Any]:
+    """Extract amount-related fields from transaction as Decimal.
 
     Args:
         tx: Transaction object or dict
@@ -83,38 +93,24 @@ def _extract_amounts(tx: Any) -> tuple[float, float, str, Any]:
     Returns:
         Tuple of (amount_val, amount_original, original_currency, stored_exchange_rate)
     """
-    amount_original = float(_get_attr(tx, "amount_original", "amountOriginal") or _get_attr(tx, "amount") or 0)
+    raw_original = _get_attr(tx, "amount_original", "amountOriginal") or _get_attr(tx, "amount") or "0.0"
+    amount_original = _to_decimal(raw_original)
     original_currency = _get_attr(tx, "currency") or PROJECT_DEFAULT_CURRENCY
     stored_exchange_rate = _get_attr(tx, "exchange_rate", "exchangeRate")
-    amount_val = float(_get_attr(tx, "amount") or 0)
+    amount_val = _to_decimal(_get_attr(tx, "amount") or "0.0")
 
     return amount_val, amount_original, original_currency, stored_exchange_rate
 
 
-def _transaction_to_dict(
-    tx: Any, display_currency: str = PROJECT_DEFAULT_CURRENCY, exchange_rate: float = 1.0
-) -> dict[str, Any]:
-    """Convert transaction model to dictionary for API response.
-
-    This function handles multiple input types:
-    - SQLModel Transaction objects
-    - Pydantic TransactionItem objects
-    - Pre-formatted dictionaries
-
-    Returns format (user-base-currency model):
-    - amount: Original currency amount (amount_original)
-    - currency: Original currency code
-    - amountBase: Base currency equivalent (Transaction.amount)
-    - baseCurrency: User's base currency code
-    - exchangeRate: Exchange rate snapshot at recording time
+def _transaction_to_dict(tx: Any, display_currency: str = PROJECT_DEFAULT_CURRENCY) -> dict[str, Any]:
+    """Convert transaction model to dictionary for API response using Pydantic TransactionResponse schema.
 
     Args:
         tx: Transaction object, dict, or TransactionItem
         display_currency: User's base currency
-        exchange_rate: Deprecated, kept for compatibility
 
     Returns:
-        Dictionary representation of the transaction
+        Dictionary representation of the transaction with camelCase aliases
     """
     from app.services.transaction_query_service import TransactionItem
 
@@ -127,8 +123,8 @@ def _transaction_to_dict(
 
     # Extract core identifiers
     tx_id = str(_get_attr(tx, "id"))
-    tx_type = _get_attr(tx, "type")
-    user_uuid = _get_attr(tx, "user_uuid", "userUuid")
+    tx_type = str(_get_attr(tx, "type"))
+    user_uuid = str(_get_attr(tx, "user_uuid", "userUuid"))
 
     # Extract amounts
     amount_val, amount_original, original_currency, stored_exchange_rate = _extract_amounts(tx)
@@ -137,40 +133,33 @@ def _transaction_to_dict(
     if not is_already_converted:
         amount_val = amount_original
 
-    # Build response dictionary
-    return {
-        # Core fields
-        "id": tx_id,
-        "userUuid": str(user_uuid),
-        "type": tx_type,
-        # Amount fields - show original currency
-        "amount": round(amount_val, 2),
-        "currency": original_currency,
-        "amountBase": round(float(_get_attr(tx, "amount") or 0), 2),
-        "baseCurrency": display_currency,
-        "amountOriginal": round(amount_original, 2),
-        "originalCurrency": original_currency,
-        "exchangeRate": str(stored_exchange_rate) if stored_exchange_rate else None,
-        # Descriptive fields
-        "categoryKey": _get_attr(tx, "category_key", "categoryKey"),
-        "description": _get_attr(tx, "description") or "",
-        "rawInput": _get_attr(tx, "raw_input", "rawInput") or "",
-        # Temporal fields
-        "transactionAt": _format_datetime(_get_attr(tx, "transaction_at", "transactionAt")),
-        "transactionTimezone": _get_attr(tx, "transaction_timezone", "transactionTimezone") or "Asia/Shanghai",
-        "createdAt": _format_datetime(_get_attr(tx, "created_at", "createdAt")),
-        # Metadata
-        "tags": _get_attr(tx, "tags") or [],
-        "status": _get_attr(tx, "status") or "CLEARED",
-        "location": _get_attr(tx, "location"),
-        # Account references
-        "sourceAccountId": str(_get_attr(tx, "source_account_id")) if _get_attr(tx, "source_account_id") else None,
-        "targetAccountId": str(_get_attr(tx, "target_account_id")) if _get_attr(tx, "target_account_id") else None,
-        # Display value for UI (uses original currency)
-        "display": TransactionDisplayValue.from_params(
-            amount=Decimal(str(amount_val)), tx_type=tx_type, currency=original_currency
-        ).model_dump(by_alias=False),
-    }
+    # Build typed Pydantic response model
+    response_model = TransactionResponse(
+        id=tx_id,
+        user_uuid=user_uuid,
+        type=tx_type,
+        amount=amount_val,
+        currency=original_currency,
+        amount_base=_to_decimal(_get_attr(tx, "amount") or "0.0"),
+        base_currency=display_currency,
+        amount_original=amount_original,
+        original_currency=original_currency,
+        exchange_rate=str(stored_exchange_rate) if stored_exchange_rate else None,
+        category_key=_get_attr(tx, "category_key", "categoryKey"),
+        description=_get_attr(tx, "description") or "",
+        raw_input=_get_attr(tx, "raw_input", "rawInput") or "",
+        transaction_at=_format_datetime(_get_attr(tx, "transaction_at", "transactionAt")),
+        transaction_timezone=_get_attr(tx, "transaction_timezone", "transactionTimezone") or "Asia/Shanghai",
+        created_at=_format_datetime(_get_attr(tx, "created_at", "createdAt")),
+        tags=_get_attr(tx, "tags") or [],
+        status=_get_attr(tx, "status") or "CLEARED",
+        location=_get_attr(tx, "location"),
+        source_account_id=str(_get_attr(tx, "source_account_id")) if _get_attr(tx, "source_account_id") else None,
+        target_account_id=str(_get_attr(tx, "target_account_id")) if _get_attr(tx, "target_account_id") else None,
+        display=TransactionDisplayValue.from_params(amount=amount_val, tx_type=tx_type, currency=original_currency),
+    )
+
+    return response_model.model_dump(by_alias=True)
 
 
 @router.get("")
@@ -237,12 +226,12 @@ async def search_transactions(
     db: Annotated[AsyncSession, Depends(get_session)],
     params: Annotated[Params, Depends()],
     keyword: str | None = None,
-    min_amount: str | None = None,
-    max_amount: str | None = None,
+    min_amount: Decimal | None = None,
+    max_amount: Decimal | None = None,
     category_keys: str | None = None,
     tags: str | None = None,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
     transaction_type: str | None = None,
 ) -> JSONResponse:
     """搜索交易记录
@@ -252,12 +241,12 @@ async def search_transactions(
     Args:
         params: 分页参数
         keyword: 关键词搜索（描述、位置）
-        min_amount: 最小金额（字符串格式）
-        max_amount: 最大金额（字符串格式）
+        min_amount: 最小金额
+        max_amount: 最大金额
         category_keys: 分类键（逗号分隔）
         tags: 标签（逗号分隔）
-        start_date: 开始日期（ISO 8601）
-        end_date: 结束日期（ISO 8601）
+        start_date: 开始时间
+        end_date: 结束时间
         transaction_type: 交易类型
         current_user: 当前用户
         db: 数据库会话
@@ -271,8 +260,6 @@ async def search_transactions(
 
     # 添加过滤条件
     if keyword:
-        # SQLModel field types are interpreted as actual types (str) rather than column elements
-        # when accessing them directly. We use type: ignore for ilike/in_ etc.
         conditions.append(
             or_(
                 Transaction.description.ilike(f"%{keyword}%"),
@@ -281,18 +268,10 @@ async def search_transactions(
         )
 
     if min_amount is not None:
-        try:
-            min_val = Decimal(min_amount)
-            conditions.append(Transaction.amount >= min_val)
-        except (ValueError, TypeError):
-            pass
+        conditions.append(Transaction.amount >= min_amount)
 
     if max_amount is not None:
-        try:
-            max_val = Decimal(max_amount)
-            conditions.append(Transaction.amount <= max_val)
-        except (ValueError, TypeError):
-            pass
+        conditions.append(Transaction.amount <= max_amount)
 
     if category_keys:
         keys = [k.strip() for k in category_keys.split(",")]
@@ -304,19 +283,11 @@ async def search_transactions(
         for tag in tag_list:
             conditions.append(Transaction.tags.contains([tag]))
 
-    if start_date:
-        try:
-            start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
-            conditions.append(Transaction.transaction_at >= start_dt)
-        except ValueError:
-            pass
+    if start_date is not None:
+        conditions.append(Transaction.transaction_at >= start_date)
 
-    if end_date:
-        try:
-            end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
-            conditions.append(Transaction.transaction_at <= end_dt)
-        except ValueError:
-            pass
+    if end_date is not None:
+        conditions.append(Transaction.transaction_at <= end_date)
 
     if transaction_type:
         conditions.append(Transaction.type == transaction_type.upper())
@@ -385,8 +356,8 @@ async def delete_transaction(
 async def update_transaction_account(
     transaction_id: UUID,
     request: UpdateAccountRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    current_user: CurrentUser,
+    service: TxService,
 ) -> JSONResponse:
     """更新交易的关联账户
 
@@ -395,7 +366,6 @@ async def update_transaction_account(
     - 取消关联：传入 null
     - 更换账户：传入新的 account_id（会自动回滚旧账户余额并更新新账户）
     """
-    service = TransactionService(db)
     result = await service.update_transaction_account(
         transaction_id=transaction_id,
         user_uuid=current_user.uuid,

@@ -91,6 +91,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
     # Cleanup connections
+    from app.services.exchange_rate_service import exchange_rate_service
+
+    await exchange_rate_service.close()
     await shutdown_scheduler()
     await close_cache()
     await close_checkpointer()

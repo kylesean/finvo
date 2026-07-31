@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.financial_account import FinancialAccount
 from app.services.transaction.cash_flow_service import CashFlowService
 from app.services.transaction.crud_service import TransactionCRUDService
-from app.services.transaction.query_service import TransactionQueryService
+from app.services.transaction.query_service import TransactionFacadeQueryHelper
 from app.services.transaction.recurring_service import RecurringTransactionService
 
 
@@ -23,7 +23,7 @@ class TransactionService:
 
     This is a Facade that delegates to specialized services:
     - TransactionCRUDService: Basic CRUD operations
-    - TransactionQueryService: Search and feed operations
+    - TransactionFacadeQueryHelper: Search and feed operations
     - RecurringTransactionService: Recurring transaction management
     - CashFlowService: Cash flow forecasting
     """
@@ -31,7 +31,7 @@ class TransactionService:
     def __init__(self, db: AsyncSession):
         self.db = db
         self._crud = TransactionCRUDService(db)
-        self._query = TransactionQueryService(db)
+        self._query = TransactionFacadeQueryHelper(db)
         self._recurring = RecurringTransactionService(db)
         self._cash_flow = CashFlowService(db, self._recurring)
 

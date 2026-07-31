@@ -1,3 +1,4 @@
+from calendar import monthrange
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any, cast as type_cast
@@ -20,7 +21,7 @@ from app.schemas.statistics import (
     TrendDataPoint,
     TrendDataResponse,
 )
-from app.utils.currency_utils import get_user_display_currency
+from app.utils.currency_utils import get_currency_symbol, get_user_display_currency
 
 
 class StatisticsService:
@@ -756,3 +757,134 @@ class StatisticsService:
             periodStart=period_start,
             periodEnd=period_end,
         )
+
+    async def get_total_expense_summary(self, user_uuid: UUID) -> dict[str, Any]:
+        """Get user's expense summary, including today, month, year, and total expense.
+
+        Uses conditional aggregation to execute in a single SQL query.
+        """
+        now = datetime.now()
+        start_of_day = datetime(now.year, now.month, now.day)
+        start_of_month = datetime(now.year, now.month, 1)
+        start_of_year = datetime(now.year, 1, 1)
+
+        user_id = str(user_uuid)
+        display_currency = await get_user_display_currency(self.db, user_uuid)
+        currency_symbol = get_currency_symbol(display_currency)
+
+        result = await self.db.execute(
+            select(
+                func.coalesce(
+                    func.sum(
+                        case((Transaction.transaction_at >= start_of_day, Transaction.amount), else_=Decimal("0.0"))
+                    ),
+                    Decimal("0.0"),
+                ).label("today"),
+                func.coalesce(
+                    func.sum(
+                        case((Transaction.transaction_at >= start_of_month, Transaction.amount), else_=Decimal("0.0"))
+                    ),
+                    Decimal("0.0"),
+                ).label("month"),
+                func.coalesce(
+                    func.sum(
+                        case((Transaction.transaction_at >= start_of_year, Transaction.amount), else_=Decimal("0.0"))
+                    ),
+                    Decimal("0.0"),
+                ).label("year"),
+                func.coalesce(func.sum(Transaction.amount), Decimal("0.0")).label("total"),
+            ).where(
+                and_(
+                    Transaction.user_uuid == user_id,
+                    Transaction.type == "EXPENSE",
+                )
+            )
+        )
+        row = result.one()
+
+        today_expense = row.today if isinstance(row.today, Decimal) else Decimal(str(row.today or "0.0"))
+        month_expense = row.month if isinstance(row.month, Decimal) else Decimal(str(row.month or "0.0"))
+        year_expense = row.year if isinstance(row.year, Decimal) else Decimal(str(row.year or "0.0"))
+        total_expense = row.total if isinstance(row.total, Decimal) else Decimal(str(row.total or "0.0"))
+
+        return {
+            "total_expense": total_expense,
+            "today_expense": today_expense,
+            "month_expense": month_expense,
+            "year_expense": year_expense,
+            "display_currency": display_currency,
+            "currency": display_currency,
+            "display": {
+                "value": f"{total_expense:,.2f}",
+                "currencySymbol": currency_symbol,
+                "fullString": f"{currency_symbol}{total_expense:,.2f}",
+            },
+        }
+
+    async def get_calendar_month_details(self, user_uuid: UUID, year: int, month: int) -> dict[str, Any]:
+        """Get calendar month daily summary and heat levels for the specified month."""
+        display_currency = await get_user_display_currency(self.db, user_uuid)
+        currency_symbol = get_currency_symbol(display_currency)
+
+        _, days_in_month = monthrange(year, month)
+        start_date = datetime(year, month, 1)
+        end_date = datetime(year + 1, 1, 1) if month == 12 else datetime(year, month + 1, 1)
+
+        result = await self.db.execute(
+            select(
+                func.date(Transaction.transaction_at).label("date"),
+                func.coalesce(func.sum(Transaction.amount), Decimal("0.0")).label("total"),
+            )
+            .where(
+                and_(
+                    Transaction.user_uuid == str(user_uuid),
+                    Transaction.type == "EXPENSE",
+                    Transaction.transaction_at >= start_date,
+                    Transaction.transaction_at < end_date,
+                )
+            )
+            .group_by(func.date(Transaction.transaction_at))
+        )
+        daily_totals = {
+            row.date: row.total if isinstance(row.total, Decimal) else Decimal(str(row.total or "0.0"))
+            for row in result.all()
+        }
+
+        total_expense_for_month = sum(daily_totals.values(), Decimal("0.0"))
+        non_zero_amounts = sorted([v for v in daily_totals.values() if v > Decimal("0.0")])
+
+        def get_heat_level(amount: Decimal) -> str:
+            if amount <= Decimal("0.0") or not non_zero_amounts:
+                return "none"
+            count_below = sum(1 for x in non_zero_amounts if x < amount)
+            percentile = count_below / len(non_zero_amounts)
+            if percentile < 0.25:
+                return "low"
+            elif percentile < 0.50:
+                return "medium"
+            elif percentile < 0.75:
+                return "high"
+            else:
+                return "veryHigh"
+
+        daily_summaries = []
+        for day in range(1, days_in_month + 1):
+            date_obj = datetime(year, month, day).date()
+            total_expense = daily_totals.get(date_obj, Decimal("0.0"))
+            heat_level = get_heat_level(total_expense)
+            daily_summaries.append(
+                {
+                    "date": date_obj.isoformat(),
+                    "totalExpense": total_expense,
+                    "heatLevel": heat_level,
+                }
+            )
+
+        return {
+            "year": year,
+            "month": month,
+            "totalExpenseForMonth": total_expense_for_month,
+            "dailySummaries": daily_summaries,
+            "display_currency": display_currency,
+            "currency_symbol": currency_symbol,
+        }

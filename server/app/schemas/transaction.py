@@ -321,28 +321,32 @@ class CommentCreateRequest(BaseModel):
 
 # Response schemas
 class TransactionResponse(BaseModel):
-    """transaction response"""
+    """Transaction response schema with calculated display fields and camelCase aliases."""
 
-    id: str  # UUID as string
-    user_uuid: str
+    id: str
+    user_uuid: str = Field(..., serialization_alias="userUuid")
     type: str  # EXPENSE, INCOME, TRANSFER
-    source_account_id: str | None = None  # UUID as string
-    target_account_id: str | None = None  # UUID as string
-    amount: str  # Decimal as string
-    amount_original: str  # Original amount
+    amount: Decimal
     currency: str
-    category_key: str  # Category key
-    description: str | None
-    transaction_at: datetime  # Transaction timestamp
-    transaction_timezone: str  # Original timezone
-    location: str | None
-    tags: list[str] | None
-    source: str  # MANUAL, AI, IMPORT
-    status: str  # CLEARED, PENDING
-    created_at: datetime
-    updated_at: datetime
+    amount_base: Decimal = Field(Decimal("0.0"), serialization_alias="amountBase")
+    base_currency: str = Field("CNY", serialization_alias="baseCurrency")
+    amount_original: Decimal = Field(Decimal("0.0"), serialization_alias="amountOriginal")
+    original_currency: str = Field("CNY", serialization_alias="originalCurrency")
+    exchange_rate: str | None = Field(None, serialization_alias="exchangeRate")
+    category_key: str | None = Field(None, serialization_alias="categoryKey")
+    description: str = ""
+    raw_input: str = Field("", serialization_alias="rawInput")
+    transaction_at: str | None = Field(None, serialization_alias="transactionAt")
+    transaction_timezone: str = Field("Asia/Shanghai", serialization_alias="transactionTimezone")
+    created_at: str | None = Field(None, serialization_alias="createdAt")
+    tags: list[str] = Field(default_factory=list)
+    status: str = "CLEARED"
+    location: str | None = None
+    source_account_id: str | None = Field(None, serialization_alias="sourceAccountId")
+    target_account_id: str | None = Field(None, serialization_alias="targetAccountId")
+    display: TransactionDisplayValue
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
 
 class TransactionDetailResponse(BaseModel):

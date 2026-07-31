@@ -5,6 +5,7 @@ This module provides API endpoints for managing and accessing exchange rate data
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 from fastapi import APIRouter, Depends, status
@@ -32,7 +33,7 @@ class ExchangeRateResponse(BaseModel):
 class ConversionRequest(BaseModel):
     """Currency conversion request model."""
 
-    amount: float = Field(ge=0, description="Amount to convert")
+    amount: Decimal = Field(ge=0, description="Amount to convert")
     from_currency: str = Field(min_length=3, max_length=3, description="Source currency code")
     to_currency: str = Field(min_length=3, max_length=3, description="Target currency code")
 
@@ -40,11 +41,11 @@ class ConversionRequest(BaseModel):
 class ConversionResponse(BaseModel):
     """Currency conversion response model."""
 
-    original_amount: float = Field(description="Original amount")
+    original_amount: Decimal = Field(description="Original amount")
     from_currency: str = Field(description="Source currency code")
     to_currency: str = Field(description="Target currency code")
-    converted_amount: float = Field(description="Converted amount")
-    rate: float = Field(description="Exchange rate used for conversion")
+    converted_amount: Decimal = Field(description="Converted amount")
+    rate: Decimal = Field(description="Exchange rate used for conversion")
 
 
 @router.get("", response_model=BaseResponse[ExchangeRateResponse])
@@ -153,7 +154,7 @@ async def convert_currency(
     if request.amount > 0:
         effective_rate = converted_amount / request.amount
     else:
-        effective_rate = 0.0
+        effective_rate = Decimal("0.0")
 
     return success_response(
         data={

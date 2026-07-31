@@ -27,8 +27,8 @@ from app.utils.currency_utils import get_user_display_currency
 logger = structlog.get_logger(__name__)
 
 
-class TransactionQueryService:
-    """Service for transaction query and search operations."""
+class TransactionFacadeQueryHelper:
+    """Service helper for transaction query and search operations within Facade."""
 
     def __init__(self, db: AsyncSession):
         self.db = db

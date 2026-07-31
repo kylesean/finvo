@@ -6,7 +6,9 @@ and cache them in Redis for use in currency conversion across the application.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Any, cast
 
 import httpx
@@ -28,6 +30,21 @@ class ExchangeRateService:
         self._api_url = settings.EXCHANGE_RATE_API_URL
         self._cache_key = settings.EXCHANGE_RATE_CACHE_KEY
         self._cache_ttl = settings.EXCHANGE_RATE_CACHE_TTL
+        self._client: httpx.AsyncClient | None = None
+        self._lock = asyncio.Lock()
+
+    async def get_client(self) -> httpx.AsyncClient:
+        """Get or initialize shared HTTP client instance."""
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=30.0)
+        return self._client
+
+    async def close(self) -> None:
+        """Close shared HTTP client connections."""
+        if self._client is not None and not self._client.is_closed:
+            await self._client.aclose()
+            self._client = None
+            logger.info("exchange_rate_client_closed")
 
     async def fetch_exchange_rates(self) -> dict[str, Any] | None:
         """Fetch latest exchange rates from the external API.
@@ -42,29 +59,29 @@ class ExchangeRateService:
             return None
 
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.get(self._api_url)
-                response.raise_for_status()
+            client = await self.get_client()
+            response = await client.get(self._api_url)
+            response.raise_for_status()
 
-                data = response.json()
+            data = response.json()
 
-                # Validate response structure
-                if data.get("result") != "success":
-                    logger.error(
-                        "exchange_rate_api_error",
-                        result=data.get("result"),
-                        error_type=data.get("error-type"),
-                    )
-                    return None
-
-                logger.info(
-                    "exchange_rate_fetched_successfully",
-                    base_code=data.get("base_code"),
-                    rates_count=len(data.get("conversion_rates", {})),
-                    last_update=data.get("time_last_update_utc"),
+            # Validate response structure
+            if data.get("result") != "success":
+                logger.error(
+                    "exchange_rate_api_error",
+                    result=data.get("result"),
+                    error_type=data.get("error-type"),
                 )
+                return None
 
-                return cast(dict[str, Any] | None, data)
+            logger.info(
+                "exchange_rate_fetched_successfully",
+                base_code=data.get("base_code"),
+                rates_count=len(data.get("conversion_rates", {})),
+                last_update=data.get("time_last_update_utc"),
+            )
+
+            return cast(dict[str, Any] | None, data)
 
         except httpx.TimeoutException:
             logger.error(
@@ -90,44 +107,52 @@ class ExchangeRateService:
     async def update_cache(self) -> bool:
         """Fetch latest rates and update the Redis cache.
 
+        Uses asyncio.Lock to prevent concurrent thundering herd on cache miss.
+
         Returns:
             bool: True if cache was updated successfully, False otherwise
         """
-        data = await self.fetch_exchange_rates()
+        async with self._lock:
+            # Double-check if another concurrent request updated cache while waiting for lock
+            existing = await cache_manager.get(self._cache_key)
+            if existing is not None:
+                return True
 
-        if data is None:
-            logger.warning("exchange_rate_cache_update_skipped", reason="fetch_failed")
-            return False
+            data = await self.fetch_exchange_rates()
 
-        # Extract and structure the cache data
-        cache_data = {
-            "base_code": data.get("base_code", "USD"),
-            "last_update_utc": data.get("time_last_update_utc"),
-            "next_update_utc": data.get("time_next_update_utc"),
-            "conversion_rates": data.get("conversion_rates", {}),
-            "cached_at": datetime.now(UTC).isoformat(),
-        }
+            if data is None:
+                logger.warning("exchange_rate_cache_update_skipped", reason="fetch_failed")
+                return False
 
-        success = await cache_manager.set(
-            key=self._cache_key,
-            value=cache_data,
-            ttl=self._cache_ttl,
-        )
+            # Extract and structure the cache data
+            cache_data = {
+                "base_code": data.get("base_code", "USD"),
+                "last_update_utc": data.get("time_last_update_utc"),
+                "next_update_utc": data.get("time_next_update_utc"),
+                "conversion_rates": data.get("conversion_rates", {}),
+                "cached_at": datetime.now(UTC).isoformat(),
+            }
 
-        if success:
-            logger.info(
-                "exchange_rate_cache_updated",
-                cache_key=self._cache_key,
+            success = await cache_manager.set(
+                key=self._cache_key,
+                value=cache_data,
                 ttl=self._cache_ttl,
-                rates_count=len(cache_data["conversion_rates"]),
-            )
-        else:
-            logger.error(
-                "exchange_rate_cache_update_failed",
-                cache_key=self._cache_key,
             )
 
-        return success
+            if success:
+                logger.info(
+                    "exchange_rate_cache_updated",
+                    cache_key=self._cache_key,
+                    ttl=self._cache_ttl,
+                    rates_count=len(cache_data["conversion_rates"]),
+                )
+            else:
+                logger.error(
+                    "exchange_rate_cache_update_failed",
+                    cache_key=self._cache_key,
+                )
+
+            return success
 
     async def get_cached_rates(self) -> dict[str, Any] | None:
         """Get cached exchange rates from Redis.
@@ -183,26 +208,27 @@ class ExchangeRateService:
 
     async def convert(
         self,
-        amount: float,
+        amount: Decimal | float,
         from_currency: str,
         to_currency: str,
-    ) -> float | None:
-        """Convert amount between currencies.
+    ) -> Decimal | None:
+        """Convert amount between currencies using Decimal precision.
 
         Args:
-            amount: Amount to convert
+            amount: Amount to convert (Decimal or float)
             from_currency: Source currency code
             to_currency: Target currency code
 
         Returns:
-            float | None: Converted amount, or None if conversion not possible
+            Decimal | None: Converted amount, or None if conversion not possible
         """
         from_currency = from_currency.upper()
         to_currency = to_currency.upper()
+        dec_amount = amount if isinstance(amount, Decimal) else Decimal(str(amount))
 
         # Same currency, no conversion needed
         if from_currency == to_currency:
-            return amount
+            return dec_amount
 
         data = await self.get_cached_rates()
 
@@ -217,30 +243,33 @@ class ExchangeRateService:
         rates = data.get("conversion_rates", {})
 
         # Get rates for both currencies
-        from_rate = rates.get(from_currency)
-        to_rate = rates.get(to_currency)
+        from_rate_val = rates.get(from_currency)
+        to_rate_val = rates.get(to_currency)
 
         # Handle base currency (USD)
         if from_currency == base_code:
-            from_rate = 1.0
+            from_rate_val = 1.0
         if to_currency == base_code:
-            to_rate = 1.0
+            to_rate_val = 1.0
 
-        if from_rate is None or to_rate is None:
+        if from_rate_val is None or to_rate_val is None:
             logger.warning(
                 "exchange_rate_conversion_failed",
                 from_currency=from_currency,
                 to_currency=to_currency,
-                from_rate_found=from_rate is not None,
-                to_rate_found=to_rate is not None,
+                from_rate_found=from_rate_val is not None,
+                to_rate_found=to_rate_val is not None,
             )
             return None
 
-        # Convert: amount in from_currency -> USD -> to_currency
-        amount_in_usd = amount / from_rate
-        converted_amount = amount_in_usd * to_rate
+        # Convert: amount in from_currency -> USD -> to_currency using Decimal
+        from_rate_dec = Decimal(str(from_rate_val))
+        to_rate_dec = Decimal(str(to_rate_val))
 
-        return cast(float, converted_amount)
+        amount_in_usd = dec_amount / from_rate_dec
+        converted_amount = amount_in_usd * to_rate_dec
+
+        return converted_amount
 
 
 # Global service instance

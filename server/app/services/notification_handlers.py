@@ -7,6 +7,7 @@ Handlers are registered at app startup and execute asynchronously.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
@@ -36,7 +37,7 @@ class TransactionAddedEvent(DomainEvent):
     space_name: str
     transaction_id: UUID
     added_by_user_uuid: UUID
-    amount: float
+    amount: Decimal
     currency: str
     tx_type: str
     description: str
