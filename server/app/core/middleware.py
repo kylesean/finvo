@@ -114,14 +114,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 class LoggingContextMiddleware(BaseHTTPMiddleware):
-    """Middleware for adding request_id to the logging context.
+    """Bind request_id to the logging context for each request.
 
-    Note: ``user_uuid`` is bound to the logging context by the
-    ``get_current_user`` dependency once the authenticated user is resolved,
-    which is the single verified source. We intentionally do NOT decode the
-    JWT here — that would duplicate the dependency's decode and previously
-    mislabeled the ``sub`` claim (which is the user UUID) as ``session_id``
-    while looking for a non-existent ``user_uuid`` claim.
+    ``user_uuid`` is bound separately by the ``get_current_user`` dependency
+    once the authenticated user is resolved; this middleware does not decode
+    the JWT.
     """
 
     async def dispatch(self, request: Request, call_next: Callable[..., Any]) -> Response:

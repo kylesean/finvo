@@ -224,8 +224,7 @@ class TransactionCRUDService:
         associated_spaces = spaces_result.scalars().all()
         spaces_data = [{"id": str(s.id), "name": s.name} for s in associated_spaces]
 
-        # Get comment user information — batch-load all comment authors in one
-        # query to avoid N+1 (previously: one select(User) per comment).
+        # Batch-load all comment authors in one query to avoid N+1.
         comments_data = []
         if transaction.comments:
             comment_user_uuids = {c.user_uuid for c in transaction.comments}
@@ -870,8 +869,7 @@ class TransactionCRUDService:
         if not comments_data:
             return []
 
-        # Batch-load parent comments in one query to avoid N+1 (previously:
-        # one select per comment that has a parent_comment_id).
+        # Batch-load parent comments in one query to avoid N+1.
         parent_ids = {c.parent_comment_id for c, _, _ in comments_data if c.parent_comment_id}
         parent_by_id: dict[Any, tuple[Any, str | None]] = {}
         if parent_ids:

@@ -116,7 +116,6 @@ class DeleteSurface(BaseModel):
 #   {"version": "v0.9", "updateDataModel":  {"surfaceId": ..., "path": ..., "value": ...}}  # noqa: ERA001
 #
 # Components are FLAT in v0.9: {"id": "root", "component": "TypeName", **props}
-# (contrast with the legacy nested {"id": ..., "component": {"TypeName": props}}).
 
 A2UI_VERSION = "v0.9"
 

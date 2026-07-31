@@ -36,11 +36,7 @@ class BudgetScope(str, Enum):
 
 
 class BudgetType(str, Enum):
-    """Budget type.
-
-    Note: SAVINGS_GOAL was removed as it requires a fundamentally different
-    product model. Future savings-goal features should use a dedicated model.
-    """
+    """Budget type."""
 
     EXPENSE_LIMIT = "EXPENSE_LIMIT"
 

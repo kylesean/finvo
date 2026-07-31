@@ -201,10 +201,8 @@ class AuthService:
         It must NOT be called from login, scheduled jobs, or any other path.
 
         Runs within the caller's transaction and does NOT commit. If this
-        raises, the caller (:meth:`register`) must roll back so that the user
-        and its financial settings are either both persisted or neither —
-        previously a swallowed error here left a half-registered user with no
-        settings row, breaking downstream code that assumes settings exist.
+        raises, the caller (:meth:`register`) rolls back so the user and its
+        financial settings are either both persisted or neither.
 
         Args:
             user_uuid: The user's UUID

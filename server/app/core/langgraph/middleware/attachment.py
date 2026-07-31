@@ -109,13 +109,12 @@ class AttachmentMiddleware(BaseMiddleware):
             # Classify attachments
             images, documents = self._classify_attachments(attachments)
 
-            # Images are NO LONGER written into the stored user message — that is
-            # what previously persisted base64 (and earlier, synthesized text) into
-            # the checkpoint and leaked into history. We only publish *ephemeral*
-            # data via config: a `_has_images` flag for the model node's vision guard,
-            # and `_image_multimodal_parts` (base64 image_url parts) for vision-capable
-            # models, which the model node applies transiently to the prompt. Non-vision
-            # models skip the base64 build; the node guard refuses them.
+            # Images are not written into the stored user message. Only ephemeral
+            # data is published via config: a `_has_images` flag for the model
+            # node's vision guard, and `_image_multimodal_parts` (base64 image_url
+            # parts) for vision-capable models, which the model node applies
+            # transiently to the prompt. Non-vision models skip the base64 build;
+            # the node guard refuses them.
             cfg = config.setdefault("configurable", {})
             cfg["_has_images"] = bool(images)
             if images:

@@ -159,11 +159,8 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
     # Convert string error code to integer
     code_int = get_error_code_int(exc.error_code)
 
-    # Use the exception's HTTP status code directly. The previous behavior
-    # forced HTTP 200 for status_code==400 (the WeChat/Alipay envelope pattern
-    # where the client inspects `code` instead of the HTTP status) — that
-    # legacy is retired: business errors now return their proper 4xx/5xx
-    # status, and the body still carries `code`/`message` for detail.
+    # Use the exception's HTTP status code directly; the body still carries
+    # `code`/`message` for machine-readable detail.
     http_status = exc.status_code
 
     # Include details in data field if present

@@ -31,10 +31,8 @@ async def get_redis_client() -> AsyncGenerator[Any]:
     """Get Redis client for caching and session management.
 
     Returns the shared :class:`CacheManager` client backed by a connection
-    pool. The previous implementation called ``redis.from_url`` on every
-    dependency resolution, opening a fresh connection per request and leaking
-    sockets under load. The singleton client must NOT be closed here — its
-    lifecycle is owned by ``cache_manager`` and torn down at app shutdown via
+    pool. The singleton client must NOT be closed here — its lifecycle is
+    owned by ``cache_manager`` and torn down at app shutdown via
     ``close_cache()``.
 
     Yields:

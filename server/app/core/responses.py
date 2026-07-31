@@ -9,8 +9,6 @@ Design principles:
    business errors (4xx) and server errors (5xx). Success is HTTP 200.
 3. The body's 'code' field provides machine-readable detail on top of the
    HTTP status — code=0 means success, non-zero means a business error.
-4. Business errors are NOT returned as HTTP 200; the legacy envelope-on-200
-   pattern has been retired.
 """
 
 from __future__ import annotations
@@ -89,10 +87,10 @@ def error_response(
 ) -> JSONResponse:
     """Create an error response with non-zero code.
 
-    Business errors return their proper HTTP 4xx/5xx status — the body still
-    carries ``code``/``message`` for machine-readable detail, but the HTTP
-    status is no longer forced to 200. Callers SHOULD pass a specific status
-    (404, 422, 403, …) when it is more precise than the generic 400 default.
+    Business errors return their proper HTTP 4xx/5xx status; the body carries
+    ``code``/``message`` for machine-readable detail. Callers SHOULD pass a
+    specific status (404, 422, 403, …) when it is more precise than the
+    generic 400 default.
 
     Args:
         code: Business error code (non-zero)
