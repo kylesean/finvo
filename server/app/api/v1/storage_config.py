@@ -290,16 +290,20 @@ async def list_providers() -> JSONResponse:
     """
     return success_response(
         data=[
-            {"type": ProviderType.LOCAL_UPLOADS.value, "name": "本地存储", "description": "服务器本地文件系统存储"},
+            {
+                "type": ProviderType.LOCAL_UPLOADS.value,
+                "name": "Local Storage",
+                "description": "Server local filesystem storage",
+            },
             {
                 "type": ProviderType.S3_COMPATIBLE.value,
-                "name": "S3 兼容存储",
-                "description": "支持 AWS S3、MinIO 等 S3 兼容的对象存储",
+                "name": "S3 Compatible Storage",
+                "description": "Supports AWS S3, MinIO, and other S3-compatible object storage",
             },
             {
                 "type": ProviderType.WEBDAV.value,
                 "name": "WebDAV",
-                "description": "支持群晖 NAS、NextCloud 等 WebDAV 协议存储",
+                "description": "Supports Synology NAS, NextCloud, and other WebDAV protocol storage",
             },
         ]
     )

@@ -1,10 +1,10 @@
-"""后台任务管理
+"""Background Task Management
 
-提供异步任务执行功能，类似 Hyperf 的 AsyncQueue。
+Provides asynchronous task execution capabilities.
 
-支持两种方式：
-1. FastAPI BackgroundTasks - 简单轻量，适合快速任务
-2. ARQ (可选) - 基于 Redis 的任务队列，支持重试和持久化
+Supports two approaches:
+1. FastAPI BackgroundTasks / asyncio.create_task - Simple, lightweight, suitable for quick tasks.
+2. ARQ (Optional) - Redis-based task queue supporting retries and persistence.
 """
 
 import asyncio
@@ -16,22 +16,22 @@ from app.core.logging import logger
 
 
 class BackgroundTaskManager:
-    """后台任务管理器
+    """Background task manager.
 
-    提供统一的后台任务接口，支持多种执行方式。
+    Provides a unified background task interface supporting multiple execution strategies.
     """
 
     @staticmethod
     async def run_in_background(func: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
-        """在后台运行任务（fire-and-forget）
+        """Run task in background (fire-and-forget).
 
-        使用 asyncio.create_task 在后台执行任务，不阻塞当前请求。
-        适合不需要持久化的轻量级任务。
+        Uses asyncio.create_task to execute task in background without blocking the current request.
+        Suitable for lightweight non-persisted tasks.
 
         Args:
-            func: 要执行的异步函数
-            *args: 位置参数
-            **kwargs: 关键字参数
+            func: Async function to execute
+            *args: Positional arguments
+            **kwargs: Keyword arguments
         """
 
         async def _wrapped_task() -> None:
@@ -53,19 +53,19 @@ class BackgroundTaskManager:
                     exc_info=True,
                 )
 
-        # 创建后台任务
+        # Create background task
         asyncio.create_task(_wrapped_task())
 
     @staticmethod
     def background_task(func: Callable[..., Any]) -> Callable[..., Any]:
-        """装饰器：将函数标记为后台任务
+        """Decorator to mark a function as a background task.
 
-        使用方式:
+        Usage:
             @background_task
             async def send_email(to: str, subject: str):
                 ...
 
-            # 调用时会自动在后台执行
+            # Executed automatically in background upon invocation
             await send_email("user@example.com", "Welcome")
         """
 
@@ -76,25 +76,25 @@ class BackgroundTaskManager:
         return wrapper
 
 
-# 全局实例
+# Global instance
 background_task_manager = BackgroundTaskManager()
 
 
 # ============================================================================
-# ARQ 集成（可选）
+# ARQ Integration (Optional)
 # ============================================================================
 
 """
-如果需要更强大的任务队列功能（重试、持久化、分布式），可以使用 ARQ。
+For advanced task queue features (retries, persistence, distribution), use ARQ.
 
-安装:
+Installation:
     pip install arq
 
-配置 (app/core/config.py):
+Configuration (app/core/config.py):
     REDIS_HOST = "localhost"
     REDIS_PORT = 6379
 
-创建 worker (app/workers/tasks.py):
+Create worker (app/workers/tasks.py):
     from arq import create_pool
     from arq.connections import RedisSettings
 
@@ -106,10 +106,10 @@ background_task_manager = BackgroundTaskManager()
         redis_settings = RedisSettings(host='localhost', port=6379)
         functions = [send_verification_code]
 
-启动 worker:
+Start worker:
     arq app.workers.tasks.WorkerSettings
 
-在代码中使用:
+Usage in code:
     from arq import create_pool
     from arq.connections import RedisSettings
 
@@ -119,16 +119,16 @@ background_task_manager = BackgroundTaskManager()
 
 
 # ============================================================================
-# Celery 集成（可选）
+# Celery Integration (Optional)
 # ============================================================================
 
 """
-如果需要企业级任务队列，可以使用 Celery。
+For enterprise-grade task queue features, use Celery.
 
-安装:
+Installation:
     pip install celery[redis]
 
-配置 (celery_app.py):
+Configuration (celery_app.py):
     from celery import Celery
 
     celery_app = Celery(
@@ -139,15 +139,15 @@ background_task_manager = BackgroundTaskManager()
 
     @celery_app.task
     def send_verification_code_task(code_type: str, account: str):
-        # 注意：Celery 任务必须是同步的，或使用 celery-aio
+        # Note: Celery tasks must be synchronous or use celery-aio
         import asyncio
         from app.services.code_manager import code_manager
         asyncio.run(code_manager.send_code(code_type, account))
 
-启动 worker:
+Start worker:
     celery -A celery_app worker --loglevel=info
 
-在代码中使用:
+Usage in code:
     from celery_app import send_verification_code_task
     send_verification_code_task.delay('email', 'user@example.com')
 """

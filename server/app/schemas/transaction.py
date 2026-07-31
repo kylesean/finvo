@@ -75,41 +75,41 @@ class TransactionDisplayValue(BaseModel):
 
 
 class UpdateAccountRequest(BaseModel):
-    """更新交易关联账户请求"""
+    """Request schema to update a transaction's associated account."""
 
-    account_id: str | None = Field(None, description="关联账户 ID，传 null 表示取消关联")
+    account_id: str | None = Field(None, description="Associated account ID; pass null to disassociate")
 
 
 class UpdateBatchAccountRequest(BaseModel):
-    """批量更新交易关联账户请求"""
+    """Request schema to batch update transactions' associated account."""
 
-    transaction_ids: list[str] = Field(..., description="交易 ID 列表")
-    account_id: str | None = Field(..., description="关联账户 ID")
+    transaction_ids: list[str] = Field(..., description="List of transaction IDs")
+    account_id: str | None = Field(..., description="Associated account ID")
 
 
 class CreateTransactionItem(BaseModel):
-    """单笔交易创建信息
+    """Information for creating a single transaction.
 
-    【重要】每笔交易必须有独立的标签，描述该笔交易的具体内容。
-    例如 "咖啡25，吉野家35" 应该产生：
-    - 交易1: tags=["咖啡", "饮品"], amount=25
-    - 交易2: tags=["吉野家", "午餐"], amount=35
+    Each transaction should have descriptive tags detailing its specific content.
+    Example: "Coffee $25, Lunch $35" should produce:
+    - Transaction 1: tags=["coffee", "beverage"], amount=25
+    - Transaction 2: tags=["bento", "lunch"], amount=35
     """
 
-    amount: str = Field(..., description="交易金额")
+    amount: str = Field(..., description="Transaction amount")
     tags: list[str] = Field(
         ...,
         min_length=1,
-        description="""【必填】该笔交易的独立标签，描述具体消费内容。
-每笔交易的标签必须不同！
-示例：
-- "咖啡" → ["咖啡", "饮品"]
-- "吉野家" → ["吉野家", "午餐"]
-- "打车" → ["打车", "通勤"]""",
+        description="""[Required] Specific tags describing the item content.
+Tags for each transaction should accurately reflect the expense.
+Examples:
+- "Coffee" -> ["coffee", "beverage"]
+- "Burger" -> ["burger", "lunch"]
+- "Taxi" -> ["taxi", "commute"]""",
     )
     transaction_type: Literal["expense", "income", "transfer"] = Field(default="expense")
     category_key: str = Field(default="OTHERS")
-    raw_input: str | None = Field(None, description="该笔交易对应的原始输入片段")
+    raw_input: str | None = Field(None, description="Raw input text snippet corresponding to this transaction")
 
     @field_validator("amount")
     @classmethod
@@ -125,14 +125,14 @@ class CreateTransactionItem(BaseModel):
 
 
 class BatchCreateTransactionRequest(BaseModel):
-    """批量创建交易请求"""
+    """Request schema to batch create transactions."""
 
     transactions: list[CreateTransactionItem] = Field(..., min_length=1)
-    source_account_id: str | None = Field(None, description="可选的全局关联账户 ID")
+    source_account_id: str | None = Field(None, description="Optional global associated account ID")
 
 
 class TransactionSearchRequest(BaseModel):
-    """搜索交易请求"""
+    """Request schema to search transactions."""
 
     keyword: str | None = None
     min_amount: str | None = Field(None, description="Minimum amount as string")

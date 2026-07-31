@@ -1,9 +1,9 @@
 """File upload API endpoints.
 
-提供 RESTful 文件上传接口:
-- POST /api/files/upload - 单文件/多文件上传
-- GET /api/files/view/{id} - 查看/下载文件
-- DELETE /api/files/{id} - 删除文件
+Exposes RESTful file upload APIs:
+- POST /api/v1/files/upload - Single/multiple file uploads
+- GET /api/v1/files/view/{id} - View/download file
+- DELETE /api/v1/files/{id} - Delete file
 """
 
 from __future__ import annotations
@@ -32,12 +32,12 @@ router = APIRouter(prefix="/files", tags=["files"])
 
 
 # =============================================================================
-# 响应模型
+# Response Schemas
 # =============================================================================
 
 
 class UploadResultItem(BaseModel):
-    """单个上传结果"""
+    """Single file upload result item schema."""
 
     id: str  # UUID
     attachmentId: str  # UUID
@@ -53,7 +53,7 @@ class UploadResultItem(BaseModel):
 
 
 class UploadFailureItem(BaseModel):
-    """上传失败项"""
+    """Failed upload item schema."""
 
     filename: str
     error: str
@@ -61,7 +61,7 @@ class UploadFailureItem(BaseModel):
 
 
 class UploadSummary(BaseModel):
-    """上传汇总"""
+    """Upload batch summary schema."""
 
     total: int
     successfulCount: int
@@ -69,7 +69,7 @@ class UploadSummary(BaseModel):
 
 
 class UploadResponse(BaseModel):
-    """上传响应"""
+    """Upload API response schema."""
 
     summary: UploadSummary
     uploads: list[UploadResultItem]
@@ -77,7 +77,7 @@ class UploadResponse(BaseModel):
 
 
 # =============================================================================
-# 上传端点
+# Upload Endpoints
 # =============================================================================
 
 
@@ -86,26 +86,26 @@ async def upload_files(
     files: list[UploadFile] = File(
         ...,
         alias="files[]",
-        description="要上传的文件列表。支持的格式: 图片(jpg/png/gif/webp等), 文档(pdf/doc/docx/xls/xlsx/ppt/pptx/txt/md等)",
+        description="Files to upload. Supported formats: images (jpg/png/gif/webp etc.), documents (pdf/doc/docx/xls/xlsx/ppt/pptx/txt/md etc.)",
     ),
-    compress: bool = Query(default=True, description="是否压缩图片（仅对 jpg/jpeg/png/webp 有效）"),
-    thread_id: UUID | None = Query(default=None, alias="threadId", description="关联的会话 ID（用于 LangGraph 对话）"),
+    compress: bool = Query(default=True, description="Whether to compress images (jpg/jpeg/png/webp only)"),
+    thread_id: UUID | None = Query(default=None, alias="threadId", description="Associated session thread ID"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
-    """上传一个或多个文件。
+    """Upload one or more files.
 
-    支持并发上传多个文件，每个文件独立处理。
+    Supports concurrent upload of multiple files, processing each file independently.
 
-    **支持的文件类型:**
+    **Supported File Types:**
 
-    - **图片**: jpg, jpeg, png, gif, webp, bmp, ico, svg
-    - **文档**: pdf, doc, docx, xls, xlsx, ppt, pptx, txt, md, csv, json, xml, html, rtf, odt, ods, odp
+    - **Images**: jpg, jpeg, png, gif, webp, bmp, ico, svg
+    - **Documents**: pdf, doc, docx, xls, xlsx, ppt, pptx, txt, md, csv, json, xml, html, rtf, odt, ods, odp
 
-    **请求示例:**
+    **Request Example:**
 
     ```
-    POST /api/files/upload
+    POST /api/v1/files/upload
     Content-Type: multipart/form-data
 
     files[]: (binary)
@@ -114,7 +114,7 @@ async def upload_files(
     threadId: conv_xxx
     ```
 
-    **响应示例:**
+    **Response Example:**
 
     ```json
     {
@@ -125,12 +125,12 @@ async def upload_files(
         },
         "uploads": [
             {
-                "id": 1,
-                "attachmentId": 1,
+                "id": "1",
+                "attachmentId": "1",
                 "originalName": "photo.jpg",
                 "filename": "photo.jpg",
                 "fileKey": "2024/12/05/up_xxx_yyy.jpg",
-                "uri": "http://localhost:8000/api/files/view/1",
+                "uri": "http://localhost:8000/api/v1/files/view/1",
                 "size": 102400,
                 "mimeType": "image/jpeg",
                 "hash": "sha256...",
@@ -142,21 +142,21 @@ async def upload_files(
     ```
 
     Args:
-        files: 文件列表 (multipart/form-data, 字段名: files[])
-        compress: 是否压缩图片
-        thread_id: 会话 ID
-        current_user: 当前认证用户
-        db: 数据库会话
+        files: File list (multipart/form-data, field name: files[])
+        compress: Whether to compress images
+        thread_id: Optional session thread ID
+        current_user: Currently authenticated user
+        db: Database session
 
     Returns:
-        包含上传结果的 JSON 响应
+        JSONResponse containing upload results
 
     Raises:
-        400: 所有文件上传失败
-        401: 未认证
-        413: 文件过大
+        400: All file uploads failed
+        401: Unauthorized
+        413: File too large
     """
-    # 校验文件数量
+    # Validate file count
     if not files:
         raise BusinessError(
             message="Please select at least one file",
@@ -171,7 +171,7 @@ async def upload_files(
             error_code="TOO_MANY_FILES",
         )
 
-    # 批量上传：先处理所有文件，再统一写入数据库
+    # Batch upload: process files first, then write DB records
     upload_service = UploadService(db)
     successful, failed = await upload_service.upload_files(
         files=files,
@@ -180,7 +180,7 @@ async def upload_files(
         thread_id=thread_id,
     )
 
-    # 检查是否全部失败
+    # Check for total failure
     if not successful and failed:
         raise BusinessError(
             message="All file uploads failed",
@@ -203,7 +203,7 @@ async def upload_files(
 
 
 # =============================================================================
-# 查看/下载端点
+# View/Download Endpoints
 # =============================================================================
 
 
@@ -213,22 +213,22 @@ async def view_attachment(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ) -> FileResponse:
-    """查看或下载文件。
+    """View or download attachment file.
 
-    根据 MIME 类型返回文件:
-    - 图片/PDF: 浏览器内联显示
-    - 其他文件: 作为附件下载
+    Returns file according to MIME type:
+    - Image/PDF: Inline display in browser
+    - Other files: Download as attachment
 
     Args:
-        attachment_id: 附件 ID
-        current_user: 当前认证用户
-        db: 数据库会话
+        attachment_id: Attachment ID
+        current_user: Currently authenticated user
+        db: Database session
 
     Returns:
-        文件内容
+        FileResponse content stream
 
     Raises:
-        404: 文件不存在或无权访问
+        404: File not found or access denied
     """
     upload_service = UploadService(db)
 
@@ -238,29 +238,29 @@ async def view_attachment(
             user_uuid=current_user.uuid,
         )
 
-        # 确定 Content-Disposition
+        # Determine Content-Disposition header
         mime_type = attachment.mime_type or "application/octet-stream"
         if mime_type == "image/svg+xml":
-            # Security: SVG can embed <script> → store-and-reflect XSS when served inline.
-            # Force download; never render SVG inline in the browser.
+            # Security: SVG can embed <script> tags -> store-and-reflect XSS when served inline.
+            # Force download; never render SVG inline in browser.
             disposition = "attachment"
         elif mime_type.startswith("image/") or mime_type == "application/pdf":
             disposition = "inline"
         else:
             disposition = "attachment"
 
-        # 对非 ASCII 文件名进行 URL 编码 (RFC 5987)
+        # Encode non-ASCII filenames per RFC 5987
         from urllib.parse import quote
 
         filename = attachment.filename
 
-        # 创建 ASCII 安全的文件名用于兼容性
+        # Create ASCII-safe filename for compatibility
         try:
             filename.encode("ascii")
-            # 文件名是纯 ASCII，直接使用
+            # Pure ASCII filename, use directly
             content_disposition = f'{disposition}; filename="{filename}"'
         except UnicodeEncodeError:
-            # 文件名包含非 ASCII 字符，使用 RFC 5987 编码
+            # Filename contains non-ASCII characters, use RFC 5987 encoding
             encoded_filename = quote(filename)
             content_disposition = f"{disposition}; filename*=UTF-8''{encoded_filename}"
 
@@ -288,7 +288,7 @@ async def view_attachment(
 
 
 # =============================================================================
-# 删除端点
+# Delete Endpoints
 # =============================================================================
 
 
@@ -298,20 +298,20 @@ async def delete_file(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
-    """删除文件。
+    """Delete file.
 
-    删除物理文件和数据库记录。
+    Removes physical file and database attachment record.
 
     Args:
-        attachment_id: 附件 ID
-        current_user: 当前认证用户
-        db: 数据库会话
+        attachment_id: Attachment ID
+        current_user: Currently authenticated user
+        db: Database session
 
     Returns:
-        成功响应
+        JSONResponse success response
 
     Raises:
-        404: 文件不存在或无权访问
+        404: File not found or access denied
     """
     upload_service = UploadService(db)
 
@@ -337,16 +337,16 @@ async def delete_file(
 
 
 # =============================================================================
-# 支持的文件类型信息
+# Supported File Types Endpoint
 # =============================================================================
 
 
 @router.get("/supported-types")
 async def get_supported_types() -> JSONResponse:
-    """获取支持的文件类型列表。
+    """Retrieve supported file types list.
 
     Returns:
-        支持的文件扩展名和 MIME 类型
+        Supported file extensions and MIME types
     """
     return success_response(
         data={

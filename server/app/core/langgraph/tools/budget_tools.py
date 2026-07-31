@@ -21,7 +21,7 @@ from app.core.database import db_manager
 from app.core.logging import logger
 from app.services.budget_service import BudgetService
 
-# 预算支持的分类键（只允许支出分类）
+# Budget supported category keys (expense categories only)
 BUDGET_CATEGORY_KEYS = Literal[
     "FOOD_DINING",
     "SHOPPING_RETAIL",
@@ -37,7 +37,7 @@ BUDGET_CATEGORY_KEYS = Literal[
     "OTHERS",
 ]
 
-# 有效分类键集合（用于运行时验证）
+# Valid category keys set (for runtime validation)
 VALID_BUDGET_CATEGORIES = {cat.value for cat in EXPENSE_CATEGORIES}
 
 

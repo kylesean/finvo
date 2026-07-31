@@ -47,8 +47,8 @@ async def test_memory_extraction_boundary():
 
 @pytest.mark.asyncio
 async def test_agent_proactive_memory_tool_call():
-    """验证 Agent 中间件的行为（目前改为 passive）"""
-    # 彻底 Mock 掉 LLM 以避免网络延迟和挂起
+    """Verify Agent memory middleware behavior (currently configured as passive)."""
+    # Fully mock LLM calls to avoid network latency and hangs
     with patch("app.services.llm.llm_service.call", new_callable=AsyncMock) as _:
         from langchain_core.messages import HumanMessage
 
@@ -56,21 +56,21 @@ async def test_agent_proactive_memory_tool_call():
 
         middleware = LongTermMemoryMiddleware()
 
-        # 此时 check before_invoke 是否由于我们的修改而不再执行检索
-        messages = [HumanMessage(content="根据我之前的预算目标建议一下")]
+        # Verify before_invoke no longer executes retrieval
+        messages = [HumanMessage(content="Give me suggestions based on my budget goals")]
         config = {"configurable": {"user_uuid": str(uuid4())}}
 
-        # 在我们的新设计中，中间件应该直接返回，不做检索
+        # Middleware should return directly without performing active retrieval
         processed_msgs, _ = await middleware.before_invoke(messages, config)
 
-        # 验证消息没被修改（即没有注入 "# 用户相关记忆"）
+        # Verify message was not mutated (i.e., no "# User Memories" injected)
         assert len(processed_msgs) == 1
-        assert "用户相关记忆" not in processed_msgs[0].content
+        assert "User Memories" not in processed_msgs[0].content
 
 
 @pytest.mark.asyncio
 async def test_memory_tool_functionality():
-    """直接测试 memory 工具的逻辑"""
+    """Directly test memory tool functionality."""
     from app.core.langgraph.tools.memory_tools import search_personal_context
 
     user_id = str(uuid4())

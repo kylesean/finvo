@@ -214,9 +214,9 @@ class AttachmentProcessor:
                 # Limit content length
                 max_length = 10000
                 if len(content) > max_length:
-                    content = content[:max_length] + "\n...(内容已截断)"
+                    content = content[:max_length] + "\n...(content truncated)"
 
-                return f"\n\n[附件: {attachment['filename']}]\n```\n{content}\n```"
+                return f"\n\n[Attachment: {attachment['filename']}]\n```\n{content}\n```"
         except Exception as e:
             logger.error(
                 "failed_to_read_text_file",
@@ -224,7 +224,7 @@ class AttachmentProcessor:
                 error=str(e),
             )
 
-        return f"\n\n[附件: {attachment['filename']} - 读取失败]"
+        return f"\n\n[Attachment: {attachment['filename']} - Read failed]"
 
     def _process_document(self, attachment: dict[str, Any]) -> str:
         """Process a document attachment.
@@ -236,7 +236,7 @@ class AttachmentProcessor:
             Formatted document information
         """
         size_formatted = self._format_file_size(attachment["size"])
-        return f"\n\n[文档附件: {attachment['filename']}, 大小: {size_formatted}]"
+        return f"\n\n[Document Attachment: {attachment['filename']}, Size: {size_formatted}]"
 
     def _process_other_file(self, attachment: dict[str, Any]) -> str:
         """Process other file types.
@@ -248,7 +248,7 @@ class AttachmentProcessor:
             Formatted file information
         """
         size_formatted = self._format_file_size(attachment["size"])
-        return f"\n\n[附件: {attachment['filename']}, 类型: {attachment['mime_type']}, 大小: {size_formatted}]"
+        return f"\n\n[Attachment: {attachment['filename']}, Type: {attachment['mime_type']}, Size: {size_formatted}]"
 
     def _format_file_size(self, size_bytes: int) -> str:
         """Format file size in human-readable format.

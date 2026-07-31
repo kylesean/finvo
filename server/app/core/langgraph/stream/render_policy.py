@@ -1,13 +1,13 @@
-"""RenderPolicy - 渲染策略模式实现
+"""RenderPolicy - Rendering Strategy Pattern Implementation
 
-职责：
-- 决定 GenUI 事件的渲染时机（立即/缓冲/静默）
-- 替代 StreamProcessor 中分散的 if-else 逻辑
-- 支持通过组合扩展策略
+Responsibilities:
+- Determines GenUI event rendering behavior (immediate/buffered/suppressed)
+- Encapsulates decision logic cleanly across stream rendering
+- Supports policy extensions via composite pattern
 
-设计模式：
-- 策略模式 (Strategy Pattern)
-- 组合模式 (Composite Pattern)
+Design Patterns:
+- Strategy Pattern
+- Composite Pattern
 """
 
 from abc import ABC, abstractmethod
@@ -19,35 +19,35 @@ if TYPE_CHECKING:
 
 
 class RenderDecision(str, Enum):
-    """渲染决策枚举"""
+    """Render decision enumeration."""
 
-    EMIT = "emit"  # 立即发送给客户端
-    BUFFER = "buffer"  # 缓冲到流结束后再发送
-    SUPPRESS = "suppress"  # 完全静默不发送
+    EMIT = "emit"  # Emit to client immediately
+    BUFFER = "buffer"  # Buffer and emit at stream end
+    SUPPRESS = "suppress"  # Suppress entirely
 
 
 class RenderPolicy(ABC):
-    """渲染策略抽象基类
+    """Abstract base class for render policies.
 
-    子类实现 decide() 方法来定义特定的渲染策略
+    Subclasses implement decide() to specify render decision logic.
     """
 
     @abstractmethod
     def decide(self, event: "GenUIEvent", node_name: str) -> RenderDecision:
-        """决定事件的渲染方式
+        """Determines the render decision for a GenUI event.
 
         Args:
-            event: GenUI 事件
-            node_name: 产生该事件的 LangGraph 节点名称
+            event: GenUI event
+            node_name: LangGraph node name producing the event
 
         Returns:
-            RenderDecision 枚举值
+            RenderDecision enum value
         """
         ...
 
 
 class AlwaysEmitPolicy(RenderPolicy):
-    """始终立即发送策略（默认行为）"""
+    """Always emit immediately policy (default behavior)."""
 
     def decide(self, event: "GenUIEvent", node_name: str) -> RenderDecision:
         """Determines that the event should always be emitted immediately."""
@@ -55,12 +55,12 @@ class AlwaysEmitPolicy(RenderPolicy):
 
 
 class ToolsNodeBufferPolicy(RenderPolicy):
-    """Tools 节点 a2ui_message 缓冲策略
+    """Tools node a2ui_message buffering policy.
 
-    设计意图：
-    - tools 节点产生的 UI 组件应该在 AI 文本分析完成后再展示
-    - 这样用户会先看到文本洞察，再看到数据可视化卡片
-    - 称为"附件置底原则"
+    Design rationale:
+    - UI components produced by tools node are rendered after AI text analysis
+    - Ensures textual insights appear prior to data visualization cards
+    - Adheres to attachment placement principle
     """
 
     def decide(self, event: "GenUIEvent", node_name: str) -> RenderDecision:
@@ -71,17 +71,17 @@ class ToolsNodeBufferPolicy(RenderPolicy):
 
 
 class CompositeRenderPolicy(RenderPolicy):
-    """组合渲染策略
+    """Composite render policy.
 
-    按优先级顺序执行多个策略，返回第一个非 EMIT 的决策。
-    如果所有策略都返回 EMIT，则最终返回 EMIT。
+    Evaluates multiple policies in priority order, returning the first non-EMIT decision.
+    If all policies return EMIT, returns EMIT.
     """
 
     def __init__(self, policies: list[RenderPolicy] | None = None):
         self._policies = policies or []
 
     def add_policy(self, policy: RenderPolicy) -> "CompositeRenderPolicy":
-        """添加策略（链式调用）"""
+        """Add policy (fluent interface)."""
         self._policies.append(policy)
         return self
 
@@ -95,12 +95,11 @@ class CompositeRenderPolicy(RenderPolicy):
 
 
 class DefaultRenderPolicy(CompositeRenderPolicy):
-    """默认渲染策略
+    """Default render policy.
 
-    简洁设计：
-    - a2ui_message 缓冲到流结束再发送
-    - 文本流完成后，GenUI 组件直接出现在消息末尾
-    - 无骨架屏预占位（避免复杂的时序问题）
+    Design:
+    - Buffers a2ui_message until stream completion
+    - GenUI components append at the end of the message after text stream completes
     """
 
     def __init__(self) -> None:

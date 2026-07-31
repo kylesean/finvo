@@ -1144,7 +1144,9 @@ class TransactionCRUDService:
 
             is_parent_author_reply = parent_author_uuid is not None and str(mentioned_uuid) == parent_author_uuid
             title = (
-                f"{commenter_username} 回复了你的评论" if is_parent_author_reply else f"{commenter_username} 提及了你"
+                f"{commenter_username} replied to your comment"
+                if is_parent_author_reply
+                else f"{commenter_username} mentioned you"
             )
 
             notification_data = {

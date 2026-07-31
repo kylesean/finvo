@@ -1,13 +1,13 @@
-"""Stream 处理模块
+"""Stream Processing Module
 
-将流处理逻辑从 Agent 类中分离，提供可复用的流处理组件。
+Decouples stream processing logic from Agent class, providing reusable streaming components.
 
-核心组件：
-- StreamProcessor: 流处理编排者
-- EventGenerator: 事件生成器
-- ComponentDetector: 组件类型检测器
-- RenderPolicy: 渲染策略
-- TextFilterPolicy: 文本过滤策略
+Core components:
+- StreamProcessor: Stream processing orchestrator
+- EventGenerator: Event generator
+- ComponentDetector: Component type detector
+- RenderPolicy: Rendering policy
+- TextFilterPolicy: Text filter policy
 """
 
 from app.core.langgraph.stream.component_detector import ComponentDetector
@@ -26,17 +26,17 @@ from app.core.langgraph.stream.text_filter_policy import (
 )
 
 __all__ = [
-    # 核心处理器
+    # Core Processor
     "StreamProcessor",
     "EventGenerator",
-    # 组件检测
+    # Component Detection
     "ComponentDetector",
-    # 渲染策略
+    # Render Policy
     "RenderPolicy",
     "RenderDecision",
     "DefaultRenderPolicy",
     "CompositeRenderPolicy",
-    # 文本过滤策略
+    # Text Filter Policy
     "TextFilterPolicy",
     "DefaultTextFilterPolicy",
     "CompositeTextFilterPolicy",

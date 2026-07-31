@@ -1083,7 +1083,7 @@ class SharedSpaceService:
         tx_type = tx.type if tx else "EXPENSE"
         currency = tx.currency if tx else "CNY"
 
-        # 使用统一的金额显示格式
+        # Use unified transaction display value formatting
         display = TransactionDisplayValue.from_params(amount=amount, tx_type=tx_type, currency=currency)
 
         return {
@@ -1096,5 +1096,5 @@ class SharedSpaceService:
             "transactionAt": tx.transaction_at.isoformat() if tx and tx.transaction_at else None,
             "addedByUsername": st.added_by.username if st.added_by else "Unknown",
             "addedAt": st.created_at.isoformat() if st.created_at else None,
-            "display": display.model_dump(),  # 添加统一的金额显示格式
+            "display": display.model_dump(),  # Include unified transaction display format
         }

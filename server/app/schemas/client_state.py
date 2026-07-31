@@ -1,7 +1,7 @@
 """Client State Mutation Schema
 
-定义客户端允许操作的状态子集，用于 GenUI 原子模式。
-这是 Client 与 Server 共享 StateGraph 的协议契约。
+Defines the subset of state operations permitted for the client in GenUI atomic mode.
+Acts as the protocol contract between Client and Server for sharing StateGraph.
 """
 
 from __future__ import annotations
@@ -12,35 +12,39 @@ from pydantic import BaseModel, Field
 
 
 class ClientStateMutation(BaseModel):
-    """客户端状态突变
+    """Client state mutation schema.
 
-    GenUI 原子模式协议：
-    - Client 在消息请求中附带 state mutation
-    - Server 在图执行前原子性地应用 mutation
+    GenUI atomic mode protocol:
+    - Client includes state mutation in message request
+    - Server atomically applies mutation before graph execution
 
-    设计原则：
-    1. 白名单制：只有显式定义的字段才能被 Client 修改
-    2. 类型安全：严格的 Pydantic 验证
-    3. 可扩展：新增工具只需传入 tool_name
+    Design principles:
+    1. Whitelist-based: Only explicitly defined fields can be modified by Client
+    2. Type-safe: Strict Pydantic validation
+    3. Extensible: New tools only require passing tool_name
 
     Attributes:
-        ui_mode: 控制图入口路由
-        tool_name: 要直接执行的内部工具名
-        tool_params: 工具参数
+        ui_mode: Controls graph entry routing
+        tool_name: Internal tool name to execute directly
+        tool_params: Tool execution parameters
     """
 
     ui_mode: Literal["idle", "direct_execute"] | None = Field(
-        default=None, description="UI 模式：idle=走 agent，direct_execute=跳过 LLM 直接执行工具"
+        default=None, description="UI mode: idle=route via agent, direct_execute=skip LLM and execute tool directly"
     )
-    tool_name: str | None = Field(default=None, description="要直接执行的工具名（需在内部工具注册表中）")
-    tool_params: dict[str, Any] | None = Field(default=None, description="工具参数，ui_mode=direct_execute 时必须提供")
+    tool_name: str | None = Field(
+        default=None, description="Tool name to execute directly (must exist in internal tool registry)"
+    )
+    tool_params: dict[str, Any] | None = Field(
+        default=None, description="Tool parameters, required when ui_mode=direct_execute"
+    )
 
     model_config = {"extra": "ignore"}
 
     def to_state_dict(self) -> dict[str, Any]:
-        """转换为可合并到 AgentState 的字典
+        """Convert to a dictionary mergeable into AgentState.
 
-        只包含非 None 的字段，避免覆盖已有状态。
+        Contains only non-None fields to avoid overwriting existing state.
         """
         result: dict[str, Any] = {}
         if self.ui_mode is not None:

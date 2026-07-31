@@ -29,8 +29,8 @@ class SearchResult(BaseModel):
         "json_schema_extra": {
             "example": {
                 "id": "session-uuid",
-                "title": "关于记账的对话",
-                "snippet": "记账助手可以帮助您...",
+                "title": "Conversation about bookkeeping",
+                "snippet": "Bookkeeping assistant can help you...",
                 "messageId": None,
                 "createdAt": "2024-01-01T00:00:00Z",
                 "updatedAt": "2024-01-01T00:00:00Z",

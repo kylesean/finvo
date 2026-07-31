@@ -16,7 +16,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-# 将项目根目录加入路径
+# Add project root directory to sys.path
 sys.path.append(str(Path(__file__).parent.parent.parent.parent.parent))
 
 from uuid import UUID
@@ -29,13 +29,13 @@ from app.services.shared_space_service import SharedSpaceService  # noqa: E402
 
 async def main() -> None:
     """Execution entry point for the skill script."""
-    # 从环境变量获取用户身份
+    # Obtain user identity from environment
     user_uuid_str = os.environ.get("USER_ID")
     if not user_uuid_str:
         print(json.dumps({"success": False, "error": "User context missing"}))
         return
 
-    # 非阻塞检测 stdin 是否有数据
+    # Non-blocking check for stdin data
     space_id = None
     import select as select_mod
 
@@ -53,23 +53,26 @@ async def main() -> None:
         async with db_manager.session_factory() as session:
             service = SharedSpaceService(session)
 
-            # 获取用户的所有空间
+            # Fetch all spaces for user
             spaces_result = await service.get_user_spaces(user_uuid)
             spaces = spaces_result.get("spaces", []) if spaces_result else []
 
             if not spaces:
-                print(json.dumps({"success": True, "message": "你还没有加入任何共享空间", "spaces": [], "total": 0}))
+                print(
+                    json.dumps(
+                        {"success": True, "message": "You have not joined any shared space", "spaces": [], "total": 0}
+                    )
+                )
                 return
 
-            # 如果指定了 space_id，只查询该空间
+            # Filter by space_id if specified
             if space_id:
                 spaces = [s for s in spaces if str(s.get("id")) == str(space_id)]
                 if not spaces:
-                    print(json.dumps({"success": False, "error": f"未找到 ID 为 {space_id} 的共享空间"}))
+                    print(json.dumps({"success": False, "error": f"Shared space with ID {space_id} not found"}))
                     return
 
-            # 为每个空间计算统计数据
-
+            # Calculate summary statistics for each space
             from app.models.shared_space import SpaceTransaction
             from app.models.transaction import Transaction
 
@@ -77,11 +80,11 @@ async def main() -> None:
             for space in spaces:
                 sid = space.get("id")
 
-                # 查询该空间本月的交易统计
+                # Query monthly transaction statistics for space
                 now = datetime.now(UTC)
                 month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-                # 查询本月总支出
+                # Query total expense for current month
                 stmt = (
                     select(
                         func.coalesce(func.sum(Transaction.amount), 0).label("total_expense"),
@@ -112,7 +115,7 @@ async def main() -> None:
                         "thisMonth": {
                             "totalExpense": total_expense,
                             "transactionCount": tx_count,
-                            "period": f"{now.year}年{now.month}月",
+                            "period": f"{now.year}-{now.month:02d}",
                         },
                     }
                 )

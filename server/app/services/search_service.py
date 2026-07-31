@@ -272,7 +272,7 @@ class SearchService:
 
                 search_results.append(
                     SearchResult(
-                        id=str(msg.thread_id),  # session_id - 转换 UUID 为字符串
+                        id=str(msg.thread_id),  # session_id - convert UUID to string
                         title="",  # Will be filled by combined_search
                         snippet=snippet,
                         message_id=str(msg.id),

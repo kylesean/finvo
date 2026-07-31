@@ -99,7 +99,7 @@ strict = true
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 exclude = ["venv", ".venv", "venv_test", "alembic/versions"]
-# 禁用第三方库装饰器的类型检查错误
+# Disable type checking errors for third-party library decorators
 disable_error_code = ["untyped-decorator"]
 # Since mypy 2.0, --local-partial-types is enabled by default. It changes field type
 # inference timing so that the pydantic.mypy plugin reads type_annotation=None when
@@ -108,19 +108,19 @@ disable_error_code = ["untyped-decorator"]
 # semantics (upstream: python/mypy#18612, closed as not planned).
 local_partial_types = false
 
-# Third-party libraries - 使用精细化配置而不是 ignore_errors
-# 只忽略真正没有类型支持的库的导入错误
+# Third-party libraries - Use fine-grained rules instead of global ignore_errors
+# Only ignore import errors for libraries lacking type support
 [[tool.mypy.overrides]]
 module = [
-    "jieba.*",             # 无类型支持
-    "ddgs.*",              # 无类型支持
-    "yaml.*",              # PyYAML 类型支持不完整
-    "aiofiles.*",          # aiofiles 类型存根不完整
-    "dateutil.*",          # dateutil 类型存根不完整
+    "jieba.*",             # Missing type annotations
+    "ddgs.*",              # Missing type annotations
+    "yaml.*",              # Incomplete PyYAML type stubs
+    "aiofiles.*",          # Incomplete aiofiles type stubs
+    "dateutil.*",          # Incomplete dateutil type stubs
 ]
 ignore_missing_imports = true
 
-# LangChain 系列 - 有类型但不够严格，放宽要求但不完全忽略
+# LangChain ecosystem - Relax strict definitions without ignoring completely
 [[tool.mypy.overrides]]
 module = [
     "langchain.*",
@@ -134,7 +134,7 @@ disallow_untyped_defs = false
 disallow_untyped_calls = false
 warn_return_any = false
 
-# 其他第三方库 - 部分类型支持
+# Other third-party libraries - Partial type support
 [[tool.mypy.overrides]]
 module = [
     "fastapi_pagination.*",
@@ -146,19 +146,19 @@ module = [
 disallow_untyped_defs = false
 warn_return_any = false
 
-# 对测试代码放宽要求
+# Relax requirements for test suite
 [[tool.mypy.overrides]]
 module = ["tests.*"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
-# 对评估代码放宽要求
+# Relax requirements for evaluation suite
 [[tool.mypy.overrides]]
 module = ["evals.*"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
-# 对 alembic 配置放宽要求
+# Relax requirements for Alembic configuration
 [[tool.mypy.overrides]]
 module = ["alembic.env"]
 disallow_untyped_defs = false

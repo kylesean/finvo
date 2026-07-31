@@ -18,7 +18,7 @@ def generate_session_title(user_message: str, max_length: int = 15) -> str:
         Generated title string
     """
     if not user_message:
-        return "新会话"
+        return "New Chat"
 
     # Clean up whitespace and newlines
     clean_message = " ".join(user_message.split())

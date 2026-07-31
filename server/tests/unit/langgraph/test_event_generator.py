@@ -16,7 +16,7 @@ def _cashflow_result(**overrides):
     base = {
         "success": True,
         "componentType": "CashFlowCard",
-        "title": "现金流分析",
+        "title": "Cash Flow Analysis",
         "netCashFlow": "+1,234.56",
         "savingsRate": 32.5,
         "totalIncome": "5,000.00",

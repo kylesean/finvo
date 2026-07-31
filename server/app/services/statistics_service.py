@@ -227,7 +227,7 @@ class StatisticsService:
             incomeChangePercent=round(income_change, 1),
             expenseChangePercent=round(expense_change, 1),
             netChangePercent=round(net_change, 1),
-            balanceNote=f"实时资产余额 ({display_currency})",
+            balanceNote=f"Real-time Asset Balance ({display_currency})",
             periodStart=period_start,
             periodEnd=period_end,
         )
@@ -658,18 +658,18 @@ class StatisticsService:
         elif savings_rate >= 0:
             savings_score = 50
             savings_status = "fair"
-            suggestions.append("储蓄率较低，建议减少非必要支出以提高储蓄")
+            suggestions.append("Savings rate is low. Consider reducing non-essential expenses to increase savings.")
         else:
             savings_score = int(round(max(0, 30 + savings_rate)))  # Negative savings
             savings_status = "poor"
-            suggestions.append("支出超过收入，需要紧急调整预算或增加收入")
+            suggestions.append("Expenses exceed income. Urgent budget adjustment or income boost required.")
 
         dimensions.append(
             HealthScoreDimension(
-                name="储蓄能力",
+                name="Savings Capacity",
                 score=savings_score,
                 weight=0.4,
-                description=f"储蓄率 {savings_rate:.1f}%",
+                description=f"Savings rate {savings_rate:.1f}%",
                 status=savings_status,
             )
         )
@@ -689,18 +689,22 @@ class StatisticsService:
         elif discretionary_ratio <= 40:
             expense_score = 60
             expense_status = "fair"
-            suggestions.append("可选消费占比较高，考虑制定预算控制娱乐和购物支出")
+            suggestions.append(
+                "Discretionary spending is high. Consider setting budgets for entertainment and shopping."
+            )
         else:
             expense_score = 40
             expense_status = "poor"
-            suggestions.append("支出结构不合理，必要支出不足或可选消费过高")
+            suggestions.append(
+                "Unbalanced expense structure. High discretionary spending relative to essential needs."
+            )
 
         dimensions.append(
             HealthScoreDimension(
-                name="支出控制",
+                name="Expense Control",
                 score=expense_score,
                 weight=0.35,
-                description=f"必要支出 {essential_ratio:.1f}%，可选消费 {discretionary_ratio:.1f}%",
+                description=f"Essential {essential_ratio:.1f}%, Discretionary {discretionary_ratio:.1f}%",
                 status=expense_status,
             )
         )
@@ -717,18 +721,20 @@ class StatisticsService:
         elif income_change >= -10:
             income_score = 65
             income_status = "fair"
-            suggestions.append("收入有所下降，建议开拓额外收入来源")
+            suggestions.append("Income has decreased. Consider exploring additional income sources.")
         else:
             income_score = int(round(max(30, 50 + income_change)))
             income_status = "poor"
-            suggestions.append("收入显著下降，需要评估职业发展或寻找新收入机会")
+            suggestions.append(
+                "Income dropped significantly. Evaluate career development or seek new income opportunities."
+            )
 
         dimensions.append(
             HealthScoreDimension(
-                name="收入稳定性",
+                name="Income Stability",
                 score=income_score,
                 weight=0.25,
-                description=f"同比变化 {income_change:+.1f}%",
+                description=f"Period change {income_change:+.1f}%",
                 status=income_status,
             )
         )

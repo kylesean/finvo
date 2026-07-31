@@ -1,7 +1,7 @@
-"""Agent State 定义
+"""Agent State Definition
 
-使用 LangGraph TypedDict + Annotated 模式定义 Agent 状态。
-参考: https://docs.langchain.com/oss/python/langgraph/graph-api#state
+Defines Agent state using LangGraph TypedDict + Annotated pattern.
+Reference: https://docs.langchain.com/oss/python/langgraph/graph-api#state
 """
 
 from __future__ import annotations
@@ -27,32 +27,32 @@ def _take_last_skill(left: str | None, right: str | None) -> str | None:
 
 
 class AgentState(TypedDict):
-    """LangGraph Agent State
+    """LangGraph Agent State.
 
     Attributes:
-        messages: 消息历史，使用 add_messages reducer 智能累积和去重
-        ui_mode: UI 驱动的路由模式
-        tool_name: GenUI 直接执行的工具名
-        tool_params: GenUI 直接执行的工具参数
-        direct_execute_result: 直接执行节点的结果（供流处理层生成 UI）
-        skills_loaded: 已加载的技能列表（用于工具约束）
-        active_skill: 当前激活的技能名称
+        messages: Message history using add_messages reducer for stream accumulation & deduplication
+        ui_mode: UI-driven routing mode
+        tool_name: Tool name for GenUI direct execution
+        tool_params: Tool parameters for GenUI direct execution
+        direct_execute_result: Result from direct execution node (consumed by stream layer for UI)
+        skills_loaded: List of loaded skill names (for tool constraint scoping)
+        active_skill: Currently active skill name
     """
 
-    # 消息历史 (add_messages reducer 自动处理流式 chunks 累积和 ID 去重)
+    # Message history (add_messages reducer handles chunk accumulation and ID deduplication)
     messages: Annotated[list[BaseMessage], add_messages]
 
-    # UI 模式 (用于入口路由)
+    # UI mode (used for entry routing)
     ui_mode: Literal[
-        "idle",  # 默认，走 agent 节点
-        "direct_execute",  # 跳过 LLM，直接执行 tool_name 指定的工具
+        "idle",  # Default: route to agent node
+        "direct_execute",  # Skip LLM and execute tool specified by tool_name directly
     ]
 
-    # GenUI 直接执行参数
+    # GenUI direct execution parameters
     tool_name: str | None
     tool_params: dict[str, Any] | None
 
-    # 直接执行结果 (供流处理层渲染 UI)
+    # Direct execution result (for stream layer UI rendering)
     direct_execute_result: dict[str, Any] | None
 
     # Loaded skills list (using reducer to merge)
@@ -63,7 +63,7 @@ class AgentState(TypedDict):
 
 
 def create_initial_state() -> AgentState:
-    """创建初始状态"""
+    """Create initial state object."""
     return {
         "messages": [],
         "ui_mode": "idle",

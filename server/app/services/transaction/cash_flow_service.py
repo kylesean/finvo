@@ -163,7 +163,7 @@ class CashFlowService:
             daily_events = events_by_date.get(date_str, []).copy()
             daily_events.append(
                 {
-                    "description": "日常消费(预测)",
+                    "description": "Daily Expense (Predicted)",
                     "amount": avg_daily_spending_str,
                 }
             )
@@ -235,7 +235,7 @@ class CashFlowService:
             all_events = []
             for day in days_in_group:
                 for event in day["events"]:
-                    if event["description"] != "日常消费(预测)":
+                    if event["description"] != "Daily Expense (Predicted)":
                         all_events.append(event)
 
             aggregated.append(

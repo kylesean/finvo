@@ -1,12 +1,12 @@
-"""TextFilterPolicy - 文本过滤策略模式实现
+"""TextFilterPolicy - Text Filtering Strategy Pattern Implementation
 
-职责：
-- 决定是否静默 AI 文本输出
-- 基于节点类型和工具元数据控制文本静默
+Responsibilities:
+- Determines whether to suppress AI text output
+- Controls text suppression based on node type and tool metadata
 
-设计模式：
-- 策略模式 (Strategy Pattern)
-- 组合模式 (Composite Pattern)
+Design Patterns:
+- Strategy Pattern
+- Composite Pattern
 """
 
 from abc import ABC, abstractmethod
@@ -14,27 +14,27 @@ from typing import Any
 
 
 class TextFilterPolicy(ABC):
-    """文本过滤策略抽象基类
+    """Abstract base class for text filtering policies.
 
-    子类实现 should_suppress() 方法来定义特定的静默策略
+    Subclasses implement should_suppress() to define specific suppression policies.
     """
 
     @abstractmethod
     def should_suppress(self, node_name: str, metadata: dict[str, Any]) -> bool:
-        """决定是否静默文本输出
+        """Determines whether text output should be suppressed.
 
         Args:
-            node_name: LangGraph 节点名称
-            metadata: 消息元数据
+            node_name: LangGraph node name
+            metadata: Message metadata
 
         Returns:
-            True 表示应该静默（不输出文本）
+            True if output should be suppressed (no text output emitted)
         """
         ...
 
 
 class NeverSuppressPolicy(TextFilterPolicy):
-    """从不静默策略（默认行为）"""
+    """Never suppress policy (default behavior)."""
 
     def should_suppress(self, node_name: str, metadata: dict[str, Any]) -> bool:
         """Determines that text output should never be suppressed."""
@@ -42,12 +42,12 @@ class NeverSuppressPolicy(TextFilterPolicy):
 
 
 class DirectExecuteSilentPolicy(TextFilterPolicy):
-    """direct_execute 节点静默策略
+    """Direct execute node suppression policy.
 
-    设计意图：
-    - direct_execute 是 GenUI 原子模式的直接执行节点
-    - 用户已在 UI 上完成交互，AI 不需要再输出文本解释
-    - 让 UI 组件自己"说话"
+    Design rationale:
+    - direct_execute is a direct tool execution node in GenUI atomic mode
+    - User has completed interaction on UI, AI does not need text explanation
+    - Let UI components present the outcome directly
     """
 
     def should_suppress(self, node_name: str, metadata: dict[str, Any]) -> bool:
@@ -56,16 +56,16 @@ class DirectExecuteSilentPolicy(TextFilterPolicy):
 
 
 class SilentToolPolicy(TextFilterPolicy):
-    """静默工具策略
+    """Silent tool policy.
 
-    设计意图：
-    - 某些工具（如 bash、read_file）的执行不需要 AI 文本输出
-    - 工具的执行结果已经足够表达意图
+    Design rationale:
+    - Executions for certain tools (e.g. bash, read_file) do not require AI text output
+    - Tool execution results sufficiently convey intent
 
-    注意：此策略需要配合 ToolMetadata.silent_mode 使用
+    Note: Used in conjunction with ToolMetadata.silent_mode
     """
 
-    # 静默工具集合（从 genui.py 迁移）
+    # Silent tools set
     _SILENT_TOOLS = {"bash", "ls", "read_file", "write_file", "write_todos", "execute"}
 
     def __init__(self, additional_tools: set[str] | None = None):
@@ -75,22 +75,21 @@ class SilentToolPolicy(TextFilterPolicy):
 
     def should_suppress(self, node_name: str, metadata: dict[str, Any]) -> bool:
         """Suppresses output if the tool executed is marked as silent."""
-        # 检查当前执行的工具是否在静默列表中
         current_tool = metadata.get("current_tool_name")
         return current_tool in self._silent_tools if current_tool else False
 
 
 class CompositeTextFilterPolicy(TextFilterPolicy):
-    """组合文本过滤策略
+    """Composite text filtering policy.
 
-    按顺序执行多个策略，只要有一个返回 True 就静默
+    Executes multiple policies in order; returns True if any policy matches.
     """
 
     def __init__(self, policies: list[TextFilterPolicy] | None = None):
         self._policies = policies or []
 
     def add_policy(self, policy: TextFilterPolicy) -> "CompositeTextFilterPolicy":
-        """添加策略（链式调用）"""
+        """Add policy (fluent interface)."""
         self._policies.append(policy)
         return self
 
@@ -100,13 +99,10 @@ class CompositeTextFilterPolicy(TextFilterPolicy):
 
 
 class DefaultTextFilterPolicy(CompositeTextFilterPolicy):
-    """默认文本过滤策略
+    """Default text filtering policy.
 
-    组合了以下策略：
-    1. DirectExecuteSilentPolicy - direct_execute 节点静默
-
-    注意：SilentToolPolicy 暂不启用，因为需要更复杂的元数据传递
-    后续可以通过 ToolMetadata.silent_mode 统一管理
+    Composes:
+    1. DirectExecuteSilentPolicy - Suppresses direct_execute node text
     """
 
     def __init__(self) -> None:

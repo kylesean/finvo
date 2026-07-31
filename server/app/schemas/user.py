@@ -18,7 +18,7 @@ class FinancialAccountItem(BaseModel):
     """Schema for a single financial account item.
 
     Attributes:
-        name: Account name (e.g., "招商银行储蓄卡")
+        name: Account name (e.g., "Checking Account")
         nature: Account nature ('ASSET' or 'LIABILITY')
         type: Account type (e.g., 'CASH', 'DEPOSIT', 'CREDIT_CARD')
         initialBalance: Initial balance amount

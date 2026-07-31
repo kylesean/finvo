@@ -135,7 +135,7 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     # ------------------------------------------------------------------
     "search_transactions": ToolMetadata(
         name="search_transactions",
-        display_name="搜索交易记录",
+        display_name="Search Transactions",
         side_effect=SideEffect.READ,
         continuation=Continuation.AGENT,
         output_policy=OutputPolicy.NORMAL,
@@ -143,7 +143,7 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     ),
     "list_financial_accounts": ToolMetadata(
         name="list_financial_accounts",
-        display_name="获取账户列表",
+        display_name="List Accounts",
         side_effect=SideEffect.READ,
         continuation=Continuation.AGENT,
         output_policy=OutputPolicy.NORMAL,
@@ -151,7 +151,7 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     ),
     "query_budget_status": ToolMetadata(
         name="query_budget_status",
-        display_name="查询预算状态",
+        display_name="Query Budget Status",
         side_effect=SideEffect.READ,
         continuation=Continuation.AGENT,
         output_policy=OutputPolicy.NORMAL,
@@ -162,46 +162,46 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     # ------------------------------------------------------------------
     "record_transactions": ToolMetadata(
         name="record_transactions",
-        display_name="记录交易",
+        display_name="Record Transactions",
         side_effect=SideEffect.WRITE,
         continuation=Continuation.END,
         output_policy=OutputPolicy.NORMAL,
         cancellable=False,
-        warning_on_cancel="操作可能已执行，请检查账户余额",
+        warning_on_cancel="Operation may have been executed, please check account balance",
     ),
     "execute_transfer": ToolMetadata(
         name="execute_transfer",
-        display_name="执行转账",
+        display_name="Execute Transfer",
         side_effect=SideEffect.WRITE,
         continuation=Continuation.END,
         output_policy=OutputPolicy.SILENT_TEXT,
         cancellable=False,
-        warning_on_cancel="转账可能已执行，请检查账户余额",
+        warning_on_cancel="Transfer may have been executed, please check account balance",
     ),
     "create_budget": ToolMetadata(
         name="create_budget",
-        display_name="创建预算",
+        display_name="Create Budget",
         side_effect=SideEffect.WRITE,
         continuation=Continuation.END,
         output_policy=OutputPolicy.NORMAL,
         cancellable=False,
-        warning_on_cancel="预算可能已创建，请刷新查看",
+        warning_on_cancel="Budget may have been created, please refresh to view",
     ),
     "associate_transactions_to_space": ToolMetadata(
         name="associate_transactions_to_space",
-        display_name="关联共享空间",
+        display_name="Associate Shared Space",
         side_effect=SideEffect.WRITE,
         continuation=Continuation.END,
         output_policy=OutputPolicy.SILENT_TEXT,
         cancellable=False,
-        warning_on_cancel="关联操作可能已执行",
+        warning_on_cancel="Association operation may have been executed",
     ),
     # ------------------------------------------------------------------
     # Interactive UI tools - wait for user interaction
     # ------------------------------------------------------------------
     "write_todos": ToolMetadata(
         name="write_todos",
-        display_name="规划任务步骤",
+        display_name="Plan Task Steps",
         side_effect=SideEffect.PURE,
         continuation=Continuation.WAIT_USER,
         output_policy=OutputPolicy.NORMAL,
@@ -212,7 +212,7 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     # ------------------------------------------------------------------
     "execute": ToolMetadata(
         name="execute",
-        display_name="执行技能脚本",
+        display_name="Execute Skill Script",
         side_effect=SideEffect.READ,
         continuation=Continuation.AGENT,
         output_policy=OutputPolicy.SILENT_ALL,
@@ -220,7 +220,7 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     ),
     "bash": ToolMetadata(
         name="bash",
-        display_name="执行命令",
+        display_name="Execute Command",
         side_effect=SideEffect.READ,
         continuation=Continuation.AGENT,
         output_policy=OutputPolicy.SILENT_ALL,
@@ -228,7 +228,7 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     ),
     "read_file": ToolMetadata(
         name="read_file",
-        display_name="读取文件",
+        display_name="Read File",
         side_effect=SideEffect.READ,
         continuation=Continuation.AGENT,
         output_policy=OutputPolicy.SILENT_ALL,
@@ -236,7 +236,7 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     ),
     "write_file": ToolMetadata(
         name="write_file",
-        display_name="写入文件",
+        display_name="Write File",
         side_effect=SideEffect.WRITE,
         continuation=Continuation.END,
         output_policy=OutputPolicy.SILENT_ALL,
@@ -244,7 +244,7 @@ TOOL_METADATA: dict[str, ToolMetadata] = {
     ),
     "ls": ToolMetadata(
         name="ls",
-        display_name="列出目录",
+        display_name="List Directory",
         side_effect=SideEffect.READ,
         continuation=Continuation.AGENT,
         output_policy=OutputPolicy.SILENT_ALL,

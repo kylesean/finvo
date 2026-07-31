@@ -1,15 +1,15 @@
-"""StreamProcessor - 流处理编排者
+"""StreamProcessor - Stream Processing Orchestrator
 
-职责：
-- 协调 LangGraph 流与 GenUI 事件生成
-- 编排策略执行（渲染策略、文本过滤策略）
-- 管理事件缓冲和释放
-- 双写消息到 searchable_messages 表（全文搜索支持）
+Responsibilities:
+- Coordinates LangGraph streaming with GenUI event generation
+- Orchestrates policy execution (RenderPolicy, TextFilterPolicy)
+- Manages event buffering and flushing
+- Asynchronously dual-writes messages to searchable_messages table (full-text search)
 
-设计原则：
-- 编排者模式：只负责协调，不负责具体逻辑
-- 依赖注入：策略通过构造函数注入
-- 开闭原则：通过更换策略扩展行为
+Design Principles:
+- Orchestrator pattern: Coordinates execution without defining concrete logic
+- Dependency injection: Policies injected via constructor
+- Open/Closed Principle: Extensible behavior via custom policies
 """
 
 import asyncio
@@ -33,21 +33,21 @@ from app.services.message_index_service import message_index_service
 
 
 class StreamProcessor:
-    """LangGraph 流处理编排者
+    """LangGraph Stream Processing Orchestrator.
 
-    负责协调 LangGraph 的多模式流输出，将其转换为 GenUI 事件。
+    Coordinates LangGraph multi-mode streaming output into GenUI events.
 
     Architecture:
-    - EventGenerator: 事件格式转换
-    - RenderPolicy: 渲染决策（EMIT/BUFFER/SUPPRESS）
-    - TextFilterPolicy: 文本过滤决策
+    - EventGenerator: Event format transformation
+    - RenderPolicy: Rendering decision (EMIT/BUFFER/SUPPRESS)
+    - TextFilterPolicy: Text filter decision
 
-    使用示例:
+    Usage Example:
         processor = StreamProcessor()
         async for event in processor.process_stream(agent, input_data, config, session_id):
             yield event
 
-        # 自定义策略
+        # Custom policy
         processor = StreamProcessor(
             render_policy=CustomRenderPolicy(),
             text_filter_policy=CustomTextFilterPolicy(),
@@ -59,11 +59,11 @@ class StreamProcessor:
         render_policy: RenderPolicy | None = None,
         text_filter_policy: TextFilterPolicy | None = None,
     ):
-        """初始化处理器
+        """Initialize StreamProcessor.
 
         Args:
-            render_policy: 渲染策略（默认使用 DefaultRenderPolicy）
-            text_filter_policy: 文本过滤策略（默认使用 DefaultTextFilterPolicy）
+            render_policy: Render policy instance (defaults to DefaultRenderPolicy)
+            text_filter_policy: Text filter policy instance (defaults to DefaultTextFilterPolicy)
         """
         self._render_policy = render_policy or DefaultRenderPolicy()
         self._text_filter_policy = text_filter_policy or DefaultTextFilterPolicy()
@@ -85,17 +85,17 @@ class StreamProcessor:
         session_id: UUID,
         user_uuid: UUID | None = None,
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理 LangGraph 流并生成 GenUI 事件
+        """Process LangGraph stream and generate GenUI events.
 
         Args:
-            agent: LangGraph Agent 实例
-            input_data: 图输入数据（None 表示从 checkpoint 恢复）
-            config: 运行时配置
-            session_id: 会话 ID
-            user_uuid: 用户 UUID
+            agent: LangGraph Agent instance
+            input_data: Graph input dictionary (None when resuming from checkpoint)
+            config: Runtime configuration
+            session_id: Session ID
+            user_uuid: User UUID
 
         Yields:
-            GenUIEvent 事件
+            GenUIEvent events
         """
         self._event_generator.reset()
         event_buffer: list[GenUIEvent] = []
@@ -126,21 +126,21 @@ class StreamProcessor:
                 error=str(e),
                 exc_info=True,
             )
-            # 发送错误事件给客户端
+            # Send error event to client
             yield GenUIEvent(
                 type="error",
-                content=f"流处理错误: {str(e)}",
+                content=f"Stream processing error: {str(e)}",
             )
 
         finally:
-            # 1. 释放缓冲的事件
+            # 1. Flush buffered events
             for event in event_buffer:
                 yield event
 
-            # 2. 发送完成事件
+            # 2. Emit completion event
             yield GenUIEvent(type="done")
 
-            # 3. 双写消息到 searchable_messages 表（异步，不阻塞响应）
+            # 3. Dual-write messages to searchable_messages table (async, non-blocking)
             if user_uuid and session_id:
                 asyncio.create_task(
                     self._index_messages(
@@ -158,13 +158,13 @@ class StreamProcessor:
             )
 
     def _extract_user_message(self, input_data: dict[str, Any] | None) -> str:
-        """从输入数据中提取用户消息内容
+        """Extract user message text from graph input data.
 
         Args:
-            input_data: 图输入数据
+            input_data: Graph input dictionary
 
         Returns:
-            用户消息文本内容
+            User message text string
         """
         if not input_data:
             return ""
@@ -173,10 +173,8 @@ class StreamProcessor:
         if not messages:
             return ""
 
-        # 取最后一条消息（通常是用户消息）
         last_msg = messages[-1]
 
-        # 支持多种消息格式
         if hasattr(last_msg, "content"):
             content = last_msg.content
         elif isinstance(last_msg, dict):
@@ -184,7 +182,6 @@ class StreamProcessor:
         else:
             content = str(last_msg)
 
-        # 处理多模态内容
         if isinstance(content, list):
             text_parts = []
             for item in content:
@@ -203,16 +200,16 @@ class StreamProcessor:
         user_message: str,
         ai_response: str,
     ) -> None:
-        """异步索引用户消息和 AI 回复到 searchable_messages 表
+        """Asynchronously index user message and AI response into searchable_messages table.
 
-        这是双写模式的核心：将消息同时写入 LangGraph checkpoints 和
-        searchable_messages 表，以支持高效的全文搜索。
+        Dual-write pattern core: writes messages simultaneously to LangGraph checkpoints
+        and searchable_messages table for full-text search.
 
         Args:
-            session_id: 会话 ID
-            user_uuid: 用户 UUID
-            user_message: 用户消息内容
-            ai_response: AI 回复内容
+            session_id: Session ID
+            user_uuid: User UUID
+            user_message: User message text
+            ai_response: AI response text
         """
         try:
             # Index user message
@@ -232,7 +229,7 @@ class StreamProcessor:
                 )
 
         except Exception as e:
-            # 索引失败不应影响主流程
+            # Indexing failure should not disrupt main execution pipeline
             logger.warning(
                 "message_indexing_failed",
                 session_id=session_id,
@@ -246,16 +243,16 @@ class StreamProcessor:
         session_id: UUID,
         event_buffer: list[GenUIEvent],
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理单个流块
+        """Process an individual stream chunk.
 
         Args:
-            mode: 流模式 ("messages", "custom", "updates")
-            chunk: 流块数据
-            session_id: 会话 ID
-            event_buffer: 事件缓冲区（用于 BUFFER 决策的事件）
+            mode: Stream mode ("messages", "custom", "updates")
+            chunk: Chunk data payload
+            session_id: Session ID
+            event_buffer: Event buffer for BUFFER decision events
 
         Yields:
-            应该立即发送的 GenUIEvent
+            GenUIEvent instances to emit immediately
         """
         if mode == "messages":
             async for event in self._process_messages_mode(chunk, session_id, event_buffer):
@@ -279,20 +276,15 @@ class StreamProcessor:
         session_id: UUID,
         event_buffer: list[GenUIEvent],
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理 messages 模式
-
-        注意：
-        - 文本过滤策略在此应用
-        - 渲染策略在此应用
-        """
+        """Process messages stream mode."""
         msg_chunk, metadata = chunk
         node_name = metadata.get("langgraph_node", "")
 
-        # 应用文本过滤策略
+        # Apply text filter policy
         should_suppress_text = self._text_filter_policy.should_suppress(node_name, metadata)
 
         async for event in self._event_generator.process_message_chunk(chunk, session_id):
-            # 1. 文本过滤
+            # 1. Text filtering
             if event.type == "text_delta" and should_suppress_text:
                 logger.debug(
                     "text_suppressed",
@@ -301,7 +293,7 @@ class StreamProcessor:
                 )
                 continue
 
-            # 2. 渲染策略
+            # 2. Render policy
             decision = self._render_policy.decide(event, node_name)
 
             if decision == RenderDecision.EMIT:
@@ -319,13 +311,12 @@ class StreamProcessor:
                     event_type=event.type,
                     node_name=node_name,
                 )
-                # 不做任何处理，事件被丢弃
 
     async def _process_custom_mode(
         self,
         chunk: dict[str, Any],
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理 custom 模式"""
+        """Process custom stream mode."""
         if isinstance(chunk, dict) and chunk.get("type") == "progress":
             yield GenUIEvent(
                 type="ui_progress",
@@ -338,10 +329,7 @@ class StreamProcessor:
         session_id: UUID,
         event_buffer: list[GenUIEvent],
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理 updates 模式
-
-        注意：渲染策略在此应用
-        """
+        """Process updates stream mode."""
         node_name = next(iter(chunk.keys())) if isinstance(chunk, dict) else ""
 
         async for event in self._event_generator.process_updates_chunk(chunk, session_id):
@@ -364,4 +352,3 @@ class StreamProcessor:
                     event_type=event.type,
                     node_name=node_name,
                 )
-                # 不做任何处理，事件被丢弃

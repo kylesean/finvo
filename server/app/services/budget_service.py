@@ -572,8 +572,8 @@ class BudgetService:
 
         result = await self.session.execute(query)
         spent = result.scalar_one()
-        # 设计意图：金额应该以正数存储，通过 type 区分收支。
-        # 使用 abs() 确保兼容历史可能存在的负数数据。
+        # Design intent: Amount is stored as a positive value; transaction type distinguishes income/expense.
+        # Use abs() to ensure compatibility with potential historical negative values.
         return abs(Decimal(str(spent))) if spent else Decimal("0")
 
     async def update_period_spent_amount(
@@ -636,10 +636,10 @@ class BudgetService:
 
         Returns all active (and optionally paused) budgets with current period status.
         """
-        # 获取活跃预算
+        # Fetch active budgets
         budgets = await self.get_user_budgets(user_uuid, status=BudgetStatus.ACTIVE)
 
-        # 如果需要包含暂停的预算
+        # Include paused budgets if requested
         if include_paused:
             paused_budgets = await self.get_user_budgets(user_uuid, status=BudgetStatus.PAUSED)
             budgets = list(budgets) + list(paused_budgets)

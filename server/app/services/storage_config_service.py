@@ -174,7 +174,7 @@ class StorageConfigService:
         return await self.create(
             user_uuid=user_uuid,
             provider_type=ProviderType.LOCAL_UPLOADS.value,
-            name="本地存储",
+            name="Local Storage",
             base_path="storage/uploads",
             is_readonly=False,
         )

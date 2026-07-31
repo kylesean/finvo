@@ -285,19 +285,17 @@ class UserService:
         )
         accounts = result.scalars().all()
 
-        # 1. 基础汇总逻辑
+        # 1. Base aggregation logic
         total_balance = Decimal("0.00")
         max_updated_at = None
 
-        # 首页列表逻辑回归：直接使用原始金额，不再强制匹配用户全局设置
-        # 但为了提供一个汇总值，这里可以统一累加（不考虑汇率，由前端决定展示逻辑）
-        # 或者统计一个基于 CNY 的本位币总额作为参考
+        # Accumulate raw account balances for total balance overview
         account_list = []
         for account in accounts:
-            # 1. 计算原始金额（用于返回）
+            # 1. Calculate raw balance for output
             orig_balance = account.current_balance if account.current_balance is not None else account.initial_balance
 
-            # 2. 统计总资产（Net worth）- 使用原始金额累加（简化逻辑）
+            # 2. Net worth calculation using raw balance values
             if account.include_in_net_worth and account.status == "ACTIVE":
                 if account.nature == "ASSET":
                     total_balance += orig_balance

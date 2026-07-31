@@ -120,7 +120,7 @@ async def main() -> None:
                 "success": True,
                 # GenUI signal - CamelCase naming
                 "type": "CashFlowForecastChart",
-                "title": "未来财务趋势预测",
+                "title": "Financial Cash Flow Forecast",
                 # Forecast data
                 **result_dict,
             }
@@ -129,8 +129,8 @@ async def main() -> None:
             if not has_meaningful_data:
                 output["data_quality"] = "insufficient"
                 output["guidance"] = (
-                    "当前账户没有足够的财务数据来生成有意义的预测。"
-                    "建议用户先添加账户余额或记录一些交易后，再使用预测功能。"
+                    "There is insufficient financial data in the current account to generate a meaningful forecast. "
+                    "Recommend adding account balances or recording transactions before using the forecast feature."
                 )
 
             print(json.dumps(output, ensure_ascii=False, indent=2, default=json_serializer))
@@ -145,7 +145,7 @@ async def main() -> None:
                     "error": error_msg,
                     "error_type": type(e).__name__,
                     "retryable": False,
-                    "suggestion": "此错误为确定性错误，重试不会产生不同结果。请根据错误信息向用户解释情况。",
+                    "suggestion": "This is a deterministic error; retrying will not produce different results. Explain the situation to the user based on the error details.",
                 },
                 ensure_ascii=False,
             )

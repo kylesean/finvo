@@ -1,7 +1,7 @@
 """State Validator
 
-防御性状态校验器，在图执行前校验客户端提交的状态突变。
-实现 "Trust, but Verify" 原则。
+Defensive state validator verifying client state mutations prior to graph execution.
+Implements the "Trust, but Verify" principle.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from app.schemas.client_state import ClientStateMutation
 
 @dataclass
 class ValidationResult:
-    """校验结果"""
+    """Validation result container."""
 
     valid: bool
     errors: list[str] = field(default_factory=list)
@@ -26,27 +26,26 @@ class ValidationResult:
 
 
 class StateValidator:
-    """状态校验器
+    """State Validator.
 
-    校验客户端提交的 ClientStateMutation 是否合法。
-    校验失败时返回 ValidationResult，让调用方决定降级策略。
+    Validates whether ClientStateMutation submitted by client is valid.
+    Returns ValidationResult on failure to let caller determine fallback strategy.
     """
 
     def validate(self, client_state: ClientStateMutation | None) -> ValidationResult:
-        """校验客户端状态突变"""
+        """Validate client state mutation."""
         if client_state is None:
             return ValidationResult(valid=True)
 
         errors = []
 
-        # direct_execute 模式校验
+        # Validate direct_execute mode
         if client_state.ui_mode == "direct_execute":
             if not client_state.tool_name:
                 errors.append("ui_mode=direct_execute requires tool_name")
             if not client_state.tool_params:
                 errors.append("ui_mode=direct_execute requires tool_params")
             else:
-                # 校验工具参数
                 params_result = self._validate_tool_params(client_state.tool_name, client_state.tool_params)
                 errors.extend(params_result.errors)
 
@@ -67,14 +66,13 @@ class StateValidator:
         return ValidationResult(valid=True)
 
     def _validate_tool_params(self, tool_name: str | None, params: dict[str, Any]) -> ValidationResult:
-        """根据工具名校验参数
+        """Validate parameters according to tool name.
 
-        可扩展：针对不同工具实施不同的校验规则。
+        Extensible: apply specific validation rules for different tools.
         """
         errors = []
 
         if tool_name == "execute_transfer":
-            # 转账必需字段校验
             if not params.get("source_account_id"):
                 errors.append("Missing source_account_id")
             if not params.get("target_account_id"):
@@ -85,10 +83,8 @@ class StateValidator:
             if not amount or (isinstance(amount, (int, float)) and amount <= 0):
                 errors.append("Amount must be greater than 0")
 
-        # 其他工具的校验规则可在此扩展
-
         return ValidationResult(valid=len(errors) == 0, errors=errors)
 
 
-# 全局单例
+# Global singleton
 state_validator = StateValidator()

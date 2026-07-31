@@ -7,7 +7,7 @@ import os
 import sys
 from pathlib import Path
 
-# 将项目根目录加入路径，以便导入 app
+# Add project root directory to path for app imports
 sys.path.append(str(Path(__file__).parent.parent.parent.parent.parent))
 
 from uuid import UUID
@@ -18,7 +18,7 @@ from app.services.shared_space_service import SharedSpaceService  # noqa: E402
 
 async def main() -> None:
     """Execution entry point for the skill script."""
-    # 从环境变量获取身份（由 SkillMiddleware 注入）
+    # Obtain user identity from environment (injected by SkillMiddleware)
     user_uuid_str = os.environ.get("USER_ID")
     if not user_uuid_str:
         print(json.dumps({"success": False, "error": "User context missing"}))
@@ -30,7 +30,7 @@ async def main() -> None:
             service = SharedSpaceService(session)
             result = await service.get_user_spaces(user_uuid)
 
-            # get_user_spaces 返回的是 {"spaces": [...], "total": ...}
+            # get_user_spaces returns {"spaces": [...], "total": ...}
             spaces = result.get("spaces", []) if result else []
 
             print(json.dumps({"success": True, "spaces": spaces}))

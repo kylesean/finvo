@@ -2,8 +2,8 @@
 
 from contextvars import ContextVar
 
-# 用于在请求生命周期内存储用户身份
+# Used to store user identity within the request lifecycle
 current_user_id: ContextVar[str] = ContextVar("current_user_id", default="")
 
-# 用于在请求生命周期内存储会话语言
+# Used to store session language within the request lifecycle
 current_session_language: ContextVar[str] = ContextVar("current_session_language", default="zh")

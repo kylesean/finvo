@@ -357,7 +357,7 @@ async def search_transactions(
             service = TransactionQueryService(session)
             result = await service.search(user_uuid_str, params)
 
-            # 获取用户的 primaryCurrency 用于汇总显示
+            # Obtain user's primaryCurrency for summary display
             display_currency = await get_user_display_currency(session, uuid.UUID(user_uuid_str))
 
         items = []
@@ -406,7 +406,7 @@ async def search_transactions(
             "success": True,
             "summary": {
                 "total_expense": float(total_expense),
-                "currency": display_currency,  # 使用用户的 primaryCurrency
+                "currency": display_currency,  # Use user's primaryCurrency
                 "distribution": distribution,
                 "top_items": top_items,
                 "count": result.total,

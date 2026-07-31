@@ -218,7 +218,7 @@ async def _create_transaction_from_recurring(
         exchange_rate=exchange_rate,
         category_key=recurring_tx.category_key,
         description=recurring_tx.description,
-        raw_input=f"[自动生成] {recurring_tx.description or '周期交易'}",
+        raw_input=f"[Auto Generated] {recurring_tx.description or 'Recurring Transaction'}",
         transaction_at=recurring_tx.next_execution_at or utc_now(),
         transaction_timezone=recurring_tx.timezone,
         source_account_id=recurring_tx.source_account_id,

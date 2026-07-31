@@ -38,7 +38,7 @@ class StatisticsOverviewResponse(BaseModel):
     incomeChangePercent: float = Field(..., description="Income change percentage compared to previous period")
     expenseChangePercent: float = Field(..., description="Expense change percentage compared to previous period")
     netChangePercent: float = Field(..., description="Net cash flow change percentage compared to previous period")
-    balanceNote: str = Field(default="实时资产余额", description="Note explaining the balance value")
+    balanceNote: str = Field(default="Real-time asset balance", description="Note explaining the balance value")
     periodStart: datetime = Field(..., description="Period start datetime")
     periodEnd: datetime = Field(..., description="Period end datetime")
 

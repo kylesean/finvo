@@ -1,32 +1,32 @@
-"""ComponentDetector - 统一的 GenUI 组件类型检测器
+"""ComponentDetector - Unified GenUI Component Type Detector
 
-职责：
-- 从工具执行结果中检测 GenUI 组件类型
-- 应用业务级别的组件覆盖规则
-- 消除代码中三处重复的检测逻辑
+Responsibilities:
+- Detects GenUI component types from tool execution results
+- Applies business-level component override rules
+- Consolidates component detection logic across streaming and history
 
-设计模式：
-- 静态工具类 + 策略钩子
+Design Patterns:
+- Utility class with static strategy methods
 """
 
 from typing import Any, cast
 
 
 class ComponentDetector:
-    """数据驱动的 GenUI 组件检测器
+    """Data-driven GenUI Component Detector.
 
-    统一组件检测逻辑：
+    Unified component detection logic:
     1. EventGenerator.process_updates_chunk (direct_execute)
     2. EventGenerator.process_updates_chunk (tools)
     3. SimpleLangChainAgent.get_detailed_history
 
-    检测优先级：
-    1. componentType - 专用字段（推荐）
-    2. _genui_component - 兼容字段
-    3. type - 启发式检测（仅当满足命名规则时）
+    Detection Priority:
+    1. componentType - Explicit component key (recommended)
+    2. _genui_component - Compatibility fallback key
+    3. type - Heuristic detection (when satisfying naming conventions)
     """
 
-    # 业务级组件覆盖规则
+    # Business-level component override rules
     _BUSINESS_OVERRIDES = {
         # (tool_name, condition_key) -> target_component
         ("create_transaction", "transfer_info"): "TransferReceipt",
@@ -35,28 +35,28 @@ class ComponentDetector:
 
     @staticmethod
     def detect(tool_result: Any) -> str | None:
-        """从工具结果中检测组件类型
+        """Detect component type from tool result dictionary.
 
         Args:
-            tool_result: 工具执行返回的结果（通常是 dict）
+            tool_result: Execution result dictionary from tool
 
         Returns:
-            组件类型名称，如 "TransactionReceipt"；无法检测时返回 None
+            Component type string (e.g. "TransactionReceipt") or None if undetected
         """
         if not isinstance(tool_result, dict):
             return None
 
-        # 优先级 1：专用字段
+        # Priority 1: Explicit field
         component_type = tool_result.get("componentType")
         if component_type:
             return cast(str, component_type)
 
-        # 优先级 2：兼容字段
+        # Priority 2: Compatibility field
         component_type = tool_result.get("_genui_component")
         if component_type:
             return cast(str, component_type)
 
-        # 优先级 3：启发式检测 type 字段
+        # Priority 3: Heuristic detection on type field
         type_value = tool_result.get("type")
         if ComponentDetector._is_valid_component_name(type_value):
             return type_value
@@ -68,21 +68,21 @@ class ComponentDetector:
         tool_result: Any,
         tool_name: str | None,
     ) -> str | None:
-        """检测组件类型并应用业务覆盖规则
+        """Detect component type and apply business override rules.
 
         Args:
-            tool_result: 工具执行返回的结果
-            tool_name: 工具名称
+            tool_result: Tool execution result
+            tool_name: Tool name
 
         Returns:
-            最终的组件类型名称
+            Final component type string or None
         """
         base_component = ComponentDetector.detect(tool_result)
 
         if not base_component:
             return None
 
-        # 应用业务覆盖规则
+        # Apply business override rules
         if isinstance(tool_result, dict):
             for (target_tool, condition_key), override_component in ComponentDetector._BUSINESS_OVERRIDES.items():
                 if tool_name == target_tool and tool_result.get(condition_key):
@@ -92,15 +92,15 @@ class ComponentDetector:
 
     @staticmethod
     def is_successful_result(tool_result: Any) -> bool:
-        """检查工具结果是否成功
+        """Check whether tool result represents successful execution.
 
-        失败的工具调用不应渲染 UI 组件
+        Failed tool calls should not render UI components.
 
         Args:
-            tool_result: 工具执行返回的结果
+            tool_result: Tool execution result
 
         Returns:
-            True 如果成功或未指定状态
+            True if execution succeeded or status unspecified
         """
         if not isinstance(tool_result, dict):
             return True
@@ -108,19 +108,19 @@ class ComponentDetector:
 
     @staticmethod
     def _is_valid_component_name(value: Any) -> bool:
-        """启发式检查是否是有效的组件名称
+        """Heuristic validation of potential component name.
 
-        规则：
-        - 必须是字符串
-        - 长度 > 3（避免 "id", "ok" 等短字符串）
-        - 不全是大写（避免 "SUCCESS", "TRANSFER" 等状态枚举）
-        - 首字母大写（CamelCase 约定）
+        Rules:
+        - Must be string
+        - Length > 3 (excluding "id", "ok", etc.)
+        - Not ALL CAPS (excluding "SUCCESS", "TRANSFER", etc.)
+        - Starts with uppercase letter (CamelCase convention)
 
         Args:
-            value: 待检查的值
+            value: Candidate value to validate
 
         Returns:
-            True 如果符合组件命名规则
+            True if value conforms to component naming rules
         """
         if not isinstance(value, str):
             return False

@@ -41,14 +41,14 @@ class TransactionFacadeQueryHelper:
         page: int = 1,
         limit: int = 10,
     ) -> dict[str, Any]:
-        """获取交易流列表（展示原币金额）"""
-        # 1. 获取用户本位币（用于 baseCurrency 字段）
+        """Retrieve transaction feed list (displaying original currency amount)."""
+        # 1. Obtain user's primary currency (for baseCurrency field)
         display_currency = await get_user_display_currency(self.db, user_uuid)
 
-        # 2. 构建查询
+        # 2. Construct query
         query = select(Transaction).where(Transaction.user_uuid == user_uuid)
 
-        # 日期过滤
+        # Date filtering
         if date_filter:
             try:
                 filter_date = datetime.strptime(date_filter, "%Y-%m-%d").date()
@@ -56,29 +56,29 @@ class TransactionFacadeQueryHelper:
             except ValueError:
                 logger.warning("invalid_date_format", date_filter=date_filter)
 
-        # 类型过滤
+        # Type filtering
         if type_filter == "income":
             query = query.where(Transaction.type == "INCOME")
         elif type_filter == "expense":
             query = query.where(Transaction.type == "EXPENSE")
 
-        # 排序
+        # Ordering
         query = query.order_by(desc(Transaction.transaction_at), desc(Transaction.id))
 
-        # 计算总数
+        # Count total
         count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar() or 0
 
-        # 分页
+        # Pagination
         offset = (page - 1) * limit
         query = query.offset(offset).limit(limit)
 
-        # 执行查询
+        # Execute query
         result = await self.db.execute(query)
         transactions = result.scalars().all()
 
-        # 3. 组装数据：单笔展示原币金额
+        # 3. Assemble response items displaying original currency amounts
         data = []
         for tx in transactions:
             # Display original currency amount directly
@@ -119,19 +119,19 @@ class TransactionFacadeQueryHelper:
         }
 
     async def search_transactions(self, user_uuid: UUID, filters: dict[str, Any]) -> dict[str, Any]:
-        """搜索交易记录
+        """Search transaction records.
 
         Args:
-            user_uuid: 用户UUID
-            filters: 搜索过滤条件
+            user_uuid: User UUID
+            filters: Search filter parameters
 
         Returns:
-            包含搜索结果和分页信息的字典
+            Dictionary containing search results and pagination metadata
         """
-        # 构建基础查询
+        # Base query
         query = select(Transaction).where(Transaction.user_uuid == user_uuid)
 
-        # 关键字搜索
+        # Keyword search
         if keyword := filters.get("keyword"):
             query = query.where(
                 type_cast(
@@ -143,22 +143,22 @@ class TransactionFacadeQueryHelper:
                 )
             )
 
-        # 金额范围
+        # Amount range
         if min_amount := filters.get("min_amount"):
             query = query.where(Transaction.amount >= min_amount)
         if max_amount := filters.get("max_amount"):
             query = query.where(Transaction.amount <= max_amount)
 
-        # 分类筛选
+        # Category filter
         if categories := filters.get("categories"):
             query = query.where(Transaction.category_key.in_(categories))
 
-        # 标签筛选
+        # Tag filter
         if tags := filters.get("tags"):
             for tag in tags:
                 query = query.where(Transaction.tags.contains([tag]))
 
-        # 日期范围
+        # Date range
         if start_date := filters.get("start_date"):
             try:
                 start_dt = datetime.strptime(start_date, "%Y-%m-%d")
@@ -173,27 +173,27 @@ class TransactionFacadeQueryHelper:
             except ValueError:
                 logger.warning("invalid_end_date_format", end_date=end_date)
 
-        # 收入/支出筛选
+        # Income/Expense filter
         if type_val := filters.get("type"):
             if type_val:
                 query = query.where(Transaction.amount > 0)
             else:
                 query = query.where(Transaction.amount < 0)
 
-        # 排序
+        # Ordering
         query = query.order_by(desc(Transaction.transaction_at))
 
-        # 分页
+        # Pagination parameters
         page = filters.get("page", 1)
         per_page = filters.get("per_page", 10)
         offset = (page - 1) * per_page
 
-        # 计算总数
+        # Calculate total
         count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar() or 0
 
-        # 执行查询
+        # Execute paginated query
         query = query.offset(offset).limit(per_page)
         result = await self.db.execute(query)
         transactions = result.scalars().all()

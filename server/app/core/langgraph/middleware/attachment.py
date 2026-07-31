@@ -296,8 +296,8 @@ class AttachmentMiddleware(BaseMiddleware):
             async with aiofiles.open(file_path, encoding="utf-8") as f:
                 return await f.read()
 
-        # PDF - placeholder for Phase 2
+        # PDF placeholder
         if attachment.mime_type == "application/pdf":
-            return f"[PDF 文档: {attachment.filename},PDF 解析功能即将上线]"
+            return f"[PDF Document: {attachment.filename}, PDF parsing feature coming soon]"
 
-        return f"[文档: {attachment.filename}]"
+        return f"[Document: {attachment.filename}]"

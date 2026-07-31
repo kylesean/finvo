@@ -41,7 +41,7 @@ async def check_version() -> JSONResponse:
         minSupportedVersion="0.1.0",
         forceUpdate=False,
         releaseDate="2026-07-27",
-        changelog="1. 新增应用自动版本检查与更新支持\n2. 优化共享空间交互逻辑\n3. 提升网络连通性与服务稳定性",
+        changelog="1. Added automatic app version check and update support\n2. Optimized shared space interaction logic\n3. Improved network connectivity and service stability",
         downloadUrls=DownloadUrlsSchema(
             androidApk="https://github.com/Finvo-ai/Finvo/releases/latest",
             iosTestFlight="https://testflight.apple.com/join/Finvo",

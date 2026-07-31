@@ -1,12 +1,12 @@
-"""SimpleLangChainAgent - LangGraph 底层 API 实现
+"""SimpleLangChainAgent - LangGraph Low-level API Implementation
 
-使用 LangGraph StateGraph 底层 API 构建的 Agent，
-职责被分解到以下模块：
-- agent/: 状态定义、节点函数、路由逻辑、图构建
-- stream/: 流处理和 GenUI 适配
-- middleware/: 动态上下文、长期记忆、附件处理
+Agent built using LangGraph StateGraph low-level API.
+Responsibilities are modularized into:
+- agent/: State definitions, node functions, routing logic, graph construction
+- stream/: Stream processing and GenUI adaptation
+- middleware/: Dynamic context, long-term memory, attachment processing
 
-此文件作为 Facade 类，协调各模块的工作。
+Acts as a facade class coordinating submodules.
 """
 
 from __future__ import annotations
@@ -42,14 +42,14 @@ from app.services.memory import MemoryService, get_memory_service
 
 
 class SimpleLangChainAgent:
-    """LangGraph Agent Facade
+    """LangGraph Agent Facade.
 
-    协调图构建、流处理和 middleware 的工作。
+    Coordinates graph building, stream processing, and middleware pipeline.
 
     Architecture:
-    - 使用 LangGraph StateGraph 底层 API 构建图
-    - 使用 MiddlewareAgent 包装实现动态上下文和记忆
-    - 使用 StreamProcessor 处理流式输出
+    - Uses LangGraph StateGraph low-level API to construct graph
+    - Uses MiddlewareAgent wrapper for dynamic context and memory
+    - Uses StreamProcessor for streaming output
     """
 
     def __init__(self, checkpointer: AsyncPostgresSaver | None = None) -> None:
@@ -74,17 +74,17 @@ class SimpleLangChainAgent:
         self._stream_processor = StreamProcessor()
 
     # =========================================================================
-    # 内部组件初始化
+    # Internal Component Initialization
     # =========================================================================
 
     async def _get_memory_service(self) -> MemoryService:
-        """获取 MemoryService 实例（集中化的长期记忆管理）"""
+        """Obtain MemoryService instance (centralized long-term memory management)."""
         if self._memory_service is None:
             self._memory_service = await get_memory_service()
         return self._memory_service
 
     async def _get_checkpointer(self) -> AsyncPostgresSaver:
-        """获取 LangGraph checkpointer（由 checkpointer_manager 统一管理连接池）"""
+        """Obtain LangGraph checkpointer managed by checkpointer_manager."""
         if self._checkpointer is None:
             from app.core.checkpointer import checkpointer_manager
 
@@ -93,7 +93,7 @@ class SimpleLangChainAgent:
         return self._checkpointer
 
     async def _initialize_middlewares(self) -> list[Any]:
-        """初始化 middleware 栈"""
+        """Initialize middleware stack."""
         if self._middlewares is None:
             from app.core.database import get_session_context
             from app.core.langgraph.middleware import SkillMiddleware
@@ -128,14 +128,14 @@ class SimpleLangChainAgent:
         return self._stream_processor.get_last_response()
 
     # =========================================================================
-    # Agent 生命周期
+    # Agent Lifecycle
     # =========================================================================
 
     async def get_agent(self) -> MiddlewareAgent:
-        """获取或创建 Agent 实例
+        """Obtain or build the MiddlewareAgent instance.
 
         Returns:
-            MiddlewareAgent 包装的 Agent 图
+            MiddlewareAgent: Agent graph wrapped with middleware stack
         """
         if self._agent is not None:
             return self._agent
@@ -145,7 +145,7 @@ class SimpleLangChainAgent:
             model=settings.DEFAULT_LLM_MODEL,
         )
 
-        # 使用自定义图构建（支持 direct_execute 节点）
+        # Build custom graph (supporting direct_execute node)
         checkpointer = await self._get_checkpointer()
         llm = self.llm_service.get_llm()
         if llm is None:
@@ -158,7 +158,7 @@ class SimpleLangChainAgent:
             checkpointer=checkpointer,
         )
 
-        # 包装应用层 middleware（动态上下文、长期记忆、附件处理）
+        # Wrap with application layer middleware (dynamic context, long-term memory, attachments)
         middlewares = await self._initialize_middlewares()
         self._agent = MiddlewareAgent(graph, middlewares)
 
@@ -166,7 +166,7 @@ class SimpleLangChainAgent:
         return self._agent
 
     # =========================================================================
-    # 核心 API
+    # Core API
     # =========================================================================
 
     async def get_genui_stream(
@@ -177,22 +177,22 @@ class SimpleLangChainAgent:
         attachment_ids: list[UUID] | None = None,
         client_state: ClientStateMutation | None = None,
     ) -> AsyncGenerator[GenUIEvent]:
-        """GenUI 核心流处理器
+        """GenUI core stream processor.
 
-        GenUI 原子模式的核心入口：
-        - client_state 作为图的初始输入直接合并
-        - 在图执行前进行状态校验
-        - 校验失败时自动降级到 agent 节点
+        Core entry point for GenUI atomic mode:
+        - client_state is merged as initial graph input
+        - Performs state validation prior to graph execution
+        - Fallbacks automatically to agent node when validation fails
 
         Args:
-            messages: 消息列表
-            session_id: 会话 ID
-            user_uuid: 用户 UUID
-            attachment_ids: 附件 ID 列表
-            client_state: 客户端状态突变（GenUI 原子模式）
+            messages: List of messages
+            session_id: Session ID
+            user_uuid: User UUID
+            attachment_ids: List of attachment IDs
+            client_state: Client state mutation (GenUI atomic mode)
 
         Yields:
-            GenUIEvent 事件
+            GenUIEvent events
         """
         agent = await self.get_agent()
 
@@ -209,8 +209,8 @@ class SimpleLangChainAgent:
         if langfuse_handler:
             config["callbacks"] = [langfuse_handler]
 
-        # 转换消息格式
-        # 持久化层已保存历史，只处理增量输入。
+        # Convert message formats
+        # History is persisted in checkpoint; process incremental input only.
         lc_messages = []
         if messages:
             last_msg = messages[-1]
@@ -231,16 +231,16 @@ class SimpleLangChainAgent:
                 else AIMessage(content=last_msg.content)
             ]
 
-        # 构建 input_data
+        # Build input_data
         input_data: dict[str, Any] = {"messages": lc_messages}
 
-        # GenUI 原子模式：处理 client_state
+        # GenUI atomic mode: process client_state
         if client_state:
-            # 防御性校验
+            # Defensive validation
             validation_result = state_validator.validate(client_state)
 
             if validation_result:
-                # 校验通过：合并到图输入
+                # Validation passed: merge into graph input
                 state_dict = client_state.to_state_dict()
                 input_data.update(state_dict)
                 logger.info(
@@ -250,15 +250,15 @@ class SimpleLangChainAgent:
                     tool_name=client_state.tool_name,
                 )
             else:
-                # 校验失败：降级到 agent 节点处理
+                # Validation failed: fallback to agent node
                 logger.warning(
                     "genui_atomic_mode_validation_failed",
                     session_id=session_id,
                     errors=validation_result.errors,
                 )
-                # 不设置 ui_mode，让 route_entry 路由到 agent
+                # Do not set ui_mode; let route_entry route to agent
 
-        # 委托给 StreamProcessor
+        # Delegate to StreamProcessor
         from app.core.langgraph.tools import current_user_id
 
         token = None
@@ -281,7 +281,7 @@ class SimpleLangChainAgent:
             )
             yield GenUIEvent(
                 type="text_delta",
-                content="\n\n抱歉，我在执行这个任务时尝试了太多次仍未成功。请尝试简化你的请求，或者换一种方式描述。",
+                content="\n\nSorry, I attempted this task too many times without success. Please try simplifying your request or rephrasing it.",
             )
             yield GenUIEvent(type="done")
         finally:
@@ -291,35 +291,35 @@ class SimpleLangChainAgent:
                 except ValueError:
                     pass
 
-            # 强制刷新 Langfuse 数据上报
+            # Flush Langfuse telemetry
             if "langfuse_handler" in locals() and langfuse_handler and hasattr(langfuse_handler, "flush"):
                 langfuse_handler.flush()
 
     async def get_session_state(self, session_id: UUID) -> Any:
-        """获取会话的当前 LangGraph 状态
+        """Retrieve current LangGraph state snapshot for session.
 
-        用于检查会话是否有未完成的执行（state.next != None）。
+        Used to inspect pending executions (state.next != None).
 
         Args:
-            session_id: 会话 ID
+            session_id: Session ID
 
         Returns:
-            StateSnapshot 对象，包含 values 和 next 属性
+            StateSnapshot containing values and next properties
         """
         agent = await self.get_agent()
         config = {"configurable": {"thread_id": str(session_id)}}
         return await agent.aget_state(config)
 
     async def update_state(self, session_id: UUID, values: dict[str, Any], as_node: str | None = None) -> Any:
-        """更新会话的当前 LangGraph 状态
+        """Update current LangGraph state snapshot for session.
 
         Args:
-            session_id: 会话 ID
-            values: 要更新到状态中的值
-            as_node: 可选，作为哪个节点更新状态
+            session_id: Session ID
+            values: Dictionary of values to update in state
+            as_node: Optional node name under which state is updated
 
         Returns:
-            更新后的配置对象
+            Updated configuration dictionary
         """
         agent = await self.get_agent()
         config = {"configurable": {"thread_id": str(session_id)}}
@@ -330,24 +330,24 @@ class SimpleLangChainAgent:
         session_id: UUID,
         user_uuid: UUID | None = None,
     ) -> AsyncGenerator[GenUIEvent]:
-        """从 checkpoint 恢复未完成的流式执行
+        """Resume streaming execution from checkpoint.
 
-        当 get_session_state() 返回的 state.next 不为 None 时，
-        可调用此方法从最新 checkpoint 恢复执行。
+        When get_session_state() returns non-None state.next, invoke this
+        method to resume execution from the latest checkpoint.
 
         Args:
-            session_id: 会话 ID
-            user_uuid: 用户 UUID
+            session_id: Session ID
+            user_uuid: User UUID
 
         Yields:
-            GenUIEvent 事件
+            GenUIEvent events
         """
         agent = await self.get_agent()
 
         config: dict[str, Any] = {
             "configurable": {
                 "thread_id": session_id,
-                "user_uuid": str(user_uuid) if user_uuid else None,  # 确保是字符串
+                "user_uuid": str(user_uuid) if user_uuid else None,
             },
         }
 
@@ -362,7 +362,7 @@ class SimpleLangChainAgent:
             user_uuid=user_uuid,
         )
 
-        # 传入 None 作为输入，从最新 checkpoint 恢复执行
+        # Pass None as input to resume execution from checkpoint
         from app.core.langgraph.tools import current_user_id
 
         token = None
@@ -372,7 +372,7 @@ class SimpleLangChainAgent:
         try:
             async for event in self._stream_processor.process_stream(
                 agent=agent,
-                input_data=None,  # 关键：None 表示从 checkpoint 恢复
+                input_data=None,  # None signifies resume from checkpoint
                 config=config,
                 session_id=session_id,
                 user_uuid=user_uuid,
@@ -385,7 +385,7 @@ class SimpleLangChainAgent:
             )
             yield GenUIEvent(
                 type="text_delta",
-                content="\n\n任务执行超过了最大尝试次数。请重新开始对话。",
+                content="\n\nTask execution exceeded maximum attempt limits. Please restart the conversation.",
             )
             yield GenUIEvent(type="done")
         finally:
@@ -395,7 +395,7 @@ class SimpleLangChainAgent:
                 except ValueError:
                     pass
 
-            # 强制刷新 Langfuse 数据上报
+            # Flush Langfuse telemetry
             if "langfuse_handler" in locals() and langfuse_handler and hasattr(langfuse_handler, "flush"):
                 langfuse_handler.flush()
 
@@ -404,18 +404,14 @@ class SimpleLangChainAgent:
             session_id=session_id,
         )
 
-    # NOTE: update_state 方法已移除
-    # GenUI 原子模式不再需要单独的 state update API
-    # 所有状态突变通过 get_genui_stream 的 client_state 参数原子性处理
-
     async def get_chat_history(self, session_id: UUID) -> list[Message]:
-        """获取聊天历史
+        """Retrieve chat history for session.
 
         Args:
-            session_id: 会话 ID
+            session_id: Session ID
 
         Returns:
-            消息列表
+            List of Message instances
         """
         agent = await self.get_agent()
         config = {"configurable": {"thread_id": str(session_id)}}
@@ -441,22 +437,19 @@ class SimpleLangChainAgent:
         return []
 
     async def get_detailed_history(self, session_id: UUID, user_uuid: UUID | None = None) -> list[dict[str, Any]]:
-        """获取会话的详细历史消息，包含 UI 组件和附件信息。
+        """Retrieve detailed chat history including UI components and attachment details.
 
-        从 LangGraph checkpoint 读取消息并解析：
-        - AI 消息的 tool_calls
-        - ToolMessage 中的 UI 组件数据（基于 TOOL_UI_MAP 映射）
-        - 附件信息（通过 additional_kwargs 中的 attachment_id 关联）
-
-        注意：AI 文本过滤已下沉到 StreamMiddleware (流层面) 完成，
-        Checkpoint 中存储的是完整的原始消息，以保证 Agent 逻辑的连贯性。
+        Reads messages from LangGraph checkpoint and parses:
+        - AI message tool_calls
+        - UI component data from ToolMessages
+        - Attachment details referenced via additional_kwargs
 
         Args:
-            session_id: 会话 ID
-            user_uuid: 用户 ID (用于 Enrichment Layer 数据回填)
+            session_id: Session ID
+            user_uuid: User UUID (for data enrichment backfill)
 
         Returns:
-            符合客户端格式的消息列表（使用 camelCase 字段名）
+            List of message dictionaries formatted for client response (using camelCase keys)
         """
         from langchain_core.messages import ToolMessage
 
@@ -470,17 +463,14 @@ class SimpleLangChainAgent:
         messages = state.values["messages"]
         result = []
 
-        # 第一步：预处理 - 收集 ToolMessage 的 UI 组件映射
-        # (tool_call_id -> ui_component_data)
+        # Step 1: Preprocess - Collect UI component mappings from ToolMessages
         tool_call_ui_map: dict[str, dict[str, Any]] = {}
 
-        # 引入 ComponentDetector
-        # 引入 Enrichment Layer
         from app.core.genui.enricher import EnricherRegistry
         from app.core.langgraph.stream import ComponentDetector
         from app.services.enrichers.transaction_enricher import transaction_enricher
 
-        # 注册 Enricher (幂等)
+        # Register enricher (idempotent)
         EnricherRegistry.register(transaction_enricher)
 
         for msg in messages:
@@ -490,7 +480,7 @@ class SimpleLangChainAgent:
                 if not tool_call_id:
                     continue
 
-                # 提取工具执行结果（优先从 artifact 获取，否则从 content 解析）
+                # Extract tool execution result (from artifact first, or parse content string)
                 tool_result = getattr(msg, "artifact", None)
                 if tool_result is None:
                     try:
@@ -502,17 +492,16 @@ class SimpleLangChainAgent:
                     except Exception:  # nosec B112
                         continue
 
-                # 数据驱动：使用 ComponentDetector 统一检测
                 if not isinstance(tool_result, dict):
                     continue
 
-                # 使用 ComponentDetector 检测组件类型（包含业务覆盖规则）
+                # Detect component type using ComponentDetector
                 component_type = ComponentDetector.detect_with_overrides(tool_result, tool_name)
 
                 if not component_type:
                     continue
 
-                # 过滤失败的工具调用
+                # Filter out unsuccessful execution results
                 if not ComponentDetector.is_successful_result(tool_result):
                     continue
 
@@ -526,16 +515,13 @@ class SimpleLangChainAgent:
                     "toolName": tool_name,
                 }
 
-        # ============================================================
-        # 处理 direct_execute_result（用于绕过 LLM 直接执行工具的结果）
-        # ============================================================
+        # Process direct_execute_result (bypassing LLM execution results)
         direct_execute_result = state.values.get("direct_execute_result")
         if direct_execute_result and direct_execute_result.get("success"):
             tool_name = direct_execute_result.get("tool_name", "")
             tool_result = direct_execute_result.get("data", {})
 
             if isinstance(tool_result, dict):
-                # 使用 ComponentDetector 检测组件类型
                 component_type = ComponentDetector.detect_with_overrides(tool_result, tool_name)
 
                 if component_type and ComponentDetector.is_successful_result(tool_result):
@@ -549,16 +535,13 @@ class SimpleLangChainAgent:
                         "toolName": tool_name,
                     }
 
-        # Enrichment Layer: 实时数据回填
-        # 遍历所有 UI 组件，尝试使用 Enricher 更新数据
+        # Enrichment Layer: Real-time data backfill
         if user_uuid:
             for tc_id, ui_comp in tool_call_ui_map.items():
                 component_type = ui_comp.get("componentType")
                 if component_type and ui_comp.get("mode") == "historical":
-                    # 只 enrich historical 模式的组件
                     original_data = ui_comp.get("data", {})
 
-                    # 调用 Registry 进行 enrich
                     enriched_data = await EnricherRegistry.enrich_component(
                         component_name=component_type,
                         tool_call_id=tc_id,
@@ -574,14 +557,11 @@ class SimpleLangChainAgent:
                             component_type=component_type,
                         )
 
-        # ------------------------------------------------------------
-        # 补全历史状态：关联 TransferWizard 和其执行结果（解决交互式组件历史数据丢失问题）
-        # ------------------------------------------------------------
+        # Link TransferWizard to execution result for historical state completeness
         confirmed_params = None
         if direct_execute_result and direct_execute_result.get("success"):
             de_data = direct_execute_result.get("data", {})
             if de_data.get("componentType") == "TransferReceipt" or de_data.get("transfer_info"):
-                # 记录转账成交参数 (注意: amount 位于顶层，account 详细信息可能在 transfer_info 内部)
                 transfer_info = de_data.get("transfer_info") or {}
                 source_acc = transfer_info.get("source_account") or {}
                 target_acc = transfer_info.get("target_account") or {}
@@ -596,7 +576,6 @@ class SimpleLangChainAgent:
             for ui_comp in tool_call_ui_map.values():
                 if ui_comp.get("componentType") == "TransferWizard":
                     wizard_data = ui_comp.get("data", {})
-                    # 更新 Wizard 数据为最终成交值（覆盖初始建议值）
                     if confirmed_params["source_id"]:
                         wizard_data["preselectedSourceId"] = confirmed_params["source_id"]
                     if confirmed_params["target_id"]:
@@ -604,19 +583,17 @@ class SimpleLangChainAgent:
                     if float(str(confirmed_params.get("amount") or 0.0)) > 0:
                         wizard_data["amount"] = confirmed_params["amount"]
 
-                    # 标记为已确认，以便前端渲染为 Historical 状态
                     wizard_data["isConfirmed"] = True
                     logger.debug("history_wizard_data_auto_filled", surface_id=ui_comp.get("surfaceId"))
 
         logger.debug("tool_call_ui_map_built", count=len(tool_call_ui_map))
 
-        # 第二步：构建并优化消息列表
-        # 策略：收集所有消息 -> 分组 -> 智能合并 Assistant 文本
+        # Step 2: Build and optimize message structure
         raw_result: list[dict[str, Any]] = []
         for msg in messages:
             msg_id = getattr(msg, "id", None) or str(uuid.uuid4())
 
-            # 跳过 ToolMessage（已在上面处理）
+            # Skip ToolMessages (handled above)
             if isinstance(msg, ToolMessage):
                 continue
 
@@ -626,7 +603,6 @@ class SimpleLangChainAgent:
                 additional_kwargs = getattr(msg, "additional_kwargs", {}) or {}
                 attachment_ids = additional_kwargs.get("attachment_ids", [])
 
-                # Debug: 记录 HumanMessage 的原始内容结构
                 content_type = type(msg.content).__name__
                 content_length = len(msg.content) if isinstance(msg.content, str | list) else 0
                 logger.debug(
@@ -675,8 +651,6 @@ class SimpleLangChainAgent:
                 tool_calls_data = []
                 ui_components = []
 
-                # 注意：AI 文本过滤由 response_filter 在图层面完成
-                # Checkpoint 中存储的已经是过滤后的消息
                 if hasattr(msg, "tool_calls") and msg.tool_calls:
                     for tc in msg.tool_calls:
                         tc_id = str(tc.get("id") or "")
@@ -686,7 +660,7 @@ class SimpleLangChainAgent:
                                 "id": tc_id,
                                 "name": tc_name,
                                 "args": tc.get("args", {}),
-                                "status": "success",  # 历史消息默认为成功状态
+                                "status": "success",
                             }
                         )
                         if tc_id in tool_call_ui_map:
@@ -714,14 +688,9 @@ class SimpleLangChainAgent:
 
         result = raw_result
 
-        # ============================================================
-        # 将 direct_execute_result 的 UI 组件添加到最后一个 AI 消息
-        # 由于 direct_execute 节点的 AIMessage 没有 tool_calls，
-        # 原有逻辑无法将 UI 组件关联到消息，需要在这里手动添加
-        # ============================================================
+        # Append direct_execute_result UI component to last AI message
         de_ui_component = tool_call_ui_map.get("direct_execute_result")
         if de_ui_component:
-            # 找到最后一个 AI 消息（从后往前找）
             for i in range(len(result) - 1, -1, -1):
                 if isinstance(result[i], dict) and result[i].get("role") == "assistant":
                     assistant_msg_ui_components: Any = result[i]["uiComponents"]
@@ -744,23 +713,22 @@ class SimpleLangChainAgent:
         return result
 
     async def delete_session_history(self, session_id: UUID) -> None:
-        """彻底删除会话的所有历史记录和 checkpoints。
+        """Purge all session history and checkpoints.
 
-        1. 使用 LangGraph 官方 API adelete_thread。
-        2. 删除业务表 searchable_messages 中的记录。
+        1. Invoke LangGraph official adelete_thread API.
+        2. Delete records from searchable_messages database table.
 
         Args:
-            session_id: 会话 ID
+            session_id: Session ID
         """
         from app.services.message_index_service import message_index_service
 
-        # 获取 checkpointer 实例
         checkpointer = await self._get_checkpointer()
 
-        # 1. 使用 LangGraph Official API 删除整个 thread 的 checkpoints 和 writes
+        # 1. Delete thread checkpoints and writes
         await checkpointer.adelete_thread(str(session_id))
 
-        # 2. 删除业务表中的消息索引 (searchable_messages)
+        # 2. Delete searchable message index records
         deleted_count = await message_index_service.delete_thread_messages(session_id)
 
         logger.info(
@@ -771,24 +739,24 @@ class SimpleLangChainAgent:
         )
 
     async def clear_chat_history(self, session_id: UUID) -> None:
-        """清除聊天历史 (保留会话元数据，仅清理消息内容)
+        """Clear chat message content while keeping session metadata.
 
         Args:
-            session_id: 会话 ID
+            session_id: Session ID
         """
         await self.delete_session_history(session_id)
         logger.info("chat_history_cleared", session_id=session_id)
 
     async def cancel_last_turn(self, session_id: UUID) -> dict[str, Any]:
-        """取消最后一轮对话
+        """Cancel the last conversation turn.
 
-        使用 RemoveMessage 清理 checkpoint 状态。
+        Uses RemoveMessage to clear checkpoint state.
 
         Args:
-            session_id: 会话 ID
+            session_id: Session ID
 
         Returns:
-            包含 removed_count 和 removed_message_ids 的字典
+            Dictionary containing removed_count and removed_message_ids
         """
         from langchain_core.messages import RemoveMessage
 
@@ -805,7 +773,6 @@ class SimpleLangChainAgent:
         if not messages:
             return {"removed_count": 0, "removed_message_ids": []}
 
-        # 找到最后一个 HumanMessage
         last_human_idx = -1
         for i in range(len(messages) - 1, -1, -1):
             if isinstance(messages[i], HumanMessage):
@@ -815,7 +782,6 @@ class SimpleLangChainAgent:
         if last_human_idx == -1:
             return {"removed_count": 0, "removed_message_ids": []}
 
-        # 收集要删除的消息
         messages_to_remove = []
         for msg in messages[last_human_idx:]:
             msg_id = getattr(msg, "id", None)
@@ -825,7 +791,6 @@ class SimpleLangChainAgent:
         if not messages_to_remove:
             return {"removed_count": 0, "removed_message_ids": []}
 
-        # 更新状态
         await agent.aupdate_state(config, {"messages": messages_to_remove})
 
         removed_ids = [rm.id for rm in messages_to_remove]
@@ -841,11 +806,11 @@ class SimpleLangChainAgent:
         }
 
     # =========================================================================
-    # 辅助方法
+    # Helper Methods
     # =========================================================================
 
     def _extract_text_content(self, content: Any) -> str:
-        """从消息内容中提取文本"""
+        """Extract text string from message content."""
         if isinstance(content, str):
             return content
         elif isinstance(content, list):
@@ -861,29 +826,26 @@ class SimpleLangChainAgent:
             return str(content)
 
     def _extract_attachment_ids(self, content: Any) -> list[dict[str, Any]]:
-        """从消息内容中提取附件信息
+        """Extract attachment data from message content.
 
-        支持多种格式：
-        1. Base64 data URI：{type: "image_url", image_url: {url: "data:..."}}
-        2. 外部 URL：{type: "image_url", image_url: {url: "http://..."}}
-        3. 带 attachment_id 的格式：{type: "image_url", attachment_id: "xxx", image_url: {...}}
+        Supports formats:
+        1. Base64 data URI: {type: "image_url", image_url: {url: "data:..."}}
+        2. External URL: {type: "image_url", image_url: {url: "http://..."}}
+        3. attachment_id format: {type: "image_url", attachment_id: "xxx", image_url: {...}}
 
-        返回格式匹配客户端 ChatMessageAttachment 模型
+        Returns list of attachment dicts matching client ChatMessageAttachment model.
         """
         attachments = []
         if isinstance(content, list):
             for idx, item in enumerate(content):
                 if isinstance(item, dict):
-                    # OpenAI multimodal 格式
                     if item.get("type") == "image_url":
                         image_url = item.get("image_url", {})
                         url = image_url.get("url", "")
 
-                        # 优先使用 attachment_id（如果存在）
                         attachment_id = item.get("attachment_id")
 
                         if attachment_id:
-                            # 使用 attachment_id 构造 URL
                             attachments.append(
                                 {
                                     "id": attachment_id,
@@ -892,7 +854,6 @@ class SimpleLangChainAgent:
                                 }
                             )
                         elif url.startswith("data:"):
-                            # Base64 图片
                             mime_match = url.split(";")[0].replace("data:", "")
                             ext = mime_match.split("/")[1] if "/" in mime_match else "jpg"
 
@@ -900,12 +861,10 @@ class SimpleLangChainAgent:
                                 {
                                     "id": f"inline_{idx}_{str(uuid.uuid4())[:8]}",
                                     "filename": f"image_{idx}.{ext}",
-                                    "signedUrl": url,  # data URI 作为 signedUrl
+                                    "signedUrl": url,
                                 }
                             )
                         elif url.startswith(("http://", "https://", "/")):
-                            # 外部 URL 或相对 URL
-                            # 尝试从 URL 提取文件扩展名
                             ext = "jpg"
                             if "." in url.split("/")[-1]:
                                 ext = url.split(".")[-1].split("?")[0][:4]
@@ -976,7 +935,7 @@ class SimpleLangChainAgent:
             )
 
     def _get_langfuse_callback(self, thread_id: UUID, user_id: UUID | None = None) -> Any:
-        """获取 Langfuse Callback Handler 用于追踪执行过程。"""
+        """Obtain Langfuse Callback Handler for execution tracing."""
         logger.debug(
             "langfuse_check",
             has_pub=bool(settings.LANGFUSE_PUBLIC_KEY),
@@ -994,10 +953,8 @@ class SimpleLangChainAgent:
             logger.info(
                 "initializing_langfuse_callback", host=settings.LANGFUSE_HOST, thread_id=thread_id, user_id=user_id
             )
-            # 直接初始化，SDK 会自动从环境变量读取密钥和 HOST
             handler = CallbackHandler()
-            # 设置额外的 metadata
-            handler.metadata = {"thread_id": str(thread_id), "user_id": str(user_id) if user_id else None}  # type: ignore[attr-defined]  # langfuse CallbackHandler accepts metadata at runtime
+            handler.metadata = {"thread_id": str(thread_id), "user_id": str(user_id) if user_id else None}  # type: ignore[attr-defined]
             return handler
         except Exception as e:
             logger.warning("failed_to_initialize_langfuse_callback", error=str(e))
@@ -1009,7 +966,7 @@ class SimpleLangChainAgent:
         session_id: UUID,
         user_uuid: UUID | None = None,
     ) -> list[Message]:
-        """非流式获取响应（支持 Langfuse 追踪）"""
+        """Get non-streaming AI response with Langfuse tracing support."""
         agent = await self.get_agent()
 
         config: dict[str, Any] = {
@@ -1019,7 +976,6 @@ class SimpleLangChainAgent:
             },
         }
 
-        # 添加 Langfuse 回调
         langfuse_handler = self._get_langfuse_callback(session_id, user_uuid)
         if langfuse_handler:
             config["callbacks"] = [langfuse_handler]
@@ -1035,13 +991,10 @@ class SimpleLangChainAgent:
 
         input_data = {"messages": lc_messages}
 
-        # 执行图
         result = await agent.ainvoke(input_data, config=config)
 
-        # 提取最新消息
         if result and "messages" in result:
             new_msgs = result["messages"]
-            # 找到最后一个 AI 消息
             for msg in reversed(new_msgs):
                 if isinstance(msg, AIMessage) and msg.content:
                     text = self._extract_text_content(msg.content)

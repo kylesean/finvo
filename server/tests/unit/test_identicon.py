@@ -19,8 +19,8 @@ SAMPLE_SEEDS = [
     "0d9f5ee4-2c9b-4c62-9db5-8c2b0b3761ab",
     "7e6b2c1e-4f8a-4d3c-9e21-1a5c8f7b3d90",
     "user-without-email-42",
-    "kylesean@example.com",
-    "中文用户名种子",
+    "kylesean@gmail.com",
+    "unicode-username-seed",
 ]
 
 

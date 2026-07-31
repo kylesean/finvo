@@ -1,13 +1,13 @@
-"""EventGenerator - 纯事件生成器（原 GenUIAdapter 重构）
+"""EventGenerator - Pure Event Generator
 
-职责：
-- 将 LangGraph 流事件转换为 GenUI 协议事件
-- 不包含策略决策逻辑（已移至 RenderPolicy, TextFilterPolicy）
-- 不包含组件检测逻辑（已移至 ComponentDetector）
+Responsibilities:
+- Converts LangGraph stream events into GenUI protocol events
+- Excludes strategy decision logic (encapsulated in RenderPolicy, TextFilterPolicy)
+- Excludes component detection logic (encapsulated in ComponentDetector)
 
-设计原则：
-- 单一职责：只负责事件格式转换
-- 无状态：尽可能减少内部状态追踪
+Design Principles:
+- Single Responsibility: Event format transformation
+- Stateless: Minimizes internal state tracking
 """
 
 import json
@@ -28,43 +28,43 @@ from app.schemas.genui import GenUIEvent
 
 
 class EventGenerator:
-    """GenUI 事件生成器
+    """GenUI Event Generator.
 
-    将 LangGraph 流输出转换为 GenUI 协议事件。
+    Converts LangGraph stream output into GenUI protocol events.
 
-    职责边界：
-    - 事件格式转换
-    - Surface ID 生成
-    - 时间戳追踪
-    - 渲染策略决策 (RenderPolicy)
-    - 文本过滤决策 (TextFilterPolicy)
+    Responsibilities:
+    - Event format transformation
+    - Surface ID generation
+    - Timestamp tracking
+    - Render policy decisions (RenderPolicy)
+    - Text filter decisions (TextFilterPolicy)
     """
 
     def __init__(self, surface_tracker: SurfaceTracker | None = None) -> None:
-        # 工具调用时间追踪（用于计算 duration_ms）
+        # Tool call timing tracking (for duration_ms calculation)
         self._tool_start_times: dict[str, float] = {}
-        # 工具 ID 到名称的映射
+        # Tool ID to name mapping
         self._tool_id_to_name: dict[str, str] = {}
-        # 已处理的工具调用 ID（避免重复发送 tool_call_start）
+        # Processed tool call IDs (prevents duplicate tool_call_start events)
         self._processed_tool_calls: set[str] = set()
-        # 流式 AI 回复积累（用于历史记录）
+        # Accumulated streaming AI response parts (for history recording)
         self._ai_response_parts: list[str] = []
-        # Surface 追踪器（用于增量更新和 Surface 复用）
+        # Surface tracker (for incremental updates and Surface reuse)
         self._surface_tracker = surface_tracker or SurfaceTracker()
 
     def reset(self) -> None:
-        """重置状态（每次新请求前调用）"""
+        """Reset state (invoked prior to each new stream request)."""
         self._tool_start_times.clear()
         self._tool_id_to_name.clear()
         self._processed_tool_calls.clear()
         self._ai_response_parts.clear()
 
     def get_collected_response(self) -> str:
-        """获取积累的 AI 回复文本"""
+        """Obtain accumulated AI response text."""
         return "".join(self._ai_response_parts)
 
     # =========================================================================
-    # 消息流事件生成
+    # Message Stream Event Generation
     # =========================================================================
 
     async def process_message_chunk(
@@ -72,28 +72,27 @@ class EventGenerator:
         chunk: tuple[Any, ...],
         session_id: UUID,
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理 messages 模式的流块
+        """Process stream chunk from messages mode.
 
         Args:
-            chunk: (message_chunk, metadata) 元组
-            session_id: 会话 ID
+            chunk: (message_chunk, metadata) tuple
+            session_id: Session ID
 
         Yields:
-            GenUIEvent 事件
+            GenUIEvent events
         """
         msg_chunk, metadata = chunk
-        # msg_chunk.content contains the message part
 
-        # 跳过 ToolMessage（在 updates 模式处理）
+        # Skip ToolMessage (handled in updates mode)
         if isinstance(msg_chunk, ToolMessage):
             return
 
-        # 1. 处理文本内容
+        # 1. Process text content
         if msg_chunk.content:
             async for event in self._process_text_content(msg_chunk.content):
                 yield event
 
-        # 2. 处理工具调用意图
+        # 2. Process tool call intents
         if isinstance(msg_chunk, AIMessage) and hasattr(msg_chunk, "tool_call_chunks"):
             tool_chunks = getattr(msg_chunk, "tool_call_chunks", None)
             if tool_chunks:
@@ -107,7 +106,7 @@ class EventGenerator:
         self,
         content: Any,
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理文本内容"""
+        """Process text content."""
         if isinstance(content, str):
             if content:
                 self._ai_response_parts.append(content)
@@ -139,11 +138,10 @@ class EventGenerator:
         tool_call_chunks: list[dict[str, Any]],
         session_id: UUID,
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理工具调用块
+        """Process tool call chunks.
 
-        发送 tool_call_start 事件通知客户端工具开始执行
+        Emits tool_call_start events notifying client of tool execution start.
         """
-        # 临时存储活跃的工具调用
         active_calls: dict[int, dict[str, Any]] = {}
 
         for tc_chunk in tool_call_chunks:
@@ -163,13 +161,13 @@ class EventGenerator:
             tool_id = curr["id"]
             tool_name = curr["name"]
 
-            # 首次看到完整的工具调用
+            # First encounter of complete tool call
             if tool_id and tool_name and tool_id not in self._processed_tool_calls:
                 self._processed_tool_calls.add(tool_id)
                 self._tool_start_times[tool_id] = time.time()
                 self._tool_id_to_name[tool_id] = tool_name
 
-                # 发送 tool_call_start 事件（所有工具都发送）
+                # Emit tool_call_start event
                 yield GenUIEvent(
                     type="tool_call_start",
                     data={
@@ -180,7 +178,7 @@ class EventGenerator:
                 )
 
     # =========================================================================
-    # 更新流事件生成
+    # Updates Stream Event Generation
     # =========================================================================
 
     async def process_updates_chunk(
@@ -188,22 +186,20 @@ class EventGenerator:
         chunk: dict[str, Any],
         session_id: UUID,
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理 updates 模式的流块
+        """Process stream chunk from updates mode.
 
         Args:
-            chunk: {node_name: node_output} 字典
-            session_id: 会话 ID
+            chunk: {node_name: node_output} dictionary
+            session_id: Session ID
 
         Yields:
-            GenUIEvent 事件
+            GenUIEvent events
         """
         for node_name, node_output in chunk.items():
             if node_name.startswith("__"):
                 continue
 
-            # ============================================================
-            # 处理 direct_execute 节点
-            # ============================================================
+            # Process direct_execute node
             if node_name == "direct_execute":
                 result_data = node_output.get("direct_execute_result")
                 if result_data and result_data.get("success"):
@@ -211,14 +207,12 @@ class EventGenerator:
                         tool_result=result_data.get("data", {}),
                         tool_name=result_data.get("tool_name", ""),
                         session_id=session_id,
-                        tool_call_id=None,  # direct_execute 没有 tool_call_id
+                        tool_call_id=None,
                     ):
                         yield event
                 continue
 
-            # ============================================================
-            # 处理 tools 节点
-            # ============================================================
+            # Process tools node
             if node_name == "tools":
                 async for event in self._process_tools_node(node_output, session_id):
                     yield event
@@ -228,29 +222,20 @@ class EventGenerator:
         node_output: Any,
         session_id: UUID,
     ) -> AsyncGenerator[GenUIEvent]:
-        """处理 tools 节点输出
+        """Process tools node output.
 
-        LangGraph ToolNode._combine_tool_outputs 可能返回三种格式：
-        1. dict: {"messages": [ToolMessage, ...]} — 所有工具返回普通值
-        2. list[ToolMessage]: 直接的消息列表（input_type="list" 时）
-        3. list[Command | dict]: 混合列表 — 当任一工具返回 Command 时
-           例: [Command(update={"messages": [ToolMsg]}), {"messages": [ToolMsg]}]
-
-        格式 3 发生在 load_skill（返回 Command）与普通工具（如 search_personal_context）
-        在同一轮并行执行时。
+        LangGraph ToolNode._combine_tool_outputs may return:
+        1. dict: {"messages": [ToolMessage, ...]}
+        2. list[ToolMessage]: Direct message list
+        3. list[Command | dict]: Mixed list when tools return Command objects
         """
         messages = self._extract_tool_messages_from_node_output(node_output)
 
         for msg in messages:
             tool_name, tool_call_id = self._extract_tool_info(msg)
-
-            # 计算执行时长
             duration_ms = self._calculate_duration(tool_call_id)
-
-            # 提取工具结果
             tool_result = self._extract_tool_result(msg)
 
-            # 发送 tool_call_end 事件
             is_success = ComponentDetector.is_successful_result(tool_result)
             logger.info(
                 "langgraph_tool_execution_trace",
@@ -281,7 +266,7 @@ class EventGenerator:
                 },
             )
 
-            # 发送 UI 组件事件
+            # Emit UI component events
             async for event in self._emit_component_events(
                 tool_result=tool_result,
                 tool_name=tool_name,
@@ -291,27 +276,19 @@ class EventGenerator:
                 yield event
 
     def _extract_tool_messages_from_node_output(self, node_output: Any) -> list[Any]:
-        """从 tools 节点输出中提取所有 ToolMessage。
-
-        处理 LangGraph _combine_tool_outputs 的三种返回格式。
-        """
+        """Extract ToolMessage instances from tools node output."""
         messages: list[Any] = []
 
         if isinstance(node_output, dict):
-            # 格式 1: {"messages": [ToolMessage, ...]}
             messages = node_output.get("messages", [])
 
         elif isinstance(node_output, list):
-            # 格式 2 或 3: 可能是纯 ToolMessage 列表，或 Command/dict 混合列表
             for item in node_output:
                 if self._is_tool_message(item):
-                    # 格式 2: 直接是 ToolMessage
                     messages.append(item)
                 elif isinstance(item, dict):
-                    # 格式 3 中的 dict 包装: {"messages": [ToolMessage]}
                     messages.extend(item.get("messages", []))
                 elif isinstance(item, Command):
-                    # 格式 3 中的 Command: 从 update 中提取 messages
                     update = item.update
                     if isinstance(update, dict):
                         cmd_messages = update.get("messages", [])
@@ -326,9 +303,9 @@ class EventGenerator:
         session_id: UUID,
         tool_call_id: str | None,
     ) -> AsyncGenerator[GenUIEvent]:
-        """生成 UI 组件事件（a2ui_message）
+        """Generate UI component events (a2ui_message).
 
-        Enhanced for GenUI Full Architecture (A2UI protocol v0.9):
+        GenUI Architecture (A2UI protocol v0.9):
         1. Check if reusable Surface exists for this component type
         2. If reusable: emit UpdateDataModel for changed fields only
         3. If new: emit CreateSurface + UpdateComponents (flat v0.9 format)
@@ -343,7 +320,6 @@ class EventGenerator:
             V09Component,
         )
 
-        # 使用 ComponentDetector 检测组件类型
         component_name = ComponentDetector.detect_with_overrides(tool_result, tool_name)
 
         logger.debug(
@@ -360,23 +336,19 @@ class EventGenerator:
         if not ComponentDetector.is_successful_result(tool_result):
             return
 
-        # =====================================================================
-        # NEW: Check for reusable Surface (enables "update existing UI" scenarios)
-        # =====================================================================
+        # Check for reusable Surface
         existing_surface_id = self._surface_tracker.find_reusable_surface(
             session_id=str(session_id),
             component_type=component_name,
         )
 
         if existing_surface_id and self._is_incremental_update(tool_result):
-            # Reuse existing Surface with incremental updates
             logger.info(
                 "reusing_surface_with_incremental_update",
                 surface_id=existing_surface_id,
                 component=component_name,
             )
 
-            # Get changes and emit UpdateDataModel for each
             changes = self._extract_data_changes(existing_surface_id, tool_result)
             for path, value in changes:
                 data_update_msg = UpdateDataModel(
@@ -387,14 +359,10 @@ class EventGenerator:
                     )
                 )
                 yield GenUIEvent(type="a2ui_message", data=data_update_msg.model_dump())
-
-                # Update tracker state
                 self._surface_tracker.update_surface_data(existing_surface_id, path, value)
             return
 
-        # =====================================================================
-        # Original logic: Create new Surface
-        # =====================================================================
+        # Create new Surface
         if not tool_call_id:
             logger.warning(
                 "missing_tool_call_id_for_component",
@@ -413,10 +381,8 @@ class EventGenerator:
             surface_id=surface_id,
         )
 
-        # 注入 _surfaceId 到 Tracker 内部跟踪组件数据
         tracker_data = {**tool_result, "_surfaceId": surface_id} if isinstance(tool_result, dict) else tool_result
 
-        # Register Surface in tracker
         self._surface_tracker.register_surface(
             session_id=str(session_id),
             surface_id=surface_id,
@@ -425,21 +391,15 @@ class EventGenerator:
             tool_call_id=tool_call_id,
         )
 
-        # 发送 CreateSurface (v0.9)
         create_msg = CreateSurface(createSurface=CreateSurfacePayload(surfaceId=surface_id))
         yield GenUIEvent(type="a2ui_message", data=create_msg.model_dump())
 
-        # 清洗私有内部字段（以 '_' 开头），防止污染前端数据模式和 Schema 校验
         clean_props = (
             {k: v for k, v in tool_result.items() if not k.startswith("_")}
             if isinstance(tool_result, dict)
             else tool_result
         )
 
-        # 发送 UpdateComponents (v0.9)
-        # Flat component format: {id: 'root', component: TypeName, **props}.
-        # id/component are placed AFTER the spread so they always win over any
-        # colliding keys in clean_props (the surface root MUST be id 'root').
         flat_component = {**clean_props, "id": "root", "component": component_name}
         comp = V09Component.model_validate(flat_component)
         update_msg = UpdateComponents(
@@ -448,22 +408,15 @@ class EventGenerator:
         yield GenUIEvent(type="a2ui_message", data=update_msg.model_dump())
 
     def _is_incremental_update(self, tool_result: Any) -> bool:
-        """Check if this tool result should trigger incremental update.
-
-        Incremental updates are suitable when:
-        - The result contains an 'update' or 'modify' intent marker
-        - The result has only a few changed fields
-        """
+        """Check if tool result should trigger incremental update."""
         if not isinstance(tool_result, dict):
             return False
 
-        # Check for explicit update intent
         if tool_result.get("_intent") == "update":
             return True
         if tool_result.get("_incremental_update"):
             return True
 
-        # Future: Could add heuristics based on changed field count
         return False
 
     def _extract_data_changes(
@@ -471,39 +424,34 @@ class EventGenerator:
         surface_id: str,
         new_data: dict[str, Any],
     ) -> list[tuple[str, Any]]:
-        """Extract changed fields between existing surface data and new data.
-
-        Returns list of (path, value) tuples for changed fields.
-        """
+        """Extract changed fields between existing surface data and new data."""
         existing_data = self._surface_tracker.get_surface_data(surface_id) or {}
         changes: list[tuple[str, Any]] = []
 
-        # Compare top-level fields
         for key, new_value in new_data.items():
             if key.startswith("_"):
-                continue  # Skip internal fields
+                continue
             if key not in existing_data or existing_data[key] != new_value:
                 changes.append((f"/{key}", new_value))
 
         return changes
 
     # =========================================================================
-    # 辅助方法
+    # Helper Methods
     # =========================================================================
 
     def _is_tool_message(self, msg: Any) -> bool:
-        """检查是否是 ToolMessage"""
+        """Check if message is a ToolMessage."""
         return isinstance(msg, ToolMessage) or (isinstance(msg, dict) and msg.get("role") == "tool")
 
     def _extract_tool_info(self, msg: Any) -> tuple[str, str | None]:
-        """从消息中提取工具信息"""
+        """Extract tool name and tool_call_id from message."""
         if isinstance(msg, dict):
             return msg.get("name", ""), msg.get("tool_call_id")
         return getattr(msg, "name", ""), getattr(msg, "tool_call_id", None)
 
     def _extract_tool_result(self, msg: Any) -> Any:
-        """提取工具执行结果"""
-        # 优先从 artifact 获取
+        """Extract tool execution result from message."""
         tool_result = getattr(msg, "artifact", None)
         if tool_result is None and isinstance(msg, dict):
             tool_result = msg.get("artifact")
@@ -511,7 +459,6 @@ class EventGenerator:
         if tool_result is not None:
             return tool_result
 
-        # 从 content 解析
         msg_content = getattr(msg, "content", None)
         if msg_content is None and isinstance(msg, dict):
             msg_content = msg.get("content", "")
@@ -527,7 +474,7 @@ class EventGenerator:
             return {"result": str(msg_content)}
 
     def _calculate_duration(self, tool_call_id: str | None) -> int | None:
-        """计算工具执行时长（毫秒）"""
+        """Calculate tool execution duration in milliseconds."""
         if not tool_call_id:
             return None
         start_time = self._tool_start_times.pop(tool_call_id, None)

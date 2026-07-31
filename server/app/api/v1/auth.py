@@ -203,7 +203,7 @@ async def register(
         account=data.account[:3] + "***",
     )
 
-    # 返回统一格式
+    # Return unified format
     auth_response = AuthResponse(token=token, user=user_info)
     return success_response(data=auth_response.model_dump(), message="Registration successful")
 
@@ -260,7 +260,7 @@ async def login(
         account=data.account[:3] + "***",
     )
 
-    # 返回统一格式
+    # Return unified format
     auth_response = AuthResponse(token=token, user=user_info)
     return success_response(data=auth_response.model_dump(), message="Login successful")
 

@@ -357,17 +357,17 @@ class ForecastService:
     ) -> Decimal:
         """Calculate predicted daily variable spending using scientific methods.
 
-        改进点：
-        1. 使用中位数而非平均数（对异常值更健壮）
-        2. 排除周期性交易（避免重复计算）
-        3. 使用完整时间范围计算（lookback_days 而非只有消费的天数）
+        Improvements:
+        1. Use median instead of mean (robust against outliers)
+        2. Exclude recurring transactions (prevents double counting)
+        3. Use full time window calculation (lookback_days rather than active spending days only)
 
         Priority:
-        1. 如果用户手动设置了 daily_burn_rate > 0 → 优先使用用户设定
-        2. 历史中位数（if enough data points exist）
+        1. If user explicitly configured daily_burn_rate > 0 -> use user setting first
+        2. Historical median (if enough data points exist)
         3. System default (100.00)
         """
-        # 如果用户手动设置了值，优先使用（表示用户想覆盖）
+        # If user manually configured a value, use it as an override
         if manual_fallback is not None and manual_fallback > Decimal("0"):
             logger.debug(
                 "forecast_using_user_override", user_uuid=str(user_uuid), daily_burn_rate=float(manual_fallback)
@@ -376,7 +376,7 @@ class ForecastService:
 
         lookback_start = datetime.now(UTC) - timedelta(days=lookback_days)
 
-        # 获取周期性交易的金额集合（用于排除）
+        # Retrieve recurring transaction amounts for exclusion
         recurring_amounts = set()
         recurring_query = select(RecurringTransaction.amount).where(
             cast(
@@ -391,12 +391,12 @@ class ForecastService:
         try:
             result = await self.db.execute(recurring_query)
             for row in result.all():
-                # 添加周期金额（允许小误差匹配）
+                # Add recurring amount (allow small tolerance match)
                 recurring_amounts.add(float(abs(row[0])))
         except Exception:  # nosec B110
             pass
 
-        # 查询每笔支出交易（而非每日汇总）
+        # Query individual expense transactions (rather than daily aggregates)
         query = (
             select(
                 Transaction.amount,
@@ -419,11 +419,11 @@ class ForecastService:
         result = await self.db.execute(query)
         transactions = result.all()
 
-        # 过滤掉周期性交易（金额匹配）
+        # Filter out recurring transactions by amount matching
         variable_expenses = []
         for tx in transactions:
             tx_amount = float(abs(tx.amount))
-            # 如果金额与任何周期交易匹配（允许 1% 误差），则排除
+            # If amount matches any recurring transaction (allow 1% tolerance), exclude
             is_recurring = (
                 any(
                     abs(tx_amount - recurring_amt) / max(recurring_amt, 1) < 0.01
@@ -437,7 +437,7 @@ class ForecastService:
                 variable_expenses.append(tx_amount)
 
         if len(variable_expenses) >= 5:
-            # 使用中位数（对异常值更健壮）
+            # Use median (robust against outliers)
             sorted_expenses = sorted(variable_expenses)
             n = len(sorted_expenses)
             if n % 2 == 0:
@@ -445,12 +445,11 @@ class ForecastService:
             else:
                 median = sorted_expenses[n // 2]
 
-            # 计算日均：总可变支出 / 完整天数（而非只有消费的天数）
+            # Calculate daily average: total variable expense / full lookback days
             total_variable = sum(variable_expenses)
             daily_avg = Decimal(str(total_variable)) / Decimal(str(lookback_days))
 
-            # 使用中位数和日均的加权平均（中位数权重更高）
-            # 这样既考虑了典型消费水平，也考虑了消费频率
+            # Use weighted average of median and daily average (higher weight on median)
             avg = Decimal(str(median)) * Decimal("0.4") + daily_avg * Decimal("0.6")
 
             logger.debug(
@@ -463,7 +462,7 @@ class ForecastService:
                 excluded_recurring=len(transactions) - len(variable_expenses),
             )
         else:
-            # 数据不足，使用默认值
+            # Insufficient data, fallback to default
             avg = Decimal("100.00")
             logger.debug(
                 "forecast_using_system_default",
@@ -496,7 +495,7 @@ class ForecastService:
                 events.append(
                     ForecastEvent(
                         date=scenario_date,
-                        description=scenario.get("description", "模拟场景"),
+                        description=scenario.get("description", "Simulated scenario"),
                         amount=amount,
                         event_type="SIMULATED",
                         confidence=0.8,  # Simulated events have lower confidence
@@ -602,7 +601,7 @@ class ForecastService:
                 day_events.append(
                     ForecastEvent(
                         date=current_date,
-                        description="日常消费(预测)",
+                        description="Daily Expense (Predicted)",
                         amount=avg_daily_spending,
                         event_type="PREDICTED_VARIABLE",
                         confidence=0.7,
@@ -696,7 +695,7 @@ class ForecastService:
         user_uuid: UUID,
         amount: Decimal,
         purchase_date: date | None = None,
-        description: str = "模拟购买",
+        description: str = "Simulated Purchase",
     ) -> CashFlowForecastResult:
         """Simulate a one-time purchase and show its impact.
 

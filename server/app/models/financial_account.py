@@ -57,7 +57,7 @@ class FinancialAccount(Base):
     Attributes:
         id: Primary key (UUID)
         user_uuid: Foreign key to users table (UUID)
-        name: Account name (e.g., "招商银行储蓄卡")
+        name: Account name (e.g., "Checking Account")
         nature: Account nature ('ASSET' or 'LIABILITY')
         type: Account type (e.g., 'CASH', 'DEPOSIT', 'CREDIT_CARD')
         currency_code: Currency code (default: 'CNY')

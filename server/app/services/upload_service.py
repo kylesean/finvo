@@ -1,9 +1,9 @@
-"""File upload service (Local Storage Only).
+"""File upload service.
 
-最佳实践：将文件处理和数据库操作分开。
-1. 先处理所有文件（验证、压缩、保存到磁盘）
-2. 然后一次性批量插入数据库记录
-3. 单次 commit
+Best practice: Separate file processing and database operations.
+1. Process all files first (validation, compression, saving to disk/S3)
+2. Batch insert database records once
+3. Single database commit
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ from app.services.storage.adapters.base import StorageAdapter
 from app.services.storage.adapters.factory import StorageAdapterFactory
 
 # ============================================================================
-# 文件类型配置
+# File Type Configuration
 # ============================================================================
 
 IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp", "bmp", "ico", "svg"}
@@ -97,11 +97,11 @@ COMPRESSIBLE_FORMATS = {"jpg", "jpeg", "png", "webp"}
 
 
 class UploadService:
-    """文件上传服务（支持本地存储和 S3 兼容存储）。
+    """File upload service supporting local storage and S3-compatible storage.
 
-    根据 settings.STORAGE_PROVIDER 自动选择存储后端：
-    - local_uploads: 本地文件系统
-    - s3_compatible: S3 兼容存储（Supabase、MinIO、AWS S3）
+    Automatically selects storage backend based on settings.STORAGE_PROVIDER:
+    - local_uploads: Local filesystem
+    - s3_compatible: S3 compatible storage (Supabase, MinIO, AWS S3)
     """
 
     MAX_FILE_SIZE: int = settings.MAX_UPLOAD_SIZE
@@ -121,32 +121,28 @@ class UploadService:
         compress: bool = True,
         thread_id: UUID | None = None,
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        """批量上传文件。
+        """Batch upload files.
 
-        最佳实践：
-        1. 先处理所有文件（文件 I/O，不涉及数据库）
-        2. 批量创建数据库记录（单次 commit）
+        Pipeline:
+        1. Process files (file I/O, no DB operations)
+        2. Batch create DB records in single commit
 
         Args:
-            files: 文件列表
-            user_uuid: 用户 UUID (str or UUID object)
-            compress: 是否压缩图片
-            thread_id: 可选的会话 ID
+            files: List of upload files
+            user_uuid: User UUID
+            compress: Whether to compress images
+            thread_id: Optional session thread ID
 
         Returns:
-            (成功列表, 失败列表)
+            Tuple of (successful_list, failed_list)
         """
-        # ====================================================================
-        # 阶段 1：获取存储配置并初始化适配器
-        # ====================================================================
+        # Phase 1: Retrieve storage config and initialize adapter
         storage_config_id, storage_config = await self._get_or_create_storage_config(user_uuid)
         self._adapter = await StorageAdapterFactory.create(storage_config)
 
-        # ====================================================================
-        # 阶段 2：处理所有文件（纯文件 I/O，无数据库操作）
-        # ====================================================================
-        processed = []  # 成功处理的文件信息
-        failed = []  # 失败的文件
+        # Phase 2: Process all files (pure file I/O)
+        processed = []  # Successfully processed file metadata
+        failed = []  # Failed files
 
         for file in files:
             try:
@@ -169,7 +165,7 @@ class UploadService:
                 failed.append(
                     {
                         "filename": file.filename,
-                        "error": "文件处理失败",
+                        "error": "File processing failed",
                         "errorCode": "PROCESS_FAILED",
                     }
                 )
@@ -177,9 +173,7 @@ class UploadService:
         if not processed:
             return [], failed
 
-        # ====================================================================
-        # 阶段 3：批量创建数据库记录（单次数据库操作）
-        # ====================================================================
+        # Phase 3: Batch create database records
         attachments = []
         for info in processed:
             attachment = Attachment(
@@ -194,23 +188,19 @@ class UploadService:
             )
             attachments.append(attachment)
 
-        # 批量添加
         self.db.add_all(attachments)
         await self.db.commit()
 
-        # 刷新获取 ID
+        # Refresh for IDs
         for att in attachments:
             await self.db.refresh(att)
 
-        # ====================================================================
-        # 阶段 4：构建返回结果
-        # ====================================================================
+        # Phase 4: Construct results
         base_url = settings.APP_URL.rstrip("/")
         successful = []
 
         for i, att in enumerate(attachments):
             info = processed[i]
-            # Convert UUID to string for JSON serialization
             att_id = str(att.id)
             successful.append(
                 {
@@ -239,12 +229,12 @@ class UploadService:
         return successful, failed
 
     async def _get_or_create_storage_config(self, user_uuid: UUID) -> tuple[int | None, StorageConfig]:
-        """获取或创建用户的默认存储配置。
+        """Obtain or create user's default storage configuration.
 
-        根据 settings.STORAGE_PROVIDER 确定存储后端类型。
+        Selects storage backend type based on settings.STORAGE_PROVIDER.
 
         Args:
-            user_uuid: 用户 UUID
+            user_uuid: User UUID
 
         Returns:
             Tuple[config_id, StorageConfig]
@@ -261,13 +251,12 @@ class UploadService:
         if config:
             return config.id, config
 
-        # 创建新配置
+        # Create new configuration
         if target_provider == ProviderType.S3_COMPATIBLE.value:
-            # S3 兼容存储配置
             new_config = StorageConfig(
                 user_uuid=user_uuid,
                 provider_type=target_provider,
-                name="S3 存储",
+                name="S3 Storage",
                 base_path=settings.S3_BUCKET,
                 credentials={
                     "endpoint_url": settings.S3_ENDPOINT,
@@ -278,11 +267,10 @@ class UploadService:
                 is_readonly=False,
             )
         else:
-            # 默认本地存储
             new_config = StorageConfig(
                 user_uuid=user_uuid,
                 provider_type=ProviderType.LOCAL_UPLOADS.value,
-                name="本地存储",
+                name="Local Storage",
                 base_path=str(self.UPLOAD_DIR),
                 is_readonly=False,
             )
@@ -305,17 +293,17 @@ class UploadService:
         user_uuid: UUID,
         compress: bool,
     ) -> dict[str, Any]:
-        """处理并保存单个文件（支持本地存储和 S3 适配器）。
+        """Process and save individual file (supporting local and S3 storage adapters).
 
         Returns:
-            包含文件信息的字典
+            Dictionary containing processed file metadata
         """
         upload_id = f"up_{uuid.uuid4().hex[:8]}"
 
-        # 1. 校验并读取文件
+        # 1. Validate and read file content
         content = await self._validate_and_read(file)
 
-        # 2. 获取扩展名和 MIME 类型
+        # 2. Extract file extension and MIME type
         filename = file.filename or "unnamed_file"
         extension = self._get_extension(filename)
         mime_type = file.content_type
@@ -323,22 +311,21 @@ class UploadService:
         if guessed_type:
             mime_type = guessed_type
 
-        # 3. 压缩图片（如果需要）
+        # 3. Compress image if requested
         compressed = False
         if compress and extension.lower() in COMPRESSIBLE_FORMATS:
-            # Run blocking image compression in threadpool to avoid blocking event loop
             content, _ = await run_in_threadpool(self._compress_image, content, extension)
             compressed = True
 
-        # 4. 计算哈希
+        # 4. Compute file hash
         file_hash = hashlib.sha256(content).hexdigest()
 
-        # 5. 生成存储路径
+        # 5. Generate storage object key
         object_key = self._generate_object_key(extension, upload_id)
 
-        # 6. 保存文件（根据适配器类型选择方式）
+        # 6. Save file payload according to adapter backend
         if self._adapter and settings.STORAGE_PROVIDER != "local_uploads":
-            # 使用适配器保存到远程存储（S3/Supabase）
+
             async def content_generator() -> AsyncGenerator[bytes]:
                 yield content
 
@@ -355,7 +342,6 @@ class UploadService:
                 provider=settings.STORAGE_PROVIDER,
             )
         else:
-            # 本地存储：直接写入磁盘
             file_path = self.UPLOAD_DIR / object_key
             await aiofiles.os.makedirs(file_path.parent, exist_ok=True)
             async with aiofiles.open(file_path, "wb") as f:
@@ -377,17 +363,17 @@ class UploadService:
         }
 
     # =========================================================================
-    # 其他公共方法
+    # Public Methods
     # =========================================================================
 
     async def get_file_path(self, attachment_id: UUID, user_uuid: UUID) -> tuple[Path, Attachment]:
-        """获取附件的本地文件路径。
+        """Obtain local file path for attachment.
 
-        支持所有者本人以及同一共享空间成员查看访问。
+        Grants access to attachment owner and members belonging to the same shared space.
 
         Args:
-            attachment_id: 附件 ID
-            user_uuid: 用户 UUID
+            attachment_id: Attachment ID
+            user_uuid: User UUID
         """
         stmt = select(Attachment).where(Attachment.id == attachment_id)
         result = await self.db.execute(stmt)
@@ -400,7 +386,7 @@ class UploadService:
                 error_code="FILE_NOT_FOUND",
             )
 
-        # 校验访问权限：所有者本人，或者与所有者属于同一生效共享空间的成员
+        # Validate access permission: owner or shared space co-member
         if attachment.user_uuid != user_uuid:
             shared_space_stmt = (
                 select(SpaceMember.space_id)
@@ -427,7 +413,6 @@ class UploadService:
                     error_code="FILE_NOT_FOUND",
                 )
 
-        # 构建绝对文件路径（FileResponse 需要绝对路径）
         file_path = (self.UPLOAD_DIR / attachment.object_key).resolve()
 
         if not file_path.exists():
@@ -440,7 +425,7 @@ class UploadService:
         return file_path, attachment
 
     async def delete_file(self, attachment_id: UUID, user_uuid: UUID) -> bool:
-        """删除文件。"""
+        """Delete attachment file and DB record."""
         file_path, attachment = await self.get_file_path(attachment_id, user_uuid)
 
         if file_path.exists():
@@ -451,11 +436,11 @@ class UploadService:
         return True
 
     # =========================================================================
-    # 私有辅助方法
+    # Private Helper Methods
     # =========================================================================
 
     async def _validate_and_read(self, file: UploadFile) -> bytes:
-        """校验并读取文件。"""
+        """Validate and read upload file content."""
         if not file.filename:
             raise BusinessError(
                 message="Filename must not be empty",
@@ -491,25 +476,24 @@ class UploadService:
         return content
 
     def _get_extension(self, filename: str) -> str:
-        """获取文件扩展名。"""
+        """Extract lower-case file extension."""
         if "." not in filename:
             return ""
         return filename.rsplit(".", 1)[-1].lower()
 
     def _generate_object_key(self, extension: str, upload_id: str) -> str:
-        """生成存储路径。"""
+        """Generate storage object key."""
         now = datetime.now(UTC)
         date_path = now.strftime("%Y/%m/%d")
         unique_suffix = uuid.uuid4().hex[:12]
         return f"{date_path}/{upload_id}_{unique_suffix}.{extension}"
 
     def _compress_image(self, content: bytes, extension: str) -> tuple[bytes, int]:
-        """压缩图片（同步方法）。"""
+        """Compress image bytes synchronously."""
         try:
             image: Image.Image = Image.open(io.BytesIO(content))
             original_width, original_height = image.size
 
-            # 调整尺寸
             if original_width > self.IMAGE_MAX_WIDTH or original_height > self.IMAGE_MAX_HEIGHT:
                 ratio = original_width / original_height
                 if original_width > original_height:
@@ -520,13 +504,11 @@ class UploadService:
                     new_width = int(new_height * ratio)
                 image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
-            # RGBA -> RGB
             if image.mode == "RGBA" and extension.lower() in ("jpg", "jpeg"):
                 background = Image.new("RGB", image.size, (255, 255, 255))
                 background.paste(image, mask=image.split()[3])
                 image = background
 
-            # 保存
             buffer = io.BytesIO()
             format_map = {"jpg": "JPEG", "jpeg": "JPEG", "png": "PNG", "webp": "WEBP"}
             save_format = format_map.get(extension.lower(), "PNG")
@@ -545,5 +527,4 @@ class UploadService:
 
         except Exception as e:
             logger.warning("compression_failed", error=str(e))
-            # 压缩失败时返回原内容
             return content, len(content)

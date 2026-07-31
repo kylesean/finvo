@@ -594,10 +594,10 @@ async def get_resume_status(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
-    """检查会话是否有可恢复的未完成执行。
+    """Check if the session has an uncompleted execution that can be resumed.
 
-    利用 LangGraph checkpoint 机制，检查 state.next 是否有待执行节点。
-    如果 canResume 为 true，客户端可调用 /resume 端点恢复执行。
+    Leverages the LangGraph checkpoint mechanism to check whether state.next contains pending nodes.
+    If canResume is true, the client may invoke the /resume endpoint to continue execution.
 
     Args:
         request: The FastAPI request object for rate limiting.
@@ -606,7 +606,7 @@ async def get_resume_status(
         db: Database session.
 
     Returns:
-        dict: 包含 canResume 和 nextNodes 字段
+        JSONResponse wrapping canResume and nextNodes payload.
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)
@@ -615,7 +615,7 @@ async def get_resume_status(
     try:
         state = await agent.get_session_state(session.id)
 
-        # state.next 是一个元组，包含待执行的节点名称
+        # state.next is a tuple containing pending node names
         can_resume = state.next is not None and len(state.next) > 0
         next_nodes = list(state.next) if state.next else []
 
@@ -654,10 +654,10 @@ async def resume_session(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ) -> StreamingResponse:
-    """从 checkpoint 恢复会话的未完成执行。
+    """Resume uncompleted session execution from checkpoint.
 
-    返回 SSE 流，继续接收剩余的流式响应。
-    建议先调用 /resume-status 检查是否有可恢复状态。
+    Returns an SSE stream to continue receiving remaining streaming responses.
+    It is recommended to invoke /resume-status first to verify resumable state.
 
     Args:
         request: The FastAPI request object for rate limiting.
@@ -666,7 +666,7 @@ async def resume_session(
         db: Database session.
 
     Returns:
-        StreamingResponse: SSE 流式响应
+        StreamingResponse: SSE stream response.
     """
     # Verify session ownership
     session = await get_authorized_session(session_id, current_user, db)
