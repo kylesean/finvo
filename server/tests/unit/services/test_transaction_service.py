@@ -26,7 +26,7 @@ async def test_create_transaction_simple(db_session):
     # 3. Execute
     result = await service.create_transaction(
         user_uuid=user_uuid,
-        amount=100.0,
+        amount=Decimal("100"),
         category_key="FOOD",
         raw_input="lunch 100",
         transaction_type="expense",

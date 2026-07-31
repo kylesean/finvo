@@ -5,6 +5,7 @@ while delegating to specialized services internally.
 """
 
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
@@ -43,7 +44,7 @@ class TransactionService:
     async def create_transaction(
         self,
         user_uuid: UUID,
-        amount: float,
+        amount: Decimal,
         transaction_type: str = "expense",
         transaction_at: datetime | None = None,
         category_key: str = "OTHERS",
@@ -111,7 +112,7 @@ class TransactionService:
         transaction_id: UUID,
         user_uuid: UUID,
         *,
-        amount: float | None = None,
+        amount: Decimal | None = None,
         category_key: str | None = None,
         raw_input: str | None = None,
         transaction_at: datetime | None = None,

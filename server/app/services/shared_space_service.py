@@ -614,7 +614,7 @@ class SharedSpaceService:
         self,
         user_uuid: UUID,
         space_id: UUID,
-        amount: float,
+        amount: Decimal,
         transaction_type: str = "expense",
         transaction_at: datetime | None = None,
         category_key: str = "OTHERS",

@@ -46,7 +46,7 @@ class TransactionCRUDService:
     async def create_transaction(
         self,
         user_uuid: UUID,
-        amount: float,
+        amount: Decimal,
         transaction_type: str = "expense",
         transaction_at: datetime | None = None,
         category_key: str = "OTHERS",
@@ -63,7 +63,7 @@ class TransactionCRUDService:
         Follow the principle of "record first, then link" and defaults to not linking balance.
         """
         tx_type = transaction_type.lower()
-        transfer_amount = Decimal(str(amount))
+        transfer_amount = amount
         tx_time = transaction_at or datetime.now(UTC)
 
         # Validation logic has been handled by the utility layer, Service layer mainly responsible for persistence
@@ -314,7 +314,7 @@ class TransactionCRUDService:
         transaction_id: UUID,
         user_uuid: UUID,
         *,
-        amount: float | None = None,
+        amount: Decimal | None = None,
         category_key: str | None = None,
         raw_input: str | None = None,
         transaction_at: datetime | None = None,
@@ -357,9 +357,11 @@ class TransactionCRUDService:
         changed_fields: list[str] = []
 
         # Update amount if provided
-        if amount is not None and amount > 0:
+        if amount is not None:
+            if amount <= 0:
+                raise BusinessError("Amount must be positive", "VALIDATION_ERROR")
             old_amount = transaction.amount
-            new_original = Decimal(str(amount))
+            new_original = amount
 
             # Get user's base currency and transaction currency
             user_base = await get_user_base_currency(self.db, user_uuid)

@@ -57,7 +57,7 @@ async def test_create_batch_transactions_api(client_with_auth, db_session, test_
     payload = {
         "transactions": [
             {
-                "amount": 100.0,
+                "amount": "100",
                 "currency": "USD",
                 "tags": ["food"],
                 "transaction_type": "expense",
@@ -65,7 +65,7 @@ async def test_create_batch_transactions_api(client_with_auth, db_session, test_
                 "raw_input": "lunch 100",
             },
             {
-                "amount": 200.0,
+                "amount": "200",
                 "currency": "USD",
                 "tags": ["transport"],
                 "transaction_type": "expense",

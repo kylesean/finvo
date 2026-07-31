@@ -81,7 +81,7 @@ class TransactionItem(BaseModel):
     type: Literal["expense", "income"] = Field(
         ..., description="Transaction type: expense (outflow) or income (inflow)"
     )
-    amount: float = Field(..., gt=0, description="Amount")
+    amount: str = Field(..., description="Amount as a string, e.g. '25.50'")
     currency: str | None = Field(
         default=None,
         description=(
@@ -100,6 +100,18 @@ class TransactionItem(BaseModel):
         ..., description="Key of the category. Choose the most appropriate one based on context."
     )
     raw_input: str | None = Field(default=None, description="Corresponding original input fragment")
+
+    @field_validator("amount")
+    @classmethod
+    def validate_amount(cls, v: str) -> str:
+        """Validate amount is a positive number."""
+        try:
+            decimal_val = Decimal(v)
+        except Exception as e:
+            raise ValueError(f"Invalid amount format: {e}") from e
+        if decimal_val <= 0:
+            raise ValueError("Amount must be positive")
+        return f"{decimal_val:.8f}"
 
 
 class RecordTransactionsInput(BaseModel):
@@ -201,16 +213,16 @@ async def record_transactions(
             if isinstance(result, dict) and result.get("success"):
                 expense_count = len(expense_items)
                 income_count = len(income_items)
-                expense_total = sum(item["amount"] for item in expense_items)
-                income_total = sum(item["amount"] for item in income_items)
+                expense_total = sum((Decimal(item["amount"]) for item in expense_items), Decimal("0"))
+                income_total = sum((Decimal(item["amount"]) for item in income_items), Decimal("0"))
 
                 result["componentType"] = "TransactionGroupReceipt"
                 result["summary"] = {
                     "expense_count": expense_count,
                     "income_count": income_count,
-                    "expense_total": expense_total,
-                    "income_total": income_total,
-                    "net": income_total - expense_total,
+                    "expense_total": float(expense_total),
+                    "income_total": float(income_total),
+                    "net": float(income_total - expense_total),
                 }
 
                 logger.info(

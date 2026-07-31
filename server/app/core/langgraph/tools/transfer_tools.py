@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Any
 
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.database import db_manager
 from app.core.logging import logger
@@ -25,7 +26,20 @@ class ExecuteTransferInput(BaseModel):
 
     source_account_id: str = Field(..., description="ID of the source account (provided by UI)")
     target_account_id: str = Field(..., description="ID of the target account (provided by UI)")
-    amount: float = Field(..., gt=0, description="Transfer amount")
+    amount: str = Field(..., description="Transfer amount as a string, e.g. '100.00'")
+
+    @field_validator("amount")
+    @classmethod
+    def validate_amount(cls, v: str) -> str:
+        """Validate amount is a positive number."""
+        try:
+            decimal_val = Decimal(v)
+        except Exception as e:
+            raise ValueError(f"Invalid amount format: {e}") from e
+        if decimal_val <= 0:
+            raise ValueError("Amount must be positive")
+        return f"{decimal_val:.8f}"
+
     memo: str = Field(default="", description="Optional transfer memo/note")
     transaction_at: str | None = Field(
         default=None, description="Transaction time in ISO 8601 format (defaults to current time)"
@@ -55,7 +69,7 @@ def _parse_time(time_str: str | None) -> datetime:
 async def execute_transfer(
     source_account_id: str,
     target_account_id: str,
-    amount: float,
+    amount: str,
     memo: str = "",
     transaction_at: str | None = None,
     surface_id: str | None = None,
@@ -89,7 +103,7 @@ async def execute_transfer(
         try:
             result = await service.create_transaction(
                 user_uuid=user_uuid,  # Already UUID object
-                amount=amount,
+                amount=Decimal(amount),
                 transaction_type="transfer",
                 transaction_at=tx_time,
                 category_key="GENERAL_TRANSFER",

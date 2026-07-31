@@ -31,7 +31,9 @@ class TransactionDisplayValue(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
-    def from_params(cls, amount: float, tx_type: str, currency: str = "CNY") -> "TransactionDisplayValue":
+    def from_params(
+        cls, amount: float | str | Decimal, tx_type: str, currency: str = "CNY"
+    ) -> "TransactionDisplayValue":
         """Factory method to create display value from raw parameters."""
         # 1. Determine Sign
         tx_type_upper = tx_type.upper()
@@ -43,7 +45,7 @@ class TransactionDisplayValue(BaseModel):
             sign = ""
 
         # 2. Format Value (plain)
-        abs_amount = abs(float(amount))
+        abs_amount = abs(Decimal(str(amount)))
         value_str = f"{abs_amount:.2f}"
 
         # 3. Format Value with thousand separators
@@ -96,7 +98,7 @@ class CreateTransactionItem(BaseModel):
     - 交易2: tags=["吉野家", "午餐"], amount=35
     """
 
-    amount: float = Field(..., gt=0, description="交易金额")
+    amount: str = Field(..., description="交易金额")
     tags: list[str] = Field(
         ...,
         min_length=1,
@@ -110,6 +112,18 @@ class CreateTransactionItem(BaseModel):
     transaction_type: Literal["expense", "income", "transfer"] = Field(default="expense")
     category_key: str = Field(default="OTHERS")
     raw_input: str | None = Field(None, description="该笔交易对应的原始输入片段")
+
+    @field_validator("amount")
+    @classmethod
+    def validate_amount(cls, v: str) -> str:
+        """Validate amount is a positive number."""
+        try:
+            decimal_val = Decimal(v)
+        except Exception as e:
+            raise ValueError(f"Invalid amount format: {e}") from e
+        if decimal_val <= 0:
+            raise ValueError("Amount must be positive")
+        return f"{decimal_val:.8f}"
 
 
 class BatchCreateTransactionRequest(BaseModel):
