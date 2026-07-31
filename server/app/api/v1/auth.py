@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from fastapi_pagination import Params
+from fastapi_pagination.ext.sqlalchemy import apaginate
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,10 +25,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import SessionRepository, get_session, get_session_context
 from app.core.dependencies import get_current_user
 from app.core.logging import bind_context, logger
+from app.core.responses import error_response, get_error_code_int, success_response
 from app.models.session import Session
 from app.models.user import User
 from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, SendCodeRequest, UserInfo
 from app.services.auth_service import AuthService
+from app.utils.auth import create_access_token
 from app.utils.sanitization import sanitize_string
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -128,8 +131,6 @@ async def send_code(
     Raises:
         BusinessError: If account already exists (handled by exception handler)
     """
-    from app.core.responses import success_response
-
     auth_service = AuthService(db)
 
     # Send verification code
@@ -166,8 +167,6 @@ async def register(
     Raises:
         AppException: propagated to the global app_exception_handler in main.py.
     """
-    from app.core.responses import success_response
-
     auth_service = AuthService(db)
 
     # Get client IP
@@ -185,8 +184,6 @@ async def register(
     )
 
     # Generate token using user UUID
-    from app.utils.auth import create_access_token
-
     token_obj = create_access_token(user.uuid)
     token = token_obj.access_token
 
@@ -233,8 +230,6 @@ async def login(
     Raises:
         AppException: propagated to the global app_exception_handler in main.py.
     """
-    from app.core.responses import success_response
-
     auth_service = AuthService(db)
 
     # Get client IP
@@ -287,8 +282,6 @@ async def create_session(
     Returns:
         Unified response with session data
     """
-    from app.core.responses import error_response, get_error_code_int, success_response
-
     try:
         # Generate a unique session ID
         session_id = uuid.uuid4()
@@ -334,8 +327,6 @@ async def update_session_name(
     Returns:
         JSONResponse: Unified response with the updated session information
     """
-    from app.core.responses import success_response
-
     # Verify session ownership (this will use the same db session via Depends)
     session = await get_authorized_session(session_id, current_user, db)
 
@@ -388,7 +379,6 @@ async def delete_session(
         Success response
     """
     from app.api.v1.chatbot import get_agent
-    from app.core.responses import success_response
 
     # Verify session ownership using the request-scoped db session
     repo = SessionRepository(db)
@@ -441,10 +431,6 @@ async def get_user_sessions(
     Returns:
         JSONResponse: Unified response with paginated sessions
     """
-    from fastapi_pagination.ext.sqlalchemy import apaginate
-
-    from app.core.responses import success_response
-
     # Build query for user's sessions, ordered by most recent first
     query = select(Session).where(Session.user_uuid == user.uuid).order_by(desc(Session.created_at))
 

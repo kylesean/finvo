@@ -6,11 +6,10 @@ SQLAlchemy 2.0's Declarative system with Mapped[...] annotations.
 
 from __future__ import annotations
 
-import logging as _logging
 from collections.abc import Callable
 from datetime import UTC, date, datetime, time
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from uuid import UUID
 
 import sqlalchemy as sa
@@ -27,11 +26,6 @@ from sqlalchemy.orm import (
     Mapped,
     mapped_column,
 )
-
-if TYPE_CHECKING:
-    pass
-
-_logger = _logging.getLogger(__name__)
 
 
 class Base(DeclarativeBase):

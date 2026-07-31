@@ -1001,7 +1001,8 @@ class TransactionCRUDService:
         # Don't notify the commenter themselves
         users_to_notify.discard(str(user_uuid))
 
-        assert new_comment.id is not None
+        if new_comment.id is None:
+            raise RuntimeError("Comment id is missing after insert")
         comment_id_int = int(new_comment.id)
 
         if users_to_notify:
