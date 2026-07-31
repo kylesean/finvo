@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'app_exception.dart';
 import '../../../i18n/strings.g.dart';
+import '../../utils/error_translator.dart';
 
 /// Unified conversion of DioException to custom AppException.
 ///
@@ -12,15 +13,19 @@ class AppExceptionFactory {
     final statusCode = err.response?.statusCode ?? 0;
     final backendMessage = _extractMessage(responseData);
 
-    // Check for business error code != 0
-    if (statusCode >= 200 && statusCode < 300) {
+    // Check for business error code != 0.
+    // The server returns the {code, message, data} envelope for both 2xx
+    // (legacy, now retired) and 4xx (proper REST status) business errors.
+    // 5xx responses are system errors — they keep their HTTP-status mapping
+    // (InternalServerErrorException) rather than being treated as business errors.
+    if (statusCode >= 200 && statusCode < 500) {
       if (responseData is Map<String, dynamic>) {
         final code = responseData['code'];
         if (code is int && code != 0) {
-          return BusinessException(
-            (responseData['message'] as String?) ?? 'Unknown business error',
-            code,
-          );
+          final message =
+              (responseData['message'] as String?) ?? 'Unknown business error';
+          final localizedMessage = ErrorTranslator.translate(code, message);
+          return BusinessException(localizedMessage, code);
         }
       }
     }
