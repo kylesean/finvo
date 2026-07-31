@@ -1,15 +1,18 @@
 """Recurring transaction service for scheduled transactions."""
 
+import calendar
+import re
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any, cast
 from uuid import UUID
 
 import structlog
+from dateutil.rrule import rrulestr
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import BusinessError
+from app.core.exceptions import BusinessError, CommonErrorCode, TransactionErrorCode
 from app.models.base import utc_now
 from app.models.transaction import RecurringTransaction
 
@@ -29,38 +32,56 @@ def validate_recurrence_rule(v: str) -> str:
         The normalized (uppercased, stripped) rule string.
 
     Raises:
-        ValueError: If the rule is invalid.
+        BusinessError: If the rule is invalid (error_code =
+            TransactionErrorCode.INVALID_RECURRENCE_RULE).
     """
     if not v or not v.strip():
-        raise ValueError("Recurrence rule cannot be empty")
+        raise BusinessError(
+            message="Recurrence rule cannot be empty",
+            error_code=TransactionErrorCode.INVALID_RECURRENCE_RULE,
+        )
 
     rule = v.strip().upper()
 
     if not rule.startswith("FREQ="):
-        raise ValueError("Invalid RRULE format: must start with FREQ=")
+        raise BusinessError(
+            message="Invalid RRULE format: must start with FREQ=",
+            error_code=TransactionErrorCode.INVALID_RECURRENCE_RULE,
+        )
 
     valid_freqs = {"DAILY", "WEEKLY", "MONTHLY", "YEARLY"}
     freq_part = rule.split(";")[0].replace("FREQ=", "")
     if freq_part not in valid_freqs:
-        raise ValueError(f"Invalid frequency: {freq_part}. Must be one of {valid_freqs}")
+        raise BusinessError(
+            message=f"Invalid frequency: {freq_part}. Must be one of {valid_freqs}",
+            error_code=TransactionErrorCode.INVALID_RECURRENCE_RULE,
+        )
 
     # Validate parseability with rrulestr
-    from dateutil.rrule import rrulestr
-
     try:
         rule_str = rule if rule.startswith("RRULE:") else f"RRULE:{rule}"
         rrulestr(rule_str, dtstart=datetime.now(UTC))
     except Exception as e:
-        raise ValueError(f"Invalid recurrence rule string: {e}")
+        raise BusinessError(
+            message=f"Invalid recurrence rule string: {e}",
+            error_code=TransactionErrorCode.INVALID_RECURRENCE_RULE,
+        ) from e
 
     return rule
 
 
 def validate_transaction_type(v: str) -> str:
-    """Validate transaction type."""
+    """Validate transaction type.
+
+    Raises:
+        BusinessError: If the type is not one of EXPENSE/INCOME/TRANSFER.
+    """
     valid_types = {"EXPENSE", "INCOME", "TRANSFER"}
     if v.upper() not in valid_types:
-        raise ValueError(f"Type must be one of: {', '.join(valid_types)}")
+        raise BusinessError(
+            message=f"Type must be one of: {', '.join(valid_types)}",
+            error_code=CommonErrorCode.VALIDATION_ERROR,
+        )
     return v.upper()
 
 
@@ -151,19 +172,13 @@ class RecurringTransactionService:
         Returns:
             下次执行的 datetime (UTC)，如果无法计算则返回 None
         """
-        import calendar
-        import re
-        from datetime import date as d_cls, datetime as dt
-
-        from dateutil.rrule import rrulestr
-
         try:
             # 使用 UTC 时区，与 RRULE 中的 UNTIL 保持一致
-            dtstart = dt.combine(start_date, dt.min.time(), tzinfo=UTC)
+            dtstart = datetime.combine(start_date, datetime.min.time(), tzinfo=UTC)
             rule_formatted = rrule_str if rrule_str.startswith("RRULE:") else f"RRULE:{rrule_str}"
             rrule = rrulestr(rule_formatted, dtstart=dtstart)
 
-            now = dt.now(UTC)
+            now = datetime.now(UTC)
             exception_set = set(exception_dates or [])
 
             # 从当前时间节点向下索引，避免历史起点的无限循环迭代
@@ -183,8 +198,8 @@ class RecurringTransactionService:
                         for _ in range(12):
                             max_days = calendar.monthrange(cur_year, cur_month)[1]
                             clamped_day = min(target_day, max_days)
-                            cand_date = d_cls(cur_year, cur_month, clamped_day)
-                            cand_dt = dt.combine(cand_date, dt.min.time(), tzinfo=UTC)
+                            cand_date = date(cur_year, cur_month, clamped_day)
+                            cand_dt = datetime.combine(cand_date, datetime.min.time(), tzinfo=UTC)
 
                             if cand_dt > now and cand_date >= start_date:
                                 if end_date and cand_date > end_date:
@@ -446,15 +461,9 @@ class RecurringTransactionService:
         Returns:
             日期列表
         """
-        from datetime import (
-            datetime as dt,
-        )
-
-        from dateutil.rrule import rrulestr
-
         try:
             # 使用 UTC 时区，与 RRULE 中的 UNTIL 保持一致
-            dtstart = dt.combine(start_date, dt.min.time(), tzinfo=UTC)
+            dtstart = datetime.combine(start_date, datetime.min.time(), tzinfo=UTC)
             rrule = rrulestr(rrule_string, dtstart=dtstart)
 
             # 确定实际的结束日期

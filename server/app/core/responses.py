@@ -5,9 +5,12 @@ with existing client applications expecting {code, message, data} structure.
 
 Design principles:
 1. All responses use the same envelope: {code, message, data}
-2. HTTP status codes indicate request/system-level issues (4xx/5xx)
-3. Business logic success/failure is indicated by the 'code' field
-4. code=0 means success, non-zero means business error
+2. HTTP status codes follow REST semantics for ALL outcomes, including
+   business errors (4xx) and server errors (5xx). Success is HTTP 200.
+3. The body's 'code' field provides machine-readable detail on top of the
+   HTTP status — code=0 means success, non-zero means a business error.
+4. Business errors are NOT returned as HTTP 200; the legacy envelope-on-200
+   pattern has been retired.
 """
 
 from __future__ import annotations
@@ -82,25 +85,26 @@ def error_response(
     code: int,
     message: str,
     data: Any = None,
-    http_status: int = 200,
+    http_status: int = 400,
 ) -> JSONResponse:
     """Create an error response with non-zero code.
 
-    For business logic errors, use http_status=200 and let the client
-    check the 'code' field. For request/system errors, use appropriate
-    HTTP status codes (4xx/5xx).
+    Business errors return their proper HTTP 4xx/5xx status — the body still
+    carries ``code``/``message`` for machine-readable detail, but the HTTP
+    status is no longer forced to 200. Callers SHOULD pass a specific status
+    (404, 422, 403, …) when it is more precise than the generic 400 default.
 
     Args:
         code: Business error code (non-zero)
         message: Error message
         data: Optional error details
-        http_status: HTTP status code (default: 200 for business errors)
+        http_status: HTTP status code (default: 400 for a generic client error)
 
     Returns:
         JSONResponse with standardized envelope
 
     Example:
-        >>> return error_response(code=1001, message="User not found")
+        >>> return error_response(code=1001, message="User not found", http_status=404)
         # Returns: {"code": 1001, "message": "User not found"}
     """
     body: dict[str, Any] = {

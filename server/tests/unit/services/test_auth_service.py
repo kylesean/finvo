@@ -101,12 +101,15 @@ async def test_login_failure_wrong_password(db_session):
     await db_session.commit()
 
     # Action & Assert
-    with pytest.raises(AuthenticationError, match="Invalid password"):
+    # Security: login returns a generic "Invalid credentials" message for both
+    # wrong-password and user-not-found to prevent account enumeration.
+    with pytest.raises(AuthenticationError, match="Invalid credentials"):
         await service.login("email", email, "wrongpass", "UTC")
 
 
 @pytest.mark.asyncio
 async def test_login_failure_user_not_found(db_session):
     service = AuthService(db_session)
-    with pytest.raises(AuthenticationError, match="User does not exist"):
+    # Security: same generic message as wrong-password — no enumeration leak.
+    with pytest.raises(AuthenticationError, match="Invalid credentials"):
         await service.login("email", "nonexistent@example.com", "pass", "UTC")

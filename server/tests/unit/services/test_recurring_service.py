@@ -16,13 +16,13 @@ def test_validate_recurrence_rule_valid():
 
 
 def test_validate_recurrence_rule_invalid():
-    with pytest.raises(ValueError, match="must start with FREQ="):
+    with pytest.raises(BusinessError, match="must start with FREQ="):
         validate_recurrence_rule("INVALID_RULE")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(BusinessError):
         validate_recurrence_rule("FREQ=INVALID_FREQ")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(BusinessError):
         validate_recurrence_rule("FREQ=MONTHLY;BYDAY=INVALID_DAY")
 
 

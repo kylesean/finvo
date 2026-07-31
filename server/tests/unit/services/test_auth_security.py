@@ -197,11 +197,11 @@ class TestVerificationCodeSecurity:
 class TestAccountEnumeration:
     """Tests for preventing account enumeration attacks.
 
-    Asserts that error messages/codes don't leak whether a specific account
-    exists. NOTE: the current implementation does surface distinct error codes
-    (EMAIL_REGISTERED on register, USER_NOT_EXIST vs USER_NOT_MATCH_PASSWORD on
-    login). These tests document the CURRENT behavior so any future change to
-    tighten enumeration is visible.
+    Login returns a single generic AUTHENTICATE_FAILED error for both
+    "user not found" and "wrong password" branches, so an attacker cannot
+    distinguish whether an account exists. Registration still surfaces
+    EMAIL_REGISTERED — an accepted trade-off for a self-hosted app where the
+    single operator already knows their own accounts.
     """
 
     @pytest.mark.asyncio
@@ -229,21 +229,21 @@ class TestAccountEnumeration:
 
     @pytest.mark.asyncio
     async def test_login_no_user_leak(self, db_session: AsyncSession) -> None:
-        """Login distinguishes 'user not found' from 'wrong password'.
+        """Login returns the same error code for 'user not found' and 'wrong password'.
 
-        This documents the current (intentional) behavior: a self-hosted app
-        benefits from actionable login errors (the operator can tell whether
-        they mistyped the email vs the password). The test pins both error
-        codes so changes are deliberate.
+        Both branches must raise AUTHENTICATE_FAILED with an identical generic
+        message so an attacker cannot enumerate accounts by distinguishing the
+        two failure cases.
         """
         service = AuthService(db_session)
 
-        # Nonexistent user → USER_NOT_EXIST.
+        # Nonexistent user → AUTHENTICATE_FAILED (same as wrong password).
         with pytest.raises(AuthenticationError) as exc:
             await service.login("email", "nobody@example.com", "whatever", "Asia/Shanghai")
-        assert exc.value.error_code == AuthErrorCode.USER_NOT_EXIST
+        assert exc.value.error_code == AuthErrorCode.AUTHENTICATE_FAILED
+        assert exc.value.message == "Invalid credentials"
 
-        # Create a user, then wrong password → USER_NOT_MATCH_PASSWORD.
+        # Create a user, then wrong password → also AUTHENTICATE_FAILED.
         email = f"login_{uuid4().hex[:8]}@example.com"
         with (
             patch("app.services.auth_service.settings.EMAIL_PROVIDER", "smtp"),
@@ -253,11 +253,11 @@ class TestAccountEnumeration:
 
         with pytest.raises(AuthenticationError) as exc:
             await service.login("email", email, "WrongPass1!", "Asia/Shanghai")
-        assert exc.value.error_code == AuthErrorCode.USER_NOT_MATCH_PASSWORD
+        assert exc.value.error_code == AuthErrorCode.AUTHENTICATE_FAILED
+        assert exc.value.message == "Invalid credentials"
 
-        # Distinct codes confirm the current design leaks existence — documented,
-        # not enforced, per the self-hosted product decision.
-        assert AuthErrorCode.USER_NOT_EXIST != AuthErrorCode.USER_NOT_MATCH_PASSWORD
+        # Both failure modes produce the same code+message — no enumeration leak.
+        assert AuthErrorCode.AUTHENTICATE_FAILED == AuthErrorCode.AUTHENTICATE_FAILED
 
     @pytest.mark.skip(
         reason=(

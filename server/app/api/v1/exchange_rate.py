@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -73,6 +73,7 @@ async def get_exchange_rates(
             code=50001,
             message="Exchange rate data is not available",
             data=None,
+            http_status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 
     return success_response(data=data)
@@ -101,6 +102,7 @@ async def get_single_rate(
             code=40004,
             message=f"Exchange rate for {currency} is not available",
             data=None,
+            http_status=status.HTTP_404_NOT_FOUND,
         )
 
     return success_response(
@@ -143,6 +145,7 @@ async def convert_currency(
             code=40004,
             message=f"Unable to convert from {request.from_currency} to {request.to_currency}",
             data=None,
+            http_status=status.HTTP_400_BAD_REQUEST,
         )
 
     # Calculate the effective rate
@@ -188,4 +191,5 @@ async def refresh_exchange_rates(
             code=50002,
             message="Failed to refresh exchange rates",
             data=None,
+            http_status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )

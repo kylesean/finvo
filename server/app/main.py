@@ -159,9 +159,12 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
     # Convert string error code to integer
     code_int = get_error_code_int(exc.error_code)
 
-    # For business logic errors (400), use HTTP 200 and let code indicate error
-    # For auth/permission/system errors, keep the HTTP status
-    http_status = 200 if exc.status_code == 400 else exc.status_code
+    # Use the exception's HTTP status code directly. The previous behavior
+    # forced HTTP 200 for status_code==400 (the WeChat/Alipay envelope pattern
+    # where the client inspects `code` instead of the HTTP status) — that
+    # legacy is retired: business errors now return their proper 4xx/5xx
+    # status, and the body still carries `code`/`message` for detail.
+    http_status = exc.status_code
 
     # Include details in data field if present
     data = exc.details if exc.details else None
@@ -237,63 +240,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         message="Validation error",
         data={"field_errors": formatted_errors},
         http_status=status.HTTP_422_UNPROCESSABLE_ENTITY,
-    )
-
-
-@app.exception_handler(ValueError)
-async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse:
-    """Handle ValueError exceptions.
-
-    Many legacy services raise ValueError with error codes.
-    Returns unified {code, message, data} format.
-
-    Args:
-        request: The request that caused the error
-        exc: The ValueError exception
-
-    Returns:
-        JSONResponse: Unified response envelope
-    """
-    error_message = str(exc)
-
-    # Try to extract error code from message (format: "ERROR_CODE: message")
-    error_code_str = "VALIDATION_ERROR"
-    message = error_message
-
-    if ": " in error_message:
-        parts = error_message.split(": ", 1)
-        potential_code = parts[0]
-        # Check if it looks like an error code (all caps with underscores)
-        if potential_code.isupper() and "_" in potential_code:
-            error_code_str = potential_code
-            message = parts[1] if len(parts) > 1 else error_message
-
-    # Log the error
-    logger.error(
-        "value_error",
-        error_code=error_code_str,
-        message=message,
-        path=request.url.path,
-        method=request.method,
-        client_host=request.client.host if request.client else "unknown",
-    )
-
-    # Convert to integer code
-    code_int = get_error_code_int(error_code_str)
-
-    # Determine HTTP status code based on error type
-    http_status = 200  # Default to 200 for business errors
-    if "NOT_EXIST" in error_code_str or "NOT_FOUND" in error_code_str:
-        http_status = 404
-    elif "AUTH" in error_code_str or "PASSWORD" in error_code_str:
-        http_status = 401
-    elif "PERMISSION" in error_code_str:
-        http_status = 403
-
-    return error_response(
-        code=code_int,
-        message=message,
-        http_status=http_status,
     )
 
 

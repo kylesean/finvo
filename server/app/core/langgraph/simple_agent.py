@@ -11,6 +11,8 @@
 
 from __future__ import annotations
 
+import json
+import uuid
 from collections.abc import AsyncGenerator, Sequence
 from typing import Any
 from uuid import UUID
@@ -457,9 +459,6 @@ class SimpleLangChainAgent:
         Returns:
             符合客户端格式的消息列表（使用 camelCase 字段名）
         """
-        import json
-        import uuid
-
         from langchain_core.messages import ToolMessage
 
         agent = await self.get_agent()
@@ -872,8 +871,6 @@ class SimpleLangChainAgent:
 
         返回格式匹配客户端 ChatMessageAttachment 模型
         """
-        import uuid as uuid_module
-
         attachments = []
         if isinstance(content, list):
             for idx, item in enumerate(content):
@@ -902,7 +899,7 @@ class SimpleLangChainAgent:
 
                             attachments.append(
                                 {
-                                    "id": f"inline_{idx}_{str(uuid_module.uuid4())[:8]}",
+                                    "id": f"inline_{idx}_{str(uuid.uuid4())[:8]}",
                                     "filename": f"image_{idx}.{ext}",
                                     "signedUrl": url,  # data URI 作为 signedUrl
                                 }
@@ -916,7 +913,7 @@ class SimpleLangChainAgent:
 
                             attachments.append(
                                 {
-                                    "id": f"url_{idx}_{str(uuid_module.uuid4())[:8]}",
+                                    "id": f"url_{idx}_{str(uuid.uuid4())[:8]}",
                                     "filename": f"image_{idx}.{ext}",
                                     "signedUrl": url,
                                 }

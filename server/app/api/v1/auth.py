@@ -23,11 +23,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import SessionRepository, get_session, get_session_context
 from app.core.dependencies import get_current_user
-from app.core.exceptions import AppException
 from app.core.logging import bind_context, logger
 from app.models.session import Session
 from app.models.user import User
-from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, SendCodeRequest, SessionResponse, UserInfo
+from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, SendCodeRequest, UserInfo
 from app.services.auth_service import AuthService
 from app.utils.sanitization import sanitize_string
 
@@ -131,7 +130,7 @@ async def send_code(
     """
     from app.core.responses import success_response
 
-    auth_service = AuthService(db, None)
+    auth_service = AuthService(db)
 
     # Send verification code
     await auth_service.send_verification_code(
@@ -165,65 +164,54 @@ async def register(
         JSONResponse: Unified response with token and user info (code=0 on success)
 
     Raises:
-        Returns error_response with appropriate error code on failure
+        AppException: propagated to the global app_exception_handler in main.py.
     """
-    from app.core.responses import error_response, get_error_code_int, success_response
+    from app.core.responses import success_response
 
-    try:
-        auth_service = AuthService(db, None)
+    auth_service = AuthService(db)
 
-        # Get client IP
-        client_ip = request.client.host if request.client else None
+    # Get client IP
+    client_ip = request.client.host if request.client else None
 
-        # Register user
-        user = await auth_service.register(
-            account_type=data.type,
-            account=data.account,
-            password=data.password,
-            code=data.code,
-            timezone=data.timezone,
-            client_ip=client_ip,
-            locale=data.locale,
-        )
+    # Register user
+    user = await auth_service.register(
+        account_type=data.type,
+        account=data.account,
+        password=data.password,
+        code=data.code,
+        timezone=data.timezone,
+        client_ip=client_ip,
+        locale=data.locale,
+    )
 
-        # Generate token using user UUID
-        from app.utils.auth import create_access_token
+    # Generate token using user UUID
+    from app.utils.auth import create_access_token
 
-        token_obj = create_access_token(user.uuid)
-        token = token_obj.access_token
+    token_obj = create_access_token(user.uuid)
+    token = token_obj.access_token
 
-        # Build user info response
-        user_info = UserInfo(
-            id=user.uuid,
-            email=user.email,
-            mobile=user.mobile,
-            username=user.username or user.email or user.mobile or f"user_{str(user.uuid)[:8]}",
-            avatarUrl=user.avatar_url,
-            createdAt=user.created_at.isoformat(),
-            updatedAt=user.updated_at.isoformat() if user.updated_at else None,
-            clientLastLoginAt=user.last_login_at.isoformat() if user.last_login_at else None,
-        )
+    # Build user info response
+    user_info = UserInfo(
+        id=user.uuid,
+        email=user.email,
+        mobile=user.mobile,
+        username=user.username or user.email or user.mobile or f"user_{str(user.uuid)[:8]}",
+        avatarUrl=user.avatar_url,
+        createdAt=user.created_at.isoformat(),
+        updatedAt=user.updated_at.isoformat() if user.updated_at else None,
+        clientLastLoginAt=user.last_login_at.isoformat() if user.last_login_at else None,
+    )
 
-        logger.info(
-            "user_registered",
-            user_uuid=user.uuid,
-            account_type=data.type,
-            account=data.account[:3] + "***",
-        )
+    logger.info(
+        "user_registered",
+        user_uuid=user.uuid,
+        account_type=data.type,
+        account=data.account[:3] + "***",
+    )
 
-        # 返回统一格式
-        auth_response = AuthResponse(token=token, user=user_info)
-        return success_response(data=auth_response.model_dump(), message="Registration successful")
-
-    except AppException:
-        # BusinessError / AuthenticationError carry structured error_code + message;
-        # let the global app_exception_handler (main.py) format the unified response.
-        raise
-    except Exception as e:
-        logger.exception("registration_unexpected_error", error=str(e))
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"), message="Registration failed", http_status=500
-        )
+    # 返回统一格式
+    auth_response = AuthResponse(token=token, user=user_info)
+    return success_response(data=auth_response.model_dump(), message="Registration successful")
 
 
 @router.post("/login")
@@ -243,55 +231,46 @@ async def login(
         JSONResponse: Unified response with token and user info (code=0 on success)
 
     Raises:
-        Returns error_response with appropriate error code on failure
+        AppException: propagated to the global app_exception_handler in main.py.
     """
-    from app.core.responses import error_response, get_error_code_int, success_response
+    from app.core.responses import success_response
 
-    try:
-        auth_service = AuthService(db, None)
+    auth_service = AuthService(db)
 
-        # Get client IP
-        client_ip = request.client.host if request.client else None
+    # Get client IP
+    client_ip = request.client.host if request.client else None
 
-        # Login user (returns tuple of user and token)
-        user, token = await auth_service.login(
-            account_type=data.type,
-            account=data.account,
-            password=data.password,
-            timezone=data.timezone,
-            client_ip=client_ip,
-        )
+    # Login user (returns tuple of user and token)
+    user, token = await auth_service.login(
+        account_type=data.type,
+        account=data.account,
+        password=data.password,
+        timezone=data.timezone,
+        client_ip=client_ip,
+    )
 
-        # Build user info response
-        user_info = UserInfo(
-            id=user.uuid,
-            email=user.email,
-            mobile=user.mobile,
-            username=user.username or user.email or user.mobile or f"user_{str(user.uuid)[:8]}",
-            avatarUrl=user.avatar_url,
-            createdAt=user.created_at.isoformat(),
-            updatedAt=user.updated_at.isoformat() if user.updated_at else None,
-            clientLastLoginAt=user.last_login_at.isoformat() if user.last_login_at else None,
-        )
+    # Build user info response
+    user_info = UserInfo(
+        id=user.uuid,
+        email=user.email,
+        mobile=user.mobile,
+        username=user.username or user.email or user.mobile or f"user_{str(user.uuid)[:8]}",
+        avatarUrl=user.avatar_url,
+        createdAt=user.created_at.isoformat(),
+        updatedAt=user.updated_at.isoformat() if user.updated_at else None,
+        clientLastLoginAt=user.last_login_at.isoformat() if user.last_login_at else None,
+    )
 
-        logger.info(
-            "user_logged_in",
-            user_uuid=str(user.uuid),
-            account_type=data.type,
-            account=data.account[:3] + "***",
-        )
+    logger.info(
+        "user_logged_in",
+        user_uuid=str(user.uuid),
+        account_type=data.type,
+        account=data.account[:3] + "***",
+    )
 
-        # 返回统一格式
-        auth_response = AuthResponse(token=token, user=user_info)
-        return success_response(data=auth_response.model_dump(), message="Login successful")
-
-    except AppException:
-        # AuthenticationError (subclass) carries structured error_code + message;
-        # let the global app_exception_handler (main.py) format the 401 response.
-        raise
-    except Exception as e:
-        logger.exception("login_unexpected_error", error=str(e))
-        return error_response(code=get_error_code_int("INTERNAL_ERROR"), message="Login failed", http_status=500)
+    # 返回统一格式
+    auth_response = AuthResponse(token=token, user=user_info)
+    return success_response(data=auth_response.model_dump(), message="Login successful")
 
 
 @router.post("/session")
@@ -334,7 +313,7 @@ async def create_session(user: Annotated[User, Depends(get_current_user)]) -> JS
         return error_response(code=get_error_code_int("VALIDATION_ERROR"), message=str(ve), http_status=422)
 
 
-@router.patch("/session/{session_id}/name", response_model=SessionResponse)
+@router.patch("/session/{session_id}/name")
 async def update_session_name(
     session_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -350,7 +329,7 @@ async def update_session_name(
         db: Database session
 
     Returns:
-        SessionResponse: The updated session information
+        JSONResponse: Unified response with the updated session information
     """
     from app.core.responses import success_response
 
@@ -404,7 +383,7 @@ async def delete_session(
         Success response
     """
     from app.api.v1.chatbot import get_agent
-    from app.core.responses import error_response, get_error_code_int, success_response
+    from app.core.responses import success_response
 
     # Verify session ownership
     async with get_session_context() as db:
@@ -422,37 +401,23 @@ async def delete_session(
             )
             raise HTTPException(status_code=403, detail="Access denied to this session")
 
-    try:
-        # 1. Use the chatbot agent to cascade delete history
-        # This handles LangGraph checkpoints (via official API) and searchable_messages
-        chatbot_agent = get_agent()
-        await chatbot_agent.delete_session_history(session.id)
+    # 1. Use the chatbot agent to cascade delete history
+    # This handles LangGraph checkpoints (via official API) and searchable_messages
+    chatbot_agent = get_agent()
+    await chatbot_agent.delete_session_history(session.id)
 
-        # 2. Delete the session metadata
-        async with get_session_context() as db:
-            repo = SessionRepository(db)
-            await repo.delete(session.id)
+    # 2. Delete the session metadata
+    async with get_session_context() as db:
+        repo = SessionRepository(db)
+        await repo.delete(session.id)
 
-        logger.info(
-            "session_deleted_with_history",
-            session_id=session.id,
-            user_uuid=current_user.uuid,
-        )
+    logger.info(
+        "session_deleted_with_history",
+        session_id=session.id,
+        user_uuid=current_user.uuid,
+    )
 
-        return success_response(message="Session deleted")
-
-    except Exception as e:
-        logger.error(
-            "session_delete_failed",
-            session_id=session.id,
-            error=str(e),
-            exc_info=True,
-        )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to delete session",
-            http_status=500,
-        )
+    return success_response(message="Session deleted")
 
 
 @router.get("/sessions")
@@ -476,54 +441,37 @@ async def get_user_sessions(
     """
     from fastapi_pagination.ext.sqlalchemy import apaginate
 
-    from app.core.responses import error_response, get_error_code_int, success_response
+    from app.core.responses import success_response
 
-    try:
-        # Build query for user's sessions, ordered by most recent first
-        query = select(Session).where(Session.user_uuid == user.uuid).order_by(desc(Session.created_at))
+    # Build query for user's sessions, ordered by most recent first
+    query = select(Session).where(Session.user_uuid == user.uuid).order_by(desc(Session.created_at))
 
-        # Use fastapi-pagination to paginate the query
-        page_result = await apaginate(
-            db,
-            query,
-            params=params,
-            transformer=lambda items: [
-                {
-                    "session_id": session.id,
-                    "name": session.name or "",
-                    # Use standard ISO 8601 format: replace +00:00 with Z for UTC
-                    "created_at": (
-                        session.created_at.isoformat().replace("+00:00", "Z") if session.created_at else ""
-                    ),
-                    "updated_at": (
-                        session.updated_at.isoformat().replace("+00:00", "Z") if session.updated_at else ""
-                    ),
-                }
-                for session in items
-            ],
-        )
+    # Use fastapi-pagination to paginate the query
+    page_result = await apaginate(
+        db,
+        query,
+        params=params,
+        transformer=lambda items: [
+            {
+                "session_id": session.id,
+                "name": session.name or "",
+                # Use standard ISO 8601 format: replace +00:00 with Z for UTC
+                "created_at": (session.created_at.isoformat().replace("+00:00", "Z") if session.created_at else ""),
+                "updated_at": (session.updated_at.isoformat().replace("+00:00", "Z") if session.updated_at else ""),
+            }
+            for session in items
+        ],
+    )
 
-        # Wrap fastapi-pagination result in unified response format
-        return success_response(
-            data={
-                "items": page_result.items,
-                "page": page_result.page,
-                "size": page_result.size,
-                "total": page_result.total,
-                "pages": page_result.pages,
-                "has_more": page_result.page < page_result.pages if page_result.pages else False,
-            },
-            message="Sessions retrieved successfully",
-        )
-    except Exception as e:
-        logger.error(
-            "get_sessions_failed",
-            user_uuid=user.uuid,
-            error=str(e),
-            exc_info=True,
-        )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to retrieve sessions",
-            http_status=500,
-        )
+    # Wrap fastapi-pagination result in unified response format
+    return success_response(
+        data={
+            "items": page_result.items,
+            "page": page_result.page,
+            "size": page_result.size,
+            "total": page_result.total,
+            "pages": page_result.pages,
+            "has_more": page_result.page < page_result.pages if page_result.pages else False,
+        },
+        message="Sessions retrieved successfully",
+    )

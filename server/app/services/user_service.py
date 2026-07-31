@@ -646,7 +646,12 @@ class UserService:
         return settings
 
     async def create_default_financial_settings(
-        self, user_uuid: UUID, locale: str | None = None, timezone: str | None = None
+        self,
+        user_uuid: UUID,
+        locale: str | None = None,
+        timezone: str | None = None,
+        *,
+        commit: bool = True,
     ) -> FinancialSettings:
         """Create default financial settings for a user.
 
@@ -657,6 +662,10 @@ class UserService:
             user_uuid: The user's UUID
             locale: User's locale (e.g. "zh_CN") for currency inference
             timezone: User's IANA timezone (e.g. "Asia/Shanghai") for currency inference
+            commit: When True (default), commit and refresh within this method.
+                When False, only flush within the caller's transaction so the
+                caller can roll back user + settings atomically if a later step
+                fails. Used by :meth:`AuthService.register`.
 
         Returns:
             FinancialSettings: The created settings object
@@ -675,8 +684,14 @@ class UserService:
             updated_at=utc_now(),
         )
         self.db.add(settings)
-        await self.db.commit()
-        await self.db.refresh(settings)
+        if commit:
+            await self.db.commit()
+            await self.db.refresh(settings)
+        else:
+            # Send INSERT within the caller's transaction without committing,
+            # so the caller can roll back atomically if a later step fails.
+            await self.db.flush()
+            await self.db.refresh(settings)
 
         logger.info(
             "financial_settings_created",

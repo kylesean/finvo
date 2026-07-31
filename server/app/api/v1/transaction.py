@@ -1,14 +1,18 @@
 """Transaction management API endpoints."""
 
+from datetime import datetime
+from decimal import Decimal
 from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi_pagination import Params
-from sqlalchemy import and_, func, select
+from fastapi_pagination.ext.sqlalchemy import apaginate
+from sqlalchemy import and_, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.responses import error_response, get_error_code_int, success_response
@@ -79,14 +83,16 @@ def _extract_amounts(tx: Any) -> tuple[float, float, str, Any]:
         Tuple of (amount_val, amount_original, original_currency, stored_exchange_rate)
     """
     amount_original = float(_get_attr(tx, "amount_original", "amountOriginal") or _get_attr(tx, "amount") or 0)
-    original_currency = _get_attr(tx, "currency") or "CNY"
+    original_currency = _get_attr(tx, "currency") or PROJECT_DEFAULT_CURRENCY
     stored_exchange_rate = _get_attr(tx, "exchange_rate", "exchangeRate")
     amount_val = float(_get_attr(tx, "amount") or 0)
 
     return amount_val, amount_original, original_currency, stored_exchange_rate
 
 
-def _transaction_to_dict(tx: Any, display_currency: str = "CNY", exchange_rate: float = 1.0) -> dict[str, Any]:
+def _transaction_to_dict(
+    tx: Any, display_currency: str = PROJECT_DEFAULT_CURRENCY, exchange_rate: float = 1.0
+) -> dict[str, Any]:
     """Convert transaction model to dictionary for API response.
 
     This function handles multiple input types:
@@ -189,47 +195,39 @@ async def get_transactions(
     Returns:
         Unified format pagination response, containing display fields
     """
-    from app.core.responses import error_response, get_error_code_int, success_response
     from app.services.transaction_query_service import (
         TransactionQueryParams,
         TransactionQueryService,
         TransactionType,
     )
 
-    try:
-        # 构建查询参数
-        params = TransactionQueryParams(
-            date=date,
-            transaction_types=[TransactionType(transaction_type.upper())] if transaction_type else None,
-            page=page,
-            per_page=size,
-        )
+    # 构建查询参数
+    params = TransactionQueryParams(
+        date=date,
+        transaction_types=[TransactionType(transaction_type.upper())] if transaction_type else None,
+        page=page,
+        per_page=size,
+    )
 
-        # 使用共享服务执行查询
-        service = TransactionQueryService(db)
-        result = await service.search(str(current_user.uuid), params)
+    # 使用共享服务执行查询
+    service = TransactionQueryService(db)
+    result = await service.search(str(current_user.uuid), params)
 
-        # 获取用户本位币
-        display_currency = await get_user_display_currency(db, current_user.uuid)
+    # 获取用户本位币
+    display_currency = await get_user_display_currency(db, current_user.uuid)
 
-        # 映射响应（展示原币金额）
-        return success_response(
-            data={
-                "items": [_transaction_to_dict(item, display_currency) for item in result.items],
-                "page": result.page,
-                "size": result.per_page,
-                "total": result.total,
-                "pages": result.pages,
-                "hasMore": result.has_more,
-            },
-            message="Transactions retrieved successfully",
-        )
-    except Exception:
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to retrieve transactions",
-            http_status=500,
-        )
+    # 映射响应（展示原币金额）
+    return success_response(
+        data={
+            "items": [_transaction_to_dict(item, display_currency) for item in result.items],
+            "page": result.page,
+            "size": result.per_page,
+            "total": result.total,
+            "pages": result.pages,
+            "hasMore": result.has_more,
+        },
+        message="Transactions retrieved successfully",
+    )
 
 
 @router.get("/search")
@@ -266,104 +264,88 @@ async def search_transactions(
     Returns:
         统一格式的分页响应
     """
-    from datetime import datetime
-    from decimal import Decimal
+    # 构建基础查询
+    conditions: list[Any] = []
+    conditions.append(Transaction.user_uuid == current_user.uuid)
 
-    from fastapi_pagination.ext.sqlalchemy import apaginate
-    from sqlalchemy import and_, desc, or_, select
-
-    from app.core.responses import error_response, get_error_code_int, success_response
-    from app.models.transaction import Transaction
-
-    try:
-        # 构建基础查询
-        conditions: list[Any] = []
-        conditions.append(Transaction.user_uuid == current_user.uuid)
-
-        # 添加过滤条件
-        if keyword:
-            # SQLModel field types are interpreted as actual types (str) rather than column elements
-            # when accessing them directly. We use type: ignore for ilike/in_ etc.
-            conditions.append(
-                or_(
-                    Transaction.description.ilike(f"%{keyword}%"),
-                    Transaction.location.ilike(f"%{keyword}%"),
-                )
+    # 添加过滤条件
+    if keyword:
+        # SQLModel field types are interpreted as actual types (str) rather than column elements
+        # when accessing them directly. We use type: ignore for ilike/in_ etc.
+        conditions.append(
+            or_(
+                Transaction.description.ilike(f"%{keyword}%"),
+                Transaction.location.ilike(f"%{keyword}%"),
             )
-
-        if min_amount is not None:
-            try:
-                min_val = Decimal(min_amount)
-                conditions.append(Transaction.amount >= min_val)
-            except (ValueError, TypeError):
-                pass
-
-        if max_amount is not None:
-            try:
-                max_val = Decimal(max_amount)
-                conditions.append(Transaction.amount <= max_val)
-            except (ValueError, TypeError):
-                pass
-
-        if category_keys:
-            keys = [k.strip() for k in category_keys.split(",")]
-            conditions.append(Transaction.category_key.in_(keys))
-
-        if tags:
-            tag_list = [t.strip() for t in tags.split(",")]
-            # PostgreSQL JSONB contains check
-            for tag in tag_list:
-                conditions.append(Transaction.tags.contains([tag]))
-
-        if start_date:
-            try:
-                start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
-                conditions.append(Transaction.transaction_at >= start_dt)
-            except ValueError:
-                pass
-
-        if end_date:
-            try:
-                end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
-                conditions.append(Transaction.transaction_at <= end_dt)
-            except ValueError:
-                pass
-
-        if transaction_type:
-            conditions.append(Transaction.type == transaction_type.upper())
-
-        # 构建查询
-        query = select(Transaction).where(and_(True, *conditions)).order_by(desc(Transaction.transaction_at))
-
-        # 获取用户本位币
-        display_currency = await get_user_display_currency(db, current_user.uuid)
-
-        # 使用 fastapi-pagination 分页
-        page_result = await apaginate(
-            db,
-            query,
-            params=params,
-            transformer=lambda items: [_transaction_to_dict(t, display_currency) for t in items],
         )
 
-        # 返回统一格式
-        return success_response(
-            data={
-                "items": page_result.items,
-                "page": page_result.page,
-                "size": page_result.size,
-                "total": page_result.total,
-                "pages": page_result.pages,
-                "has_more": page_result.page < page_result.pages if page_result.pages else False,
-            },
-            message="Transactions searched successfully",
-        )
-    except Exception:
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to search transactions",
-            http_status=500,
-        )
+    if min_amount is not None:
+        try:
+            min_val = Decimal(min_amount)
+            conditions.append(Transaction.amount >= min_val)
+        except (ValueError, TypeError):
+            pass
+
+    if max_amount is not None:
+        try:
+            max_val = Decimal(max_amount)
+            conditions.append(Transaction.amount <= max_val)
+        except (ValueError, TypeError):
+            pass
+
+    if category_keys:
+        keys = [k.strip() for k in category_keys.split(",")]
+        conditions.append(Transaction.category_key.in_(keys))
+
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",")]
+        # PostgreSQL JSONB contains check
+        for tag in tag_list:
+            conditions.append(Transaction.tags.contains([tag]))
+
+    if start_date:
+        try:
+            start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            conditions.append(Transaction.transaction_at >= start_dt)
+        except ValueError:
+            pass
+
+    if end_date:
+        try:
+            end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            conditions.append(Transaction.transaction_at <= end_dt)
+        except ValueError:
+            pass
+
+    if transaction_type:
+        conditions.append(Transaction.type == transaction_type.upper())
+
+    # 构建查询
+    query = select(Transaction).where(and_(True, *conditions)).order_by(desc(Transaction.transaction_at))
+
+    # 获取用户本位币
+    display_currency = await get_user_display_currency(db, current_user.uuid)
+
+    # 使用 fastapi-pagination 分页
+    page_result = await apaginate(
+        db,
+        query,
+        params=params,
+        transformer=lambda items: [_transaction_to_dict(t, display_currency) for t in items],
+    )
+
+    # 返回统一格式
+    return success_response(
+        data={
+            "items": page_result.items,
+            "page": page_result.page,
+            "size": page_result.size,
+            "total": page_result.total,
+            "pages": page_result.pages,
+            "has_more": page_result.page < page_result.pages if page_result.pages else False,
+        },
+        message="Transactions searched successfully",
+    )
 
 
 @router.get("/{transaction_id:uuid}")

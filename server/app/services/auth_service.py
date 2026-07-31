@@ -9,8 +9,8 @@ This module provides the core authentication business logic including:
 
 from __future__ import annotations
 
+import re
 import secrets
-import time
 import uuid
 from typing import Any, cast as type_cast
 
@@ -36,15 +36,13 @@ class AuthService:
     - Account existence checking
     """
 
-    def __init__(self, db_session: AsyncSession, redis_client: Any = None):
+    def __init__(self, db_session: AsyncSession):
         """Initialize the authentication service.
 
         Args:
             db_session: Async database session
-            redis_client: Redis client for verification code storage
         """
         self.db = db_session
-        self.redis = redis_client
 
     async def send_verification_code(self, account_type: str, account: str) -> bool:
         """Send verification code to the specified account.
@@ -167,10 +165,15 @@ class AuthService:
         else:
             user_data["mobile"] = account
 
-        # Create user
+        # Create user.
+        # Flush (not commit) so the INSERT is sent within the current transaction
+        # and `user.uuid` is populated, but nothing is persisted yet. The financial
+        # settings creation below runs in the SAME transaction; if it raises, both
+        # inserts roll back together — no half-registered user. The single commit
+        # point is after settings creation.
         user = User(**user_data)
         self.db.add(user)
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(user)
 
         # Create default financial settings for the new user.
@@ -180,6 +183,9 @@ class AuthService:
         # immutable after registration unless explicitly changed via the
         # financial-settings API.
         await self._create_default_financial_settings(user.uuid, locale=locale, timezone=timezone)
+
+        # Single commit point: user + financial settings are atomic.
+        await self.db.commit()
 
         logger.info("user_registered", user_uuid=user.uuid, account_type=account_type)
 
@@ -194,22 +200,28 @@ class AuthService:
         This method is called EXACTLY ONCE during registration.
         It must NOT be called from login, scheduled jobs, or any other path.
 
+        Runs within the caller's transaction and does NOT commit. If this
+        raises, the caller (:meth:`register`) must roll back so that the user
+        and its financial settings are either both persisted or neither —
+        previously a swallowed error here left a half-registered user with no
+        settings row, breaking downstream code that assumes settings exist.
+
         Args:
             user_uuid: The user's UUID
             locale: User's locale (e.g. "zh_CN")
             timezone: User's IANA timezone (e.g. "Asia/Shanghai")
+
+        Raises:
+            Exception: Propagates any failure from settings creation so the
+                caller's transaction rolls back atomically.
         """
         from app.services.user_service import UserService
 
-        try:
-            # sqlmodel.AsyncSession is a thin subclass of sqlalchemy.AsyncSession;
-            # the type mismatch is only in the stubs, not at runtime.
-            user_service = UserService(self.db)  # type: ignore[arg-type]
-            await user_service.create_default_financial_settings(user_uuid, locale=locale, timezone=timezone)
-            logger.info("default_financial_settings_created", user_uuid=str(user_uuid))
-        except Exception as e:
-            # Log error but don't fail registration
-            logger.error("failed_to_create_financial_settings", user_uuid=str(user_uuid), error=str(e))
+        # sqlmodel.AsyncSession is a thin subclass of sqlalchemy.AsyncSession;
+        # the type mismatch is only in the stubs, not at runtime.
+        user_service = UserService(self.db)  # type: ignore[arg-type]
+        await user_service.create_default_financial_settings(user_uuid, locale=locale, timezone=timezone, commit=False)
+        logger.info("default_financial_settings_created", user_uuid=str(user_uuid))
 
     async def login(
         self, account_type: str, account: str, password: str, timezone: str, client_ip: str | None = None
@@ -239,12 +251,16 @@ class AuthService:
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
 
-        if not user:
-            raise AuthenticationError(message="User does not exist", error_code=AuthErrorCode.USER_NOT_EXIST)
-
-        # Verify password
-        if not user.verify_password(password):
-            raise AuthenticationError(message="Invalid password", error_code=AuthErrorCode.USER_NOT_MATCH_PASSWORD)
+        # Verify password.
+        # Security: use a single generic message + error code for both "user not found"
+        # and "wrong password" branches to prevent account enumeration via distinguishable
+        # error responses. The original USER_NOT_EXIST / USER_NOT_MATCH_PASSWORD codes are
+        # intentionally collapsed into AUTHENTICATE_FAILED here.
+        if not user or not user.verify_password(password):
+            raise AuthenticationError(
+                message="Invalid credentials",
+                error_code=AuthErrorCode.AUTHENTICATE_FAILED,
+            )
 
         # Update user login information
         needs_update = False
@@ -296,126 +312,6 @@ class AuthService:
 
     # Private helper methods
 
-    def _generate_code(self, length: int = 6) -> str:
-        """Generate a random numeric verification code.
-
-        Args:
-            length: Length of the code (default: 6)
-
-        Returns:
-            str: Random numeric code
-        """
-        min_val = 10 ** (length - 1)
-        max_val = 10**length - 1
-        return str(secrets.randbelow(max_val - min_val + 1) + min_val)
-
-    async def _send_code(self, account_type: str, account: str, code: str) -> bool:
-        """Send verification code via email or SMS.
-
-        Args:
-            account_type: Type of account ('email' or 'mobile')
-            account: Email address or mobile number
-            code: Verification code to send
-
-        Returns:
-            bool: True if sent successfully
-        """
-        # In production, integrate with actual email/SMS service
-        # For now, just log the code (for development/testing)
-        if settings.ENVIRONMENT.value == "development":
-            logger.info(
-                "verification_code_generated",
-                account_type=account_type,
-                account=account,
-                code=code,
-                message="In production, this would be sent via email/SMS",
-            )
-
-        # Mock sending based on provider setting
-        if account_type == "email":
-            if settings.EMAIL_PROVIDER == "mock":
-                # debug-level only: never log the code at info (log hygiene)
-                logger.debug("mock_email_sent", to=account)
-                return True
-            # Integration with actual email service (SMTP, SendGrid, etc.) should be implemented for production
-        else:
-            if settings.SMS_PROVIDER == "mock":
-                # debug-level only: never log the code at info (log hygiene)
-                logger.debug("mock_sms_sent", to=account)
-                return True
-            # Integration with actual SMS service (Twilio, Aliyun, etc.) should be implemented for production
-
-        return True
-
-    async def _store_code(self, account: str, code: str) -> None:
-        """Store verification code in Redis.
-
-        Args:
-            account: Email address or mobile number
-            code: Verification code
-        """
-        if not self.redis:
-            logger.warning("redis_not_configured", message="Code storage skipped")
-            return
-
-        key = self._get_code_key(account)
-        await self.redis.setex(key, settings.CODE_EXPIRY_SECONDS, code)
-
-    async def _check_rate_limit(self, account: str) -> bool:
-        """Check if account has exceeded rate limit for code sending.
-
-        Args:
-            account: Email address or mobile number
-
-        Returns:
-            bool: True if within rate limit, False otherwise
-        """
-        if not self.redis:
-            return True
-
-        key = self._get_rate_limit_key(account)
-        last_send_time = await self.redis.get(key)
-
-        if not last_send_time:
-            return True
-
-        elapsed = time.time() - float(last_send_time.decode())
-        return elapsed >= 60  # 60 seconds rate limit
-
-    async def _record_send_time(self, account: str) -> None:
-        """Record the time when code was sent for rate limiting.
-
-        Args:
-            account: Email address or mobile number
-        """
-        if not self.redis:
-            return
-
-        key = self._get_rate_limit_key(account)
-        await self.redis.setex(key, 60, str(time.time()))
-
-    def _get_code_key(self, account: str) -> str:
-        """Get Redis key for verification code storage.
-
-        Args:
-            account: Email address or mobile number
-
-        Returns:
-            str: Redis key
-        """
-        return f"verification_code:{account}"
-
-    def _get_rate_limit_key(self, account: str) -> str:
-        """Get Redis key for rate limiting.
-
-        Args:
-            account: Email address or mobile number
-
-        Returns:
-            str: Redis key
-        """
-        return f"code_rate_limit:{account}"
-
     def _generate_uuid(self) -> uuid.UUID:
         """Generate a unique UUID v7 for user.
 
@@ -443,8 +339,6 @@ class AuthService:
         Returns:
             str: Generated username (max 30 chars)
         """
-        import re as _re
-
         max_len = 30
         suffix_len = 5  # e.g. "_a3x7"
 
@@ -452,14 +346,14 @@ class AuthService:
             # Extract local part: "john.doe@gmail.com" -> "john.doe"
             local_part = account.split("@")[0]
             # Replace dots, hyphens, plus signs with underscore
-            base = _re.sub(r"[.+\-]", "_", local_part)
+            base = re.sub(r"[.+\-]", "_", local_part)
             # Keep only alphanumeric and underscore
-            base = _re.sub(r"[^a-zA-Z0-9_]", "", base)
+            base = re.sub(r"[^a-zA-Z0-9_]", "", base)
             # Collapse consecutive underscores
-            base = _re.sub(r"_+", "_", base).strip("_")
+            base = re.sub(r"_+", "_", base).strip("_")
         else:
             # Mobile: use last 4 digits as base
-            digits = _re.sub(r"\D", "", account)
+            digits = re.sub(r"\D", "", account)
             base = f"user_{digits[-4:]}" if len(digits) >= 4 else "user"
 
         # Truncate base to leave room for suffix

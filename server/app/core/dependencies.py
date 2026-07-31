@@ -7,11 +7,14 @@ This module provides reusable dependency functions for:
 - Session management
 """
 
+import hashlib
+import json
 from collections.abc import AsyncGenerator
 from typing import Annotated, Any, cast
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
@@ -27,32 +30,23 @@ security = HTTPBearer()
 async def get_redis_client() -> AsyncGenerator[Any]:
     """Get Redis client for caching and session management.
 
+    Returns the shared :class:`CacheManager` client backed by a connection
+    pool. The previous implementation called ``redis.from_url`` on every
+    dependency resolution, opening a fresh connection per request and leaking
+    sockets under load. The singleton client must NOT be closed here — its
+    lifecycle is owned by ``cache_manager`` and torn down at app shutdown via
+    ``close_cache()``.
+
     Yields:
-        Redis client instance or None if not configured
+        Redis client instance or None if Redis is not configured/unreachable.
     """
-    redis_client = None
     try:
-        from redis import asyncio as redis_async
+        from app.core.cache import cache_manager
 
-        from app.core.config import settings
-
-        redis_client = await redis_async.from_url(
-            settings.redis_url,
-            encoding="utf-8",
-            decode_responses=False,
-        )
+        yield cache_manager.get_client()
     except Exception as e:
-        logger.warning("redis_connection_init_failed", error=str(e))
-        redis_client = None
-
-    try:
-        yield redis_client
-    finally:
-        if redis_client is not None:
-            try:
-                await redis_client.aclose()
-            except Exception:  # nosec B110
-                pass
+        logger.warning("redis_client_unavailable", error=str(e))
+        yield None
 
 
 async def get_current_user_uuid(
@@ -74,7 +68,12 @@ async def get_current_user_uuid(
         user_uuid = verify_token(token)
 
         if user_uuid is None:
-            logger.error("invalid_token", token_part=token[:10] + "...")
+            # Log a non-reversible fingerprint (SHA-256 prefix) for correlation
+            # only. Never log raw token fragments: a JWT's first chars are the
+            # base64 header (identical across tokens, no diagnostic value) and
+            # the payload can carry sensitive claims.
+            token_fingerprint = hashlib.sha256(token.encode()).hexdigest()[:12]
+            logger.error("invalid_token", token_fingerprint=token_fingerprint, token_length=len(token))
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid authentication credentials",
@@ -196,8 +195,12 @@ class OptionalAuth:
 
             return user
 
-        except Exception as e:
-            logger.warning("optional_auth_failed", error=str(e))
+        except (ValueError, JWTError) as e:
+            # Token-format / JWT-decode failures mean "no valid auth" → anonymous.
+            # Other exceptions (DB outage, programming error) MUST propagate so
+            # they surface as 5xx instead of silently downgrading authenticated
+            # users to anonymous, which would mask real bugs.
+            logger.warning("optional_auth_invalid_token", error=str(e))
             return None
 
 
@@ -226,9 +229,6 @@ async def get_user_session_data(
         session_data = await redis_client.get(session_key)
 
         if session_data:
-            import json
-            from typing import cast
-
             return cast(dict[str, Any], json.loads(session_data.decode()))
 
         return {}
@@ -258,8 +258,6 @@ async def save_user_session_data(
         return False
 
     try:
-        import json
-
         session_key = f"user_session:{user.uuid}"
 
         # Store session data with 30-day expiration

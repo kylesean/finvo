@@ -24,7 +24,6 @@ from app.api.v1.user import router as user_router
 from app.api.v1.version import router as version_router
 from app.api.v1.ws import router as ws_router
 from app.core.config import settings
-from app.core.logging import logger
 
 api_router = APIRouter()
 
@@ -48,12 +47,21 @@ api_router.include_router(version_router)
 api_router.include_router(ws_router)
 
 
+# NOTE: This endpoint intentionally returns a plain dict (not the unified
+# {code, message, data} envelope) because the Flutter client reads
+# ``version``/``environment`` directly from the response root in
+# ``server_config_service.dart``. The comprehensive ``/health`` endpoint in
+# ``main.py`` returns the envelope format and checks backing services; this
+# one is a lightweight liveness probe for client server-config discovery.
 @api_router.get("/health")
 async def health_check() -> dict[str, str]:
-    """Health check endpoint.
+    """Lightweight health check for client server-config discovery.
 
     Returns:
-        dict: Health status information.
+        dict: Health status, version, and environment.
     """
-    logger.info("health_check_called")
-    return {"status": "healthy", "version": settings.VERSION}
+    return {
+        "status": "healthy",
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT.value,
+    }

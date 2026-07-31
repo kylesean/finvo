@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Any, cast
+from typing import Any
 from uuid import UUID, uuid4
 
 import structlog
@@ -10,6 +10,7 @@ from sqlalchemy import Select, String, and_, cast as sa_cast, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.config.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import BusinessError, NotFoundError
 from app.models.attachment import Attachment
 from app.models.base import utc_now
@@ -37,10 +38,7 @@ class TransactionCRUDService:
     async def get_financial_account(self, account_id: UUID, user_uuid: UUID) -> FinancialAccount | None:
         """Get and validate financial account."""
         query = select(FinancialAccount).where(
-            cast(
-                Any,
-                and_(FinancialAccount.id == account_id, FinancialAccount.user_uuid == user_uuid),
-            )
+            and_(FinancialAccount.id == account_id, FinancialAccount.user_uuid == user_uuid),
         )
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
@@ -52,7 +50,7 @@ class TransactionCRUDService:
         transaction_type: str = "expense",
         transaction_at: datetime | None = None,
         category_key: str = "OTHERS",
-        currency: str = "CNY",
+        currency: str = PROJECT_DEFAULT_CURRENCY,
         raw_input: str | None = None,
         source_account_id: UUID | None = None,
         target_account_id: UUID | None = None,
@@ -101,7 +99,6 @@ class TransactionCRUDService:
             user_uuid=user_uuid,
             type=tx_type.upper(),
             raw_input=raw_input or "",
-            description=None,
             amount_original=abs(amount_original),
             amount=base_amount.quantize(Decimal("0.00000001")),
             currency=tx_currency,
@@ -227,28 +224,30 @@ class TransactionCRUDService:
         associated_spaces = spaces_result.scalars().all()
         spaces_data = [{"id": str(s.id), "name": s.name} for s in associated_spaces]
 
-        # Get comment user information
+        # Get comment user information — batch-load all comment authors in one
+        # query to avoid N+1 (previously: one select(User) per comment).
         comments_data = []
-        for comment in transaction.comments:
-            # Query comment author information
-            user_query = select(User).where(User.uuid == comment.user_uuid)
-            user_result = await self.db.execute(user_query)
-            user = user_result.scalar_one_or_none()
+        if transaction.comments:
+            comment_user_uuids = {c.user_uuid for c in transaction.comments}
+            users_result = await self.db.execute(select(User).where(User.uuid.in_(comment_user_uuids)))
+            user_by_uuid = {u.uuid: u for u in users_result.scalars().all()}
 
-            comments_data.append(
-                {
-                    "id": comment.id,
-                    "transactionId": str(comment.transaction_id),
-                    "userUuid": str(comment.user_uuid),
-                    "userName": user.username if user else "Unknown",
-                    "userAvatarUrl": user.avatar_url if user else None,
-                    "parentCommentId": comment.parent_comment_id,
-                    "commentText": comment.comment_text,
-                    "mentionedUserIds": comment.mentioned_user_ids or [],
-                    "createdAt": comment.created_at.isoformat() if comment.created_at else None,
-                    "updatedAt": comment.updated_at.isoformat() if comment.updated_at else None,
-                }
-            )
+            for comment in transaction.comments:
+                user = user_by_uuid.get(comment.user_uuid)
+                comments_data.append(
+                    {
+                        "id": comment.id,
+                        "transactionId": str(comment.transaction_id),
+                        "userUuid": str(comment.user_uuid),
+                        "userName": user.username if user else "Unknown",
+                        "userAvatarUrl": user.avatar_url if user else None,
+                        "parentCommentId": comment.parent_comment_id,
+                        "commentText": comment.comment_text,
+                        "mentionedUserIds": comment.mentioned_user_ids or [],
+                        "createdAt": comment.created_at.isoformat() if comment.created_at else None,
+                        "updatedAt": comment.updated_at.isoformat() if comment.updated_at else None,
+                    }
+                )
 
         # Display: show original currency amount for individual transaction
         amount_val = float(transaction.amount_original)
@@ -515,6 +514,12 @@ class TransactionCRUDService:
             "batch_create_using_default_currency", user_uuid=str(user_uuid), default_currency=user_default_currency
         )
 
+        # Capture once for consistency across all items in the batch.
+        # Use the tzinfo of `now` for transaction_timezone, matching create_transaction()
+        # — never hardcode a region-specific zone for a globally usable product.
+        now = utc_now()
+        tx_timezone = str(now.tzinfo or "UTC")
+
         for item in transactions_data:
             amount_original = Decimal(str(item["amount"]))
             # Use user's primaryCurrency as default value, instead of hardcoding CNY
@@ -538,8 +543,8 @@ class TransactionCRUDService:
                 tags=item.get("tags", []),
                 raw_input=item.get("raw_input"),
                 source_account_id=UUID(str(source_account_id)) if source_account_id else None,
-                transaction_at=utc_now(),
-                transaction_timezone="Asia/Shanghai",
+                transaction_at=now,
+                transaction_timezone=tx_timezone,
                 source="AI",
                 status="CLEARED",
                 source_thread_id=source_thread_id,
@@ -580,18 +585,32 @@ class TransactionCRUDService:
         transaction_ids: list[UUID],
         account_id: UUID | None,
     ) -> dict[str, Any]:
-        """Batch update transaction account"""
-        results = []
+        """Batch update transaction account.
+
+        Returns a partial-failure result: ``success`` is True only if every
+        item was updated; ``failed`` lists the transaction_ids that raised.
+        Previously this always reported success=True and ``count`` conflated
+        attempted with successful updates, masking total failures.
+        """
+        results: list[dict[str, Any]] = []
+        failed: list[dict[str, str]] = []
         for tx_id in transaction_ids:
             try:
                 res = await self.update_transaction_account(
                     transaction_id=tx_id, user_uuid=user_uuid, account_id=account_id
                 )
-                results.append(res)
+                results.append(res)  # type: ignore[arg-type]
             except Exception as e:
                 logger.error("batch_update_tx_failed", tx_id=str(tx_id), error=str(e))
+                failed.append({"transaction_id": str(tx_id), "error": str(e)})
 
-        return {"success": True, "count": len(results), "account_id": account_id}
+        return {
+            "success": len(failed) == 0,
+            "count": len(results),
+            "failed_count": len(failed),
+            "failed": failed,
+            "account_id": str(account_id) if account_id else None,
+        }
 
     async def update_transaction_account(
         self,
@@ -662,12 +681,9 @@ class TransactionCRUDService:
         # Rollback old account balance
         if old_account_id:
             old_account_query = select(FinancialAccount).where(
-                cast(
-                    Any,
-                    and_(
-                        FinancialAccount.id == old_account_id,
-                        FinancialAccount.user_uuid == user_uuid,
-                    ),
+                and_(
+                    FinancialAccount.id == old_account_id,
+                    FinancialAccount.user_uuid == user_uuid,
                 )
             )
             old_account_result = await self.db.execute(old_account_query)
@@ -715,12 +731,9 @@ class TransactionCRUDService:
         # 2. Update new account balance
         if new_account_id:
             new_account_query = select(FinancialAccount).where(
-                cast(
-                    Any,
-                    and_(
-                        FinancialAccount.id == new_account_id,
-                        FinancialAccount.user_uuid == user_uuid,
-                    ),
+                and_(
+                    FinancialAccount.id == new_account_id,
+                    FinancialAccount.user_uuid == user_uuid,
                 )
             )
             new_account_result = await self.db.execute(new_account_query)
@@ -857,6 +870,20 @@ class TransactionCRUDService:
         if not comments_data:
             return []
 
+        # Batch-load parent comments in one query to avoid N+1 (previously:
+        # one select per comment that has a parent_comment_id).
+        parent_ids = {c.parent_comment_id for c, _, _ in comments_data if c.parent_comment_id}
+        parent_by_id: dict[Any, tuple[Any, str | None]] = {}
+        if parent_ids:
+            parent_query = (
+                select(TransactionComment, User.username)
+                .join(User, TransactionComment.user_uuid == User.uuid)
+                .where(TransactionComment.id.in_(parent_ids))
+            )
+            parent_result = await self.db.execute(parent_query)
+            for pc, pn in parent_result.all():
+                parent_by_id[pc.id] = (pc, pn)
+
         # Format comment data
         formatted_comments = []
         for comment, user_name, user_avatar_url in comments_data:
@@ -864,19 +891,10 @@ class TransactionCRUDService:
             replied_to_user_uuid = None
             replied_to_user_name = None
 
-            if comment.parent_comment_id:
-                parent_query = (
-                    select(TransactionComment, User.username)
-                    .join(User, TransactionComment.user_uuid == User.uuid)
-                    .where(TransactionComment.id == comment.parent_comment_id)
-                )
-                parent_result = await self.db.execute(parent_query)
-                parent_data = parent_result.first()
-
-                if parent_data:
-                    parent_comment, parent_user_name = parent_data
-                    replied_to_user_uuid = str(parent_comment.user_uuid)
-                    replied_to_user_name = parent_user_name
+            if comment.parent_comment_id and comment.parent_comment_id in parent_by_id:
+                parent_comment, parent_user_name = parent_by_id[comment.parent_comment_id]
+                replied_to_user_uuid = str(parent_comment.user_uuid)
+                replied_to_user_name = parent_user_name
 
             formatted_comments.append(
                 {

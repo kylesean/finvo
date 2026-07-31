@@ -418,7 +418,26 @@ class Settings(BaseSettings):
             self.OPENAI_BASE_URL = os.getenv("OPENAI_API_BASE")
 
         if not self.OPENAI_API_KEY:
-            self.OPENAI_API_KEY = os.getenv("DEEPSEEK_API_KEY") or os.getenv("LLM_API_KEY") or ""
+            # Legacy generic LLM_API_KEY env var — still honored but deprecated.
+            # NOTE: DEEPSEEK_API_KEY is intentionally NOT aliased here. It is its
+            # own Settings field (see above) and is consumed directly by the
+            # DeepSeek provider in llm.py. Silently copying a DeepSeek key into
+            # OPENAI_API_KEY would let the OpenAI provider accidentally
+            # authenticate with a DeepSeek credential, routing requests to the
+            # wrong provider. Set OPENAI_API_KEY explicitly for the OpenAI-
+            # compatible endpoint.
+            legacy_llm_key = os.getenv("LLM_API_KEY")
+            if legacy_llm_key:
+                import warnings
+
+                warnings.warn(
+                    "LLM_API_KEY is deprecated; set OPENAI_API_KEY explicitly for "
+                    "the OpenAI-compatible endpoint. LLM_API_KEY support will be "
+                    "removed in a future release.",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                self.OPENAI_API_KEY = legacy_llm_key
 
         # Apply environment-specific overrides
         if self.ENVIRONMENT == Environment.DEVELOPMENT:

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import sys
 from contextvars import ContextVar
 from datetime import datetime, timedelta
@@ -179,8 +180,6 @@ class JsonlFileHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         """Emit a record to the JSONL file."""
         try:
-            import re
-
             # Check for rotation before writing
             file_path = self._get_current_file_path()
             if self._should_rotate():

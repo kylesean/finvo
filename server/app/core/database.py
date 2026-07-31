@@ -326,7 +326,11 @@ class SessionRepository:
             name=name,
         )
         self.db.add(chat_session)
-        await self.db.commit()
+        # Flush (not commit) so the INSERT is sent within the caller's transaction.
+        # The caller (typically via get_session_context) owns the commit boundary;
+        # committing here would break the unit-of-work pattern and prevent
+        # composing multiple repo operations in one transaction.
+        await self.db.flush()
         await self.db.refresh(chat_session)
 
         logger.info(
@@ -395,7 +399,8 @@ class SessionRepository:
 
         if chat_session:
             chat_session.name = name
-            await self.db.commit()
+            # Flush within the caller's transaction; commit is the caller's responsibility.
+            await self.db.flush()
             await self.db.refresh(chat_session)
 
             logger.info(
@@ -421,7 +426,9 @@ class SessionRepository:
         from app.models.session import Session as ChatSession
 
         result = await self.db.execute(delete(ChatSession).where(ChatSession.id == session_id))
-        await self.db.commit()
+        # Commit is the caller's responsibility (get_session_context auto-commits
+        # on successful exit). Flushing is unnecessary for DELETE — rowcount is
+        # available immediately after execute.
 
         deleted = bool(getattr(result, "rowcount", 0) > 0)
         if deleted:
