@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import (
     Any,
+    TextIO,
 )
 
 import structlog
@@ -112,6 +113,8 @@ class JsonlFileHandler(logging.Handler):
         super().__init__()
         self.file_path = file_path
         self._current_date = datetime.now().strftime("%Y-%m-%d")
+        # Persistent write handle so emit() does not reopen the file per log line.
+        self._handle: TextIO | None = None
         self._cleanup_old_logs()
 
     def _get_current_file_path(self) -> Path:
@@ -119,6 +122,10 @@ class JsonlFileHandler(logging.Handler):
         current_date = datetime.now().strftime("%Y-%m-%d")
         if current_date != self._current_date:
             self._current_date = current_date
+            # Date changed: point the persistent handle at the new file.
+            if self._handle is not None:
+                self._handle.close()
+                self._handle = None
             self.file_path = get_log_file_path()
             self._cleanup_old_logs()
         return self.file_path
@@ -136,6 +143,11 @@ class JsonlFileHandler(logging.Handler):
         """Rotate the current log file by renaming with backup number."""
         if not self.file_path.exists():
             return
+
+        # Close the persistent handle before the underlying file is renamed.
+        if self._handle is not None:
+            self._handle.close()
+            self._handle = None
 
         # Find the next available backup number
         for i in range(self.MAX_BACKUP_COUNT, 0, -1):
@@ -181,11 +193,18 @@ class JsonlFileHandler(logging.Handler):
             # Don't let cleanup errors affect logging
             pass
 
+    def _ensure_handle(self) -> TextIO:
+        """Return the persistent write handle, reopening after rotation/date change."""
+        if self._handle is None or self._handle.closed:
+            self._handle = open(self.file_path, "a", encoding="utf-8")
+        return self._handle
+
     def emit(self, record: logging.LogRecord) -> None:
         """Emit a record to the JSONL file as a single encoded-once JSON line."""
         try:
-            # Check for rotation before writing
-            file_path = self._get_current_file_path()
+            # Refresh date-based path (rotates to a new file at midnight) and
+            # check size-based rotation before writing.
+            self._get_current_file_path()
             if self._should_rotate():
                 self._rotate_file()
 
@@ -196,13 +215,17 @@ class JsonlFileHandler(logging.Handler):
             # Strip ANSI escape codes (console renderer) defensively.
             clean_line = _ANSI_ESCAPE_RE.sub("", line)
 
-            with open(file_path, "a", encoding="utf-8") as f:
-                f.write(clean_line + "\n")
+            handle = self._ensure_handle()
+            handle.write(clean_line + "\n")
+            handle.flush()
         except Exception:
             self.handleError(record)
 
     def close(self) -> None:
-        """Close the handler."""
+        """Close the handler and its persistent file handle."""
+        if self._handle is not None:
+            self._handle.close()
+            self._handle = None
         super().close()
 
 

@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.exceptions import BusinessError, StorageErrorCode
-from app.core.responses import success_response
+from app.core.responses import ResponseEnvelope, success_response
 from app.models.storage_config import ProviderType
 from app.models.user import User
 from app.services.storage_config_service import StorageConfigService
@@ -67,7 +67,7 @@ class StorageConfigResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=ResponseEnvelope[dict[str, Any]])
 async def create_storage_config(
     data: StorageConfigCreate,
     current_user: User = Depends(get_current_user),
@@ -115,7 +115,7 @@ async def create_storage_config(
     )
 
 
-@router.get("")
+@router.get("", response_model=ResponseEnvelope[list[dict[str, Any]]])
 async def list_storage_configs(
     provider_type: str | None = None,
     current_user: User = Depends(get_current_user),
@@ -151,7 +151,7 @@ async def list_storage_configs(
     )
 
 
-@router.get("/{config_id}")
+@router.get("/{config_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_storage_config(
     config_id: int,
     current_user: User = Depends(get_current_user),
@@ -191,7 +191,7 @@ async def get_storage_config(
     )
 
 
-@router.patch("/{config_id}")
+@router.patch("/{config_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def update_storage_config(
     config_id: int,
     data: StorageConfigUpdate,
@@ -241,7 +241,7 @@ async def update_storage_config(
     )
 
 
-@router.delete("/{config_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{config_id}", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_storage_config(
     config_id: int,
     current_user: User = Depends(get_current_user),
@@ -281,7 +281,7 @@ async def delete_storage_config(
     return success_response(data=None, message="Storage configuration deleted successfully")
 
 
-@router.get("/providers/list")
+@router.get("/providers/list", response_model=ResponseEnvelope[list[dict[str, Any]]])
 async def list_providers() -> JSONResponse:
     """List available storage provider types.
 

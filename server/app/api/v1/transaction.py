@@ -16,11 +16,12 @@ from app.config.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError
-from app.core.responses import success_response
+from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_transaction_query_service, get_transaction_service
 from app.models.notification import Notification
 from app.models.transaction import Transaction
 from app.models.user import User
+from app.repositories.notification_repository import NotificationRepository
 from app.repositories.transaction_repository import TransactionRepository
 from app.schemas.transaction import (
     BatchCreateTransactionRequest,
@@ -170,7 +171,7 @@ def _transaction_to_dict(tx: Any, display_currency: str = PROJECT_DEFAULT_CURREN
     return response_model.model_dump(by_alias=True)
 
 
-@router.get("")
+@router.get("", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_transactions(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
@@ -230,7 +231,7 @@ async def get_transactions(
     )
 
 
-@router.get("/search")
+@router.get("/search", response_model=ResponseEnvelope[dict[str, Any]])
 async def search_transactions(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
@@ -264,49 +265,19 @@ async def search_transactions(
     Returns:
         Unified JSON pagination response
     """
-    # Construct base query conditions
-    conditions: list[Any] = []
-    conditions.append(Transaction.user_uuid == current_user.uuid)
-
-    # Add filter conditions
-    if keyword:
-        # Escape LIKE metacharacters so user input `%`/`_` matches literally
-        # instead of acting as wildcards (see search_transactions).
-        escaped_keyword = keyword.replace("\\", r"\\").replace("%", r"\%").replace("_", r"\_")
-        conditions.append(
-            or_(
-                Transaction.description.ilike(f"%{escaped_keyword}%", escape="\\"),
-                Transaction.location.ilike(f"%{escaped_keyword}%", escape="\\"),
-            )
-        )
-
-    if min_amount is not None:
-        conditions.append(Transaction.amount >= min_amount)
-
-    if max_amount is not None:
-        conditions.append(Transaction.amount <= max_amount)
-
-    if category_keys:
-        keys = [k.strip() for k in category_keys.split(",")]
-        conditions.append(Transaction.category_key.in_(keys))
-
-    if tags:
-        tag_list = [t.strip() for t in tags.split(",")]
-        # PostgreSQL JSONB contains check
-        for tag in tag_list:
-            conditions.append(Transaction.tags.contains([tag]))
-
-    if start_date is not None:
-        conditions.append(Transaction.transaction_at >= start_date)
-
-    if end_date is not None:
-        conditions.append(Transaction.transaction_at <= end_date)
-
-    if transaction_type:
-        conditions.append(Transaction.type == transaction_type.upper())
-
-    # Build query
-    query = select(Transaction).where(and_(True, *conditions)).order_by(desc(Transaction.transaction_at))
+    # Build the filtered query via the repository (keeps ORM construction out
+    # of the route layer and escapes LIKE metacharacters consistently).
+    query = TransactionRepository(db).search_query(
+        current_user.uuid,
+        keyword=keyword,
+        min_amount=min_amount,
+        max_amount=max_amount,
+        category_keys=category_keys,
+        tags=tags,
+        start_date=start_date,
+        end_date=end_date,
+        transaction_type=transaction_type,
+    )
 
     # Obtain user's primary display currency
     display_currency = await get_user_display_currency(db, current_user.uuid)
@@ -333,153 +304,7 @@ async def search_transactions(
     )
 
 
-@router.get("/{transaction_id:uuid}")
-async def get_transaction_detail(
-    transaction_id: UUID,
-    current_user: CurrentUser,
-    service: TxService,
-) -> JSONResponse:
-    """Get transaction details."""
-    transaction_data = await service.get_transaction_detail(transaction_id, current_user.uuid)
-
-    if not transaction_data:
-        raise NotFoundError("Transaction")
-
-    return success_response(
-        data=transaction_data,
-        message="Transaction retrieved successfully",
-    )
-
-
-@router.delete("/{transaction_id:uuid}", status_code=status.HTTP_200_OK)
-async def delete_transaction(
-    transaction_id: UUID,
-    current_user: CurrentUser,
-    service: TxService,
-) -> JSONResponse:
-    """Delete transaction."""
-    await service.delete_transaction(transaction_id, current_user.uuid)
-    return success_response(
-        data=None,
-        message="Transaction deleted successfully",
-    )
-
-
-@router.patch("/{transaction_id:uuid}/account")
-async def update_transaction_account(
-    transaction_id: UUID,
-    request: UpdateAccountRequest,
-    current_user: CurrentUser,
-    service: TxService,
-) -> JSONResponse:
-    """Update transaction associated account.
-
-    Supports:
-    - Associate account: pass account_id
-    - Disassociate account: pass null
-    - Switch account: pass new account_id (automatically rolls back old account balance and updates new account)
-    """
-    result = await service.update_transaction_account(
-        transaction_id=transaction_id,
-        user_uuid=current_user.uuid,
-        account_id=UUID(request.account_id) if request.account_id else None,
-    )
-    return success_response(
-        data=result,
-        message="Transaction account updated successfully",
-    )
-
-
-@router.post("/batch")
-async def create_batch_transactions(
-    request: BatchCreateTransactionRequest,
-    current_user: CurrentUser,
-    service: TxService,
-) -> JSONResponse:
-    """Batch create transactions."""
-    result = await service.create_batch_transactions(
-        user_uuid=current_user.uuid,
-        data=request.model_dump(),
-    )
-    return success_response(
-        data=result,
-        message="Batch transactions created successfully",
-    )
-
-
-@router.patch("/batch/account")
-async def update_batch_transactions_account(
-    request: UpdateBatchAccountRequest,
-    current_user: CurrentUser,
-    service: TxService,
-) -> JSONResponse:
-    """Batch update transactions account."""
-    result = await service.update_batch_transactions_account(
-        user_uuid=current_user.uuid,
-        transaction_ids=[UUID(tid) for tid in request.transaction_ids],
-        account_id=UUID(request.account_id) if request.account_id else None,
-    )
-    return success_response(
-        data=result,
-        message="Batch transactions account updated successfully",
-    )
-
-
-@router.get("/{transaction_id:uuid}/comments")
-async def get_transaction_comments(
-    transaction_id: UUID,  # UUID from path
-    current_user: Annotated[User, Depends(get_current_user)],
-    service: Annotated[TransactionService, Depends(get_transaction_service)],
-) -> JSONResponse:
-    """Get transaction comment list."""
-    comments = await service.get_comments_for_transaction(transaction_id, current_user.uuid)
-    return success_response(
-        data=comments,
-        message="Comments retrieved successfully",
-    )
-
-
-@router.post("/{transaction_id:uuid}/comments")
-async def add_transaction_comment(
-    transaction_id: UUID,  # UUID from path
-    request: CommentCreateRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
-    service: Annotated[TransactionService, Depends(get_transaction_service)],
-) -> JSONResponse:
-    """Add transaction comment."""
-    comment = await service.add_comment(
-        transaction_id=transaction_id,
-        user_uuid=current_user.uuid,
-        comment_text=request.comment_text,
-        parent_comment_id=request.parent_comment_id,
-        mentioned_user_ids=request.mentioned_user_ids,
-        commenter_username=current_user.username or "Unknown",
-    )
-    return success_response(
-        data=comment,
-        message="Comment added successfully",
-    )
-
-
-@router.delete("/comments/{comment_id}")
-async def delete_transaction_comment(
-    comment_id: int,
-    current_user: Annotated[User, Depends(get_current_user)],
-    service: Annotated[TransactionService, Depends(get_transaction_service)],
-) -> JSONResponse:
-    """Delete transaction comment."""
-    success = await service.delete_comment(comment_id, current_user.uuid)
-
-    if not success:
-        raise NotFoundError("Comment")
-
-    return success_response(
-        data=None,
-        message="Comment deleted successfully",
-    )
-
-
-@router.get("/recurring")
+@router.get("/recurring", response_model=ResponseEnvelope[list[dict[str, Any]]])
 async def list_recurring_transactions(
     current_user: Annotated[User, Depends(get_current_user)],
     service: Annotated[TransactionService, Depends(get_transaction_service)],
@@ -508,7 +333,7 @@ async def list_recurring_transactions(
     )
 
 
-@router.post("/recurring")
+@router.post("/recurring", response_model=ResponseEnvelope[dict[str, Any]])
 async def create_recurring_transaction(
     request: RecurringTransactionCreateRequest,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -522,88 +347,12 @@ async def create_recurring_transaction(
     )
 
 
-@router.get("/recurring/{recurring_id:uuid}")
-async def get_recurring_transaction(
-    recurring_id: UUID,  # UUID from path
-    current_user: Annotated[User, Depends(get_current_user)],
-    service: Annotated[TransactionService, Depends(get_transaction_service)],
-) -> JSONResponse:
-    """Retrieve recurring transaction detail."""
-    recurring_tx = await service.get_recurring_transaction(recurring_id, current_user.uuid)
-
-    if not recurring_tx:
-        raise NotFoundError("Recurring transaction")
-
-    return success_response(
-        data=recurring_tx,
-        message="Recurring transaction retrieved successfully",
-    )
-
-
-@router.put("/recurring/{recurring_id:uuid}")
-async def update_recurring_transaction(
-    recurring_id: UUID,  # UUID from path
-    request: RecurringTransactionUpdateRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
-    service: Annotated[TransactionService, Depends(get_transaction_service)],
-) -> JSONResponse:
-    """Update recurring transaction."""
-    recurring_tx = await service.update_recurring_transaction(
-        recurring_id, current_user.uuid, request.model_dump(exclude_unset=True)
-    )
-
-    if not recurring_tx:
-        raise NotFoundError("Recurring transaction")
-
-    return success_response(
-        data=recurring_tx,
-        message="Recurring transaction updated successfully",
-    )
-
-
-@router.delete("/recurring/{recurring_id:uuid}")
-async def delete_recurring_transaction(
-    recurring_id: UUID,  # UUID from path
-    current_user: Annotated[User, Depends(get_current_user)],
-    service: Annotated[TransactionService, Depends(get_transaction_service)],
-) -> JSONResponse:
-    """Delete recurring transaction."""
-    success = await service.delete_recurring_transaction(recurring_id, current_user.uuid)
-
-    if not success:
-        raise NotFoundError("Recurring transaction")
-
-    return success_response(
-        data=None,
-        message="Recurring transaction deleted successfully",
-    )
-
-
-@router.post("/forecast")
-async def forecast_cash_flow(
-    request: CashFlowForecastRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
-    service: Annotated[TransactionService, Depends(get_transaction_service)],
-) -> JSONResponse:
-    """Generate cash flow forecast."""
-    forecast = await service.forecast_cash_flow(
-        user_uuid=current_user.uuid,
-        forecast_days=request.forecast_days,
-        granularity=request.granularity,
-        scenarios=request.scenarios,
-    )
-    return success_response(
-        data=forecast,
-        message="Cash flow forecast generated successfully",
-    )
-
-
 # ============================================================================
 # Pending Transaction Confirmation
 # ============================================================================
 
 
-@router.get("/pending")
+@router.get("/pending", response_model=ResponseEnvelope[list[dict[str, Any]]])
 async def get_pending_transactions(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
@@ -633,7 +382,231 @@ async def get_pending_transactions(
     return success_response(data=items)
 
 
-@router.post("/{transaction_id:uuid}/confirm")
+@router.get("/{transaction_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
+async def get_transaction_detail(
+    transaction_id: UUID,
+    current_user: CurrentUser,
+    service: TxService,
+) -> JSONResponse:
+    """Get transaction details."""
+    transaction_data = await service.get_transaction_detail(transaction_id, current_user.uuid)
+
+    if not transaction_data:
+        raise NotFoundError("Transaction")
+
+    return success_response(
+        data=transaction_data,
+        message="Transaction retrieved successfully",
+    )
+
+
+@router.delete(
+    "/{transaction_id:uuid}", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[dict[str, Any]]
+)
+async def delete_transaction(
+    transaction_id: UUID,
+    current_user: CurrentUser,
+    service: TxService,
+) -> JSONResponse:
+    """Delete transaction."""
+    await service.delete_transaction(transaction_id, current_user.uuid)
+    return success_response(
+        data=None,
+        message="Transaction deleted successfully",
+    )
+
+
+@router.patch("/{transaction_id:uuid}/account", response_model=ResponseEnvelope[dict[str, Any]])
+async def update_transaction_account(
+    transaction_id: UUID,
+    request: UpdateAccountRequest,
+    current_user: CurrentUser,
+    service: TxService,
+) -> JSONResponse:
+    """Update transaction associated account.
+
+    Supports:
+    - Associate account: pass account_id
+    - Disassociate account: pass null
+    - Switch account: pass new account_id (automatically rolls back old account balance and updates new account)
+    """
+    result = await service.update_transaction_account(
+        transaction_id=transaction_id,
+        user_uuid=current_user.uuid,
+        account_id=UUID(request.account_id) if request.account_id else None,
+    )
+    return success_response(
+        data=result,
+        message="Transaction account updated successfully",
+    )
+
+
+@router.post("/batch", response_model=ResponseEnvelope[dict[str, Any]])
+async def create_batch_transactions(
+    request: BatchCreateTransactionRequest,
+    current_user: CurrentUser,
+    service: TxService,
+) -> JSONResponse:
+    """Batch create transactions."""
+    result = await service.create_batch_transactions(
+        user_uuid=current_user.uuid,
+        data=request.model_dump(),
+    )
+    return success_response(
+        data=result,
+        message="Batch transactions created successfully",
+    )
+
+
+@router.patch("/batch/account", response_model=ResponseEnvelope[dict[str, Any]])
+async def update_batch_transactions_account(
+    request: UpdateBatchAccountRequest,
+    current_user: CurrentUser,
+    service: TxService,
+) -> JSONResponse:
+    """Batch update transactions account."""
+    result = await service.update_batch_transactions_account(
+        user_uuid=current_user.uuid,
+        transaction_ids=[UUID(tid) for tid in request.transaction_ids],
+        account_id=UUID(request.account_id) if request.account_id else None,
+    )
+    return success_response(
+        data=result,
+        message="Batch transactions account updated successfully",
+    )
+
+
+@router.get("/{transaction_id:uuid}/comments", response_model=ResponseEnvelope[list[dict[str, Any]]])
+async def get_transaction_comments(
+    transaction_id: UUID,  # UUID from path
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
+) -> JSONResponse:
+    """Get transaction comment list."""
+    comments = await service.get_comments_for_transaction(transaction_id, current_user.uuid)
+    return success_response(
+        data=comments,
+        message="Comments retrieved successfully",
+    )
+
+
+@router.post("/{transaction_id:uuid}/comments", response_model=ResponseEnvelope[dict[str, Any]])
+async def add_transaction_comment(
+    transaction_id: UUID,  # UUID from path
+    request: CommentCreateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
+) -> JSONResponse:
+    """Add transaction comment."""
+    comment = await service.add_comment(
+        transaction_id=transaction_id,
+        user_uuid=current_user.uuid,
+        comment_text=request.comment_text,
+        parent_comment_id=request.parent_comment_id,
+        mentioned_user_ids=request.mentioned_user_ids,
+        commenter_username=current_user.username or "Unknown",
+    )
+    return success_response(
+        data=comment,
+        message="Comment added successfully",
+    )
+
+
+@router.delete("/comments/{comment_id}", response_model=ResponseEnvelope[dict[str, Any]])
+async def delete_transaction_comment(
+    comment_id: int,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
+) -> JSONResponse:
+    """Delete transaction comment."""
+    success = await service.delete_comment(comment_id, current_user.uuid)
+
+    if not success:
+        raise NotFoundError("Comment")
+
+    return success_response(
+        data=None,
+        message="Comment deleted successfully",
+    )
+
+
+@router.get("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
+async def get_recurring_transaction(
+    recurring_id: UUID,  # UUID from path
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
+) -> JSONResponse:
+    """Retrieve recurring transaction detail."""
+    recurring_tx = await service.get_recurring_transaction(recurring_id, current_user.uuid)
+
+    if not recurring_tx:
+        raise NotFoundError("Recurring transaction")
+
+    return success_response(
+        data=recurring_tx,
+        message="Recurring transaction retrieved successfully",
+    )
+
+
+@router.put("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
+async def update_recurring_transaction(
+    recurring_id: UUID,  # UUID from path
+    request: RecurringTransactionUpdateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
+) -> JSONResponse:
+    """Update recurring transaction."""
+    recurring_tx = await service.update_recurring_transaction(
+        recurring_id, current_user.uuid, request.model_dump(exclude_unset=True)
+    )
+
+    if not recurring_tx:
+        raise NotFoundError("Recurring transaction")
+
+    return success_response(
+        data=recurring_tx,
+        message="Recurring transaction updated successfully",
+    )
+
+
+@router.delete("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
+async def delete_recurring_transaction(
+    recurring_id: UUID,  # UUID from path
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
+) -> JSONResponse:
+    """Delete recurring transaction."""
+    success = await service.delete_recurring_transaction(recurring_id, current_user.uuid)
+
+    if not success:
+        raise NotFoundError("Recurring transaction")
+
+    return success_response(
+        data=None,
+        message="Recurring transaction deleted successfully",
+    )
+
+
+@router.post("/forecast", response_model=ResponseEnvelope[dict[str, Any]])
+async def forecast_cash_flow(
+    request: CashFlowForecastRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[TransactionService, Depends(get_transaction_service)],
+) -> JSONResponse:
+    """Generate cash flow forecast."""
+    forecast = await service.forecast_cash_flow(
+        user_uuid=current_user.uuid,
+        forecast_days=request.forecast_days,
+        granularity=request.granularity,
+        scenarios=request.scenarios,
+    )
+    return success_response(
+        data=forecast,
+        message="Cash flow forecast generated successfully",
+    )
+
+
+@router.post("/{transaction_id:uuid}/confirm", response_model=ResponseEnvelope[dict[str, Any]])
 async def confirm_pending_transaction(
     transaction_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -653,13 +626,13 @@ async def confirm_pending_transaction(
 
     tx.status = "CONFIRMED"
     # Auto-mark associated notification as read
-    await _mark_recurring_notification_read(db, current_user.uuid, transaction_id)
+    await NotificationRepository(db).mark_recurring_pending_read(current_user.uuid, transaction_id)
     await db.commit()
 
     return success_response(data={"id": str(tx.id), "status": "CONFIRMED"}, message="Transaction confirmed")
 
 
-@router.post("/{transaction_id:uuid}/skip")
+@router.post("/{transaction_id:uuid}/skip", response_model=ResponseEnvelope[dict[str, Any]])
 async def skip_pending_transaction(
     transaction_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -678,25 +651,8 @@ async def skip_pending_transaction(
         )
 
     # Auto-mark associated notification as read before deleting the transaction
-    await _mark_recurring_notification_read(db, current_user.uuid, transaction_id)
+    await NotificationRepository(db).mark_recurring_pending_read(current_user.uuid, transaction_id)
     await db.delete(tx)
     await db.commit()
 
     return success_response(data=None, message="Transaction skipped")
-
-
-async def _mark_recurring_notification_read(db: AsyncSession, user_uuid: UUID, transaction_id: UUID) -> None:
-    """Mark the recurring_pending notification associated with this transaction as read."""
-    from sqlalchemy import update as sa_update
-
-    stmt = (
-        sa_update(Notification)
-        .where(
-            Notification.user_uuid == user_uuid,
-            Notification.type == "recurring_pending",
-            Notification.is_read == False,  # noqa: E712
-            Notification.data["transaction_id"].as_string() == str(transaction_id),
-        )
-        .values(is_read=True, read_at=func.now())
-    )
-    await db.execute(stmt)

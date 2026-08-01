@@ -33,7 +33,7 @@ from app.core.exceptions import AppException, CommonErrorCode, to_client_error
 from app.core.langgraph.simple_agent import SimpleLangChainAgent as LangGraphAgent
 from app.core.limiter import limiter
 from app.core.logging import logger
-from app.core.responses import error_response, get_error_code_int, success_response
+from app.core.responses import ResponseEnvelope, error_response, get_error_code_int, success_response
 from app.models.session import Session
 from app.models.user import User
 from app.repositories.session_repository import SessionRepository
@@ -379,7 +379,7 @@ async def chat_stream(
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
-@router.post("/sessions/{session_id}/state")
+@router.post("/sessions/{session_id}/state", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["messages"][0])
 async def update_session_state(
     request: Request,
@@ -455,7 +455,7 @@ async def update_session_state(
         ) from e
 
 
-@router.get("/sessions/{session_id}/messages")
+@router.get("/sessions/{session_id}/messages", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["messages"][0])
 async def get_session_messages(
     request: Request,
@@ -510,7 +510,7 @@ async def get_session_messages(
         ) from e
 
 
-@router.delete("/sessions/{session_id}/messages")
+@router.delete("/sessions/{session_id}/messages", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["messages"][0])
 async def clear_session_messages(
     request: Request,
@@ -560,7 +560,7 @@ async def clear_session_messages(
         ) from e
 
 
-@router.post("/sessions/{session_id}/cancel")
+@router.post("/sessions/{session_id}/cancel", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["messages"][0])
 async def cancel_last_turn(
     request: Request,
@@ -615,7 +615,7 @@ async def cancel_last_turn(
         ) from e
 
 
-@router.get("/sessions/{session_id}/resume-status")
+@router.get("/sessions/{session_id}/resume-status", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["messages"][0])
 async def get_resume_status(
     request: Request,
@@ -716,7 +716,7 @@ async def resume_session(
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
-@router.get("/sessions/messages/search")
+@router.get("/sessions/messages/search", response_model=ResponseEnvelope[list[dict[str, Any]]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["messages"][0])
 async def search_conversations(
     request: Request,

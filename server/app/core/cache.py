@@ -4,6 +4,7 @@ This module provides Redis connection management, caching decorators,
 and cache invalidation strategies for the application.
 """
 
+import asyncio
 import functools
 import json
 from collections.abc import Callable
@@ -321,6 +322,10 @@ class CacheManager:
 # Global cache manager instance
 cache_manager = CacheManager()
 
+# In-flight computation registry: prevents cache stampede when many concurrent
+# requests miss the same key at once (only one source call runs, others await it).
+_in_flight: dict[str, asyncio.Future[Any]] = {}
+
 
 def _cache_serializable(value: Any) -> str | None:
     """Return a stable string form of a primitive/UUID argument, else None.
@@ -393,9 +398,21 @@ def cached(
                 logger.debug("cache_hit", key=key, function=func.__name__)
                 return cached_value
 
-            # Cache miss - execute function
+            # Cache miss - dedupe concurrent misses for the same key (single-flight)
+            pending = _in_flight.get(key)
+            if pending is not None and not pending.done():
+                logger.debug("cache_await_inflight", key=key, function=func.__name__)
+                return await asyncio.shield(pending)
+
+            # Execute function, registering the in-flight future so concurrent
+            # callers await this computation instead of stampeding the source.
             logger.debug("cache_miss", key=key, function=func.__name__)
-            result = await func(*args, **kwargs)
+            task = asyncio.ensure_future(func(*args, **kwargs))
+            _in_flight[key] = task
+            try:
+                result = await task
+            finally:
+                _in_flight.pop(key, None)
 
             # Store in cache
             if result is not None:

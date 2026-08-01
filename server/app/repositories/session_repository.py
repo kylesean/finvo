@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING
+from typing import Any
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import logger
-
-if TYPE_CHECKING:
-    from app.models.session import Session as ChatSession
+from app.models.session import Session as ChatSession
 
 
 class SessionRepository:
@@ -45,8 +43,6 @@ class SessionRepository:
         Returns:
             ChatSession: The created session
         """
-        from app.models.session import Session as ChatSession
-
         chat_session = ChatSession(
             id=session_id,
             user_uuid=user_uuid,
@@ -77,8 +73,6 @@ class SessionRepository:
         Returns:
             ChatSession if found, None otherwise
         """
-        from app.models.session import Session as ChatSession
-
         result = await self.db.execute(select(ChatSession).where(ChatSession.id == session_id))
         return result.scalar_one_or_none()
 
@@ -94,12 +88,18 @@ class SessionRepository:
         Returns:
             List of ChatSession objects
         """
-        from app.models.session import Session as ChatSession
-
         result = await self.db.execute(
             select(ChatSession).where(ChatSession.user_uuid == user_uuid).order_by(ChatSession.created_at.desc())
         )
         return list(result.scalars().all())
+
+    def query_for_user(self, user_uuid: uuid.UUID) -> Any:
+        """Return a ``select`` statement for a user's sessions (newest first).
+
+        Exposes the raw query so callers can combine it with pagination helpers
+        (e.g. ``fastapi_pagination``) while keeping ORM construction here.
+        """
+        return select(ChatSession).where(ChatSession.user_uuid == user_uuid).order_by(ChatSession.created_at.desc())
 
     async def update_name(
         self,
@@ -115,8 +115,6 @@ class SessionRepository:
         Returns:
             Updated ChatSession if found, None otherwise
         """
-        from app.models.session import Session as ChatSession
-
         result = await self.db.execute(select(ChatSession).where(ChatSession.id == session_id))
         chat_session = result.scalar_one_or_none()
 
@@ -145,8 +143,6 @@ class SessionRepository:
         Returns:
             True if deleted, False if not found
         """
-        from app.models.session import Session as ChatSession
-
         result = await self.db.execute(delete(ChatSession).where(ChatSession.id == session_id))
 
         deleted = bool(getattr(result, "rowcount", 0) > 0)

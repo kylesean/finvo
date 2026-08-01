@@ -13,7 +13,6 @@ from typing import Any
 from uuid import UUID
 
 import sqlalchemy as sa
-from pydantic import ConfigDict
 from sqlalchemy import DateTime, MetaData, String, Text, Time, text
 from sqlalchemy.dialects.postgresql import (
     INET,
@@ -47,13 +46,6 @@ class Base(DeclarativeBase):
             "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
             "pk": "pk_%(table_name)s",
         }
-    )
-
-    # Pydantic config for all models
-    model_config = ConfigDict(
-        populate_by_name=True,
-        str_strip_whitespace=True,
-        arbitrary_types_allowed=True,
     )
 
 

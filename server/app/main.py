@@ -270,11 +270,14 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
         client_host=request.client.host if request.client else "unknown",
     )
 
-    # Map HTTP status codes to error codes
+    # Map HTTP status codes to business error codes; anything not listed keeps
+    # its HTTP status so the client still sees a meaningful, distinguishable code.
     error_code_map = {
         404: get_error_code_int("NOT_FOUND"),
         403: get_error_code_int("PERMISSION_DENIED"),
         401: get_error_code_int("AUTH_FAILED"),
+        409: get_error_code_int("CONFLICT"),
+        422: get_error_code_int("VALIDATION_ERROR"),
     }
 
     code = error_code_map.get(exc.status_code, exc.status_code)

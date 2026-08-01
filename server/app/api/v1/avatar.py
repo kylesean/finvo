@@ -22,7 +22,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import FileResponse, RedirectResponse
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -31,6 +30,7 @@ from app.core.exceptions import NotFoundError
 from app.core.limiter import limiter
 from app.core.logging import logger
 from app.models.user import User
+from app.repositories.user_repository import UserRepository
 from app.services.upload_service import UploadService
 from app.utils.identicon import render_identicon_png, render_identicon_svg
 
@@ -57,8 +57,7 @@ def _attachment_id_from_url(avatar_url: str) -> UUID | None:
 
 
 async def _resolve_user(db: AsyncSession, user_uuid: UUID) -> User:
-    result = await db.execute(select(User).where(User.uuid == user_uuid))
-    user = result.scalar_one_or_none()
+    user = await UserRepository(db).get_by_uuid(user_uuid)
     if user is None:
         raise NotFoundError("User")
     return user

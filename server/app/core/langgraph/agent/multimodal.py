@@ -34,6 +34,12 @@ IMAGE_MIME_TYPES = {
     "image/webp",
 }
 
+# Defense-in-depth caps for the transient multimodal payload. The upload path
+# already enforces a 10MB per-file limit, but re-checking total size/count here
+# guards against a huge number of small files producing an oversized prompt.
+MAX_IMAGE_COUNT = 10
+MAX_TOTAL_BYTES = 20 * 1024 * 1024  # 20MB total base64 payload
+
 
 def _lang_key(lang: str | None) -> str:
     """Normalize a session language tag to a supported message key."""
@@ -94,10 +100,28 @@ async def image_parts_from_attachments(
     images: list[Attachment],
 ) -> list[dict[str, Any]]:
     """Base64-encode already-loaded image ``Attachment`` rows into image_url parts."""
+    if len(images) > MAX_IMAGE_COUNT:
+        logger.warning(
+            "image_count_limit_exceeded",
+            count=len(images),
+            max_count=MAX_IMAGE_COUNT,
+        )
+        images = images[:MAX_IMAGE_COUNT]
+
     parts: list[dict[str, Any]] = []
+    total_bytes = 0
     for img in images:
         try:
             b64 = await _read_image_as_base64(img.object_key)
+            total_bytes += len(b64)
+            if total_bytes > MAX_TOTAL_BYTES:
+                logger.warning(
+                    "image_total_size_limit_exceeded",
+                    attachment_id=str(img.id),
+                    total_bytes=total_bytes,
+                    max_bytes=MAX_TOTAL_BYTES,
+                )
+                break
             parts.append(_to_image_part(img, b64))
             logger.debug(
                 "image_converted_to_base64",

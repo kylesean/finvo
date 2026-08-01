@@ -134,14 +134,8 @@ class StreamProcessor:
             )
 
         finally:
-            # 1. Flush buffered events
-            for event in event_buffer:
-                yield event
-
-            # 2. Emit completion event
-            yield GenUIEvent(type="done")
-
-            # 3. Dual-write messages to searchable_messages table (async, non-blocking)
+            # Non-yield cleanup only: yielding here would raise RuntimeError when
+            # the client disconnects mid-stream (GeneratorExit during yield).
             if user_uuid and session_id:
                 from app.core.background_tasks import spawn_background_task
 
@@ -159,6 +153,12 @@ class StreamProcessor:
                 session_id=session_id,
                 buffered_events=len(event_buffer),
             )
+
+        # Flush buffered events and emit completion (normal or error path).
+        # Kept outside `finally` so disconnects don't raise mid-yield.
+        for event in event_buffer:
+            yield event
+        yield GenUIEvent(type="done")
 
     def _extract_user_message(self, input_data: dict[str, Any] | None) -> str:
         """Extract user message text from graph input data.

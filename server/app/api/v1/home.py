@@ -5,13 +5,13 @@ Provides endpoints for home page data including:
 - Calendar month heatmap details
 """
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from app.core.dependencies import get_current_user
-from app.core.responses import success_response
+from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_statistics_service
 from app.models.user import User
 from app.services.statistics_service import StatisticsService
@@ -22,7 +22,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 StatsService = Annotated[StatisticsService, Depends(get_statistics_service)]
 
 
-@router.get("/total-expense")
+@router.get("/total-expense", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_total_expense(
     current_user: CurrentUser,
     service: StatsService,
@@ -39,7 +39,7 @@ async def get_total_expense(
     )
 
 
-@router.get("/calendar-month-details")
+@router.get("/calendar-month-details", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_calendar_month_details(
     current_user: CurrentUser,
     service: StatsService,

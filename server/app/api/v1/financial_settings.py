@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from app.core.dependencies import get_current_user
-from app.core.responses import success_response
+from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_user_service
 from app.models.user import User
 from app.schemas.user import (
@@ -18,7 +18,7 @@ from app.services.user_service import UserService
 router = APIRouter(prefix="/financial-settings", tags=["financial-settings"])
 
 
-@router.get("")
+@router.get("", response_model=ResponseEnvelope[FinancialSettingsResponseSchema])
 async def get_financial_settings(
     current_user: Annotated[User, Depends(get_current_user)],
     user_service: Annotated[UserService, Depends(get_user_service)],
@@ -47,7 +47,7 @@ async def get_financial_settings(
     )
 
 
-@router.patch("")
+@router.patch("", response_model=ResponseEnvelope[FinancialSettingsResponseSchema])
 async def update_financial_settings(
     request: UpdateFinancialSettingsRequest,
     current_user: Annotated[User, Depends(get_current_user)],

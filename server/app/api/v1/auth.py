@@ -27,7 +27,7 @@ from app.core.dependencies import get_current_user, get_redis_client, revoke_tok
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.limiter import limiter
 from app.core.logging import bind_context, logger
-from app.core.responses import success_response
+from app.core.responses import ResponseEnvelope, success_response
 from app.models.session import Session
 from app.models.user import User
 from app.repositories.session_repository import SessionRepository
@@ -94,7 +94,21 @@ async def get_authorized_session(
     return session
 
 
-@router.post("/send-code")
+def _build_user_info(user: User) -> UserInfo:
+    """Build the auth response ``UserInfo`` from a user model (shared by register/login)."""
+    return UserInfo(
+        id=user.uuid,
+        email=user.email,
+        mobile=user.mobile,
+        username=user.username or user.email or user.mobile or f"user_{str(user.uuid)[:8]}",
+        avatarUrl=user.avatar_url,
+        createdAt=user.created_at.isoformat(),
+        updatedAt=user.updated_at.isoformat() if user.updated_at else None,
+        clientLastLoginAt=user.last_login_at.isoformat() if user.last_login_at else None,
+    )
+
+
+@router.post("/send-code", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["send_code"][0])
 async def send_code(
     request: Request,
@@ -131,7 +145,7 @@ async def send_code(
     return success_response(message="Verification code sent successfully")
 
 
-@router.post("/register")
+@router.post("/register", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["register"][0])
 async def register(
     request: Request,
@@ -172,16 +186,7 @@ async def register(
     token = token_obj.access_token
 
     # Build user info response
-    user_info = UserInfo(
-        id=user.uuid,
-        email=user.email,
-        mobile=user.mobile,
-        username=user.username or user.email or user.mobile or f"user_{str(user.uuid)[:8]}",
-        avatarUrl=user.avatar_url,
-        createdAt=user.created_at.isoformat(),
-        updatedAt=user.updated_at.isoformat() if user.updated_at else None,
-        clientLastLoginAt=user.last_login_at.isoformat() if user.last_login_at else None,
-    )
+    user_info = _build_user_info(user)
 
     logger.info(
         "user_registered",
@@ -195,7 +200,7 @@ async def register(
     return success_response(data=auth_response.model_dump(), message="Registration successful")
 
 
-@router.post("/login")
+@router.post("/login", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["login"][0])
 async def login(
     request: Request,
@@ -230,16 +235,7 @@ async def login(
     )
 
     # Build user info response
-    user_info = UserInfo(
-        id=user.uuid,
-        email=user.email,
-        mobile=user.mobile,
-        username=user.username or user.email or user.mobile or f"user_{str(user.uuid)[:8]}",
-        avatarUrl=user.avatar_url,
-        createdAt=user.created_at.isoformat(),
-        updatedAt=user.updated_at.isoformat() if user.updated_at else None,
-        clientLastLoginAt=user.last_login_at.isoformat() if user.last_login_at else None,
-    )
+    user_info = _build_user_info(user)
 
     logger.info(
         "user_logged_in",
@@ -253,7 +249,7 @@ async def login(
     return success_response(data=auth_response.model_dump(), message="Login successful")
 
 
-@router.post("/session")
+@router.post("/session", response_model=ResponseEnvelope[dict[str, Any]])
 async def create_session(
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
@@ -295,7 +291,7 @@ async def create_session(
         raise ValidationError(str(ve))
 
 
-@router.patch("/session/{session_id}/name")
+@router.patch("/session/{session_id}/name", response_model=ResponseEnvelope[dict[str, Any]])
 async def update_session_name(
     session_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -342,7 +338,7 @@ async def update_session_name(
     )
 
 
-@router.delete("/session/{session_id}")
+@router.delete("/session/{session_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_session(
     session_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -350,10 +346,14 @@ async def delete_session(
 ) -> JSONResponse:
     """Delete a session for the authenticated user.
 
-    This endpoint performs cascade deletion within a single database transaction:
+    Deletion is best-effort across two stores that cannot share one transaction:
     1. Verify ownership and delete session metadata from sessions table
-    2. Delete LangGraph checkpoints (checkpoint_blobs, checkpoint_writes, checkpoints)
-    3. Delete searchable_messages for the thread
+       (request-scoped SQLAlchemy session, committed last)
+    2. Delete LangGraph checkpoints (checkpoint_blobs, checkpoint_writes,
+       checkpoints) and searchable_messages via the agent's own connection
+
+    Note: The checkpoint cleanup and the session-row delete are NOT atomic —
+    if the process dies between steps, orphan checkpoints may remain.
 
     Note: Attachments are NOT deleted as they may be reused.
 
@@ -400,7 +400,7 @@ async def delete_session(
     return success_response(message="Session deleted")
 
 
-@router.post("/logout")
+@router.post("/logout", response_model=ResponseEnvelope[dict[str, Any]])
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["login"][0])
 async def logout(
     request: Request,
@@ -419,7 +419,7 @@ async def logout(
     )
 
 
-@router.get("/sessions")
+@router.get("/sessions", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_user_sessions(
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
@@ -439,7 +439,7 @@ async def get_user_sessions(
         JSONResponse: Unified response with paginated sessions
     """
     # Build query for user's sessions, ordered by most recent first
-    query = select(Session).where(Session.user_uuid == user.uuid).order_by(desc(Session.created_at))
+    query = SessionRepository(db).query_for_user(user.uuid)
 
     # Use fastapi-pagination to paginate the query
     page_result = await apaginate(

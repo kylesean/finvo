@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from app.core.config import settings
-from app.core.responses import success_response
+from app.core.responses import ResponseEnvelope, success_response
 
 
 class DownloadUrlsSchema(BaseModel):
@@ -30,7 +30,7 @@ class VersionCheckResponseSchema(BaseModel):
 router = APIRouter(prefix="/version", tags=["version"])
 
 
-@router.get("/check")
+@router.get("/check", response_model=ResponseEnvelope[VersionCheckResponseSchema])
 async def check_version() -> JSONResponse:
     """Check latest app version and return update instructions.
 

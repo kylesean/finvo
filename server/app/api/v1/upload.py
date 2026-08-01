@@ -25,7 +25,7 @@ from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.exceptions import BusinessError
 from app.core.logging import logger
-from app.core.responses import success_response
+from app.core.responses import ResponseEnvelope, success_response
 from app.models.storage_config import StorageConfig
 from app.models.user import User
 from app.services.storage.adapters.factory import StorageAdapterFactory
@@ -89,7 +89,7 @@ class UploadResponse(BaseModel):
 # =============================================================================
 
 
-@router.post("/upload", status_code=status.HTTP_200_OK)
+@router.post("/upload", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[UploadResponse])
 async def upload_files(
     files: list[UploadFile] = File(
         ...,
@@ -380,7 +380,7 @@ async def view_attachment(
 # =============================================================================
 
 
-@router.delete("/{attachment_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{attachment_id}", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_file(
     attachment_id: UUID,
     current_user: User = Depends(get_current_user),
@@ -435,7 +435,7 @@ async def delete_file(
 # =============================================================================
 
 
-@router.get("/supported-types")
+@router.get("/supported-types", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_supported_types() -> JSONResponse:
     """Retrieve supported file types list.
 

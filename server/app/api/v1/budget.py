@@ -91,20 +91,13 @@ async def get_budgets(
     except ValueError:
         raise ValidationError("Invalid scope or status filter")
 
-    budgets = await service.get_user_budgets(
+    budgets = await service.get_user_budgets_with_periods(
         current_user.uuid,
         status=status_enum,
         scope=scope_enum,
     )
 
-    responses = []
-    for budget in budgets:
-        period = await service.get_or_create_current_period(budget)
-        period = await service.update_period_spent_amount(budget, period, auto_commit=False)
-        responses.append(await service.build_budget_response(budget, period))
-
-    await service.session.commit()
-    return success_response(data=responses)
+    return success_response(data=budgets)
 
 
 @router.get("/summary", response_model=BudgetSummaryResponse)
