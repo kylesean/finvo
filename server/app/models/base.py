@@ -114,12 +114,18 @@ class BaseColumn:
     def timestamptz(
         nullable: bool = False,
         default: Callable[[], datetime] | None = None,
+        onupdate: Callable[[], datetime] | None = None,
     ) -> Mapped[datetime]:
-        """Timestamp with timezone."""
+        """Timestamp with timezone.
+
+        ``onupdate`` is opt-in so ``updated_at``-style columns can auto-refresh
+        on UPDATE without affecting ``created_at`` semantics.
+        """
         return mapped_column(
             TIMESTAMP(timezone=True),
             nullable=nullable,
             default=default or utc_now,
+            onupdate=onupdate,
             server_default=text("NOW()"),
         )
 

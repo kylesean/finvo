@@ -143,7 +143,9 @@ class StreamProcessor:
 
             # 3. Dual-write messages to searchable_messages table (async, non-blocking)
             if user_uuid and session_id:
-                asyncio.create_task(
+                from app.core.background_tasks import spawn_background_task
+
+                spawn_background_task(
                     self._index_messages(
                         session_id=session_id,
                         user_uuid=user_uuid,

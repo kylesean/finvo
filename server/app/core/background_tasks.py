@@ -1,14 +1,15 @@
 """Background Task Management
 
-Provides asynchronous task execution capabilities.
+Provides a tracked, fire-and-forget background task mechanism:
 
-Supports two approaches:
-1. FastAPI BackgroundTasks / asyncio.create_task - Simple, lightweight, suitable for quick tasks.
-2. ARQ (Optional) - Redis-based task queue supporting retries and persistence.
+- Every scheduled coroutine is held by a strong reference until it finishes,
+  so the task is never garbage-collected mid-flight.
+- ``shutdown()`` waits for in-flight tasks on application shutdown instead of
+  letting the event loop tear them down abruptly.
 """
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from functools import wraps
 from typing import Any
 
@@ -18,15 +19,32 @@ from app.core.logging import logger
 class BackgroundTaskManager:
     """Background task manager.
 
-    Provides a unified background task interface supporting multiple execution strategies.
+    Tracks all scheduled tasks in a set; tasks are discarded on completion.
     """
 
-    @staticmethod
-    async def run_in_background(func: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
+    def __init__(self) -> None:
+        self._tasks: set[asyncio.Task[Any]] = set()
+
+    def spawn(self, coro: Coroutine[Any, Any, Any]) -> asyncio.Task[Any]:
+        """Schedule a coroutine, holding a strong reference until it completes."""
+        task = asyncio.create_task(coro)
+        self._tasks.add(task)
+        task.add_done_callback(self._tasks.discard)
+        return task
+
+    async def shutdown(self) -> None:
+        """Wait for in-flight background tasks (called at application shutdown)."""
+        pending = [t for t in self._tasks if not t.done()]
+        if pending:
+            logger.info("waiting_for_background_tasks", count=len(pending))
+            await asyncio.gather(*pending, return_exceptions=True)
+        self._tasks.clear()
+
+    async def run_in_background(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
         """Run task in background (fire-and-forget).
 
-        Uses asyncio.create_task to execute task in background without blocking the current request.
-        Suitable for lightweight non-persisted tasks.
+        Uses asyncio.create_task to execute the function without blocking the
+        current request. Suitable for lightweight non-persisted tasks.
 
         Args:
             func: Async function to execute
@@ -36,28 +54,15 @@ class BackgroundTaskManager:
 
         async def _wrapped_task() -> None:
             try:
-                logger.debug(
-                    "background_task_started",
-                    function=func.__name__,
-                )
+                logger.debug("background_task_started", function=func.__name__)
                 await func(*args, **kwargs)
-                logger.debug(
-                    "background_task_completed",
-                    function=func.__name__,
-                )
+                logger.debug("background_task_completed", function=func.__name__)
             except Exception as e:
-                logger.error(
-                    "background_task_failed",
-                    function=func.__name__,
-                    error=str(e),
-                    exc_info=True,
-                )
+                logger.error("background_task_failed", function=func.__name__, error=str(e), exc_info=True)
 
-        # Create background task
-        asyncio.create_task(_wrapped_task())
+        self.spawn(_wrapped_task())
 
-    @staticmethod
-    def background_task(func: Callable[..., Any]) -> Callable[..., Any]:
+    def background_task(self, func: Callable[..., Any]) -> Callable[..., Any]:
         """Decorator to mark a function as a background task.
 
         Usage:
@@ -71,7 +76,7 @@ class BackgroundTaskManager:
 
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> None:
-            await BackgroundTaskManager.run_in_background(func, *args, **kwargs)
+            await self.run_in_background(func, *args, **kwargs)
 
         return wrapper
 
@@ -80,74 +85,6 @@ class BackgroundTaskManager:
 background_task_manager = BackgroundTaskManager()
 
 
-# ============================================================================
-# ARQ Integration (Optional)
-# ============================================================================
-
-"""
-For advanced task queue features (retries, persistence, distribution), use ARQ.
-
-Installation:
-    pip install arq
-
-Configuration (app/core/config.py):
-    REDIS_HOST = "localhost"
-    REDIS_PORT = 6379
-
-Create worker (app/workers/tasks.py):
-    from arq import create_pool
-    from arq.connections import RedisSettings
-
-    async def send_verification_code(ctx, code_type: str, account: str):
-        from app.services.code_manager import code_manager
-        await code_manager.send_code(code_type, account)
-
-    class WorkerSettings:
-        redis_settings = RedisSettings(host='localhost', port=6379)
-        functions = [send_verification_code]
-
-Start worker:
-    arq app.workers.tasks.WorkerSettings
-
-Usage in code:
-    from arq import create_pool
-    from arq.connections import RedisSettings
-
-    redis = await create_pool(RedisSettings())
-    await redis.enqueue_job('send_verification_code', 'email', 'user@example.com')
-"""
-
-
-# ============================================================================
-# Celery Integration (Optional)
-# ============================================================================
-
-"""
-For enterprise-grade task queue features, use Celery.
-
-Installation:
-    pip install celery[redis]
-
-Configuration (celery_app.py):
-    from celery import Celery
-
-    celery_app = Celery(
-        'tasks',
-        broker='redis://localhost:6379/0',
-        backend='redis://localhost:6379/0'
-    )
-
-    @celery_app.task
-    def send_verification_code_task(code_type: str, account: str):
-        # Note: Celery tasks must be synchronous or use celery-aio
-        import asyncio
-        from app.services.code_manager import code_manager
-        asyncio.run(code_manager.send_code(code_type, account))
-
-Start worker:
-    celery -A celery_app worker --loglevel=info
-
-Usage in code:
-    from celery_app import send_verification_code_task
-    send_verification_code_task.delay('email', 'user@example.com')
-"""
+def spawn_background_task(coro: Coroutine[Any, Any, Any]) -> asyncio.Task[Any]:
+    """Schedule a tracked background task from anywhere in the app."""
+    return background_task_manager.spawn(coro)

@@ -64,7 +64,11 @@ class EventBus:
             return
 
         for handler in handlers:
-            asyncio.create_task(self._safe_dispatch(handler, event))
+            # Track the task so it is not garbage-collected and shutdown can
+            # wait for it (see BackgroundTaskManager).
+            from app.core.background_tasks import spawn_background_task
+
+            spawn_background_task(self._safe_dispatch(handler, event))
 
     async def _safe_dispatch(self, handler: EventHandler, event: DomainEvent) -> None:
         """Dispatch event to handler with error isolation."""

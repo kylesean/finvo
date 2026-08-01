@@ -18,10 +18,20 @@ __all__: list[str] = []
 class StatisticsQueryParams(BaseModel):
     """Common query parameters for statistics endpoints."""
 
-    time_range: str = Field(default="month", description="Time range: week, month, year, or custom")
+    time_range: str = Field(
+        default="month",
+        pattern="^(week|month|year|custom)$",
+        description="Time range: week, month, year, or custom",
+    )
     start_date: str | None = Field(default=None, description="Start date for custom range (ISO 8601 format)")
     end_date: str | None = Field(default=None, description="End date for custom range (ISO 8601 format)")
     account_types: str | None = Field(default=None, description="Comma-separated list of account types to filter")
+    tz_offset: int | None = Field(default=None, ge=-1440, le=1440, description="Timezone offset in minutes")
+
+    @property
+    def account_types_list(self) -> list[str] | None:
+        """Parse the comma-separated account types into a list."""
+        return [t.strip() for t in self.account_types.split(",") if t.strip()] if self.account_types else None
 
 
 # ============================================================================

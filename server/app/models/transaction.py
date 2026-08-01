@@ -14,7 +14,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Un
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.financial_account import FinancialAccount
@@ -74,7 +74,7 @@ class Transaction(Base):
         Index("ix_transactions_user_at", "user_uuid", "transaction_at"),
     )
 
-    id: Mapped[UUID | None] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
     type: Mapped[str] = mapped_column(String(20))
     source_account_id: Mapped[UUID | None] = col.uuid_fk(
@@ -108,7 +108,7 @@ class Transaction(Base):
         nullable=True,
     )
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True, onupdate=utc_now)
 
     comments: Mapped[list[TransactionComment]] = relationship(
         "TransactionComment",
@@ -169,16 +169,16 @@ class TransactionComment(Base):
 
     __tablename__ = "transaction_comments"
 
-    id: Mapped[int | None] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE", index=True)
     user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
     parent_comment_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("transaction_comments.id", ondelete="CASCADE"), nullable=True
     )
     comment_text: Mapped[str] = mapped_column(String)
-    mentioned_user_ids: Mapped[list[int] | None] = mapped_column(JSONB, nullable=True)
+    mentioned_user_ids: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True, onupdate=utc_now)
 
     transaction: Mapped[Transaction | None] = relationship("Transaction", back_populates="comments")
     user: Mapped[User | None] = relationship(
@@ -221,7 +221,7 @@ class RecurringTransaction(Base):
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True, onupdate=utc_now)
 
     @property
     def amount_float(self) -> float:
@@ -234,7 +234,7 @@ class TransactionShare(Base):
 
     __tablename__ = "transaction_shares"
 
-    id: Mapped[UUID | None] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE")
     sharer_user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="uuid")
     shared_with_user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="uuid")

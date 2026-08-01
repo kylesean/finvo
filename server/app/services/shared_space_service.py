@@ -619,7 +619,7 @@ class SharedSpaceService:
             TransactionAddedEvent(
                 space_id=space_id,
                 space_name=space_name,
-                transaction_id=cast(UUID, transaction.id),
+                transaction_id=transaction.id,
                 added_by_user_uuid=user_uuid,
                 amount=transaction.amount,
                 currency=(transaction.currency or "CNY").upper(),

@@ -8,6 +8,7 @@ import functools
 import json
 from collections.abc import Callable
 from typing import Any
+from uuid import UUID
 
 from redis.asyncio import Redis
 from redis.asyncio.connection import ConnectionPool
@@ -321,6 +322,18 @@ class CacheManager:
 cache_manager = CacheManager()
 
 
+def _cache_serializable(value: Any) -> str | None:
+    """Return a stable string form of a primitive/UUID argument, else None.
+
+    UUIDs must be included: silently dropping them would make different users'
+    cache keys collide (cross-user data leak). Non-primitives are excluded so
+    callers must provide an explicit ``key_builder`` for complex arguments.
+    """
+    if isinstance(value, (str, int, float, bool, type(None), UUID)):
+        return str(value)
+    return None
+
+
 def cache_key(*args: Any, **kwargs: Any) -> str:
     """Generate cache key from function arguments.
 
@@ -331,15 +344,9 @@ def cache_key(*args: Any, **kwargs: Any) -> str:
     Returns:
         str: Generated cache key
     """
-    # Filter out non-serializable arguments
-    serializable_args = []
-    for arg in args:
-        if isinstance(arg, str | int | float | bool | type(None)):
-            serializable_args.append(str(arg))
-
-    serializable_kwargs = {
-        k: str(v) for k, v in kwargs.items() if isinstance(v, str | int | float | bool | type(None))
-    }
+    # Filter out non-serializable arguments (keeping primitives and UUIDs)
+    serializable_args = [a for a in args if _cache_serializable(a) is not None]
+    serializable_kwargs = {k: v for k, v in kwargs.items() if _cache_serializable(v) is not None}
 
     key_parts = serializable_args + [f"{k}={v}" for k, v in sorted(serializable_kwargs.items())]
     return ":".join(key_parts)
