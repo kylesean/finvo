@@ -114,10 +114,18 @@ class AppScheduler:
             logger.info("scheduler_started")
 
     def shutdown(self) -> None:
-        """Shutdown the scheduler."""
+        """Stop the scheduler and allow it to be re-initialized later.
+
+        APScheduler's ``AsyncIOScheduler`` uses ``wait=False`` because joining
+        async job futures with ``wait=True`` would block the event loop; the
+        scheduler simply stops scheduling new runs. Clearing ``_scheduler`` is
+        what makes a later :meth:`init` able to rebuild it (a non-None scheduler
+        previously blocked re-initialization after shutdown).
+        """
         if self._scheduler is not None and self._scheduler.running:
             self._scheduler.shutdown(wait=False)
-            logger.info("scheduler_stopped")
+        self._scheduler = None
+        logger.info("scheduler_stopped")
 
     def is_running(self) -> bool:
         """Check if the scheduler is running."""

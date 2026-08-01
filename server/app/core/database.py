@@ -203,29 +203,21 @@ db_manager = DatabaseManager()
 
 
 async def get_session() -> AsyncGenerator[AsyncSession]:
-    """Dependency for getting async database sessions.
+    """FastAPI dependency for async database sessions.
 
-    Yields:
-        AsyncSession: Async database session
+    Delegates to :func:`get_session_context` so there is exactly ONE transaction
+    contract (commit on success, rollback on error, always close) shared by the
+    FastAPI dependency and internal context-managed sessions.
 
     Example:
         ```python
         @app.get("/users")
         async def get_users(session: AsyncSession = Depends(get_session)):
-            result = await session.execute(select(User))
-            return result.scalars().all()
+            ...
         ```
     """
-    session = db_manager.session_factory()
-    try:
+    async with get_session_context() as session:
         yield session
-    except Exception:
-        await session.rollback()
-        raise
-    else:
-        await session.commit()
-    finally:
-        await session.close()
 
 
 @asynccontextmanager

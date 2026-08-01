@@ -9,7 +9,7 @@ signals collected during user registration. The priority is:
 
 from __future__ import annotations
 
-from app.config.currency import PROJECT_DEFAULT_CURRENCY
+from app.config.currency import PROJECT_DEFAULT_CURRENCY, SUPPORTED_CURRENCY_CODES
 
 # Mapping: locale (exact or prefix) -> currency code
 # Exact keys (e.g. "en_US") are checked first, then prefix keys (e.g. "en")
@@ -67,20 +67,9 @@ TIMEZONE_CURRENCY_MAP: dict[str, str] = {
     "Australia/Brisbane": "AUD",
 }
 
-# Currencies supported by the application (G9 + TWD + HKD)
-SUPPORTED_CURRENCIES: set[str] = {
-    "USD",
-    "CNY",
-    "EUR",
-    "GBP",
-    "JPY",
-    "CAD",
-    "AUD",
-    "INR",
-    "RUB",
-    "HKD",
-    "TWD",
-}
+# Currencies supported by the application (derived from the single source of
+# truth in app.config.currency; members are checked for membership only).
+SUPPORTED_CURRENCIES: frozenset[str] = SUPPORTED_CURRENCY_CODES
 
 # Fallback currency when no signal is available (no locale, no timezone match).
 # Aligned with PROJECT_DEFAULT_CURRENCY to ensure consistency across all layers.

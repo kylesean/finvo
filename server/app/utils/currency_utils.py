@@ -18,7 +18,20 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config.currency import CURRENCY_SYMBOLS, SUPPORTED_CURRENCIES
 from app.core.logging import logger
+
+# Re-exported from the single source of truth (app.config.currency) so callers
+# importing these from currency_utils keep working without a second definition.
+__all__ = [
+    "BASE_CURRENCY",
+    "get_user_base_currency",
+    "get_user_display_currency",
+    "convert_to_user_base",
+    "convert_to_display_currency",
+    "get_currency_symbol",
+    "SUPPORTED_CURRENCIES",
+]
 
 # ---------------------------------------------------------------------------
 # Deprecated: kept only for backward compatibility with exchange_rate_service
@@ -172,38 +185,6 @@ def get_currency_symbol(currency_code: str) -> str:
         currency_code: ISO 4217 currency code
 
     Returns:
-        str: Currency symbol
+        str: Currency symbol (falls back to the code itself if unknown)
     """
-    # G9 countries + TWD + HKD
-    CURRENCY_SYMBOLS = {
-        "USD": "$",
-        "EUR": "€",
-        "GBP": "£",
-        "JPY": "¥",
-        "CAD": "C$",
-        "AUD": "A$",
-        "CNY": "¥",
-        "INR": "₹",
-        "RUB": "₽",
-        "HKD": "HK$",
-        "TWD": "NT$",
-    }
-
     return CURRENCY_SYMBOLS.get(currency_code.upper(), currency_code)
-
-
-# Supported currencies: G9 countries + TWD + HKD
-# Order: USD, CNY, then others
-SUPPORTED_CURRENCIES = [
-    {"code": "USD", "name": "US Dollar", "symbol": "$", "flag": "🇺🇸"},
-    {"code": "CNY", "name": "Chinese Yuan", "symbol": "¥", "flag": "🇨🇳"},
-    {"code": "EUR", "name": "Euro", "symbol": "€", "flag": "🇪🇺"},
-    {"code": "GBP", "name": "British Pound", "symbol": "£", "flag": "🇬🇧"},
-    {"code": "JPY", "name": "Japanese Yen", "symbol": "¥", "flag": "🇯🇵"},
-    {"code": "CAD", "name": "Canadian Dollar", "symbol": "C$", "flag": "🇨🇦"},
-    {"code": "AUD", "name": "Australian Dollar", "symbol": "A$", "flag": "🇦🇺"},
-    {"code": "INR", "name": "Indian Rupee", "symbol": "₹", "flag": "🇮🇳"},
-    {"code": "RUB", "name": "Russian Ruble", "symbol": "₽", "flag": "🇷🇺"},
-    {"code": "HKD", "name": "Hong Kong Dollar", "symbol": "HK$", "flag": "🇭🇰"},
-    {"code": "TWD", "name": "New Taiwan Dollar", "symbol": "NT$", "flag": "🇹🇼"},
-]

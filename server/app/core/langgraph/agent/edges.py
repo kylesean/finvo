@@ -7,14 +7,18 @@ Routing is now declarative based on tool metadata's `continuation` property,
 with minimal override rules for special modes like `direct_execute`.
 """
 
-from typing import Literal, assert_never, cast
+from typing import Literal, assert_never
 
 from langchain_core.messages import AIMessage
-from langgraph.graph import END
 
 from app.core.langgraph.agent.state import AgentState
 from app.core.langgraph.tools.tool_metadata import Continuation
 from app.core.logging import logger
+
+# LangGraph's end-sentinel string value ("__end__"). Using a typed literal
+# constant avoids per-callsite `cast` of the (str-typed) END sentinel and keeps
+# route return types exhaustively checkable.
+_END: Literal["__end__"] = "__end__"
 
 
 def route_entry(state: AgentState) -> Literal["direct_execute", "agent"]:
@@ -45,7 +49,7 @@ def route_after_agent(state: AgentState) -> Literal["tools", "__end__"]:
     messages = state.get("messages", [])
 
     if not messages:
-        return cast(Literal["tools", "__end__"], END)
+        return _END
 
     last_message = messages[-1]
 
@@ -55,7 +59,7 @@ def route_after_agent(state: AgentState) -> Literal["tools", "__end__"]:
         logger.debug("route_after_agent_to_tools", tool_names=tool_names)
         return "tools"
 
-    return cast(Literal["tools", "__end__"], END)
+    return _END
 
 
 # ============================================================================
@@ -68,7 +72,7 @@ DIRECT_EXECUTE_OVERRIDES: dict[Continuation, Literal["agent", "__end__"]] = {
     # WRITE tools: need agent to provide summary/confirmation after direct execution
     Continuation.END: "agent",
     # WAIT_USER tools: UI handles the rest, terminate graph
-    Continuation.WAIT_USER: cast(Literal["agent", "__end__"], END),
+    Continuation.WAIT_USER: _END,
     # AGENT tools: continue as normal
     Continuation.AGENT: "agent",
 }
@@ -97,12 +101,12 @@ def route_after_tools(state: AgentState) -> Literal["agent", "__end__"]:
     messages = state.get("messages", [])
 
     if not messages:
-        return cast(Literal["agent", "__end__"], END)
+        return _END
 
     last_message = messages[-1]
 
     if not isinstance(last_message, ToolMessage):
-        return cast(Literal["agent", "__end__"], END)
+        return _END
 
     tool_name = getattr(last_message, "name", "")
     tool_meta = get_tool_metadata(tool_name)
@@ -123,7 +127,7 @@ def route_after_tools(state: AgentState) -> Literal["agent", "__end__"]:
                 "route_after_tools_direct_execute_override",
                 tool_name=tool_name,
                 original_continuation=continuation.value,
-                override=override if override != END else "END",
+                override=override if override != _END else "END",
             )
             return override
 
@@ -143,7 +147,7 @@ def route_after_tools(state: AgentState) -> Literal["agent", "__end__"]:
                 tool_name=tool_name,
                 continuation=continuation.value,
             )
-            return cast(Literal["agent", "__end__"], END)
+            return _END
 
         case Continuation.WAIT_USER:
             logger.info(
@@ -151,7 +155,7 @@ def route_after_tools(state: AgentState) -> Literal["agent", "__end__"]:
                 tool_name=tool_name,
                 continuation=continuation.value,
             )
-            return cast(Literal["agent", "__end__"], END)
+            return _END
 
         case _:
             assert_never(continuation)
