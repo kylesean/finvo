@@ -307,6 +307,11 @@ class Settings(BaseSettings):
     RATE_LIMIT_REGISTER: str = "10 per hour"
     RATE_LIMIT_SEND_CODE: str = "10 per minute"
 
+    # Set to True only when running behind a trusted reverse proxy that strips
+    # untrusted X-Forwarded-For headers. Enables rate limiting / IP logging to
+    # use the real client IP; keeps spoofing attempts ineffective otherwise.
+    BEHIND_PROXY: bool = False
+
     @property
     def RATE_LIMIT_ENDPOINTS(self) -> dict[str, list[str]]:
         """Get rate limit configuration for endpoints."""

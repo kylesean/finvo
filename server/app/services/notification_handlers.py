@@ -6,6 +6,7 @@ Handlers are registered at app startup and execute asynchronously.
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any
@@ -13,11 +14,38 @@ from uuid import UUID
 
 from sqlalchemy import and_, select
 
+from app.core.database import db_manager
 from app.core.events import DomainEvent, event_bus
 
 # =============================================================================
 # Domain Events
 # =============================================================================
+
+
+async def _notify_recipients(
+    recipient_uuids: list[UUID],
+    *,
+    type_: str,
+    title: str,
+    content: str,
+    data: dict[str, Any],
+) -> None:
+    """Send a push notification to many space members in parallel.
+
+    Each recipient gets its OWN session because ``AsyncSession`` is not safe to
+    share across concurrent tasks; this keeps large spaces from paying N serial
+    DB + push round-trips on the event loop (m22).
+    """
+    from app.services.push_service import PushService
+
+    async def send_one(user_uuid: UUID) -> None:
+        async with db_manager.session_factory() as s:
+            await PushService.send_notification(
+                db=s, user_uuid=user_uuid, type_=type_, title=title, content=content, data=data
+            )
+
+    if recipient_uuids:
+        await asyncio.gather(*(send_one(u) for u in recipient_uuids))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -72,23 +100,21 @@ async def handle_member_joined(event: MemberJoinedEvent) -> None:
         members_result = await db.execute(members_query)
         recipient_uuids = list(members_result.scalars().all())
 
-        # Notify existing members
-        for recipient_uuid in recipient_uuids:
-            await PushService.send_notification(
-                db=db,
-                user_uuid=recipient_uuid,
-                type_="member_joined",
-                title=f"{username} joined your space",
-                content=f'{username} joined "{event.space_name}"',
-                data={
-                    "action": "member_joined",
-                    "space_id": str(event.space_id),
-                    "space_name": event.space_name,
-                    "joined_user_id": str(event.joined_user_uuid),
-                    "joined_username": username,
-                    "target_path": f"/profile/shared-space/{event.space_id}",
-                },
-            )
+        # Notify existing members (in parallel, one session each)
+        await _notify_recipients(
+            recipient_uuids,
+            type_="member_joined",
+            title=f"{username} joined your space",
+            content=f'{username} joined "{event.space_name}"',
+            data={
+                "action": "member_joined",
+                "space_id": str(event.space_id),
+                "space_name": event.space_name,
+                "joined_user_id": str(event.joined_user_uuid),
+                "joined_username": username,
+                "target_path": f"/profile/shared-space/{event.space_id}",
+            },
+        )
 
         # Welcome notification to the joining user
         await PushService.send_notification(
@@ -111,7 +137,6 @@ async def handle_transaction_added(event: TransactionAddedEvent) -> None:
     from app.core.database import db_manager
     from app.models.shared_space import SpaceMember
     from app.models.user import User
-    from app.services.push_service import PushService
 
     async with db_manager.session_factory() as db:
         # Get recording user's display name
@@ -139,26 +164,24 @@ async def handle_transaction_added(event: TransactionAddedEvent) -> None:
         if event.description:
             content += f" ({event.description})"
 
-        for recipient_uuid in recipient_uuids:
-            await PushService.send_notification(
-                db=db,
-                user_uuid=recipient_uuid,
-                type_="transaction",
-                title=title,
-                content=content,
-                data={
-                    "action": "new_transaction",
-                    "space_id": str(event.space_id),
-                    "space_name": event.space_name,
-                    "transaction_id": str(event.transaction_id),
-                    "amount": f"{event.amount:.2f}",
-                    "currency": event.currency,
-                    "tx_type": event.tx_type,
-                    "added_by_user_id": str(event.added_by_user_uuid),
-                    "added_by_username": username,
-                    "target_path": f"/profile/shared-space/{event.space_id}",
-                },
-            )
+        await _notify_recipients(
+            recipient_uuids,
+            type_="transaction",
+            title=title,
+            content=content,
+            data={
+                "action": "new_transaction",
+                "space_id": str(event.space_id),
+                "space_name": event.space_name,
+                "transaction_id": str(event.transaction_id),
+                "amount": f"{event.amount:.2f}",
+                "currency": event.currency,
+                "tx_type": event.tx_type,
+                "added_by_user_id": str(event.added_by_user_uuid),
+                "added_by_username": username,
+                "target_path": f"/profile/shared-space/{event.space_id}",
+            },
+        )
 
 
 # =============================================================================

@@ -117,7 +117,12 @@ class TimezoneHelper:
             UTC datetime (naive datetime, for database storage)
         """
         dt_str = datetime_str.replace("T", " ").strip()
-        dt = datetime.fromisoformat(dt_str)
+        try:
+            dt = datetime.fromisoformat(dt_str)
+        except ValueError:
+            # Surface a clear message instead of a bare parser exception so the
+            # caller can respond with a user-friendly validation error.
+            raise ValueError(f"Invalid datetime format: {datetime_str!r}. Expected e.g. '2025-12-02 21:00:00'.")
 
         return TimezoneHelper.user_to_utc(dt, user_timezone)
 

@@ -81,8 +81,7 @@ def process_llm_response(response: BaseMessage) -> BaseMessage:
         response.content = "".join(text_parts)
         logger.debug(
             "processed_structured_content",
-            block_count=len(response.content) if isinstance(response.content, list) else 1,
-            extracted_length=len(response.content) if isinstance(response.content, str) else 0,
+            extracted_length=len(response.content),
         )
 
     return response
