@@ -103,8 +103,13 @@ SHELL_INJECTION_PATTERN: re.Pattern[str] = re.compile(
 )
 
 # Allowed pipe pattern: echo '...' | uv run python ...
+# The echo payload is restricted to single-quoted text whose characters are
+# safe inside a shell (no quotes, backslash, $, backtick, chaining/redirection
+# metacharacters). This prevents quote-closing + command substitution attacks
+# like: echo ''$(whoami)'' | uv run python ...  (would otherwise pass a
+# naive `.*` match and execute $(whoami)).
 ALLOWED_PIPE_PATTERN: re.Pattern[str] = re.compile(
-    r"^echo\s+['\"].*['\"]\s*\|\s*uv\s+run\s+python\s+"
+    r"^echo\s+'[^'\\$`;&|<>]*'\s*\|\s*uv\s+run\s+python\s+"
     r"app/skills/[\w-]+/scripts/[\w-]+\.py"
     r"(?:\s+[^\s;&|<>`\"'\$\\]+)*$"
 )
@@ -461,4 +466,5 @@ class SimpleFilesystemBackend:
         except subprocess.TimeoutExpired:
             return ExecuteResponse(output="Error: Command execution timed out after 30 seconds", exit_code=124)
         except Exception as e:
-            return ExecuteResponse(output=f"Error executing command: {str(e)}", exit_code=1)
+            logger.warning("command_execution_error: %s", e)
+            return ExecuteResponse(output="Error executing command", exit_code=1)

@@ -17,6 +17,7 @@ from collections.abc import AsyncGenerator
 from typing import Any
 from uuid import UUID
 
+from app.core.exceptions import to_client_error
 from app.core.langgraph.stream.event_generator import EventGenerator
 from app.core.langgraph.stream.render_policy import (
     DefaultRenderPolicy,
@@ -126,10 +127,10 @@ class StreamProcessor:
                 error=str(e),
                 exc_info=True,
             )
-            # Send error event to client
+            # Send error event to client (internal details stay in the log)
             yield GenUIEvent(
                 type="error",
-                content=f"Stream processing error: {str(e)}",
+                content=f"Stream processing error: {to_client_error(e)}",
             )
 
         finally:

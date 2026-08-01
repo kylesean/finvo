@@ -319,3 +319,17 @@ class DatabaseError(AppException):
         details: dict[str, Any] | None = None,
     ):
         super().__init__(message, status_code=500, error_code=error_code, details=details)
+
+
+def to_client_error(exc: Exception, fallback: str = "An internal error occurred") -> str:
+    """Map an exception to a client/LLM-safe message.
+
+    ``AppException`` carries an intentional user-facing message that can be
+    surfaced; every other exception is reduced to a generic message so internal
+    details (paths, SQL, stack traces) are never leaked to clients, the LLM, or
+    persisted checkpoints. Callers must log the full exception separately
+    (``logger.error(..., exc_info=True)``).
+    """
+    if isinstance(exc, AppException):
+        return exc.message
+    return fallback

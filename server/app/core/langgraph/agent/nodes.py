@@ -23,6 +23,7 @@ from tenacity import (
 )
 
 from app.core.config import settings
+from app.core.exceptions import to_client_error
 from app.core.langgraph.agent.multimodal import (
     build_multimodal_content,
     load_image_parts,
@@ -318,9 +319,9 @@ def create_direct_execute_node(
                 },
             }
         except Exception as e:
-            logger.error("direct_execute_error", tool_name=tool_name, error=str(e))
+            logger.error("direct_execute_error", tool_name=tool_name, error=str(e), exc_info=True)
             return {
-                "messages": [AIMessage(content=f"Action failed: {str(e)}")],
+                "messages": [AIMessage(content=f"Action failed: {to_client_error(e)}")],
                 "ui_mode": "idle",
                 "tool_name": None,
                 "tool_params": None,

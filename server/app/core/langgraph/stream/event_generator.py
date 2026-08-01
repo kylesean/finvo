@@ -26,6 +26,52 @@ from app.core.langgraph.stream.component_detector import ComponentDetector
 from app.core.logging import logger
 from app.schemas.genui import GenUIEvent
 
+# Tool-result fields that may carry sensitive financial/personal details and
+# must be redacted before the result is written to logs.
+_SENSITIVE_RESULT_KEYS: frozenset[str] = frozenset(
+    {
+        "account_number",
+        "account_no",
+        "address",
+        "card",
+        "card_number",
+        "comment",
+        "description",
+        "email",
+        "iban",
+        "memo",
+        "mobile",
+        "name",
+        "note",
+        "notes",
+        "pan",
+        "phone",
+        "raw_input",
+        "remark",
+    }
+)
+
+
+def _sanitize_tool_result_for_log(value: Any, depth: int = 0) -> Any:
+    """Recursively redact sensitive fields of a tool result for log output.
+
+    Financial amounts are preserved; identifying details (account numbers,
+    notes, names, contact info) are replaced with a redaction marker. Deeply
+    nested or oversized structures are truncated to bound log size.
+    """
+    if depth > 4:
+        return "<truncated>"
+    if isinstance(value, dict):
+        return {
+            k: ("<redacted>" if k.lower() in _SENSITIVE_RESULT_KEYS else _sanitize_tool_result_for_log(v, depth + 1))
+            for k, v in value.items()
+        }
+    if isinstance(value, list):
+        return [_sanitize_tool_result_for_log(item, depth + 1) for item in value[:20]]
+    if isinstance(value, str) and len(value) > 200:
+        return f"{value[:200]}..."
+    return value
+
 
 class EventGenerator:
     """GenUI Event Generator.
@@ -248,9 +294,7 @@ class EventGenerator:
                 "langgraph_tool_result_preview",
                 tool_name=tool_name,
                 tool_call_id=tool_call_id,
-                tool_result_preview=json.dumps(tool_result, ensure_ascii=False)[:300]
-                if isinstance(tool_result, dict)
-                else str(tool_result)[:300],
+                tool_result_preview=json.dumps(_sanitize_tool_result_for_log(tool_result), ensure_ascii=False)[:300],
             )
             yield GenUIEvent(
                 type="tool_call_end",

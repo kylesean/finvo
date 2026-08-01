@@ -109,14 +109,34 @@ def write_file_tool(path: str, content: str) -> Any:
         if not user_id:
             return "Error: User ID not available"
 
-        # Build user artifact path
-        user_artifact_dir = Path("artifacts") / user_id
-        full_path = user_artifact_dir / path
-        full_path.parent.mkdir(parents=True, exist_ok=True)
+        # Security: writes are sandboxed to artifacts/{user_id}. Reject absolute
+        # paths, sensitive targets, and any path that resolves outside the
+        # sandbox (e.g. "../../.env").
+        if not path or Path(path).is_absolute():
+            return "Error: path must be a relative path"
+        if _is_sensitive_path(path):
+            logger.warning("write_file_sensitive_blocked", path=path[:200])
+            return "Error: writing this file is not allowed"
 
-        relative_path = str(full_path)
-        fs_backend.write(relative_path, content)
+        project_root = PROJECT_ROOT.resolve()
+        user_artifact_dir = (project_root / "artifacts" / user_id).resolve()
+        sandbox_path = (user_artifact_dir / path).resolve()
 
+        # resolve() collapses ".." and symlinks, so a traversal attempt ends
+        # up outside the sandbox and is rejected here.
+        if not sandbox_path.is_relative_to(user_artifact_dir):
+            logger.warning(
+                "write_file_path_escape_blocked",
+                user_id=user_id,
+                path=path[:200],
+            )
+            return "Error: path escapes the artifact sandbox"
+
+        sandbox_path.parent.mkdir(parents=True, exist_ok=True)
+        # fs_backend.write re-resolves against project_root as a second barrier.
+        fs_backend.write(str(sandbox_path.relative_to(project_root)), content)
+
+        relative_path = str(sandbox_path.relative_to(project_root))
         access_url = f"/artifacts/{user_id}/{path}"
         return {
             "success": True,

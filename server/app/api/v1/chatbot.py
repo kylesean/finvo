@@ -29,7 +29,7 @@ from app.api.v1.auth import (
 )
 from app.core.config import settings
 from app.core.database import get_session, get_session_context
-from app.core.exceptions import AppException, CommonErrorCode
+from app.core.exceptions import AppException, CommonErrorCode, to_client_error
 from app.core.langgraph.simple_agent import SimpleLangChainAgent as LangGraphAgent
 from app.core.limiter import limiter
 from app.core.logging import logger
@@ -371,7 +371,7 @@ async def chat_stream(
 
         except Exception as e:
             logger.error("stream_error", error=str(e), exc_info=True)
-            error_event = GenUIEvent(type="error", content=str(e))
+            error_event = GenUIEvent(type="error", content=to_client_error(e))
             yield f"data: {json.dumps(error_event.model_dump(mode='json'), ensure_ascii=False)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")

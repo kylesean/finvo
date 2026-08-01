@@ -17,6 +17,7 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.database import db_manager
+from app.core.exceptions import to_client_error
 from app.core.logging import logger
 from app.services.transaction_service import TransactionService
 
@@ -126,7 +127,7 @@ async def execute_transfer(
 
         except Exception as e:
             logger.error("execute_transfer_failed", error=str(e), exc_info=True)
-            return {"success": False, "message": f"Transfer failed: {str(e)}"}
+            return {"success": False, "message": f"Transfer failed: {to_client_error(e)}"}
 
 
 # Export

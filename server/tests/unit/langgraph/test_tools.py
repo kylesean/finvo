@@ -4,7 +4,17 @@ This module contains unit tests for the tool functions used by the
 LangGraph agent, including transaction, budget, and transfer tools.
 """
 
+import importlib
+from pathlib import Path
+
 import pytest
+
+from app.core.langgraph.tools import current_user_id
+from app.core.langgraph.tools.filesystem_backend import CommandValidator, SimpleFilesystemBackend
+
+# NOTE: the package re-exports `filesystem_tools` as a list, so a plain
+# `import ... as ft` resolves to the list; fetch the module explicitly.
+ft = importlib.import_module("app.core.langgraph.tools.filesystem_tools")
 
 
 class TestTransactionTools:
@@ -85,3 +95,80 @@ class TestToolMetadata:
     def test_tool_parameter_types(self):
         """Test that tool parameters have correct type annotations."""
         pass
+
+
+class TestWriteFileSandbox:
+    """Security tests for the write_file tool sandbox (C1)."""
+
+    def _call_write(self, path: str, tmp_path: Path) -> object:
+        """Invoke write_file_tool with PROJECT_ROOT/fs_backend pointed at tmp_path."""
+        backend = SimpleFilesystemBackend(tmp_path)
+
+        original_root = ft.PROJECT_ROOT
+        original_backend = ft.fs_backend
+        ft.PROJECT_ROOT = tmp_path
+        ft.fs_backend = backend
+        token = current_user_id.set("user-1")
+        try:
+            return ft.write_file_tool.invoke({"path": path, "content": "payload"})
+        finally:
+            ft.PROJECT_ROOT = original_root
+            ft.fs_backend = original_backend
+            current_user_id.reset(token)
+
+    def test_rejects_path_traversal(self, tmp_path: Path) -> None:
+        """../../evil.txt must not escape the artifacts sandbox."""
+        result = self._call_write("../../evil.txt", tmp_path)
+        assert isinstance(result, str)
+        assert not (tmp_path / "evil.txt").exists()
+
+    def test_rejects_absolute_path(self, tmp_path: Path) -> None:
+        """Absolute paths must be rejected outright."""
+        result = self._call_write(str(tmp_path / "evil.txt"), tmp_path)
+        assert isinstance(result, str)
+        assert not (tmp_path / "evil.txt").exists()
+
+    def test_rejects_sensitive_path(self, tmp_path: Path) -> None:
+        """Paths targeting .env/keys must be rejected."""
+        result = self._call_write("../../.env", tmp_path)
+        assert isinstance(result, str)
+        assert not (tmp_path / ".env").exists()
+
+    def test_allows_sandboxed_path(self, tmp_path: Path) -> None:
+        """A normal relative path inside the sandbox is written successfully."""
+        result = self._call_write("sub/page.html", tmp_path)
+        assert isinstance(result, dict)
+        assert result.get("success") is True
+        assert (tmp_path / "artifacts" / "user-1" / "sub" / "page.html").exists()
+
+
+class TestCommandValidatorSecurity:
+    """Security tests for the shell command validator (C2)."""
+
+    _ATTACKS = [
+        "echo ''$(whoami)'' | uv run python app/skills/x/scripts/y.py",
+        "echo 'a'$(whoami)'b' | uv run python app/skills/x/scripts/y.py",
+        'echo "$(whoami)" | uv run python app/skills/x/scripts/y.py',
+        "echo 'a'; rm -rf / | uv run python app/skills/x/scripts/y.py",
+        "echo '`id`' | uv run python app/skills/x/scripts/y.py",
+        "echo 'a\\'$(id)' | uv run python app/skills/x/scripts/y.py",
+    ]
+
+    def test_injection_attempts_blocked(self) -> None:
+        """Quote-closing and command-substitution payloads must be rejected."""
+        validator = CommandValidator(Path("/tmp"))
+        for cmd in self._ATTACKS:
+            assert not validator.validate(cmd).allowed, f"attack slipped through: {cmd}"
+
+    def test_legit_pipe_allowed(self, tmp_path: Path) -> None:
+        """The documented JSON echo pipe usage must still pass validation."""
+        script = tmp_path / "app" / "skills" / "managing-shared-ledgers" / "scripts" / "query_space_summary.py"
+        script.parent.mkdir(parents=True)
+        script.write_text("", encoding="utf-8")
+
+        validator = CommandValidator(tmp_path)
+        result = validator.validate(
+            'echo \'{"space_id": "uuid-string"}\' | '
+            "uv run python app/skills/managing-shared-ledgers/scripts/query_space_summary.py"
+        )
+        assert result.allowed, result.reason

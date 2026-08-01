@@ -7,6 +7,7 @@ from uuid import UUID
 
 from langchain_core.tools import tool
 
+from app.core.exceptions import to_client_error
 from app.core.logging import logger
 from app.services.memory import get_memory_service
 
@@ -49,8 +50,8 @@ async def search_personal_context(query: str) -> str:
         return f"Found the following personal context for '{query}':\n{formatted}"
 
     except Exception as e:
-        logger.error("memory_tool_search_failed", error=str(e), user_id=user_id)
-        return f"Error occurred while searching memories: {str(e)}"
+        logger.error("memory_tool_search_failed", error=str(e), user_id=user_id, exc_info=True)
+        return f"Error occurred while searching memories: {to_client_error(e)}"
 
 
 # Collection of memory tools
