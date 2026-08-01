@@ -79,4 +79,4 @@ async def notification_websocket(websocket: WebSocket, token: str = "") -> None:
     except Exception as exc:  # noqa: BLE001
         logger.exception("ws_connection_error", user_uuid=user_uuid, error=str(exc))
     finally:
-        await ws_manager.disconnect(user_uuid)
+        await ws_manager.disconnect(user_uuid, websocket)

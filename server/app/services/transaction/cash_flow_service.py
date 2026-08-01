@@ -1,6 +1,6 @@
 """Cash flow service for forecasting and analysis."""
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
@@ -61,7 +61,7 @@ class CashFlowService:
         current_balance_str = str(current_balance)
 
         # Calculate average daily consumption (past 30 days of expense records)
-        thirty_days_ago = datetime.now() - timedelta(days=30)
+        thirty_days_ago = datetime.now(UTC) - timedelta(days=30)
         # First get the daily total expenses
         daily_expense_query = (
             select(
@@ -97,7 +97,7 @@ class CashFlowService:
 
         # 2. Aggregate all future events
         events_by_date: dict[str, list[dict[str, Any]]] = {}
-        start_date = datetime.now().date()
+        start_date = datetime.now(UTC).date()
         forecast_end_date = start_date + timedelta(days=forecast_days)
 
         # a. Process recurring events

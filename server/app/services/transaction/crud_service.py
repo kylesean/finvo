@@ -40,11 +40,30 @@ class TransactionCRUDService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_financial_account(self, account_id: UUID, user_uuid: UUID) -> FinancialAccount | None:
-        """Get and validate financial account."""
+    async def get_financial_account(
+        self,
+        account_id: UUID,
+        user_uuid: UUID,
+        *,
+        for_update: bool = False,
+    ) -> FinancialAccount | None:
+        """Get and validate financial account.
+
+        Args:
+            account_id: Financial account UUID.
+            user_uuid: Owner UUID.
+            for_update: If True, acquire a row lock (``SELECT ... FOR UPDATE``)
+                so concurrent balance adjustments on the same account are
+                serialized instead of silently overwriting each other.
+
+        Returns:
+            The financial account or None if not found/not owned.
+        """
         query = select(FinancialAccount).where(
             and_(FinancialAccount.id == account_id, FinancialAccount.user_uuid == user_uuid),
         )
+        if for_update:
+            query = query.with_for_update()
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
@@ -124,9 +143,13 @@ class TransactionCRUDService:
 
         # Transfer scenario: immediately update account balance
         if tx_type == "transfer" and source_acc and target_acc:
-            from app.services.exchange_rate_service import ExchangeRateService
+            # Re-acquire both accounts with row locks so concurrent transfers
+            # touching the same account serialize instead of losing updates.
+            source_acc = await self.get_financial_account(source_acc.id, user_uuid, for_update=True) or source_acc
+            target_acc = await self.get_financial_account(target_acc.id, user_uuid, for_update=True) or target_acc
+            from app.services.exchange_rate_service import exchange_rate_service
 
-            exchange_rate_svc = ExchangeRateService()
+            exchange_rate_svc = exchange_rate_service
             transfer_abs = abs(transfer_amount)  # guard against negative amounts
             # Adjust each account's balance in ITS OWN currency
             source_currency = (source_acc.currency_code or tx_currency).upper()
@@ -679,7 +702,7 @@ class TransactionCRUDService:
             NotFoundError: Transaction or account not found
             BusinessError: Permission denied or exchange rate unavailable
         """
-        from app.services.exchange_rate_service import ExchangeRateService
+        from app.services.exchange_rate_service import exchange_rate_service
 
         query = select(Transaction).where(Transaction.id == transaction_id)
         result = await self.db.execute(query)
@@ -708,7 +731,7 @@ class TransactionCRUDService:
 
         tx_original_amount = transaction.amount_original or transaction.amount
         tx_currency = (transaction.currency or BASE_CURRENCY).upper()
-        exchange_rate_svc = ExchangeRateService()
+        exchange_rate_svc = exchange_rate_service
 
         if old_account_id:
             await self._rollback_old_account_balance(

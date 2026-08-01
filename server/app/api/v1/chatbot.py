@@ -446,11 +446,11 @@ async def update_session_state(
             error=str(e),
             exc_info=True,
         )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to update state",
-            http_status=500,
-        )
+        raise AppException(
+            "Failed to update state",
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_ERROR,
+        ) from e
 
 
 @router.get("/sessions/{session_id}/messages")
@@ -501,11 +501,11 @@ async def get_session_messages(
             error=str(e),
             exc_info=True,
         )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to retrieve session messages",
-            http_status=500,
-        )
+        raise AppException(
+            "Failed to retrieve session messages",
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_ERROR,
+        ) from e
 
 
 @router.delete("/sessions/{session_id}/messages")
@@ -551,11 +551,11 @@ async def clear_session_messages(
             error=str(e),
             exc_info=True,
         )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to clear session messages",
-            http_status=500,
-        )
+        raise AppException(
+            "Failed to clear session messages",
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_ERROR,
+        ) from e
 
 
 @router.post("/sessions/{session_id}/cancel")
@@ -606,11 +606,11 @@ async def cancel_last_turn(
             error=str(e),
             exc_info=True,
         )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to cancel last turn",
-            http_status=500,
-        )
+        raise AppException(
+            "Failed to cancel last turn",
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_ERROR,
+        ) from e
 
 
 @router.get("/sessions/{session_id}/resume-status")
@@ -666,11 +666,11 @@ async def get_resume_status(
             error=str(e),
             exc_info=True,
         )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Failed to check resume status",
-            http_status=500,
-        )
+        raise AppException(
+            "Failed to check resume status",
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_ERROR,
+        ) from e
 
 
 @router.post("/sessions/{session_id}/resume")
@@ -773,8 +773,8 @@ async def search_conversations(
             error=str(e),
             exc_info=True,
         )
-        return error_response(
-            code=get_error_code_int("INTERNAL_ERROR"),
-            message="Search failed",
-            http_status=500,
-        )
+        raise AppException(
+            "Search failed",
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_ERROR,
+        ) from e

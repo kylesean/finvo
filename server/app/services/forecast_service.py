@@ -24,7 +24,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import logger
 from app.models.financial_account import FinancialAccount
-from app.models.forecast import AIFeedbackMemory
 from app.models.transaction import RecurringTransaction, Transaction
 
 
@@ -191,10 +190,7 @@ class ForecastService:
         # 5. Process simulated scenarios
         scenario_events = self._process_scenarios(scenarios or [])
 
-        # 6. Get user preferences for AI context
-        user_preferences = await self._get_user_preferences(user_uuid, "SPENDING_FORECAST")
-
-        # 7. Build forecast data points
+        # 6. Build forecast data points
         data_points = self._build_data_points(
             start_date=start_date,
             end_date=end_date,
@@ -204,13 +200,13 @@ class ForecastService:
             avg_daily_spending=avg_daily_spending,
         )
 
-        # 8. Generate warnings
+        # 7. Generate warnings
         warnings = self._generate_warnings(
             data_points=data_points,
             safety_threshold=safety_threshold,
         )
 
-        # 9. Calculate summary
+        # 8. Calculate summary
         summary = self._calculate_summary(deterministic_events, avg_daily_spending, forecast_days)
 
         logger.info(
@@ -233,7 +229,6 @@ class ForecastService:
             data_points=data_points,
             warnings=warnings,
             summary=summary,
-            user_preferences=user_preferences,
         )
 
     async def _get_total_balance(self, user_uuid: UUID) -> Decimal:
@@ -508,49 +503,6 @@ class ForecastService:
                 continue
 
         return events
-
-    async def _get_user_preferences(
-        self,
-        user_uuid: UUID,
-        insight_type: str,
-        limit: int = 10,
-    ) -> list[dict[str, Any]]:
-        """Get user's AI feedback preferences for RAG context."""
-        query = (
-            select(AIFeedbackMemory)
-            .where(
-                cast(
-                    Any,
-                    and_(
-                        AIFeedbackMemory.user_uuid == user_uuid,
-                        AIFeedbackMemory.insight_type == insight_type,
-                    ),
-                )
-            )
-            .order_by(desc(AIFeedbackMemory.created_at))
-            .limit(limit)
-        )
-
-        try:
-            result = await self.db.execute(query)
-            feedbacks = result.scalars().all()
-        except Exception:
-            # Table might not exist yet; degrade to empty but log for visibility.
-            logger.warning("feedback_preferences_query_failed", user_uuid=str(user_uuid), exc_info=True)
-            return []
-
-        preferences = []
-        for fb in feedbacks:
-            if fb.preference_rule:
-                preferences.append(
-                    {
-                        "action": fb.user_action,
-                        "rule": fb.preference_rule,
-                        "created_at": fb.created_at.isoformat() if fb.created_at else None,
-                    }
-                )
-
-        return preferences
 
     async def _get_financial_settings(self, user_uuid: UUID) -> tuple[Decimal, Decimal]:
         """Get user's financial settings (safety_threshold, daily_burn_rate)."""

@@ -15,6 +15,7 @@ import asyncio
 import json
 import uuid
 from collections.abc import AsyncGenerator, Sequence
+from contextvars import ContextVar
 from typing import Any
 from uuid import UUID
 
@@ -40,6 +41,12 @@ from app.schemas.client_state import ClientStateMutation
 from app.schemas.genui import GenUIEvent
 from app.services.llm import llm_service
 from app.services.memory import MemoryService, get_memory_service
+
+# Holds the StreamProcessor for the *current request*. ``SimpleLangChainAgent``
+# is a module-level singleton, but each asyncio task receives its own
+# ContextVar context, so concurrent requests using this context get their own
+# processor and never share mutable stream state (M17).
+_current_stream_processor: ContextVar[StreamProcessor | None] = ContextVar("current_stream_processor", default=None)
 
 
 class SimpleLangChainAgent:
@@ -123,10 +130,27 @@ class SimpleLangChainAgent:
     def get_last_response(self) -> str:
         """Get the AI response text from the last stream.
 
+        Resolves the per-request ``StreamProcessor`` so concurrent requests do
+        not read each other's collected response. Falls back to a shared
+        instance only when no streaming has occurred in this request context.
+
         Returns:
             str: The collected AI response text from the most recent stream
         """
-        return self._stream_processor.get_last_response()
+        processor = _current_stream_processor.get() or self._stream_processor
+        return processor.get_last_response()
+
+    def _new_stream_processor(self) -> StreamProcessor:
+        """Create a request-scoped StreamProcessor bound to this task's context.
+
+        Each streaming call gets a fresh processor so mutable stream state
+        (tool timing, deduplication sets, collected response) never leaks
+        across concurrent requests. The per-request ContextVar is what
+        ``get_last_response`` reads after the stream finishes.
+        """
+        processor = StreamProcessor()
+        _current_stream_processor.set(processor)
+        return processor
 
     # =========================================================================
     # Agent Lifecycle
@@ -267,7 +291,7 @@ class SimpleLangChainAgent:
             token = current_user_id.set(str(user_uuid))
 
         try:
-            async for event in self._stream_processor.process_stream(
+            async for event in self._new_stream_processor().process_stream(
                 agent=agent,
                 input_data=input_data,
                 config=config,
@@ -372,7 +396,7 @@ class SimpleLangChainAgent:
             token = current_user_id.set(str(user_uuid))
 
         try:
-            async for event in self._stream_processor.process_stream(
+            async for event in self._new_stream_processor().process_stream(
                 agent=agent,
                 input_data=None,  # None signifies resume from checkpoint
                 config=config,

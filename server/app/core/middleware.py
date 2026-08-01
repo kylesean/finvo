@@ -19,6 +19,22 @@ from app.core.metrics import (
 )
 
 
+def _route_label(request: Request) -> str:
+    """Normalize a request to its route template for use as a metrics label.
+
+    Using the raw ``request.url.path`` as the Prometheus ``endpoint`` label would
+    produce one time-series per distinct path-parameter value (e.g. every
+    transaction id in ``/api/v1/transactions/{id}``), ballooning memory and TSDB
+    storage. Prefer the matched route template (``/api/v1/transactions/{}``) and
+    fall back to the raw path only when no route matched (static files, mounted
+    apps, streaming endpoints).
+    """
+    route = request.scope.get("route")
+    if route is not None and getattr(route, "path", None):
+        return str(route.path)
+    return request.url.path
+
+
 class MetricsMiddleware(BaseHTTPMiddleware):
     """Middleware for tracking HTTP request metrics."""
 
@@ -44,9 +60,10 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             duration = time.time() - start_time
 
             # Record metrics
-            http_requests_total.labels(method=request.method, endpoint=request.url.path, status=status_code).inc()
+            endpoint = _route_label(request)
+            http_requests_total.labels(method=request.method, endpoint=endpoint, status=status_code).inc()
 
-            http_request_duration_seconds.labels(method=request.method, endpoint=request.url.path).observe(duration)
+            http_request_duration_seconds.labels(method=request.method, endpoint=endpoint).observe(duration)
 
         return response
 

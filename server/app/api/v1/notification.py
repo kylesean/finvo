@@ -1,23 +1,24 @@
-from typing import Any
-
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
-from app.core.responses import error_response, get_error_code_int, success_response
-from app.models.notification import Notification
+from app.core.responses import success_response
 from app.models.user import User
 from app.schemas.notification import (
     NotificationListResponse,
-    NotificationResponse,
     RegisterDeviceTokenRequest,
     UnregisterDeviceTokenRequest,
 )
+from app.services.notification_service import NotificationService
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
+
+
+def _service(db: AsyncSession) -> NotificationService:
+    """Build a NotificationService bound to the request session."""
+    return NotificationService(db)
 
 
 @router.get("")
@@ -29,50 +30,13 @@ async def get_notifications(
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     """Get user notifications with pagination."""
-    # Base filters
-    filters: list[Any] = [Notification.user_uuid == current_user.uuid]
-    if unread_only:
-        filters.append(Notification.is_read.is_(False))
-
-    # Count total
-    count_query = select(func.count(Notification.id)).where(and_(*filters))
-    count_result = await db.execute(count_query)
-    total = count_result.scalar() or 0
-
-    # Get unread count
-    unread_count_query = select(func.count(Notification.id)).where(
-        and_(Notification.user_uuid == current_user.uuid, Notification.is_read.is_(False))
+    service = _service(db)
+    items, total, unread_count = await service.list_notifications(
+        user_uuid=current_user.uuid,
+        page=page,
+        limit=limit,
+        unread_only=unread_only,
     )
-    unread_result = await db.execute(unread_count_query)
-    unread_count = unread_result.scalar() or 0
-
-    # Get notifications
-    query = (
-        select(Notification)
-        .where(and_(*filters))
-        .order_by(Notification.created_at.desc())
-        .offset((page - 1) * limit)
-        .limit(limit)
-    )
-    result = await db.execute(query)
-    notifications = result.scalars().all()
-
-    # Convert to response objects using schema
-    items = [
-        NotificationResponse(
-            id=str(n.id),
-            userId=str(current_user.uuid),
-            type=n.type,
-            title=n.title,
-            message=n.content or "",
-            data=n.data,
-            isRead=n.is_read,
-            createdAt=n.created_at,
-            readAt=n.read_at,
-        )
-        for n in notifications
-    ]
-
     response = NotificationListResponse(
         notifications=items,
         total=total,
@@ -89,11 +53,7 @@ async def get_unread_count(
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     """Get unread notifications count."""
-    query = select(func.count(Notification.id)).where(
-        and_(Notification.user_uuid == current_user.uuid, Notification.is_read.is_(False))
-    )
-    result = await db.execute(query)
-    count = result.scalar() or 0
+    count = await _service(db).get_unread_count(current_user.uuid)
     return success_response(data={"count": count})
 
 
@@ -104,17 +64,7 @@ async def mark_as_read(
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     """Mark notification as read."""
-    query = select(Notification).where(
-        and_(Notification.id == notification_id, Notification.user_uuid == current_user.uuid)
-    )
-    result = await db.execute(query)
-    notification = result.scalar_one_or_none()
-
-    if not notification:
-        return error_response(code=get_error_code_int("NOT_FOUND"), message="Notification not found", http_status=404)
-
-    notification.mark_as_read()
-    await db.commit()
+    await _service(db).mark_as_read(notification_id, current_user.uuid)
     return success_response(data={"message": "Marked as read"})
 
 
@@ -124,15 +74,7 @@ async def mark_all_read(
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     """Mark all notifications as read."""
-    from sqlalchemy import update
-
-    query = (
-        update(Notification)
-        .where(and_(Notification.user_uuid == current_user.uuid, Notification.is_read.is_(False)))
-        .values(is_read=True, read_at=func.now())
-    )
-    await db.execute(query)
-    await db.commit()
+    await _service(db).mark_all_read(current_user.uuid)
     return success_response(data={"message": "All marked as read"})
 
 
@@ -143,17 +85,7 @@ async def delete_notification(
     db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     """Delete a notification."""
-    query = select(Notification).where(
-        and_(Notification.id == notification_id, Notification.user_uuid == current_user.uuid)
-    )
-    result = await db.execute(query)
-    notification = result.scalar_one_or_none()
-
-    if not notification:
-        return error_response(code=get_error_code_int("NOT_FOUND"), message="Notification not found", http_status=404)
-
-    await db.delete(notification)
-    await db.commit()
+    await _service(db).delete(notification_id, current_user.uuid)
     return success_response(data={"message": "Notification deleted"})
 
 

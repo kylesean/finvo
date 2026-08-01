@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -52,6 +52,19 @@ class Transaction(Base):
     """
 
     __tablename__ = "transactions"
+
+    # Enforce recurring idempotency at the database layer: a recurring rule must
+    # not produce two transactions for the exact same execution timestamp. The
+    # DB backstops the application's count-based check (`_already_generated`),
+    # guarding against duplicate entries when running multiple workers. NULL
+    # ``recurring_transaction_id`` rows (non-recurring) are exempt.
+    __table_args__ = (
+        UniqueConstraint(
+            "recurring_transaction_id",
+            "transaction_at",
+            name="uq_transactions_recurring_timestamp",
+        ),
+    )
 
     id: Mapped[UUID | None] = mapped_column(primary_key=True)
     user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")

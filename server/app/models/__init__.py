@@ -7,7 +7,7 @@ from app.models.attachment import Attachment
 from app.models.budget import Budget, BudgetPeriod, BudgetSettings
 from app.models.financial_account import FinancialAccount
 from app.models.financial_settings import BurnRateMode, FinancialSettings
-from app.models.forecast import AccountDailySnapshot, AIFeedbackMemory
+from app.models.forecast import AccountDailySnapshot
 from app.models.notification import Notification
 from app.models.searchable_message import SearchableMessage
 from app.models.session import Session
@@ -47,5 +47,4 @@ __all__ = [
     "BudgetPeriod",
     "BudgetSettings",
     "AccountDailySnapshot",
-    "AIFeedbackMemory",
 ]

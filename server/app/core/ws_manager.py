@@ -41,10 +41,20 @@ class ConnectionManager:
             self._connections[user_uuid] = websocket
         logger.info("ws_connected", user_uuid=user_uuid, total=len(self._connections))
 
-    async def disconnect(self, user_uuid: str) -> None:
-        """Remove a user's connection."""
+    async def disconnect(self, user_uuid: str, websocket: WebSocket | None = None) -> None:
+        """Remove a user's connection.
+
+        When ``websocket`` is provided, only remove it if it is still the
+        registered connection for this user. This prevents a stale connection's
+        teardown (its ``finally`` block) from popping a *newer* live connection
+        that was registered after a reconnect.
+        """
         async with self._lock:
-            self._connections.pop(user_uuid, None)
+            if websocket is not None:
+                if self._connections.get(user_uuid) is websocket:
+                    self._connections.pop(user_uuid, None)
+            else:
+                self._connections.pop(user_uuid, None)
         logger.info("ws_disconnected", user_uuid=user_uuid, total=len(self._connections))
 
     async def send_notification(self, user_uuid: str, data: dict[str, Any]) -> bool:

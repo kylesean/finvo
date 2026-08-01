@@ -3,6 +3,7 @@
 This module sets up and configures Prometheus metrics for monitoring the application.
 """
 
+import secrets
 from typing import Any
 
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
@@ -47,7 +48,7 @@ async def metrics_endpoint(request: Request) -> Response:
     """
     if settings.METRICS_TOKEN:
         auth = request.headers.get("Authorization", "")
-        if auth != f"Bearer {settings.METRICS_TOKEN}":
+        if not secrets.compare_digest(auth, f"Bearer {settings.METRICS_TOKEN}"):
             return Response("Unauthorized", status_code=401)
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 

@@ -212,16 +212,18 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         field = " -> ".join(loc_parts) if loc_parts else "_root"
         formatted_errors.append({"field": field, "message": msg})
 
-    # For _root errors, try to get more context about the request body
+    # For _root errors, add non-sensitive diagnostic metadata only. We must
+    # NOT log the raw request body here: auth endpoints put passwords /
+    # verification codes in the body, and persisting them to logs would leak
+    # credentials. Capture only size/type (and field errors, already handled).
     log_extra: dict[str, Any] = {}
     if any(err["field"] == "_root" for err in formatted_errors):
         try:
-            # Try to read the raw body for debugging
-            body = await request.body()
             content_type = request.headers.get("content-type", "")
             log_extra["content_type"] = content_type
-            log_extra["body_length"] = len(body)
-            log_extra["body_preview"] = body[:200].decode("utf-8", errors="replace") if body else "<empty>"
+            body_len = int(request.headers.get("content-length", "0") or 0)
+            # Fall back to actually measuring when the header is absent (chunked).
+            log_extra["body_length"] = body_len or len(await request.body())
         except Exception as e:
             log_extra["body_read_error"] = str(e)
 
