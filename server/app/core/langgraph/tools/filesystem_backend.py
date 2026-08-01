@@ -92,20 +92,30 @@ BLOCKED_COMMANDS: set[str] = {
 
 # Shell metacharacters that enable command chaining/injection
 SHELL_INJECTION_PATTERN: re.Pattern[str] = re.compile(
-    r"[;`]"  # semicolon, backtick
+    r"[\n&;`]"  # newline, single &, semicolon, backtick
     r"|&&"  # logical AND chaining
     r"|\|\|"  # logical OR chaining
     r"|\$\("  # command substitution $(...)
     r"|\$\{"  # variable expansion ${...}
+    r"|<"  # input redirection
     r"|>\s*/"  # redirect to absolute path
     r"|>>"  # append redirect
 )
 
 # Allowed pipe pattern: echo '...' | uv run python ...
-ALLOWED_PIPE_PATTERN: re.Pattern[str] = re.compile(r"^echo\s+['\"].*['\"]\s*\|\s*uv\s+run\s+python\s+")
+ALLOWED_PIPE_PATTERN: re.Pattern[str] = re.compile(
+    r"^echo\s+['\"].*['\"]\s*\|\s*uv\s+run\s+python\s+"
+    r"app/skills/[\w-]+/scripts/[\w-]+\.py"
+    r"(?:\s+[^\s;&|<>`\"'\$\\]+)*$"
+)
 
 # Core allowlist pattern: uv run python app/skills/<name>/scripts/<script>.py [args...]
-ALLOWED_COMMAND_PATTERN: re.Pattern[str] = re.compile(r"^uv\s+run\s+python\s+app/skills/[\w-]+/scripts/[\w-]+\.py")
+# Anchored with fullmatch semantics: no trailing garbage, and every argument
+# must be free of shell metacharacters (quotes, $, backslash, redirection, chaining).
+ALLOWED_COMMAND_PATTERN: re.Pattern[str] = re.compile(
+    r"^uv\s+run\s+python\s+app/skills/[\w-]+/scripts/[\w-]+\.py"
+    r"(?:\s+[^\s;&|<>`\"'\$\\]+)*$"
+)
 
 
 @dataclass
@@ -144,6 +154,11 @@ class CommandValidator:
         if not command:
             return ValidationResult(allowed=False, reason="Empty command", level="L0")
 
+        # Reject multi-line commands outright (newlines enable chaining regardless
+        # of what the rest of the validation says).
+        if "\n" in command:
+            return ValidationResult(allowed=False, reason="Multi-line command detected", level="L4")
+
         # Determine if this is a piped command (echo '...' | uv run python ...)
         is_piped = "|" in command
         if is_piped:
@@ -171,8 +186,8 @@ class CommandValidator:
                 level="L1",
             )
 
-        # L2: Command structure allowlist
-        if not ALLOWED_COMMAND_PATTERN.match(command):
+        # L2: Command structure allowlist (fullmatch: no trailing garbage allowed)
+        if not ALLOWED_COMMAND_PATTERN.fullmatch(command):
             return ValidationResult(
                 allowed=False,
                 reason=f"Command does not match allowlist pattern: '{command[:80]}'",
@@ -184,8 +199,8 @@ class CommandValidator:
 
     def _validate_piped_command(self, command: str) -> ValidationResult:
         """Validate a piped command (echo '...' | uv run python ...)."""
-        # L4: Only allow the specific echo pipe pattern
-        if not ALLOWED_PIPE_PATTERN.match(command):
+        # L4: Only allow the specific echo pipe pattern (fullmatch: no trailing garbage)
+        if not ALLOWED_PIPE_PATTERN.fullmatch(command):
             return ValidationResult(
                 allowed=False,
                 reason=f"Pipe command does not match allowlist: '{command[:80]}'",
@@ -205,8 +220,8 @@ class CommandValidator:
                 level="L1",
             )
 
-        # L2: Right side must match allowed pattern
-        if not ALLOWED_COMMAND_PATTERN.match(right_side):
+        # L2: Right side must match allowed pattern (fullmatch)
+        if not ALLOWED_COMMAND_PATTERN.fullmatch(right_side):
             return ValidationResult(
                 allowed=False,
                 reason=f"Piped command does not match allowlist: '{right_side[:80]}'",
@@ -251,7 +266,7 @@ class CommandValidator:
             )
 
         # Verify resolved path is still within project root (prevent symlink attacks)
-        if not str(full_path).startswith(str(self.project_root)):
+        if not full_path.is_relative_to(self.project_root):
             return ValidationResult(
                 allowed=False,
                 reason=f"Script path escapes project root: '{script_path}'",
@@ -307,7 +322,7 @@ class SimpleFilesystemBackend:
 
         full_path = (self.root_dir / path_obj).resolve()
 
-        if not str(full_path).startswith(str(self.root_dir)):
+        if not full_path.is_relative_to(self.root_dir):
             raise ValueError(f"Path traversal not allowed: {path}")
 
         return full_path

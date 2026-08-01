@@ -14,6 +14,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
@@ -262,14 +263,13 @@ async def delete_storage_config(
 
     try:
         deleted = await service.delete(config_id, current_user.uuid)
-    except Exception as e:
-        if "foreign key" in str(e).lower():
-            raise BusinessError(
-                message="Cannot delete: storage config is still in use by attachments",
-                status_code=400,
-                error_code=StorageErrorCode.CONFIG_IN_USE,
-            )
-        raise
+    except IntegrityError:
+        await db.rollback()
+        raise BusinessError(
+            message="Cannot delete: storage config is still in use by attachments",
+            status_code=400,
+            error_code=StorageErrorCode.CONFIG_IN_USE,
+        ) from None
 
     if not deleted:
         raise BusinessError(

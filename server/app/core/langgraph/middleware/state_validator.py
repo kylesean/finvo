@@ -7,10 +7,14 @@ Implements the "Trust, but Verify" principle.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from app.core.logging import logger
 from app.schemas.client_state import ClientStateMutation
+
+# Single-transfer amount cap (configurable later via settings)
+_TRANSFER_MAX_AMOUNT = Decimal("1000000")
 
 
 @dataclass
@@ -79,9 +83,21 @@ class StateValidator:
                 errors.append("Missing target_account_id")
             if params.get("source_account_id") == params.get("target_account_id"):
                 errors.append("source_account_id cannot equal target_account_id")
+            # Parse as Decimal: rejects strings like "0", negatives and non-numeric
+            # values that the old `not amount` check let through.
             amount = params.get("amount")
-            if not amount or (isinstance(amount, (int, float)) and amount <= 0):
+            if amount is None or amount == "":
                 errors.append("Amount must be greater than 0")
+            else:
+                try:
+                    amount_dec = Decimal(str(amount))
+                except (InvalidOperation, ValueError):
+                    errors.append("Amount must be a valid number")
+                else:
+                    if amount_dec <= 0:
+                        errors.append("Amount must be greater than 0")
+                    if amount_dec > _TRANSFER_MAX_AMOUNT:
+                        errors.append(f"Amount exceeds single-transfer limit {_TRANSFER_MAX_AMOUNT}")
 
         return ValidationResult(valid=len(errors) == 0, errors=errors)
 

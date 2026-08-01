@@ -42,8 +42,8 @@ class SearchService:
         """
         # Use jieba's search mode for better recall
         tokens = list(jieba.cut_for_search(query))
-        # Filter out empty tokens and single chars that are common
-        tokens = [t.strip() for t in tokens if t.strip() and len(t.strip()) >= 1]
+        # Filter out empty tokens / whitespace-only, then dedupe preserving order.
+        tokens = [t.strip() for t in tokens if t.strip()]
         # Remove duplicates while preserving order
         seen = set()
         unique_tokens = []
@@ -161,9 +161,9 @@ class SearchService:
 
                 conditions = []
                 for token in tokens:
-                    # Escape special characters for LIKE
-                    escaped_token = token.replace("%", r"\%").replace("_", r"\_")
-                    conditions.append(Session.name.ilike(f"%{escaped_token}%"))
+                    # Escape LIKE metacharacters so `%`/`_`/`\` in user input match literally.
+                    escaped_token = token.replace("\\", r"\\").replace("%", r"\%").replace("_", r"\_")
+                    conditions.append(Session.name.ilike(f"%{escaped_token}%", escape="\\"))
 
                 if conditions:
                     base_query = base_query.where(or_(*conditions))
@@ -248,8 +248,9 @@ class SearchService:
 
                 conditions = []
                 for token in tokens:
-                    escaped_token = token.replace("%", r"\%").replace("_", r"\_")
-                    conditions.append(SearchableMessage.content.ilike(f"%{escaped_token}%"))
+                    # Escape LIKE metacharacters so `%`/`_`/`\` in user input match literally.
+                    escaped_token = token.replace("\\", r"\\").replace("%", r"\%").replace("_", r"\_")
+                    conditions.append(SearchableMessage.content.ilike(f"%{escaped_token}%", escape="\\"))
 
                 if conditions:
                     base_query = base_query.where(or_(*conditions))

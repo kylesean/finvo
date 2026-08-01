@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
 from app.core.dependencies import get_current_user
-from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError
+from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError, ValidationError
 from app.core.responses import success_response
 from app.core.service_deps import get_budget_service
 from app.models.budget import BudgetScope, BudgetStatus
@@ -85,8 +85,11 @@ async def get_budgets(
     service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get all budgets for the current user."""
-    scope_enum = BudgetScope(scope) if scope else None
-    status_enum = BudgetStatus(status_filter) if status_filter else None
+    try:
+        scope_enum = BudgetScope(scope) if scope else None
+        status_enum = BudgetStatus(status_filter) if status_filter else None
+    except ValueError:
+        raise ValidationError("Invalid scope or status filter")
 
     budgets = await service.get_user_budgets(
         current_user.uuid,

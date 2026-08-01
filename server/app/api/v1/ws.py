@@ -11,6 +11,7 @@ Protocol:
 from __future__ import annotations
 
 import asyncio
+import json
 
 import structlog
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -32,12 +33,16 @@ async def notification_websocket(websocket: WebSocket, token: str = "") -> None:
 
     Authenticates via JWT token in query parameter.
     """
-    # 1. Validate JWT token
+    # 1. Validate JWT token (verify_token raises ValueError on malformed format)
     if not token:
         await websocket.close(code=4001, reason="Missing token")
         return
 
-    user_uuid = verify_token(token)
+    try:
+        user_uuid = verify_token(token)
+    except ValueError:
+        user_uuid = None
+
     if not user_uuid:
         await websocket.close(code=4001, reason="Invalid token")
         return
@@ -49,18 +54,26 @@ async def notification_websocket(websocket: WebSocket, token: str = "") -> None:
     try:
         while True:
             try:
-                data = await asyncio.wait_for(
-                    websocket.receive_json(),
+                raw = await asyncio.wait_for(
+                    websocket.receive_text(),
                     timeout=_HEARTBEAT_TIMEOUT,
                 )
-                # Respond to ping with pong
-                if data.get("type") == "ping":
-                    if websocket.client_state == WebSocketState.CONNECTED:
-                        await websocket.send_json({"type": "pong"})
             except TimeoutError:
                 # No message received within timeout, close connection
                 logger.info("ws_heartbeat_timeout", user_uuid=user_uuid)
                 break
+
+            try:
+                data = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                # Non-JSON message — ignore and keep the connection alive
+                logger.debug("ws_non_json_message_ignored", user_uuid=user_uuid)
+                continue
+
+            # Respond to ping with pong
+            if data.get("type") == "ping":
+                if websocket.client_state == WebSocketState.CONNECTED:
+                    await websocket.send_json({"type": "pong"})
     except WebSocketDisconnect:
         logger.info("ws_client_disconnected", user_uuid=user_uuid)
     except Exception as exc:  # noqa: BLE001

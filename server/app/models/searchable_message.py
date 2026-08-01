@@ -40,8 +40,8 @@ class SearchableMessage(Base):
     __tablename__ = "searchable_messages"
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    thread_id: Mapped[UUID] = col.uuid_column(index=True)
-    user_uuid: Mapped[UUID] = col.uuid_column(index=True)
+    thread_id: Mapped[UUID] = col.uuid_fk("sessions", ondelete="CASCADE", index=True)
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
     role: Mapped[str] = mapped_column(String(20))
     content: Mapped[str] = col.text_column()
     created_at: Mapped[datetime] = col.timestamptz()

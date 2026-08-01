@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -54,10 +54,14 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id: Mapped[UUID | None] = mapped_column(primary_key=True)
-    user_uuid: Mapped[UUID] = col.uuid_column(index=True)
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
     type: Mapped[str] = mapped_column(String(20))
-    source_account_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
-    target_account_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
+    source_account_id: Mapped[UUID | None] = col.uuid_fk(
+        "financial_accounts", ondelete="SET NULL", index=True, nullable=True
+    )
+    target_account_id: Mapped[UUID | None] = col.uuid_fk(
+        "financial_accounts", ondelete="SET NULL", index=True, nullable=True
+    )
     amount_original: Mapped[Decimal] = col.numeric(precision=20, scale=8)
     amount: Mapped[Decimal] = col.numeric(precision=20, scale=8)
     currency: Mapped[str] = mapped_column(String(3), default="CNY")
@@ -142,7 +146,9 @@ class TransactionComment(Base):
     id: Mapped[int | None] = mapped_column(primary_key=True, autoincrement=True)
     transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE", index=True)
     user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
-    parent_comment_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    parent_comment_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("transaction_comments.id", ondelete="CASCADE"), nullable=True
+    )
     comment_text: Mapped[str] = mapped_column(String)
     mentioned_user_ids: Mapped[list[int] | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = col.timestamptz()

@@ -393,8 +393,9 @@ class ForecastService:
             for row in result.all():
                 # Add recurring amount (allow small tolerance match)
                 recurring_amounts.add(float(abs(row[0])))
-        except Exception:  # nosec B110
-            pass
+        except Exception:  # noqa: BLE001
+            # Degrade gracefully to "no recurring expenses", but surface the failure.
+            logger.warning("recurring_amount_query_failed", user_uuid=str(user_uuid), exc_info=True)
 
         # Query individual expense transactions (rather than daily aggregates)
         query = (
@@ -534,7 +535,8 @@ class ForecastService:
             result = await self.db.execute(query)
             feedbacks = result.scalars().all()
         except Exception:
-            # Table might not exist yet
+            # Table might not exist yet; degrade to empty but log for visibility.
+            logger.warning("feedback_preferences_query_failed", user_uuid=str(user_uuid), exc_info=True)
             return []
 
         preferences = []
@@ -565,6 +567,7 @@ class ForecastService:
                 return settings.safety_threshold, settings.daily_burn_rate
             return Decimal("0"), Decimal("100.00")
         except Exception:
+            logger.warning("financial_settings_query_failed", user_uuid=str(user_uuid), exc_info=True)
             return Decimal("0"), Decimal("100.00")
 
     def _build_data_points(

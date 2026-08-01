@@ -8,11 +8,13 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from app.core.config import settings
 from app.core.dependencies import get_current_user
+from app.core.limiter import limiter
 from app.core.logging import logger
 from app.core.responses import error_response, get_error_code_int, success_response
 from app.schemas.common import BaseResponse
@@ -168,7 +170,9 @@ async def convert_currency(
 
 
 @router.post("/refresh", response_model=BaseResponse[ExchangeRateResponse])
+@limiter.limit("1 per minute")
 async def refresh_exchange_rates(
+    request: Request,
     _: Any = Depends(get_current_user),
 ) -> JSONResponse:
     """Manually refresh exchange rates.

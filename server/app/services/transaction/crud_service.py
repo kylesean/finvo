@@ -124,11 +124,29 @@ class TransactionCRUDService:
 
         # Transfer scenario: immediately update account balance
         if tx_type == "transfer" and source_acc and target_acc:
+            from app.services.exchange_rate_service import ExchangeRateService
+
+            exchange_rate_svc = ExchangeRateService()
+            transfer_abs = abs(transfer_amount)  # guard against negative amounts
+            # Adjust each account's balance in ITS OWN currency
+            source_currency = (source_acc.currency_code or tx_currency).upper()
+            target_currency = (target_acc.currency_code or tx_currency).upper()
+            source_delta = await exchange_rate_svc.convert(float(transfer_abs), tx_currency, source_currency)
+            target_delta = await exchange_rate_svc.convert(float(transfer_abs), tx_currency, target_currency)
+            if source_delta is None or target_delta is None:
+                logger.warning(
+                    "transfer_currency_conversion_failed_fallback",
+                    tx_currency=tx_currency,
+                    source_currency=source_currency,
+                    target_currency=target_currency,
+                )
+                source_delta = target_delta = transfer_abs
+
             # Deduct from source account
-            source_acc.current_balance -= transfer_amount
+            source_acc.current_balance -= Decimal(str(source_delta))
             source_acc.updated_at = datetime.now(UTC)
             # Add to target account
-            target_acc.current_balance += transfer_amount
+            target_acc.current_balance += Decimal(str(target_delta))
             target_acc.updated_at = datetime.now(UTC)
 
         await self.db.commit()
@@ -380,22 +398,31 @@ class TransactionCRUDService:
             transaction.exchange_rate = new_rate.quantize(Decimal("0.00000001"))
             changed_fields.append("/amount")
 
-            # Update linked account balance if exists
-            linked_account_id = (
-                transaction.source_account_id if transaction.type == "EXPENSE" else transaction.target_account_id
-            )
-            if linked_account_id:
-                account_query = select(FinancialAccount).where(FinancialAccount.id == linked_account_id)
-                account_result = await self.db.execute(account_query)
-                account = account_result.scalar_one_or_none()
+            # Rollback old amount, apply new amount
+            diff = base_amount - old_amount
+
+            # Update linked account balance(s) — TRANSFER touches both ends:
+            # EXPENSE adjusts the source, INCOME adjusts the target, TRANSFER
+            # deducts from source and credits the target.
+            if transaction.type == "EXPENSE" and transaction.source_account_id:
+                account = await self.get_financial_account(transaction.source_account_id, user_uuid)
                 if account:
-                    # Rollback old amount, apply new amount
-                    diff = base_amount - old_amount
-                    if transaction.type == "EXPENSE":
-                        account.current_balance -= diff
-                    else:
-                        account.current_balance += diff
+                    account.current_balance -= diff
                     account.updated_at = utc_now()
+            elif transaction.type == "INCOME" and transaction.target_account_id:
+                account = await self.get_financial_account(transaction.target_account_id, user_uuid)
+                if account:
+                    account.current_balance += diff
+                    account.updated_at = utc_now()
+            elif transaction.type == "TRANSFER" and transaction.source_account_id and transaction.target_account_id:
+                source_account = await self.get_financial_account(transaction.source_account_id, user_uuid)
+                if source_account:
+                    source_account.current_balance -= diff
+                    source_account.updated_at = utc_now()
+                target_account = await self.get_financial_account(transaction.target_account_id, user_uuid)
+                if target_account:
+                    target_account.current_balance += diff
+                    target_account.updated_at = utc_now()
 
         # Update category if provided
         if category_key is not None:
@@ -512,6 +539,15 @@ class TransactionCRUDService:
         """
         transactions_data = data.get("transactions", [])
         source_account_id = data.get("source_account_id")
+
+        # Validate/normalize the shared source account once, before the loop, instead of
+        # parsing an unvalidated raw value per item where a bad UUID would surface as a 500.
+        source_account_uuid: UUID | None = None
+        if source_account_id:
+            try:
+                source_account_uuid = UUID(str(source_account_id))
+            except (ValueError, AttributeError):
+                raise BusinessError(message="Invalid source_account_id", error_code="INVALID_ACCOUNT_ID") from None
         created_transactions = []
 
         # Get user's default currency (primaryCurrency) as the default value when currency is not specified
@@ -548,7 +584,7 @@ class TransactionCRUDService:
                 category_key=item.get("category_key", "OTHERS"),
                 tags=item.get("tags", []),
                 raw_input=item.get("raw_input"),
-                source_account_id=UUID(str(source_account_id)) if source_account_id else None,
+                source_account_id=source_account_uuid,
                 transaction_at=now,
                 transaction_timezone=tx_timezone,
                 source="AI",

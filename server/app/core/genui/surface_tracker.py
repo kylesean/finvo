@@ -41,7 +41,9 @@ class SurfaceInfo:
             keys = [k for k in path.split("/") if k]
             current = self.data
             for key in keys[:-1]:
-                if key not in current:
+                # If the segment is missing or is a scalar (not a dict), seed an
+                # empty dict so we never subscript a non-mapping along the path.
+                if key not in current or not isinstance(current[key], dict):
                     current[key] = {}
                 current = current[key]
             current[keys[-1]] = value

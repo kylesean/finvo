@@ -346,7 +346,7 @@ class LLMService:
                 total_models=len(all_names),
                 environment=settings.ENVIRONMENT.value,
             )
-        except (ValueError, Exception) as e:
+        except Exception as e:
             # Default model not found, use first model
             self._default_model_index = 0
             self._llm = LLMRegistry.LLMS[0]["llm"]
@@ -459,13 +459,14 @@ class LLMService:
             model_id = getattr(target_llm, "model_name", None) or getattr(target_llm, "model", current_model_name)
             base_url = getattr(target_llm, "base_url", "default")
             api_key = getattr(target_llm, "api_key", "")
-            masked_key = f"{api_key[:8]}..." if (isinstance(api_key, str) and api_key) else "None"
+            # Never log any portion of the credential; expose only whether it is configured.
+            api_key_configured = isinstance(api_key, str) and bool(api_key)
 
             logger.info(
                 "attempting_llm_call",
                 model=model_id,
                 base_url=str(base_url),
-                api_key_prefix=masked_key,
+                api_key_configured=api_key_configured,
                 attempt=models_tried + 1,
             )
 

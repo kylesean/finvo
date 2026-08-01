@@ -71,7 +71,8 @@ class CashFlowService:
             .where(
                 and_(
                     Transaction.user_uuid == user_uuid,
-                    Transaction.amount < 0,  # Expenses are negative
+                    # Amounts are stored positive; expense is identified by type
+                    Transaction.type == "EXPENSE",
                     Transaction.transaction_at >= thirty_days_ago,
                 )
             )

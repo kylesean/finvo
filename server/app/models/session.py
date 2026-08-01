@@ -31,7 +31,7 @@ class Session(Base):
     __tablename__ = "sessions"
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    user_uuid: Mapped[UUID] = col.uuid_column(index=True)
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
     name: Mapped[str] = mapped_column(default="")
     created_at: Mapped[datetime] = col.timestamptz()
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import secrets
 from datetime import (
     UTC,
     datetime,
@@ -19,7 +20,6 @@ from jose import (
 from app.core.config import settings
 from app.core.logging import logger
 from app.schemas.auth import Token
-from app.utils.sanitization import sanitize_string
 
 
 def create_access_token(
@@ -52,8 +52,8 @@ def create_access_token(
         {
             "exp": expire,
             "iat": datetime.now(UTC),
-            # Add unique token identifier
-            "jti": sanitize_string(f"{subject_str}-{datetime.now(UTC).timestamp()}"),
+            # Unique random token identifier — enables future revocation by jti
+            "jti": secrets.token_urlsafe(16),
         }
     )
 

@@ -31,14 +31,22 @@ class ExecuteTransferInput(BaseModel):
     @field_validator("amount")
     @classmethod
     def validate_amount(cls, v: str) -> str:
-        """Validate amount is a positive number."""
+        """Validate amount is a positive number.
+
+        Values that round to zero at the 8-decimal precision (e.g. 1e-9) or
+        below half the minimum precision are rejected instead of silently
+        creating a 0-amount transaction.
+        """
         try:
             decimal_val = Decimal(v)
         except Exception as e:
             raise ValueError(f"Invalid amount format: {e}") from e
         if decimal_val <= 0:
             raise ValueError("Amount must be positive")
-        return f"{decimal_val:.8f}"
+        rounded = f"{decimal_val:.8f}"
+        if Decimal(rounded) <= 0:
+            raise ValueError("Amount is too small (minimum 0.00000001)")
+        return rounded
 
     memo: str = Field(default="", description="Optional transfer memo/note")
     transaction_at: str | None = Field(

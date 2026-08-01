@@ -378,20 +378,35 @@ class MemoryService:
             )
             return []
 
+    @staticmethod
+    def _memory_belongs_to(memory: dict[str, Any], user_uuid: UUID) -> bool:
+        """Check whether a memory record belongs to the given user.
+
+        Mem0 stores the owner in ``user_id``; it may appear at the top level
+        of the returned dict or inside ``metadata`` depending on the version.
+        """
+        owner_id = memory.get("user_id") or (memory.get("metadata") or {}).get("user_id")
+        return bool(owner_id) and str(owner_id).lower() == str(user_uuid).lower()
+
     async def get_memory_by_id(
         self,
         memory_id: str,
+        user_uuid: UUID,
     ) -> dict[str, Any] | None:
-        """Get a specific memory by ID.
+        """Get a specific memory by ID, verifying ownership.
 
         Args:
             memory_id: Memory identifier
+            user_uuid: UUID of the requesting user; memories not owned by
+                this user are treated as not found (no existence leak)
 
         Returns:
-            Memory dict or None if not found
+            Memory dict or None if not found / not owned
         """
         try:
             result = await self.memory.get(memory_id)
+            if not result or not self._memory_belongs_to(result, user_uuid):
+                return None
             return cast(dict[Any, Any] | None, result)
         except Exception as e:
             logger.warning(
@@ -430,16 +445,28 @@ class MemoryService:
     async def delete_memory(
         self,
         memory_id: str,
+        user_uuid: UUID,
     ) -> bool:
-        """Delete a specific memory.
+        """Delete a specific memory, verifying ownership.
 
         Args:
             memory_id: Memory identifier
+            user_uuid: UUID of the requesting user; memories not owned by
+                this user are not deleted (no existence leak)
 
         Returns:
             True if successful, False otherwise
         """
         try:
+            result = await self.memory.get(memory_id)
+            if not result or not self._memory_belongs_to(result, user_uuid):
+                logger.warning(
+                    "memory_delete_denied",
+                    memory_id=memory_id,
+                    user_uuid=str(user_uuid),
+                )
+                return False
+
             await self.memory.delete(memory_id)
             logger.info("memory_deleted", memory_id=memory_id)
             return True
@@ -615,7 +642,7 @@ class MemoryService:
             for mem in memories_to_delete:
                 mem_id = mem.get("id")
                 if mem_id:
-                    success = await self.delete_memory(mem_id)
+                    success = await self.delete_memory(mem_id, user_uuid)
                     if success:
                         deleted_count += 1
 

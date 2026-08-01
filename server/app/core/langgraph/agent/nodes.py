@@ -6,6 +6,7 @@ Each node focuses on a single responsibility.
 from __future__ import annotations
 
 from collections.abc import Callable
+from functools import lru_cache
 from typing import Any, cast
 
 from langchain_core.language_models import BaseChatModel
@@ -48,6 +49,72 @@ def _resolve_search_tools(
 
     # Chat Completions models keep ddg unchanged
     return list(tools)
+
+
+# Whenever a skill grants its allowed tools, the agent must keep orchestrating.
+# load_skill is always preserved so the model can still switch or disengage a skill.
+_LOAD_SKILL_NAME = "load_skill"
+
+
+@lru_cache(maxsize=1)
+def _skill_allowed_tools_index() -> dict[str, set[str]]:
+    """Build a static skill name -> allowed-tools index from installed skills.
+
+    Skills are static files (SKILL.md frontmatter); caching keeps the per-turn
+    skill scoping cheap while still reflecting the manifests on disk.
+    """
+    from app.core.skills.loader import SkillLoader
+
+    index: dict[str, set[str]] = {}
+    for skill in SkillLoader().load_skills():
+        if skill.allowed_tools:
+            index[skill.name] = set(skill.allowed_tools)
+    return index
+
+
+def _resolve_skill_tools(state: AgentState, base_tools: list[BaseTool]) -> list[BaseTool]:
+    """Return the current turn's toolset based on the active skill.
+
+    - No active skill (or a skill without an allowed-tools constraint): full base
+      toolset is used, matching the default behavior.
+    - Active skill with allowed-tools: narrow the base toolset to that whitelist
+      and inject any privileged tools the skill declares (e.g. `execute`,
+      `read_file`), so the skill can actually run its scripts.
+    - `load_skill` is always retained so the model can switch/disengage skills.
+    """
+    active_skill = state.get("active_skill")
+    if not active_skill:
+        return list(base_tools)
+
+    allowed = _skill_allowed_tools_index().get(active_skill)
+    if not allowed:
+        return list(base_tools)
+
+    narrowed = [t for t in base_tools if t.name in allowed]
+    injected = [t for t in _privileged_filesystem_tools() if t.name in allowed]
+
+    if not any(t.name == _LOAD_SKILL_NAME for t in narrowed):
+        for t in base_tools:
+            if t.name == _LOAD_SKILL_NAME:
+                narrowed.append(t)
+                break
+
+    resolved = narrowed + injected
+    logger.debug(
+        "agent_skill_tools_scoped",
+        skill=active_skill,
+        narrowed_count=len(narrowed),
+        injected_count=len(injected),
+        allowed=sorted(allowed),
+    )
+    return resolved
+
+
+def _privileged_filesystem_tools() -> list[BaseTool]:
+    """Lazily load the privileged filesystem tools (kept off the default toolset)."""
+    from app.core.langgraph.tools.filesystem_tools import filesystem_tools
+
+    return filesystem_tools
 
 
 def create_agent_node(
@@ -122,9 +189,14 @@ def create_agent_node(
                 additional_kwargs=getattr(original, "additional_kwargs", {}),
             )
 
-        # Support dynamic tool filtering via SkillConstraintMiddleware
-        filtered_tools = cfg.get("filtered_tools")
-        current_tools = cast(list[BaseTool], filtered_tools or state.get("filtered_tools") or tools)
+        # Tool scoping: an explicit `filtered_tools` in config overrides everything;
+        # otherwise derive the toolset from the active skill (if any).
+        configured_filtered = cfg.get("filtered_tools")
+        if configured_filtered is not None:
+            current_tools = list(cast(list[BaseTool], configured_filtered))
+            logger.debug("agent_using_configured_filtered_tools", count=len(current_tools))
+        else:
+            current_tools = _resolve_skill_tools(state, tools)
 
         # Search strategy routing: Responses API → built-in web_search, Chat Completions → ddg
         resolved_tools = _resolve_search_tools(llm, current_tools)

@@ -12,7 +12,7 @@ endpoints, LangGraph tools and skills. The two have different APIs and are
 intentionally not merged; see the docstring there for rationale.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, cast as type_cast
 from uuid import UUID
 
@@ -48,11 +48,17 @@ class TransactionFacadeQueryHelper:
         # 2. Construct query
         query = select(Transaction).where(Transaction.user_uuid == user_uuid)
 
-        # Date filtering
+        # Date filtering.
+        # Use a half-open [start, end) datetime range instead of wrapping the column in
+        # func.date(...), so the b-tree index on transaction_at is used.
         if date_filter:
             try:
                 filter_date = datetime.strptime(date_filter, "%Y-%m-%d").date()
-                query = query.where(func.date(Transaction.transaction_at) == filter_date)
+                start_dt = datetime.combine(filter_date, datetime.min.time(), tzinfo=UTC)
+                query = query.where(
+                    Transaction.transaction_at >= start_dt,
+                    Transaction.transaction_at < start_dt + timedelta(days=1),
+                )
             except ValueError:
                 logger.warning("invalid_date_format", date_filter=date_filter)
 
@@ -133,12 +139,15 @@ class TransactionFacadeQueryHelper:
 
         # Keyword search
         if keyword := filters.get("keyword"):
+            # Escape LIKE metacharacters so user input `%`/`_`/`\` match literally
+            # instead of acting as wildcards.
+            escaped = keyword.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_")
             query = query.where(
                 type_cast(
                     Any,
                     or_(
-                        Transaction.description.ilike(f"%{keyword}%"),
-                        Transaction.location.ilike(f"%{keyword}%"),
+                        Transaction.description.ilike(f"%{escaped}%", escape="\\"),
+                        Transaction.location.ilike(f"%{escaped}%", escape="\\"),
                     ),
                 )
             )
@@ -173,12 +182,14 @@ class TransactionFacadeQueryHelper:
             except ValueError:
                 logger.warning("invalid_end_date_format", end_date=end_date)
 
-        # Income/Expense filter
+        # Income/Expense filter — match on the `type` column (amounts are stored
+        # as positive values), not on amount sign which never varies.
         if type_val := filters.get("type"):
-            if type_val:
-                query = query.where(Transaction.amount > 0)
+            normalized = str(type_val).upper()
+            if normalized in ("INCOME", "EXPENSE", "TRANSFER"):
+                query = query.where(Transaction.type == normalized)
             else:
-                query = query.where(Transaction.amount < 0)
+                logger.warning("invalid_transaction_type_filter", type_val=type_val)
 
         # Ordering
         query = query.order_by(desc(Transaction.transaction_at))

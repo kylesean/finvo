@@ -8,6 +8,7 @@ import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from typing import Any
+from urllib.parse import quote
 
 from app.core.logging import logger
 from app.models.storage_config import StorageConfig
@@ -16,7 +17,6 @@ from app.services.storage.adapters.base import (
     StorageError,
     StorageNotFoundError,
 )
-from app.utils.encryption import credential_encryption
 
 
 class S3Adapter(StorageAdapter):
@@ -51,14 +51,8 @@ class S3Adapter(StorageAdapter):
         Decrypts credentials and creates aiobotocore session.
         """
         try:
-            # Decrypt credentials
-            creds_raw = self.config.credentials
-            if isinstance(creds_raw, str) and creds_raw:
-                self._credentials = credential_encryption.decrypt_credentials(creds_raw)
-            elif isinstance(creds_raw, dict):
-                self._credentials = creds_raw
-            else:
-                self._credentials = {}
+            # Decrypt credentials (handles {"_encrypted": ...} wrapper too)
+            self._credentials = self._resolve_credentials(self.config.credentials)
 
             self._initialized = True
             logger.info(
@@ -190,7 +184,14 @@ class S3Adapter(StorageAdapter):
                 }
 
                 if filename:
-                    params["ResponseContentDisposition"] = f'attachment; filename="{filename}"'
+                    # Build Content-Disposition defensively: keep an ASCII-safe fallback
+                    # (stripped of header metacharacters) and always add an RFC 5987
+                    # encoded form so non-ASCII names and embedded quotes don't corrupt
+                    # the header value.
+                    ascii_name = "".join(c for c in filename if c.isalnum() or c in ".-_ ")[:255] or "attachment"
+                    params["ResponseContentDisposition"] = (
+                        f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(filename)}"
+                    )
 
                 url = await client.generate_presigned_url(
                     "get_object",

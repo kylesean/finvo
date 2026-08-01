@@ -14,11 +14,13 @@ router = APIRouter(prefix="/statistics", tags=["statistics"])
 
 @router.get("/overview")
 async def get_statistics_overview(
-    time_range: str = Query(default="month", description="Time range: week, month, year, or custom"),
+    time_range: str = Query(
+        default="month", pattern="^(week|month|year|custom)$", description="Time range: week, month, year, or custom"
+    ),
     start_date: str | None = Query(default=None, description="Start date for custom range (ISO 8601)"),
     end_date: str | None = Query(default=None, description="End date for custom range (ISO 8601)"),
     account_types: str | None = Query(default=None, description="Comma-separated account types to filter"),
-    tz_offset: int | None = Query(default=None, description="Timezone offset in minutes"),
+    tz_offset: int | None = Query(default=None, ge=-1440, le=1440, description="Timezone offset in minutes"),
     current_user: User = Depends(get_current_user),
     service: StatisticsService = Depends(get_statistics_service),
 ) -> JSONResponse:
@@ -39,8 +41,10 @@ async def get_statistics_overview(
 
 @router.get("/trends")
 async def get_trend_data(
-    time_range: str = Query(default="month"),
-    transaction_type: str = Query(default="expense", description="Transaction type: expense or income"),
+    time_range: str = Query(default="month", pattern="^(week|month|year|custom)$"),
+    transaction_type: str = Query(
+        default="expense", pattern="^(expense|income)$", description="Transaction type: expense or income"
+    ),
     start_date: str | None = Query(default=None),
     end_date: str | None = Query(default=None),
     account_types: str | None = Query(default=None),
@@ -64,11 +68,13 @@ async def get_trend_data(
 
 @router.get("/categories")
 async def get_category_breakdown(
-    time_range: str = Query(default="month"),
+    time_range: str = Query(default="month", pattern="^(week|month|year|custom)$"),
     start_date: str | None = Query(default=None),
     end_date: str | None = Query(default=None),
     account_types: str | None = Query(default=None),
-    transaction_type: str = Query(default="expense", description="Transaction type: expense or income"),
+    transaction_type: str = Query(
+        default="expense", pattern="^(expense|income)$", description="Transaction type: expense or income"
+    ),
     limit: int = Query(default=10, ge=1, le=50),
     current_user: User = Depends(get_current_user),
     service: StatisticsService = Depends(get_statistics_service),
@@ -91,12 +97,14 @@ async def get_category_breakdown(
 
 @router.get("/top-transactions")
 async def get_top_transactions(
-    time_range: str = Query(default="month"),
+    time_range: str = Query(default="month", pattern="^(week|month|year|custom)$"),
     start_date: str | None = Query(default=None),
     end_date: str | None = Query(default=None),
     account_types: str | None = Query(default=None),
-    transaction_type: str = Query(default="expense", description="Transaction type: expense or income"),
-    sort_by: str = Query(default="amount", description="Sort by: amount or date"),
+    transaction_type: str = Query(
+        default="expense", pattern="^(expense|income)$", description="Transaction type: expense or income"
+    ),
+    sort_by: str = Query(default="amount", pattern="^(amount|date)$", description="Sort by: amount or date"),
     page: int = Query(default=1, ge=1),
     size: int = Query(default=10, ge=1, le=50),
     current_user: User = Depends(get_current_user),
@@ -122,7 +130,7 @@ async def get_top_transactions(
 
 @router.get("/cash-flow")
 async def get_cash_flow_analysis(
-    time_range: str = Query(default="month"),
+    time_range: str = Query(default="month", pattern="^(week|month|year|custom)$"),
     start_date: str | None = Query(default=None),
     end_date: str | None = Query(default=None),
     account_types: str | None = Query(default=None),
@@ -145,7 +153,7 @@ async def get_cash_flow_analysis(
 
 @router.get("/health-score")
 async def get_health_score(
-    time_range: str = Query(default="month"),
+    time_range: str = Query(default="month", pattern="^(week|month|year|custom)$"),
     start_date: str | None = Query(default=None),
     end_date: str | None = Query(default=None),
     account_types: str | None = Query(default=None),

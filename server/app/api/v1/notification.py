@@ -32,7 +32,7 @@ async def get_notifications(
     # Base filters
     filters: list[Any] = [Notification.user_uuid == current_user.uuid]
     if unread_only:
-        filters.append(Notification.is_read == False)  # noqa: E712
+        filters.append(Notification.is_read.is_(False))
 
     # Count total
     count_query = select(func.count(Notification.id)).where(and_(*filters))
@@ -41,7 +41,7 @@ async def get_notifications(
 
     # Get unread count
     unread_count_query = select(func.count(Notification.id)).where(
-        and_(Notification.user_uuid == current_user.uuid, Notification.is_read == False)  # noqa: E712
+        and_(Notification.user_uuid == current_user.uuid, Notification.is_read.is_(False))
     )
     unread_result = await db.execute(unread_count_query)
     unread_count = unread_result.scalar() or 0
@@ -90,7 +90,7 @@ async def get_unread_count(
 ) -> JSONResponse:
     """Get unread notifications count."""
     query = select(func.count(Notification.id)).where(
-        and_(Notification.user_uuid == current_user.uuid, Notification.is_read == False)  # noqa: E712
+        and_(Notification.user_uuid == current_user.uuid, Notification.is_read.is_(False))
     )
     result = await db.execute(query)
     count = result.scalar() or 0
@@ -128,7 +128,7 @@ async def mark_all_read(
 
     query = (
         update(Notification)
-        .where(and_(Notification.user_uuid == current_user.uuid, Notification.is_read == False))  # noqa: E712
+        .where(and_(Notification.user_uuid == current_user.uuid, Notification.is_read.is_(False)))
         .values(is_read=True, read_at=func.now())
     )
     await db.execute(query)

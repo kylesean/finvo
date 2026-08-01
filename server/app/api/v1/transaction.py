@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
@@ -168,10 +168,12 @@ async def get_transactions(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
     query_service: Annotated[TransactionQueryService, Depends(get_transaction_query_service)],
-    page: int = 1,
-    size: int = 20,
-    date: str | None = None,  # YYYY-MM-DD format
-    transaction_type: str | None = None,  # EXPENSE, INCOME, TRANSFER
+    page: int = Query(default=1, ge=1),
+    size: int = Query(default=20, ge=1, le=100),
+    date: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),  # YYYY-MM-DD format
+    transaction_type: str | None = Query(
+        default=None, pattern="(?i)^(EXPENSE|INCOME|TRANSFER)$"
+    ),  # EXPENSE, INCOME, TRANSFER
 ) -> JSONResponse:
     """Retrieve Transaction List (Feed Stream)
        Supports filtering by date and transaction type, returns a list of transactions with display calculated fields.
@@ -449,7 +451,7 @@ async def add_transaction_comment(
     )
 
 
-@router.delete("/comments/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/comments/{comment_id}")
 async def delete_transaction_comment(
     comment_id: int,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -549,7 +551,7 @@ async def update_recurring_transaction(
     )
 
 
-@router.delete("/recurring/{recurring_id:uuid}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/recurring/{recurring_id:uuid}")
 async def delete_recurring_transaction(
     recurring_id: UUID,  # UUID from path
     current_user: Annotated[User, Depends(get_current_user)],

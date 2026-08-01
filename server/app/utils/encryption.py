@@ -38,6 +38,7 @@ class CredentialEncryption:
     def _initialize(self) -> None:
         """Initialize Fernet with encryption key from settings."""
         key = getattr(settings, "ENCRYPTION_KEY", None)
+        used_fallback = False
 
         if not key:
             # Try environment variable directly
@@ -62,6 +63,7 @@ class CredentialEncryption:
             # Use a deterministic key for development only
             fallback_seed = b"Finvo-dev-key-do-not-use-in-prod"
             key = base64.urlsafe_b64encode(fallback_seed[:32].ljust(32, b"0"))
+            used_fallback = True
 
         # Ensure key is properly formatted (bytes or base64 string)
         if isinstance(key, str):
@@ -72,7 +74,7 @@ class CredentialEncryption:
 
         try:
             self._fernet = Fernet(key)
-            logger.info("encryption_initialized", key_source="environment" if key else "fallback")
+            logger.info("encryption_initialized", key_source="fallback" if used_fallback else "environment")
         except Exception as e:
             logger.error("encryption_init_failed", error=str(e))
             raise ValueError(f"Failed to initialize encryption: {e}")

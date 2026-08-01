@@ -30,8 +30,7 @@ class UpdateSpaceRequest(BaseModel):
 class GenerateInviteCodeRequest(BaseModel):
     """Request schema for generating an invite code."""
 
-    max_uses: int = Field(default=1, ge=1, le=100, description="Maximum number of uses")
-    expires_days: int = Field(default=7, ge=1, le=30, description="Expiration in days")
+    expires_days: int = Field(default=1, ge=1, le=30, description="Expiration in days")
 
 
 class JoinWithCodeRequest(BaseModel):

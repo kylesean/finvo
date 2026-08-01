@@ -163,7 +163,9 @@ class CacheManager:
             else:
                 serialized_value = value
 
-            if ttl:
+            if ttl is not None:
+                # ttl=0 is honored by setex as "expire immediately" (i.e. no-cache),
+                # unlike `if ttl:` which would silently persist the key forever.
                 await client.setex(key, ttl, serialized_value)
             else:
                 await client.set(key, serialized_value)
@@ -196,11 +198,22 @@ class CacheManager:
         try:
             client = self.get_client()
             if serialize:
-                serialized_value: str | bytes = json.dumps(value)
+                try:
+                    serialized_value: str | bytes = json.dumps(value)
+                except (TypeError, ValueError) as e:
+                    logger.warning(
+                        "cache_set_nx_serialize_failed",
+                        key=key,
+                        error=str(e),
+                        hint="value is not JSON-serializable",
+                    )
+                    return False
             else:
                 serialized_value = value
 
-            result = await client.set(key, serialized_value, nx=True, ex=ttl)
+            # Only pass ex when a positive ttl is given; ex=0 is invalid for redis SET.
+            ex: int | None = ttl if ttl is not None and ttl > 0 else None
+            result = await client.set(key, serialized_value, nx=True, ex=ex)
             return bool(result)
         except (RedisError, OSError) as e:
             logger.error("cache_set_nx_failed", key=key, error=str(e))

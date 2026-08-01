@@ -18,13 +18,14 @@ from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
-from pydantic import BaseModel, Field
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
+from app.core.limiter import limiter
 from app.core.logging import bind_context, logger
 from app.core.responses import success_response
 from app.models.session import Session
@@ -45,24 +46,6 @@ security = HTTPBearer()
 # `app.core.dependencies.get_current_user` (split into `get_current_user_uuid`
 # + `get_current_user`, with `bind_context` and a 500 fallback).
 __all__ = ["get_current_user"]
-
-
-class SessionItem(BaseModel):
-    """Session item for paginated list response.
-
-    Attributes:
-        session_id: The unique identifier for the chat session
-        name: Name of the session
-        token: The authentication token for the session
-        created_at: When the session was created (ISO 8601 format)
-        updated_at: When the session was last updated (ISO 8601 format)
-    """
-
-    session_id: str = Field(..., description="The unique identifier for the chat session")
-    name: str = Field(default="", description="Name of the session")
-    token: str = Field(..., description="The authentication token for the session")
-    created_at: str = Field(..., description="When the session was created")
-    updated_at: str = Field(..., description="When the session was last updated")
 
 
 async def get_authorized_session(
@@ -112,13 +95,16 @@ async def get_authorized_session(
 
 
 @router.post("/send-code")
+@limiter.limit(settings.RATE_LIMIT_ENDPOINTS["send_code"][0])
 async def send_code(
+    request: Request,
     data: SendCodeRequest,
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> JSONResponse:
     """Send verification code to email or mobile.
 
     Args:
+        request: FastAPI request object
         data: Send code request data
         db: Database session
 
@@ -146,6 +132,7 @@ async def send_code(
 
 
 @router.post("/register")
+@limiter.limit(settings.RATE_LIMIT_ENDPOINTS["register"][0])
 async def register(
     request: Request,
     data: RegisterRequest,
@@ -209,6 +196,7 @@ async def register(
 
 
 @router.post("/login")
+@limiter.limit(settings.RATE_LIMIT_ENDPOINTS["login"][0])
 async def login(
     request: Request,
     data: LoginRequest,

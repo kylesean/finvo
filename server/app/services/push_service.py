@@ -140,7 +140,7 @@ class PushService:
             await db.refresh(notification)
         except Exception as exc:
             await db.rollback()
-            logger.error("notification_save_failed: %s", exc)
+            logger.error("notification_save_failed", error=str(exc), exc_info=True)
             raise
 
         # 2. Fetch active device tokens (non-critical: skip push if query fails)

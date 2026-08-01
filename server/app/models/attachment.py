@@ -49,10 +49,13 @@ class Attachment(Base):
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
-    storage_config_id: Mapped[int] = mapped_column(
+    # nullable=True matches migration 0004: deleting a storage config nulls the
+    # reference (ON DELETE SET NULL) instead of failing.
+    storage_config_id: Mapped[int | None] = mapped_column(
         Integer,
         sa.ForeignKey("storage_configs.id", ondelete="SET NULL"),
         index=True,
+        nullable=True,
     )
     thread_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
 

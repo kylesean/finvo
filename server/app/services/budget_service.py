@@ -136,11 +136,14 @@ class BudgetService:
         )
 
         self.session.add(initial_period)
+
+        # Ensure a BudgetSettings row exists so threshold lookups never write on the read path.
+        # Create it in the same transaction as the budget (before the final commit) so a
+        # settings-creation failure leaves no orphaned budget behind.
+        await self._ensure_settings_exists(user_uuid)
+
         await self.session.commit()
         await self.session.refresh(budget)
-
-        # Ensure a BudgetSettings row exists so threshold lookups never write on the read path
-        await self._ensure_settings_exists(user_uuid)
 
         logger.info(
             "budget_created",

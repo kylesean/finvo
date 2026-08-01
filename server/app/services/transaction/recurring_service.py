@@ -2,7 +2,7 @@
 
 import calendar
 import re
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any, cast
 from uuid import UUID
@@ -17,9 +17,6 @@ from app.models.base import utc_now
 from app.models.transaction import RecurringTransaction
 
 logger = structlog.get_logger(__name__)
-
-# Maximum iterations when scanning rrule to prevent infinite loops
-_MAX_RRULE_ITERATIONS = 1000
 
 
 def validate_recurrence_rule(v: str) -> str:
@@ -470,22 +467,19 @@ class RecurringTransactionService:
                 actual_end = end_date
 
             occurrences = []
-            iterations = 0
-            for occurrence in rrule:
-                iterations += 1
-                if iterations > _MAX_RRULE_ITERATIONS:
-                    logger.warning(
-                        "rrule_parse_iteration_limit_reached",
-                        rrule=rrule_string,
-                        limit=_MAX_RRULE_ITERATIONS,
-                    )
-                    break
-                occ_date = occurrence.date()
-                if occ_date < forecast_start:
-                    continue
-                if occ_date > actual_end:
-                    break
-                occurrences.append(occ_date)
+
+            # Jump directly into the forecast window with rrule.between() instead of
+            # iterating from dtstart. The old loop consumed its 1000-iteration budget on
+            # occurrences before forecast_start, silently dropping ALL recurring events
+            # for rules older than ~1000 days (e.g. a 3-year-old DAILY rule).
+            start_dt = datetime.combine(forecast_start, datetime.min.time(), tzinfo=UTC)
+            end_dt = datetime.combine(actual_end + timedelta(days=1), datetime.min.time(), tzinfo=UTC)
+            occurrences = [d.date() for d in rrule.between(start_dt, end_dt, inc=False)]
+
+            # between(inc=False) is exclusive on the lower bound; preserve the original
+            # semantics of including forecast_start itself when it is an occurrence.
+            if start_dt in rrule and (not occurrences or occurrences[0] != forecast_start):
+                occurrences.insert(0, forecast_start)
 
             return occurrences
         except Exception as e:

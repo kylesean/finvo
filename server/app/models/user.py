@@ -116,8 +116,16 @@ class User(Base):
         return self
 
     def verify_password(self, password: str) -> bool:
-        """Verify if the provided password matches the hash."""
-        return bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+        """Verify if the provided password matches the hash.
+
+        A malformed/non-bcrypt stored hash must not raise: bcrypt.checkpw raises
+        ValueError for invalid hashes, which would surface as a 500. Treat it as a
+        mismatch instead.
+        """
+        try:
+            return bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+        except (ValueError, TypeError):
+            return False
 
     @staticmethod
     def hash_password(password: str) -> str:

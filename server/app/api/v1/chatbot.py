@@ -165,6 +165,7 @@ async def chat(
     Raises:
         AppException: If there's an error processing the request.
     """
+    session = None  # Initialized before try so the error path can reference it safely
     try:
         # Get session_id from request if available
         session_id = getattr(chat_request, "session_id", None)
@@ -189,7 +190,7 @@ async def chat(
     except Exception as e:
         logger.error(
             "chat_request_failed",
-            session_id=session.id if "session" in dir() else None,
+            session_id=session.id if session is not None else None,
             error=str(e),
             exc_info=True,
         )
@@ -387,6 +388,9 @@ async def update_session_state(
 ) -> JSONResponse:
     """Update session state directly.
 
+    Only whitelisted state keys (matching schemas.client_state.ClientStateMutation)
+    may be written; arbitrary keys are dropped to prevent injection into the graph.
+
     Args:
         request: The FastAPI request object for rate limiting.
         session_id: The session ID to update.
@@ -401,15 +405,38 @@ async def update_session_state(
     session = await get_authorized_session(session_id, current_user, db)
     agent = get_agent()
 
+    # Whitelist-based filtering: mirror ClientStateMutation.to_state_dict() keys
+    allowed_keys = {"ui_mode", "tool_name", "tool_params"}
+    filtered_updates = {k: v for k, v in updates.items() if k in allowed_keys}
+
+    if not filtered_updates:
+        logger.warning(
+            "update_state_no_allowed_keys",
+            session_id=session.id,
+            received_keys=list(updates.keys()),
+        )
+        return error_response(
+            code=get_error_code_int("VALIDATION_ERROR"),
+            message="No allowed state keys provided",
+            http_status=422,
+        )
+
+    if len(filtered_updates) != len(updates):
+        logger.warning(
+            "update_state_filtered_keys",
+            session_id=session.id,
+            dropped_keys=[k for k in updates if k not in allowed_keys],
+        )
+
     logger.info(
         "update_state_request_received",
         session_id=session.id,
-        update_keys=list(updates.keys()),
-        updates=updates,
+        update_keys=list(filtered_updates.keys()),
+        updates=filtered_updates,
     )
 
     try:
-        await agent.update_state(session.id, updates)
+        await agent.update_state(session.id, filtered_updates)
         logger.info("update_state_success", session_id=session.id)
         return success_response(message="State updated successfully")
     except Exception as e:

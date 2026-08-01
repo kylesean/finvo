@@ -150,6 +150,24 @@ class StorageAdapter(ABC):
         """
         return None
 
+    def _resolve_credentials(self, raw: Any) -> dict[str, Any]:
+        """Decode credentials from the storage config into a plain dict.
+
+        Accepts both supported on-disk formats:
+        - ``{"_encrypted": "<Fernet blob>"}`` (encrypted, written by
+          StorageConfigService / upload_service) — decrypted here.
+        - plain dict / encrypted string — passed through as-is.
+        """
+        from app.utils.encryption import credential_encryption
+
+        if isinstance(raw, str):
+            return credential_encryption.decrypt_credentials(raw) if raw else {}
+        if isinstance(raw, dict):
+            if raw.get("_encrypted"):
+                return credential_encryption.decrypt_credentials(raw["_encrypted"])
+            return raw
+        return {}
+
     def _check_writable(self) -> None:
         """Check if storage allows write operations.
 

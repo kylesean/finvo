@@ -6,7 +6,9 @@ https://docs.langchain.com/oss/python/langchain/multi-agent/skills
 Key responsibilities:
 1. Inject skill catalog (name + description) into system prompt
 2. Register the load_skill tool for on-demand skill loading
-3. Apply tool constraints when a skill is active
+
+Note: tool scoping when a skill is active is resolved by the agent node
+(see app.core.langgraph.agent.nodes._resolve_skill_tools), not here.
 """
 
 from __future__ import annotations
@@ -25,20 +27,19 @@ class SkillMiddleware(BaseMiddleware):
 
     This middleware:
     1. Injects skill descriptions into the system prompt (progressive disclosure)
-    2. Applies tool constraints when a skill is loaded
-    3. Tracks skill state through before_invoke/after_invoke hooks
+    2. Tracks skill state through before_invoke/after_invoke hooks
 
-    The actual skill loading is done by the load_skill tool, which updates
-    the agent state with skills_loaded and active_skill fields.
+    The actual skill loading and tool scoping are handled elsewhere:
+    - load_skill tool updates the agent state with skills_loaded/active_skill
+    - the agent node derives the scoped toolset from active_skill
     """
 
     def __init__(self) -> None:
         """Initialize skill middleware with skill catalog."""
         self._skill_loader = SkillLoader()
         self._skills_prompt: str | None = None
-        self._allowed_tools_cache: dict[str, set[str]] = {}
 
-        # Pre-build skills prompt and cache allowed tools
+        # Pre-build skills prompt
         self._build_skills_catalog()
 
     def _build_skills_catalog(self) -> None:
@@ -50,20 +51,13 @@ class SkillMiddleware(BaseMiddleware):
             return
 
         # Build skill list for system prompt
-        skills_list = []
-        for skill in skills:
-            skills_list.append(f"- ID: `{skill.name}` | Description: {skill.description}")
-
-            # Cache allowed tools for each skill
-            if skill.allowed_tools:
-                self._allowed_tools_cache[skill.name] = set(skill.allowed_tools)
+        skills_list = [f"- ID: `{skill.name}` | Description: {skill.description}" for skill in skills]
 
         self._skills_prompt = "\n".join(skills_list)
 
         logger.info(
             "skill_middleware_initialized",
             skill_count=len(skills),
-            skills_with_constraints=len(self._allowed_tools_cache),
         )
 
     @property
@@ -132,44 +126,3 @@ When calling `load_skill`, you MUST set `skill_name` EXACTLY to one of the ID st
             )
 
         return result
-
-    def get_allowed_tools(self, skill_name: str) -> set[str] | None:
-        """Get allowed tools for a skill.
-
-        Args:
-            skill_name: Name of the skill
-
-        Returns:
-            Set of allowed tool names, or None if no constraints
-        """
-        return self._allowed_tools_cache.get(skill_name)
-
-    def filter_tools_for_skill(
-        self,
-        skill_name: str,
-        all_tools: list[Any],
-    ) -> list[Any]:
-        """Filter tools based on skill's allowed-tools constraint.
-
-        Args:
-            skill_name: Active skill name
-            all_tools: All available tools
-
-        Returns:
-            Filtered tool list, or all tools if no constraints
-        """
-        allowed = self.get_allowed_tools(skill_name)
-        if not allowed:
-            return all_tools
-
-        filtered = [t for t in all_tools if t.name in allowed]
-
-        logger.debug(
-            "skill_tools_filtered",
-            skill=skill_name,
-            original_count=len(all_tools),
-            filtered_count=len(filtered),
-            allowed=list(allowed),
-        )
-
-        return filtered

@@ -9,6 +9,8 @@ from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, ge
 from starlette.requests import Request
 from starlette.responses import Response
 
+from app.core.config import settings
+
 # Request metrics
 http_requests_total = Counter("http_requests_total", "Total number of HTTP requests", ["method", "endpoint", "status"])
 
@@ -18,9 +20,6 @@ http_request_duration_seconds = Histogram(
 
 # Database metrics
 db_connections = Gauge("db_connections", "Number of active database connections")
-
-# Custom business metrics
-orders_processed = Counter("orders_processed_total", "Total number of orders processed")
 
 llm_inference_duration_seconds = Histogram(
     "llm_inference_duration_seconds",
@@ -42,7 +41,14 @@ async def metrics_endpoint(request: Request) -> Response:
     """Expose Prometheus metrics in the text exposition format.
 
     HTTP request metrics are collected by MetricsMiddleware (app.core.middleware).
+
+    If settings.METRICS_TOKEN is set, requests must present it as a Bearer
+    token to avoid leaking internal metrics publicly.
     """
+    if settings.METRICS_TOKEN:
+        auth = request.headers.get("Authorization", "")
+        if auth != f"Bearer {settings.METRICS_TOKEN}":
+            return Response("Unauthorized", status_code=401)
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 

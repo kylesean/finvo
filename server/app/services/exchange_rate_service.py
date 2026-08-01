@@ -34,9 +34,15 @@ class ExchangeRateService:
         self._lock = asyncio.Lock()
 
     async def get_client(self) -> httpx.AsyncClient:
-        """Get or initialize shared HTTP client instance."""
+        """Get or initialize shared HTTP client instance.
+
+        Uses the existing asyncio lock with double-checked locking so two concurrent
+        callers can't both create (and leak) a new AsyncClient when _client is None.
+        """
         if self._client is None or self._client.is_closed:
-            self._client = httpx.AsyncClient(timeout=30.0)
+            async with self._lock:
+                if self._client is None or self._client.is_closed:
+                    self._client = httpx.AsyncClient(timeout=30.0)
         return self._client
 
     async def close(self) -> None:
@@ -263,8 +269,18 @@ class ExchangeRateService:
             return None
 
         # Convert: amount in from_currency -> USD -> to_currency using Decimal
-        from_rate_dec = Decimal(str(from_rate_val))
-        to_rate_dec = Decimal(str(to_rate_val))
+        # Guard against a malformed 0 rate which would raise ZeroDivisionError.
+        from_rate_dec = Decimal(str(from_rate_val or 0))
+        to_rate_dec = Decimal(str(to_rate_val or 0))
+        if from_rate_dec == 0 or to_rate_dec == 0:
+            logger.warning(
+                "exchange_rate_zero_rate",
+                from_currency=from_currency,
+                to_currency=to_currency,
+                from_rate=from_rate_dec,
+                to_rate=to_rate_dec,
+            )
+            return None
 
         amount_in_usd = dec_amount / from_rate_dec
         converted_amount = amount_in_usd * to_rate_dec

@@ -214,13 +214,10 @@ async def get_memory(
         NotFoundError: If memory not found
     """
     service = await get_memory_service()
-    memory = await service.get_memory_by_id(memory_id)
+    memory = await service.get_memory_by_id(memory_id, current_user.uuid)
 
     if not memory:
         raise NotFoundError("Memory")
-
-    # Verify ownership (memory should belong to current user)
-    # Note: Mem0 doesn't provide user_id in get response, so we trust the ID
 
     return success_response(
         data=MemoryItem(
@@ -248,12 +245,12 @@ async def delete_memory(
     """
     service = await get_memory_service()
 
-    # Verify memory exists first
-    memory = await service.get_memory_by_id(memory_id)
+    # Verify memory exists and is owned by the current user first
+    memory = await service.get_memory_by_id(memory_id, current_user.uuid)
     if not memory:
         raise NotFoundError("Memory")
 
-    deleted = await service.delete_memory(memory_id)
+    deleted = await service.delete_memory(memory_id, current_user.uuid)
 
     logger.info(
         "memory_deleted_by_user",

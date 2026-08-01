@@ -261,6 +261,7 @@ class StatisticsService:
         base_conditions: list[Any] = [
             Transaction.user_uuid == user_uuid,
             Transaction.type == tx_type,
+            Transaction.status == "CLEARED",
             Transaction.transaction_at >= period_start,
             Transaction.transaction_at <= period_end,
         ]
@@ -353,6 +354,7 @@ class StatisticsService:
         base_conditions: list[Any] = [
             Transaction.user_uuid == user_uuid,
             Transaction.type == tx_type,
+            Transaction.status == "CLEARED",
             Transaction.transaction_at >= period_start,
             Transaction.transaction_at <= period_end,
         ]
@@ -422,6 +424,7 @@ class StatisticsService:
         base_conditions: list[Any] = [
             Transaction.user_uuid == user_uuid,
             Transaction.type == tx_type,
+            Transaction.status == "CLEARED",
             Transaction.transaction_at >= period_start,
             Transaction.transaction_at <= period_end,
         ]
@@ -769,12 +772,11 @@ class StatisticsService:
 
         Uses conditional aggregation to execute in a single SQL query.
         """
-        now = datetime.now()
-        start_of_day = datetime(now.year, now.month, now.day)
-        start_of_month = datetime(now.year, now.month, 1)
-        start_of_year = datetime(now.year, 1, 1)
+        now = datetime.now(UTC)
+        start_of_day = datetime(now.year, now.month, now.day, tzinfo=UTC)
+        start_of_month = datetime(now.year, now.month, 1, tzinfo=UTC)
+        start_of_year = datetime(now.year, 1, 1, tzinfo=UTC)
 
-        user_id = str(user_uuid)
         display_currency = await get_user_display_currency(self.db, user_uuid)
         currency_symbol = get_currency_symbol(display_currency)
 
@@ -801,7 +803,7 @@ class StatisticsService:
                 func.coalesce(func.sum(Transaction.amount), Decimal("0.0")).label("total"),
             ).where(
                 and_(
-                    Transaction.user_uuid == user_id,
+                    Transaction.user_uuid == user_uuid,
                     Transaction.type == "EXPENSE",
                 )
             )
@@ -833,8 +835,8 @@ class StatisticsService:
         currency_symbol = get_currency_symbol(display_currency)
 
         _, days_in_month = monthrange(year, month)
-        start_date = datetime(year, month, 1)
-        end_date = datetime(year + 1, 1, 1) if month == 12 else datetime(year, month + 1, 1)
+        start_date = datetime(year, month, 1, tzinfo=UTC)
+        end_date = datetime(year + 1, 1, 1, tzinfo=UTC) if month == 12 else datetime(year, month + 1, 1, tzinfo=UTC)
 
         result = await self.db.execute(
             select(
@@ -843,7 +845,7 @@ class StatisticsService:
             )
             .where(
                 and_(
-                    Transaction.user_uuid == str(user_uuid),
+                    Transaction.user_uuid == user_uuid,
                     Transaction.type == "EXPENSE",
                     Transaction.transaction_at >= start_date,
                     Transaction.transaction_at < end_date,

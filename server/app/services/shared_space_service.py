@@ -307,8 +307,12 @@ class SharedSpaceService:
         if not space:
             raise NotFoundError("shared space not found")
 
-        # Generate 6-digit numeric invite code
-        code = "".join(secrets.choice("0123456789") for _ in range(6))
+        # Generate invite code: 8 chars, no ambiguous characters (0/O, 1/l/I),
+        # ~10^14 combinations vs 10^6 for the old 6-digit numeric code — resistant
+        # to brute-force enumeration.
+        # charset excludes ambiguous characters (0/O, 1/l/I)
+        charset = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz"  # pragma: allowlist secret
+        code = "".join(secrets.choice(charset) for _ in range(8))
         expires_at = datetime.now(UTC) + timedelta(days=expires_days)
 
         # Update space with new invite code
@@ -345,6 +349,10 @@ class SharedSpaceService:
 
         if not space:
             raise NotFoundError("invalid invitation code")
+
+        # Reject joining deactivated spaces
+        if space.status != "active":
+            raise BusinessError("space is not active", error_code=CommonErrorCode.VALIDATION_ERROR)
 
         # Check expiration
         if space.invite_code_expires_at and space.invite_code_expires_at < datetime.now(UTC):
@@ -801,9 +809,13 @@ class SharedSpaceService:
         # Build user lookup
         user_map = {m.user_uuid: m.user for m in members}
 
+        # Track remaining credit per creditor so that a creditor shared by
+        # multiple debtors is never assigned more than they are owed.
+        creditor_remaining = {creditor_uuid: credit for creditor_uuid, credit in creditors}
+
         for debtor_uuid, debt in debtors:
             remaining = abs(debt)
-            for creditor_uuid, credit in creditors:
+            for creditor_uuid, credit in creditor_remaining.items():
                 if remaining <= 0 or credit <= 0:
                     continue
 
@@ -823,6 +835,7 @@ class SharedSpaceService:
                     )
 
                 remaining -= settle_amount
+                creditor_remaining[creditor_uuid] -= settle_amount
 
         return {
             "spaceId": str(space_id),

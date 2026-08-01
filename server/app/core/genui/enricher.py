@@ -44,8 +44,16 @@ class EnricherRegistry:
 
     @classmethod
     def register(cls, enricher: ComponentEnricher) -> None:
-        """Register a new enricher."""
-        if enricher.component_name in cls._enrichers:
+        """Register a new enricher.
+
+        Re-registering the exact same instance is a silent no-op, so a hot-path
+        registration (even if repeated per-request) produces no log noise; only a
+        genuine overwrite by a different instance is logged as a warning.
+        """
+        existing = cls._enrichers.get(enricher.component_name)
+        if existing is enricher:
+            return
+        if existing is not None:
             logger.warning("enricher_overwritten", component_name=enricher.component_name)
         cls._enrichers[enricher.component_name] = enricher
         logger.info("enricher_registered", component_name=enricher.component_name)

@@ -328,12 +328,18 @@ async def delete_file(
 
     except BusinessError:
         raise
-    except Exception:
+    except Exception as e:
+        logger.error(
+            "file_delete_failed",
+            attachment_id=str(attachment_id),
+            error=str(e),
+            exc_info=True,
+        )
         raise BusinessError(
             message="File deletion failed",
             status_code=500,
             error_code="FILE_DELETE_ERROR",
-        )
+        ) from e
 
 
 # =============================================================================

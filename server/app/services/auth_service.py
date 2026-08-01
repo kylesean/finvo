@@ -14,6 +14,7 @@ import secrets
 import uuid
 from typing import Any, cast
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from uuid_utils import uuid7
@@ -133,7 +134,11 @@ class AuthService:
 
         # Verify the code (skip when provider is mock — no real code is sent)
         provider = settings.EMAIL_PROVIDER if account_type == "email" else settings.SMS_PROVIDER
-        if provider != "mock" and not await self.verify_code(account, code):
+        if provider == "mock":
+            # Mock mode bypasses real code verification; log it for auditability so
+            # a misconfigured env doesn't silently allow unverified registrations.
+            logger.warning("registration_code_verification_skipped_mock_provider", account_type=account_type)
+        elif not await self.verify_code(account, code):
             raise BusinessError("Verification code is invalid or expired", error_code=AuthErrorCode.CODE_EXPIRED)
 
         # Generate unique UUID
@@ -173,7 +178,17 @@ class AuthService:
         # point is after settings creation.
         user = User(**user_data)
         self.db.add(user)
-        await self.db.flush()
+        try:
+            await self.db.flush()
+        except IntegrityError:
+            # Race: another request created the same email/mobile between the
+            # is_account_exists check above and this INSERT (unique constraint).
+            await self.db.rollback()
+            if account_type == "email":
+                raise BusinessError(message="Email already registered", error_code=AuthErrorCode.EMAIL_REGISTERED)
+            raise BusinessError(
+                message="Mobile number already registered", error_code=AuthErrorCode.PHONE_NUMBER_REGISTERED
+            )
         await self.db.refresh(user)
 
         # Create default financial settings for the new user.
@@ -261,23 +276,17 @@ class AuthService:
             )
 
         # Update user login information
-        needs_update = False
-
         if user.timezone != timezone:
             user.timezone = timezone
-            needs_update = True
 
         if client_ip:
             user.last_login_ip = client_ip
-            needs_update = True
 
         # Always update last login time
         user.last_login_at = utc_now()
-        needs_update = True
 
-        if needs_update:
-            await self.db.commit()
-            await self.db.refresh(user)
+        await self.db.commit()
+        await self.db.refresh(user)
 
         # Generate JWT token using user UUID
         token_obj = create_access_token(user.uuid)

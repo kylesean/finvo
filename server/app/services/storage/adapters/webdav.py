@@ -1,9 +1,12 @@
 """WebDAV storage adapter.
 
 Provides async file operations for WebDAV-compatible storage.
-Uses webdav4 async client for connections to NAS devices, cloud drives, etc.
+The installed webdav4 version ships only a synchronous httpx-based client
+(no ``webdav4.asyncio`` module), so every blocking call is dispatched to a
+worker thread via ``asyncio.to_thread`` to keep the event loop responsive.
 """
 
+import asyncio
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
@@ -19,7 +22,6 @@ from app.services.storage.adapters.base import (
     StorageNotFoundError,
 )
 from app.utils.auth import create_access_token
-from app.utils.encryption import credential_encryption
 
 
 class WebDAVAdapter(StorageAdapter):
@@ -52,14 +54,8 @@ class WebDAVAdapter(StorageAdapter):
         Decrypts credentials and creates async WebDAV client.
         """
         try:
-            # Decrypt credentials
-            creds_raw = self.config.credentials
-            if isinstance(creds_raw, str) and creds_raw:
-                self._credentials = credential_encryption.decrypt_credentials(creds_raw)
-            elif isinstance(creds_raw, dict):
-                self._credentials = creds_raw
-            else:
-                self._credentials = {}
+            # Decrypt credentials (handles {"_encrypted": ...} wrapper too)
+            self._credentials = self._resolve_credentials(self.config.credentials)
 
             # Import and create client
             from webdav4.client import Client
@@ -81,14 +77,28 @@ class WebDAVAdapter(StorageAdapter):
     def _get_full_path(self, object_key: str) -> str:
         """Combine base_path with object_key.
 
+        Normalizes the joined path (collapses ``..``) and rejects any result
+        that escapes the configured storage root.
+
         Args:
             object_key: Relative object path
 
         Returns:
             Full WebDAV path
+
+        Raises:
+            StorageError: If the resolved path escapes the storage root
         """
+        import posixpath
+
         base = self.config.base_path.rstrip("/")
-        return f"{base}/{object_key.lstrip('/')}"
+        normalized = posixpath.normpath(f"{base}/{object_key.lstrip('/')}")
+
+        if normalized != base and not normalized.startswith(base + "/"):
+            logger.warning("webdav_path_escape_blocked", object_key=object_key[:200])
+            raise StorageError(f"Path escapes storage root: {object_key}")
+
+        return normalized
 
     def _generate_object_key(self, filename: str) -> str:
         """Generate unique object key.
@@ -142,14 +152,14 @@ class WebDAVAdapter(StorageAdapter):
             # Ensure parent directories exist
             parent_path = str(PurePosixPath(full_path).parent)
             try:
-                self._client.mkdir(parent_path)
+                await asyncio.to_thread(self._client.mkdir, parent_path)
             except Exception:  # nosec B110
                 pass  # Directory might already exist
 
             # Upload file
             from io import BytesIO
 
-            self._client.upload_fileobj(BytesIO(content), full_path)
+            await asyncio.to_thread(self._client.upload_fileobj, BytesIO(content), full_path)
 
             logger.info("webdav_file_uploaded", path=full_path, size=len(content))
             return object_key
@@ -213,14 +223,14 @@ class WebDAVAdapter(StorageAdapter):
 
         try:
             # Check existence
-            if not self._client.exists(full_path):
+            if not await asyncio.to_thread(self._client.exists, full_path):
                 raise StorageNotFoundError(f"File not found: {object_key}")
 
             # Download to memory and stream
             from io import BytesIO
 
             buffer = BytesIO()
-            self._client.download_fileobj(full_path, buffer)
+            await asyncio.to_thread(self._client.download_fileobj, full_path, buffer)
             buffer.seek(0)
 
             while chunk := buffer.read(8192):
@@ -249,10 +259,10 @@ class WebDAVAdapter(StorageAdapter):
         full_path = self._get_full_path(object_key)
 
         try:
-            if not self._client.exists(full_path):
+            if not await asyncio.to_thread(self._client.exists, full_path):
                 return False
 
-            self._client.remove(full_path)
+            await asyncio.to_thread(self._client.remove, full_path)
             logger.info("webdav_file_deleted", path=full_path)
             return True
 
@@ -271,7 +281,7 @@ class WebDAVAdapter(StorageAdapter):
         """
         try:
             full_path = self._get_full_path(object_key)
-            return bool(self._client.exists(full_path))
+            return bool(await asyncio.to_thread(self._client.exists, full_path))
         except Exception:
             return False
 
@@ -286,7 +296,7 @@ class WebDAVAdapter(StorageAdapter):
         """
         try:
             full_path = self._get_full_path(object_key)
-            info = self._client.info(full_path)
+            info = await asyncio.to_thread(self._client.info, full_path)
             return {
                 "size": info.get("size"),
                 "modified": info.get("modified"),

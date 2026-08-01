@@ -251,7 +251,7 @@ class UserService:
             select(FinancialAccount)
             .where(FinancialAccount.user_uuid == user_uuid)
             .where(FinancialAccount.status == "ACTIVE")
-            .where(FinancialAccount.include_in_net_worth == True)  # noqa: E712
+            .where(FinancialAccount.include_in_net_worth.is_(True))
         )
         active_accounts = result.scalars().all()
 

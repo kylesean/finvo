@@ -11,6 +11,7 @@ Acts as a facade class coordinating submodules.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import uuid
 from collections.abc import AsyncGenerator, Sequence
@@ -291,9 +292,10 @@ class SimpleLangChainAgent:
                 except ValueError:
                     pass
 
-            # Flush Langfuse telemetry
-            if "langfuse_handler" in locals() and langfuse_handler and hasattr(langfuse_handler, "flush"):
-                langfuse_handler.flush()
+            # Flush Langfuse telemetry off the event loop.
+            # langfuse_handler is always bound above; the old `in locals()` guard was dead code.
+            if langfuse_handler and hasattr(langfuse_handler, "flush"):
+                await asyncio.to_thread(langfuse_handler.flush)
 
     async def get_session_state(self, session_id: UUID) -> Any:
         """Retrieve current LangGraph state snapshot for session.
@@ -346,7 +348,7 @@ class SimpleLangChainAgent:
 
         config: dict[str, Any] = {
             "configurable": {
-                "thread_id": session_id,
+                "thread_id": str(session_id),
                 "user_uuid": str(user_uuid) if user_uuid else None,
             },
         }
@@ -395,9 +397,9 @@ class SimpleLangChainAgent:
                 except ValueError:
                     pass
 
-            # Flush Langfuse telemetry
-            if "langfuse_handler" in locals() and langfuse_handler and hasattr(langfuse_handler, "flush"):
-                langfuse_handler.flush()
+            # Flush Langfuse telemetry off the event loop.
+            if langfuse_handler and hasattr(langfuse_handler, "flush"):
+                await asyncio.to_thread(langfuse_handler.flush)
 
         logger.info(
             "resume_stream_completed",
@@ -761,7 +763,7 @@ class SimpleLangChainAgent:
         from langchain_core.messages import RemoveMessage
 
         agent = await self.get_agent()
-        config = {"configurable": {"thread_id": session_id}}
+        config = {"configurable": {"thread_id": str(session_id)}}
 
         state = await agent.aget_state(config)
 

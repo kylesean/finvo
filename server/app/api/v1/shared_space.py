@@ -12,6 +12,7 @@ from app.models.user import User
 from app.schemas.shared_space import (
     AddTransactionToSpaceRequest,
     CreateSpaceRequest,
+    GenerateInviteCodeRequest,
     JoinWithCodeRequest,
     UpdateMemberRoleRequest,
     UpdateSpaceRequest,
@@ -109,16 +110,19 @@ async def delete_shared_space(
 @router.post("/{space_id}/invite-code")
 async def generate_invite_code(
     space_id: UUID,
+    request: GenerateInviteCodeRequest | None = None,
     current_user: User = Depends(get_current_user),
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Generate an invite code.
 
     Generates an invite code for inviting others to join the space.
+    Optional body allows the caller to set the expiration window.
     """
     invite = await service.generate_invite_code(
         space_id=space_id,
         user_uuid=current_user.uuid,
+        expires_days=request.expires_days if request else 1,
     )
     return success_response(data=invite)
 

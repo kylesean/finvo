@@ -253,16 +253,24 @@ class UploadService:
 
         # Create new configuration
         if target_provider == ProviderType.S3_COMPATIBLE.value:
+            from app.utils.encryption import credential_encryption
+
+            # Server-side S3 credentials are stored encrypted (Fernet) — never
+            # plaintext in the DB (contract shared with StorageConfigService).
             new_config = StorageConfig(
                 user_uuid=user_uuid,
                 provider_type=target_provider,
                 name="S3 Storage",
                 base_path=settings.S3_BUCKET,
                 credentials={
-                    "endpoint_url": settings.S3_ENDPOINT,
-                    "access_key": settings.S3_ACCESS_KEY,
-                    "secret_key": settings.S3_SECRET_KEY,
-                    "region": settings.S3_REGION,
+                    "_encrypted": credential_encryption.encrypt_credentials(
+                        {
+                            "endpoint_url": settings.S3_ENDPOINT,
+                            "access_key": settings.S3_ACCESS_KEY,
+                            "secret_key": settings.S3_SECRET_KEY,
+                            "region": settings.S3_REGION,
+                        }
+                    ),
                 },
                 is_readonly=False,
             )

@@ -10,6 +10,7 @@ Providing system tools via SimpleFilesystemBackend:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +26,18 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
 # Configure backend using custom SimpleFilesystemBackend
 fs_backend = SimpleFilesystemBackend(root_dir=PROJECT_ROOT)
 
+# Sensitive files that must never be exposed to the LLM through read/ls tools.
+SENSITIVE_FILE_PATTERN = re.compile(
+    r"(^|/)(\.env[^/]*|\.secrets\.baseline|\.git/.*|.*\.pem$|.*\.key$|.*\.p12$|"
+    r"credentials[^/]*|.*secret[^/]*|.*token[^/]*|id_rsa.*|\.ssh/.*)$",
+    re.IGNORECASE,
+)
+
+
+def _is_sensitive_path(path: str) -> bool:
+    """Check whether a path targets sensitive files (env/secrets/keys)."""
+    return bool(SENSITIVE_FILE_PATTERN.search(path.replace("\\", "/")))
+
 
 # --- read_file ---
 class ReadFileInput(BaseModel):
@@ -36,11 +49,15 @@ class ReadFileInput(BaseModel):
 @tool("read_file", args_schema=ReadFileInput)
 def read_file_tool(path: str) -> str:
     """Read the content of a file."""
+    if _is_sensitive_path(path):
+        logger.warning("read_file_sensitive_blocked", path=path[:200])
+        return "Error: reading this file is not allowed"
     try:
         content = fs_backend.read(path)
         return content
     except Exception as e:
-        return f"Error reading file: {str(e)}"
+        logger.warning("read_file_failed", path=path[:200], error=str(e))
+        return "Error reading file"
 
 
 # --- ls ---
@@ -53,15 +70,21 @@ class LsInput(BaseModel):
 @tool("ls", args_schema=LsInput)
 def ls_tool(path: str = ".") -> str:
     """List directory contents."""
+    if _is_sensitive_path(path):
+        logger.warning("ls_sensitive_blocked", path=path[:200])
+        return "Error: listing this path is not allowed"
     try:
         items = fs_backend.ls_info(path)
         output = []
         for item in items:
+            if _is_sensitive_path(f"{path}/{item.name}"):
+                continue
             type_str = "DIR" if item.is_dir else "FILE"
             output.append(f"{type_str:4} {item.name}")
         return "\n".join(output)
     except Exception as e:
-        return f"Error listing directory: {str(e)}"
+        logger.warning("ls_failed", path=path[:200], error=str(e))
+        return "Error listing directory"
 
 
 # --- write_file ---
@@ -105,7 +128,8 @@ def write_file_tool(path: str, content: str) -> Any:
             "artifactName": Path(path).name,
         }
     except Exception as e:
-        return f"Error writing file: {str(e)}"
+        logger.warning("write_file_failed", path=path[:200], error=str(e))
+        return "Error writing file"
 
 
 # --- execute (bash) ---

@@ -220,7 +220,9 @@ class Settings(BaseSettings):
     # (enforced in model_post_init — see fail-fast check below)
     JWT_SECRET_KEY: str = Field(default="change-this-secret-key-in-production")
     JWT_ALGORITHM: str = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 30
+    # 7-day lifetime limits the damage window of a leaked token. Revocation
+    # (jti-based blacklist) is tracked as P1/M7 in CODE_REVIEW_OPTIMIZATION.md.
+    JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 7
 
     # Base Directory
     BASE_DIR: Path = Field(default=Path(__file__).parent.parent.parent)
@@ -297,6 +299,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_MESSAGES: str = "50 per minute"
     RATE_LIMIT_LOGIN: str = "20 per minute"
     RATE_LIMIT_REGISTER: str = "10 per hour"
+    RATE_LIMIT_SEND_CODE: str = "10 per minute"
 
     @property
     def RATE_LIMIT_ENDPOINTS(self) -> dict[str, list[str]]:
@@ -307,6 +310,7 @@ class Settings(BaseSettings):
             "avatar": [self.RATE_LIMIT_DEFAULT],
             "register": [self.RATE_LIMIT_REGISTER],
             "login": [self.RATE_LIMIT_LOGIN],
+            "send_code": [self.RATE_LIMIT_SEND_CODE],
             "chat": [self.RATE_LIMIT_CHAT],
             "chat_stream": [self.RATE_LIMIT_CHAT_STREAM],
             "messages": [self.RATE_LIMIT_MESSAGES],
@@ -334,6 +338,8 @@ class Settings(BaseSettings):
     # Monitoring
     ENABLE_METRICS: bool = False
     METRICS_PORT: int = 9090
+    # Bearer token required to access /metrics when set (leave empty to keep open)
+    METRICS_TOKEN: str = ""
 
     @property
     def allowed_origins_list(self) -> list[str]:

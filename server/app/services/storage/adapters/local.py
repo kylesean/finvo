@@ -72,8 +72,10 @@ class LocalAdapter(StorageAdapter):
         # Combine base path with file key
         full_path = (self.base_path / object_key).resolve()
 
-        # Security check: prevent path traversal
-        if not str(full_path).startswith(str(self.base_path.resolve())):
+        # Security check: prevent path traversal.
+        # Use is_relative_to (component-aware) instead of a string startswith() prefix
+        # match, which a sibling dir like <base>_evil would satisfy.
+        if not full_path.is_relative_to(self.base_path.resolve()):
             logger.error(
                 "path_traversal_attempt", object_key=object_key, resolved=str(full_path), base=str(self.base_path)
             )
