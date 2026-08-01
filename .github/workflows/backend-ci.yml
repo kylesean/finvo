@@ -245,6 +245,24 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev --group test
 
+      - name: Run database migrations on a clean database
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/Finvo_test # pragma: allowlist secret
+          ENVIRONMENT: test
+        run: uv run alembic upgrade head
+
+      - name: Check model vs migration drift (alembic check)
+        # Currently a warning: known drift items (model-level FK gaps, field-level
+        # type/nullability diffs) are tracked as P1/P2 in server/docs/CODE_REVIEW_OPTIMIZATION.md.
+        # Convert to a hard failure once those are resolved.
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/Finvo_test # pragma: allowlist secret
+          ENVIRONMENT: test
+        run: |
+          if ! uv run alembic check; then
+            echo "::warning::alembic check found model/migration drift (known P1/P2 items pending)"
+          fi
+
       - name: Run tests with coverage
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/Finvo_test # pragma: allowlist secret

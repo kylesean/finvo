@@ -130,6 +130,8 @@ class TestMemoryServiceCleanup:
         """Create a mock AsyncMemory instance."""
         mock = AsyncMock()
         mock.get_all = AsyncMock()
+        # delete_memory now verifies ownership via get() first
+        mock.get = AsyncMock(return_value={"id": "mem_x", "user_id": "user-123"})
         mock.delete = AsyncMock()
         return mock
 
