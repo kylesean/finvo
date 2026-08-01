@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import bcrypt
-from pydantic import field_validator, model_validator
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -72,48 +71,6 @@ class User(Base):
         foreign_keys="[FinancialAccount.user_uuid]",
         primaryjoin="User.uuid == FinancialAccount.user_uuid",
     )
-
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, v: str | None) -> str | None:
-        """Validate and normalize email format."""
-        if v is None:
-            return v
-
-        v_stripped = v.strip() if isinstance(v, str) else str(v)
-        if not v_stripped:
-            return None
-
-        if "@" not in v_stripped or "." not in v_stripped.split("@")[-1]:
-            raise ValueError("Invalid email format")
-
-        return v_stripped.lower()
-
-    @field_validator("mobile")
-    @classmethod
-    def validate_mobile(cls, v: str | None) -> str | None:
-        """Validate mobile number format."""
-        if v is not None and v.strip():
-            cleaned = v.strip().replace("-", "").replace(" ", "").replace("(", "").replace(")", "")
-            if not cleaned.isdigit() or len(cleaned) < 8 or len(cleaned) > 15:
-                raise ValueError("Invalid mobile number format")
-            return cleaned
-        return v
-
-    @field_validator("last_login_ip")
-    @classmethod
-    def validate_ip_address(cls, v: str | None) -> str | None:
-        """Validate IP address format."""
-        if v is None or not v.strip():
-            return None
-        return v.strip()
-
-    @model_validator(mode="after")
-    def validate_contact_info(self) -> User:
-        """Ensure at least one contact method is provided."""
-        if not self.email and not self.mobile:
-            raise ValueError("Either email or mobile must be provided")
-        return self
 
     def verify_password(self, password: str) -> bool:
         """Verify if the provided password matches the hash.

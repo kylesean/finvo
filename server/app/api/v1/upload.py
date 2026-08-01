@@ -14,7 +14,7 @@ from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from jose import JWTError, jwt
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -288,7 +288,7 @@ async def view_attachment(
     attachment_id: UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
-) -> FileResponse:
+) -> Response:
     """View or download attachment file.
 
     Returns file according to MIME type:
@@ -307,6 +307,18 @@ async def view_attachment(
         404: File not found or access denied
     """
     upload_service = UploadService(db)
+
+    # Resolve attachment + storage backend. Remote (S3/WebDAV) files are
+    # served through the adapter-issued signed URL (redirect); local files are
+    # streamed from disk via FileResponse.
+    attachment = await upload_service._resolve_attachment(attachment_id, current_user.uuid)
+    adapter, provider_type = await upload_service._get_attachment_adapter(attachment)
+    if provider_type and provider_type != "local_uploads" and adapter is not None:
+        signed_url = await adapter.get_download_url(
+            attachment.object_key,
+            filename=attachment.filename,
+        )
+        return RedirectResponse(url=signed_url)
 
     try:
         file_path, attachment = await upload_service.get_file_path(

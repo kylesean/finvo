@@ -20,6 +20,9 @@ from app.core.langgraph.middleware.attachment import AttachmentMiddleware
 
 def _make_llm():
     llm = MagicMock()
+    # Token counting used by trim_messages (token budget) must return numbers.
+    llm.get_num_tokens.return_value = 10
+    llm.get_num_tokens_from_messages.return_value = 30
     bound = MagicMock()
     bound.ainvoke = AsyncMock(return_value=AIMessage(content="ok"))
     llm.bind_tools.return_value = bound

@@ -178,30 +178,38 @@ def create_agent_node(
         # message). Image parts come from the middleware's config cache on the fresh
         # path; on resume (middleware bypassed) we rebuild them from the stored
         # attachment id references. Only the local prompt copy is enriched.
-        target_idx: int | None = None
-        for idx in range(len(non_system_messages) - 1, -1, -1):
-            m = non_system_messages[idx]
-            if isinstance(m, HumanMessage):
-                if (getattr(m, "additional_kwargs", {}) or {}).get("attachment_ids"):
-                    target_idx = idx
-                break
-
         image_parts = cfg.get("_image_multimodal_parts")
-        if target_idx is not None and image_parts is None:
-            ref_ids = (getattr(non_system_messages[target_idx], "additional_kwargs", {}) or {})["attachment_ids"]
-            image_parts = await load_image_parts(ref_ids, cfg.get("user_uuid"))
+        if image_parts is None:
+            for m in reversed(non_system_messages):
+                if isinstance(m, HumanMessage) and (getattr(m, "additional_kwargs", {}) or {}).get("attachment_ids"):
+                    ref_ids = (getattr(m, "additional_kwargs", {}) or {})["attachment_ids"]
+                    image_parts = await load_image_parts(ref_ids, cfg.get("user_uuid"))
+                    break
 
-        prompt_messages: list[BaseMessage] = [SystemMessage(content="\n\n".join(system_contents))] + list(
-            non_system_messages
+        # Token budget: trim the non-system history to fit the model context
+        # window; the consolidated system prompt is preserved for prompt cache.
+        from app.utils.graph import prepare_messages
+
+        prompt_messages = prepare_messages(
+            list(non_system_messages),
+            llm,
+            system_prompt="\n\n".join(system_contents),
         )
-        if target_idx is not None and image_parts:
-            original = non_system_messages[target_idx]
-            user_text = original.content if isinstance(original.content, str) else ""
-            # +1 accounts for the single consolidated SystemMessage prepended above.
-            prompt_messages[target_idx + 1] = HumanMessage(
-                content=build_multimodal_content(user_text, image_parts),
-                additional_kwargs=getattr(original, "additional_kwargs", {}),
-            )
+
+        # Re-attach image parts to the multimodal HumanMessage after trimming
+        # (locate by attachment_ids, not positional index — trimming may drop
+        # older turns).
+        if image_parts:
+            for i, msg in enumerate(prompt_messages):
+                if isinstance(msg, HumanMessage) and (getattr(msg, "additional_kwargs", {}) or {}).get(
+                    "attachment_ids"
+                ):
+                    user_text = msg.content if isinstance(msg.content, str) else ""
+                    prompt_messages[i] = HumanMessage(
+                        content=build_multimodal_content(user_text, image_parts),
+                        additional_kwargs=getattr(msg, "additional_kwargs", {}),
+                    )
+                    break
 
         # Tool scoping: an explicit `filtered_tools` in config overrides everything;
         # otherwise derive the toolset from the active skill (if any).

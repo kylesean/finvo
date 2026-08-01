@@ -397,15 +397,8 @@ class UploadService:
     # Public Methods
     # =========================================================================
 
-    async def get_file_path(self, attachment_id: UUID, user_uuid: UUID) -> tuple[Path, Attachment]:
-        """Obtain local file path for attachment.
-
-        Grants access to attachment owner and members belonging to the same shared space.
-
-        Args:
-            attachment_id: Attachment ID
-            user_uuid: User UUID
-        """
+    async def _resolve_attachment(self, attachment_id: UUID, user_uuid: UUID) -> Attachment:
+        """Load an attachment and enforce owner / shared-space access."""
         stmt = select(Attachment).where(Attachment.id == attachment_id)
         result = await self.db.execute(stmt)
         attachment = result.scalar_one_or_none()
@@ -444,6 +437,43 @@ class UploadService:
                     error_code="FILE_NOT_FOUND",
                 )
 
+        return attachment
+
+    async def _get_attachment_adapter(self, attachment: Attachment) -> tuple[StorageAdapter | None, str | None]:
+        """Resolve the storage adapter + provider type for an attachment's config.
+
+        Returns ``(None, None)`` for legacy attachments without a config, which
+        are treated as local files.
+        """
+        if attachment.storage_config_id is None:
+            return None, None
+        config = await self.db.get(StorageConfig, attachment.storage_config_id)
+        if config is None:
+            return None, None
+        adapter = await StorageAdapterFactory.create(config)
+        return adapter, config.provider_type
+
+    async def get_file_path(self, attachment_id: UUID, user_uuid: UUID) -> tuple[Path, Attachment]:
+        """Obtain local file path for attachment.
+
+        Only valid for local storage. Remote (S3/WebDAV) attachments must be
+        served through their adapter-issued signed URL instead — see
+        ``_get_attachment_adapter``.
+
+        Args:
+            attachment_id: Attachment ID
+            user_uuid: User UUID
+        """
+        attachment = await self._resolve_attachment(attachment_id, user_uuid)
+
+        _, provider_type = await self._get_attachment_adapter(attachment)
+        if provider_type and provider_type != ProviderType.LOCAL_UPLOADS.value:
+            raise BusinessError(
+                message="File is stored on remote storage; use the signed URL",
+                status_code=404,
+                error_code="FILE_NOT_FOUND",
+            )
+
         file_path = (self.UPLOAD_DIR / attachment.object_key).resolve()
 
         if not file_path.exists():
@@ -456,11 +486,19 @@ class UploadService:
         return file_path, attachment
 
     async def delete_file(self, attachment_id: UUID, user_uuid: UUID) -> bool:
-        """Delete attachment file and DB record."""
-        file_path, attachment = await self.get_file_path(attachment_id, user_uuid)
+        """Delete attachment file (through its storage backend) and DB record."""
+        attachment = await self._resolve_attachment(attachment_id, user_uuid)
 
-        if file_path.exists():
-            await aiofiles.os.remove(file_path)
+        adapter, provider_type = await self._get_attachment_adapter(attachment)
+        if provider_type and provider_type != ProviderType.LOCAL_UPLOADS.value:
+            # Remote backend: delete the object via the adapter so no orphaned
+            # object is left behind on S3/WebDAV.
+            if adapter is not None:
+                await adapter.delete(attachment.object_key)
+        else:
+            file_path = (self.UPLOAD_DIR / attachment.object_key).resolve()
+            if file_path.exists():
+                await aiofiles.os.remove(file_path)
 
         await self.db.delete(attachment)
         await self.db.commit()

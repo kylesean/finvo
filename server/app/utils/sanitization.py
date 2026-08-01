@@ -33,22 +33,31 @@ def sanitize_string(value: str) -> str:
 
 
 def sanitize_email(email: str) -> str:
-    """Sanitize an email address.
+    """Validate and normalize an email address.
+
+    Only format validation + lowercase normalization. Input-side HTML escaping
+    is deliberately NOT applied: escaping belongs at the render/output layer,
+    and applying it here would corrupt legitimate addresses containing special
+    characters and double-escape later.
 
     Args:
-        email: The email address to sanitize
+        email: The email address to validate
 
     Returns:
-        str: The sanitized email address
-    """
-    # Basic sanitization
-    email = sanitize_string(email)
+        str: The normalized (trimmed, lowercased) email address
 
-    # Ensure email format (simple check)
+    Raises:
+        ValueError: If the email format is invalid
+    """
+    if not isinstance(email, str):
+        raise ValueError("Invalid email format")
+
+    email = email.strip().lower()
+
     if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
         raise ValueError("Invalid email format")
 
-    return email.lower()
+    return email
 
 
 def sanitize_dict(data: dict[str, Any]) -> dict[str, Any]:

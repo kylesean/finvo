@@ -9,7 +9,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from pydantic import field_validator
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -53,20 +52,6 @@ class UserSettings(Base):
         foreign_keys="[UserSettings.user_uuid]",
         primaryjoin="UserSettings.user_uuid == User.uuid",
     )
-
-    @field_validator("safety_balance_threshold", "avg_daily_spending")
-    @classmethod
-    def validate_decimal_string(cls, v: str) -> str:
-        """Validate that the string represents a valid decimal number."""
-        from decimal import Decimal
-
-        try:
-            decimal_val = Decimal(v)
-            if decimal_val < 0:
-                raise ValueError("Value must be non-negative")
-            return f"{decimal_val:.2f}"
-        except Exception as e:
-            raise ValueError(f"Invalid decimal format: {e}")
 
     @property
     def safety_threshold_float(self) -> float:

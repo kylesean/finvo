@@ -123,6 +123,15 @@ class AuthService:
         Raises:
             ValueError: If verification code is invalid or account already exists
         """
+        # Normalize the account once, up front: emails are case-insensitive, so
+        # strip + lowercase before the existence check and before storage. The
+        # old Pydantic model validators are gone (models are plain SQLAlchemy),
+        # so this normalization is now the single source of truth.
+        if account_type == "email":
+            account = account.strip().lower()
+        else:
+            account = account.strip()
+
         # Check if account already exists first (before verifying code)
         if await self.is_account_exists(account_type, account):
             if account_type == "email":

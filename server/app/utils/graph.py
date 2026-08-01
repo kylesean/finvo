@@ -8,6 +8,7 @@ from typing import Any
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import (
     BaseMessage,
+    SystemMessage,
     trim_messages as _trim_messages,
 )
 from pydantic import BaseModel
@@ -88,32 +89,29 @@ def process_llm_response(response: BaseMessage) -> BaseMessage:
 
 
 def prepare_messages(
-    messages: list[Message | dict[str, Any]],
+    messages: list[BaseMessage],
     llm: BaseChatModel,
     system_prompt: str,
-) -> list[dict[str, Any]]:
-    """Prepare messages for LLM invocation with token trimming.
+) -> list[BaseMessage]:
+    """Trim messages to fit within the token budget and prepend the system prompt.
 
-    This function:
-    1. Trims messages to fit within token limits
-    2. Prepends the system prompt
-
-    Note: Dynamic context (time, user_uuid) should be injected separately
-    via the context module to preserve prompt cache efficiency.
+    The consolidated ``system_prompt`` is kept untouched (prompt-cache
+    friendly); only the non-system history is trimmed, keeping the most recent
+    turns. If the model cannot count tokens for an unrecognized content block
+    (e.g. GPT-5 reasoning blocks), trimming is skipped rather than failing the
+    turn.
 
     Args:
-        messages: The messages to prepare.
+        messages: The non-system conversation history (BaseMessage list).
         llm: The LLM to use for token counting.
         system_prompt: The stable system prompt.
 
     Returns:
-        list[dict]: The prepared messages with system prompt.
+        list[BaseMessage]: ``[SystemMessage(system_prompt), *trimmed_history]``.
     """
-    message_dicts = dump_messages(messages)
-
     try:
-        trimmed_messages: Any = _trim_messages(
-            message_dicts,
+        trimmed = _trim_messages(
+            messages,
             strategy="last",
             token_counter=llm,
             max_tokens=settings.MAX_TOKENS,
@@ -129,8 +127,8 @@ def prepare_messages(
                 error=str(e),
                 message_count=len(messages),
             )
-            trimmed_messages = message_dicts
+            trimmed = messages
         else:
             raise
 
-    return [{"role": "system", "content": system_prompt}] + dump_messages(trimmed_messages)
+    return [SystemMessage(content=system_prompt), *trimmed]
