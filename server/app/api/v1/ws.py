@@ -12,11 +12,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+from typing import Annotated, Any
 
 import structlog
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 
+from app.core.dependencies import get_redis_client, is_token_revoked
 from app.core.ws_manager import ws_manager
 from app.utils.auth import verify_token
 
@@ -28,7 +30,11 @@ _HEARTBEAT_TIMEOUT = 60  # seconds without message before disconnect
 
 
 @router.websocket("/ws/notifications")
-async def notification_websocket(websocket: WebSocket, token: str = "") -> None:
+async def notification_websocket(
+    websocket: WebSocket,
+    token: str = "",
+    redis_client: Annotated[Any, Depends(get_redis_client)] = None,
+) -> None:
     """WebSocket endpoint for real-time notifications.
 
     Authenticates via JWT token in query parameter.
@@ -47,10 +53,16 @@ async def notification_websocket(websocket: WebSocket, token: str = "") -> None:
         await websocket.close(code=4001, reason="Invalid token")
         return
 
-    # 2. Accept and register connection
+    # 2. Reject revoked (logged-out) tokens
+    if await is_token_revoked(redis_client, token):
+        logger.info("ws_revoked_token_rejected")
+        await websocket.close(code=4001, reason="Invalid token")
+        return
+
+    # 3. Accept and register connection
     await ws_manager.connect(user_uuid, websocket)
 
-    # 3. Listen for messages (heartbeat) and detect disconnection
+    # 4. Listen for messages (heartbeat) and detect disconnection
     try:
         while True:
             try:

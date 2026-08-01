@@ -137,6 +137,7 @@ async def resolve_chat_session(
             new_uuid = uuid4()
             repo = SessionRepository(db)
             session = await repo.create(new_uuid, current_user.uuid, name="New Chat")
+            await db.commit()
             logger.info(
                 "created_new_session",
                 session_id=new_uuid,
@@ -289,6 +290,7 @@ async def chat_stream(
             async with get_session_context() as db:
                 repo = SessionRepository(db)
                 await repo.update_name(session.id, title)
+                await db.commit()
             logger.info("session_title_set", session_id=session.id, title=title)
 
     agent = get_agent()

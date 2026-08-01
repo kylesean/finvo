@@ -134,6 +134,9 @@ class StatisticsService:
             Transaction.user_uuid == user_uuid,
             Transaction.transaction_at >= period_start,
             Transaction.transaction_at <= period_end,
+            # Only include settled transactions so overview/cash-flow match
+            # trends/categories/top-transactions conventions.
+            Transaction.status == "CLEARED",
         ]
 
         # Apply account type filter if specified
@@ -188,6 +191,7 @@ class StatisticsService:
             Transaction.user_uuid == user_uuid,
             Transaction.transaction_at >= prev_start,
             Transaction.transaction_at <= prev_end,
+            Transaction.status == "CLEARED",
         ]
         if account_filter is not None:
             prev_conditions.append(Transaction.source_account_id.in_(account_filter))
@@ -502,6 +506,9 @@ class StatisticsService:
             Transaction.user_uuid == user_uuid,
             Transaction.transaction_at >= period_start,
             Transaction.transaction_at <= period_end,
+            # Only include settled transactions so overview/cash-flow match
+            # trends/categories/top-transactions conventions.
+            Transaction.status == "CLEARED",
         ]
 
         # Apply account type filter if specified
@@ -532,6 +539,7 @@ class StatisticsService:
             Transaction.user_uuid == user_uuid,
             Transaction.transaction_at >= prev_start,
             Transaction.transaction_at <= prev_end,
+            Transaction.status == "CLEARED",
         ]
         if account_filter is not None:
             prev_conditions.append(Transaction.source_account_id.in_(account_filter))
@@ -805,6 +813,7 @@ class StatisticsService:
                 and_(
                     Transaction.user_uuid == user_uuid,
                     Transaction.type == "EXPENSE",
+                    Transaction.status == "CLEARED",
                 )
             )
         )

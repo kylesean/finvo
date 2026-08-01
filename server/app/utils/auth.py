@@ -101,6 +101,38 @@ def verify_token(token: str) -> str | None:
         return None
 
 
+def get_token_claims(token: str) -> dict[str, Any]:
+    """Extract unverified claims from a token.
+
+    Used only for revocation bookkeeping (jti/exp lookups) on already-validated
+    tokens — never for authentication decisions.
+    """
+    try:
+        claims = jwt.get_unverified_claims(token)
+        return claims if isinstance(claims, dict) else {}
+    except JWTError:
+        return {}
+
+
+def get_token_jti(token: str) -> str | None:
+    """Return the token's ``jti`` claim (for blacklist lookup) or None."""
+    jti = get_token_claims(token).get("jti")
+    return jti if isinstance(jti, str) else None
+
+
+def get_token_remaining_seconds(token: str) -> int | None:
+    """Return the number of seconds until the token expires (>= 0), or None.
+
+    Used as the TTL for blacklist entries so revoked tokens stay blocked only
+    until they would have expired anyway.
+    """
+    exp = get_token_claims(token).get("exp")
+    if not isinstance(exp, (int, float)):
+        return None
+    remaining = int(exp) - int(datetime.now(UTC).timestamp())
+    return max(remaining, 0)
+
+
 def refresh_token(old_token: str) -> Token | None:
     """Refresh an existing JWT token.
 

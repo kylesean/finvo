@@ -58,11 +58,18 @@ class CredentialEncryption:
             # Generate a warning but don't fail in development
             logger.warning(
                 "encryption_key_not_configured",
-                message="ENCRYPTION_KEY not set. Using insecure dev-only fallback key. NEVER use this in production!",
+                message=(
+                    "ENCRYPTION_KEY not set. Using an ephemeral random key that only "
+                    "lives for this process — credentials encrypted with it cannot be "
+                    "decrypted after a restart. Set ENCRYPTION_KEY in production."
+                ),
             )
-            # Use a deterministic key for development only
-            fallback_seed = b"Finvo-dev-key-do-not-use-in-prod"
-            key = base64.urlsafe_b64encode(fallback_seed[:32].ljust(32, b"0"))
+            # Generate an ephemeral random key for development only. Unlike a
+            # deterministic fallback, an attacker cannot decrypt credentials
+            # with a publicly-known key — the key exists only for the lifetime
+            # of this process. Production still requires an explicit
+            # ENCRYPTION_KEY (fail-fast above).
+            key = Fernet.generate_key()
             used_fallback = True
 
         # Ensure key is properly formatted (bytes or base64 string)

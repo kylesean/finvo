@@ -43,19 +43,27 @@ class CashFlowService:
         safety_threshold = settings.safety_threshold if settings else Decimal("0.00")
 
         # Calculate current total balance (from financial_accounts table)
-        # Assets (ASSET) are added as positive values, liabilities (LIABILITY) are added as negative values
+        # Assets (ASSET) are added as positive values, liabilities (LIABILITY) are added as negative values.
+        # Uses current_balance (not initial_balance) and only ACTIVE accounts to
+        # match statistics_service/forecast_service conventions.
         accounts_query = select(
             func.coalesce(
                 func.sum(
                     case(
-                        (FinancialAccount.nature == "ASSET", FinancialAccount.initial_balance),
-                        (FinancialAccount.nature == "LIABILITY", -FinancialAccount.initial_balance),
+                        (FinancialAccount.nature == "ASSET", FinancialAccount.current_balance),
+                        (FinancialAccount.nature == "LIABILITY", -FinancialAccount.current_balance),
                         else_=0,
                     )
                 ),
                 0,
             )
-        ).where(and_(FinancialAccount.user_uuid == user_uuid, FinancialAccount.include_in_net_worth))
+        ).where(
+            and_(
+                FinancialAccount.user_uuid == user_uuid,
+                FinancialAccount.status == "ACTIVE",
+                FinancialAccount.include_in_net_worth,
+            )
+        )
         balance_result = await self.db.execute(accounts_query)
         current_balance = balance_result.scalar() or Decimal("0.00")
         current_balance_str = str(current_balance)

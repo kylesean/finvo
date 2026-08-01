@@ -19,6 +19,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.currency import CURRENCY_SYMBOLS, SUPPORTED_CURRENCIES
+from app.core.exceptions import BusinessError
 from app.core.logging import logger
 
 # Re-exported from the single source of truth (app.config.currency) so callers
@@ -90,7 +91,11 @@ async def convert_to_user_base(
     Returns:
         Tuple of (base_amount, exchange_rate) where exchange_rate is
         "1 unit of from_currency = X units of user_base_currency".
-        If conversion fails, returns (amount, Decimal("1.0")) as fallback.
+
+    Raises:
+        BusinessError: If the exchange rate is unavailable. Callers must not
+            silently book the original amount at rate 1.0 — that would mislabel
+            the currency in the ledger and corrupt aggregations.
     """
     if from_currency.upper() == user_base_currency.upper():
         return amount, Decimal("1.0")
@@ -112,14 +117,13 @@ async def convert_to_user_base(
             base_amount = amount * exchange_rate
             return base_amount, exchange_rate
 
-        logger.warning(
-            "convert_to_user_base_rate_not_found",
-            from_currency=from_currency,
-            user_base_currency=user_base_currency,
-            amount=str(amount),
+        raise BusinessError(
+            f"Unable to get exchange rate from {from_currency} to {user_base_currency}, please try again later",
+            "EXCHANGE_RATE_UNAVAILABLE",
         )
-        return amount, Decimal("1.0")
 
+    except BusinessError:
+        raise
     except Exception as e:
         logger.error(
             "convert_to_user_base_error",
@@ -127,7 +131,10 @@ async def convert_to_user_base(
             from_currency=from_currency,
             user_base_currency=user_base_currency,
         )
-        return amount, Decimal("1.0")
+        raise BusinessError(
+            f"Unable to get exchange rate from {from_currency} to {user_base_currency}, please try again later",
+            "EXCHANGE_RATE_UNAVAILABLE",
+        ) from e
 
 
 async def convert_to_display_currency(

@@ -27,10 +27,59 @@ from app.core.exceptions import (
 )
 from app.core.logging import bind_context, logger
 from app.models.user import User
-from app.utils.auth import verify_token
+from app.utils.auth import (
+    get_token_jti,
+    get_token_remaining_seconds,
+    verify_token,
+)
 
 # Security scheme for JWT authentication
 security = HTTPBearer()
+
+# Redis key namespace for revoked token jti entries.
+_TOKEN_BLACKLIST_PREFIX = "auth:blacklist:"
+
+
+async def revoke_token(redis_client: Any, token: str) -> bool:
+    """Add a token's ``jti`` to the revocation blacklist until it expires.
+
+    Returns True when the token was blacklisted (or Redis is unavailable and
+    revocation cannot be recorded). Callers should treat an unavailable Redis
+    conservatively: the token stays valid (graceful degradation).
+    """
+    if redis_client is None:
+        logger.warning("token_revocation_redis_unavailable")
+        return False
+    jti = get_token_jti(token)
+    if not jti:
+        return False
+    ttl = get_token_remaining_seconds(token)
+    if ttl is None:
+        return False
+    try:
+        await redis_client.setex(f"{_TOKEN_BLACKLIST_PREFIX}{jti}", ttl, "1")
+        return True
+    except Exception as e:
+        logger.warning("token_revocation_failed", error=str(e))
+        return False
+
+
+async def is_token_revoked(redis_client: Any, token: str) -> bool:
+    """Return True if the token's jti is on the revocation blacklist.
+
+    Redis unavailability degrades to "not revoked" (tokens stay valid), which
+    matches the project's optional-Redis posture.
+    """
+    if redis_client is None:
+        return False
+    jti = get_token_jti(token)
+    if not jti:
+        return False
+    try:
+        return bool(await redis_client.exists(f"{_TOKEN_BLACKLIST_PREFIX}{jti}"))
+    except Exception as e:
+        logger.warning("token_blacklist_check_failed", error=str(e))
+        return False
 
 
 async def _fetch_user(db: AsyncSession, user_uuid: str) -> User | None:
@@ -62,17 +111,19 @@ async def get_redis_client() -> AsyncGenerator[Any]:
 
 async def get_current_user_uuid(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    redis_client: Annotated[Any, Depends(get_redis_client)],
 ) -> str:
     """Extract and verify user ID from JWT token.
 
     Args:
         credentials: HTTP authorization credentials containing JWT token
+        redis_client: Redis client for token revocation (jti blacklist) checks
 
     Returns:
         str: User UUID from token
 
     Raises:
-        AuthenticationError: If token is invalid or malformed
+        AuthenticationError: If token is invalid, malformed, or revoked
     """
     try:
         token = credentials.credentials
@@ -85,6 +136,10 @@ async def get_current_user_uuid(
             # the payload can carry sensitive claims.
             token_fingerprint = hashlib.sha256(token.encode()).hexdigest()[:12]
             logger.error("invalid_token", token_fingerprint=token_fingerprint, token_length=len(token))
+            raise AuthenticationError("Invalid authentication credentials")
+
+        if await is_token_revoked(redis_client, token):
+            logger.warning("revoked_token_rejected", user_uuid=user_uuid)
             raise AuthenticationError("Invalid authentication credentials")
 
         return user_uuid

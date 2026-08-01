@@ -221,8 +221,14 @@ async def get_session() -> AsyncGenerator[AsyncSession]:
 
 
 @asynccontextmanager
-async def get_session_context() -> AsyncGenerator[AsyncSession]:
+async def get_session_context(auto_commit: bool = False) -> AsyncGenerator[AsyncSession]:
     """Context manager for getting async database sessions.
+
+    Unit-of-Work contract: by default the session is NOT auto-committed on
+    exit — service methods own their transaction boundary and must commit
+    explicitly, so a mid-request failure never leaves a partially-written DB
+    state. Pass ``auto_commit=True`` only for legacy call sites that perform a
+    single statement and previously relied on the implicit commit.
 
     Yields:
         AsyncSession: Async database session
@@ -237,7 +243,8 @@ async def get_session_context() -> AsyncGenerator[AsyncSession]:
     async with db_manager.session_factory() as session:
         try:
             yield session
-            await session.commit()
+            if auto_commit:
+                await session.commit()
         except Exception:
             await session.rollback()
             raise

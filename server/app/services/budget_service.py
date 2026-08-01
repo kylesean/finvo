@@ -417,12 +417,15 @@ class BudgetService:
                 )
 
                 try:
-                    self.session.add(new_period)
+                    # Nested transaction: on IntegrityError only the savepoint is
+                    # rolled back, so caller modifications (e.g. rebalance amount
+                    # adjustments) made in the outer transaction survive.
+                    async with self.session.begin_nested():
+                        self.session.add(new_period)
+                        await self.session.flush()
                     await self.session.commit()
-                    await self.session.refresh(new_period)
                     prev_period = new_period
                 except IntegrityError:
-                    await self.session.rollback()
                     ex_res = await self.session.execute(
                         select(BudgetPeriod).where(
                             BudgetPeriod.budget_id == budget.id,
@@ -451,12 +454,14 @@ class BudgetService:
         )
 
         try:
-            self.session.add(initial_period)
+            # Nested transaction: IntegrityError only rolls back the savepoint,
+            # preserving caller modifications in the outer transaction.
+            async with self.session.begin_nested():
+                self.session.add(initial_period)
+                await self.session.flush()
             await self.session.commit()
-            await self.session.refresh(initial_period)
             return initial_period
         except IntegrityError:
-            await self.session.rollback()
             existing = await self._get_current_period(budget)
             if existing:
                 return existing

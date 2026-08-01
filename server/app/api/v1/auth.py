@@ -10,12 +10,12 @@ This module provides endpoints for user authentication including:
 from __future__ import annotations
 
 import uuid
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import JSONResponse
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
 from sqlalchemy import desc, select
@@ -23,7 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_session
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, get_redis_client, revoke_token
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.limiter import limiter
 from app.core.logging import bind_context, logger
@@ -274,6 +274,7 @@ async def create_session(
         # Create session in database with default name "New Chat" within request transaction
         repo = SessionRepository(db)
         session = await repo.create(session_id, user.uuid, name="New Chat")
+        await db.commit()
 
         logger.info(
             "session_created",
@@ -323,6 +324,7 @@ async def update_session_name(
     updated_session = await repo.update_name(session.id, sanitized_name)
     if updated_session is None:
         raise NotFoundError("Session")
+    await db.commit()
 
     logger.info(
         "session_name_updated",
@@ -387,6 +389,7 @@ async def delete_session(
 
     # 2. Delete the session metadata within the same atomic transaction
     await repo.delete(session.id)
+    await db.commit()
 
     logger.info(
         "session_deleted_with_history",
@@ -395,6 +398,25 @@ async def delete_session(
     )
 
     return success_response(message="Session deleted")
+
+
+@router.post("/logout")
+@limiter.limit(settings.RATE_LIMIT_ENDPOINTS["login"][0])
+async def logout(
+    request: Request,
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    redis_client: Annotated[Any, Depends(get_redis_client)],
+) -> JSONResponse:
+    """Revoke the current access token (jti blacklist).
+
+    The token stays blocked until it would have expired anyway, so no explicit
+    cleanup job is needed. Requires a valid bearer token.
+    """
+    revoked = await revoke_token(redis_client, credentials.credentials)
+    return success_response(
+        message="Logged out successfully" if revoked else "Logged out",
+        data={"revoked": revoked},
+    )
 
 
 @router.get("/sessions")

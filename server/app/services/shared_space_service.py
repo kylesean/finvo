@@ -666,7 +666,20 @@ class SharedSpaceService:
         )
 
         tx_id = UUID(result["transaction_id"])
-        await self.add_transaction_to_space(space_id=space_id, user_uuid=user_uuid, transaction_id=tx_id)
+        try:
+            await self.add_transaction_to_space(space_id=space_id, user_uuid=user_uuid, transaction_id=tx_id)
+        except Exception as e:
+            # The transaction is already persisted; surface the partial state
+            # explicitly instead of failing the whole request while the
+            # transaction silently stays out of the space.
+            logger.error(
+                "failed_to_link_transaction_to_space",
+                transaction_id=str(tx_id),
+                space_id=space_id,
+                error=str(e),
+                exc_info=True,
+            )
+            result["space_link_failed"] = True
 
         return result
 
@@ -683,7 +696,9 @@ class SharedSpaceService:
         result = await tx_service.create_batch_transactions(user_uuid, data)
 
         if result.get("success"):
-            # Link all created transactions to the space
+            # Link all created transactions to the space; report failures
+            # explicitly instead of masking partial success.
+            failed_links: list[str] = []
             for tx_item in result.get("transactions", []):
                 tx_id = UUID(tx_item["id"])
                 try:
@@ -694,7 +709,14 @@ class SharedSpaceService:
                         transaction_id=str(tx_id),
                         space_id=space_id,
                         error=str(e),
+                        exc_info=True,
                     )
+                    failed_links.append(str(tx_id))
+
+            if failed_links:
+                result["link_failed"] = True
+                result["link_failed_count"] = len(failed_links)
+                result["link_failed_transaction_ids"] = failed_links
 
         return result
 
