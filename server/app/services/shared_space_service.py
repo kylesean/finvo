@@ -11,6 +11,7 @@ from uuid import UUID
 
 import structlog
 from sqlalchemy import and_, desc, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -597,7 +598,13 @@ class SharedSpaceService:
             added_by_user_uuid=user_uuid,
         )
         self.db.add(space_tx)
-        await self.db.commit()
+        try:
+            await self.db.commit()
+        except IntegrityError:
+            # Lost the race against a concurrent duplicate insert; the (space_id,
+            # transaction_id) unique constraint fired. Treat as idempotent success.
+            await self.db.rollback()
+            return {"message": "Transaction already in this space", "already_exists": True}
 
         # Emit domain event (async, fire-and-forget)
         from app.core.events import event_bus
@@ -991,48 +998,16 @@ class SharedSpaceService:
         include_members: bool = False,
         role: str | None = None,
     ) -> dict[str, Any]:
-        """Convert space to dictionary."""
-        data: dict[str, Any] = {
-            "id": str(space.id),
-            "name": space.name,
-            "role": role,
-            "description": space.description,
-            "creator": {
-                "id": str(space.creator.uuid) if space.creator else str(space.creator_uuid),
-                "username": space.creator.username if space.creator else "Unknown",
-                "avatarUrl": getattr(space.creator, "avatar_url", None) if space.creator else None,
-            },
-            "createdAt": space.created_at.isoformat() if space.created_at else None,
-            "updatedAt": space.updated_at.isoformat() if space.updated_at else None,
-            "transactionCount": tx_count,
-            "totalExpense": f"{total_expense:.2f}",
-        }
-
-        if include_members and space.members:
-            contributions = member_contributions or {}
-            data["members"] = [
-                {
-                    "userId": str(m.user_uuid),
-                    "username": m.user.username if m.user else "Unknown",
-                    "avatarUrl": getattr(m.user, "avatar_url", None) if m.user else None,
-                    "role": m.role,
-                    "status": m.status,
-                    "createdAt": m.created_at.isoformat() if m.created_at else None,
-                    "contributionAmount": f"{contributions.get(m.user_uuid, Decimal('0')):.2f}",
-                }
-                for m in space.members
-            ]
-
-            # Get current valid invite code
-            if space.invite_code:
-                is_valid = not space.invite_code_expires_at or space.invite_code_expires_at > datetime.now(UTC)
-                if is_valid:
-                    data["currentInviteCode"] = space.invite_code
-                    data["inviteCodeExpiresAt"] = (
-                        space.invite_code_expires_at.isoformat() if space.invite_code_expires_at else None
-                    )
-
-        return data
+        """Convert space to dictionary (creator resolved from the relationship)."""
+        return self._space_to_dict_with_creator(
+            space,
+            creator=space.creator,
+            tx_count=tx_count,
+            total_expense=total_expense,
+            member_contributions=member_contributions,
+            include_members=include_members,
+            role=role,
+        )
 
     def _space_to_dict_with_creator(
         self,

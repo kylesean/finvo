@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from app.core.config import settings
 from app.core.responses import success_response
 
 
@@ -37,8 +38,8 @@ async def check_version() -> JSONResponse:
         JSONResponse with version details wrapped in unified response envelope.
     """
     version_data = VersionCheckResponseSchema(
-        latestVersion="0.2.0",
-        minSupportedVersion="0.1.0",
+        latestVersion=settings.VERSION,
+        minSupportedVersion=settings.MIN_SUPPORTED_CLIENT_VERSION,
         forceUpdate=False,
         releaseDate="2026-07-27",
         changelog="1. Added automatic app version check and update support\n2. Optimized shared space interaction logic\n3. Improved network connectivity and service stability",

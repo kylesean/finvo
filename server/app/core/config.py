@@ -142,6 +142,8 @@ class Settings(BaseSettings):
     # Application Settings
     PROJECT_NAME: str = "Finvo"
     VERSION: str = _read_version()
+    # Minimum client version the server still supports (see api/v1/version.py).
+    MIN_SUPPORTED_CLIENT_VERSION: str = "0.1.0"
     DESCRIPTION: str = "AI-powered expense tracking and financial management system"
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = False
@@ -159,6 +161,10 @@ class Settings(BaseSettings):
     DEFAULT_LLM_TEMPERATURE: float = 0.2
     MAX_TOKENS: int = 2000
     MAX_LLM_CALL_RETRIES: int = 3
+    # Per-request timeout for LLM upstream HTTP calls (connect+read). Prevents a
+    # dead upstream from hanging requests for minutes. Each model call within a
+    # stream is bounded separately, so this does not cut off valid streaming.
+    LLM_REQUEST_TIMEOUT_SECONDS: float = 120.0
 
     # Vision / Multimodal Configuration
     # None = auto-detect from LLMRegistry capabilities declaration

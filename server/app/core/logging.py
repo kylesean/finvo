@@ -28,6 +28,10 @@ from app.core.config import (
 # Ensure log directory exists
 settings.LOG_DIR.mkdir(parents=True, exist_ok=True)
 
+# Pattern to match ANSI escape sequences (used to sanitize log lines defensively).
+_ANSI_ESCAPE_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+
+
 # Context variables for storing request-specific data
 _request_context: ContextVar[dict[str, Any] | None] = ContextVar("request_context", default=None)
 
@@ -178,34 +182,22 @@ class JsonlFileHandler(logging.Handler):
             pass
 
     def emit(self, record: logging.LogRecord) -> None:
-        """Emit a record to the JSONL file."""
+        """Emit a record to the JSONL file as a single encoded-once JSON line."""
         try:
             # Check for rotation before writing
             file_path = self._get_current_file_path()
             if self._should_rotate():
                 self._rotate_file()
 
-            # Remove ANSI escape codes from the message
-            message = record.getMessage()
-            # Pattern to match ANSI escape sequences
-            ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-            clean_message = ansi_escape.sub("", message)
-
-            log_entry = {
-                "timestamp": datetime.fromtimestamp(record.created).isoformat(),
-                "level": record.levelname,
-                "message": clean_message,
-                "module": record.module,
-                "function": record.funcName,
-                "filename": record.pathname,
-                "line": record.lineno,
-                "environment": settings.ENVIRONMENT.value,
-            }
-            if hasattr(record, "extra"):
-                log_entry.update(record.extra)
+            # Render once via the configured ProcessorFormatter (JSON). Using the
+            # formatter (instead of record.getMessage(), which would already be
+            # a JSON string in JSON mode) prevents double-encoding.
+            line = self.format(record)
+            # Strip ANSI escape codes (console renderer) defensively.
+            clean_line = _ANSI_ESCAPE_RE.sub("", line)
 
             with open(file_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+                f.write(clean_line + "\n")
         except Exception:
             self.handleError(record)
 
@@ -299,9 +291,18 @@ def setup_logging() -> None:
     )
     console_handler.setFormatter(console_formatter)
 
-    # Create file handler for JSON logs
+    # File logs are always JSONL: a dedicated ProcessorFormatter renders the flat
+    # event dict once, so the JsonlFileHandler writes an encoded-once JSON line.
+    file_formatter = structlog.stdlib.ProcessorFormatter(
+        foreign_pre_chain=foreign_pre_chain,
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            structlog.processors.JSONRenderer(),
+        ],
+    )
     file_handler = JsonlFileHandler(get_log_file_path())
     file_handler.setLevel(log_level)
+    file_handler.setFormatter(file_formatter)
 
     # Configure root logger
     root_logger = logging.getLogger()
@@ -328,27 +329,18 @@ def setup_logging() -> None:
     logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
     logging.getLogger("tzlocal").setLevel(logging.WARNING)
 
-    # Configure structlog with separate formatters for console and file
-    if settings.LOG_FORMAT == "console":
-        structlog.configure(
-            processors=[
-                *shared_processors,
-                structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
-            ],
-            logger_factory=structlog.stdlib.LoggerFactory(),
-            wrapper_class=structlog.stdlib.BoundLogger,
-            cache_logger_on_first_use=True,
-        )
-    else:
-        structlog.configure(
-            processors=[
-                *shared_processors,
-                structlog.processors.JSONRenderer(),
-            ],
-            logger_factory=structlog.stdlib.LoggerFactory(),
-            wrapper_class=structlog.stdlib.BoundLogger,
-            cache_logger_on_first_use=True,
-        )
+    # Configure structlog to always emit via ProcessorFormatter. Rendering is
+    # deferred to the console/file formatters so each output is encoded exactly
+    # once (avoids double-encoding in JSON mode).
+    structlog.configure(
+        processors=[
+            *shared_processors,
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True,
+    )
 
 
 # Initialize logging

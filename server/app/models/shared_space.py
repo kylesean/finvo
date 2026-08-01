@@ -85,6 +85,10 @@ class SpaceTransaction(Base):
 
     __tablename__ = "space_transactions"
 
+    # A transaction can be associated with a space only once; the DB constraint
+    # backstops the service's check-then-insert against concurrent duplicates.
+    __table_args__ = (sa.UniqueConstraint("space_id", "transaction_id", name="uq_space_transactions_space_tx"),)
+
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     space_id: Mapped[UUID] = col.uuid_fk("shared_spaces", ondelete="NO ACTION")
     transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE")

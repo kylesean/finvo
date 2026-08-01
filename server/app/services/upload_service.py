@@ -113,6 +113,7 @@ class UploadService:
     def __init__(self, db: AsyncSession):
         self.db = db
         self._adapter: StorageAdapter | None = None
+        self._provider_type: str | None = None
 
     async def upload_files(
         self,
@@ -139,6 +140,9 @@ class UploadService:
         # Phase 1: Retrieve storage config and initialize adapter
         storage_config_id, storage_config = await self._get_or_create_storage_config(user_uuid)
         self._adapter = await StorageAdapterFactory.create(storage_config)
+        # Resolve the provider from the per-user config actually in use, not the
+        # global settings default (they can differ for a configured user).
+        self._provider_type = storage_config.provider_type
 
         # Phase 2: Process all files (pure file I/O)
         processed = []  # Successfully processed file metadata
@@ -189,7 +193,19 @@ class UploadService:
             attachments.append(attachment)
 
         self.db.add_all(attachments)
-        await self.db.commit()
+        try:
+            await self.db.commit()
+        except Exception:
+            await self.db.rollback()
+            # DB records failed to persist, so the physical files already written
+            # in Phase 2 would be orphaned. Best-effort delete them before rethrowing.
+            if self._adapter is not None:
+                for info in processed:
+                    try:
+                        await self._adapter.delete(info["object_key"])
+                    except Exception as del_exc:  # noqa: BLE001
+                        logger.error("orphan_file_cleanup_failed", object_key=info["object_key"], error=str(del_exc))
+            raise
 
         # Refresh for IDs
         for att in attachments:
@@ -332,7 +348,7 @@ class UploadService:
         object_key = self._generate_object_key(extension, upload_id)
 
         # 6. Save file payload according to adapter backend
-        if self._adapter and settings.STORAGE_PROVIDER != "local_uploads":
+        if self._adapter is not None and self._provider_type != "local_uploads":
 
             async def content_generator() -> AsyncGenerator[bytes]:
                 yield content
@@ -347,7 +363,7 @@ class UploadService:
                 upload_id=upload_id,
                 filename=file.filename,
                 size=len(content),
-                provider=settings.STORAGE_PROVIDER,
+                provider=self._provider_type,
             )
         else:
             file_path = self.UPLOAD_DIR / object_key
@@ -464,15 +480,20 @@ class UploadService:
                 error_code="INVALID_FILE_TYPE",
             )
 
-        content = await file.read()
-
-        if len(content) > self.MAX_FILE_SIZE:
-            size_mb = self.MAX_FILE_SIZE / (1024 * 1024)
-            raise BusinessError(
-                message=f"File size exceeds limit ({size_mb:.1f}MB)",
-                status_code=400,
-                error_code="FILE_TOO_LARGE",
-            )
+        content = bytearray()
+        _read_chunk_size = 1024 * 1024  # 1MB chunks bound peak memory to ~MAX_FILE_SIZE
+        while True:
+            chunk = await file.read(_read_chunk_size)
+            if not chunk:
+                break
+            content.extend(chunk)
+            if len(content) > self.MAX_FILE_SIZE:
+                size_mb = self.MAX_FILE_SIZE / (1024 * 1024)
+                raise BusinessError(
+                    message=f"File size exceeds limit ({size_mb:.1f}MB)",
+                    status_code=400,
+                    error_code="FILE_TOO_LARGE",
+                )
 
         if len(content) == 0:
             raise BusinessError(
@@ -481,7 +502,7 @@ class UploadService:
                 error_code="FILE_EMPTY",
             )
 
-        return content
+        return bytes(content)
 
     def _get_extension(self, filename: str) -> str:
         """Extract lower-case file extension."""
