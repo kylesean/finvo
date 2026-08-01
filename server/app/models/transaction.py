@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -58,12 +58,20 @@ class Transaction(Base):
     # DB backstops the application's count-based check (`_already_generated`),
     # guarding against duplicate entries when running multiple workers. NULL
     # ``recurring_transaction_id`` rows (non-recurring) are exempt.
+    #
+    # The indexes below mirror the production schema (ix_transactions_category,
+    # _status, _transaction_at, _user_at) so `alembic autogenerate` does not
+    # falsely propose dropping them.
     __table_args__ = (
         UniqueConstraint(
             "recurring_transaction_id",
             "transaction_at",
             name="uq_transactions_recurring_timestamp",
         ),
+        Index("ix_transactions_category", "category_key"),
+        Index("ix_transactions_status", "status"),
+        Index("ix_transactions_transaction_at", "transaction_at"),
+        Index("ix_transactions_user_at", "user_uuid", "transaction_at"),
     )
 
     id: Mapped[UUID | None] = mapped_column(primary_key=True)
@@ -93,7 +101,12 @@ class Transaction(Base):
     subject: Mapped[str] = mapped_column(String(20), default="SELF")
     intent: Mapped[str] = mapped_column(String(20), default="SURVIVAL")
     source_thread_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
-    recurring_transaction_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
+    recurring_transaction_id: Mapped[UUID | None] = col.uuid_fk(
+        "recurring_transactions",
+        ondelete="SET NULL",
+        index=True,
+        nullable=True,
+    )
     created_at: Mapped[datetime] = col.timestamptz()
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
 

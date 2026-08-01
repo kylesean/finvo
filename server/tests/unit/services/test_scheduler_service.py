@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from unittest.mock import patch
 from uuid import uuid4
@@ -19,8 +19,11 @@ async def test_process_due_transactions(db_session):
     db_session.add(user)
 
     # 2. Setup Due Recurring Transaction
-    # Due today (start from yesterday to ensure stable next_execution calculation)
-    start = date.today() - timedelta(days=1)
+    # Due today in UTC (use datetime.now(UTC) date, NOT local date.today(), so the
+    # "midnight UTC today" timestamp is actually in the past relative to the job's
+    # `datetime.now(UTC)`; otherwise this test fails whenever local date > UTC date).
+    utc_today = datetime.now(UTC).date()
+    start = utc_today - timedelta(days=1)
     rt = RecurringTransaction(
         id=uuid4(),
         user_uuid=user.uuid,
@@ -30,7 +33,7 @@ async def test_process_due_transactions(db_session):
         category_key="FOOD",
         recurrence_rule="FREQ=DAILY;INTERVAL=1",
         start_date=start,
-        next_execution_at=datetime.combine(date.today(), datetime.min.time(), tzinfo=UTC),
+        next_execution_at=datetime.combine(utc_today, datetime.min.time(), tzinfo=UTC),
         is_active=True,
         amount_type="FIXED",
         requires_confirmation=False,

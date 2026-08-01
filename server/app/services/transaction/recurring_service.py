@@ -85,6 +85,10 @@ def validate_transaction_type(v: str) -> str:
 class RecurringTransactionService:
     """Service for recurring transaction operations."""
 
+    # Safety cap for skipping exception dates recursively; prevents unbounded
+    # recursion if a rule's every candidate date is excluded.
+    _MAX_EXCEPTION_RECURSION = 100
+
     def __init__(self, db: AsyncSession):
         self.db = db
 
@@ -157,6 +161,7 @@ class RecurringTransactionService:
         start_date: date,
         end_date: date | None = None,
         exception_dates: list[str] | None = None,
+        _depth: int = 0,
     ) -> datetime | None:
         """Calculate next execution date.
 
@@ -165,10 +170,16 @@ class RecurringTransactionService:
             start_date: Rule start date
             end_date: Optional rule end date
             exception_dates: List of excluded date strings
+            _depth: Internal recursion depth guard when skipping exception dates
 
         Returns:
             Next execution datetime (UTC), or None if unavailable
         """
+        # Guard against unbounded recursion when every candidate date is an
+        # exception (or the rule yields an endless chain of skipped dates).
+        if _depth >= self._MAX_EXCEPTION_RECURSION:
+            logger.warning("next_execution_exception_recursion_limit", rrule=rrule_str, start=start_date)
+            return None
         try:
             # Use UTC timezone to match UNTIL in RRULE
             dtstart = datetime.combine(start_date, datetime.min.time(), tzinfo=UTC)
@@ -220,7 +231,13 @@ class RecurringTransactionService:
 
             if next_occ.date().isoformat() in exception_set:
                 # Exception date match: skip and recursively find next valid execution
-                return self.calculate_next_execution(rrule_str, next_occ.date(), end_date, exception_dates)
+                return self.calculate_next_execution(
+                    rrule_str,
+                    next_occ.date(),
+                    end_date,
+                    exception_dates,
+                    _depth=_depth + 1,
+                )
 
             return next_occ
         except Exception as e:

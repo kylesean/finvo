@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import base64
 from pathlib import Path
 from typing import Any
@@ -137,8 +138,9 @@ class AttachmentProcessor:
         if mime_type.startswith("image/"):
             try:
                 if file_path.exists():
-                    with open(file_path, "rb") as f:
-                        image_data = f.read()
+                    # Read off the event loop; file I/O + base64 of a large image
+                    # is blocking and would stall concurrent requests otherwise.
+                    image_data = await asyncio.to_thread(file_path.read_bytes)
                     base64_data = base64.b64encode(image_data).decode("utf-8")
                     return f"data:{mime_type};base64,{base64_data}"
             except Exception as e:
