@@ -8,19 +8,27 @@ Exposes RESTful file upload APIs:
 
 from __future__ import annotations
 
+import mimetypes
+from typing import Any
+from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from jose import JWTError, jwt
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.core.exceptions import BusinessError
 from app.core.logging import logger
 from app.core.responses import success_response
+from app.models.storage_config import StorageConfig
 from app.models.user import User
+from app.services.storage.adapters.factory import StorageAdapterFactory
 from app.services.upload_service import (
     ALLOWED_EXTENSIONS,
     DOCUMENT_EXTENSIONS,
@@ -205,6 +213,74 @@ async def upload_files(
 # =============================================================================
 # View/Download Endpoints
 # =============================================================================
+
+
+def _content_disposition(filename: str, mime_type: str) -> str:
+    """Build an RFC 5987-aware Content-Disposition header for a stored file."""
+    if mime_type == "image/svg+xml":
+        disposition = "attachment"  # SVG can embed <script> -> force download
+    elif mime_type.startswith("image/") or mime_type == "application/pdf":
+        disposition = "inline"
+    else:
+        disposition = "attachment"
+
+    try:
+        filename.encode("ascii")
+        return f'{disposition}; filename="{filename}"'
+    except UnicodeEncodeError:
+        return f"{disposition}; filename*=UTF-8''{quote(filename)}"
+
+
+@router.get("/stream")
+async def stream_file(token: str = "", db: AsyncSession = Depends(get_session)) -> StreamingResponse:
+    """Stream a stored file from its signed capability URL.
+
+    This is the endpoint referenced by adapter-issued ``get_download_url``
+    (e.g. the local adapter's ``/api/v1/files/stream?token=...``). It validates
+    the short-lived signed token, resolves the ownership storage config, and
+    streams the object through the correct backend — so both local and
+    remote (S3/WebDAV) uploads are retrievable instead of 404ing.
+    """
+    from uuid import UUID as _UUID
+
+    if not token:
+        raise BusinessError("Missing token", status_code=401, error_code="AUTH_FAILED")
+    try:
+        payload: dict[str, Any] = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    except JWTError as e:
+        logger.warning("stream_token_invalid", error=str(e))
+        raise BusinessError("Invalid token", status_code=401, error_code="AUTH_FAILED")
+
+    fa = payload.get("file_access")
+    if not isinstance(fa, dict):
+        raise BusinessError("Invalid token payload", status_code=401, error_code="AUTH_FAILED")
+
+    object_key = fa.get("object_key")
+    storage_config_id = fa.get("storage_config_id")
+    filename = str(fa.get("filename") or str(object_key or "").split("/")[-1] or "file")
+    if not object_key or not storage_config_id:
+        raise BusinessError("Invalid token payload", status_code=401, error_code="AUTH_FAILED")
+
+    try:
+        sc = await db.get(StorageConfig, _UUID(str(storage_config_id)))
+    except (ValueError, TypeError):
+        raise BusinessError("Invalid storage config", status_code=404, error_code="FILE_NOT_FOUND")
+    if sc is None:
+        raise BusinessError("Storage config not found", status_code=404, error_code="FILE_NOT_FOUND")
+
+    adapter = await StorageAdapterFactory.create(sc)
+    if not await adapter.exists(object_key):
+        raise BusinessError("File not found", status_code=404, error_code="FILE_NOT_FOUND")
+
+    mime_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+    return StreamingResponse(
+        adapter.get_stream(object_key),
+        media_type=mime_type,
+        headers={
+            "Content-Disposition": _content_disposition(filename, mime_type),
+            "Cache-Control": "private, max-age=300",
+        },
+    )
 
 
 @router.get("/view/{attachment_id}", response_class=FileResponse)

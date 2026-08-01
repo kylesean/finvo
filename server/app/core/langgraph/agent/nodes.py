@@ -5,6 +5,7 @@ Each node focuses on a single responsibility.
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 from functools import lru_cache
 from typing import Any, cast
@@ -13,7 +14,15 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
+from openai import APIError, APITimeoutError, RateLimitError
+from tenacity import (
+    AsyncRetrying,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
+from app.core.config import settings
 from app.core.langgraph.agent.multimodal import (
     build_multimodal_content,
     load_image_parts,
@@ -27,6 +36,10 @@ _DDG_TOOL_NAME = "duckduckgo_results_json"
 
 # Responses API built-in web search tool declaration
 _BUILTIN_WEB_SEARCH: dict[str, str] = {"type": "web_search"}
+
+# Exceptions that indicate a transient LLM upstream failure and are worth
+# retrying (mirrors the retry policy in app.services.llm.LLMService).
+_AGENT_RETRYABLE = (RateLimitError, APITimeoutError, APIError, asyncio.TimeoutError)
 
 
 def _resolve_search_tools(
@@ -203,11 +216,24 @@ def create_agent_node(
 
         bound_llm = llm.bind_tools(resolved_tools)
         try:
-            response = await bound_llm.ainvoke(prompt_messages, config)
+            # Retry transient upstream failures (rate-limit/timeout/API error)
+            # instead of failing the turn on a single blip. Non-recoverable errors
+            # are not retried and propagate immediately.
+            async for attempt in AsyncRetrying(
+                stop=stop_after_attempt(settings.MAX_LLM_CALL_RETRIES),
+                wait=wait_exponential(multiplier=1, min=2, max=10),
+                retry=retry_if_exception_type(_AGENT_RETRYABLE),
+                reraise=True,
+            ):
+                with attempt:
+                    response = await bound_llm.ainvoke(prompt_messages, config)
         except Exception as e:
-            logger.error("agent_node_llm_invoke_failed", error=str(e), exc_info=True)
-            fallback_response = AIMessage(content="AI service is temporarily unavailable. Please try again later.")
-            return {"messages": [fallback_response]}
+            # Do NOT write a fabricated "service unavailable" AIMessage into
+            # state here: it would be persisted to the checkpoint and pollute
+            # conversation history/search. Instead propagate so the stream layer
+            # emits an error event (processor.py) and no fake turn is recorded.
+            logger.error("agent_node_llm_failed", error=str(e), exc_info=True)
+            raise
 
         logger.debug(
             "agent_node_response",

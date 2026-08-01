@@ -729,8 +729,6 @@ class TransactionCRUDService:
         if old_account_id == new_account_id:
             return await self.get_transaction_detail(transaction_id, user_uuid)
 
-        tx_original_amount = transaction.amount_original or transaction.amount
-        tx_currency = (transaction.currency or BASE_CURRENCY).upper()
         exchange_rate_svc = exchange_rate_service
 
         if old_account_id:
@@ -738,8 +736,7 @@ class TransactionCRUDService:
                 transaction_id=transaction_id,
                 old_account_id=old_account_id,
                 user_uuid=user_uuid,
-                tx_original_amount=tx_original_amount,
-                tx_currency=tx_currency,
+                transaction=transaction,
                 is_expense=is_expense,
                 is_income=is_income,
                 exchange_rate_svc=exchange_rate_svc,
@@ -750,8 +747,7 @@ class TransactionCRUDService:
                 transaction_id=transaction_id,
                 new_account_id=new_account_id,
                 user_uuid=user_uuid,
-                tx_original_amount=tx_original_amount,
-                tx_currency=tx_currency,
+                transaction=transaction,
                 is_expense=is_expense,
                 is_income=is_income,
                 exchange_rate_svc=exchange_rate_svc,
@@ -772,26 +768,40 @@ class TransactionCRUDService:
 
     async def _convert_tx_amount(
         self,
-        tx_original_amount: Decimal,
-        tx_currency: str,
+        tx: Transaction,
         target_currency: str,
         exchange_rate_svc: ExchangeRateService,
-    ) -> Decimal | None:
-        """Convert transaction amount to target currency.
+    ) -> Decimal:
+        """Compute the amount to apply for ``tx`` in the target account's currency.
 
-        Returns the absolute amount directly if currencies match.
-        Returns None if exchange rate conversion fails.
+        Uses the transaction's own recorded (snapshot) amounts so balance
+        rollback/apply on re-association matches what was originally booked,
+        instead of re-converting at the *live* rate (M13):
+        - same currency as the transaction -> ``amount_original`` (exact)
+        - user's base currency             -> ``amount`` (snapshot-based, stable)
+        - any other currency               -> live conversion; raises if the rate
+          is unavailable (never silently mislabels a currency)
+
+        Raises:
+            BusinessError: If a required cross-currency conversion is unavailable.
         """
-        abs_amount = abs(Decimal(str(tx_original_amount)))
-        if tx_currency == target_currency:
-            return abs_amount
+        tx_currency = (tx.currency or BASE_CURRENCY).upper()
+        target = target_currency.upper()
+        if target == tx_currency:
+            return abs(tx.amount_original)
+        if target == BASE_CURRENCY:
+            return abs(tx.amount)
+
         converted = await exchange_rate_svc.convert(
-            amount=float(abs_amount),
+            amount=float(abs(tx.amount_original)),
             from_currency=tx_currency,
-            to_currency=target_currency,
+            to_currency=target,
         )
         if converted is None:
-            return None
+            raise BusinessError(
+                f"Unable to get exchange rate from {tx_currency} to {target}, please try again later",
+                "EXCHANGE_RATE_UNAVAILABLE",
+            )
         return Decimal(str(converted))
 
     async def _rollback_old_account_balance(
@@ -799,33 +809,24 @@ class TransactionCRUDService:
         transaction_id: UUID,
         old_account_id: UUID,
         user_uuid: UUID,
-        tx_original_amount: Decimal,
-        tx_currency: str,
+        transaction: Transaction,
         is_expense: bool,
         is_income: bool,
         exchange_rate_svc: ExchangeRateService,
     ) -> None:
         """Reverse a transaction's effect on the old account balance.
 
-        Expense → add back; Income → subtract. If the account is not found
-        (e.g. deleted), the rollback is silently skipped.
+        Expense → add back; Income → subtract. The amount is derived from the
+        transaction's snapshot (see ``_convert_tx_amount``), NOT a live rate, so
+        the rollback matches what was originally booked. If the account is not
+        found (e.g. deleted), the rollback is silently skipped.
         """
         old_account = await self.get_financial_account(old_account_id, user_uuid)
         if not old_account:
             return
 
         old_account_currency = (old_account.currency_code or BASE_CURRENCY).upper()
-        rollback_amount = await self._convert_tx_amount(
-            tx_original_amount, tx_currency, old_account_currency, exchange_rate_svc
-        )
-        if rollback_amount is None:
-            logger.warning(
-                "exchange_rate_conversion_failed_rollback",
-                transaction_id=str(transaction_id),
-                tx_currency=tx_currency,
-                account_currency=old_account_currency,
-            )
-            rollback_amount = abs(Decimal(str(tx_original_amount)))
+        rollback_amount = await self._convert_tx_amount(transaction, old_account_currency, exchange_rate_svc)
 
         if is_expense:
             old_account.current_balance += rollback_amount
@@ -837,7 +838,6 @@ class TransactionCRUDService:
             "account_balance_rollback",
             transaction_id=str(transaction_id),
             account_id=str(old_account_id),
-            tx_currency=tx_currency,
             account_currency=old_account_currency,
             rollback_amount=str(rollback_amount),
         )
@@ -847,30 +847,24 @@ class TransactionCRUDService:
         transaction_id: UUID,
         new_account_id: UUID,
         user_uuid: UUID,
-        tx_original_amount: Decimal,
-        tx_currency: str,
+        transaction: Transaction,
         is_expense: bool,
         is_income: bool,
         exchange_rate_svc: ExchangeRateService,
     ) -> None:
         """Apply a transaction's effect to the new account balance.
 
-        Expense → deduct; Income → add. Raises NotFoundError if the account
-        does not exist, or BusinessError if exchange rate conversion fails.
+        Expense → deduct; Income → add. The amount comes from the transaction's
+        snapshot (see ``_convert_tx_amount``). Raises NotFoundError if the
+        account does not exist, or BusinessError if exchange rate conversion
+        fails (no silent fallback).
         """
         new_account = await self.get_financial_account(new_account_id, user_uuid)
         if not new_account:
             raise NotFoundError("Account")
 
         new_account_currency = (new_account.currency_code or BASE_CURRENCY).upper()
-        deduct_amount = await self._convert_tx_amount(
-            tx_original_amount, tx_currency, new_account_currency, exchange_rate_svc
-        )
-        if deduct_amount is None:
-            raise BusinessError(
-                f"Unable to get exchange rate from {tx_currency} to {new_account_currency}, please try again later",
-                "EXCHANGE_RATE_UNAVAILABLE",
-            )
+        deduct_amount = await self._convert_tx_amount(transaction, new_account_currency, exchange_rate_svc)
 
         if is_expense:
             new_account.current_balance -= deduct_amount
@@ -882,9 +876,7 @@ class TransactionCRUDService:
             "account_balance_updated",
             transaction_id=str(transaction_id),
             account_id=str(new_account_id),
-            tx_currency=tx_currency,
             account_currency=new_account_currency,
-            original_amount=str(tx_original_amount),
             deduct_amount=str(deduct_amount),
         )
 

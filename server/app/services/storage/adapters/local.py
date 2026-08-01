@@ -204,9 +204,9 @@ class LocalAdapter(StorageAdapter):
             expires_delta=timedelta(seconds=expire_seconds),
         )
 
-        # Build URL
+        # Build URL pointing to the real streaming route (see api/v1/upload.py)
         base_url = getattr(settings, "APP_URL", "http://localhost:8000").rstrip("/")
-        return f"{base_url}/api/files/stream?token={token}"
+        return f"{base_url}/api/v1/files/stream?token={token}"
 
     async def get_stream(
         self,

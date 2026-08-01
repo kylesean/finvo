@@ -212,12 +212,19 @@ class UploadService:
             await self.db.refresh(att)
 
         # Phase 4: Construct results
-        base_url = settings.APP_URL.rstrip("/")
         successful = []
 
         for i, att in enumerate(attachments):
             info = processed[i]
             att_id = str(att.id)
+            # Build the download URL from the actual storage backend (local → signed
+            # /api/v1/files/stream URL, S3 → presigned URL) so every backend yields a
+            # working link instead of always pointing at the local-disk view route.
+            try:
+                uri = await self._adapter.get_download_url(object_key=info["object_key"], filename=info["filename"])
+            except Exception as e:  # noqa: BLE001
+                logger.error("download_url_generation_failed", object_key=info["object_key"], error=str(e))
+                uri = ""
             successful.append(
                 {
                     "id": att_id,
@@ -225,7 +232,7 @@ class UploadService:
                     "originalName": info["filename"],
                     "filename": info["filename"],
                     "objectKey": info["object_key"],
-                    "uri": f"{base_url}/api/v1/files/view/{att_id}",
+                    "uri": uri,
                     "size": info["size"],
                     "mimeType": info["mime_type"],
                     "hash": info["hash"],
