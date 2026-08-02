@@ -24,6 +24,7 @@ from langgraph.prebuilt import ToolNode
 from app.core.langgraph.agent.edges import route_after_agent, route_after_tools, route_entry
 from app.core.langgraph.agent.nodes import create_agent_node, create_direct_execute_node
 from app.core.langgraph.agent.state import AgentState
+from app.core.langgraph.tools.filesystem_tools import filesystem_tools
 from app.core.logging import logger
 
 
@@ -58,7 +59,15 @@ def build_agent_graph(
     # LangGraph's add_node overload set is extremely narrow; our async callable
     # shape is valid at runtime but not matched by the typed overloads.
     workflow.add_node("agent", create_agent_node(llm, tools, system_prompt))  # type: ignore[call-overload]
-    workflow.add_node("tools", ToolNode(tools))
+    # The ToolNode must be able to execute every tool the agent may bind. The
+    # agent node injects privileged filesystem tools (e.g. `execute`) into the
+    # LLM binding when a skill's allowed-tools grants them; without them here,
+    # calling `execute` would fail with "execute is not a valid tool", making the
+    # model report the skill tool is "unavailable". Per-turn gating (which tools
+    # the LLM may actually call) still happens at the binding layer in
+    # _resolve_skill_tools, so registering the superset here does not expose the
+    # filesystem tools to skill-less turns.
+    workflow.add_node("tools", ToolNode(tools + filesystem_tools))
     workflow.add_node("direct_execute", create_direct_execute_node(tools))  # type: ignore[call-overload]
 
     # Add edges
