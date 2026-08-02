@@ -26,6 +26,32 @@ from app.core.logging import logger
 from app.models.financial_account import FinancialAccount
 from app.models.transaction import RecurringTransaction, Transaction
 
+# Human-readable forecast labels localized per app language.
+# Keyed by ``language`` (zh, zh-Hant, ja, ko, en) with an English fallback.
+_FORECAST_LOCALE: dict[str, dict[str, str]] = {
+    "daily_variable": {
+        "zh": "每日预期支出",
+        "zh-Hant": "每日預期支出",
+        "ja": "日次予測支出",
+        "ko": "일일 예상 지출",
+        "en": "Daily Expense (Predicted)",
+    },
+    "warning_negative": {
+        "zh": "余额预计在 {month}/{day} 转为负数",
+        "zh-Hant": "餘額預計在 {month}/{day} 轉為負數",
+        "ja": "{month}/{day} に残高がマイナスになる見込みです",
+        "ko": "{month}/{day} 잔액이 마이너스가 될 것으로 예상됩니다",
+        "en": "Balance is projected to go negative on {month}/{day}",
+    },
+    "warning_below_safety": {
+        "zh": "余额预计在 {month}/{day} 低于安全阈值",
+        "zh-Hant": "餘額預計在 {month}/{day} 低於安全門檻",
+        "ja": "{month}/{day} に残高が安全しきい値を下回る見込みです",
+        "ko": "{month}/{day} 잔액이 안전 기준 이하로 떨어질 것으로 예상됩니다",
+        "en": "Balance is projected to drop below the safety threshold on {month}/{day}",
+    },
+}
+
 
 @dataclass
 class ForecastEvent:
@@ -146,6 +172,12 @@ class ForecastService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    def _loc(self, key: str, language: str | None, **fmt: object) -> str:
+        """Localize a forecast label for the given ``language`` (en fallback)."""
+        lang = (language or "zh").strip() or "zh"
+        template = _FORECAST_LOCALE.get(key, {}).get(lang) or _FORECAST_LOCALE[key]["en"]
+        return template.format(**fmt) if fmt else template
+
     async def generate_cash_flow_forecast(
         self,
         user_uuid: UUID,
@@ -153,6 +185,7 @@ class ForecastService:
         scenarios: list[dict[str, Any]] | None = None,
         include_variable_spending: bool = True,
         safety_threshold: Decimal | None = None,
+        language: str | None = "zh",
     ) -> CashFlowForecastResult:
         """Generate a complete cash flow forecast.
 
@@ -162,6 +195,7 @@ class ForecastService:
             scenarios: Optional list of simulated events from LLM
             include_variable_spending: Whether to include predicted daily spending
             safety_threshold: Optional custom safety threshold, overrides user settings
+            language: Session language for localizing labels (zh/zh-Hant/ja/ko/en)
 
         Returns:
             CashFlowForecastResult with all data points and analysis
@@ -198,12 +232,14 @@ class ForecastService:
             deterministic_events=deterministic_events,
             scenario_events=scenario_events,
             avg_daily_spending=avg_daily_spending,
+            language=language,
         )
 
         # 7. Generate warnings
         warnings = self._generate_warnings(
             data_points=data_points,
             safety_threshold=safety_threshold,
+            language=language,
         )
 
         # 8. Calculate summary
@@ -530,6 +566,7 @@ class ForecastService:
         deterministic_events: list[ForecastEvent],
         scenario_events: list[ForecastEvent],
         avg_daily_spending: Decimal,
+        language: str | None = "zh",
     ) -> list[ForecastDataPoint]:
         """Build the complete forecast time series."""
         # Group events by date
@@ -556,7 +593,7 @@ class ForecastService:
                 day_events.append(
                     ForecastEvent(
                         date=current_date,
-                        description="Daily Expense (Predicted)",
+                        description=self._loc("daily_variable", language),
                         amount=avg_daily_spending,
                         event_type="PREDICTED_VARIABLE",
                         confidence=0.7,
@@ -594,6 +631,7 @@ class ForecastService:
         self,
         data_points: list[ForecastDataPoint],
         safety_threshold: Decimal,
+        language: str | None = "zh",
     ) -> list[ForecastWarning]:
         """Generate warnings for potential financial issues."""
         warnings = []
@@ -607,7 +645,12 @@ class ForecastService:
                     ForecastWarning(
                         date=dp.date,
                         warning_type="NEGATIVE_BALANCE",
-                        message=f"Balance is projected to go negative on {dp.date.month}/{dp.date.day}",
+                        message=self._loc(
+                            "warning_negative",
+                            language,
+                            month=dp.date.month,
+                            day=dp.date.day,
+                        ),
                     )
                 )
                 warned_negative = True
@@ -618,7 +661,12 @@ class ForecastService:
                     ForecastWarning(
                         date=dp.date,
                         warning_type="BELOW_SAFETY",
-                        message=f"Balance is projected to drop below the safety threshold on {dp.date.month}/{dp.date.day}",
+                        message=self._loc(
+                            "warning_below_safety",
+                            language,
+                            month=dp.date.month,
+                            day=dp.date.day,
+                        ),
                     )
                 )
                 warned_below_safety = True
@@ -651,6 +699,7 @@ class ForecastService:
         amount: Decimal,
         purchase_date: date | None = None,
         description: str = "Simulated Purchase",
+        language: str | None = "zh",
     ) -> CashFlowForecastResult:
         """Simulate a one-time purchase and show its impact.
 
@@ -669,4 +718,5 @@ class ForecastService:
             user_uuid=user_uuid,
             forecast_days=30,
             scenarios=[scenario],
+            language=language,
         )

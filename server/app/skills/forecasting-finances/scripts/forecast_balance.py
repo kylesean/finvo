@@ -51,6 +51,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 from app.core.database import db_manager  # noqa: E402  # noqa: E402
 from app.services.forecast_service import ForecastService  # noqa: E402  # noqa: E402
 
+# Localized component title keyed by language (zh, zh-Hant, ja, ko, en).
+_FORECAST_TITLE: dict[str, str] = {
+    "zh": "未来余额预测",
+    "zh-Hant": "未來餘額預測",
+    "ja": "将来残高予測",
+    "ko": "미래 잔액 예측",
+    "en": "Financial Cash Flow Forecast",
+}
+
 
 async def main() -> None:
     """Execution entry point for the skill script."""
@@ -67,6 +76,10 @@ async def main() -> None:
         print(json.dumps({"success": False, "error": "USER_ID environment variable not set"}, ensure_ascii=False))
         sys.exit(1)
 
+    # Session language (set by the execute tool from the user's app language)
+    language = os.environ.get("LANG", "zh")
+    title = _FORECAST_TITLE.get(language, _FORECAST_TITLE["en"])
+
     try:
         user_uuid = UUID(user_id)
 
@@ -82,6 +95,7 @@ async def main() -> None:
                     amount=Decimal(str(args.amount)),
                     purchase_date=purchase_date,
                     description=args.description,
+                    language=language,
                 )
 
                 # Convert to dict
@@ -99,6 +113,7 @@ async def main() -> None:
                 result = await service.generate_cash_flow_forecast(
                     user_uuid=user_uuid,
                     forecast_days=args.days,
+                    language=language,
                 )
 
                 # Convert to dict
@@ -120,7 +135,7 @@ async def main() -> None:
                 "success": True,
                 # GenUI signal - CamelCase naming
                 "type": "CashFlowForecastChart",
-                "title": "Financial Cash Flow Forecast",
+                "title": title,
                 # Forecast data
                 **result_dict,
             }
