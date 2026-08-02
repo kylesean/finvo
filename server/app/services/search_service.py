@@ -273,7 +273,7 @@ class SearchService:
 
                 search_results.append(
                     SearchResult(
-                        id=str(msg.thread_id),  # session_id - convert UUID to string
+                        id=str(msg.thread_id),
                         title="",  # Will be filled by combined_search
                         snippet=snippet,
                         message_id=str(msg.id),
@@ -338,19 +338,22 @@ class SearchService:
         seen_sessions = {r.id for r in title_results}
         combined = list(title_results)
 
+        # Batch-load session titles for unseen message results in ONE query
+        # instead of opening a session per result (N+1 connection pattern).
+        missing_ids = [r.id for r in message_results if r.id not in seen_sessions]
+        titles: dict[str, str | None] = {}
+        if missing_ids:
+            try:
+                async with get_session_context() as db:
+                    stmt = select(Session.id, Session.name).where(Session.id.in_(missing_ids))
+                    rows = await db.execute(stmt)
+                    titles = {session_id: name for session_id, name in rows.all()}
+            except Exception as e:
+                logger.warning("session_title_lookup_failed", error=str(e))
+
         for msg_result in message_results:
             if msg_result.id not in seen_sessions:
-                # Try to get session title
-                try:
-                    async with get_session_context() as db:
-                        stmt = select(Session).where(Session.id == msg_result.id)
-                        result = await db.execute(stmt)
-                        session_obj = result.scalar_one_or_none()
-                        if session_obj:
-                            msg_result.title = session_obj.name
-                except Exception:  # nosec B110
-                    pass
-
+                msg_result.title = titles.get(msg_result.id) or msg_result.title
                 combined.append(msg_result)
                 seen_sessions.add(msg_result.id)
 

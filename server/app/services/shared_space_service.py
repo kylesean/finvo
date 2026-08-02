@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.exceptions import (
+    AppException,
     AuthorizationError,
     BusinessError,
     CommonErrorCode,
@@ -669,10 +670,11 @@ class SharedSpaceService:
         tx_id = UUID(result["transaction_id"])
         try:
             await self.add_transaction_to_space(space_id=space_id, user_uuid=user_uuid, transaction_id=tx_id)
-        except Exception as e:
+        except AppException as e:
             # The transaction is already persisted; surface the partial state
             # explicitly instead of failing the whole request while the
-            # transaction silently stays out of the space.
+            # transaction silently stays out of the space. Only expected business
+            # failures are tolerated here — programming errors must propagate.
             logger.error(
                 "failed_to_link_transaction_to_space",
                 transaction_id=str(tx_id),
@@ -704,7 +706,7 @@ class SharedSpaceService:
                 tx_id = UUID(tx_item["id"])
                 try:
                     await self.add_transaction_to_space(space_id=space_id, user_uuid=user_uuid, transaction_id=tx_id)
-                except Exception as e:
+                except AppException as e:
                     logger.error(
                         "failed_to_link_batch_transaction_to_space",
                         transaction_id=str(tx_id),

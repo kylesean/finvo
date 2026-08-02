@@ -56,7 +56,7 @@ class FinancialSettings(Base):
     )
     safety_threshold: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("1000.00"))
     daily_burn_rate: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("100.00"))
-    burn_rate_mode: Mapped[str] = mapped_column(String(20), default="AI_AUTO")
+    burn_rate_mode: Mapped[BurnRateMode] = mapped_column(String(20), default=BurnRateMode.AI_AUTO)
     primary_currency: Mapped[str] = mapped_column(String(3), default=PROJECT_DEFAULT_CURRENCY)
     month_start_day: Mapped[int] = mapped_column(Integer, default=1)
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)

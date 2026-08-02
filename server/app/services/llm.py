@@ -18,6 +18,7 @@ from openai import (
     OpenAIError,
     RateLimitError,
 )
+from pydantic import SecretStr
 from tenacity import (
     before_sleep_log,
     retry,
@@ -50,10 +51,10 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="gpt-5.6-sol",
-                api_key=settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
+                api_key=SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
                 base_url=settings.OPENAI_BASE_URL,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_tokens=settings.MAX_TOKENS,
+                max_completion_tokens=settings.MAX_TOKENS,
                 reasoning_effort="medium",
                 use_responses_api=True,
             ),
@@ -63,10 +64,10 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="gpt-5.6-terra",
-                api_key=settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
+                api_key=SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
                 base_url=settings.OPENAI_BASE_URL,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_tokens=settings.MAX_TOKENS,
+                max_completion_tokens=settings.MAX_TOKENS,
                 reasoning_effort="low",
                 use_responses_api=True,
             ),
@@ -76,10 +77,10 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="gpt-5.6-luna",
-                api_key=settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
+                api_key=SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
                 base_url=settings.OPENAI_BASE_URL,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_tokens=settings.MAX_TOKENS,
+                max_completion_tokens=settings.MAX_TOKENS,
                 reasoning_effort="low",
                 use_responses_api=True,
             ),
@@ -89,10 +90,10 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="qwen3.8-max-preview",
-                api_key=settings.QWEN_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
+                api_key=SecretStr(settings.QWEN_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
                 base_url=settings.QWEN_BASE_URL or settings.OPENAI_BASE_URL,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_tokens=settings.MAX_TOKENS,
+                max_completion_tokens=settings.MAX_TOKENS,
                 reasoning_effort="low",
                 use_responses_api=True,
             ),
@@ -102,10 +103,10 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm": ChatOpenAI(
                 model="doubao-seed-1-6-251015",
-                api_key=settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
+                api_key=SecretStr(settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
                 base_url=settings.DOUBAO_BASE_URL or settings.OPENAI_BASE_URL,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_tokens=settings.MAX_TOKENS,
+                max_completion_tokens=settings.MAX_TOKENS,
                 temperature=settings.DEFAULT_LLM_TEMPERATURE,
                 use_responses_api=True,
             ),
@@ -115,10 +116,10 @@ class LLMRegistry:
             "capabilities": {"vision": False},
             "llm": ChatOpenAI(
                 model="deepseek-v4-flash",
-                api_key=settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init",
+                api_key=SecretStr(settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
                 base_url=settings.DEEPSEEK_BASE_URL or settings.OPENAI_BASE_URL,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_tokens=settings.MAX_TOKENS,
+                max_completion_tokens=settings.MAX_TOKENS,
                 temperature=settings.DEFAULT_LLM_TEMPERATURE,
             ),
         },
@@ -128,10 +129,10 @@ class LLMRegistry:
             "capabilities": {"vision": False},
             "llm": ChatOpenAI(
                 model="qwen3.6-genesis-35b",
-                api_key=settings.OLLAMA_API_KEY or "ollama",
+                api_key=SecretStr(settings.OLLAMA_API_KEY or "ollama"),
                 base_url=settings.OLLAMA_BASE_URL,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_tokens=512,
+                max_completion_tokens=512,
                 temperature=0.1,
                 reasoning_effort="low",
                 extra_body={
@@ -148,10 +149,10 @@ class LLMRegistry:
             "capabilities": {"vision": False},
             "llm": ChatOpenAI(
                 model="translategemma:4b-it",
-                api_key=settings.OLLAMA_API_KEY or "ollama",
+                api_key=SecretStr(settings.OLLAMA_API_KEY or "ollama"),
                 base_url=settings.OLLAMA_BASE_URL,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_tokens=512,
+                max_completion_tokens=512,
                 temperature=0.1,
                 extra_body={
                     "options": {
@@ -212,26 +213,30 @@ class LLMRegistry:
             logger.info(
                 "model_not_found_in_registry_creating_dynamic", model_name=model_name, clean_name=clean_model_name
             )
-            api_key = settings.OLLAMA_API_KEY if is_ollama else settings.OPENAI_API_KEY
+            api_key_val = (
+                settings.OLLAMA_API_KEY or "ollama"
+                if is_ollama
+                else settings.OPENAI_API_KEY or "sk-dummy-key-for-init"
+            )
             base_url = settings.OLLAMA_BASE_URL if is_ollama else settings.OPENAI_BASE_URL
 
             extra_kwargs: dict[str, Any] = {}
             if is_ollama:
                 extra_kwargs = {
-                    "max_tokens": 512,
+                    "max_completion_tokens": 512,
                     "temperature": 0.1,
                     "reasoning_effort": "low",
                     "extra_body": {"options": {"num_predict": 512, "num_ctx": 4096}},
                 }
             else:
                 extra_kwargs = {
-                    "max_tokens": settings.MAX_TOKENS,
+                    "max_completion_tokens": settings.MAX_TOKENS,
                     "temperature": settings.DEFAULT_LLM_TEMPERATURE,
                 }
 
             dynamic_llm = ChatOpenAI(
                 model=clean_model_name,
-                api_key=api_key,
+                api_key=SecretStr(api_key_val),
                 base_url=base_url,
                 timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
                 **extra_kwargs,
@@ -483,7 +488,9 @@ class LLMService:
             try:
                 response = await self._call_llm_with_retry(target_llm, messages)
                 return response
-            except OpenAIError as e:
+            except Exception as e:
+                # Any failure of this model is grounds to try the next one in the
+                # fallback ring (retries already happened inside the tenacity call).
                 last_error = e
                 models_tried += 1
 

@@ -30,7 +30,11 @@ from app.schemas.transaction import (
     UpdateBatchAccountRequest,
 )
 from app.schemas.transaction_mapper import transaction_to_dict
-from app.services.transaction_query_service import TransactionQueryService
+from app.services.transaction_query_service import (
+    TransactionQueryParams,
+    TransactionQueryService,
+    TransactionType,
+)
 from app.services.transaction_service import TransactionService
 from app.utils.currency_utils import get_user_display_currency
 
@@ -68,11 +72,6 @@ async def get_transactions(
     Returns:
         Unified format pagination response, containing display fields
     """
-    from app.services.transaction_query_service import (
-        TransactionQueryParams,
-        TransactionType,
-    )
-
     # Build query parameters
     params = TransactionQueryParams(
         date=date,
@@ -286,7 +285,7 @@ async def update_transaction_account(
     result = await service.update_transaction_account(
         transaction_id=transaction_id,
         user_uuid=current_user.uuid,
-        account_id=UUID(request.account_id) if request.account_id else None,
+        account_id=request.account_id,
     )
     return success_response(
         data=result,
@@ -320,8 +319,8 @@ async def update_batch_transactions_account(
     """Batch update transactions account."""
     result = await service.update_batch_transactions_account(
         user_uuid=current_user.uuid,
-        transaction_ids=[UUID(tid) for tid in request.transaction_ids],
-        account_id=UUID(request.account_id) if request.account_id else None,
+        transaction_ids=request.transaction_ids,
+        account_id=request.account_id,
     )
     return success_response(
         data=result,

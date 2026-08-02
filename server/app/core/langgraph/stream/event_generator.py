@@ -127,7 +127,7 @@ class EventGenerator:
         Yields:
             GenUIEvent events
         """
-        msg_chunk, metadata = chunk
+        msg_chunk, _ = chunk
 
         # Skip ToolMessage (handled in updates mode)
         if isinstance(msg_chunk, ToolMessage):
@@ -249,11 +249,16 @@ class EventGenerator:
             if node_name == "direct_execute":
                 result_data = node_output.get("direct_execute_result")
                 if result_data and result_data.get("success"):
+                    # Honor the surface_id the direct_execute node persisted (from
+                    # the client's tool_params); without it, every turn would mint a
+                    # brand-new random surface and in-place component updates break.
+                    client_surface_id = result_data.get("surface_id")
                     async for event in self._emit_component_events(
                         tool_result=result_data.get("data", {}),
                         tool_name=result_data.get("tool_name", ""),
                         session_id=session_id,
                         tool_call_id=None,
+                        surface_id=client_surface_id,
                     ):
                         yield event
                 continue
@@ -294,7 +299,9 @@ class EventGenerator:
                 "langgraph_tool_result_preview",
                 tool_name=tool_name,
                 tool_call_id=tool_call_id,
-                tool_result_preview=json.dumps(_sanitize_tool_result_for_log(tool_result), ensure_ascii=False)[:300],
+                tool_result_preview=json.dumps(
+                    _sanitize_tool_result_for_log(tool_result), ensure_ascii=False, default=str
+                )[:300],
             )
             yield GenUIEvent(
                 type="tool_call_end",
@@ -303,7 +310,7 @@ class EventGenerator:
                     "name": tool_name,
                     "status": "success" if is_success else "error",
                     "duration_ms": duration_ms,
-                    "result": json.dumps(tool_result, indent=2, ensure_ascii=False)
+                    "result": json.dumps(tool_result, indent=2, ensure_ascii=False, default=str)
                     if isinstance(tool_result, dict)
                     else str(tool_result),
                     "error": tool_result.get("error") if isinstance(tool_result, dict) else None,
@@ -346,6 +353,7 @@ class EventGenerator:
         tool_name: str,
         session_id: UUID,
         tool_call_id: str | None,
+        surface_id: str | None = None,
     ) -> AsyncGenerator[GenUIEvent]:
         """Generate UI component events (a2ui_message).
 
@@ -353,6 +361,14 @@ class EventGenerator:
         1. Check if reusable Surface exists for this component type
         2. If reusable: emit UpdateDataModel for changed fields only
         3. If new: emit CreateSurface + UpdateComponents (flat v0.9 format)
+
+        Args:
+            tool_result: Tool execution result (data payload)
+            tool_name: Name of the executed tool
+            session_id: Chat session ID
+            tool_call_id: Tool call ID (used to derive a surface id)
+            surface_id: Optional explicit surface id from the client (direct_execute);
+                when given it is used verbatim instead of deriving a new one.
         """
         from app.core.genui_protocol import (
             CreateSurface,
@@ -407,7 +423,7 @@ class EventGenerator:
             return
 
         # Create new Surface
-        if not tool_call_id:
+        if not tool_call_id and not surface_id:
             logger.warning(
                 "missing_tool_call_id_for_component",
                 tool_name=tool_name,
@@ -415,7 +431,7 @@ class EventGenerator:
             )
             tool_call_id = uuid.uuid4().hex[:8]
 
-        surface_id = f"surface_{session_id}_{tool_call_id}"
+        surface_id = surface_id or f"surface_{session_id}_{tool_call_id}"
 
         logger.info(
             "emitting_genui_component",

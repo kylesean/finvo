@@ -90,10 +90,13 @@ When calling `load_skill`, you MUST set `skill_name` EXACTLY to one of the ID st
 
         for i, msg in enumerate(updated_messages):
             if isinstance(msg, SystemMessage):
-                # Append skills section to existing system message
+                # Append skills section to existing system message. Guard against
+                # re-appending on retries/resumes where the addendum is already
+                # present — each turn's copy is also persisted into the checkpoint.
                 existing_content = msg.content
                 if isinstance(existing_content, str):
-                    updated_messages[i] = SystemMessage(content=existing_content + skills_addendum)
+                    if skills_addendum not in existing_content:
+                        updated_messages[i] = SystemMessage(content=existing_content + skills_addendum)
                 system_found = True
                 break
 

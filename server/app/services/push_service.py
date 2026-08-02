@@ -14,6 +14,7 @@ from uuid import UUID
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import AuthorizationError
 from app.core.logging import logger
 from app.models.notification import Notification
 from app.models.user_device import UserDevice
@@ -70,6 +71,13 @@ class PushService:
         device = result.scalar_one_or_none()
 
         if device:
+            # A device token is a push channel bound to an app install. Reassigning
+            # an ACTIVE registration to another user would let anyone with a leaked
+            # token hijack the original owner's notifications — reject that. Tokens
+            # deactivated by logout (is_active=False) are freely reusable: the same
+            # physical device logging in as a different user is a normal flow.
+            if device.user_uuid != user_uuid and device.is_active:
+                raise AuthorizationError("Device token is already registered to another account")
             device.user_uuid = user_uuid
             device.platform = platform
             device.is_active = True
@@ -87,18 +95,24 @@ class PushService:
         return device
 
     @staticmethod
-    async def unregister_device_token(db: AsyncSession, device_token: str) -> bool:
+    async def unregister_device_token(db: AsyncSession, device_token: str, user_uuid: UUID | None = None) -> bool:
         """Deactivate a device token (e.g. on user logout).
+
+        Only the token's owner may deactivate it: when ``user_uuid`` is provided,
+        tokens registered to another user are left untouched.
 
         Args:
             db: Database session
             device_token: Device token to deactivate
+            user_uuid: Optional owner UUID; when set, ownership is verified
 
         Returns:
-            bool: True if token was found and updated
+            bool: True if token was found (and owned) and updated
         """
-        query = update(UserDevice).where(UserDevice.device_token == device_token).values(is_active=False)
-        result = await db.execute(query)
+        stmt = update(UserDevice).where(UserDevice.device_token == device_token).values(is_active=False)
+        if user_uuid is not None:
+            stmt = stmt.where(UserDevice.user_uuid == user_uuid)
+        result = await db.execute(stmt)
         await db.commit()
         return (getattr(result, "rowcount", 0) or 0) > 0
 

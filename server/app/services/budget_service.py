@@ -108,7 +108,7 @@ class BudgetService:
             period_anchor_day=request.period_anchor_day,
             rollover_enabled=request.rollover_enabled,
             source=source.value if isinstance(source, BudgetSource) else source,
-            ai_confidence=Decimal(str(ai_confidence)) if ai_confidence else None,
+            ai_confidence=Decimal(str(ai_confidence)) if ai_confidence is not None else None,
             status=BudgetStatus.ACTIVE.value,
         )
 
@@ -551,7 +551,7 @@ class BudgetService:
             rollover_enabled=budget.rollover_enabled,
             rollover_balance=str(budget.rollover_balance),
             source=budget.source,
-            ai_confidence=float(budget.ai_confidence) if budget.ai_confidence else None,
+            ai_confidence=float(budget.ai_confidence) if budget.ai_confidence is not None else None,
             status=budget.status,
             spent_amount=str(period.spent_amount),
             remaining_amount=str(period.remaining_amount),
@@ -714,7 +714,11 @@ class BudgetService:
         """Create default settings row if it does not exist.
 
         Called only on write paths (create_budget, update_settings).
-        Uses IntegrityError protection for concurrent first-time creation.
+
+        The insert runs inside a SAVEPOINT (``begin_nested``) so the IntegrityError
+        protection for concurrent first-time creation never rolls back the caller's
+        pending transaction. Nothing is committed here — the caller owns the single
+        commit point (see create_budget), keeping the transaction boundary atomic.
         """
         settings = await self._get_settings(user_uuid)
         if settings:
@@ -722,15 +726,16 @@ class BudgetService:
 
         settings = BudgetSettings(user_uuid=user_uuid)
         try:
-            self.session.add(settings)
-            await self.session.commit()
-            await self.session.refresh(settings)
+            async with self.session.begin_nested():
+                self.session.add(settings)
+                await self.session.flush()
         except IntegrityError:
-            await self.session.rollback()
+            # Concurrent first-time creation: another request inserted the row first.
             existing = await self._get_settings(user_uuid)
             if existing:
                 return existing
             raise
+        await self.session.refresh(settings)
         return settings
 
     async def get_or_create_settings(self, user_uuid: UUID) -> BudgetSettings:

@@ -51,6 +51,7 @@ class CommonErrorCode(_ErrorCode):
     NOT_FOUND = ("NOT_FOUND", 404)
     PERMISSION_DENIED = ("PERMISSION_DENIED", 403)
     CONFLICT = ("CONFLICT", 409)
+    RATE_LIMITED = ("RATE_LIMITED", 429)
 
 
 class AuthErrorCode(_ErrorCode):

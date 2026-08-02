@@ -66,8 +66,10 @@ def _resolve_search_tools(
 
 
 # Whenever a skill grants its allowed tools, the agent must keep orchestrating.
-# load_skill is always preserved so the model can still switch or disengage a skill.
+# load_skill / unload_skill are always preserved so the model can still switch
+# or disengage a skill.
 _LOAD_SKILL_NAME = "load_skill"
+_UNLOAD_SKILL_NAME = "unload_skill"
 
 
 @lru_cache(maxsize=1)
@@ -107,11 +109,13 @@ def _resolve_skill_tools(state: AgentState, base_tools: list[BaseTool]) -> list[
     narrowed = [t for t in base_tools if t.name in allowed]
     injected = [t for t in _privileged_filesystem_tools() if t.name in allowed]
 
-    if not any(t.name == _LOAD_SKILL_NAME for t in narrowed):
-        for t in base_tools:
-            if t.name == _LOAD_SKILL_NAME:
-                narrowed.append(t)
-                break
+    # Keep the skill-orchestration tools available so the model can switch or
+    # unload the active skill (without them, the whitelist would lock the model
+    # into the skill forever).
+    _orchestration_names = {_LOAD_SKILL_NAME, _UNLOAD_SKILL_NAME}
+    for t in base_tools:
+        if t.name in _orchestration_names and not any(x.name == t.name for x in narrowed):
+            narrowed.append(t)
 
     resolved = narrowed + injected
     logger.debug(
@@ -162,16 +166,23 @@ def create_agent_node(
 
                 return {"messages": [AIMessage(content=vision_unsupported_message(current_session_language.get()))]}
 
-        # Extract and consolidate system messages into a single leading SystemMessage
+        # Extract and consolidate system messages into a single leading SystemMessage.
+        # The middleware injects a fresh SystemMessage (dynamic context + skill catalog)
+        # on EVERY turn, and every turn's copy is persisted into the checkpoint — so
+        # only the most recent one is meaningful. Merging all of them would grow the
+        # prompt linearly with turn count (N copies of the date/skill catalog).
         system_contents: list[str] = [system_prompt]
         non_system_messages: list[BaseMessage] = []
+        latest_system_content: str | None = None
 
         for m in messages:
-            if isinstance(m, SystemMessage):
-                if m.content:
-                    system_contents.append(str(m.content))
+            if isinstance(m, SystemMessage) and m.content:
+                latest_system_content = str(m.content)
             else:
                 non_system_messages.append(m)
+
+        if latest_system_content:
+            system_contents.append(latest_system_content)
 
         # Ephemeral multimodal enrichment: build what the MODEL sees without touching
         # state["messages"] (so the checkpoint keeps the compact plain-text user
@@ -270,9 +281,7 @@ def _get_internal_tools() -> dict[str, BaseTool]:
     }
 
 
-def create_direct_execute_node(
-    tools: list[BaseTool],  # Kept for graph-building interface compatibility
-) -> Callable[[AgentState, RunnableConfig], Any]:
+def create_direct_execute_node() -> Callable[[AgentState, RunnableConfig], Any]:
     """Create the direct-execute node.
 
     Used in GenUI scenarios: after the user completes a UI action, skip the
@@ -299,7 +308,9 @@ def create_direct_execute_node(
         if not tool:
             logger.error("direct_execute_tool_not_found", tool_name=tool_name, available=list(internal_tools.keys()))
             return {
-                "messages": [AIMessage(content=f"System error: tool {tool_name} is not registered.")],
+                # Generic, user-safe copy: never surface internal tool-registration
+                # details to the client or persist them into the checkpoint.
+                "messages": [AIMessage(content="This action is not available right now.")],
                 "ui_mode": "idle",
             }
 

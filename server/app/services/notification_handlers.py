@@ -16,6 +16,7 @@ from sqlalchemy import and_, select
 
 from app.core.database import db_manager
 from app.core.events import DomainEvent, event_bus
+from app.core.logging import logger
 
 # =============================================================================
 # Domain Events
@@ -45,7 +46,12 @@ async def _notify_recipients(
             )
 
     if recipient_uuids:
-        await asyncio.gather(*(send_one(u) for u in recipient_uuids))
+        # return_exceptions=True so one recipient's failure (e.g. DB hiccup) does
+        # not cancel the remaining parallel sends; failures are logged below.
+        results = await asyncio.gather(*(send_one(u) for u in recipient_uuids), return_exceptions=True)
+        for uuid_, res in zip(recipient_uuids, results, strict=False):
+            if isinstance(res, Exception):
+                logger.error("recipient_notification_failed", user_uuid=uuid_, error=str(res), exc_info=res)
 
 
 @dataclass(frozen=True, kw_only=True)

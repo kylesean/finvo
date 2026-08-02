@@ -133,9 +133,9 @@ async def _update_account_balances_for_recurring(
 ) -> None:
     """Update linked financial account balances when recurring transaction is automatically confirmed."""
     from app.models.financial_account import FinancialAccount
-    from app.services.exchange_rate_service import ExchangeRateService
+    from app.services.exchange_rate_service import exchange_rate_service
 
-    exchange_rate_svc = ExchangeRateService()
+    exchange_rate_svc = exchange_rate_service
 
     async def _adjust_account_balance(account_id: UUID, is_deduction: bool) -> None:
         account = await db.get(FinancialAccount, account_id)
@@ -148,7 +148,7 @@ async def _update_account_balances_for_recurring(
         else:
             try:
                 converted = await exchange_rate_svc.convert(
-                    amount=float(abs(Decimal(str(amount_original)))),
+                    amount=abs(Decimal(str(amount_original))),
                     from_currency=currency,
                     to_currency=account_currency,
                 )
@@ -257,22 +257,26 @@ async def _create_transaction_from_recurring(
             from app.services.push_service import PushService
 
             desc = recurring_tx.description or ""
-            await PushService.send_notification(
-                db=db,
-                user_uuid=recurring_tx.user_uuid,
-                type_="recurring_pending",
-                title="recurring_pending",
-                content=desc,
-                data={
-                    "action": "recurring_pending",
-                    "transaction_id": str(transaction.id),
-                    "amount": str(amount_original),
-                    "currency": currency,
-                    "category_key": recurring_tx.category_key or "",
-                    "description": desc,
-                    "target_path": "/finance/recurring-transactions",
-                },
-            )
+            # Use a SEPARATE session for the notification: send_notification commits
+            # (and rolls back on error) its session, which must not touch the job's
+            # still-pending transaction insert below.
+            async with get_session_context() as notif_db:
+                await PushService.send_notification(
+                    db=notif_db,
+                    user_uuid=recurring_tx.user_uuid,
+                    type_="recurring_pending",
+                    title="recurring_pending",
+                    content=desc,
+                    data={
+                        "action": "recurring_pending",
+                        "transaction_id": str(transaction.id),
+                        "amount": str(amount_original),
+                        "currency": currency,
+                        "category_key": recurring_tx.category_key or "",
+                        "description": desc,
+                        "target_path": "/finance/recurring-transactions",
+                    },
+                )
         except Exception as e:
             # Non-critical: notification failure should not block transaction creation
             logger.warning(

@@ -328,14 +328,17 @@ _in_flight: dict[str, asyncio.Future[Any]] = {}
 
 
 def _cache_serializable(value: Any) -> str | None:
-    """Return a stable string form of a primitive/UUID argument, else None.
+    """Return a stable, type-tagged string form of a primitive/UUID argument, else None.
 
     UUIDs must be included: silently dropping them would make different users'
     cache keys collide (cross-user data leak). Non-primitives are excluded so
     callers must provide an explicit ``key_builder`` for complex arguments.
+
+    The type tag prevents collisions between values that stringify identically
+    but are semantically different (e.g. int ``1`` vs str ``"1"``).
     """
     if isinstance(value, (str, int, float, bool, type(None), UUID)):
-        return str(value)
+        return f"{type(value).__name__}:{value}"
     return None
 
 

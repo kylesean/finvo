@@ -8,7 +8,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Path, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -16,8 +16,7 @@ from app.core.aliases import CurrentUser
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.core.logging import logger
-from app.core.responses import error_response, get_error_code_int, success_response
-from app.schemas.common import BaseResponse
+from app.core.responses import ResponseEnvelope, error_response, get_error_code_int, success_response
 from app.services.exchange_rate_service import exchange_rate_service
 
 router = APIRouter(prefix="/exchange-rates", tags=["Exchange Rates"])
@@ -50,7 +49,7 @@ class ConversionResponse(BaseModel):
     rate: Decimal = Field(description="Exchange rate used for conversion")
 
 
-@router.get("", response_model=BaseResponse[ExchangeRateResponse])
+@router.get("", response_model=ResponseEnvelope[ExchangeRateResponse])
 async def get_exchange_rates(
     _: CurrentUser,
 ) -> JSONResponse:
@@ -83,10 +82,10 @@ async def get_exchange_rates(
     return success_response(data=data)
 
 
-@router.get("/rate/{currency}", response_model=BaseResponse[dict[str, Any]])
+@router.get("/rate/{currency}", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_single_rate(
-    currency: str,
     _: CurrentUser,
+    currency: str = Path(..., min_length=3, max_length=3, pattern=r"^[A-Za-z]{3}$"),
 ) -> JSONResponse:
     """Get exchange rate for a specific currency.
 
@@ -118,7 +117,7 @@ async def get_single_rate(
     )
 
 
-@router.post("/convert", response_model=BaseResponse[ConversionResponse])
+@router.post("/convert", response_model=ResponseEnvelope[ConversionResponse])
 async def convert_currency(
     request: ConversionRequest,
     _: CurrentUser,
@@ -145,9 +144,20 @@ async def convert_currency(
     )
 
     if converted_amount is None:
+        # Distinguish "provider data unavailable" (server-side, 503) from
+        # "unknown currency code" (client-side, 400) so the error code actually
+        # guides the retry direction.
+        data = await exchange_rate_service.get_cached_rates()
+        if data is None:
+            return error_response(
+                code=get_error_code_int("SERVER_ERROR"),
+                message="Exchange rate data is unavailable, please try again later",
+                data=None,
+                http_status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         return error_response(
             code=get_error_code_int("VALIDATION_ERROR"),
-            message=f"Unable to convert from {request.from_currency} to {request.to_currency}",
+            message=f"Unsupported currency code: {request.from_currency}/{request.to_currency}",
             data=None,
             http_status=status.HTTP_400_BAD_REQUEST,
         )
@@ -169,7 +179,7 @@ async def convert_currency(
     )
 
 
-@router.post("/refresh", response_model=BaseResponse[ExchangeRateResponse])
+@router.post("/refresh", response_model=ResponseEnvelope[ExchangeRateResponse])
 @limiter.limit("1 per minute")
 async def refresh_exchange_rates(
     request: Request,

@@ -231,7 +231,10 @@ def _content_disposition(filename: str, mime_type: str) -> str:
 
 
 @router.get("/stream")
-async def stream_file(token: str = "", db: AsyncSession = Depends(get_session)) -> StreamingResponse:
+async def stream_file(
+    db: DbSession,
+    token: str = "",
+) -> StreamingResponse:
     """Stream a stored file from its signed capability URL.
 
     This is the endpoint referenced by adapter-issued ``get_download_url``

@@ -23,7 +23,6 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_pagination import add_pagination
 from langfuse import Langfuse
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -126,7 +125,27 @@ app.add_middleware(MetricsMiddleware)
 
 # Set up rate limiter exception handler
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]  # Starlette expects Exception, RateLimitExceeded is a subclass
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    """Handle rate limit exceeded errors with the unified response envelope.
+
+    Replaces slowapi's stock handler (which returns a bare ``{"error": ...}``
+    body and is a private API) so 429 responses keep the {code, message, data}
+    format used by every other error path.
+    """
+    logger.warning(
+        "rate_limit_exceeded",
+        path=request.url.path,
+        method=request.method,
+        client_host=request.client.host if request.client else "unknown",
+    )
+    return error_response(
+        code=get_error_code_int("RATE_LIMITED"),
+        message=f"Rate limit exceeded: {exc.detail}",
+        http_status=status.HTTP_429_TOO_MANY_REQUESTS,
+    )
 
 
 # ============================================================================

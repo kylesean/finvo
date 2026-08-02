@@ -33,9 +33,9 @@ class MemoryItem(BaseModel):
 
     id: str = Field(..., description="Memory unique identifier")
     memory: str = Field(..., description="Memory content")
-    score: float | None = Field(None, description="Relevance score (for search results)")
-    metadata: dict[str, Any] | None = Field(None, description="Memory metadata")
-    createdAt: str | None = Field(None, description="Creation timestamp")
+    score: float | None = Field(default=None, description="Relevance score (for search results)")
+    metadata: dict[str, Any] | None = Field(default=None, description="Memory metadata")
+    createdAt: str | None = Field(default=None, description="Creation timestamp")
 
 
 class MemoryListResponse(BaseModel):
@@ -103,8 +103,9 @@ async def list_memories(
         MemoryItem(
             id=mem.get("id", ""),
             memory=mem.get("memory", ""),
+            score=mem.get("score"),
             metadata=mem.get("metadata"),
-            createdAt=mem.get("created_at") or mem.get("metadata", {}).get("timestamp"),
+            createdAt=mem.get("created_at") or (mem.get("metadata") or {}).get("timestamp"),
         )
         for mem in memories
     ]
@@ -154,7 +155,7 @@ async def search_memories(
             memory=mem.get("memory", ""),
             score=mem.get("score"),
             metadata=mem.get("metadata"),
-            createdAt=mem.get("created_at") or mem.get("metadata", {}).get("timestamp"),
+            createdAt=mem.get("created_at") or (mem.get("metadata") or {}).get("timestamp"),
         )
         for mem in memories
     ]
@@ -222,6 +223,7 @@ async def get_memory(
         data=MemoryItem(
             id=memory.get("id", memory_id),
             memory=memory.get("memory", ""),
+            score=memory.get("score"),
             metadata=memory.get("metadata"),
             createdAt=memory.get("created_at") or memory.get("metadata", {}).get("timestamp"),
         )

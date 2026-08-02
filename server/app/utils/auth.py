@@ -88,7 +88,7 @@ def verify_token(token: str) -> str | None:
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
 
-        subject_id: str = payload.get("sub")
+        subject_id: str | None = payload.get("sub")
         if subject_id is None:
             logger.warning("token_missing_subject")
             return None

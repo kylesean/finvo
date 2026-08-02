@@ -2,7 +2,8 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 
 class HighlightRange(BaseModel):
@@ -16,17 +17,10 @@ class HighlightRange(BaseModel):
 class SearchResult(BaseModel):
     """Search result item from conversation search."""
 
-    id: str = Field(..., description="Session ID")
-    title: str = Field(..., description="Session title")
-    snippet: str = Field(..., description="Matching content snippet")
-    message_id: str | None = Field(None, alias="messageId", description="Message ID if applicable")
-    created_at: datetime | None = Field(None, alias="createdAt", description="Creation time")
-    updated_at: datetime | None = Field(None, alias="updatedAt", description="Last update time")
-    highlights: list[HighlightRange] = Field(default_factory=list, description="Highlight ranges")
-
-    model_config = {
-        "populate_by_name": True,
-        "json_schema_extra": {
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        json_schema_extra={
             "example": {
                 "id": "session-uuid",
                 "title": "Conversation about bookkeeping",
@@ -37,4 +31,12 @@ class SearchResult(BaseModel):
                 "highlights": [{"start": 2, "end": 4, "field": "title"}],
             }
         },
-    }
+    )
+
+    id: str = Field(..., description="Session ID")
+    title: str = Field(..., description="Session title")
+    snippet: str = Field(..., description="Matching content snippet")
+    message_id: str | None = Field(None, description="Message ID if applicable")
+    created_at: datetime | None = Field(None, description="Creation time")
+    updated_at: datetime | None = Field(None, description="Last update time")
+    highlights: list[HighlightRange] = Field(default_factory=list, description="Highlight ranges")

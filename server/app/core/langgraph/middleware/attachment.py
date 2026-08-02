@@ -15,6 +15,7 @@ Based on LangChain 1.0 middleware best practices.
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from typing import Any
 from uuid import UUID
@@ -48,7 +49,10 @@ class AttachmentMiddleware(BaseMiddleware):
     Follows LangChain 1.0 middleware best practices.
     """
 
-    name = "AttachmentMiddleware"
+    @property
+    def name(self) -> str:
+        """Middleware name."""
+        return "AttachmentMiddleware"
 
     # Supported document MIME types (Phase 2)
     DOCUMENT_MIME_TYPES = {
@@ -288,7 +292,7 @@ class AttachmentMiddleware(BaseMiddleware):
         """
         file_path = Path(settings.UPLOAD_DIR) / attachment.object_key
 
-        if not file_path.exists():
+        if not await asyncio.to_thread(file_path.exists):
             raise FileNotFoundError(f"Document file not found: {file_path}")
 
         # Plain text and markdown

@@ -139,8 +139,15 @@ class CodeManager:
             success = await sender.send(account, code)
 
             if success:
-                # Store the code
-                await self._store_code(account, code)
+                # Store the code; if the store fails (e.g. Redis unavailable) the
+                # code is unusable — do NOT report success to the user.
+                if not await self._store_code(account, code):
+                    await self._release_rate_limit_lock(account)
+                    logger.error("verification_code_store_failed", type=code_type, account=account)
+                    raise BusinessError(
+                        message="Failed to send verification code",
+                        error_code=AuthErrorCode.SEND_CODE_FAILED,
+                    )
 
                 logger.info(
                     "verification_code_sent",
@@ -227,11 +234,15 @@ class CodeManager:
                 return sender
         return None
 
-    async def _store_code(self, account: str, code: str) -> None:
-        """Store the verification code in Redis."""
+    async def _store_code(self, account: str, code: str) -> bool:
+        """Store the verification code in Redis.
+
+        Returns:
+            bool: True when the code was persisted (verifiable), False otherwise
+        """
         key = self._get_code_key(account)
         # Note: use the ttl parameter, not expire
-        await cache_manager.set(key, code, ttl=self.expire_seconds, serialize=False)
+        return await cache_manager.set(key, code, ttl=self.expire_seconds, serialize=False)
 
     async def _acquire_rate_limit_lock(self, account: str) -> bool:
         """Atomically check and acquire the send rate-limit lock (SETNX)."""

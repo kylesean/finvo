@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,7 @@ from app.schemas.notification import (
     UnregisterDeviceTokenRequest,
 )
 from app.services.notification_service import NotificationService
+from app.services.push_service import PushService
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
@@ -25,8 +26,8 @@ def _service(db: AsyncSession) -> NotificationService:
 async def get_notifications(
     current_user: CurrentUser,
     db: DbSession,
-    page: int = 1,
-    limit: int = 20,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
     unread_only: bool = False,
 ) -> JSONResponse:
     """Get user notifications with pagination."""
@@ -96,8 +97,6 @@ async def register_device_token(
     db: DbSession,
 ) -> JSONResponse:
     """Register or update user FCM device token."""
-    from app.services.push_service import PushService
-
     device = await PushService.register_device_token(
         db=db,
         user_uuid=current_user.uuid,
@@ -114,7 +113,9 @@ async def unregister_device_token(
     db: DbSession,
 ) -> JSONResponse:
     """Unregister device token on logout."""
-    from app.services.push_service import PushService
-
-    success = await PushService.unregister_device_token(db=db, device_token=payload.deviceToken.strip())
+    success = await PushService.unregister_device_token(
+        db=db,
+        device_token=payload.deviceToken.strip(),
+        user_uuid=current_user.uuid,
+    )
     return success_response(data={"message": "Device token unregistered", "success": success})

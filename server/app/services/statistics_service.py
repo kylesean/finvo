@@ -856,6 +856,7 @@ class StatisticsService:
                 and_(
                     Transaction.user_uuid == user_uuid,
                     Transaction.type == "EXPENSE",
+                    Transaction.status == "CLEARED",
                     Transaction.transaction_at >= start_date,
                     Transaction.transaction_at < end_date,
                 )

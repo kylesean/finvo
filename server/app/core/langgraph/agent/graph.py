@@ -68,7 +68,7 @@ def build_agent_graph(
     # _resolve_skill_tools, so registering the superset here does not expose the
     # filesystem tools to skill-less turns.
     workflow.add_node("tools", ToolNode(tools + filesystem_tools))
-    workflow.add_node("direct_execute", create_direct_execute_node(tools))  # type: ignore[call-overload]
+    workflow.add_node("direct_execute", create_direct_execute_node())  # type: ignore[call-overload]
 
     # Add edges
     # 1. Entry conditional edge: Check if direct execution is needed
@@ -91,7 +91,7 @@ def build_agent_graph(
 
     logger.info(
         "agent_graph_built",
-        node_count=4,
+        node_count=len(workflow.nodes),
         has_checkpointer=checkpointer is not None,
         name=name,
     )

@@ -346,8 +346,6 @@ async def chat_stream(
                 # Update long-term memory in background (fire-and-forget)
                 # IMPORTANT: Don't await here to avoid blocking HTTP response
                 if user_message and session.user_uuid:
-                    import asyncio
-
                     ai_response = agent.get_last_response()
                     memory_messages = [
                         {"role": "user", "content": user_message},
@@ -706,7 +704,7 @@ async def resume_session(
                 yield f"data: {json.dumps(event.model_dump(mode='json', exclude_none=True), ensure_ascii=False)}\n\n"
         except Exception as e:
             logger.error("resume_stream_error", error=str(e), exc_info=True)
-            error_event = GenUIEvent(type="error", content=str(e))
+            error_event = GenUIEvent(type="error", content=to_client_error(e))
             yield f"data: {json.dumps(error_event.model_dump(mode='json'), ensure_ascii=False)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")

@@ -28,7 +28,10 @@ class DynamicContextMiddleware(BaseMiddleware):
     and natural adaptation to user input.
     """
 
-    name = "DynamicContextMiddleware"
+    @property
+    def name(self) -> str:
+        """Middleware name."""
+        return "DynamicContextMiddleware"
 
     async def before_invoke(
         self,

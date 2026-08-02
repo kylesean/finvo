@@ -41,7 +41,10 @@ class LongTermMemoryMiddleware(BaseMiddleware):
         - Mandatory memory retrieval for specific scenarios
     """
 
-    name = "LongTermMemoryMiddleware"
+    @property
+    def name(self) -> str:
+        """Middleware name."""
+        return "LongTermMemoryMiddleware"
 
     def __init__(
         self,

@@ -14,7 +14,6 @@ from typing import Any
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy.exc import IntegrityError
 
 from app.core.aliases import CurrentUser, DbSession
 from app.core.exceptions import BusinessError, StorageErrorCode
@@ -50,18 +49,35 @@ class StorageConfigUpdate(BaseModel):
 
 
 class StorageConfigResponse(BaseModel):
-    """Response schema for storage config."""
+    """Response schema for storage config (matches the on-wire camelCase keys)."""
 
     id: int
-    provider_type: str
+    providerType: str
     name: str
-    base_path: str
+    basePath: str
     credentials: dict[str, Any]  # Masked credentials
-    is_readonly: bool
-    created_at: str
-    updated_at: str
+    isReadonly: bool
+    createdAt: str
+    updatedAt: str | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+def _config_to_dict(config: Any, service: StorageConfigService) -> dict[str, Any]:
+    """Build the camelCase response dict for a storage config (credentials masked).
+
+    Single construction site — the shape used to be copy-pasted in 4 routes.
+    """
+    return {
+        "id": config.id,
+        "providerType": config.provider_type,
+        "name": config.name,
+        "basePath": config.base_path,
+        "credentials": service.mask_credentials(config),
+        "isReadonly": config.is_readonly,
+        "createdAt": config.created_at.isoformat().replace("+00:00", "Z"),
+        "updatedAt": config.updated_at.isoformat().replace("+00:00", "Z") if config.updated_at else None,
+    }
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=ResponseEnvelope[dict[str, Any]])
@@ -98,16 +114,7 @@ async def create_storage_config(
         raise BusinessError(message=str(e), status_code=400, error_code=StorageErrorCode.INVALID_PROVIDER_TYPE)
 
     return success_response(
-        data={
-            "id": config.id,
-            "providerType": config.provider_type,
-            "name": config.name,
-            "basePath": config.base_path,
-            "credentials": service.mask_credentials(config),
-            "isReadonly": config.is_readonly,
-            "createdAt": config.created_at.isoformat().replace("+00:00", "Z"),
-            "updatedAt": config.updated_at.isoformat().replace("+00:00", "Z") if config.updated_at else None,
-        },
+        data=_config_to_dict(config, service),
         message="Storage configuration created successfully",
     )
 
@@ -131,21 +138,7 @@ async def list_storage_configs(
     service = StorageConfigService(db)
     configs = await service.get_user_configs(user_uuid=current_user.uuid, provider_type=provider_type)
 
-    return success_response(
-        data=[
-            {
-                "id": c.id,
-                "providerType": c.provider_type,
-                "name": c.name,
-                "basePath": c.base_path,
-                "credentials": service.mask_credentials(c),
-                "isReadonly": c.is_readonly,
-                "createdAt": c.created_at.isoformat().replace("+00:00", "Z"),
-                "updatedAt": c.updated_at.isoformat().replace("+00:00", "Z") if c.updated_at else None,
-            }
-            for c in configs
-        ]
-    )
+    return success_response(data=[_config_to_dict(c, service) for c in configs])
 
 
 @router.get("/{config_id}", response_model=ResponseEnvelope[dict[str, Any]])
@@ -174,18 +167,7 @@ async def get_storage_config(
             error_code=StorageErrorCode.CONFIG_NOT_FOUND,
         )
 
-    return success_response(
-        data={
-            "id": config.id,
-            "providerType": config.provider_type,
-            "name": config.name,
-            "basePath": config.base_path,
-            "credentials": service.mask_credentials(config),
-            "isReadonly": config.is_readonly,
-            "createdAt": config.created_at.isoformat().replace("+00:00", "Z"),
-            "updatedAt": config.updated_at.isoformat().replace("+00:00", "Z") if config.updated_at else None,
-        }
-    )
+    return success_response(data=_config_to_dict(config, service))
 
 
 @router.patch("/{config_id}", response_model=ResponseEnvelope[dict[str, Any]])
@@ -224,16 +206,7 @@ async def update_storage_config(
         )
 
     return success_response(
-        data={
-            "id": config.id,
-            "providerType": config.provider_type,
-            "name": config.name,
-            "basePath": config.base_path,
-            "credentials": service.mask_credentials(config),
-            "isReadonly": config.is_readonly,
-            "createdAt": config.created_at.isoformat().replace("+00:00", "Z"),
-            "updatedAt": config.updated_at.isoformat().replace("+00:00", "Z") if config.updated_at else None,
-        },
+        data=_config_to_dict(config, service),
         message="Storage configuration updated successfully",
     )
 
@@ -258,15 +231,8 @@ async def delete_storage_config(
     """
     service = StorageConfigService(db)
 
-    try:
-        deleted = await service.delete(config_id, current_user.uuid)
-    except IntegrityError:
-        await db.rollback()
-        raise BusinessError(
-            message="Cannot delete: storage config is still in use by attachments",
-            status_code=400,
-            error_code=StorageErrorCode.CONFIG_IN_USE,
-        ) from None
+    # In-use (FK) violations are translated into a BusinessError inside the service.
+    deleted = await service.delete(config_id, current_user.uuid)
 
     if not deleted:
         raise BusinessError(

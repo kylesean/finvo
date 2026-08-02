@@ -20,7 +20,12 @@ def _merge_skills(left: list[str] | None, right: list[str] | None) -> list[str]:
 
 
 def _take_last_skill(left: str | None, right: str | None) -> str | None:
-    """Reducer for active_skill: take the last updated skill name (or right if non-none)."""
+    """Reducer for active_skill: take the last updated skill name (or right if non-none).
+
+    LangGraph treats a ``None`` channel update as "no update", so ``unload_skill``
+    uses the empty string as the explicit "clear" marker: it is stored verbatim and
+    ``_resolve_skill_tools`` treats any falsy ``active_skill`` as "no active skill".
+    """
     if right is not None:
         return right
     return left
@@ -60,16 +65,3 @@ class AgentState(TypedDict):
 
     # Currently active skill (using reducer to safely handle concurrent updates in a single step)
     active_skill: Annotated[str | None, _take_last_skill]
-
-
-def create_initial_state() -> AgentState:
-    """Create initial state object."""
-    return {
-        "messages": [],
-        "ui_mode": "idle",
-        "tool_name": None,
-        "tool_params": None,
-        "direct_execute_result": None,
-        "skills_loaded": [],
-        "active_skill": None,
-    }

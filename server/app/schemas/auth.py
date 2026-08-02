@@ -29,8 +29,8 @@ class Token(BaseModel):
 
 
 def _validate_email(email: str) -> bool:
-    """Validate email format."""
-    return "@" in email and "." in email.split("@")[-1]
+    """Validate email format (local@domain.tld)."""
+    return bool(re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email))
 
 
 def _validate_mobile(mobile: str) -> bool:
@@ -114,10 +114,6 @@ class RegisterRequest(BaseModel):
             raise ValueError("Account cannot be empty")
         return v.strip()
 
-    # Commented out for development testing
-    # @field_validator("code")
-    # @classmethod
-    # def validate_code_numeric(cls, v: str) -> str:
     @model_validator(mode="after")
     def validate_account_format(self) -> "RegisterRequest":
         """Validate account format based on type."""
@@ -151,20 +147,11 @@ class LoginRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_account_format(self) -> "LoginRequest":
-        """Validate account format based on type.
-
-        Returns:
-            LoginRequest: The validated instance
-
-        Raises:
-            ValueError: If account format doesn't match type
-        """
-        if self.type == "email":
-            if "@" not in self.account or "." not in self.account.split("@")[-1]:
-                raise ValueError("Invalid email format")
-        elif self.type == "mobile":
-            if not re.match(r"^1[3-9]\d{9}$", self.account):
-                raise ValueError("Invalid mobile number format")
+        """Validate account format based on type (reuses the shared helpers)."""
+        if self.type == "email" and not _validate_email(self.account):
+            raise ValueError("Invalid email format")
+        if self.type == "mobile" and not _validate_mobile(self.account):
+            raise ValueError("Invalid mobile number format")
         return self
 
 

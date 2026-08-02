@@ -342,11 +342,11 @@ class UploadService:
         if guessed_type:
             mime_type = guessed_type
 
-        # 3. Compress image if requested
+        # 3. Compress image if requested (flag reflects whether compression actually
+        #    succeeded — a failure returns the original bytes untouched)
         compressed = False
         if compress and extension.lower() in COMPRESSIBLE_FORMATS:
-            content, _ = await run_in_threadpool(self._compress_image, content, extension)
-            compressed = True
+            content, compressed = await run_in_threadpool(self._compress_image, content, extension)
 
         # 4. Compute file hash
         file_hash = hashlib.sha256(content).hexdigest()
@@ -562,8 +562,14 @@ class UploadService:
         unique_suffix = uuid.uuid4().hex[:12]
         return f"{date_path}/{upload_id}_{unique_suffix}.{extension}"
 
-    def _compress_image(self, content: bytes, extension: str) -> tuple[bytes, int]:
-        """Compress image bytes synchronously."""
+    def _compress_image(self, content: bytes, extension: str) -> tuple[bytes, bool]:
+        """Compress image bytes synchronously.
+
+        Returns:
+            Tuple of (content, was_compressed): on any failure the ORIGINAL bytes
+            are returned with ``was_compressed=False`` so callers can report the
+            result accurately instead of claiming compression that did not happen.
+        """
         try:
             image: Image.Image = Image.open(io.BytesIO(content))
             original_width, original_height = image.size
@@ -597,8 +603,8 @@ class UploadService:
 
             image.save(buffer, format=save_format, **save_kwargs)
             compressed = buffer.getvalue()
-            return compressed, len(compressed)
+            return compressed, True
 
         except Exception as e:
             logger.warning("compression_failed", error=str(e))
-            return content, len(content)
+            return content, False

@@ -94,5 +94,38 @@ You have loaded the **{skill.name}** skill. Follow the instructions above for th
     )
 
 
+@tool
+def unload_skill(
+    tool_call_id: Annotated[str, InjectedToolCallId],
+) -> Command[str]:
+    """Leave the currently loaded skill and restore the full toolset.
+
+    Call this tool when the user asks to stop using the loaded skill, switch to
+    general-purpose assistance, or the skill is no longer relevant to the task.
+
+    Args:
+        tool_call_id: Injected by LangGraph runtime, do not provide manually
+
+    Returns:
+        Command that clears the active skill, lifting the tool whitelist
+    """
+    logger.info("skill_unloaded")
+
+    # LangGraph skips channel updates whose value is None ("no update"), so the
+    # empty string is the explicit "clear" marker: `_take_last_skill` stores it
+    # verbatim and `_resolve_skill_tools` treats falsy active_skill as no skill.
+    return Command(
+        update={
+            "messages": [
+                ToolMessage(
+                    content="Skill unloaded. The full toolset is available again.",
+                    tool_call_id=tool_call_id,
+                )
+            ],
+            "active_skill": "",
+        }
+    )
+
+
 # Export as list for easy registration
-skill_tools = [load_skill]
+skill_tools = [load_skill, unload_skill]

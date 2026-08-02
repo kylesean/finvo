@@ -89,7 +89,9 @@ class TransactionRepository(BaseRepository[Transaction]):
             conditions.append(Transaction.category_key.in_(keys))
 
         if tags:
-            for tag in (t.strip() for t in tags.split(",")):
+            # Drop empty segments (e.g. trailing commas in "a,b,") — an empty tag
+            # would otherwise produce a meaningless contains([""]) condition.
+            for tag in (t.strip() for t in tags.split(",") if t.strip()):
                 conditions.append(Transaction.tags.contains([tag]))
 
         if start_date is not None:
@@ -101,4 +103,4 @@ class TransactionRepository(BaseRepository[Transaction]):
         if transaction_type:
             conditions.append(Transaction.type == transaction_type.upper())
 
-        return select(Transaction).where(and_(True, *conditions)).order_by(desc(Transaction.transaction_at))
+        return select(Transaction).where(and_(*conditions)).order_by(desc(Transaction.transaction_at))

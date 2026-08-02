@@ -532,8 +532,9 @@ class MemoryService:
         for mem in selected:
             memory_text = mem.get("memory", "")
             if memory_text:
-                # Include score if available for debugging
-                score = mem.get("score", 0)
+                # Include score if available for debugging (mem0 may return None
+                # when a result misses its relevance threshold).
+                score = mem.get("score") or 0
                 if score > 0:
                     lines.append(f"* {memory_text} (relevance: {score:.2f})")
                 else:

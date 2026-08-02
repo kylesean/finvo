@@ -455,6 +455,8 @@ class TransactionCRUDService:
         display_currency = await get_user_display_currency(self.db, user_uuid)
         original_currency = (transaction.currency or display_currency).upper()
         display_amount = float(transaction.amount_original)
+        tx_at = transaction.transaction_at
+        updated_at = transaction.updated_at
 
         return {
             "success": True,
@@ -468,8 +470,8 @@ class TransactionCRUDService:
             "category_key": transaction.category_key,
             "raw_input": transaction.raw_input,
             "tags": transaction.tags or [],
-            "transaction_at": transaction.transaction_at.isoformat() if transaction.transaction_at else None,
-            "updated_at": transaction.updated_at.isoformat() if transaction.updated_at else None,
+            "transaction_at": tx_at.isoformat() if tx_at else None,
+            "updated_at": updated_at.isoformat() if updated_at else None,
             # KEY: This flag tells frontend to use DataModelUpdate instead of creating new surface
             "_intent": "update",
             "_changed_fields": changed_fields,

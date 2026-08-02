@@ -3,7 +3,7 @@
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from app.core.aliases import CurrentUser
@@ -26,8 +26,8 @@ router = APIRouter(prefix="/shared-spaces", tags=["shared-spaces"])
 async def get_shared_spaces(
     current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
-    page: int = 1,
-    limit: int = 20,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
 ) -> JSONResponse:
     """Get user's shared spaces.
 
@@ -195,8 +195,8 @@ async def get_space_transactions(
     space_id: UUID,
     current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
-    page: int = 1,
-    limit: int = 20,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
 ) -> JSONResponse:
     """Get transactions in the space."""
     transactions = await service.get_space_transactions(

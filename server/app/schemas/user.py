@@ -7,6 +7,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.models.financial_settings import BurnRateMode
 from app.schemas.transaction import TransactionDisplayValue
 
 # =============================================================================
@@ -273,7 +274,7 @@ class FinancialSafetyLineResponse(BaseModel):
     """
 
     safetyBalanceThreshold: str
-    updatedAt: str
+    updatedAt: str | None = None
 
 
 # =============================================================================
@@ -363,7 +364,7 @@ class UserSettingsResponse(BaseModel):
     estimatedAvgDailySpending: str
     safetyBalanceThreshold: str
     createdAt: str
-    updatedAt: str
+    updatedAt: str | None = None
 
 
 # =============================================================================
@@ -391,7 +392,7 @@ class UserInfoResponse(BaseModel):
     username: str
     avatarUrl: str | None = None
     createdAt: str
-    updatedAt: str
+    updatedAt: str | None = None
     clientLastLoginAt: str | None = None
 
 
@@ -433,7 +434,7 @@ class FinancialSettingsResponseSchema(BaseModel):
 
     safetyThreshold: str
     dailyBurnRate: str
-    burnRateMode: Literal["MANUAL", "AI_AUTO"] = "AI_AUTO"
+    burnRateMode: BurnRateMode = BurnRateMode.AI_AUTO
     primaryCurrency: str = "USD"
     monthStartDay: int = 1
     updatedAt: str | None = None
@@ -447,7 +448,7 @@ class UpdateFinancialSettingsRequest(BaseModel):
 
     safetyThreshold: str | None = Field(None, description="Minimum safe balance threshold")
     dailyBurnRate: str | None = Field(None, description="Daily spending estimate")
-    burnRateMode: Literal["MANUAL", "AI_AUTO"] | None = Field(None, description="Burn rate mode")
+    burnRateMode: BurnRateMode | None = Field(None, description="Burn rate mode")
     primaryCurrency: str | None = Field(None, max_length=3, description="Primary currency code")
     monthStartDay: int | None = Field(None, ge=1, le=31, description="Month start day")
 

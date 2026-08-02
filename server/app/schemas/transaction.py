@@ -3,6 +3,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Any, Literal
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -77,14 +78,14 @@ class TransactionDisplayValue(BaseModel):
 class UpdateAccountRequest(BaseModel):
     """Request schema to update a transaction's associated account."""
 
-    account_id: str | None = Field(None, description="Associated account ID; pass null to disassociate")
+    account_id: UUID | None = Field(None, description="Associated account ID; pass null to disassociate")
 
 
 class UpdateBatchAccountRequest(BaseModel):
     """Request schema to batch update transactions' associated account."""
 
-    transaction_ids: list[str] = Field(..., description="List of transaction IDs")
-    account_id: str | None = Field(..., description="Associated account ID")
+    transaction_ids: list[UUID] = Field(..., min_length=1, description="List of transaction IDs")
+    account_id: UUID | None = Field(..., description="Associated account ID")
 
 
 class CreateTransactionItem(BaseModel):
@@ -468,13 +469,6 @@ class CashFlowForecastResponse(BaseModel):
     dailyBreakdown: list[ForecastDayBreakdown]
     warnings: list[ForecastWarning]
     summary: ForecastSummary
-
-
-class PaginatedTransactionResponse(BaseModel):
-    """paginated transaction response"""
-
-    data: list[TransactionResponse]
-    meta: dict[str, Any]
 
 
 class TransactionFeedResponse(BaseModel):

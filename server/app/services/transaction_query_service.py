@@ -239,9 +239,12 @@ class TransactionQueryService:
             # Build base query conditions
             conditions = [Transaction.user_uuid == UUID(user_uuid)]
 
-            # Keyword search: match description, location, category_key, and tags
-            if params.keyword:
-                keyword_pattern = f"%{params.keyword.strip()}%"
+            # Keyword search: match description, location, category_key, and tags.
+            # A whitespace-only keyword would otherwise strip to an empty pattern
+            # ("%%") that matches every row.
+            keyword = params.keyword.strip() if params.keyword else ""
+            if keyword:
+                keyword_pattern = f"%{keyword}%"
                 conditions.append(
                     type_cast(
                         Any,

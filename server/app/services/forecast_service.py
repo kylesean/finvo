@@ -710,7 +710,7 @@ class ForecastService:
 
         scenario = {
             "date": purchase_date.isoformat(),
-            "amount": -abs(float(amount)),  # Ensure it's negative (expense)
+            "amount": -abs(amount),  # Ensure it's negative (expense); keep Decimal precision
             "description": description,
         }
 

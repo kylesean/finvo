@@ -13,9 +13,10 @@ middleware is not installed here).
 
 from __future__ import annotations
 
+import asyncio
 import base64
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 import aiofiles
@@ -79,7 +80,7 @@ def build_multimodal_content(
 async def _read_image_as_base64(object_key: str) -> str:
     """Read an image file from disk and encode it as base64."""
     file_path = Path(settings.UPLOAD_DIR) / object_key
-    if not file_path.exists():
+    if not await asyncio.to_thread(file_path.exists):
         raise FileNotFoundError(f"Image file not found: {file_path}")
     async with aiofiles.open(file_path, "rb") as f:
         data = await f.read()
@@ -151,9 +152,15 @@ async def load_image_parts(
     if not attachment_ids:
         return []
 
-    async with get_session_context() as session:
+    try:
         uuids = [UUID(aid) for aid in attachment_ids]
-        # NB: cast() is typing.cast (runtime no-op) — matches the rest of the code.
+    except ValueError:
+        # Stored id references should always be valid UUIDs; a corrupt reference
+        # must not crash the whole turn — degrade to "no images" instead.
+        logger.warning("invalid_attachment_id_reference", attachment_ids=attachment_ids)
+        return []
+
+    async with get_session_context() as session:
         conditions: list[Any] = [Attachment.id.in_(uuids)]
         if user_uuid:
             conditions.append(Attachment.user_uuid == user_uuid)

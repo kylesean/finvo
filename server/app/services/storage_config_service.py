@@ -10,8 +10,10 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import asc, desc, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import BusinessError, StorageErrorCode
 from app.core.logging import logger
 from app.models.storage_config import ProviderType, StorageConfig
 from app.utils.encryption import credential_encryption
@@ -235,13 +237,26 @@ class StorageConfigService:
 
         Returns:
             True if deleted, False if not found
+
+        Raises:
+            BusinessError: If attachments still reference this config
         """
         config = await self.get_by_id(config_id, user_uuid)
         if not config:
             return False
 
-        await self.db.delete(config)
-        await self.db.commit()
+        try:
+            await self.db.delete(config)
+            await self.db.commit()
+        except IntegrityError:
+            # FK constraint from attachments: roll back and translate into a
+            # business error (keeps session handling inside the service layer).
+            await self.db.rollback()
+            raise BusinessError(
+                message="Cannot delete: storage config is still in use by attachments",
+                status_code=400,
+                error_code=StorageErrorCode.CONFIG_IN_USE,
+            ) from None
 
         logger.info("storage_config_deleted", config_id=config_id, user_uuid=user_uuid)
 

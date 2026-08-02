@@ -31,16 +31,22 @@ class ExchangeRateService:
         self._cache_key = settings.EXCHANGE_RATE_CACHE_KEY
         self._cache_ttl = settings.EXCHANGE_RATE_CACHE_TTL
         self._client: httpx.AsyncClient | None = None
+        # Cache-refresh lock guards update_cache against thundering herd.
         self._lock = asyncio.Lock()
+        # Client-init lock is SEPARATE: get_client runs while update_cache holds
+        # self._lock (fetch_exchange_rates → get_client), and asyncio.Lock is not
+        # reentrant — sharing one lock would deadlock on the first cold start.
+        self._client_lock = asyncio.Lock()
 
     async def get_client(self) -> httpx.AsyncClient:
         """Get or initialize shared HTTP client instance.
 
-        Uses the existing asyncio lock with double-checked locking so two concurrent
-        callers can't both create (and leak) a new AsyncClient when _client is None.
+        Uses a dedicated lock (distinct from the cache-refresh lock) with
+        double-checked locking so two concurrent callers can't both create (and
+        leak) a new AsyncClient when _client is None.
         """
         if self._client is None or self._client.is_closed:
-            async with self._lock:
+            async with self._client_lock:
                 if self._client is None or self._client.is_closed:
                     self._client = httpx.AsyncClient(timeout=30.0)
         return self._client

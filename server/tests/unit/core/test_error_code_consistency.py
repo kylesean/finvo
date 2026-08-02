@@ -77,7 +77,7 @@ class TestErrorCodeConsistency:
         # Range table: (low, high, domain_label). Verified non-overlapping.
         ranges = [
             (0, 0, "success"),
-            (400, 409, "http-aligned generic"),
+            (400, 429, "http-aligned generic"),
             (500, 599, "server"),
             (999, 999, "validation"),
             (1000, 1012, "auth"),

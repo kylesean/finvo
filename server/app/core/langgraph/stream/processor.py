@@ -12,10 +12,11 @@ Design Principles:
 - Open/Closed Principle: Extensible behavior via custom policies
 """
 
-import asyncio
 from collections.abc import AsyncGenerator
 from typing import Any
 from uuid import UUID
+
+from langgraph.errors import GraphRecursionError
 
 from app.core.exceptions import to_client_error
 from app.core.langgraph.stream.event_generator import EventGenerator
@@ -120,6 +121,11 @@ class StreamProcessor:
                 ):
                     yield event
 
+        except GraphRecursionError:
+            # Re-raise so callers (simple_agent) can translate this into a
+            # user-friendly "too many attempts" message. Previously this was
+            # swallowed by the generic handler below, leaving that branch dead.
+            raise
         except Exception as e:
             logger.error(
                 "stream_processor_error",
@@ -127,16 +133,19 @@ class StreamProcessor:
                 error=str(e),
                 exc_info=True,
             )
-            # Send error event to client (internal details stay in the log)
+            # Terminal error: emit the error event and STOP — do NOT flush
+            # buffered component events or send a completion "done" event after
+            # a failure, which would make the client treat the turn as finished.
             yield GenUIEvent(
                 type="error",
                 content=f"Stream processing error: {to_client_error(e)}",
             )
+            return
 
         finally:
             # Non-yield cleanup only: yielding here would raise RuntimeError when
             # the client disconnects mid-stream (GeneratorExit during yield).
-            if user_uuid and session_id:
+            if user_uuid:
                 from app.core.background_tasks import spawn_background_task
 
                 spawn_background_task(
@@ -154,8 +163,7 @@ class StreamProcessor:
                 buffered_events=len(event_buffer),
             )
 
-        # Flush buffered events and emit completion (normal or error path).
-        # Kept outside `finally` so disconnects don't raise mid-yield.
+        # Normal completion path only: flush buffered events and emit completion.
         for event in event_buffer:
             yield event
         yield GenUIEvent(type="done")

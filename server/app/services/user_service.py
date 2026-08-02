@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any, cast as type_cast
 from uuid import UUID
@@ -15,7 +15,7 @@ from app.core.exceptions import NotFoundError
 from app.core.logging import logger
 from app.models.base import utc_now
 from app.models.financial_account import FinancialAccount
-from app.models.financial_settings import FinancialSettings
+from app.models.financial_settings import BurnRateMode, FinancialSettings
 from app.models.transaction import RecurringTransaction
 from app.models.user import User
 from app.models.user_settings import UserSettings
@@ -42,9 +42,10 @@ def _format_decimal(value: Decimal, precision: int = 8) -> str:
 
 
 def _format_iso_datetime(dt: datetime | None) -> str | None:
-    """Format a datetime to ISO 8601 string with Z suffix.
+    """Format a datetime to ISO 8601 UTC string with Z suffix.
 
-    Ensures consistent formatting by replacing timezone offset with Z suffix.
+    Normalizes any timezone offset to UTC first so a non-UTC aware datetime
+    (e.g. ``+08:00``) is never silently relabeled as UTC.
 
     Args:
         dt: The datetime to format (may be None or timezone-aware)
@@ -54,16 +55,9 @@ def _format_iso_datetime(dt: datetime | None) -> str | None:
     """
     if dt is None:
         return None
-    # Convert to ISO format and replace timezone info with Z
-    iso_str = dt.isoformat()
-    # Remove any existing timezone info and append Z
-    if "+" in iso_str:
-        iso_str = iso_str.split("+")[0] + "Z"
-    elif iso_str.endswith("Z"):
-        pass  # Already has Z suffix
-    else:
-        iso_str += "Z"
-    return iso_str
+    if dt.tzinfo is not None:
+        dt = dt.astimezone(UTC)
+    return dt.isoformat().replace("+00:00", "Z")
 
 
 class UserService:
@@ -170,7 +164,7 @@ class UserService:
             "avatarUrl": user.avatar_url,
             "createdAt": _format_iso_datetime(type_cast(datetime | None, user.created_at)),
             "updatedAt": _format_iso_datetime(type_cast(datetime | None, user.updated_at)),
-            "lastLoginAt": _format_iso_datetime(type_cast(datetime | None, user.last_login_at)),
+            "clientLastLoginAt": _format_iso_datetime(type_cast(datetime | None, user.last_login_at)),
         }
 
     async def save_financial_accounts(self, user_uuid: UUID, accounts: list[dict[str, Any]]) -> dict[str, Any]:
@@ -706,7 +700,7 @@ class UserService:
         user_uuid: UUID,
         safety_threshold: str | None = None,
         daily_burn_rate: str | None = None,
-        burn_rate_mode: str | None = None,
+        burn_rate_mode: BurnRateMode | str | None = None,
         primary_currency: str | None = None,
         month_start_day: int | None = None,
     ) -> FinancialSettings:
@@ -740,7 +734,7 @@ class UserService:
                 user_uuid=user_uuid,
                 safety_threshold=Decimal(safety_threshold) if safety_threshold else Decimal("1000.00"),
                 daily_burn_rate=Decimal(daily_burn_rate) if daily_burn_rate else Decimal("100.00"),
-                burn_rate_mode=burn_rate_mode or "AI_AUTO",
+                burn_rate_mode=BurnRateMode(burn_rate_mode) if burn_rate_mode else BurnRateMode.AI_AUTO,
                 primary_currency=primary_currency or PROJECT_DEFAULT_CURRENCY,
                 month_start_day=month_start_day or 1,
                 updated_at=now,
@@ -754,7 +748,7 @@ class UserService:
             if daily_burn_rate is not None:
                 settings.daily_burn_rate = Decimal(daily_burn_rate)
             if burn_rate_mode is not None:
-                settings.burn_rate_mode = burn_rate_mode
+                settings.burn_rate_mode = BurnRateMode(burn_rate_mode)
             if primary_currency is not None:
                 settings.primary_currency = primary_currency
             if month_start_day is not None:
@@ -805,11 +799,18 @@ class UserService:
             return
 
         recalculated = 0
+        # Two-phase: first convert ALL amounts (network-bound), then apply. If any
+        # conversion fails (e.g. the exchange-rate provider is unreachable), raise
+        # BEFORE mutating any row so no partially-recalculated state is left behind.
+        conversions: list[tuple[Transaction, Decimal, Decimal]] = []
         for tx in transactions:
             original_currency = (tx.currency or new_base_currency).upper()
             base_amount, new_rate = await convert_to_user_base(
                 tx.amount_original, original_currency, new_base_currency
             )
+            conversions.append((tx, base_amount, new_rate))
+
+        for tx, base_amount, new_rate in conversions:
             tx.amount = base_amount.quantize(Decimal("0.00000001"))
             tx.exchange_rate = new_rate.quantize(Decimal("0.00000001"))
             recalculated += 1

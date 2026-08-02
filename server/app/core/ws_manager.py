@@ -10,11 +10,10 @@ import asyncio
 from typing import Any
 from uuid import UUID
 
-import structlog
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-logger = structlog.get_logger(__name__)
+from app.core.logging import logger
 
 
 class ConnectionManager:
@@ -78,11 +77,9 @@ class ConnectionManager:
 
     async def broadcast(self, user_uuids: list[str], data: dict[str, Any]) -> int:
         """Push a notification to multiple users. Returns count of successful sends."""
-        sent = 0
-        for uid in user_uuids:
-            if await self.send_notification(uid, data):
-                sent += 1
-        return sent
+        # send_notification never raises (it catches internally), so gather is safe.
+        results = await asyncio.gather(*(self.send_notification(uid, data) for uid in user_uuids))
+        return sum(1 for ok in results if ok)
 
     @property
     def active_count(self) -> int:
