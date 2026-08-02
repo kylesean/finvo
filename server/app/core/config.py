@@ -159,7 +159,13 @@ class Settings(BaseSettings):
     # LLM Configuration
     DEFAULT_LLM_MODEL: str = "gpt-5.6-luna"
     DEFAULT_LLM_TEMPERATURE: float = 0.2
-    MAX_TOKENS: int = 2000
+    MAX_TOKENS: int = 2000  # LLM output generation cap (per response)
+    # Dedicated budget for trimming conversation history fed to the model.
+    # Must be independent of MAX_TOKENS (output cap) — a 2000-token history is
+    # far too small for tool-calling turns whose ToolMessages (e.g. forecast
+    # JSON) alone can exceed it, which previously caused `trim_messages` to
+    # return an empty list and strip ALL context from the model's turn.
+    MAX_HISTORY_TOKENS: int = 24000
     MAX_LLM_CALL_RETRIES: int = 3
     # Per-request timeout for LLM upstream HTTP calls (connect+read). Prevents a
     # dead upstream from hanging requests for minutes. Each model call within a
