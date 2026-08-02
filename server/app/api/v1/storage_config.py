@@ -11,18 +11,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_session
-from app.core.dependencies import get_current_user
+from app.core.aliases import CurrentUser, DbSession
 from app.core.exceptions import BusinessError, StorageErrorCode
 from app.core.responses import ResponseEnvelope, success_response
 from app.models.storage_config import ProviderType
-from app.models.user import User
 from app.services.storage_config_service import StorageConfigService
 
 router = APIRouter(prefix="/storage-configs", tags=["storage-configs"])
@@ -70,8 +67,8 @@ class StorageConfigResponse(BaseModel):
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=ResponseEnvelope[dict[str, Any]])
 async def create_storage_config(
     data: StorageConfigCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Create a new storage configuration.
 
@@ -117,9 +114,9 @@ async def create_storage_config(
 
 @router.get("", response_model=ResponseEnvelope[list[dict[str, Any]]])
 async def list_storage_configs(
+    current_user: CurrentUser,
+    db: DbSession,
     provider_type: str | None = None,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     """List all storage configurations for the user.
 
@@ -154,8 +151,8 @@ async def list_storage_configs(
 @router.get("/{config_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_storage_config(
     config_id: int,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Get a specific storage configuration.
 
@@ -195,8 +192,8 @@ async def get_storage_config(
 async def update_storage_config(
     config_id: int,
     data: StorageConfigUpdate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Update a storage configuration.
 
@@ -244,8 +241,8 @@ async def update_storage_config(
 @router.delete("/{config_id}", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_storage_config(
     config_id: int,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Delete a storage configuration.
 

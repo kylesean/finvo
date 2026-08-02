@@ -16,15 +16,13 @@ Usage:
         return await service.get_transaction_feed(...)
 """
 
-from typing import TYPE_CHECKING, Annotated, Any
+from typing import TYPE_CHECKING
 
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.aliases import DbSession
 
-from app.core.database import get_session
-
-# Type alias for injected database session
-DbSession = Annotated[AsyncSession, Depends(get_session)]
+# Re-export DbSession so existing ``from app.core.service_deps import DbSession``
+# imports keep working; the canonical definition lives in app.core.aliases.
+__all__ = ["DbSession"]
 
 
 # ============================================================================

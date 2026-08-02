@@ -19,10 +19,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
 from sqlalchemy import desc, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
-from app.core.database import get_session
 from app.core.dependencies import get_current_user, get_redis_client, revoke_token
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.limiter import limiter
@@ -50,8 +49,8 @@ __all__ = ["get_current_user"]
 
 async def get_authorized_session(
     session_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> Session:
     """Get session with ownership verification.
 
@@ -113,7 +112,7 @@ def _build_user_info(user: User) -> UserInfo:
 async def send_code(
     request: Request,
     data: SendCodeRequest,
-    db: Annotated[AsyncSession, Depends(get_session)],
+    db: DbSession,
 ) -> JSONResponse:
     """Send verification code to email or mobile.
 
@@ -150,7 +149,7 @@ async def send_code(
 async def register(
     request: Request,
     data: RegisterRequest,
-    db: Annotated[AsyncSession, Depends(get_session)],
+    db: DbSession,
 ) -> JSONResponse:
     """Register a new user.
 
@@ -205,7 +204,7 @@ async def register(
 async def login(
     request: Request,
     data: LoginRequest,
-    db: Annotated[AsyncSession, Depends(get_session)],
+    db: DbSession,
 ) -> JSONResponse:
     """User login.
 
@@ -251,8 +250,8 @@ async def login(
 
 @router.post("/session", response_model=ResponseEnvelope[dict[str, Any]])
 async def create_session(
-    user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Create a new chat session for the authenticated user.
 
@@ -294,8 +293,8 @@ async def create_session(
 @router.patch("/session/{session_id}/name", response_model=ResponseEnvelope[dict[str, Any]])
 async def update_session_name(
     session_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    current_user: CurrentUser,
+    db: DbSession,
     name: str = Form(...),
 ) -> JSONResponse:
     """Update a session's name.
@@ -341,8 +340,8 @@ async def update_session_name(
 @router.delete("/session/{session_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_session(
     session_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Delete a session for the authenticated user.
 
@@ -421,8 +420,8 @@ async def logout(
 
 @router.get("/sessions", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_user_sessions(
-    user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser,
+    db: DbSession,
     params: Annotated[Params, Depends()],
 ) -> JSONResponse:
     """Get paginated session list for the authenticated user.

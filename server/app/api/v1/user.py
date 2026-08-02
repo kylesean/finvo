@@ -6,12 +6,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Path
 from fastapi.responses import JSONResponse
 
-from app.core.dependencies import get_current_user
+from app.core.aliases import CurrentUser
 from app.core.exceptions import NotFoundError
 from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_user_service
-from app.models.user import User
 from app.schemas.user import (
     CreateFinancialAccountRequest,
     FinancialAccountResponse,
@@ -35,7 +34,7 @@ router = APIRouter(prefix="/user", tags=["user"])
 
 @router.get("", response_model=ResponseEnvelope[UserInfoResponse])
 async def get_current_user_info(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
 ) -> JSONResponse:
     """Get current user information.
 
@@ -64,7 +63,7 @@ async def get_current_user_info(
 @router.patch("", response_model=ResponseEnvelope[UserInfoResponse])
 async def update_user_profile(
     request: UpdateUserProfileRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update current user's profile.
@@ -87,7 +86,7 @@ async def update_user_profile(
 @router.post("/financial-accounts", response_model=ResponseEnvelope[SaveFinancialAccountsResponse])
 async def save_financial_accounts(
     request: SaveFinancialAccountsRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Save or update user's financial accounts.
@@ -114,7 +113,7 @@ async def save_financial_accounts(
 
 @router.get("/financial-accounts", response_model=ResponseEnvelope[FinancialAccountsResponse])
 async def get_financial_accounts(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Get user's financial accounts.
@@ -158,7 +157,7 @@ async def get_financial_accounts(
 @router.post("/financial-accounts/create", response_model=ResponseEnvelope[FinancialAccountResponse])
 async def create_financial_account(
     request: CreateFinancialAccountRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Create a single financial account.
@@ -194,7 +193,7 @@ async def create_financial_account(
 async def update_financial_account(
     account_id: Annotated[UUID, Path(description="Account ID (UUID)")],
     request: UpdateFinancialAccountRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update a financial account.
@@ -235,7 +234,7 @@ async def update_financial_account(
 @router.delete("/financial-accounts/{account_id}")
 async def delete_financial_account(
     account_id: Annotated[UUID, Path(description="Account ID (UUID)")],
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Delete a financial account.
@@ -259,7 +258,7 @@ async def delete_financial_account(
 @router.patch("/financial-settings", response_model=ResponseEnvelope[FinancialSafetyLineResponse])
 async def update_financial_safety_line(
     request: FinancialSafetyLineRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update user's financial safety line threshold.
@@ -285,7 +284,7 @@ async def update_financial_safety_line(
 
 @router.get("/onboarding/status", response_model=ResponseEnvelope[OnboardingStatusResponse])
 async def check_onboarding_status(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Check if user has completed onboarding.
@@ -310,7 +309,7 @@ async def check_onboarding_status(
 @router.put("/settings", response_model=ResponseEnvelope[UserSettingsResponse])
 async def update_user_settings(
     request: UserSettingsRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> JSONResponse:
     """Update user settings.

@@ -6,10 +6,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
-from app.core.dependencies import get_current_user
+from app.core.aliases import CurrentUser
 from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_shared_space_service
-from app.models.user import User
 from app.schemas.shared_space import (
     AddTransactionToSpaceRequest,
     CreateSpaceRequest,
@@ -25,10 +24,10 @@ router = APIRouter(prefix="/shared-spaces", tags=["shared-spaces"])
 
 @router.get("", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_shared_spaces(
+    current_user: CurrentUser,
+    service: SharedSpaceService = Depends(get_shared_space_service),
     page: int = 1,
     limit: int = 20,
-    current_user: User = Depends(get_current_user),
-    service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Get user's shared spaces.
 
@@ -41,7 +40,7 @@ async def get_shared_spaces(
 @router.post("", response_model=ResponseEnvelope[dict[str, Any]])
 async def create_shared_space(
     request: CreateSpaceRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Create a new shared space.
@@ -62,7 +61,7 @@ async def create_shared_space(
 @router.get("/{space_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_shared_space_detail(
     space_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Get shared space details.
@@ -77,7 +76,7 @@ async def get_shared_space_detail(
 async def update_shared_space(
     space_id: UUID,
     request: UpdateSpaceRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Update shared space info.
@@ -97,7 +96,7 @@ async def update_shared_space(
 @router.delete("/{space_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_shared_space(
     space_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Delete a shared space.
@@ -111,9 +110,9 @@ async def delete_shared_space(
 @router.post("/{space_id}/invite-code", response_model=ResponseEnvelope[dict[str, Any]])
 async def generate_invite_code(
     space_id: UUID,
-    request: GenerateInviteCodeRequest | None = None,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
+    request: GenerateInviteCodeRequest | None = None,
 ) -> JSONResponse:
     """Generate an invite code.
 
@@ -131,7 +130,7 @@ async def generate_invite_code(
 @router.post("/join-with-code", response_model=ResponseEnvelope[dict[str, Any]])
 async def join_space_with_code(
     request: JoinWithCodeRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Joins a shared space using an invite code."""
@@ -142,7 +141,7 @@ async def join_space_with_code(
 @router.post("/{space_id}/leave", response_model=ResponseEnvelope[dict[str, Any]])
 async def leave_space(
     space_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Leave a shared space."""
@@ -154,7 +153,7 @@ async def leave_space(
 async def remove_member(
     space_id: UUID,
     user_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Remove a member from the space (only for administrators/creators)."""
@@ -167,7 +166,7 @@ async def update_member_role(
     space_id: UUID,
     user_id: UUID,
     request: UpdateMemberRoleRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Update a member's role (owner only)."""
@@ -183,7 +182,7 @@ async def update_member_role(
 @router.get("/{space_id}/settlement", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_space_settlement(
     space_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Get settlement info for the space."""
@@ -194,10 +193,10 @@ async def get_space_settlement(
 @router.get("/{space_id}/transactions", response_model=ResponseEnvelope[list[dict[str, Any]]])
 async def get_space_transactions(
     space_id: UUID,
+    current_user: CurrentUser,
+    service: SharedSpaceService = Depends(get_shared_space_service),
     page: int = 1,
     limit: int = 20,
-    current_user: User = Depends(get_current_user),
-    service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Get transactions in the space."""
     transactions = await service.get_space_transactions(
@@ -213,7 +212,7 @@ async def get_space_transactions(
 async def add_transaction_to_space(
     space_id: UUID,
     request: AddTransactionToSpaceRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
 ) -> JSONResponse:
     """Add a transaction to the space."""

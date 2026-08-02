@@ -10,15 +10,13 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
-from app.core.dependencies import get_current_user
+from app.core.aliases import CurrentUser
 from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_statistics_service
-from app.models.user import User
 from app.services.statistics_service import StatisticsService
 
 router = APIRouter(prefix="/home", tags=["home"])
 
-CurrentUser = Annotated[User, Depends(get_current_user)]
 StatsService = Annotated[StatisticsService, Depends(get_statistics_service)]
 
 

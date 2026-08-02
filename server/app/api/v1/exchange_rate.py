@@ -8,12 +8,12 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from app.core.aliases import CurrentUser
 from app.core.config import settings
-from app.core.dependencies import get_current_user
 from app.core.limiter import limiter
 from app.core.logging import logger
 from app.core.responses import error_response, get_error_code_int, success_response
@@ -52,7 +52,7 @@ class ConversionResponse(BaseModel):
 
 @router.get("", response_model=BaseResponse[ExchangeRateResponse])
 async def get_exchange_rates(
-    _: Any = Depends(get_current_user),
+    _: CurrentUser,
 ) -> JSONResponse:
     """Get cached exchange rates.
 
@@ -86,7 +86,7 @@ async def get_exchange_rates(
 @router.get("/rate/{currency}", response_model=BaseResponse[dict[str, Any]])
 async def get_single_rate(
     currency: str,
-    _: Any = Depends(get_current_user),
+    _: CurrentUser,
 ) -> JSONResponse:
     """Get exchange rate for a specific currency.
 
@@ -121,7 +121,7 @@ async def get_single_rate(
 @router.post("/convert", response_model=BaseResponse[ConversionResponse])
 async def convert_currency(
     request: ConversionRequest,
-    _: Any = Depends(get_current_user),
+    _: CurrentUser,
 ) -> JSONResponse:
     """Convert amount between currencies.
 
@@ -173,7 +173,7 @@ async def convert_currency(
 @limiter.limit("1 per minute")
 async def refresh_exchange_rates(
     request: Request,
-    _: Any = Depends(get_current_user),
+    _: CurrentUser,
 ) -> JSONResponse:
     """Manually refresh exchange rates.
 

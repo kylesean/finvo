@@ -475,3 +475,20 @@ class PaginatedTransactionResponse(BaseModel):
 
     data: list[TransactionResponse]
     meta: dict[str, Any]
+
+
+class TransactionFeedResponse(BaseModel):
+    """Paginated transaction feed returned by ``GET /transactions``.
+
+    Matches the existing on-wire shape (``items`` + pagination fields) so the
+    response_model can be typed without a client-breaking change.
+    """
+
+    items: list[TransactionResponse]
+    page: int
+    size: int
+    total: int
+    pages: int
+    has_more: bool = Field(serialization_alias="hasMore")
+
+    model_config = ConfigDict(populate_by_name=True)

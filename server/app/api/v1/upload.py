@@ -20,14 +20,13 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
 from app.core.database import get_session
-from app.core.dependencies import get_current_user
 from app.core.exceptions import BusinessError
 from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, success_response
 from app.models.storage_config import StorageConfig
-from app.models.user import User
 from app.services.storage.adapters.factory import StorageAdapterFactory
 from app.services.upload_service import (
     ALLOWED_EXTENSIONS,
@@ -91,6 +90,8 @@ class UploadResponse(BaseModel):
 
 @router.post("/upload", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[UploadResponse])
 async def upload_files(
+    current_user: CurrentUser,
+    db: DbSession,
     files: list[UploadFile] = File(
         ...,
         alias="files[]",
@@ -98,8 +99,6 @@ async def upload_files(
     ),
     compress: bool = Query(default=True, description="Whether to compress images (jpg/jpeg/png/webp only)"),
     thread_id: UUID | None = Query(default=None, alias="threadId", description="Associated session thread ID"),
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     """Upload one or more files.
 
@@ -286,8 +285,8 @@ async def stream_file(token: str = "", db: AsyncSession = Depends(get_session)) 
 @router.get("/view/{attachment_id}", response_class=FileResponse)
 async def view_attachment(
     attachment_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> Response:
     """View or download attachment file.
 
@@ -383,8 +382,8 @@ async def view_attachment(
 @router.delete("/{attachment_id}", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_file(
     attachment_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Delete file.
 

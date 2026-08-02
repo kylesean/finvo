@@ -1,13 +1,11 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_session
-from app.core.dependencies import get_current_user
+from app.core.aliases import CurrentUser, DbSession
 from app.core.responses import ResponseEnvelope, success_response
-from app.models.user import User
 from app.schemas.notification import (
     NotificationListResponse,
     RegisterDeviceTokenRequest,
@@ -25,11 +23,11 @@ def _service(db: AsyncSession) -> NotificationService:
 
 @router.get("", response_model=ResponseEnvelope[NotificationListResponse])
 async def get_notifications(
+    current_user: CurrentUser,
+    db: DbSession,
     page: int = 1,
     limit: int = 20,
     unread_only: bool = False,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     """Get user notifications with pagination."""
     service = _service(db)
@@ -51,8 +49,8 @@ async def get_notifications(
 
 @router.get("/unread-count", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_unread_count(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Get unread notifications count."""
     count = await _service(db).get_unread_count(current_user.uuid)
@@ -62,8 +60,8 @@ async def get_unread_count(
 @router.patch("/{notification_id}/read", response_model=ResponseEnvelope[dict[str, Any]])
 async def mark_as_read(
     notification_id: int,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Mark notification as read."""
     await _service(db).mark_as_read(notification_id, current_user.uuid)
@@ -72,8 +70,8 @@ async def mark_as_read(
 
 @router.patch("/mark-all-read", response_model=ResponseEnvelope[dict[str, Any]])
 async def mark_all_read(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Mark all notifications as read."""
     await _service(db).mark_all_read(current_user.uuid)
@@ -83,8 +81,8 @@ async def mark_all_read(
 @router.delete("/{notification_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_notification(
     notification_id: int,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Delete a notification."""
     await _service(db).delete(notification_id, current_user.uuid)
@@ -94,8 +92,8 @@ async def delete_notification(
 @router.post("/device-token", response_model=ResponseEnvelope[dict[str, Any]])
 async def register_device_token(
     payload: RegisterDeviceTokenRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Register or update user FCM device token."""
     from app.services.push_service import PushService
@@ -112,8 +110,8 @@ async def register_device_token(
 @router.delete("/device-token", response_model=ResponseEnvelope[dict[str, Any]])
 async def unregister_device_token(
     payload: UnregisterDeviceTokenRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Unregister device token on logout."""
     from app.services.push_service import PushService

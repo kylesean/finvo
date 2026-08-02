@@ -4,10 +4,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
-from app.core.dependencies import get_current_user
+from app.core.aliases import CurrentUser
 from app.core.responses import ResponseEnvelope
 from app.core.service_deps import get_statistics_service
-from app.models.user import User
 from app.schemas.statistics import (
     CashFlowResponse,
     CategoryBreakdownResponse,
@@ -24,7 +23,6 @@ router = APIRouter(prefix="/statistics", tags=["statistics"])
 # Shared query params (time_range/start_date/end_date/account_types/tz_offset)
 # injected via Depends(); parse account_types via params.account_types_list.
 StatsParams = Annotated[StatisticsQueryParams, Depends()]
-CurrentUser = Annotated[User, Depends(get_current_user)]
 StatsService = Annotated[StatisticsService, Depends(get_statistics_service)]
 
 

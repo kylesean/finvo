@@ -7,12 +7,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
-from app.core.dependencies import get_current_user
+from app.core.aliases import CurrentUser
 from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError, ValidationError
 from app.core.responses import success_response
 from app.core.service_deps import get_budget_service
 from app.models.budget import BudgetScope, BudgetStatus
-from app.models.user import User
 from app.schemas.budget import (
     BudgetCreateRequest,
     BudgetRebalanceRequest,
@@ -36,7 +35,7 @@ router = APIRouter(prefix="/budgets", tags=["Budget"])
 @router.post("", response_model=BudgetResponse, status_code=status.HTTP_201_CREATED)
 async def create_budget(
     request: BudgetCreateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Create a new budget.
@@ -79,10 +78,10 @@ async def create_budget(
 
 @router.get("", response_model=list[BudgetResponse])
 async def get_budgets(
+    current_user: CurrentUser,
+    service: BudgetService = Depends(get_budget_service),
     scope: str | None = None,
     status_filter: str | None = None,
-    current_user: User = Depends(get_current_user),
-    service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get all budgets for the current user."""
     try:
@@ -102,9 +101,9 @@ async def get_budgets(
 
 @router.get("/summary", response_model=BudgetSummaryResponse)
 async def get_budget_summary(
-    include_paused: bool = False,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
+    include_paused: bool = False,
 ) -> JSONResponse:
     """Get budget summary with budgets and alerts."""
     return success_response(data=await service.get_budget_summary(current_user.uuid, include_paused=include_paused))
@@ -112,7 +111,7 @@ async def get_budget_summary(
 
 @router.get("/suggestions", response_model=list[BudgetSuggestion])
 async def get_budget_suggestions(
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get AI-generated budget suggestions based on historical spending."""
@@ -134,7 +133,7 @@ async def get_budget_suggestions(
 @router.get("/{budget_id}", response_model=BudgetResponse)
 async def get_budget(
     budget_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get a specific budget by ID."""
@@ -152,7 +151,7 @@ async def get_budget(
 async def update_budget(
     budget_id: UUID,
     request: BudgetUpdateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Update a budget."""
@@ -169,7 +168,7 @@ async def update_budget(
 @router.delete("/{budget_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_budget(
     budget_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
 ) -> None:
     """Delete a budget."""
@@ -186,7 +185,7 @@ async def delete_budget(
 @router.post("/rebalance", status_code=status.HTTP_200_OK)
 async def rebalance_budgets(
     request: BudgetRebalanceRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Rebalance amount between two budgets."""
@@ -220,7 +219,7 @@ async def rebalance_budgets(
 
 @router.get("/settings/me", response_model=BudgetSettingsResponse)
 async def get_budget_settings(
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Get current user's budget settings."""
@@ -238,7 +237,7 @@ async def get_budget_settings(
 @router.put("/settings/me", response_model=BudgetSettingsResponse)
 async def update_budget_settings(
     request: BudgetSettingsUpdateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
     service: BudgetService = Depends(get_budget_service),
 ) -> JSONResponse:
     """Update current user's budget settings."""

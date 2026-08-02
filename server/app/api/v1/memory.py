@@ -10,15 +10,14 @@ Provides user-facing APIs for managing long-term memories:
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Path, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from app.core.dependencies import get_current_user
+from app.core.aliases import CurrentUser
 from app.core.exceptions import NotFoundError
 from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, success_response
-from app.models.user import User
 from app.services.memory import get_memory_service
 
 router = APIRouter(prefix="/memory", tags=["memory"])
@@ -82,7 +81,7 @@ class DeleteAllMemoriesResponse(BaseModel):
 
 @router.get("", response_model=ResponseEnvelope[MemoryListResponse])
 async def list_memories(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     limit: int = Query(50, ge=1, le=200, description="Maximum memories to return"),
 ) -> JSONResponse:
     """Get all memories for the current user.
@@ -126,7 +125,7 @@ async def list_memories(
 
 @router.get("/search", response_model=ResponseEnvelope[MemorySearchResponse])
 async def search_memories(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
     q: str = Query(..., min_length=1, max_length=500, description="Search query"),
     limit: int = Query(10, ge=1, le=50, description="Maximum results to return"),
 ) -> JSONResponse:
@@ -178,7 +177,7 @@ async def search_memories(
 
 @router.get("/stats", response_model=ResponseEnvelope[MemoryStatsResponse])
 async def get_memory_stats(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
 ) -> JSONResponse:
     """Get memory statistics for the current user.
 
@@ -199,7 +198,7 @@ async def get_memory_stats(
 @router.get("/{memory_id}", response_model=ResponseEnvelope[MemoryItem])
 async def get_memory(
     memory_id: Annotated[str, Path(description="Memory ID")],
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
 ) -> JSONResponse:
     """Get a specific memory by ID.
 
@@ -232,7 +231,7 @@ async def get_memory(
 @router.delete("/{memory_id}", response_model=ResponseEnvelope[DeleteMemoryResponse])
 async def delete_memory(
     memory_id: Annotated[str, Path(description="Memory ID")],
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
 ) -> JSONResponse:
     """Delete a specific memory.
 
@@ -270,7 +269,7 @@ async def delete_memory(
 
 @router.delete("", response_model=ResponseEnvelope[DeleteAllMemoriesResponse])
 async def delete_all_memories(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: CurrentUser,
 ) -> JSONResponse:
     """Delete all memories for the current user.
 

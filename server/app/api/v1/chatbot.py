@@ -16,19 +16,15 @@ from uuid import UUID, uuid4
 
 from fastapi import (
     APIRouter,
-    Depends,
     Query,
     Request,
 )
 from fastapi.responses import JSONResponse, StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.auth import (
-    get_authorized_session,
-    get_current_user,
-)
+from app.api.v1.auth import get_authorized_session
+from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
-from app.core.database import get_session, get_session_context
+from app.core.database import get_session_context
 from app.core.exceptions import AppException, CommonErrorCode, to_client_error
 from app.core.langgraph.simple_agent import SimpleLangChainAgent as LangGraphAgent
 from app.core.limiter import limiter
@@ -151,7 +147,7 @@ async def resolve_chat_session(
 async def chat(
     request: Request,
     chat_request: ChatRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
 ) -> ChatResponse:
     """Process a chat request using LangGraph.
 
@@ -207,7 +203,7 @@ async def chat(
 async def chat_stream(
     request: Request,
     chat_request: ChatRequestWithAttachments,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
 ) -> StreamingResponse:
     """Process a chat request with streaming response.
 
@@ -385,8 +381,8 @@ async def update_session_state(
     request: Request,
     session_id: UUID,
     updates: dict[str, Any],
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Update session state directly.
 
@@ -460,8 +456,8 @@ async def update_session_state(
 async def get_session_messages(
     request: Request,
     session_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Get detailed messages for a session including tool calls and UI components.
 
@@ -515,8 +511,8 @@ async def get_session_messages(
 async def clear_session_messages(
     request: Request,
     session_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Clear all messages for a session.
 
@@ -565,8 +561,8 @@ async def clear_session_messages(
 async def cancel_last_turn(
     request: Request,
     session_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Cancel the last turn and remove incomplete messages from checkpoint.
 
@@ -620,8 +616,8 @@ async def cancel_last_turn(
 async def get_resume_status(
     request: Request,
     session_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> JSONResponse:
     """Check if the session has an uncompleted execution that can be resumed.
 
@@ -680,8 +676,8 @@ async def get_resume_status(
 async def resume_session(
     request: Request,
     session_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
+    current_user: CurrentUser,
+    db: DbSession,
 ) -> StreamingResponse:
     """Resume uncompleted session execution from checkpoint.
 
@@ -720,9 +716,9 @@ async def resume_session(
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["messages"][0])
 async def search_conversations(
     request: Request,
+    current_user: CurrentUser,
     q: str = Query(..., min_length=1, description="Search query"),
     limit: int = Query(20, ge=1, le=50, description="Maximum results to return"),
-    current_user: User = Depends(get_current_user),
 ) -> JSONResponse:
     """Search user's conversation history.
 
