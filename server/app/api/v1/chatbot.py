@@ -120,7 +120,7 @@ async def resolve_chat_session(
         NotFoundError: If session not found
         AuthorizationError: If access denied
     """
-    async with get_session_context() as db:
+    async with get_session_context(auto_commit=True) as db:
         if session_id:
             # Existing session - verify ownership
             session = await get_authorized_session(session_id, current_user, db)
@@ -131,11 +131,10 @@ async def resolve_chat_session(
             )
             return session, False
         else:
-            # Create new session
+            # Create new session; the context manager owns the commit
             new_uuid = uuid4()
             repo = SessionRepository(db)
             session = await repo.create(new_uuid, current_user.uuid, name="New Chat")
-            await db.commit()
             logger.info(
                 "created_new_session",
                 session_id=new_uuid,
@@ -301,10 +300,9 @@ async def chat_stream(
                 title = None
 
             if title:
-                async with get_session_context() as db:
+                async with get_session_context(auto_commit=True) as db:
                     repo = SessionRepository(db)
                     await repo.update_name(session.id, title)
-                    await db.commit()
                 logger.info("session_title_set", session_id=session.id, title=title)
 
         agent = get_agent()

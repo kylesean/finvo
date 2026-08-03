@@ -135,3 +135,49 @@ async def test_delete_transaction(db_session):
     query = select(Transaction).where(Transaction.id == tx_id)
     db_result = await db_session.execute(query)
     assert db_result.scalar_one_or_none() is None
+
+
+@pytest.mark.asyncio
+async def test_update_transaction_amount_original_is_float(db_session):
+    """Regression: update result must serialize amountOriginal as a JSON number.
+
+    TransactionDetailResponse (detail endpoint) once emitted amount_original as
+    a str (crud_service str() of the Decimal) while the update result emitted
+    float — the same field, two contracts. Lock the update path to float.
+    """
+    # 1. Setup User + Transaction (CNY base == fallback, no rate network call)
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid, username="test_user_4", email="test4@example.com", password="hash", registration_type="email"
+    )
+    db_session.add(user)
+
+    tx_id = uuid4()
+    tx = Transaction(
+        id=tx_id,
+        user_uuid=user_uuid,
+        type="EXPENSE",
+        amount=Decimal("50.0"),
+        amount_original=Decimal("50.0"),
+        currency="CNY",
+        transaction_at=datetime.now(UTC),
+        status="CLEARED",
+    )
+    db_session.add(tx)
+    await db_session.commit()
+
+    # 2. Update via service (serializes by alias)
+    service = TransactionService(db_session)
+    result = await service.update_transaction(
+        transaction_id=tx_id,
+        user_uuid=user_uuid,
+        amount=Decimal("200"),
+    )
+
+    # 3. Assert
+    # Note: TransactionUpdateResult keeps the snake_case key `amount_original`
+    # (deliberate GenUI DataModelUpdate contract); the wire TYPE must still be
+    # a JSON number, matching the detail/list endpoints.
+    assert result["amount_original"] == 200.0
+    assert isinstance(result["amount_original"], float), f"got {result['amount_original']!r}"
+    assert result["amount"] == 200.0

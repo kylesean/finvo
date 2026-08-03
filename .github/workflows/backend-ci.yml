@@ -253,7 +253,7 @@ jobs:
 
       - name: Check model vs migration drift (alembic check)
         # Currently a warning: known drift items (model-level FK gaps, field-level
-        # type/nullability diffs) are tracked as P1/P2 in server/docs/CODE_REVIEW_OPTIMIZATION.md.
+        # type/nullability diffs) are tracked as P1/P2 in server/docs/CODE_REVIEW_OPTIMIZATION.md (alembic env fix landed 2026-08; drift items re-verified).
         # Convert to a hard failure once those are resolved.
         env:
           DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/Finvo_test # pragma: allowlist secret
@@ -278,6 +278,7 @@ jobs:
             --cov-report=xml \
             --cov-report=html \
             --cov-report=term-missing \
+            --cov-fail-under=50 \
             -v \
             --tb=short \
             -x

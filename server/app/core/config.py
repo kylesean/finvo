@@ -233,7 +233,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = Field(default="change-this-secret-key-in-production")
     JWT_ALGORITHM: str = "HS256"
     # 7-day lifetime limits the damage window of a leaked token. Revocation
-    # (jti-based blacklist) is tracked as P1/M7 in CODE_REVIEW_OPTIMIZATION.md.
+    # (jti-based blacklist) is tracked as P1/M7 in docs/CODE_REVIEW_OPTIMIZATION.md.
     JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 7
 
     # Base Directory
@@ -312,6 +312,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_LOGIN: str = "20 per minute"
     RATE_LIMIT_REGISTER: str = "10 per hour"
     RATE_LIMIT_SEND_CODE: str = "10 per minute"
+    RATE_LIMIT_SESSION: str = "30 per minute"
 
     # Set to True only when running behind a trusted reverse proxy that strips
     # untrusted X-Forwarded-For headers. Enables rate limiting / IP logging to
@@ -331,6 +332,7 @@ class Settings(BaseSettings):
             "chat": [self.RATE_LIMIT_CHAT],
             "chat_stream": [self.RATE_LIMIT_CHAT_STREAM],
             "messages": [self.RATE_LIMIT_MESSAGES],
+            "session": [self.RATE_LIMIT_SESSION],
         }
 
     # Verification Code Settings

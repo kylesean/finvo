@@ -75,7 +75,7 @@ class RegisterRequest(BaseModel):
     Attributes:
         type: Account type ('email' or 'mobile')
         account: Email address or mobile number
-        password: User's password (6-20 characters)
+        password: User's password (8-20 characters, must contain letters and digits)
         code: 6-digit verification code
         timezone: User's timezone (default: Asia/Shanghai)
     """
@@ -97,7 +97,13 @@ class RegisterRequest(BaseModel):
 
     type: Literal["email", "mobile"] = Field(..., description="Account type", examples=["email"])
     account: str = Field(..., description="Email address or mobile number", examples=["user@example.com"])
-    password: str = Field(..., min_length=6, max_length=20, description="User's password", examples=["password123"])
+    password: str = Field(
+        ...,
+        min_length=8,
+        max_length=20,
+        description="User's password (8-20 chars, letters + digits)",
+        examples=["password123"],
+    )
     code: str = Field(default="", description="Verification code (Optional in current dev mode)", examples=["123456"])
     timezone: str = Field(default="Asia/Shanghai", description="User's timezone", examples=["Asia/Shanghai"])
     locale: str | None = Field(
@@ -113,6 +119,16 @@ class RegisterRequest(BaseModel):
         if not v or not v.strip():
             raise ValueError("Account cannot be empty")
         return v.strip()
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """Validate password composition (letters + digits), matching the client rule."""
+        if not re.search(r"[a-zA-Z]", v):
+            raise ValueError("Password must contain at least one letter")
+        if not re.search(r"[0-9]", v):
+            raise ValueError("Password must contain at least one number")
+        return v
 
     @model_validator(mode="after")
     def validate_account_format(self) -> "RegisterRequest":
@@ -189,3 +205,15 @@ class AuthResponse(BaseModel):
 
     token: str = Field(..., description="JWT authentication token")
     user: UserInfo = Field(..., description="User information")
+
+
+class UpdateSessionNameRequest(BaseModel):
+    """Request model for renaming a chat session.
+
+    Attributes:
+        name: The new session name
+    """
+
+    model_config = ConfigDict(json_schema_extra={"examples": [{"name": "Trip to Tokyo"}]})
+
+    name: str = Field(..., min_length=1, max_length=100, description="The new session name")

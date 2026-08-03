@@ -13,7 +13,7 @@ import uuid
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi_pagination import Params
@@ -22,15 +22,23 @@ from sqlalchemy import desc, select
 
 from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
+from app.core.database import get_session_context
 from app.core.dependencies import get_current_user, get_redis_client, revoke_token
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.limiter import limiter
 from app.core.logging import bind_context, logger
-from app.core.responses import ResponseEnvelope, success_response
+from app.core.responses import ResponseEnvelope, pagination_payload, success_response
 from app.models.session import Session
 from app.models.user import User
 from app.repositories.session_repository import SessionRepository
-from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, SendCodeRequest, UserInfo
+from app.schemas.auth import (
+    AuthResponse,
+    LoginRequest,
+    RegisterRequest,
+    SendCodeRequest,
+    UpdateSessionNameRequest,
+    UserInfo,
+)
 from app.services.auth_service import AuthService
 from app.utils.auth_utils import create_access_token
 from app.utils.sanitization import sanitize_string
@@ -249,27 +257,30 @@ async def login(
 
 
 @router.post("/session", response_model=ResponseEnvelope[dict[str, Any]])
+@limiter.limit(settings.RATE_LIMIT_ENDPOINTS["session"][0])
 async def create_session(
+    request: Request,
     user: CurrentUser,
-    db: DbSession,
 ) -> JSONResponse:
     """Create a new chat session for the authenticated user.
 
     Args:
+        request: FastAPI request object (used by the rate limiter)
         user: The authenticated user
-        db: Database session
 
     Returns:
         Unified response with session data
     """
     try:
-        # Generate a unique session ID
-        session_id = uuid.uuid4()
+        # Single-statement write; the context manager owns the commit
+        # (transaction boundary lives in the data layer, not the route).
+        async with get_session_context(auto_commit=True) as db:
+            # Generate a unique session ID
+            session_id = uuid.uuid4()
 
-        # Create session in database with default name "New Chat" within request transaction
-        repo = SessionRepository(db)
-        session = await repo.create(session_id, user.uuid, name="New Chat")
-        await db.commit()
+            # Create session in database with default name "New Chat"
+            repo = SessionRepository(db)
+            session = await repo.create(session_id, user.uuid, name="New Chat")
 
         logger.info(
             "session_created",
@@ -295,13 +306,13 @@ async def update_session_name(
     session_id: UUID,
     current_user: CurrentUser,
     db: DbSession,
-    name: str = Form(...),
+    payload: UpdateSessionNameRequest,
 ) -> JSONResponse:
     """Update a session's name.
 
     Args:
         session_id: The ID of the session to update
-        name: The new name for the session
+        payload: JSON body containing the new name
         current_user: The authenticated user
         db: Database session
 
@@ -312,14 +323,14 @@ async def update_session_name(
     session = await get_authorized_session(session_id, current_user, db)
 
     # Sanitize name
-    sanitized_name = sanitize_string(name)
+    sanitized_name = sanitize_string(payload.name)
 
-    # Update the session name
-    repo = SessionRepository(db)
-    updated_session = await repo.update_name(session.id, sanitized_name)
-    if updated_session is None:
-        raise NotFoundError("Session")
-    await db.commit()
+    # Update the session name; the context manager owns the commit
+    async with get_session_context(auto_commit=True) as db:
+        repo = SessionRepository(db)
+        updated_session = await repo.update_name(session.id, sanitized_name)
+        if updated_session is None:
+            raise NotFoundError("Session")
 
     logger.info(
         "session_name_updated",
@@ -386,9 +397,10 @@ async def delete_session(
     chatbot_agent = get_agent()
     await chatbot_agent.delete_session_history(session.id)
 
-    # 2. Delete the session metadata within the same atomic transaction
-    await repo.delete(session.id)
-    await db.commit()
+    # 2. Delete the session metadata; the context manager owns the commit
+    async with get_session_context(auto_commit=True) as db:
+        repo = SessionRepository(db)
+        await repo.delete(session.id)
 
     logger.info(
         "session_deleted_with_history",
@@ -459,13 +471,12 @@ async def get_user_sessions(
 
     # Wrap fastapi-pagination result in unified response format
     return success_response(
-        data={
-            "items": page_result.items,
-            "page": page_result.page,
-            "size": page_result.size,
-            "total": page_result.total,
-            "pages": page_result.pages,
-            "hasMore": page_result.page < page_result.pages if page_result.pages else False,
-        },
+        data=pagination_payload(
+            items=page_result.items,
+            page=page_result.page,
+            size=page_result.size,
+            total=page_result.total,
+            pages=page_result.pages,
+        ),
         message="Sessions retrieved successfully",
     )

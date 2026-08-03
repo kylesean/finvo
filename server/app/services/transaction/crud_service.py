@@ -316,7 +316,10 @@ class TransactionCRUDService:
             user_uuid=str(transaction.user_uuid),
             type=transaction.type,
             amount=round(amount_val, 2),
-            amount_original=str(transaction.amount_original) if transaction.amount_original else None,
+            # Numeric (float) — must stay consistent with TransactionUpdateResult
+            # and TransactionResponse (list endpoints); a string here breaks the
+            # shared client contract for amountOriginal.
+            amount_original=float(transaction.amount_original) if transaction.amount_original else None,
             amount_base=float(transaction.amount),
             currency=original_currency,
             base_currency=display_currency,

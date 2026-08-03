@@ -82,6 +82,45 @@ def success_response(
     return JSONResponse(status_code=http_status, content=body)
 
 
+def pagination_payload(
+    items: list[Any],
+    page: int,
+    size: int,
+    total: int,
+    pages: int,
+    has_more: bool | None = None,
+) -> dict[str, Any]:
+    """Build the unified pagination envelope used by every list endpoint.
+
+    ``has_more`` defaults to ``page < pages`` (the fastapi-pagination
+    convention); pass it explicitly when a source (e.g. a service layer
+    result) already computed it, so the shape stays identical across
+    endpoints.
+
+    Args:
+        items: Page items
+        page: Current page number (1-based)
+        size: Items per page
+        total: Total number of matching records
+        pages: Total number of pages
+        has_more: Whether more pages exist (defaults to page < pages)
+
+    Returns:
+        Dict with keys: items, page, size, total, pages, hasMore
+    """
+    if has_more is None:
+        has_more = page < pages if pages else False
+
+    return {
+        "items": items,
+        "page": page,
+        "size": size,
+        "total": total,
+        "pages": pages,
+        "hasMore": has_more,
+    }
+
+
 def error_response(
     code: int,
     message: str,

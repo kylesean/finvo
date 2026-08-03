@@ -98,6 +98,43 @@ async def test_create_batch_transactions_api(client_with_auth, db_session, test_
 
 
 @pytest.mark.asyncio
+async def test_amount_original_is_json_number_across_endpoints(client_with_auth, db_session, test_user):
+    """Regression: amountOriginal must serialize as a JSON number everywhere.
+
+    Historically the detail endpoint returned str (crud_service str() of the
+    Decimal, e.g. "123.45000000") while update/search returned float — same
+    field, three contracts. The client tolerates both, but the drift was
+    invisible; lock the wire type to number.
+    """
+    tx = Transaction(
+        id=uuid4(),
+        user_uuid=test_user.uuid,
+        type="EXPENSE",
+        amount=Decimal("50.0"),
+        amount_original=Decimal("123.45"),
+        currency="USD",
+        exchange_rate=Decimal("1.0"),
+        transaction_at=datetime.now(UTC),
+        status="CLEARED",
+    )
+    db_session.add(tx)
+    await db_session.commit()
+
+    detail = client_with_auth.get(f"/api/v1/transactions/{tx.id}")
+    assert detail.status_code == 200
+    detail_amount_original = detail.json()["data"]["amountOriginal"]
+    assert isinstance(detail_amount_original, float), f"detail endpoint: {detail_amount_original!r}"
+    assert detail_amount_original == 123.45
+
+    listed = client_with_auth.get("/api/v1/transactions")
+    assert listed.status_code == 200
+    listed_item = next(i for i in listed.json()["data"]["items"] if i["id"] == str(tx.id))
+    assert isinstance(listed_item["amountOriginal"], float), f"list endpoint: {listed_item['amountOriginal']!r}"
+    # Service-layer update result contract (amountOriginal as float) is covered
+    # in tests/unit/services/test_transaction_service.py (no HTTP route yet).
+
+
+@pytest.mark.asyncio
 async def test_delete_transaction_api(client_with_auth, db_session, test_user):
     # 1. Setup
     tx = Transaction(

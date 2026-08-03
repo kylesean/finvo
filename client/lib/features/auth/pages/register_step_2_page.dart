@@ -112,7 +112,7 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
                             if (value == null || value.isEmpty) {
                               return t.auth.password.required;
                             }
-                            if (value.length < 6) {
+                            if (value.length < 8) {
                               return t.auth.password.tooShort;
                             }
                             if (!value.contains(RegExp(r'[0-9]')) ||

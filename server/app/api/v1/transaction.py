@@ -14,7 +14,7 @@ from sqlalchemy import and_, desc, func, or_, select
 from app.core.aliases import CurrentUser, DbSession
 from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import NotFoundError
-from app.core.responses import ResponseEnvelope, success_response
+from app.core.responses import ResponseEnvelope, pagination_payload, success_response
 from app.core.service_deps import get_transaction_query_service, get_transaction_service
 from app.models.notification import Notification
 from app.models.transaction import Transaction
@@ -89,14 +89,14 @@ async def get_transactions(
 
     # Map response items (displaying original currency amounts)
     return success_response(
-        data={
-            "items": [transaction_to_dict(item, display_currency) for item in result.items],
-            "page": result.page,
-            "size": result.per_page,
-            "total": result.total,
-            "pages": result.pages,
-            "hasMore": result.has_more,
-        },
+        data=pagination_payload(
+            items=[transaction_to_dict(item, display_currency) for item in result.items],
+            page=result.page,
+            size=result.per_page,
+            total=result.total,
+            pages=result.pages,
+            has_more=result.has_more,
+        ),
         message="Transactions retrieved successfully",
     )
 
@@ -162,14 +162,13 @@ async def search_transactions(
 
     # Return unified format response
     return success_response(
-        data={
-            "items": page_result.items,
-            "page": page_result.page,
-            "size": page_result.size,
-            "total": page_result.total,
-            "pages": page_result.pages,
-            "hasMore": page_result.page < page_result.pages if page_result.pages else False,
-        },
+        data=pagination_payload(
+            items=page_result.items,
+            page=page_result.page,
+            size=page_result.size,
+            total=page_result.total,
+            pages=page_result.pages,
+        ),
         message="Transactions searched successfully",
     )
 

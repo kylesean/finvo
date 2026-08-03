@@ -399,7 +399,7 @@ class TransactionDetailResponse(BaseModel):
     user_uuid: str = Field(..., serialization_alias="userUuid")
     type: str
     amount: float
-    amount_original: str | None = Field(None, serialization_alias="amountOriginal")
+    amount_original: float | None = Field(None, serialization_alias="amountOriginal")
     amount_base: float = Field(..., serialization_alias="amountBase")
     currency: str
     base_currency: str = Field(..., serialization_alias="baseCurrency")
