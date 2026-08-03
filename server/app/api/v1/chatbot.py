@@ -19,6 +19,7 @@ from fastapi import (
     Request,
 )
 from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import ValidationError as PydanticValidationError
 
 from app.api.v1.auth import get_authorized_session
 from app.core.aliases import CurrentUser, DbSession
@@ -26,6 +27,7 @@ from app.core.background_tasks import background_task_manager
 from app.core.config import settings
 from app.core.database import get_session_context
 from app.core.exceptions import AppException, CommonErrorCode, ValidationError, to_client_error
+from app.core.langgraph.middleware.state_validator import state_validator
 from app.core.langgraph.simple_agent import SimpleLangChainAgent as LangGraphAgent
 from app.core.limiter import limiter
 from app.core.logging import logger
@@ -38,6 +40,7 @@ from app.schemas.chat import (
     ChatRequestWithAttachments,
     ChatResponse,
 )
+from app.schemas.client_state import ClientStateMutation
 from app.schemas.genui import GenUIEvent
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
@@ -456,6 +459,26 @@ async def update_session_state(
             "update_state_filtered_keys",
             session_id=session.id,
             dropped_keys=[k for k in updates if k not in allowed_keys],
+        )
+
+    # Type-parse the payload (rejects unknown ui_mode values / malformed types)
+    # AND run the same state_validator the streaming path uses. The whitelist
+    # alone is not a safety boundary: without validation, a direct_execute
+    # transfer payload could bypass the single-transfer amount cap enforced
+    # only on the client_state path.
+    try:
+        mutation = ClientStateMutation(**filtered_updates)
+    except PydanticValidationError as e:
+        raise ValidationError(
+            "Invalid state update",
+            field_errors={"state": "; ".join(err["msg"] for err in e.errors())},
+        ) from e
+
+    validation = state_validator.validate(mutation)
+    if not validation.valid:
+        raise ValidationError(
+            "Invalid state update",
+            field_errors={"state": "; ".join(validation.errors)},
         )
 
     logger.info(

@@ -171,6 +171,7 @@ class TransactionCommentService:
         await self._can_access_transaction_comments(transaction_id, user_uuid)
 
         # If there is a parent comment, validate the parent comment
+        parent_comment: TransactionComment | None = None
         if parent_comment_id is not None:
             parent_comment_query = select(TransactionComment).where(
                 and_(
@@ -196,8 +197,11 @@ class TransactionCommentService:
             parent_comment_id=parent_comment_id,
         )
 
+        # Flush (not commit): the comment and its notifications are ONE logical
+        # operation and must commit atomically — a failure while creating
+        # notifications must not leave an orphan comment behind.
         self.db.add(new_comment)
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(new_comment)
 
         logger.info(
@@ -210,21 +214,12 @@ class TransactionCommentService:
 
         # Collect users to notify: mentioned + parent comment author (on reply)
         users_to_notify: set[str] = set(mentioned_user_ids or [])
-        if parent_comment_id is not None:
-            # Notify the parent comment's author that someone replied
-            parent_author_query = select(TransactionComment.user_uuid).where(
-                TransactionComment.id == parent_comment_id
-            )
-            parent_author_result = await self.db.execute(parent_author_query)
-            parent_author_uuid = parent_author_result.scalar_one_or_none()
-            if parent_author_uuid:
-                users_to_notify.add(str(parent_author_uuid))
+        if parent_comment is not None:
+            users_to_notify.add(str(parent_comment.user_uuid))
 
         # Don't notify the commenter themselves
         users_to_notify.discard(str(user_uuid))
 
-        if new_comment.id is None:
-            raise RuntimeError("Comment id is missing after insert")
         comment_id_int = int(new_comment.id)
 
         if users_to_notify:
@@ -234,12 +229,13 @@ class TransactionCommentService:
                 comment_id=comment_id_int,
                 commenter_username=commenter_username,
                 comment_text=comment_text,
-                parent_author_uuid=str(parent_author_uuid)
-                if parent_comment_id is not None and parent_author_uuid
-                else None,
+                parent_author_uuid=str(parent_comment.user_uuid) if parent_comment is not None else None,
             )
 
-        # Broadcast real-time comment created event
+        # Single commit point: comment + notifications are persisted together.
+        await self.db.commit()
+
+        # Broadcast real-time comment created event (best-effort, after commit)
         await self._broadcast_comment_event(
             transaction_id=transaction_id,
             comment_id=comment_id_int,
@@ -269,19 +265,11 @@ class TransactionCommentService:
         replied_to_user_uuid = None
         replied_to_user_name = None
 
-        if parent_comment_id:
-            reply_context_query: Select[Any] = (
-                select(TransactionComment, User.username)
-                .join(User, TransactionComment.user_uuid == User.uuid)
-                .where(TransactionComment.id == parent_comment_id)
-            )
+        if parent_comment is not None:
+            reply_context_query = select(User.username).where(User.uuid == parent_comment.user_uuid)
             reply_context_result = await self.db.execute(reply_context_query)
-            reply_context_data = reply_context_result.first()
-
-            if reply_context_data:
-                parent_comment_obj, parent_user_name = reply_context_data
-                replied_to_user_uuid = str(parent_comment_obj.user_uuid)
-                replied_to_user_name = parent_user_name
+            replied_to_user_name = reply_context_result.scalar_one_or_none()
+            replied_to_user_uuid = str(parent_comment.user_uuid)
 
         return {
             "id": str(comment.id),
@@ -306,7 +294,12 @@ class TransactionCommentService:
         comment_text: str,
         parent_author_uuid: str | None = None,
     ) -> None:
-        """Create notifications for mentioned users and push via WebSocket."""
+        """Create notifications for mentioned users and push via WebSocket.
+
+        Notification rows are added to the caller's session and committed by the
+        caller — never here — so a comment and its notifications share one
+        atomic transaction. WebSocket pushes remain best-effort.
+        """
         from app.core.ws_manager import ws_manager
         from app.models.notification import Notification
 
@@ -343,8 +336,6 @@ class TransactionCommentService:
                 data=notification_data,
             )
             self.db.add(notification)
-
-        await self.db.commit()
 
         # Push via WebSocket (best effort, don't fail the comment)
         for mentioned_id in mentioned_user_ids:

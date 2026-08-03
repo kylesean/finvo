@@ -201,6 +201,11 @@ async def rebalance_budgets(
             "Transfer amount must be greater than zero",
             error_code=CommonErrorCode.VALIDATION_ERROR,
         )
+    if result_code == "CURRENCY_MISMATCH":
+        raise BusinessError(
+            "Cannot rebalance between budgets in different currencies",
+            error_code=CommonErrorCode.VALIDATION_ERROR,
+        )
     if result_code == "NOT_FOUND":
         raise NotFoundError("One or more budgets")
     if result_code == "INSUFFICIENT_FUNDS":

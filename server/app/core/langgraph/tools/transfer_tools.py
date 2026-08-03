@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.core.database import db_manager
 from app.core.exceptions import to_client_error
+from app.core.langgraph.tools._helpers import get_user_uuid, parse_time
 from app.core.logging import logger
 from app.services.transaction_service import TransactionService
 
@@ -56,24 +57,6 @@ class ExecuteTransferInput(BaseModel):
     surface_id: str | None = Field(default=None, description="GenUI surface ID for in-place updates")
 
 
-def _get_user_uuid(config: RunnableConfig) -> uuid.UUID | None:
-    """Extract user UUID from config, return UUID object."""
-    val = config.get("configurable", {}).get("user_uuid")
-    if val is None:
-        return None
-    return uuid.UUID(val) if isinstance(val, str) else val
-
-
-def _parse_time(time_str: str | None) -> datetime:
-    """Parse time string, return current time if failed."""
-    if not time_str:
-        return datetime.now(UTC)
-    try:
-        return datetime.fromisoformat(time_str.replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return datetime.now(UTC)
-
-
 @tool("execute_transfer", args_schema=ExecuteTransferInput)
 async def execute_transfer(
     source_account_id: str,
@@ -91,7 +74,7 @@ async def execute_transfer(
     TransferPathBuilder UI. When user asks to transfer money, use the executing-transfers
     skill to display the interactive UI for account selection.
     """
-    user_uuid = _get_user_uuid(config)
+    user_uuid = get_user_uuid(config)
     if not user_uuid:
         return {"success": False, "message": "User not authenticated"}
 
@@ -99,7 +82,7 @@ async def execute_transfer(
     if source_account_id == target_account_id:
         return {"success": False, "message": "Source and target accounts cannot be the same"}
 
-    tx_time = _parse_time(transaction_at)
+    tx_time = parse_time(transaction_at)
 
     # Build tags (transfer usually uses memo as description)
     tags = ["transfer"]

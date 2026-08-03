@@ -262,7 +262,24 @@ def create_agent_node(
             tools_count=len(current_tools),
         )
 
-        return {"messages": [response]}
+        # Per-turn cleanup of injected SystemMessages: the middleware injects a
+        # fresh SystemMessage (dynamic context + skill catalog) into every turn's
+        # input, so the checkpoint would otherwise accumulate one copy per turn.
+        # Only the most recent is meaningful (the prompt is consolidated above) —
+        # emit RemoveMessage for stale copies so the checkpoint stays bounded and
+        # resume/history reads never traverse N system messages.
+        from langchain_core.messages import RemoveMessage
+
+        system_ids = []
+        for m in messages:
+            msg_id = getattr(m, "id", None)
+            if isinstance(m, SystemMessage) and msg_id is not None:
+                system_ids.append(msg_id)
+        updates: list[BaseMessage] = [response]
+        if len(system_ids) > 1:
+            updates.extend(RemoveMessage(id=sid) for sid in system_ids[:-1])
+
+        return {"messages": updates}
 
     return agent_node
 

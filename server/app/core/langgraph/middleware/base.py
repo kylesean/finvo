@@ -245,7 +245,7 @@ class MiddlewareAgent:
 
     async def astream(
         self,
-        input_data: dict[str, Any] | Command[Any],
+        input_data: dict[str, Any] | Command[Any] | None,
         config: dict[str, Any] | None = None,
         stream_mode: str = "values",
     ) -> AsyncGenerator[Any]:
@@ -256,7 +256,8 @@ class MiddlewareAgent:
         - after_stream: last to first (reversed)
 
         Args:
-            input_data: Input dict with "messages" key
+            input_data: Input dict with "messages" key, a Command (HITL resume),
+                or None (resume from checkpoint)
             config: Configuration dict for agent invocation
             stream_mode: Streaming mode for agent
 
@@ -267,11 +268,15 @@ class MiddlewareAgent:
             config = {}
 
         # Pattern B HITL: If input is a Command object (resume), bypass middleware
-        # and pass directly to agent - middleware is for processing messages, not resume
-        if isinstance(input_data, Command):
+        # and pass directly to agent - middleware is for processing messages, not resume.
+        # ``None`` input is the resume-from-checkpoint signal used by
+        # ``SimpleLangChainAgent.resume_stream`` and is equivalent to a Command:
+        # there are no messages to process, so middleware must be bypassed too
+        # (``input_data.get`` would crash on None otherwise).
+        if input_data is None or isinstance(input_data, Command):
             logger.debug(
                 "middleware_bypass_for_command",
-                command_type=type(input_data).__name__,
+                command_type="None (checkpoint resume)" if input_data is None else type(input_data).__name__,
             )
             async for chunk in self.agent.astream(
                 input_data,

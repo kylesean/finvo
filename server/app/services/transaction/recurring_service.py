@@ -3,8 +3,8 @@
 import calendar
 import re
 from datetime import UTC, date, datetime, timedelta
-from decimal import Decimal
-from typing import Any, cast
+from decimal import Decimal, InvalidOperation
+from typing import Any
 from uuid import UUID
 
 import structlog
@@ -12,6 +12,7 @@ from dateutil.rrule import rrulestr
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import BusinessError, CommonErrorCode, TransactionErrorCode
 from app.models.base import utc_now
 from app.models.transaction import RecurringTransaction
@@ -104,20 +105,30 @@ class RecurringTransactionService:
         """
         # Explicitly validate RRULE to ensure data integrity
         if "recurrence_rule" in data:
-            try:
-                validate_recurrence_rule(data["recurrence_rule"])
-            except ValueError as e:
-                raise BusinessError(f"Invalid recurrence rule: {e}", error_code="INVALID_RECURRENCE_RULE")
+            validate_recurrence_rule(data["recurrence_rule"])
 
         # Validate type
         if "type" in data:
-            try:
-                validate_transaction_type(data["type"])
-            except ValueError as e:
-                raise BusinessError(str(e), error_code="INVALID_TYPE")
+            validate_transaction_type(data["type"])
 
-        start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
-        end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date() if data.get("end_date") else None
+        # Validate/parse the date/account/amount inputs defensively: this
+        # service receives raw dicts from the API schema and LLM tools alike,
+        # and an unguarded strptime/UUID/Decimal parse would surface as a 500.
+        try:
+            start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+            end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date() if data.get("end_date") else None
+            source_account_uuid = UUID(str(data["source_account_id"])) if data.get("source_account_id") else None
+            target_account_uuid = UUID(str(data["target_account_id"])) if data.get("target_account_id") else None
+            amount_dec = Decimal(str(data["amount"]))
+        except (KeyError, ValueError, TypeError, InvalidOperation) as e:
+            raise BusinessError(
+                f"Invalid recurring transaction data: {e}",
+                error_code=CommonErrorCode.VALIDATION_ERROR,
+            ) from e
+
+        if amount_dec <= 0:
+            raise BusinessError("Amount must be greater than 0", error_code=CommonErrorCode.VALIDATION_ERROR)
+
         exception_dates = data.get("exception_dates", [])
 
         # Calculate next execution date
@@ -131,16 +142,16 @@ class RecurringTransactionService:
         recurring_tx = RecurringTransaction(
             user_uuid=user_uuid,
             type=data["type"],
-            source_account_id=UUID(str(data["source_account_id"])) if data.get("source_account_id") else None,
-            target_account_id=UUID(str(data["target_account_id"])) if data.get("target_account_id") else None,
+            source_account_id=source_account_uuid,
+            target_account_id=target_account_uuid,
             amount_type=data.get("amount_type", "FIXED"),
             requires_confirmation=data.get("requires_confirmation", False),
-            amount=Decimal(str(data["amount"])),
-            currency=data.get("currency", "CNY"),
+            amount=amount_dec,
+            currency=data.get("currency") or PROJECT_DEFAULT_CURRENCY,
             category_key=data.get("category_key", "OTHERS"),
             tags=data.get("tags"),
             recurrence_rule=data["recurrence_rule"],
-            timezone=data.get("timezone", "Asia/Shanghai"),
+            timezone=data.get("timezone"),
             start_date=start_date,
             end_date=end_date,
             exception_dates=exception_dates,
@@ -307,6 +318,17 @@ class RecurringTransactionService:
 
         return [self._recurring_tx_to_dict(tx) for tx in recurring_txs]
 
+    async def _get_owned(self, recurring_id: UUID, user_uuid: UUID) -> RecurringTransaction | None:
+        """Fetch a recurring transaction scoped to its owner."""
+        query = select(RecurringTransaction).where(
+            and_(
+                RecurringTransaction.id == recurring_id,
+                RecurringTransaction.user_uuid == user_uuid,
+            )
+        )
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+
     async def get_recurring_transaction(self, recurring_id: UUID, user_uuid: UUID) -> dict[str, Any] | None:
         """Retrieve recurring transaction detail.
 
@@ -317,18 +339,7 @@ class RecurringTransactionService:
         Returns:
             Recurring transaction dictionary, or None if not found
         """
-        query = select(RecurringTransaction).where(
-            cast(
-                Any,
-                and_(
-                    RecurringTransaction.id == recurring_id,
-                    RecurringTransaction.user_uuid == user_uuid,
-                ),
-            )
-        )
-        result = await self.db.execute(query)
-        recurring_tx = result.scalar_one_or_none()
-
+        recurring_tx = await self._get_owned(recurring_id, user_uuid)
         if not recurring_tx:
             return None
 
@@ -347,38 +358,52 @@ class RecurringTransactionService:
         Returns:
             Updated recurring transaction dictionary, or None if not found
         """
-        query = select(RecurringTransaction).where(
-            cast(
-                Any,
-                and_(
-                    RecurringTransaction.id == recurring_id,
-                    RecurringTransaction.user_uuid == user_uuid,
-                ),
-            )
-        )
-        result = await self.db.execute(query)
-        recurring_tx = result.scalar_one_or_none()
-
+        recurring_tx = await self._get_owned(recurring_id, user_uuid)
         if not recurring_tx:
             return None
 
-        # Update attributes
+        # Re-validate mutating fields on update — the create path validates
+        # RRULE/type, but the update path previously assigned them raw.
+        if "recurrence_rule" in data:
+            validate_recurrence_rule(data["recurrence_rule"])
         if "type" in data:
-            recurring_tx.type = data["type"]
-        if "source_account_id" in data:
-            recurring_tx.source_account_id = (
-                UUID(str(data["source_account_id"])) if data["source_account_id"] else None
-            )
-        if "target_account_id" in data:
-            recurring_tx.target_account_id = (
-                UUID(str(data["target_account_id"])) if data["target_account_id"] else None
-            )
+            validate_transaction_type(data["type"])
+
+        # Defensive parse of date/amount inputs (see create_recurring_transaction).
+        try:
+            if "amount" in data:
+                new_amount = Decimal(str(data["amount"]))
+                if new_amount <= 0:
+                    raise BusinessError(
+                        "Amount must be greater than 0",
+                        error_code=CommonErrorCode.VALIDATION_ERROR,
+                    )
+                recurring_tx.amount = new_amount
+            if "source_account_id" in data:
+                recurring_tx.source_account_id = (
+                    UUID(str(data["source_account_id"])) if data["source_account_id"] else None
+                )
+            if "target_account_id" in data:
+                recurring_tx.target_account_id = (
+                    UUID(str(data["target_account_id"])) if data["target_account_id"] else None
+                )
+            if "start_date" in data:
+                recurring_tx.start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+            if "end_date" in data:
+                recurring_tx.end_date = (
+                    datetime.strptime(data["end_date"], "%Y-%m-%d").date() if data["end_date"] else None
+                )
+        except (ValueError, TypeError, InvalidOperation) as e:
+            raise BusinessError(
+                f"Invalid recurring transaction data: {e}",
+                error_code=CommonErrorCode.VALIDATION_ERROR,
+            ) from e
+
+        # Update attributes
         if "amount_type" in data:
             recurring_tx.amount_type = data["amount_type"]
         if "requires_confirmation" in data:
             recurring_tx.requires_confirmation = data["requires_confirmation"]
-        if "amount" in data:
-            recurring_tx.amount = Decimal(str(data["amount"]))
         if "currency" in data:
             recurring_tx.currency = data["currency"]
         if "category_key" in data:
@@ -389,12 +414,6 @@ class RecurringTransactionService:
             recurring_tx.recurrence_rule = data["recurrence_rule"]
         if "timezone" in data:
             recurring_tx.timezone = data["timezone"]
-        if "start_date" in data:
-            recurring_tx.start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
-        if "end_date" in data:
-            recurring_tx.end_date = (
-                datetime.strptime(data["end_date"], "%Y-%m-%d").date() if data["end_date"] else None
-            )
         if "exception_dates" in data:
             recurring_tx.exception_dates = data["exception_dates"]
         if "description" in data:
@@ -435,18 +454,7 @@ class RecurringTransactionService:
         Returns:
             Boolean indicating whether deletion succeeded
         """
-        query = select(RecurringTransaction).where(
-            cast(
-                Any,
-                and_(
-                    RecurringTransaction.id == recurring_id,
-                    RecurringTransaction.user_uuid == user_uuid,
-                ),
-            )
-        )
-        result = await self.db.execute(query)
-        recurring_tx = result.scalar_one_or_none()
-
+        recurring_tx = await self._get_owned(recurring_id, user_uuid)
         if not recurring_tx:
             return False
 

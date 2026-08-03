@@ -32,8 +32,22 @@ class CashFlowService:
         granularity: str = "daily",
         scenarios: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """Forecast future cash flow."""
+        """Forecast future cash flow.
+
+        All money is normalized to the user's base currency before aggregation:
+        - ``FinancialAccount.current_balance`` is stored per-account currency,
+          converted here via live rates;
+        - ``Transaction.amount`` is already denominated in the user's base
+          currency (no conversion);
+        - ``RecurringTransaction.amount`` is in the original currency, converted
+          via ``convert_to_user_base``.
+        Unavailable rates skip the affected account/event (with a warning)
+        rather than silently summing mixed currencies.
+        """
         from app.models.financial_settings import FinancialSettings
+        from app.utils.currency_utils import get_user_base_currency
+
+        user_base_currency = await get_user_base_currency(self.db, user_uuid)
 
         # 1. Get base data
         # Get user settings (change to read FinancialSettings)
@@ -42,21 +56,14 @@ class CashFlowService:
         settings = settings_result.scalar_one_or_none()
         safety_threshold = settings.safety_threshold if settings else Decimal("0.00")
 
-        # Calculate current total balance (from financial_accounts table)
-        # Assets (ASSET) are added as positive values, liabilities (LIABILITY) are added as negative values.
-        # Uses current_balance (not initial_balance) and only ACTIVE accounts to
-        # match statistics_service/forecast_service conventions.
+        # Current total balance: assets (ASSET) count positive, liabilities
+        # (LIABILITY) negative. Each account's balance is in its own currency,
+        # so convert to the user's base currency before summing.
         accounts_query = select(
-            func.coalesce(
-                func.sum(
-                    case(
-                        (FinancialAccount.nature == "ASSET", FinancialAccount.current_balance),
-                        (FinancialAccount.nature == "LIABILITY", -FinancialAccount.current_balance),
-                        else_=0,
-                    )
-                ),
-                0,
-            )
+            FinancialAccount.id,
+            FinancialAccount.nature,
+            FinancialAccount.current_balance,
+            FinancialAccount.currency_code,
         ).where(
             and_(
                 FinancialAccount.user_uuid == user_uuid,
@@ -64,11 +71,25 @@ class CashFlowService:
                 FinancialAccount.include_in_net_worth,
             )
         )
-        balance_result = await self.db.execute(accounts_query)
-        current_balance = balance_result.scalar() or Decimal("0.00")
-        current_balance_str = str(current_balance)
+        accounts_result = await self.db.execute(accounts_query)
 
-        # Calculate average daily consumption (past 30 days of expense records)
+        current_balance = Decimal("0.00")
+        for account_id, nature, balance, currency_code in accounts_result.all():
+            balance = balance or Decimal("0.00")
+            converted = await self._to_user_base(balance, currency_code or user_base_currency, user_base_currency)
+            if converted is None:
+                logger.warning(
+                    "forecast_account_skipped_conversion",
+                    user_uuid=str(user_uuid),
+                    account_id=str(account_id),
+                    currency=currency_code,
+                )
+                continue
+            current_balance += converted if nature == "ASSET" else -converted
+
+        # Calculate average daily consumption (past 30 days of expense records).
+        # Transaction.amount is stored in the user's base currency; expense is
+        # identified by type and amounts are positive.
         thirty_days_ago = datetime.now(UTC) - timedelta(days=30)
         # First get the daily total expenses
         daily_expense_query = (
@@ -79,7 +100,6 @@ class CashFlowService:
             .where(
                 and_(
                     Transaction.user_uuid == user_uuid,
-                    # Amounts are stored positive; expense is identified by type
                     Transaction.type == "EXPENSE",
                     Transaction.transaction_at >= thirty_days_ago,
                 )
@@ -90,18 +110,13 @@ class CashFlowService:
         daily_expense_result = await self.db.execute(daily_expense_query)
         daily_expenses = daily_expense_result.all()
 
+        # Average daily spending is the positive mean over the last 30 days;
+        # with no history we do not fabricate spending — the forecast simply
+        # carries the current balance forward.
+        avg_daily_spending: Decimal = Decimal("0.00")
         if daily_expenses:
-            total_spending = sum(row.daily_total for row in daily_expenses)
-            days_with_spending = len(daily_expenses)
-            avg_daily_spending = total_spending / max(days_with_spending, 1)
-        else:
-            avg_daily_spending = Decimal("-100.00")  # Default value
-
-        avg_daily_spending_str = str(avg_daily_spending)
-
-        # Ensure it's negative (expenses should be negative)
-        if Decimal(avg_daily_spending_str) > 0:
-            avg_daily_spending_str = str(-abs(Decimal(avg_daily_spending_str)))
+            total_spending = sum((row.daily_total or Decimal("0.00")) for row in daily_expenses)
+            avg_daily_spending = total_spending / Decimal(max(len(daily_expenses), 1))
 
         # 2. Aggregate all future events
         events_by_date: dict[str, list[dict[str, Any]]] = {}
@@ -120,6 +135,22 @@ class CashFlowService:
 
         for tx in recurring_txs:
             try:
+                # Recurring amounts are in the original currency: normalize to
+                # the user's base currency, then sign by type (EXPENSE reduces
+                # the balance, INCOME increases it, TRANSFER is net-neutral and
+                # is skipped).
+                base_amount = await self._to_user_base(tx.amount, tx.currency, user_base_currency)
+                if base_amount is None:
+                    logger.warning(
+                        "forecast_recurring_skipped_conversion",
+                        tx_id=str(tx.id),
+                        currency=tx.currency,
+                    )
+                    continue
+                if tx.type == "TRANSFER":
+                    continue
+                signed_amount = base_amount if tx.type == "INCOME" else -base_amount
+
                 # Get exception_dates list
                 exception_dates_list = tx.exception_dates or []
                 exception_dates_set = set(exception_dates_list)
@@ -141,7 +172,7 @@ class CashFlowService:
                     events_by_date[date_str].append(
                         {
                             "description": tx.description or "Recurring transaction",
-                            "amount": str(tx.amount),
+                            "amount": str(signed_amount),
                         }
                     )
             except Exception as e:
@@ -157,25 +188,26 @@ class CashFlowService:
                 events_by_date[date_str].append(
                     {
                         "description": scenario["description"],
-                        "amount": str(scenario["amount"]),
+                        "amount": str(Decimal(str(scenario["amount"]))),
                     }
                 )
 
         # 3. Loop through daily balance calculation
         raw_daily_breakdown = []
-        balance = Decimal(current_balance_str)
+        balance = current_balance
 
         for i in range(forecast_days):
             current_date = start_date + timedelta(days=i)
             date_str = current_date.isoformat()
 
             daily_events = events_by_date.get(date_str, []).copy()
-            daily_events.append(
-                {
-                    "description": "Daily Expense (Predicted)",
-                    "amount": avg_daily_spending_str,
-                }
-            )
+            if avg_daily_spending != 0:
+                daily_events.append(
+                    {
+                        "description": "Daily Expense (Predicted)",
+                        "amount": str(-avg_daily_spending),
+                    }
+                )
 
             daily_net = Decimal("0.00")
             for event in daily_events:
@@ -196,13 +228,37 @@ class CashFlowService:
 
         # 5. Calculate warnings and summary information
         warnings = self._calculate_warnings(raw_daily_breakdown, safety_threshold)
-        summary = self._calculate_summary(current_balance_str, raw_daily_breakdown)
+        summary = self._calculate_summary(str(current_balance), raw_daily_breakdown)
 
         return {
             "dailyBreakdown": aggregated_breakdown,
             "warnings": warnings,
             "summary": summary,
         }
+
+    async def _to_user_base(
+        self,
+        amount: Decimal,
+        currency: str,
+        user_base_currency: str,
+    ) -> Decimal | None:
+        """Convert an amount to the user's base currency, or None if unavailable."""
+        if (currency or user_base_currency).upper() == user_base_currency.upper():
+            return amount
+        try:
+            from app.utils.currency_utils import convert_to_user_base
+
+            base_amount, _ = await convert_to_user_base(amount, currency, user_base_currency)
+            return base_amount
+        except Exception as e:
+            logger.warning(
+                "forecast_conversion_failed",
+                amount=str(amount),
+                currency=currency,
+                user_base_currency=user_base_currency,
+                error=str(e),
+            )
+            return None
 
     def _aggregate_breakdown(self, daily_breakdown: list[dict[str, Any]], granularity: str) -> list[dict[str, Any]]:
         """Aggregate data based on granularity parameter

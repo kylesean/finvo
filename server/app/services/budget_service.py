@@ -11,10 +11,11 @@ from datetime import (
     timezone,
 )
 from decimal import Decimal
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
-from sqlalchemy import asc, desc, func, select
+from sqlalchemy import asc, desc, func, select, update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -302,7 +303,8 @@ class BudgetService:
         """Rebalance amount between two budgets with detailed status code.
 
         Returns:
-            'SUCCESS', 'INVALID_AMOUNT', 'NOT_FOUND', or 'INSUFFICIENT_FUNDS'
+            'SUCCESS', 'INVALID_AMOUNT', 'CURRENCY_MISMATCH', 'NOT_FOUND', or
+            'INSUFFICIENT_FUNDS'
         """
         if amount <= 0:
             return "INVALID_AMOUNT"
@@ -313,23 +315,52 @@ class BudgetService:
         if not from_budget or not to_budget:
             return "NOT_FOUND"
 
-        if from_budget.amount < amount:
+        # Never move money between budgets denominated in different currencies:
+        # subtracting `amount` from one and adding it to the other would
+        # silently misstate the receiving budget's value.
+        if (from_budget.currency_code or "").upper() != (to_budget.currency_code or "").upper():
+            return "CURRENCY_MISMATCH"
+
+        # Atomic debit: the conditional UPDATE is the balance check itself, so
+        # two concurrent rebalances can never both pass a read-then-write
+        # check and drive the source budget negative (CheckConstraint
+        # "amount >= 0" is the last-resort backstop).
+        result = await self.session.execute(
+            update(Budget)
+            .where(Budget.id == from_budget.id, Budget.amount >= amount)
+            .values(amount=Budget.amount - amount)
+        )
+        # An UPDATE statement always returns a CursorResult; the generic Result
+        # stub doesn't expose rowcount.
+        if cast(CursorResult[Any], result).rowcount == 0:
             return "INSUFFICIENT_FUNDS"
 
-        # Update budget amounts
-        from_budget.amount -= amount
-        to_budget.amount += amount
+        # Atomic credit: an ORM read-modify-write (``to_budget.amount +=
+        # amount``) would lose updates under concurrency — every session would
+        # write its own stale snapshot and only the last commit survives.
+        await self.session.execute(
+            update(Budget).where(Budget.id == to_budget.id).values(amount=Budget.amount + amount)
+        )
 
-        # Also update current periods
+        # Also update current periods (adjusted_target is a concurrent
+        # read-modify-write too — use atomic increments, not ORM assignment).
         from_period = await self.get_or_create_current_period(from_budget)
         to_period = await self.get_or_create_current_period(to_budget)
 
         if from_period:
-            from_period.adjusted_target -= amount
+            await self.session.execute(
+                update(BudgetPeriod)
+                .where(BudgetPeriod.id == from_period.id)
+                .values(adjusted_target=BudgetPeriod.adjusted_target - amount)
+            )
             await self.update_period_spent_amount(from_budget, from_period, auto_commit=False)
 
         if to_period:
-            to_period.adjusted_target += amount
+            await self.session.execute(
+                update(BudgetPeriod)
+                .where(BudgetPeriod.id == to_period.id)
+                .values(adjusted_target=BudgetPeriod.adjusted_target + amount)
+            )
             await self.update_period_spent_amount(to_budget, to_period, auto_commit=False)
 
         await self.session.commit()

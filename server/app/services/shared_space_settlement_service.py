@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import and_, select
@@ -71,12 +71,7 @@ class SharedSpaceSettlementService:
         # Get all members
         members_query = (
             select(SpaceMember)
-            .where(
-                cast(
-                    Any,
-                    and_(SpaceMember.space_id == space_id, SpaceMember.status == "ACCEPTED"),
-                )
-            )
+            .where(and_(SpaceMember.space_id == space_id, SpaceMember.status == "ACCEPTED"))
             .options(selectinload(SpaceMember.user))
         )
         members_result = await self.db.execute(members_query)
@@ -88,6 +83,8 @@ class SharedSpaceSettlementService:
                 "spaceId": str(space_id),
                 "items": [],
                 "totalAmount": "0.00",
+                "excludedTransactions": 0,
+                "excludedAmount": "0.00",
                 "calculatedAt": datetime.now(UTC).isoformat(),
                 "isSettled": True,
             }
@@ -96,23 +93,38 @@ class SharedSpaceSettlementService:
         balances: dict[UUID, Decimal] = defaultdict(Decimal)
         total_amount = Decimal("0")
 
+        # A payer who has left the space is NOT part of the settlement: their
+        # SpaceTransaction rows are never removed (only the SpaceMember row is),
+        # so crediting them here would invoice the remaining members for money
+        # they can never collect (and render the creditor as "Unknown").
+        # Exclude such transactions explicitly instead of mis-attributing them.
+        active_members = {m.user_uuid for m in members}
+        excluded_count = 0
+        excluded_amount = Decimal("0")
+
         for st in space_txs:
             tx = st.transaction
-            if tx and tx.type == "EXPENSE":
-                # Person who paid gets credit
-                payer_uuid = st.added_by_user_uuid
-                amount = Decimal(str(tx.amount))
-                share = amount / member_count
+            if not (tx and tx.type == "EXPENSE"):
+                continue
 
-                # Payer's balance increases (others owe them)
-                balances[payer_uuid] += amount - share
+            payer_uuid = st.added_by_user_uuid
+            if payer_uuid not in active_members:
+                excluded_count += 1
+                excluded_amount += Decimal(str(tx.amount))
+                continue
 
-                # Everyone else's balance decreases (they owe)
-                for member in members:
-                    if member.user_uuid != payer_uuid:
-                        balances[member.user_uuid] -= share
+            amount = Decimal(str(tx.amount))
+            share = amount / member_count
 
-                total_amount += amount
+            # Payer's balance increases (others owe them)
+            balances[payer_uuid] += amount - share
+
+            # Everyone else's balance decreases (they owe)
+            for member in members:
+                if member.user_uuid != payer_uuid:
+                    balances[member.user_uuid] -= share
+
+            total_amount += amount
 
         # Create settlement items (who pays whom)
         items = []
@@ -154,6 +166,8 @@ class SharedSpaceSettlementService:
             "spaceId": str(space_id),
             "items": items,
             "totalAmount": f"{total_amount:.2f}",
+            "excludedTransactions": excluded_count,
+            "excludedAmount": f"{excluded_amount:.2f}",
             "calculatedAt": datetime.now(UTC).isoformat(),
             "isSettled": len(items) == 0,
         }

@@ -33,6 +33,13 @@ SENSITIVE_FILE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# Tool output guards: keep what reaches the LLM context bounded regardless of
+# what the filesystem contains.
+MAX_READ_CHARS = 50_000
+MAX_LS_ENTRIES = 200
+MAX_EXEC_OUTPUT_CHARS = 30_000
+MAX_WRITE_CHARS = 512 * 1024
+
 
 def _is_sensitive_path(path: str) -> bool:
     """Check whether a path targets sensitive files (env/secrets/keys)."""
@@ -48,12 +55,15 @@ class ReadFileInput(BaseModel):
 
 @tool("read_file", args_schema=ReadFileInput)
 def read_file_tool(path: str) -> str:
-    """Read the content of a file."""
+    """Read the content of a file (large files are truncated)."""
     if _is_sensitive_path(path):
         logger.warning("read_file_sensitive_blocked", path=path[:200])
         return "Error: reading this file is not allowed"
     try:
         content = fs_backend.read(path)
+        if len(content) > MAX_READ_CHARS:
+            omitted = len(content) - MAX_READ_CHARS
+            return f"{content[:MAX_READ_CHARS]}\n\n... (truncated, {omitted} more chars)"
         return content
     except Exception as e:
         logger.warning("read_file_failed", path=path[:200], error=str(e))
@@ -69,7 +79,7 @@ class LsInput(BaseModel):
 
 @tool("ls", args_schema=LsInput)
 def ls_tool(path: str = ".") -> str:
-    """List directory contents."""
+    """List directory contents (capped at a bounded number of entries)."""
     if _is_sensitive_path(path):
         logger.warning("ls_sensitive_blocked", path=path[:200])
         return "Error: listing this path is not allowed"
@@ -81,6 +91,10 @@ def ls_tool(path: str = ".") -> str:
                 continue
             type_str = "DIR" if item.is_dir else "FILE"
             output.append(f"{type_str:4} {item.name}")
+            if len(output) >= MAX_LS_ENTRIES:
+                break
+        if len(output) >= MAX_LS_ENTRIES:
+            output.append(f"... (listing truncated at {MAX_LS_ENTRIES} entries)")
         return "\n".join(output)
     except Exception as e:
         logger.warning("ls_failed", path=path[:200], error=str(e))
@@ -117,6 +131,8 @@ def write_file_tool(path: str, content: str) -> Any:
         if _is_sensitive_path(path):
             logger.warning("write_file_sensitive_blocked", path=path[:200])
             return "Error: writing this file is not allowed"
+        if len(content) > MAX_WRITE_CHARS:
+            return "Error: content too large to write"
 
         project_root = PROJECT_ROOT.resolve()
         user_artifact_dir = (project_root / "artifacts" / user_id).resolve()
@@ -197,6 +213,14 @@ def execute_tool(command: str) -> Any:
             has_first_brace=first_brace != -1,
             has_last_brace=last_brace != -1,
         )
+
+    # Bound the output that reaches the LLM context: scripts may print
+    # arbitrarily much, and the model only needs the tail of a long output.
+    # When a JSON payload was parsed, result_data["output"] is a short marker,
+    # so only the raw (unparsed) output needs truncating.
+    if result_data.get("output") == output and len(output) > MAX_EXEC_OUTPUT_CHARS:
+        omitted = len(output) - MAX_EXEC_OUTPUT_CHARS
+        result_data["output"] = f"... (truncated, {omitted} chars omitted)\n{output[-MAX_EXEC_OUTPUT_CHARS:]}"
 
     # Log script failures for observability (LLM decides retry based on error content)
     if response.exit_code != 0:

@@ -3,8 +3,10 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.budget import BudgetPeriodStatus
+from app.models.base import Base
+from app.models.budget import Budget, BudgetPeriodStatus
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.schemas.budget import BudgetCreateRequest
@@ -237,3 +239,71 @@ async def test_budget_summary_deduplication(db_session):
     # normalizes the cross-backend precision difference.
     assert Decimal(summary.overall_spent) == Decimal("0")
     assert Decimal(summary.overall_remaining) == Decimal("5000")
+
+
+@pytest.mark.asyncio
+async def test_rebalance_concurrent_no_overdraw(tmp_path):
+    """Concurrent rebalances must never drive a budget below zero.
+
+    The debit is a single conditional UPDATE (``amount >= transfer`` is the
+    balance check itself), so the number of SUCCESS results can never exceed
+    ``floor(balance / amount)`` — even when readers race ahead of writers.
+    Uses a file-backed SQLite DB (one connection per session) so the tasks
+    genuinely contend; the in-memory StaticPool fixture can't parallelize.
+    """
+    import asyncio
+
+    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+    from app.models.user import User
+
+    engine = create_async_engine(
+        f"sqlite+aiosqlite:///{tmp_path / 'conc.db'}",
+        connect_args={"timeout": 30},
+    )
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        await conn.exec_driver_sql("PRAGMA journal_mode=WAL")
+        await conn.exec_driver_sql("PRAGMA busy_timeout=30000")
+
+    session_factory = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+
+    user_uuid = uuid4()
+    async with session_factory() as session:
+        session.add(
+            User(
+                uuid=user_uuid,
+                username="conc_user",
+                email="conc@example.com",
+                password="hash",
+                registration_type="email",
+            )
+        )
+        await session.commit()
+
+        service = BudgetService(session)
+        source = await service.create_budget(
+            user_uuid,
+            BudgetCreateRequest(name="Source", amount=1000.0, scope="CATEGORY", category_key="FOOD"),
+        )
+        sink = await service.create_budget(
+            user_uuid,
+            BudgetCreateRequest(name="Sink", amount=1.0, scope="CATEGORY", category_key="TRANSPORT"),
+        )
+
+    async def attempt(_i: int) -> str:
+        async with session_factory() as session:
+            return await BudgetService(session).rebalance_with_status(source.id, sink.id, Decimal("100.0"), user_uuid)
+
+    statuses = await asyncio.gather(*(attempt(i) for i in range(12)))
+
+    assert statuses.count("SUCCESS") == 10, statuses
+    assert statuses.count("INSUFFICIENT_FUNDS") == 2, statuses
+
+    async with session_factory() as session:
+        final_source = await session.get(Budget, source.id)
+        final_sink = await session.get(Budget, sink.id)
+        assert final_source.amount == Decimal("0.0")
+        assert final_sink.amount == Decimal("1001.0")
+
+    await engine.dispose()

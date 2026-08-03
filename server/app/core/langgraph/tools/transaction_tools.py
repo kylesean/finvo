@@ -24,43 +24,13 @@ from pydantic import BaseModel, Field, field_validator
 from app.core.constants.transaction_constants import TransactionCategory
 from app.core.database import db_manager
 from app.core.exceptions import AppException
+from app.core.langgraph.tools._helpers import get_thread_id, get_user_uuid, get_user_uuid_str, money_str, parse_time
 from app.core.logging import logger
 from app.services.transaction_service import TransactionService
 
 # ============================================================================
 # Helper Functions
 # ============================================================================
-
-
-def _get_user_uuid(config: RunnableConfig) -> uuid.UUID | None:
-    """Extract user UUID from configuration"""
-    val = config.get("configurable", {}).get("user_uuid")
-    if val is None:
-        return None
-    return uuid.UUID(val) if isinstance(val, str) else val
-
-
-def _get_user_uuid_str(config: RunnableConfig) -> str | None:
-    """Extract user UUID string from configuration"""
-    val = config.get("configurable", {}).get("user_uuid")
-    if val is None:
-        return None
-    return str(val) if isinstance(val, uuid.UUID) else val
-
-
-def _get_thread_id(config: RunnableConfig) -> str | None:
-    """Extract thread_id (session_id) from configuration for message anchor"""
-    return config.get("configurable", {}).get("thread_id")
-
-
-def _parse_time(time_str: str | None) -> datetime:
-    """Parse time string, return current time if failed"""
-    if not time_str:
-        return datetime.now(UTC)
-    try:
-        return datetime.fromisoformat(time_str.replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return datetime.now(UTC)
 
 
 def _get_default_category(tx_type: str) -> str:
@@ -170,11 +140,11 @@ async def record_transactions(
 
     The model should infer the direction of flow based on the semantic intent of the input language.
     """
-    user_uuid = _get_user_uuid(config)
+    user_uuid = get_user_uuid(config)
     if not user_uuid:
         return {"success": False, "message": "User not authenticated"}
 
-    tx_time = _parse_time(transaction_at)
+    tx_time = parse_time(transaction_at)
 
     if not transactions:
         return {"success": False, "message": "Please provide at least one transaction"}
@@ -220,7 +190,7 @@ async def record_transactions(
                     "target_account_id": target_account_id,
                     "transaction_at": tx_time.isoformat(),
                 },
-                source_thread_id=uuid.UUID(tid) if (tid := _get_thread_id(config)) else None,
+                source_thread_id=uuid.UUID(tid) if (tid := get_thread_id(config)) else None,
             )
 
             if isinstance(result, dict) and result.get("success"):
@@ -294,8 +264,8 @@ class SearchTransactionInput(BaseModel):
 
     start_date: str | None = Field(None, description="Start date (ISO 8601)")
     end_date: str | None = Field(None, description="End date (ISO 8601)")
-    page: int = Field(1, description="Page number")
-    per_page: int = Field(10, description="Number of items per page")
+    page: int = Field(1, ge=1, description="Page number")
+    per_page: int = Field(10, ge=1, le=50, description="Number of items per page (max 50)")
 
 
 @tool("search_transactions", args_schema=SearchTransactionInput)
@@ -326,7 +296,12 @@ async def search_transactions(
     )
     from app.utils.currency_utils import get_user_display_currency
 
-    user_uuid_str = _get_user_uuid_str(config)
+    # Defensive bounds even if called outside the Pydantic schema: page starts
+    # at 1 and per_page is capped so one tool call can't flood the LLM context.
+    page = max(int(page), 1)
+    per_page = min(max(int(per_page), 1), 50)
+
+    user_uuid_str = get_user_uuid_str(config)
     if not user_uuid_str:
         return {"success": False, "message": "User context missing", "items": []}
 
@@ -377,7 +352,8 @@ async def search_transactions(
             items.append(
                 {
                     "id": item.id,
-                    "amount": float(val),
+                    # LLM-facing amount: clean decimal string (no float precision loss).
+                    "amount": money_str(val),
                     "currency": item.currency,
                     "description": item.description or "",
                     "type": item.type,
@@ -405,9 +381,20 @@ async def search_transactions(
 
         top_items = sorted(
             [it for it in items if it["type"] == "EXPENSE"],
-            key=lambda x: cast(float, x.get("amount") or 0.0),
+            key=lambda x: float(cast(Any, x.get("amount")) or 0),
             reverse=True,
         )[:3]
+
+        # Keep what reaches the LLM context bounded: cap the number of items
+        # echoed back and truncate long free-text fields per item.
+        MAX_LLM_ITEMS = 20
+        MAX_FIELD_CHARS = 200
+        llm_items = items[:MAX_LLM_ITEMS]
+        for it in llm_items:
+            for field_name in ("description", "location"):
+                value = it.get(field_name)
+                if isinstance(value, str) and len(value) > MAX_FIELD_CHARS:
+                    it[field_name] = f"{value[:MAX_FIELD_CHARS]}..."
 
         response_data: dict[str, Any] = {
             "success": True,
@@ -418,11 +405,12 @@ async def search_transactions(
                 "top_items": top_items,
                 "count": result.total,
             },
-            "items": items,
+            "items": llm_items,
             "total": result.total,
             "page": result.page,
             "per_page": result.per_page,
             "hasMore": result.has_more,
+            "truncated": len(items) > MAX_LLM_ITEMS,
             "metadata": {
                 "keyword": keyword,
                 "start_date": start_date,

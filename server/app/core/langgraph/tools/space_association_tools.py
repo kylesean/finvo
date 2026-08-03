@@ -13,15 +13,8 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
 from app.core.database import db_manager
+from app.core.langgraph.tools._helpers import get_user_uuid
 from app.core.logging import logger
-
-
-def _get_user_uuid(config: RunnableConfig) -> UUID | None:
-    """Extract user UUID from configuration"""
-    val = config.get("configurable", {}).get("user_uuid")
-    if val is None:
-        return None
-    return UUID(val) if isinstance(val, str) else val
 
 
 @tool("associate_transactions_to_space")
@@ -46,7 +39,7 @@ async def associate_transactions_to_space(
     Returns:
         SpaceAssociationReceipt component data
     """
-    user_uuid = _get_user_uuid(config)
+    user_uuid = get_user_uuid(config)
     if not user_uuid:
         return {
             "success": False,
