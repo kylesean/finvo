@@ -242,31 +242,22 @@ async def test_budget_summary_deduplication(db_session):
 
 
 @pytest.mark.asyncio
-async def test_rebalance_concurrent_no_overdraw(tmp_path):
+async def test_rebalance_concurrent_no_overdraw(async_db_engine):
     """Concurrent rebalances must never drive a budget below zero.
 
     The debit is a single conditional UPDATE (``amount >= transfer`` is the
     balance check itself), so the number of SUCCESS results can never exceed
     ``floor(balance / amount)`` — even when readers race ahead of writers.
-    Uses a file-backed SQLite DB (one connection per session) so the tasks
-    genuinely contend; the in-memory StaticPool fixture can't parallelize.
+    Each task gets its own session/connection against the shared Postgres test
+    database, so the tasks genuinely contend via row locks.
     """
     import asyncio
 
-    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+    from sqlalchemy.ext.asyncio import async_sessionmaker
 
     from app.models.user import User
 
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{tmp_path / 'conc.db'}",
-        connect_args={"timeout": 30},
-    )
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        await conn.exec_driver_sql("PRAGMA journal_mode=WAL")
-        await conn.exec_driver_sql("PRAGMA busy_timeout=30000")
-
-    session_factory = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+    session_factory = async_sessionmaker(bind=async_db_engine, class_=AsyncSession, expire_on_commit=False)
 
     user_uuid = uuid4()
     async with session_factory() as session:
@@ -305,5 +296,3 @@ async def test_rebalance_concurrent_no_overdraw(tmp_path):
         final_sink = await session.get(Budget, sink.id)
         assert final_source.amount == Decimal("0.0")
         assert final_sink.amount == Decimal("1001.0")
-
-    await engine.dispose()

@@ -110,6 +110,12 @@ class Transaction(Base):
     created_at: Mapped[datetime] = col.timestamptz()
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True, onupdate=utc_now)
 
+    user: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys="[Transaction.user_uuid]",
+        primaryjoin="Transaction.user_uuid == User.uuid",
+    )
+
     comments: Mapped[list[TransactionComment]] = relationship(
         "TransactionComment",
         back_populates="transaction",
@@ -222,6 +228,12 @@ class RecurringTransaction(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = col.timestamptz()
     updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True, onupdate=utc_now)
+
+    user: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys="[RecurringTransaction.user_uuid]",
+        primaryjoin="RecurringTransaction.user_uuid == User.uuid",
+    )
 
     @property
     def amount_float(self) -> float:
