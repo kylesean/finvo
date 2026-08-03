@@ -166,11 +166,6 @@ class BaseColumn:
         """String column with length."""
         return mapped_column(String(length), nullable=nullable, default=default)
 
-    @staticmethod
-    def server_default_uuid() -> str:
-        """Get server-side UUID generation expression."""
-        return "gen_random_uuid()"
-
 
 # Convenience column instances
 col = BaseColumn()

@@ -1,12 +1,12 @@
 """Alembic environment configuration.
 
-This module configures Alembic for database migrations with SQLModel support.
-It enables autogenerate functionality by connecting to the application's
-model metadata.
+This module configures Alembic for database migrations with SQLAlchemy 2.0
+models. It enables autogenerate functionality by connecting to the
+application's model metadata.
 
 Best Practices Implemented:
 1. Dynamic database URL from environment variables
-2. SQLModel metadata integration for autogenerate
+2. SQLAlchemy Declarative metadata integration for autogenerate
 3. Type comparison for detecting column type changes
 4. Server default comparison for detecting default value changes
 """
@@ -21,10 +21,10 @@ from sqlalchemy import engine_from_config, pool
 # Add the project root to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import all models to register them with SQLModel metadata
-# This MUST happen before accessing SQLModel.metadata
+# Import all models to register them with the Declarative metadata.
+# This MUST happen before accessing Base.metadata.
 import app.models  # noqa: F401
-from sqlmodel import SQLModel
+from app.models.base import Base
 
 from app.core.config import settings
 
@@ -39,9 +39,12 @@ config.set_main_option("sqlalchemy.url", settings.database_url_sync)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Target metadata for autogenerate support
-# SQLModel.metadata contains all table definitions from imported models
-target_metadata = SQLModel.metadata
+# Target metadata for autogenerate support.
+# Models use the SQLAlchemy 2.0 Declarative ``Base`` (not SQLModel), so
+# ``Base.metadata`` is the registry alembic must compare against. Using
+# ``SQLModel.metadata`` here would be empty and make ``alembic check``
+# report every table as removed.
+target_metadata = Base.metadata
 
 
 def include_object(object, name, type_, reflected, compare_to):
