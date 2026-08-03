@@ -11,8 +11,8 @@ from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
 from sqlalchemy import and_, desc, func, or_, select
 
-from app.config.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.aliases import CurrentUser, DbSession
+from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import NotFoundError
 from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_transaction_query_service, get_transaction_service
@@ -25,6 +25,7 @@ from app.schemas.transaction import (
     CommentCreateRequest,
     RecurringTransactionCreateRequest,
     RecurringTransactionUpdateRequest,
+    TransactionDetailResponse,
     TransactionFeedResponse,
     UpdateAccountRequest,
     UpdateBatchAccountRequest,
@@ -141,11 +142,11 @@ async def search_transactions(
         keyword=keyword,
         min_amount=min_amount,
         max_amount=max_amount,
-        category_keys=category_keys,
-        tags=tags,
+        category_keys=[k.strip() for k in category_keys.split(",") if k.strip()] if category_keys else None,
+        tags=[t.strip() for t in tags.split(",") if t.strip()] if tags else None,
         start_date=start_date,
         end_date=end_date,
-        transaction_type=transaction_type,
+        transaction_types=[transaction_type.upper()] if transaction_type else None,
     )
 
     # Obtain user's primary display currency
@@ -167,7 +168,7 @@ async def search_transactions(
             "size": page_result.size,
             "total": page_result.total,
             "pages": page_result.pages,
-            "has_more": page_result.page < page_result.pages if page_result.pages else False,
+            "hasMore": page_result.page < page_result.pages if page_result.pages else False,
         },
         message="Transactions searched successfully",
     )
@@ -234,7 +235,7 @@ async def get_pending_transactions(
     return success_response(data=items)
 
 
-@router.get("/{transaction_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
+@router.get("/{transaction_id:uuid}", response_model=ResponseEnvelope[TransactionDetailResponse])
 async def get_transaction_detail(
     transaction_id: UUID,
     current_user: CurrentUser,

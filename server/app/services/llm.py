@@ -32,10 +32,13 @@ from app.core.logging import logger
 
 
 class LLMRegistry:
-    """Registry of available LLM models with pre-initialized instances.
+    """Registry of available LLM models with lazily-initialized instances.
 
-    This class maintains a list of LLM configurations and provides
-    methods to retrieve them by name with optional argument overrides.
+    This class maintains a declarative list of LLM configurations and
+    provides methods to retrieve them by name with optional argument
+    overrides. Model instances are materialized on first access (under a
+    lock) instead of at import time, so importing this module constructs no
+    ``ChatOpenAI`` objects and settings are read when actually needed.
 
     Each model entry supports a ``capabilities`` dict declaring feature
     flags such as ``vision`` (multimodal image understanding).  Use
@@ -43,126 +46,150 @@ class LLMRegistry:
     """
 
     _registry_lock = threading.Lock()
+    _initialized = False
 
-    # Class-level variable containing all available LLM models
-    LLMS: list[dict[str, Any]] = [
+    # Declarative registry: entries carry ``llm_kwargs``; the live
+    # ``ChatOpenAI`` instance is materialized into ``entry["llm"]`` by
+    # :meth:`_ensure_initialized` on first access.
+    _MODELS: list[dict[str, Any]] = [
         {
             "name": "gpt-5.6-sol",
             "capabilities": {"vision": True},
-            "llm": ChatOpenAI(
-                model="gpt-5.6-sol",
-                api_key=SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
-                base_url=settings.OPENAI_BASE_URL,
-                timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_completion_tokens=settings.MAX_TOKENS,
-                reasoning_effort="medium",
-                use_responses_api=True,
-            ),
+            "llm_kwargs": {
+                "model": "gpt-5.6-sol",
+                "api_key": SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "base_url": settings.OPENAI_BASE_URL,
+                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
+                "max_completion_tokens": settings.MAX_TOKENS,
+                "reasoning_effort": "medium",
+                "use_responses_api": True,
+            },
         },
         {
             "name": "gpt-5.6-terra",
             "capabilities": {"vision": True},
-            "llm": ChatOpenAI(
-                model="gpt-5.6-terra",
-                api_key=SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
-                base_url=settings.OPENAI_BASE_URL,
-                timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_completion_tokens=settings.MAX_TOKENS,
-                reasoning_effort="low",
-                use_responses_api=True,
-            ),
+            "llm_kwargs": {
+                "model": "gpt-5.6-terra",
+                "api_key": SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "base_url": settings.OPENAI_BASE_URL,
+                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
+                "max_completion_tokens": settings.MAX_TOKENS,
+                "reasoning_effort": "low",
+                "use_responses_api": True,
+            },
         },
         {
             "name": "gpt-5.6-luna",
             "capabilities": {"vision": True},
-            "llm": ChatOpenAI(
-                model="gpt-5.6-luna",
-                api_key=SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
-                base_url=settings.OPENAI_BASE_URL,
-                timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_completion_tokens=settings.MAX_TOKENS,
-                reasoning_effort="low",
-                use_responses_api=True,
-            ),
+            "llm_kwargs": {
+                "model": "gpt-5.6-luna",
+                "api_key": SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "base_url": settings.OPENAI_BASE_URL,
+                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
+                "max_completion_tokens": settings.MAX_TOKENS,
+                "reasoning_effort": "low",
+                "use_responses_api": True,
+            },
         },
         {
             "name": "qwen3.8-max-preview",
             "capabilities": {"vision": True},
-            "llm": ChatOpenAI(
-                model="qwen3.8-max-preview",
-                api_key=SecretStr(settings.QWEN_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
-                base_url=settings.QWEN_BASE_URL or settings.OPENAI_BASE_URL,
-                timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_completion_tokens=settings.MAX_TOKENS,
-                reasoning_effort="low",
-                use_responses_api=True,
-            ),
+            "llm_kwargs": {
+                "model": "qwen3.8-max-preview",
+                "api_key": SecretStr(settings.QWEN_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "base_url": settings.QWEN_BASE_URL or settings.OPENAI_BASE_URL,
+                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
+                "max_completion_tokens": settings.MAX_TOKENS,
+                "reasoning_effort": "low",
+                "use_responses_api": True,
+            },
         },
         {
             "name": "doubao-seed-1-6-251015",
             "capabilities": {"vision": True},
-            "llm": ChatOpenAI(
-                model="doubao-seed-1-6-251015",
-                api_key=SecretStr(settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
-                base_url=settings.DOUBAO_BASE_URL or settings.OPENAI_BASE_URL,
-                timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_completion_tokens=settings.MAX_TOKENS,
-                temperature=settings.DEFAULT_LLM_TEMPERATURE,
-                use_responses_api=True,
-            ),
+            "llm_kwargs": {
+                "model": "doubao-seed-1-6-251015",
+                "api_key": SecretStr(settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "base_url": settings.DOUBAO_BASE_URL or settings.OPENAI_BASE_URL,
+                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
+                "max_completion_tokens": settings.MAX_TOKENS,
+                "temperature": settings.DEFAULT_LLM_TEMPERATURE,
+                "use_responses_api": True,
+            },
         },
         {
             "name": "deepseek-v4-flash",
             "capabilities": {"vision": False},
-            "llm": ChatOpenAI(
-                model="deepseek-v4-flash",
-                api_key=SecretStr(settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
-                base_url=settings.DEEPSEEK_BASE_URL or settings.OPENAI_BASE_URL,
-                timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_completion_tokens=settings.MAX_TOKENS,
-                temperature=settings.DEFAULT_LLM_TEMPERATURE,
-            ),
+            "llm_kwargs": {
+                "model": "deepseek-v4-flash",
+                "api_key": SecretStr(settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "base_url": settings.DEEPSEEK_BASE_URL or settings.OPENAI_BASE_URL,
+                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
+                "max_completion_tokens": settings.MAX_TOKENS,
+                "temperature": settings.DEFAULT_LLM_TEMPERATURE,
+            },
         },
         {
             "name": "qwen3.6-genesis-35b",
             "provider": "ollama",
             "capabilities": {"vision": False},
-            "llm": ChatOpenAI(
-                model="qwen3.6-genesis-35b",
-                api_key=SecretStr(settings.OLLAMA_API_KEY or "ollama"),
-                base_url=settings.OLLAMA_BASE_URL,
-                timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_completion_tokens=512,
-                temperature=0.1,
-                reasoning_effort="low",
-                extra_body={
+            "llm_kwargs": {
+                "model": "qwen3.6-genesis-35b",
+                "api_key": SecretStr(settings.OLLAMA_API_KEY or "ollama"),
+                "base_url": settings.OLLAMA_BASE_URL,
+                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
+                "max_completion_tokens": 512,
+                "temperature": 0.1,
+                "reasoning_effort": "low",
+                "extra_body": {
                     "options": {
                         "num_predict": 512,
                         "num_ctx": 4096,
                     }
                 },
-            ),
+            },
         },
         {
             "name": "translategemma:4b-it",
             "provider": "ollama",
             "capabilities": {"vision": False},
-            "llm": ChatOpenAI(
-                model="translategemma:4b-it",
-                api_key=SecretStr(settings.OLLAMA_API_KEY or "ollama"),
-                base_url=settings.OLLAMA_BASE_URL,
-                timeout=settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                max_completion_tokens=512,
-                temperature=0.1,
-                extra_body={
+            "llm_kwargs": {
+                "model": "translategemma:4b-it",
+                "api_key": SecretStr(settings.OLLAMA_API_KEY or "ollama"),
+                "base_url": settings.OLLAMA_BASE_URL,
+                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
+                "max_completion_tokens": 512,
+                "temperature": 0.1,
+                "extra_body": {
                     "options": {
                         "num_predict": 512,
                         "num_ctx": 4096,
                     }
                 },
-            ),
+            },
         },
     ]
+
+    @classmethod
+    def _build_llm(cls, entry: dict[str, Any]) -> ChatOpenAI:
+        """Construct the ChatOpenAI instance for a declarative registry entry."""
+        return ChatOpenAI(**entry["llm_kwargs"])
+
+    @classmethod
+    def _ensure_initialized(cls) -> None:
+        """Materialize all model instances exactly once (thread-safe)."""
+        if not cls._initialized:
+            with cls._registry_lock:
+                if not cls._initialized:
+                    for entry in cls._MODELS:
+                        entry["llm"] = cls._build_llm(entry)
+                    cls._initialized = True
+
+    @classmethod
+    def _llms(cls) -> list[dict[str, Any]]:
+        """Return the materialized registry, initializing on first access."""
+        cls._ensure_initialized()
+        return cls._MODELS
 
     @classmethod
     def _is_ollama_model(cls, model_name: str) -> tuple[bool, str]:
@@ -179,7 +206,7 @@ class LLMRegistry:
         if model_name.startswith("ollama/"):
             return True, model_name[7:]
 
-        for entry in cls.LLMS:
+        for entry in cls._llms():
             if entry["name"] == model_name and entry.get("provider") == "ollama":
                 return True, model_name
 
@@ -203,7 +230,7 @@ class LLMRegistry:
 
         # Find the model in the registry
         model_entry = None
-        for entry in cls.LLMS:
+        for entry in cls._llms():
             if entry["name"] in (model_name, clean_model_name):
                 model_entry = entry
                 break
@@ -249,8 +276,8 @@ class LLMRegistry:
             # Add to registry so it can be used in fallback loop safely
             with cls._registry_lock:
                 # Double-check inside lock to avoid race conditions
-                if not any(e["name"] in (model_name, clean_model_name) for e in cls.LLMS):
-                    cls.LLMS.append(model_entry)
+                if not any(e["name"] in (model_name, clean_model_name) for e in cls._llms()):
+                    cls._llms().append(model_entry)
 
         # If user provides kwargs, create a new instance with those args
         if kwargs:
@@ -290,7 +317,7 @@ class LLMRegistry:
         Returns:
             List of LLM names
         """
-        return [entry["name"] for entry in cls.LLMS]
+        return [entry["name"] for entry in cls._llms()]
 
     @classmethod
     def get_model_at_index(cls, index: int) -> dict[str, Any]:
@@ -302,9 +329,9 @@ class LLMRegistry:
         Returns:
             Model entry dict
         """
-        if 0 <= index < len(cls.LLMS):
-            return cls.LLMS[index]
-        return cls.LLMS[0]  # Wrap around to first model
+        if 0 <= index < len(cls._llms()):
+            return cls._llms()[index]
+        return cls._llms()[0]  # Wrap around to first model
 
     @classmethod
     def supports_vision(cls, model_name: str | None = None) -> bool:
@@ -326,7 +353,7 @@ class LLMRegistry:
             return settings.LLM_SUPPORTS_VISION
 
         target = model_name or settings.DEFAULT_LLM_MODEL
-        for entry in cls.LLMS:
+        for entry in cls._llms():
             if entry["name"] == target:
                 caps = entry.get("capabilities", {})
                 return bool(caps.get("vision", False))
@@ -364,7 +391,7 @@ class LLMService:
         except Exception as e:
             # Default model not found, use first model
             self._default_model_index = 0
-            self._llm = LLMRegistry.LLMS[0]["llm"]
+            self._llm = LLMRegistry._llms()[0]["llm"]
             logger.warning(
                 "default_model_not_found_using_first",
                 requested=settings.DEFAULT_LLM_MODEL,
@@ -438,7 +465,7 @@ class LLMService:
             RuntimeError: If all models fail after retries
         """
         all_names = LLMRegistry.get_all_names()
-        total_models = len(LLMRegistry.LLMS)
+        total_models = len(LLMRegistry._llms())
 
         # Determine initial model index
         starting_index = self._default_model_index
@@ -506,7 +533,7 @@ class LLMService:
                     logger.error(
                         "all_models_failed",
                         models_tried=models_tried,
-                        starting_model=LLMRegistry.LLMS[starting_index]["name"],
+                        starting_model=LLMRegistry._llms()[starting_index]["name"],
                     )
                     break
 
@@ -555,5 +582,27 @@ class LLMService:
         return new_service
 
 
-# Create global LLM service instance
-llm_service = LLMService()
+# Lazy global LLM service singleton.
+#
+# The underlying LLMService (and with it the registry's ChatOpenAI instances)
+# is constructed on first attribute access instead of at import time, so
+# importing this module has no side effects. `patch("app.services.llm.llm_service.call", ...)`
+# still works: setattr lands on the proxy and shadows the forwarded attribute.
+class _LazyLLMService:
+    """Thread-safe lazy singleton proxy for :class:`LLMService`."""
+
+    _instance: LLMService | None = None
+    _lock = threading.Lock()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._get_instance(), name)
+
+    def _get_instance(self) -> LLMService:
+        if _LazyLLMService._instance is None:
+            with _LazyLLMService._lock:
+                if _LazyLLMService._instance is None:
+                    _LazyLLMService._instance = LLMService()
+        return _LazyLLMService._instance
+
+
+llm_service = _LazyLLMService()

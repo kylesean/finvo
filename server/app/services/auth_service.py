@@ -24,7 +24,7 @@ from app.core.exceptions import AuthenticationError, AuthErrorCode, BusinessErro
 from app.core.logging import logger
 from app.models.base import utc_now
 from app.models.user import User
-from app.utils.auth import create_access_token
+from app.utils.auth_utils import create_access_token
 
 
 class AuthService:

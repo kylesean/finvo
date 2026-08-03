@@ -27,7 +27,7 @@ from app.core.exceptions import (
 )
 from app.core.logging import bind_context, logger
 from app.models.user import User
-from app.utils.auth import (
+from app.utils.auth_utils import (
     get_token_jti,
     get_token_remaining_seconds,
     verify_token,

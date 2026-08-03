@@ -7,7 +7,6 @@ Authentication: All endpoints use access token (user authentication).
 Authorization: Session ownership is verified via get_authorized_session.
 """
 
-import asyncio
 import json
 from collections.abc import AsyncGenerator
 from functools import lru_cache
@@ -23,13 +22,14 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.api.v1.auth import get_authorized_session
 from app.core.aliases import CurrentUser, DbSession
+from app.core.background_tasks import background_task_manager
 from app.core.config import settings
 from app.core.database import get_session_context
-from app.core.exceptions import AppException, CommonErrorCode, to_client_error
+from app.core.exceptions import AppException, CommonErrorCode, ValidationError, to_client_error
 from app.core.langgraph.simple_agent import SimpleLangChainAgent as LangGraphAgent
 from app.core.limiter import limiter
 from app.core.logging import logger
-from app.core.responses import ResponseEnvelope, error_response, get_error_code_int, success_response
+from app.core.responses import ResponseEnvelope, success_response
 from app.models.session import Session
 from app.models.user import User
 from app.repositories.session_repository import SessionRepository
@@ -57,9 +57,6 @@ def get_agent() -> LangGraphAgent:
     return LangGraphAgent()
 
 
-_background_memory_tasks: set[asyncio.Task[Any]] = set()
-
-
 async def _update_memory_background(
     agent: LangGraphAgent,
     user_uuid: UUID,
@@ -68,8 +65,10 @@ async def _update_memory_background(
 ) -> None:
     """Update long-term memory in background (fire-and-forget).
 
-    This function runs as a background task to avoid blocking
-    the HTTP response after streaming completes.
+    This function runs as a tracked background task (via
+    ``background_task_manager``) to avoid blocking the HTTP response after
+    streaming completes. The manager holds a strong reference until the task
+    finishes and waits for it on application shutdown.
     """
     logger.debug(
         "background_memory_update_started",
@@ -78,7 +77,7 @@ async def _update_memory_background(
         message_count=len(messages),
     )
     try:
-        await agent._update_long_term_memory(
+        await agent.update_long_term_memory(
             user_uuid=user_uuid,
             messages=messages,
             session_id=session_id,
@@ -140,6 +139,22 @@ async def resolve_chat_session(
                 user_uuid=current_user.uuid,
             )
             return session, True
+
+
+def _sse_error_response(exc: Exception) -> StreamingResponse:
+    """Build an SSE stream carrying a single error frame.
+
+    Streaming endpoints are consumed as ``text/event-stream``; a JSON error
+    body would be silently dropped by the client's SSE parser, so pre-stream
+    failures are serialized as an ``error`` GenUI event frame instead.
+    """
+    error_event = GenUIEvent(type="error", content=to_client_error(exc))
+    frame = f"data: {json.dumps(error_event.model_dump(mode='json'), ensure_ascii=False)}\n\n"
+
+    async def _error_generator() -> AsyncGenerator[str]:
+        yield frame
+
+    return StreamingResponse(_error_generator(), media_type="text/event-stream")
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -229,14 +244,11 @@ async def chat_stream(
         user_uuid=current_user.uuid,
         message_count=len(chat_request.messages) if chat_request.messages else 0,
     )
-    session, is_new = await resolve_chat_session(session_id, current_user)
-    logger.info(
-        "chat_stream_session_resolved",
-        resolved_session_id=str(session.id),
-        is_new_session=is_new,
-        original_request_session_id=session_id,
-    )
 
+    # Setup that must run BEFORE streaming begins (session resolution, title
+    # generation, agent lookup). Failures here are serialized as an SSE error
+    # frame instead of a JSON error body — the client is already parsing the
+    # response as text/event-stream and would silently drop a JSON response.
     # Extract user message
     user_message = ""
     if chat_request.messages:
@@ -270,26 +282,44 @@ async def chat_stream(
         # Only take primary subtag (e.g. "fr-FR" → "fr")
         app_language = app_language.split("-")[0].split("_")[0].lower()
 
-    # For new sessions, generate and save title synchronously (fast, no LLM)
-    if is_new:
-        if user_message:
-            title = generate_session_title(user_message)
-        elif attachment_ids:
-            # Image-only message: use localized fallback title
-            _image_titles = {"zh": "图片识别", "en": "Image Analysis", "ja": "画像認識", "ko": "이미지 분석"}
-            lang_key = app_language.split("-")[0].lower()
-            title = _image_titles.get(lang_key, _image_titles["en"])
-        else:
-            title = None
+    try:
+        session, is_new = await resolve_chat_session(session_id, current_user)
 
-        if title:
-            async with get_session_context() as db:
-                repo = SessionRepository(db)
-                await repo.update_name(session.id, title)
-                await db.commit()
-            logger.info("session_title_set", session_id=session.id, title=title)
+        # For new sessions, generate and save title synchronously (fast, no LLM)
+        if is_new:
+            if user_message:
+                title = generate_session_title(user_message)
+            elif attachment_ids:
+                # Image-only message: use localized fallback title
+                _image_titles = {"zh": "图片识别", "en": "Image Analysis", "ja": "画像認識", "ko": "이미지 분석"}
+                lang_key = app_language.split("-")[0].lower()
+                title = _image_titles.get(lang_key, _image_titles["en"])
+            else:
+                title = None
 
-    agent = get_agent()
+            if title:
+                async with get_session_context() as db:
+                    repo = SessionRepository(db)
+                    await repo.update_name(session.id, title)
+                    await db.commit()
+                logger.info("session_title_set", session_id=session.id, title=title)
+
+        agent = get_agent()
+    except Exception as exc:
+        logger.error(
+            "chat_stream_setup_failed",
+            request_session_id=session_id,
+            user_uuid=current_user.uuid,
+            error=str(exc),
+            exc_info=True,
+        )
+        return _sse_error_response(exc)
+    logger.info(
+        "chat_stream_session_resolved",
+        resolved_session_id=str(session.id),
+        is_new_session=is_new,
+        original_request_session_id=session_id,
+    )
 
     async def event_generator() -> AsyncGenerator[str]:
         try:
@@ -343,8 +373,11 @@ async def chat_stream(
                     except ValueError:
                         pass
 
-                # Update long-term memory in background (fire-and-forget)
-                # IMPORTANT: Don't await here to avoid blocking HTTP response
+                # Update long-term memory in background (fire-and-forget).
+                # IMPORTANT: Don't await here to avoid blocking HTTP response.
+                # The task is tracked by background_task_manager (strong ref +
+                # awaited on shutdown), so it can never be GC'd mid-flight or
+                # leak past application shutdown.
                 if user_message and session.user_uuid:
                     ai_response = agent.get_last_response()
                     memory_messages = [
@@ -353,8 +386,7 @@ async def chat_stream(
                     if ai_response:
                         memory_messages.append({"role": "assistant", "content": ai_response})
 
-                    # Create background task - this won't block the response
-                    bg_task = asyncio.create_task(
+                    background_task_manager.spawn(
                         _update_memory_background(
                             agent=agent,
                             user_uuid=session.user_uuid,
@@ -362,8 +394,11 @@ async def chat_stream(
                             session_id=session.id,
                         )
                     )
-                    _background_memory_tasks.add(bg_task)
-                    bg_task.add_done_callback(_background_memory_tasks.discard)
+
+                # Release the request-scoped stream processor now that the
+                # collected response has been read; without this the ContextVar
+                # could leak into a reused task context.
+                agent.reset_stream_context()
 
         except Exception as e:
             logger.error("stream_error", error=str(e), exc_info=True)
@@ -411,10 +446,9 @@ async def update_session_state(
             session_id=session.id,
             received_keys=list(updates.keys()),
         )
-        return error_response(
-            code=get_error_code_int("VALIDATION_ERROR"),
-            message="No allowed state keys provided",
-            http_status=422,
+        raise ValidationError(
+            "No allowed state keys provided",
+            field_errors={"state": "at least one of ui_mode, tool_name, tool_params is required"},
         )
 
     if len(filtered_updates) != len(updates):
@@ -691,9 +725,21 @@ async def resume_session(
     Returns:
         StreamingResponse: SSE stream response.
     """
-    # Verify session ownership
-    session = await get_authorized_session(session_id, current_user, db)
-    agent = get_agent()
+    # Verify session ownership. Pre-stream failures are serialized as an SSE
+    # error frame (same rationale as chat_stream) rather than a JSON body the
+    # SSE client would silently drop.
+    try:
+        session = await get_authorized_session(session_id, current_user, db)
+        agent = get_agent()
+    except Exception as exc:
+        logger.error(
+            "resume_session_setup_failed",
+            session_id=session_id,
+            user_uuid=current_user.uuid,
+            error=str(exc),
+            exc_info=True,
+        )
+        return _sse_error_response(exc)
 
     async def event_generator() -> AsyncGenerator[str]:
         try:
@@ -706,6 +752,8 @@ async def resume_session(
             logger.error("resume_stream_error", error=str(e), exc_info=True)
             error_event = GenUIEvent(type="error", content=to_client_error(e))
             yield f"data: {json.dumps(error_event.model_dump(mode='json'), ensure_ascii=False)}\n\n"
+        finally:
+            agent.reset_stream_context()
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 

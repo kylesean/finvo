@@ -41,7 +41,7 @@ llm_stream_duration_seconds = Histogram(
 async def metrics_endpoint(request: Request) -> Response:
     """Expose Prometheus metrics in the text exposition format.
 
-    HTTP request metrics are collected by MetricsMiddleware (app.core.middleware).
+    HTTP request metrics are collected by MetricsMiddleware (app.core.middlewares).
 
     If settings.METRICS_TOKEN is set, requests must present it as a Bearer
     token to avoid leaking internal metrics publicly.

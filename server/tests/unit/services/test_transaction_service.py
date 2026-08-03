@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from app.models.transaction import Transaction
 from app.models.user import User
+from app.services.transaction_query_service import TransactionQueryService
 from app.services.transaction_service import TransactionService
 
 
@@ -85,18 +86,18 @@ async def test_get_transaction_feed_pagination(db_session):
     await db_session.commit()
 
     # 3. Test Pagination (Page 1, limit 10)
-    service = TransactionService(db_session)
-    result_p1 = await service.get_transaction_feed(user_uuid=user_uuid, page=1, limit=10)
+    service = TransactionQueryService(db_session)
+    result_p1 = await service.get_feed(user_uuid=str(user_uuid), page=1, per_page=10)
 
-    assert len(result_p1["data"]) == 10
-    assert result_p1["meta"]["total"] == 15
-    assert result_p1["meta"]["has_more"] is True
+    assert len(result_p1.items) == 10
+    assert result_p1.total == 15
+    assert result_p1.has_more is True
 
     # 4. Test Pagination (Page 2, limit 10)
-    result_p2 = await service.get_transaction_feed(user_uuid=user_uuid, page=2, limit=10)
+    result_p2 = await service.get_feed(user_uuid=str(user_uuid), page=2, per_page=10)
 
-    assert len(result_p2["data"]) == 5
-    assert result_p2["meta"]["has_more"] is False
+    assert len(result_p2.items) == 5
+    assert result_p2.has_more is False
 
 
 @pytest.mark.asyncio

@@ -18,11 +18,11 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config.currency import CURRENCY_SYMBOLS, SUPPORTED_CURRENCIES
+from app.core.constants.currency import CURRENCY_SYMBOLS, SUPPORTED_CURRENCIES
 from app.core.exceptions import BusinessError
 from app.core.logging import logger
 
-# Re-exported from the single source of truth (app.config.currency) so callers
+# Re-exported from the single source of truth (app.core.constants.currency) so callers
 # importing these from currency_utils keep working without a second definition.
 __all__ = [
     "BASE_CURRENCY",

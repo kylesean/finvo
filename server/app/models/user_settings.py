@@ -12,7 +12,7 @@ from uuid import UUID
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.config.currency import PROJECT_DEFAULT_CURRENCY
+from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.models.base import Base, col
 
 if TYPE_CHECKING:

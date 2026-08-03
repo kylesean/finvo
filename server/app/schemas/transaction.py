@@ -350,34 +350,152 @@ class TransactionResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
 
+class TransactionCommentItem(BaseModel):
+    """Transaction comment item in detail response (camelCase serialization)."""
+
+    id: str
+    transaction_id: str = Field(..., serialization_alias="transactionId")
+    user_uuid: str = Field(..., serialization_alias="userUuid")
+    user_name: str = Field("Unknown", serialization_alias="userName")
+    user_avatar_url: str | None = Field(None, serialization_alias="userAvatarUrl")
+    parent_comment_id: str | None = Field(None, serialization_alias="parentCommentId")
+    comment_text: str = Field(..., serialization_alias="commentText")
+    mentioned_user_ids: list[str] = Field(default_factory=list, serialization_alias="mentionedUserIds")
+    created_at: str | None = Field(None, serialization_alias="createdAt")
+    updated_at: str | None = Field(None, serialization_alias="updatedAt")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class TransactionAttachmentItem(BaseModel):
+    """Transaction attachment item in detail response (camelCase serialization)."""
+
+    id: str
+    filename: str
+    mime_type: str = Field(..., serialization_alias="mimeType")
+    size: int
+    url: str
+    is_image: bool = Field(..., serialization_alias="isImage")
+    created_at: str | None = Field(None, serialization_alias="createdAt")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class TransactionSpaceItem(BaseModel):
+    """Associated shared space item in detail response."""
+
+    id: str
+    name: str
+
+
 class TransactionDetailResponse(BaseModel):
-    """transaction detail response"""
+    """Transaction detail response (camelCase aliases).
+
+    Built by ``TransactionCRUDService.get_transaction_detail`` and serialized
+    with ``model_dump(by_alias=True)``; the shape is the GenUI client contract.
+    """
 
     id: str  # UUID as string
-    user_uuid: str
+    user_uuid: str = Field(..., serialization_alias="userUuid")
     type: str
-    amount: str
-    amount_original: str
+    amount: float
+    amount_original: str | None = Field(None, serialization_alias="amountOriginal")
+    amount_base: float = Field(..., serialization_alias="amountBase")
     currency: str
-    exchange_rate: str | None
-    category_key: str
-    description: str | None
-    transaction_at: datetime
-    transaction_timezone: str
-    tags: list[str] | None
-    location: str | None
-    latitude: str | None
-    longitude: str | None
-    source: str
-    status: str
-    raw_input: str
-    source_account_id: str | None = None  # UUID as string
-    target_account_id: str | None = None  # UUID as string
-    shared_space_id: int | None
-    created_at: datetime
-    updated_at: datetime
+    base_currency: str = Field(..., serialization_alias="baseCurrency")
+    exchange_rate: str | None = Field(None, serialization_alias="exchangeRate")
+    category_key: str | None = Field(None, serialization_alias="categoryKey")
+    raw_input: str = Field("", serialization_alias="rawInput")
+    description: str | None = None
+    transaction_at: str | None = Field(None, serialization_alias="transactionAt")
+    transaction_timezone: str | None = Field(None, serialization_alias="transactionTimezone")
+    source_account_id: str | None = Field(None, serialization_alias="sourceAccountId")
+    target_account_id: str | None = Field(None, serialization_alias="targetAccountId")
+    tags: list[str] = Field(default_factory=list)
+    location: str | None = None
+    latitude: str | None = None
+    longitude: str | None = None
+    source: str | None = None
+    status: str = "CLEARED"
+    created_at: str | None = Field(None, serialization_alias="createdAt")
+    updated_at: str | None = Field(None, serialization_alias="updatedAt")
+    comments: list[TransactionCommentItem] = Field(default_factory=list)
+    comment_count: int = Field(0, serialization_alias="commentCount")
+    spaces: list[TransactionSpaceItem] = Field(default_factory=list)
+    source_thread_id: str | None = Field(None, serialization_alias="sourceThreadId")
+    attachments: list[TransactionAttachmentItem] = Field(default_factory=list)
+    display: TransactionDisplayValue
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class LinkedAccountInfo(BaseModel):
+    """Account linked to a transaction (create result)."""
+
+    id: str
+    name: str
+    type: str
+
+
+class TransferInfo(BaseModel):
+    """Source/target account pair for a transfer (create result)."""
+
+    source_account: LinkedAccountInfo = Field(..., serialization_alias="source_account")
+    target_account: LinkedAccountInfo = Field(..., serialization_alias="target_account")
+
+
+class TransactionCreateResult(BaseModel):
+    """Typed shape of ``TransactionCRUDService.create_transaction`` output.
+
+    Returned to LangGraph tools / GenUI rendering; the snake_case keys are the
+    contract, so field names match the output exactly (no aliases needed).
+    """
+
+    success: bool
+    transaction_id: str
+    amount: float
+    currency: str
+    type: str
+    category_key: str
+    subject: str
+    intent: str
+    tags: list[str] = Field(default_factory=list)
+    transaction_at: str
+    status: str = "success"
+    raw_input: str = ""
+    account_linked: bool
+    linked_account: LinkedAccountInfo | None = None
+    transfer_info: TransferInfo | None = None
+    link_failed_transaction_ids: list[str] = Field(default_factory=list)
+
+
+class TransactionUpdateResult(BaseModel):
+    """Typed shape of ``TransactionCRUDService.update_transaction`` output.
+
+    The mixed snake/camel key set (``amount_base`` vs ``baseCurrency``) and the
+    ``_intent`` / ``_changed_fields`` flags are the GenUI DataModelUpdate
+    contract; serialized with ``model_dump(by_alias=True)`` so the output
+    matches it exactly.
+    """
+
+    success: bool
+    transaction_id: str
+    amount: float
+    amount_original: float
+    amount_base: float
+    currency: str
+    base_currency: str = Field(..., serialization_alias="baseCurrency")
+    type: str
+    category_key: str | None = None
+    raw_input: str = ""
+    tags: list[str] = Field(default_factory=list)
+    transaction_at: str | None = None
+    updated_at: str | None = None
+    intent: str = Field("update", serialization_alias="_intent")
+    changed_fields: list[str] = Field(default_factory=list, serialization_alias="_changed_fields")
+    message: str = "Transaction updated"
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class CommentResponse(BaseModel):

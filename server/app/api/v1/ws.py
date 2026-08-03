@@ -20,7 +20,7 @@ from starlette.websockets import WebSocketState
 from app.core.dependencies import get_redis_client, is_token_revoked
 from app.core.logging import logger
 from app.core.ws_manager import ws_manager
-from app.utils.auth import verify_token
+from app.utils.auth_utils import verify_token
 
 router = APIRouter(tags=["websocket"])
 

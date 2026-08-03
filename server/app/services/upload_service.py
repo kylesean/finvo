@@ -397,7 +397,7 @@ class UploadService:
     # Public Methods
     # =========================================================================
 
-    async def _resolve_attachment(self, attachment_id: UUID, user_uuid: UUID) -> Attachment:
+    async def resolve_attachment(self, attachment_id: UUID, user_uuid: UUID) -> Attachment:
         """Load an attachment and enforce owner / shared-space access."""
         stmt = select(Attachment).where(Attachment.id == attachment_id)
         result = await self.db.execute(stmt)
@@ -439,7 +439,7 @@ class UploadService:
 
         return attachment
 
-    async def _get_attachment_adapter(self, attachment: Attachment) -> tuple[StorageAdapter | None, str | None]:
+    async def get_attachment_adapter(self, attachment: Attachment) -> tuple[StorageAdapter | None, str | None]:
         """Resolve the storage adapter + provider type for an attachment's config.
 
         Returns ``(None, None)`` for legacy attachments without a config, which
@@ -458,15 +458,15 @@ class UploadService:
 
         Only valid for local storage. Remote (S3/WebDAV) attachments must be
         served through their adapter-issued signed URL instead — see
-        ``_get_attachment_adapter``.
+        ``get_attachment_adapter``.
 
         Args:
             attachment_id: Attachment ID
             user_uuid: User UUID
         """
-        attachment = await self._resolve_attachment(attachment_id, user_uuid)
+        attachment = await self.resolve_attachment(attachment_id, user_uuid)
 
-        _, provider_type = await self._get_attachment_adapter(attachment)
+        _, provider_type = await self.get_attachment_adapter(attachment)
         if provider_type and provider_type != ProviderType.LOCAL_UPLOADS.value:
             raise BusinessError(
                 message="File is stored on remote storage; use the signed URL",
@@ -487,9 +487,9 @@ class UploadService:
 
     async def delete_file(self, attachment_id: UUID, user_uuid: UUID) -> bool:
         """Delete attachment file (through its storage backend) and DB record."""
-        attachment = await self._resolve_attachment(attachment_id, user_uuid)
+        attachment = await self.resolve_attachment(attachment_id, user_uuid)
 
-        adapter, provider_type = await self._get_attachment_adapter(attachment)
+        adapter, provider_type = await self.get_attachment_adapter(attachment)
         if provider_type and provider_type != ProviderType.LOCAL_UPLOADS.value:
             # Remote backend: delete the object via the adapter so no orphaned
             # object is left behind on S3/WebDAV.

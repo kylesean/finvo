@@ -422,7 +422,7 @@ async def search_transactions(
             "total": result.total,
             "page": result.page,
             "per_page": result.per_page,
-            "has_more": result.has_more,
+            "hasMore": result.has_more,
             "metadata": {
                 "keyword": keyword,
                 "start_date": start_date,

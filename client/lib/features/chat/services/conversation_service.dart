@@ -113,7 +113,7 @@ class ConversationService {
               final int totalPages = data['pages'] as int? ?? 1;
               final int size = data['size'] as int? ?? perPage;
               final int total = data['total'] as int? ?? conversations.length;
-              final bool hasMore = data['has_more'] as bool? ?? false;
+              final bool hasMore = data['hasMore'] as bool? ?? false;
 
               return PaginatedConversations(
                 data: conversations,

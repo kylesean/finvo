@@ -12,7 +12,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from app.config.currency import PROJECT_DEFAULT_CURRENCY
+from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.schemas.transaction import TransactionDisplayValue, TransactionResponse
 
 

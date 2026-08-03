@@ -46,6 +46,10 @@ from app.services.memory import MemoryService, get_memory_service
 # is a module-level singleton, but each asyncio task receives its own
 # ContextVar context, so concurrent requests using this context get their own
 # processor and never share mutable stream state (M17).
+#
+# There is deliberately NO shared fallback instance: reading the collected
+# response without an active stream in this context returns "" instead of
+# leaking another request's data.
 _current_stream_processor: ContextVar[StreamProcessor | None] = ContextVar("current_stream_processor", default=None)
 
 
@@ -79,7 +83,6 @@ class SimpleLangChainAgent:
         self._checkpointer: AsyncPostgresSaver | None = checkpointer
         self._memory_service: MemoryService | None = None
         self._middlewares: list[Any] | None = None
-        self._stream_processor = StreamProcessor()
 
     # =========================================================================
     # Internal Component Initialization
@@ -128,17 +131,30 @@ class SimpleLangChainAgent:
         return self._middlewares
 
     def get_last_response(self) -> str:
-        """Get the AI response text from the last stream.
+        """Get the AI response text from the last stream in the current request.
 
-        Resolves the per-request ``StreamProcessor`` so concurrent requests do
-        not read each other's collected response. Falls back to a shared
-        instance only when no streaming has occurred in this request context.
+        Resolves the per-request ``StreamProcessor`` bound to this task's
+        context, so concurrent requests never read each other's collected
+        response. Returns ``""`` when no stream has run in this context
+        (e.g. a non-streaming call or an early failure) instead of falling
+        back to shared state.
 
         Returns:
             str: The collected AI response text from the most recent stream
         """
-        processor = _current_stream_processor.get() or self._stream_processor
+        processor = _current_stream_processor.get()
+        if processor is None:
+            return ""
         return processor.get_last_response()
+
+    def reset_stream_context(self) -> None:
+        """Release the request-scoped stream processor bound to this context.
+
+        Call after reading ``get_last_response()`` (or when the stream ends
+        without a reader) so the ContextVar does not leak into a reused task
+        context (e.g. pytest worker tasks or pooled executors).
+        """
+        _current_stream_processor.set(None)
 
     def _new_stream_processor(self) -> StreamProcessor:
         """Create a request-scoped StreamProcessor bound to this task's context.
@@ -904,7 +920,7 @@ class SimpleLangChainAgent:
                             )
         return attachments
 
-    async def _update_long_term_memory(
+    async def update_long_term_memory(
         self,
         user_uuid: UUID | None,
         messages: list[dict[str, Any]],
@@ -912,7 +928,7 @@ class SimpleLangChainAgent:
         category: str = "conversation",
         additional_metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Update long-term memory (background task).
+        """Update long-term memory (safe to run as a background task).
 
         Uses MemoryService to extract and store relevant information
         from the conversation.

@@ -6,16 +6,10 @@ API endpoints (``api/v1/transaction.py``), LangGraph tools
 (``analyze_spending.py``). Its API centers on ``search()`` +
 ``TransactionQueryParams``.
 
-NOTE: A separate, slimmer ``TransactionQueryService`` exists at
-``app/services/transaction/query_service.py`` exposing
-``get_transaction_feed`` / ``search_transactions``. That one is consumed
-only by the ``TransactionService`` Facade (``transaction_service.py``) and
-is re-exported from ``app/services/transaction/__init__.py``. The two classes
-have **different APIs and responsibilities** (full query vs. facade-internal
-helper) and are intentionally not merged — merging would force a wide rewrite
-of callers for little benefit in a self-hosted app. When you need the full
-query API, import from here; when extending the Facade, use the
-``transaction.query_service`` version.
+This module is the **single** query implementation: the former facade-internal
+``TransactionFacadeQueryHelper`` (``app/services/transaction/query_service.py``)
+was removed because its ``get_transaction_feed`` / ``search_transactions`` had
+no production callers — only the facade delegating into it and a unit test.
 
 Best practice: Business logic lives here, not in API routes or tool definitions.
 """
@@ -25,17 +19,18 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, cast as type_cast
+from typing import Any
 from uuid import UUID
 
 from dateutil import parser as dateutil_parser, tz
 from pydantic import BaseModel, Field
-from sqlalchemy import String, and_, cast as sql_cast, desc, func, or_, select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import db_manager
 from app.core.logging import logger
 from app.models.transaction import Transaction
+from app.repositories.transaction_repository import TransactionRepository
 from app.schemas.transaction import TransactionDisplayValue
 from app.utils.currency_utils import get_user_display_currency
 
@@ -236,69 +231,31 @@ class TransactionQueryService:
             TransactionQueryResult containing paginated transaction list.
         """
         try:
-            # Build base query conditions
-            conditions = [Transaction.user_uuid == UUID(user_uuid)]
+            # Delegate filtered-statement building to the repository (single
+            # source of truth, shared with the /search endpoint).
+            start_dt: datetime | None = _parse_date_to_utc(params.start_date) if params.start_date else None
+            end_dt: datetime | None = _parse_date_to_utc(params.end_date, end_of_day=True) if params.end_date else None
 
-            # Keyword search: match description, location, category_key, and tags.
-            # A whitespace-only keyword would otherwise strip to an empty pattern
-            # ("%%") that matches every row.
-            keyword = params.keyword.strip() if params.keyword else ""
-            if keyword:
-                keyword_pattern = f"%{keyword}%"
-                conditions.append(
-                    type_cast(
-                        Any,
-                        or_(
-                            Transaction.description.ilike(keyword_pattern),
-                            Transaction.location.ilike(keyword_pattern),
-                            Transaction.category_key.ilike(keyword_pattern),
-                            sql_cast(Transaction.tags, String).ilike(keyword_pattern),
-                        ),
-                    )
-                )
-
-            # Amount range filter - func.abs returns ColumnElement which may need cast or ignore
-            if params.min_amount is not None:
-                conditions.append(func.abs(Transaction.amount) >= params.min_amount)
-            if params.max_amount is not None:
-                conditions.append(func.abs(Transaction.amount) <= params.max_amount)
-
-            # Transaction type filter
-            if params.transaction_types:
-                type_values = [t.value for t in params.transaction_types]
-                conditions.append(Transaction.type.in_(type_values))
-
-            # Category filter
-            if params.category_keys:
-                conditions.append(Transaction.category_key.in_(params.category_keys))
-
-            # Tags filter (JSONB contains)
-            if params.tags:
-                for tag in params.tags:
-                    conditions.append(Transaction.tags.contains([tag]))
-
-            # Date range filter
-            if params.start_date:
-                start_dt = _parse_date_to_utc(params.start_date, end_of_day=False)
-                if start_dt:
-                    conditions.append(Transaction.transaction_at >= start_dt)
-
-            if params.end_date:
-                end_dt = _parse_date_to_utc(params.end_date, end_of_day=True)
-                if end_dt:
-                    conditions.append(Transaction.transaction_at <= end_dt)
-
-            # Specific date filter (used for home calendar)
+            # Specific date filter (used for home calendar) narrows the range.
             if params.date:
-                day_start = _parse_date_to_utc(params.date, end_of_day=False)
+                day_start = _parse_date_to_utc(params.date)
                 day_end = _parse_date_to_utc(params.date, end_of_day=True)
-                if day_start and day_end:
-                    conditions.append(Transaction.transaction_at >= day_start)
-                    conditions.append(Transaction.transaction_at <= day_end)
+                if day_start is not None:
+                    start_dt = day_start if start_dt is None else max(start_dt, day_start)
+                if day_end is not None:
+                    end_dt = day_end if end_dt is None else min(end_dt, day_end)
 
-            # Build query statement
-            # Mypy cannot handle the *conditions expansion with SQLModel fields correctly
-            stmt = select(Transaction).where(and_(True, *conditions))
+            stmt = TransactionRepository(self.db).search_query(
+                UUID(user_uuid),
+                keyword=params.keyword.strip() if params.keyword else None,
+                min_amount=params.min_amount,
+                max_amount=params.max_amount,
+                category_keys=params.category_keys,
+                tags=params.tags,
+                start_date=start_dt,
+                end_date=end_dt,
+                transaction_types=[t.value for t in params.transaction_types] if params.transaction_types else None,
+            )
 
             # Count total matching items
             count_stmt = select(func.count()).select_from(stmt.subquery())
@@ -309,9 +266,7 @@ class TransactionQueryService:
             pages = (total + params.per_page - 1) // params.per_page if total > 0 else 0
             has_more = params.page < pages
 
-            # Ordering and pagination
-            # Transaction.transaction_at is seen as a datetime instance, not a column by Mypy
-            stmt = stmt.order_by(desc(Transaction.transaction_at))
+            # Pagination (ordering is applied by the repository builder)
             stmt = stmt.offset((params.page - 1) * params.per_page).limit(params.per_page)
 
             # Execute query

@@ -10,7 +10,7 @@ from uuid import UUID
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.config.currency import PROJECT_DEFAULT_CURRENCY
+from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import NotFoundError
 from app.core.logging import logger
 from app.models.base import utc_now

@@ -42,7 +42,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
     _items = List.from(d['items'] as List<dynamic>? ?? []);
     _total = (d['total'] as num?)?.toInt() ?? 0;
     _currentPage = (d['page'] as num?)?.toInt() ?? 1;
-    _hasMore = d['has_more'] as bool? ?? false;
+    _hasMore = d['hasMore'] as bool? ?? false;
     _searchMetadata = d['metadata'] as Map<String, dynamic>?;
   }
 
@@ -79,7 +79,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
           _items.addAll(newItems);
           _currentPage =
               (result['page'] as num?)?.toInt() ?? (_currentPage + 1);
-          _hasMore = result['has_more'] as bool? ?? false;
+          _hasMore = result['hasMore'] as bool? ?? false;
           _isLoadingMore = false;
         });
       }

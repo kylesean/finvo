@@ -787,7 +787,7 @@ class AppCatalog {
           ),
           'total': IntegerSchema(description: '总条数'),
           'page': IntegerSchema(description: '当前页'),
-          'has_more': BooleanSchema(description: '是否有更多'),
+          'hasMore': BooleanSchema(description: '是否有更多'),
         },
         required: ['items'],
       ),

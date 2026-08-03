@@ -313,8 +313,8 @@ async def view_attachment(
     # Resolve attachment + storage backend. Remote (S3/WebDAV) files are
     # served through the adapter-issued signed URL (redirect); local files are
     # streamed from disk via FileResponse.
-    attachment = await upload_service._resolve_attachment(attachment_id, current_user.uuid)
-    adapter, provider_type = await upload_service._get_attachment_adapter(attachment)
+    attachment = await upload_service.resolve_attachment(attachment_id, current_user.uuid)
+    adapter, provider_type = await upload_service.get_attachment_adapter(attachment)
     if provider_type and provider_type != "local_uploads" and adapter is not None:
         signed_url = await adapter.get_download_url(
             attachment.object_key,

@@ -35,7 +35,7 @@ from app.core.exceptions import (
 from app.core.limiter import limiter
 from app.core.logging import logger
 from app.core.metrics import setup_metrics
-from app.core.middleware import (
+from app.core.middlewares import (
     LoggingContextMiddleware,
     MetricsMiddleware,
     SecurityHeadersMiddleware,

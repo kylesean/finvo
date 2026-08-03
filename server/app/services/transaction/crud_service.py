@@ -12,7 +12,7 @@ from sqlalchemy import String, and_, cast as sa_cast, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.config.currency import PROJECT_DEFAULT_CURRENCY
+from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError
 from app.models.attachment import Attachment
 from app.models.base import utc_now
@@ -20,7 +20,17 @@ from app.models.financial_account import FinancialAccount
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.repositories.notification_repository import NotificationRepository
-from app.schemas.transaction import TransactionDisplayValue
+from app.schemas.transaction import (
+    LinkedAccountInfo,
+    TransactionAttachmentItem,
+    TransactionCommentItem,
+    TransactionCreateResult,
+    TransactionDetailResponse,
+    TransactionDisplayValue,
+    TransactionSpaceItem,
+    TransactionUpdateResult,
+    TransferInfo,
+)
 from app.services.transaction.comment_service import TransactionCommentService
 from app.utils.currency_utils import (
     BASE_CURRENCY,
@@ -159,47 +169,36 @@ class TransactionCRUDService:
         await self.db.commit()
         await self.db.refresh(transaction)
 
-        # Assemble return result (for GenUI rendering)
-        result = {
-            "success": True,
-            "transaction_id": str(transaction.id),
-            "amount": float(amount),
-            "currency": currency,
-            "type": tx_type.upper(),
-            "category_key": transaction.category_key,
-            "subject": transaction.subject,
-            "intent": transaction.intent,
-            "tags": transaction.tags,
-            "transaction_at": transaction.transaction_at.isoformat(),
-            "status": "success",
-            "raw_input": transaction.raw_input,
-            "account_linked": source_acc is not None or target_acc is not None,
-        }
-
+        # Assemble typed result (for GenUI rendering / LangGraph tools)
+        linked_account: LinkedAccountInfo | None = None
+        transfer_info: TransferInfo | None = None
         if tx_type != "transfer":
             linked_acc = source_acc or target_acc
             if linked_acc:
-                result["linked_account"] = {
-                    "id": str(linked_acc.id),
-                    "name": linked_acc.name,
-                    "type": linked_acc.type,
-                }
-        else:
-            if source_acc and target_acc:
-                result["transfer_info"] = {
-                    "source_account": {
-                        "id": str(source_acc.id),
-                        "name": source_acc.name,
-                        "type": source_acc.type,
-                    },
-                    "target_account": {
-                        "id": str(target_acc.id),
-                        "name": target_acc.name,
-                        "type": target_acc.type,
-                    },
-                }
+                linked_account = LinkedAccountInfo(id=str(linked_acc.id), name=linked_acc.name, type=linked_acc.type)
+        elif source_acc and target_acc:
+            transfer_info = TransferInfo(
+                source_account=LinkedAccountInfo(id=str(source_acc.id), name=source_acc.name, type=source_acc.type),
+                target_account=LinkedAccountInfo(id=str(target_acc.id), name=target_acc.name, type=target_acc.type),
+            )
 
-        return result
+        return TransactionCreateResult(
+            success=True,
+            transaction_id=str(transaction.id),
+            amount=float(amount),
+            currency=currency,
+            type=tx_type.upper(),
+            category_key=transaction.category_key,
+            subject=transaction.subject,
+            intent=transaction.intent,
+            tags=transaction.tags,
+            transaction_at=transaction.transaction_at.isoformat(),
+            status="success",
+            raw_input=transaction.raw_input,
+            account_linked=source_acc is not None or target_acc is not None,
+            linked_account=linked_account,
+            transfer_info=transfer_info,
+        ).model_dump()
 
     async def get_transaction_detail(self, transaction_id: UUID, user_uuid: UUID) -> dict[str, Any] | None:
         """Get transaction details (including comments)
@@ -252,7 +251,7 @@ class TransactionCRUDService:
         )
         spaces_result = await self.db.execute(spaces_query)
         associated_spaces = spaces_result.scalars().all()
-        spaces_data = [{"id": str(s.id), "name": s.name} for s in associated_spaces]
+        spaces_data = [TransactionSpaceItem(id=str(s.id), name=s.name) for s in associated_spaces]
 
         # Batch-load all comment authors in one query to avoid N+1.
         comments_data = []
@@ -264,18 +263,18 @@ class TransactionCRUDService:
             for comment in transaction.comments:
                 user = user_by_uuid.get(comment.user_uuid)
                 comments_data.append(
-                    {
-                        "id": comment.id,
-                        "transactionId": str(comment.transaction_id),
-                        "userUuid": str(comment.user_uuid),
-                        "userName": user.username if user else "Unknown",
-                        "userAvatarUrl": user.avatar_url if user else None,
-                        "parentCommentId": comment.parent_comment_id,
-                        "commentText": comment.comment_text,
-                        "mentionedUserIds": comment.mentioned_user_ids or [],
-                        "createdAt": comment.created_at.isoformat() if comment.created_at else None,
-                        "updatedAt": comment.updated_at.isoformat() if comment.updated_at else None,
-                    }
+                    TransactionCommentItem(
+                        id=str(comment.id),
+                        transaction_id=str(comment.transaction_id),
+                        user_uuid=str(comment.user_uuid),
+                        user_name=user.username if user else "Unknown",
+                        user_avatar_url=user.avatar_url if user else None,
+                        parent_comment_id=str(comment.parent_comment_id) if comment.parent_comment_id else None,
+                        comment_text=comment.comment_text,
+                        mentioned_user_ids=comment.mentioned_user_ids or [],
+                        created_at=comment.created_at.isoformat() if comment.created_at else None,
+                        updated_at=comment.updated_at.isoformat() if comment.updated_at else None,
+                    )
                 )
 
         # Display: show original currency amount for individual transaction
@@ -283,7 +282,7 @@ class TransactionCRUDService:
         original_currency = (transaction.currency or display_currency).upper()
 
         # Query attachments linked via source_thread_id
-        attachments_data: list[dict[str, Any]] = []
+        attachments_data: list[TransactionAttachmentItem] = []
         if transaction.source_thread_id:
             # thread_id is text in DB but UUID in model; cast column to String for comparison
             att_query = select(Attachment).where(
@@ -292,52 +291,52 @@ class TransactionCRUDService:
             att_result = await self.db.execute(att_query)
             attachments = att_result.scalars().all()
             attachments_data = [
-                {
-                    "id": str(a.id),
-                    "filename": a.filename,
-                    "mimeType": a.mime_type,
-                    "size": a.size,
-                    "url": f"/files/view/{a.id}",
-                    "isImage": a.is_image,
-                    "createdAt": a.created_at.isoformat() if a.created_at else None,
-                }
+                TransactionAttachmentItem(
+                    id=str(a.id),
+                    filename=a.filename,
+                    mime_type=a.mime_type,
+                    size=a.size,
+                    url=f"/files/view/{a.id}",
+                    is_image=a.is_image,
+                    created_at=a.created_at.isoformat() if a.created_at else None,
+                )
                 for a in attachments
             ]
 
-        return {
-            "id": str(transaction.id),
-            "userUuid": str(transaction.user_uuid),
-            "type": transaction.type,
-            "amount": round(amount_val, 2),
-            "amountOriginal": str(transaction.amount_original) if transaction.amount_original else None,
-            "amountBase": float(transaction.amount),
-            "currency": original_currency,
-            "baseCurrency": display_currency,
-            "exchangeRate": str(transaction.exchange_rate) if transaction.exchange_rate else None,
-            "categoryKey": transaction.category_key,
-            "rawInput": transaction.raw_input,
-            "description": transaction.description,
-            "transactionAt": transaction.transaction_at.isoformat() if transaction.transaction_at else None,
-            "transactionTimezone": transaction.transaction_timezone,
-            "sourceAccountId": transaction.source_account_id,
-            "targetAccountId": transaction.target_account_id,
-            "tags": transaction.tags or [],
-            "location": transaction.location,
-            "latitude": str(transaction.latitude) if transaction.latitude else None,
-            "longitude": str(transaction.longitude) if transaction.longitude else None,
-            "source": transaction.source,
-            "status": transaction.status,
-            "createdAt": transaction.created_at.isoformat() if transaction.created_at else None,
-            "updatedAt": transaction.updated_at.isoformat() if transaction.updated_at else None,
-            "comments": comments_data,
-            "commentCount": len(comments_data),
-            "spaces": spaces_data,
-            "sourceThreadId": str(transaction.source_thread_id) if transaction.source_thread_id else None,
-            "attachments": attachments_data,
-            "display": TransactionDisplayValue.from_params(
+        return TransactionDetailResponse(
+            id=str(transaction.id),
+            user_uuid=str(transaction.user_uuid),
+            type=transaction.type,
+            amount=round(amount_val, 2),
+            amount_original=str(transaction.amount_original) if transaction.amount_original else None,
+            amount_base=float(transaction.amount),
+            currency=original_currency,
+            base_currency=display_currency,
+            exchange_rate=str(transaction.exchange_rate) if transaction.exchange_rate else None,
+            category_key=transaction.category_key,
+            raw_input=transaction.raw_input,
+            description=transaction.description,
+            transaction_at=transaction.transaction_at.isoformat() if transaction.transaction_at else None,
+            transaction_timezone=transaction.transaction_timezone,
+            source_account_id=str(transaction.source_account_id) if transaction.source_account_id else None,
+            target_account_id=str(transaction.target_account_id) if transaction.target_account_id else None,
+            tags=transaction.tags or [],
+            location=transaction.location,
+            latitude=str(transaction.latitude) if transaction.latitude else None,
+            longitude=str(transaction.longitude) if transaction.longitude else None,
+            source=transaction.source,
+            status=transaction.status,
+            created_at=transaction.created_at.isoformat() if transaction.created_at else None,
+            updated_at=transaction.updated_at.isoformat() if transaction.updated_at else None,
+            comments=comments_data,
+            comment_count=len(comments_data),
+            spaces=spaces_data,
+            source_thread_id=str(transaction.source_thread_id) if transaction.source_thread_id else None,
+            attachments=attachments_data,
+            display=TransactionDisplayValue.from_params(
                 amount=transaction.amount_original, tx_type=transaction.type, currency=original_currency
-            ).model_dump(),
-        }
+            ),
+        ).model_dump(by_alias=True)
 
     async def update_transaction(
         self,
@@ -458,25 +457,24 @@ class TransactionCRUDService:
         tx_at = transaction.transaction_at
         updated_at = transaction.updated_at
 
-        return {
-            "success": True,
-            "transaction_id": str(transaction.id),
-            "amount": round(display_amount, 2),
-            "amount_original": float(transaction.amount_original) if transaction.amount_original else display_amount,
-            "amount_base": float(transaction.amount),
-            "currency": original_currency,
-            "baseCurrency": display_currency,
-            "type": transaction.type,
-            "category_key": transaction.category_key,
-            "raw_input": transaction.raw_input,
-            "tags": transaction.tags or [],
-            "transaction_at": tx_at.isoformat() if tx_at else None,
-            "updated_at": updated_at.isoformat() if updated_at else None,
-            # KEY: This flag tells frontend to use DataModelUpdate instead of creating new surface
-            "_intent": "update",
-            "_changed_fields": changed_fields,
-            "message": "Transaction updated",
-        }
+        return TransactionUpdateResult(
+            success=True,
+            transaction_id=str(transaction.id),
+            amount=round(display_amount, 2),
+            amount_original=float(transaction.amount_original) if transaction.amount_original else display_amount,
+            amount_base=float(transaction.amount),
+            currency=original_currency,
+            base_currency=display_currency,
+            type=transaction.type,
+            category_key=transaction.category_key,
+            raw_input=transaction.raw_input,
+            tags=transaction.tags or [],
+            transaction_at=tx_at.isoformat() if tx_at else None,
+            updated_at=updated_at.isoformat() if updated_at else None,
+            intent="update",
+            changed_fields=changed_fields,
+            message="Transaction updated",
+        ).model_dump(by_alias=True)
 
     async def delete_transaction(
         self,

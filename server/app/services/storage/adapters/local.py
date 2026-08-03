@@ -22,7 +22,7 @@ from app.services.storage.adapters.base import (
     StorageError,
     StorageNotFoundError,
 )
-from app.utils.auth import create_access_token
+from app.utils.auth_utils import create_access_token
 
 
 class LocalAdapter(StorageAdapter):

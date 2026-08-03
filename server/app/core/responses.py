@@ -19,7 +19,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
 
-from app.core.exceptions import ERROR_CODE_MAP
+from app.core.exceptions import ERROR_CODE_MAP, CommonErrorCode
+from app.core.logging import logger
 
 T = TypeVar("T")
 
@@ -121,10 +122,19 @@ def error_response(
 def get_error_code_int(error_code_str: str) -> int:
     """Convert string error code to integer.
 
+    Unknown strings fall back to ``CommonErrorCode.INTERNAL_ERROR`` (500) and
+    are logged as a warning so a typo'd or unregistered code string is
+    observable instead of silently collapsing into a genuine internal error
+    (both would otherwise surface the same indistinguishable code).
+
     Args:
         error_code_str: String error code (e.g., "USER_NOT_EXIST")
 
     Returns:
         Integer error code for client compatibility
     """
-    return ERROR_CODE_MAP.get(error_code_str, 500)
+    code = ERROR_CODE_MAP.get(error_code_str)
+    if code is None:
+        logger.warning("unknown_error_code_fallback", error_code=error_code_str)
+        return CommonErrorCode.INTERNAL_ERROR.int_code
+    return code

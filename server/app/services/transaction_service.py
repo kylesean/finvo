@@ -14,7 +14,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.financial_account import FinancialAccount
 from app.services.transaction.cash_flow_service import CashFlowService
 from app.services.transaction.crud_service import TransactionCRUDService
-from app.services.transaction.query_service import TransactionFacadeQueryHelper
 from app.services.transaction.recurring_service import RecurringTransactionService
 
 
@@ -23,15 +22,17 @@ class TransactionService:
 
     This is a Facade that delegates to specialized services:
     - TransactionCRUDService: Basic CRUD operations
-    - TransactionFacadeQueryHelper: Search and feed operations
     - RecurringTransactionService: Recurring transaction management
     - CashFlowService: Cash flow forecasting
+
+    Query operations (search / feed) live in the canonical
+    ``app.services.transaction_query_service.TransactionQueryService`` and are
+    used directly by callers, not re-delegated through this facade.
     """
 
     def __init__(self, db: AsyncSession):
         self.db = db
         self._crud = TransactionCRUDService(db)
-        self._query = TransactionFacadeQueryHelper(db)
         self._recurring = RecurringTransactionService(db)
         self._cash_flow = CashFlowService(db, self._recurring)
 
@@ -146,20 +147,9 @@ class TransactionService:
 
     # ===== Query Operations (delegated to TransactionQueryService) =====
 
-    async def get_transaction_feed(
-        self,
-        user_uuid: UUID,
-        date_filter: str | None = None,
-        type_filter: str = "all",
-        page: int = 1,
-        limit: int = 10,
-    ) -> dict[str, Any]:
-        """Get transaction feed (with automatic currency conversion)."""
-        return await self._query.get_transaction_feed(user_uuid, date_filter, type_filter, page, limit)
-
-    async def search_transactions(self, user_uuid: UUID, filters: dict[str, Any]) -> dict[str, Any]:
-        """Search transaction records."""
-        return await self._query.search_transactions(user_uuid, filters)
+    # Query operations (feed / search) are provided by the canonical
+    # app.services.transaction_query_service.TransactionQueryService, used
+    # directly by API routes, tools, and skills — see its docstring.
 
     # ===== Recurring Transaction Operations (delegated to RecurringTransactionService) =====
 

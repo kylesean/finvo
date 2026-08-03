@@ -25,7 +25,7 @@ from app.core.config import settings
 from app.core.exceptions import AuthenticationError, AuthErrorCode, BusinessError
 from app.models.user import User
 from app.services.auth_service import AuthService
-from app.utils.auth import create_access_token, verify_token
+from app.utils.auth_utils import create_access_token, verify_token
 
 
 class TestTokenSecurity:

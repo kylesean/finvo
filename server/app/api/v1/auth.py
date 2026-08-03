@@ -32,7 +32,7 @@ from app.models.user import User
 from app.repositories.session_repository import SessionRepository
 from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, SendCodeRequest, UserInfo
 from app.services.auth_service import AuthService
-from app.utils.auth import create_access_token
+from app.utils.auth_utils import create_access_token
 from app.utils.sanitization import sanitize_string
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -465,7 +465,7 @@ async def get_user_sessions(
             "size": page_result.size,
             "total": page_result.total,
             "pages": page_result.pages,
-            "has_more": page_result.page < page_result.pages if page_result.pages else False,
+            "hasMore": page_result.page < page_result.pages if page_result.pages else False,
         },
         message="Sessions retrieved successfully",
     )

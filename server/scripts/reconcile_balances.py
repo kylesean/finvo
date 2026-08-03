@@ -30,8 +30,8 @@ from uuid import UUID
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-from app.config.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.config import settings
+from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.models.base import utc_now
 from app.models.financial_account import FinancialAccount
 from app.models.transaction import Transaction
