@@ -366,13 +366,19 @@ async def chat_stream(
                 try:
                     current_session_language.reset(lang_token)
                 except ValueError:
-                    pass
+                    logger.debug(
+                        "session_language_context_already_reset",
+                        session_id=str(session.id),
+                    )
 
                 if user_token:
                     try:
                         current_user_id.reset(user_token)
                     except ValueError:
-                        pass
+                        logger.debug(
+                            "user_id_context_already_reset",
+                            session_id=str(session.id),
+                        )
 
                 # Update long-term memory in background (fire-and-forget).
                 # IMPORTANT: Don't await here to avoid blocking HTTP response.

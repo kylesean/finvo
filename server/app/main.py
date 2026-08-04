@@ -274,7 +274,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         code=get_error_code_int("VALIDATION_ERROR"),
         message="Validation error",
         data={"field_errors": formatted_errors},
-        http_status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        http_status=status.HTTP_422_UNPROCESSABLE_CONTENT,
     )
 
 

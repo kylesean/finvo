@@ -9,7 +9,7 @@ import structlog
 from sqlalchemy import Select, and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import BusinessError, NotFoundError
+from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError, TransactionErrorCode
 from app.models.transaction import Transaction, TransactionComment
 from app.models.user import User
 from app.utils.identicon import default_avatar_url
@@ -165,7 +165,7 @@ class TransactionCommentService:
                 user_uuid=user_uuid,
                 transaction_id=transaction_id,
             )
-            raise BusinessError("Comment content cannot be empty", "TRANSACTION_COMMENT_NULL")
+            raise BusinessError("Comment content cannot be empty", TransactionErrorCode.TRANSACTION_COMMENT_NULL)
 
         # Validate transaction exists and user has access
         await self._can_access_transaction_comments(transaction_id, user_uuid)
@@ -183,11 +183,11 @@ class TransactionCommentService:
             parent_comment = parent_comment_result.scalar_one_or_none()
 
             if not parent_comment:
-                raise BusinessError("Parent comment does not exist", "INVALID_PARENT_COMMENT_ID")
+                raise BusinessError("Parent comment does not exist", TransactionErrorCode.INVALID_PARENT_COMMENT_ID)
 
             # Ensure the parent comment is not a child comment (single-level reply structure)
             if parent_comment.parent_comment_id is not None:
-                raise BusinessError("Cannot reply to a child comment", "INVALID_PARENT_COMMENT_ID")
+                raise BusinessError("Cannot reply to a child comment", TransactionErrorCode.INVALID_PARENT_COMMENT_ID)
 
         # Create new comment
         new_comment = TransactionComment(
@@ -255,7 +255,7 @@ class TransactionCommentService:
         comment_data = result.first()
 
         if not comment_data:
-            raise BusinessError("Failed to retrieve new comment data", "STORE_COMMENT_FAILED")
+            raise BusinessError("Failed to retrieve new comment data", TransactionErrorCode.STORE_COMMENT_FAILED)
 
         comment, user_name, user_avatar_url = comment_data
 
@@ -381,7 +381,7 @@ class TransactionCommentService:
 
         # Verify permissions
         if comment.user_uuid != user_uuid:
-            raise BusinessError("You do not have permission to delete this comment", "PERMISSION_DENIED")
+            raise BusinessError("You do not have permission to delete this comment", CommonErrorCode.PERMISSION_DENIED)
 
         target_tx_id = comment.transaction_id
 

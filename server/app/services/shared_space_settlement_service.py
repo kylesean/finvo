@@ -12,11 +12,11 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.exceptions import AuthorizationError
 from app.models.shared_space import (
     SpaceMember,
     SpaceTransaction,
 )
+from app.services.shared_space_access import verify_membership
 
 
 class SharedSpaceSettlementService:
@@ -24,23 +24,6 @@ class SharedSpaceSettlementService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
-
-    async def _verify_membership(self, space_id: UUID, user_uuid: UUID) -> SpaceMember:
-        """Verify user is a member of the space."""
-        # Query members
-        query = select(SpaceMember).where(
-            and_(
-                SpaceMember.space_id == space_id,
-                SpaceMember.user_uuid == user_uuid,
-                SpaceMember.status == "ACCEPTED",
-            )
-        )
-        result = await self.db.execute(query)
-        member = result.scalar_one_or_none()
-
-        if not member:
-            raise AuthorizationError("you are not a member of this space")
-        return member
 
     async def get_settlement(self, space_id: UUID, user_uuid: UUID) -> dict[str, Any]:
         """Calculate settlement for the space.
@@ -54,7 +37,7 @@ class SharedSpaceSettlementService:
         Returns:
             Settlement dictionary
         """
-        await self._verify_membership(space_id, user_uuid)
+        await verify_membership(self.db, space_id, user_uuid)
 
         # Get all transactions in space
         query = (

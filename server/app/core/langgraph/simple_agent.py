@@ -330,7 +330,10 @@ class SimpleLangChainAgent:
                 try:
                     current_user_id.reset(token)
                 except ValueError:
-                    pass
+                    logger.debug(
+                        "user_id_context_already_reset",
+                        session_id=str(session_id),
+                    )
 
             # Flush Langfuse telemetry off the event loop.
             # langfuse_handler is always bound above; the old `in locals()` guard was dead code.
@@ -435,7 +438,10 @@ class SimpleLangChainAgent:
                 try:
                     current_user_id.reset(token)
                 except ValueError:
-                    pass
+                    logger.debug(
+                        "user_id_context_already_reset",
+                        session_id=str(session_id),
+                    )
 
             # Flush Langfuse telemetry off the event loop.
             if langfuse_handler and hasattr(langfuse_handler, "flush"):

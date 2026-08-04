@@ -23,7 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
 from app.core.database import get_session
-from app.core.exceptions import BusinessError
+from app.core.exceptions import AuthErrorCode, BusinessError, FileErrorCode
 from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, success_response
 from app.models.storage_config import StorageConfig
@@ -168,14 +168,14 @@ async def upload_files(
         raise BusinessError(
             message="Please select at least one file",
             status_code=400,
-            error_code="NO_FILES",
+            error_code=FileErrorCode.NO_FILES,
         )
 
     if len(files) > 20:
         raise BusinessError(
             message="Maximum 20 files per upload",
             status_code=400,
-            error_code="TOO_MANY_FILES",
+            error_code=FileErrorCode.TOO_MANY_FILES,
         )
 
     # Batch upload: process files first, then write DB records
@@ -192,7 +192,7 @@ async def upload_files(
         raise BusinessError(
             message="All file uploads failed",
             status_code=400,
-            error_code="UPLOAD_ALL_FAILED",
+            error_code=FileErrorCode.UPLOAD_ALL_FAILED,
         )
 
     return success_response(
@@ -246,33 +246,33 @@ async def stream_file(
     from uuid import UUID as _UUID
 
     if not token:
-        raise BusinessError("Missing token", status_code=401, error_code="AUTH_FAILED")
+        raise BusinessError("Missing token", status_code=401, error_code=AuthErrorCode.AUTH_FAILED)
     try:
         payload: dict[str, Any] = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     except JWTError as e:
         logger.warning("stream_token_invalid", error=str(e))
-        raise BusinessError("Invalid token", status_code=401, error_code="AUTH_FAILED")
+        raise BusinessError("Invalid token", status_code=401, error_code=AuthErrorCode.AUTH_FAILED)
 
     fa = payload.get("file_access")
     if not isinstance(fa, dict):
-        raise BusinessError("Invalid token payload", status_code=401, error_code="AUTH_FAILED")
+        raise BusinessError("Invalid token payload", status_code=401, error_code=AuthErrorCode.AUTH_FAILED)
 
     object_key = fa.get("object_key")
     storage_config_id = fa.get("storage_config_id")
     filename = str(fa.get("filename") or str(object_key or "").split("/")[-1] or "file")
     if not object_key or not storage_config_id:
-        raise BusinessError("Invalid token payload", status_code=401, error_code="AUTH_FAILED")
+        raise BusinessError("Invalid token payload", status_code=401, error_code=AuthErrorCode.AUTH_FAILED)
 
     try:
         sc = await db.get(StorageConfig, _UUID(str(storage_config_id)))
     except (ValueError, TypeError):
-        raise BusinessError("Invalid storage config", status_code=404, error_code="FILE_NOT_FOUND")
+        raise BusinessError("Invalid storage config", status_code=404, error_code=FileErrorCode.FILE_NOT_FOUND)
     if sc is None:
-        raise BusinessError("Storage config not found", status_code=404, error_code="FILE_NOT_FOUND")
+        raise BusinessError("Storage config not found", status_code=404, error_code=FileErrorCode.FILE_NOT_FOUND)
 
     adapter = await StorageAdapterFactory.create(sc)
     if not await adapter.exists(object_key):
-        raise BusinessError("File not found", status_code=404, error_code="FILE_NOT_FOUND")
+        raise BusinessError("File not found", status_code=404, error_code=FileErrorCode.FILE_NOT_FOUND)
 
     mime_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
     return StreamingResponse(
@@ -373,7 +373,7 @@ async def view_attachment(
         raise BusinessError(
             message="File access failed",
             status_code=500,
-            error_code="FILE_ACCESS_ERROR",
+            error_code=FileErrorCode.FILE_ACCESS_ERROR,
         )
 
 
@@ -428,7 +428,7 @@ async def delete_file(
         raise BusinessError(
             message="File deletion failed",
             status_code=500,
-            error_code="FILE_DELETE_ERROR",
+            error_code=FileErrorCode.FILE_DELETE_ERROR,
         ) from e
 
 

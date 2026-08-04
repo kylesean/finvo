@@ -20,11 +20,18 @@ from app.models.notification import Notification
 from app.models.transaction import Transaction
 from app.repositories.transaction_repository import TransactionRepository
 from app.schemas.transaction import (
+    BatchAccountUpdateResult,
     BatchCreateTransactionRequest,
     CashFlowForecastRequest,
+    CashFlowForecastResponse,
     CommentCreateRequest,
+    PendingTransactionResponse,
     RecurringTransactionCreateRequest,
+    RecurringTransactionResponse,
     RecurringTransactionUpdateRequest,
+    TransactionActionResponse,
+    TransactionBatchResult,
+    TransactionCommentResponse,
     TransactionDetailResponse,
     TransactionFeedResponse,
     UpdateAccountRequest,
@@ -101,7 +108,7 @@ async def get_transactions(
     )
 
 
-@router.get("/search", response_model=ResponseEnvelope[dict[str, Any]])
+@router.get("/search", response_model=ResponseEnvelope[TransactionFeedResponse])
 async def search_transactions(
     current_user: CurrentUser,
     db: DbSession,
@@ -173,7 +180,7 @@ async def search_transactions(
     )
 
 
-@router.get("/recurring", response_model=ResponseEnvelope[list[dict[str, Any]]])
+@router.get("/recurring", response_model=ResponseEnvelope[list[RecurringTransactionResponse]])
 async def list_recurring_transactions(
     current_user: CurrentUser,
     service: TxService,
@@ -202,7 +209,7 @@ async def list_recurring_transactions(
     )
 
 
-@router.post("/recurring", response_model=ResponseEnvelope[dict[str, Any]])
+@router.post("/recurring", response_model=ResponseEnvelope[RecurringTransactionResponse])
 async def create_recurring_transaction(
     request: RecurringTransactionCreateRequest,
     current_user: CurrentUser,
@@ -221,7 +228,7 @@ async def create_recurring_transaction(
 # ============================================================================
 
 
-@router.get("/pending", response_model=ResponseEnvelope[list[dict[str, Any]]])
+@router.get("/pending", response_model=ResponseEnvelope[list[PendingTransactionResponse]])
 async def get_pending_transactions(
     current_user: CurrentUser,
     service: TxService,
@@ -252,9 +259,7 @@ async def get_transaction_detail(
     )
 
 
-@router.delete(
-    "/{transaction_id:uuid}", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[dict[str, Any]]
-)
+@router.delete("/{transaction_id:uuid}", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[None])
 async def delete_transaction(
     transaction_id: UUID,
     current_user: CurrentUser,
@@ -268,7 +273,7 @@ async def delete_transaction(
     )
 
 
-@router.patch("/{transaction_id:uuid}/account", response_model=ResponseEnvelope[dict[str, Any]])
+@router.patch("/{transaction_id:uuid}/account", response_model=ResponseEnvelope[TransactionDetailResponse])
 async def update_transaction_account(
     transaction_id: UUID,
     request: UpdateAccountRequest,
@@ -293,7 +298,7 @@ async def update_transaction_account(
     )
 
 
-@router.post("/batch", response_model=ResponseEnvelope[dict[str, Any]])
+@router.post("/batch", response_model=ResponseEnvelope[TransactionBatchResult])
 async def create_batch_transactions(
     request: BatchCreateTransactionRequest,
     current_user: CurrentUser,
@@ -310,7 +315,7 @@ async def create_batch_transactions(
     )
 
 
-@router.patch("/batch/account", response_model=ResponseEnvelope[dict[str, Any]])
+@router.patch("/batch/account", response_model=ResponseEnvelope[BatchAccountUpdateResult])
 async def update_batch_transactions_account(
     request: UpdateBatchAccountRequest,
     current_user: CurrentUser,
@@ -328,7 +333,7 @@ async def update_batch_transactions_account(
     )
 
 
-@router.get("/{transaction_id:uuid}/comments", response_model=ResponseEnvelope[list[dict[str, Any]]])
+@router.get("/{transaction_id:uuid}/comments", response_model=ResponseEnvelope[list[TransactionCommentResponse]])
 async def get_transaction_comments(
     transaction_id: UUID,  # UUID from path
     current_user: CurrentUser,
@@ -342,7 +347,7 @@ async def get_transaction_comments(
     )
 
 
-@router.post("/{transaction_id:uuid}/comments", response_model=ResponseEnvelope[dict[str, Any]])
+@router.post("/{transaction_id:uuid}/comments", response_model=ResponseEnvelope[TransactionCommentResponse])
 async def add_transaction_comment(
     transaction_id: UUID,  # UUID from path
     request: CommentCreateRequest,
@@ -364,7 +369,7 @@ async def add_transaction_comment(
     )
 
 
-@router.delete("/comments/{comment_id}", response_model=ResponseEnvelope[dict[str, Any]])
+@router.delete("/comments/{comment_id}", response_model=ResponseEnvelope[None])
 async def delete_transaction_comment(
     comment_id: UUID,
     current_user: CurrentUser,
@@ -382,7 +387,7 @@ async def delete_transaction_comment(
     )
 
 
-@router.get("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
+@router.get("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[RecurringTransactionResponse])
 async def get_recurring_transaction(
     recurring_id: UUID,  # UUID from path
     current_user: CurrentUser,
@@ -400,7 +405,7 @@ async def get_recurring_transaction(
     )
 
 
-@router.put("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
+@router.put("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[RecurringTransactionResponse])
 async def update_recurring_transaction(
     recurring_id: UUID,  # UUID from path
     request: RecurringTransactionUpdateRequest,
@@ -421,7 +426,7 @@ async def update_recurring_transaction(
     )
 
 
-@router.delete("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
+@router.delete("/recurring/{recurring_id:uuid}", response_model=ResponseEnvelope[None])
 async def delete_recurring_transaction(
     recurring_id: UUID,  # UUID from path
     current_user: CurrentUser,
@@ -439,7 +444,7 @@ async def delete_recurring_transaction(
     )
 
 
-@router.post("/forecast", response_model=ResponseEnvelope[dict[str, Any]])
+@router.post("/forecast", response_model=ResponseEnvelope[CashFlowForecastResponse])
 async def forecast_cash_flow(
     request: CashFlowForecastRequest,
     current_user: CurrentUser,
@@ -458,7 +463,7 @@ async def forecast_cash_flow(
     )
 
 
-@router.post("/{transaction_id:uuid}/confirm", response_model=ResponseEnvelope[dict[str, Any]])
+@router.post("/{transaction_id:uuid}/confirm", response_model=ResponseEnvelope[TransactionActionResponse])
 async def confirm_pending_transaction(
     transaction_id: UUID,
     current_user: CurrentUser,
@@ -469,7 +474,7 @@ async def confirm_pending_transaction(
     return success_response(data=data, message="Transaction confirmed")
 
 
-@router.post("/{transaction_id:uuid}/skip", response_model=ResponseEnvelope[dict[str, Any]])
+@router.post("/{transaction_id:uuid}/skip", response_model=ResponseEnvelope[TransactionActionResponse])
 async def skip_pending_transaction(
     transaction_id: UUID,
     current_user: CurrentUser,

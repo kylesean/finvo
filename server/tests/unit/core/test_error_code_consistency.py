@@ -84,7 +84,7 @@ class TestErrorCodeConsistency:
             (3000, 3018, "transaction"),
             (3100, 3118, "shared space"),
             (3200, 3218, "recurring"),
-            (4001, 4017, "file upload"),
+            (4001, 4022, "file upload"),
             (4500, 4599, "storage config"),
             (9000, 9099, "ai/llm"),
         ]

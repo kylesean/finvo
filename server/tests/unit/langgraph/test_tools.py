@@ -86,15 +86,35 @@ class TestTransferTools:
 class TestToolMetadata:
     """Tests for tool metadata and registration."""
 
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
     def test_all_tools_have_descriptions(self):
         """Test that all tools have proper descriptions for LLM."""
-        pass
+        from app.core.langgraph.tools import tools
 
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
+        assert len(tools) > 0
+        for tool in tools:
+            assert tool.name, f"tool {tool!r} has no name"
+            assert tool.description, f"tool {tool.name!r} has no description"
+            assert len(tool.description) > 10, f"tool {tool.name!r} description too short"
+
     def test_tool_parameter_types(self):
         """Test that tool parameters have correct type annotations."""
-        pass
+        from app.core.langgraph.tools import tools
+
+        for tool in tools:
+            if tool.args_schema is None:
+                continue
+            fields = tool.args_schema.model_fields
+            assert fields, f"tool {tool.name!r} args schema has no fields"
+            for name, field in fields.items():
+                assert field.annotation is not None, f"tool {tool.name!r} parameter {name!r} has no type annotation"
+
+    def test_tool_names_unique(self):
+        """Test that tool names are unique across the registry."""
+        from app.core.langgraph.tools import tools
+
+        names = [t.name for t in tools]
+        duplicates = {n for n in names if names.count(n) > 1}
+        assert not duplicates, f"duplicate tool names: {duplicates}"
 
 
 class TestWriteFileSandbox:

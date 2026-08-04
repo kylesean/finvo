@@ -604,3 +604,85 @@ class TransactionFeedResponse(BaseModel):
     has_more: bool = Field(serialization_alias="hasMore")
 
     model_config = ConfigDict(populate_by_name=True)
+
+
+class TransactionCommentResponse(BaseModel):
+    """Comment item as returned by the comments API (camelCase wire keys).
+
+    Mirrors the on-wire shape of :meth:`TransactionCommentService.get_comments_for_transaction`
+    (camelCase keys plus the replied-to user metadata) so response models are
+    accurate without changing the client contract.
+    """
+
+    id: str
+    transactionId: str
+    userId: str
+    userName: str
+    userAvatarUrl: str | None = None
+    parentCommentId: str | None = None
+    commentText: str
+    repliedToUserId: str | None = None
+    repliedToUserName: str | None = None
+    createdAt: str
+    updatedAt: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class TransactionActionResponse(BaseModel):
+    """Result of a transaction state transition (confirm/skip)."""
+
+    id: str
+    status: str
+
+
+class PendingTransactionResponse(BaseModel):
+    """A PENDING transaction awaiting user confirmation (recurring rules)."""
+
+    id: str
+    type: str
+    amount: str
+    currency: str
+    category_key: str
+    description: str | None = None
+    transaction_at: str | None = None
+    source: str
+    recurring_transaction_id: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class TransactionBatchItem(BaseModel):
+    """A single created transaction inside a batch result."""
+
+    id: str
+    amount: str
+    type: str
+    tags: list[str]
+    category_key: str
+    originalAmount: str
+    originalCurrency: str
+    display: TransactionDisplayValue
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class TransactionBatchResult(BaseModel):
+    """Result of a batch create: per-item partial-failure semantics."""
+
+    success: bool
+    count: int
+    failed_count: int
+    failed: list[dict[str, Any]]
+    account_id: str | None = None
+    transactions: list[TransactionBatchItem]
+
+
+class BatchAccountUpdateResult(BaseModel):
+    """Result of a batch account re-association."""
+
+    success: bool
+    count: int
+    failed_count: int
+    failed: list[dict[str, Any]]
+    account_id: str | None = None

@@ -48,12 +48,14 @@ class ErrorCodes {
   static const int invalidInvitationCode = 3112;
   static const int invitationCodeExpiredOrLimited = 3113;
   static const int transactionAlreadyInSpace = 3114;
+  static const int invalidAccountId = 3005;
+  static const int exchangeRateUnavailable = 3006;
 
   // Recurring transaction errors (3200-3201)
   static const int invalidRecurrenceRule = 3200;
   static const int recurrenceRuleNotFound = 3201;
 
-  // File upload errors (4001-4017)
+  // File upload errors (4001-4022)
   static const int noFileUploaded = 4001;
   static const int invalidFileUploaded = 4002;
   static const int fileTooLarge = 4003;
@@ -71,6 +73,11 @@ class ErrorCodes {
   static const int invalidImageUrls = 4015;
   static const int fileNotFound = 4016;
   static const int imageCompressionFailed = 4017;
+  static const int fileAccessError = 4018;
+  static const int fileDeleteError = 4019;
+  static const int noFiles = 4020;
+  static const int fileEmpty = 4021;
+  static const int invalidFilename = 4022;
 
   // Storage config errors (4500-4502)
   static const int invalidProviderType = 4500;

@@ -334,6 +334,21 @@ class LLMRegistry:
         return cls._llms()[0]  # Wrap around to first model
 
     @classmethod
+    def get_llm_by_index(cls, index: int) -> BaseChatModel:
+        """Get the LLM instance at a specific index (wraps around).
+
+        Args:
+            index: Index of the model entry
+
+        Returns:
+            The configured chat model for that entry
+        """
+        from langchain_core.language_models import BaseChatModel
+
+        entry = cls.get_model_at_index(index)
+        return cast(BaseChatModel, entry["llm"])
+
+    @classmethod
     def supports_vision(cls, model_name: str | None = None) -> bool:
         """Check whether a model supports vision (multimodal image input).
 
@@ -391,7 +406,7 @@ class LLMService:
         except Exception as e:
             # Default model not found, use first model
             self._default_model_index = 0
-            self._llm = LLMRegistry._llms()[0]["llm"]
+            self._llm = LLMRegistry.get_llm_by_index(0)
             logger.warning(
                 "default_model_not_found_using_first",
                 requested=settings.DEFAULT_LLM_MODEL,
@@ -465,7 +480,7 @@ class LLMService:
             RuntimeError: If all models fail after retries
         """
         all_names = LLMRegistry.get_all_names()
-        total_models = len(LLMRegistry._llms())
+        total_models = len(all_names)
 
         # Determine initial model index
         starting_index = self._default_model_index
@@ -533,7 +548,7 @@ class LLMService:
                     logger.error(
                         "all_models_failed",
                         models_tried=models_tried,
-                        starting_model=LLMRegistry._llms()[starting_index]["name"],
+                        starting_model=all_names[starting_index],
                     )
                     break
 

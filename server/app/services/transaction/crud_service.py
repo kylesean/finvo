@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
-from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError
+from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError, TransactionErrorCode
 from app.models.attachment import Attachment
 from app.models.base import utc_now
 from app.models.financial_account import FinancialAccount
@@ -32,6 +32,7 @@ from app.schemas.transaction import (
     TransferInfo,
 )
 from app.services.transaction.comment_service import TransactionCommentService
+from app.services.transaction.ledger_service import TransactionLedgerService
 from app.utils.currency_utils import (
     convert_to_user_base,
     get_user_base_currency,
@@ -47,6 +48,7 @@ class TransactionCRUDService:
     def __init__(self, db: AsyncSession):
         self.db = db
         self.comments = TransactionCommentService(db)
+        self.ledger = TransactionLedgerService(db)
 
     async def get_financial_account(
         self,
@@ -108,7 +110,7 @@ class TransactionCRUDService:
         # (update_transaction already rejected them; the create path must too,
         # otherwise the two paths disagree on what a negative amount means).
         if amount <= 0:
-            raise BusinessError("Amount must be positive", "VALIDATION_ERROR")
+            raise BusinessError("Amount must be positive", CommonErrorCode.VALIDATION_ERROR)
 
         # Validation logic has been handled by the utility layer, Service layer mainly responsible for persistence
         source_acc = None
@@ -165,7 +167,7 @@ class TransactionCRUDService:
         # to each account's own currency (snapshot conversion + row locks).
         # EXPENSE/INCOME/TRANSFER all follow the same rule so create/update/
         # delete share one ledger convention.
-        await self._apply_transaction_balance_effect(
+        await self.ledger.apply_transaction_balance_effect(
             transaction,
             user_uuid,
             sign=1,
@@ -393,7 +395,7 @@ class TransactionCRUDService:
 
         # Verify ownership
         if transaction.user_uuid != user_uuid:
-            raise BusinessError("Permission denied to modify this transaction", "PERMISSION_DENIED")
+            raise BusinessError("Permission denied to modify this transaction", CommonErrorCode.PERMISSION_DENIED)
 
         # Track what changed for DataModelUpdate paths
         changed_fields: list[str] = []
@@ -401,7 +403,7 @@ class TransactionCRUDService:
         # Update amount if provided
         if amount is not None:
             if amount <= 0:
-                raise BusinessError("Amount must be positive", "VALIDATION_ERROR")
+                raise BusinessError("Amount must be positive", CommonErrorCode.VALIDATION_ERROR)
             old_amount = transaction.amount
             old_amount_original = transaction.amount_original
             user_base = await get_user_base_currency(self.db, user_uuid)
@@ -425,7 +427,7 @@ class TransactionCRUDService:
             # TRANSFER both ends. PENDING rows have no booked effect, so an
             # amount change there must not touch balances either.
             if transaction.status != "PENDING":
-                await self._apply_balance_diff(
+                await self.ledger.apply_balance_diff(
                     transaction,
                     user_uuid,
                     old_amount_original=old_amount_original,
@@ -519,7 +521,7 @@ class TransactionCRUDService:
 
         # Verify ownership
         if transaction.user_uuid != user_uuid:
-            raise BusinessError("Permission denied to delete this transaction", "PERMISSION_DENIED")
+            raise BusinessError("Permission denied to delete this transaction", CommonErrorCode.PERMISSION_DENIED)
 
         # PENDING rows carry no booked balance effect (see confirm/skip docs),
         # so deleting one must not reverse an effect that was never applied.
@@ -527,7 +529,7 @@ class TransactionCRUDService:
             # Reverse the transaction's balance effect before deletion (EXPENSE
             # adds back, INCOME subtracts, TRANSFER reverses both ends), using the
             # same snapshot conversion applied at creation.
-            await self._apply_transaction_balance_effect(
+            await self.ledger.apply_transaction_balance_effect(
                 transaction,
                 user_uuid,
                 sign=-1,
@@ -593,7 +595,7 @@ class TransactionCRUDService:
         # Book the deferred balance effect now: recurring jobs book balances
         # immediately for auto-confirmed transactions, so the invariant
         # "CONFIRMED ⇒ balance booked" must hold for user-confirmed rows too.
-        await self._apply_transaction_balance_effect(
+        await self.ledger.apply_transaction_balance_effect(
             transaction,
             user_uuid,
             sign=1,
@@ -701,7 +703,9 @@ class TransactionCRUDService:
             try:
                 source_account_uuid = UUID(str(source_account_id))
             except (ValueError, AttributeError):
-                raise BusinessError(message="Invalid source_account_id", error_code="INVALID_ACCOUNT_ID") from None
+                raise BusinessError(
+                    message="Invalid source_account_id", error_code=TransactionErrorCode.INVALID_ACCOUNT_ID
+                ) from None
 
         # Get user's default currency (primaryCurrency) as the default value when currency is not specified
         user_default_currency = await get_user_display_currency(self.db, user_uuid)
@@ -727,10 +731,10 @@ class TransactionCRUDService:
             try:
                 raw_amount = item.get("amount")
                 if raw_amount is None or raw_amount == "":
-                    raise BusinessError("Amount is required", "VALIDATION_ERROR")
+                    raise BusinessError("Amount is required", CommonErrorCode.VALIDATION_ERROR)
                 amount_original = Decimal(str(raw_amount))
                 if amount_original <= 0:
-                    raise BusinessError("Amount must be greater than 0", "VALIDATION_ERROR")
+                    raise BusinessError("Amount must be greater than 0", CommonErrorCode.VALIDATION_ERROR)
 
                 # Use user's primaryCurrency as default value, instead of hardcoding CNY
                 currency = (item.get("currency") or user_default_currency).upper()
@@ -863,7 +867,7 @@ class TransactionCRUDService:
             raise NotFoundError("Transaction")
 
         if transaction.user_uuid != user_uuid:
-            raise BusinessError("Permission denied to modify this transaction", "PERMISSION_DENIED")
+            raise BusinessError("Permission denied to modify this transaction", CommonErrorCode.PERMISSION_DENIED)
 
         is_income = transaction.type == "INCOME"
 
@@ -890,7 +894,7 @@ class TransactionCRUDService:
             # credits the old source back and debits the new one (previously
             # this path skipped TRANSFER entirely and silently drifted).
             if old_account_id:
-                await self._apply_account_balance_effect(
+                await self.ledger.apply_account_balance_effect(
                     transaction,
                     account_id=old_account_id,
                     user_uuid=user_uuid,
@@ -899,7 +903,7 @@ class TransactionCRUDService:
                     for_update=True,
                 )
             if new_account_id:
-                await self._apply_account_balance_effect(
+                await self.ledger.apply_account_balance_effect(
                     transaction,
                     account_id=new_account_id,
                     user_uuid=user_uuid,
@@ -925,215 +929,7 @@ class TransactionCRUDService:
 
         return await self.get_transaction_detail(transaction_id, user_uuid)
 
-    async def _convert_snapshot_amount(
-        self,
-        *,
-        amount_original: Decimal,
-        amount_base: Decimal,
-        tx_currency: str | None,
-        target_currency: str,
-        user_base_currency: str,
-    ) -> Decimal:
-        """Convert a transaction snapshot amount to an account's currency.
-
-        Balance apply/rollback must use the transaction's recorded snapshot so
-        it matches what was originally booked, instead of re-converting at the
-        *live* rate:
-        - same currency as the transaction -> ``amount_original`` (exact)
-        - the user's real base currency     -> ``amount`` (snapshot-based, stable)
-        - any other currency               -> live conversion; raises if the rate
-          is unavailable (never silently mislabels a currency)
-
-        ``amount_base`` is denominated in the user's base currency, so comparing
-        against the hardcoded USD hub constant would mislabel currencies for
-        non-USD users — the user's real base currency is always used here.
-
-        Raises:
-            BusinessError: If a required cross-currency conversion is unavailable.
-        """
-        tx_currency = (tx_currency or target_currency).upper()
-        target = target_currency.upper()
-        if target == tx_currency:
-            return abs(amount_original)
-        if target == user_base_currency.upper():
-            return abs(amount_base)
-
-        from app.services.exchange_rate_service import exchange_rate_service
-
-        converted = await exchange_rate_service.convert(
-            amount=abs(amount_original),
-            from_currency=tx_currency,
-            to_currency=target,
-        )
-        if converted is None:
-            raise BusinessError(
-                f"Unable to get exchange rate from {tx_currency} to {target}, please try again later",
-                "EXCHANGE_RATE_UNAVAILABLE",
-            )
-        return abs(converted)
-
-    async def _apply_account_balance_effect(
-        self,
-        transaction: Transaction,
-        *,
-        account_id: UUID | None,
-        user_uuid: UUID,
-        user_base_currency: str,
-        sign: int,
-        for_update: bool = False,
-    ) -> None:
-        """Apply (sign=+1) or reverse (sign=-1) a transaction's balance effect on one account.
-
-        EXPENSE and TRANSFER debit their linked account; INCOME credits it. The
-        effect is converted to the account's own currency from the transaction
-        snapshot (see :meth:`_convert_snapshot_amount`). Accounts that no longer
-        exist (or are no longer owned) are skipped so stale links never crash
-        the ledger. Row locks serialize concurrent adjustments on the same
-        account — always keep ``for_update=True`` when mutating balances.
-        """
-        if account_id is None:
-            return
-        account = await self.get_financial_account(account_id, user_uuid, for_update=for_update)
-        if not account:
-            return
-
-        acc_currency = account.currency_code or user_base_currency
-        effect = await self._convert_snapshot_amount(
-            amount_original=transaction.amount_original,
-            amount_base=transaction.amount,
-            tx_currency=transaction.currency,
-            target_currency=acc_currency,
-            user_base_currency=user_base_currency,
-        )
-        # Expense/Transfer debit the linked account, Income credits it.
-        direction = 1 if transaction.type == "INCOME" else -1
-        account.current_balance = (account.current_balance or Decimal("0")) + sign * direction * effect
-        account.updated_at = utc_now()
-
-        logger.info(
-            "account_balance_effect",
-            transaction_id=str(transaction.uuid),
-            account_id=str(account_id),
-            account_currency=acc_currency,
-            effect=str(sign * direction * effect),
-            sign=sign,
-        )
-
-    async def _apply_transaction_balance_effect(
-        self,
-        transaction: Transaction,
-        user_uuid: UUID,
-        *,
-        sign: int,
-        source_account_id: UUID | None,
-        target_account_id: UUID | None,
-        for_update: bool = False,
-    ) -> None:
-        """Apply (sign=1) or reverse (sign=-1) a transaction's balance effect.
-
-        EXPENSE deducts the source account, INCOME credits the target account,
-        TRANSFER deducts the source and credits the target. The amount is
-        converted from the transaction's stored snapshot to each account's own
-        currency (see ``_convert_snapshot_amount``) so apply and rollback are
-        symmetric and never silently mislabel a currency. Accounts that no
-        longer exist are skipped.
-        """
-        user_base_currency = await get_user_base_currency(self.db, user_uuid)
-        tx_type = transaction.type
-
-        if tx_type == "EXPENSE":
-            await self._apply_account_balance_effect(
-                transaction,
-                account_id=source_account_id,
-                user_uuid=user_uuid,
-                user_base_currency=user_base_currency,
-                sign=sign,
-                for_update=for_update,
-            )
-        elif tx_type == "INCOME":
-            await self._apply_account_balance_effect(
-                transaction,
-                account_id=target_account_id,
-                user_uuid=user_uuid,
-                user_base_currency=user_base_currency,
-                sign=sign,
-                for_update=for_update,
-            )
-        elif tx_type == "TRANSFER":
-            await self._apply_account_balance_effect(
-                transaction,
-                account_id=source_account_id,
-                user_uuid=user_uuid,
-                user_base_currency=user_base_currency,
-                sign=sign,
-                for_update=for_update,
-            )
-            await self._apply_account_balance_effect(
-                transaction,
-                account_id=target_account_id,
-                user_uuid=user_uuid,
-                user_base_currency=user_base_currency,
-                sign=sign,
-                for_update=for_update,
-            )
-
-    async def _apply_balance_diff(
-        self,
-        transaction: Transaction,
-        user_uuid: UUID,
-        *,
-        old_amount_original: Decimal,
-        old_amount_base: Decimal,
-        old_currency: str,
-    ) -> None:
-        """Adjust linked account balances by the (new - old) effect after an amount update.
-
-        The old effect is derived from the pre-update snapshot (original amount
-        and currency) and the new effect from the transaction's fresh snapshot,
-        both converted to each account's own currency. Row locks serialize
-        concurrent updates to the same account.
-        """
-        user_base_currency = await get_user_base_currency(self.db, user_uuid)
-        tx_type = transaction.type
-
-        async def adjust(account_id: UUID | None, direction: int) -> None:
-            if account_id is None:
-                return
-            account = await self.get_financial_account(account_id, user_uuid, for_update=True)
-            if not account:
-                return
-            acc_currency = account.currency_code or user_base_currency
-            old_effect = await self._convert_snapshot_amount(
-                amount_original=old_amount_original,
-                amount_base=old_amount_base,
-                tx_currency=old_currency,
-                target_currency=acc_currency,
-                user_base_currency=user_base_currency,
-            )
-            new_effect = await self._convert_snapshot_amount(
-                amount_original=transaction.amount_original,
-                amount_base=transaction.amount,
-                tx_currency=transaction.currency,
-                target_currency=acc_currency,
-                user_base_currency=user_base_currency,
-            )
-            delta = new_effect - old_effect
-            account.current_balance = (account.current_balance or Decimal("0")) + direction * delta
-            account.updated_at = utc_now()
-
-        if tx_type == "EXPENSE":
-            await adjust(transaction.source_account_id, -1)
-        elif tx_type == "INCOME":
-            await adjust(transaction.target_account_id, +1)
-        elif tx_type == "TRANSFER":
-            await adjust(transaction.source_account_id, -1)
-            await adjust(transaction.target_account_id, +1)
-
     # ===== Comment Operations =====
-
-    async def _can_access_transaction_comments(self, transaction_id: UUID, user_uuid: UUID) -> Transaction:
-        """Check if user can access transaction comments."""
-        return await self.comments._can_access_transaction_comments(transaction_id, user_uuid)
 
     async def get_comments_for_transaction(self, transaction_id: UUID, user_uuid: UUID) -> list[dict[str, Any]]:
         """Get transaction comments list."""
@@ -1158,34 +954,6 @@ class TransactionCRUDService:
             commenter_username=commenter_username,
         )
 
-    async def _notify_mentioned_users(
-        self,
-        mentioned_user_ids: list[str],
-        transaction_id: UUID,
-        comment_id: UUID,
-        commenter_username: str,
-        comment_text: str,
-        parent_author_uuid: str | None = None,
-    ) -> None:
-        """Create notifications for mentioned users and push via WebSocket."""
-        return await self.comments._notify_mentioned_users(
-            mentioned_user_ids,
-            transaction_id,
-            comment_id,
-            commenter_username,
-            comment_text,
-            parent_author_uuid=parent_author_uuid,
-        )
-
     async def delete_comment(self, comment_id: UUID, user_uuid: UUID) -> bool:
         """Delete comment."""
         return await self.comments.delete_comment(comment_id, user_uuid)
-
-    async def _broadcast_comment_event(
-        self,
-        transaction_id: UUID,
-        comment_id: UUID,
-        action: str,
-    ) -> None:
-        """Broadcast real-time comment created/deleted event to all space members / transaction participants."""
-        return await self.comments._broadcast_comment_event(transaction_id, comment_id, action)
