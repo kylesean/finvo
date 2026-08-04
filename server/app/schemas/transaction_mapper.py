@@ -91,8 +91,9 @@ def transaction_to_dict(tx: Any, display_currency: str = PROJECT_DEFAULT_CURRENC
     # Check if already converted by service layer
     is_already_converted = isinstance(tx, TransactionItem)
 
-    # Extract core identifiers
-    tx_id = str(_get_attr(tx, "id"))
+    # Extract core identifiers. ORM models expose `uuid`; TransactionItem/dicts
+    # expose `id` as the wire field. Prefer `uuid` so model inputs resolve.
+    tx_id = str(_get_attr(tx, "uuid") or _get_attr(tx, "id"))
     tx_type = str(_get_attr(tx, "type"))
     user_uuid = str(_get_attr(tx, "user_uuid", "userUuid"))
 

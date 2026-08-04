@@ -20,7 +20,7 @@ async def test_list_user_accounts(db_session):
 
     # Setup Accounts
     acc1 = FinancialAccount(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         name="Cash",
         type="CASH",
@@ -31,7 +31,7 @@ async def test_list_user_accounts(db_session):
         status="ACTIVE",
     )
     acc2 = FinancialAccount(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         name="Bank",
         type="DEPOSIT",
@@ -66,7 +66,7 @@ async def test_get_account_by_id(db_session):
 
     acc_id = uuid4()
     acc = FinancialAccount(
-        id=acc_id,
+        uuid=acc_id,
         user_uuid=user_uuid,
         name="Test Acc",
         type="CASH",
@@ -85,5 +85,5 @@ async def test_get_account_by_id(db_session):
 
     # Assert
     assert fetched is not None
-    assert fetched.id == acc_id
+    assert fetched.uuid == acc_id
     assert fetched.name == "Test Acc"

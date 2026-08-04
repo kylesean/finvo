@@ -19,7 +19,7 @@ async def test_generate_cash_flow_forecast_basic(db_session):
 
     # 2. Setup Financial Account (Asset)
     acc = FinancialAccount(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         name="Bank",
         nature="ASSET",
@@ -33,7 +33,7 @@ async def test_generate_cash_flow_forecast_basic(db_session):
     # 3. Setup Recurring Transaction (Rent)
     # Starts today, monthly, 2000
     rt = RecurringTransaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         type="EXPENSE",
         amount=Decimal("2000.0"),
@@ -85,7 +85,7 @@ async def test_forecast_warnings(db_session):
 
     # Only 100 in bank
     acc = FinancialAccount(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         name="Bank",
         nature="ASSET",
@@ -98,7 +98,7 @@ async def test_forecast_warnings(db_session):
 
     # Big expense coming
     rt = RecurringTransaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         type="EXPENSE",
         amount=Decimal("500.0"),
@@ -129,7 +129,7 @@ async def test_simulate_purchase(db_session):
     db_session.add(user)
 
     acc = FinancialAccount(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         name="Bank",
         nature="ASSET",

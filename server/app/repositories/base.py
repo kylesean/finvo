@@ -8,20 +8,13 @@ boundaries stay with the caller (Unit of Work).
 
 from __future__ import annotations
 
-from typing import Any, Protocol
-from uuid import UUID
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class HasId(Protocol):
-    """A model with an ``id`` primary key attribute."""
-
-    id: Any
-
-
-class BaseRepository[ModelT: HasId]:
+class BaseRepository[ModelT]:
     """Generic CRUD operations for a SQLAlchemy model.
 
     Subclasses must set the ``model`` class attribute and may add
@@ -33,11 +26,6 @@ class BaseRepository[ModelT: HasId]:
     def __init__(self, db: AsyncSession):
         """Initialize with the shared async session."""
         self.db = db
-
-    async def get(self, id_value: UUID) -> ModelT | None:
-        """Get a record by primary key."""
-        result = await self.db.execute(select(self.model).where(self.model.id == id_value))
-        return result.scalar_one_or_none()
 
     async def list(self, *criteria: Any, order_by: Any | None = None) -> list[ModelT]:
         """List records matching criteria (all records if no criteria given)."""

@@ -223,7 +223,7 @@ class TransactionService:
         transaction_id: UUID,
         user_uuid: UUID,
         comment_text: str,
-        parent_comment_id: int | None = None,
+        parent_comment_id: UUID | None = None,
         mentioned_user_ids: list[str] | None = None,
         commenter_username: str = "Unknown",
     ) -> dict[str, Any]:
@@ -237,6 +237,6 @@ class TransactionService:
             commenter_username=commenter_username,
         )
 
-    async def delete_comment(self, comment_id: int, user_uuid: UUID) -> bool:
+    async def delete_comment(self, comment_id: UUID, user_uuid: UUID) -> bool:
         """Delete a comment."""
         return await self._crud.delete_comment(comment_id, user_uuid)

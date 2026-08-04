@@ -161,7 +161,7 @@ class AuthService:
 
         # Create user data
         user_data = {
-            "uuid": user_uuid,
+            "id": user_uuid,
             "username": username,
             "password": hashed_password,
             "timezone": timezone,

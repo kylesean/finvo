@@ -43,7 +43,7 @@ class AccountService:
         query = select(FinancialAccount).where(
             cast(
                 Any,
-                and_(FinancialAccount.id == account_id, FinancialAccount.user_uuid == user_uuid),
+                and_(FinancialAccount.uuid == account_id, FinancialAccount.user_uuid == user_uuid),
             )
         )
         result = await self.db.execute(query)

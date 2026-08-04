@@ -570,7 +570,7 @@ class SharedSpaceService:
         await self._verify_membership(space_id, user_uuid)
 
         # Verify transaction exists and belongs to user
-        tx_query = select(Transaction).where(Transaction.id == transaction_id)
+        tx_query = select(Transaction).where(Transaction.uuid == transaction_id)
         tx_result = await self.db.execute(tx_query)
         transaction = tx_result.scalar_one_or_none()
 
@@ -621,7 +621,7 @@ class SharedSpaceService:
             TransactionAddedEvent(
                 space_id=space_id,
                 space_name=space_name,
-                transaction_id=transaction.id,
+                transaction_id=transaction.uuid,
                 added_by_user_uuid=user_uuid,
                 amount=transaction.amount,
                 currency=(transaction.currency or "CNY").upper(),
@@ -820,7 +820,7 @@ class SharedSpaceService:
         # 2. Total expense (only EXPENSE type)
         expense_query = (
             select(func.sum(Transaction.amount))
-            .join(SpaceTransaction, Transaction.id == SpaceTransaction.transaction_id)
+            .join(SpaceTransaction, Transaction.uuid == SpaceTransaction.transaction_id)
             .where(
                 cast(
                     Any,
@@ -834,7 +834,7 @@ class SharedSpaceService:
         # 3. Total contributions by each member (only EXPENSE type)
         contribution_query = (
             select(SpaceTransaction.added_by_user_uuid, func.sum(Transaction.amount))
-            .join(Transaction, Transaction.id == SpaceTransaction.transaction_id)
+            .join(Transaction, Transaction.uuid == SpaceTransaction.transaction_id)
             .where(
                 cast(
                     Any,
@@ -879,7 +879,7 @@ class SharedSpaceService:
         # 2. Batch total expenses
         expense_query = (
             select(SpaceTransaction.space_id, func.sum(Transaction.amount))
-            .join(Transaction, Transaction.id == SpaceTransaction.transaction_id)
+            .join(Transaction, Transaction.uuid == SpaceTransaction.transaction_id)
             .where(
                 cast(
                     Any,
@@ -896,7 +896,7 @@ class SharedSpaceService:
         # 3. Batch member contributions
         contribution_query = (
             select(SpaceTransaction.space_id, SpaceTransaction.added_by_user_uuid, func.sum(Transaction.amount))
-            .join(Transaction, Transaction.id == SpaceTransaction.transaction_id)
+            .join(Transaction, Transaction.uuid == SpaceTransaction.transaction_id)
             .where(
                 cast(
                     Any,
@@ -998,7 +998,7 @@ class SharedSpaceService:
         display = TransactionDisplayValue.from_params(amount=amount, tx_type=tx_type, currency=currency)
 
         return {
-            "id": str(tx.id) if tx else "",
+            "id": str(tx.uuid) if tx else "",
             "type": tx_type,
             "amount": str(tx.amount) if tx else "0",
             "currency": currency,

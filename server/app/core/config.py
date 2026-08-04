@@ -232,8 +232,7 @@ class Settings(BaseSettings):
     # (enforced in model_post_init — see fail-fast check below)
     JWT_SECRET_KEY: str = Field(default="change-this-secret-key-in-production")
     JWT_ALGORITHM: str = "HS256"
-    # 7-day lifetime limits the damage window of a leaked token. Revocation
-    # (jti-based blacklist) is tracked as P1/M7 in docs/CODE_REVIEW_OPTIMIZATION.md.
+    # 7-day lifetime limits the damage window of a leaked token.
     JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 7
 
     # Base Directory
@@ -486,6 +485,16 @@ class Settings(BaseSettings):
         # Ensure directories exist
         self.LOG_DIR.mkdir(parents=True, exist_ok=True)
         self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def is_development(self) -> bool:
+        """Check if running in development environment."""
+        return self.ENVIRONMENT == Environment.DEVELOPMENT
+
+    @property
+    def is_production(self) -> bool:
+        """Check if running in production environment."""
+        return self.ENVIRONMENT == Environment.PRODUCTION
 
         # JWT secret fail-fast: production must not use the insecure default placeholder.
         # Mirrors the ENCRYPTION_KEY guard in app/utils/encryption.py:_initialize().

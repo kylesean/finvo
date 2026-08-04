@@ -35,7 +35,7 @@ class TransactionCommentService:
         from app.models.shared_space import SpaceMember, SpaceTransaction
 
         # Check ownership first (fast path)
-        tx_query = select(Transaction).where(Transaction.id == transaction_id)
+        tx_query = select(Transaction).where(Transaction.uuid == transaction_id)
         tx_result = await self.db.execute(tx_query)
         transaction = tx_result.scalar_one_or_none()
 
@@ -82,7 +82,7 @@ class TransactionCommentService:
                 User.username.label("user_name"),
                 User.avatar_url.label("user_avatar_url"),
             )
-            .join(User, TransactionComment.user_uuid == User.uuid)
+            .join(User, TransactionComment.user_uuid == User.id)
             .where(TransactionComment.transaction_id == transaction_id)
             .order_by(TransactionComment.created_at.asc())
         )
@@ -99,7 +99,7 @@ class TransactionCommentService:
         if parent_ids:
             parent_query = (
                 select(TransactionComment, User.username)
-                .join(User, TransactionComment.user_uuid == User.uuid)
+                .join(User, TransactionComment.user_uuid == User.id)
                 .where(TransactionComment.id.in_(parent_ids))
             )
             parent_result = await self.db.execute(parent_query)
@@ -120,7 +120,7 @@ class TransactionCommentService:
 
             formatted_comments.append(
                 {
-                    "id": str(comment.id),
+                    "id": str(comment.uuid),
                     "transactionId": str(comment.transaction_id),
                     "userId": str(comment.user_uuid),
                     "userName": user_name or "default_name",
@@ -141,7 +141,7 @@ class TransactionCommentService:
         transaction_id: UUID,
         user_uuid: UUID,
         comment_text: str,
-        parent_comment_id: int | None = None,
+        parent_comment_id: UUID | None = None,
         mentioned_user_ids: list[str] | None = None,
         commenter_username: str = "Unknown",
     ) -> dict[str, Any]:
@@ -208,7 +208,7 @@ class TransactionCommentService:
             "comment_created",
             user_uuid=user_uuid,
             transaction_id=transaction_id,
-            comment_id=new_comment.id,
+            comment_id=new_comment.uuid,
             is_reply=bool(parent_comment_id),
         )
 
@@ -220,13 +220,11 @@ class TransactionCommentService:
         # Don't notify the commenter themselves
         users_to_notify.discard(str(user_uuid))
 
-        comment_id_int = int(new_comment.id)
-
         if users_to_notify:
             await self._notify_mentioned_users(
                 mentioned_user_ids=list(users_to_notify),
                 transaction_id=transaction_id,
-                comment_id=comment_id_int,
+                comment_id=new_comment.uuid,
                 commenter_username=commenter_username,
                 comment_text=comment_text,
                 parent_author_uuid=str(parent_comment.user_uuid) if parent_comment is not None else None,
@@ -238,7 +236,7 @@ class TransactionCommentService:
         # Broadcast real-time comment created event (best-effort, after commit)
         await self._broadcast_comment_event(
             transaction_id=transaction_id,
-            comment_id=comment_id_int,
+            comment_id=new_comment.uuid,
             action="created",
         )
 
@@ -249,7 +247,7 @@ class TransactionCommentService:
                 User.username.label("user_name"),
                 User.avatar_url.label("user_avatar_url"),
             )
-            .join(User, TransactionComment.user_uuid == User.uuid)
+            .join(User, TransactionComment.user_uuid == User.id)
             .where(TransactionComment.id == new_comment.id)
         )
 
@@ -289,7 +287,7 @@ class TransactionCommentService:
         self,
         mentioned_user_ids: list[str],
         transaction_id: UUID,
-        comment_id: int,
+        comment_id: UUID,
         commenter_username: str,
         comment_text: str,
         parent_author_uuid: str | None = None,
@@ -363,7 +361,7 @@ class TransactionCommentService:
             except Exception as e:  # noqa: BLE001 - best-effort push, don't fail the comment
                 logger.warning("ws_push_failed", user_uuid=str(mentioned_id), error=str(e))
 
-    async def delete_comment(self, comment_id: int, user_uuid: UUID) -> bool:
+    async def delete_comment(self, comment_id: UUID, user_uuid: UUID) -> bool:
         """Delete comment
 
         Args:
@@ -403,7 +401,7 @@ class TransactionCommentService:
     async def _broadcast_comment_event(
         self,
         transaction_id: UUID,
-        comment_id: int,
+        comment_id: UUID,
         action: str,
     ) -> None:
         """Broadcast real-time comment created/deleted event to all space members / transaction participants."""
@@ -414,7 +412,7 @@ class TransactionCommentService:
         user_uuids: set[str] = set()
 
         # 1. Add transaction owner
-        tx_query = select(Transaction.user_uuid).where(Transaction.id == transaction_id)
+        tx_query = select(Transaction.user_uuid).where(Transaction.uuid == transaction_id)
         tx_res = await self.db.execute(tx_query)
         tx_user_uuid = tx_res.scalar_one_or_none()
         if tx_user_uuid:

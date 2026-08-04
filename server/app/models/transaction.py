@@ -10,9 +10,9 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, text
+from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from app.models.base import Base, col, utc_now
 
@@ -75,45 +75,48 @@ class Transaction(Base):
     )
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
+    uuid = synonym("id")
+
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="id")
     type: Mapped[str] = mapped_column(String(20))
     source_account_id: Mapped[UUID | None] = col.uuid_fk(
-        "financial_accounts", ondelete="SET NULL", index=True, nullable=True
+        "financial_accounts", ondelete="SET NULL", index=True, nullable=True, column="id"
     )
     target_account_id: Mapped[UUID | None] = col.uuid_fk(
-        "financial_accounts", ondelete="SET NULL", index=True, nullable=True
+        "financial_accounts", ondelete="SET NULL", index=True, nullable=True, column="id"
     )
     amount_original: Mapped[Decimal] = col.numeric(precision=20, scale=8)
     amount: Mapped[Decimal] = col.numeric(precision=20, scale=8)
-    currency: Mapped[str] = mapped_column(String(3), default="CNY")
+    currency: Mapped[str] = mapped_column(String(3), default="CNY", server_default=text("'CNY'"))
     exchange_rate: Mapped[Decimal | None] = col.numeric(precision=20, scale=8, nullable=True)
-    transaction_at: Mapped[datetime] = col.datetime_tz()
-    transaction_timezone: Mapped[str] = mapped_column(String(50), default="UTC")
+    transaction_at: Mapped[datetime] = col.timestamptz()
+    transaction_timezone: Mapped[str] = mapped_column(String(50), default="UTC", server_default=text("'UTC'"))
     tags: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
     location: Mapped[str | None] = mapped_column(String(255), nullable=True)
     latitude: Mapped[Decimal | None] = col.numeric(precision=9, scale=6, nullable=True)
     longitude: Mapped[Decimal | None] = col.numeric(precision=9, scale=6, nullable=True)
-    source: Mapped[str] = mapped_column(String(20), default="MANUAL")
-    status: Mapped[str] = mapped_column(String(20), default="CLEARED")
-    description: Mapped[str | None] = mapped_column(String, nullable=True)
-    raw_input: Mapped[str] = mapped_column(String, default="")
-    category_key: Mapped[str] = mapped_column(String(25), default="")
-    subject: Mapped[str] = mapped_column(String(20), default="SELF")
-    intent: Mapped[str] = mapped_column(String(20), default="SURVIVAL")
+    source: Mapped[str] = mapped_column(String(20), default="MANUAL", server_default=text("'MANUAL'"))
+    status: Mapped[str] = mapped_column(String(20), default="CLEARED", server_default=text("'CLEARED'"))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    raw_input: Mapped[str] = mapped_column(Text, default="", server_default=text("''"))
+    category_key: Mapped[str] = mapped_column(String(25), default="", server_default=text("''"))
+    subject: Mapped[str] = mapped_column(String(20), default="SELF", server_default=text("'SELF'"))
+    intent: Mapped[str] = mapped_column(String(20), default="SURVIVAL", server_default=text("'SURVIVAL'"))
     source_thread_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
     recurring_transaction_id: Mapped[UUID | None] = col.uuid_fk(
         "recurring_transactions",
         ondelete="SET NULL",
         index=True,
         nullable=True,
+        column="id",
     )
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True, onupdate=utc_now)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     user: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[Transaction.user_uuid]",
-        primaryjoin="Transaction.user_uuid == User.uuid",
+        primaryjoin="Transaction.user_uuid == User.id",
     )
 
     comments: Mapped[list[TransactionComment]] = relationship(
@@ -130,13 +133,13 @@ class Transaction(Base):
     source_account: Mapped[FinancialAccount | None] = relationship(
         "FinancialAccount",
         foreign_keys="[Transaction.source_account_id]",
-        primaryjoin="Transaction.source_account_id == FinancialAccount.id",
+        primaryjoin="Transaction.source_account_id == FinancialAccount.uuid",
     )
 
     target_account: Mapped[FinancialAccount | None] = relationship(
         "FinancialAccount",
         foreign_keys="[Transaction.target_account_id]",
-        primaryjoin="Transaction.target_account_id == FinancialAccount.id",
+        primaryjoin="Transaction.target_account_id == FinancialAccount.uuid",
     )
 
     @property
@@ -175,22 +178,23 @@ class TransactionComment(Base):
 
     __tablename__ = "transaction_comments"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE", index=True)
-    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
-    parent_comment_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("transaction_comments.id", ondelete="CASCADE"), nullable=True
+    id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
+    uuid = synonym("id")
+    transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE", index=True, column="id")
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="id")
+    parent_comment_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("transaction_comments.id", ondelete="CASCADE"), nullable=True
     )
-    comment_text: Mapped[str] = mapped_column(String)
+    comment_text: Mapped[str] = mapped_column(Text)
     mentioned_user_ids: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True, onupdate=utc_now)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     transaction: Mapped[Transaction | None] = relationship("Transaction", back_populates="comments")
     user: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[TransactionComment.user_uuid]",
-        primaryjoin="TransactionComment.user_uuid == User.uuid",
+        primaryjoin="TransactionComment.user_uuid == User.id",
     )
 
 
@@ -200,23 +204,24 @@ class RecurringTransaction(Base):
     __tablename__ = "recurring_transactions"
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
+    uuid = synonym("id")
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True)
 
     type: Mapped[str] = mapped_column(String(20))
 
     source_account_id: Mapped[UUID | None] = col.uuid_column(nullable=True)
     target_account_id: Mapped[UUID | None] = col.uuid_column(nullable=True)
 
-    amount_type: Mapped[str] = mapped_column(String(20), default="FIXED")
-    requires_confirmation: Mapped[bool] = mapped_column(Boolean, default=False)
+    amount_type: Mapped[str] = mapped_column(String(20), default="FIXED", server_default=text("'FIXED'"))
+    requires_confirmation: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
     amount: Mapped[Decimal] = col.numeric(precision=28, scale=8)
-    currency: Mapped[str] = mapped_column(String(3), default="CNY")
+    currency: Mapped[str] = mapped_column(String(3), default="CNY", server_default=text("'CNY'"))
 
-    category_key: Mapped[str] = mapped_column(String(50), default="OTHERS")
+    category_key: Mapped[str] = mapped_column(String(50), default="OTHERS", server_default=text("'OTHERS'"))
     tags: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
 
     recurrence_rule: Mapped[str] = mapped_column(String(255))
-    timezone: Mapped[str] = mapped_column(String(50), default="Asia/Shanghai")
+    timezone: Mapped[str] = mapped_column(String(50), default="Asia/Shanghai", server_default=text("'Asia/Shanghai'"))
     start_date: Mapped[date] = col.date_column()
     end_date: Mapped[date | None] = col.date_column(nullable=True)
 
@@ -224,15 +229,15 @@ class RecurringTransaction(Base):
     last_generated_at: Mapped[datetime | None] = col.datetime_tz(nullable=True)
     next_execution_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
 
-    description: Mapped[str | None] = mapped_column(String, nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"), index=True)
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True, onupdate=utc_now)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     user: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[RecurringTransaction.user_uuid]",
-        primaryjoin="RecurringTransaction.user_uuid == User.uuid",
+        primaryjoin="RecurringTransaction.user_uuid == User.id",
     )
 
     @property
@@ -247,21 +252,25 @@ class TransactionShare(Base):
     __tablename__ = "transaction_shares"
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE")
-    sharer_user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="uuid")
-    shared_with_user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="uuid")
-    can_view: Mapped[bool] = mapped_column(Boolean, default=True)
+    uuid = synonym("id")
+
+    transaction_id: Mapped[UUID] = col.uuid_fk("transactions", ondelete="CASCADE", column="id")
+    sharer_user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="id")
+    shared_with_user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="id")
+    can_view: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
     shared_at: Mapped[datetime] = col.datetime_tz()
     expires_at: Mapped[datetime] = col.datetime_tz()
+    created_at: Mapped[datetime] = col.timestamptz()
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     transaction: Mapped[Transaction | None] = relationship("Transaction", back_populates="shares")
     sharer: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[TransactionShare.sharer_user_uuid]",
-        primaryjoin="TransactionShare.sharer_user_uuid == User.uuid",
+        primaryjoin="TransactionShare.sharer_user_uuid == User.id",
     )
     shared_with: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[TransactionShare.shared_with_user_uuid]",
-        primaryjoin="TransactionShare.shared_with_user_uuid == User.uuid",
+        primaryjoin="TransactionShare.shared_with_user_uuid == User.id",
     )

@@ -6,14 +6,16 @@ This model has been migrated to SQLAlchemy 2.0 with Mapped[...] annotations.
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String, text
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.user import User
@@ -26,8 +28,7 @@ class UserSettings(Base):
 
     Attributes:
         user_uuid: Primary key, references users.uuid
-        currency: User's preferred currency (default: USD)
-        timezone: User's timezone (default: Asia/Shanghai)
+        currency: User's preferred currency (default: CNY)
         avg_daily_spending: Estimated average daily spending
         safety_balance_threshold: Minimum safe balance threshold
         created_at: When the settings were created
@@ -37,20 +38,27 @@ class UserSettings(Base):
 
     __tablename__ = "user_settings"
 
-    user_uuid: Mapped[UUID] = col.uuid_pk()
-    currency: Mapped[str] = mapped_column(String(10), default=PROJECT_DEFAULT_CURRENCY)
-    timezone: Mapped[str] = mapped_column(String(100), default="Asia/Shanghai")
-    avg_daily_spending: Mapped[str] = mapped_column(String, default="100.00")
-    safety_balance_threshold: Mapped[str] = mapped_column(String, default="500.00")
+    user_uuid: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    currency: Mapped[str] = mapped_column(String(10), default=PROJECT_DEFAULT_CURRENCY, server_default=text("'CNY'"))
+    avg_daily_spending: Mapped[Decimal] = col.numeric(
+        nullable=False, default=Decimal("100.00"), server_default=text("100.00")
+    )
+    safety_balance_threshold: Mapped[Decimal] = col.numeric(
+        nullable=False, default=Decimal("500.00"), server_default=text("500.00")
+    )
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     user: Mapped[User | None] = relationship(
         "User",
         back_populates="settings",
         uselist=False,
         foreign_keys="[UserSettings.user_uuid]",
-        primaryjoin="UserSettings.user_uuid == User.uuid",
+        primaryjoin="UserSettings.user_uuid == User.id",
     )
 
     @property

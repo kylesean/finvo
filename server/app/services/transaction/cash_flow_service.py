@@ -60,7 +60,7 @@ class CashFlowService:
         # (LIABILITY) negative. Each account's balance is in its own currency,
         # so convert to the user's base currency before summing.
         accounts_query = select(
-            FinancialAccount.id,
+            FinancialAccount.uuid,
             FinancialAccount.nature,
             FinancialAccount.current_balance,
             FinancialAccount.currency_code,
@@ -143,7 +143,7 @@ class CashFlowService:
                 if base_amount is None:
                     logger.warning(
                         "forecast_recurring_skipped_conversion",
-                        tx_id=str(tx.id),
+                        tx_id=str(tx.uuid),
                         currency=tx.currency,
                     )
                     continue
@@ -176,7 +176,7 @@ class CashFlowService:
                         }
                     )
             except Exception as e:
-                logger.error("recurring_tx_processing_failed", tx_id=str(tx.id), error=str(e))
+                logger.error("recurring_tx_processing_failed", tx_id=str(tx.uuid), error=str(e))
                 continue
 
         # b. Process scenario events

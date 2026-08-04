@@ -75,7 +75,7 @@ async def process_due_transactions() -> None:
                     error_count += 1
                     logger.error(
                         "recurring_transaction_processing_failed",
-                        recurring_id=str(recurring_tx.id),
+                        recurring_id=str(recurring_tx.uuid),
                         error=str(e),
                     )
 
@@ -114,7 +114,7 @@ async def _already_generated(
         type_cast(
             Any,
             and_(
-                Transaction.recurring_transaction_id == recurring_tx.id,
+                Transaction.recurring_transaction_id == recurring_tx.uuid,
                 Transaction.transaction_at == recurring_tx.next_execution_at,
             ),
         )
@@ -226,7 +226,7 @@ async def _create_transaction_from_recurring(
         tags=recurring_tx.tags,
         source="RECURRING",
         status=status,
-        recurring_transaction_id=recurring_tx.id,
+        recurring_transaction_id=recurring_tx.uuid,
     )
 
     db.add(transaction)
@@ -245,8 +245,8 @@ async def _create_transaction_from_recurring(
 
     logger.info(
         "transaction_created_from_recurring",
-        transaction_id=str(transaction.id),
-        recurring_id=str(recurring_tx.id),
+        transaction_id=str(transaction.uuid),
+        recurring_id=str(recurring_tx.uuid),
         amount=str(recurring_tx.amount),
         status=status,
     )
@@ -269,7 +269,7 @@ async def _create_transaction_from_recurring(
                     content=desc,
                     data={
                         "action": "recurring_pending",
-                        "transaction_id": str(transaction.id),
+                        "transaction_id": str(transaction.uuid),
                         "amount": str(amount_original),
                         "currency": currency,
                         "category_key": recurring_tx.category_key or "",
@@ -281,7 +281,7 @@ async def _create_transaction_from_recurring(
             # Non-critical: notification failure should not block transaction creation
             logger.warning(
                 "recurring_pending_notification_failed",
-                transaction_id=str(transaction.id),
+                transaction_id=str(transaction.uuid),
                 error=str(e),
             )
 
@@ -306,5 +306,5 @@ async def _update_next_execution(
         recurring_tx.is_active = False
         logger.info(
             "recurring_transaction_completed",
-            recurring_id=str(recurring_tx.id),
+            recurring_id=str(recurring_tx.uuid),
         )

@@ -43,7 +43,7 @@ async def test_create_transaction_simple(db_session):
 
     # 5. Verify DB
     tx_id = UUID(result["transaction_id"])  # Cast to UUID object
-    query = select(Transaction).where(Transaction.id == tx_id)
+    query = select(Transaction).where(Transaction.uuid == tx_id)
     db_result = await db_session.execute(query)
     tx_record = db_result.scalar_one()
 
@@ -73,7 +73,7 @@ async def test_get_transaction_feed_pagination(db_session):
     # 2. Create 15 dummy transactions
     for i in range(15):
         tx = Transaction(
-            id=uuid4(),
+            uuid=uuid4(),
             user_uuid=user_uuid,
             type="EXPENSE",
             amount=Decimal(10.0 + i),
@@ -113,7 +113,7 @@ async def test_delete_transaction(db_session):
     # 2. Create Transaction
     tx_id = uuid4()
     tx = Transaction(
-        id=tx_id,
+        uuid=tx_id,
         user_uuid=user_uuid,
         type="EXPENSE",
         amount=Decimal("50.0"),
@@ -132,7 +132,7 @@ async def test_delete_transaction(db_session):
     assert success is True
 
     # 4. Verify Gone
-    query = select(Transaction).where(Transaction.id == tx_id)
+    query = select(Transaction).where(Transaction.uuid == tx_id)
     db_result = await db_session.execute(query)
     assert db_result.scalar_one_or_none() is None
 
@@ -154,7 +154,7 @@ async def test_update_transaction_amount_original_is_float(db_session):
 
     tx_id = uuid4()
     tx = Transaction(
-        id=tx_id,
+        uuid=tx_id,
         user_uuid=user_uuid,
         type="EXPENSE",
         amount=Decimal("50.0"),

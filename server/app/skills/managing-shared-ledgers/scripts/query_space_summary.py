@@ -88,9 +88,9 @@ async def main() -> None:
                 stmt = (
                     select(
                         func.coalesce(func.sum(Transaction.amount), 0).label("total_expense"),
-                        func.count(Transaction.id).label("transaction_count"),
+                        func.count(Transaction.uuid).label("transaction_count"),
                     )
-                    .join(SpaceTransaction, Transaction.id == SpaceTransaction.transaction_id)
+                    .join(SpaceTransaction, Transaction.uuid == SpaceTransaction.transaction_id)
                     .where(
                         SpaceTransaction.space_id == sid,
                         Transaction.transaction_at >= month_start,

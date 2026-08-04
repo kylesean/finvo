@@ -152,7 +152,7 @@ async def main() -> None:
             for acc in asset_accounts:
                 formatted_accounts.append(
                     {
-                        "id": str(acc.id),
+                        "id": str(acc.uuid),
                         "name": acc.name,
                         "type": acc.type or "UNKNOWN",
                         "balance": float(acc.current_balance),

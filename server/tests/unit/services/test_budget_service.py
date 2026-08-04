@@ -72,7 +72,7 @@ async def test_calculate_spent_amount(db_session):
     today = datetime.now(UTC)
 
     t1 = Transaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         type="EXPENSE",
         amount=Decimal("50.0"),
@@ -84,7 +84,7 @@ async def test_calculate_spent_amount(db_session):
         raw_input="lunch",
     )
     t2 = Transaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         type="EXPENSE",
         amount=Decimal("30.0"),
@@ -96,7 +96,7 @@ async def test_calculate_spent_amount(db_session):
         raw_input="snack",
     )
     t3 = Transaction(  # Different category
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         type="EXPENSE",
         amount=Decimal("20.0"),
@@ -109,7 +109,7 @@ async def test_calculate_spent_amount(db_session):
     )
     # Income shouldn't count
     t4 = Transaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         type="INCOME",
         amount=Decimal("1000.0"),
@@ -157,7 +157,7 @@ async def test_update_period_status(db_session):
 
     # 2. Add transaction that exceeds budget
     tx = Transaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user_uuid,
         type="EXPENSE",
         amount=Decimal("150.0"),

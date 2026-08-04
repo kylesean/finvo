@@ -13,11 +13,11 @@ from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, CheckConstraint, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.user import User
@@ -74,10 +74,6 @@ class BudgetPeriodStatus(str, Enum):
     ACHIEVED = "ACHIEVED"
 
 
-# OverspendBehavior enum removed — no consumer existed.
-# Future overspend-handling UX should be designed alongside the Rebalance UI.
-
-
 # ============================================================================
 # Budget Model
 # ============================================================================
@@ -91,9 +87,9 @@ class Budget(Base):
     Attributes:
         id: Primary key (UUID)
         owner_uuid: Foreign key to users.uuid
-        shared_space_id: Reserved for shared-space collaborative budgets (not yet implemented)
+        shared_space_id: Reserved for shared-space collaborative budgets
         name: Budget display name
-        type: Always EXPENSE_LIMIT (SAVINGS_GOAL removed)
+        type: Always EXPENSE_LIMIT
         scope: TOTAL or CATEGORY
         category_key: Category key for category budgets (NULL for total)
         amount: Budget limit amount
@@ -105,11 +101,12 @@ class Budget(Base):
         source: AI_SUGGESTED or USER_DEFINED
         ai_confidence: Confidence score for AI suggestions
         status: ACTIVE, PAUSED, or ARCHIVED
+        created_at: Creation timestamp
+        updated_at: Last update timestamp
     """
 
     __tablename__ = "budgets"
     __table_args__ = (
-        # chk_budgets_type dropped: only EXPENSE_LIMIT remains after SAVINGS_GOAL removal
         CheckConstraint("scope IN ('TOTAL', 'CATEGORY')", name="chk_budgets_scope"),
         CheckConstraint("period_type IN ('WEEKLY', 'BIWEEKLY', 'MONTHLY', 'YEARLY')", name="chk_budgets_period_type"),
         CheckConstraint("period_anchor_day >= 1 AND period_anchor_day <= 31", name="chk_budgets_anchor_day"),
@@ -119,35 +116,36 @@ class Budget(Base):
     )
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    owner_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
-    # TODO: Shared budget collaboration - not yet implemented
-    shared_space_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
+    owner_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="id")
+    shared_space_id: Mapped[UUID | None] = col.uuid_fk(
+        "shared_spaces", ondelete="SET NULL", index=True, nullable=True, column="id"
+    )
 
     name: Mapped[str] = mapped_column(String(100))
-    type: Mapped[str] = mapped_column(String(20), default="EXPENSE_LIMIT")
+    type: Mapped[str] = mapped_column(String(20), default="EXPENSE_LIMIT", server_default=sa.text("'EXPENSE_LIMIT'"))
     scope: Mapped[str] = mapped_column(String(20))
-    category_key: Mapped[str | None] = mapped_column(String(25), nullable=True)
+    category_key: Mapped[str | None] = mapped_column(String(25), nullable=True, index=True)
 
     amount: Mapped[Decimal] = col.numeric(precision=20, scale=8)
-    currency_code: Mapped[str] = mapped_column(String(3), default="CNY")
+    currency_code: Mapped[str] = mapped_column(String(3), default="CNY", server_default=sa.text("'CNY'"))
 
-    period_type: Mapped[str] = mapped_column(String(20), default="MONTHLY")
-    period_anchor_day: Mapped[int] = mapped_column(Integer, default=1)
+    period_type: Mapped[str] = mapped_column(String(20), default="MONTHLY", server_default=sa.text("'MONTHLY'"))
+    period_anchor_day: Mapped[int] = mapped_column(Integer, default=1, server_default=sa.text("1"))
 
-    rollover_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    rollover_enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default=sa.text("true"))
     rollover_balance: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("0"))
 
-    source: Mapped[str] = mapped_column(String(20), default="USER_DEFINED")
+    source: Mapped[str] = mapped_column(String(20), default="USER_DEFINED", server_default=sa.text("'USER_DEFINED'"))
     ai_confidence: Mapped[Decimal | None] = col.numeric(precision=5, scale=4, nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="ACTIVE")
+    status: Mapped[str] = mapped_column(String(20), default="ACTIVE", server_default=sa.text("'ACTIVE'"))
 
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     owner: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[Budget.owner_uuid]",
-        primaryjoin="Budget.owner_uuid == User.uuid",
+        primaryjoin="Budget.owner_uuid == User.id",
     )
     periods: Mapped[list[BudgetPeriod]] = relationship(
         "BudgetPeriod",
@@ -203,6 +201,8 @@ class BudgetPeriod(Base):
         status: ON_TRACK, WARNING, EXCEEDED, or ACHIEVED
         ai_forecast: AI-predicted end-of-period spending
         notes: Optional notes
+        created_at: Creation timestamp
+        updated_at: Last update timestamp
     """
 
     __tablename__ = "budget_periods"
@@ -210,12 +210,12 @@ class BudgetPeriod(Base):
         CheckConstraint("period_end >= period_start", name="chk_budget_periods_dates"),
         CheckConstraint("status IN ('ON_TRACK', 'WARNING', 'EXCEEDED', 'ACHIEVED')", name="chk_budget_periods_status"),
         CheckConstraint("spent_amount >= 0", name="chk_budget_periods_spent_positive"),
-        # Prevents duplicate periods for the same budget+start date under concurrent requests
         UniqueConstraint("budget_id", "period_start", name="uq_budget_periods_budget_start"),
+        Index("ix_budget_periods_dates", "period_start", "period_end"),
     )
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    budget_id: Mapped[UUID] = col.uuid_fk("budgets", ondelete="CASCADE", index=True)
+    budget_id: Mapped[UUID] = col.uuid_fk("budgets", ondelete="CASCADE", index=True, column="id")
 
     period_start: Mapped[date] = col.date_column()
     period_end: Mapped[date] = col.date_column()
@@ -225,11 +225,12 @@ class BudgetPeriod(Base):
     rollover_out: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("0"))
     adjusted_target: Mapped[Decimal] = col.numeric(precision=20, scale=8)
 
-    status: Mapped[str] = mapped_column(String(20), default="ON_TRACK")
-    # TODO: AI spending forecast - not yet implemented
+    status: Mapped[str] = mapped_column(String(20), default="ON_TRACK", server_default=sa.text("'ON_TRACK'"))
     ai_forecast: Mapped[Decimal | None] = col.numeric(precision=20, scale=8, nullable=True)
 
-    notes: Mapped[str | None] = mapped_column(String, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = col.timestamptz()
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     budget: Mapped[Budget | None] = relationship("Budget", back_populates="periods")
 
@@ -275,15 +276,13 @@ class BudgetSettings(Base):
     """User budget threshold preferences.
 
     One-to-one relationship with User (user_uuid is primary key).
-    Only warning/alert thresholds are stored here; notification-related
-    settings (weekly summary, anomaly detection, quiet hours) were removed
-    as they had no consumer and will be redesigned when push infrastructure
-    is built.
 
     Attributes:
         user_uuid: Primary key, references users.uuid
         warning_threshold: Percentage threshold for WARNING status (default 70)
         alert_threshold: Percentage threshold for EXCEEDED status (default 90)
+        created_at: Creation timestamp
+        updated_at: Last update timestamp
     """
 
     __tablename__ = "budget_settings"
@@ -295,15 +294,17 @@ class BudgetSettings(Base):
 
     user_uuid: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),
-        sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+        sa.ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True,
     )
 
-    warning_threshold: Mapped[int] = mapped_column(Integer, default=70)
-    alert_threshold: Mapped[int] = mapped_column(Integer, default=90)
+    warning_threshold: Mapped[int] = mapped_column(Integer, default=70, server_default=sa.text("70"))
+    alert_threshold: Mapped[int] = mapped_column(Integer, default=90, server_default=sa.text("90"))
+    created_at: Mapped[datetime] = col.timestamptz()
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     user: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[BudgetSettings.user_uuid]",
-        primaryjoin="BudgetSettings.user_uuid == User.uuid",
+        primaryjoin="BudgetSettings.user_uuid == User.id",
     )

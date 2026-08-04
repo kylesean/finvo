@@ -100,13 +100,15 @@ async def get_redis_client() -> AsyncGenerator[Any]:
     Yields:
         Redis client instance or None if Redis is not configured/unreachable.
     """
+    client = None
     try:
         from app.core.cache import cache_manager
 
-        yield cache_manager.get_client()
+        client = cache_manager.get_client()
     except Exception as e:
         logger.warning("redis_client_unavailable", error=str(e))
-        yield None
+
+    yield client
 
 
 async def get_current_user_uuid(

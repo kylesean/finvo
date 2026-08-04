@@ -95,7 +95,7 @@ class TransactionItem(BaseModel):
         amount_val = tx.amount if isinstance(tx.amount, Decimal) else Decimal(str(tx.amount or "0.0"))
 
         return cls(
-            id=str(tx.id),
+            id=str(tx.uuid),
             user_uuid=str(tx.user_uuid),
             type=tx.type,
             amount=amount_val,

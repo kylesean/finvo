@@ -24,11 +24,16 @@ def upgrade() -> None:
     """Create notifications table."""
     op.create_table(
         "notifications",
-        sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column("type", sa.String(50), nullable=False),

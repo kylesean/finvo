@@ -26,17 +26,22 @@ def upgrade() -> None:
     # storage_configs
     op.create_table(
         "storage_configs",
-        sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column("provider_type", sa.String(50), nullable=False),
         sa.Column("name", sa.String(100), nullable=False),
         sa.Column("base_path", sa.String(255), nullable=False),
-        sa.Column("credentials", postgresql.JSONB, nullable=True, server_default=sa.text("'{}'::jsonb")),
+        sa.Column("credentials", postgresql.JSONB, nullable=False, server_default=sa.text("'{}'::jsonb")),
         sa.Column("is_readonly", sa.Boolean, nullable=False, server_default="true"),
         sa.Column(
             "created_at",
@@ -65,12 +70,12 @@ def upgrade() -> None:
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column(
             "storage_config_id",
-            sa.Integer,
+            postgresql.UUID(as_uuid=True),
             sa.ForeignKey("storage_configs.id", ondelete="SET NULL"),
             nullable=True,
         ),
@@ -80,7 +85,7 @@ def upgrade() -> None:
         sa.Column("mime_type", sa.String(100), nullable=True),
         sa.Column("size", sa.BigInteger, nullable=True),
         sa.Column("hash", sa.String(64), nullable=True),
-        sa.Column("meta_info", postgresql.JSONB, nullable=True, server_default=sa.text("'{}'::jsonb")),
+        sa.Column("meta_info", postgresql.JSONB, nullable=False, server_default=sa.text("'{}'::jsonb")),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

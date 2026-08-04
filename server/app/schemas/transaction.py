@@ -316,7 +316,7 @@ class CommentCreateRequest(BaseModel):
     """create comment request"""
 
     comment_text: str = Field(min_length=1)
-    parent_comment_id: int | None = None
+    parent_comment_id: UUID | None = None
     mentioned_user_ids: list[str] | None = None  # UUIDs of mentioned users
 
 

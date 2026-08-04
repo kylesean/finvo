@@ -104,8 +104,10 @@ case $COMMAND in
         echo -e "${YELLOW}======================${NC}"
         ;;
     start)
-        echo -e "${GREEN}Starting application in $ENV...${NC}"
+        echo -e "${GREEN}Ensuring database schema for $ENV...${NC}"
         export PYTHONPATH=$PYTHONPATH:.
+        uv run alembic upgrade head
+        echo -e "${GREEN}Starting application in $ENV...${NC}"
         # Show QR code for mobile app configuration
         uv run python scripts/show_qr.py 2>/dev/null || true
         # Bind to 0.0.0.0 to allow LAN access
@@ -117,6 +119,15 @@ case $COMMAND in
         echo -e "${GREEN}Initializing external components...${NC}"
         export PYTHONPATH=$PYTHONPATH:.
         uv run python scripts/bootstrap.py
+        ;;
+    reset)
+        echo -e "${YELLOW}Resetting database schema...${NC}"
+        export PYTHONPATH=$PYTHONPATH:.
+        uv run python scripts/reset_schema.py
+        echo -e "${GREEN}Re-running database setup...${NC}"
+        uv run alembic upgrade head
+        uv run python scripts/bootstrap.py
+        echo -e "${GREEN}Database reset & bootstrap complete!${NC}"
         ;;
     docker-up)
         echo -e "${GREEN}Starting Docker for $ENV...${NC}"

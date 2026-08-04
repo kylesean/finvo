@@ -258,7 +258,7 @@ class RecurringTransactionService:
     def _recurring_tx_to_dict(self, recurring_tx: RecurringTransaction) -> dict[str, Any]:
         """Convert RecurringTransaction model to dict response."""
         return {
-            "id": str(recurring_tx.id),
+            "id": str(recurring_tx.uuid),
             "user_uuid": str(recurring_tx.user_uuid),
             "type": recurring_tx.type,
             "source_account_id": str(recurring_tx.source_account_id) if recurring_tx.source_account_id else None,
@@ -322,7 +322,7 @@ class RecurringTransactionService:
         """Fetch a recurring transaction scoped to its owner."""
         query = select(RecurringTransaction).where(
             and_(
-                RecurringTransaction.id == recurring_id,
+                RecurringTransaction.uuid == recurring_id,
                 RecurringTransaction.user_uuid == user_uuid,
             )
         )

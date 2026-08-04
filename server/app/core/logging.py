@@ -219,7 +219,10 @@ class JsonlFileHandler(logging.Handler):
             handle.write(clean_line + "\n")
             handle.flush()
         except Exception:
-            self.handleError(record)
+            try:
+                self.handleError(record)
+            except Exception:
+                pass
 
     def close(self) -> None:
         """Close the handler and its persistent file handle."""

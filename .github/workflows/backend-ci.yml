@@ -204,7 +204,9 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        # pgvector image required by migration 0001 (CREATE EXTENSION vector).
+        # Keep in sync with docker-compose.yml for local/CI parity.
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # pragma: allowlist secret
@@ -248,20 +250,19 @@ jobs:
       - name: Run database migrations on a clean database
         env:
           DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/Finvo_test # pragma: allowlist secret
+          JWT_SECRET_KEY: test-secret-key-for-ci # pragma: allowlist secret
           ENVIRONMENT: test
         run: uv run alembic upgrade head
 
       - name: Check model vs migration drift (alembic check)
-        # Currently a warning: known drift items (model-level FK gaps, field-level
-        # type/nullability diffs) are tracked as P1/P2 in server/docs/CODE_REVIEW_OPTIMIZATION.md (alembic env fix landed 2026-08; drift items re-verified).
-        # Convert to a hard failure once those are resolved.
+        # Fails the build on any DDL/model drift. Run after `alembic upgrade head`
+        # so the comparison is against a freshly migrated schema. A failure here
+        # means a model change was made without a matching migration (or vice versa).
         env:
           DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/Finvo_test # pragma: allowlist secret
+          JWT_SECRET_KEY: test-secret-key-for-ci # pragma: allowlist secret
           ENVIRONMENT: test
-        run: |
-          if ! uv run alembic check; then
-            echo "::warning::alembic check found model/migration drift (known P1/P2 items pending)"
-          fi
+        run: uv run alembic check
 
       - name: Run tests with coverage
         env:

@@ -71,6 +71,9 @@ format:
 bootstrap:
 	cd server && ./manage.sh bootstrap
 
+db-reset:
+	cd server && ./manage.sh reset
+
 # ============================================================
 # Database Migration Commands
 # ============================================================

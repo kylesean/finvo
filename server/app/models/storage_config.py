@@ -13,12 +13,13 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any
-from uuid import UUID
+from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import Boolean, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Boolean, String, text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.attachment import Attachment
@@ -46,6 +47,7 @@ class StorageConfig(Base):
 
     Attributes:
         id: Primary key (auto-increment)
+        uuid: Alias for id
         user_uuid: Foreign key to users table
         provider_type: Storage provider type (local_uploads, s3_compatible, webdav)
         name: User-friendly display name
@@ -59,16 +61,19 @@ class StorageConfig(Base):
 
     __tablename__ = "storage_configs"
 
-    id: Mapped[int | None] = mapped_column(primary_key=True, autoincrement=True)
-    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="uuid")
+    id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
+    uuid = synonym("id")
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="id", index=True)
 
     provider_type: Mapped[str] = mapped_column(String(50))
     name: Mapped[str] = mapped_column(String(100))
     base_path: Mapped[str] = mapped_column(String(255))
-    credentials: Mapped[dict[str, Any]] = col.jsonb_column()
-    is_readonly: Mapped[bool] = mapped_column(Boolean, default=True)
+    credentials: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, default=dict, server_default=text("'{}'::jsonb"), nullable=False
+    )
+    is_readonly: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     attachments: Mapped[list[Attachment]] = relationship(
         "Attachment",

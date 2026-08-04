@@ -15,6 +15,7 @@ Best Practices Implemented:
 
 from __future__ import annotations
 
+import asyncio
 import os
 from datetime import UTC, datetime
 from typing import Any, cast
@@ -83,6 +84,25 @@ class MemoryService:
             cls._instance = cls()
             await cls._instance._initialize()
         return cls._instance
+
+    @classmethod
+    async def close_instance(cls) -> None:
+        """Close Mem0 vector store connection pool cleanly."""
+        if cls._instance is not None and cls._instance._memory is not None:
+            try:
+                mem = cls._instance._memory
+                vs = getattr(mem, "vector_store", None)
+                if vs is not None:
+                    pool = getattr(vs, "pool", None)
+                    if pool is not None and hasattr(pool, "close"):
+                        if asyncio.iscoroutinefunction(pool.close):
+                            await pool.close()
+                        else:
+                            pool.close()
+            except Exception as e:
+                logger.warning("mem0_pool_close_failed", error=str(e))
+            finally:
+                cls._instance = None
 
     async def _initialize(self) -> None:
         """Initialize the AsyncMemory instance with configurable embedder."""

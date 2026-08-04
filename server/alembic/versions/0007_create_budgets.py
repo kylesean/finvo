@@ -39,7 +39,7 @@ def upgrade() -> None:
         sa.Column(
             "owner_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         # shared_space_id FK added in 0008 after shared_spaces table is created
@@ -145,7 +145,7 @@ def upgrade() -> None:
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             primary_key=True,
         ),
         sa.Column("warning_threshold", sa.Integer, nullable=False, server_default="70"),

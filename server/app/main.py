@@ -72,6 +72,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     await init_checkpointer()
 
+    # In development mode, auto-ensure external dependency tables (LangGraph, Mem0) are initialized
+    if settings.is_development:
+        try:
+            from scripts.bootstrap import run_bootstrap
+
+            await run_bootstrap()
+        except Exception as e:
+            logger.warning("development_auto_bootstrap_skipped", error=str(e))
+
     # Initialize Redis cache
     from app.core.cache import close_cache, init_cache
 
@@ -94,8 +103,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     await background_task_manager.shutdown()
     from app.services.exchange_rate_service import exchange_rate_service
+    from app.services.memory.memory_service import MemoryService
 
     await exchange_rate_service.close()
+    await MemoryService.close_instance()
     await shutdown_scheduler()
     await close_cache()
     await close_checkpointer()

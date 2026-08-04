@@ -7,13 +7,13 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import bcrypt
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.financial_account import FinancialAccount
@@ -24,8 +24,7 @@ class User(Base):
     """User model for storing user accounts.
 
     Attributes:
-        id: The primary key (BigInteger)
-        uuid: Unique identifier UUID
+        uuid: Primary key identifier (UUID)
         username: User's username
         email: User's email (unique, optional)
         mobile: User's mobile number (unique, optional)
@@ -43,33 +42,34 @@ class User(Base):
 
     __tablename__ = "users"
 
-    id: Mapped[int | None] = mapped_column(primary_key=True, autoincrement=True)
-    uuid: Mapped[UUID] = mapped_column(unique=True, index=True)
+    id: Mapped[UUID] = col.uuid_pk(uuid4)
+    uuid = synonym("id")
+
     username: Mapped[str] = mapped_column(String(50))
-    email: Mapped[str | None] = mapped_column(String(100), unique=True, index=True, nullable=True)
-    mobile: Mapped[str | None] = mapped_column(String(20), unique=True, index=True, nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
+    mobile: Mapped[str | None] = mapped_column(String(20), unique=True, nullable=True)
     password: Mapped[str] = mapped_column(String(255))
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    timezone: Mapped[str] = mapped_column(String(100), default="Asia/Shanghai")
-    registration_type: Mapped[str] = mapped_column(String(20))
+    timezone: Mapped[str] = mapped_column(String(100), default="UTC", server_default=text("'UTC'"))
+    registration_type: Mapped[str] = mapped_column(String(20), server_default=text("'email'"))
     last_login_ip: Mapped[str | None] = col.inet_column()
     last_login_at: Mapped[datetime | None] = col.datetime_tz(nullable=True)
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     settings: Mapped[UserSettings | None] = relationship(
         "UserSettings",
         back_populates="user",
         uselist=False,
         foreign_keys="[UserSettings.user_uuid]",
-        primaryjoin="User.uuid == UserSettings.user_uuid",
+        primaryjoin="User.id == UserSettings.user_uuid",
     )
 
     financial_accounts: Mapped[list[FinancialAccount]] = relationship(
         "FinancialAccount",
         back_populates="user",
         foreign_keys="[FinancialAccount.user_uuid]",
-        primaryjoin="User.uuid == FinancialAccount.user_uuid",
+        primaryjoin="User.id == FinancialAccount.user_uuid",
     )
 
     def verify_password(self, password: str) -> bool:

@@ -55,11 +55,17 @@ class BaseColumn:
 
     @staticmethod
     def uuid_pk(default_factory: Callable[[], UUID] | None = None) -> Mapped[UUID]:
-        """UUID primary key column."""
+        """UUID primary key column.
+
+        Both a Python-side ``default`` (for ORM inserts) and a DB-side
+        ``server_default`` (for raw SQL inserts) are set so the column is
+        populated regardless of the insert path.
+        """
         return mapped_column(
             PGUUID(as_uuid=True),
             primary_key=True,
             default=default_factory,
+            server_default=text("gen_random_uuid()"),
         )
 
     @staticmethod
@@ -70,7 +76,11 @@ class BaseColumn:
         index: bool = True,
         column: str = "id",
     ) -> Mapped[UUID]:
-        """UUID foreign key column."""
+        """UUID foreign key column.
+
+        The default ``column="id"`` matches the project convention where every
+        table's UUID primary key is named ``id``.
+        """
         return mapped_column(
             PGUUID(as_uuid=True),
             sa.ForeignKey(f"{foreign_table}.{column}", ondelete=ondelete),
@@ -93,13 +103,18 @@ class BaseColumn:
         scale: int = 8,
         nullable: bool = False,
         default: Decimal | None = None,
+        server_default: Any = None,
+        index: bool = False,
     ) -> Mapped[Decimal]:
         """Numeric column with precision."""
         return mapped_column(
             sa.Numeric(precision, scale),
             nullable=nullable,
             default=default,
-            server_default=text("0") if default == 0 else None,
+            index=index,
+            server_default=server_default
+            if server_default is not None
+            else (text("0") if default == Decimal("0") or default == 0 else None),
         )
 
     @staticmethod
@@ -107,6 +122,7 @@ class BaseColumn:
         nullable: bool = False,
         default: Callable[[], datetime] | None = None,
         onupdate: Callable[[], datetime] | None = None,
+        index: bool = False,
     ) -> Mapped[datetime]:
         """Timestamp with timezone.
 
@@ -118,53 +134,59 @@ class BaseColumn:
             nullable=nullable,
             default=default or utc_now,
             onupdate=onupdate,
+            index=index,
             server_default=text("NOW()"),
         )
 
     @staticmethod
-    def datetime_tz(nullable: bool = False) -> Mapped[datetime]:
+    def datetime_tz(nullable: bool = False, index: bool = False) -> Mapped[datetime]:
         """DateTime with timezone."""
         return mapped_column(
             DateTime(timezone=True),
             nullable=nullable,
+            index=index,
         )
 
     @staticmethod
-    def date_column(nullable: bool = False) -> Mapped[date]:
+    def date_column(nullable: bool = False, index: bool = False) -> Mapped[date]:
         """Date column."""
-        return mapped_column(sa.Date, nullable=nullable)
+        return mapped_column(sa.Date, nullable=nullable, index=index)
 
     @staticmethod
-    def time_column(nullable: bool = True) -> Mapped[time]:
+    def time_column(nullable: bool = True, index: bool = False) -> Mapped[time]:
         """Time column."""
-        return mapped_column(Time, nullable=nullable)
+        return mapped_column(Time, nullable=nullable, index=index)
 
     @staticmethod
     def jsonb_column(
         default_factory: Callable[[], dict[str, Any]] | None = None,
         nullable: bool = False,
+        index: bool = False,
     ) -> Mapped[dict[str, Any]]:
         """JSONB column."""
         return mapped_column(
             JSONB,
             default=default_factory or dict,
             nullable=nullable,
+            index=index,
         )
 
     @staticmethod
-    def inet_column(nullable: bool = True) -> Mapped[str]:
+    def inet_column(nullable: bool = True, index: bool = False) -> Mapped[str]:
         """PostgreSQL INET column for IP addresses."""
-        return mapped_column(INET, nullable=nullable)
+        return mapped_column(INET, nullable=nullable, index=index)
 
     @staticmethod
-    def text_column(nullable: bool = False) -> Mapped[str]:
+    def text_column(nullable: bool = False, index: bool = False) -> Mapped[str]:
         """Text column for long strings."""
-        return mapped_column(Text, nullable=nullable)
+        return mapped_column(Text, nullable=nullable, index=index)
 
     @staticmethod
-    def string_column(length: int, nullable: bool = False, default: str | None = None) -> Mapped[str]:
+    def string_column(
+        length: int, nullable: bool = False, default: str | None = None, index: bool = False
+    ) -> Mapped[str]:
         """String column with length."""
-        return mapped_column(String(length), nullable=nullable, default=default)
+        return mapped_column(String(length), nullable=nullable, default=default, index=index)
 
 
 # Convenience column instances

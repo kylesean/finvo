@@ -103,7 +103,9 @@ async def register_device_token(
         device_token=payload.deviceToken.strip(),
         platform=payload.platform,
     )
-    return success_response(data={"message": "Device token registered", "id": device.id, "platform": device.platform})
+    return success_response(
+        data={"message": "Device token registered", "id": str(device.uuid), "platform": device.platform}
+    )
 
 
 @router.delete("/device-token", response_model=ResponseEnvelope[dict[str, Any]])

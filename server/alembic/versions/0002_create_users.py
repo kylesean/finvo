@@ -28,20 +28,18 @@ def upgrade() -> None:
     # =========================================================================
     op.create_table(
         "users",
-        sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
         sa.Column(
-            "uuid",
+            "id",
             postgresql.UUID(as_uuid=True),
-            nullable=False,
-            unique=True,
+            primary_key=True,
             server_default=sa.text("gen_random_uuid()"),
         ),
-        sa.Column("username", sa.String(50), nullable=True),
-        sa.Column("email", sa.String(255), nullable=True, unique=True),
-        sa.Column("mobile", sa.String(20), nullable=True, unique=True),
-        sa.Column("password", sa.String(255), nullable=True),
+        sa.Column("username", sa.String(50), nullable=False),
+        sa.Column("email", sa.String(255), nullable=True),
+        sa.Column("mobile", sa.String(20), nullable=True),
+        sa.Column("password", sa.String(255), nullable=False),
         sa.Column("avatar_url", sa.String(500), nullable=True),
-        sa.Column("timezone", sa.String(50), nullable=True, server_default="UTC"),
+        sa.Column("timezone", sa.String(100), nullable=False, server_default="UTC"),
         sa.Column(
             "registration_type",
             sa.String(20),
@@ -64,28 +62,25 @@ def upgrade() -> None:
         ),
     )
 
-    # Indexes for users
-    op.create_index("ix_users_uuid", "users", ["uuid"])
-    op.create_index("ix_users_email", "users", ["email"])
-    op.create_index("ix_users_mobile", "users", ["mobile"])
+    # Named unique constraints aligned with ORM naming convention (uq_<table>_<col>).
+    # No separate index: unique constraint already provides an index for lookups.
+    op.create_unique_constraint("uq_users_email", "users", ["email"])
+    op.create_unique_constraint("uq_users_mobile", "users", ["mobile"])
 
     # =========================================================================
     # user_settings - User preferences
     # =========================================================================
     op.create_table(
         "user_settings",
-        sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
-            nullable=False,
-            unique=True,
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            primary_key=True,
         ),
-        sa.Column("primary_currency", sa.String(3), nullable=False, server_default="CNY"),
-        sa.Column("timezone", sa.String(50), nullable=True, server_default="Asia/Shanghai"),
-        sa.Column("average_daily_spending", sa.String(20), nullable=True),
-        sa.Column("safety_balance", sa.String(20), nullable=True),
+        sa.Column("currency", sa.String(10), nullable=False, server_default="CNY"),
+        sa.Column("avg_daily_spending", sa.Numeric(precision=20, scale=8), nullable=False, server_default="100.00"),
+        sa.Column("safety_balance_threshold", sa.Numeric(precision=20, scale=8), nullable=False, server_default="500.00"),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -100,15 +95,10 @@ def upgrade() -> None:
         ),
     )
 
-    op.create_index("ix_user_settings_user_uuid", "user_settings", ["user_uuid"])
-
 
 def downgrade() -> None:
     """Drop users and user_settings tables."""
-    op.drop_index("ix_user_settings_user_uuid")
     op.drop_table("user_settings")
-
-    op.drop_index("ix_users_mobile")
-    op.drop_index("ix_users_email")
-    op.drop_index("ix_users_uuid")
+    op.drop_constraint("uq_users_mobile", "users", type_="unique")
+    op.drop_constraint("uq_users_email", "users", type_="unique")
     op.drop_table("users")

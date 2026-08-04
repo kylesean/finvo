@@ -39,7 +39,7 @@ class StatisticsService:
         if not account_types:
             return None
         # Return a subquery for filtering by account type
-        return select(FinancialAccount.id).where(
+        return select(FinancialAccount.uuid).where(
             FinancialAccount.user_uuid == user_uuid,
             FinancialAccount.type.in_(account_types),
         )
@@ -464,7 +464,7 @@ class StatisticsService:
 
             items.append(
                 TopTransactionItem(
-                    id=str(tx.id),
+                    id=str(tx.uuid),
                     description=tx.description or tx.raw_input or "",
                     amount=f"{Decimal(str(tx.amount)):.2f}",
                     categoryKey=category_key,

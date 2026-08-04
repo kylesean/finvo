@@ -38,7 +38,7 @@ def upgrade() -> None:
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         # Model uses: type: str (not transaction_type)
@@ -104,6 +104,9 @@ def upgrade() -> None:
             nullable=False,
             server_default=sa.text("CURRENT_TIMESTAMP"),
         ),
+        sa.UniqueConstraint(
+            "recurring_transaction_id", "transaction_at", name="uq_transactions_recurring_timestamp"
+        ),
     )
 
     op.create_index("ix_transactions_user_uuid", "transactions", ["user_uuid"])
@@ -113,7 +116,7 @@ def upgrade() -> None:
     op.create_index("ix_transactions_source_thread_id", "transactions", ["source_thread_id"])
     op.create_index("ix_transactions_source_account_id", "transactions", ["source_account_id"])
     op.create_index("ix_transactions_target_account_id", "transactions", ["target_account_id"])
-    op.create_index("ix_transactions_recurring_id", "transactions", ["recurring_transaction_id"])
+    op.create_index("ix_transactions_recurring_transaction_id", "transactions", ["recurring_transaction_id"])
     # Composite index for efficient range-based spending queries
     op.create_index("ix_transactions_user_at", "transactions", ["user_uuid", "transaction_at"])
 
@@ -122,9 +125,12 @@ def upgrade() -> None:
     # =========================================================================
     op.create_table(
         "transaction_comments",
-        # Model uses: id: Optional[int] (auto-increment)
-        sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
-        # Model uses: transaction_id: UUID (references transactions.id which is now UUID)
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
         sa.Column(
             "transaction_id",
             postgresql.UUID(as_uuid=True),
@@ -134,13 +140,12 @@ def upgrade() -> None:
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
-        # Model uses: parent_comment_id, comment_text, mentioned_user_ids
         sa.Column(
             "parent_comment_id",
-            sa.Integer,
+            postgresql.UUID(as_uuid=True),
             sa.ForeignKey("transaction_comments.id", ondelete="CASCADE"),
             nullable=True,
         ),
@@ -186,13 +191,13 @@ def upgrade() -> None:
         sa.Column(
             "sharer_user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column(
             "shared_with_user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         # Model uses: can_view, shared_at, expires_at
@@ -232,7 +237,7 @@ def upgrade() -> None:
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         # Model uses: type (not transaction_type)
@@ -273,9 +278,9 @@ def upgrade() -> None:
     )
 
     op.create_index("ix_recurring_transactions_user_uuid", "recurring_transactions", ["user_uuid"])
-    op.create_index("ix_recurring_transactions_active", "recurring_transactions", ["is_active"])
+    op.create_index("ix_recurring_transactions_is_active", "recurring_transactions", ["is_active"])
     # Index for daily job query: WHERE is_active AND next_execution_at BETWEEN ...
-    op.create_index("ix_recurring_next_execution", "recurring_transactions", ["next_execution_at"])
+    op.create_index("ix_recurring_transactions_next_execution_at", "recurring_transactions", ["next_execution_at"])
 
     # Now that recurring_transactions exists, add the deferred FK from transactions
     op.create_foreign_key(
@@ -291,8 +296,8 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Drop transactions and related tables."""
     op.drop_constraint("fk_transactions_recurring_transaction_id", "transactions", type_="foreignkey")
-    op.drop_index("ix_recurring_next_execution", table_name="recurring_transactions")
-    op.drop_index("ix_recurring_transactions_active")
+    op.drop_index("ix_recurring_transactions_next_execution_at", table_name="recurring_transactions")
+    op.drop_index("ix_recurring_transactions_is_active")
     op.drop_index("ix_recurring_transactions_user_uuid")
     op.drop_table("recurring_transactions")
 
@@ -306,7 +311,7 @@ def downgrade() -> None:
     op.drop_table("transaction_comments")
 
     op.drop_index("ix_transactions_user_at")
-    op.drop_index("ix_transactions_recurring_id")
+    op.drop_index("ix_transactions_recurring_transaction_id")
     op.drop_index("ix_transactions_target_account_id")
     op.drop_index("ix_transactions_source_account_id")
     op.drop_index("ix_transactions_source_thread_id")

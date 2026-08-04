@@ -366,7 +366,7 @@ async def add_transaction_comment(
 
 @router.delete("/comments/{comment_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_transaction_comment(
-    comment_id: int,
+    comment_id: UUID,
     current_user: CurrentUser,
     service: TxService,
 ) -> JSONResponse:

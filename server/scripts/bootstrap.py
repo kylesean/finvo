@@ -15,7 +15,7 @@ from app.core.config import settings
 from app.core.logging import logger
 
 
-async def ensure_pgvector():
+async def ensure_pgvector() -> None:
     """Ensure pgvector extension is enabled.
 
     This is run before Alembic migrations as a prerequisite for Mem0.
@@ -41,7 +41,7 @@ async def ensure_pgvector():
         await engine.dispose()
 
 
-async def init_langgraph():
+async def init_langgraph() -> None:
     """Initialize LangGraph checkpoint tables.
 
     These tables are managed by LangGraph, not Alembic.
@@ -59,7 +59,7 @@ async def init_langgraph():
         raise
 
 
-async def init_mem0():
+async def init_mem0() -> None:
     """Initialize Mem0 storage tables.
 
     These tables are managed by Mem0, not Alembic.
@@ -69,7 +69,7 @@ async def init_mem0():
     try:
         from app.services.memory.memory_service import MemoryService
 
-        # get_instance() initializes Mem0 and creates its tables
+        # get_instance() initializes Mem0 (collection tables are lazily managed by Mem0)
         await MemoryService.get_instance()
         logger.info("bootstrap_mem0_storage_initialized")
     except Exception as e:
@@ -80,26 +80,34 @@ async def init_mem0():
         )
 
 
-async def main():
-    """Main bootstrap routine.
+async def run_bootstrap() -> None:
+    """Run full bootstrap routine for external components (LangGraph, Mem0).
 
-    This script should be run AFTER Alembic migrations.
-    It initializes external components (LangGraph, Mem0) that manage
-    their own tables outside of Alembic.
+    This routine ensures pgvector is enabled, and initializes LangGraph checkpoint
+    tables and Mem0 vector storage tables idempotently.
     """
     logger.info("bootstrap_started", env=settings.ENVIRONMENT.value)
+    # 1. Ensure pgvector is enabled (for Mem0)
+    await ensure_pgvector()
 
+    # 2. Initialize external components
+    await asyncio.gather(init_langgraph(), init_mem0())
+    logger.info("bootstrap_completed_successfully")
+
+
+async def main() -> None:
+    """CLI entrypoint for database bootstrap script."""
     try:
-        # 1. Ensure pgvector is enabled (for Mem0)
-        await ensure_pgvector()
-
-        # 2. Initialize external components
-        await asyncio.gather(init_langgraph(), init_mem0())
-
-        logger.info("bootstrap_completed_successfully")
+        await run_bootstrap()
     except Exception as e:
         logger.critical("bootstrap_failed", error=str(e))
         sys.exit(1)
+    finally:
+        from app.core.checkpointer import close_checkpointer
+        from app.services.memory.memory_service import MemoryService
+
+        await close_checkpointer()
+        await MemoryService.close_instance()
 
 
 if __name__ == "__main__":

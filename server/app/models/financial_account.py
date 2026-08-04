@@ -11,10 +11,12 @@ from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
+import sqlalchemy as sa
 from sqlalchemy import Boolean, CheckConstraint, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.user import User
@@ -78,24 +80,25 @@ class FinancialAccount(Base):
     )
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
+    uuid = synonym("id")
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True)
     name: Mapped[str] = mapped_column(String(100))
     nature: Mapped[str] = mapped_column(String(20))
     type: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    currency_code: Mapped[str] = mapped_column(String(3), default="CNY")
+    currency_code: Mapped[str] = mapped_column(String(3), default="CNY", server_default=sa.text("'CNY'"))
     initial_balance: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("0"))
     current_balance: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("0"))
-    include_in_net_worth: Mapped[bool] = mapped_column(Boolean, default=True)
-    include_in_cash_flow: Mapped[bool] = mapped_column(Boolean, default=False)
-    status: Mapped[str] = mapped_column(String(20), default="ACTIVE")
+    include_in_net_worth: Mapped[bool] = mapped_column(Boolean, default=True, server_default=sa.text("true"))
+    include_in_cash_flow: Mapped[bool] = mapped_column(Boolean, default=False, server_default=sa.text("false"))
+    status: Mapped[str] = mapped_column(String(20), default="ACTIVE", server_default=sa.text("'ACTIVE'"))
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     user: Mapped[User | None] = relationship(
         "User",
         back_populates="financial_accounts",
         foreign_keys="[FinancialAccount.user_uuid]",
-        primaryjoin="FinancialAccount.user_uuid == User.uuid",
+        primaryjoin="FinancialAccount.user_uuid == User.id",
     )
 
     @property

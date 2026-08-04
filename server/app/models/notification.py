@@ -7,10 +7,12 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
-from uuid import UUID
+from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import Boolean, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+import sqlalchemy as sa
+from sqlalchemy import Boolean, String, Text, text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from app.models.base import Base, col, utc_now
 
@@ -22,8 +24,9 @@ class Notification(Base):
     """Notification model for storing user notifications.
 
     Attributes:
-        id: The primary key
-        user_uuid: Foreign key to users.uuid
+        id: Primary key (UUID)
+        uuid: Alias for id
+        user_uuid: Foreign key to users.id
         type: Notification type
         title: Notification title
         content: Notification content (optional)
@@ -37,21 +40,24 @@ class Notification(Base):
 
     __tablename__ = "notifications"
 
-    id: Mapped[int | None] = mapped_column(primary_key=True, autoincrement=True)
-    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
+    id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
+    uuid = synonym("id")
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="id")
     type: Mapped[str] = mapped_column(String(50))
     title: Mapped[str] = mapped_column(String(255))
-    content: Mapped[str | None] = mapped_column(String, nullable=True)
-    data: Mapped[dict[str, Any] | None] = col.jsonb_column(nullable=True)
-    is_read: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    data: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, default=dict, server_default=text("'{}'::jsonb"), nullable=True
+    )
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False, server_default=sa.text("false"), index=True)
     read_at: Mapped[datetime | None] = col.datetime_tz(nullable=True)
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     user: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[Notification.user_uuid]",
-        primaryjoin="Notification.user_uuid == User.uuid",
+        primaryjoin="Notification.user_uuid == User.id",
     )
 
     def mark_as_read(self) -> None:

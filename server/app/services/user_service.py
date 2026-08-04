@@ -75,26 +75,6 @@ class UserService:
         """
         self.db = db
 
-    async def get_user_info(self, user_id: int) -> User:
-        """Get user information by ID.
-
-        Args:
-            user_id: The user's database ID
-
-        Returns:
-            User: The user object
-
-        Raises:
-            NotFoundError: If user is not found
-        """
-        result = await self.db.execute(select(User).where(User.id == user_id))
-        user = result.scalar_one_or_none()
-
-        if not user:
-            raise NotFoundError("User")
-
-        return type_cast(User, user)
-
     async def get_user_by_uuid(self, user_uuid: UUID) -> User:
         """Get user information by UUID.
 
@@ -360,12 +340,12 @@ class UserService:
         logger.info(
             "financial_account_created",
             user_uuid=str(user_uuid),
-            account_id=financial_account.id,
+            account_id=financial_account.uuid,
             account_name=financial_account.name,
         )
 
         return {
-            "id": str(financial_account.id),  # UUID as string
+            "id": str(financial_account.uuid),  # UUID as string
             "name": financial_account.name,
             "nature": financial_account.nature,
             "type": financial_account.type,
@@ -392,7 +372,7 @@ class UserService:
         """
         result = await self.db.execute(
             select(FinancialAccount).where(
-                FinancialAccount.id == account_id,
+                FinancialAccount.uuid == account_id,
                 FinancialAccount.user_uuid == user_uuid,
             )
         )
@@ -451,7 +431,7 @@ class UserService:
         """
         result = await self.db.execute(
             select(FinancialAccount).where(
-                FinancialAccount.id == account_id,
+                FinancialAccount.uuid == account_id,
                 FinancialAccount.user_uuid == user_uuid,
             )
         )

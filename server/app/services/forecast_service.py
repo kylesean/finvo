@@ -364,7 +364,7 @@ class ForecastService:
                             description=tx.description or tx.category_key or tx.type,
                             amount=amount,
                             event_type="RECURRING",
-                            source_id=str(tx.id),
+                            source_id=str(tx.uuid),
                             category_key=tx.category_key,
                             confidence=1.0,  # Deterministic = 100% confidence
                         )
@@ -373,7 +373,7 @@ class ForecastService:
             except Exception as e:
                 logger.warning(
                     "rrule_parse_error",
-                    recurring_id=str(tx.id),
+                    recurring_id=str(tx.uuid),
                     error=str(e),
                 )
                 continue

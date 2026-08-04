@@ -12,10 +12,10 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import String
+from sqlalchemy import Index, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     pass
@@ -39,10 +39,21 @@ class SearchableMessage(Base):
 
     __tablename__ = "searchable_messages"
 
+    # GIN index on to_tsvector('simple', content) must be declared here so
+    # alembic autogenerate knows it is ORM-managed and does not propose dropping it.
+    __table_args__ = (
+        Index(
+            "ix_searchable_messages_content_gin",
+            text("to_tsvector('simple', content)"),
+            postgresql_using="gin",
+        ),
+    )
+
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    thread_id: Mapped[UUID] = col.uuid_fk("sessions", ondelete="CASCADE", index=True)
-    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
+    # sessions PK is still `id` (pending migration to `uuid`); pin until then.
+    thread_id: Mapped[UUID] = col.uuid_fk("sessions", ondelete="CASCADE", index=True, column="id")
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="id")
     role: Mapped[str] = mapped_column(String(20))
     content: Mapped[str] = col.text_column()
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)

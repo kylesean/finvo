@@ -12,12 +12,12 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import sqlalchemy as sa
-from sqlalchemy import Integer, String
+from sqlalchemy import Integer, String, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.user import User
@@ -43,6 +43,7 @@ class FinancialSettings(Base):
         burn_rate_mode: How burn rate is calculated (MANUAL or AI_AUTO)
         primary_currency: Default display currency (default: USD)
         month_start_day: Day of month to start calculations (default: 1)
+        created_at: Creation timestamp
         updated_at: Last update timestamp
         user: Relationship to user
     """
@@ -51,20 +52,29 @@ class FinancialSettings(Base):
 
     user_uuid: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),
-        sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+        sa.ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    safety_threshold: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("1000.00"))
-    daily_burn_rate: Mapped[Decimal] = col.numeric(precision=20, scale=8, default=Decimal("100.00"))
-    burn_rate_mode: Mapped[BurnRateMode] = mapped_column(String(20), default=BurnRateMode.AI_AUTO)
-    primary_currency: Mapped[str] = mapped_column(String(3), default=PROJECT_DEFAULT_CURRENCY)
-    month_start_day: Mapped[int] = mapped_column(Integer, default=1)
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    safety_threshold: Mapped[Decimal] = col.numeric(
+        precision=20, scale=8, default=Decimal("1000.00"), server_default=text("1000.00")
+    )
+    daily_burn_rate: Mapped[Decimal] = col.numeric(
+        precision=20, scale=8, default=Decimal("100.00"), server_default=text("100.00")
+    )
+    burn_rate_mode: Mapped[BurnRateMode] = mapped_column(
+        String(20), default=BurnRateMode.AI_AUTO, server_default=sa.text("'AI_AUTO'")
+    )
+    primary_currency: Mapped[str] = mapped_column(
+        String(3), default=PROJECT_DEFAULT_CURRENCY, server_default=sa.text("'CNY'")
+    )
+    month_start_day: Mapped[int] = mapped_column(Integer, default=1, server_default=sa.text("1"))
+    created_at: Mapped[datetime] = col.timestamptz()
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     user: Mapped[User | None] = relationship(
         "User",
         foreign_keys="[FinancialSettings.user_uuid]",
-        primaryjoin="FinancialSettings.user_uuid == User.uuid",
+        primaryjoin="FinancialSettings.user_uuid == User.id",
     )
 
     @property

@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -6,6 +7,7 @@ from uuid import uuid4
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.transaction import RecurringTransaction, Transaction
 from app.models.user import User
@@ -13,7 +15,7 @@ from app.services.recurring_transaction_jobs import process_due_transactions
 
 
 @pytest.mark.asyncio
-async def test_process_due_transactions(db_session):
+async def test_process_due_transactions(db_session: AsyncSession) -> None:
     # 1. Setup User
     user = User(uuid=uuid4(), username="sched_user", email="sched@e.com", password="pwd", registration_type="email")
     db_session.add(user)
@@ -25,7 +27,7 @@ async def test_process_due_transactions(db_session):
     utc_today = datetime.now(UTC).date()
     start = utc_today - timedelta(days=1)
     rt = RecurringTransaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=user.uuid,
         type="EXPENSE",
         amount=Decimal("100.0"),
@@ -44,7 +46,7 @@ async def test_process_due_transactions(db_session):
 
     # 3. Patch get_session_context
     @asynccontextmanager
-    async def mock_ctx():
+    async def mock_ctx() -> AsyncGenerator[AsyncSession]:
         # Prevent actual commit from closing the session/transaction
         # We mock commit to do flush instead
         with patch.object(db_session, "commit", side_effect=db_session.flush):
@@ -74,4 +76,5 @@ async def test_process_due_transactions(db_session):
         await db_session.refresh(rt)
         assert rt.last_generated_at is not None
         # next_execution_at should be tomorrow
+        assert rt.next_execution_at is not None
         assert rt.next_execution_at.date() > start

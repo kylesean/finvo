@@ -27,7 +27,7 @@ class TransactionRepository(BaseRepository[Transaction]):
         result = await self.db.execute(
             select(Transaction).where(
                 and_(
-                    Transaction.id == transaction_id,
+                    Transaction.uuid == transaction_id,
                     Transaction.user_uuid == user_uuid,
                 )
             )

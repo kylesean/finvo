@@ -251,7 +251,7 @@ class UploadService:
 
         return successful, failed
 
-    async def _get_or_create_storage_config(self, user_uuid: UUID) -> tuple[int | None, StorageConfig]:
+    async def _get_or_create_storage_config(self, user_uuid: UUID) -> tuple[UUID, StorageConfig]:
         """Obtain or create user's default storage configuration.
 
         Selects storage backend type based on settings.STORAGE_PROVIDER.

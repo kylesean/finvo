@@ -17,7 +17,7 @@ async def test_get_transactions_api(client_with_auth, db_session, test_user):
     db_session.add(settings)
 
     tx1 = Transaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=test_user.uuid,
         type="EXPENSE",
         amount=Decimal("50.0"),
@@ -43,10 +43,10 @@ async def test_get_transactions_api(client_with_auth, db_session, test_user):
 
     # Check if tx1 is in items
     tx_ids = [item["id"] for item in items]
-    assert str(tx1.id) in tx_ids
+    assert str(tx1.uuid) in tx_ids
 
     # Find our specific transaction
-    tx_data = next(item for item in items if item["id"] == str(tx1.id))
+    tx_data = next(item for item in items if item["id"] == str(tx1.uuid))
     # Compare as float to avoid string formatting mismatches
     assert float(tx_data["amount"]) == 50.0
 
@@ -107,7 +107,7 @@ async def test_amount_original_is_json_number_across_endpoints(client_with_auth,
     invisible; lock the wire type to number.
     """
     tx = Transaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=test_user.uuid,
         type="EXPENSE",
         amount=Decimal("50.0"),
@@ -120,7 +120,7 @@ async def test_amount_original_is_json_number_across_endpoints(client_with_auth,
     db_session.add(tx)
     await db_session.commit()
 
-    detail = client_with_auth.get(f"/api/v1/transactions/{tx.id}")
+    detail = client_with_auth.get(f"/api/v1/transactions/{tx.uuid}")
     assert detail.status_code == 200
     detail_amount_original = detail.json()["data"]["amountOriginal"]
     assert isinstance(detail_amount_original, float), f"detail endpoint: {detail_amount_original!r}"
@@ -128,7 +128,7 @@ async def test_amount_original_is_json_number_across_endpoints(client_with_auth,
 
     listed = client_with_auth.get("/api/v1/transactions")
     assert listed.status_code == 200
-    listed_item = next(i for i in listed.json()["data"]["items"] if i["id"] == str(tx.id))
+    listed_item = next(i for i in listed.json()["data"]["items"] if i["id"] == str(tx.uuid))
     assert isinstance(listed_item["amountOriginal"], float), f"list endpoint: {listed_item['amountOriginal']!r}"
     # Service-layer update result contract (amountOriginal as float) is covered
     # in tests/unit/services/test_transaction_service.py (no HTTP route yet).
@@ -138,7 +138,7 @@ async def test_amount_original_is_json_number_across_endpoints(client_with_auth,
 async def test_delete_transaction_api(client_with_auth, db_session, test_user):
     # 1. Setup
     tx = Transaction(
-        id=uuid4(),
+        uuid=uuid4(),
         user_uuid=test_user.uuid,
         type="EXPENSE",
         amount=Decimal("10.0"),
@@ -151,12 +151,12 @@ async def test_delete_transaction_api(client_with_auth, db_session, test_user):
     await db_session.commit()
 
     # 2. Action
-    response = client_with_auth.delete(f"/api/v1/transactions/{tx.id}")
+    response = client_with_auth.delete(f"/api/v1/transactions/{tx.uuid}")
 
     # 3. Assert
     assert response.status_code == 200
 
     # 4. Verify Gone
-    query = select(Transaction).where(Transaction.id == tx.id)
+    query = select(Transaction).where(Transaction.uuid == tx.uuid)
     result = await db_session.execute(query)
     assert result.scalar_one_or_none() is None

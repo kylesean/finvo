@@ -12,11 +12,11 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4 as uuid4_factory
 
-import sqlalchemy as sa
-from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import BigInteger, ForeignKey, Integer, String, Text, text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
-from app.models.base import Base, col
+from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
     from app.models.storage_config import StorageConfig
@@ -30,6 +30,7 @@ class Attachment(Base):
 
     Attributes:
         id: Primary key (UUID)
+        uuid: Alias for id
         user_uuid: Foreign key to users table
         storage_config_id: Foreign key to storage_configs table
         thread_id: LangGraph thread/conversation ID (optional)
@@ -48,25 +49,25 @@ class Attachment(Base):
     __tablename__ = "attachments"
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
-    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="uuid")
+    uuid = synonym("id")
+    user_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", index=True, column="id")
     # nullable=True matches migration 0004: deleting a storage config nulls the
     # reference (ON DELETE SET NULL) instead of failing.
-    storage_config_id: Mapped[int | None] = mapped_column(
-        Integer,
-        sa.ForeignKey("storage_configs.id", ondelete="SET NULL"),
-        index=True,
-        nullable=True,
+    storage_config_id: Mapped[UUID | None] = col.uuid_fk(
+        "storage_configs", ondelete="SET NULL", index=True, nullable=True, column="id"
     )
-    thread_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
+    thread_id: Mapped[str | None] = mapped_column(Text, index=True, nullable=True)
 
     filename: Mapped[str] = mapped_column(String(255))
     object_key: Mapped[str] = mapped_column(String(1024))
     mime_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    size: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     hash: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
-    meta_info: Mapped[dict[str, Any]] = col.jsonb_column()
+    meta_info: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, default=dict, server_default=text("'{}'::jsonb"), nullable=False
+    )
     created_at: Mapped[datetime] = col.timestamptz()
-    updated_at: Mapped[datetime | None] = col.timestamptz(nullable=True)
+    updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 
     storage_config: Mapped[StorageConfig | None] = relationship(
         "StorageConfig",

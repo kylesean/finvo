@@ -623,7 +623,7 @@ class BudgetService:
         # Get historical spending
         query = select(
             func.sum(Transaction.amount).label("total"),
-            func.count(Transaction.id).label("tx_count"),
+            func.count(Transaction.uuid).label("tx_count"),
             func.avg(Transaction.amount).label("avg"),
         ).where(
             Transaction.user_uuid == user_uuid,
@@ -703,7 +703,7 @@ class BudgetService:
             select(
                 Transaction.category_key,
                 func.sum(Transaction.amount).label("total"),
-                func.count(Transaction.id).label("count"),
+                func.count(Transaction.uuid).label("count"),
             )
             .where(
                 Transaction.user_uuid == user_uuid,
@@ -713,7 +713,7 @@ class BudgetService:
                 Transaction.transaction_at < end_dt,
             )
             .group_by(Transaction.category_key)
-            .having(func.count(Transaction.id) >= 5)  # At least 5 transactions
+            .having(func.count(Transaction.uuid) >= 5)  # At least 5 transactions
             .order_by(desc(func.sum(Transaction.amount)))
         )
 

@@ -75,7 +75,7 @@ class RegisterRequest(BaseModel):
     Attributes:
         type: Account type ('email' or 'mobile')
         account: Email address or mobile number
-        password: User's password (8-20 characters, must contain letters and digits)
+        password: User's password (6-20 characters, must contain letters and digits)
         code: 6-digit verification code
         timezone: User's timezone (default: Asia/Shanghai)
     """
@@ -99,9 +99,9 @@ class RegisterRequest(BaseModel):
     account: str = Field(..., description="Email address or mobile number", examples=["user@example.com"])
     password: str = Field(
         ...,
-        min_length=8,
+        min_length=6,
         max_length=20,
-        description="User's password (8-20 chars, letters + digits)",
+        description="User's password (6-20 chars, letters + digits)",
         examples=["password123"],
     )
     code: str = Field(default="", description="Verification code (Optional in current dev mode)", examples=["123456"])

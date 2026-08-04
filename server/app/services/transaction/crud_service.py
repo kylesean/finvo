@@ -68,7 +68,7 @@ class TransactionCRUDService:
             The financial account or None if not found/not owned.
         """
         query = select(FinancialAccount).where(
-            and_(FinancialAccount.id == account_id, FinancialAccount.user_uuid == user_uuid),
+            and_(FinancialAccount.uuid == account_id, FinancialAccount.user_uuid == user_uuid),
         )
         if for_update:
             # populate_existing: even if the row is already in the session's
@@ -139,7 +139,7 @@ class TransactionCRUDService:
 
         # Create record
         transaction = Transaction(
-            id=uuid4(),
+            uuid=uuid4(),
             user_uuid=user_uuid,
             type=tx_type.upper(),
             raw_input=raw_input or "",
@@ -183,16 +183,16 @@ class TransactionCRUDService:
         if tx_type != "transfer":
             linked_acc = source_acc or target_acc
             if linked_acc:
-                linked_account = LinkedAccountInfo(id=str(linked_acc.id), name=linked_acc.name, type=linked_acc.type)
+                linked_account = LinkedAccountInfo(id=str(linked_acc.uuid), name=linked_acc.name, type=linked_acc.type)
         elif source_acc and target_acc:
             transfer_info = TransferInfo(
-                source_account=LinkedAccountInfo(id=str(source_acc.id), name=source_acc.name, type=source_acc.type),
-                target_account=LinkedAccountInfo(id=str(target_acc.id), name=target_acc.name, type=target_acc.type),
+                source_account=LinkedAccountInfo(id=str(source_acc.uuid), name=source_acc.name, type=source_acc.type),
+                target_account=LinkedAccountInfo(id=str(target_acc.uuid), name=target_acc.name, type=target_acc.type),
             )
 
         return TransactionCreateResult(
             success=True,
-            transaction_id=str(transaction.id),
+            transaction_id=str(transaction.uuid),
             amount=float(amount),
             currency=currency,
             type=tx_type.upper(),
@@ -225,7 +225,9 @@ class TransactionCRUDService:
         from app.models.shared_space import SharedSpace, SpaceMember, SpaceTransaction
 
         # First, load the transaction by ID (no owner filter)
-        query = select(Transaction).options(selectinload(Transaction.comments)).where(Transaction.id == transaction_id)
+        query = (
+            select(Transaction).options(selectinload(Transaction.comments)).where(Transaction.uuid == transaction_id)
+        )
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
@@ -272,7 +274,7 @@ class TransactionCRUDService:
                 user = user_by_uuid.get(comment.user_uuid)
                 comments_data.append(
                     TransactionCommentItem(
-                        id=str(comment.id),
+                        id=str(comment.uuid),
                         transaction_id=str(comment.transaction_id),
                         user_uuid=str(comment.user_uuid),
                         user_name=user.username if user else "Unknown",
@@ -312,7 +314,7 @@ class TransactionCRUDService:
             ]
 
         return TransactionDetailResponse(
-            id=str(transaction.id),
+            id=str(transaction.uuid),
             user_uuid=str(transaction.user_uuid),
             type=transaction.type,
             amount=round(amount_val, 2),
@@ -382,7 +384,7 @@ class TransactionCRUDService:
             BusinessError: Permission denied
         """
         # Query transaction
-        query = select(Transaction).where(Transaction.id == transaction_id)
+        query = select(Transaction).where(Transaction.uuid == transaction_id)
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
@@ -472,7 +474,7 @@ class TransactionCRUDService:
 
         return TransactionUpdateResult(
             success=True,
-            transaction_id=str(transaction.id),
+            transaction_id=str(transaction.uuid),
             amount=round(display_amount, 2),
             amount_original=float(transaction.amount_original) if transaction.amount_original else display_amount,
             amount_base=float(transaction.amount),
@@ -508,7 +510,7 @@ class TransactionCRUDService:
             BusinessError: Permission denied
         """
         # Query transaction record
-        query = select(Transaction).where(Transaction.id == transaction_id)
+        query = select(Transaction).where(Transaction.uuid == transaction_id)
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
@@ -554,7 +556,7 @@ class TransactionCRUDService:
         """
         result = await self.db.execute(
             select(Transaction).where(
-                and_(Transaction.id == transaction_id, Transaction.user_uuid == user_uuid),
+                and_(Transaction.uuid == transaction_id, Transaction.user_uuid == user_uuid),
             )
         )
         transaction = result.scalar_one_or_none()
@@ -608,7 +610,7 @@ class TransactionCRUDService:
             transaction_id=str(transaction_id),
             user_uuid=str(user_uuid),
         )
-        return {"id": str(transaction.id), "status": "CONFIRMED"}
+        return {"id": str(transaction.uuid), "status": "CONFIRMED"}
 
     async def skip_pending_transaction(
         self,
@@ -662,7 +664,7 @@ class TransactionCRUDService:
         )
         return [
             {
-                "id": str(tx.id),
+                "id": str(tx.uuid),
                 "type": tx.type,
                 "amount": str(tx.amount_original),
                 "currency": tx.currency,
@@ -740,7 +742,7 @@ class TransactionCRUDService:
                 amount = base_amount
 
                 tx = Transaction(
-                    id=uuid4(),
+                    uuid=uuid4(),
                     user_uuid=user_uuid,
                     type=item.get("transaction_type", "EXPENSE").upper(),
                     amount=amount.quantize(Decimal("0.00000001")),
@@ -780,7 +782,7 @@ class TransactionCRUDService:
             "account_id": str(source_account_id) if source_account_id else None,
             "transactions": [
                 {
-                    "id": str(tx.id),
+                    "id": str(tx.uuid),
                     "amount": str(tx.amount),
                     "type": tx.type,
                     "tags": tx.tags,
@@ -853,7 +855,7 @@ class TransactionCRUDService:
             NotFoundError: Transaction or account not found
             BusinessError: Permission denied or exchange rate unavailable
         """
-        query = select(Transaction).where(Transaction.id == transaction_id)
+        query = select(Transaction).where(Transaction.uuid == transaction_id)
         result = await self.db.execute(query)
         transaction = result.scalar_one_or_none()
 
@@ -1010,7 +1012,7 @@ class TransactionCRUDService:
 
         logger.info(
             "account_balance_effect",
-            transaction_id=str(transaction.id),
+            transaction_id=str(transaction.uuid),
             account_id=str(account_id),
             account_currency=acc_currency,
             effect=str(sign * direction * effect),
@@ -1142,7 +1144,7 @@ class TransactionCRUDService:
         transaction_id: UUID,
         user_uuid: UUID,
         comment_text: str,
-        parent_comment_id: int | None = None,
+        parent_comment_id: UUID | None = None,
         mentioned_user_ids: list[str] | None = None,
         commenter_username: str = "Unknown",
     ) -> dict[str, Any]:
@@ -1160,7 +1162,7 @@ class TransactionCRUDService:
         self,
         mentioned_user_ids: list[str],
         transaction_id: UUID,
-        comment_id: int,
+        comment_id: UUID,
         commenter_username: str,
         comment_text: str,
         parent_author_uuid: str | None = None,
@@ -1175,14 +1177,14 @@ class TransactionCRUDService:
             parent_author_uuid=parent_author_uuid,
         )
 
-    async def delete_comment(self, comment_id: int, user_uuid: UUID) -> bool:
+    async def delete_comment(self, comment_id: UUID, user_uuid: UUID) -> bool:
         """Delete comment."""
         return await self.comments.delete_comment(comment_id, user_uuid)
 
     async def _broadcast_comment_event(
         self,
         transaction_id: UUID,
-        comment_id: int,
+        comment_id: UUID,
         action: str,
     ) -> None:
         """Broadcast real-time comment created/deleted event to all space members / transaction participants."""

@@ -48,7 +48,9 @@ class TransactionReceiptEnricher(ComponentEnricher):
                 # Note: Transaction model has relationships source_account and target_account
                 stmt = (
                     select(Transaction)
-                    .where(Transaction.id == uuid.UUID(transaction_id), Transaction.user_uuid == uuid.UUID(user_uuid))
+                    .where(
+                        Transaction.uuid == uuid.UUID(transaction_id), Transaction.user_uuid == uuid.UUID(user_uuid)
+                    )
                     .options(selectinload(Transaction.source_account), selectinload(Transaction.target_account))
                 )
 
@@ -97,7 +99,7 @@ class TransactionReceiptEnricher(ComponentEnricher):
                 # This matches what create_transaction tool returns
                 if linked_acc:
                     enriched["linked_account"] = {
-                        "id": str(linked_acc.id),
+                        "id": str(linked_acc.uuid),
                         "name": linked_acc.name,
                         "type": linked_acc.type,
                     }

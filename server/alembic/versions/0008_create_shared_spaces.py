@@ -40,7 +40,7 @@ def upgrade() -> None:
         sa.Column(
             "creator_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column("status", sa.String(50), nullable=False, server_default="ACTIVE"),
@@ -81,7 +81,7 @@ def upgrade() -> None:
         sa.Column(
             "user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             primary_key=True,
             nullable=False,
         ),
@@ -132,9 +132,10 @@ def upgrade() -> None:
         sa.Column(
             "added_by_user_uuid",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("users.uuid", ondelete="CASCADE"),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
+        sa.UniqueConstraint("space_id", "transaction_id", name="uq_space_transactions_space_tx"),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -151,6 +152,7 @@ def upgrade() -> None:
 
     op.create_index("ix_space_transactions_space_id", "space_transactions", ["space_id"])
     op.create_index("ix_space_transactions_transaction_id", "space_transactions", ["transaction_id"])
+    op.create_index("ix_space_transactions_added_by_user_uuid", "space_transactions", ["added_by_user_uuid"])
 
     # Add deferred FK constraint for budgets.shared_space_id (table created in 0007)
     op.create_foreign_key(
@@ -168,6 +170,7 @@ def downgrade() -> None:
     # Drop deferred FK first
     op.drop_constraint("fk_budgets_shared_space_id", "budgets", type_="foreignkey")
 
+    op.drop_index("ix_space_transactions_added_by_user_uuid")
     op.drop_index("ix_space_transactions_transaction_id")
     op.drop_index("ix_space_transactions_space_id")
     op.drop_table("space_transactions")
