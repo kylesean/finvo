@@ -2016,6 +2016,7 @@ class _Translations$chat$genui$spaceSelector$ja extends Translations$chat$genui$
 	@override String get roleOwner => 'Owner';
 	@override String get roleAdmin => 'Admin';
 	@override String get roleMember => 'Member';
+	@override String get associateAction => '選択したスペースに関連付け';
 }
 
 // Path: chat.genui.transferPath
@@ -2046,6 +2047,7 @@ class _Translations$chat$genui$transferPath$ja extends Translations$chat$genui$t
 	@override String get history => 'History';
 	@override String get unknownAccount => 'Unknown Account';
 	@override String get confirmed => 'Confirmed';
+	@override String get executeAction => '選択に従って振替を実行';
 }
 
 // Path: chat.genui.transactionConfirmation
@@ -3029,6 +3031,7 @@ extension on TranslationsJa {
 			'chat.genui.spaceSelector.roleOwner' => 'Owner',
 			'chat.genui.spaceSelector.roleAdmin' => 'Admin',
 			'chat.genui.spaceSelector.roleMember' => 'Member',
+			'chat.genui.spaceSelector.associateAction' => '選択したスペースに関連付け',
 			'chat.genui.transferPath.selectSource' => 'Select Source Account',
 			'chat.genui.transferPath.selectTarget' => 'Select Target Account',
 			'chat.genui.transferPath.from' => 'From (Source)',
@@ -3050,6 +3053,7 @@ extension on TranslationsJa {
 			'chat.genui.transferPath.history' => 'History',
 			'chat.genui.transferPath.unknownAccount' => 'Unknown Account',
 			'chat.genui.transferPath.confirmed' => 'Confirmed',
+			'chat.genui.transferPath.executeAction' => '選択に従って振替を実行',
 			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
 			'chat.genui.transactionConfirmation.confirmed' => '已确认',
 			'chat.genui.budgetAnalysis.title' => '预算分析报告',
@@ -3368,10 +3372,10 @@ extension on TranslationsJa {
 			'sharedSpace.notificationCard.reject' => '拒否',
 			'sharedSpace.notificationCard.unknownTime' => '不明な時間',
 			'sharedSpace.notificationCard.justNow' => 'たった今',
-			'sharedSpace.spaceCard.noDescription' => '説明なし',
-			'sharedSpace.spaceCard.creator' => '作成者',
 			_ => null,
 		} ?? switch (path) {
+			'sharedSpace.spaceCard.noDescription' => '説明なし',
+			'sharedSpace.spaceCard.creator' => '作成者',
 			'sharedSpace.spaceCard.member' => 'メンバー',
 			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count} 人のメンバー',
 			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count} 件の取引',

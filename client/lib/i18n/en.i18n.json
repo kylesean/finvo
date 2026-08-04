@@ -728,7 +728,8 @@
         "linked": "Linked",
         "roleOwner": "Owner",
         "roleAdmin": "Admin",
-        "roleMember": "Member"
+        "roleMember": "Member",
+        "associateAction": "Associate selected space"
       },
       "transferPath": {
         "selectSource": "Select Source Account",
@@ -751,7 +752,8 @@
         "title": "Transfer",
         "history": "History",
         "unknownAccount": "Unknown Account",
-        "confirmed": "Confirmed"
+        "confirmed": "Confirmed",
+        "executeAction": "Execute transfer according to my selection"
       },
       "transactionCard": {
         "title": "Transaction Successful",

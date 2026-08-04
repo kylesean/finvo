@@ -762,7 +762,8 @@
         "linked": "Linked",
         "roleOwner": "Owner",
         "roleAdmin": "Admin",
-        "roleMember": "Member"
+        "roleMember": "Member",
+        "associateAction": "關聯到所選空間"
       },
       "transferPath": {
         "selectSource": "Select Source Account",
@@ -785,7 +786,8 @@
         "title": "Transfer",
         "history": "History",
         "unknownAccount": "Unknown Account",
-        "confirmed": "Confirmed"
+        "confirmed": "Confirmed",
+        "executeAction": "按我的選擇執行轉帳"
       },
       "transactionConfirmation": {
         "multipleAccounts": "检测到多个关联账户",

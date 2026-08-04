@@ -23,6 +23,7 @@ library;
 
 import 'package:logging/logging.dart';
 
+import 'package:finvo/i18n/strings.g.dart';
 import '../models/client_state_mutation.dart';
 import 'events/interaction_events.dart';
 
@@ -78,7 +79,7 @@ class GenUiEventRegistry {
       ),
       payloadExtensions: {
         'role': 'user',
-        'content': 'Execute transfer according to my selection',
+        'content': t.chat.genui.transferPath.executeAction,
         'metadata': {'event_type': event.eventName, ...event.toContext()},
       },
     );
@@ -94,7 +95,7 @@ class GenUiEventRegistry {
       ),
       payloadExtensions: {
         'role': 'user',
-        'content': 'Associate selected space',
+        'content': t.chat.genui.spaceSelector.associateAction,
         'metadata': {'event_type': event.eventName, ...event.toContext()},
       },
     );

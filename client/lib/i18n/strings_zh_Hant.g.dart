@@ -2016,6 +2016,7 @@ class _Translations$chat$genui$spaceSelector$zh_Hant extends Translations$chat$g
 	@override String get roleOwner => 'Owner';
 	@override String get roleAdmin => 'Admin';
 	@override String get roleMember => 'Member';
+	@override String get associateAction => '關聯到所選空間';
 }
 
 // Path: chat.genui.transferPath
@@ -2046,6 +2047,7 @@ class _Translations$chat$genui$transferPath$zh_Hant extends Translations$chat$ge
 	@override String get history => 'History';
 	@override String get unknownAccount => 'Unknown Account';
 	@override String get confirmed => 'Confirmed';
+	@override String get executeAction => '按我的選擇執行轉帳';
 }
 
 // Path: chat.genui.transactionConfirmation
@@ -3029,6 +3031,7 @@ extension on TranslationsZhHant {
 			'chat.genui.spaceSelector.roleOwner' => 'Owner',
 			'chat.genui.spaceSelector.roleAdmin' => 'Admin',
 			'chat.genui.spaceSelector.roleMember' => 'Member',
+			'chat.genui.spaceSelector.associateAction' => '關聯到所選空間',
 			'chat.genui.transferPath.selectSource' => 'Select Source Account',
 			'chat.genui.transferPath.selectTarget' => 'Select Target Account',
 			'chat.genui.transferPath.from' => 'From (Source)',
@@ -3050,6 +3053,7 @@ extension on TranslationsZhHant {
 			'chat.genui.transferPath.history' => 'History',
 			'chat.genui.transferPath.unknownAccount' => 'Unknown Account',
 			'chat.genui.transferPath.confirmed' => 'Confirmed',
+			'chat.genui.transferPath.executeAction' => '按我的選擇執行轉帳',
 			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
 			'chat.genui.transactionConfirmation.confirmed' => '已确认',
 			'chat.genui.budgetAnalysis.title' => '预算分析报告',
@@ -3368,10 +3372,10 @@ extension on TranslationsZhHant {
 			'sharedSpace.notificationCard.reject' => '拒絕',
 			'sharedSpace.notificationCard.unknownTime' => '未知時間',
 			'sharedSpace.notificationCard.justNow' => '剛剛',
-			'sharedSpace.spaceCard.noDescription' => '暫無描述',
-			'sharedSpace.spaceCard.creator' => '建立者',
 			_ => null,
 		} ?? switch (path) {
+			'sharedSpace.spaceCard.noDescription' => '暫無描述',
+			'sharedSpace.spaceCard.creator' => '建立者',
 			'sharedSpace.spaceCard.member' => '成員',
 			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count} 位成員',
 			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count} 筆帳單',

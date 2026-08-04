@@ -42,7 +42,7 @@ class ClientStateMutation {
         'target_account_id': targetAccountId,
         'source_account_name': sourceAccountName,
         'target_account_name': targetAccountName,
-        'amount': amount,
+        'amount': amount.toString(),
         'currency': currency,
       },
     );

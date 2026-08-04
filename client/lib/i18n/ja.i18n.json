@@ -762,7 +762,8 @@
         "linked": "Linked",
         "roleOwner": "Owner",
         "roleAdmin": "Admin",
-        "roleMember": "Member"
+        "roleMember": "Member",
+        "associateAction": "選択したスペースに関連付け"
       },
       "transferPath": {
         "selectSource": "Select Source Account",
@@ -785,7 +786,8 @@
         "title": "Transfer",
         "history": "History",
         "unknownAccount": "Unknown Account",
-        "confirmed": "Confirmed"
+        "confirmed": "Confirmed",
+        "executeAction": "選択に従って振替を実行"
       },
       "transactionConfirmation": {
         "multipleAccounts": "检测到多个关联账户",

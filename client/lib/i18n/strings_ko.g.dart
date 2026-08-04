@@ -2016,6 +2016,7 @@ class _Translations$chat$genui$spaceSelector$ko extends Translations$chat$genui$
 	@override String get roleOwner => 'Owner';
 	@override String get roleAdmin => 'Admin';
 	@override String get roleMember => 'Member';
+	@override String get associateAction => '선택한 코안에 연결';
 }
 
 // Path: chat.genui.transferPath
@@ -2046,6 +2047,7 @@ class _Translations$chat$genui$transferPath$ko extends Translations$chat$genui$t
 	@override String get history => 'History';
 	@override String get unknownAccount => 'Unknown Account';
 	@override String get confirmed => 'Confirmed';
+	@override String get executeAction => '선택에 따라 이체 실행';
 }
 
 // Path: chat.genui.transactionConfirmation
@@ -3029,6 +3031,7 @@ extension on TranslationsKo {
 			'chat.genui.spaceSelector.roleOwner' => 'Owner',
 			'chat.genui.spaceSelector.roleAdmin' => 'Admin',
 			'chat.genui.spaceSelector.roleMember' => 'Member',
+			'chat.genui.spaceSelector.associateAction' => '선택한 코안에 연결',
 			'chat.genui.transferPath.selectSource' => 'Select Source Account',
 			'chat.genui.transferPath.selectTarget' => 'Select Target Account',
 			'chat.genui.transferPath.from' => 'From (Source)',
@@ -3050,6 +3053,7 @@ extension on TranslationsKo {
 			'chat.genui.transferPath.history' => 'History',
 			'chat.genui.transferPath.unknownAccount' => 'Unknown Account',
 			'chat.genui.transferPath.confirmed' => 'Confirmed',
+			'chat.genui.transferPath.executeAction' => '선택에 따라 이체 실행',
 			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
 			'chat.genui.transactionConfirmation.confirmed' => '已确认',
 			'chat.genui.budgetAnalysis.title' => '预算分析报告',
@@ -3368,10 +3372,10 @@ extension on TranslationsKo {
 			'sharedSpace.notificationCard.reject' => '거절',
 			'sharedSpace.notificationCard.unknownTime' => '알 수 없는 시간',
 			'sharedSpace.notificationCard.justNow' => '방금',
-			'sharedSpace.spaceCard.noDescription' => '설명 없음',
-			'sharedSpace.spaceCard.creator' => '생성자',
 			_ => null,
 		} ?? switch (path) {
+			'sharedSpace.spaceCard.noDescription' => '설명 없음',
+			'sharedSpace.spaceCard.creator' => '생성자',
 			'sharedSpace.spaceCard.member' => '멤버',
 			'sharedSpace.spaceCard.membersCount' => ({required Object count}) => '${count}명의 멤버',
 			'sharedSpace.spaceCard.transactionsCount' => ({required Object count}) => '${count}건의 거래',

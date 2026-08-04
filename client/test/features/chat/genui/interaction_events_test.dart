@@ -1,5 +1,6 @@
 import 'package:finvo/features/chat/genui/events/interaction_events.dart';
 import 'package:finvo/features/chat/genui/genui_event_registry.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 类型化交互事件模型单元测试。
@@ -11,6 +12,11 @@ import 'package:flutter_test/flutter_test.dart';
 /// - [GenUiEventRegistry.handle] 对各类型事件的业务处理（含 account 修复与
 ///   交易确认返回 null 的兜底行为）。
 void main() {
+  setUp(() async {
+    // Initialize slang with default (zh) locale so t.* accessors work in unit tests.
+    await LocaleSettings.setLocale(AppLocale.zh);
+  });
+
   group('GenUiInteractionEvent.tryParse', () {
     test('parses transfer_path_confirmed into typed event', () {
       final event = GenUiInteractionEvent.tryParse('transfer_path_confirmed', {
@@ -177,10 +183,10 @@ void main() {
       expect(json['tool_name'], 'execute_transfer');
       final toolParams = json['tool_params'] as Map<String, dynamic>;
       expect(toolParams['source_account_id'], 'src-1');
-      expect(toolParams['amount'], 50.0);
+      expect(toolParams['amount'], '50.00000000');
       expect(
         result.payloadExtensions!['content'],
-        'Execute transfer according to my selection',
+        t.chat.genui.transferPath.executeAction,
       );
     });
 

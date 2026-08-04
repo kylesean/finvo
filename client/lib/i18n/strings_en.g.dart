@@ -1961,6 +1961,7 @@ class _Translations$chat$genui$spaceSelector$en extends Translations$chat$genui$
 	@override String get roleOwner => 'Owner';
 	@override String get roleAdmin => 'Admin';
 	@override String get roleMember => 'Member';
+	@override String get associateAction => 'Associate selected space';
 }
 
 // Path: chat.genui.transferPath
@@ -1991,6 +1992,7 @@ class _Translations$chat$genui$transferPath$en extends Translations$chat$genui$t
 	@override String get history => 'History';
 	@override String get unknownAccount => 'Unknown Account';
 	@override String get confirmed => 'Confirmed';
+	@override String get executeAction => 'Execute transfer according to my selection';
 }
 
 // Path: chat.genui.transactionCard
@@ -3005,6 +3007,7 @@ extension on TranslationsEn {
 			'chat.genui.spaceSelector.roleOwner' => 'Owner',
 			'chat.genui.spaceSelector.roleAdmin' => 'Admin',
 			'chat.genui.spaceSelector.roleMember' => 'Member',
+			'chat.genui.spaceSelector.associateAction' => 'Associate selected space',
 			'chat.genui.transferPath.selectSource' => 'Select Source Account',
 			'chat.genui.transferPath.selectTarget' => 'Select Target Account',
 			'chat.genui.transferPath.from' => 'From (Source)',
@@ -3026,6 +3029,7 @@ extension on TranslationsEn {
 			'chat.genui.transferPath.history' => 'History',
 			'chat.genui.transferPath.unknownAccount' => 'Unknown Account',
 			'chat.genui.transferPath.confirmed' => 'Confirmed',
+			'chat.genui.transferPath.executeAction' => 'Execute transfer according to my selection',
 			'chat.genui.transactionCard.title' => 'Transaction Successful',
 			'chat.genui.transactionCard.associatedAccount' => 'Associated Account',
 			'chat.genui.transactionCard.notCounted' => 'Not counted',
@@ -3372,10 +3376,10 @@ extension on TranslationsEn {
 			'sharedSpace.detail.noTransactions' => 'No transactions yet',
 			'sharedSpace.detail.noTransactionsHint' => 'Transactions in this space will appear here',
 			'sharedSpace.detail.refreshCode' => 'Refresh Code',
-			'sharedSpace.detail.joinOtherSpace' => 'Join Another Space',
-			'sharedSpace.notifications.title' => 'Notifications',
 			_ => null,
 		} ?? switch (path) {
+			'sharedSpace.detail.joinOtherSpace' => 'Join Another Space',
+			'sharedSpace.notifications.title' => 'Notifications',
 			'sharedSpace.notifications.empty' => 'No notifications',
 			'sharedSpace.notifications.emptyHint' => 'When you have new invites or activities,\nyou will receive notifications here',
 			'sharedSpace.notifications.incompleteInfo' => 'Incomplete invite info',

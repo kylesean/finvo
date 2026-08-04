@@ -729,7 +729,8 @@
         "linked": "已关联",
         "roleOwner": "创建者",
         "roleAdmin": "管理员",
-        "roleMember": "成员"
+        "roleMember": "成员",
+        "associateAction": "关联到所选空间"
       },
       "transferPath": {
         "selectSource": "选择转出账户",
@@ -752,7 +753,8 @@
         "title": "转账",
         "history": "历史记录",
         "unknownAccount": "未知账户",
-        "confirmed": "已确认"
+        "confirmed": "已确认",
+        "executeAction": "按我的选择执行转账"
       },
       "transactionCard": {
         "title": "交易成功",

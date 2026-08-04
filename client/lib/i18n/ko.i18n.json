@@ -762,7 +762,8 @@
         "linked": "Linked",
         "roleOwner": "Owner",
         "roleAdmin": "Admin",
-        "roleMember": "Member"
+        "roleMember": "Member",
+        "associateAction": "선택한 코안에 연결"
       },
       "transferPath": {
         "selectSource": "Select Source Account",
@@ -785,7 +786,8 @@
         "title": "Transfer",
         "history": "History",
         "unknownAccount": "Unknown Account",
-        "confirmed": "Confirmed"
+        "confirmed": "Confirmed",
+        "executeAction": "선택에 따라 이체 실행"
       },
       "transactionConfirmation": {
         "multipleAccounts": "检测到多个关联账户",

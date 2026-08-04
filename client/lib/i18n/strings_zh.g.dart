@@ -4080,6 +4080,9 @@ class Translations$chat$genui$spaceSelector$zh {
 
 	/// zh: '成员'
 	String get roleMember => '成员';
+
+	/// zh: '关联到所选空间'
+	String get associateAction => '关联到所选空间';
 }
 
 // Path: chat.genui.transferPath
@@ -4152,6 +4155,9 @@ class Translations$chat$genui$transferPath$zh {
 
 	/// zh: '已确认'
 	String get confirmed => '已确认';
+
+	/// zh: '按我的选择执行转账'
+	String get executeAction => '按我的选择执行转账';
 }
 
 // Path: chat.genui.transactionCard
@@ -5368,6 +5374,7 @@ extension on Translations {
 			'chat.genui.spaceSelector.roleOwner' => '创建者',
 			'chat.genui.spaceSelector.roleAdmin' => '管理员',
 			'chat.genui.spaceSelector.roleMember' => '成员',
+			'chat.genui.spaceSelector.associateAction' => '关联到所选空间',
 			'chat.genui.transferPath.selectSource' => '选择转出账户',
 			'chat.genui.transferPath.selectTarget' => '选择转入账户',
 			'chat.genui.transferPath.from' => '转出 (FROM)',
@@ -5389,6 +5396,7 @@ extension on Translations {
 			'chat.genui.transferPath.history' => '历史记录',
 			'chat.genui.transferPath.unknownAccount' => '未知账户',
 			'chat.genui.transferPath.confirmed' => '已确认',
+			'chat.genui.transferPath.executeAction' => '按我的选择执行转账',
 			'chat.genui.transactionCard.title' => '交易成功',
 			'chat.genui.transactionCard.associatedAccount' => '已关联账户',
 			'chat.genui.transactionCard.notCounted' => '不计入资产',
@@ -5734,10 +5742,10 @@ extension on Translations {
 			'sharedSpace.detail.retry' => '重试',
 			'sharedSpace.detail.noTransactions' => '暂无交易记录',
 			'sharedSpace.detail.noTransactionsHint' => '空间内的交易将显示在这里',
-			'sharedSpace.detail.refreshCode' => '刷新生成新码',
-			'sharedSpace.detail.joinOtherSpace' => '加入其他空间',
 			_ => null,
 		} ?? switch (path) {
+			'sharedSpace.detail.refreshCode' => '刷新生成新码',
+			'sharedSpace.detail.joinOtherSpace' => '加入其他空间',
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暂无通知',
 			'sharedSpace.notifications.emptyHint' => '当你收到新的邀请或动态时，\n通知将显示在这里',

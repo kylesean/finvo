@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:finvo/features/chat/services/interaction_router.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:genui/genui.dart' as genui;
 
@@ -9,6 +10,11 @@ import 'package:genui/genui.dart' as genui;
 /// 覆盖 A2UI v0.9 出站消息路由的核心路径：纯文本、UI 交互（动作/错误反馈）、
 /// 已注册业务事件（转账）、未注册事件兜底、非法输入与非 user 消息。
 void main() {
+  setUp(() async {
+    // Initialize slang with default (zh) locale so t.* accessors work in unit tests.
+    await LocaleSettings.setLocale(AppLocale.zh);
+  });
+
   final router = InteractionRouter();
 
   /// 构造一条携带 UI 交互的"空文本"user 消息（genui 0.10 按钮交互的标准形态）。
@@ -85,10 +91,7 @@ void main() {
       );
 
       expect(outgoing.skip, isFalse);
-      expect(
-        outgoing.displayContent,
-        'Execute transfer according to my selection',
-      );
+      expect(outgoing.displayContent, t.chat.genui.transferPath.executeAction);
 
       // client_state 触发后端 direct_execute 原子转账。
       final clientState = outgoing.clientState;
@@ -98,13 +101,13 @@ void main() {
       final toolParams = clientState['tool_params'] as Map<String, dynamic>;
       expect(toolParams['source_account_id'], 'src-1');
       expect(toolParams['target_account_id'], 'tgt-1');
-      expect(toolParams['amount'], 50.0);
+      expect(toolParams['amount'], '50.0');
 
       // 发给后端的 payload 为注册表提供的 payloadExtensions。
       expect(outgoing.payload, hasLength(1));
       expect(
         outgoing.payload.first['content'],
-        'Execute transfer according to my selection',
+        t.chat.genui.transferPath.executeAction,
       );
     });
 
