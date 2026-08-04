@@ -30,15 +30,20 @@ class ExecuteTransferInput(BaseModel):
     target_account_id: str = Field(..., description="ID of the target account (provided by UI)")
     amount: str = Field(..., description="Transfer amount as a string, e.g. '100.00'")
 
-    @field_validator("amount")
+    @field_validator("amount", mode="before")
     @classmethod
-    def validate_amount(cls, v: str) -> str:
+    def validate_amount(cls, v: Any) -> str:
         """Validate amount is a positive number.
 
         Values that round to zero at the 8-decimal precision (e.g. 1e-9) or
         below half the minimum precision are rejected instead of silently
         creating a 0-amount transaction.
         """
+        if isinstance(v, (int, float, Decimal)):
+            v = str(v)
+        elif not isinstance(v, str):
+            raise ValueError(f"Invalid amount type: {type(v)}")
+
         try:
             decimal_val = Decimal(v)
         except Exception as e:
