@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../../../i18n/strings.g.dart';
 import '../models/statistics_models.dart';
 import '../../../shared/providers/amount_theme_provider.dart';
@@ -193,7 +194,7 @@ class OverviewCard extends ConsumerWidget {
             AmountChangeIndicator(
               changePercent: change,
               inverseColor: label == t.statistics.overview.expense,
-              theme: ref.watch(currentAmountThemeValueProvider),
+              theme: ref.watch(currentAmountThemeProvider),
               style: theme.typography.body.xs.copyWith(
                 fontSize: 9,
                 fontWeight: AppFontConfig.amountBold,
@@ -457,7 +458,7 @@ class TrendChart extends ConsumerWidget {
                             ? t.statistics.trend.expense
                             : t.statistics.trend.income;
                         return LineTooltipItem(
-                          '$label: $currencySymbol${NumberFormat("#,##0", "en_US").format(spot.y)}',
+                          '$label: $currencySymbol${AmountFormatter.getNumberFormat('CNY', decimalDigits: 0).format(spot.y)}',
                           theme.typography.body.xs.copyWith(
                             color: colors.primaryForeground,
                             fontWeight: AppFontConfig.headingBold,
@@ -597,7 +598,10 @@ class _CategoryAnalysisSectionState
   CategoryViewMode _viewMode = CategoryViewMode.bar;
 
   String _formatAmount(String amount) {
-    final numberFormat = NumberFormat('#,##0', 'zh_CN');
+    final numberFormat = AmountFormatter.getNumberFormat(
+      'CNY',
+      decimalDigits: 0,
+    );
     return numberFormat.format(double.tryParse(amount) ?? 0);
   }
 

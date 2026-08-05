@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'package:intl/intl.dart';
+
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
@@ -178,7 +178,7 @@ class AmountText extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final foruiTheme = context.theme;
     // Inject global amount theme reactively
-    final amountTheme = ref.watch(currentAmountThemeValueProvider);
+    final amountTheme = ref.watch(currentAmountThemeProvider);
 
     // Resolve currency
     final effectiveCurrency =
@@ -189,11 +189,7 @@ class AmountText extends ConsumerWidget {
     final absAmount = amount.abs();
     final formattedValue = compact
         ? AmountFormatter.formatCompact(absAmount)
-        : NumberFormat.currency(
-            locale: 'zh_CN',
-            symbol: '',
-            decimalDigits: 2,
-          ).format(absAmount);
+        : AmountFormatter.getNumberFormat(effectiveCurrency).format(absAmount);
 
     // Resolve color based on semantic
     Color color;
@@ -331,7 +327,7 @@ class _AmountTextFromDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foruiTheme = context.theme;
-    final amountTheme = ref.watch(currentAmountThemeValueProvider);
+    final amountTheme = ref.watch(currentAmountThemeProvider);
     final color = AmountFormatter.getAmountColor(type, amountTheme);
 
     // Resolve default currency symbol from global settings if missing

@@ -82,16 +82,16 @@ Map<String, dynamic> _$AmountDisplayToJson(_AmountDisplay instance) =>
 _TransactionCommentModel _$TransactionCommentModelFromJson(
   Map<String, dynamic> json,
 ) => _TransactionCommentModel(
-  id: (json['id'] as num).toInt(),
+  id: json['id'] as String,
   transactionId: json['transactionId'] as String,
   userUuid: json['userUuid'] as String,
   userName: json['userName'] as String?,
   userAvatarUrl: json['userAvatarUrl'] as String?,
-  parentCommentId: (json['parentCommentId'] as num?)?.toInt(),
+  parentCommentId: json['parentCommentId'] as String?,
   commentText: json['commentText'] as String,
   mentionedUserIds:
       (json['mentionedUserIds'] as List<dynamic>?)
-          ?.map((e) => (e as num).toInt())
+          ?.map((e) => e as String)
           .toList() ??
       const [],
   createdAt: json['createdAt'] == null

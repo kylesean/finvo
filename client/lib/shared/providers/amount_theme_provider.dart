@@ -44,18 +44,21 @@ class AmountThemeNotifier extends Notifier<AmountThemeState> {
 
   @override
   AmountThemeState build() {
-    _loadFromStorage();
-    return AmountThemeState.defaultState;
+    // Load the persisted theme synchronously so the initial state reflects the
+    // user's saved preference on cold start (previously the value set by
+    // _loadFromStorage was discarded by the returned default).
+    return _loadFromStorage();
   }
 
   /// Load user preferences from storage
-  void _loadFromStorage() {
+  AmountThemeState _loadFromStorage() {
     final prefs = ref.read(sharedPreferencesProvider);
     final savedThemeId = prefs.getString(_storageKey);
     if (savedThemeId != null) {
       final theme = AmountTheme.fromName(savedThemeId);
-      state = AmountThemeState(themeId: savedThemeId, theme: theme);
+      return AmountThemeState(themeId: savedThemeId, theme: theme);
     }
+    return AmountThemeState.defaultState;
   }
 
   /// Set theme
@@ -88,9 +91,4 @@ final currentAmountThemeProvider = Provider<AmountTheme>((ref) {
 /// Provider for list of all available themes
 final availableAmountThemesProvider = Provider<List<AmountThemeOption>>((ref) {
   return AmountTheme.availableThemes;
-});
-
-/// Provider for the current AmountTheme UI object
-final currentAmountThemeValueProvider = Provider<AmountTheme>((ref) {
-  return ref.watch(amountThemeProvider).theme;
 });

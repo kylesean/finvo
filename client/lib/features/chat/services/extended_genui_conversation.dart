@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:genui/genui.dart' as genui;
 import 'custom_content_generator.dart';
@@ -12,6 +13,7 @@ class ExtendedGenUiConversation {
   final CustomContentGenerator _customGenerator;
   final genui.Conversation _conversation;
   final genui.SurfaceController _controller;
+  StreamSubscription<dynamic>? _eventsSubscription;
   String? _currentSessionId;
 
   // Callbacks
@@ -33,7 +35,7 @@ class ExtendedGenUiConversation {
          transport: contentGenerator,
        ) {
     // Listen to Conversation events for surface lifecycle
-    _conversation.events.listen((event) {
+    _eventsSubscription = _conversation.events.listen((event) {
       switch (event) {
         case genui.ConversationSurfaceAdded(:final surfaceId):
           _logger.info('ExtendedGenUiConversation: Surface added: $surfaceId');
@@ -115,6 +117,8 @@ class ExtendedGenUiConversation {
 
   /// Resource release
   void dispose() {
+    unawaited(_eventsSubscription?.cancel());
+    _eventsSubscription = null;
     _customGenerator.dispose();
   }
 

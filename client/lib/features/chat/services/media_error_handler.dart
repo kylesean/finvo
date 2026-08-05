@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/media_upload_exception.dart';
+import 'retry_policy.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'dart:async';
@@ -866,47 +867,20 @@ class MediaErrorHandler {
   /// [maxRetries] Maximum retry attempts
   /// [initialDelay] Initial delay time (milliseconds)
   /// [onRetryAttempt] Retry attempt callback (optional)
+  ///
+  /// Delegates to the shared [RetryPolicy] so retry mechanics live in one place.
   static Future<T> retryNetworkOperation<T>(
     Future<T> Function() operation, {
     int maxRetries = 3,
     int initialDelay = 1000,
     void Function(int attempt, Duration delay)? onRetryAttempt,
-  }) async {
-    int attempt = 0;
-    Duration delay = Duration(milliseconds: initialDelay);
-
-    while (attempt < maxRetries) {
-      try {
-        _logger.info(
-          'Executing network operation, attempt: ${attempt + 1}/$maxRetries',
-        );
-        return await operation();
-      } catch (e) {
-        attempt++;
-
-        if (attempt >= maxRetries) {
-          _logger.severe(
-            'Network operation failed, reached maximum retry attempts: $maxRetries',
-          );
-          rethrow;
-        }
-
-        _logger.warning(
-          'Network operation failed, will retry after ${delay.inMilliseconds}ms: $e',
-        );
-
-        if (onRetryAttempt != null) {
-          onRetryAttempt(attempt, delay);
-        }
-
-        await Future<void>.delayed(delay);
-
-        // Exponential backoff: double delay for next attempt
-        delay = Duration(milliseconds: delay.inMilliseconds * 2);
-      }
-    }
-
-    throw StateError('Should not reach here');
+  }) {
+    return RetryPolicy().retryWithBackoff<T>(
+      operation: operation,
+      maxAttempts: maxRetries,
+      initialDelay: Duration(milliseconds: initialDelay),
+      onRetry: onRetryAttempt,
+    );
   }
 
   /// Log error statistics (for analysis and improvement)

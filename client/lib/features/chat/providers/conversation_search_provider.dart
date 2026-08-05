@@ -9,6 +9,7 @@ part 'conversation_search_provider.g.dart';
 @riverpod
 class ConversationSearch extends _$ConversationSearch {
   Timer? _debounceTimer;
+  int _searchToken = 0;
 
   @override
   ConversationSearchState build() {
@@ -96,17 +97,23 @@ class ConversationSearch extends _$ConversationSearch {
   Future<void> _performSearch(String query) async {
     if (query.isEmpty) return;
 
+    // Guard against stale responses: only the request with the latest token
+    // may update the state (debounce + in-flight responses racing).
+    final requestToken = ++_searchToken;
+
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final searchService = ref.read(conversationSearchServiceProvider);
       final results = await searchService.searchConversations(query);
+      if (requestToken != _searchToken || !ref.mounted) return;
       state = state.copyWith(
         results: results,
         isLoading: false,
         hasSearched: true,
       );
     } catch (e) {
+      if (requestToken != _searchToken || !ref.mounted) return;
       state = state.copyWith(
         error: e.toString(),
         isLoading: false,

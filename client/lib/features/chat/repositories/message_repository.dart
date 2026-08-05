@@ -41,6 +41,32 @@ class MessageRepository {
     required this.getCurrentMessages,
   });
 
+  /// Streaming text buffers per message ID.
+  ///
+  /// Avoids O(n^2) full-string concatenation on every streamed chunk:
+  /// chunks are appended incrementally and the aggregated string is only
+  /// materialized when the message state is written.
+  final Map<String, StringBuffer> _contentBuffers = {};
+
+  /// Clear the incremental content buffer for a message (e.g. on reset).
+  void clearContentBuffer(String id) {
+    _contentBuffers.remove(id);
+  }
+
+  /// Clear all incremental content buffers (e.g. on conversation switch).
+  void clearAllContentBuffers() {
+    _contentBuffers.clear();
+  }
+
+  String _aggregatedContent(String id) {
+    final buffer = _contentBuffers[id];
+    return buffer?.toString() ?? '';
+  }
+
+  StringBuffer _bufferFor(String id) {
+    return _contentBuffers.putIfAbsent(id, () => StringBuffer());
+  }
+
   // ============================================================
   // Public Methods - Query
   // ============================================================
@@ -80,15 +106,30 @@ class MessageRepository {
 
   /// Update AI message state
   ///
-  /// Important: Only updates the specified fields, preserving all other data
+  /// Important: Only updates the specified fields, preserving all other data.
+  /// Provide either [contentDelta] (incremental chunk, appended to an internal
+  /// StringBuffer to avoid O(n^2) concatenation) or [content] (full text).
   void updateAiMessageState({
     required String id,
     String? content,
+    String? contentDelta,
     bool? isTyping,
     StreamingStatus? streamingStatus,
     DateTime? timestamp,
   }) {
     if (id.isEmpty) return;
+
+    String effectiveContent;
+    if (contentDelta != null) {
+      effectiveContent = (_bufferFor(id)..write(contentDelta)).toString();
+    } else if (content != null) {
+      // Full-text update: reset the incremental buffer to stay consistent
+      // with subsequent contentDelta appends.
+      _contentBuffers[id] = StringBuffer(content);
+      effectiveContent = content;
+    } else {
+      effectiveContent = _aggregatedContent(id);
+    }
 
     final messages = getCurrentMessages();
     final updatedMessages = messages.map((msg) {
@@ -97,17 +138,17 @@ class MessageRepository {
         final updatedFullContent = List<MessageContentPart>.from(
           msg.fullContent,
         );
-        if (content != null) {
+        if (effectiveContent.isNotEmpty) {
           // Calculate delta since last state
-          // content is full aggregated text, msg.content is previous aggregated text
+          // effectiveContent is full aggregated text, msg.content is previous aggregated text
           String delta = '';
-          if (content.startsWith(msg.content)) {
-            delta = content.substring(msg.content.length);
+          if (effectiveContent.startsWith(msg.content)) {
+            delta = effectiveContent.substring(msg.content.length);
           } else if (msg.content.isEmpty) {
-            delta = content;
+            delta = effectiveContent;
           } else {
             // Fallback: If content changed completely, treat as full update
-            delta = content;
+            delta = effectiveContent;
           }
 
           if (delta.isNotEmpty) {
@@ -145,7 +186,7 @@ class MessageRepository {
 
         // Only update AI message, preserve all original data
         return msg.copyWith(
-          content: content ?? msg.content,
+          content: effectiveContent,
           fullContent: updatedFullContent,
           isTyping: isTyping ?? msg.isTyping,
           streamingStatus: streamingStatus ?? msg.streamingStatus,
@@ -167,6 +208,13 @@ class MessageRepository {
   /// Update message ID (replace temp ID with persisted ID)
   void updateMessageId(String oldId, String newId) {
     if (oldId.isEmpty || newId.isEmpty || oldId == newId) return;
+
+    // Migrate the incremental content buffer to the new ID so streaming
+    // text accumulation survives the temp -> persisted ID swap.
+    final buffer = _contentBuffers.remove(oldId);
+    if (buffer != null) {
+      _contentBuffers[newId] = buffer;
+    }
 
     final messages = getCurrentMessages();
     final updatedMessages = messages.map((msg) {
@@ -197,7 +245,7 @@ class MessageRepository {
 
     if (messageIndex == -1) {
       _logger.info(
-        'MessageRepository: ⚠️ Message $messageId not found for surface $surfaceId',
+        'MessageRepository: Message $messageId not found for surface $surfaceId',
       );
       return false;
     }
@@ -260,7 +308,7 @@ class MessageRepository {
 
     onMessagesChanged(updatedMessages);
     _logger.info(
-      'MessageRepository: ✓ Added surface $surfaceId (tool: $toolName) to message $messageId and fullContent',
+      'MessageRepository: Added surface $surfaceId (tool: $toolName) to message $messageId and fullContent',
     );
     return true;
   }
@@ -388,7 +436,7 @@ class MessageRepository {
 
     if (messageIndex == -1) {
       _logger.info(
-        'MessageRepository: ⚠️ Message $messageId not found for tool call ${toolCall.id}',
+        'MessageRepository: Message $messageId not found for tool call ${toolCall.id}',
       );
       return;
     }

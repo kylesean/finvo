@@ -113,21 +113,6 @@ class MediaValidationService {
     }
   }
 
-  /// Validate file size by bytes (for testing and internal use)
-  static ValidationResult validateFileSizeByBytes(int fileSize) {
-    if (fileSize > maxFileSizeBytes) {
-      final fileSizeFormatted = formatFileSize(fileSize);
-      final maxSizeFormatted = formatFileSize(maxFileSizeBytes);
-      return ValidationResult(
-        isValid: false,
-        errorMessage:
-            'File size $fileSizeFormatted exceeds limit $maxSizeFormatted',
-      );
-    }
-
-    return const ValidationResult(isValid: true);
-  }
-
   /// Validate file format (throw exception version)
   ///
   /// Throws: [MediaUploadException] when file format is not supported
@@ -164,29 +149,6 @@ class MediaValidationService {
         supportedFormats: getSupportedFormatsString(),
       );
     }
-  }
-
-  /// Validate file format by extension (for testing and internal use)
-  static ValidationResult validateFileFormatByExtension(String? extension) {
-    if (extension == null || extension.isEmpty) {
-      return const ValidationResult(
-        isValid: false,
-        errorMessage: 'Unable to recognize file format',
-      );
-    }
-
-    final isSupported =
-        supportedImageExtensions.contains(extension) ||
-        supportedFileExtensions.contains(extension);
-
-    if (!isSupported) {
-      return ValidationResult(
-        isValid: false,
-        errorMessage: 'Unsupported file format: .$extension',
-      );
-    }
-
-    return const ValidationResult(isValid: true);
   }
 
   /// Determine if file is image format

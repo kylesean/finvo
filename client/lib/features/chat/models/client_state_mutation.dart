@@ -42,7 +42,8 @@ class ClientStateMutation {
         'target_account_id': targetAccountId,
         'source_account_name': sourceAccountName,
         'target_account_name': targetAccountName,
-        'amount': amount.toString(),
+        // 8 decimal places to match backend Decimal(20,8) precision contract
+        'amount': amount.toStringAsFixed(8),
         'currency': currency,
       },
     );

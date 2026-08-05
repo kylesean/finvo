@@ -206,7 +206,7 @@ final class TotalExpenseProvider
   }
 }
 
-String _$totalExpenseHash() => r'1f85f74a152ffb9ab61c0bed0905f7a52185df98';
+String _$totalExpenseHash() => r'af8b50253584f808a258a6cbd72cbc7c73ff1248';
 
 @ProviderFor(calendarMonthData)
 final calendarMonthDataProvider = CalendarMonthDataFamily._();
@@ -265,7 +265,7 @@ final class CalendarMonthDataProvider
   }
 }
 
-String _$calendarMonthDataHash() => r'4efd50c45393d896f76fe15db3ee8c5ffbcb3b0c';
+String _$calendarMonthDataHash() => r'01681cb4d69db9fb067138fd2a0038f2a8b385d0';
 
 final class CalendarMonthDataFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<CalendarMonthData>, DateTime> {
@@ -397,7 +397,7 @@ final class TransactionFeedProvider
   }
 }
 
-String _$transactionFeedHash() => r'b12394cd03dd927e4e8ff1df8a6ca73892475e06';
+String _$transactionFeedHash() => r'b151a7c1e911388347f1db98a102a15e4beea97b';
 
 abstract class _$TransactionFeed extends $Notifier<TransactionFeedState> {
   TransactionFeedState build();

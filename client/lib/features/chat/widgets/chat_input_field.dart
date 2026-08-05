@@ -51,6 +51,30 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     );
     _textController = TextEditingController();
 
+    // Start/stop the breathing animation whenever the waiting state changes.
+    // The animation is driven purely by listeners (never from build) so build
+    // stays side-effect free.
+    ref.listenManual(
+      chatHistoryProvider.select((s) => s.isStreamingResponse),
+      (_, _) => _syncBreathingAnimation(),
+    );
+    ref.listenManual(
+      provider.select((s) => s.isListening),
+      (_, _) => _syncBreathingAnimation(),
+    );
+    _syncBreathingAnimation();
+
+    // When the active conversation changes, reset draft text/media so a
+    // previous conversation's input doesn't leak into the newly opened one.
+    ref.listenManual(
+      chatHistoryProvider.select((s) => s.currentConversationId),
+      (previous, current) {
+        if (previous != current) {
+          ref.read(provider.notifier).resetForConversationSwitch();
+        }
+      },
+    );
+
     ref.listenManual(provider.select((s) => s.text), (
       previousText,
       currentText,
@@ -182,6 +206,24 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     super.dispose();
   }
 
+  /// Sync breathing animation with the current waiting state
+  void _syncBreathingAnimation() {
+    if (!mounted) return;
+    final isWaitingState =
+        ref.read(chatHistoryProvider).isStreamingResponse ||
+        ref.read(provider).isListening;
+    if (isWaitingState) {
+      if (!_breathingController.isAnimating) {
+        unawaited(_breathingController.repeat(reverse: true));
+      }
+    } else {
+      if (_breathingController.isAnimating) {
+        _breathingController.stop();
+        _breathingController.reset();
+      }
+    }
+  }
+
   String _getHintText(
     HintType hintType,
     bool isListening, {
@@ -234,18 +276,6 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
 
     // Whether in waiting state (requires breathing animation)
     final isWaitingState = isStreamingResponse || chatInputState.isListening;
-
-    // Control breathing animation start/stop
-    if (isWaitingState) {
-      if (!_breathingController.isAnimating) {
-        unawaited(_breathingController.repeat(reverse: true));
-      }
-    } else {
-      if (_breathingController.isAnimating) {
-        _breathingController.stop();
-        _breathingController.reset();
-      }
-    }
 
     // Get forui theme
     final theme = context.theme;

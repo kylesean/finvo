@@ -1,24 +1,28 @@
 import 'dart:io';
-import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 import '../../../core/network/network_client.dart';
 import 'package:finvo/features/auth/models/user.dart';
 import 'package:finvo/core/utils/map_require.dart';
+import 'package:finvo/core/services/server_config_service.dart';
 import '../../../shared/services/timezone_service.dart';
 
 class AuthService {
   final NetworkClient _networkClient;
   final TimezoneService _timezoneService;
   final FlutterSecureStorage _storage;
-  late final SharedPreferences _prefs;
+  final SharedPreferences _prefs;
   final _logger = Logger('AuthService');
 
   // Keys for secure storage
   static const String _tokenKey = 'auth_token';
+  static const String _refreshTokenKey = 'auth_refresh_token';
   static const String _userIdKey = 'user_id'; // Store user ID securely
 
   // Keys for shared preferences
@@ -26,27 +30,29 @@ class AuthService {
   static const String _userEmailKey = 'user_email';
   static const String _userPhoneKey = 'user_phone';
 
-  AuthService(this._networkClient, this._timezoneService)
-    : _storage = const FlutterSecureStorage() {
-    unawaited(_initPrefs());
-  }
-
-  Future<void> _initPrefs() async {
-    _prefs = await SharedPreferences.getInstance();
-  }
+  AuthService(this._networkClient, this._timezoneService, this._prefs)
+    : _storage = const FlutterSecureStorage();
 
   // Helper to save authentication data
-  Future<void> _saveAuthData(String token, UserModel user) async {
-    // Save sensitive data to secure storage with fallback for iOS Keychain sideloading errors
+  Future<void> _saveAuthData(
+    String token,
+    String refreshToken,
+    UserModel user,
+  ) async {
+    // Save sensitive data to secure storage. Deliberately fail closed: if
+    // Keychain/Keystore is unavailable, throw instead of falling back to
+    // plaintext SharedPreferences (product decision for P1-1).
     try {
       await _storage.write(key: _tokenKey, value: token);
+      await _storage.write(key: _refreshTokenKey, value: refreshToken);
       await _storage.write(key: _userIdKey, value: user.id);
     } catch (e) {
-      _logger.warning(
-        'SecureStorage write failed (iOS Keychain sideload issue): $e',
+      _logger.severe(
+        'SecureStorage write failed, refusing plaintext fallback: $e',
       );
-      await _prefs.setString(_tokenKey, token);
-      await _prefs.setString(_userIdKey, user.id);
+      throw SecureStorageUnavailableException(
+        'Failed to store credentials securely on this device.',
+      );
     }
 
     // Save non-sensitive data to shared preferences
@@ -69,6 +75,7 @@ class AuthService {
     // Clear sensitive data from secure storage
     try {
       await _storage.delete(key: _tokenKey);
+      await _storage.delete(key: _refreshTokenKey);
       await _storage.delete(key: _userIdKey);
     } catch (e) {
       _logger.warning('SecureStorage delete failed: $e');
@@ -93,10 +100,13 @@ class AuthService {
       token = await _storage.read(key: _tokenKey);
       userId = await _storage.read(key: _userIdKey);
     } catch (e) {
-      _logger.warning('SecureStorage read failed: $e');
+      _logger.severe(
+        'SecureStorage read failed, refusing plaintext fallback: $e',
+      );
+      throw SecureStorageUnavailableException(
+        'Failed to read credentials from secure storage on this device.',
+      );
     }
-    token ??= _prefs.getString(_tokenKey);
-    userId ??= _prefs.getString(_userIdKey);
 
     if (token != null && userId != null) {
       // Retrieve non-sensitive data from shared preferences
@@ -141,8 +151,13 @@ class AuthService {
     final data = response.require<Map<String, dynamic>>('data');
     final userJson = data.require<Map<String, dynamic>>('user');
     final token = data.require<String>('token');
+    final refreshToken = data.require<String>('refresh_token');
     final UserModel user = UserModel.fromJson(userJson);
-    await _saveAuthData(token, user); // Save data after successful registration
+    await _saveAuthData(
+      token,
+      refreshToken,
+      user,
+    ); // Save data after successful login
     // Return a tuple with strongly typed objects (Record)
     return (user: user, token: token);
   }
@@ -186,8 +201,13 @@ class AuthService {
     final data = response.require<Map<String, dynamic>>('data');
     final userJson = data.require<Map<String, dynamic>>('user');
     final token = data.require<String>('token');
+    final refreshToken = data.require<String>('refresh_token');
     final UserModel user = UserModel.fromJson(userJson);
-    await _saveAuthData(token, user); // Save data after successful registration
+    await _saveAuthData(
+      token,
+      refreshToken,
+      user,
+    ); // Save data after successful registration
 
     _logger.info('User registered with locale: $locale');
 
@@ -199,6 +219,15 @@ class AuthService {
   /// This does NOT require any permission.
   String _getDeviceLocale() {
     try {
+      // On web, `Platform` is unavailable; fall back to the browser locale.
+      if (kIsWeb) {
+        final locale = WidgetsBinding.instance.platformDispatcher.locale;
+        final code = locale.countryCode == null
+            ? locale.languageCode
+            : '${locale.languageCode}_${locale.countryCode}';
+        _logger.fine('Device locale detected (web): $code');
+        return code;
+      }
       // Platform.localeName returns the device's locale (e.g., 'zh_CN', 'en_US')
       // This is a synchronous call and does not require any permission
       final locale = Platform.localeName;
@@ -214,8 +243,6 @@ class AuthService {
   // Because login already retrieves complete user information and Token, no additional API calls needed
 
   Future<void> logout() async {
-    // Simulate logout delay
-    await Future<void>.delayed(const Duration(seconds: 1));
     await _deleteAuthData(); // Clear token and user data from secure storage and shared preferences
     _logger.info('User logged out and data cleared.');
   }
@@ -229,5 +256,6 @@ final authServiceProvider = Provider<AuthService>((ref) {
   final timezoneService = ref.watch(
     timezoneServiceProvider,
   ); // Get timezone service
-  return AuthService(networkClient, timezoneService);
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return AuthService(networkClient, timezoneService, prefs);
 });

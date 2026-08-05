@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 // features/home/widgets/feed/transaction_card.dart
 import 'package:flutter/material.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
@@ -84,43 +85,14 @@ class TransactionCard extends ConsumerWidget {
   }
 
   Future<bool> _showDeleteConfirmation(BuildContext context) async {
-    return await showFDialog<bool>(
-          context: context,
-          builder: (dialogContext, style, animation) => FDialog(
-            animation: animation,
-            builder: (context, dialogStyle) => Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    t.transaction.confirmDelete,
-                    style: dialogStyle.titleTextStyle,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    t.transaction.deleteTransactionConfirm,
-                    style: dialogStyle.bodyTextStyle,
-                  ),
-                  const SizedBox(height: 24),
-                  FButton(
-                    variant: .outline,
-                    onPress: () => Navigator.of(dialogContext).pop(false),
-                    child: Text(t.common.cancel),
-                  ),
-                  const SizedBox(height: 8),
-                  FButton(
-                    variant: .destructive,
-                    onPress: () => Navigator.of(dialogContext).pop(true),
-                    child: Text(t.common.delete),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ) ??
-        false;
+    return showConfirmDialog(
+      context: context,
+      title: t.transaction.confirmDelete,
+      message: t.transaction.deleteTransactionConfirm,
+      cancelLabel: t.common.cancel,
+      confirmVariant: FButtonVariant.destructive,
+      confirmLabel: t.common.delete,
+    );
   }
 
   Future<bool> _performDelete(BuildContext context, WidgetRef ref) async {

@@ -1,4 +1,5 @@
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
@@ -570,38 +571,16 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
 
   void _showDeleteConfirmation() {
     unawaited(
-      showFDialog(
+      showConfirmDialog(
         context: context,
-        builder: (context, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(t.budget.deleteBudget, style: dialogStyle.titleTextStyle),
-                const SizedBox(height: 8),
-                Text(t.budget.deleteConfirm, style: dialogStyle.bodyTextStyle),
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.pop(context),
-                  child: Text(t.common.cancel),
-                ),
-                const SizedBox(height: 8),
-                FButton(
-                  variant: .destructive,
-                  onPress: () async {
-                    await Navigator.maybePop(context);
-                    unawaited(_handleDelete());
-                  },
-                  child: Text(t.common.delete),
-                ),
-              ],
-            ),
-          ),
-        ),
+        title: t.budget.deleteBudget,
+        message: t.budget.deleteConfirm,
+        cancelLabel: t.common.cancel,
+        confirmVariant: FButtonVariant.destructive,
+        confirmLabel: t.common.delete,
+        onConfirm: () async {
+          unawaited(_handleDelete());
+        },
       ),
     );
   }

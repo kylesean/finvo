@@ -26,6 +26,13 @@
     "history": "거래 내역",
     "reset": "초기화"
   },
+  "genui": {
+    "errorBusy": "죄송합니다. 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요",
+    "errorTimeout": "요청이 시간 초과되었습니다. 네트워크를 확인하고 다시 시도해 주세요",
+    "errorNetwork": "네트워크 연결에 문제가 있습니다. 확인 후 다시 시도해 주세요",
+    "errorSessionExpired": "세션이 만료되었습니다. 다시 로그인해 주세요",
+    "errorGeneric": "문제가 발생했습니다. 잠시 후 다시 시도해 주세요"
+  },
   "time": {
     "today": "오늘",
     "yesterday": "어제",
@@ -524,7 +531,85 @@
       "skip": "건너뛰기",
       "noPending": "대기 거래 없음",
       "confirmSuccess": "거래 확인됨",
-      "skipSuccess": "거래 건너뜀"
+      "skipSuccess": "거래 건너뜀",
+      "interval": "반복 간격",
+      "selectDays": "요일 선택",
+      "alwaysLastDay": "매월 마지막 날에 실행",
+      "lastDayExecution": "매월 마지막 날에 실행됩니다",
+      "dayExecution": "매월 $day 일$suffix 실행（짧은 달은 월말로 조정됨）",
+      "setEndDate": "종료일 설정",
+      "selectEndDate": "종료일 선택",
+      "preview": "규칙 미리보기",
+      "daily": "매일",
+      "weekly": "매주",
+      "monthly": "매월",
+      "yearly": "매년",
+      "custom": "사용자 지정",
+      "cycle": "주기",
+      "everyDays": "$count일마다",
+      "everyWeeks": "$count주마다",
+      "everyMonths": "$count개월마다",
+      "everyYears": "$count년마다",
+      "monthlyOnDay": "매월 $day 일$suffix",
+      "everyMonthsOnDay": "$count개월마다 $day 일$suffix",
+      "monthlyLastDay": "매월 마지막 날",
+      "everyMonthsLastDay": "$count개월마다 마지막 날",
+      "yearlyOn": "매년 $month/$day",
+      "everyYearsOn": "$count년마다 $month/$day",
+      "weeklyOnDay": "매주$day",
+      "weekdayMon": "월요일",
+      "weekdayTue": "화요일",
+      "weekdayWed": "수요일",
+      "weekdayThu": "목요일",
+      "weekdayFri": "금요일",
+      "weekdaySat": "토요일",
+      "weekdaySun": "일요일",
+      "weekdayOn": "",
+      "weekdayJoiner": ", ",
+      "weeklyDaysPrefix": " ",
+      "sourceAccount": "출금 계좌",
+      "targetAccount": "입금 계좌",
+      "expenseAccount": "지출 계좌",
+      "incomeAccount": "수입 계좌",
+      "selectSourceAccount": "출금 계좌 선택",
+      "selectTargetAccount": "입금 계좌 선택",
+      "selectExpenseAccount": "지출 계좌 선택",
+      "selectIncomeAccount": "수입 계좌 선택",
+      "amountNotFixed": "$type마다 금액이 고정되지 않음",
+      "selectBothAccounts": "출금 및 입금 계좌를 선택하세요",
+      "selectAccountForType": "$type 계좌를 선택하세요",
+      "deleteConfirmGeneric": "이 정기 거래를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "selectDate": "$date 선택",
+      "accountTypeCash": "현금",
+      "accountTypeDeposit": "은행 예금",
+      "accountTypeEMoney": "전자지갑",
+      "accountTypeInvestment": "투자",
+      "accountTypeReceivable": "매출채권",
+      "accountTypeCreditCard": "신용카드",
+      "accountTypeLoan": "대출 계좌",
+      "accountTypePayable": "매입채무",
+      "assetAccount": "자산 계좌",
+      "liabilityAccount": "부채 계좌",
+      "noAssetAccounts": "자산 계좌가 없습니다",
+      "goToFinanceToAddAccounts": "재무 페이지에서 계좌를 추가하세요",
+      "selectAccount": "계좌 선택",
+      "autoGenerateByRule": "활성화하면 규칙에 따라 거래가 자동 생성됩니다",
+      "dayUnit(param=count)": {
+        "one": "일",
+        "other": "일"
+      },
+      "weekUnit(param=count)": {
+        "one": "주",
+        "other": "주"
+      },
+      "monthUnit(param=count)": {
+        "one": "개월",
+        "other": "개월"
+      },
+      "yearUnit(param=count)": {
+        "one": "년",
+        "other": "년"
+      }
     }
   },
   "chat": {
@@ -534,6 +619,11 @@
     "inputMessage": "메시지 입력...",
     "listening": "듣고 있어요...",
     "aiThinking": "처리 중...",
+    "stoppedResponse": "이 응답을 중지했습니다",
+    "errorRecover": "죄송합니다. 문제가 발생했습니다. 다시 시도해 주세요 🙏",
+    "contentCopied": "내용이 복사되었습니다",
+    "jsonCopied": "JSON 데이터가 복사되었습니다",
+    "noContentToCopy": "복사할 내용이 없습니다",
     "tools": {
       "processing": "처리 중...",
       "read_file": "파일 확인 중...",
@@ -627,6 +717,7 @@
       "sourceAccount": "출금 계좌",
       "targetAccount": "입금 계좌",
       "selectAccount": "계좌 선택",
+      "autoGenerateByRule": "활성화하면 규칙에 따라 거래가 자동 생성됩니다",
       "confirmTransfer": "이체 확인",
       "confirmed": "확인됨",
       "transferSuccess": "이체 성공",
@@ -679,6 +770,7 @@
         "modify": "수정",
         "associate": "계좌 연결",
         "selectAccount": "계좌 선택",
+        "autoGenerateByRule": "활성화하면 규칙에 따라 거래가 자동 생성됩니다",
         "noAccount": "계좌가 없습니다. 추가해주세요.",
         "missingId": "거래 ID가 없습니다",
         "associatedTo": "$name 계좌 연결됨",
@@ -897,6 +989,10 @@
         }
       }
     }
+  },
+  "image": {
+    "deleteTitle": "이미지 삭제",
+    "deleteConfirm": "이 이미지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
   },
   "footprint": {
     "searchIn": "검색",

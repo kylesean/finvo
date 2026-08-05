@@ -23,7 +23,12 @@ from sqlalchemy import desc, select
 from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
 from app.core.database import get_session_context
-from app.core.dependencies import get_current_user, get_redis_client, revoke_token
+from app.core.dependencies import (
+    get_current_user,
+    get_redis_client,
+    is_token_revoked,
+    revoke_token,
+)
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.limiter import limiter
 from app.core.logging import bind_context, logger
@@ -40,7 +45,12 @@ from app.schemas.auth import (
     UserInfo,
 )
 from app.services.auth_service import AuthService
-from app.utils.auth_utils import create_access_token
+from app.utils.auth_utils import (
+    create_access_token,
+    create_refresh_token,
+    is_refresh_token,
+    verify_token_allow_expired,
+)
 from app.utils.sanitization import sanitize_string
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -203,7 +213,12 @@ async def register(
     )
 
     # Return unified format
-    auth_response = AuthResponse(token=token, user=user_info)
+    refresh = create_refresh_token(user.uuid)
+    auth_response = AuthResponse(
+        token=token,
+        refresh_token=refresh.access_token,
+        user=user_info,
+    )
     return success_response(data=auth_response.model_dump(), message="Registration successful")
 
 
@@ -252,7 +267,12 @@ async def login(
     )
 
     # Return unified format
-    auth_response = AuthResponse(token=token, user=user_info)
+    refresh = create_refresh_token(user.uuid)
+    auth_response = AuthResponse(
+        token=token,
+        refresh_token=refresh.access_token,
+        user=user_info,
+    )
     return success_response(data=auth_response.model_dump(), message="Login successful")
 
 
@@ -427,6 +447,53 @@ async def logout(
     return success_response(
         message="Logged out successfully" if revoked else "Logged out",
         data={"revoked": revoked},
+    )
+
+
+@router.post("/refresh", response_model=ResponseEnvelope[dict[str, Any]])
+@limiter.limit(settings.RATE_LIMIT_ENDPOINTS["login"][0])
+async def refresh_access_token_endpoint(
+    request: Request,
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    redis_client: Annotated[Any, Depends(get_redis_client)],
+) -> JSONResponse:
+    """Refresh tokens using a dedicated refresh token.
+
+    Only refresh-type tokens are accepted (access tokens are rejected), so a
+    leaked access token cannot be used to mint new ones. Revoked refresh tokens
+    are rejected. Returns a new access token and a rotated refresh token.
+    """
+    old_token = credentials.credentials
+
+    # Reject access tokens — only refresh-type tokens may be refreshed.
+    if not is_refresh_token(old_token):
+        raise AuthorizationError("Invalid or expired refresh token")
+
+    if await is_token_revoked(redis_client, old_token):
+        raise AuthorizationError("Token has been revoked")
+
+    subject = verify_token_allow_expired(old_token)
+    if subject is None:
+        raise AuthorizationError("Invalid or expired refresh token")
+
+    # Rotate: issue a fresh access token and a new refresh token (the old one
+    # is implicitly invalidated by rotation on the client side).
+    new_access = create_access_token(subject)
+    new_refresh = create_refresh_token(subject)
+
+    logger.info(
+        "token_refreshed",
+        user_uuid=subject,
+        endpoint="auth_refresh",
+        rotated=True,
+    )
+
+    return success_response(
+        data={
+            "token": new_access.access_token,
+            "refresh_token": new_refresh.access_token,
+        },
+        message="Token refreshed",
     )
 
 

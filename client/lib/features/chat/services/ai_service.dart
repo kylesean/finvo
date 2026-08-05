@@ -1,279 +1,21 @@
 import 'package:logging/logging.dart';
-import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/network/exceptions/app_exception.dart';
-import '../../../core/network/sse_client.dart';
+import '../../../core/network/dio_provider.dart' show dioProvider;
 import '../../../core/constants/api_constants.dart';
 import '../../../core/storage/secure_storage_service.dart';
-import '../../../core/network/dio_provider.dart' show sseDioProvider;
-import 'genui_sse_parser.dart';
 
-import '../../../shared/providers/locale_provider.dart';
-import '../../../i18n/strings.g.dart';
-
-// Export ParsedSseEvent and SseEventType for other files to use
-export 'genui_sse_parser.dart' show ParsedSseEvent, SseEventType;
-
-/// AI Service for handling chat streaming with the backend.
+/// AI Service for chat operations against the backend.
 ///
-/// Uses custom SseClient implementation, supports:
-/// - POST request with JSON body
-/// - Smart reconnection mechanism (preserves original request body)
-/// - Exponential backoff retry
+/// Streaming responses are handled by the GenUI layer ([CustomContentGenerator]);
+/// this service only exposes the non-streaming operations still in use.
 class AIService {
   final _logger = Logger('AIService');
   final SecureStorageService _storageService;
   final Dio _dio;
-  final Ref? ref;
-  final String _sseBaseUrl;
   final String _baseUrl;
 
-  // Used to track current active SSE connection
-  SseClient? _currentSseClient;
-  StreamController<ParsedSseEvent>? _currentController;
-
-  AIService(
-    this._storageService,
-    this._dio, {
-    this.ref,
-    required this._sseBaseUrl,
-    required this._baseUrl,
-  });
-
-  /// Stream AI response for a chat message.
-  ///
-  /// [userMessage] - The user's message content
-  /// [sessionId] - Optional session ID. If null, backend creates a new session.
-  /// [attachments] - Optional list of attachment references
-  ///
-  /// Returns a Stream of parsed SSE events.
-  Future<Stream<ParsedSseEvent>> streamAIResponse(
-    String userMessage, {
-    String? sessionId,
-    List<Map<String, dynamic>>? attachments,
-  }) async {
-    // First close any existing connection
-    await closeConnection();
-
-    final controller = StreamController<ParsedSseEvent>();
-    _currentController = controller;
-
-    bool isClosed = false;
-
-    // Always use user's access token
-    _logger.info('AIService: ========== AUTHENTICATION ==========');
-    final token = await _storageService.getToken();
-    if (token == null || token.isEmpty) {
-      _logger.info('AIService: ERROR - No auth token found!');
-      controller.addError('User not logged in or token invalid.');
-      unawaited(controller.close());
-      return controller.stream;
-    }
-    _logger.info('AIService: Using access token for authentication');
-    _logger.info("AIService: Session ID: ${sessionId ?? 'null (new session)'}");
-    _logger.info('AIService: =====================================');
-
-    final String sseUrl = '$_sseBaseUrl${ApiConstants.aiChatSseEndpoint}';
-
-    final Map<String, String> headers = {
-      'Accept': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-
-    String? appLanguage;
-    if (ref != null) {
-      final currentLocale = ref!.read(localeProvider);
-      headers['Accept-Language'] = _convertToAcceptLanguage(currentLocale);
-      appLanguage = _convertToLanguageCode(currentLocale);
-    }
-
-    // Build request body - session_id in request body
-    final Map<String, dynamic> message = {
-      'role': 'user',
-      'content': userMessage,
-    };
-
-    // If there are attachments, add them to the message
-    if (attachments != null && attachments.isNotEmpty) {
-      message['attachments'] = attachments;
-      _logger.info(
-        'AIService: Including ${attachments.length} attachments in request',
-      );
-    }
-
-    final Map<String, dynamic> requestBody = {
-      'messages': [message],
-      'session_id': sessionId, // null for new session, backend will create one
-      if (appLanguage != null) 'app_language': appLanguage,
-    };
-
-    _logger.info('AIService: Starting SSE connection...');
-
-    controller.onCancel = () {
-      if (!isClosed) {
-        isClosed = true;
-        _currentSseClient?.close();
-        if (!controller.isClosed) {
-          unawaited(controller.close());
-        }
-        _logger.info('AIService: Stream cancelled by listener');
-      }
-    };
-
-    try {
-      // Use custom SseClient
-      final sseClient = SseClient(
-        url: sseUrl,
-        headers: headers,
-        body: requestBody,
-        maxRetries: 3,
-        initialRetryDelay: const Duration(seconds: 1),
-        dio: _dio,
-      );
-      _currentSseClient = sseClient;
-
-      // Listen to SSE events
-      sseClient.stream.listen(
-        (SseEvent event) {
-          if (isClosed || event.data == null || event.data!.isEmpty) return;
-
-          try {
-            // Use GenUiSseParser to parse events
-            final parsedEvent = GenUiSseParser.parse(event.data!);
-
-            // Handle error events
-            if (parsedEvent.isError) {
-              _logger.info(
-                'AIService: Received error event: ${parsedEvent.errorMessage}',
-              );
-              if (!isClosed) {
-                controller.addError(
-                  parsedEvent.errorMessage ?? 'Unknown SSE error',
-                );
-              }
-              return;
-            }
-
-            // Handle different types of events
-            switch (parsedEvent.type) {
-              case SseEventType.text:
-                _logger.info(
-                  'AIService: Text event - content: ${parsedEvent.content}',
-                );
-                controller.add(parsedEvent);
-                break;
-
-              // A2UI protocol events
-              case SseEventType.a2uiMessage:
-                _logger.info('AIService: A2UI message event');
-                controller.add(parsedEvent);
-                break;
-
-              case SseEventType.sessionInit:
-                _logger.info('AIService: Session init event');
-                controller.add(parsedEvent);
-                break;
-
-              case SseEventType.titleUpdate:
-                _logger.info(
-                  'AIService: Title update event - title: ${parsedEvent.title}',
-                );
-                controller.add(parsedEvent);
-                break;
-
-              case SseEventType.done:
-                _logger.info('AIService: Done event received');
-                controller.add(parsedEvent);
-                if (!isClosed) {
-                  isClosed = true;
-                  unawaited(controller.close());
-                  sseClient.close();
-                  _logger.info('AIService: Stream completed (done event)');
-                }
-                break;
-
-              case SseEventType.unknown:
-                _logger.info('AIService: Unknown event type, skipping');
-                break;
-
-              case SseEventType.error:
-                // Already handled above
-                break;
-            }
-
-            // Check if completed (compatible with old done field)
-            if (parsedEvent.done && parsedEvent.type != SseEventType.done) {
-              if (!isClosed) {
-                isClosed = true;
-                unawaited(controller.close());
-                sseClient.close();
-                _logger.info('AIService: Stream completed (done: true)');
-              }
-            }
-          } catch (e) {
-            if (!isClosed) {
-              _logger.info('AIService: Error processing SSE event data: $e');
-              controller.addError('SSE data parsing error: ${e.toString()}');
-            }
-          }
-        },
-        onError: (Object error) {
-          _logger.info('AIService: ===== SSE ERROR =====');
-          _logger.info('AIService: Error: $error');
-          _logger.info('AIService: ====================');
-          if (isClosed) return;
-          isClosed = true;
-          controller.addError(
-            NetworkException('SSE stream error: ${error.toString()}'),
-          );
-          if (!controller.isClosed) {
-            unawaited(controller.close());
-          }
-        },
-        onDone: () {
-          _logger.info('AIService: ===== SSE STREAM DONE =====');
-          if (!isClosed) {
-            isClosed = true;
-            if (!controller.isClosed) {
-              unawaited(controller.close());
-            }
-            _logger.info('AIService: Stream closed normally');
-          }
-        },
-      );
-
-      // Start connection
-      await sseClient.connect();
-    } catch (e, stackTrace) {
-      _logger.info('AIService: ===== EXCEPTION CREATING SSE CONNECTION =====');
-      _logger.info('AIService: Exception: $e');
-      _logger.info('AIService: StackTrace: $stackTrace');
-      _logger.info('AIService: =============================================');
-      controller.addError('Failed to create SSE connection: ${e.toString()}');
-      unawaited(controller.close());
-      return controller.stream;
-    }
-
-    return controller.stream;
-  }
-
-  /// Public method to manually close connection
-  Future<void> closeConnection() async {
-    if (_currentSseClient != null) {
-      _logger.info('AIService: Closing existing SSE connection');
-      _currentSseClient!.close();
-      _currentSseClient = null;
-    }
-
-    if (_currentController != null && !_currentController!.isClosed) {
-      _logger.info('AIService: Closing existing controller');
-      unawaited(_currentController!.close());
-      _currentController = null;
-    }
-  }
+  AIService(this._storageService, this._dio, {required this._baseUrl});
 
   /// Cancel the last turn and clean up checkpoint state.
   Future<bool> cancelLastTurn(String sessionId) async {
@@ -318,49 +60,13 @@ class AIService {
       return false;
     }
   }
-
-  String _convertToAcceptLanguage(AppLocale locale) {
-    switch (locale) {
-      case AppLocale.zh:
-        return 'zh-CN,zh;q=0.9,en;q=0.8';
-      case AppLocale.en:
-        return 'en-US,en;q=0.9,zh;q=0.8';
-      case AppLocale.ja:
-        return 'ja-JP,ja;q=0.9,en;q=0.8';
-      case AppLocale.ko:
-        return 'ko-KR,ko;q=0.9,en;q=0.8';
-      case AppLocale.zhHant:
-        return 'zh-TW,zh;q=0.9,en;q=0.8';
-    }
-  }
-
-  String _convertToLanguageCode(AppLocale locale) {
-    switch (locale) {
-      case AppLocale.zh:
-        return 'zh';
-      case AppLocale.en:
-        return 'en';
-      case AppLocale.ja:
-        return 'ja';
-      case AppLocale.ko:
-        return 'ko';
-      case AppLocale.zhHant:
-        return 'zh-Hant';
-    }
-  }
 }
 
 // AIService Provider
 final aiServiceProvider = Provider<AIService>((ref) {
   final storageService = ref.watch(secureStorageServiceProvider);
-  // Use SSE-dedicated Dio instance (no receiveTimeout limit)
-  final dio = ref.watch(sseDioProvider);
+  // Use the main Dio instance so error mapping / interceptors apply.
+  final dio = ref.watch(dioProvider);
   final apiConstants = ref.watch(apiConstantsProvider);
-  return AIService(
-    storageService,
-    dio,
-    ref: ref,
-    sseBaseUrl: apiConstants.sseBaseUrl,
-    baseUrl: apiConstants.baseUrl,
-  );
+  return AIService(storageService, dio, baseUrl: apiConstants.baseUrl);
 });

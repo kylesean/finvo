@@ -26,6 +26,13 @@
     "history": "履歴",
     "reset": "リセット"
   },
+  "genui": {
+    "errorBusy": "申し訳ございません。サービスが一時的に混雑しています。後ほどお試しください",
+    "errorTimeout": "リクエストがタイムアウトしました。ネットワークを確認して再試行してください",
+    "errorNetwork": "ネットワーク接続に問題があります。確認して再試行してください",
+    "errorSessionExpired": "セッションが期限切れです。再度ログインしてください",
+    "errorGeneric": "問題が発生しました。後ほどお試しください"
+  },
   "time": {
     "today": "今日",
     "yesterday": "昨日",
@@ -524,7 +531,85 @@
       "skip": "スキップ",
       "noPending": "確認待ち取引なし",
       "confirmSuccess": "取引を確認しました",
-      "skipSuccess": "取引をスキップしました"
+      "skipSuccess": "取引をスキップしました",
+      "interval": "繰り返し間隔",
+      "selectDays": "曜日を選択",
+      "alwaysLastDay": "毎月末日に実行",
+      "lastDayExecution": "毎月の最終日に実行されます",
+      "dayExecution": "毎月 $day 日$suffixに実行（短い月は月末に合わせます）",
+      "setEndDate": "終了日を設定",
+      "selectEndDate": "終了日を選択",
+      "preview": "ルールプレビュー",
+      "daily": "毎日",
+      "weekly": "毎週",
+      "monthly": "毎月",
+      "yearly": "毎年",
+      "custom": "カスタム",
+      "cycle": "サイクル",
+      "everyDays": "$count 日ごと",
+      "everyWeeks": "$count 週ごと",
+      "everyMonths": "$count か月ごと",
+      "everyYears": "$count 年ごと",
+      "monthlyOnDay": "毎月 $day 日$suffix",
+      "everyMonthsOnDay": "$count か月ごとの $day 日$suffix",
+      "monthlyLastDay": "毎月最終日",
+      "everyMonthsLastDay": "$count か月ごとの最終日",
+      "yearlyOn": "毎年 $month/$day",
+      "everyYearsOn": "$count 年ごとの $month/$day",
+      "weeklyOnDay": "毎週$day",
+      "weekdayMon": "月",
+      "weekdayTue": "火",
+      "weekdayWed": "水",
+      "weekdayThu": "木",
+      "weekdayFri": "金",
+      "weekdaySat": "土",
+      "weekdaySun": "日",
+      "weekdayOn": "曜日",
+      "weekdayJoiner": "、",
+      "weeklyDaysPrefix": "の",
+      "sourceAccount": "振替元口座",
+      "targetAccount": "振替先口座",
+      "expenseAccount": "支出口座",
+      "incomeAccount": "収入口座",
+      "selectSourceAccount": "振替元口座を選択",
+      "selectTargetAccount": "振替先口座を選択",
+      "selectExpenseAccount": "支出口座を選択",
+      "selectIncomeAccount": "収入口座を選択",
+      "amountNotFixed": "$typeごとの金額は固定されません",
+      "selectBothAccounts": "振替元と振替先の口座を選択してください",
+      "selectAccountForType": "$type口座を選択してください",
+      "deleteConfirmGeneric": "この定期取引を削除してもよろしいですか？この操作は取り消せません。",
+      "selectDate": "$date を選択",
+      "accountTypeCash": "現金",
+      "accountTypeDeposit": "銀行預金",
+      "accountTypeEMoney": "電子マネー",
+      "accountTypeInvestment": "投資",
+      "accountTypeReceivable": "売掛金",
+      "accountTypeCreditCard": "クレジットカード",
+      "accountTypeLoan": "ローン口座",
+      "accountTypePayable": "買掛金",
+      "assetAccount": "資産口座",
+      "liabilityAccount": "負債口座",
+      "noAssetAccounts": "資産口座がありません",
+      "goToFinanceToAddAccounts": "財務ページで口座を追加してください",
+      "selectAccount": "口座を選択",
+      "autoGenerateByRule": "有効にするとルールに従って取引を自動生成",
+      "dayUnit(param=count)": {
+        "one": "日",
+        "other": "日"
+      },
+      "weekUnit(param=count)": {
+        "one": "週間",
+        "other": "週間"
+      },
+      "monthUnit(param=count)": {
+        "one": "か月",
+        "other": "か月"
+      },
+      "yearUnit(param=count)": {
+        "one": "年",
+        "other": "年"
+      }
     }
   },
   "chat": {
@@ -534,6 +619,11 @@
     "inputMessage": "メッセージを入力...",
     "listening": "聞き取り中...",
     "aiThinking": "処理中...",
+    "stoppedResponse": "この返信を停止しました",
+    "errorRecover": "申し訳ありません、問題が発生しました。もう一度お試しください 🙏",
+    "contentCopied": "内容をコピーしました",
+    "jsonCopied": "JSONデータをコピーしました",
+    "noContentToCopy": "コピーする内容がありません",
     "tools": {
       "processing": "処理中...",
       "read_file": "ファイルを確認中...",
@@ -679,6 +769,7 @@
         "modify": "修正",
         "associate": "口座を関連付け",
         "selectAccount": "口座を選択",
+        "autoGenerateByRule": "有効にするとルールに従って取引を自動生成",
         "noAccount": "口座がありません。追加してください",
         "missingId": "IDがありません",
         "associatedTo": "$name に関連付け済み",
@@ -897,6 +988,10 @@
         }
       }
     }
+  },
+  "image": {
+    "deleteTitle": "画像を削除",
+    "deleteConfirm": "この画像を削除してもよろしいですか？この操作は元に戻せません。"
   },
   "footprint": {
     "searchIn": "検索",

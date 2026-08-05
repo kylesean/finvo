@@ -1369,7 +1369,7 @@ as String,
 /// @nodoc
 mixin _$TransactionCommentModel {
 
- int get id; String get transactionId; String get userUuid; String? get userName; String? get userAvatarUrl; int? get parentCommentId; String get commentText; List<int> get mentionedUserIds; DateTime? get createdAt; DateTime? get updatedAt;
+ String get id; String get transactionId; String get userUuid; String? get userName; String? get userAvatarUrl; String? get parentCommentId; String get commentText; List<String> get mentionedUserIds; DateTime? get createdAt; DateTime? get updatedAt;
 /// Create a copy of TransactionCommentModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1402,7 +1402,7 @@ abstract mixin class $TransactionCommentModelCopyWith<$Res>  {
   factory $TransactionCommentModelCopyWith(TransactionCommentModel value, $Res Function(TransactionCommentModel) _then) = _$TransactionCommentModelCopyWithImpl;
 @useResult
 $Res call({
- int id, String transactionId, String userUuid, String? userName, String? userAvatarUrl, int? parentCommentId, String commentText, List<int> mentionedUserIds, DateTime? createdAt, DateTime? updatedAt
+ String id, String transactionId, String userUuid, String? userName, String? userAvatarUrl, String? parentCommentId, String commentText, List<String> mentionedUserIds, DateTime? createdAt, DateTime? updatedAt
 });
 
 
@@ -1422,14 +1422,14 @@ class _$TransactionCommentModelCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? transactionId = null,Object? userUuid = null,Object? userName = freezed,Object? userAvatarUrl = freezed,Object? parentCommentId = freezed,Object? commentText = null,Object? mentionedUserIds = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,transactionId: null == transactionId ? _self.transactionId : transactionId // ignore: cast_nullable_to_non_nullable
+as String,transactionId: null == transactionId ? _self.transactionId : transactionId // ignore: cast_nullable_to_non_nullable
 as String,userUuid: null == userUuid ? _self.userUuid : userUuid // ignore: cast_nullable_to_non_nullable
 as String,userName: freezed == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String?,userAvatarUrl: freezed == userAvatarUrl ? _self.userAvatarUrl : userAvatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,parentCommentId: freezed == parentCommentId ? _self.parentCommentId : parentCommentId // ignore: cast_nullable_to_non_nullable
-as int?,commentText: null == commentText ? _self.commentText : commentText // ignore: cast_nullable_to_non_nullable
+as String?,commentText: null == commentText ? _self.commentText : commentText // ignore: cast_nullable_to_non_nullable
 as String,mentionedUserIds: null == mentionedUserIds ? _self.mentionedUserIds : mentionedUserIds // ignore: cast_nullable_to_non_nullable
-as List<int>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as List<String>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -1516,7 +1516,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String transactionId,  String userUuid,  String? userName,  String? userAvatarUrl,  int? parentCommentId,  String commentText,  List<int> mentionedUserIds,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String transactionId,  String userUuid,  String? userName,  String? userAvatarUrl,  String? parentCommentId,  String commentText,  List<String> mentionedUserIds,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransactionCommentModel() when $default != null:
 return $default(_that.id,_that.transactionId,_that.userUuid,_that.userName,_that.userAvatarUrl,_that.parentCommentId,_that.commentText,_that.mentionedUserIds,_that.createdAt,_that.updatedAt);case _:
@@ -1537,7 +1537,7 @@ return $default(_that.id,_that.transactionId,_that.userUuid,_that.userName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String transactionId,  String userUuid,  String? userName,  String? userAvatarUrl,  int? parentCommentId,  String commentText,  List<int> mentionedUserIds,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String transactionId,  String userUuid,  String? userName,  String? userAvatarUrl,  String? parentCommentId,  String commentText,  List<String> mentionedUserIds,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _TransactionCommentModel():
 return $default(_that.id,_that.transactionId,_that.userUuid,_that.userName,_that.userAvatarUrl,_that.parentCommentId,_that.commentText,_that.mentionedUserIds,_that.createdAt,_that.updatedAt);case _:
@@ -1557,7 +1557,7 @@ return $default(_that.id,_that.transactionId,_that.userUuid,_that.userName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String transactionId,  String userUuid,  String? userName,  String? userAvatarUrl,  int? parentCommentId,  String commentText,  List<int> mentionedUserIds,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String transactionId,  String userUuid,  String? userName,  String? userAvatarUrl,  String? parentCommentId,  String commentText,  List<String> mentionedUserIds,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _TransactionCommentModel() when $default != null:
 return $default(_that.id,_that.transactionId,_that.userUuid,_that.userName,_that.userAvatarUrl,_that.parentCommentId,_that.commentText,_that.mentionedUserIds,_that.createdAt,_that.updatedAt);case _:
@@ -1572,18 +1572,18 @@ return $default(_that.id,_that.transactionId,_that.userUuid,_that.userName,_that
 @JsonSerializable()
 
 class _TransactionCommentModel implements TransactionCommentModel {
-  const _TransactionCommentModel({required this.id, required this.transactionId, required this.userUuid, this.userName, this.userAvatarUrl, this.parentCommentId, required this.commentText, final  List<int> mentionedUserIds = const [], this.createdAt, this.updatedAt}): _mentionedUserIds = mentionedUserIds;
+  const _TransactionCommentModel({required this.id, required this.transactionId, required this.userUuid, this.userName, this.userAvatarUrl, this.parentCommentId, required this.commentText, final  List<String> mentionedUserIds = const [], this.createdAt, this.updatedAt}): _mentionedUserIds = mentionedUserIds;
   factory _TransactionCommentModel.fromJson(Map<String, dynamic> json) => _$TransactionCommentModelFromJson(json);
 
-@override final  int id;
+@override final  String id;
 @override final  String transactionId;
 @override final  String userUuid;
 @override final  String? userName;
 @override final  String? userAvatarUrl;
-@override final  int? parentCommentId;
+@override final  String? parentCommentId;
 @override final  String commentText;
- final  List<int> _mentionedUserIds;
-@override@JsonKey() List<int> get mentionedUserIds {
+ final  List<String> _mentionedUserIds;
+@override@JsonKey() List<String> get mentionedUserIds {
   if (_mentionedUserIds is EqualUnmodifiableListView) return _mentionedUserIds;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_mentionedUserIds);
@@ -1625,7 +1625,7 @@ abstract mixin class _$TransactionCommentModelCopyWith<$Res> implements $Transac
   factory _$TransactionCommentModelCopyWith(_TransactionCommentModel value, $Res Function(_TransactionCommentModel) _then) = __$TransactionCommentModelCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String transactionId, String userUuid, String? userName, String? userAvatarUrl, int? parentCommentId, String commentText, List<int> mentionedUserIds, DateTime? createdAt, DateTime? updatedAt
+ String id, String transactionId, String userUuid, String? userName, String? userAvatarUrl, String? parentCommentId, String commentText, List<String> mentionedUserIds, DateTime? createdAt, DateTime? updatedAt
 });
 
 
@@ -1645,14 +1645,14 @@ class __$TransactionCommentModelCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? transactionId = null,Object? userUuid = null,Object? userName = freezed,Object? userAvatarUrl = freezed,Object? parentCommentId = freezed,Object? commentText = null,Object? mentionedUserIds = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_TransactionCommentModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,transactionId: null == transactionId ? _self.transactionId : transactionId // ignore: cast_nullable_to_non_nullable
+as String,transactionId: null == transactionId ? _self.transactionId : transactionId // ignore: cast_nullable_to_non_nullable
 as String,userUuid: null == userUuid ? _self.userUuid : userUuid // ignore: cast_nullable_to_non_nullable
 as String,userName: freezed == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String?,userAvatarUrl: freezed == userAvatarUrl ? _self.userAvatarUrl : userAvatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,parentCommentId: freezed == parentCommentId ? _self.parentCommentId : parentCommentId // ignore: cast_nullable_to_non_nullable
-as int?,commentText: null == commentText ? _self.commentText : commentText // ignore: cast_nullable_to_non_nullable
+as String?,commentText: null == commentText ? _self.commentText : commentText // ignore: cast_nullable_to_non_nullable
 as String,mentionedUserIds: null == mentionedUserIds ? _self._mentionedUserIds : mentionedUserIds // ignore: cast_nullable_to_non_nullable
-as List<int>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as List<String>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));

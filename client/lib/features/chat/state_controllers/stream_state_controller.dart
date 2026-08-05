@@ -47,9 +47,6 @@ class StreamStateController {
   /// Current streaming message ID
   String _currentMessageId = '';
 
-  /// Last received event type (for debugging)
-  String? _lastEventType;
-
   // ============================================================
   // Public Getters
   // ============================================================
@@ -68,10 +65,6 @@ class StreamStateController {
   /// Check if first chunk has been received
   bool get isFirstChunkReceived => _currentPhase == StreamPhase.streaming;
 
-  /// Check if waiting for first chunk
-  bool get isWaitingForFirstChunk =>
-      _currentPhase == StreamPhase.waitingForFirstChunk;
-
   /// Check if stream is done (completed, error, or cancelled)
   bool get isStreamDone =>
       _currentPhase == StreamPhase.completed ||
@@ -87,9 +80,6 @@ class StreamStateController {
       _currentPhase == StreamPhase.error ||
       _currentPhase == StreamPhase.cancelled;
 
-  /// Get last event type
-  String? get lastEventType => _lastEventType;
-
   // ============================================================
   // Public Methods - State Transitions
   // ============================================================
@@ -101,7 +91,6 @@ class StreamStateController {
     );
     _currentMessageId = messageId;
     _currentPhase = StreamPhase.waitingForFirstChunk;
-    _lastEventType = null;
   }
 
   /// Mark first chunk received
@@ -112,9 +101,16 @@ class StreamStateController {
     }
   }
 
-  /// Record event type
-  void recordEventType(String eventType) {
-    _lastEventType = eventType;
+  /// Update current message ID without changing stream phase.
+  ///
+  /// Called when the server assigns the real message ID (after `session_init`),
+  /// replacing the optimistic temporary ID. Phase transitions are unaffected.
+  void updateMessageId(String messageId) {
+    if (messageId.isEmpty || _currentMessageId == messageId) return;
+    _logger.info(
+      'StreamStateController: Updating message ID $_currentMessageId -> $messageId',
+    );
+    _currentMessageId = messageId;
   }
 
   /// Mark stream as completed
@@ -140,7 +136,6 @@ class StreamStateController {
     _logger.info('StreamStateController: Reset to idle');
     _currentPhase = StreamPhase.idle;
     _currentMessageId = '';
-    _lastEventType = null;
   }
 
   // ============================================================
@@ -149,7 +144,7 @@ class StreamStateController {
 
   /// Get debug info string
   String get debugInfo =>
-      'StreamStateController[phase=$_currentPhase, messageId=$_currentMessageId, lastEvent=$_lastEventType]';
+      'StreamStateController[phase=$_currentPhase, messageId=$_currentMessageId]';
 
   @override
   String toString() => debugInfo;

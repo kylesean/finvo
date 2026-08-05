@@ -1,3 +1,4 @@
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,8 +58,6 @@ class AccountSelectionSheet extends ConsumerStatefulWidget {
 }
 
 class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
-  bool get isZh => LocaleSettings.currentLocale == AppLocale.zh;
-
   @override
   void initState() {
     super.initState();
@@ -163,14 +162,12 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
             ),
             const SizedBox(height: 12),
             Text(
-              isZh ? '暂无资产账户' : 'No asset accounts',
+              t.forecast.recurringTransaction.noAssetAccounts,
               style: AppTextStyles.listSubtitle(theme),
             ),
             const SizedBox(height: 8),
             Text(
-              isZh
-                  ? '请前往财务页面添加账户'
-                  : 'Please go to the financial page to add accounts',
+              t.forecast.recurringTransaction.goToFinanceToAddAccounts,
               style: theme.typography.body.xs.copyWith(
                 color: colors.mutedForeground.withValues(alpha: 0.7),
               ),
@@ -183,7 +180,11 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
-        _buildSectionHeader(theme, colors, isZh ? '选择账户' : 'Select Account'),
+        _buildSectionHeader(
+          theme,
+          colors,
+          t.forecast.recurringTransaction.selectAccount,
+        ),
         ...assetAccounts.map(
           (account) => _buildAccountCard(theme, colors, account),
         ),
@@ -271,8 +272,14 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
                           definition != null
                               ? _getTypeDisplayName(definition)
                               : (isLiabilityAccount
-                                    ? (isZh ? '负债账户' : 'Liability Account')
-                                    : (isZh ? '资产账户' : 'Asset Account')),
+                                    ? t
+                                          .forecast
+                                          .recurringTransaction
+                                          .liabilityAccount
+                                    : t
+                                          .forecast
+                                          .recurringTransaction
+                                          .assetAccount),
                           style: AppTextStyles.listSubtitle(theme),
                         ),
                       ],
@@ -312,40 +319,28 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
 
   String _formatAmount(Decimal amount) {
     final value = double.tryParse(amount.toString()) ?? 0.0;
-    final parts = value.toStringAsFixed(2).split('.');
-    final intPart = parts[0];
-    final decPart = parts[1];
-
-    var formatted = '';
-    var count = 0;
-    for (int i = intPart.length - 1; i >= 0; i--) {
-      if (count > 0 && count % 3 == 0 && intPart[i] != '-') {
-        formatted = ',$formatted';
-      }
-      formatted = intPart[i] + formatted;
-      count++;
-    }
-    return '$formatted.$decPart';
+    return AmountFormatter.getNumberFormat('CNY').format(value);
   }
 
   String _getTypeDisplayName(AccountTypeDefinition definition) {
+    final rt = t.forecast.recurringTransaction;
     switch (definition.id) {
       case 'cash':
-        return isZh ? '现金钱包' : 'Cash';
+        return rt.accountTypeCash;
       case 'deposit':
-        return isZh ? '银行存款' : 'Bank Deposit';
+        return rt.accountTypeDeposit;
       case 'e_money':
-        return isZh ? '电子钱包' : 'E-Wallet';
+        return rt.accountTypeEMoney;
       case 'investment':
-        return isZh ? '投资理财' : 'Investment';
+        return rt.accountTypeInvestment;
       case 'receivable':
-        return isZh ? '应收款项' : 'Accounts Receivable';
+        return rt.accountTypeReceivable;
       case 'credit_card':
-        return isZh ? '信用卡' : 'Credit Card';
+        return rt.accountTypeCreditCard;
       case 'loan':
-        return isZh ? '贷款账户' : 'Loan Account';
+        return rt.accountTypeLoan;
       case 'payable':
-        return isZh ? '应付款项' : 'Accounts Payable';
+        return rt.accountTypePayable;
       default:
         return definition.title;
     }

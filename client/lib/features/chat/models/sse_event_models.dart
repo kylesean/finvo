@@ -1,7 +1,7 @@
 /// SSE event model definitions
 ///
-/// Contains data type definitions for SSE events, shared by CustomContentGenerator
-/// and SseEventHandlerRegistry.
+/// Contains data type definitions for SSE events, used by
+/// CustomContentGenerator.
 library;
 
 /// Tool call start event

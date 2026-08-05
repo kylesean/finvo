@@ -17,6 +17,9 @@ import '../services/data_uri_service.dart';
 import 'authenticated_image.dart';
 import '../services/genui_cache_service.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/chat/widgets/image_preview_page.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/core/constants/api_constants.dart';
 
 /// User message bubble widget
 /// Supports displaying text and multimedia attachments
@@ -263,16 +266,12 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   void _showImagePreview(Uint8List bytes, String heroTag) {
     unawaited(
       Navigator.of(context).push(
-        PageRouteBuilder<void>(
-          opaque: false,
-          barrierColor: Colors.black87,
-          barrierDismissible: true,
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return _ImagePreviewOverlay(bytes: bytes, heroTag: heroTag);
-          },
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
+        MaterialPageRoute<void>(
+          builder: (context) => ImagePreviewPage(
+            itemCount: 1,
+            heroTag: (_) => heroTag,
+            imageProvider: (_) => MemoryImage(bytes),
+          ),
         ),
       ),
     );
@@ -574,38 +573,34 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     final heroTag = 'media_${_mediaCacheKey(file)}';
 
     await Navigator.of(context).push(
-      PageRouteBuilder<void>(
-        opaque: false,
-        barrierColor: Colors.black87,
-        barrierDismissible: true,
-        pageBuilder: (dialogContext, animation, secondaryAnimation) {
-          return FadeTransition(
-            opacity: animation,
-            child: _ImagePreviewOverlay(
-              bytes: _getImageBytesFromDataUri(file.dataUri),
-              heroTag: heroTag,
-            ),
-          );
-        },
+      MaterialPageRoute<void>(
+        builder: (context) => ImagePreviewPage(
+          itemCount: 1,
+          heroTag: (_) => heroTag,
+          imageProvider: (_) =>
+              MemoryImage(_getImageBytesFromDataUri(file.dataUri)),
+        ),
       ),
     );
   }
 
   Future<void> _handleRemoteImageTap(ChatMessageAttachment attachment) async {
+    final storageService = ref.read(secureStorageServiceProvider);
+    final token = await storageService.getToken();
+    if (token == null || token.isEmpty) return;
+    final apiConstants = ref.read(apiConstantsProvider);
+    if (!mounted) return;
+
     await Navigator.of(context).push(
-      PageRouteBuilder<void>(
-        opaque: false,
-        barrierColor: Colors.black87,
-        barrierDismissible: true,
-        pageBuilder: (dialogContext, animation, secondaryAnimation) {
-          return FadeTransition(
-            opacity: animation,
-            child: _AuthenticatedImagePreviewOverlay(
-              attachmentId: attachment.id,
-              heroTag: 'history_attachment_${attachment.id}',
-            ),
-          );
-        },
+      MaterialPageRoute<void>(
+        builder: (context) => ImagePreviewPage(
+          itemCount: 1,
+          heroTag: (_) => 'history_attachment_${attachment.id}',
+          imageProvider: (_) => NetworkImage(
+            '${apiConstants.baseUrl}/files/view/${attachment.id}',
+            headers: {'Authorization': 'Bearer $token'},
+          ),
+        ),
       ),
     );
   }
@@ -678,69 +673,5 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
       default:
         return FLucideIcons.file;
     }
-  }
-}
-
-class _ImagePreviewOverlay extends StatelessWidget {
-  final Uint8List bytes;
-  final String heroTag;
-
-  const _ImagePreviewOverlay({required this.bytes, required this.heroTag});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Scaffold(
-        backgroundColor: Colors.black87,
-        body: SafeArea(
-          child: Center(
-            child: Hero(
-              tag: heroTag,
-              child: InteractiveViewer(
-                minScale: 0.5,
-                maxScale: 4,
-                child: Image.memory(bytes, fit: BoxFit.contain),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AuthenticatedImagePreviewOverlay extends ConsumerWidget {
-  final String attachmentId;
-  final String heroTag;
-
-  const _AuthenticatedImagePreviewOverlay({
-    required this.attachmentId,
-    required this.heroTag,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Scaffold(
-        backgroundColor: Colors.black87,
-        body: SafeArea(
-          child: Center(
-            child: Hero(
-              tag: heroTag,
-              child: InteractiveViewer(
-                minScale: 0.5,
-                maxScale: 4,
-                child: AuthenticatedImage(
-                  attachmentId: attachmentId,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

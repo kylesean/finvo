@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:finvo/shared/widgets/amount_input_field.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,9 +17,7 @@ import '../widgets/category_selection_sheet.dart';
 import '../widgets/date_picker_sheet.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/shared/models/currency.dart';
 import '../../profile/providers/financial_account_provider.dart';
-import '../../profile/providers/financial_settings_provider.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
 import '../../../shared/theme/form_text_styles.dart';
 
@@ -43,8 +42,6 @@ class _RecurringTransactionPageState
 
   // Amount input controller
   final _amountController = TextEditingController(text: '0.00');
-
-  bool get isZh => LocaleSettings.currentLocale == AppLocale.zh;
 
   // Recurrence rule
   String _recurrenceRule = 'FREQ=MONTHLY;BYMONTHDAY=1';
@@ -79,14 +76,6 @@ class _RecurringTransactionPageState
   // Is saving in progress
   bool _isSaving = false;
 
-  // Is loading edit data
-  // ignore: unused_field - used for future loading indicator
-  bool _isLoadingEdit = false;
-
-  // Original data in edit mode
-  // ignore: unused_field - stores original for comparison/reset
-  RecurringTransaction? _editingTransaction;
-
   @override
   void initState() {
     super.initState();
@@ -97,7 +86,6 @@ class _RecurringTransactionPageState
   }
 
   Future<void> _loadEditData() async {
-    setState(() => _isLoadingEdit = true);
     try {
       final service = ref.read(recurringTransactionServiceProvider);
       final transaction = await service.getById(widget.editId!);
@@ -134,7 +122,6 @@ class _RecurringTransactionPageState
 
       if (mounted) {
         setState(() {
-          _editingTransaction = transaction;
           _selectedType = transaction.type;
           _amountType = transaction.amountType;
           _amountController.text = transaction.amount.toString();
@@ -160,40 +147,30 @@ class _RecurringTransactionPageState
           if (transaction.description != null) {
             _descriptionController.text = transaction.description!;
           }
-          _isLoadingEdit = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoadingEdit = false);
         TopToast.error(context, '${t.common.loadFailed}: $e');
       }
     }
   }
 
   String _parseRecurrenceDescription(String rule) {
-    final isZh = LocaleSettings.currentLocale == AppLocale.zh;
+    final rt = t.forecast.recurringTransaction;
 
     if (rule.contains('FREQ=DAILY')) {
       final intervalMatch = RegExp(r'INTERVAL=(\d+)').firstMatch(rule);
       final interval = intervalMatch != null
           ? int.tryParse(intervalMatch.group(1)!) ?? 1
           : 1;
-      if (isZh) {
-        return interval == 1 ? '每天' : '每 $interval 天';
-      } else {
-        return interval == 1 ? 'Daily' : 'Every $interval days';
-      }
+      return interval == 1 ? rt.daily : rt.everyDays(count: interval);
     } else if (rule.contains('FREQ=WEEKLY')) {
       final intervalMatch = RegExp(r'INTERVAL=(\d+)').firstMatch(rule);
       final interval = intervalMatch != null
           ? int.tryParse(intervalMatch.group(1)!) ?? 1
           : 1;
-      if (isZh) {
-        return interval == 1 ? '每周' : '每 $interval 周';
-      } else {
-        return interval == 1 ? 'Weekly' : 'Every $interval weeks';
-      }
+      return interval == 1 ? rt.weekly : rt.everyWeeks(count: interval);
     } else if (rule.contains('FREQ=MONTHLY')) {
       final intervalMatch = RegExp(r'INTERVAL=(\d+)').firstMatch(rule);
       final interval = intervalMatch != null
@@ -201,26 +178,23 @@ class _RecurringTransactionPageState
           : 1;
       final dayMatch = RegExp(r'BYMONTHDAY=(\d+)').firstMatch(rule);
       final day = dayMatch != null ? dayMatch.group(1) : '';
-      if (isZh) {
-        if (interval == 1) {
-          return day!.isNotEmpty ? '每月 $day 号' : '每月';
-        } else {
-          return day!.isNotEmpty ? '每 $interval 个月的 $day 号' : '每 $interval 个月';
-        }
+      if (interval == 1) {
+        return day!.isNotEmpty
+            ? rt.monthlyOnDay(day: day, suffix: _monthDaySuffix(day))
+            : rt.monthly;
       } else {
-        final daySuffix = _getDaySuffix(day ?? '1');
-        if (interval == 1) {
-          return day != null ? 'Monthly on the $day$daySuffix' : 'Monthly';
-        } else {
-          return day != null
-              ? 'Every $interval months on the $day$daySuffix'
-              : 'Every $interval months';
-        }
+        return day!.isNotEmpty
+            ? rt.everyMonthsOnDay(
+                count: interval,
+                day: day,
+                suffix: _monthDaySuffix(day),
+              )
+            : rt.everyMonths(count: interval);
       }
     } else if (rule.contains('FREQ=YEARLY')) {
-      return isZh ? '每年' : 'Yearly';
+      return rt.yearly;
     }
-    return isZh ? '自定义' : 'Custom';
+    return rt.custom;
   }
 
   String _getDaySuffix(String dayStr) {
@@ -237,6 +211,11 @@ class _RecurringTransactionPageState
         return 'th';
     }
   }
+
+  /// English templates embed the ordinal suffix via [$suffix], other
+  /// languages already include it in the template itself.
+  String _monthDaySuffix(String dayStr) =>
+      LocaleSettings.currentLocale == AppLocale.en ? _getDaySuffix(dayStr) : '';
 
   String _getTypeLabel(RecurringTransactionType type) {
     switch (type) {
@@ -325,7 +304,7 @@ class _RecurringTransactionPageState
       title: Text(
         widget.editId != null
             ? t.forecast.recurringTransaction.edit
-            : (isZh ? '新建周期交易' : 'New Recurring Transaction'),
+            : t.forecast.recurringTransaction.newTransaction,
         style: AppTextStyles.pageTitle(theme),
       ),
       centerTitle: true,
@@ -375,30 +354,6 @@ class _RecurringTransactionPageState
     );
   }
 
-  // ignore: unused_element - reserved for future use
-  IconData _getTypeIcon(RecurringTransactionType type) {
-    switch (type) {
-      case RecurringTransactionType.expense:
-        return FLucideIcons.trendingDown;
-      case RecurringTransactionType.income:
-        return FLucideIcons.trendingUp;
-      case RecurringTransactionType.transfer:
-        return FLucideIcons.arrowLeftRight;
-    }
-  }
-
-  // ignore: unused_element - reserved for future use
-  Color _getTypeColor(RecurringTransactionType type, FColors colors) {
-    switch (type) {
-      case RecurringTransactionType.expense:
-        return colors.destructive;
-      case RecurringTransactionType.income:
-        return Colors.green;
-      case RecurringTransactionType.transfer:
-        return colors.primary;
-    }
-  }
-
   /// Amount input area
   Widget _buildAmountSection(FThemeData theme, FColors colors) {
     final amountFontSize = theme.typography.body.xl2.fontSize ?? 24.0;
@@ -412,51 +367,9 @@ class _RecurringTransactionPageState
           decoration: BoxDecoration(
             border: Border(bottom: BorderSide(color: colors.border, width: 1)),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Currency symbol - follows global settings
-              Text(
-                Currency.fromCode(
-                      ref.watch(financialSettingsProvider).primaryCurrency,
-                    )?.symbol ??
-                    '¥',
-                style: AppTextStyles.statLabel(
-                  theme,
-                ).copyWith(fontSize: amountFontSize),
-              ),
-              const SizedBox(width: 8),
-              // Amount input field
-              Expanded(
-                child: TextField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: amountFontSize,
-                    color: colors.foreground,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
-                  cursorColor: colors.primary,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    isDense: true,
-                    isCollapsed: true,
-                    hintText: '0.00',
-                    hintStyle: TextStyle(
-                      fontSize: amountFontSize,
-                      color: colors.mutedForeground,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: AmountInputField(
+            controller: _amountController,
+            fontSize: amountFontSize,
           ),
         ),
         const SizedBox(height: 16),
@@ -466,9 +379,9 @@ class _RecurringTransactionPageState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              isZh
-                  ? '每次${_getTypeLabel(_selectedType)}金额不固定'
-                  : 'Amount not fixed for each ${_getTypeLabel(_selectedType).toLowerCase()}',
+              t.forecast.recurringTransaction.amountNotFixed(
+                type: _getTypeLabel(_selectedType),
+              ),
               style: AppTextStyles.listTrailing(theme),
             ),
             FSwitch(
@@ -572,7 +485,7 @@ class _RecurringTransactionPageState
                   theme,
                   colors,
                   icon: FLucideIcons.wallet,
-                  title: isZh ? '转出账户' : 'Source Account',
+                  title: t.forecast.recurringTransaction.sourceAccount,
                   subtitle: _sourceAccountName ?? t.common.all,
                   onTap: () => _showAccountSelector(isSource: true),
                 ),
@@ -581,7 +494,7 @@ class _RecurringTransactionPageState
                   theme,
                   colors,
                   icon: FLucideIcons.landmark,
-                  title: isZh ? '转入账户' : 'Target Account',
+                  title: t.forecast.recurringTransaction.targetAccount,
                   subtitle: _targetAccountName ?? t.common.all,
                   onTap: () => _showAccountSelector(isSource: false),
                 ),
@@ -591,8 +504,8 @@ class _RecurringTransactionPageState
                   colors,
                   icon: FLucideIcons.wallet,
                   title: _selectedType == RecurringTransactionType.expense
-                      ? (isZh ? '支出账户' : 'Expense Account')
-                      : (isZh ? '收入账户' : 'Income Account'),
+                      ? t.forecast.recurringTransaction.expenseAccount
+                      : t.forecast.recurringTransaction.incomeAccount,
                   subtitle: _sourceAccountName ?? t.common.all,
                   onTap: () => _showAccountSelector(isSource: true),
                 ),
@@ -744,77 +657,6 @@ class _RecurringTransactionPageState
     );
   }
 
-  /// Tag input area - removable tags + add button
-  // ignore: unused_element - alternate implementation of tags section
-  Widget _buildTagsSection(FThemeData theme, FColors colors) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        // Added tags list
-        if (_tags.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _tags.map((tag) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.muted,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(tag, style: AppTextStyles.listTrailing(theme)),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: () => _removeTag(tag),
-                        child: Icon(
-                          FLucideIcons.x,
-                          size: 14,
-                          color: colors.mutedForeground,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        // Tag input row - tag icon + input + add button
-        Row(
-          children: [
-            Icon(FLucideIcons.tag, size: 20, color: colors.mutedForeground),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                controller: _tagController,
-                decoration: InputDecoration(
-                  hintText: t.transaction.tags,
-                  hintStyle: AppTextStyles.listSubtitle(theme),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                style: AppTextStyles.listTrailing(theme),
-                onSubmitted: _addTag,
-              ),
-            ),
-            GestureDetector(
-              onTap: () => _addTag(_tagController.text),
-              child: Text(t.common.add, style: AppTextStyles.actionText(theme)),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   void _addTag(String tag) {
     final trimmed = tag.trim();
     if (trimmed.isNotEmpty && !_tags.contains(trimmed)) {
@@ -905,9 +747,7 @@ class _RecurringTransactionPageState
                             style: AppTextStyles.switchTitle(theme),
                           ),
                           Text(
-                            isZh
-                                ? '开启后按规则自动生成交易'
-                                : 'Automatically generate transactions by rule',
+                            t.forecast.recurringTransaction.autoGenerateByRule,
                             style: AppTextStyles.detailLabel(theme),
                           ),
                         ],
@@ -991,10 +831,11 @@ class _RecurringTransactionPageState
 
   /// Update the recurrence rule with the new start date
   void _updateRecurrenceRuleWithNewDate(DateTime newDate) {
+    final rt = t.forecast.recurringTransaction;
     // If it's a monthly rule, update BYMONTHDAY (preserve -1 for last day of month)
     if (_recurrenceRule.contains('FREQ=MONTHLY')) {
       if (_recurrenceRule.contains('BYMONTHDAY=-1')) {
-        _recurrenceDescription = isZh ? '每月最后一天' : 'Monthly on the last day';
+        _recurrenceDescription = rt.monthlyLastDay;
       } else {
         _recurrenceRule = _recurrenceRule.replaceAllMapped(
           RegExp(r'BYMONTHDAY=-?\d+'),
@@ -1004,16 +845,23 @@ class _RecurringTransactionPageState
         if (!_recurrenceRule.contains('BYMONTHDAY')) {
           _recurrenceRule += ';BYMONTHDAY=${newDate.day}';
         }
-        _recurrenceDescription = isZh
-            ? '每月 ${newDate.day} 号'
-            : 'Monthly on the ${newDate.day}${_getDaySuffix(newDate.day.toString())}';
+        _recurrenceDescription = rt.monthlyOnDay(
+          day: newDate.day.toString(),
+          suffix: _monthDaySuffix(newDate.day.toString()),
+        );
       }
     } else if (_recurrenceRule.contains('FREQ=WEEKLY')) {
       // If it's a weekly rule, update BYDAY
       final weekdays = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
-      final weekdayLabels = isZh
-          ? ['一', '二', '三', '四', '五', '六', '日']
-          : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      final weekdayLabels = [
+        rt.weekdayMon,
+        rt.weekdayTue,
+        rt.weekdayWed,
+        rt.weekdayThu,
+        rt.weekdayFri,
+        rt.weekdaySat,
+        rt.weekdaySun,
+      ];
       final weekdayIndex = newDate.weekday - 1;
       _recurrenceRule = _recurrenceRule.replaceAllMapped(
         RegExp(r'BYDAY=[A-Z,]+'),
@@ -1022,20 +870,19 @@ class _RecurringTransactionPageState
       if (!_recurrenceRule.contains('BYDAY')) {
         _recurrenceRule += ';BYDAY=${weekdays[weekdayIndex]}';
       }
-      _recurrenceDescription = isZh
-          ? '每周${weekdayLabels[weekdayIndex]}'
-          : 'Weekly on ${weekdayLabels[weekdayIndex]}';
+      _recurrenceDescription = rt.weeklyOnDay(
+        day: '${rt.weekdayOn}${weekdayLabels[weekdayIndex]}',
+      );
     }
   }
 
   Future<void> _showAccountSelector({required bool isSource}) async {
+    final rt = t.forecast.recurringTransaction;
     final title = _selectedType == RecurringTransactionType.transfer
-        ? (isSource
-              ? (isZh ? '选择转出账户' : 'Source')
-              : (isZh ? '选择转入账户' : 'Target'))
+        ? (isSource ? rt.selectSourceAccount : rt.selectTargetAccount)
         : (_selectedType == RecurringTransactionType.expense
-              ? (isZh ? '选择支出账户' : 'Expense')
-              : (isZh ? '选择收入账户' : 'Income'));
+              ? rt.selectExpenseAccount
+              : rt.selectIncomeAccount);
 
     final result = await AccountSelectionSheet.show(
       context,
@@ -1084,7 +931,7 @@ class _RecurringTransactionPageState
       if (_sourceAccountId == null || _targetAccountId == null) {
         TopToast.warning(
           context,
-          isZh ? '请选择转出和转入账户' : 'Please select source and target accounts',
+          t.forecast.recurringTransaction.selectBothAccounts,
         );
         return;
       }
@@ -1092,9 +939,9 @@ class _RecurringTransactionPageState
       if (_sourceAccountId == null) {
         TopToast.warning(
           context,
-          isZh
-              ? '请选择${_getTypeLabel(_selectedType)}账户'
-              : 'Please select ${_getTypeLabel(_selectedType).toLowerCase()} account',
+          t.forecast.recurringTransaction.selectAccountForType(
+            type: _getTypeLabel(_selectedType),
+          ),
         );
         return;
       }
@@ -1171,55 +1018,6 @@ class _RecurringTransactionPageState
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
-      }
-    }
-  }
-
-  // ignore: unused_element - delete functionality to be activated from UI
-  Future<void> _handleDelete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(t.forecast.recurringTransaction.confirmDelete),
-        content: Text(
-          isZh
-              ? '确定要删除这个周期交易吗？此操作不可撤销。'
-              : 'Are you sure you want to delete this recurring transaction? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(t.common.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              t.common.delete,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && widget.editId != null) {
-      setState(() => _isSaving = true);
-      try {
-        final success = await ref
-            .read(recurringTransactionProvider.notifier)
-            .delete(widget.editId!);
-        if (mounted) {
-          if (success) {
-            TopToast.success(context, t.transaction.deleted);
-            context.pop();
-          } else {
-            TopToast.error(context, t.transaction.deleteFailed);
-          }
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isSaving = false);
-        }
       }
     }
   }

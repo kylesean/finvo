@@ -26,6 +26,9 @@ class MediaMemoryManager {
   /// Active media file references
   final Map<String, MediaFileWithBytes> _activeMediaFiles = {};
 
+  /// Registration order (oldest first), used for deterministic eviction.
+  final List<String> _registrationOrder = [];
+
   /// Memory usage statistics
   int _currentMemoryUsage = 0;
 
@@ -47,6 +50,10 @@ class MediaMemoryManager {
     }
 
     _activeMediaFiles[id] = mediaFileWithBytes;
+    // Remove any stale entry first so the id is never stored twice; the
+    // containsKey check above only covers entries present in the map.
+    _registrationOrder.remove(id);
+    _registrationOrder.add(id);
 
     // Update memory usage statistics
     if (mediaFileWithBytes.bytes != null) {
@@ -125,6 +132,7 @@ class MediaMemoryManager {
   /// [mediaFileId] Media file ID
   void unregisterMediaFile(String mediaFileId) {
     final mediaFile = _activeMediaFiles.remove(mediaFileId);
+    _registrationOrder.remove(mediaFileId);
     if (mediaFile != null) {
       // Update memory usage statistics
       if (mediaFile.bytes != null) {
@@ -204,14 +212,16 @@ class MediaMemoryManager {
 
   /// Clean up oldest media files (based on registration order)
   void _cleanupOldestMediaFiles() {
-    final sortedFiles = _activeMediaFiles.entries.toList();
+    // Evict from the explicit registration order (oldest first), which is
+    // deterministic even when a file is re-registered (which would otherwise
+    // move it to the end of the map's insertion order).
+    final orderedIds = _registrationOrder.toList();
 
     // Remove 25% of files to release memory
-    final removeCount = (sortedFiles.length * 0.25).ceil();
+    final removeCount = (orderedIds.length * 0.25).ceil();
 
-    for (int i = 0; i < removeCount && i < sortedFiles.length; i++) {
-      final entry = sortedFiles[i];
-      unregisterMediaFile(entry.key);
+    for (int i = 0; i < removeCount && i < orderedIds.length; i++) {
+      unregisterMediaFile(orderedIds[i]);
 
       // Stop cleanup if memory usage drops below threshold
       if (_currentMemoryUsage <= memoryThresholdBytes * 0.8) {

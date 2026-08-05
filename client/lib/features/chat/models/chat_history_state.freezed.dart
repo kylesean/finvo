@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatHistoryState {
 
- String? get currentConversationId; String? get currentConversationTitle; bool get isLoadingHistory; List<ChatMessage> get messages; String? get historyError; int get historyCurrentPage; bool get historyHasMore; bool get isStreamingResponse;
+ String? get currentConversationId; String? get currentConversationTitle; bool get isLoadingHistory; List<ChatMessage> get messages; String? get historyError; bool get isStreamingResponse;
 /// Create a copy of ChatHistoryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ChatHistoryStateCopyWith<ChatHistoryState> get copyWith => _$ChatHistoryStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatHistoryState&&(identical(other.currentConversationId, currentConversationId) || other.currentConversationId == currentConversationId)&&(identical(other.currentConversationTitle, currentConversationTitle) || other.currentConversationTitle == currentConversationTitle)&&(identical(other.isLoadingHistory, isLoadingHistory) || other.isLoadingHistory == isLoadingHistory)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.historyError, historyError) || other.historyError == historyError)&&(identical(other.historyCurrentPage, historyCurrentPage) || other.historyCurrentPage == historyCurrentPage)&&(identical(other.historyHasMore, historyHasMore) || other.historyHasMore == historyHasMore)&&(identical(other.isStreamingResponse, isStreamingResponse) || other.isStreamingResponse == isStreamingResponse));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatHistoryState&&(identical(other.currentConversationId, currentConversationId) || other.currentConversationId == currentConversationId)&&(identical(other.currentConversationTitle, currentConversationTitle) || other.currentConversationTitle == currentConversationTitle)&&(identical(other.isLoadingHistory, isLoadingHistory) || other.isLoadingHistory == isLoadingHistory)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.historyError, historyError) || other.historyError == historyError)&&(identical(other.isStreamingResponse, isStreamingResponse) || other.isStreamingResponse == isStreamingResponse));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currentConversationId,currentConversationTitle,isLoadingHistory,const DeepCollectionEquality().hash(messages),historyError,historyCurrentPage,historyHasMore,isStreamingResponse);
+int get hashCode => Object.hash(runtimeType,currentConversationId,currentConversationTitle,isLoadingHistory,const DeepCollectionEquality().hash(messages),historyError,isStreamingResponse);
 
 @override
 String toString() {
-  return 'ChatHistoryState(currentConversationId: $currentConversationId, currentConversationTitle: $currentConversationTitle, isLoadingHistory: $isLoadingHistory, messages: $messages, historyError: $historyError, historyCurrentPage: $historyCurrentPage, historyHasMore: $historyHasMore, isStreamingResponse: $isStreamingResponse)';
+  return 'ChatHistoryState(currentConversationId: $currentConversationId, currentConversationTitle: $currentConversationTitle, isLoadingHistory: $isLoadingHistory, messages: $messages, historyError: $historyError, isStreamingResponse: $isStreamingResponse)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ChatHistoryStateCopyWith<$Res>  {
   factory $ChatHistoryStateCopyWith(ChatHistoryState value, $Res Function(ChatHistoryState) _then) = _$ChatHistoryStateCopyWithImpl;
 @useResult
 $Res call({
- String? currentConversationId, String? currentConversationTitle, bool isLoadingHistory, List<ChatMessage> messages, String? historyError, int historyCurrentPage, bool historyHasMore, bool isStreamingResponse
+ String? currentConversationId, String? currentConversationTitle, bool isLoadingHistory, List<ChatMessage> messages, String? historyError, bool isStreamingResponse
 });
 
 
@@ -62,16 +62,14 @@ class _$ChatHistoryStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatHistoryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentConversationId = freezed,Object? currentConversationTitle = freezed,Object? isLoadingHistory = null,Object? messages = null,Object? historyError = freezed,Object? historyCurrentPage = null,Object? historyHasMore = null,Object? isStreamingResponse = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentConversationId = freezed,Object? currentConversationTitle = freezed,Object? isLoadingHistory = null,Object? messages = null,Object? historyError = freezed,Object? isStreamingResponse = null,}) {
   return _then(_self.copyWith(
 currentConversationId: freezed == currentConversationId ? _self.currentConversationId : currentConversationId // ignore: cast_nullable_to_non_nullable
 as String?,currentConversationTitle: freezed == currentConversationTitle ? _self.currentConversationTitle : currentConversationTitle // ignore: cast_nullable_to_non_nullable
 as String?,isLoadingHistory: null == isLoadingHistory ? _self.isLoadingHistory : isLoadingHistory // ignore: cast_nullable_to_non_nullable
 as bool,messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
 as List<ChatMessage>,historyError: freezed == historyError ? _self.historyError : historyError // ignore: cast_nullable_to_non_nullable
-as String?,historyCurrentPage: null == historyCurrentPage ? _self.historyCurrentPage : historyCurrentPage // ignore: cast_nullable_to_non_nullable
-as int,historyHasMore: null == historyHasMore ? _self.historyHasMore : historyHasMore // ignore: cast_nullable_to_non_nullable
-as bool,isStreamingResponse: null == isStreamingResponse ? _self.isStreamingResponse : isStreamingResponse // ignore: cast_nullable_to_non_nullable
+as String?,isStreamingResponse: null == isStreamingResponse ? _self.isStreamingResponse : isStreamingResponse // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -157,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? currentConversationId,  String? currentConversationTitle,  bool isLoadingHistory,  List<ChatMessage> messages,  String? historyError,  int historyCurrentPage,  bool historyHasMore,  bool isStreamingResponse)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? currentConversationId,  String? currentConversationTitle,  bool isLoadingHistory,  List<ChatMessage> messages,  String? historyError,  bool isStreamingResponse)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatHistoryState() when $default != null:
-return $default(_that.currentConversationId,_that.currentConversationTitle,_that.isLoadingHistory,_that.messages,_that.historyError,_that.historyCurrentPage,_that.historyHasMore,_that.isStreamingResponse);case _:
+return $default(_that.currentConversationId,_that.currentConversationTitle,_that.isLoadingHistory,_that.messages,_that.historyError,_that.isStreamingResponse);case _:
   return orElse();
 
 }
@@ -178,10 +176,10 @@ return $default(_that.currentConversationId,_that.currentConversationTitle,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? currentConversationId,  String? currentConversationTitle,  bool isLoadingHistory,  List<ChatMessage> messages,  String? historyError,  int historyCurrentPage,  bool historyHasMore,  bool isStreamingResponse)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? currentConversationId,  String? currentConversationTitle,  bool isLoadingHistory,  List<ChatMessage> messages,  String? historyError,  bool isStreamingResponse)  $default,) {final _that = this;
 switch (_that) {
 case _ChatHistoryState():
-return $default(_that.currentConversationId,_that.currentConversationTitle,_that.isLoadingHistory,_that.messages,_that.historyError,_that.historyCurrentPage,_that.historyHasMore,_that.isStreamingResponse);case _:
+return $default(_that.currentConversationId,_that.currentConversationTitle,_that.isLoadingHistory,_that.messages,_that.historyError,_that.isStreamingResponse);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +196,10 @@ return $default(_that.currentConversationId,_that.currentConversationTitle,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? currentConversationId,  String? currentConversationTitle,  bool isLoadingHistory,  List<ChatMessage> messages,  String? historyError,  int historyCurrentPage,  bool historyHasMore,  bool isStreamingResponse)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? currentConversationId,  String? currentConversationTitle,  bool isLoadingHistory,  List<ChatMessage> messages,  String? historyError,  bool isStreamingResponse)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatHistoryState() when $default != null:
-return $default(_that.currentConversationId,_that.currentConversationTitle,_that.isLoadingHistory,_that.messages,_that.historyError,_that.historyCurrentPage,_that.historyHasMore,_that.isStreamingResponse);case _:
+return $default(_that.currentConversationId,_that.currentConversationTitle,_that.isLoadingHistory,_that.messages,_that.historyError,_that.isStreamingResponse);case _:
   return null;
 
 }
@@ -213,7 +211,7 @@ return $default(_that.currentConversationId,_that.currentConversationTitle,_that
 
 
 class _ChatHistoryState implements ChatHistoryState {
-  const _ChatHistoryState({this.currentConversationId, this.currentConversationTitle, this.isLoadingHistory = false, final  List<ChatMessage> messages = const [], this.historyError, this.historyCurrentPage = 1, this.historyHasMore = true, this.isStreamingResponse = false}): _messages = messages;
+  const _ChatHistoryState({this.currentConversationId, this.currentConversationTitle, this.isLoadingHistory = false, final  List<ChatMessage> messages = const [], this.historyError, this.isStreamingResponse = false}): _messages = messages;
 
 
 @override final  String? currentConversationId;
@@ -227,8 +225,6 @@ class _ChatHistoryState implements ChatHistoryState {
 }
 
 @override final  String? historyError;
-@override@JsonKey() final  int historyCurrentPage;
-@override@JsonKey() final  bool historyHasMore;
 @override@JsonKey() final  bool isStreamingResponse;
 
 /// Create a copy of ChatHistoryState
@@ -241,16 +237,16 @@ _$ChatHistoryStateCopyWith<_ChatHistoryState> get copyWith => __$ChatHistoryStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatHistoryState&&(identical(other.currentConversationId, currentConversationId) || other.currentConversationId == currentConversationId)&&(identical(other.currentConversationTitle, currentConversationTitle) || other.currentConversationTitle == currentConversationTitle)&&(identical(other.isLoadingHistory, isLoadingHistory) || other.isLoadingHistory == isLoadingHistory)&&const DeepCollectionEquality().equals(other._messages, _messages)&&(identical(other.historyError, historyError) || other.historyError == historyError)&&(identical(other.historyCurrentPage, historyCurrentPage) || other.historyCurrentPage == historyCurrentPage)&&(identical(other.historyHasMore, historyHasMore) || other.historyHasMore == historyHasMore)&&(identical(other.isStreamingResponse, isStreamingResponse) || other.isStreamingResponse == isStreamingResponse));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatHistoryState&&(identical(other.currentConversationId, currentConversationId) || other.currentConversationId == currentConversationId)&&(identical(other.currentConversationTitle, currentConversationTitle) || other.currentConversationTitle == currentConversationTitle)&&(identical(other.isLoadingHistory, isLoadingHistory) || other.isLoadingHistory == isLoadingHistory)&&const DeepCollectionEquality().equals(other._messages, _messages)&&(identical(other.historyError, historyError) || other.historyError == historyError)&&(identical(other.isStreamingResponse, isStreamingResponse) || other.isStreamingResponse == isStreamingResponse));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currentConversationId,currentConversationTitle,isLoadingHistory,const DeepCollectionEquality().hash(_messages),historyError,historyCurrentPage,historyHasMore,isStreamingResponse);
+int get hashCode => Object.hash(runtimeType,currentConversationId,currentConversationTitle,isLoadingHistory,const DeepCollectionEquality().hash(_messages),historyError,isStreamingResponse);
 
 @override
 String toString() {
-  return 'ChatHistoryState(currentConversationId: $currentConversationId, currentConversationTitle: $currentConversationTitle, isLoadingHistory: $isLoadingHistory, messages: $messages, historyError: $historyError, historyCurrentPage: $historyCurrentPage, historyHasMore: $historyHasMore, isStreamingResponse: $isStreamingResponse)';
+  return 'ChatHistoryState(currentConversationId: $currentConversationId, currentConversationTitle: $currentConversationTitle, isLoadingHistory: $isLoadingHistory, messages: $messages, historyError: $historyError, isStreamingResponse: $isStreamingResponse)';
 }
 
 
@@ -261,7 +257,7 @@ abstract mixin class _$ChatHistoryStateCopyWith<$Res> implements $ChatHistorySta
   factory _$ChatHistoryStateCopyWith(_ChatHistoryState value, $Res Function(_ChatHistoryState) _then) = __$ChatHistoryStateCopyWithImpl;
 @override @useResult
 $Res call({
- String? currentConversationId, String? currentConversationTitle, bool isLoadingHistory, List<ChatMessage> messages, String? historyError, int historyCurrentPage, bool historyHasMore, bool isStreamingResponse
+ String? currentConversationId, String? currentConversationTitle, bool isLoadingHistory, List<ChatMessage> messages, String? historyError, bool isStreamingResponse
 });
 
 
@@ -278,16 +274,14 @@ class __$ChatHistoryStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatHistoryState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentConversationId = freezed,Object? currentConversationTitle = freezed,Object? isLoadingHistory = null,Object? messages = null,Object? historyError = freezed,Object? historyCurrentPage = null,Object? historyHasMore = null,Object? isStreamingResponse = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentConversationId = freezed,Object? currentConversationTitle = freezed,Object? isLoadingHistory = null,Object? messages = null,Object? historyError = freezed,Object? isStreamingResponse = null,}) {
   return _then(_ChatHistoryState(
 currentConversationId: freezed == currentConversationId ? _self.currentConversationId : currentConversationId // ignore: cast_nullable_to_non_nullable
 as String?,currentConversationTitle: freezed == currentConversationTitle ? _self.currentConversationTitle : currentConversationTitle // ignore: cast_nullable_to_non_nullable
 as String?,isLoadingHistory: null == isLoadingHistory ? _self.isLoadingHistory : isLoadingHistory // ignore: cast_nullable_to_non_nullable
 as bool,messages: null == messages ? _self._messages : messages // ignore: cast_nullable_to_non_nullable
 as List<ChatMessage>,historyError: freezed == historyError ? _self.historyError : historyError // ignore: cast_nullable_to_non_nullable
-as String?,historyCurrentPage: null == historyCurrentPage ? _self.historyCurrentPage : historyCurrentPage // ignore: cast_nullable_to_non_nullable
-as int,historyHasMore: null == historyHasMore ? _self.historyHasMore : historyHasMore // ignore: cast_nullable_to_non_nullable
-as bool,isStreamingResponse: null == isStreamingResponse ? _self.isStreamingResponse : isStreamingResponse // ignore: cast_nullable_to_non_nullable
+as String?,isStreamingResponse: null == isStreamingResponse ? _self.isStreamingResponse : isStreamingResponse // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

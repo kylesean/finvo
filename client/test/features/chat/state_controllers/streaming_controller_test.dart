@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:finvo/features/chat/state_controllers/streaming_controller.dart';
 import 'package:finvo/features/chat/state_controllers/stream_state_controller.dart';
 import 'package:finvo/features/chat/services/genui_service.dart';
@@ -8,10 +7,10 @@ import 'package:finvo/features/chat/models/chat_message.dart';
 
 import 'streaming_controller_test.mocks.dart';
 
-@GenerateMocks([GenUiService, StreamStateController])
+@GenerateMocks([GenUiService])
 void main() {
   late StreamingController controller;
-  late MockStreamStateController mockStreamState;
+  late StreamStateController streamState;
   late MockGenUiService mockGenUiService;
 
   // Callbacks
@@ -21,7 +20,7 @@ void main() {
   late dynamic lastStreamError;
 
   setUp(() {
-    mockStreamState = MockStreamStateController();
+    streamState = StreamStateController();
     mockGenUiService = MockGenUiService();
 
     // Reset callback trackers
@@ -33,7 +32,7 @@ void main() {
       config: const StreamingConfig(
         initialDelayMs: 100,
       ), // Short delay for testing
-      streamState: mockStreamState,
+      streamState: streamState,
       onUpdateMessageState:
           ({
             required String id,
@@ -69,9 +68,37 @@ void main() {
         expect(controller.isMessageCompleted, false);
         expect(controller.isUserCancelled, false);
 
-        verify(mockStreamState.startStreaming('msg-1')).called(1);
+        expect(streamState.currentPhase, StreamPhase.waitingForFirstChunk);
+        expect(streamState.currentMessageId, 'msg-1');
       },
     );
+
+    test(
+      'updateCurrentMessageId should replace temp ID and keep stream flags',
+      () {
+        controller.resetForNewMessage('temp-uuid-1');
+        controller.handleTextChunk('Hello');
+
+        controller.updateCurrentMessageId('server-msg-1');
+
+        expect(controller.currentMessageId, 'server-msg-1');
+        expect(streamState.currentMessageId, 'server-msg-1');
+        // Stream flags must be preserved (not reset like resetForNewMessage)
+        expect(controller.isFirstChunkReceived, true);
+        expect(controller.isMessageCompleted, false);
+        expect(controller.isUserCancelled, false);
+      },
+    );
+
+    test('updateCurrentMessageId should ignore empty or same IDs', () {
+      controller.resetForNewMessage('msg-1');
+
+      controller.updateCurrentMessageId('msg-1');
+      controller.updateCurrentMessageId('');
+
+      expect(controller.currentMessageId, 'msg-1');
+      expect(streamState.currentMessageId, 'msg-1');
+    });
 
     test(
       'startInitialDelayTimer should trigger callback after delay if no chunk received',
@@ -86,6 +113,7 @@ void main() {
     );
 
     test('handleTextChunk should mark first chunk and cancel timer', () async {
+      controller.resetForNewMessage('msg-1');
       controller.startInitialDelayTimer();
 
       // Send first chunk immediately
@@ -93,7 +121,7 @@ void main() {
 
       expect(isFirst, true);
       expect(controller.isFirstChunkReceived, true);
-      verify(mockStreamState.markFirstChunkReceived()).called(1);
+      expect(streamState.currentPhase, StreamPhase.streaming);
 
       // Wait to ensure timer was cancelled (callback shouldn't fire)
       await Future<void>.delayed(const Duration(milliseconds: 150));
@@ -101,13 +129,13 @@ void main() {
     });
 
     test('handleTextChunk subsequent chunks should return false', () {
+      controller.resetForNewMessage('msg-1');
       controller.handleTextChunk('Hello');
       final isFirst = controller.handleTextChunk(' World');
 
       expect(isFirst, false);
-      // markFirstChunkReceived should still verify handled correctly internally,
-      // but strictly we verify it was called once overall.
-      verify(mockStreamState.markFirstChunkReceived()).called(1);
+      // First chunk should have advanced the state machine only once
+      expect(streamState.currentPhase, StreamPhase.streaming);
     });
 
     test('handleStreamComplete should update flags and notify', () {
@@ -115,8 +143,8 @@ void main() {
 
       expect(controller.isStreamDone, true);
       expect(controller.isMessageCompleted, true);
+      expect(streamState.currentPhase, StreamPhase.completed);
       expect(lastStreamCompleteFinalText, 'Final Text');
-      verify(mockStreamState.markCompleted()).called(1);
     });
 
     test('handleStreamError should update flags and notify', () {
@@ -124,8 +152,8 @@ void main() {
 
       expect(controller.isStreamDone, true);
       expect(controller.isMessageCompleted, true);
+      expect(streamState.currentPhase, StreamPhase.error);
       expect(lastStreamError, 'Error');
-      verify(mockStreamState.markError()).called(1);
     });
 
     test(
@@ -135,6 +163,7 @@ void main() {
 
         expect(controller.isStreamDone, true);
         expect(controller.isMessageCompleted, true);
+        expect(streamState.currentPhase, StreamPhase.completed);
         // Callbacks should NOT be fired
         expect(lastStreamCompleteFinalText, null);
         expect(lastStreamError, null);
@@ -142,13 +171,14 @@ void main() {
     );
 
     test('markFirstChunkReceived should check flag before updating', () {
+      controller.resetForNewMessage('msg-1');
       controller.markFirstChunkReceived();
       expect(controller.isFirstChunkReceived, true);
-      verify(mockStreamState.markFirstChunkReceived()).called(1);
+      expect(streamState.currentPhase, StreamPhase.streaming);
 
       controller.markFirstChunkReceived();
-      // Should not call again
-      verifyNever(mockStreamState.markFirstChunkReceived());
+      // State machine stays in streaming phase
+      expect(streamState.currentPhase, StreamPhase.streaming);
     });
   });
 }

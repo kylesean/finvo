@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -515,50 +516,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// Handles logout
   Future<void> _handleLogout(BuildContext context) async {
     unawaited(
-      showFDialog<void>(
+      showConfirmDialog(
         context: context,
-        builder: (dialogContext, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  t.auth.confirmLogoutTitle,
-                  style: dialogStyle.titleTextStyle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.auth.confirmLogoutContent,
-                  style: dialogStyle.bodyTextStyle,
-                ),
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.of(dialogContext).pop(),
-                  child: Text(t.common.cancel),
-                ),
-                const SizedBox(height: 8),
-                FButton(
-                  variant: .destructive,
-                  onPress: () async {
-                    Navigator.of(dialogContext).pop();
+        title: t.auth.confirmLogoutTitle,
+        message: t.auth.confirmLogoutContent,
+        cancelLabel: t.common.cancel,
+        confirmVariant: FButtonVariant.destructive,
+        confirmLabel: t.auth.logout,
+        onConfirm: () async {
+          // Send toast message first to avoid context failure after redirection
+          ToastService.success(description: Text(t.auth.logoutSuccess));
 
-                    // Send toast message first to avoid context failure after redirection
-                    ToastService.success(
-                      description: Text(t.auth.logoutSuccess),
-                    );
-
-                    await ref.read(authProvider.notifier).logout();
-                  },
-                  child: Text(t.auth.logout),
-                ),
-              ],
-            ),
-          ),
-        ),
+          await ref.read(authProvider.notifier).logout();
+        },
       ),
     );
   }

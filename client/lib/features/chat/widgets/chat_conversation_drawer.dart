@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -142,106 +143,6 @@ class _ChatConversationDrawerState
           ],
         ),
       ),
-    );
-  }
-
-  // Build conversation list
-  // ignore: unused_element - legacy implementation, kept for reference
-  Widget _buildConversationList(
-    BuildContext context,
-    List<dynamic> conversations,
-    String? currentConversationId,
-    WidgetRef ref,
-  ) {
-    final theme = context.theme;
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: conversations.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 4),
-      itemBuilder: (context, index) {
-        final conversation = conversations[index];
-        final isSelected = conversation.id == currentConversationId;
-
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 2),
-          decoration: BoxDecoration(
-            color: isSelected ? theme.colors.secondary : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: isSelected ? Border.all(color: theme.colors.border) : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                // If the clicked item is not the current session
-                if (!isSelected) {
-                  context.goNamed(
-                    'conversation',
-                    pathParameters: {
-                      'conversationId': conversation.id as String,
-                    },
-                  );
-                }
-                // Safely close the drawer
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    // Session icon - using ThemedIcon for design consistency
-                    ThemedIcon(
-                      icon: FLucideIcons.messageCircle,
-                      backgroundColor: isSelected
-                          ? theme.colors.primary.withValues(alpha: 0.15)
-                          : theme.colors.secondary,
-                      iconColor: isSelected
-                          ? theme.colors.primary
-                          : theme.colors.mutedForeground,
-                    ),
-                    const SizedBox(width: 12),
-                    // Session info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            (conversation as dynamic).title as String,
-                            style: AppTextStyles.listTrailing(theme).copyWith(
-                              color: isSelected
-                                  ? theme.colors.primary
-                                  : theme.colors.foreground,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            DateFormat(
-                              'M/d HH:mm',
-                              TranslationProvider.of(
-                                context,
-                              ).locale.languageCode,
-                            ).format(
-                              (conversation as dynamic).updatedAt as DateTime,
-                            ),
-                            style: theme.typography.body.xs.copyWith(
-                              color: theme.colors.mutedForeground,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -451,36 +352,6 @@ class _ChatConversationDrawerState
     );
   }
 
-  // Build category column
-  // ignore: unused_element - reserved for future library feature
-  Widget _buildCategoryColumn(
-    BuildContext context,
-    FThemeData theme,
-    String title,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          border: Border.all(color: theme.colors.border),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: theme.colors.foreground),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(title, style: AppTextStyles.listTrailing(theme)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // Build paginated conversation list
   Widget _buildPaginatedConversationList(
     BuildContext context,
@@ -641,41 +512,13 @@ class _ChatConversationDrawerState
 
     if (!context.mounted) return;
 
-    final confirmed = await showFDialog<bool>(
+    final confirmed = await showConfirmDialog(
       context: context,
-      builder: (dialogContext, style, animation) => FDialog(
-        animation: animation,
-        builder: (context, dialogStyle) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                t.chat.deleteConversation,
-                style: dialogStyle.titleTextStyle,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                t.chat.deleteConversationConfirm,
-                style: dialogStyle.bodyTextStyle,
-              ),
-              const SizedBox(height: 24),
-              FButton(
-                variant: .outline,
-                onPress: () => Navigator.of(dialogContext).pop(false),
-                child: Text(t.common.cancel),
-              ),
-              const SizedBox(height: 8),
-              FButton(
-                variant: .destructive,
-                onPress: () => Navigator.of(dialogContext).pop(true),
-                child: Text(t.common.delete),
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: t.chat.deleteConversation,
+      message: t.chat.deleteConversationConfirm,
+      cancelLabel: t.common.cancel,
+      confirmVariant: FButtonVariant.destructive,
+      confirmLabel: t.common.delete,
     );
 
     if (confirmed == true && context.mounted) {
@@ -888,48 +731,6 @@ class _ChatConversationDrawerState
           theme,
           result,
           searchState.query,
-        );
-      },
-    );
-  }
-
-  // Build search suggestions
-  // ignore: unused_element - reserved for future search suggestions feature
-  Widget _buildSearchSuggestions(BuildContext context, FThemeData theme) {
-    final suggestions = [
-      {'icon': FLucideIcons.hash, 'title': 'First Principles Engine Breakdown'},
-      {'icon': FLucideIcons.terminal, 'title': 'Linux Ubuntu Command Master'},
-      {'icon': FLucideIcons.circle, 'title': 'Laravel GPT'},
-      {'icon': FLucideIcons.code, 'title': 'Technical Guidance Master'},
-    ];
-
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: suggestions.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final suggestion = suggestions[index];
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-          child: Row(
-            children: [
-              Icon(
-                suggestion['icon'] as IconData,
-                size: 20,
-                color: theme.colors.mutedForeground,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  suggestion['title'] as String,
-                  style: theme.typography.body.sm.copyWith(
-                    color: theme.colors.foreground,
-                  ),
-                ),
-              ),
-            ],
-          ),
         );
       },
     );
@@ -1168,76 +969,6 @@ class _ChatConversationDrawerState
               : _buildSearchResults(context, ref, theme, searchState),
         ),
       ],
-    );
-  }
-
-  // Build fullscreen conversation list (simplified version, no icons, no dates)
-  // ignore: unused_element - alternative layout implementation
-  Widget _buildFullscreenConversationList(
-    BuildContext context,
-    WidgetRef ref,
-    FThemeData theme,
-    PaginatedConversationState paginatedState,
-    String? currentConversationId,
-  ) {
-    if (paginatedState.isLoading && paginatedState.conversations.isEmpty) {
-      return _buildSkeletonList(context);
-    }
-
-    if (paginatedState.error != null && paginatedState.conversations.isEmpty) {
-      return _buildErrorState(context, paginatedState.error!, ref);
-    }
-
-    if (paginatedState.conversations.isEmpty) {
-      return _buildEmptyState(context);
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: paginatedState.conversations.length,
-      itemBuilder: (context, index) {
-        final conversation = paginatedState.conversations[index];
-        final isSelected = conversation.id == currentConversationId;
-
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 2),
-          decoration: BoxDecoration(
-            color: isSelected ? theme.colors.secondary : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: isSelected ? Border.all(color: theme.colors.border) : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                if (!isSelected) {
-                  context.goNamed(
-                    'conversation',
-                    pathParameters: {'conversationId': conversation.id},
-                  );
-                }
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  conversation.title,
-                  style: AppTextStyles.listTrailing(theme).copyWith(
-                    color: isSelected
-                        ? theme.colors.primary
-                        : theme.colors.foreground,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 // features/home/pages/transaction_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +24,7 @@ import 'package:finvo/features/profile/providers/financial_account_provider.dart
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/chat/genui/organisms/account_picker_card.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
-import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/features/home/services/home_service.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
@@ -123,8 +124,6 @@ class TransactionDetailPage extends ConsumerWidget {
     if (transaction == null) {
       return const TransactionDetailSkeleton();
     }
-
-    timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
 
     // Page header
     final pageHeader = _buildPageHeader(context, theme, colors, transaction);
@@ -695,14 +694,10 @@ class TransactionDetailPage extends ConsumerWidget {
     String accountId,
   ) async {
     try {
-      final networkClient = ref.read(networkClientProvider);
-      final result = await networkClient.requestMap(
-        '/transactions/$transactionId/account',
-        method: HttpMethod.patch,
-        data: {'account_id': accountId},
-      );
+      final homeService = ref.read(homeServiceProvider);
+      await homeService.updateTransactionAccount(transactionId, accountId);
 
-      if (result['code'] == 0 && context.mounted) {
+      if (context.mounted) {
         // Reload transaction detail
         unawaited(
           ref.read(transactionDetailProvider(transactionId).notifier).reload(),
@@ -733,17 +728,12 @@ class TransactionDetailPage extends ConsumerWidget {
 
     try {
       // Load space list
-      final networkClient = ref.read(networkClientProvider);
-      final result = await networkClient.requestMap(
-        '/shared-spaces',
-        method: HttpMethod.get,
-      );
+      final homeService = ref.read(homeServiceProvider);
+      final result = await homeService.listSharedSpaces();
 
       if (!context.mounted) return;
 
-      final spaces = (result['data']?['spaces'] as List? ?? [])
-          .map((s) => s as Map<String, dynamic>)
-          .toList();
+      final spaces = result;
 
       if (spaces.isEmpty) {
         ToastService.show(description: Text(t.transaction.noSpacesAvailable));
@@ -829,12 +819,8 @@ class TransactionDetailPage extends ConsumerWidget {
     String spaceId,
   ) async {
     try {
-      final networkClient = ref.read(networkClientProvider);
-      await networkClient.requestMap(
-        '/shared-spaces/$spaceId/transactions',
-        method: HttpMethod.post,
-        data: {'transaction_id': transactionId},
-      );
+      final homeService = ref.read(homeServiceProvider);
+      await homeService.linkTransactionToSpace(transactionId, spaceId);
 
       if (context.mounted) {
         // Reload transaction detail
@@ -886,66 +872,31 @@ class TransactionDetailPage extends ConsumerWidget {
             Future<void>.delayed(const Duration(milliseconds: 100), () {
               if (!rootContext.mounted) return;
               unawaited(
-                showFDialog<void>(
+                showConfirmDialog(
                   context: rootContext,
-                  builder: (dialogContext, style, animation) => FDialog(
-                    animation: animation,
-                    builder: (context, dialogStyle) => Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            t.transaction.confirmDelete,
-                            style: dialogStyle.titleTextStyle,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            t.transaction.deleteTransactionConfirm,
-                            style: dialogStyle.bodyTextStyle,
-                          ),
-                          const SizedBox(height: 24),
-                          FButton(
-                            variant: .outline,
-                            onPress: () => Navigator.of(dialogContext).pop(),
-                            child: Text(t.common.cancel),
-                          ),
-                          const SizedBox(height: 8),
-                          FButton(
-                            onPress: () async {
-                              Navigator.of(dialogContext).pop();
-                              // Execute delete operation
-                              try {
-                                final networkClient = ref.read(
-                                  networkClientProvider,
-                                );
-                                final result = await networkClient.requestMap(
-                                  '/transactions/${transaction.id}',
-                                  method: HttpMethod.delete,
-                                );
+                  title: t.transaction.confirmDelete,
+                  message: t.transaction.deleteTransactionConfirm,
+                  cancelLabel: t.common.cancel,
+                  confirmLabel: t.common.delete,
+                  onConfirm: () async {
+                    // Execute delete operation
+                    try {
+                      final homeService = ref.read(homeServiceProvider);
+                      await homeService.deleteTransaction(transaction.id);
 
-                                if (result['code'] == 0) {
-                                  ToastService.success(
-                                    description: Text(t.transaction.deleted),
-                                  );
-                                  // Navigate back
-                                  if (rootContext.mounted) {
-                                    GoRouter.of(rootContext).pop();
-                                  }
-                                }
-                              } catch (e) {
-                                ToastService.showDestructive(
-                                  description: Text(t.transaction.deleteFailed),
-                                );
-                              }
-                            },
-                            child: Text(t.common.delete),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                      ToastService.success(
+                        description: Text(t.transaction.deleted),
+                      );
+                      // Navigate back
+                      if (rootContext.mounted) {
+                        GoRouter.of(rootContext).pop();
+                      }
+                    } catch (e) {
+                      ToastService.showDestructive(
+                        description: Text(t.transaction.deleteFailed),
+                      );
+                    }
+                  },
                 ),
               );
             }),
@@ -958,12 +909,15 @@ class TransactionDetailPage extends ConsumerWidget {
       return;
     }
 
+    // Get root Navigator context safely (it may not be mounted yet on deep links)
+    final rootContext = GoRouter.of(
+      context,
+    ).routerDelegate.navigatorKey.currentContext;
+    if (rootContext == null) return;
+
     unawaited(
       showModalBottomSheet<void>(
-        context: GoRouter.of(context)
-            .routerDelegate
-            .navigatorKey
-            .currentContext!, // Get root Navigator context from GoRouter
+        context: rootContext,
         // Alternatively, if MaterialApp has a global navigatorKey:
         // context: rootNavigatorKey.currentContext!,
         backgroundColor: Colors.transparent,

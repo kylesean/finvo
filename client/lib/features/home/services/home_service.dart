@@ -4,7 +4,7 @@ import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
 import 'package:finvo/features/home/models/total_expense_model.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 
-import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 
 class HomeService {
   final NetworkClient _networkClient;
@@ -105,6 +105,47 @@ class HomeService {
     );
   }
 
+  /// Update the linked account of a transaction
+  Future<void> updateTransactionAccount(
+    String transactionId,
+    String accountId,
+  ) async {
+    await _networkClient.request<void>(
+      '/transactions/$transactionId/account',
+      method: HttpMethod.patch,
+      data: {'account_id': accountId},
+      fromJsonT: (_) {},
+    );
+  }
+
+  /// List shared spaces a transaction can be linked to
+  Future<List<Map<String, dynamic>>> listSharedSpaces() async {
+    return _networkClient.request<List<Map<String, dynamic>>>(
+      '/shared-spaces',
+      method: HttpMethod.get,
+      fromJsonT: (json) {
+        final data = json is Map<String, dynamic> ? json['data'] : null;
+        final spaces = data is Map<String, dynamic>
+            ? (data['spaces'] as List? ?? const <dynamic>[])
+            : const <dynamic>[];
+        return spaces.map((s) => s as Map<String, dynamic>).toList();
+      },
+    );
+  }
+
+  /// Link a transaction to a shared space
+  Future<void> linkTransactionToSpace(
+    String transactionId,
+    String spaceId,
+  ) async {
+    await _networkClient.request<void>(
+      '/shared-spaces/$spaceId/transactions',
+      method: HttpMethod.post,
+      data: {'transaction_id': transactionId},
+      fromJsonT: (_) {},
+    );
+  }
+
   // Search transactions - for infinite scroll pagination
   Future<Map<String, dynamic>> searchTransactions({
     int page = 1,
@@ -137,76 +178,19 @@ class HomeService {
     );
   }
 
-  // --- Helpers for centralized parsing logic ---
+  // --- Parsing helpers centralized in ResponseParser ---
 
   /// Helper to parse a single item response { code: 0, data: { ... } } or direct { ... }
   T _parseItemResponse<T>(
     dynamic json,
     T Function(Map<String, dynamic>) fromJson,
-  ) {
-    if (json is Map<String, dynamic>) {
-      // API Standard Response: { code: 0, message: "...", data: {...} }
-      if (json.containsKey('data')) {
-        final dataField = json['data'];
-        if (dataField is Map<String, dynamic>) {
-          return fromJson(dataField);
-        }
-        // Fallback if data is null or not a map, might depend on specific API behavior
-        // If data is expected but null, logic might need adjustment based on requirements
-      }
-      // Fallback: try parsing the root object directly (for legacy or direct returns)
-      try {
-        return fromJson(json);
-      } catch (e) {
-        throw DataParsingException('Failed to parse item response: $json');
-      }
-    }
-    throw DataParsingException('Expected JSON Object, got ${json.runtimeType}');
-  }
+  ) => ResponseParser.parseItem(json, fromJson);
 
   /// Helper to parse a list response { code: 0, data: { items: [...] } }
   List<T> _parseListResponse<T>(
     dynamic json,
     T Function(Map<String, dynamic>) fromJson,
-  ) {
-    if (json is Map<String, dynamic>) {
-      final dataField = json['data'];
-
-      // Handle case where data is null (empty list)
-      if (dataField == null) return [];
-
-      // Handle standard pagination format: data: { items: [...] }
-      if (dataField is Map<String, dynamic>) {
-        final items = dataField['items'];
-        if (items is List) {
-          return items.map((item) {
-            if (item is Map<String, dynamic>) {
-              return fromJson(item);
-            }
-            throw DataParsingException(
-              'Item in list is not a Map: ${item.runtimeType}',
-            );
-          }).toList();
-        }
-        // If data is a map but has no 'items' key, verify if it is itself the list (unlikely based on API spec but safe to check)
-      }
-
-      // Handle case where data itself is the list: data: [...]
-      if (dataField is List) {
-        return dataField.map((item) {
-          if (item is Map<String, dynamic>) {
-            return fromJson(item);
-          }
-          throw DataParsingException(
-            'Item in list is not a Map: ${item.runtimeType}',
-          );
-        }).toList();
-      }
-    }
-    // If structure doesn't match known patterns, return empty or throw
-    // For robustness, returning empty list is safer than crashing UI in some views, but strict parsing helps debugging
-    return [];
-  }
+  ) => ResponseParser.parseList(json, fromJson);
 }
 
 // Provider for HomeService

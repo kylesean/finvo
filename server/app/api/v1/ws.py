@@ -35,9 +35,16 @@ async def notification_websocket(
 ) -> None:
     """WebSocket endpoint for real-time notifications.
 
-    Authenticates via JWT token in query parameter.
+    Authenticates via a JWT provided either in the ``Authorization`` header
+    (``Bearer <jwt>``, preferred — avoids leaking the token into URLs/logs) or,
+    as a fallback for web clients, in the ``token`` query parameter.
     """
-    # 1. Validate JWT token (verify_token raises ValueError on malformed format)
+    # 1. Resolve token: Authorization header first, then query parameter.
+    auth_header = websocket.headers.get("authorization", "")
+    if not token and auth_header.startswith("Bearer "):
+        token = auth_header[len("Bearer ") :].strip()
+
+    # 2. Validate JWT token (verify_token raises ValueError on malformed format)
     if not token:
         await websocket.close(code=4001, reason="Missing token")
         return

@@ -40,6 +40,7 @@ class TranslationsJa extends Translations with BaseTranslations<AppLocale, Trans
 
 	// Translations
 	@override late final _Translations$common$ja common = _Translations$common$ja._(_root);
+	@override late final _Translations$genui$ja genui = _Translations$genui$ja._(_root);
 	@override late final _Translations$time$ja time = _Translations$time$ja._(_root);
 	@override late final _Translations$greeting$ja greeting = _Translations$greeting$ja._(_root);
 	@override late final _Translations$navigation$ja navigation = _Translations$navigation$ja._(_root);
@@ -58,6 +59,7 @@ class TranslationsJa extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$dateRange$ja dateRange = _Translations$dateRange$ja._(_root);
 	@override late final _Translations$forecast$ja forecast = _Translations$forecast$ja._(_root);
 	@override late final _Translations$chat$ja chat = _Translations$chat$ja._(_root);
+	@override late final _Translations$image$ja image = _Translations$image$ja._(_root);
 	@override late final _Translations$footprint$ja footprint = _Translations$footprint$ja._(_root);
 	@override late final _Translations$media$ja media = _Translations$media$ja._(_root);
 	@override late final _Translations$error$ja error = _Translations$error$ja._(_root);
@@ -108,6 +110,20 @@ class _Translations$common$ja extends Translations$common$zh {
 	@override String get loadFailed => '読み込み失敗';
 	@override String get history => '履歴';
 	@override String get reset => 'リセット';
+}
+
+// Path: genui
+class _Translations$genui$ja extends Translations$genui$zh {
+	_Translations$genui$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get errorBusy => '申し訳ございません。サービスが一時的に混雑しています。後ほどお試しください';
+	@override String get errorTimeout => 'リクエストがタイムアウトしました。ネットワークを確認して再試行してください';
+	@override String get errorNetwork => 'ネットワーク接続に問題があります。確認して再試行してください';
+	@override String get errorSessionExpired => 'セッションが期限切れです。再度ログインしてください';
+	@override String get errorGeneric => '問題が発生しました。後ほどお試しください';
 }
 
 // Path: time
@@ -666,6 +682,11 @@ class _Translations$chat$ja extends Translations$chat$zh {
 	@override String get inputMessage => 'メッセージを入力...';
 	@override String get listening => '聞き取り中...';
 	@override String get aiThinking => '処理中...';
+	@override String get stoppedResponse => 'この返信を停止しました';
+	@override String get errorRecover => '申し訳ありません、問題が発生しました。もう一度お試しください 🙏';
+	@override String get contentCopied => '内容をコピーしました';
+	@override String get jsonCopied => 'JSONデータをコピーしました';
+	@override String get noContentToCopy => 'コピーする内容がありません';
 	@override late final _Translations$chat$tools$ja tools = _Translations$chat$tools$ja._(_root);
 	@override String get speechNotRecognized => '音声を認識できませんでした';
 	@override String get currentExpense => '今回の支出';
@@ -685,6 +706,17 @@ class _Translations$chat$ja extends Translations$chat$zh {
 	@override late final _Translations$chat$transferWizard$ja transferWizard = _Translations$chat$transferWizard$ja._(_root);
 	@override late final _Translations$chat$genui$ja genui = _Translations$chat$genui$ja._(_root);
 	@override late final _Translations$chat$welcome$ja welcome = _Translations$chat$welcome$ja._(_root);
+}
+
+// Path: image
+class _Translations$image$ja extends Translations$image$zh {
+	_Translations$image$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get deleteTitle => '画像を削除';
+	@override String get deleteConfirm => 'この画像を削除してもよろしいですか？この操作は元に戻せません。';
 }
 
 // Path: footprint
@@ -1142,6 +1174,84 @@ class _Translations$forecast$recurringTransaction$ja extends Translations$foreca
 	@override String get noPending => '確認待ち取引なし';
 	@override String get confirmSuccess => '取引を確認しました';
 	@override String get skipSuccess => '取引をスキップしました';
+	@override String get interval => '繰り返し間隔';
+	@override String get selectDays => '曜日を選択';
+	@override String get alwaysLastDay => '毎月末日に実行';
+	@override String get lastDayExecution => '毎月の最終日に実行されます';
+	@override String dayExecution({required Object day, required Object suffix}) => '毎月 ${day} 日${suffix}に実行（短い月は月末に合わせます）';
+	@override String get setEndDate => '終了日を設定';
+	@override String get selectEndDate => '終了日を選択';
+	@override String get preview => 'ルールプレビュー';
+	@override String get daily => '毎日';
+	@override String get weekly => '毎週';
+	@override String get monthly => '毎月';
+	@override String get yearly => '毎年';
+	@override String get custom => 'カスタム';
+	@override String get cycle => 'サイクル';
+	@override String everyDays({required Object count}) => '${count} 日ごと';
+	@override String everyWeeks({required Object count}) => '${count} 週ごと';
+	@override String everyMonths({required Object count}) => '${count} か月ごと';
+	@override String everyYears({required Object count}) => '${count} 年ごと';
+	@override String monthlyOnDay({required Object day, required Object suffix}) => '毎月 ${day} 日${suffix}';
+	@override String everyMonthsOnDay({required Object count, required Object day, required Object suffix}) => '${count} か月ごとの ${day} 日${suffix}';
+	@override String get monthlyLastDay => '毎月最終日';
+	@override String everyMonthsLastDay({required Object count}) => '${count} か月ごとの最終日';
+	@override String yearlyOn({required Object month, required Object day}) => '毎年 ${month}/${day}';
+	@override String everyYearsOn({required Object count, required Object month, required Object day}) => '${count} 年ごとの ${month}/${day}';
+	@override String weeklyOnDay({required Object day}) => '毎週${day}';
+	@override String get weekdayMon => '月';
+	@override String get weekdayTue => '火';
+	@override String get weekdayWed => '水';
+	@override String get weekdayThu => '木';
+	@override String get weekdayFri => '金';
+	@override String get weekdaySat => '土';
+	@override String get weekdaySun => '日';
+	@override String get weekdayOn => '曜日';
+	@override String get weekdayJoiner => '、';
+	@override String get weeklyDaysPrefix => 'の';
+	@override String get sourceAccount => '振替元口座';
+	@override String get targetAccount => '振替先口座';
+	@override String get expenseAccount => '支出口座';
+	@override String get incomeAccount => '収入口座';
+	@override String get selectSourceAccount => '振替元口座を選択';
+	@override String get selectTargetAccount => '振替先口座を選択';
+	@override String get selectExpenseAccount => '支出口座を選択';
+	@override String get selectIncomeAccount => '収入口座を選択';
+	@override String amountNotFixed({required Object type}) => '${type}ごとの金額は固定されません';
+	@override String get selectBothAccounts => '振替元と振替先の口座を選択してください';
+	@override String selectAccountForType({required Object type}) => '${type}口座を選択してください';
+	@override String get deleteConfirmGeneric => 'この定期取引を削除してもよろしいですか？この操作は取り消せません。';
+	@override String selectDate({required Object date}) => '${date} を選択';
+	@override String get accountTypeCash => '現金';
+	@override String get accountTypeDeposit => '銀行預金';
+	@override String get accountTypeEMoney => '電子マネー';
+	@override String get accountTypeInvestment => '投資';
+	@override String get accountTypeReceivable => '売掛金';
+	@override String get accountTypeCreditCard => 'クレジットカード';
+	@override String get accountTypeLoan => 'ローン口座';
+	@override String get accountTypePayable => '買掛金';
+	@override String get assetAccount => '資産口座';
+	@override String get liabilityAccount => '負債口座';
+	@override String get noAssetAccounts => '資産口座がありません';
+	@override String get goToFinanceToAddAccounts => '財務ページで口座を追加してください';
+	@override String get selectAccount => '口座を選択';
+	@override String get autoGenerateByRule => '有効にするとルールに従って取引を自動生成';
+	@override String dayUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count,
+		one: '日',
+		other: '日',
+	);
+	@override String weekUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count,
+		one: '週間',
+		other: '週間',
+	);
+	@override String monthUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count,
+		one: 'か月',
+		other: 'か月',
+	);
+	@override String yearUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count,
+		one: '年',
+		other: '年',
+	);
 }
 
 // Path: chat.tools
@@ -1889,6 +1999,7 @@ class _Translations$chat$genui$transactionCard$ja extends Translations$chat$genu
 	@override String get modify => '修正';
 	@override String get associate => '口座を関連付け';
 	@override String get selectAccount => '口座を選択';
+	@override String get autoGenerateByRule => '有効にするとルールに従って取引を自動生成';
 	@override String get noAccount => '口座がありません。追加してください';
 	@override String get missingId => 'IDがありません';
 	@override String associatedTo({required Object name}) => '${name} に関連付け済み';
@@ -2371,6 +2482,11 @@ extension on TranslationsJa {
 			'common.loadFailed' => '読み込み失敗',
 			'common.history' => '履歴',
 			'common.reset' => 'リセット',
+			'genui.errorBusy' => '申し訳ございません。サービスが一時的に混雑しています。後ほどお試しください',
+			'genui.errorTimeout' => 'リクエストがタイムアウトしました。ネットワークを確認して再試行してください',
+			'genui.errorNetwork' => 'ネットワーク接続に問題があります。確認して再試行してください',
+			'genui.errorSessionExpired' => 'セッションが期限切れです。再度ログインしてください',
+			'genui.errorGeneric' => '問題が発生しました。後ほどお試しください',
 			'time.today' => '今日',
 			'time.yesterday' => '昨日',
 			'time.dayBeforeYesterday' => '一昨日',
@@ -2826,12 +2942,85 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.noPending' => '確認待ち取引なし',
 			'forecast.recurringTransaction.confirmSuccess' => '取引を確認しました',
 			'forecast.recurringTransaction.skipSuccess' => '取引をスキップしました',
+			'forecast.recurringTransaction.interval' => '繰り返し間隔',
+			'forecast.recurringTransaction.selectDays' => '曜日を選択',
+			'forecast.recurringTransaction.alwaysLastDay' => '毎月末日に実行',
+			'forecast.recurringTransaction.lastDayExecution' => '毎月の最終日に実行されます',
+			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => '毎月 ${day} 日${suffix}に実行（短い月は月末に合わせます）',
+			'forecast.recurringTransaction.setEndDate' => '終了日を設定',
+			'forecast.recurringTransaction.selectEndDate' => '終了日を選択',
+			'forecast.recurringTransaction.preview' => 'ルールプレビュー',
+			'forecast.recurringTransaction.daily' => '毎日',
+			'forecast.recurringTransaction.weekly' => '毎週',
+			'forecast.recurringTransaction.monthly' => '毎月',
+			'forecast.recurringTransaction.yearly' => '毎年',
+			'forecast.recurringTransaction.custom' => 'カスタム',
+			'forecast.recurringTransaction.cycle' => 'サイクル',
+			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count} 日ごと',
+			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '${count} 週ごと',
+			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '${count} か月ごと',
+			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '${count} 年ごと',
+			'forecast.recurringTransaction.monthlyOnDay' => ({required Object day, required Object suffix}) => '毎月 ${day} 日${suffix}',
+			'forecast.recurringTransaction.everyMonthsOnDay' => ({required Object count, required Object day, required Object suffix}) => '${count} か月ごとの ${day} 日${suffix}',
+			'forecast.recurringTransaction.monthlyLastDay' => '毎月最終日',
+			'forecast.recurringTransaction.everyMonthsLastDay' => ({required Object count}) => '${count} か月ごとの最終日',
+			'forecast.recurringTransaction.yearlyOn' => ({required Object month, required Object day}) => '毎年 ${month}/${day}',
+			'forecast.recurringTransaction.everyYearsOn' => ({required Object count, required Object month, required Object day}) => '${count} 年ごとの ${month}/${day}',
+			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => '毎週${day}',
+			'forecast.recurringTransaction.weekdayMon' => '月',
+			'forecast.recurringTransaction.weekdayTue' => '火',
+			_ => null,
+		} ?? switch (path) {
+			'forecast.recurringTransaction.weekdayWed' => '水',
+			'forecast.recurringTransaction.weekdayThu' => '木',
+			'forecast.recurringTransaction.weekdayFri' => '金',
+			'forecast.recurringTransaction.weekdaySat' => '土',
+			'forecast.recurringTransaction.weekdaySun' => '日',
+			'forecast.recurringTransaction.weekdayOn' => '曜日',
+			'forecast.recurringTransaction.weekdayJoiner' => '、',
+			'forecast.recurringTransaction.weeklyDaysPrefix' => 'の',
+			'forecast.recurringTransaction.sourceAccount' => '振替元口座',
+			'forecast.recurringTransaction.targetAccount' => '振替先口座',
+			'forecast.recurringTransaction.expenseAccount' => '支出口座',
+			'forecast.recurringTransaction.incomeAccount' => '収入口座',
+			'forecast.recurringTransaction.selectSourceAccount' => '振替元口座を選択',
+			'forecast.recurringTransaction.selectTargetAccount' => '振替先口座を選択',
+			'forecast.recurringTransaction.selectExpenseAccount' => '支出口座を選択',
+			'forecast.recurringTransaction.selectIncomeAccount' => '収入口座を選択',
+			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => '${type}ごとの金額は固定されません',
+			'forecast.recurringTransaction.selectBothAccounts' => '振替元と振替先の口座を選択してください',
+			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => '${type}口座を選択してください',
+			'forecast.recurringTransaction.deleteConfirmGeneric' => 'この定期取引を削除してもよろしいですか？この操作は取り消せません。',
+			'forecast.recurringTransaction.selectDate' => ({required Object date}) => '${date} を選択',
+			'forecast.recurringTransaction.accountTypeCash' => '現金',
+			'forecast.recurringTransaction.accountTypeDeposit' => '銀行預金',
+			'forecast.recurringTransaction.accountTypeEMoney' => '電子マネー',
+			'forecast.recurringTransaction.accountTypeInvestment' => '投資',
+			'forecast.recurringTransaction.accountTypeReceivable' => '売掛金',
+			'forecast.recurringTransaction.accountTypeCreditCard' => 'クレジットカード',
+			'forecast.recurringTransaction.accountTypeLoan' => 'ローン口座',
+			'forecast.recurringTransaction.accountTypePayable' => '買掛金',
+			'forecast.recurringTransaction.assetAccount' => '資産口座',
+			'forecast.recurringTransaction.liabilityAccount' => '負債口座',
+			'forecast.recurringTransaction.noAssetAccounts' => '資産口座がありません',
+			'forecast.recurringTransaction.goToFinanceToAddAccounts' => '財務ページで口座を追加してください',
+			'forecast.recurringTransaction.selectAccount' => '口座を選択',
+			'forecast.recurringTransaction.autoGenerateByRule' => '有効にするとルールに従って取引を自動生成',
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '日', other: '日', ),
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '週間', other: '週間', ),
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: 'か月', other: 'か月', ),
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '年', other: '年', ),
 			'chat.newChat' => '新しいチャット',
 			'chat.noMessages' => 'メッセージがありません。',
 			'chat.loadingFailed' => '読み込み失敗',
 			'chat.inputMessage' => 'メッセージを入力...',
 			'chat.listening' => '聞き取り中...',
 			'chat.aiThinking' => '処理中...',
+			'chat.stoppedResponse' => 'この返信を停止しました',
+			'chat.errorRecover' => '申し訳ありません、問題が発生しました。もう一度お試しください 🙏',
+			'chat.contentCopied' => '内容をコピーしました',
+			'chat.jsonCopied' => 'JSONデータをコピーしました',
+			'chat.noContentToCopy' => 'コピーする内容がありません',
 			'chat.tools.processing' => '処理中...',
 			'chat.tools.readFile' => 'ファイルを確認中...',
 			'chat.tools.searchTransactions' => '取引を検索中...',
@@ -2858,8 +3047,6 @@ extension on TranslationsJa {
 			'chat.tools.listSpaces' => '共有スペースを取得中...',
 			'chat.tools.querySpaceSummary' => 'スペース概要を確認中...',
 			'chat.tools.prepareTransfer' => '振替を準備中...',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.unknown' => 'リクエストを処理中...',
 			'chat.tools.done.readFile' => 'ファイルを確認しました',
 			'chat.tools.done.searchTransactions' => '取引を検索しました',
@@ -2963,6 +3150,7 @@ extension on TranslationsJa {
 			'chat.genui.transactionCard.modify' => '修正',
 			'chat.genui.transactionCard.associate' => '口座を関連付け',
 			'chat.genui.transactionCard.selectAccount' => '口座を選択',
+			'chat.genui.transactionCard.autoGenerateByRule' => '有効にするとルールに従って取引を自動生成',
 			'chat.genui.transactionCard.noAccount' => '口座がありません。追加してください',
 			'chat.genui.transactionCard.missingId' => 'IDがありません',
 			'chat.genui.transactionCard.associatedTo' => ({required Object name}) => '${name} に関連付け済み',
@@ -3115,6 +3303,8 @@ extension on TranslationsJa {
 			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
 			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
 			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'image.deleteTitle' => '画像を削除',
+			'image.deleteConfirm' => 'この画像を削除してもよろしいですか？この操作は元に戻せません。',
 			'footprint.searchIn' => '検索',
 			'footprint.searchInAllRecords' => 'すべての記録から検索',
 			'media.selectPhotos' => '写真を選択',
@@ -3293,6 +3483,8 @@ extension on TranslationsJa {
 			'sharedSpace.roles.admin' => '管理者',
 			'sharedSpace.roles.member' => 'メンバー',
 			'sharedSpace.title' => '共有スペース',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.create.title' => '共有スペースを作成',
 			'sharedSpace.create.subtitle' => '新しい共有スペースを作成して、友達と支出を管理しましょう',
 			'sharedSpace.create.nameLabel' => 'スペース名',
@@ -3372,8 +3564,6 @@ extension on TranslationsJa {
 			'sharedSpace.notificationCard.reject' => '拒否',
 			'sharedSpace.notificationCard.unknownTime' => '不明な時間',
 			'sharedSpace.notificationCard.justNow' => 'たった今',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.spaceCard.noDescription' => '説明なし',
 			'sharedSpace.spaceCard.creator' => '作成者',
 			'sharedSpace.spaceCard.member' => 'メンバー',

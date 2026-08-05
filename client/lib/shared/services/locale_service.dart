@@ -1,5 +1,6 @@
 // shared/services/locale_service.dart
 import 'dart:async';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../i18n/strings.g.dart';
 
@@ -53,6 +54,7 @@ class LocaleService {
       if (success) {
         // Apply new language settings
         unawaited(LocaleSettings.setLocale(locale));
+        syncIntlLocale();
       }
 
       return success;
@@ -66,6 +68,12 @@ class LocaleService {
 
   /// Get current language
   static AppLocale get currentLocale => LocaleSettings.currentLocale;
+
+  /// Synchronize [Intl] with the active app locale so
+  /// NumberFormat/DateFormat fall back to the selected language.
+  static void syncIntlLocale() {
+    Intl.defaultLocale = LocaleSettings.currentLocale.languageTag;
+  }
 
   /// Check if language code is supported
   static bool isSupportedLocale(String localeCode) {

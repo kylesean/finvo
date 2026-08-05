@@ -1,9 +1,10 @@
 import 'package:logging/logging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../network/exceptions/app_exception.dart';
 
 const String _authTokenKey = 'auth_token';
+const String _authRefreshTokenKey = 'auth_refresh_token';
 // Note: _userIdKey and _userDataKey removed - add back when implementing user data storage
 
 class SecureStorageService {
@@ -13,9 +14,16 @@ class SecureStorageService {
   // Memory cache to avoid repeated reading causing performance overhead
   String? _cachedToken;
   bool _tokenCacheInitialized = false;
+  String? _cachedRefreshToken;
+  bool _refreshTokenCacheInitialized = false;
 
   SecureStorageService(this._secureStorage);
 
+  /// Save token to secure storage.
+  ///
+  /// Deliberately does NOT fall back to plaintext SharedPreferences: if
+  /// Keychain/Keystore is unavailable the write fails hard (product decision:
+  /// "fail closed" rather than storing secrets insecurely).
   Future<void> saveToken(String token) async {
     try {
       await _secureStorage.write(key: _authTokenKey, value: token);
@@ -23,17 +31,13 @@ class SecureStorageService {
       _tokenCacheInitialized = true;
       _logger.fine('SecureStorageService: Token saved (${token.length} chars)');
     } catch (e) {
-      _logger.warning(
-        'SecureStorageService: Failed to save token to Keychain, falling back to SharedPreferences: $e',
+      _tokenCacheInitialized = false;
+      _logger.severe(
+        'SecureStorageService: Failed to save token to Keychain/Keystore, refusing plaintext fallback: $e',
       );
-      _cachedToken = token;
-      _tokenCacheInitialized = true;
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_authTokenKey, token);
-      } catch (err) {
-        _logger.warning('SharedPreferences fallback failed: $err');
-      }
+      throw SecureStorageUnavailableException(
+        'Failed to store token securely on this device.',
+      );
     }
   }
 
@@ -53,20 +57,12 @@ class SecureStorageService {
       );
       return token;
     } catch (e) {
-      _logger.warning(
-        'SecureStorageService: Failed to read token from Keychain, trying SharedPreferences: $e',
+      _logger.severe(
+        'SecureStorageService: Failed to read token from Keychain/Keystore: $e',
       );
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString(_authTokenKey);
-        _cachedToken = token;
-        _tokenCacheInitialized = true;
-        return token;
-      } catch (err) {
-        _tokenCacheInitialized = true;
-        _cachedToken = null;
-        return null;
-      }
+      throw SecureStorageUnavailableException(
+        'Failed to read token from secure storage on this device.',
+      );
     }
   }
 
@@ -82,15 +78,66 @@ class SecureStorageService {
     }
   }
 
+  /// Save the refresh token to secure storage (fail-closed, like the access token).
+  Future<void> saveRefreshToken(String token) async {
+    try {
+      await _secureStorage.write(key: _authRefreshTokenKey, value: token);
+      _cachedRefreshToken = token;
+      _refreshTokenCacheInitialized = true;
+      _logger.fine(
+        'SecureStorageService: Refresh token saved (${token.length} chars)',
+      );
+    } catch (e) {
+      _refreshTokenCacheInitialized = false;
+      _logger.severe('SecureStorageService: Failed to save refresh token: $e');
+      throw SecureStorageUnavailableException(
+        'Failed to store refresh token securely on this device.',
+      );
+    }
+  }
+
+  /// Read the refresh token from secure storage.
+  Future<String?> getRefreshToken() async {
+    if (_refreshTokenCacheInitialized) {
+      return _cachedRefreshToken;
+    }
+    try {
+      final token = await _secureStorage.read(key: _authRefreshTokenKey);
+      _cachedRefreshToken = token;
+      _refreshTokenCacheInitialized = true;
+      return token;
+    } catch (e) {
+      _logger.severe('SecureStorageService: Failed to read refresh token: $e');
+      throw SecureStorageUnavailableException(
+        'Failed to read refresh token from secure storage on this device.',
+      );
+    }
+  }
+
+  /// Delete the refresh token (best-effort during logout).
+  Future<void> deleteRefreshToken() async {
+    try {
+      await _secureStorage.delete(key: _authRefreshTokenKey);
+      _cachedRefreshToken = null;
+      _refreshTokenCacheInitialized = true;
+      _logger.info('SecureStorageService: Refresh token deleted');
+    } catch (e) {
+      _logger.info('SecureStorageService: Failed to delete refresh token: $e');
+    }
+  }
+
   /// Clear memory cache (for scenarios such as server switching)
   void invalidateCache() {
     _cachedToken = null;
     _tokenCacheInitialized = false;
+    _cachedRefreshToken = null;
+    _refreshTokenCacheInitialized = false;
     _logger.info('SecureStorageService: Cache invalidated');
   }
 
   Future<void> clearAllData() async {
     await deleteToken();
+    await deleteRefreshToken();
     invalidateCache();
     // Clear other authentication-related data
   }

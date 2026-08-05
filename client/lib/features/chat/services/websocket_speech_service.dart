@@ -19,6 +19,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   final String path;
 
   WebSocketChannel? _channel;
+  StreamSubscription<dynamic>? _channelSubscription;
   bool _isConnected = false;
   bool _isListening = false;
   bool _isManualStop = false; // User manual stop protection flag
@@ -111,7 +112,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _logger.info('WebSocket connected successfully');
 
       // Listen to messages
-      _channel!.stream.listen(
+      _channelSubscription = _channel!.stream.listen(
         _onMessage,
         onError: _onError,
         onDone: _onDisconnected,
@@ -148,6 +149,9 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _audioSubscription = null;
       _isListening = false;
     }
+
+    await _channelSubscription?.cancel();
+    _channelSubscription = null;
 
     if (_channel != null) {
       try {

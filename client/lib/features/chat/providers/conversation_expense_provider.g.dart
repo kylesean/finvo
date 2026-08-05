@@ -10,14 +10,14 @@ part of 'conversation_expense_provider.dart';
 // ignore_for_file: type=lint, type=warning
 /// Current conversation expense Notifier
 ///
-/// Maintains real-time expense accumulation for header display.
+/// Tracks the active conversation; expense totals are derived from messages.
 
 @ProviderFor(ConversationExpenseNotifier)
 final conversationExpenseProvider = ConversationExpenseNotifierProvider._();
 
 /// Current conversation expense Notifier
 ///
-/// Maintains real-time expense accumulation for header display.
+/// Tracks the active conversation; expense totals are derived from messages.
 final class ConversationExpenseNotifierProvider
     extends
         $NotifierProvider<
@@ -26,7 +26,7 @@ final class ConversationExpenseNotifierProvider
         > {
   /// Current conversation expense Notifier
   ///
-  /// Maintains real-time expense accumulation for header display.
+  /// Tracks the active conversation; expense totals are derived from messages.
   ConversationExpenseNotifierProvider._()
     : super(
         from: null,
@@ -55,11 +55,11 @@ final class ConversationExpenseNotifierProvider
 }
 
 String _$conversationExpenseNotifierHash() =>
-    r'fa8e7e63445e817ceb94dbe841a35f9b8235f5c4';
+    r'1aaa89a1eb2b82d78f331d975a5afd69a53b2904';
 
 /// Current conversation expense Notifier
 ///
-/// Maintains real-time expense accumulation for header display.
+/// Tracks the active conversation; expense totals are derived from messages.
 
 abstract class _$ConversationExpenseNotifier
     extends $Notifier<ConversationExpenseState> {
@@ -83,21 +83,27 @@ abstract class _$ConversationExpenseNotifier
 
 /// Current conversation expense statistics Provider
 ///
-/// Calculates total expenses from historical messages + real-time accumulation.
+/// Derived purely from historical messages (uiComponents + toolCalls).
+/// A single transaction is counted at most once per message via toolCallId
+/// deduplication between the two data sources.
 
 @ProviderFor(conversationTotalExpense)
 final conversationTotalExpenseProvider = ConversationTotalExpenseProvider._();
 
 /// Current conversation expense statistics Provider
 ///
-/// Calculates total expenses from historical messages + real-time accumulation.
+/// Derived purely from historical messages (uiComponents + toolCalls).
+/// A single transaction is counted at most once per message via toolCallId
+/// deduplication between the two data sources.
 
 final class ConversationTotalExpenseProvider
     extends $FunctionalProvider<double, double, double>
     with $Provider<double> {
   /// Current conversation expense statistics Provider
   ///
-  /// Calculates total expenses from historical messages + real-time accumulation.
+  /// Derived purely from historical messages (uiComponents + toolCalls).
+  /// A single transaction is counted at most once per message via toolCallId
+  /// deduplication between the two data sources.
   ConversationTotalExpenseProvider._()
     : super(
         from: null,
@@ -132,7 +138,7 @@ final class ConversationTotalExpenseProvider
 }
 
 String _$conversationTotalExpenseHash() =>
-    r'2a66328616f291979e9d40e490f194c053f1eeb0';
+    r'857112985dce3985ce69b341cd32cbd17d53a33f';
 
 /// Formatted current conversation expense title Provider
 ///

@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/core/network/network_client.dart';
 import '../../../core/network/exceptions/app_exception.dart';
+import '../../../shared/services/response_parser.dart';
 import '../models/shared_space_models.dart';
 
 part 'shared_space_service.g.dart';
@@ -20,7 +21,7 @@ class SharedSpaceService {
       method: HttpMethod.get,
       queryParameters: {'page': page, 'limit': limit},
       fromJsonT: (json) =>
-          _parsePaginatedResponse(json, SharedSpaceListResponse.fromJson),
+          _parseItemResponse(json, SharedSpaceListResponse.fromJson),
     );
   }
 
@@ -123,13 +124,43 @@ class SharedSpaceService {
       '/shared-spaces/$spaceId/transactions',
       method: HttpMethod.get,
       queryParameters: {'page': page, 'limit': limit},
-      fromJsonT: (json) => _parseTransactionListResponse(json),
+      fromJsonT: (json) =>
+          _parseTransactionListResponse(json, page: page, limit: limit),
     );
   }
 
-  SpaceTransactionListResponse _parseTransactionListResponse(dynamic json) {
+  SpaceTransactionListResponse _parseTransactionListResponse(
+    dynamic json, {
+    required int page,
+    required int limit,
+  }) {
     if (json is Map<String, dynamic>) {
       final dataField = json['data'];
+
+      // Backend paginated shape: {"transactions": [...], "total": n, "page": p, "limit": l}
+      if (dataField is Map<String, dynamic>) {
+        final transactionsField = dataField['transactions'];
+        if (transactionsField is List) {
+          final transactions = transactionsField
+              .map(
+                (item) =>
+                    SpaceTransaction.fromJson(item as Map<String, dynamic>),
+              )
+              .toList();
+          return SpaceTransactionListResponse(
+            transactions: transactions,
+            total: dataField['total'] is int
+                ? dataField['total'] as int
+                : transactions.length,
+            page: dataField['page'] is int ? dataField['page'] as int : page,
+            limit: dataField['limit'] is int
+                ? dataField['limit'] as int
+                : limit,
+          );
+        }
+      }
+
+      // Backend list shape: [...]
       if (dataField is List) {
         final transactions = dataField
             .map(
@@ -139,8 +170,8 @@ class SharedSpaceService {
         return SpaceTransactionListResponse(
           transactions: transactions,
           total: transactions.length,
-          page: 1,
-          limit: 20,
+          page: page,
+          limit: limit,
         );
       }
     }
@@ -170,38 +201,7 @@ class SharedSpaceService {
   T _parseItemResponse<T>(
     dynamic json,
     T Function(Map<String, dynamic>) fromJson,
-  ) {
-    if (json is Map<String, dynamic>) {
-      final dataField = json['data'];
-      if (dataField is Map<String, dynamic>) {
-        try {
-          return fromJson(dataField);
-        } catch (e) {
-          throw DataParsingException('Failed to parse item: ${e.toString()}');
-        }
-      }
-    }
-    throw DataParsingException("Expected JSON Object in 'data' field");
-  }
-
-  T _parsePaginatedResponse<T>(
-    dynamic json,
-    T Function(Map<String, dynamic>) fromJson,
-  ) {
-    if (json is Map<String, dynamic>) {
-      final dataField = json['data'];
-      if (dataField is Map<String, dynamic>) {
-        try {
-          return fromJson(dataField);
-        } catch (e) {
-          throw DataParsingException(
-            'Failed to parse paginated response: ${e.toString()}',
-          );
-        }
-      }
-    }
-    throw DataParsingException("Expected JSON Object in 'data' field");
-  }
+  ) => ResponseParser.parseItem(json, fromJson);
 }
 
 // Provider for SharedSpaceService

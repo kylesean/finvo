@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:forui/forui.dart';
-import 'package:intl/intl.dart';
 import '../../../i18n/strings.g.dart';
 import '../models/statistics_models.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -28,7 +28,7 @@ class CategoryDetailSheet extends StatelessWidget {
   }
 
   String _formatAmount(String amount) {
-    final numberFormat = NumberFormat('#,##0.00', 'zh_CN');
+    final numberFormat = AmountFormatter.getNumberFormat('CNY');
     return numberFormat.format(double.tryParse(amount) ?? 0);
   }
 

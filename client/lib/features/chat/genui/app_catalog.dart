@@ -320,307 +320,157 @@ class AppCatalog {
 
   /// Build transaction card widget
   static Widget _buildTransactionCardWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'TransactionReceipt';
+    return _wrapBuilder(
+      componentName: 'TransactionReceipt',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
 
-    try {
-      final data = context.data as Map<String, dynamic>;
+        // Validate required fields (only check truly required fields)
+        // transaction_id and amount are required
+        // raw_input/description can be empty, will use default values
+        final hasTransactionId =
+            data.containsKey('transaction_id') &&
+            data['transaction_id'] != null;
+        final hasAmount = data.containsKey('amount') && data['amount'] != null;
 
-      // Validate required fields (only check truly required fields)
-      // transaction_id and amount are required
-      // raw_input/description can be empty, will use default values
-      final hasTransactionId =
-          data.containsKey('transaction_id') && data['transaction_id'] != null;
-      final hasAmount = data.containsKey('amount') && data['amount'] != null;
+        if (!hasTransactionId || !hasAmount) {
+          GenUiLogger.logError(
+            message: 'TransactionReceipt missing required fields',
+            schema: data,
+          );
+          return _buildErrorWidget(
+            context.buildContext,
+            'Failed to load transaction record, please retry',
+          );
+        }
 
-      if (!hasTransactionId || !hasAmount) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        GenUiLogger.logError(
-          message: 'TransactionReceipt missing required fields',
-          schema: data,
-        );
-        return _buildErrorWidget(
-          context.buildContext,
-          'Failed to load transaction record, please retry',
-        );
-      }
-
-      // Use standard TransactionCard (no reactive binding needed for one-shot receipts)
-      final widget = TransactionCard(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
-    }
+        // Use standard TransactionCard (no reactive binding needed for one-shot receipts)
+        return TransactionCard(data: data);
+      },
+    );
   }
 
   /// Build transfer receipt widget
   static Widget _buildTransferReceiptWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'TransferReceipt';
+    return _wrapBuilder(
+      componentName: 'TransferReceipt',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
 
-    try {
-      final data = context.data as Map<String, dynamic>;
+        // Validate required fields
+        final hasTransactionId =
+            data.containsKey('transaction_id') &&
+            data['transaction_id'] != null;
+        final hasAmount = data.containsKey('amount') && data['amount'] != null;
+        final hasTransferInfo =
+            data.containsKey('transfer_info') && data['transfer_info'] != null;
 
-      // Validate required fields
-      final hasTransactionId =
-          data.containsKey('transaction_id') && data['transaction_id'] != null;
-      final hasAmount = data.containsKey('amount') && data['amount'] != null;
-      final hasTransferInfo =
-          data.containsKey('transfer_info') && data['transfer_info'] != null;
+        if (!hasTransactionId || !hasAmount || !hasTransferInfo) {
+          GenUiLogger.logError(
+            message: 'TransferReceipt missing required fields',
+            schema: data,
+          );
+          return _buildErrorWidget(
+            context.buildContext,
+            'Failed to load transfer record, please retry',
+          );
+        }
 
-      if (!hasTransactionId || !hasAmount || !hasTransferInfo) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        GenUiLogger.logError(
-          message: 'TransferReceipt missing required fields',
-          schema: data,
-        );
-        return _buildErrorWidget(
-          context.buildContext,
-          'Failed to load transfer record, please retry',
-        );
-      }
-
-      final widget = TransferReceipt(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
-    }
+        return TransferReceipt(data: data);
+      },
+    );
   }
 
   /// Build data table widget
   static Widget _buildExpenseTableWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'DataTable';
+    return _wrapBuilder(
+      componentName: 'DataTable',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
 
-    try {
-      final data = context.data as Map<String, dynamic>;
+        // Validate required fields
+        if (!_validateRequiredFields(data, ['title', 'headers', 'rows'])) {
+          return _buildErrorWidget(
+            context.buildContext,
+            'Missing required fields',
+          );
+        }
 
-      // Validate required fields
-      if (!_validateRequiredFields(data, ['title', 'headers', 'rows'])) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        return _buildErrorWidget(
-          context.buildContext,
-          'Missing required fields',
-        );
-      }
-
-      final widget = ExpenseTable(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
-    }
+        return ExpenseTable(data: data);
+      },
+    );
   }
 
   /// Build chart card widget
   static Widget _buildChartCardWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'ChartCard';
+    return _wrapBuilder(
+      componentName: 'ChartCard',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
 
-    try {
-      final data = context.data as Map<String, dynamic>;
+        // Validate required fields
+        if (!_validateRequiredFields(data, [
+          'title',
+          'chartType',
+          'chartData',
+        ])) {
+          return _buildErrorWidget(
+            context.buildContext,
+            'Missing required fields',
+          );
+        }
 
-      // Validate required fields
-      if (!_validateRequiredFields(data, ['title', 'chartType', 'chartData'])) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        return _buildErrorWidget(
-          context.buildContext,
-          'Missing required fields',
-        );
-      }
-
-      final widget = ChartCard(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
-    }
+        return ChartCard(data: data);
+      },
+    );
   }
 
   /// Build summary card widget
   static Widget _buildSummaryCardWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'SummaryCard';
+    return _wrapBuilder(
+      componentName: 'SummaryCard',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
 
-    try {
-      final data = context.data as Map<String, dynamic>;
+        // Validate required fields
+        if (!_validateRequiredFields(data, ['title', 'summary', 'items'])) {
+          return _buildErrorWidget(
+            context.buildContext,
+            'Missing required fields',
+          );
+        }
 
-      // Validate required fields
-      if (!_validateRequiredFields(data, ['title', 'summary', 'items'])) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        return _buildErrorWidget(
-          context.buildContext,
-          'Missing required fields',
-        );
-      }
-
-      final widget = SummaryCard(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
-    }
+        return SummaryCard(data: data);
+      },
+    );
   }
 
   /// Build transfer wizard widget
   static Widget _buildTransferWizardWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'TransferWizard';
+    return _wrapBuilder(
+      componentName: 'TransferWizard',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
 
-    try {
-      final data = context.data as Map<String, dynamic>;
-
-      // Validate required fields
-      if (!_validateRequiredFields(data, [
-        'sourceAccounts',
-        'targetAccounts',
-      ])) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        return _buildErrorWidget(
-          context.buildContext,
-          'Failed to load transfer wizard, please retry',
-        );
-      }
-      final widget = TransferWizard(
-        data: data,
-        dispatchEvent: context.dispatchEvent,
-      );
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(
-        context.buildContext,
-        'Transfer wizard rendering failed: $e',
-      );
-    }
+        // Validate required fields
+        if (!_validateRequiredFields(data, [
+          'sourceAccounts',
+          'targetAccounts',
+        ])) {
+          return _buildErrorWidget(
+            context.buildContext,
+            'Failed to load transfer wizard, please retry',
+          );
+        }
+        return TransferWizard(data: data, dispatchEvent: context.dispatchEvent);
+      },
+    );
   }
 
   /// Validate required fields
@@ -634,6 +484,36 @@ class AppCatalog {
       }
     }
     return true;
+  }
+
+  /// Wrap a builder with invocation logging and error handling
+  static Widget _wrapBuilder({
+    required String componentName,
+    required CatalogItemContext context,
+    required Widget Function(CatalogItemContext context) build,
+  }) {
+    final startTime = DateTime.now();
+    try {
+      final widget = build(context);
+      GenUiLogger.logBuilderInvocation(
+        componentName: componentName,
+        success: true,
+        durationMs: DateTime.now().difference(startTime).inMilliseconds,
+      );
+      return widget;
+    } catch (e, stackTrace) {
+      GenUiLogger.logBuilderInvocation(
+        componentName: componentName,
+        success: false,
+        durationMs: DateTime.now().difference(startTime).inMilliseconds,
+      );
+      GenUiLogger.logError(
+        message: 'Builder failed for $componentName',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
+    }
   }
 
   /// Build error widget
@@ -1096,314 +976,125 @@ class AppCatalog {
 
   /// Build transaction list widget
   static Widget _buildTransactionListWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'TransactionList';
-    try {
-      final data = context.data as Map<String, dynamic>;
-      final widget = TransactionList(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(context.buildContext, 'Rendering failed: $e');
-    }
+    return _wrapBuilder(
+      componentName: 'TransactionList',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
+        return TransactionList(data: data);
+      },
+    );
   }
 
   /// Build budget status card widget
   static Widget _buildBudgetStatusCardWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'BudgetStatusCard';
-    try {
-      final data = context.data as Map<String, dynamic>;
-      final widget = BudgetStatusCard(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(
-        context.buildContext,
-        'Budget status card rendering failed: $e',
-      );
-    }
+    return _wrapBuilder(
+      componentName: 'BudgetStatusCard',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
+        return BudgetStatusCard(data: data);
+      },
+    );
   }
 
   /// Build budget creation receipt widget
   static Widget _buildBudgetReceiptWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'BudgetReceipt';
-    try {
-      final data = context.data as Map<String, dynamic>;
-      final widget = BudgetReceipt(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(
-        context.buildContext,
-        'Budget receipt rendering failed: $e',
-      );
-    }
+    return _wrapBuilder(
+      componentName: 'BudgetReceipt',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
+        return BudgetReceipt(data: data);
+      },
+    );
   }
 
   /// Build budget analysis card widget (Skills-specific)
   static Widget _buildBudgetAnalysisCardWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'BudgetAnalysisCard';
-    try {
-      final data = context.data as Map<String, dynamic>;
-      final widget = BudgetAnalysisCard(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(
-        context.buildContext,
-        'Budget analysis card rendering failed: $e',
-      );
-    }
+    return _wrapBuilder(
+      componentName: 'BudgetAnalysisCard',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
+        return BudgetAnalysisCard(data: data);
+      },
+    );
   }
 
   /// Build batch transaction receipt widget
   static Widget _buildTransactionGroupReceiptWidget(
     CatalogItemContext context,
   ) {
-    final startTime = DateTime.now();
-    const componentName = 'TransactionGroupReceipt';
-    try {
-      final data = context.data as Map<String, dynamic>;
-      final success = data['success'] as bool? ?? false;
-      final transactions = data['transactions'] as List?;
-      if (!success || transactions == null || transactions.isEmpty) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
+    return _wrapBuilder(
+      componentName: 'TransactionGroupReceipt',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
+        final success = data['success'] as bool? ?? false;
+        final transactions = data['transactions'] as List?;
+        if (!success || transactions == null || transactions.isEmpty) {
+          return _buildErrorWidget(context.buildContext, '批量交易数据不完整');
+        }
+        return TransactionGroupReceipt(
+          data: data,
+          dispatchEvent: context.dispatchEvent,
         );
-        return _buildErrorWidget(context.buildContext, '批量交易数据不完整');
-      }
-      final widget = TransactionGroupReceipt(
-        data: data,
-        dispatchEvent: context.dispatchEvent,
-      );
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(
-        context.buildContext,
-        'Batch receipt rendering failed: $e',
-      );
-    }
+      },
+    );
   }
 
   /// Build cash flow card widget
   static Widget _buildCashFlowCardWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'CashFlowCard';
-    try {
-      final data = context.data as Map<String, dynamic>;
-      if (!_validateRequiredFields(data, ['netCashFlow', 'savingsRate'])) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        return _buildErrorWidget(
-          context.buildContext,
-          'Incomplete cash flow data',
-        );
-      }
-      final widget = CashFlowAnalysisCard(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(
-        context.buildContext,
-        'Cash flow analysis rendering failed: $e',
-      );
-    }
+    return _wrapBuilder(
+      componentName: 'CashFlowCard',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
+        if (!_validateRequiredFields(data, ['netCashFlow', 'savingsRate'])) {
+          return _buildErrorWidget(
+            context.buildContext,
+            'Incomplete cash flow data',
+          );
+        }
+        return CashFlowAnalysisCard(data: data);
+      },
+    );
   }
 
   /// Build financial health score card widget
   static Widget _buildHealthScoreCardWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'HealthScoreCard';
-    try {
-      final data = context.data as Map<String, dynamic>;
-      if (!_validateRequiredFields(data, ['totalScore', 'grade'])) {
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        return _buildErrorWidget(
-          context.buildContext,
-          'Incomplete financial health score data',
-        );
-      }
-      final widget = HealthScoreAnalysisCard(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(
-        context.buildContext,
-        'Financial health score rendering failed: $e',
-      );
-    }
+    return _wrapBuilder(
+      componentName: 'HealthScoreCard',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
+        if (!_validateRequiredFields(data, ['totalScore', 'grade'])) {
+          return _buildErrorWidget(
+            context.buildContext,
+            'Incomplete financial health score data',
+          );
+        }
+        return HealthScoreAnalysisCard(data: data);
+      },
+    );
   }
 
   /// Build cash flow forecast chart widget
   static Widget _buildCashFlowForecastChartWidget(CatalogItemContext context) {
-    final startTime = DateTime.now();
-    const componentName = 'CashFlowForecastChart';
-    try {
-      final data = context.data as Map<String, dynamic>;
-      final success = data['success'] as bool? ?? false;
-      if (!success) {
-        final errorMsg = data['error'] as String? ?? 'Forecast failed';
-        final duration = DateTime.now().difference(startTime).inMilliseconds;
-        GenUiLogger.logBuilderInvocation(
-          componentName: componentName,
-          success: false,
-          durationMs: duration,
-        );
-        return _buildErrorWidget(context.buildContext, errorMsg);
-      }
-      final widget = CashFlowForecastChart(data: data);
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: true,
-        durationMs: duration,
-      );
-      return widget;
-    } catch (e, stackTrace) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds;
-      GenUiLogger.logBuilderInvocation(
-        componentName: componentName,
-        success: false,
-        durationMs: duration,
-      );
-      GenUiLogger.logError(
-        message: 'Builder failed for $componentName',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return _buildErrorWidget(
-        context.buildContext,
-        'Cash flow forecast rendering failed: $e',
-      );
-    }
+    return _wrapBuilder(
+      componentName: 'CashFlowForecastChart',
+      context: context,
+      build: (CatalogItemContext context) {
+        final data = context.data as Map<String, dynamic>;
+        final success = data['success'] as bool? ?? false;
+        if (!success) {
+          final errorMsg = data['error'] as String? ?? 'Forecast failed';
+          return _buildErrorWidget(context.buildContext, errorMsg);
+        }
+        return CashFlowForecastChart(data: data);
+      },
+    );
   }
 
   /// Expense summary card component

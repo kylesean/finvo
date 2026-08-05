@@ -28,16 +28,36 @@ import 'package:finvo/shared/models/currency.dart';
 /// );
 /// ```
 class AmountFormatter {
-  // NumberFormat instance cache
+  // NumberFormat instance cache (bounded to avoid unbounded memory growth).
   static final Map<String, NumberFormat> _formatCache = {};
 
-  /// Get currency formatter
-  static NumberFormat _getCurrencyFormat(String currency) {
-    return _formatCache.putIfAbsent(
-      currency,
-      () =>
-          NumberFormat.currency(locale: 'zh_CN', symbol: '', decimalDigits: 2),
-    );
+  /// Maximum number of cached [NumberFormat] instances.
+  static const int _maxCacheSize = 64;
+
+  /// Get currency formatter.
+  ///
+  /// Uses the current Intl locale (kept in sync with the app locale by
+  /// [LocaleService]) instead of a hardcoded locale, so grouping/decimal
+  /// separators follow the selected language.
+  static NumberFormat getNumberFormat(
+    String currency, {
+    String? locale,
+    int decimalDigits = 2,
+  }) {
+    final effectiveLocale = locale ?? Intl.getCurrentLocale();
+    final cacheKey = '$effectiveLocale:$currency:$decimalDigits';
+    return _formatCache.putIfAbsent(cacheKey, () {
+      // Evict the oldest entry when the cache exceeds its bound.
+      if (_formatCache.length >= _maxCacheSize) {
+        final oldestKey = _formatCache.keys.first;
+        _formatCache.remove(oldestKey);
+      }
+      return NumberFormat.currency(
+        locale: effectiveLocale,
+        symbol: '',
+        decimalDigits: decimalDigits,
+      );
+    });
   }
 
   /// Format transaction amount
@@ -63,7 +83,7 @@ class AmountFormatter {
     if (compact) {
       formattedValue = formatCompact(absAmount);
     } else {
-      formattedValue = _getCurrencyFormat(currency).format(absAmount);
+      formattedValue = getNumberFormat(currency).format(absAmount);
     }
 
     if (!showSign) {
@@ -89,7 +109,7 @@ class AmountFormatter {
   static String formatCommon(double amount, {String currencyCode = 'CNY'}) {
     final symbol = getCurrencySymbol(currencyCode);
     final absAmount = amount.abs();
-    final formattedValue = _getCurrencyFormat(currencyCode).format(absAmount);
+    final formattedValue = getNumberFormat(currencyCode).format(absAmount);
     return '$symbol$formattedValue';
   }
 

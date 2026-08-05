@@ -34,32 +34,36 @@ class ExchangeRate extends _$ExchangeRate {
     // Get rate: Base -> Currency
     // If rate map contains "CNY": 7.2 (where Base is USD), then 1 USD = 7.2 CNY.
     // So Value(CNY) = Value(USD) * 7.2
-
-    double? fromRate;
-    double? toRate;
+    // Rates are parsed into Decimal so the whole conversion stays in Decimal,
+    // avoiding floating-point rounding on monetary amounts.
+    final Decimal? fromRate;
+    final Decimal? toRate;
 
     if (from == baseCurrency) {
-      fromRate = 1.0;
+      fromRate = Decimal.one;
     } else {
-      fromRate = rates[from];
+      final r = rates[from];
+      fromRate = r != null ? Decimal.parse(r.toString()) : null;
     }
 
     if (to == baseCurrency) {
-      toRate = 1.0;
+      toRate = Decimal.one;
     } else {
-      toRate = rates[to];
+      final r = rates[to];
+      toRate = r != null ? Decimal.parse(r.toString()) : null;
     }
 
     if (fromRate == null || toRate == null) return null;
 
     // Convert From -> Base
     // Amount(Base) = Amount(From) / Rate(Base->From)
-    final amountInBase = (amount.toDouble() / fromRate);
+    // Note: `Decimal / Decimal` yields a Rational, so convert back to Decimal.
+    final Decimal amountInBase = (amount / fromRate).toDecimal();
 
     // Convert Base -> To
     // Amount(To) = Amount(Base) * Rate(Base->To)
-    final amountInTarget = amountInBase * toRate;
+    final Decimal amountInTarget = amountInBase * toRate;
 
-    return Decimal.parse(amountInTarget.toStringAsFixed(2));
+    return amountInTarget.round(scale: 2);
   }
 }

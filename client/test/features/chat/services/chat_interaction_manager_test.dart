@@ -9,7 +9,6 @@ import 'package:finvo/features/chat/services/chat_interaction_manager.dart';
 import 'package:finvo/features/chat/repositories/message_repository.dart';
 import 'package:finvo/features/chat/services/genui_lifecycle_manager.dart';
 import 'package:finvo/features/chat/state_controllers/streaming_controller.dart';
-import 'package:finvo/features/chat/services/data_uri_service.dart';
 import 'package:finvo/features/chat/services/genui_service.dart';
 import 'package:finvo/features/chat/models/chat_message.dart';
 import 'package:finvo/features/chat/models/message_attachments.dart';
@@ -39,10 +38,6 @@ void main() {
   // Callbacks
   bool lastIsStreaming = false;
   String currentConversationId = '';
-
-  // Real DataUriService instance (since it's static methods are used, exact instance doesn't matter much)
-  // But we need it for constructor
-  final dataUriService = DataUriService();
 
   setUp(() {
     mockMessageRepository = MockMessageRepository();
@@ -74,10 +69,8 @@ void main() {
       messageRepository: mockMessageRepository,
       genUiLifecycleManager: mockLifecycleManager,
       streamingController: mockStreamingController,
-      dataUriService: dataUriService,
       setStreamingStatus: (val) => lastIsStreaming = val,
       getCurrentConversationId: () => currentConversationId,
-      getCurrentConversationTitle: () => 'Test Chat',
     );
 
     lastIsStreaming = false;

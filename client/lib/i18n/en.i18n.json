@@ -26,6 +26,13 @@
     "history": "Transactions",
     "reset": "Reset"
   },
+  "genui": {
+    "errorBusy": "Sorry, the service is temporarily busy, please try again later",
+    "errorTimeout": "Request timed out, please check your network and retry",
+    "errorNetwork": "Network connection issue, please check and retry",
+    "errorSessionExpired": "Session expired, please log in again",
+    "errorGeneric": "Something went wrong, please try again later"
+  },
   "time": {
     "today": "Today",
     "yesterday": "Yesterday",
@@ -528,7 +535,85 @@
       "skip": "Skip",
       "noPending": "No pending transactions",
       "confirmSuccess": "Transaction confirmed",
-      "skipSuccess": "Transaction skipped"
+      "skipSuccess": "Transaction skipped",
+      "interval": "Interval",
+      "selectDays": "Select Days",
+      "alwaysLastDay": "Always execute on last day",
+      "lastDayExecution": "Will execute on the last day of each month",
+      "dayExecution": "Will execute on the $day$suffix of each month (clamped for short months)",
+      "setEndDate": "Set End Date",
+      "selectEndDate": "Select End Date",
+      "preview": "Preview",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "custom": "Custom",
+      "cycle": "Cycle",
+      "everyDays": "Every $count days",
+      "everyWeeks": "Every $count weeks",
+      "everyMonths": "Every $count months",
+      "everyYears": "Every $count years",
+      "monthlyOnDay": "Monthly on the $day$suffix",
+      "everyMonthsOnDay": "Every $count months on the $day$suffix",
+      "monthlyLastDay": "Monthly on the last day",
+      "everyMonthsLastDay": "Every $count months on the last day",
+      "yearlyOn": "Yearly on $month/$day",
+      "everyYearsOn": "Every $count years on $month/$day",
+      "weeklyOnDay": "Weekly on $day",
+      "weekdayMon": "Mon",
+      "weekdayTue": "Tue",
+      "weekdayWed": "Wed",
+      "weekdayThu": "Thu",
+      "weekdayFri": "Fri",
+      "weekdaySat": "Sat",
+      "weekdaySun": "Sun",
+      "weekdayOn": "",
+      "weekdayJoiner": ", ",
+      "weeklyDaysPrefix": " on ",
+      "sourceAccount": "Source Account",
+      "targetAccount": "Target Account",
+      "expenseAccount": "Expense Account",
+      "incomeAccount": "Income Account",
+      "selectSourceAccount": "Source",
+      "selectTargetAccount": "Target",
+      "selectExpenseAccount": "Expense",
+      "selectIncomeAccount": "Income",
+      "amountNotFixed": "Amount not fixed for each $type",
+      "selectBothAccounts": "Please select source and target accounts",
+      "selectAccountForType": "Please select $type account",
+      "deleteConfirmGeneric": "Are you sure you want to delete this recurring transaction? This action cannot be undone.",
+      "selectDate": "Select $date",
+      "accountTypeCash": "Cash",
+      "accountTypeDeposit": "Bank Deposit",
+      "accountTypeEMoney": "E-Wallet",
+      "accountTypeInvestment": "Investment",
+      "accountTypeReceivable": "Accounts Receivable",
+      "accountTypeCreditCard": "Credit Card",
+      "accountTypeLoan": "Loan Account",
+      "accountTypePayable": "Accounts Payable",
+      "assetAccount": "Asset Account",
+      "liabilityAccount": "Liability Account",
+      "noAssetAccounts": "No asset accounts",
+      "goToFinanceToAddAccounts": "Please go to the financial page to add accounts",
+      "selectAccount": "Select Account",
+      "autoGenerateByRule": "Automatically generate transactions by rule",
+      "dayUnit(param=count)": {
+        "one": "Day",
+        "other": "Days"
+      },
+      "weekUnit(param=count)": {
+        "one": "Week",
+        "other": "Weeks"
+      },
+      "monthUnit(param=count)": {
+        "one": "Month",
+        "other": "Months"
+      },
+      "yearUnit(param=count)": {
+        "one": "Year",
+        "other": "Years"
+      }
     }
   },
   "chat": {
@@ -537,6 +622,11 @@
     "loadingFailed": "Loading failed",
     "inputMessage": "Type a message...",
     "aiThinking": "AI processing...",
+    "stoppedResponse": "You have stopped this response",
+    "errorRecover": "Sorry, I encountered an issue, please try again 🙏",
+    "contentCopied": "Content copied",
+    "jsonCopied": "JSON data copied",
+    "noContentToCopy": "No content to copy",
     "listening": "Listening...",
     "tools": {
       "processing": "Processing...",
@@ -631,6 +721,7 @@
       "sourceAccount": "Source Account",
       "targetAccount": "Target Account",
       "selectAccount": "Select Account",
+      "autoGenerateByRule": "Automatically generate transactions by rule",
       "confirmTransfer": "Confirm Transfer",
       "confirmed": "Confirmed",
       "transferSuccess": "Transfer Successful",
@@ -655,6 +746,7 @@
         "count": "$count items",
         "total": "Total",
         "selectAccount": "Select Account",
+        "autoGenerateByRule": "Automatically generate transactions by rule",
         "selectAccountSubtitle": "This account will be applied to all transactions above",
         "associatedAccount": "Associated: $name",
         "clickToAssociate": "Click to associate account",
@@ -762,6 +854,7 @@
         "modify": "Modify",
         "associate": "Associate Account",
         "selectAccount": "Select Account",
+        "autoGenerateByRule": "Automatically generate transactions by rule",
         "noAccount": "No accounts available, please add one first",
         "missingId": "Transaction ID missing, cannot update",
         "associatedTo": "Associated to $name",
@@ -901,6 +994,10 @@
         }
       }
     }
+  },
+  "image": {
+    "deleteTitle": "Delete Image",
+    "deleteConfirm": "Are you sure you want to delete this image? This action cannot be undone."
   },
   "footprint": {
     "searchIn": "Search",

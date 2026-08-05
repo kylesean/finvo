@@ -64,6 +64,47 @@ def create_access_token(
     return Token(access_token=encoded_jwt, expires_at=expire)
 
 
+def create_refresh_token(subject: str | UUID | Any = None) -> Token:
+    """Create a long-lived refresh token for [subject].
+
+    Refresh tokens carry a ``type: "refresh"`` claim so the refresh endpoint can
+    distinguish them from access tokens. They are rotated on every refresh and
+    can be revoked via the same jti blacklist as access tokens.
+    """
+    to_encode: dict[str, Any] = {"type": "refresh"}
+    if subject:
+        to_encode["sub"] = str(subject)
+    else:
+        to_encode["sub"] = str(to_encode.get("sub", "unknown"))
+
+    expire = datetime.now(UTC) + timedelta(days=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update(
+        {
+            "exp": expire,
+            "iat": datetime.now(UTC),
+            "jti": secrets.token_urlsafe(16),
+        }
+    )
+
+    encoded = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    logger.info("refresh_token_created", subject=to_encode["sub"], expires_at=expire.isoformat())
+    return Token(access_token=encoded, expires_at=expire)
+
+
+def is_refresh_token(token: str) -> bool:
+    """Return True if [token] is a refresh-type token (signature-valid)."""
+    try:
+        payload = jwt.decode(
+            token,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+            options={"verify_exp": False},
+        )
+        return str(payload.get("type")) == "refresh"
+    except JWTError:
+        return False
+
+
 def verify_token(token: str) -> str | None:
     """Verify a JWT token and return the subject (user UUID).
 
@@ -157,6 +198,39 @@ def refresh_token(old_token: str) -> Token | None:
     logger.info("token_refreshed", user_uuid=user_uuid, expires_at=new_token.expires_at.isoformat())
 
     return new_token
+
+
+def verify_token_allow_expired(token: str) -> str | None:
+    """Verify a JWT token's signature while ignoring the ``exp`` claim.
+
+    Used only by the refresh endpoint to authenticate the bearer of an expired
+    access token so a fresh token can be issued. The signature is still fully
+    validated; only expiry is waived. The caller is responsible for checking
+    revocation (jti blacklist) before issuing a new token.
+    """
+    if not token or not isinstance(token, str):
+        logger.warning("token_invalid_format")
+        raise ValueError("Token must be a non-empty string")
+
+    if not re.match(r"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$", token):
+        logger.warning("token_suspicious_format")
+        raise ValueError("Token format is invalid - expected JWT format")
+
+    try:
+        payload = jwt.decode(
+            token,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+            options={"verify_exp": False},
+        )
+        subject_id = payload.get("sub")
+        if not isinstance(subject_id, str):
+            logger.warning("token_missing_subject")
+            return None
+        return subject_id
+    except JWTError as e:
+        logger.error("token_refresh_verification_failed", error=str(e))
+        return None
 
 
 # NOTE: The unsafe `decode_token_payload` (signature verification bypass) was

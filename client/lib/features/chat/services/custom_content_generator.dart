@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:logging/logging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:genui/genui.dart' as genui;
 import 'package:a2ui_core/a2ui_core.dart' as a2ui;
 import 'package:dio/dio.dart';
@@ -11,7 +10,7 @@ import '../models/sse_event_models.dart';
 import 'interaction_router.dart';
 
 export '../models/sse_event_models.dart'
-    show ToolCallStartEvent, ToolCallEndEvent, ToolInfo;
+    show ToolCallStartEvent, ToolCallEndEvent;
 
 final _logger = Logger('CustomContentGenerator');
 
@@ -85,18 +84,8 @@ class CustomContentGenerator implements genui.Transport {
   /// User message send callback - notifies upper layer to update UI when GenUI internally sends request
   void Function(String content)? onUserMessageSent;
 
-  // Processing state
-  final ValueNotifier<bool> _isProcessing = ValueNotifier(false);
-
   // Store current session ID (user authentication uses SecureStorageService's token)
   String? _currentSessionId;
-
-  // Used to accumulate text content
-  final _textBuffer = StringBuffer();
-
-  // Used to buffer A2UI messages for transactional rendering
-  // These messages will only be sent to UI when stream ends normally
-  final _a2uiBuffer = <a2ui.A2uiMessage>[];
 
   // =========================================================================
   // SSE stream cancellation mechanism
@@ -106,13 +95,6 @@ class CustomContentGenerator implements genui.Transport {
   CancelToken? _cancelToken;
   // Cancellation flag - set to true when user clicks stop button
   bool _isCancelled = false;
-
-  // =========================================================================
-  // Tool state tracking - for smart cancellation handling
-  // =========================================================================
-  // Currently executing tool information
-  ToolInfo? _currentToolInfo;
-  ToolInfo? get currentToolInfo => _currentToolInfo;
 
   // URL configuration
   final String _sseBaseUrl;
@@ -159,12 +141,6 @@ class CustomContentGenerator implements genui.Transport {
       _cancelToken = null;
     }
 
-    // Reset processing state
-    _isProcessing.value = false;
-
-    // Clear buffered UI messages to ensure transactionality: cancelled requests should not produce side effects
-    _a2uiBuffer.clear();
-
     // Only notify stream end when explicitly requested
     if (notifyComplete) {
       _logger.info('CustomContentGenerator: Notifying stream complete');
@@ -179,13 +155,6 @@ class CustomContentGenerator implements genui.Transport {
 
   @override
   Stream<String> get incomingText => _textResponseController.stream;
-
-  // Legacy accessors for backward compatibility
-  Stream<a2ui.A2uiMessage> get a2uiMessageStream => incomingMessages;
-  Stream<String> get textResponseStream => incomingText;
-
-  /// Processing state (not part of Transport interface)
-  ValueListenable<bool> get isProcessing => _isProcessing;
 
   @override
   Future<void> sendRequest(genui.ChatMessage message) async {
@@ -273,12 +242,8 @@ class CustomContentGenerator implements genui.Transport {
     // 0. Ensure any ongoing request is cancelled
     _internalCancel(notifyComplete: false);
 
-    // Reset cancellation flag and tool info
+    // Reset cancellation flag
     _isCancelled = false;
-    _currentToolInfo = null;
-    _isProcessing.value = true;
-    _textBuffer.clear();
-    _a2uiBuffer.clear();
 
     try {
       // 1. Get user authentication token
@@ -397,8 +362,6 @@ class CustomContentGenerator implements genui.Transport {
         stackTrace,
       );
       onError?.call(e.toString());
-    } finally {
-      _isProcessing.value = false;
     }
   }
 
@@ -426,7 +389,6 @@ class CustomContentGenerator implements genui.Transport {
       case 'text_delta':
         final content = data['content'] as String?;
         if (content != null && content.isNotEmpty) {
-          _textBuffer.write(content);
           _textResponseController.add(content);
           onTextChunk?.call(content);
           // IMPORTANT: Yield to event loop to allow UI to update during streaming.
@@ -475,7 +437,6 @@ class CustomContentGenerator implements genui.Transport {
 
       case 'done':
         _logger.info('CustomContentGenerator: Stream completed (done event)');
-        _textBuffer.clear();
         break;
 
       default:

@@ -196,7 +196,7 @@ class MediaPreviewWidget extends StatelessWidget {
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (context) => ImagePreviewPage(
-            images: images,
+            files: images,
             initialIndex: imageIndex >= 0 ? imageIndex : 0,
             onDelete: (imageIndex) {
               // Find the index of the image to delete in the original list.

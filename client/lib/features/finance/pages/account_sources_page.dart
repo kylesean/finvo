@@ -1,3 +1,4 @@
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -517,21 +518,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
 
   String _formatAmount(Decimal amount) {
     final value = double.tryParse(amount.toString()) ?? 0.0;
-    // Format with thousand separators
-    final parts = value.toStringAsFixed(2).split('.');
-    final intPart = parts[0];
-    final decPart = parts[1];
-
-    var formatted = '';
-    var count = 0;
-    for (int i = intPart.length - 1; i >= 0; i--) {
-      if (count > 0 && count % 3 == 0 && intPart[i] != '-') {
-        formatted = ',$formatted';
-      }
-      formatted = intPart[i] + formatted;
-      count++;
-    }
-    return '$formatted.$decPart';
+    return AmountFormatter.getNumberFormat('CNY').format(value);
   }
 
   String _getTypeDisplayName(AccountTypeDefinition definition) {

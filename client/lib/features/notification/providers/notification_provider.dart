@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import '../../../core/network/network_client.dart';
-import '../../../core/network/dio_provider.dart';
 import '../../../core/services/notification_ws_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../../../core/constants/api_constants.dart';
@@ -63,8 +61,7 @@ class NotificationState {
 /// Notification Repository Provider
 @riverpod
 NotificationRepository notificationRepository(Ref ref) {
-  final dio = ref.watch(dioProvider);
-  final networkClient = NetworkClient(dio);
+  final networkClient = ref.watch(networkClientProvider);
   return NotificationRepository(networkClient);
 }
 
@@ -191,7 +188,13 @@ class NotificationNotifier extends _$NotificationNotifier {
 ///
 /// Initializes connection on first read and wires incoming
 /// notifications to the central NotificationNotifier.
-final notificationWsProvider = Provider<NotificationWsService>((ref) {
+///
+/// Marked [keepAlive] so the long-lived WebSocket connection is not torn down
+/// when the widget that reads it (MyApp) stops listening. A plain auto-dispose
+/// provider would dispose the connection (and trigger `onDispose`) as soon as
+/// the build frame that read it completes.
+@Riverpod(keepAlive: true)
+NotificationWsService notificationWs(Ref ref) {
   final wsService = NotificationWsService();
   final apiConstants = ref.read(apiConstantsProvider);
   final storageService = ref.read(secureStorageServiceProvider);
@@ -239,4 +242,4 @@ final notificationWsProvider = Provider<NotificationWsService>((ref) {
   ref.onDispose(() => wsService.dispose());
 
   return wsService;
-});
+}

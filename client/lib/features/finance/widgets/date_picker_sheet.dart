@@ -45,7 +45,6 @@ class DatePickerSheet extends StatefulWidget {
 }
 
 class _DatePickerSheetState extends State<DatePickerSheet> {
-  bool get isZh => LocaleSettings.currentLocale == AppLocale.zh;
   late DateTime _selectedDate;
 
   @override
@@ -155,9 +154,10 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
       child: FButton(
         onPress: () => Navigator.of(context).pop(_selectedDate),
         child: Text(
-          isZh
-              ? '选择 ${_selectedDate.year}/${_selectedDate.month}/${_selectedDate.day}'
-              : 'Select ${_selectedDate.year}/${_selectedDate.month}/${_selectedDate.day}',
+          t.forecast.recurringTransaction.selectDate(
+            date:
+                '${_selectedDate.year}/${_selectedDate.month}/${_selectedDate.day}',
+          ),
         ),
       ),
     );

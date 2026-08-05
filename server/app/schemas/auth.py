@@ -203,7 +203,14 @@ class AuthResponse(BaseModel):
         user: User information
     """
 
-    token: str = Field(..., description="JWT authentication token")
+    token: str = Field(..., description="JWT access token")
+    refresh_token: str = Field(
+        ...,
+        description=(
+            "Long-lived JWT refresh token, used to obtain new access tokens "
+            "without re-authentication. Rotated on each refresh."
+        ),
+    )
     user: UserInfo = Field(..., description="User information")
 
 

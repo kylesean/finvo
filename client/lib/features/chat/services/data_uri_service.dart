@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
 
 import '../models/message_attachments.dart';
+import '../../../shared/utils/mime_type_mapper.dart';
 
 /// DataUri format media file wrapper
 class DataUriFile {
@@ -121,7 +122,8 @@ class DataUriService {
 
     // Get MIME type
     final String mimeType =
-        uploadedInfo?.mimeType ?? _getMimeTypeFromExtension(file.name);
+        uploadedInfo?.mimeType ??
+        MimeTypeMapper.fromFileNameOr(file.name, 'application/octet-stream');
 
     // Convert to base64
     final String base64String = base64Encode(bytes);
@@ -141,79 +143,6 @@ class DataUriService {
       uri: uploadedInfo?.uri,
       hash: uploadedInfo?.hash,
     );
-  }
-
-  /// Get MIME type based on file extension
-  static String _getMimeTypeFromExtension(String fileName) {
-    final extension = fileName.toLowerCase().split('.').last;
-
-    switch (extension) {
-      // Image formats
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      case 'bmp':
-        return 'image/bmp';
-      case 'svg':
-        return 'image/svg+xml';
-
-      // Video formats
-      case 'mp4':
-        return 'video/mp4';
-      case 'avi':
-        return 'video/x-msvideo';
-      case 'mov':
-        return 'video/quicktime';
-      case 'wmv':
-        return 'video/x-ms-wmv';
-
-      // Audio formats
-      case 'mp3':
-        return 'audio/mpeg';
-      case 'wav':
-        return 'audio/wav';
-      case 'm4a':
-        return 'audio/mp4';
-
-      // Document formats
-      case 'pdf':
-        return 'application/pdf';
-      case 'doc':
-        return 'application/msword';
-      case 'docx':
-        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      case 'xls':
-        return 'application/vnd.ms-excel';
-      case 'xlsx':
-        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      case 'ppt':
-        return 'application/vnd.ms-powerpoint';
-      case 'pptx':
-        return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-      case 'txt':
-        return 'text/plain';
-      case 'json':
-        return 'application/json';
-      case 'xml':
-        return 'application/xml';
-
-      // Compressed files
-      case 'zip':
-        return 'application/zip';
-      case 'rar':
-        return 'application/vnd.rar';
-      case '7z':
-        return 'application/x-7z-compressed';
-
-      default:
-        return 'application/octet-stream'; // Generic binary format
-    }
   }
 
   /// Determine if file is image type

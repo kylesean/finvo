@@ -32,14 +32,11 @@ class TransactionDetailState {
 // Transaction detail Notifier
 class TransactionDetailNotifier extends Notifier<TransactionDetailState> {
   final String transactionId;
-  bool _mounted = true;
 
   TransactionDetailNotifier(this.transactionId);
 
   @override
   TransactionDetailState build() {
-    _mounted = true;
-    ref.onDispose(() => _mounted = false);
     // Auto-load data
     unawaited(
       Future<void>.microtask(() => fetchTransactionDetail(transactionId)),
@@ -57,11 +54,11 @@ class TransactionDetailNotifier extends Notifier<TransactionDetailState> {
       final homeService = ref.read(homeServiceProvider);
       final transaction = await homeService.getTransactionDetail(id);
 
-      if (_mounted) {
+      if (ref.mounted) {
         state = state.copyWith(transaction: transaction, isLoading: false);
       }
     } catch (e) {
-      if (_mounted) {
+      if (ref.mounted) {
         state = state.copyWith(isLoading: false, errorMessage: e.toString());
       }
     }

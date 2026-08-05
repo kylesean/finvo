@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:genui/genui.dart' as genui;
+import 'package:finvo/i18n/strings.g.dart';
 import '../models/chat_history_state.dart';
 import '../models/chat_message.dart';
 import '../models/chat_message_attachment.dart';
@@ -9,7 +10,6 @@ import '../models/message_attachments.dart';
 import '../models/tool_call_info.dart';
 
 import '../services/ai_service.dart';
-import '../services/data_uri_service.dart';
 import '../services/genui_service.dart';
 
 import '../../../core/network/exceptions/app_exception.dart';
@@ -25,7 +25,6 @@ import '../state_controllers/stream_state_controller.dart';
 import '../state_controllers/streaming_controller.dart';
 import '../repositories/message_repository.dart';
 import '../services/historical_message_processor.dart';
-import '../services/conversation_manager.dart';
 import '../services/attachment_manager.dart';
 import '../services/genui_lifecycle_manager.dart';
 import '../services/chat_interaction_manager.dart';
@@ -45,25 +44,26 @@ class ChatHistory extends _$ChatHistory {
   final StreamStateController _streamState = StreamStateController();
 
   // Streaming controller - manages SSE streaming lifecycle
-  late final ChatInteractionManager _chatInteractionManager;
-  late final StreamingController _streamingController;
+  // NOTE: non-final so a keepAlive provider rebuild can safely re-assign them
+  // (a `late final` field would throw LateInitializationError on re-init).
+  late ChatInteractionManager _chatInteractionManager;
+  late StreamingController _streamingController;
 
   // Message repository - manages message CRUD operations
-  late final MessageRepository _messageRepository;
+  late MessageRepository _messageRepository;
 
   // Historical message processor
   final HistoricalMessageProcessor _historicalProcessor =
       HistoricalMessageProcessor();
 
-  // Conversation manager - works through callback pattern
-  // ignore: unused_field
-  late final ConversationManager _conversationManager;
-
   // Attachment manager
-  late final AttachmentManager _attachmentManager;
-
+  late AttachmentManager _attachmentManager;
   // GenUI Lifecycle Manager
-  late final GenUiLifecycleManager _genUiLifecycleManager;
+  late GenUiLifecycleManager _genUiLifecycleManager;
+
+  /// Whether the controllers have been created at least once, so a rebuild can
+  /// dispose the previous disposable instances before re-creating them.
+  bool _controllersInitialized = false;
 
   String get _currentStreamingAiMessageId =>
       _streamingController.currentMessageId;
@@ -87,35 +87,20 @@ class ChatHistory extends _$ChatHistory {
 
   /// Initialize extracted controllers
   void _initializeControllers() {
+    // On a keepAlive provider rebuild, dispose the previous disposable
+    // controllers before re-creating them to avoid leaking their resources.
+    if (_controllersInitialized) {
+      unawaited(_streamingController.cancelStreamAndTimers());
+      _streamingController.dispose();
+      _genUiLifecycleManager.dispose();
+    }
+
     // Initialize MessageRepository
     _messageRepository = MessageRepository(
       onMessagesChanged: (messages) {
         state = state.copyWith(messages: messages);
       },
       getCurrentMessages: () => state.messages,
-    );
-
-    // Initialize ConversationManager
-    _conversationManager = ConversationManager(
-      onStateChanged: (update) {
-        state = state.copyWith(
-          currentConversationId:
-              update.conversationId ?? state.currentConversationId,
-          currentConversationTitle:
-              update.title ?? state.currentConversationTitle,
-          isLoadingHistory: update.isLoading ?? state.isLoadingHistory,
-          isStreamingResponse: update.isStreaming ?? state.isStreamingResponse,
-          historyError: update.error,
-        );
-      },
-      onSessionAdded: (session) {
-        ref.read(paginatedConversationProvider.notifier).addNewSession(session);
-      },
-      onTitleUpdated: (conversationId, title) {
-        ref
-            .read(paginatedConversationProvider.notifier)
-            .updateSessionTitle(conversationId, title);
-      },
     );
 
     // Initialize AttachmentManager
@@ -179,7 +164,7 @@ class ChatHistory extends _$ChatHistory {
         if (!hasContent) {
           _updateAiMessageState(
             id: _currentStreamingAiMessageId,
-            content: 'You have stopped this response',
+            content: t.chat.stoppedResponse,
             isTyping: false,
             streamingStatus: StreamingStatus.completed,
           );
@@ -201,13 +186,13 @@ class ChatHistory extends _$ChatHistory {
       messageRepository: _messageRepository,
       genUiLifecycleManager: _genUiLifecycleManager,
       streamingController: _streamingController,
-      dataUriService: DataUriService(),
       setStreamingStatus: (isStreaming) {
         state = state.copyWith(isStreamingResponse: isStreaming);
       },
       getCurrentConversationId: () => state.currentConversationId ?? '',
-      getCurrentConversationTitle: () => state.currentConversationTitle ?? '',
     );
+
+    _controllersInitialized = true;
   }
 
   /// Initialize GenUI service with catalog and lifecycle callbacks
@@ -258,6 +243,11 @@ class ChatHistory extends _$ChatHistory {
 
     if (messageId != null && _currentStreamingAiMessageId.isNotEmpty) {
       _updateMessageIdLocally(_currentStreamingAiMessageId, messageId);
+      // Keep streaming controller in sync so subsequent text/tool-call events
+      // (which carry the server-assigned ID) still find the message.
+      // Previously the controller kept the temporary optimistic UUID, causing
+      // first-chunk content to be silently dropped on new conversations.
+      _streamingController.updateCurrentMessageId(messageId);
     }
   }
 
@@ -277,9 +267,7 @@ class ChatHistory extends _$ChatHistory {
         if (currentMessage.surfaceIds.isNotEmpty) {
           _handleStreamComplete(null);
         } else {
-          _handleStreamComplete(
-            'Sorry, I encountered an issue, please try again 🙏',
-          );
+          _handleStreamComplete(t.chat.errorRecover);
         }
       } else {
         _streamingController.markMessageCompleted();
@@ -339,9 +327,6 @@ class ChatHistory extends _$ChatHistory {
     String transactionType,
     String currency,
   ) {
-    ref
-        .read(conversationExpenseProvider.notifier)
-        .addExpense(amount, transactionType: transactionType);
     unawaited(ref.read(transactionFeedProvider.notifier).refreshFeed());
     ref.invalidate(totalExpenseProvider);
     final currentMonth = ref.read(currentDisplayMonthProvider);
@@ -361,14 +346,9 @@ class ChatHistory extends _$ChatHistory {
     if (text.isEmpty) return;
     if (_currentStreamingAiMessageId.isEmpty) return;
 
-    final currentMessage = state.messages.firstWhere(
-      (m) => m.id == _currentStreamingAiMessageId,
-      orElse: () => ChatMessage.empty(),
-    );
-
     _updateAiMessageState(
       id: _currentStreamingAiMessageId,
-      content: currentMessage.content + text,
+      contentDelta: text,
       timestamp: DateTime.now(),
     );
   }
@@ -388,6 +368,7 @@ class ChatHistory extends _$ChatHistory {
       return;
     }
     await _streamingController.cancelStreamAndTimers();
+    _messageRepository.clearAllContentBuffers();
 
     state = state.copyWith(
       currentConversationId: conversationId,
@@ -414,8 +395,6 @@ class ChatHistory extends _$ChatHistory {
         messages: processedMessages,
         currentConversationTitle: conversationDetail.title,
         isLoadingHistory: false,
-        historyCurrentPage: 1,
-        historyHasMore: false,
       );
 
       if (_genUiService != null && _genUiService!.isInitialized) {
@@ -427,7 +406,7 @@ class ChatHistory extends _$ChatHistory {
       state = state.copyWith(
         isLoadingHistory: false,
         historyError: e.toString(),
-        currentConversationTitle: 'Load failed',
+        currentConversationTitle: t.common.loadFailed,
       );
     }
   }
@@ -450,17 +429,14 @@ class ChatHistory extends _$ChatHistory {
     }
   }
 
-  Future<void> loadMoreMessages() async {
-    return;
-  }
-
   Future<void> createNewConversation() async {
     await _streamingController.cancelStreamAndTimers();
+    _messageRepository.clearAllContentBuffers();
     if (_genUiService != null && _genUiService!.isInitialized) {
       _genUiService!.conversation.clearSession();
     }
     state = const ChatHistoryState(currentConversationTitle: 'New Chat');
-    ref.read(conversationExpenseProvider.notifier).reset();
+    ref.read(conversationExpenseProvider.notifier).switchConversation(null);
   }
 
   Future<void> addUserMessageAndGetResponse(
@@ -476,6 +452,7 @@ class ChatHistory extends _$ChatHistory {
   void _updateAiMessageState({
     required String id,
     String? content,
+    String? contentDelta,
     bool? isTyping,
     StreamingStatus? streamingStatus,
     DateTime? timestamp,
@@ -483,6 +460,7 @@ class ChatHistory extends _$ChatHistory {
     _messageRepository.updateAiMessageState(
       id: id,
       content: content,
+      contentDelta: contentDelta,
       isTyping: isTyping,
       streamingStatus: streamingStatus,
       timestamp: timestamp,

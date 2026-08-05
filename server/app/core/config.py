@@ -234,6 +234,9 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     # 7-day lifetime limits the damage window of a leaked token.
     JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 7
+    # Longer-lived refresh token used to obtain new access tokens without
+    # re-authentication. Store it securely and rotate on each refresh.
+    JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     # Base Directory
     BASE_DIR: Path = Field(default=Path(__file__).parent.parent.parent)

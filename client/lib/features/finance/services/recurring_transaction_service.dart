@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/network/network_client.dart';
+import '../../../shared/services/response_parser.dart';
 import '../models/recurring_transaction.dart';
 
 part 'recurring_transaction_service.g.dart';
@@ -29,12 +30,7 @@ class RecurringTransactionService {
       queryParameters: queryParams,
     );
 
-    final data = response['data'] as List<dynamic>;
-    return data
-        .map(
-          (json) => RecurringTransaction.fromJson(json as Map<String, dynamic>),
-        )
-        .toList();
+    return ResponseParser.parseList(response, RecurringTransaction.fromJson);
   }
 
   /// Get recurring transaction details
@@ -91,12 +87,7 @@ class RecurringTransactionService {
       '/transactions/pending',
       method: HttpMethod.get,
     );
-    final data = response['data'] as List<dynamic>;
-    return data
-        .map(
-          (json) => PendingTransaction.fromJson(json as Map<String, dynamic>),
-        )
-        .toList();
+    return ResponseParser.parseList(response, PendingTransaction.fromJson);
   }
 
   /// Confirm a pending transaction

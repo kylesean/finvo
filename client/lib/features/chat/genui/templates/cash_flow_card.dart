@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:forui/forui.dart';
-import 'package:intl/intl.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
@@ -27,7 +27,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
   bool _isExpanded = false;
 
   String _formatAmount(dynamic amount) {
-    final numberFormat = NumberFormat('#,##0.00', 'zh_CN');
+    final numberFormat = AmountFormatter.getNumberFormat('CNY');
     if (amount is String) {
       return numberFormat.format(double.tryParse(amount) ?? 0);
     }
@@ -45,7 +45,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
       builder: (context, ref, child) {
         final theme = context.theme;
         final colors = theme.colors;
-        final amountTheme = ref.watch(currentAmountThemeValueProvider);
+        final amountTheme = ref.watch(currentAmountThemeProvider);
 
         final netCashFlow = widget.data['netCashFlow'];
         final savingsRate =

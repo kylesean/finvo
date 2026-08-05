@@ -87,9 +87,3 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
     }
   }
 }
-
-@riverpod
-Future<List<Budget>> budgetList(Ref ref) async {
-  final service = ref.watch(budgetServiceProvider);
-  return await service.getAll();
-}

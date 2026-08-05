@@ -80,3 +80,10 @@ class ServerNotConfiguredException extends AppException {
   ServerNotConfiguredException([String? message])
     : super(message, 'Server Not Configured: ');
 }
+
+/// Secure storage unavailable exception: thrown when Keychain/Keystore is
+/// unavailable and the app refuses to fall back to plaintext storage.
+class SecureStorageUnavailableException extends AppException {
+  SecureStorageUnavailableException([String? message])
+    : super(message, 'Secure Storage Unavailable: ');
+}

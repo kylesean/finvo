@@ -1,10 +1,12 @@
 // shared/providers/locale_provider.dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../i18n/strings.g.dart';
 import '../services/locale_service.dart';
+part 'locale_provider.g.dart';
 
 /// Language state management - Use slang's AppLocale
-class LocaleNotifier extends Notifier<AppLocale> {
+@riverpod
+class LocaleNotifier extends _$LocaleNotifier {
   @override
   AppLocale build() {
     // Return current slang locale
@@ -46,8 +48,3 @@ class LocaleNotifier extends Notifier<AppLocale> {
     return LocaleService.getLocaleDisplayName(locale);
   }
 }
-
-/// Language state provider
-final localeProvider = NotifierProvider<LocaleNotifier, AppLocale>(
-  LocaleNotifier.new,
-);

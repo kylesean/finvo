@@ -160,9 +160,9 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
     switch (status) {
       case ToolExecutionStatus.pending:
       case ToolExecutionStatus.running:
-        return _getRunningLabel(semanticName, t);
+        return _toolLabels(semanticName, t).running;
       case ToolExecutionStatus.success:
-        return _getDoneLabel(semanticName, t);
+        return _toolLabels(semanticName, t).done;
       case ToolExecutionStatus.error:
         return t.chat.tools.failed.unknown;
       case ToolExecutionStatus.cancelled:
@@ -204,69 +204,94 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
     return toolName; // Return original tool name when unrecognized
   }
 
-  /// In-progress label (with ...)
-  String _getRunningLabel(String toolName, Translations t) {
+  /// Label pair for a tool name: (running, done)
+  ({String running, String done}) _toolLabels(String toolName, Translations t) {
     final tools = t.chat.tools;
+    final done = tools.done;
     return switch (toolName) {
-      'read_file' => tools.readFile,
-      'search_transactions' => tools.searchTransactions,
-      'query_budget_status' => tools.queryBudgetStatus,
-      'create_budget' => tools.createBudget,
-      'analyze_spending' => tools.analyzeSpending,
-      'analyze_cashflow' => tools.analyzeCashflow,
-      'forecast_balance' => tools.forecastBalance,
-      'suggest_budget' => tools.suggestBudget,
-      'prepare_budget_simulation' => tools.prepareBudgetSimulation,
-      'simulate_budget' => tools.simulateBudget,
-      'list_spaces' => tools.listSpaces,
-      'query_space_summary' => tools.querySpaceSummary,
-      'prepare_transfer' => tools.prepareTransfer,
+      'read_file' => (running: tools.readFile, done: done.readFile),
+      'search_transactions' => (
+        running: tools.searchTransactions,
+        done: done.searchTransactions,
+      ),
+      'query_budget_status' => (
+        running: tools.queryBudgetStatus,
+        done: done.queryBudgetStatus,
+      ),
+      'create_budget' => (running: tools.createBudget, done: done.createBudget),
+      'analyze_spending' => (
+        running: tools.analyzeSpending,
+        done: done.analyzeSpending,
+      ),
+      'analyze_cashflow' => (
+        running: tools.analyzeCashflow,
+        done: done.analyzeCashflow,
+      ),
+      'forecast_balance' => (
+        running: tools.forecastBalance,
+        done: done.forecastBalance,
+      ),
+      'suggest_budget' => (
+        running: tools.suggestBudget,
+        done: done.suggestBudget,
+      ),
+      'prepare_budget_simulation' => (
+        running: tools.prepareBudgetSimulation,
+        done: done.prepareBudgetSimulation,
+      ),
+      'simulate_budget' => (
+        running: tools.simulateBudget,
+        done: done.simulateBudget,
+      ),
+      'list_spaces' => (running: tools.listSpaces, done: done.listSpaces),
+      'query_space_summary' => (
+        running: tools.querySpaceSummary,
+        done: done.querySpaceSummary,
+      ),
+      'prepare_transfer' => (
+        running: tools.prepareTransfer,
+        done: done.prepareTransfer,
+      ),
       // Keep legacy tool mappings (backward compatibility)
-      'get_cash_flow_analysis' => tools.getCashFlowAnalysis,
-      'get_financial_health_score' => tools.getFinancialHealthScore,
-      'get_financial_summary' => tools.getFinancialSummary,
-      'evaluate_financial_health' => tools.evaluateFinancialHealth,
-      'simulate_expense_impact' => tools.simulateExpenseImpact,
-      'record_transactions' => tools.recordTransactions,
-      'create_transaction' => tools.createTransaction,
-      'duckduckgo_search' => tools.duckduckgoSearch,
-      'execute_transfer' => tools.executeTransfer,
-      'list_dir' => tools.listDir,
-      'execute' => tools.execute,
-      _ => tools.unknown,
-    };
-  }
-
-  /// Completed label (without ...)
-  String _getDoneLabel(String toolName, Translations t) {
-    final done = t.chat.tools.done;
-    return switch (toolName) {
-      'read_file' => done.readFile,
-      'search_transactions' => done.searchTransactions,
-      'query_budget_status' => done.queryBudgetStatus,
-      'create_budget' => done.createBudget,
-      'analyze_spending' => done.analyzeSpending,
-      'analyze_cashflow' => done.analyzeCashflow,
-      'forecast_balance' => done.forecastBalance,
-      'suggest_budget' => done.suggestBudget,
-      'prepare_budget_simulation' => done.prepareBudgetSimulation,
-      'simulate_budget' => done.simulateBudget,
-      'list_spaces' => done.listSpaces,
-      'query_space_summary' => done.querySpaceSummary,
-      'prepare_transfer' => done.prepareTransfer,
-      // Keep legacy tool mappings (backward compatibility)
-      'get_cash_flow_analysis' => done.getCashFlowAnalysis,
-      'get_financial_health_score' => done.getFinancialHealthScore,
-      'get_financial_summary' => done.getFinancialSummary,
-      'evaluate_financial_health' => done.evaluateFinancialHealth,
-      'simulate_expense_impact' => done.simulateExpenseImpact,
-      'record_transactions' => done.recordTransactions,
-      'create_transaction' => done.createTransaction,
-      'duckduckgo_search' => done.duckduckgoSearch,
-      'execute_transfer' => done.executeTransfer,
-      'list_dir' => done.listDir,
-      'execute' => done.execute,
-      _ => done.unknown,
+      'get_cash_flow_analysis' => (
+        running: tools.getCashFlowAnalysis,
+        done: done.getCashFlowAnalysis,
+      ),
+      'get_financial_health_score' => (
+        running: tools.getFinancialHealthScore,
+        done: done.getFinancialHealthScore,
+      ),
+      'get_financial_summary' => (
+        running: tools.getFinancialSummary,
+        done: done.getFinancialSummary,
+      ),
+      'evaluate_financial_health' => (
+        running: tools.evaluateFinancialHealth,
+        done: done.evaluateFinancialHealth,
+      ),
+      'simulate_expense_impact' => (
+        running: tools.simulateExpenseImpact,
+        done: done.simulateExpenseImpact,
+      ),
+      'record_transactions' => (
+        running: tools.recordTransactions,
+        done: done.recordTransactions,
+      ),
+      'create_transaction' => (
+        running: tools.createTransaction,
+        done: done.createTransaction,
+      ),
+      'duckduckgo_search' => (
+        running: tools.duckduckgoSearch,
+        done: done.duckduckgoSearch,
+      ),
+      'execute_transfer' => (
+        running: tools.executeTransfer,
+        done: done.executeTransfer,
+      ),
+      'list_dir' => (running: tools.listDir, done: done.listDir),
+      'execute' => (running: tools.execute, done: done.execute),
+      _ => (running: tools.unknown, done: done.unknown),
     };
   }
 

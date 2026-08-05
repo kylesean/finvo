@@ -1,6 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../models/chat_message.dart';
+import '../models/tool_call_info.dart';
 import '../providers/chat_history_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
@@ -8,23 +10,13 @@ part 'conversation_expense_provider.g.dart';
 
 /// Current conversation expense state
 class ConversationExpenseState {
-  /// Cumulative expenses from real-time stream (during session)
-  final double realtimeExpense;
-
   /// Current conversation ID
   final String? conversationId;
 
-  const ConversationExpenseState({
-    this.realtimeExpense = 0.0,
-    this.conversationId,
-  });
+  const ConversationExpenseState({this.conversationId});
 
-  ConversationExpenseState copyWith({
-    double? realtimeExpense,
-    String? conversationId,
-  }) {
+  ConversationExpenseState copyWith({String? conversationId}) {
     return ConversationExpenseState(
-      realtimeExpense: realtimeExpense ?? this.realtimeExpense,
       conversationId: conversationId ?? this.conversationId,
     );
   }
@@ -32,7 +24,7 @@ class ConversationExpenseState {
 
 /// Current conversation expense Notifier
 ///
-/// Maintains real-time expense accumulation for header display.
+/// Tracks the active conversation; expense totals are derived from messages.
 @riverpod
 class ConversationExpenseNotifier extends _$ConversationExpenseNotifier {
   @override
@@ -40,139 +32,163 @@ class ConversationExpenseNotifier extends _$ConversationExpenseNotifier {
     return const ConversationExpenseState();
   }
 
-  /// Add a real-time expense
-  void addExpense(double amount, {String? transactionType}) {
-    // Only count expense type
-    final type = transactionType?.toLowerCase() ?? 'expense';
-    if (type != 'expense') return;
-
-    if (amount > 0) {
-      state = state.copyWith(realtimeExpense: state.realtimeExpense + amount);
-    }
-  }
-
-  /// Reset (for new conversation)
-  void reset({String? conversationId}) {
-    state = ConversationExpenseState(
-      realtimeExpense: 0.0,
-      conversationId: conversationId,
-    );
-  }
-
   /// Switch conversation
   void switchConversation(String? newConversationId) {
     if (state.conversationId != newConversationId) {
-      reset(conversationId: newConversationId);
+      state = ConversationExpenseState(conversationId: newConversationId);
     }
   }
 }
 
 /// Current conversation expense statistics Provider
 ///
-/// Calculates total expenses from historical messages + real-time accumulation.
+/// Derived purely from historical messages (uiComponents + toolCalls).
+/// A single transaction is counted at most once per message via toolCallId
+/// deduplication between the two data sources.
 @riverpod
 double conversationTotalExpense(Ref ref) {
   // Only subscribe to messages changes, avoid recalculation triggered by other state changes
   final messages = ref.watch(
     chatHistoryProvider.select((state) => state.messages),
   );
-  // Use conversationExpenseProvider which comes from ConversationExpenseNotifier (suffix stripped)
-  final expenseState = ref.watch(conversationExpenseProvider);
 
-  double totalExpense = expenseState.realtimeExpense;
+  double totalExpense = 0.0;
 
-  // Extract expenses from historical messages
   for (final message in messages) {
-    // Process UI components
-    for (final component in message.uiComponents) {
-      if (component.toolName == 'create_transaction') {
-        final data = component.userSelection ?? component.data;
-        if (data.isEmpty) continue;
-
-        final type =
-            data['transaction_type'] as String? ??
-            data['type'] as String? ??
-            'expense';
-
-        if (type.toLowerCase() != 'expense') continue;
-
-        final amount = _parseAmount(data['amount']);
-        if (amount > 0) {
-          totalExpense += amount;
-        }
-      } else if (component.toolName == 'record_transactions' ||
-          component.toolName == 'record_shared_transactions') {
-        final data = component.userSelection ?? component.data;
-        if (data.isEmpty) continue;
-
-        final summary = data['summary'] as Map<String, dynamic>?;
-        if (summary != null) {
-          final expenseTotal = _parseAmount(summary['expense_total']);
-          if (expenseTotal > 0) {
-            totalExpense += expenseTotal;
-          }
-        }
-      } else if (component.toolName == 'create_space_transaction') {
-        final data = component.userSelection ?? component.data;
-        if (data.isEmpty) continue;
-
-        final type = data['type'] as String? ?? 'expense';
-        if (type.toLowerCase() != 'expense') continue;
-
-        final amount = _parseAmount(data['amount']);
-        if (amount > 0) {
-          totalExpense += amount;
-        }
-      }
-    }
-
-    // Process toolCalls (historical records)
-    for (final messageToolCall in message.toolCalls) {
-      if (messageToolCall.name == 'create_transaction') {
-        final args = messageToolCall.args;
-        if (args.isEmpty) continue;
-
-        final type = args['transaction_type'] as String? ?? 'expense';
-        if (type.toLowerCase() != 'expense') continue;
-
-        final amount = _parseAmount(args['amount']);
-        if (amount > 0) {
-          totalExpense += amount;
-        }
-      } else if (messageToolCall.name == 'record_transactions' ||
-          messageToolCall.name == 'record_shared_transactions') {
-        final args = messageToolCall.args;
-        if (args.isEmpty) continue;
-
-        final transactions = args['transactions'] as List<dynamic>?;
-        if (transactions != null) {
-          for (final tx in transactions) {
-            final txMap = tx as Map<String, dynamic>;
-            final type = txMap['type'] as String? ?? 'expense';
-            if (type.toLowerCase() != 'expense') continue;
-
-            final amount = _parseAmount(txMap['amount']);
-            if (amount > 0) {
-              totalExpense += amount;
-            }
-          }
-        }
-      } else if (messageToolCall.name == 'create_space_transaction') {
-        final args = messageToolCall.args;
-        if (args.isEmpty) continue;
-
-        final type = args['transaction_type'] as String? ?? 'expense';
-        if (type.toLowerCase() != 'expense') continue;
-
-        final amount = _parseAmount(args['amount']);
-        if (amount > 0) {
-          totalExpense += amount;
-        }
-      }
-    }
+    totalExpense += scanMessageExpense(message);
   }
 
   return totalExpense;
+}
+
+/// Scan a single message for expense amounts.
+///
+/// Extracts expenses from UI components and tool calls, deduplicating by
+/// toolCallId so the same transaction rendered as both a component and a
+/// tool call is counted once. Only successful tool calls are counted.
+double scanMessageExpense(ChatMessage message) {
+  double total = 0.0;
+  final countedToolCallIds = <String>{};
+
+  // Tool calls are the canonical source of executed transactions.
+  for (final messageToolCall in message.toolCalls) {
+    if (messageToolCall.status == ToolExecutionStatus.error ||
+        messageToolCall.status == ToolExecutionStatus.cancelled) {
+      continue;
+    }
+
+    final expense = _expenseFromToolCall(messageToolCall);
+    if (expense > 0) {
+      total += expense;
+      countedToolCallIds.add(messageToolCall.id);
+    }
+  }
+
+  // UI components: only count when not already counted via a linked tool call.
+  for (final component in message.uiComponents) {
+    final toolCallId = component.toolCallId;
+    if (toolCallId != null && countedToolCallIds.contains(toolCallId)) {
+      continue;
+    }
+
+    final expense = _expenseFromUiComponent(component);
+    if (expense > 0) {
+      total += expense;
+    }
+  }
+
+  return total;
+}
+
+/// Extract expense amount from a single UI component, or 0 if not expense.
+double _expenseFromUiComponent(UIComponentInfo component) {
+  if (component.toolName == 'create_transaction') {
+    final data = component.userSelection ?? component.data;
+    if (data.isEmpty) return 0.0;
+
+    final type =
+        data['transaction_type'] as String? ??
+        data['type'] as String? ??
+        'expense';
+
+    if (type.toLowerCase() != 'expense') return 0.0;
+
+    return _parseAmount(data['amount']);
+  }
+
+  if (component.toolName == 'record_transactions' ||
+      component.toolName == 'record_shared_transactions') {
+    final data = component.userSelection ?? component.data;
+    if (data.isEmpty) return 0.0;
+
+    final summary = data['summary'] as Map<String, dynamic>?;
+    if (summary != null) {
+      final expenseTotal = _parseAmount(summary['expense_total']);
+      if (expenseTotal > 0) {
+        return expenseTotal;
+      }
+    }
+    return 0.0;
+  }
+
+  if (component.toolName == 'create_space_transaction') {
+    final data = component.userSelection ?? component.data;
+    if (data.isEmpty) return 0.0;
+
+    final type = data['type'] as String? ?? 'expense';
+    if (type.toLowerCase() != 'expense') return 0.0;
+
+    return _parseAmount(data['amount']);
+  }
+
+  return 0.0;
+}
+
+/// Extract expense amount from a single tool call, or 0 if not expense.
+double _expenseFromToolCall(ToolCallInfo messageToolCall) {
+  if (messageToolCall.name == 'create_transaction') {
+    final args = messageToolCall.args;
+    if (args.isEmpty) return 0.0;
+
+    final type = args['transaction_type'] as String? ?? 'expense';
+    if (type.toLowerCase() != 'expense') return 0.0;
+
+    return _parseAmount(args['amount']);
+  }
+
+  if (messageToolCall.name == 'record_transactions' ||
+      messageToolCall.name == 'record_shared_transactions') {
+    final args = messageToolCall.args;
+    if (args.isEmpty) return 0.0;
+
+    final transactions = args['transactions'] as List<dynamic>?;
+    if (transactions == null) return 0.0;
+
+    double total = 0.0;
+    for (final tx in transactions) {
+      final txMap = tx as Map<String, dynamic>;
+      final type = txMap['type'] as String? ?? 'expense';
+      if (type.toLowerCase() != 'expense') continue;
+
+      final amount = _parseAmount(txMap['amount']);
+      if (amount > 0) {
+        total += amount;
+      }
+    }
+    return total;
+  }
+
+  if (messageToolCall.name == 'create_space_transaction') {
+    final args = messageToolCall.args;
+    if (args.isEmpty) return 0.0;
+
+    final type = args['transaction_type'] as String? ?? 'expense';
+    if (type.toLowerCase() != 'expense') return 0.0;
+
+    return _parseAmount(args['amount']);
+  }
+
+  return 0.0;
 }
 
 /// Parse amount, supporting multiple types

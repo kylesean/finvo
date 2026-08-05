@@ -23,66 +23,77 @@ class RecurrenceRuleResult {
 
 /// Recurrence frequency type
 enum RecurrenceFrequency {
-  daily('天', 'DAILY'),
-  weekly('周', 'WEEKLY'),
-  monthly('月', 'MONTHLY'),
-  yearly('年', 'YEARLY');
+  daily('DAILY'),
+  weekly('WEEKLY'),
+  monthly('MONTHLY'),
+  yearly('YEARLY');
 
-  final String zhLabel;
   final String rruleValue;
 
-  const RecurrenceFrequency(this.zhLabel, this.rruleValue);
+  const RecurrenceFrequency(this.rruleValue);
 
   String get label {
-    final isZh = LocaleSettings.currentLocale == AppLocale.zh;
-    if (isZh) return zhLabel;
+    final rt = t.forecast.recurringTransaction;
     switch (this) {
       case daily:
-        return 'Day';
+        return rt.daily;
       case weekly:
-        return 'Week';
+        return rt.weekly;
       case monthly:
-        return 'Month';
+        return rt.monthly;
       case yearly:
-        return 'Year';
+        return rt.yearly;
+    }
+  }
+
+  /// Unit label used after an interval count, e.g. "2 Days" / "2 天"
+  String unitLabel(int count) {
+    final rt = t.forecast.recurringTransaction;
+    switch (this) {
+      case daily:
+        return rt.dayUnit(count: count);
+      case weekly:
+        return rt.weekUnit(count: count);
+      case monthly:
+        return rt.monthUnit(count: count);
+      case yearly:
+        return rt.yearUnit(count: count);
     }
   }
 }
 
 /// Day of week
 enum Weekday {
-  monday('一', 'MO', 1),
-  tuesday('二', 'TU', 2),
-  wednesday('三', 'WE', 3),
-  thursday('四', 'TH', 4),
-  friday('五', 'FR', 5),
-  saturday('六', 'SA', 6),
-  sunday('日', 'SU', 7);
+  monday('MO', 1),
+  tuesday('TU', 2),
+  wednesday('WE', 3),
+  thursday('TH', 4),
+  friday('FR', 5),
+  saturday('SA', 6),
+  sunday('SU', 7);
 
-  final String zhLabel;
   final String rruleValue;
   final int isoWeekday;
 
-  const Weekday(this.zhLabel, this.rruleValue, this.isoWeekday);
+  const Weekday(this.rruleValue, this.isoWeekday);
 
   String get label {
-    final isZh = LocaleSettings.currentLocale == AppLocale.zh;
-    if (isZh) return zhLabel;
+    final rt = t.forecast.recurringTransaction;
     switch (this) {
       case monday:
-        return 'Mon';
+        return rt.weekdayMon;
       case tuesday:
-        return 'Tue';
+        return rt.weekdayTue;
       case wednesday:
-        return 'Wed';
+        return rt.weekdayWed;
       case thursday:
-        return 'Thu';
+        return rt.weekdayThu;
       case friday:
-        return 'Fri';
+        return rt.weekdayFri;
       case saturday:
-        return 'Sat';
+        return rt.weekdaySat;
       case sunday:
-        return 'Sun';
+        return rt.weekdaySun;
     }
   }
 }
@@ -120,8 +131,6 @@ class RecurrenceRuleSheet extends StatefulWidget {
 }
 
 class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
-  bool get isZh => LocaleSettings.currentLocale == AppLocale.zh;
-
   // Currently selected frequency type
   RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
 
@@ -244,96 +253,63 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   }
 
   String _buildDescription() {
+    final rt = t.forecast.recurringTransaction;
     final buffer = StringBuffer();
 
-    if (isZh) {
-      switch (_frequency) {
-        case RecurrenceFrequency.daily:
+    switch (_frequency) {
+      case RecurrenceFrequency.daily:
+        buffer.write(
+          _interval == 1 ? rt.daily : rt.everyDays(count: _interval),
+        );
+      case RecurrenceFrequency.weekly:
+        buffer.write(
+          _interval == 1 ? rt.weekly : rt.everyWeeks(count: _interval),
+        );
+        if (_selectedWeekdays.isNotEmpty) {
+          final sortedDays = _selectedWeekdays.toList()
+            ..sort((a, b) => a.isoWeekday.compareTo(b.isoWeekday));
+          buffer.write(rt.weeklyDaysPrefix);
+          buffer.write(
+            sortedDays
+                .map((w) => '${rt.weekdayOn}${w.label}')
+                .join(rt.weekdayJoiner),
+          );
+        }
+      case RecurrenceFrequency.monthly:
+        if (_monthDay == -1) {
+          buffer.write(
+            _interval == 1
+                ? rt.monthlyLastDay
+                : rt.everyMonthsLastDay(count: _interval),
+          );
+        } else {
           if (_interval == 1) {
-            buffer.write('每天');
+            buffer.write(
+              rt.monthlyOnDay(
+                day: '$_monthDay',
+                suffix: _monthDaySuffix(_monthDay),
+              ),
+            );
           } else {
-            buffer.write('每 $_interval 天');
+            buffer.write(
+              rt.everyMonthsOnDay(
+                count: _interval,
+                day: '$_monthDay',
+                suffix: _monthDaySuffix(_monthDay),
+              ),
+            );
           }
-        case RecurrenceFrequency.weekly:
-          if (_interval == 1) {
-            buffer.write('每周');
-          } else {
-            buffer.write('每 $_interval 周');
-          }
-          if (_selectedWeekdays.isNotEmpty) {
-            final sortedDays = _selectedWeekdays.toList()
-              ..sort((a, b) => a.isoWeekday.compareTo(b.isoWeekday));
-            buffer.write('的');
-            buffer.write(sortedDays.map((w) => '周${w.zhLabel}').join('、'));
-          }
-        case RecurrenceFrequency.monthly:
-          if (_monthDay == -1) {
-            if (_interval == 1) {
-              buffer.write('每月最后一天');
-            } else {
-              buffer.write('每 $_interval 个月的最后一天');
-            }
-          } else {
-            if (_interval == 1) {
-              buffer.write('每月 $_monthDay 号');
-            } else {
-              buffer.write('每 $_interval 个月的 $_monthDay 号');
-            }
-          }
-        case RecurrenceFrequency.yearly:
-          if (_interval == 1) {
-            buffer.write('每年');
-          } else {
-            buffer.write('每 $_interval 年');
-          }
-          buffer.write(' ${_startDate.month}/${_startDate.day}');
-      }
-    } else {
-      // English descriptions
-      switch (_frequency) {
-        case RecurrenceFrequency.daily:
-          if (_interval == 1) {
-            buffer.write('Daily');
-          } else {
-            buffer.write('Every $_interval days');
-          }
-        case RecurrenceFrequency.weekly:
-          if (_interval == 1) {
-            buffer.write('Weekly');
-          } else {
-            buffer.write('Every $_interval weeks');
-          }
-          if (_selectedWeekdays.isNotEmpty) {
-            final sortedDays = _selectedWeekdays.toList()
-              ..sort((a, b) => a.isoWeekday.compareTo(b.isoWeekday));
-            buffer.write(' on ');
-            buffer.write(sortedDays.map((w) => w.label).join(', '));
-          }
-        case RecurrenceFrequency.monthly:
-          if (_monthDay == -1) {
-            if (_interval == 1) {
-              buffer.write('Monthly on the last day');
-            } else {
-              buffer.write('Every $_interval months on the last day');
-            }
-          } else {
-            final daySuffix = _getDaySuffix(_monthDay);
-            if (_interval == 1) {
-              buffer.write('Monthly on the $_monthDay$daySuffix');
-            } else {
-              buffer.write(
-                'Every $_interval months on the $_monthDay$daySuffix',
-              );
-            }
-          }
-        case RecurrenceFrequency.yearly:
-          if (_interval == 1) {
-            buffer.write('Yearly');
-          } else {
-            buffer.write('Every $_interval years');
-          }
-          buffer.write(' on ${_startDate.month}/${_startDate.day}');
-      }
+        }
+      case RecurrenceFrequency.yearly:
+        buffer.write(
+          _interval == 1
+              ? rt.yearlyOn(month: _startDate.month, day: _startDate.day)
+              : rt.everyYearsOn(
+                  count: _interval,
+                  month: _startDate.month,
+                  day: _startDate.day,
+                ),
+        );
     }
 
     return buffer.toString();
@@ -352,6 +328,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         return 'th';
     }
   }
+
+  /// English templates embed the ordinal suffix via [$suffix], other
+  /// languages already include it in the template itself.
+  String _monthDaySuffix(int day) =>
+      LocaleSettings.currentLocale == AppLocale.en ? _getDaySuffix(day) : '';
 
   @override
   Widget build(BuildContext context) {
@@ -470,7 +451,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         children: [
           // Left label
           Text(
-            isZh ? '重复间隔' : 'Interval',
+            t.forecast.recurringTransaction.interval,
             style: theme.typography.body.sm.copyWith(color: colors.foreground),
           ),
           const Spacer(),
@@ -503,7 +484,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           const SizedBox(width: 16),
           // Number + frequency unit
           Text(
-            '$_interval ${isZh ? _frequency.label : (_frequency.label + (_interval > 1 ? 's' : ''))}',
+            '$_interval ${_frequency.unitLabel(_interval)}',
             style: AppTextStyles.listTitle(theme),
           ),
           const SizedBox(width: 16),
@@ -545,7 +526,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isZh ? '选择星期' : 'Select Days',
+          t.forecast.recurringTransaction.selectDays,
           style: AppTextStyles.sectionHeader(theme),
         ),
         const SizedBox(height: 8),
@@ -615,12 +596,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                   Expanded(
                     child: Text(
                       isLastDaySelected
-                          ? (isZh
-                                ? '将在每月最后一天执行'
-                                : 'Will execute on the last day of each month')
-                          : (isZh
-                                ? '将在每月 ${_startDate.day} 号执行（短月份自动对齐月末）'
-                                : 'Will execute on the ${_startDate.day}${_getDaySuffix(_startDate.day)} of each month (clamped for short months)'),
+                          ? t.forecast.recurringTransaction.lastDayExecution
+                          : t.forecast.recurringTransaction.dayExecution(
+                              day: '${_startDate.day}',
+                              suffix: _monthDaySuffix(_startDate.day),
+                            ),
                       style: AppTextStyles.listTrailing(theme),
                     ),
                   ),
@@ -631,7 +611,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isZh ? '固定在每月最后一天' : 'Always execute on last day',
+                    t.forecast.recurringTransaction.alwaysLastDay,
                     style: AppTextStyles.detailLabel(theme),
                   ),
                   FSwitch(
@@ -671,7 +651,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 children: [
                   Expanded(
                     child: Text(
-                      isZh ? '设置结束日期' : 'Set End Date',
+                      t.forecast.recurringTransaction.setEndDate,
                       style: AppTextStyles.listTrailing(theme),
                     ),
                   ),
@@ -715,7 +695,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                           child: Text(
                             _endDate != null
                                 ? '${_endDate!.year}/${_endDate!.month}/${_endDate!.day}'
-                                : (isZh ? '选择结束日期' : 'Select End Date'),
+                                : t.forecast.recurringTransaction.selectEndDate,
                             style: theme.typography.body.sm.copyWith(
                               color: _endDate != null
                                   ? colors.foreground
@@ -757,7 +737,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
               Icon(FLucideIcons.repeat, size: 18, color: colors.primary),
               const SizedBox(width: 8),
               Text(
-                isZh ? '规则预览' : 'Preview',
+                t.forecast.recurringTransaction.preview,
                 style: AppTextStyles.actionText(theme),
               ),
             ],

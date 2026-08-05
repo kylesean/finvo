@@ -2,6 +2,7 @@ import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
 import 'package:finvo/core/network/interceptors/business_interceptor.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_constants.dart';
 import './interceptors/auth_interceptor.dart';
@@ -48,6 +49,12 @@ class ConfigurationCheckInterceptor extends Interceptor {
   }
 }
 
+/// Sign out locally when a 401 is received (token invalid/expired).
+/// The router redirects to the login page after auth state clears.
+Future<void> handleUnauthorized(Ref ref) async {
+  await ref.read(authProvider.notifier).handleSessionExpired();
+}
+
 /// SSE Dio Provider
 ///
 /// Used for SSE streaming connections (AI chat, script execution, etc.), disabling timeout limits.
@@ -57,9 +64,8 @@ final sseDioProvider = Provider<Dio>((ref) {
   final dio = Dio();
 
   // SSE connection configuration: only set connectTimeout, do not set receiveTimeout
-  // Use baseUrl or empty placeholder (will be set by interceptor)
-  final baseUrl = apiConstants.baseUrl;
-  dio.options.baseUrl = baseUrl.isNotEmpty ? baseUrl : 'http://placeholder';
+  // baseUrl is set dynamically by ConfigurationCheckInterceptor on each request
+  dio.options.baseUrl = apiConstants.baseUrl;
   dio.options.connectTimeout = ApiConstants.connectTimeout;
   // do not set receiveTimeout - SSE stream may last for a long time
   // receiveTimeout: Duration.zero means no limit
@@ -77,7 +83,13 @@ final sseDioProvider = Provider<Dio>((ref) {
   ); // Check config first
   dio.interceptors.add(loggingInterceptor);
   dio.interceptors.add(LocaleInterceptor(ref));
-  dio.interceptors.add(AuthInterceptor(storageService));
+  dio.interceptors.add(
+    AuthInterceptor(
+      storageService,
+      onUnauthorized: () => handleUnauthorized(ref),
+      dio: dio,
+    ),
+  );
   // Note: SSE does not need ErrorInterceptor and BusinessInterceptor, because the streaming response handling is different
 
   _logger.info('SSE Dio instance created (baseUrl will be set dynamically)');
@@ -108,7 +120,13 @@ final dioProvider = Provider<Dio>((ref) {
   ); // Check config first
   dio.interceptors.add(loggingInterceptor); // Logging interceptor
   dio.interceptors.add(LocaleInterceptor(ref)); // Locale interceptor
-  dio.interceptors.add(AuthInterceptor(storageService)); // Auth interceptor
+  dio.interceptors.add(
+    AuthInterceptor(
+      storageService,
+      onUnauthorized: () => handleUnauthorized(ref),
+      dio: dio,
+    ),
+  ); // Auth interceptor
   dio.interceptors.add(ErrorInterceptor()); // Error handling interceptor
   dio.interceptors.add(BusinessInterceptor()); // Business logic interceptor
   _logger.info('Dio instance created (baseUrl will be set dynamically)');

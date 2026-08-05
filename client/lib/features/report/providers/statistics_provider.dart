@@ -1,9 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import '../models/statistics_models.dart';
 import '../services/statistics_service.dart';
 
 part 'statistics_provider.g.dart';
+
+final _logger = Logger('Statistics');
 
 /// Statistics state
 class StatisticsState {
@@ -101,8 +104,17 @@ class Statistics extends _$Statistics {
 
     try {
       final service = ref.read(statisticsServiceProvider);
-      // Fetch all data in parallel
-      final results = await Future.wait([
+      // Fetch all data in parallel. Overview/trend/category/top-transactions are
+      // core and fail together; cash-flow and health-score are supplementary and
+      // degrade gracefully to null on error so the report still renders.
+      final (
+        StatisticsOverview overview,
+        TrendDataResponse trendData,
+        CategoryBreakdownResponse categoryBreakdown,
+        TopTransactionsResponse topTransactions,
+        CashFlowAnalysis? cashFlow,
+        HealthScore? healthScore,
+      ) = await (
         service.getOverview(
           timeRange: state.timeRange,
           startDate: state.customStartDate,
@@ -161,16 +173,16 @@ class Statistics extends _$Statistics {
             )
             .then<HealthScore?>((res) => res)
             .catchError((_) => null),
-      ]);
+      ).wait;
 
       state = state.copyWith(
         isLoading: false,
-        overview: results[0] as StatisticsOverview,
-        trendData: results[1] as TrendDataResponse,
-        categoryBreakdown: results[2] as CategoryBreakdownResponse,
-        topTransactions: results[3] as TopTransactionsResponse,
-        cashFlow: results[4] as CashFlowAnalysis?,
-        healthScore: results[5] as HealthScore?,
+        overview: overview,
+        trendData: trendData,
+        categoryBreakdown: categoryBreakdown,
+        topTransactions: topTransactions,
+        cashFlow: cashFlow,
+        healthScore: healthScore,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -279,7 +291,8 @@ class Statistics extends _$Statistics {
       );
     } catch (e) {
       state = state.copyWith(isLoadingMoreTopTransactions: false);
-      // TODO: Handle error
+      // Keep the already-loaded data visible; log the failure for diagnostics.
+      _logger.warning('Failed to load more top transactions: $e');
     }
   }
 }

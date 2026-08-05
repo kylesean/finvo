@@ -1,3 +1,4 @@
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
@@ -234,20 +235,7 @@ class SpaceDashboardCard extends StatelessWidget {
   String _formatAmount(dynamic amount) {
     final valueStr = amount.toString();
     final value = double.tryParse(valueStr) ?? 0.0;
-    final parts = value.toStringAsFixed(2).split('.');
-    final intPart = parts[0];
-    final decPart = parts[1];
-
-    var formatted = '';
-    var count = 0;
-    for (int i = intPart.length - 1; i >= 0; i--) {
-      if (count > 0 && count % 3 == 0 && intPart[i] != '-') {
-        formatted = ',$formatted';
-      }
-      formatted = intPart[i] + formatted;
-      count++;
-    }
-    return '$formatted.$decPart';
+    return AmountFormatter.getNumberFormat('CNY').format(value);
   }
 
   String _calculateAverage() {

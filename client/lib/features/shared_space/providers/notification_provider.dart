@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import '../../../core/network/network_client.dart';
-import '../../../core/network/dio_provider.dart';
 import '../../../core/network/exceptions/app_exception.dart';
 import '../../notification/repositories/notification_repository.dart';
 import '../../notification/providers/notification_provider.dart';
@@ -193,8 +192,7 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
     String notificationId,
   ) async {
     try {
-      final dio = ref.read(dioProvider);
-      final networkClient = NetworkClient(dio);
+      final networkClient = ref.read(networkClientProvider);
       await networkClient.request<void>(
         '/shared-spaces/$spaceId/invites/respond',
         method: HttpMethod.put,

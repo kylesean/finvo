@@ -14,7 +14,7 @@ from typing import Any, cast
 from uuid import UUID
 
 import structlog
-from sqlalchemy import and_, desc, select
+from sqlalchemy import and_, desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -205,8 +205,8 @@ class SharedSpaceTransactionService:
 
     async def get_space_transactions(
         self, space_id: UUID, user_uuid: UUID, page: int = 1, limit: int = 20
-    ) -> list[dict[str, Any]]:
-        """Get transactions in a space.
+    ) -> dict[str, Any]:
+        """Get transactions in a space with pagination metadata.
 
         Args:
             space_id: Space ID
@@ -215,10 +215,14 @@ class SharedSpaceTransactionService:
             limit: Items per page
 
         Returns:
-            List of transaction dictionaries
+            Dictionary with 'transactions' (list), 'total' count, 'page' and 'limit'
         """
         await verify_membership(self.db, space_id, user_uuid)
         offset = (page - 1) * limit
+
+        count_query = select(func.count(SpaceTransaction.id)).where(SpaceTransaction.space_id == space_id)
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar() or 0
 
         query = (
             select(SpaceTransaction)
@@ -235,7 +239,12 @@ class SharedSpaceTransactionService:
         result = await self.db.execute(query)
         space_txs = result.scalars().all()
 
-        return [self._space_transaction_to_dict(st) for st in space_txs]
+        return {
+            "transactions": [self._space_transaction_to_dict(st) for st in space_txs],
+            "total": total,
+            "page": page,
+            "limit": limit,
+        }
 
     def _space_transaction_to_dict(self, st: SpaceTransaction) -> dict[str, Any]:
         """Convert space transaction to dictionary."""

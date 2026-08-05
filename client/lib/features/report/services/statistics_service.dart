@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/network/network_client.dart';
-import '../../../core/network/exceptions/app_exception.dart';
 import '../models/statistics_models.dart';
+import '../../../shared/services/response_parser.dart';
 
 part 'statistics_service.g.dart';
 
@@ -32,11 +32,8 @@ class StatisticsService {
       '/statistics/overview',
       method: HttpMethod.get,
       queryParameters: queryParams,
-      fromJsonT: (json) => _parseDataResponse<StatisticsOverview>(
-        json,
-        (data) => StatisticsOverview.fromJson(data),
-        'overview',
-      ),
+      fromJsonT: (json) =>
+          ResponseParser.parseItem(json, StatisticsOverview.fromJson),
     );
   }
 
@@ -66,11 +63,8 @@ class StatisticsService {
       '/statistics/trends',
       method: HttpMethod.get,
       queryParameters: queryParams,
-      fromJsonT: (json) => _parseDataResponse<TrendDataResponse>(
-        json,
-        (data) => TrendDataResponse.fromJson(data),
-        'trends',
-      ),
+      fromJsonT: (json) =>
+          ResponseParser.parseItem(json, TrendDataResponse.fromJson),
     );
   }
 
@@ -100,11 +94,8 @@ class StatisticsService {
       '/statistics/categories',
       method: HttpMethod.get,
       queryParameters: queryParams,
-      fromJsonT: (json) => _parseDataResponse<CategoryBreakdownResponse>(
-        json,
-        (data) => CategoryBreakdownResponse.fromJson(data),
-        'categories',
-      ),
+      fromJsonT: (json) =>
+          ResponseParser.parseItem(json, CategoryBreakdownResponse.fromJson),
     );
   }
 
@@ -138,11 +129,8 @@ class StatisticsService {
       '/statistics/top-transactions',
       method: HttpMethod.get,
       queryParameters: queryParams,
-      fromJsonT: (json) => _parseDataResponse<TopTransactionsResponse>(
-        json,
-        (data) => TopTransactionsResponse.fromJson(data),
-        'top-transactions',
-      ),
+      fromJsonT: (json) =>
+          ResponseParser.parseItem(json, TopTransactionsResponse.fromJson),
     );
   }
 
@@ -164,11 +152,8 @@ class StatisticsService {
       '/statistics/cash-flow',
       method: HttpMethod.get,
       queryParameters: queryParams,
-      fromJsonT: (json) => _parseDataResponse<CashFlowAnalysis>(
-        json,
-        (data) => CashFlowAnalysis.fromJson(data),
-        'cash-flow',
-      ),
+      fromJsonT: (json) =>
+          ResponseParser.parseItem(json, CashFlowAnalysis.fromJson),
     );
   }
 
@@ -190,37 +175,7 @@ class StatisticsService {
       '/statistics/health-score',
       method: HttpMethod.get,
       queryParameters: queryParams,
-      fromJsonT: (json) => _parseDataResponse<HealthScore>(
-        json,
-        (data) => HealthScore.fromJson(data),
-        'health-score',
-      ),
-    );
-  }
-
-  /// Parse the unified response format
-  T _parseDataResponse<T>(
-    dynamic json,
-    T Function(Map<String, dynamic>) fromJson,
-    String endpoint,
-  ) {
-    if (json is Map<String, dynamic>) {
-      final data = json['data'];
-      if (data is Map<String, dynamic>) {
-        try {
-          return fromJson(data);
-        } catch (e) {
-          throw DataParsingException(
-            'Failed to parse statistics response ($endpoint): ${e.toString()}',
-          );
-        }
-      }
-      throw DataParsingException(
-        'API /statistics/$endpoint response data field format error, expected object, got ${data.runtimeType}',
-      );
-    }
-    throw DataParsingException(
-      'API /statistics/$endpoint expected an object response, but got ${json.runtimeType}',
+      fromJsonT: (json) => ResponseParser.parseItem(json, HealthScore.fromJson),
     );
   }
 }

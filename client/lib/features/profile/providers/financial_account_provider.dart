@@ -9,6 +9,21 @@ import '../../../core/network/exceptions/app_exception.dart';
 part 'financial_account_provider.freezed.dart';
 part 'financial_account_provider.g.dart';
 
+/// Calculate net worth as (assets - liabilities) over active, included accounts.
+Decimal _netWorthOf(List<FinancialAccount> accounts) {
+  return accounts.fold(Decimal.zero, (sum, account) {
+    // Only count active accounts included in net worth
+    if (account.status == AccountStatus.active && account.includeInNetWorth) {
+      if (account.nature == FinancialNature.asset) {
+        return sum + account.initialBalance;
+      } else {
+        return sum - account.initialBalance.abs();
+      }
+    }
+    return sum;
+  });
+}
+
 // Account state
 @freezed
 abstract class FinancialAccountState with _$FinancialAccountState {
@@ -23,19 +38,7 @@ abstract class FinancialAccountState with _$FinancialAccountState {
   const FinancialAccountState._();
 
   // Calculate account net worth (Assets - Liabilities)
-  Decimal get calculatedNetWorth {
-    return accounts.fold(Decimal.zero, (sum, account) {
-      // Only count active accounts included in net worth
-      if (account.status == AccountStatus.active && account.includeInNetWorth) {
-        if (account.nature == FinancialNature.asset) {
-          return sum + account.initialBalance;
-        } else {
-          return sum - account.initialBalance.abs();
-        }
-      }
-      return sum;
-    });
-  }
+  Decimal get calculatedNetWorth => _netWorthOf(accounts);
 
   // Get actual total balance (priority to server-returned value)
   Decimal get effectiveTotalBalance {
@@ -123,27 +126,13 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
     final updatedAccounts = [...state.accounts, account];
     state = state.copyWith(
       accounts: updatedAccounts,
-      totalBalance: _calculateAccountsTotal(updatedAccounts),
+      totalBalance: _netWorthOf(updatedAccounts),
     );
   }
 
   /// Clear error state
   void clearError() {
     state = state.copyWith(error: null);
-  }
-
-  /// Calculate account net worth
-  Decimal _calculateAccountsTotal(List<FinancialAccount> accounts) {
-    return accounts.fold(Decimal.zero, (sum, account) {
-      if (account.status == AccountStatus.active && account.includeInNetWorth) {
-        if (account.nature == FinancialNature.asset) {
-          return sum + account.initialBalance;
-        } else {
-          return sum - account.initialBalance.abs();
-        }
-      }
-      return sum;
-    });
   }
 
   /// Update single account
@@ -167,7 +156,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
       state = state.copyWith(
         accounts: updatedAccounts,
-        totalBalance: _calculateAccountsTotal(updatedAccounts),
+        totalBalance: _netWorthOf(updatedAccounts),
         isLoading: false,
         error: null,
       );
@@ -199,7 +188,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
       state = state.copyWith(
         accounts: updatedAccounts,
-        totalBalance: _calculateAccountsTotal(updatedAccounts),
+        totalBalance: _netWorthOf(updatedAccounts),
         isLoading: false,
         error: null,
       );

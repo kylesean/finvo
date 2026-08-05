@@ -1,4 +1,5 @@
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -406,40 +407,15 @@ class _FinancialAccountEditPageState
 
   void _handleDelete() {
     unawaited(
-      showFDialog<void>(
+      showConfirmDialog(
         context: context,
-        builder: (context, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  t.account.deleteAccount,
-                  style: dialogStyle.titleTextStyle,
-                ),
-                const SizedBox(height: 8),
-                Text(t.account.deleteConfirm, style: dialogStyle.bodyTextStyle),
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.pop(context),
-                  child: Text(t.common.cancel),
-                ),
-                const SizedBox(height: 8),
-                FButton(
-                  onPress: () {
-                    Navigator.pop(context);
-                    unawaited(_performDelete());
-                  },
-                  child: Text(t.common.delete),
-                ),
-              ],
-            ),
-          ),
-        ),
+        title: t.account.deleteAccount,
+        message: t.account.deleteConfirm,
+        cancelLabel: t.common.cancel,
+        confirmLabel: t.common.delete,
+        onConfirm: () async {
+          unawaited(_performDelete());
+        },
       ),
     );
   }

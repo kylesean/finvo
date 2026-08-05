@@ -26,6 +26,13 @@
     "history": "交易记录",
     "reset": "重置"
   },
+  "genui": {
+    "errorBusy": "抱歉，服务暂时繁忙，请稍后重试",
+    "errorTimeout": "请求超时，请检查网络后重试",
+    "errorNetwork": "网络连接异常，请检查后重试",
+    "errorSessionExpired": "会话已过期，请重新登录",
+    "errorGeneric": "出现了一些问题，请稍后重试"
+  },
   "time": {
     "today": "今天",
     "yesterday": "昨天",
@@ -529,7 +536,85 @@
       "skip": "跳过",
       "noPending": "无待确认交易",
       "confirmSuccess": "已确认记账",
-      "skipSuccess": "已跳过"
+      "skipSuccess": "已跳过",
+      "interval": "重复间隔",
+      "selectDays": "选择星期",
+      "alwaysLastDay": "固定在每月最后一天",
+      "lastDayExecution": "将在每月最后一天执行",
+      "dayExecution": "将在每月 $day 号$suffix执行（短月份自动对齐月末）",
+      "setEndDate": "设置结束日期",
+      "selectEndDate": "选择结束日期",
+      "preview": "规则预览",
+      "daily": "每天",
+      "weekly": "每周",
+      "monthly": "每月",
+      "yearly": "每年",
+      "custom": "自定义",
+      "cycle": "周期",
+      "everyDays": "每 $count 天",
+      "everyWeeks": "每 $count 周",
+      "everyMonths": "每 $count 个月",
+      "everyYears": "每 $count 年",
+      "monthlyOnDay": "每月 $day 号$suffix",
+      "everyMonthsOnDay": "每 $count 个月的 $day 号$suffix",
+      "monthlyLastDay": "每月最后一天",
+      "everyMonthsLastDay": "每 $count 个月的最后一天",
+      "yearlyOn": "每年 $month/$day",
+      "everyYearsOn": "每 $count 年 $month/$day",
+      "weeklyOnDay": "每周的$day",
+      "weekdayMon": "一",
+      "weekdayTue": "二",
+      "weekdayWed": "三",
+      "weekdayThu": "四",
+      "weekdayFri": "五",
+      "weekdaySat": "六",
+      "weekdaySun": "日",
+      "weekdayOn": "周",
+      "weekdayJoiner": "、",
+      "weeklyDaysPrefix": "的",
+      "sourceAccount": "转出账户",
+      "targetAccount": "转入账户",
+      "expenseAccount": "支出账户",
+      "incomeAccount": "收入账户",
+      "selectSourceAccount": "选择转出账户",
+      "selectTargetAccount": "选择转入账户",
+      "selectExpenseAccount": "选择支出账户",
+      "selectIncomeAccount": "选择收入账户",
+      "amountNotFixed": "每次$type金额不固定",
+      "selectBothAccounts": "请选择转出和转入账户",
+      "selectAccountForType": "请选择$type账户",
+      "deleteConfirmGeneric": "确定要删除这个周期交易吗？此操作不可撤销。",
+      "selectDate": "选择 $date",
+      "accountTypeCash": "现金钱包",
+      "accountTypeDeposit": "银行存款",
+      "accountTypeEMoney": "电子钱包",
+      "accountTypeInvestment": "投资理财",
+      "accountTypeReceivable": "应收款项",
+      "accountTypeCreditCard": "信用卡",
+      "accountTypeLoan": "贷款账户",
+      "accountTypePayable": "应付款项",
+      "assetAccount": "资产账户",
+      "liabilityAccount": "负债账户",
+      "noAssetAccounts": "暂无资产账户",
+      "goToFinanceToAddAccounts": "请前往财务页面添加账户",
+      "selectAccount": "选择账户",
+      "autoGenerateByRule": "开启后按规则自动生成交易",
+      "dayUnit(param=count)": {
+        "one": "天",
+        "other": "天"
+      },
+      "weekUnit(param=count)": {
+        "one": "周",
+        "other": "周"
+      },
+      "monthUnit(param=count)": {
+        "one": "个月",
+        "other": "个月"
+      },
+      "yearUnit(param=count)": {
+        "one": "年",
+        "other": "年"
+      }
     }
   },
   "chat": {
@@ -539,6 +624,11 @@
     "inputMessage": "输入消息...",
     "listening": "正在聆听...",
     "aiThinking": "正在处理...",
+    "stoppedResponse": "已停止此回复",
+    "errorRecover": "抱歉，我遇到了问题，请重试 🙏",
+    "contentCopied": "内容已复制",
+    "jsonCopied": "JSON 数据已复制",
+    "noContentToCopy": "没有可复制的内容",
     "tools": {
       "processing": "正在处理...",
       "read_file": "正在查看文件...",
@@ -902,6 +992,10 @@
         }
       }
     }
+  },
+  "image": {
+    "deleteTitle": "删除图片",
+    "deleteConfirm": "确定要删除这张图片吗？此操作无法撤销。"
   },
   "footprint": {
     "searchIn": "搜索",

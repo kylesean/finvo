@@ -8,7 +8,9 @@ import 'i18n/strings.g.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'core/utils/logger_setup.dart';
+import 'shared/services/locale_service.dart';
 import 'core/services/server_config_service.dart';
 import 'features/chat/services/sound_feedback_service.dart';
 
@@ -35,6 +37,12 @@ void main() async {
       unawaited(LocaleSettings.useDeviceLocale());
       _logger.info('Using device language');
     }
+    // Keep Intl in sync so NumberFormat/DateFormat follow the app locale
+    LocaleService.syncIntlLocale();
+
+    // Register timeago message set once (was previously re-registered on every
+    // build of the transaction detail / comment widgets).
+    timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
 
     // Initialize Chinese date format data
     await initializeDateFormatting('zh_CN', null);

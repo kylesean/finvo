@@ -12,12 +12,15 @@ abstract class AppRouteNames {
   static const financialAccountAdd = 'financialAccountAdd';
   static const financialAccountEdit = 'financialAccountEdit';
   static const financialAccountDetail = 'financialAccountDetail';
-  static const recurringTransaction = 'recurringTransaction';
-  static const recurringTransactionList = 'recurringTransactionList';
+  static const recurringTransactions = 'recurringTransactions';
+  static const recurringTransactionNew = 'recurringTransactionNew';
+  static const recurringTransactionEdit = 'recurringTransactionEdit';
 
   static const budgetOverview = 'budgetOverview';
-  static const budgetForm = 'budgetForm';
+  static const budgetNew = 'budgetNew';
+  static const budgetSettings = 'budgetSettings';
   static const budgetDetail = 'budgetDetail';
+  static const budgetEdit = 'budgetEdit';
 
   static const ai = 'ai';
 
@@ -36,6 +39,7 @@ abstract class AppRouteNames {
   static const sharedSpaceList = 'sharedSpaceList';
   static const inviteSuccess = 'inviteSuccess';
   static const sharedSpaceDetail = 'sharedSpaceDetail';
+  static const sharedSpaceSettings = 'sharedSpaceSettings';
   static const notificationList = 'notificationList';
 
   static const joinSharedSpace = 'joinSharedSpace';
@@ -50,3 +54,9 @@ abstract class AppRoutePaths {
   static const report = '/report';
   static const profile = '/profile';
 }
+
+/// Route prefixes that do not require authentication.
+///
+/// Consumed by the router's redirect guard so that public routes are defined
+/// in a single place instead of being inlined in the router.
+const List<String> publicRoutePrefixes = ['/login', '/register'];

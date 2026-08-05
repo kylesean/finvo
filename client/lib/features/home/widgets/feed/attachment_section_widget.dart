@@ -5,12 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/chat/widgets/image_preview_page.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
 
 /// Displays attachments linked to a transaction via its AI conversation thread.
 ///
@@ -199,17 +198,14 @@ class AttachmentSectionWidget extends ConsumerWidget {
   ) {
     unawaited(
       Navigator.of(context).push(
-        PageRouteBuilder<void>(
-          opaque: false,
-          barrierColor: Colors.black.withValues(alpha: 0.95),
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return _ImageGalleryDialog(
-              images: images,
-              initialIndex: initialIndex,
-              baseUrl: baseUrl,
-              headers: headers,
-            );
-          },
+        MaterialPageRoute<void>(
+          builder: (context) => ImagePreviewPage(
+            itemCount: images.length,
+            initialIndex: initialIndex,
+            heroTag: (index) => '$baseUrl${images[index].url}',
+            imageProvider: (index) =>
+                NetworkImage('$baseUrl${images[index].url}', headers: headers),
+          ),
         ),
       ),
     );
@@ -225,145 +221,5 @@ class AttachmentSectionWidget extends ConsumerWidget {
       return FLucideIcons.fileText;
     }
     return FLucideIcons.file;
-  }
-}
-
-/// Full-screen image gallery dialog with swipe gestures and count indicator (matching AI module)
-class _ImageGalleryDialog extends StatefulWidget {
-  final List<TransactionAttachment> images;
-  final int initialIndex;
-  final String baseUrl;
-  final Map<String, String> headers;
-
-  const _ImageGalleryDialog({
-    required this.images,
-    required this.initialIndex,
-    required this.baseUrl,
-    required this.headers,
-  });
-
-  @override
-  State<_ImageGalleryDialog> createState() => _ImageGalleryDialogState();
-}
-
-class _ImageGalleryDialogState extends State<_ImageGalleryDialog> {
-  late int _currentIndex;
-  late PageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: widget.initialIndex);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final totalCount = widget.images.length;
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // PhotoView gallery for interactive swiping & zooming
-            PhotoViewGallery.builder(
-              scrollPhysics: const BouncingScrollPhysics(),
-              pageController: _pageController,
-              itemCount: totalCount,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              builder: (BuildContext context, int index) {
-                final att = widget.images[index];
-                final fullUrl = '${widget.baseUrl}${att.url}';
-
-                return PhotoViewGalleryPageOptions(
-                  imageProvider: NetworkImage(fullUrl, headers: widget.headers),
-                  initialScale: PhotoViewComputedScale.contained,
-                  minScale: PhotoViewComputedScale.contained * 0.8,
-                  maxScale: PhotoViewComputedScale.covered * 3.0,
-                  heroAttributes: PhotoViewHeroAttributes(tag: fullUrl),
-                );
-              },
-              loadingBuilder: (context, event) {
-                return Center(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                );
-              },
-              backgroundDecoration: const BoxDecoration(
-                color: Colors.transparent,
-              ),
-            ),
-
-            // Top bar: Page count indicator ("1 / 3")
-            Positioned(
-              top: 12,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    '${_currentIndex + 1} / $totalCount',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // Top-right close button
-            Positioned(
-              top: 12,
-              right: 16,
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    FLucideIcons.x,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

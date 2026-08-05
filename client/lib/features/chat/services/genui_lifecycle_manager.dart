@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../genui/app_catalog.dart';
 import '../models/chat_message.dart';
@@ -134,11 +135,6 @@ class GenUiLifecycleManager {
 
       _logger.info('GenUiLifecycleManager: Service initialized successfully');
       GenUiLogger.logInitialization(success: true);
-
-      // Hook up user message updates
-      _genUiService!.conversation.onUserMessageSent = (content) {
-        // This needs to be handled by ChatInteractionManager later.
-      };
     } catch (e, stackTrace) {
       _logger.severe(
         'GenUiLifecycleManager: Initialization failed',
@@ -312,19 +308,18 @@ class GenUiLifecycleManager {
     // Log and update message state
     _logger.warning('GenUiLifecycleManager: GenUI error: $error');
 
-    // Converter logic
+    // Converter logic (localized via i18n)
     String userFriendlyMessage;
     if (error.contains('No generations') || error.contains('empty stream')) {
-      userFriendlyMessage =
-          'Sorry, the service is temporarily busy, please try again later';
+      userFriendlyMessage = t.genui.errorBusy;
     } else if (error.contains('timeout') || error.contains('Timeout')) {
-      userFriendlyMessage = 'Request timed out, please check network and retry';
+      userFriendlyMessage = t.genui.errorTimeout;
     } else if (error.contains('network') || error.contains('connection')) {
-      userFriendlyMessage = 'Network connection issue, please check and retry';
+      userFriendlyMessage = t.genui.errorNetwork;
     } else if (error.contains('Authentication') || error.contains('token')) {
-      userFriendlyMessage = 'Session expired, please log in again';
+      userFriendlyMessage = t.genui.errorSessionExpired;
     } else {
-      userFriendlyMessage = 'Something went wrong, please try again later';
+      userFriendlyMessage = t.genui.errorGeneric;
     }
 
     final currentId = _getCurrentStreamingMessageId();

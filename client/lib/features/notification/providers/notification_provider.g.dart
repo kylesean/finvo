@@ -59,7 +59,7 @@ final class NotificationRepositoryProvider
 }
 
 String _$notificationRepositoryHash() =>
-    r'd176f511a967ef8422ae7fde13195e8cb264be6a';
+    r'a9a637a020c8bc0922faf5bfcdf3206117ea0baa';
 
 /// Notification State Notifier Provider
 
@@ -119,3 +119,79 @@ abstract class _$NotificationNotifier extends $Notifier<NotificationState> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// WebSocket service provider for real-time notifications.
+///
+/// Initializes connection on first read and wires incoming
+/// notifications to the central NotificationNotifier.
+///
+/// Marked [keepAlive] so the long-lived WebSocket connection is not torn down
+/// when the widget that reads it (MyApp) stops listening. A plain auto-dispose
+/// provider would dispose the connection (and trigger `onDispose`) as soon as
+/// the build frame that read it completes.
+
+@ProviderFor(notificationWs)
+final notificationWsProvider = NotificationWsProvider._();
+
+/// WebSocket service provider for real-time notifications.
+///
+/// Initializes connection on first read and wires incoming
+/// notifications to the central NotificationNotifier.
+///
+/// Marked [keepAlive] so the long-lived WebSocket connection is not torn down
+/// when the widget that reads it (MyApp) stops listening. A plain auto-dispose
+/// provider would dispose the connection (and trigger `onDispose`) as soon as
+/// the build frame that read it completes.
+
+final class NotificationWsProvider
+    extends
+        $FunctionalProvider<
+          NotificationWsService,
+          NotificationWsService,
+          NotificationWsService
+        >
+    with $Provider<NotificationWsService> {
+  /// WebSocket service provider for real-time notifications.
+  ///
+  /// Initializes connection on first read and wires incoming
+  /// notifications to the central NotificationNotifier.
+  ///
+  /// Marked [keepAlive] so the long-lived WebSocket connection is not torn down
+  /// when the widget that reads it (MyApp) stops listening. A plain auto-dispose
+  /// provider would dispose the connection (and trigger `onDispose`) as soon as
+  /// the build frame that read it completes.
+  NotificationWsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'notificationWsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$notificationWsHash();
+
+  @$internal
+  @override
+  $ProviderElement<NotificationWsService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  NotificationWsService create(Ref ref) {
+    return notificationWs(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NotificationWsService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NotificationWsService>(value),
+    );
+  }
+}
+
+String _$notificationWsHash() => r'ffc559a0f8a863eedd43b1684be6e472bb0aa6ea';

@@ -10,12 +10,9 @@ import 'package:finvo/core/storage/secure_storage_service.dart' as _i7;
 import 'package:finvo/features/chat/services/extended_genui_conversation.dart'
     as _i2;
 import 'package:finvo/features/chat/services/genui_service.dart' as _i5;
-import 'package:finvo/features/chat/state_controllers/stream_state_controller.dart'
-    as _i9;
 import 'package:flutter/foundation.dart' as _i4;
 import 'package:genui/genui.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i10;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -178,128 +175,4 @@ class MockGenUiService extends _i1.Mock implements _i5.GenUiService {
             returnValueForMissingStub: _i6.Future<void>.value(),
           )
           as _i6.Future<void>);
-}
-
-/// A class which mocks [StreamStateController].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockStreamStateController extends _i1.Mock
-    implements _i9.StreamStateController {
-  MockStreamStateController() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i9.StreamPhase get currentPhase =>
-      (super.noSuchMethod(
-            Invocation.getter(#currentPhase),
-            returnValue: _i9.StreamPhase.idle,
-          )
-          as _i9.StreamPhase);
-
-  @override
-  String get currentMessageId =>
-      (super.noSuchMethod(
-            Invocation.getter(#currentMessageId),
-            returnValue: _i10.dummyValue<String>(
-              this,
-              Invocation.getter(#currentMessageId),
-            ),
-          )
-          as String);
-
-  @override
-  bool get isStreaming =>
-      (super.noSuchMethod(Invocation.getter(#isStreaming), returnValue: false)
-          as bool);
-
-  @override
-  bool get isFirstChunkReceived =>
-      (super.noSuchMethod(
-            Invocation.getter(#isFirstChunkReceived),
-            returnValue: false,
-          )
-          as bool);
-
-  @override
-  bool get isWaitingForFirstChunk =>
-      (super.noSuchMethod(
-            Invocation.getter(#isWaitingForFirstChunk),
-            returnValue: false,
-          )
-          as bool);
-
-  @override
-  bool get isStreamDone =>
-      (super.noSuchMethod(Invocation.getter(#isStreamDone), returnValue: false)
-          as bool);
-
-  @override
-  bool get isUserCancelled =>
-      (super.noSuchMethod(
-            Invocation.getter(#isUserCancelled),
-            returnValue: false,
-          )
-          as bool);
-
-  @override
-  bool get isMessageCompleted =>
-      (super.noSuchMethod(
-            Invocation.getter(#isMessageCompleted),
-            returnValue: false,
-          )
-          as bool);
-
-  @override
-  String get debugInfo =>
-      (super.noSuchMethod(
-            Invocation.getter(#debugInfo),
-            returnValue: _i10.dummyValue<String>(
-              this,
-              Invocation.getter(#debugInfo),
-            ),
-          )
-          as String);
-
-  @override
-  void startStreaming(String? messageId) => super.noSuchMethod(
-    Invocation.method(#startStreaming, [messageId]),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  void markFirstChunkReceived() => super.noSuchMethod(
-    Invocation.method(#markFirstChunkReceived, []),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  void recordEventType(String? eventType) => super.noSuchMethod(
-    Invocation.method(#recordEventType, [eventType]),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  void markCompleted() => super.noSuchMethod(
-    Invocation.method(#markCompleted, []),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  void markError() => super.noSuchMethod(
-    Invocation.method(#markError, []),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  void markCancelled() => super.noSuchMethod(
-    Invocation.method(#markCancelled, []),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  void reset() => super.noSuchMethod(
-    Invocation.method(#reset, []),
-    returnValueForMissingStub: null,
-  );
 }

@@ -329,10 +329,6 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                       : t.comment.addNote,
                   onTap: () {
                     if (ref.read(replyingToCommentIdProvider) == null &&
-                        _commentFocusNode.hasFocus) {
-                    } else if (ref.read(replyingToCommentIdProvider) != null &&
-                        !_commentFocusNode.hasFocus) {
-                    } else if (ref.read(replyingToCommentIdProvider) == null &&
                         !_commentFocusNode.hasFocus) {
                       ref.read(replyingToCommentIdProvider.notifier).set(null);
                       ref.read(replyingToUserNameProvider.notifier).set(null);

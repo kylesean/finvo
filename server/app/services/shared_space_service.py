@@ -589,7 +589,7 @@ class SharedSpaceService:
 
     async def get_space_transactions(
         self, space_id: UUID, user_uuid: UUID, page: int = 1, limit: int = 20
-    ) -> list[dict[str, Any]]:
+    ) -> dict[str, Any]:
         """Get transactions in a space (see :class:`SharedSpaceTransactionService`)."""
         return await self.space_transactions.get_space_transactions(space_id, user_uuid, page, limit)
 

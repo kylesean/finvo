@@ -13,6 +13,9 @@ class MediaThumbnailService {
   static final _logger = Logger('MediaThumbnailService');
   static const int _thumbnailSize = 200; // Maximum thumbnail size
 
+  /// Maximum number of cached thumbnails before evicting oldest entries.
+  static const int _maxCacheEntries = 64;
+
   // Cache for generated thumbnails
   static final Map<String, Uint8List> _thumbnailCache = {};
 
@@ -44,26 +47,35 @@ class MediaThumbnailService {
         targetWidth: _thumbnailSize,
         targetHeight: _thumbnailSize,
       );
+      try {
+        final frame = await codec.getNextFrame();
+        final image = frame.image;
+        try {
+          // Convert to byte data
+          final byteData = await image.toByteData(
+            format: ui.ImageByteFormat.png,
+          );
+          if (byteData == null) {
+            return null;
+          }
 
-      final frame = await codec.getNextFrame();
-      final image = frame.image;
+          final thumbnailBytes = byteData.buffer.asUint8List();
 
-      // Convert to byte data
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) {
-        image.dispose();
-        return null;
+          // Cache thumbnail, evicting the oldest entry if the cache is full.
+          if (!_thumbnailCache.containsKey(cacheKey) &&
+              _thumbnailCache.length >= _maxCacheEntries) {
+            final oldestKey = _thumbnailCache.keys.first;
+            _thumbnailCache.remove(oldestKey);
+          }
+          _thumbnailCache[cacheKey] = thumbnailBytes;
+
+          return thumbnailBytes;
+        } finally {
+          image.dispose();
+        }
+      } finally {
+        codec.dispose();
       }
-
-      final thumbnailBytes = byteData.buffer.asUint8List();
-
-      // Cache thumbnail
-      _thumbnailCache[cacheKey] = thumbnailBytes;
-
-      // Clean up resources
-      image.dispose();
-
-      return thumbnailBytes;
     } catch (e) {
       _logger.warning('Failed to generate thumbnail', e);
       return null;
@@ -174,21 +186,26 @@ class MediaThumbnailService {
         targetWidth: maxWidth,
         targetHeight: maxHeight,
       );
+      try {
+        final frame = await codec.getNextFrame();
+        final image = frame.image;
+        try {
+          // Convert to byte data (use PNG format to ensure quality)
+          final byteData = await image.toByteData(
+            format: ui.ImageByteFormat.png,
+          );
 
-      final frame = await codec.getNextFrame();
-      final image = frame.image;
+          if (byteData == null) {
+            throw Exception('Unable to compress image');
+          }
 
-      // Convert to byte data (use PNG format to ensure quality)
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-
-      // Clean up resources
-      image.dispose();
-
-      if (byteData == null) {
-        throw Exception('Unable to compress image');
+          return byteData.buffer.asUint8List();
+        } finally {
+          image.dispose();
+        }
+      } finally {
+        codec.dispose();
       }
-
-      return byteData.buffer.asUint8List();
     } catch (e) {
       _logger.warning('Image compression failed', e);
       // If compression fails, return original data

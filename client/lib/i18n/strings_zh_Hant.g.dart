@@ -40,6 +40,7 @@ class TranslationsZhHant extends Translations with BaseTranslations<AppLocale, T
 
 	// Translations
 	@override late final _Translations$common$zh_Hant common = _Translations$common$zh_Hant._(_root);
+	@override late final _Translations$genui$zh_Hant genui = _Translations$genui$zh_Hant._(_root);
 	@override late final _Translations$time$zh_Hant time = _Translations$time$zh_Hant._(_root);
 	@override late final _Translations$greeting$zh_Hant greeting = _Translations$greeting$zh_Hant._(_root);
 	@override late final _Translations$navigation$zh_Hant navigation = _Translations$navigation$zh_Hant._(_root);
@@ -58,6 +59,7 @@ class TranslationsZhHant extends Translations with BaseTranslations<AppLocale, T
 	@override late final _Translations$dateRange$zh_Hant dateRange = _Translations$dateRange$zh_Hant._(_root);
 	@override late final _Translations$forecast$zh_Hant forecast = _Translations$forecast$zh_Hant._(_root);
 	@override late final _Translations$chat$zh_Hant chat = _Translations$chat$zh_Hant._(_root);
+	@override late final _Translations$image$zh_Hant image = _Translations$image$zh_Hant._(_root);
 	@override late final _Translations$footprint$zh_Hant footprint = _Translations$footprint$zh_Hant._(_root);
 	@override late final _Translations$media$zh_Hant media = _Translations$media$zh_Hant._(_root);
 	@override late final _Translations$error$zh_Hant error = _Translations$error$zh_Hant._(_root);
@@ -108,6 +110,20 @@ class _Translations$common$zh_Hant extends Translations$common$zh {
 	@override String get loadFailed => '載入失敗';
 	@override String get history => '交易記錄';
 	@override String get reset => '重置';
+}
+
+// Path: genui
+class _Translations$genui$zh_Hant extends Translations$genui$zh {
+	_Translations$genui$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get errorBusy => '抱歉，服務暫時繁忙，請稍後重試';
+	@override String get errorTimeout => '請求逾時，請檢查網路後重試';
+	@override String get errorNetwork => '網路連線異常，請檢查後重試';
+	@override String get errorSessionExpired => '工作階段已過期，請重新登入';
+	@override String get errorGeneric => '發生了一些問題，請稍後重試';
 }
 
 // Path: time
@@ -666,6 +682,11 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override String get inputMessage => '輸入消息...';
 	@override String get listening => '正在聆聽...';
 	@override String get aiThinking => '正在處理...';
+	@override String get stoppedResponse => '已停止此回覆';
+	@override String get errorRecover => '抱歉，我遇到了問題，請重試 🙏';
+	@override String get contentCopied => '內容已複製';
+	@override String get jsonCopied => 'JSON 資料已複製';
+	@override String get noContentToCopy => '沒有可複製的內容';
 	@override late final _Translations$chat$tools$zh_Hant tools = _Translations$chat$tools$zh_Hant._(_root);
 	@override String get speechNotRecognized => '未識別到語音，請重試';
 	@override String get currentExpense => '当前支出';
@@ -685,6 +706,17 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override late final _Translations$chat$transferWizard$zh_Hant transferWizard = _Translations$chat$transferWizard$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$zh_Hant genui = _Translations$chat$genui$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$zh_Hant welcome = _Translations$chat$welcome$zh_Hant._(_root);
+}
+
+// Path: image
+class _Translations$image$zh_Hant extends Translations$image$zh {
+	_Translations$image$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get deleteTitle => '刪除圖片';
+	@override String get deleteConfirm => '確定要刪除這張圖片嗎？此操作無法撤銷。';
 }
 
 // Path: footprint
@@ -1142,6 +1174,84 @@ class _Translations$forecast$recurringTransaction$zh_Hant extends Translations$f
 	@override String get noPending => '無待確認交易';
 	@override String get confirmSuccess => '已確認記帳';
 	@override String get skipSuccess => '已跳過';
+	@override String get interval => '重複間隔';
+	@override String get selectDays => '選擇星期';
+	@override String get alwaysLastDay => '固定在每月最後一天';
+	@override String get lastDayExecution => '將在每月最後一天執行';
+	@override String dayExecution({required Object day, required Object suffix}) => '將在每月 ${day} 號${suffix}執行（短月份自動對齊月末）';
+	@override String get setEndDate => '設定結束日期';
+	@override String get selectEndDate => '選擇結束日期';
+	@override String get preview => '規則預覽';
+	@override String get daily => '每天';
+	@override String get weekly => '每週';
+	@override String get monthly => '每月';
+	@override String get yearly => '每年';
+	@override String get custom => '自訂';
+	@override String get cycle => '週期';
+	@override String everyDays({required Object count}) => '每 ${count} 天';
+	@override String everyWeeks({required Object count}) => '每 ${count} 週';
+	@override String everyMonths({required Object count}) => '每 ${count} 個月';
+	@override String everyYears({required Object count}) => '每 ${count} 年';
+	@override String monthlyOnDay({required Object day, required Object suffix}) => '每月 ${day} 號${suffix}';
+	@override String everyMonthsOnDay({required Object count, required Object day, required Object suffix}) => '每 ${count} 個月的 ${day} 號${suffix}';
+	@override String get monthlyLastDay => '每月最後一天';
+	@override String everyMonthsLastDay({required Object count}) => '每 ${count} 個月的最後一天';
+	@override String yearlyOn({required Object month, required Object day}) => '每年 ${month}/${day}';
+	@override String everyYearsOn({required Object count, required Object month, required Object day}) => '每 ${count} 年 ${month}/${day}';
+	@override String weeklyOnDay({required Object day}) => '每週的${day}';
+	@override String get weekdayMon => '一';
+	@override String get weekdayTue => '二';
+	@override String get weekdayWed => '三';
+	@override String get weekdayThu => '四';
+	@override String get weekdayFri => '五';
+	@override String get weekdaySat => '六';
+	@override String get weekdaySun => '日';
+	@override String get weekdayOn => '週';
+	@override String get weekdayJoiner => '、';
+	@override String get weeklyDaysPrefix => '的';
+	@override String get sourceAccount => '轉出帳戶';
+	@override String get targetAccount => '轉入帳戶';
+	@override String get expenseAccount => '支出帳戶';
+	@override String get incomeAccount => '收入帳戶';
+	@override String get selectSourceAccount => '選擇轉出帳戶';
+	@override String get selectTargetAccount => '選擇轉入帳戶';
+	@override String get selectExpenseAccount => '選擇支出帳戶';
+	@override String get selectIncomeAccount => '選擇收入帳戶';
+	@override String amountNotFixed({required Object type}) => '每次${type}金額不固定';
+	@override String get selectBothAccounts => '請選擇轉出和轉入帳戶';
+	@override String selectAccountForType({required Object type}) => '請選擇${type}帳戶';
+	@override String get deleteConfirmGeneric => '確定要刪除這個週期交易嗎？此操作不可撤銷。';
+	@override String selectDate({required Object date}) => '選擇 ${date}';
+	@override String get accountTypeCash => '現金錢包';
+	@override String get accountTypeDeposit => '銀行存款';
+	@override String get accountTypeEMoney => '電子錢包';
+	@override String get accountTypeInvestment => '投資理財';
+	@override String get accountTypeReceivable => '應收款項';
+	@override String get accountTypeCreditCard => '信用卡';
+	@override String get accountTypeLoan => '貸款帳戶';
+	@override String get accountTypePayable => '應付款項';
+	@override String get assetAccount => '資產帳戶';
+	@override String get liabilityAccount => '負債帳戶';
+	@override String get noAssetAccounts => '暫無資產帳戶';
+	@override String get goToFinanceToAddAccounts => '請前往財務頁面新增帳戶';
+	@override String get selectAccount => '選擇帳戶';
+	@override String get autoGenerateByRule => '開啟後按規則自動生成交易';
+	@override String dayUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count,
+		one: '天',
+		other: '天',
+	);
+	@override String weekUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count,
+		one: '週',
+		other: '週',
+	);
+	@override String monthUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count,
+		one: '個月',
+		other: '個月',
+	);
+	@override String yearUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count,
+		one: '年',
+		other: '年',
+	);
 }
 
 // Path: chat.tools
@@ -2371,6 +2481,11 @@ extension on TranslationsZhHant {
 			'common.loadFailed' => '載入失敗',
 			'common.history' => '交易記錄',
 			'common.reset' => '重置',
+			'genui.errorBusy' => '抱歉，服務暫時繁忙，請稍後重試',
+			'genui.errorTimeout' => '請求逾時，請檢查網路後重試',
+			'genui.errorNetwork' => '網路連線異常，請檢查後重試',
+			'genui.errorSessionExpired' => '工作階段已過期，請重新登入',
+			'genui.errorGeneric' => '發生了一些問題，請稍後重試',
 			'time.today' => '今天',
 			'time.yesterday' => '昨天',
 			'time.dayBeforeYesterday' => '前天',
@@ -2826,12 +2941,85 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.noPending' => '無待確認交易',
 			'forecast.recurringTransaction.confirmSuccess' => '已確認記帳',
 			'forecast.recurringTransaction.skipSuccess' => '已跳過',
+			'forecast.recurringTransaction.interval' => '重複間隔',
+			'forecast.recurringTransaction.selectDays' => '選擇星期',
+			'forecast.recurringTransaction.alwaysLastDay' => '固定在每月最後一天',
+			'forecast.recurringTransaction.lastDayExecution' => '將在每月最後一天執行',
+			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => '將在每月 ${day} 號${suffix}執行（短月份自動對齊月末）',
+			'forecast.recurringTransaction.setEndDate' => '設定結束日期',
+			'forecast.recurringTransaction.selectEndDate' => '選擇結束日期',
+			'forecast.recurringTransaction.preview' => '規則預覽',
+			'forecast.recurringTransaction.daily' => '每天',
+			'forecast.recurringTransaction.weekly' => '每週',
+			'forecast.recurringTransaction.monthly' => '每月',
+			'forecast.recurringTransaction.yearly' => '每年',
+			'forecast.recurringTransaction.custom' => '自訂',
+			'forecast.recurringTransaction.cycle' => '週期',
+			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '每 ${count} 天',
+			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '每 ${count} 週',
+			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '每 ${count} 個月',
+			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '每 ${count} 年',
+			'forecast.recurringTransaction.monthlyOnDay' => ({required Object day, required Object suffix}) => '每月 ${day} 號${suffix}',
+			'forecast.recurringTransaction.everyMonthsOnDay' => ({required Object count, required Object day, required Object suffix}) => '每 ${count} 個月的 ${day} 號${suffix}',
+			'forecast.recurringTransaction.monthlyLastDay' => '每月最後一天',
+			'forecast.recurringTransaction.everyMonthsLastDay' => ({required Object count}) => '每 ${count} 個月的最後一天',
+			'forecast.recurringTransaction.yearlyOn' => ({required Object month, required Object day}) => '每年 ${month}/${day}',
+			'forecast.recurringTransaction.everyYearsOn' => ({required Object count, required Object month, required Object day}) => '每 ${count} 年 ${month}/${day}',
+			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => '每週的${day}',
+			'forecast.recurringTransaction.weekdayMon' => '一',
+			'forecast.recurringTransaction.weekdayTue' => '二',
+			_ => null,
+		} ?? switch (path) {
+			'forecast.recurringTransaction.weekdayWed' => '三',
+			'forecast.recurringTransaction.weekdayThu' => '四',
+			'forecast.recurringTransaction.weekdayFri' => '五',
+			'forecast.recurringTransaction.weekdaySat' => '六',
+			'forecast.recurringTransaction.weekdaySun' => '日',
+			'forecast.recurringTransaction.weekdayOn' => '週',
+			'forecast.recurringTransaction.weekdayJoiner' => '、',
+			'forecast.recurringTransaction.weeklyDaysPrefix' => '的',
+			'forecast.recurringTransaction.sourceAccount' => '轉出帳戶',
+			'forecast.recurringTransaction.targetAccount' => '轉入帳戶',
+			'forecast.recurringTransaction.expenseAccount' => '支出帳戶',
+			'forecast.recurringTransaction.incomeAccount' => '收入帳戶',
+			'forecast.recurringTransaction.selectSourceAccount' => '選擇轉出帳戶',
+			'forecast.recurringTransaction.selectTargetAccount' => '選擇轉入帳戶',
+			'forecast.recurringTransaction.selectExpenseAccount' => '選擇支出帳戶',
+			'forecast.recurringTransaction.selectIncomeAccount' => '選擇收入帳戶',
+			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => '每次${type}金額不固定',
+			'forecast.recurringTransaction.selectBothAccounts' => '請選擇轉出和轉入帳戶',
+			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => '請選擇${type}帳戶',
+			'forecast.recurringTransaction.deleteConfirmGeneric' => '確定要刪除這個週期交易嗎？此操作不可撤銷。',
+			'forecast.recurringTransaction.selectDate' => ({required Object date}) => '選擇 ${date}',
+			'forecast.recurringTransaction.accountTypeCash' => '現金錢包',
+			'forecast.recurringTransaction.accountTypeDeposit' => '銀行存款',
+			'forecast.recurringTransaction.accountTypeEMoney' => '電子錢包',
+			'forecast.recurringTransaction.accountTypeInvestment' => '投資理財',
+			'forecast.recurringTransaction.accountTypeReceivable' => '應收款項',
+			'forecast.recurringTransaction.accountTypeCreditCard' => '信用卡',
+			'forecast.recurringTransaction.accountTypeLoan' => '貸款帳戶',
+			'forecast.recurringTransaction.accountTypePayable' => '應付款項',
+			'forecast.recurringTransaction.assetAccount' => '資產帳戶',
+			'forecast.recurringTransaction.liabilityAccount' => '負債帳戶',
+			'forecast.recurringTransaction.noAssetAccounts' => '暫無資產帳戶',
+			'forecast.recurringTransaction.goToFinanceToAddAccounts' => '請前往財務頁面新增帳戶',
+			'forecast.recurringTransaction.selectAccount' => '選擇帳戶',
+			'forecast.recurringTransaction.autoGenerateByRule' => '開啟後按規則自動生成交易',
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '天', other: '天', ),
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '週', other: '週', ),
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '個月', other: '個月', ),
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '年', other: '年', ),
 			'chat.newChat' => '新聊天',
 			'chat.noMessages' => '沒有消息可顯示。',
 			'chat.loadingFailed' => '載入失敗',
 			'chat.inputMessage' => '輸入消息...',
 			'chat.listening' => '正在聆聽...',
 			'chat.aiThinking' => '正在處理...',
+			'chat.stoppedResponse' => '已停止此回覆',
+			'chat.errorRecover' => '抱歉，我遇到了問題，請重試 🙏',
+			'chat.contentCopied' => '內容已複製',
+			'chat.jsonCopied' => 'JSON 資料已複製',
+			'chat.noContentToCopy' => '沒有可複製的內容',
 			'chat.tools.processing' => '正在處理...',
 			'chat.tools.readFile' => '正在查看文件...',
 			'chat.tools.searchTransactions' => '正在查詢交易...',
@@ -2858,8 +3046,6 @@ extension on TranslationsZhHant {
 			'chat.tools.listSpaces' => '正在獲取共享空間...',
 			'chat.tools.querySpaceSummary' => '正在查詢空間摘要...',
 			'chat.tools.prepareTransfer' => '正在準備轉帳...',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.unknown' => '正在處理請求...',
 			'chat.tools.done.readFile' => '已查看文件',
 			'chat.tools.done.searchTransactions' => '已查詢交易',
@@ -3115,6 +3301,8 @@ extension on TranslationsZhHant {
 			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
 			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
 			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'image.deleteTitle' => '刪除圖片',
+			'image.deleteConfirm' => '確定要刪除這張圖片嗎？此操作無法撤銷。',
 			'footprint.searchIn' => '搜尋',
 			'footprint.searchInAllRecords' => '在所有記錄中搜尋相關內容',
 			'media.selectPhotos' => '選擇照片',
@@ -3294,6 +3482,8 @@ extension on TranslationsZhHant {
 			'sharedSpace.roles.member' => '成員',
 			'sharedSpace.title' => '共享空間',
 			'sharedSpace.create.title' => '建立共享空間',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.create.subtitle' => '建立一個新的共享空間，與朋友一起記帳',
 			'sharedSpace.create.nameLabel' => '空間名稱',
 			'sharedSpace.create.nameHint' => '例如：畢業旅行',
@@ -3372,8 +3562,6 @@ extension on TranslationsZhHant {
 			'sharedSpace.notificationCard.reject' => '拒絕',
 			'sharedSpace.notificationCard.unknownTime' => '未知時間',
 			'sharedSpace.notificationCard.justNow' => '剛剛',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.spaceCard.noDescription' => '暫無描述',
 			'sharedSpace.spaceCard.creator' => '建立者',
 			'sharedSpace.spaceCard.member' => '成員',

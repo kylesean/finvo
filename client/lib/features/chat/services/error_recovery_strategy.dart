@@ -3,18 +3,15 @@ import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
 import '../widgets/genui_error_widget.dart';
 
-/// Error recovery strategy for GenUI rendering failures
+/// Error recovery for GenUI rendering failures.
 ///
-/// This class provides fallback mechanisms and retry logic for various
-/// error scenarios that can occur during GenUI widget rendering.
+/// Provides fallback widgets for various error scenarios that can occur during
+/// GenUI widget rendering. Retry logic lives in [RetryPolicy].
 class ErrorRecoveryStrategy {
   final _logger = Logger('ErrorRecoveryStrategy');
 
-  /// Maximum number of retry attempts for network operations
+  /// Maximum number of retry attempts for network operations.
   static const int defaultMaxRetries = 3;
-
-  /// Initial delay for exponential backoff
-  static const Duration defaultInitialDelay = Duration(seconds: 1);
 
   /// Schema validation failed - fall back to text-only rendering
   Widget buildFallbackForInvalidSchema(
@@ -75,56 +72,6 @@ class ErrorRecoveryStrategy {
     _logger.severe('Builder exception caught', errorMessage, stackTrace);
 
     return GenUiCompactErrorWidget(errorMessage: errorMessage);
-  }
-
-  /// Network error with retry logic using exponential backoff
-  Future<T> retryWithBackoff<T>({
-    required Future<T> Function() operation,
-    int maxAttempts = defaultMaxRetries,
-    Duration initialDelay = defaultInitialDelay,
-    void Function(int attempt, Duration nextDelay)? onRetry,
-  }) async {
-    int attempt = 0;
-    Duration delay = initialDelay;
-    Object? lastError;
-    StackTrace? lastStackTrace;
-
-    while (attempt < maxAttempts) {
-      try {
-        _logger.info(
-          'Attempting operation (attempt ${attempt + 1}/$maxAttempts)',
-        );
-        return await operation();
-      } catch (e, stackTrace) {
-        lastError = e;
-        lastStackTrace = stackTrace;
-        attempt++;
-
-        _logger.warning(
-          'Operation failed (attempt $attempt/$maxAttempts)',
-          e,
-          stackTrace,
-        );
-
-        if (attempt >= maxAttempts) {
-          _logger.severe('All retry attempts exhausted', lastError);
-          rethrow;
-        }
-
-        if (onRetry != null) {
-          onRetry(attempt, delay);
-        }
-
-        _logger.info('Retrying after ${delay.inSeconds}s delay');
-        await Future<void>.delayed(delay);
-        delay *= 2;
-      }
-    }
-
-    Error.throwWithStackTrace(
-      Exception('All retry attempts failed: $lastError'),
-      lastStackTrace ?? StackTrace.current,
-    );
   }
 
   /// Network error widget with retry functionality

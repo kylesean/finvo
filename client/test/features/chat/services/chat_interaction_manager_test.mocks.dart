@@ -105,6 +105,18 @@ class MockMessageRepository extends _i1.Mock implements _i8.MessageRepository {
           as _i8.GetCurrentMessagesCallback);
 
   @override
+  void clearContentBuffer(String? id) => super.noSuchMethod(
+    Invocation.method(#clearContentBuffer, [id]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void clearAllContentBuffers() => super.noSuchMethod(
+    Invocation.method(#clearAllContentBuffers, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   _i9.ChatMessage? findById(String? id) =>
       (super.noSuchMethod(Invocation.method(#findById, [id]))
           as _i9.ChatMessage?);
@@ -129,6 +141,7 @@ class MockMessageRepository extends _i1.Mock implements _i8.MessageRepository {
   void updateAiMessageState({
     required String? id,
     String? content,
+    String? contentDelta,
     bool? isTyping,
     _i9.StreamingStatus? streamingStatus,
     DateTime? timestamp,
@@ -136,6 +149,7 @@ class MockMessageRepository extends _i1.Mock implements _i8.MessageRepository {
     Invocation.method(#updateAiMessageState, [], {
       #id: id,
       #content: content,
+      #contentDelta: contentDelta,
       #isTyping: isTyping,
       #streamingStatus: streamingStatus,
       #timestamp: timestamp,
@@ -507,6 +521,12 @@ class MockStreamingController extends _i1.Mock
   @override
   void setGenUiService(_i17.GenUiService? service) => super.noSuchMethod(
     Invocation.method(#setGenUiService, [service]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void updateCurrentMessageId(String? messageId) => super.noSuchMethod(
+    Invocation.method(#updateCurrentMessageId, [messageId]),
     returnValueForMissingStub: null,
   );
 

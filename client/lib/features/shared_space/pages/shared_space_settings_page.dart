@@ -1,5 +1,6 @@
 // features/shared_space/pages/shared_space_settings_page.dart
 import 'dart:async';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -511,46 +512,18 @@ class _SharedSpaceSettingsPageState
         : t.sharedSpace.roles.member;
 
     unawaited(
-      showFDialog<void>(
+      showConfirmDialog(
         context: context,
-        builder: (dialogContext, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  t.sharedSpace.settings.changeRole,
-                  style: dialogStyle.titleTextStyle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.sharedSpace.settings.changeRoleConfirm(
-                    name: member.username,
-                    role: roleLabel,
-                  ),
-                  style: dialogStyle.bodyTextStyle,
-                ),
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.of(dialogContext).pop(),
-                  child: Text(t.sharedSpace.create.cancel),
-                ),
-                const SizedBox(height: 8),
-                FButton(
-                  onPress: () {
-                    Navigator.of(dialogContext).pop();
-                    unawaited(_updateRole(member, space, newRole));
-                  },
-                  child: Text(t.sharedSpace.settings.confirm),
-                ),
-              ],
-            ),
-          ),
+        title: t.sharedSpace.settings.changeRole,
+        message: t.sharedSpace.settings.changeRoleConfirm(
+          name: member.username,
+          role: roleLabel,
         ),
+        cancelLabel: t.sharedSpace.create.cancel,
+        confirmLabel: t.sharedSpace.settings.confirm,
+        onConfirm: () async {
+          unawaited(_updateRole(member, space, newRole));
+        },
       ),
     );
   }
@@ -574,46 +547,18 @@ class _SharedSpaceSettingsPageState
 
   void _confirmRemoveMember(SharedSpaceMember member, SharedSpace space) {
     unawaited(
-      showFDialog<void>(
+      showConfirmDialog(
         context: context,
-        builder: (dialogContext, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  t.sharedSpace.detail.removeMember,
-                  style: dialogStyle.titleTextStyle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.sharedSpace.settings.removeMemberConfirm(
-                    name: member.username,
-                  ),
-                  style: dialogStyle.bodyTextStyle,
-                ),
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.of(dialogContext).pop(),
-                  child: Text(t.sharedSpace.create.cancel),
-                ),
-                const SizedBox(height: 8),
-                FButton(
-                  variant: .destructive,
-                  onPress: () {
-                    Navigator.of(dialogContext).pop();
-                    unawaited(_removeMember(member, space));
-                  },
-                  child: Text(t.sharedSpace.detail.removeMember),
-                ),
-              ],
-            ),
-          ),
+        title: t.sharedSpace.detail.removeMember,
+        message: t.sharedSpace.settings.removeMemberConfirm(
+          name: member.username,
         ),
+        cancelLabel: t.sharedSpace.create.cancel,
+        confirmVariant: FButtonVariant.destructive,
+        confirmLabel: t.sharedSpace.detail.removeMember,
+        onConfirm: () async {
+          unawaited(_removeMember(member, space));
+        },
       ),
     );
   }
@@ -716,100 +661,44 @@ class _SharedSpaceSettingsPageState
 
   void _confirmLeaveSpace(SharedSpace space) {
     unawaited(
-      showFDialog<void>(
+      showConfirmDialog(
         context: context,
-        builder: (dialogContext, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  t.sharedSpace.detail.leaveSpace,
-                  style: dialogStyle.titleTextStyle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.sharedSpace.detail.leaveConfirm,
-                  style: dialogStyle.bodyTextStyle,
-                ),
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.of(dialogContext).pop(),
-                  child: Text(t.sharedSpace.create.cancel),
-                ),
-                const SizedBox(height: 8),
-                FButton(
-                  variant: .destructive,
-                  onPress: () async {
-                    Navigator.of(dialogContext).pop();
-                    final success = await ref
-                        .read(sharedSpaceProvider.notifier)
-                        .leaveSpace(space.id);
-                    if (success && mounted) {
-                      this.context.pop();
-                      this.context.pop();
-                    }
-                  },
-                  child: Text(t.sharedSpace.detail.leaveSpace),
-                ),
-              ],
-            ),
-          ),
-        ),
+        title: t.sharedSpace.detail.leaveSpace,
+        message: t.sharedSpace.detail.leaveConfirm,
+        cancelLabel: t.sharedSpace.create.cancel,
+        confirmVariant: FButtonVariant.destructive,
+        confirmLabel: t.sharedSpace.detail.leaveSpace,
+        onConfirm: () async {
+          final success = await ref
+              .read(sharedSpaceProvider.notifier)
+              .leaveSpace(space.id);
+          if (success && mounted) {
+            context.pop();
+            context.pop();
+          }
+        },
       ),
     );
   }
 
   void _confirmDeleteSpace(SharedSpace space) {
     unawaited(
-      showFDialog<void>(
+      showConfirmDialog(
         context: context,
-        builder: (dialogContext, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  t.sharedSpace.detail.deleteSpace,
-                  style: dialogStyle.titleTextStyle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.sharedSpace.detail.deleteConfirm,
-                  style: dialogStyle.bodyTextStyle,
-                ),
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.of(dialogContext).pop(),
-                  child: Text(t.sharedSpace.create.cancel),
-                ),
-                const SizedBox(height: 8),
-                FButton(
-                  variant: .destructive,
-                  onPress: () async {
-                    Navigator.of(dialogContext).pop();
-                    final success = await ref
-                        .read(sharedSpaceProvider.notifier)
-                        .deleteSpace(space.id);
-                    if (success && mounted) {
-                      this.context.pop();
-                      this.context.pop();
-                    }
-                  },
-                  child: Text(t.sharedSpace.detail.deleteSpace),
-                ),
-              ],
-            ),
-          ),
-        ),
+        title: t.sharedSpace.detail.deleteSpace,
+        message: t.sharedSpace.detail.deleteConfirm,
+        cancelLabel: t.sharedSpace.create.cancel,
+        confirmVariant: FButtonVariant.destructive,
+        confirmLabel: t.sharedSpace.detail.deleteSpace,
+        onConfirm: () async {
+          final success = await ref
+              .read(sharedSpaceProvider.notifier)
+              .deleteSpace(space.id);
+          if (success && mounted) {
+            context.pop();
+            context.pop();
+          }
+        },
       ),
     );
   }

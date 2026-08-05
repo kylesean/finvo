@@ -35,26 +35,9 @@ class ChatInteractionManager {
     required this._messageRepository,
     required this._genUiLifecycleManager,
     required this._streamingController,
-    required DataUriService
-    dataUriService, // kept for DI but unused (static methods)
     required this._setStreamingStatus,
     required this._getCurrentConversationId,
-    required String Function()
-    getCurrentConversationTitle, // kept for DI but unused
   });
-
-  // Note: DataUriService methods are static in the file seen previously.
-  // But usage in Notifier was ref.read(dataUriServiceProvider).
-  // If DataUriService has static methods, we don't need an instance.
-  // Let's assume we use static methods if possible, or instance if provider returns instance.
-  // Code view of DataUriService showed static methods.
-  // But Notifier passes `ref.read(dataUriServiceProvider)`.
-  // I will check if I should use static calls or instance calls.
-  // Step 913 view: class DataUriService { static ... }
-  // It has NO instance methods. It's a utility class.
-  // So constructor injection is weird if it's static.
-  // But let's keep the field in case it changes or for testing mocking.
-  // Actually, I should just call DataUriService.convert...
 
   /// User sends a message, triggering AI response flow
   Future<void> addUserMessageAndGetResponse(

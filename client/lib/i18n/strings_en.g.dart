@@ -40,6 +40,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	// Translations
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
+	@override late final _Translations$genui$en genui = _Translations$genui$en._(_root);
 	@override late final _Translations$time$en time = _Translations$time$en._(_root);
 	@override late final _Translations$greeting$en greeting = _Translations$greeting$en._(_root);
 	@override late final _Translations$navigation$en navigation = _Translations$navigation$en._(_root);
@@ -58,6 +59,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$dateRange$en dateRange = _Translations$dateRange$en._(_root);
 	@override late final _Translations$forecast$en forecast = _Translations$forecast$en._(_root);
 	@override late final _Translations$chat$en chat = _Translations$chat$en._(_root);
+	@override late final _Translations$image$en image = _Translations$image$en._(_root);
 	@override late final _Translations$footprint$en footprint = _Translations$footprint$en._(_root);
 	@override late final _Translations$media$en media = _Translations$media$en._(_root);
 	@override late final _Translations$error$en error = _Translations$error$en._(_root);
@@ -108,6 +110,20 @@ class _Translations$common$en extends Translations$common$zh {
 	@override String get loadFailed => 'Loading failed';
 	@override String get history => 'Transactions';
 	@override String get reset => 'Reset';
+}
+
+// Path: genui
+class _Translations$genui$en extends Translations$genui$zh {
+	_Translations$genui$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get errorBusy => 'Sorry, the service is temporarily busy, please try again later';
+	@override String get errorTimeout => 'Request timed out, please check your network and retry';
+	@override String get errorNetwork => 'Network connection issue, please check and retry';
+	@override String get errorSessionExpired => 'Session expired, please log in again';
+	@override String get errorGeneric => 'Something went wrong, please try again later';
 }
 
 // Path: time
@@ -669,6 +685,11 @@ class _Translations$chat$en extends Translations$chat$zh {
 	@override String get loadingFailed => 'Loading failed';
 	@override String get inputMessage => 'Type a message...';
 	@override String get aiThinking => 'AI processing...';
+	@override String get stoppedResponse => 'You have stopped this response';
+	@override String get errorRecover => 'Sorry, I encountered an issue, please try again 🙏';
+	@override String get contentCopied => 'Content copied';
+	@override String get jsonCopied => 'JSON data copied';
+	@override String get noContentToCopy => 'No content to copy';
 	@override String get listening => 'Listening...';
 	@override late final _Translations$chat$tools$en tools = _Translations$chat$tools$en._(_root);
 	@override String get speechNotRecognized => 'Speech not recognized, please try again';
@@ -689,6 +710,17 @@ class _Translations$chat$en extends Translations$chat$zh {
 	@override late final _Translations$chat$transferWizard$en transferWizard = _Translations$chat$transferWizard$en._(_root);
 	@override late final _Translations$chat$genui$en genui = _Translations$chat$genui$en._(_root);
 	@override late final _Translations$chat$welcome$en welcome = _Translations$chat$welcome$en._(_root);
+}
+
+// Path: image
+class _Translations$image$en extends Translations$image$zh {
+	_Translations$image$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get deleteTitle => 'Delete Image';
+	@override String get deleteConfirm => 'Are you sure you want to delete this image? This action cannot be undone.';
 }
 
 // Path: footprint
@@ -1146,6 +1178,84 @@ class _Translations$forecast$recurringTransaction$en extends Translations$foreca
 	@override String get noPending => 'No pending transactions';
 	@override String get confirmSuccess => 'Transaction confirmed';
 	@override String get skipSuccess => 'Transaction skipped';
+	@override String get interval => 'Interval';
+	@override String get selectDays => 'Select Days';
+	@override String get alwaysLastDay => 'Always execute on last day';
+	@override String get lastDayExecution => 'Will execute on the last day of each month';
+	@override String dayExecution({required Object day, required Object suffix}) => 'Will execute on the ${day}${suffix} of each month (clamped for short months)';
+	@override String get setEndDate => 'Set End Date';
+	@override String get selectEndDate => 'Select End Date';
+	@override String get preview => 'Preview';
+	@override String get daily => 'Daily';
+	@override String get weekly => 'Weekly';
+	@override String get monthly => 'Monthly';
+	@override String get yearly => 'Yearly';
+	@override String get custom => 'Custom';
+	@override String get cycle => 'Cycle';
+	@override String everyDays({required Object count}) => 'Every ${count} days';
+	@override String everyWeeks({required Object count}) => 'Every ${count} weeks';
+	@override String everyMonths({required Object count}) => 'Every ${count} months';
+	@override String everyYears({required Object count}) => 'Every ${count} years';
+	@override String monthlyOnDay({required Object day, required Object suffix}) => 'Monthly on the ${day}${suffix}';
+	@override String everyMonthsOnDay({required Object count, required Object day, required Object suffix}) => 'Every ${count} months on the ${day}${suffix}';
+	@override String get monthlyLastDay => 'Monthly on the last day';
+	@override String everyMonthsLastDay({required Object count}) => 'Every ${count} months on the last day';
+	@override String yearlyOn({required Object month, required Object day}) => 'Yearly on ${month}/${day}';
+	@override String everyYearsOn({required Object count, required Object month, required Object day}) => 'Every ${count} years on ${month}/${day}';
+	@override String weeklyOnDay({required Object day}) => 'Weekly on ${day}';
+	@override String get weekdayMon => 'Mon';
+	@override String get weekdayTue => 'Tue';
+	@override String get weekdayWed => 'Wed';
+	@override String get weekdayThu => 'Thu';
+	@override String get weekdayFri => 'Fri';
+	@override String get weekdaySat => 'Sat';
+	@override String get weekdaySun => 'Sun';
+	@override String get weekdayOn => '';
+	@override String get weekdayJoiner => ', ';
+	@override String get weeklyDaysPrefix => ' on ';
+	@override String get sourceAccount => 'Source Account';
+	@override String get targetAccount => 'Target Account';
+	@override String get expenseAccount => 'Expense Account';
+	@override String get incomeAccount => 'Income Account';
+	@override String get selectSourceAccount => 'Source';
+	@override String get selectTargetAccount => 'Target';
+	@override String get selectExpenseAccount => 'Expense';
+	@override String get selectIncomeAccount => 'Income';
+	@override String amountNotFixed({required Object type}) => 'Amount not fixed for each ${type}';
+	@override String get selectBothAccounts => 'Please select source and target accounts';
+	@override String selectAccountForType({required Object type}) => 'Please select ${type} account';
+	@override String get deleteConfirmGeneric => 'Are you sure you want to delete this recurring transaction? This action cannot be undone.';
+	@override String selectDate({required Object date}) => 'Select ${date}';
+	@override String get accountTypeCash => 'Cash';
+	@override String get accountTypeDeposit => 'Bank Deposit';
+	@override String get accountTypeEMoney => 'E-Wallet';
+	@override String get accountTypeInvestment => 'Investment';
+	@override String get accountTypeReceivable => 'Accounts Receivable';
+	@override String get accountTypeCreditCard => 'Credit Card';
+	@override String get accountTypeLoan => 'Loan Account';
+	@override String get accountTypePayable => 'Accounts Payable';
+	@override String get assetAccount => 'Asset Account';
+	@override String get liabilityAccount => 'Liability Account';
+	@override String get noAssetAccounts => 'No asset accounts';
+	@override String get goToFinanceToAddAccounts => 'Please go to the financial page to add accounts';
+	@override String get selectAccount => 'Select Account';
+	@override String get autoGenerateByRule => 'Automatically generate transactions by rule';
+	@override String dayUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count,
+		one: 'Day',
+		other: 'Days',
+	);
+	@override String weekUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count,
+		one: 'Week',
+		other: 'Weeks',
+	);
+	@override String monthUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count,
+		one: 'Month',
+		other: 'Months',
+	);
+	@override String yearUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count,
+		one: 'Year',
+		other: 'Years',
+	);
 }
 
 // Path: chat.tools
@@ -1205,6 +1315,7 @@ class _Translations$chat$transferWizard$en extends Translations$chat$transferWiz
 	@override String get sourceAccount => 'Source Account';
 	@override String get targetAccount => 'Target Account';
 	@override String get selectAccount => 'Select Account';
+	@override String get autoGenerateByRule => 'Automatically generate transactions by rule';
 	@override String get confirmTransfer => 'Confirm Transfer';
 	@override String get confirmed => 'Confirmed';
 	@override String get transferSuccess => 'Transfer Successful';
@@ -1858,6 +1969,7 @@ class _Translations$chat$genui$transactionGroupReceipt$en extends Translations$c
 	@override String count({required Object count}) => '${count} items';
 	@override String get total => 'Total';
 	@override String get selectAccount => 'Select Account';
+	@override String get autoGenerateByRule => 'Automatically generate transactions by rule';
 	@override String get selectAccountSubtitle => 'This account will be applied to all transactions above';
 	@override String associatedAccount({required Object name}) => 'Associated: ${name}';
 	@override String get clickToAssociate => 'Click to associate account';
@@ -2008,6 +2120,7 @@ class _Translations$chat$genui$transactionCard$en extends Translations$chat$genu
 	@override String get modify => 'Modify';
 	@override String get associate => 'Associate Account';
 	@override String get selectAccount => 'Select Account';
+	@override String get autoGenerateByRule => 'Automatically generate transactions by rule';
 	@override String get noAccount => 'No accounts available, please add one first';
 	@override String get missingId => 'Transaction ID missing, cannot update';
 	@override String associatedTo({required Object name}) => 'Associated to ${name}';
@@ -2375,6 +2488,11 @@ extension on TranslationsEn {
 			'common.loadFailed' => 'Loading failed',
 			'common.history' => 'Transactions',
 			'common.reset' => 'Reset',
+			'genui.errorBusy' => 'Sorry, the service is temporarily busy, please try again later',
+			'genui.errorTimeout' => 'Request timed out, please check your network and retry',
+			'genui.errorNetwork' => 'Network connection issue, please check and retry',
+			'genui.errorSessionExpired' => 'Session expired, please log in again',
+			'genui.errorGeneric' => 'Something went wrong, please try again later',
 			'time.today' => 'Today',
 			'time.yesterday' => 'Yesterday',
 			'time.dayBeforeYesterday' => 'Day Before Yesterday',
@@ -2834,11 +2952,84 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.noPending' => 'No pending transactions',
 			'forecast.recurringTransaction.confirmSuccess' => 'Transaction confirmed',
 			'forecast.recurringTransaction.skipSuccess' => 'Transaction skipped',
+			'forecast.recurringTransaction.interval' => 'Interval',
+			'forecast.recurringTransaction.selectDays' => 'Select Days',
+			'forecast.recurringTransaction.alwaysLastDay' => 'Always execute on last day',
+			'forecast.recurringTransaction.lastDayExecution' => 'Will execute on the last day of each month',
+			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => 'Will execute on the ${day}${suffix} of each month (clamped for short months)',
+			'forecast.recurringTransaction.setEndDate' => 'Set End Date',
+			'forecast.recurringTransaction.selectEndDate' => 'Select End Date',
+			'forecast.recurringTransaction.preview' => 'Preview',
+			'forecast.recurringTransaction.daily' => 'Daily',
+			'forecast.recurringTransaction.weekly' => 'Weekly',
+			'forecast.recurringTransaction.monthly' => 'Monthly',
+			'forecast.recurringTransaction.yearly' => 'Yearly',
+			'forecast.recurringTransaction.custom' => 'Custom',
+			'forecast.recurringTransaction.cycle' => 'Cycle',
+			'forecast.recurringTransaction.everyDays' => ({required Object count}) => 'Every ${count} days',
+			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => 'Every ${count} weeks',
+			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => 'Every ${count} months',
+			'forecast.recurringTransaction.everyYears' => ({required Object count}) => 'Every ${count} years',
+			'forecast.recurringTransaction.monthlyOnDay' => ({required Object day, required Object suffix}) => 'Monthly on the ${day}${suffix}',
+			'forecast.recurringTransaction.everyMonthsOnDay' => ({required Object count, required Object day, required Object suffix}) => 'Every ${count} months on the ${day}${suffix}',
+			'forecast.recurringTransaction.monthlyLastDay' => 'Monthly on the last day',
+			'forecast.recurringTransaction.everyMonthsLastDay' => ({required Object count}) => 'Every ${count} months on the last day',
+			'forecast.recurringTransaction.yearlyOn' => ({required Object month, required Object day}) => 'Yearly on ${month}/${day}',
+			_ => null,
+		} ?? switch (path) {
+			'forecast.recurringTransaction.everyYearsOn' => ({required Object count, required Object month, required Object day}) => 'Every ${count} years on ${month}/${day}',
+			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => 'Weekly on ${day}',
+			'forecast.recurringTransaction.weekdayMon' => 'Mon',
+			'forecast.recurringTransaction.weekdayTue' => 'Tue',
+			'forecast.recurringTransaction.weekdayWed' => 'Wed',
+			'forecast.recurringTransaction.weekdayThu' => 'Thu',
+			'forecast.recurringTransaction.weekdayFri' => 'Fri',
+			'forecast.recurringTransaction.weekdaySat' => 'Sat',
+			'forecast.recurringTransaction.weekdaySun' => 'Sun',
+			'forecast.recurringTransaction.weekdayOn' => '',
+			'forecast.recurringTransaction.weekdayJoiner' => ', ',
+			'forecast.recurringTransaction.weeklyDaysPrefix' => ' on ',
+			'forecast.recurringTransaction.sourceAccount' => 'Source Account',
+			'forecast.recurringTransaction.targetAccount' => 'Target Account',
+			'forecast.recurringTransaction.expenseAccount' => 'Expense Account',
+			'forecast.recurringTransaction.incomeAccount' => 'Income Account',
+			'forecast.recurringTransaction.selectSourceAccount' => 'Source',
+			'forecast.recurringTransaction.selectTargetAccount' => 'Target',
+			'forecast.recurringTransaction.selectExpenseAccount' => 'Expense',
+			'forecast.recurringTransaction.selectIncomeAccount' => 'Income',
+			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => 'Amount not fixed for each ${type}',
+			'forecast.recurringTransaction.selectBothAccounts' => 'Please select source and target accounts',
+			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => 'Please select ${type} account',
+			'forecast.recurringTransaction.deleteConfirmGeneric' => 'Are you sure you want to delete this recurring transaction? This action cannot be undone.',
+			'forecast.recurringTransaction.selectDate' => ({required Object date}) => 'Select ${date}',
+			'forecast.recurringTransaction.accountTypeCash' => 'Cash',
+			'forecast.recurringTransaction.accountTypeDeposit' => 'Bank Deposit',
+			'forecast.recurringTransaction.accountTypeEMoney' => 'E-Wallet',
+			'forecast.recurringTransaction.accountTypeInvestment' => 'Investment',
+			'forecast.recurringTransaction.accountTypeReceivable' => 'Accounts Receivable',
+			'forecast.recurringTransaction.accountTypeCreditCard' => 'Credit Card',
+			'forecast.recurringTransaction.accountTypeLoan' => 'Loan Account',
+			'forecast.recurringTransaction.accountTypePayable' => 'Accounts Payable',
+			'forecast.recurringTransaction.assetAccount' => 'Asset Account',
+			'forecast.recurringTransaction.liabilityAccount' => 'Liability Account',
+			'forecast.recurringTransaction.noAssetAccounts' => 'No asset accounts',
+			'forecast.recurringTransaction.goToFinanceToAddAccounts' => 'Please go to the financial page to add accounts',
+			'forecast.recurringTransaction.selectAccount' => 'Select Account',
+			'forecast.recurringTransaction.autoGenerateByRule' => 'Automatically generate transactions by rule',
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Day', other: 'Days', ),
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Week', other: 'Weeks', ),
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Month', other: 'Months', ),
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Year', other: 'Years', ),
 			'chat.newChat' => 'New Chat',
 			'chat.noMessages' => 'No messages to display.',
 			'chat.loadingFailed' => 'Loading failed',
 			'chat.inputMessage' => 'Type a message...',
 			'chat.aiThinking' => 'AI processing...',
+			'chat.stoppedResponse' => 'You have stopped this response',
+			'chat.errorRecover' => 'Sorry, I encountered an issue, please try again 🙏',
+			'chat.contentCopied' => 'Content copied',
+			'chat.jsonCopied' => 'JSON data copied',
+			'chat.noContentToCopy' => 'No content to copy',
 			'chat.listening' => 'Listening...',
 			'chat.tools.processing' => 'Processing...',
 			'chat.tools.readFile' => 'Reading file...',
@@ -2862,8 +3053,6 @@ extension on TranslationsEn {
 			'chat.tools.suggestBudget' => 'Suggesting budget...',
 			'chat.tools.listSpaces' => 'Loading shared spaces...',
 			'chat.tools.querySpaceSummary' => 'Querying space summary...',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.prepareTransfer' => 'Preparing transfer...',
 			'chat.tools.unknown' => 'Processing request...',
 			'chat.tools.done.readFile' => 'Read file',
@@ -2928,6 +3117,7 @@ extension on TranslationsEn {
 			'chat.transferWizard.sourceAccount' => 'Source Account',
 			'chat.transferWizard.targetAccount' => 'Target Account',
 			'chat.transferWizard.selectAccount' => 'Select Account',
+			'chat.transferWizard.autoGenerateByRule' => 'Automatically generate transactions by rule',
 			'chat.transferWizard.confirmTransfer' => 'Confirm Transfer',
 			'chat.transferWizard.confirmed' => 'Confirmed',
 			'chat.transferWizard.transferSuccess' => 'Transfer Successful',
@@ -2945,6 +3135,7 @@ extension on TranslationsEn {
 			'chat.genui.transactionGroupReceipt.count' => ({required Object count}) => '${count} items',
 			'chat.genui.transactionGroupReceipt.total' => 'Total',
 			'chat.genui.transactionGroupReceipt.selectAccount' => 'Select Account',
+			'chat.genui.transactionGroupReceipt.autoGenerateByRule' => 'Automatically generate transactions by rule',
 			'chat.genui.transactionGroupReceipt.selectAccountSubtitle' => 'This account will be applied to all transactions above',
 			'chat.genui.transactionGroupReceipt.associatedAccount' => ({required Object name}) => 'Associated: ${name}',
 			'chat.genui.transactionGroupReceipt.clickToAssociate' => 'Click to associate account',
@@ -3036,6 +3227,7 @@ extension on TranslationsEn {
 			'chat.genui.transactionCard.modify' => 'Modify',
 			'chat.genui.transactionCard.associate' => 'Associate Account',
 			'chat.genui.transactionCard.selectAccount' => 'Select Account',
+			'chat.genui.transactionCard.autoGenerateByRule' => 'Automatically generate transactions by rule',
 			'chat.genui.transactionCard.noAccount' => 'No accounts available, please add one first',
 			'chat.genui.transactionCard.missingId' => 'Transaction ID missing, cannot update',
 			'chat.genui.transactionCard.associatedTo' => ({required Object name}) => 'Associated to ${name}',
@@ -3123,6 +3315,8 @@ extension on TranslationsEn {
 			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
 			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
 			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'image.deleteTitle' => 'Delete Image',
+			'image.deleteConfirm' => 'Are you sure you want to delete this image? This action cannot be undone.',
 			'footprint.searchIn' => 'Search',
 			'footprint.searchInAllRecords' => 'Search in all records',
 			'media.selectPhotos' => 'Select Photos',
@@ -3295,6 +3489,8 @@ extension on TranslationsEn {
 			'budgetSuggestion.financialInsights' => 'Financial Insights',
 			'server.title' => 'Connect to Server',
 			'server.subtitle' => 'Enter your self-hosted server address or scan the QR code displayed when starting the server',
+			_ => null,
+		} ?? switch (path) {
 			'server.urlLabel' => 'Server Address',
 			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
 			'server.scanQr' => 'Scan QR Code',
@@ -3376,8 +3572,6 @@ extension on TranslationsEn {
 			'sharedSpace.detail.noTransactions' => 'No transactions yet',
 			'sharedSpace.detail.noTransactionsHint' => 'Transactions in this space will appear here',
 			'sharedSpace.detail.refreshCode' => 'Refresh Code',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.detail.joinOtherSpace' => 'Join Another Space',
 			'sharedSpace.notifications.title' => 'Notifications',
 			'sharedSpace.notifications.empty' => 'No notifications',

@@ -36,14 +36,12 @@ class NetworkClient {
     bool enableRetry = true,
     int maxRetries = 3,
   }) async {
+    final isIdempotentMethod = method == HttpMethod.get;
     return await _executeWithRetry<T>(
       () async {
         // Prepare Options
         final requestOptions = (options ?? Options()).copyWith(
-          method: method
-              .toString()
-              .split('.')
-              .last, // Convert enum to "GET", "POST" strings
+          method: method.name, // Convert enum to "GET", "POST" strings
         );
 
         // Execute request
@@ -61,6 +59,7 @@ class NetworkClient {
       enableRetry: enableRetry,
       maxRetries: maxRetries,
       path: path,
+      isIdempotentMethod: isIdempotentMethod,
     );
   }
 
@@ -71,6 +70,7 @@ class NetworkClient {
     required bool enableRetry,
     required int maxRetries,
     required String path,
+    required bool isIdempotentMethod,
   }) async {
     int attempts = 0;
     DioException? lastException;
@@ -109,7 +109,9 @@ class NetworkClient {
         attempts++;
 
         // Check if should retry
-        if (!enableRetry || attempts > maxRetries || !_shouldRetry(e)) {
+        if (!enableRetry ||
+            attempts > maxRetries ||
+            !_shouldRetry(e, isIdempotentMethod: isIdempotentMethod)) {
           break;
         }
 
@@ -117,13 +119,18 @@ class NetworkClient {
           'Request failed, preparing retry ($attempts/$maxRetries): ${e.message}',
         );
 
-        // Wait before retry (exponential backoff)
-        await Future<void>.delayed(Duration(milliseconds: 500 * attempts));
+        // Wait before retry (exponential backoff: 500ms, 1s, 2s, 4s, ... capped)
+        await Future<void>.delayed(_exponentialBackoff(attempts));
         continue;
-      } catch (e) {
+      } catch (e, stackTrace) {
         if (e is AppException) rethrow;
-        _logger.severe('Caught unknown error', e);
-        throw Exception('Unexpected client error: ${e.toString()}');
+        _logger.severe('Caught unknown error', e, stackTrace);
+        // Wrap in a typed AppException so callers can handle it uniformly,
+        // while preserving the original stack for debugging.
+        Error.throwWithStackTrace(
+          GeneralException('Unexpected client error: $e'),
+          stackTrace,
+        );
       }
     }
 
@@ -148,7 +155,17 @@ class NetworkClient {
   }
 
   /// Determine if request should be retried
-  bool _shouldRetry(DioException e) {
+  ///
+  /// Non-idempotent methods (POST/PUT/DELETE/PATCH) must NOT be retried:
+  /// a timed-out write may already have succeeded server-side, so retrying
+  /// could create/modify resources twice. Only GET (and other idempotent
+  /// requests) participate in retries.
+  bool _shouldRetry(DioException e, {required bool isIdempotentMethod}) {
+    // Non-idempotent methods are never retried
+    if (!isIdempotentMethod) {
+      return false;
+    }
+
     // Only retry for specific error types
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
@@ -163,6 +180,13 @@ class NetworkClient {
       default:
         return false;
     }
+  }
+
+  /// Exponential backoff delay in milliseconds:
+  /// attempts 1, 2, 3, 4 -> 500, 1000, 2000, 4000 (capped at 8s for 5+)
+  Duration _exponentialBackoff(int attempts) {
+    final cappedAttempts = attempts > 5 ? 5 : attempts;
+    return Duration(milliseconds: 500 << (cappedAttempts - 1));
   }
 
   /// Handle final failure, log error details

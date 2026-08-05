@@ -12,9 +12,6 @@ abstract class ChatHistoryState with _$ChatHistoryState {
     @Default(false) bool isLoadingHistory,
     @Default([]) List<ChatMessage> messages,
     String? historyError,
-    @Default(1) int historyCurrentPage, // Current loaded history message page
-    @Default(true)
-    bool historyHasMore, // Whether there are more history messages to load
     @Default(false)
     bool isStreamingResponse, // Whether AI is currently streaming response
   }) = _ChatHistoryState;

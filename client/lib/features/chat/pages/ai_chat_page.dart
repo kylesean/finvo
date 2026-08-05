@@ -37,8 +37,8 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
   @override
   void initState() {
     super.initState();
-    _logger.info(
-      'DEBUG: AIChatPage initState called. conversationId: ${widget.conversationId}',
+    _logger.fine(
+      'AIChatPage initState called. conversationId: ${widget.conversationId}',
     );
     // When the Widget is first inserted into the tree, load initial data based on the passed conversationId.
     // Use addPostFrameCallback to safely interact with Provider after the first frame renders.
@@ -53,8 +53,8 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
   @override
   void didUpdateWidget(covariant AIChatPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _logger.info(
-      'DEBUG: AIChatPage didUpdateWidget called. oldConversationId: ${oldWidget.conversationId}, newConversationId: ${widget.conversationId}',
+    _logger.fine(
+      'AIChatPage didUpdateWidget called. oldConversationId: ${oldWidget.conversationId}, newConversationId: ${widget.conversationId}',
     );
     // Called when GoRouter changes route causing this Widget's parameters to change.
     // We compare old and new conversationId.
@@ -69,8 +69,8 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
   }
 
   void _loadDataForCurrentRoute() {
-    _logger.info(
-      'DEBUG: _loadDataForCurrentRoute called. Current widget.conversationId: ${widget.conversationId}',
+    _logger.fine(
+      '_loadDataForCurrentRoute called. Current widget.conversationId: ${widget.conversationId}',
     );
     final notifier = ref.read(chatHistoryProvider.notifier);
     // If the route provides a conversationId, load it.
@@ -92,7 +92,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
 
   // Show native Drawer sidebar
   void _showSidebar() {
-    _logger.info('DEBUG: _showSidebar called, opening drawer');
+    _logger.fine('_showSidebar called, opening drawer');
     _scaffoldKey.currentState?.openDrawer();
   }
 
@@ -104,7 +104,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
   ) {
     // 1. If plain text content exists, return directly
     if (message.content.trim().isNotEmpty) {
-      return (content: message.content, message: 'Content copied');
+      return (content: message.content, message: t.chat.contentCopied);
     }
 
     // 2. If GenUI component data exists (history messages), copy JSON data
@@ -126,7 +126,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         final jsonString = const JsonEncoder.withIndent('  ').convert(
           componentsData.length == 1 ? componentsData.first : componentsData,
         );
-        return (content: jsonString, message: 'JSON data copied');
+        return (content: jsonString, message: t.chat.jsonCopied);
       } catch (e) {
         _logger.info('Failed to serialize UI components: $e');
       }
@@ -168,7 +168,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                   ? surfaceDataList.first
                   : surfaceDataList,
             );
-            return (content: jsonString, message: 'JSON data copied');
+            return (content: jsonString, message: t.chat.jsonCopied);
           }
         }
       } catch (e) {
@@ -277,10 +277,10 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
             if (copyResult.content.isEmpty) {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('No content to copy'),
+                  SnackBar(
+                    content: Text(t.chat.noContentToCopy),
                     behavior: SnackBarBehavior.fixed,
-                    shape: RoundedRectangleBorder(),
+                    shape: const RoundedRectangleBorder(),
                   ),
                 );
               }
@@ -427,18 +427,10 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                         case app.MessageSender.assistant:
                         default:
                           // AI message with GenUI support
-                          // CRITICAL: KeyedSubtree is required to force widget rebuild when message state changes
-                          // The key must include ALL fields that affect rendering to ensure proper streaming updates
-                          // Without this, Flutter may batch updates and only render final state
-                          return KeyedSubtree(
-                            key: ValueKey(
-                              '${message.id}_${message.fullContent.length}',
-                            ),
-                            child: _buildAiMessageWithGenUi(
-                              context,
-                              message,
-                              chatHistoryNotifier,
-                            ),
+                          return _buildAiMessageWithGenUi(
+                            context,
+                            message,
+                            chatHistoryNotifier,
                           );
                       }
                     },

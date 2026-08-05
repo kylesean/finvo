@@ -40,6 +40,7 @@ class TranslationsKo extends Translations with BaseTranslations<AppLocale, Trans
 
 	// Translations
 	@override late final _Translations$common$ko common = _Translations$common$ko._(_root);
+	@override late final _Translations$genui$ko genui = _Translations$genui$ko._(_root);
 	@override late final _Translations$time$ko time = _Translations$time$ko._(_root);
 	@override late final _Translations$greeting$ko greeting = _Translations$greeting$ko._(_root);
 	@override late final _Translations$navigation$ko navigation = _Translations$navigation$ko._(_root);
@@ -58,6 +59,7 @@ class TranslationsKo extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$dateRange$ko dateRange = _Translations$dateRange$ko._(_root);
 	@override late final _Translations$forecast$ko forecast = _Translations$forecast$ko._(_root);
 	@override late final _Translations$chat$ko chat = _Translations$chat$ko._(_root);
+	@override late final _Translations$image$ko image = _Translations$image$ko._(_root);
 	@override late final _Translations$footprint$ko footprint = _Translations$footprint$ko._(_root);
 	@override late final _Translations$media$ko media = _Translations$media$ko._(_root);
 	@override late final _Translations$error$ko error = _Translations$error$ko._(_root);
@@ -108,6 +110,20 @@ class _Translations$common$ko extends Translations$common$zh {
 	@override String get loadFailed => '불러오기 실패';
 	@override String get history => '거래 내역';
 	@override String get reset => '초기화';
+}
+
+// Path: genui
+class _Translations$genui$ko extends Translations$genui$zh {
+	_Translations$genui$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get errorBusy => '죄송합니다. 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요';
+	@override String get errorTimeout => '요청이 시간 초과되었습니다. 네트워크를 확인하고 다시 시도해 주세요';
+	@override String get errorNetwork => '네트워크 연결에 문제가 있습니다. 확인 후 다시 시도해 주세요';
+	@override String get errorSessionExpired => '세션이 만료되었습니다. 다시 로그인해 주세요';
+	@override String get errorGeneric => '문제가 발생했습니다. 잠시 후 다시 시도해 주세요';
 }
 
 // Path: time
@@ -666,6 +682,11 @@ class _Translations$chat$ko extends Translations$chat$zh {
 	@override String get inputMessage => '메시지 입력...';
 	@override String get listening => '듣고 있어요...';
 	@override String get aiThinking => '처리 중...';
+	@override String get stoppedResponse => '이 응답을 중지했습니다';
+	@override String get errorRecover => '죄송합니다. 문제가 발생했습니다. 다시 시도해 주세요 🙏';
+	@override String get contentCopied => '내용이 복사되었습니다';
+	@override String get jsonCopied => 'JSON 데이터가 복사되었습니다';
+	@override String get noContentToCopy => '복사할 내용이 없습니다';
 	@override late final _Translations$chat$tools$ko tools = _Translations$chat$tools$ko._(_root);
 	@override String get speechNotRecognized => '음성을 인식하지 못했습니다';
 	@override String get currentExpense => '이번 지출';
@@ -685,6 +706,17 @@ class _Translations$chat$ko extends Translations$chat$zh {
 	@override late final _Translations$chat$transferWizard$ko transferWizard = _Translations$chat$transferWizard$ko._(_root);
 	@override late final _Translations$chat$genui$ko genui = _Translations$chat$genui$ko._(_root);
 	@override late final _Translations$chat$welcome$ko welcome = _Translations$chat$welcome$ko._(_root);
+}
+
+// Path: image
+class _Translations$image$ko extends Translations$image$zh {
+	_Translations$image$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get deleteTitle => '이미지 삭제';
+	@override String get deleteConfirm => '이 이미지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
 }
 
 // Path: footprint
@@ -1142,6 +1174,84 @@ class _Translations$forecast$recurringTransaction$ko extends Translations$foreca
 	@override String get noPending => '대기 거래 없음';
 	@override String get confirmSuccess => '거래 확인됨';
 	@override String get skipSuccess => '거래 건너뜀';
+	@override String get interval => '반복 간격';
+	@override String get selectDays => '요일 선택';
+	@override String get alwaysLastDay => '매월 마지막 날에 실행';
+	@override String get lastDayExecution => '매월 마지막 날에 실행됩니다';
+	@override String dayExecution({required Object day, required Object suffix}) => '매월 ${day} 일${suffix} 실행（짧은 달은 월말로 조정됨）';
+	@override String get setEndDate => '종료일 설정';
+	@override String get selectEndDate => '종료일 선택';
+	@override String get preview => '규칙 미리보기';
+	@override String get daily => '매일';
+	@override String get weekly => '매주';
+	@override String get monthly => '매월';
+	@override String get yearly => '매년';
+	@override String get custom => '사용자 지정';
+	@override String get cycle => '주기';
+	@override String everyDays({required Object count}) => '${count}일마다';
+	@override String everyWeeks({required Object count}) => '${count}주마다';
+	@override String everyMonths({required Object count}) => '${count}개월마다';
+	@override String everyYears({required Object count}) => '${count}년마다';
+	@override String monthlyOnDay({required Object day, required Object suffix}) => '매월 ${day} 일${suffix}';
+	@override String everyMonthsOnDay({required Object count, required Object day, required Object suffix}) => '${count}개월마다 ${day} 일${suffix}';
+	@override String get monthlyLastDay => '매월 마지막 날';
+	@override String everyMonthsLastDay({required Object count}) => '${count}개월마다 마지막 날';
+	@override String yearlyOn({required Object month, required Object day}) => '매년 ${month}/${day}';
+	@override String everyYearsOn({required Object count, required Object month, required Object day}) => '${count}년마다 ${month}/${day}';
+	@override String weeklyOnDay({required Object day}) => '매주${day}';
+	@override String get weekdayMon => '월요일';
+	@override String get weekdayTue => '화요일';
+	@override String get weekdayWed => '수요일';
+	@override String get weekdayThu => '목요일';
+	@override String get weekdayFri => '금요일';
+	@override String get weekdaySat => '토요일';
+	@override String get weekdaySun => '일요일';
+	@override String get weekdayOn => '';
+	@override String get weekdayJoiner => ', ';
+	@override String get weeklyDaysPrefix => ' ';
+	@override String get sourceAccount => '출금 계좌';
+	@override String get targetAccount => '입금 계좌';
+	@override String get expenseAccount => '지출 계좌';
+	@override String get incomeAccount => '수입 계좌';
+	@override String get selectSourceAccount => '출금 계좌 선택';
+	@override String get selectTargetAccount => '입금 계좌 선택';
+	@override String get selectExpenseAccount => '지출 계좌 선택';
+	@override String get selectIncomeAccount => '수입 계좌 선택';
+	@override String amountNotFixed({required Object type}) => '${type}마다 금액이 고정되지 않음';
+	@override String get selectBothAccounts => '출금 및 입금 계좌를 선택하세요';
+	@override String selectAccountForType({required Object type}) => '${type} 계좌를 선택하세요';
+	@override String get deleteConfirmGeneric => '이 정기 거래를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
+	@override String selectDate({required Object date}) => '${date} 선택';
+	@override String get accountTypeCash => '현금';
+	@override String get accountTypeDeposit => '은행 예금';
+	@override String get accountTypeEMoney => '전자지갑';
+	@override String get accountTypeInvestment => '투자';
+	@override String get accountTypeReceivable => '매출채권';
+	@override String get accountTypeCreditCard => '신용카드';
+	@override String get accountTypeLoan => '대출 계좌';
+	@override String get accountTypePayable => '매입채무';
+	@override String get assetAccount => '자산 계좌';
+	@override String get liabilityAccount => '부채 계좌';
+	@override String get noAssetAccounts => '자산 계좌가 없습니다';
+	@override String get goToFinanceToAddAccounts => '재무 페이지에서 계좌를 추가하세요';
+	@override String get selectAccount => '계좌 선택';
+	@override String get autoGenerateByRule => '활성화하면 규칙에 따라 거래가 자동 생성됩니다';
+	@override String dayUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count,
+		one: '일',
+		other: '일',
+	);
+	@override String weekUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count,
+		one: '주',
+		other: '주',
+	);
+	@override String monthUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count,
+		one: '개월',
+		other: '개월',
+	);
+	@override String yearUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count,
+		one: '년',
+		other: '년',
+	);
 }
 
 // Path: chat.tools
@@ -1201,6 +1311,7 @@ class _Translations$chat$transferWizard$ko extends Translations$chat$transferWiz
 	@override String get sourceAccount => '출금 계좌';
 	@override String get targetAccount => '입금 계좌';
 	@override String get selectAccount => '계좌 선택';
+	@override String get autoGenerateByRule => '활성화하면 규칙에 따라 거래가 자동 생성됩니다';
 	@override String get confirmTransfer => '이체 확인';
 	@override String get confirmed => '확인됨';
 	@override String get transferSuccess => '이체 성공';
@@ -1889,6 +2000,7 @@ class _Translations$chat$genui$transactionCard$ko extends Translations$chat$genu
 	@override String get modify => '수정';
 	@override String get associate => '계좌 연결';
 	@override String get selectAccount => '계좌 선택';
+	@override String get autoGenerateByRule => '활성화하면 규칙에 따라 거래가 자동 생성됩니다';
 	@override String get noAccount => '계좌가 없습니다. 추가해주세요.';
 	@override String get missingId => '거래 ID가 없습니다';
 	@override String associatedTo({required Object name}) => '${name} 계좌 연결됨';
@@ -2371,6 +2483,11 @@ extension on TranslationsKo {
 			'common.loadFailed' => '불러오기 실패',
 			'common.history' => '거래 내역',
 			'common.reset' => '초기화',
+			'genui.errorBusy' => '죄송합니다. 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요',
+			'genui.errorTimeout' => '요청이 시간 초과되었습니다. 네트워크를 확인하고 다시 시도해 주세요',
+			'genui.errorNetwork' => '네트워크 연결에 문제가 있습니다. 확인 후 다시 시도해 주세요',
+			'genui.errorSessionExpired' => '세션이 만료되었습니다. 다시 로그인해 주세요',
+			'genui.errorGeneric' => '문제가 발생했습니다. 잠시 후 다시 시도해 주세요',
 			'time.today' => '오늘',
 			'time.yesterday' => '어제',
 			'time.dayBeforeYesterday' => '그저께',
@@ -2826,12 +2943,85 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.noPending' => '대기 거래 없음',
 			'forecast.recurringTransaction.confirmSuccess' => '거래 확인됨',
 			'forecast.recurringTransaction.skipSuccess' => '거래 건너뜀',
+			'forecast.recurringTransaction.interval' => '반복 간격',
+			'forecast.recurringTransaction.selectDays' => '요일 선택',
+			'forecast.recurringTransaction.alwaysLastDay' => '매월 마지막 날에 실행',
+			'forecast.recurringTransaction.lastDayExecution' => '매월 마지막 날에 실행됩니다',
+			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => '매월 ${day} 일${suffix} 실행（짧은 달은 월말로 조정됨）',
+			'forecast.recurringTransaction.setEndDate' => '종료일 설정',
+			'forecast.recurringTransaction.selectEndDate' => '종료일 선택',
+			'forecast.recurringTransaction.preview' => '규칙 미리보기',
+			'forecast.recurringTransaction.daily' => '매일',
+			'forecast.recurringTransaction.weekly' => '매주',
+			'forecast.recurringTransaction.monthly' => '매월',
+			'forecast.recurringTransaction.yearly' => '매년',
+			'forecast.recurringTransaction.custom' => '사용자 지정',
+			'forecast.recurringTransaction.cycle' => '주기',
+			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count}일마다',
+			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '${count}주마다',
+			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '${count}개월마다',
+			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '${count}년마다',
+			'forecast.recurringTransaction.monthlyOnDay' => ({required Object day, required Object suffix}) => '매월 ${day} 일${suffix}',
+			'forecast.recurringTransaction.everyMonthsOnDay' => ({required Object count, required Object day, required Object suffix}) => '${count}개월마다 ${day} 일${suffix}',
+			'forecast.recurringTransaction.monthlyLastDay' => '매월 마지막 날',
+			'forecast.recurringTransaction.everyMonthsLastDay' => ({required Object count}) => '${count}개월마다 마지막 날',
+			'forecast.recurringTransaction.yearlyOn' => ({required Object month, required Object day}) => '매년 ${month}/${day}',
+			'forecast.recurringTransaction.everyYearsOn' => ({required Object count, required Object month, required Object day}) => '${count}년마다 ${month}/${day}',
+			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => '매주${day}',
+			'forecast.recurringTransaction.weekdayMon' => '월요일',
+			'forecast.recurringTransaction.weekdayTue' => '화요일',
+			_ => null,
+		} ?? switch (path) {
+			'forecast.recurringTransaction.weekdayWed' => '수요일',
+			'forecast.recurringTransaction.weekdayThu' => '목요일',
+			'forecast.recurringTransaction.weekdayFri' => '금요일',
+			'forecast.recurringTransaction.weekdaySat' => '토요일',
+			'forecast.recurringTransaction.weekdaySun' => '일요일',
+			'forecast.recurringTransaction.weekdayOn' => '',
+			'forecast.recurringTransaction.weekdayJoiner' => ', ',
+			'forecast.recurringTransaction.weeklyDaysPrefix' => ' ',
+			'forecast.recurringTransaction.sourceAccount' => '출금 계좌',
+			'forecast.recurringTransaction.targetAccount' => '입금 계좌',
+			'forecast.recurringTransaction.expenseAccount' => '지출 계좌',
+			'forecast.recurringTransaction.incomeAccount' => '수입 계좌',
+			'forecast.recurringTransaction.selectSourceAccount' => '출금 계좌 선택',
+			'forecast.recurringTransaction.selectTargetAccount' => '입금 계좌 선택',
+			'forecast.recurringTransaction.selectExpenseAccount' => '지출 계좌 선택',
+			'forecast.recurringTransaction.selectIncomeAccount' => '수입 계좌 선택',
+			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => '${type}마다 금액이 고정되지 않음',
+			'forecast.recurringTransaction.selectBothAccounts' => '출금 및 입금 계좌를 선택하세요',
+			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => '${type} 계좌를 선택하세요',
+			'forecast.recurringTransaction.deleteConfirmGeneric' => '이 정기 거래를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+			'forecast.recurringTransaction.selectDate' => ({required Object date}) => '${date} 선택',
+			'forecast.recurringTransaction.accountTypeCash' => '현금',
+			'forecast.recurringTransaction.accountTypeDeposit' => '은행 예금',
+			'forecast.recurringTransaction.accountTypeEMoney' => '전자지갑',
+			'forecast.recurringTransaction.accountTypeInvestment' => '투자',
+			'forecast.recurringTransaction.accountTypeReceivable' => '매출채권',
+			'forecast.recurringTransaction.accountTypeCreditCard' => '신용카드',
+			'forecast.recurringTransaction.accountTypeLoan' => '대출 계좌',
+			'forecast.recurringTransaction.accountTypePayable' => '매입채무',
+			'forecast.recurringTransaction.assetAccount' => '자산 계좌',
+			'forecast.recurringTransaction.liabilityAccount' => '부채 계좌',
+			'forecast.recurringTransaction.noAssetAccounts' => '자산 계좌가 없습니다',
+			'forecast.recurringTransaction.goToFinanceToAddAccounts' => '재무 페이지에서 계좌를 추가하세요',
+			'forecast.recurringTransaction.selectAccount' => '계좌 선택',
+			'forecast.recurringTransaction.autoGenerateByRule' => '활성화하면 규칙에 따라 거래가 자동 생성됩니다',
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '일', other: '일', ),
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '주', other: '주', ),
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '개월', other: '개월', ),
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '년', other: '년', ),
 			'chat.newChat' => '새 대화',
 			'chat.noMessages' => '표시할 메시지가 없습니다.',
 			'chat.loadingFailed' => '로딩 실패',
 			'chat.inputMessage' => '메시지 입력...',
 			'chat.listening' => '듣고 있어요...',
 			'chat.aiThinking' => '처리 중...',
+			'chat.stoppedResponse' => '이 응답을 중지했습니다',
+			'chat.errorRecover' => '죄송합니다. 문제가 발생했습니다. 다시 시도해 주세요 🙏',
+			'chat.contentCopied' => '내용이 복사되었습니다',
+			'chat.jsonCopied' => 'JSON 데이터가 복사되었습니다',
+			'chat.noContentToCopy' => '복사할 내용이 없습니다',
 			'chat.tools.processing' => '처리 중...',
 			'chat.tools.readFile' => '파일 확인 중...',
 			'chat.tools.searchTransactions' => '거래 조회 중...',
@@ -2858,8 +3048,6 @@ extension on TranslationsKo {
 			'chat.tools.listSpaces' => '공유 공간 목록 불러오는 중...',
 			'chat.tools.querySpaceSummary' => '공간 요약 조회 중...',
 			'chat.tools.prepareTransfer' => '이체 준비 중...',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.unknown' => '요청 처리 중...',
 			'chat.tools.done.readFile' => '파일 확인 완료',
 			'chat.tools.done.searchTransactions' => '거래 조회 완료',
@@ -2920,6 +3108,7 @@ extension on TranslationsKo {
 			'chat.transferWizard.sourceAccount' => '출금 계좌',
 			'chat.transferWizard.targetAccount' => '입금 계좌',
 			'chat.transferWizard.selectAccount' => '계좌 선택',
+			'chat.transferWizard.autoGenerateByRule' => '활성화하면 규칙에 따라 거래가 자동 생성됩니다',
 			'chat.transferWizard.confirmTransfer' => '이체 확인',
 			'chat.transferWizard.confirmed' => '확인됨',
 			'chat.transferWizard.transferSuccess' => '이체 성공',
@@ -2963,6 +3152,7 @@ extension on TranslationsKo {
 			'chat.genui.transactionCard.modify' => '수정',
 			'chat.genui.transactionCard.associate' => '계좌 연결',
 			'chat.genui.transactionCard.selectAccount' => '계좌 선택',
+			'chat.genui.transactionCard.autoGenerateByRule' => '활성화하면 규칙에 따라 거래가 자동 생성됩니다',
 			'chat.genui.transactionCard.noAccount' => '계좌가 없습니다. 추가해주세요.',
 			'chat.genui.transactionCard.missingId' => '거래 ID가 없습니다',
 			'chat.genui.transactionCard.associatedTo' => ({required Object name}) => '${name} 계좌 연결됨',
@@ -3115,6 +3305,8 @@ extension on TranslationsKo {
 			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
 			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
 			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'image.deleteTitle' => '이미지 삭제',
+			'image.deleteConfirm' => '이 이미지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
 			'footprint.searchIn' => '검색',
 			'footprint.searchInAllRecords' => '모든 기록에서 검색',
 			'media.selectPhotos' => '사진 선택',
@@ -3292,6 +3484,8 @@ extension on TranslationsKo {
 			'sharedSpace.roles.owner' => '공간장',
 			'sharedSpace.roles.admin' => '관리자',
 			'sharedSpace.roles.member' => '멤버',
+			_ => null,
+		} ?? switch (path) {
 			'sharedSpace.title' => '공유 공간',
 			'sharedSpace.create.title' => '공유 공간 만들기',
 			'sharedSpace.create.subtitle' => '새로운 공유 공간을 만들어 친구와 함께 지출을 관리하세요',
@@ -3372,8 +3566,6 @@ extension on TranslationsKo {
 			'sharedSpace.notificationCard.reject' => '거절',
 			'sharedSpace.notificationCard.unknownTime' => '알 수 없는 시간',
 			'sharedSpace.notificationCard.justNow' => '방금',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.spaceCard.noDescription' => '설명 없음',
 			'sharedSpace.spaceCard.creator' => '생성자',
 			'sharedSpace.spaceCard.member' => '멤버',

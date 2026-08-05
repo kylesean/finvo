@@ -1,7 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
+import '../constants/api_constants.dart';
+part 'server_config_service.g.dart';
 
 final _logger = Logger('ServerConfigService');
 
@@ -112,9 +114,13 @@ class ServerConfigService {
     final healthUrl = '$normalizedUrl/api/v1/health';
     _logger.info('Checking health at: $healthUrl');
 
+    // Health checks run from the server-setup flow, i.e. BEFORE the server is
+    // configured, so the app's unified Dio (whose ConfigurationCheckInterceptor
+    // rejects unconfigured requests) cannot be used here. A minimal standalone
+    // instance with the shared timeout constants is used instead.
     final dio = Dio()
-      ..options.connectTimeout = const Duration(seconds: 10)
-      ..options.receiveTimeout = const Duration(seconds: 10);
+      ..options.connectTimeout = ApiConstants.connectTimeout
+      ..options.receiveTimeout = ApiConstants.receiveTimeout;
 
     try {
       final response = await dio.get<dynamic>(healthUrl);
@@ -201,27 +207,32 @@ class ServerHealthResult {
 }
 
 /// Provider for SharedPreferences (should be overridden in main.dart)
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+@Riverpod(keepAlive: true)
+SharedPreferences sharedPreferences(Ref ref) {
   throw UnimplementedError('sharedPreferencesProvider must be overridden');
-});
+}
 
 /// Provider for ServerConfigService
-final serverConfigServiceProvider = Provider<ServerConfigService>((ref) {
+@Riverpod(keepAlive: true)
+ServerConfigService serverConfigService(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return ServerConfigService(prefs);
-});
+}
 
 /// Provider for checking if server is configured
-final isServerConfiguredProvider = Provider<bool>((ref) {
+@Riverpod(keepAlive: true)
+bool isServerConfigured(Ref ref) {
   return ref.watch(serverConfigServiceProvider).isConfigured;
-});
+}
 
 /// Provider for current server URL
-final serverUrlProvider = Provider<String?>((ref) {
+@Riverpod(keepAlive: true)
+String? serverUrl(Ref ref) {
   return ref.watch(serverConfigServiceProvider).serverUrl;
-});
+}
 
 /// Provider for API base URL
-final apiBaseUrlProvider = Provider<String?>((ref) {
+@Riverpod(keepAlive: true)
+String? apiBaseUrl(Ref ref) {
   return ref.watch(serverConfigServiceProvider).baseUrl;
-});
+}

@@ -11,7 +11,7 @@
 
 import 'dart:async';
 import 'package:logging/logging.dart';
-
+import 'package:finvo/i18n/strings.g.dart';
 import '../models/chat_message_attachment.dart';
 import '../repositories/message_repository.dart';
 import '../services/file_attachment_service.dart';
@@ -100,7 +100,7 @@ class AttachmentManager {
           final failure = failureMap[failureKey]!;
           return attachment.copyWith(
             status: AttachmentLoadStatus.failed,
-            errorMessage: failure.displayMessage ?? 'Load failed',
+            errorMessage: failure.displayMessage ?? t.common.loadFailed,
           );
         }
 

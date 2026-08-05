@@ -176,10 +176,22 @@ class ConversationService {
             throw DataParsingException('Invalid message format');
           }).toList();
 
+          // Parse the server-provided updated_at timestamp. Fall back to now if
+          // it is missing or malformed so conversation ordering stays accurate.
+          DateTime updatedAt = DateTime.now();
+          if (data['updated_at'] != null &&
+              data['updated_at'].toString().isNotEmpty) {
+            try {
+              updatedAt = _parseDateTime(data['updated_at'] as String);
+            } catch (e) {
+              _logger.warning('Error parsing conversation updated_at: $e');
+            }
+          }
+
           return ConversationDetail(
             id: data['session_id'] as String? ?? conversationId,
             title: data['title'] as String? ?? 'Chat',
-            updatedAt: DateTime.now(),
+            updatedAt: updatedAt,
             messages: messages,
           );
         }

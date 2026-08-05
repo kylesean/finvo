@@ -4,10 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/speech_recognition_service.dart';
-import '../services/system_speech_service.dart';
-import '../services/speech_service_factory.dart';
+import '../services/speech_session_manager.dart';
 import '../services/file_upload_service.dart';
-import '../services/sound_feedback_service.dart';
 import '../models/message_attachments.dart';
 import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
 import 'chat_input_state.dart';
@@ -33,18 +31,13 @@ extension ChatInputStateMediaHandling on ChatInputState {
 class ChatInputNotifier extends _$ChatInputNotifier {
   static final _logger = Logger('ChatInputNotifier');
 
-  SpeechRecognitionService? _speechService;
+  final SpeechSessionManager _speechSession = SpeechSessionManager();
   FileUploadService? _fileUploadService;
-  SpeechServiceType? _serviceType;
 
   final Map<String, UploadedAttachmentInfo> _uploadedInfos = {};
 
   String _textBeforeSpeechSession = '';
-  Timer? _noSpeechInputTimer;
   bool _isManualStop = false;
-  StreamSubscription<String>? _resultSubscription;
-  StreamSubscription<String>? _statusSubscription;
-  StreamSubscription<String>? _errorSubscription;
 
   @override
   ChatInputState build(OnSendMessageCallback onSendMessage) {
@@ -54,90 +47,26 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     final settings = ref.watch(speechSettingsProvider).settings;
     final newServiceType = settings?.serviceType ?? SpeechServiceType.system;
 
-    // Detect if service type has changed
-    final isFirstInit = _serviceType == null;
-    final serviceTypeChanged = !isFirstInit && _serviceType != newServiceType;
-
-    _logger.info(
-      'build() called: isFirstInit=$isFirstInit, serviceTypeChanged=$serviceTypeChanged, '
-      'currentType=$_serviceType, newType=$newServiceType',
+    // Select (create or swap) the underlying speech service.
+    _speechSession.setServiceType(
+      type: newServiceType,
+      previousType: _speechSession.serviceType,
+      websocketHost: settings?.websocketHost,
+      websocketPort: settings?.websocketPort,
+      websocketPath: settings?.websocketPath,
     );
 
-    if (serviceTypeChanged) {
-      _logger.info(
-        'Speech service type changed from $_serviceType to $newServiceType, reinitializing...',
-      );
+    // Wire the speech manager callbacks to the UI state machine.
+    _speechSession.onResult = _onSpeechResult;
+    _speechSession.onStatus = _onSpeechStatus;
+    _speechSession.onError = _onSpeechError;
 
-      _cleanupCurrentService();
-    }
+    ref.onDispose(() {
+      _logger.info('Provider disposing, cleaning up speech session...');
+      _speechSession.disposeService();
+    });
 
-    // Only create new service if not created yet or service type changed
-    if (_speechService == null || serviceTypeChanged) {
-      _serviceType = newServiceType;
-      _speechService = SpeechServiceFactory.create(
-        newServiceType,
-        websocketHost: settings?.websocketHost,
-        websocketPort: settings?.websocketPort,
-        websocketPath: settings?.websocketPath,
-      );
-      _logger.info('Created new ${newServiceType.name} speech service');
-    }
-
-    // Only register dispose callback on first init to avoid duplicate registration
-    if (isFirstInit) {
-      ref.onDispose(() {
-        _logger.info('Provider disposing, cleaning up...');
-        _cleanupCurrentService();
-      });
-    }
-
-    return const ChatInputState();
-  }
-
-  /// Cleanup current service resources
-  void _cleanupCurrentService() {
-    _logger.info('Cleaning up current speech service...');
-
-    // Cancel all subscriptions
-    unawaited(_resultSubscription?.cancel());
-    unawaited(_statusSubscription?.cancel());
-    unawaited(_errorSubscription?.cancel());
-    _noSpeechInputTimer?.cancel();
-
-    _resultSubscription = null;
-    _statusSubscription = null;
-    _errorSubscription = null;
-    _noSpeechInputTimer = null;
-
-    // Release old service
-    unawaited(_speechService?.dispose());
-    _speechService = null;
-
-    // Reset state flags
-    _textBeforeSpeechSession = '';
-    _isManualStop = false;
-  }
-
-  /// Ensure event subscriptions are set up
-  ///
-  /// Only create new subscriptions if they are not already set up, to avoid duplicate subscriptions
-  void _ensureSubscriptionsSetup() {
-    if (_speechService == null) return;
-
-    // Skip if subscriptions are already set up
-    if (_resultSubscription != null) return;
-
-    _logger.info('Setting up speech service subscriptions...');
-    _resultSubscription = _speechService!.onResult.listen(_onSpeechResult);
-    _statusSubscription = _speechService!.onStatus.listen(_onSpeechStatus);
-    _errorSubscription = _speechService!.onError.listen(_onSpeechError);
-
-    state = state.copyWith(
-      isSpeechAvailable: true,
-      showError: false,
-      errorMessage: '',
-      hintType: HintType.normal,
-    );
+    return const ChatInputState(isSpeechAvailable: true);
   }
 
   void _onSpeechStatus(String status) {
@@ -145,7 +74,6 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     final isCurrentlyListening = status == 'listening';
 
     if (state.isListening && !isCurrentlyListening) {
-      _noSpeechInputTimer?.cancel();
       _logger.info('Stopped listening.');
 
       if (state.isLoadingResponse) {
@@ -193,6 +121,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       if (state.hintType == HintType.speechNotRecognized) {
         unawaited(
           Future<void>.delayed(const Duration(seconds: 2), () {
+            if (!ref.mounted) return;
             if (state.hintType == HintType.speechNotRecognized &&
                 !state.isListening &&
                 !state.isLoadingResponse) {
@@ -207,37 +136,23 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     }
   }
 
-  void _onSpeechError(String error) {
-    _noSpeechInputTimer?.cancel();
-    _logger.severe('Speech error: $error');
+  void _onSpeechError(String errorToken) {
+    _logger.severe('Speech error: $errorToken');
 
     if (state.isLoadingResponse) {
-      _logger.info('Sending message, ignoring speech error: $error');
+      _logger.info('Sending message, ignoring speech error: $errorToken');
       return;
     }
 
     if (_isManualStop) {
-      _logger.info('Error caused by user manual stop, ignoring: $error');
+      _logger.info('Error caused by user manual stop, ignoring: $errorToken');
       _isManualStop = false;
       return;
     }
 
-    String userMessage = error;
-    if (error == 'system_speech_restricted' ||
-        error == 'dictation_disabled' ||
-        error == 'permission_denied') {
-      userMessage = error;
-    } else if (error == 'speech_not_configured') {
-      userMessage = 'speech_not_configured';
-    } else if (error == 'speech_connection_failed' ||
-        error.toLowerCase().contains('connection') ||
-        error.toLowerCase().contains('connect') ||
-        error.toLowerCase().contains('failed') ||
-        error.toLowerCase().contains('refused') ||
-        error.toLowerCase().contains('socket')) {
-      userMessage = 'speech_connection_failed';
-    } else if (error.toLowerCase().contains('timeout')) {
-      userMessage = 'no_speech_recognized';
+    // The token is already classified by SpeechSessionManager; only the
+    // no-speech case additionally clears the draft text.
+    if (errorToken == 'no_speech_recognized') {
       _textBeforeSpeechSession = '';
       state = state.copyWith(text: '');
     }
@@ -245,13 +160,12 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     state = state.copyWith(
       isListening: false,
       showError: true,
-      errorMessage: userMessage,
+      errorMessage: errorToken,
       hintType: HintType.normal,
     );
   }
 
   void _onSpeechResult(String recognizedText) {
-    _noSpeechInputTimer?.cancel();
     final newText = _textBeforeSpeechSession.isEmpty
         ? recognizedText
         : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
@@ -267,8 +181,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
     if (state.isListening) {
       _isManualStop = true;
-      _noSpeechInputTimer?.cancel();
-      await _speechService?.stopListening();
+      await _speechSession.stopListening(manual: true);
     } else if (state.text.trim().isNotEmpty || state.hasMediaFiles) {
       await _submitMessage();
     } else {
@@ -279,56 +192,26 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   Future<void> _startNewSpeechSession() async {
     _logger.info('Starting new speech recognition session');
 
-    if (_speechService == null) {
-      _logger.warning('Speech service not configured');
-      final errMsg = _serviceType == SpeechServiceType.system
-          ? 'system_speech_restricted'
-          : 'Speech service not configured';
-      state = state.copyWith(
-        showError: true,
-        errorMessage: errMsg,
-        hintType: HintType.normal,
-      );
-      return;
-    }
-
-    // Play start sound / haptic feedback immediately to give user instant feedback
-    // Regardless of the service connection status, the user should be informed
-    // that the system has responded.
+    // Play haptic feedback immediately to give the user instant feedback.
     unawaited(HapticFeedback.lightImpact());
-    if (_serviceType == SpeechServiceType.websocket) {
-      await SoundFeedbackService.instance.playStartSound();
-    }
 
     try {
-      // Use the unified ensureReady() method to ensure service readiness
-      // The service handles its own initialization/reconnection logic
-      final isReady = await _speechService!.ensureReady();
+      final errorToken = await _speechSession.startSession();
 
-      if (!isReady) {
-        _logger.warning('Speech service not ready');
-        String errMsg;
-        if (_serviceType == SpeechServiceType.system) {
-          if (_speechService is SystemSpeechService) {
-            errMsg =
-                (_speechService as SystemSpeechService).lastError ??
-                'system_speech_restricted';
-          } else {
-            errMsg = 'system_speech_restricted';
-          }
-        } else {
-          errMsg = 'Speech service connection failed, please check network';
+      if (errorToken != null) {
+        _logger.warning('Speech service not ready: $errorToken');
+        if (errorToken == 'no_speech_recognized') {
+          _textBeforeSpeechSession = '';
+          state = state.copyWith(text: '');
         }
         state = state.copyWith(
+          isListening: false,
           showError: true,
-          errorMessage: errMsg,
+          errorMessage: errorToken,
           hintType: HintType.normal,
         );
         return;
       }
-
-      // Ensure event subscriptions are set up
-      _ensureSubscriptionsSetup();
 
       _textBeforeSpeechSession = state.text.trim();
       state = state.copyWith(
@@ -337,24 +220,12 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         errorMessage: '',
         hintType: HintType.listening,
       );
-
-      await _speechService!.startListening();
-      _noSpeechInputTimer?.cancel();
-      _noSpeechInputTimer = Timer(const Duration(seconds: 30), () {
-        if (state.isListening && state.text == _textBeforeSpeechSession) {
-          _logger.info(
-            'No valid speech input after 30 seconds, stopping actively',
-          );
-          unawaited(_speechService?.stopListening());
-        }
-      });
     } catch (e) {
       _logger.severe('Failed to start speech recognition session: $e');
       state = state.copyWith(
         isListening: false,
         showError: true,
-        errorMessage:
-            'Voice service connection failed. Please check your network connection.',
+        errorMessage: 'speech_connection_failed',
         hintType: HintType.normal,
       );
     }
@@ -363,8 +234,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   void onTextChanged(String newText) {
     if (state.isListening) {
       _logger.info('User manually input, stopping current speech listening');
-      _noSpeechInputTimer?.cancel();
-      unawaited(_speechService?.stopListening());
+      unawaited(_speechSession.stopListening(manual: false));
     }
     _textBeforeSpeechSession = newText;
     state = state.copyWith(text: newText, hintType: HintType.normal);
@@ -379,8 +249,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     if (textToSend.isEmpty && !hasMediaFiles) return;
 
     if (state.isListening) {
-      _noSpeechInputTimer?.cancel();
-      await _speechService?.stopListening();
+      await _speechSession.stopListening(manual: false);
       state = state.copyWith(isListening: false, hintType: HintType.normal);
     }
 
@@ -444,6 +313,26 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     if (state.showError) {
       state = state.copyWith(showError: false, errorMessage: '');
     }
+  }
+
+  /// Reset input text and media for a conversation switch, so a previous
+  /// conversation's draft doesn't leak into the newly opened one.
+  void resetForConversationSwitch() {
+    if (state.isListening) {
+      unawaited(_speechSession.stopListening(manual: false));
+    }
+    _textBeforeSpeechSession = '';
+    _uploadedInfos.clear();
+    state = state.copyWith(
+      text: '',
+      selectedFiles: [],
+      uploadingFiles: {},
+      isLoadingResponse: false,
+      isListening: false,
+      showError: false,
+      errorMessage: '',
+      hintType: HintType.normal,
+    );
   }
 
   void showError(String message) {

@@ -25,8 +25,7 @@ ExpenseHeatLevel _heatLevelFromString(String? levelStr) {
 }
 
 // Helper function: Convert ExpenseHeatLevel enum to string
-String _heatLevelToString(ExpenseHeatLevel level) =>
-    level.toString().split('.').last;
+String _heatLevelToString(ExpenseHeatLevel level) => level.name;
 
 // Date toJson helper function
 String _dateTimeToIso8601String(DateTime dt) {

@@ -54,11 +54,28 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    unawaited(_controller.repeat());
+    // Only animate while the streaming indicator is actually shown, so
+    // historical/static messages don't keep a ticker running forever.
+    if (_shouldShowStreamingIndicator()) {
+      unawaited(_controller.repeat());
+    }
+  }
+
+  @override
+  void didUpdateWidget(ChatMessageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final shouldAnimate = _shouldShowStreamingIndicator();
+    if (shouldAnimate && !_controller.isAnimating) {
+      unawaited(_controller.repeat());
+    } else if (!shouldAnimate && _controller.isAnimating) {
+      _controller.stop();
+      _controller.value = 0;
+    }
   }
 
   @override
   void dispose() {
+    _controller.stop();
     _controller.dispose();
     super.dispose();
   }

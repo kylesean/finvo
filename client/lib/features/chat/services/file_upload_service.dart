@@ -9,6 +9,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/network_client.dart';
 import '../../../core/network/exceptions/app_exception.dart';
+import '../../../shared/utils/mime_type_mapper.dart';
 
 /// Upload progress listener
 typedef ProgressCallback = void Function(int bytes, int total);
@@ -28,73 +29,6 @@ class FileUploadService {
   final _logger = Logger('FileUploadService');
 
   FileUploadService(this._networkClient);
-
-  /// Get correct MIME type from file extension
-  static String? _getMimeTypeFromExtension(String fileName) {
-    final extension = fileName.toLowerCase().split('.').last;
-
-    switch (extension) {
-      // Image formats
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      case 'bmp':
-        return 'image/bmp';
-      case 'svg':
-        return 'image/svg+xml';
-
-      // Video formats
-      case 'mp4':
-        return 'video/mp4';
-      case 'avi':
-        return 'video/x-msvideo';
-      case 'mov':
-        return 'video/quicktime';
-      case 'wmv':
-        return 'video/x-ms-wmv';
-
-      // Audio formats
-      case 'mp3':
-        return 'audio/mpeg';
-      case 'wav':
-        return 'audio/wav';
-      case 'm4a':
-        return 'audio/mp4';
-
-      // Document formats
-      case 'pdf':
-        return 'application/pdf';
-      case 'doc':
-        return 'application/msword';
-      case 'docx':
-        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      case 'xls':
-        return 'application/vnd.ms-excel';
-      case 'xlsx':
-        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      case 'ppt':
-        return 'application/vnd.ms-powerpoint';
-      case 'pptx':
-        return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-      case 'txt':
-        return 'text/plain';
-
-      // Compressed files
-      case 'zip':
-        return 'application/zip';
-      case 'rar':
-        return 'application/vnd.rar';
-
-      default:
-        return null; // Let Dio auto-detect
-    }
-  }
 
   /// Upload files using Dio to handle FormData directly, but unified error handling
   Future<FileUploadResult> uploadFiles(
@@ -142,12 +76,12 @@ class FileUploadService {
 
           for (var upload in result.uploads) {
             _logger.info(
-              '✓ ${upload.originalName} -> objectKey: ${upload.objectKey}',
+              '${upload.originalName} -> objectKey: ${upload.objectKey}',
             );
           }
 
           for (var failure in result.failures) {
-            _logger.warning('✗ ${failure.fileName}: ${failure.error}');
+            _logger.warning('${failure.fileName}: ${failure.error}');
           }
 
           return result;
@@ -177,7 +111,7 @@ class FileUploadService {
 
     for (final file in files) {
       // Determine correct MIME type based on file extension
-      final mimeType = _getMimeTypeFromExtension(file.name);
+      final mimeType = MimeTypeMapper.fromFileName(file.name);
       _logger.fine('File: ${file.name}, MIME: ${mimeType ?? "auto"}');
 
       late MultipartFile multipartFile;

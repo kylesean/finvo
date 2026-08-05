@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:forui/forui.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,7 +59,10 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
   }
 
   String _formatAmount(dynamic amount) {
-    final numberFormat = NumberFormat('#,##0', 'zh_CN');
+    final numberFormat = AmountFormatter.getNumberFormat(
+      'CNY',
+      decimalDigits: 0,
+    );
     if (amount is String) {
       return numberFormat.format(double.tryParse(amount) ?? 0);
     }
@@ -101,7 +105,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
       builder: (context, ref, child) {
         final theme = context.theme;
         final colors = theme.colors;
-        final amountTheme = ref.watch(currentAmountThemeValueProvider);
+        final amountTheme = ref.watch(currentAmountThemeProvider);
         final hasWarnings = _warnings.isNotEmpty;
 
         return GestureDetector(

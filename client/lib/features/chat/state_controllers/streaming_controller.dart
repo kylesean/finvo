@@ -73,17 +73,8 @@ class StreamingController {
   /// Timer for initial response delay
   Timer? _initialResponseDelayTimer;
 
-  /// Stream subscription
-  StreamSubscription<dynamic>? _streamSubscription;
-
   /// Pending cancel completer (for tracking cancel operation)
   Completer<void>? _pendingCancelCompleter;
-
-  /// Internal flags (kept for backward compatibility during migration)
-  bool _streamIsDone = false;
-  bool _isFirstChunkReceived = false;
-  bool _isMessageCompleted = false;
-  bool _isUserCancelled = false;
 
   // ============================================================
   // Callbacks
@@ -126,16 +117,16 @@ class StreamingController {
   String get currentMessageId => _currentMessageId;
 
   /// Check if stream is done
-  bool get isStreamDone => _streamIsDone;
+  bool get isStreamDone => streamState.isStreamDone;
 
   /// Check if first chunk received
-  bool get isFirstChunkReceived => _isFirstChunkReceived;
+  bool get isFirstChunkReceived => streamState.isFirstChunkReceived;
 
   /// Check if message completed
-  bool get isMessageCompleted => _isMessageCompleted;
+  bool get isMessageCompleted => streamState.isMessageCompleted;
 
   /// Check if user cancelled
-  bool get isUserCancelled => _isUserCancelled;
+  bool get isUserCancelled => streamState.isUserCancelled;
 
   /// Check if there's a pending cancel operation
   bool get hasPendingCancel =>
@@ -150,6 +141,21 @@ class StreamingController {
     _genUiService = service;
   }
 
+  /// Update current streaming message ID without resetting stream state.
+  ///
+  /// Used when the server assigns a real message ID after `session_init`
+  /// (replacing the optimistic temporary ID). Stream flags are preserved so
+  /// subsequent text/tool-call events continue to target the same message.
+  void updateCurrentMessageId(String messageId) {
+    if (messageId.isEmpty) return;
+    if (_currentMessageId == messageId) return;
+    _logger.info(
+      'StreamingController: Updating message ID $_currentMessageId -> $messageId',
+    );
+    _currentMessageId = messageId;
+    streamState.updateMessageId(messageId);
+  }
+
   // ============================================================
   // Public Methods - Stream Lifecycle
   // ============================================================
@@ -157,12 +163,6 @@ class StreamingController {
   /// Reset state for a new streaming session
   void resetForNewMessage(String messageId) {
     _currentMessageId = messageId;
-    _streamIsDone = false;
-    _isFirstChunkReceived = false;
-    _isMessageCompleted = false;
-    _isUserCancelled = false;
-
-    // Sync with StreamStateController
     streamState.startStreaming(messageId);
 
     _logger.info('StreamingController: Reset for message $messageId');
@@ -177,7 +177,7 @@ class StreamingController {
     _initialResponseDelayTimer = Timer(
       Duration(milliseconds: config.initialDelayMs),
       () {
-        if (!_isFirstChunkReceived) {
+        if (!streamState.isFirstChunkReceived) {
           _logger.info(
             'StreamingController: Initial delay exceeded, showing thinking indicator',
           );
@@ -195,9 +195,8 @@ class StreamingController {
 
     _initialResponseDelayTimer?.cancel();
 
-    final isFirst = !_isFirstChunkReceived;
+    final isFirst = !streamState.isFirstChunkReceived;
     if (isFirst) {
-      _isFirstChunkReceived = true;
       streamState.markFirstChunkReceived();
       _logger.info('StreamingController: First chunk received');
     }
@@ -207,49 +206,39 @@ class StreamingController {
 
   /// Mark first chunk as received (for UI components)
   void markFirstChunkReceived() {
-    if (!_isFirstChunkReceived) {
-      _isFirstChunkReceived = true;
+    if (!streamState.isFirstChunkReceived) {
       streamState.markFirstChunkReceived();
     }
   }
 
   /// Manually mark message as completed
   void markMessageCompleted() {
-    _isMessageCompleted = true;
+    streamState.markCompleted();
   }
 
   /// Mark stream as ended (without triggering callbacks)
   void markStreamEnded({bool isError = false}) {
     _initialResponseDelayTimer?.cancel();
-    _streamIsDone = true;
-    _isMessageCompleted = true;
     if (isError) {
       streamState.markError();
     } else {
       streamState.markCompleted();
     }
-    _cleanupAfterStream();
   }
 
   /// Handle stream completion
   void handleStreamComplete(String? finalTextOverride) {
     _initialResponseDelayTimer?.cancel();
-    _streamIsDone = true;
-    _isMessageCompleted = true;
     streamState.markCompleted();
 
-    _cleanupAfterStream();
     onStreamComplete(finalTextOverride);
   }
 
   /// Handle stream error
   void handleStreamError(dynamic error) {
     _initialResponseDelayTimer?.cancel();
-    _streamIsDone = true;
-    _isMessageCompleted = true;
     streamState.markError();
 
-    _cleanupAfterStream();
     onStreamError(error);
   }
 
@@ -264,9 +253,6 @@ class StreamingController {
 
     // Set cancel flags BEFORE calling cancel()
     // cancel() may synchronously trigger onStreamComplete callback
-    _isUserCancelled = true;
-    _isMessageCompleted = true;
-    _streamIsDone = true;
     streamState.markCancelled();
 
     // Cancel the GenUI conversation
@@ -277,8 +263,7 @@ class StreamingController {
     // Cancel timers and subscriptions
     await cancelStreamAndTimers();
 
-    // Reset first chunk flag for next message
-    _isFirstChunkReceived = false;
+    // StreamStateController phase already reflects the cancelled state
 
     // Determine if message has content
     final hasContent = getCurrentMessageContent(
@@ -342,9 +327,8 @@ class StreamingController {
     }
   }
 
-  /// Cancel stream subscription and timers
+  /// Cancel stream timers
   Future<void> cancelStreamAndTimers() async {
-    await _streamSubscription?.cancel();
     _initialResponseDelayTimer?.cancel();
   }
 
@@ -352,15 +336,5 @@ class StreamingController {
   void dispose() {
     unawaited(cancelStreamAndTimers());
     _pendingCancelCompleter = null;
-  }
-
-  // ============================================================
-  // Private Methods
-  // ============================================================
-
-  /// Cleanup after stream ends
-  void _cleanupAfterStream() {
-    // Timers already cancelled in individual handlers
-    // _currentMessageId will be overwritten on next request
   }
 }

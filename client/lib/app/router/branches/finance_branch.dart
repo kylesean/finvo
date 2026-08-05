@@ -1,0 +1,145 @@
+// app/router/branches/finance_branch.dart
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../app_routes.dart';
+import '../../../features/finance/pages/financial_accounts_page.dart';
+import '../../../features/finance/pages/account_sources_page.dart';
+import '../../../features/finance/pages/account_type_picker_page.dart';
+import '../../../features/finance/pages/account_add_page.dart';
+import '../../../features/finance/pages/account_edit_page.dart';
+import '../../../features/finance/pages/account_detail_page.dart';
+import '../../../features/finance/pages/recurring_transaction_list_page.dart';
+import '../../../features/finance/pages/recurring_transaction_page.dart';
+import '../../../features/budget/pages/budget_overview_page.dart';
+import '../../../features/budget/pages/budget_form_page.dart';
+import '../../../features/budget/pages/budget_settings_page.dart';
+import '../../../features/budget/pages/budget_detail_page.dart';
+
+/// The finance [StatefulShellBranch]: financial accounts, recurring
+/// transactions and budgets. Extracted to keep the root router concise.
+///
+/// NOTE: route `name`s are kept identical to the original definitions because
+/// they are referenced by named navigation elsewhere.
+StatefulShellBranch buildFinanceBranch() {
+  return StatefulShellBranch(
+    routes: [
+      GoRoute(
+        path: AppRoutePaths.finance,
+        name: AppRouteNames.finance,
+        builder: (context, state) {
+          return const FinancialAccountsPage();
+        },
+        routes: [
+          GoRoute(
+            path: 'accounts',
+            name: AppRouteNames.financialAccounts,
+            builder: (context, state) => const AccountSourcesPage(),
+            routes: [
+              GoRoute(
+                path: 'type-picker',
+                name: AppRouteNames.financialAccountTypePicker,
+                builder: (context, state) => const AccountTypePickerPage(),
+              ),
+              GoRoute(
+                path: 'add',
+                name: AppRouteNames.financialAccountAdd,
+                builder: (context, state) {
+                  final args = state.extra as FinancialAccountAddArgs?;
+                  if (args == null) {
+                    return const Scaffold(
+                      body: Center(child: Text('Account information missing')),
+                    );
+                  }
+                  return FinancialAccountAddPage(args: args);
+                },
+              ),
+              GoRoute(
+                path: 'edit',
+                name: AppRouteNames.financialAccountEdit,
+                builder: (context, state) {
+                  final args = state.extra as FinancialAccountEditArgs?;
+                  if (args == null) {
+                    return const Scaffold(
+                      body: Center(child: Text('Account information missing')),
+                    );
+                  }
+                  return FinancialAccountEditPage(args: args);
+                },
+                routes: [],
+              ),
+              GoRoute(
+                path: 'detail',
+                name: AppRouteNames.financialAccountDetail,
+                builder: (context, state) {
+                  final args = state.extra as FinancialAccountDetailArgs?;
+                  if (args == null) {
+                    return const Scaffold(
+                      body: Center(child: Text('Account information missing')),
+                    );
+                  }
+                  return FinancialAccountDetailPage(args: args);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: 'recurring-transactions',
+            name: AppRouteNames.recurringTransactions,
+            builder: (context, state) => const RecurringTransactionListPage(),
+            routes: [
+              GoRoute(
+                path: 'new',
+                name: AppRouteNames.recurringTransactionNew,
+                builder: (context, state) => const RecurringTransactionPage(),
+              ),
+              GoRoute(
+                path: ':id/edit',
+                name: AppRouteNames.recurringTransactionEdit,
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return RecurringTransactionPage(editId: id);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: 'budgets',
+            name: AppRouteNames.budgetOverview,
+            builder: (context, state) => const BudgetOverviewPage(),
+            routes: [
+              GoRoute(
+                path: 'new',
+                name: AppRouteNames.budgetNew,
+                builder: (context, state) => const BudgetFormPage(),
+              ),
+              GoRoute(
+                path: 'settings',
+                name: AppRouteNames.budgetSettings,
+                builder: (context, state) => const BudgetSettingsPage(),
+              ),
+              GoRoute(
+                path: ':id',
+                name: AppRouteNames.budgetDetail,
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return BudgetDetailPage(budgetId: id);
+                },
+                routes: [
+                  GoRoute(
+                    path: 'edit',
+                    name: AppRouteNames.budgetEdit,
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return BudgetFormPage(editId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+}

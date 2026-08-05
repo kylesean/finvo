@@ -4,11 +4,11 @@ extension RequireField on Map<String, dynamic>? {
   T require<T>(String key) {
     final map = this;
     if (map == null || !map.containsKey(key)) {
-      throw BusinessException('Required field missing: $key');
+      throw DataParsingException('Required field missing: $key');
     }
     final value = map[key];
     if (value is! T) {
-      throw BusinessException(
+      throw DataParsingException(
         "Field '$key' type error: expected $T, actual ${value.runtimeType}",
       );
     }

@@ -1,5 +1,6 @@
 // features/shared_space/pages/shared_space_detail_page.dart
 import 'package:flutter/material.dart';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
@@ -615,7 +616,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
     final transactionType = isExpense
         ? TransactionType.expense
         : (isIncome ? TransactionType.income : TransactionType.transfer);
-    final amountTheme = ref.watch(currentAmountThemeValueProvider);
+    final amountTheme = ref.watch(currentAmountThemeProvider);
     final amountColor = AmountFormatter.getAmountColor(
       transactionType,
       amountTheme,
@@ -817,11 +818,15 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
       );
     }
 
+    // Get root Navigator context safely (it may not be mounted yet on deep links)
+    final rootContext = GoRouter.of(
+      context,
+    ).routerDelegate.navigatorKey.currentContext;
+    if (rootContext == null) return;
+
     unawaited(
       showModalBottomSheet<void>(
-        context: GoRouter.of(
-          context,
-        ).routerDelegate.navigatorKey.currentContext!,
+        context: rootContext,
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         builder: (sheetContext) {
@@ -843,38 +848,16 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
     required VoidCallback onConfirm,
   }) {
     unawaited(
-      showFDialog<void>(
+      showConfirmDialog(
         context: context,
-        builder: (dialogContext, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(title, style: dialogStyle.titleTextStyle),
-                const SizedBox(height: 8),
-                Text(message, style: dialogStyle.bodyTextStyle),
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .outline,
-                  onPress: () => Navigator.of(dialogContext).pop(),
-                  child: Text(t.sharedSpace.create.cancel),
-                ),
-                const SizedBox(height: 8),
-                FButton(
-                  variant: .destructive,
-                  onPress: () {
-                    Navigator.of(dialogContext).pop();
-                    onConfirm();
-                  },
-                  child: Text(title),
-                ),
-              ],
-            ),
-          ),
-        ),
+        title: title,
+        message: message,
+        cancelLabel: t.sharedSpace.create.cancel,
+        confirmVariant: FButtonVariant.destructive,
+        confirmLabel: title,
+        onConfirm: () async {
+          onConfirm();
+        },
       ),
     );
   }

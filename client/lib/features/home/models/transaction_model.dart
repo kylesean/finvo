@@ -86,14 +86,14 @@ abstract class AmountDisplay with _$AmountDisplay {
 @freezed
 abstract class TransactionCommentModel with _$TransactionCommentModel {
   const factory TransactionCommentModel({
-    required int id,
+    required String id,
     required String transactionId,
     required String userUuid,
     String? userName,
     String? userAvatarUrl,
-    int? parentCommentId,
+    String? parentCommentId,
     required String commentText,
-    @Default([]) List<int> mentionedUserIds,
+    @Default([]) List<String> mentionedUserIds,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _TransactionCommentModel;
@@ -104,15 +104,15 @@ abstract class TransactionCommentModel with _$TransactionCommentModel {
   /// Create comment model from API JSON
   factory TransactionCommentModel.fromApiJson(Map<String, dynamic> json) {
     return TransactionCommentModel(
-      id: json['id'] as int,
+      id: json['id'] as String,
       transactionId: json['transactionId'] as String,
       userUuid: json['userUuid'] as String,
       userName: json['userName'] as String?,
       userAvatarUrl: json['userAvatarUrl'] as String?,
-      parentCommentId: json['parentCommentId'] as int?,
+      parentCommentId: json['parentCommentId'] as String?,
       commentText: json['commentText'] as String,
       mentionedUserIds:
-          (json['mentionedUserIds'] as List<dynamic>?)?.cast<int>() ?? [],
+          (json['mentionedUserIds'] as List<dynamic>?)?.cast<String>() ?? [],
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,

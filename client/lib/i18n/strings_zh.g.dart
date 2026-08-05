@@ -41,6 +41,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	// Translations
 	late final Translations$common$zh common = Translations$common$zh.internal(_root);
+	late final Translations$genui$zh genui = Translations$genui$zh.internal(_root);
 	late final Translations$time$zh time = Translations$time$zh.internal(_root);
 	late final Translations$greeting$zh greeting = Translations$greeting$zh.internal(_root);
 	late final Translations$navigation$zh navigation = Translations$navigation$zh.internal(_root);
@@ -59,6 +60,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$dateRange$zh dateRange = Translations$dateRange$zh.internal(_root);
 	late final Translations$forecast$zh forecast = Translations$forecast$zh.internal(_root);
 	late final Translations$chat$zh chat = Translations$chat$zh.internal(_root);
+	late final Translations$image$zh image = Translations$image$zh.internal(_root);
 	late final Translations$footprint$zh footprint = Translations$footprint$zh.internal(_root);
 	late final Translations$media$zh media = Translations$media$zh.internal(_root);
 	late final Translations$error$zh error = Translations$error$zh.internal(_root);
@@ -159,6 +161,30 @@ class Translations$common$zh {
 
 	/// zh: '重置'
 	String get reset => '重置';
+}
+
+// Path: genui
+class Translations$genui$zh {
+	Translations$genui$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '抱歉，服务暂时繁忙，请稍后重试'
+	String get errorBusy => '抱歉，服务暂时繁忙，请稍后重试';
+
+	/// zh: '请求超时，请检查网络后重试'
+	String get errorTimeout => '请求超时，请检查网络后重试';
+
+	/// zh: '网络连接异常，请检查后重试'
+	String get errorNetwork => '网络连接异常，请检查后重试';
+
+	/// zh: '会话已过期，请重新登录'
+	String get errorSessionExpired => '会话已过期，请重新登录';
+
+	/// zh: '出现了一些问题，请稍后重试'
+	String get errorGeneric => '出现了一些问题，请稍后重试';
 }
 
 // Path: time
@@ -1517,6 +1543,21 @@ class Translations$chat$zh {
 	/// zh: '正在处理...'
 	String get aiThinking => '正在处理...';
 
+	/// zh: '已停止此回复'
+	String get stoppedResponse => '已停止此回复';
+
+	/// zh: '抱歉，我遇到了问题，请重试 🙏'
+	String get errorRecover => '抱歉，我遇到了问题，请重试 🙏';
+
+	/// zh: '内容已复制'
+	String get contentCopied => '内容已复制';
+
+	/// zh: 'JSON 数据已复制'
+	String get jsonCopied => 'JSON 数据已复制';
+
+	/// zh: '没有可复制的内容'
+	String get noContentToCopy => '没有可复制的内容';
+
 	late final Translations$chat$tools$zh tools = Translations$chat$tools$zh.internal(_root);
 
 	/// zh: '未识别到语音，请重试'
@@ -1567,6 +1608,21 @@ class Translations$chat$zh {
 	late final Translations$chat$transferWizard$zh transferWizard = Translations$chat$transferWizard$zh.internal(_root);
 	late final Translations$chat$genui$zh genui = Translations$chat$genui$zh.internal(_root);
 	late final Translations$chat$welcome$zh welcome = Translations$chat$welcome$zh.internal(_root);
+}
+
+// Path: image
+class Translations$image$zh {
+	Translations$image$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '删除图片'
+	String get deleteTitle => '删除图片';
+
+	/// zh: '确定要删除这张图片吗？此操作无法撤销。'
+	String get deleteConfirm => '确定要删除这张图片吗？此操作无法撤销。';
 }
 
 // Path: footprint
@@ -2487,6 +2543,216 @@ class Translations$forecast$recurringTransaction$zh {
 
 	/// zh: '已跳过'
 	String get skipSuccess => '已跳过';
+
+	/// zh: '重复间隔'
+	String get interval => '重复间隔';
+
+	/// zh: '选择星期'
+	String get selectDays => '选择星期';
+
+	/// zh: '固定在每月最后一天'
+	String get alwaysLastDay => '固定在每月最后一天';
+
+	/// zh: '将在每月最后一天执行'
+	String get lastDayExecution => '将在每月最后一天执行';
+
+	/// zh: '将在每月 $day 号$suffix执行（短月份自动对齐月末）'
+	String dayExecution({required Object day, required Object suffix}) => '将在每月 ${day} 号${suffix}执行（短月份自动对齐月末）';
+
+	/// zh: '设置结束日期'
+	String get setEndDate => '设置结束日期';
+
+	/// zh: '选择结束日期'
+	String get selectEndDate => '选择结束日期';
+
+	/// zh: '规则预览'
+	String get preview => '规则预览';
+
+	/// zh: '每天'
+	String get daily => '每天';
+
+	/// zh: '每周'
+	String get weekly => '每周';
+
+	/// zh: '每月'
+	String get monthly => '每月';
+
+	/// zh: '每年'
+	String get yearly => '每年';
+
+	/// zh: '自定义'
+	String get custom => '自定义';
+
+	/// zh: '周期'
+	String get cycle => '周期';
+
+	/// zh: '每 $count 天'
+	String everyDays({required Object count}) => '每 ${count} 天';
+
+	/// zh: '每 $count 周'
+	String everyWeeks({required Object count}) => '每 ${count} 周';
+
+	/// zh: '每 $count 个月'
+	String everyMonths({required Object count}) => '每 ${count} 个月';
+
+	/// zh: '每 $count 年'
+	String everyYears({required Object count}) => '每 ${count} 年';
+
+	/// zh: '每月 $day 号$suffix'
+	String monthlyOnDay({required Object day, required Object suffix}) => '每月 ${day} 号${suffix}';
+
+	/// zh: '每 $count 个月的 $day 号$suffix'
+	String everyMonthsOnDay({required Object count, required Object day, required Object suffix}) => '每 ${count} 个月的 ${day} 号${suffix}';
+
+	/// zh: '每月最后一天'
+	String get monthlyLastDay => '每月最后一天';
+
+	/// zh: '每 $count 个月的最后一天'
+	String everyMonthsLastDay({required Object count}) => '每 ${count} 个月的最后一天';
+
+	/// zh: '每年 $month/$day'
+	String yearlyOn({required Object month, required Object day}) => '每年 ${month}/${day}';
+
+	/// zh: '每 $count 年 $month/$day'
+	String everyYearsOn({required Object count, required Object month, required Object day}) => '每 ${count} 年 ${month}/${day}';
+
+	/// zh: '每周的$day'
+	String weeklyOnDay({required Object day}) => '每周的${day}';
+
+	/// zh: '一'
+	String get weekdayMon => '一';
+
+	/// zh: '二'
+	String get weekdayTue => '二';
+
+	/// zh: '三'
+	String get weekdayWed => '三';
+
+	/// zh: '四'
+	String get weekdayThu => '四';
+
+	/// zh: '五'
+	String get weekdayFri => '五';
+
+	/// zh: '六'
+	String get weekdaySat => '六';
+
+	/// zh: '日'
+	String get weekdaySun => '日';
+
+	/// zh: '周'
+	String get weekdayOn => '周';
+
+	/// zh: '、'
+	String get weekdayJoiner => '、';
+
+	/// zh: '的'
+	String get weeklyDaysPrefix => '的';
+
+	/// zh: '转出账户'
+	String get sourceAccount => '转出账户';
+
+	/// zh: '转入账户'
+	String get targetAccount => '转入账户';
+
+	/// zh: '支出账户'
+	String get expenseAccount => '支出账户';
+
+	/// zh: '收入账户'
+	String get incomeAccount => '收入账户';
+
+	/// zh: '选择转出账户'
+	String get selectSourceAccount => '选择转出账户';
+
+	/// zh: '选择转入账户'
+	String get selectTargetAccount => '选择转入账户';
+
+	/// zh: '选择支出账户'
+	String get selectExpenseAccount => '选择支出账户';
+
+	/// zh: '选择收入账户'
+	String get selectIncomeAccount => '选择收入账户';
+
+	/// zh: '每次$type金额不固定'
+	String amountNotFixed({required Object type}) => '每次${type}金额不固定';
+
+	/// zh: '请选择转出和转入账户'
+	String get selectBothAccounts => '请选择转出和转入账户';
+
+	/// zh: '请选择$type账户'
+	String selectAccountForType({required Object type}) => '请选择${type}账户';
+
+	/// zh: '确定要删除这个周期交易吗？此操作不可撤销。'
+	String get deleteConfirmGeneric => '确定要删除这个周期交易吗？此操作不可撤销。';
+
+	/// zh: '选择 $date'
+	String selectDate({required Object date}) => '选择 ${date}';
+
+	/// zh: '现金钱包'
+	String get accountTypeCash => '现金钱包';
+
+	/// zh: '银行存款'
+	String get accountTypeDeposit => '银行存款';
+
+	/// zh: '电子钱包'
+	String get accountTypeEMoney => '电子钱包';
+
+	/// zh: '投资理财'
+	String get accountTypeInvestment => '投资理财';
+
+	/// zh: '应收款项'
+	String get accountTypeReceivable => '应收款项';
+
+	/// zh: '信用卡'
+	String get accountTypeCreditCard => '信用卡';
+
+	/// zh: '贷款账户'
+	String get accountTypeLoan => '贷款账户';
+
+	/// zh: '应付款项'
+	String get accountTypePayable => '应付款项';
+
+	/// zh: '资产账户'
+	String get assetAccount => '资产账户';
+
+	/// zh: '负债账户'
+	String get liabilityAccount => '负债账户';
+
+	/// zh: '暂无资产账户'
+	String get noAssetAccounts => '暂无资产账户';
+
+	/// zh: '请前往财务页面添加账户'
+	String get goToFinanceToAddAccounts => '请前往财务页面添加账户';
+
+	/// zh: '选择账户'
+	String get selectAccount => '选择账户';
+
+	/// zh: '开启后按规则自动生成交易'
+	String get autoGenerateByRule => '开启后按规则自动生成交易';
+
+	/// zh: '(one) {天} (other) {天}'
+	String dayUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count,
+		one: '天',
+		other: '天',
+	);
+
+	/// zh: '(one) {周} (other) {周}'
+	String weekUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count,
+		one: '周',
+		other: '周',
+	);
+
+	/// zh: '(one) {个月} (other) {个月}'
+	String monthUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count,
+		one: '个月',
+		other: '个月',
+	);
+
+	/// zh: '(one) {年} (other) {年}'
+	String yearUnit({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count,
+		one: '年',
+		other: '年',
+	);
 }
 
 // Path: chat.tools
@@ -4741,6 +5007,11 @@ extension on Translations {
 			'common.loadFailed' => '加载失败',
 			'common.history' => '交易记录',
 			'common.reset' => '重置',
+			'genui.errorBusy' => '抱歉，服务暂时繁忙，请稍后重试',
+			'genui.errorTimeout' => '请求超时，请检查网络后重试',
+			'genui.errorNetwork' => '网络连接异常，请检查后重试',
+			'genui.errorSessionExpired' => '会话已过期，请重新登录',
+			'genui.errorGeneric' => '出现了一些问题，请稍后重试',
 			'time.today' => '今天',
 			'time.yesterday' => '昨天',
 			'time.dayBeforeYesterday' => '前天',
@@ -5201,12 +5472,85 @@ extension on Translations {
 			'forecast.recurringTransaction.noPending' => '无待确认交易',
 			'forecast.recurringTransaction.confirmSuccess' => '已确认记账',
 			'forecast.recurringTransaction.skipSuccess' => '已跳过',
+			'forecast.recurringTransaction.interval' => '重复间隔',
+			'forecast.recurringTransaction.selectDays' => '选择星期',
+			'forecast.recurringTransaction.alwaysLastDay' => '固定在每月最后一天',
+			'forecast.recurringTransaction.lastDayExecution' => '将在每月最后一天执行',
+			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => '将在每月 ${day} 号${suffix}执行（短月份自动对齐月末）',
+			'forecast.recurringTransaction.setEndDate' => '设置结束日期',
+			'forecast.recurringTransaction.selectEndDate' => '选择结束日期',
+			'forecast.recurringTransaction.preview' => '规则预览',
+			'forecast.recurringTransaction.daily' => '每天',
+			'forecast.recurringTransaction.weekly' => '每周',
+			'forecast.recurringTransaction.monthly' => '每月',
+			'forecast.recurringTransaction.yearly' => '每年',
+			'forecast.recurringTransaction.custom' => '自定义',
+			'forecast.recurringTransaction.cycle' => '周期',
+			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '每 ${count} 天',
+			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '每 ${count} 周',
+			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '每 ${count} 个月',
+			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '每 ${count} 年',
+			'forecast.recurringTransaction.monthlyOnDay' => ({required Object day, required Object suffix}) => '每月 ${day} 号${suffix}',
+			'forecast.recurringTransaction.everyMonthsOnDay' => ({required Object count, required Object day, required Object suffix}) => '每 ${count} 个月的 ${day} 号${suffix}',
+			'forecast.recurringTransaction.monthlyLastDay' => '每月最后一天',
+			'forecast.recurringTransaction.everyMonthsLastDay' => ({required Object count}) => '每 ${count} 个月的最后一天',
+			_ => null,
+		} ?? switch (path) {
+			'forecast.recurringTransaction.yearlyOn' => ({required Object month, required Object day}) => '每年 ${month}/${day}',
+			'forecast.recurringTransaction.everyYearsOn' => ({required Object count, required Object month, required Object day}) => '每 ${count} 年 ${month}/${day}',
+			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => '每周的${day}',
+			'forecast.recurringTransaction.weekdayMon' => '一',
+			'forecast.recurringTransaction.weekdayTue' => '二',
+			'forecast.recurringTransaction.weekdayWed' => '三',
+			'forecast.recurringTransaction.weekdayThu' => '四',
+			'forecast.recurringTransaction.weekdayFri' => '五',
+			'forecast.recurringTransaction.weekdaySat' => '六',
+			'forecast.recurringTransaction.weekdaySun' => '日',
+			'forecast.recurringTransaction.weekdayOn' => '周',
+			'forecast.recurringTransaction.weekdayJoiner' => '、',
+			'forecast.recurringTransaction.weeklyDaysPrefix' => '的',
+			'forecast.recurringTransaction.sourceAccount' => '转出账户',
+			'forecast.recurringTransaction.targetAccount' => '转入账户',
+			'forecast.recurringTransaction.expenseAccount' => '支出账户',
+			'forecast.recurringTransaction.incomeAccount' => '收入账户',
+			'forecast.recurringTransaction.selectSourceAccount' => '选择转出账户',
+			'forecast.recurringTransaction.selectTargetAccount' => '选择转入账户',
+			'forecast.recurringTransaction.selectExpenseAccount' => '选择支出账户',
+			'forecast.recurringTransaction.selectIncomeAccount' => '选择收入账户',
+			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => '每次${type}金额不固定',
+			'forecast.recurringTransaction.selectBothAccounts' => '请选择转出和转入账户',
+			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => '请选择${type}账户',
+			'forecast.recurringTransaction.deleteConfirmGeneric' => '确定要删除这个周期交易吗？此操作不可撤销。',
+			'forecast.recurringTransaction.selectDate' => ({required Object date}) => '选择 ${date}',
+			'forecast.recurringTransaction.accountTypeCash' => '现金钱包',
+			'forecast.recurringTransaction.accountTypeDeposit' => '银行存款',
+			'forecast.recurringTransaction.accountTypeEMoney' => '电子钱包',
+			'forecast.recurringTransaction.accountTypeInvestment' => '投资理财',
+			'forecast.recurringTransaction.accountTypeReceivable' => '应收款项',
+			'forecast.recurringTransaction.accountTypeCreditCard' => '信用卡',
+			'forecast.recurringTransaction.accountTypeLoan' => '贷款账户',
+			'forecast.recurringTransaction.accountTypePayable' => '应付款项',
+			'forecast.recurringTransaction.assetAccount' => '资产账户',
+			'forecast.recurringTransaction.liabilityAccount' => '负债账户',
+			'forecast.recurringTransaction.noAssetAccounts' => '暂无资产账户',
+			'forecast.recurringTransaction.goToFinanceToAddAccounts' => '请前往财务页面添加账户',
+			'forecast.recurringTransaction.selectAccount' => '选择账户',
+			'forecast.recurringTransaction.autoGenerateByRule' => '开启后按规则自动生成交易',
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '天', other: '天', ),
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '周', other: '周', ),
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '个月', other: '个月', ),
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '年', other: '年', ),
 			'chat.newChat' => '新聊天',
 			'chat.noMessages' => '没有消息可显示。',
 			'chat.loadingFailed' => '加载失败',
 			'chat.inputMessage' => '输入消息...',
 			'chat.listening' => '正在聆听...',
 			'chat.aiThinking' => '正在处理...',
+			'chat.stoppedResponse' => '已停止此回复',
+			'chat.errorRecover' => '抱歉，我遇到了问题，请重试 🙏',
+			'chat.contentCopied' => '内容已复制',
+			'chat.jsonCopied' => 'JSON 数据已复制',
+			'chat.noContentToCopy' => '没有可复制的内容',
 			'chat.tools.processing' => '正在处理...',
 			'chat.tools.readFile' => '正在查看文件...',
 			'chat.tools.searchTransactions' => '正在查询交易...',
@@ -5228,8 +5572,6 @@ extension on Translations {
 			'chat.tools.forecastBalance' => '正在预测未来余额...',
 			'chat.tools.suggestBudget' => '正在推荐预算...',
 			'chat.tools.listSpaces' => '正在获取共享空间...',
-			_ => null,
-		} ?? switch (path) {
 			'chat.tools.querySpaceSummary' => '正在查询空间摘要...',
 			'chat.tools.prepareTransfer' => '正在准备转账...',
 			'chat.tools.unknown' => '正在处理请求...',
@@ -5490,6 +5832,8 @@ extension on Translations {
 			'chat.welcome.night.financialThinking.title' => '未来预测',
 			'chat.welcome.night.financialThinking.prompt' => '预测未来 30 天余额',
 			'chat.welcome.night.financialThinking.description' => '看清未来的财务趋势',
+			'image.deleteTitle' => '删除图片',
+			'image.deleteConfirm' => '确定要删除这张图片吗？此操作无法撤销。',
 			'footprint.searchIn' => '搜索',
 			'footprint.searchInAllRecords' => '在所有记录中搜索相关内容',
 			'media.selectPhotos' => '选择照片',
@@ -5664,6 +6008,8 @@ extension on Translations {
 			'server.subtitle' => '输入您自部署的服务器地址，或扫描服务器启动时显示的二维码',
 			'server.urlLabel' => '服务器地址',
 			'server.urlPlaceholder' => '例如：https://api.example.com 或 192.168.1.100:8000',
+			_ => null,
+		} ?? switch (path) {
 			'server.scanQr' => '扫描二维码',
 			'server.scanQrInstruction' => '对准服务器终端显示的二维码',
 			'server.testConnection' => '测试连接',
@@ -5742,8 +6088,6 @@ extension on Translations {
 			'sharedSpace.detail.retry' => '重试',
 			'sharedSpace.detail.noTransactions' => '暂无交易记录',
 			'sharedSpace.detail.noTransactionsHint' => '空间内的交易将显示在这里',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.detail.refreshCode' => '刷新生成新码',
 			'sharedSpace.detail.joinOtherSpace' => '加入其他空间',
 			'sharedSpace.notifications.title' => '通知',

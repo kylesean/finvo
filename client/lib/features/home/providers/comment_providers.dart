@@ -21,23 +21,50 @@ class TransactionComments extends _$TransactionComments {
   ) async {
     final service = ref.read(commentServiceProvider);
 
-    state = await AsyncValue.guard(() async {
-      await service.addComment(
+    try {
+      final created = await service.addComment(
         transactionId: transactionId,
         commentText: text,
         parentCommentId: parentId,
         mentionedUserIds: mentionedUserIds,
       );
-      return await service.getComments(transactionId);
-    });
+
+      final current = state.value;
+      if (current == null) {
+        // List not loaded yet; reload to pick up the new comment.
+        final comments = await service.getComments(transactionId);
+        comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        state = AsyncData(comments);
+      } else {
+        // Optimistically append the server-created comment without a full reload.
+        final updated = [...current, created]
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        state = AsyncData(updated);
+      }
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
   }
 
   Future<void> deleteComment(String commentId) async {
     final service = ref.read(commentServiceProvider);
-    state = await AsyncValue.guard(() async {
+
+    final current = state.value;
+    if (current != null) {
+      // Optimistically remove the comment for an immediate UI response.
+      state = AsyncData(current.where((c) => c.id != commentId).toList());
+    }
+
+    try {
       await service.deleteComment(commentId);
-      return await service.getComments(transactionId);
-    });
+    } catch (e) {
+      // Reconcile with the server truth if the delete failed.
+      state = await AsyncValue.guard(() async {
+        final comments = await service.getComments(transactionId);
+        comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        return comments;
+      });
+    }
   }
 }
 

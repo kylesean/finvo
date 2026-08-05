@@ -58,7 +58,7 @@ final class SharedSpaceNotificationProvider
 }
 
 String _$sharedSpaceNotificationHash() =>
-    r'a612bf23da36289a3cd6332e411fbd16f91689a4';
+    r'018e2df809324d21e2c63fcde296c4ed56d549b9';
 
 /// Shared-space notification provider.
 ///

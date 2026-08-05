@@ -9,18 +9,29 @@ import 'package:photo_view/photo_view_gallery.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
+
 /// Image preview page with zoom and swipe navigation support
-/// iOS/Android: uses efficient FileImage
-/// Web: uses MemoryImage + readAsBytes
+///
+/// Supports two image sources:
+/// - [files]: local [XFile]s (iOS/Android: efficient FileImage, Web: MemoryImage)
+/// - [imageProvider]: arbitrary [ImageProvider] per index (network, memory, ...)
 class ImagePreviewPage extends StatefulWidget {
-  final List<XFile> images;
+  final List<XFile>? files;
+  final ImageProvider Function(int index)? imageProvider;
+  final int itemCount;
   final int initialIndex;
+  final String Function(int index)? heroTag;
   final void Function(int)? onDelete;
 
   const ImagePreviewPage({
     super.key,
-    required this.images,
+    this.files,
+    this.imageProvider,
+    this.itemCount = 0,
     this.initialIndex = 0,
+    this.heroTag,
     this.onDelete,
   });
 
@@ -35,6 +46,8 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
   // Web platform: cache image byte data to avoid redundant reads
   final Map<int, Uint8List> _imageCache = {};
 
+  int get _count => widget.files?.length ?? widget.itemCount;
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +55,7 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
     _pageController = PageController(initialPage: widget.initialIndex);
 
     // Web platform: preload current and adjacent images
-    if (kIsWeb) {
+    if (kIsWeb && widget.files != null) {
       _preloadImages();
     }
   }
@@ -51,9 +64,7 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
     // Preload current, previous, and next images
     for (int i = -1; i <= 1; i++) {
       final index = _currentIndex + i;
-      if (index >= 0 &&
-          index < widget.images.length &&
-          !_imageCache.containsKey(index)) {
+      if (index >= 0 && index < _count && !_imageCache.containsKey(index)) {
         unawaited(_loadImage(index));
       }
     }
@@ -63,7 +74,7 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
     if (_imageCache.containsKey(index)) return;
 
     try {
-      final bytes = await widget.images[index].readAsBytes();
+      final bytes = await widget.files![index].readAsBytes();
       if (mounted) {
         setState(() {
           _imageCache[index] = bytes;
@@ -88,7 +99,7 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text('${_currentIndex + 1} / ${widget.images.length}'),
+        title: Text('${_currentIndex + 1} / $_count'),
         centerTitle: true,
         actions: [
           if (widget.onDelete != null)
@@ -107,10 +118,10 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
             initialScale: PhotoViewComputedScale.contained,
             minScale: PhotoViewComputedScale.contained * 0.5,
             maxScale: PhotoViewComputedScale.covered * 2.0,
-            heroAttributes: PhotoViewHeroAttributes(tag: 'image_$index'),
+            heroAttributes: PhotoViewHeroAttributes(tag: _heroTag(index)),
           );
         },
-        itemCount: widget.images.length,
+        itemCount: _count,
         loadingBuilder: (context, event) => Center(
           child: CircularProgressIndicator(
             value: event == null
@@ -126,7 +137,7 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
             _currentIndex = index;
           });
           // Web platform: preload adjacent images when page changes
-          if (kIsWeb) {
+          if (kIsWeb && widget.files != null) {
             _preloadImages();
           }
         },
@@ -134,11 +145,21 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
     );
   }
 
+  String _heroTag(int index) {
+    if (widget.heroTag != null) return widget.heroTag!(index);
+    return 'image_$index';
+  }
+
   /// Get image provider
   /// iOS/Android: use efficient FileImage
   /// Web: use MemoryImage
+  /// Custom: delegate to [imageProvider]
   ImageProvider _getImageProvider(int index) {
-    final image = widget.images[index];
+    if (widget.imageProvider != null) {
+      return widget.imageProvider!(index);
+    }
+
+    final image = widget.files![index];
 
     if (kIsWeb) {
       // Web platform: use cached byte data
@@ -156,29 +177,13 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
 
   void _showDeleteConfirmation() {
     unawaited(
-      showDialog<void>(
+      showConfirmDialog(
         context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Delete Image'),
-            content: const Text('Are you sure you want to delete this image?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _deleteCurrentImage();
-                },
-                child: const Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
-          );
+        title: t.image.deleteTitle,
+        message: t.image.deleteConfirm,
+        confirmLabel: t.common.delete,
+        onConfirm: () async {
+          _deleteCurrentImage();
         },
       ),
     );

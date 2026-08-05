@@ -101,7 +101,7 @@ void main() {
       final toolParams = clientState['tool_params'] as Map<String, dynamic>;
       expect(toolParams['source_account_id'], 'src-1');
       expect(toolParams['target_account_id'], 'tgt-1');
-      expect(toolParams['amount'], '50.0');
+      expect(toolParams['amount'], '50.00000000');
 
       // 发给后端的 payload 为注册表提供的 payloadExtensions。
       expect(outgoing.payload, hasLength(1));

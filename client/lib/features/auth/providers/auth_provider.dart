@@ -79,6 +79,15 @@ class Auth extends _$Auth {
     _logger.info('Login successful, state updated - user: ${user.email}');
   }
 
+  /// If [error] is a [DioException] wrapping an [AppException], return that
+  /// AppException so callers can rethrow it; otherwise return null.
+  AppException? _appExceptionFrom(Object error) {
+    if (error is DioException && error.error is AppException) {
+      return error.error as AppException;
+    }
+    return null;
+  }
+
   Future<void> login(String email, String password) async {
     try {
       final result = await _authService.login(email, password);
@@ -90,8 +99,9 @@ class Auth extends _$Auth {
       if (state.status != AuthStatus.unauthenticated) {
         state = state.copyWith(status: AuthStatus.unauthenticated);
       }
-      if (e is DioException && e.error is AppException) {
-        throw e.error as AppException;
+      final appException = _appExceptionFrom(e);
+      if (appException != null) {
+        throw appException;
       }
       rethrow;
     }
@@ -113,8 +123,9 @@ class Auth extends _$Auth {
         token: result.token,
       );
     } catch (e) {
-      if (e is DioException && e.error is AppException) {
-        throw e.error as AppException;
+      final appException = _appExceptionFrom(e);
+      if (appException != null) {
+        throw appException;
       }
       rethrow;
     }
@@ -124,12 +135,28 @@ class Auth extends _$Auth {
     try {
       await _authService.logout();
       await _storageService.deleteToken();
+      await _storageService.deleteRefreshToken();
       state = const AuthState(status: AuthStatus.unauthenticated);
     } catch (e) {
       await _storageService.deleteToken();
+      await _storageService.deleteRefreshToken();
       state = const AuthState(status: AuthStatus.unauthenticated);
       _logger.warning('Error during logout, but local state cleared', e);
     }
+  }
+
+  /// Called by the auth interceptor when a 401 is received: the token is
+  /// invalid or expired. Clears local auth state immediately so the router
+  /// redirects to the login page, without the simulated logout delay.
+  Future<void> handleSessionExpired() async {
+    try {
+      await _storageService.deleteToken();
+      await _storageService.deleteRefreshToken();
+    } catch (e) {
+      _logger.warning('Failed to delete token on session expiry', e);
+    }
+    state = const AuthState(status: AuthStatus.unauthenticated);
+    _logger.info('Session expired (401), auth state cleared');
   }
 
   Future<void> refreshUser() async {

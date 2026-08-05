@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
@@ -48,58 +49,25 @@ class CommentItemWidget extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    return showFDialog<void>(
+    await showConfirmDialog(
       context: context,
-      builder: (dialogContext, style, animation) => FDialog(
-        animation: animation,
-        builder: (context, dialogStyle) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                t.comment.confirmDeleteTitle,
-                style: dialogStyle.titleTextStyle,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                t.comment.confirmDeleteContent,
-                style: dialogStyle.bodyTextStyle,
-              ),
-              const SizedBox(height: 24),
-              FButton(
-                variant: .outline,
-                onPress: () => Navigator.of(dialogContext).pop(),
-                child: Text(t.common.cancel),
-              ),
-              const SizedBox(height: 8),
-              FButton(
-                variant: .destructive,
-                onPress: () async {
-                  Navigator.of(dialogContext).pop();
-                  try {
-                    await ref
-                        .read(
-                          transactionCommentsProvider(transactionId).notifier,
-                        )
-                        .deleteComment(comment.id);
-                    if (!context.mounted) return;
-                    TopToast.success(context, t.comment.commentDeleted);
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    TopToast.error(
-                      context,
-                      '${t.comment.deleteFailed}: ${e.toString()}',
-                    );
-                  }
-                },
-                child: Text(t.common.delete),
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: t.comment.confirmDeleteTitle,
+      message: t.comment.confirmDeleteContent,
+      cancelLabel: t.common.cancel,
+      confirmVariant: FButtonVariant.destructive,
+      confirmLabel: t.common.delete,
+      onConfirm: () async {
+        try {
+          await ref
+              .read(transactionCommentsProvider(transactionId).notifier)
+              .deleteComment(comment.id);
+          if (!context.mounted) return;
+          TopToast.success(context, t.comment.commentDeleted);
+        } catch (e) {
+          if (!context.mounted) return;
+          TopToast.error(context, '${t.comment.deleteFailed}: ${e.toString()}');
+        }
+      },
     );
   }
 
@@ -154,7 +122,6 @@ class CommentItemWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
     final colorScheme = theme.colors;
-    timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
 
     final bool isSubComment = comment.parentCommentId != null;
     final String currentLoggedInUserId = ref.watch(currentUserIdProvider);

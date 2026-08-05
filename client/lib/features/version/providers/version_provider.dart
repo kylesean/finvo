@@ -1,6 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/update_info.dart';
 import '../services/app_version_service.dart';
+part 'version_provider.g.dart';
 
 class VersionCheckState {
   final bool isChecking;
@@ -26,7 +27,8 @@ class VersionCheckState {
   }
 }
 
-class VersionNotifier extends Notifier<VersionCheckState> {
+@Riverpod(name: 'versionNotifierProvider')
+class VersionNotifier extends _$VersionNotifier {
   @override
   VersionCheckState build() {
     return const VersionCheckState();
@@ -48,6 +50,3 @@ class VersionNotifier extends Notifier<VersionCheckState> {
     return result;
   }
 }
-
-final versionNotifierProvider =
-    NotifierProvider<VersionNotifier, VersionCheckState>(VersionNotifier.new);

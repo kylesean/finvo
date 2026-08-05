@@ -1,4 +1,5 @@
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/widgets/amount_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
@@ -9,8 +10,6 @@ import 'dart:async';
 import '../../../core/constants/category_constants.dart';
 import '../../finance/widgets/category_selection_sheet.dart';
 import '../../finance/models/recurring_transaction.dart';
-import '../../profile/providers/financial_settings_provider.dart';
-import '../../../shared/models/currency.dart';
 import '../models/budget_models.dart';
 import '../providers/budget_provider.dart';
 import '../services/budget_service.dart';
@@ -246,50 +245,9 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           decoration: BoxDecoration(
             border: Border(bottom: BorderSide(color: colors.border, width: 1)),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Currency symbol - follows global settings
-              Text(
-                Currency.fromCode(
-                      ref.watch(financialSettingsProvider).primaryCurrency,
-                    )?.symbol ??
-                    '¥',
-                style: AppTextStyles.statLabel(
-                  theme,
-                ).copyWith(fontSize: amountFontSize),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: amountFontSize,
-                    color: colors.foreground,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
-                  cursorColor: colors.primary,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    isDense: true,
-                    isCollapsed: true,
-                    hintText: '0.00',
-                    hintStyle: TextStyle(
-                      fontSize: amountFontSize,
-                      color: colors.mutedForeground,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: AmountInputField(
+            controller: _amountController,
+            fontSize: amountFontSize,
           ),
         ),
       ],

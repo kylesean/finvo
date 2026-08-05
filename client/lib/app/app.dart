@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import 'assets/app_vectors.dart';
 
 import '../app/router/app_router.dart';
+
 import '../app/theme/app_font_config.dart';
-import '../app/theme/forui_theme_config.dart';
-import '../app/theme/theme_palette_provider.dart';
 import '../app/theme/theme_provider.dart';
+import '../app/theme/app_theme_pair_provider.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../features/notification/providers/notification_provider.dart';
 import '../i18n/strings.g.dart';
@@ -20,46 +21,16 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appThemeMode = ref.watch(themeProvider);
-    final palette = ref.watch(themePaletteProvider);
+    final themes = ref.watch(appThemePairProvider);
 
-    // Initialize WebSocket notification service (connects if token available)
-    ref.read(notificationWsProvider);
-
-    final foruiLightTheme = ForuiThemeConfig.resolve(
-      palette: palette,
-      brightness: Brightness.light,
-    );
-    final foruiDarkTheme = ForuiThemeConfig.resolve(
-      palette: palette,
-      brightness: Brightness.dark,
-    );
-
-    final materialLightTheme = foruiLightTheme
-        .toApproximateMaterialTheme()
-        .copyWith(
-          textTheme: AppFontConfig.createGlobalTextTheme(
-            ThemeData.light().textTheme,
-          ),
-          // Set SnackBar default style: fixed behavior (no rounded corners, bottom display)
-          snackBarTheme: const SnackBarThemeData(
-            behavior: SnackBarBehavior.fixed,
-          ),
-        );
-    final materialDarkTheme = foruiDarkTheme
-        .toApproximateMaterialTheme()
-        .copyWith(
-          textTheme: AppFontConfig.createGlobalTextTheme(
-            ThemeData.dark().textTheme,
-          ),
-          snackBarTheme: const SnackBarThemeData(
-            behavior: SnackBarBehavior.fixed,
-          ),
-        );
+    // Hold the WebSocket notification service (keepAlive) so the long-lived
+    // connection is not torn down after this frame completes.
+    ref.watch(notificationWsProvider);
 
     return MaterialApp.router(
       title: 'Finvo',
-      theme: materialLightTheme,
-      darkTheme: materialDarkTheme,
+      theme: themes.materialLight,
+      darkTheme: themes.materialDark,
       themeMode: appThemeMode,
       locale: TranslationProvider.of(context).flutterLocale,
       localizationsDelegates: [
@@ -74,8 +45,8 @@ class MyApp extends ConsumerWidget {
       builder: (materialContext, navigator) {
         final activeBrightness = Theme.of(materialContext).brightness;
         final activeForuiTheme = activeBrightness == Brightness.dark
-            ? foruiDarkTheme
-            : foruiLightTheme;
+            ? themes.foruiDark
+            : themes.foruiLight;
 
         return FTheme(
           data: activeForuiTheme,

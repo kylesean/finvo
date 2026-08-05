@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -614,46 +615,15 @@ class _RecurringTransactionListPageState
   ) async {
     bool confirmed = false;
 
-    await showFDialog<void>(
+    confirmed = await showConfirmDialog(
       context: context,
-      builder: (dialogContext, style, animation) => FDialog(
-        animation: animation,
-        builder: (context, dialogStyle) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                t.forecast.recurringTransaction.confirmDelete,
-                style: dialogStyle.titleTextStyle,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                t.forecast.recurringTransaction.deleteConfirm(
-                  name: _getDisplayName(transaction),
-                ),
-                style: dialogStyle.bodyTextStyle,
-              ),
-              const SizedBox(height: 24),
-              FButton(
-                variant: .outline,
-                onPress: () => Navigator.pop(dialogContext),
-                child: Text(t.common.cancel),
-              ),
-              const SizedBox(height: 8),
-              FButton(
-                variant: .destructive,
-                onPress: () {
-                  confirmed = true;
-                  Navigator.pop(dialogContext);
-                },
-                child: Text(t.common.delete),
-              ),
-            ],
-          ),
-        ),
+      title: t.forecast.recurringTransaction.confirmDelete,
+      message: t.forecast.recurringTransaction.deleteConfirm(
+        name: _getDisplayName(transaction),
       ),
+      cancelLabel: t.common.cancel,
+      confirmVariant: FButtonVariant.destructive,
+      confirmLabel: t.common.delete,
     );
 
     if (confirmed) {
@@ -679,56 +649,22 @@ class _RecurringTransactionListPageState
     final newState = !transaction.isActive;
     bool confirmed = false;
 
-    await showFDialog<void>(
+    confirmed = await showConfirmDialog(
       context: context,
-      builder: (dialogContext, style, animation) => FDialog(
-        animation: animation,
-        builder: (context, dialogStyle) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                newState
-                    ? t.forecast.recurringTransaction.confirmActivate
-                    : t.forecast.recurringTransaction.confirmPause,
-                style: dialogStyle.titleTextStyle,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                newState
-                    ? t.forecast.recurringTransaction.activateConfirm(
-                        name: _getDisplayName(transaction),
-                      )
-                    : t.forecast.recurringTransaction.pauseConfirm(
-                        name: _getDisplayName(transaction),
-                      ),
-                style: dialogStyle.bodyTextStyle,
-              ),
-              const SizedBox(height: 24),
-              FButton(
-                variant: .outline,
-                onPress: () => Navigator.pop(dialogContext),
-                child: Text(t.common.cancel),
-              ),
-              const SizedBox(height: 8),
-              FButton(
-                variant: newState ? .primary : .outline,
-                onPress: () {
-                  confirmed = true;
-                  Navigator.pop(dialogContext);
-                },
-                child: Text(
-                  newState
-                      ? t.forecast.recurringTransaction.activated
-                      : t.forecast.recurringTransaction.paused,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: newState
+          ? t.forecast.recurringTransaction.confirmActivate
+          : t.forecast.recurringTransaction.confirmPause,
+      message: newState
+          ? t.forecast.recurringTransaction.activateConfirm(
+              name: _getDisplayName(transaction),
+            )
+          : t.forecast.recurringTransaction.pauseConfirm(
+              name: _getDisplayName(transaction),
+            ),
+      cancelLabel: t.common.cancel,
+      confirmLabel: newState
+          ? t.forecast.recurringTransaction.activated
+          : t.forecast.recurringTransaction.paused,
     );
 
     if (confirmed) {
@@ -774,17 +710,17 @@ class _RecurringTransactionListPageState
 
   /// Get short frequency label
   String _getShortFrequencyLabel(String rule) {
-    final isZh = LocaleSettings.currentLocale == AppLocale.zh;
+    final rt = t.forecast.recurringTransaction;
     if (rule.contains('FREQ=DAILY')) {
-      return isZh ? '每天' : 'Daily';
+      return rt.daily;
     } else if (rule.contains('FREQ=WEEKLY')) {
-      return isZh ? '每周' : 'Weekly';
+      return rt.weekly;
     } else if (rule.contains('FREQ=MONTHLY')) {
-      return isZh ? '每月' : 'Monthly';
+      return rt.monthly;
     } else if (rule.contains('FREQ=YEARLY')) {
-      return isZh ? '每年' : 'Yearly';
+      return rt.yearly;
     }
-    return isZh ? '周期' : 'Cycle';
+    return rt.cycle;
   }
 
   /// Format short date (i18n support)
