@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import '../providers/conversation_search_state.dart';
+import 'package:finvo/features/chat/providers/conversation_search_state.dart';
 
 /// Highlighted text component
 class HighlightedText extends StatelessWidget {

@@ -1,86 +1,88 @@
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class AttachmentSignedUrlResult {
-  final List<AttachmentSignedUrlInfo> successful;
-  final List<AttachmentSignedUrlFailure> failed;
+part 'attachment_signed_url_result.freezed.dart';
 
-  const AttachmentSignedUrlResult({
-    this.successful = const [],
-    this.failed = const [],
-  });
+/// Result of a batch signed-URL request.
+///
+/// JSON parsing stays custom (top-level [attachmentSignedUrlResultFromJson])
+/// to keep the tolerant list handling (accepting both `Map<String, dynamic>`
+/// and raw `Map` entries).
+@freezed
+abstract class AttachmentSignedUrlResult with _$AttachmentSignedUrlResult {
+  const factory AttachmentSignedUrlResult({
+    @Default(<AttachmentSignedUrlInfo>[])
+    List<AttachmentSignedUrlInfo> successful,
+    @Default(<AttachmentSignedUrlFailure>[])
+    List<AttachmentSignedUrlFailure> failed,
+  }) = _AttachmentSignedUrlResult;
+}
 
-  factory AttachmentSignedUrlResult.fromJson(Map<String, dynamic> json) {
-    final successfulList = json['successful'];
-    final failedList = json['failed'];
-
-    return AttachmentSignedUrlResult(
-      successful: _parseInfoList(successfulList),
-      failed: _parseFailureList(failedList),
-    );
-  }
-
-  static const empty = AttachmentSignedUrlResult();
-
+extension AttachmentSignedUrlResultX on AttachmentSignedUrlResult {
   bool get hasSuccess => successful.isNotEmpty;
 
   bool get hasFailures => failed.isNotEmpty;
-
-  static List<AttachmentSignedUrlInfo> _parseInfoList(dynamic value) {
-    if (value is! List) return const [];
-
-    final result = <AttachmentSignedUrlInfo>[];
-    for (final entry in value) {
-      if (entry is Map<String, dynamic>) {
-        result.add(AttachmentSignedUrlInfo.fromJson(entry));
-      } else if (entry is Map) {
-        result.add(
-          AttachmentSignedUrlInfo.fromJson(entry.cast<String, dynamic>()),
-        );
-      }
-    }
-    return result;
-  }
-
-  static List<AttachmentSignedUrlFailure> _parseFailureList(dynamic value) {
-    if (value is! List) return const [];
-
-    final result = <AttachmentSignedUrlFailure>[];
-    for (final entry in value) {
-      if (entry is Map<String, dynamic>) {
-        result.add(AttachmentSignedUrlFailure.fromJson(entry));
-      } else if (entry is Map) {
-        result.add(
-          AttachmentSignedUrlFailure.fromJson(entry.cast<String, dynamic>()),
-        );
-      }
-    }
-    return result;
-  }
 }
 
-@immutable
-class AttachmentSignedUrlInfo {
-  final String id;
-  final String filename;
-  final String signedUrl;
-  final DateTime? expiresAt;
+/// Empty result used as a safe default.
+const AttachmentSignedUrlResult emptyAttachmentSignedUrlResult =
+    AttachmentSignedUrlResult();
 
-  const AttachmentSignedUrlInfo({
-    required this.id,
-    required this.filename,
-    required this.signedUrl,
-    this.expiresAt,
-  });
+AttachmentSignedUrlResult attachmentSignedUrlResultFromJson(
+  Map<String, dynamic> json,
+) {
+  final successfulList = json['successful'];
+  final failedList = json['failed'];
 
-  factory AttachmentSignedUrlInfo.fromJson(Map<String, dynamic> json) {
-    return AttachmentSignedUrlInfo(
-      id: _readRequiredString(json, 'id', 'attachment_id'),
-      filename: _readRequiredString(json, 'filename', 'object_key'),
-      signedUrl: _readRequiredString(json, 'signed_url', 'signedUrl'),
-      expiresAt: _readOptionalDateTime(json, 'expires_at', 'expiresAt'),
-    );
+  return AttachmentSignedUrlResult(
+    successful: _parseInfoList(successfulList),
+    failed: _parseFailureList(failedList),
+  );
+}
+
+List<AttachmentSignedUrlInfo> _parseInfoList(dynamic value) {
+  if (value is! List) return const [];
+
+  final result = <AttachmentSignedUrlInfo>[];
+  for (final entry in value) {
+    if (entry is Map<String, dynamic>) {
+      result.add(attachmentSignedUrlInfoFromJson(entry));
+    } else if (entry is Map) {
+      result.add(
+        attachmentSignedUrlInfoFromJson(entry.cast<String, dynamic>()),
+      );
+    }
   }
+  return result;
+}
 
+List<AttachmentSignedUrlFailure> _parseFailureList(dynamic value) {
+  if (value is! List) return const [];
+
+  final result = <AttachmentSignedUrlFailure>[];
+  for (final entry in value) {
+    if (entry is Map<String, dynamic>) {
+      result.add(attachmentSignedUrlFailureFromJson(entry));
+    } else if (entry is Map) {
+      result.add(
+        attachmentSignedUrlFailureFromJson(entry.cast<String, dynamic>()),
+      );
+    }
+  }
+  return result;
+}
+
+@freezed
+abstract class AttachmentSignedUrlInfo with _$AttachmentSignedUrlInfo {
+  const factory AttachmentSignedUrlInfo({
+    required String id,
+    required String filename,
+    required String signedUrl,
+    DateTime? expiresAt,
+  }) = _AttachmentSignedUrlInfo;
+}
+
+extension AttachmentSignedUrlInfoX on AttachmentSignedUrlInfo {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
@@ -91,31 +93,30 @@ class AttachmentSignedUrlInfo {
   }
 }
 
-@immutable
-class AttachmentSignedUrlFailure {
-  final String? id;
-  final String? filename;
-  final String? error;
-  final int? errorCode;
-  final String? message;
+AttachmentSignedUrlInfo attachmentSignedUrlInfoFromJson(
+  Map<String, dynamic> json,
+) {
+  return AttachmentSignedUrlInfo(
+    id: _readRequiredString(json, 'id', 'attachment_id'),
+    filename: _readRequiredString(json, 'filename', 'object_key'),
+    signedUrl: _readRequiredString(json, 'signed_url', 'signedUrl'),
+    expiresAt: _readOptionalDateTime(json, 'expires_at', 'expiresAt'),
+  );
+}
 
-  const AttachmentSignedUrlFailure({
-    this.id,
-    this.filename,
-    this.error,
-    this.errorCode,
-    this.message,
-  });
+@freezed
+abstract class AttachmentSignedUrlFailure with _$AttachmentSignedUrlFailure {
+  const factory AttachmentSignedUrlFailure({
+    String? id,
+    String? filename,
+    String? error,
+    int? errorCode,
+    String? message,
+  }) = _AttachmentSignedUrlFailure;
+}
 
-  factory AttachmentSignedUrlFailure.fromJson(Map<String, dynamic> json) {
-    return AttachmentSignedUrlFailure(
-      id: _readOptionalString(json, 'id', 'attachment_id'),
-      filename: _readOptionalString(json, 'filename', 'object_key'),
-      error: _readOptionalString(json, 'error', 'error'),
-      errorCode: _readOptionalInt(json, 'error_code', 'errorCode'),
-      message: _readOptionalString(json, 'message', 'message'),
-    );
-  }
+extension AttachmentSignedUrlFailureX on AttachmentSignedUrlFailure {
+  String? get displayMessage => error ?? message;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -126,8 +127,18 @@ class AttachmentSignedUrlFailure {
       if (message != null) 'message': message,
     };
   }
+}
 
-  String? get displayMessage => error ?? message;
+AttachmentSignedUrlFailure attachmentSignedUrlFailureFromJson(
+  Map<String, dynamic> json,
+) {
+  return AttachmentSignedUrlFailure(
+    id: _readOptionalString(json, 'id', 'attachment_id'),
+    filename: _readOptionalString(json, 'filename', 'object_key'),
+    error: _readOptionalString(json, 'error', 'error'),
+    errorCode: _readOptionalInt(json, 'error_code', 'errorCode'),
+    message: _readOptionalString(json, 'message', 'message'),
+  );
 }
 
 String _readRequiredString(

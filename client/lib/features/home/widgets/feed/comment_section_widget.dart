@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
-import '../../models/comment_model.dart';
-import '../../providers/comment_providers.dart';
-import 'comment_item_widget.dart';
+import 'package:finvo/features/home/models/comment_model.dart';
+import 'package:finvo/features/home/providers/comment_providers.dart';
+import 'package:finvo/features/home/widgets/feed/comment_item_widget.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class CommentSectionWidget extends ConsumerStatefulWidget {
@@ -207,8 +207,10 @@ class _CommentSectionWidgetState extends ConsumerState<CommentSectionWidget> {
                               const SizedBox(width: 4),
                               Text(
                                 isExpanded
-                                    ? '收起回复'
-                                    : '展开额外 $remainingCount 条回复',
+                                    ? t.comment.collapseReplies
+                                    : t.comment.expandMoreReplies(
+                                        count: remainingCount,
+                                      ),
                                 style: theme.typography.body.xs.copyWith(
                                   color: colorScheme.primary,
                                   fontWeight: FontWeight.w600,

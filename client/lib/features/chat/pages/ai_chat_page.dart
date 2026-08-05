@@ -9,16 +9,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 
-import '../widgets/chat_input_field.dart';
-import '../widgets/chat_message_widget.dart';
-import '../widgets/genui_error_widget.dart';
-import '../providers/chat_history_provider.dart';
-import '../providers/conversation_expense_provider.dart';
-import '../models/chat_message.dart' as app;
-import '../models/message_attachments.dart';
-import '../widgets/enhanced_user_message_bubble.dart';
-import '../widgets/chat_conversation_drawer.dart';
-import '../widgets/welcome/welcome_guide_widget.dart';
+import 'package:finvo/features/chat/widgets/chat_input_field.dart';
+import 'package:finvo/features/chat/widgets/chat_message_widget.dart';
+import 'package:finvo/features/chat/widgets/genui_error_widget.dart';
+import 'package:finvo/features/chat/providers/chat_history_provider.dart';
+import 'package:finvo/features/chat/providers/conversation_expense_provider.dart';
+import 'package:finvo/features/chat/models/chat_message.dart' as app;
+import 'package:finvo/features/chat/models/message_attachments.dart';
+import 'package:finvo/features/chat/widgets/enhanced_user_message_bubble.dart';
+import 'package:finvo/features/chat/widgets/chat_conversation_drawer.dart';
+import 'package:finvo/features/chat/widgets/welcome/welcome_guide_widget.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
@@ -324,11 +324,11 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
           icon: FLucideIcons.share2,
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Share feature coming soon...'),
-                duration: Duration(seconds: 1),
+              SnackBar(
+                content: Text(t.chat.shareComingSoon),
+                duration: const Duration(seconds: 1),
                 behavior: SnackBarBehavior.fixed,
-                shape: RoundedRectangleBorder(),
+                shape: const RoundedRectangleBorder(),
               ),
             );
           },

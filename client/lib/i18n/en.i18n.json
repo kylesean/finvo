@@ -24,7 +24,10 @@
     "noMore": "No More",
     "loadFailed": "Loading failed",
     "history": "Transactions",
-    "reset": "Reset"
+    "reset": "Reset",
+    "cancelled": "Cancelled",
+    "saving": "Saving...",
+    "saveFailed": "Save failed"
   },
   "genui": {
     "errorBusy": "Sorry, the service is temporarily busy, please try again later",
@@ -46,7 +49,9 @@
     "minutesAgo": "${count}m ago",
     "hoursAgo": "${count}h ago",
     "daysAgo": "${count}d ago",
-    "weeksAgo": "${count}w ago"
+    "weeksAgo": "${count}w ago",
+    "monthsAgo": "${count}mo ago",
+    "yearsAgo": "${count}y ago"
   },
   "greeting": {
     "morning": "Good Morning",
@@ -172,6 +177,12 @@
     "commentFailed": "Comment failed",
     "replyToPrefix": "Reply to @$name:",
     "reply": "Reply",
+    "contentRequired": "Comment content is required",
+    "copyContent": "Copy content",
+    "contentCopied": "Comment content copied",
+    "collapseReplies": "Collapse replies",
+    "expandMoreReplies": "Show $count more replies",
+    "recordedBy": "Recorded by",
     "addNote": "Add a note...",
     "addNoteWithMention": "Comment or @mention members...",
     "confirmDeleteTitle": "Confirm Delete",
@@ -257,6 +268,7 @@
     "checkingUpdate": "Checking for updates...",
     "latestVersionToast": "You are on the latest version",
     "newVersionTitle": "New Version Available",
+    "currentVersion": "Current version: v$version",
     "updateNow": "Update Now",
     "updateLater": "Later",
     "fetchUpdateFailed": "Failed to check for updates, please try again later",
@@ -993,7 +1005,11 @@
           "description": "Get AI-powered financial insights"
         }
       }
-    }
+    },
+    "shareComingSoon": "Share feature coming soon...",
+    "invalidAttachmentLink": "Invalid attachment link",
+    "unableToOpenAttachmentLink": "Unable to open attachment link",
+    "aiCommunicationError": "Sorry, AI assistant communication error: $error"
   },
   "image": {
     "deleteTitle": "Delete Image",
@@ -1038,6 +1054,16 @@
     "unknownError": "Unknown Error",
     "unknownErrorHint": "An unexpected error occurred. Please try again or contact support.",
     "registrationMissingInfo": "Registration flow error, missing required information.",
+    "accountInfoMissing": "Account information missing",
+    "sharedSpaceInfoMissing": "Shared space information missing",
+    "settingsSteps": "Settings steps:",
+    "suggestions": "Suggestions:",
+    "fileNotFound": "File not found",
+    "fileNotFoundHint": "Please confirm the file exists or select another file.",
+    "selectAgain": "Select again",
+    "thumbnailGenerationFailed": "Thumbnail generation failed",
+    "thumbnailGenerationHint": "Failed to generate thumbnail for the image, but the file has been selected. You can still continue using this file.",
+    "help": "Help:",
     "genui": {
       "loadingFailed": "Component loading failed",
       "schemaFailed": "Schema validation failed",
@@ -1142,7 +1168,9 @@
     "setDailyBurnRate": "Set your estimated daily spending",
     "dailyBurnRateSaved": "Daily burn rate saved",
     "dayUnit": "day",
-    "saveFailed": "Save failed"
+    "saveFailed": "Save failed",
+    "deleteFailed": "Delete failed, please try again later",
+    "missingExchangeRates": "Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: $currencies"
   },
   "app": {
     "splashTitle": "Finvo: Intelligence that Grows.",

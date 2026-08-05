@@ -110,6 +110,9 @@ class _Translations$common$zh_Hant extends Translations$common$zh {
 	@override String get loadFailed => '載入失敗';
 	@override String get history => '交易記錄';
 	@override String get reset => '重置';
+	@override String get cancelled => '已取消';
+	@override String get saving => '保存中...';
+	@override String get saveFailed => '保存失敗';
 }
 
 // Path: genui
@@ -146,6 +149,8 @@ class _Translations$time$zh_Hant extends Translations$time$zh {
 	@override String hoursAgo({required Object count}) => '${count}小時前';
 	@override String daysAgo({required Object count}) => '${count}天前';
 	@override String weeksAgo({required Object count}) => '${count}週前';
+	@override String monthsAgo({required Object count}) => '${count}個月前';
+	@override String yearsAgo({required Object count}) => '${count}年前';
 }
 
 // Path: greeting
@@ -288,6 +293,12 @@ class _Translations$comment$zh_Hant extends Translations$comment$zh {
 	@override String get commentFailed => '評論失敗';
 	@override String replyToPrefix({required Object name}) => '回覆 @${name}:';
 	@override String get reply => '回覆';
+	@override String get contentRequired => '評論內容不能為空';
+	@override String get copyContent => '複製內容';
+	@override String get contentCopied => '已複製評論內容';
+	@override String get collapseReplies => '收起回覆';
+	@override String expandMoreReplies({required Object count}) => '展開額外 ${count} 條回覆';
+	@override String get recordedBy => '記錄人';
 	@override String get addNote => '添加備註...';
 	@override String get confirmDeleteTitle => '確認刪除';
 	@override String get confirmDeleteContent => '你確定要刪除這條評論嗎？此操作無法撤銷。';
@@ -385,6 +396,7 @@ class _Translations$settings$zh_Hant extends Translations$settings$zh {
 	@override String get checkingUpdate => '正在檢查更新...';
 	@override String get latestVersionToast => '當前已是最新版本';
 	@override String get newVersionTitle => '發現新版本';
+	@override String currentVersion({required Object version}) => '當前版本: v${version}';
 	@override String get updateNow => '立即更新';
 	@override String get updateLater => '暫不更新';
 	@override String get fetchUpdateFailed => '檢查更新失敗，請稍後重試';
@@ -706,6 +718,10 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override late final _Translations$chat$transferWizard$zh_Hant transferWizard = _Translations$chat$transferWizard$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$zh_Hant genui = _Translations$chat$genui$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$zh_Hant welcome = _Translations$chat$welcome$zh_Hant._(_root);
+	@override String get shareComingSoon => '分享功能即將上線...';
+	@override String get invalidAttachmentLink => '無效的附件連結';
+	@override String get unableToOpenAttachmentLink => '無法開啟附件連結';
+	@override String aiCommunicationError({required Object error}) => '抱歉，AI 助手通訊錯誤：${error}';
 }
 
 // Path: image
@@ -778,6 +794,16 @@ class _Translations$error$zh_Hant extends Translations$error$zh {
 	@override String get unknownError => '未知錯誤';
 	@override String get unknownErrorHint => '發生了意外錯誤，請重試或聯繫技術支持。';
 	@override String get registrationMissingInfo => '註冊流程錯誤，缺少必要資訊。';
+	@override String get accountInfoMissing => '帳戶資訊缺失';
+	@override String get sharedSpaceInfoMissing => '共享空間資訊缺失';
+	@override String get settingsSteps => '設定步驟：';
+	@override String get suggestions => '建議：';
+	@override String get fileNotFound => '檔案未找到';
+	@override String get fileNotFoundHint => '請確認檔案存在或重新選擇檔案。';
+	@override String get selectAgain => '重新選擇';
+	@override String get thumbnailGenerationFailed => '縮圖產生失敗';
+	@override String get thumbnailGenerationHint => '縮圖產生失敗，但檔案已成功選取，仍可繼續使用該檔案。';
+	@override String get help => '幫助：';
 	@override late final _Translations$error$genui$zh_Hant genui = _Translations$error$genui$zh_Hant._(_root);
 }
 
@@ -892,6 +918,8 @@ class _Translations$financial$zh_Hant extends Translations$financial$zh {
 	@override String get dailyBurnRateSaved => '日常消費預估已保存';
 	@override String get dayUnit => '天';
 	@override String get saveFailed => '保存失敗';
+	@override String get deleteFailed => '刪除失敗，請稍後再試';
+	@override String missingExchangeRates({required Object currencies}) => '部分幣種缺少匯率，相關帳戶未計入總額：${currencies}';
 }
 
 // Path: app
@@ -2481,6 +2509,9 @@ extension on TranslationsZhHant {
 			'common.loadFailed' => '載入失敗',
 			'common.history' => '交易記錄',
 			'common.reset' => '重置',
+			'common.cancelled' => '已取消',
+			'common.saving' => '保存中...',
+			'common.saveFailed' => '保存失敗',
 			'genui.errorBusy' => '抱歉，服務暫時繁忙，請稍後重試',
 			'genui.errorTimeout' => '請求逾時，請檢查網路後重試',
 			'genui.errorNetwork' => '網路連線異常，請檢查後重試',
@@ -2499,6 +2530,8 @@ extension on TranslationsZhHant {
 			'time.hoursAgo' => ({required Object count}) => '${count}小時前',
 			'time.daysAgo' => ({required Object count}) => '${count}天前',
 			'time.weeksAgo' => ({required Object count}) => '${count}週前',
+			'time.monthsAgo' => ({required Object count}) => '${count}個月前',
+			'time.yearsAgo' => ({required Object count}) => '${count}年前',
 			'greeting.morning' => '上午好',
 			'greeting.afternoon' => '下午好',
 			'greeting.evening' => '晚上好',
@@ -2603,6 +2636,12 @@ extension on TranslationsZhHant {
 			'comment.commentFailed' => '評論失敗',
 			'comment.replyToPrefix' => ({required Object name}) => '回覆 @${name}:',
 			'comment.reply' => '回覆',
+			'comment.contentRequired' => '評論內容不能為空',
+			'comment.copyContent' => '複製內容',
+			'comment.contentCopied' => '已複製評論內容',
+			'comment.collapseReplies' => '收起回覆',
+			'comment.expandMoreReplies' => ({required Object count}) => '展開額外 ${count} 條回覆',
+			'comment.recordedBy' => '記錄人',
 			'comment.addNote' => '添加備註...',
 			'comment.confirmDeleteTitle' => '確認刪除',
 			'comment.confirmDeleteContent' => '你確定要刪除這條評論嗎？此操作無法撤銷。',
@@ -2679,6 +2718,7 @@ extension on TranslationsZhHant {
 			'settings.checkingUpdate' => '正在檢查更新...',
 			'settings.latestVersionToast' => '當前已是最新版本',
 			'settings.newVersionTitle' => '發現新版本',
+			'settings.currentVersion' => ({required Object version}) => '當前版本: v${version}',
 			'settings.updateNow' => '立即更新',
 			'settings.updateLater' => '暫不更新',
 			'settings.fetchUpdateFailed' => '檢查更新失敗，請稍後重試',
@@ -2956,6 +2996,8 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.custom' => '自訂',
 			'forecast.recurringTransaction.cycle' => '週期',
 			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '每 ${count} 天',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '每 ${count} 週',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '每 ${count} 個月',
 			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '每 ${count} 年',
@@ -2968,8 +3010,6 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => '每週的${day}',
 			'forecast.recurringTransaction.weekdayMon' => '一',
 			'forecast.recurringTransaction.weekdayTue' => '二',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.weekdayWed' => '三',
 			'forecast.recurringTransaction.weekdayThu' => '四',
 			'forecast.recurringTransaction.weekdayFri' => '五',
@@ -3301,6 +3341,10 @@ extension on TranslationsZhHant {
 			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
 			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
 			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'chat.shareComingSoon' => '分享功能即將上線...',
+			'chat.invalidAttachmentLink' => '無效的附件連結',
+			'chat.unableToOpenAttachmentLink' => '無法開啟附件連結',
+			'chat.aiCommunicationError' => ({required Object error}) => '抱歉，AI 助手通訊錯誤：${error}',
 			'image.deleteTitle' => '刪除圖片',
 			'image.deleteConfirm' => '確定要刪除這張圖片嗎？此操作無法撤銷。',
 			'footprint.searchIn' => '搜尋',
@@ -3337,6 +3381,16 @@ extension on TranslationsZhHant {
 			'error.unknownError' => '未知錯誤',
 			'error.unknownErrorHint' => '發生了意外錯誤，請重試或聯繫技術支持。',
 			'error.registrationMissingInfo' => '註冊流程錯誤，缺少必要資訊。',
+			'error.accountInfoMissing' => '帳戶資訊缺失',
+			'error.sharedSpaceInfoMissing' => '共享空間資訊缺失',
+			'error.settingsSteps' => '設定步驟：',
+			'error.suggestions' => '建議：',
+			'error.fileNotFound' => '檔案未找到',
+			'error.fileNotFoundHint' => '請確認檔案存在或重新選擇檔案。',
+			'error.selectAgain' => '重新選擇',
+			'error.thumbnailGenerationFailed' => '縮圖產生失敗',
+			'error.thumbnailGenerationHint' => '縮圖產生失敗，但檔案已成功選取，仍可繼續使用該檔案。',
+			'error.help' => '幫助：',
 			'error.genui.loadingFailed' => '組件載入失敗',
 			'error.genui.schemaFailed' => '架構驗證失敗',
 			'error.genui.schemaDescription' => '組件定義不符合 GenUI 規範，降級為純文本顯示',
@@ -3428,6 +3482,8 @@ extension on TranslationsZhHant {
 			'financial.dailyBurnRateSaved' => '日常消費預估已保存',
 			'financial.dayUnit' => '天',
 			'financial.saveFailed' => '保存失敗',
+			'financial.deleteFailed' => '刪除失敗，請稍後再試',
+			'financial.missingExchangeRates' => ({required Object currencies}) => '部分幣種缺少匯率，相關帳戶未計入總額：${currencies}',
 			'app.splashTitle' => '智見增長，格物致富。',
 			'app.splashSubtitle' => '智能財務助手',
 			'statistics.title' => '統計分析',
@@ -3454,6 +3510,8 @@ extension on TranslationsZhHant {
 			'statistics.sort.date' => '按時間排序',
 			'statistics.exportList' => '導出列表',
 			'statistics.noMoreData' => '沒有更多數據了',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.emptyState.title' => 'Unlock Financial Insights',
 			'statistics.emptyState.description' => 'Your financial report is currently a blank canvas.\nRecord your first transaction and let the data tell your story.',
 			'statistics.emptyState.action' => 'Record First Transaction',
@@ -3482,8 +3540,6 @@ extension on TranslationsZhHant {
 			'sharedSpace.roles.member' => '成員',
 			'sharedSpace.title' => '共享空間',
 			'sharedSpace.create.title' => '建立共享空間',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.create.subtitle' => '建立一個新的共享空間，與朋友一起記帳',
 			'sharedSpace.create.nameLabel' => '空間名稱',
 			'sharedSpace.create.nameHint' => '例如：畢業旅行',

@@ -4,9 +4,10 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../profile/models/financial_account.dart';
-import '../models/account_type_definition.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class FinancialAccountDetailArgs {
   const FinancialAccountDetailArgs({
@@ -60,7 +61,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Account Name', style: AppTextStyles.listSubtitle(theme)),
+            Text(t.account.nameLabel, style: AppTextStyles.listSubtitle(theme)),
             const SizedBox(height: 8),
             Text(
               // Use name field
@@ -68,7 +69,10 @@ class FinancialAccountDetailPage extends ConsumerWidget {
               style: AppTextStyles.pageTitle(theme),
             ),
             const SizedBox(height: 24),
-            Text('Current Balance', style: AppTextStyles.listSubtitle(theme)),
+            Text(
+              t.account.amountLabel,
+              style: AppTextStyles.listSubtitle(theme),
+            ),
             const SizedBox(height: 8),
             Text(
               formattedAmount,

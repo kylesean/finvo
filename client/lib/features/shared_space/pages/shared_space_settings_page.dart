@@ -6,14 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../models/shared_space_models.dart';
-import '../providers/shared_space_provider.dart';
-import '../services/shared_space_service.dart';
-import '../../../shared/services/toast_service.dart';
-import '../../../shared/widgets/user_avatar.dart';
-import '../../../shared/models/action_item_model.dart';
-import '../../../shared/widgets/dialogs/action_bottom_sheet.dart';
-import '../../auth/providers/auth_provider.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
+import 'package:finvo/features/shared_space/services/shared_space_service.dart';
+import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/shared/widgets/user_avatar.dart';
+import 'package:finvo/shared/models/action_item_model.dart';
+import 'package:finvo/shared/widgets/dialogs/action_bottom_sheet.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class SharedSpaceSettingsPage extends ConsumerStatefulWidget {
@@ -485,11 +485,16 @@ class _SharedSpaceSettingsPageState
       ),
     );
 
+    // The root navigator context can be null right after a deep link or
+    // shell branch switch; bail out instead of crashing on a `!` unwrap.
+    final rootContext = GoRouter.of(
+      context,
+    ).routerDelegate.navigatorKey.currentContext;
+    if (rootContext == null) return;
+
     unawaited(
       showModalBottomSheet<void>(
-        context: GoRouter.of(
-          context,
-        ).routerDelegate.navigatorKey.currentContext!,
+        context: rootContext,
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         builder: (sheetContext) {

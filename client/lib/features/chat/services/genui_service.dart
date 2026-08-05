@@ -4,9 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genui/genui.dart' as genui;
 import 'package:a2ui_core/a2ui_core.dart' as a2ui;
-import 'custom_content_generator.dart';
-import 'extended_genui_conversation.dart';
-import '../../../core/storage/secure_storage_service.dart';
+import 'package:finvo/features/chat/services/custom_content_generator.dart';
+import 'package:finvo/features/chat/services/extended_genui_conversation.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
 
 final _logger = Logger('GenUiService');
 

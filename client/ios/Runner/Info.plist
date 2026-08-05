@@ -17,9 +17,25 @@
         <array>
             <string>zh</string>
             <string>en</string>
+            <string>ja</string>
+            <string>ko</string>
+            <string>zh-Hant</string>
         </array>
         <key>CFBundleDisplayName</key>
         <string>Finvo</string>
+        <key>CFBundleURLTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleTypeRole</key>
+                <string>Editor</string>
+                <key>CFBundleURLName</key>
+                <string>finvo</string>
+                <key>CFBundleURLSchemes</key>
+                <array>
+                    <string>finvo</string>
+                </array>
+            </dict>
+        </array>
         <key>CFBundleExecutable</key>
         <string>$(EXECUTABLE_NAME)</string>
         <key>CFBundleIdentifier</key>
@@ -61,7 +77,12 @@
         <true />
         <key>NSAppTransportSecurity</key>
         <dict>
-            <key>NSAllowsArbitraryLoads</key>
+            <!-- Allow HTTP only for local network addresses (192.168.x.x,
+                 10.x.x.x, 127.0.0.1, .local). Public domains must use HTTPS
+                 so that auth tokens are never sent over plaintext to the
+                 open internet. Replaces the previous NSAllowsArbitraryLoads
+                 which disabled ATS globally. -->
+            <key>NSAllowsLocalNetworking</key>
             <true/>
         </dict>
         <key>NSLocalNetworkUsageDescription</key>

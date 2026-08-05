@@ -1,9 +1,9 @@
 import 'package:logging/logging.dart';
 import 'package:dio/dio.dart';
-import 'dio_provider.dart';
-import 'exceptions/app_exception.dart';
+import 'package:finvo/core/network/dio_provider.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'interceptors/business_interceptor.dart';
+import 'package:finvo/core/network/interceptors/business_interceptor.dart';
 
 // Define HTTP method enum for type safety
 enum HttpMethod { get, post, put, delete, patch }
@@ -60,6 +60,7 @@ class NetworkClient {
       maxRetries: maxRetries,
       path: path,
       isIdempotentMethod: isIdempotentMethod,
+      cancelToken: cancelToken,
     );
   }
 
@@ -71,8 +72,10 @@ class NetworkClient {
     required int maxRetries,
     required String path,
     required bool isIdempotentMethod,
+    CancelToken? cancelToken,
   }) async {
     int attempts = 0;
+    int retriesPerformed = 0;
     DioException? lastException;
 
     while (attempts <= maxRetries) {
@@ -85,8 +88,8 @@ class NetworkClient {
         if (fromJsonT != null) {
           try {
             return fromJsonT(response.data);
-          } catch (e) {
-            _logger.severe('fromJsonT parsing failed', e);
+          } catch (e, stackTrace) {
+            _logger.severe('fromJsonT parsing failed', e, stackTrace);
             // Throw specific data parsing exception
             throw DataParsingException(
               'Client data parsing failed: ${e.toString()}',
@@ -120,7 +123,25 @@ class NetworkClient {
         );
 
         // Wait before retry (exponential backoff: 500ms, 1s, 2s, 4s, ... capped)
-        await Future<void>.delayed(_exponentialBackoff(attempts));
+        final delay = _exponentialBackoff(attempts);
+        if (cancelToken != null) {
+          // Abort the backoff wait the moment the caller cancels the request,
+          // instead of sleeping through the full delay and retrying a request
+          // nobody cares about anymore.
+          await Future.any<void>([
+            Future<void>.delayed(delay),
+            cancelToken.whenCancel,
+          ]);
+          if (cancelToken.isCancelled) {
+            throw DioException(
+              requestOptions: RequestOptions(path: path),
+              type: DioExceptionType.cancel,
+            );
+          }
+        } else {
+          await Future<void>.delayed(delay);
+        }
+        retriesPerformed++;
         continue;
       } catch (e, stackTrace) {
         if (e is AppException) rethrow;
@@ -147,7 +168,9 @@ class NetworkClient {
         'All retries failed, final error: ${lastException.type}, ${lastException.message}',
       );
       throw NetworkException(
-        "Network request failed, retried $maxRetries times: ${lastException.message ?? 'Unknown network error'}",
+        // Report the number of retries actually performed (0 for
+        // non-idempotent/disabled retry), not the configured max.
+        "Network request failed, retried $retriesPerformed times: ${lastException.message ?? 'Unknown network error'}",
       );
     }
 

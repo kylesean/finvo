@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../services/auth_service.dart';
+import 'package:finvo/features/auth/services/auth_service.dart';
 
 part 'verification_provider.g.dart';
 

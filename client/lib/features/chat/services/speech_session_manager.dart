@@ -3,10 +3,10 @@ import 'dart:async';
 
 import 'package:logging/logging.dart';
 
-import 'speech_recognition_service.dart';
-import 'speech_service_factory.dart';
-import 'system_speech_service.dart';
-import 'sound_feedback_service.dart';
+import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/features/chat/services/speech_service_factory.dart';
+import 'package:finvo/features/chat/services/system_speech_service.dart';
+import 'package:finvo/features/chat/services/sound_feedback_service.dart';
 
 /// Classifies raw speech error strings into stable, user-facing tokens.
 ///
@@ -79,6 +79,12 @@ class SpeechSessionManager {
 
   SpeechServiceType? get serviceType => _serviceType;
   bool get isListening => _isListening;
+
+  /// Whether the active service emits incremental (replace-mode) partial
+  /// results rather than discrete final results. The chat input notifier uses
+  /// this to decide between replacing the recognized text (incremental) and
+  /// appending it (discrete finals).
+  bool get isIncrementalResult => _service?.isIncrementalResult ?? false;
 
   /// Last classified error token, retained for callers that need it.
   String? lastError;

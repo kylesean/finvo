@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import '../providers/chat_input_provider.dart';
-import 'media_upload_bottom_sheet.dart';
+import 'package:finvo/features/chat/providers/chat_input_provider.dart';
+import 'package:finvo/features/chat/widgets/media_upload_bottom_sheet.dart';
 
 /// Media upload button component
 /// Tapping shows a bottom sheet with multiple function options

@@ -655,14 +655,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "17.3.0"
-  google_fonts:
-    dependency: "direct main"
-    description:
-      name: google_fonts
-      sha256: ba03d03bcaa2f6cb7bd920e3b5027181db75ab524f8891c8bc3aa603885b8055
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.3.3"
   gpt_markdown:
     dependency: "direct main"
     description:
@@ -1689,14 +1681,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.6"
-  timeago:
-    dependency: "direct main"
-    description:
-      name: timeago
-      sha256: b05159406a97e1cbb2b9ee4faa9fb096fe0e2dfcd8b08fcd2a00553450d3422e
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.7.1"
   tuple:
     dependency: transitive
     description:

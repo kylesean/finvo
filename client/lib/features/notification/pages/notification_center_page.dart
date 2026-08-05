@@ -6,8 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../models/notification_item.dart';
-import '../providers/notification_provider.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
+import 'package:finvo/features/notification/models/notification_item.dart';
+import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class NotificationCenterPage extends ConsumerStatefulWidget {
@@ -405,19 +406,6 @@ class _NotificationTile extends StatelessWidget {
   }
 
   String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inMinutes < 1) {
-      return t.notification.justNow;
-    } else if (difference.inHours < 1) {
-      return t.notification.minutesAgo(minutes: difference.inMinutes);
-    } else if (difference.inDays < 1) {
-      return t.notification.hoursAgo(hours: difference.inHours);
-    } else if (difference.inDays < 7) {
-      return t.notification.daysAgo(days: difference.inDays);
-    } else {
-      return '${dateTime.month}-${dateTime.day}';
-    }
+    return relativeTime(dateTime);
   }
 }

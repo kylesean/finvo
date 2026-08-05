@@ -24,7 +24,10 @@
     "noMore": "沒有更多了",
     "loadFailed": "載入失敗",
     "history": "交易記錄",
-    "reset": "重置"
+    "reset": "重置",
+    "cancelled": "已取消",
+    "saving": "保存中...",
+    "saveFailed": "保存失敗"
   },
   "genui": {
     "errorBusy": "抱歉，服務暫時繁忙，請稍後重試",
@@ -46,7 +49,9 @@
     "minutesAgo": "$count分鐘前",
     "hoursAgo": "$count小時前",
     "daysAgo": "$count天前",
-    "weeksAgo": "$count週前"
+    "weeksAgo": "$count週前",
+    "monthsAgo": "$count個月前",
+    "yearsAgo": "$count年前"
   },
   "greeting": {
     "morning": "上午好",
@@ -169,6 +174,12 @@
     "commentFailed": "評論失敗",
     "replyToPrefix": "回覆 @$name:",
     "reply": "回覆",
+    "contentRequired": "評論內容不能為空",
+    "copyContent": "複製內容",
+    "contentCopied": "已複製評論內容",
+    "collapseReplies": "收起回覆",
+    "expandMoreReplies": "展開額外 $count 條回覆",
+    "recordedBy": "記錄人",
     "addNote": "添加備註...",
     "confirmDeleteTitle": "確認刪除",
     "confirmDeleteContent": "你確定要刪除這條評論嗎？此操作無法撤銷。",
@@ -253,6 +264,7 @@
     "checkingUpdate": "正在檢查更新...",
     "latestVersionToast": "當前已是最新版本",
     "newVersionTitle": "發現新版本",
+    "currentVersion": "當前版本: v$version",
     "updateNow": "立即更新",
     "updateLater": "暫不更新",
     "fetchUpdateFailed": "檢查更新失敗，請稍後重試",
@@ -986,7 +998,11 @@
           "description": "Get AI-powered financial insights"
         }
       }
-    }
+    },
+    "shareComingSoon": "分享功能即將上線...",
+    "invalidAttachmentLink": "無效的附件連結",
+    "unableToOpenAttachmentLink": "無法開啟附件連結",
+    "aiCommunicationError": "抱歉，AI 助手通訊錯誤：$error"
   },
   "image": {
     "deleteTitle": "刪除圖片",
@@ -1031,6 +1047,16 @@
     "unknownError": "未知錯誤",
     "unknownErrorHint": "發生了意外錯誤，請重試或聯繫技術支持。",
     "registrationMissingInfo": "註冊流程錯誤，缺少必要資訊。",
+    "accountInfoMissing": "帳戶資訊缺失",
+    "sharedSpaceInfoMissing": "共享空間資訊缺失",
+    "settingsSteps": "設定步驟：",
+    "suggestions": "建議：",
+    "fileNotFound": "檔案未找到",
+    "fileNotFoundHint": "請確認檔案存在或重新選擇檔案。",
+    "selectAgain": "重新選擇",
+    "thumbnailGenerationFailed": "縮圖產生失敗",
+    "thumbnailGenerationHint": "縮圖產生失敗，但檔案已成功選取，仍可繼續使用該檔案。",
+    "help": "幫助：",
     "genui": {
       "loadingFailed": "組件載入失敗",
       "schemaFailed": "架構驗證失敗",
@@ -1135,7 +1161,9 @@
     "setDailyBurnRate": "設置您的日常消費預估金額",
     "dailyBurnRateSaved": "日常消費預估已保存",
     "dayUnit": "天",
-    "saveFailed": "保存失敗"
+    "saveFailed": "保存失敗",
+    "deleteFailed": "刪除失敗，請稍後再試",
+    "missingExchangeRates": "部分幣種缺少匯率，相關帳戶未計入總額：$currencies"
   },
   "app": {
     "splashTitle": "智見增長，格物致富。",

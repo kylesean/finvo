@@ -5,14 +5,14 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
-import '../../../core/constants/category_constants.dart';
-import '../../../shared/models/currency.dart';
-import '../../profile/providers/financial_settings_provider.dart';
-import '../models/budget_models.dart';
-import '../providers/budget_provider.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/budget/models/budget_models.dart';
+import 'package:finvo/features/budget/providers/budget_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../../shared/widgets/app_card.dart';
-import '../../../shared/widgets/app_filter_chip.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
+import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class BudgetOverviewPage extends ConsumerStatefulWidget {
@@ -96,7 +96,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
 
     // error state
     if (state.error != null && state.summary == null) {
-      return _buildErrorState(theme, colors, state.error!);
+      return _buildErrorState(theme, colors, state.error.toString());
     }
 
     // empty state
@@ -658,32 +658,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
 
   /// format amount
   String _formatAmount(Decimal amount) {
-    final value = double.tryParse(amount.toString()) ?? 0.0;
-    final absValue = value.abs();
-
-    if (absValue >= 10000) {
-      return '${(absValue / 10000).toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
-    }
-
-    final parts = absValue.toStringAsFixed(2).split('.');
-    final intPart = parts[0];
-    final decPart = parts[1];
-
-    var formatted = '';
-    var count = 0;
-    for (int i = intPart.length - 1; i >= 0; i--) {
-      if (count > 0 && count % 3 == 0) {
-        formatted = ',$formatted';
-      }
-      formatted = intPart[i] + formatted;
-      count++;
-    }
-
-    // if decimal part is 00, omit it
-    if (decPart == '00') {
-      return value < 0 ? '-$formatted' : formatted;
-    }
-    return value < 0 ? '-$formatted.$decPart' : '$formatted.$decPart';
+    return formatBudgetCompactAmount(amount);
   }
 
   /// get category icon

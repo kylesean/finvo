@@ -4,10 +4,10 @@ import 'package:logging/logging.dart';
 import 'package:genui/genui.dart' as genui;
 import 'package:a2ui_core/a2ui_core.dart' as a2ui;
 import 'package:dio/dio.dart';
-import '../../../core/constants/api_constants.dart';
-import '../../../core/storage/secure_storage_service.dart';
-import '../models/sse_event_models.dart';
-import 'interaction_router.dart';
+import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/features/chat/models/sse_event_models.dart';
+import 'package:finvo/features/chat/services/interaction_router.dart';
 
 export '../models/sse_event_models.dart'
     show ToolCallStartEvent, ToolCallEndEvent;
@@ -413,7 +413,7 @@ class CustomContentGenerator implements genui.Transport {
       case 'tool_call_start':
         final eventData = data['data'] as Map<String, dynamic>?;
         if (eventData != null) {
-          final event = ToolCallStartEvent.fromJson(eventData);
+          final event = toolCallStartEventFromJson(eventData);
           _logger.info(
             'CustomContentGenerator: Tool call start - ${event.name} (${event.id})',
           );
@@ -425,7 +425,7 @@ class CustomContentGenerator implements genui.Transport {
       case 'tool_call_end':
         final eventData = data['data'] as Map<String, dynamic>?;
         if (eventData != null) {
-          final event = ToolCallEndEvent.fromJson(eventData);
+          final event = toolCallEndEventFromJson(eventData);
           _logger.info(
             'CustomContentGenerator: Tool call end - ${event.name} (${event.id}) '
             'status: ${event.status}, duration: ${event.durationMs}ms',

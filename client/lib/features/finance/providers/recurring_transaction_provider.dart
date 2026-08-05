@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../models/recurring_transaction.dart';
-import '../services/recurring_transaction_service.dart';
+import 'package:finvo/features/finance/models/recurring_transaction.dart';
+import 'package:finvo/features/finance/services/recurring_transaction_service.dart';
 
 part 'recurring_transaction_provider.g.dart';
 

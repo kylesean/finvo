@@ -110,6 +110,9 @@ class _Translations$common$ja extends Translations$common$zh {
 	@override String get loadFailed => '読み込み失敗';
 	@override String get history => '履歴';
 	@override String get reset => 'リセット';
+	@override String get cancelled => 'キャンセル済み';
+	@override String get saving => '保存中...';
+	@override String get saveFailed => '保存に失敗しました';
 }
 
 // Path: genui
@@ -146,6 +149,8 @@ class _Translations$time$ja extends Translations$time$zh {
 	@override String hoursAgo({required Object count}) => '${count}時間前';
 	@override String daysAgo({required Object count}) => '${count}日前';
 	@override String weeksAgo({required Object count}) => '${count}週間前';
+	@override String monthsAgo({required Object count}) => '${count}ヶ月前';
+	@override String yearsAgo({required Object count}) => '${count}年前';
 }
 
 // Path: greeting
@@ -288,6 +293,12 @@ class _Translations$comment$ja extends Translations$comment$zh {
 	@override String get commentFailed => 'コメントに失敗しました';
 	@override String replyToPrefix({required Object name}) => '@${name} さんに返信:';
 	@override String get reply => '返信';
+	@override String get contentRequired => 'コメント内容を入力してください';
+	@override String get copyContent => '内容をコピー';
+	@override String get contentCopied => 'コメント内容をコピーしました';
+	@override String get collapseReplies => '返信を折りたたむ';
+	@override String expandMoreReplies({required Object count}) => 'さらに返信 ${count} 件を表示';
+	@override String get recordedBy => '記録者';
 	@override String get addNote => '備考を追加...';
 	@override String get confirmDeleteTitle => '削除の確認';
 	@override String get confirmDeleteContent => 'このコメントを削除してもよろしいですか？この操作は取り消せません。';
@@ -385,6 +396,7 @@ class _Translations$settings$ja extends Translations$settings$zh {
 	@override String get checkingUpdate => 'アップデートを確認中...';
 	@override String get latestVersionToast => '最新バージョンを使用中です';
 	@override String get newVersionTitle => '新しいバージョンがあります';
+	@override String currentVersion({required Object version}) => '現在のバージョン: v${version}';
 	@override String get updateNow => '今すぐアップデート';
 	@override String get updateLater => '後で';
 	@override String get fetchUpdateFailed => 'アップデートの確認に失敗しました';
@@ -706,6 +718,10 @@ class _Translations$chat$ja extends Translations$chat$zh {
 	@override late final _Translations$chat$transferWizard$ja transferWizard = _Translations$chat$transferWizard$ja._(_root);
 	@override late final _Translations$chat$genui$ja genui = _Translations$chat$genui$ja._(_root);
 	@override late final _Translations$chat$welcome$ja welcome = _Translations$chat$welcome$ja._(_root);
+	@override String get shareComingSoon => '共有機能は近日公開予定です...';
+	@override String get invalidAttachmentLink => '無効な添付ファイルリンク';
+	@override String get unableToOpenAttachmentLink => '添付ファイルリンクを開けません';
+	@override String aiCommunicationError({required Object error}) => '申し訳ありません、AIアシスタントとの通信エラーが発生しました：${error}';
 }
 
 // Path: image
@@ -778,6 +794,16 @@ class _Translations$error$ja extends Translations$error$zh {
 	@override String get unknownError => '不明なエラー';
 	@override String get unknownErrorHint => '予期せぬエラーが発生しました。';
 	@override String get registrationMissingInfo => '登録フローエラー、必要な情報がありません。';
+	@override String get accountInfoMissing => '口座情報がありません';
+	@override String get sharedSpaceInfoMissing => '共有スペース情報がありません';
+	@override String get settingsSteps => '設定手順：';
+	@override String get suggestions => '提案：';
+	@override String get fileNotFound => 'ファイルが見つかりません';
+	@override String get fileNotFoundHint => 'ファイルの存在を確認するか、別のファイルを選択してください。';
+	@override String get selectAgain => '再選択';
+	@override String get thumbnailGenerationFailed => 'サムネイル生成に失敗しました';
+	@override String get thumbnailGenerationHint => 'サムネイルの生成に失敗しましたが、ファイルは選択済みで引き続き使用できます。';
+	@override String get help => 'ヘルプ：';
 	@override late final _Translations$error$genui$ja genui = _Translations$error$genui$ja._(_root);
 }
 
@@ -892,6 +918,8 @@ class _Translations$financial$ja extends Translations$financial$zh {
 	@override String get dailyBurnRateSaved => '支出見積もりを保存しました';
 	@override String get dayUnit => '日';
 	@override String get saveFailed => '保存に失敗しました';
+	@override String get deleteFailed => '削除に失敗しました。しばらくしてから再試行してください';
+	@override String missingExchangeRates({required Object currencies}) => '一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：${currencies}';
 }
 
 // Path: app
@@ -2482,6 +2510,9 @@ extension on TranslationsJa {
 			'common.loadFailed' => '読み込み失敗',
 			'common.history' => '履歴',
 			'common.reset' => 'リセット',
+			'common.cancelled' => 'キャンセル済み',
+			'common.saving' => '保存中...',
+			'common.saveFailed' => '保存に失敗しました',
 			'genui.errorBusy' => '申し訳ございません。サービスが一時的に混雑しています。後ほどお試しください',
 			'genui.errorTimeout' => 'リクエストがタイムアウトしました。ネットワークを確認して再試行してください',
 			'genui.errorNetwork' => 'ネットワーク接続に問題があります。確認して再試行してください',
@@ -2500,6 +2531,8 @@ extension on TranslationsJa {
 			'time.hoursAgo' => ({required Object count}) => '${count}時間前',
 			'time.daysAgo' => ({required Object count}) => '${count}日前',
 			'time.weeksAgo' => ({required Object count}) => '${count}週間前',
+			'time.monthsAgo' => ({required Object count}) => '${count}ヶ月前',
+			'time.yearsAgo' => ({required Object count}) => '${count}年前',
 			'greeting.morning' => 'おはようございます',
 			'greeting.afternoon' => 'こんにちは',
 			'greeting.evening' => 'こんばんは',
@@ -2604,6 +2637,12 @@ extension on TranslationsJa {
 			'comment.commentFailed' => 'コメントに失敗しました',
 			'comment.replyToPrefix' => ({required Object name}) => '@${name} さんに返信:',
 			'comment.reply' => '返信',
+			'comment.contentRequired' => 'コメント内容を入力してください',
+			'comment.copyContent' => '内容をコピー',
+			'comment.contentCopied' => 'コメント内容をコピーしました',
+			'comment.collapseReplies' => '返信を折りたたむ',
+			'comment.expandMoreReplies' => ({required Object count}) => 'さらに返信 ${count} 件を表示',
+			'comment.recordedBy' => '記録者',
 			'comment.addNote' => '備考を追加...',
 			'comment.confirmDeleteTitle' => '削除の確認',
 			'comment.confirmDeleteContent' => 'このコメントを削除してもよろしいですか？この操作は取り消せません。',
@@ -2680,6 +2719,7 @@ extension on TranslationsJa {
 			'settings.checkingUpdate' => 'アップデートを確認中...',
 			'settings.latestVersionToast' => '最新バージョンを使用中です',
 			'settings.newVersionTitle' => '新しいバージョンがあります',
+			'settings.currentVersion' => ({required Object version}) => '現在のバージョン: v${version}',
 			'settings.updateNow' => '今すぐアップデート',
 			'settings.updateLater' => '後で',
 			'settings.fetchUpdateFailed' => 'アップデートの確認に失敗しました',
@@ -2957,6 +2997,8 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.custom' => 'カスタム',
 			'forecast.recurringTransaction.cycle' => 'サイクル',
 			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count} 日ごと',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '${count} 週ごと',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '${count} か月ごと',
 			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '${count} 年ごと',
@@ -2969,8 +3011,6 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => '毎週${day}',
 			'forecast.recurringTransaction.weekdayMon' => '月',
 			'forecast.recurringTransaction.weekdayTue' => '火',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.weekdayWed' => '水',
 			'forecast.recurringTransaction.weekdayThu' => '木',
 			'forecast.recurringTransaction.weekdayFri' => '金',
@@ -3303,6 +3343,10 @@ extension on TranslationsJa {
 			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
 			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
 			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'chat.shareComingSoon' => '共有機能は近日公開予定です...',
+			'chat.invalidAttachmentLink' => '無効な添付ファイルリンク',
+			'chat.unableToOpenAttachmentLink' => '添付ファイルリンクを開けません',
+			'chat.aiCommunicationError' => ({required Object error}) => '申し訳ありません、AIアシスタントとの通信エラーが発生しました：${error}',
 			'image.deleteTitle' => '画像を削除',
 			'image.deleteConfirm' => 'この画像を削除してもよろしいですか？この操作は元に戻せません。',
 			'footprint.searchIn' => '検索',
@@ -3339,6 +3383,16 @@ extension on TranslationsJa {
 			'error.unknownError' => '不明なエラー',
 			'error.unknownErrorHint' => '予期せぬエラーが発生しました。',
 			'error.registrationMissingInfo' => '登録フローエラー、必要な情報がありません。',
+			'error.accountInfoMissing' => '口座情報がありません',
+			'error.sharedSpaceInfoMissing' => '共有スペース情報がありません',
+			'error.settingsSteps' => '設定手順：',
+			'error.suggestions' => '提案：',
+			'error.fileNotFound' => 'ファイルが見つかりません',
+			'error.fileNotFoundHint' => 'ファイルの存在を確認するか、別のファイルを選択してください。',
+			'error.selectAgain' => '再選択',
+			'error.thumbnailGenerationFailed' => 'サムネイル生成に失敗しました',
+			'error.thumbnailGenerationHint' => 'サムネイルの生成に失敗しましたが、ファイルは選択済みで引き続き使用できます。',
+			'error.help' => 'ヘルプ：',
 			'error.genui.loadingFailed' => '読み込み失敗',
 			'error.genui.schemaFailed' => '検証失敗',
 			'error.genui.schemaDescription' => '定義が仕様に適合していません',
@@ -3430,6 +3484,8 @@ extension on TranslationsJa {
 			'financial.dailyBurnRateSaved' => '支出見積もりを保存しました',
 			'financial.dayUnit' => '日',
 			'financial.saveFailed' => '保存に失敗しました',
+			'financial.deleteFailed' => '削除に失敗しました。しばらくしてから再試行してください',
+			'financial.missingExchangeRates' => ({required Object currencies}) => '一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：${currencies}',
 			'app.splashTitle' => 'スマートに、豊かに。',
 			'app.splashSubtitle' => 'インテリジェント財務アシスタント',
 			'statistics.title' => '統計分析',
@@ -3455,6 +3511,8 @@ extension on TranslationsJa {
 			'statistics.sort.amount' => '金額順',
 			'statistics.sort.date' => '日付順',
 			'statistics.exportList' => 'リストを書き出す',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.emptyState.title' => 'Unlock Financial Insights',
 			'statistics.emptyState.description' => 'Your financial report is currently a blank canvas.\nRecord your first transaction and let the data tell your story.',
 			'statistics.emptyState.action' => 'Record First Transaction',
@@ -3483,8 +3541,6 @@ extension on TranslationsJa {
 			'sharedSpace.roles.admin' => '管理者',
 			'sharedSpace.roles.member' => 'メンバー',
 			'sharedSpace.title' => '共有スペース',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.create.title' => '共有スペースを作成',
 			'sharedSpace.create.subtitle' => '新しい共有スペースを作成して、友達と支出を管理しましょう',
 			'sharedSpace.create.nameLabel' => 'スペース名',

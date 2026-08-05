@@ -227,6 +227,56 @@ void main() {
       expect(summary.totalNetWorth, Decimal.zero);
       expect(summary.isLoading, isFalse);
     });
+
+    test('excludes accounts whose currency has no exchange rate', () async {
+      final accounts = [
+        FinancialAccount(
+          id: '1',
+          name: 'Savings',
+          nature: FinancialNature.asset,
+          type: FinancialAccountType.deposit,
+          initialBalance: Decimal.fromInt(5000),
+          currencyCode: 'CNY',
+          includeInNetWorth: true,
+        ),
+        FinancialAccount(
+          id: '2',
+          name: 'USD Wallet',
+          nature: FinancialNature.asset,
+          type: FinancialAccountType.deposit,
+          initialBalance: Decimal.fromInt(100),
+          currencyCode: 'USD',
+          includeInNetWorth: true,
+        ),
+      ];
+
+      container = ProviderContainer(
+        overrides: [
+          financialAccountProvider.overrideWith(
+            () => _MockFinancialAccountNotifier(
+              FinancialAccountState(accounts: accounts, isLoading: false),
+            ),
+          ),
+          exchangeRateProvider.overrideWith(
+            () => _MockExchangeRateNotifier(
+              // No USD rate available.
+              const ExchangeRateResponse(baseCode: 'CNY', conversionRates: {}),
+            ),
+          ),
+        ],
+      );
+
+      await container.read(exchangeRateProvider.future);
+      await Future<void>.delayed(Duration.zero);
+
+      final summary = container.read(financialSummaryProvider('CNY'));
+
+      // The USD account must be excluded entirely (not counted as zero
+      // silently) and recorded so the UI can warn the user.
+      expect(summary.totalAssets, Decimal.fromInt(5000));
+      expect(summary.totalNetWorth, Decimal.fromInt(5000));
+      expect(summary.missingRateCurrencies, {'USD'});
+    });
   });
 }
 

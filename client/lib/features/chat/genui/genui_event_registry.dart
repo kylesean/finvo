@@ -24,8 +24,8 @@ library;
 import 'package:logging/logging.dart';
 
 import 'package:finvo/i18n/strings.g.dart';
-import '../models/client_state_mutation.dart';
-import 'events/interaction_events.dart';
+import 'package:finvo/features/chat/models/client_state_mutation.dart';
+import 'package:finvo/features/chat/genui/events/interaction_events.dart';
 
 /// Event processing result
 ///

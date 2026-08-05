@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/constants/category_constants.dart';
-import '../organisms/organisms.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/features/chat/genui/organisms/organisms.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
-import '../utils/genui_num_utils.dart';
+import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 
 /// Smart Expense Summary Card
 class ExpenseSummaryCard extends ConsumerWidget {

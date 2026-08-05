@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:decimal/decimal.dart';
 import 'package:logging/logging.dart';
-import '../../../core/network/network_client.dart';
-import '../../../core/network/exceptions/app_exception.dart';
-import '../models/financial_account.dart';
-import '../models/financial_settings.dart';
-import '../models/user_info.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/profile/models/financial_settings.dart';
+import 'package:finvo/features/profile/models/user_info.dart';
 
 class ProfileService {
   final NetworkClient _networkClient;
@@ -221,12 +221,18 @@ class ProfileService {
       data: account.toJson(),
       fromJsonT: (json) {
         if (json is Map<String, dynamic>) {
-          try {
-            return FinancialAccount.fromJson(json);
-          } catch (e) {
-            throw DataParsingException(
-              'Failed to parse update account response: ${e.toString()}',
-            );
+          // The callback receives the full response envelope; the account
+          // payload lives under `data`. Parsing the envelope directly would
+          // fail on the missing account fields.
+          final data = json['data'];
+          if (data is Map<String, dynamic>) {
+            try {
+              return FinancialAccount.fromJson(data);
+            } catch (e) {
+              throw DataParsingException(
+                'Failed to parse update account response: ${e.toString()}',
+              );
+            }
           }
         }
         throw DataParsingException(

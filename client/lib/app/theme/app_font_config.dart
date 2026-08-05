@@ -1,14 +1,15 @@
 import 'dart:io';
 import 'dart:ui' show loadFontFromList;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// App-wide typography configuration designed for global users and open-source compliance.
 ///
-/// This class provides a centralized way to manage fonts, integrating [GoogleFonts]
-/// for high-quality Latin typography and robust system fallbacks for CJK and other scripts.
+/// This class provides a centralized way to manage fonts. The primary Latin font,
+/// Inter, is bundled with the `forui` package (registered under the family name
+/// "Inter"), and we layer robust system fallbacks for CJK and other scripts.
 class AppFontConfig {
   AppFontConfig._();
 
@@ -58,8 +59,9 @@ class AppFontConfig {
   static const FontWeight amountBold = FontWeight.w700;
 
   /// The primary font family for Latin characters.
-  /// Using 'Inter' as it's a modern, open-source standard for UI design.
-  static final String primaryFontFamily = GoogleFonts.inter().fontFamily!;
+  /// Inter is bundled with the `forui` package under this family name, so no
+  /// runtime network fetch is needed.
+  static const String primaryFontFamily = 'Inter';
 
   /// A comprehensive list of system font fallbacks to ensure correct rendering
   /// across iOS, Android, macOS, Windows, and Linux.
@@ -85,7 +87,8 @@ class AppFontConfig {
     double? height,
     double? letterSpacing,
   }) {
-    return GoogleFonts.inter(
+    return TextStyle(
+      fontFamily: primaryFontFamily,
       fontSize: fontSize,
       fontWeight: fontWeight,
       color: color,
@@ -179,7 +182,8 @@ class AppFontConfig {
   /// app sandbox. The actual read attempt gives us a concrete error message.
   static Future<void> preloadMiSans() async {
     if (miSansLoaded) return;
-    if (!Platform.isAndroid) {
+    // Platform.isAndroid would throw UnsupportedError on web.
+    if (kIsWeb || !Platform.isAndroid) {
       debugPrint('[AppFontConfig] preloadMiSans: skipped (not Android)');
       return;
     }

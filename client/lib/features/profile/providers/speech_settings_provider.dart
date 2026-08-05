@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finvo/features/chat/services/speech_recognition_service.dart';
-import '../models/speech_settings.dart';
+import 'package:finvo/features/profile/models/speech_settings.dart';
 
 part 'speech_settings_provider.g.dart';
 

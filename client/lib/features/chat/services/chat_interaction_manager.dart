@@ -3,13 +3,12 @@ import 'package:logging/logging.dart';
 
 import 'package:uuid/uuid.dart';
 
-import '../models/chat_message.dart';
-import '../models/message_attachments.dart';
-import '../models/chat_message_attachment.dart';
-import '../repositories/message_repository.dart';
-import '../state_controllers/streaming_controller.dart';
-import '../services/genui_lifecycle_manager.dart';
-import '../services/data_uri_service.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/models/message_attachments.dart';
+import 'package:finvo/features/chat/models/chat_message_attachment.dart';
+import 'package:finvo/features/chat/repositories/message_repository.dart';
+import 'package:finvo/features/chat/state_controllers/streaming_controller.dart';
+import 'package:finvo/features/chat/services/genui_lifecycle_manager.dart';
 
 final _logger = Logger('ChatInteractionManager');
 
@@ -73,6 +72,7 @@ class ChatInteractionManager {
       return ChatMessageAttachment(
         id: a.uploadInfo.attachmentId,
         filename: a.file.name,
+        objectKey: a.uploadInfo.objectKey,
         // Use backend-returned uri as signedUrl (new rendering logic auto-detects and renders)
         signedUrl: a.uploadInfo.uri,
       );
@@ -199,26 +199,13 @@ class ChatInteractionManager {
         _logger.info(
           'ChatInteractionManager: Processing ${attachments.length} attachments...',
         );
-        // Convert to Data URI format using static method
-        final dataUriFiles = await DataUriService.convertFilesToDataUri(
-          attachments.map((a) => a.file).toList(),
-          uploadedInfos: attachments.map((a) => a.uploadInfo).toList(),
-        );
-
-        if (dataUriFiles.length != attachments.length) {
-          _logger.warning(
-            'ChatInteractionManager: Warning - Attachment count mismatch after conversion',
-          );
-        }
-
-        attachmentPayload = dataUriFiles
-            .map(
-              (f) => {
-                'id': f.attachmentId ?? _uuid.v4(),
-                'type': f.mimeType,
-                'data': f.dataUri,
-              },
-            )
+        // Reference-only payload: files were already uploaded via
+        // /files/upload, and the server's AttachmentRef schema resolves
+        // attachments by id alone. The previous implementation re-read every
+        // file, base64-encoded it (~1.33x expansion) and embedded it in the
+        // request — a redundant second transfer of the same bytes.
+        attachmentPayload = attachments
+            .map((a) => {'id': a.uploadInfo.attachmentId})
             .toList();
       }
 

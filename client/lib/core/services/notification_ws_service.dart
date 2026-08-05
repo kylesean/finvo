@@ -45,6 +45,10 @@ class NotificationWsService {
   }) async {
     if (_isDisposed) return;
 
+    // Reconnect path (or server switch) may arrive while a previous channel
+    // is still alive; tear it down first to avoid leaking the old socket.
+    _cleanup();
+
     _baseUrl = baseUrl;
     _storageService = storageService;
 
@@ -64,15 +68,24 @@ class NotificationWsService {
     try {
       // Token is sent via Authorization header (IO) or query param (web).
       _channel = connectWs(wsBase, token: token);
-      await _channel!.ready;
+      // Guard against a half-open TCP connection where the server accepts
+      // the socket but never completes the WebSocket upgrade. Without a
+      // timeout, `ready` would hang forever, blocking connect() and
+      // preventing _scheduleReconnect from ever firing.
+      await _channel!.ready.timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('WebSocket connection timed out after 15s');
+        },
+      );
       _reconnectAttempts = 0;
       _lastServerMessage = DateTime.now();
       _logger.info('WebSocket connected');
 
       _startHeartbeat();
       _listen();
-    } catch (e) {
-      _logger.warning('WebSocket connection failed: $e');
+    } catch (e, stackTrace) {
+      _logger.warning('WebSocket connection failed', e, stackTrace);
       // Clean up the failed channel (closes its sink to release underlying
       // resources) before scheduling a reconnect.
       _cleanup();

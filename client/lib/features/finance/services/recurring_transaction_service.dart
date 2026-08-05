@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../core/network/network_client.dart';
-import '../../../shared/services/response_parser.dart';
-import '../models/recurring_transaction.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/shared/services/response_parser.dart';
+import 'package:finvo/features/finance/models/recurring_transaction.dart';
 
 part 'recurring_transaction_service.g.dart';
 
@@ -39,9 +39,7 @@ class RecurringTransactionService {
       '/transactions/recurring/$id',
       method: HttpMethod.get,
     );
-    return RecurringTransaction.fromJson(
-      response['data'] as Map<String, dynamic>,
-    );
+    return ResponseParser.parseItem(response, RecurringTransaction.fromJson);
   }
 
   /// Create recurring transaction
@@ -53,9 +51,7 @@ class RecurringTransactionService {
       method: HttpMethod.post,
       data: request.toJson(),
     );
-    return RecurringTransaction.fromJson(
-      response['data'] as Map<String, dynamic>,
-    );
+    return ResponseParser.parseItem(response, RecurringTransaction.fromJson);
   }
 
   /// Update recurring transaction
@@ -68,9 +64,7 @@ class RecurringTransactionService {
       method: HttpMethod.put,
       data: updates,
     );
-    return RecurringTransaction.fromJson(
-      response['data'] as Map<String, dynamic>,
-    );
+    return ResponseParser.parseItem(response, RecurringTransaction.fromJson);
   }
 
   /// Delete recurring transaction

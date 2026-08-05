@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
-import '../constants/api_constants.dart';
+import 'package:finvo/core/constants/api_constants.dart';
 part 'server_config_service.g.dart';
 
 final _logger = Logger('ServerConfigService');
@@ -171,8 +171,8 @@ class ServerConfigService {
       }
       _logger.warning('Health check error: $errorMessage');
       return ServerHealthResult(isHealthy: false, errorMessage: errorMessage);
-    } catch (e) {
-      _logger.severe('Unexpected health check error: $e');
+    } catch (e, stackTrace) {
+      _logger.severe('Unexpected health check error', e, stackTrace);
       return ServerHealthResult(
         isHealthy: false,
         errorMessage: 'Unexpected error: $e',

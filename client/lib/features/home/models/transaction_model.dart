@@ -248,7 +248,11 @@ abstract class TransactionModel with _$TransactionModel {
       amount: _parseAmount(json['amount']),
       // Original amount info (historical data, immutable)
       amountOriginal: _parseAmount(json['amountOriginal']),
-      originalCurrency: json['originalCurrency'] as String?,
+      // The backend reports the recorded currency under `currency`; map it to
+      // the semantically correct field instead of stuffing it into
+      // `paymentMethod` (historical workaround, kept only as a fallback).
+      originalCurrency:
+          json['originalCurrency'] as String? ?? json['currency'] as String?,
       exchangeRate: json['exchangeRate'] as String?,
       category:
           json['categoryName'] as String? ??
@@ -256,7 +260,7 @@ abstract class TransactionModel with _$TransactionModel {
           t.category.other,
       timestamp: timestamp,
       description: json['description'] as String?,
-      paymentMethod: json['currency'] as String?,
+      paymentMethod: json['paymentMethod'] as String?,
       location: json['location'] as String?,
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
@@ -323,3 +327,14 @@ double _parseAmount(dynamic value) {
 
 // If your API returns 0/1 instead of true/false for is_ai_build, you might need a custom fromJson
 // bool _boolFromInt(dynamic value) => value == 1 || value == true;
+
+/// The currency a transaction was recorded in (used to format the original
+/// amount). The backend reports it under the `currency` field; `paymentMethod`
+/// historically carried this value too, so it serves as a fallback for older
+/// cached data.
+///
+/// Implemented as an extension (not a member) so the freezed-generated class
+/// does not need regeneration.
+extension TransactionModelCurrency on TransactionModel {
+  String? get currency => originalCurrency ?? paymentMethod;
+}

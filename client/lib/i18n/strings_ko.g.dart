@@ -110,6 +110,9 @@ class _Translations$common$ko extends Translations$common$zh {
 	@override String get loadFailed => '불러오기 실패';
 	@override String get history => '거래 내역';
 	@override String get reset => '초기화';
+	@override String get cancelled => '취소됨';
+	@override String get saving => '저장 중...';
+	@override String get saveFailed => '저장 실패';
 }
 
 // Path: genui
@@ -146,6 +149,8 @@ class _Translations$time$ko extends Translations$time$zh {
 	@override String hoursAgo({required Object count}) => '${count}시간 전';
 	@override String daysAgo({required Object count}) => '${count}일 전';
 	@override String weeksAgo({required Object count}) => '${count}주 전';
+	@override String monthsAgo({required Object count}) => '${count}개월 전';
+	@override String yearsAgo({required Object count}) => '${count}년 전';
 }
 
 // Path: greeting
@@ -288,6 +293,12 @@ class _Translations$comment$ko extends Translations$comment$zh {
 	@override String get commentFailed => '댓글 작성 실패';
 	@override String replyToPrefix({required Object name}) => '@${name} 님에게 답글:';
 	@override String get reply => '답글';
+	@override String get contentRequired => '댓글 내용을 입력하세요';
+	@override String get copyContent => '내용 복사';
+	@override String get contentCopied => '댓글 내용을 복사했습니다';
+	@override String get collapseReplies => '답글 접기';
+	@override String expandMoreReplies({required Object count}) => '추가 답글 ${count}개 보기';
+	@override String get recordedBy => '기록자';
 	@override String get addNote => '메모 추가...';
 	@override String get confirmDeleteTitle => '삭제 확인';
 	@override String get confirmDeleteContent => '댓글을 삭제하시겠습니까? 복구할 수 없습니다.';
@@ -385,6 +396,7 @@ class _Translations$settings$ko extends Translations$settings$zh {
 	@override String get checkingUpdate => '업데이트 확인 중...';
 	@override String get latestVersionToast => '최신 버전을 사용 중입니다';
 	@override String get newVersionTitle => '새 버전 출시';
+	@override String currentVersion({required Object version}) => '현재 버전: v${version}';
 	@override String get updateNow => '지금 업데이트';
 	@override String get updateLater => '나중에';
 	@override String get fetchUpdateFailed => '업데이트 확인 실패';
@@ -706,6 +718,10 @@ class _Translations$chat$ko extends Translations$chat$zh {
 	@override late final _Translations$chat$transferWizard$ko transferWizard = _Translations$chat$transferWizard$ko._(_root);
 	@override late final _Translations$chat$genui$ko genui = _Translations$chat$genui$ko._(_root);
 	@override late final _Translations$chat$welcome$ko welcome = _Translations$chat$welcome$ko._(_root);
+	@override String get shareComingSoon => '공유 기능은 곧 출시될 예정입니다...';
+	@override String get invalidAttachmentLink => '잘못된 첨부 파일 링크';
+	@override String get unableToOpenAttachmentLink => '첨부 파일 링크를 열 수 없습니다';
+	@override String aiCommunicationError({required Object error}) => '죄송합니다. AI 어시스턴트 통신 오류: ${error}';
 }
 
 // Path: image
@@ -778,6 +794,16 @@ class _Translations$error$ko extends Translations$error$zh {
 	@override String get unknownError => '알 수 없는 오류';
 	@override String get unknownErrorHint => '예기치 않은 오류가 발생했습니다. 다시 시도하거나 고객 지원에 문의하세요.';
 	@override String get registrationMissingInfo => '가입 절차 오류, 필수 정보가 없습니다.';
+	@override String get accountInfoMissing => '계좌 정보가 없습니다';
+	@override String get sharedSpaceInfoMissing => '공유 공간 정보가 없습니다';
+	@override String get settingsSteps => '설정 단계:';
+	@override String get suggestions => '제안:';
+	@override String get fileNotFound => '파일을 찾을 수 없습니다';
+	@override String get fileNotFoundHint => '파일이 존재하는지 확인하거나 다른 파일을 선택하세요.';
+	@override String get selectAgain => '다시 선택';
+	@override String get thumbnailGenerationFailed => '썸네일 생성 실패';
+	@override String get thumbnailGenerationHint => '썸네일 생성에 실패했지만 파일은 선택되었으며 계속 사용할 수 있습니다.';
+	@override String get help => '도움말:';
 	@override late final _Translations$error$genui$ko genui = _Translations$error$genui$ko._(_root);
 }
 
@@ -892,6 +918,8 @@ class _Translations$financial$ko extends Translations$financial$zh {
 	@override String get dailyBurnRateSaved => '일일 지출 추정치 저장됨';
 	@override String get dayUnit => '일';
 	@override String get saveFailed => '저장 실패';
+	@override String get deleteFailed => '삭제에 실패했습니다. 잠시 후 다시 시도해 주세요';
+	@override String missingExchangeRates({required Object currencies}) => '일부 통화의 환율을 가져올 수 없어 해당 계정은 합계에 포함되지 않았습니다: ${currencies}';
 }
 
 // Path: app
@@ -2483,6 +2511,9 @@ extension on TranslationsKo {
 			'common.loadFailed' => '불러오기 실패',
 			'common.history' => '거래 내역',
 			'common.reset' => '초기화',
+			'common.cancelled' => '취소됨',
+			'common.saving' => '저장 중...',
+			'common.saveFailed' => '저장 실패',
 			'genui.errorBusy' => '죄송합니다. 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요',
 			'genui.errorTimeout' => '요청이 시간 초과되었습니다. 네트워크를 확인하고 다시 시도해 주세요',
 			'genui.errorNetwork' => '네트워크 연결에 문제가 있습니다. 확인 후 다시 시도해 주세요',
@@ -2501,6 +2532,8 @@ extension on TranslationsKo {
 			'time.hoursAgo' => ({required Object count}) => '${count}시간 전',
 			'time.daysAgo' => ({required Object count}) => '${count}일 전',
 			'time.weeksAgo' => ({required Object count}) => '${count}주 전',
+			'time.monthsAgo' => ({required Object count}) => '${count}개월 전',
+			'time.yearsAgo' => ({required Object count}) => '${count}년 전',
 			'greeting.morning' => '좋은 아침입니다',
 			'greeting.afternoon' => '좋은 오후입니다',
 			'greeting.evening' => '좋은 저녁입니다',
@@ -2605,6 +2638,12 @@ extension on TranslationsKo {
 			'comment.commentFailed' => '댓글 작성 실패',
 			'comment.replyToPrefix' => ({required Object name}) => '@${name} 님에게 답글:',
 			'comment.reply' => '답글',
+			'comment.contentRequired' => '댓글 내용을 입력하세요',
+			'comment.copyContent' => '내용 복사',
+			'comment.contentCopied' => '댓글 내용을 복사했습니다',
+			'comment.collapseReplies' => '답글 접기',
+			'comment.expandMoreReplies' => ({required Object count}) => '추가 답글 ${count}개 보기',
+			'comment.recordedBy' => '기록자',
 			'comment.addNote' => '메모 추가...',
 			'comment.confirmDeleteTitle' => '삭제 확인',
 			'comment.confirmDeleteContent' => '댓글을 삭제하시겠습니까? 복구할 수 없습니다.',
@@ -2681,6 +2720,7 @@ extension on TranslationsKo {
 			'settings.checkingUpdate' => '업데이트 확인 중...',
 			'settings.latestVersionToast' => '최신 버전을 사용 중입니다',
 			'settings.newVersionTitle' => '새 버전 출시',
+			'settings.currentVersion' => ({required Object version}) => '현재 버전: v${version}',
 			'settings.updateNow' => '지금 업데이트',
 			'settings.updateLater' => '나중에',
 			'settings.fetchUpdateFailed' => '업데이트 확인 실패',
@@ -2958,6 +2998,8 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.custom' => '사용자 지정',
 			'forecast.recurringTransaction.cycle' => '주기',
 			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count}일마다',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '${count}주마다',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '${count}개월마다',
 			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '${count}년마다',
@@ -2970,8 +3012,6 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => '매주${day}',
 			'forecast.recurringTransaction.weekdayMon' => '월요일',
 			'forecast.recurringTransaction.weekdayTue' => '화요일',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.weekdayWed' => '수요일',
 			'forecast.recurringTransaction.weekdayThu' => '목요일',
 			'forecast.recurringTransaction.weekdayFri' => '금요일',
@@ -3305,6 +3345,10 @@ extension on TranslationsKo {
 			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
 			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
 			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'chat.shareComingSoon' => '공유 기능은 곧 출시될 예정입니다...',
+			'chat.invalidAttachmentLink' => '잘못된 첨부 파일 링크',
+			'chat.unableToOpenAttachmentLink' => '첨부 파일 링크를 열 수 없습니다',
+			'chat.aiCommunicationError' => ({required Object error}) => '죄송합니다. AI 어시스턴트 통신 오류: ${error}',
 			'image.deleteTitle' => '이미지 삭제',
 			'image.deleteConfirm' => '이 이미지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
 			'footprint.searchIn' => '검색',
@@ -3341,6 +3385,16 @@ extension on TranslationsKo {
 			'error.unknownError' => '알 수 없는 오류',
 			'error.unknownErrorHint' => '예기치 않은 오류가 발생했습니다. 다시 시도하거나 고객 지원에 문의하세요.',
 			'error.registrationMissingInfo' => '가입 절차 오류, 필수 정보가 없습니다.',
+			'error.accountInfoMissing' => '계좌 정보가 없습니다',
+			'error.sharedSpaceInfoMissing' => '공유 공간 정보가 없습니다',
+			'error.settingsSteps' => '설정 단계:',
+			'error.suggestions' => '제안:',
+			'error.fileNotFound' => '파일을 찾을 수 없습니다',
+			'error.fileNotFoundHint' => '파일이 존재하는지 확인하거나 다른 파일을 선택하세요.',
+			'error.selectAgain' => '다시 선택',
+			'error.thumbnailGenerationFailed' => '썸네일 생성 실패',
+			'error.thumbnailGenerationHint' => '썸네일 생성에 실패했지만 파일은 선택되었으며 계속 사용할 수 있습니다.',
+			'error.help' => '도움말:',
 			'error.genui.loadingFailed' => '컴포넌트 로드 실패',
 			'error.genui.schemaFailed' => '스키마 검증 실패',
 			'error.genui.schemaDescription' => '컴포넌트 정의가 GenUI 규격에 맞지 않아 텍스트로 표시합니다.',
@@ -3432,6 +3486,8 @@ extension on TranslationsKo {
 			'financial.dailyBurnRateSaved' => '일일 지출 추정치 저장됨',
 			'financial.dayUnit' => '일',
 			'financial.saveFailed' => '저장 실패',
+			'financial.deleteFailed' => '삭제에 실패했습니다. 잠시 후 다시 시도해 주세요',
+			'financial.missingExchangeRates' => ({required Object currencies}) => '일부 통화의 환율을 가져올 수 없어 해당 계정은 합계에 포함되지 않았습니다: ${currencies}',
 			'app.splashTitle' => '지혜로운 성장, 가치 있는 부.',
 			'app.splashSubtitle' => '스마트 금융 비서',
 			'statistics.title' => '통계 분석',
@@ -3456,6 +3512,8 @@ extension on TranslationsKo {
 			'statistics.filter.apply' => '적용',
 			'statistics.sort.amount' => '금액순',
 			'statistics.sort.date' => '날짜순',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.exportList' => '목록 내보내기',
 			'statistics.emptyState.title' => 'Unlock Financial Insights',
 			'statistics.emptyState.description' => 'Your financial report is currently a blank canvas.\nRecord your first transaction and let the data tell your story.',
@@ -3484,8 +3542,6 @@ extension on TranslationsKo {
 			'sharedSpace.roles.owner' => '공간장',
 			'sharedSpace.roles.admin' => '관리자',
 			'sharedSpace.roles.member' => '멤버',
-			_ => null,
-		} ?? switch (path) {
 			'sharedSpace.title' => '공유 공간',
 			'sharedSpace.create.title' => '공유 공간 만들기',
 			'sharedSpace.create.subtitle' => '새로운 공유 공간을 만들어 친구와 함께 지출을 관리하세요',

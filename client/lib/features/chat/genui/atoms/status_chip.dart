@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import '../../../../core/constants/category_constants.dart';
+import 'package:finvo/core/constants/category_constants.dart';
 
 /// Size variants for StatusChip
 enum ChipSize { small, medium, large }

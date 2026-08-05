@@ -7,9 +7,9 @@ import 'package:logging/logging.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:async';
 
-import '../providers/server_config_provider.dart';
-import '../../../core/services/server_config_service.dart';
-import '../../../i18n/strings.g.dart';
+import 'package:finvo/features/server/providers/server_config_provider.dart';
+import 'package:finvo/core/services/server_config_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';

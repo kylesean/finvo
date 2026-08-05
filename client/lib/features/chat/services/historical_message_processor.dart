@@ -10,10 +10,10 @@
 
 import 'package:logging/logging.dart';
 
-import '../models/chat_message.dart';
-import '../models/chat_message_attachment.dart';
-import '../models/message_content_part.dart';
-import '../models/tool_call_info.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/models/chat_message_attachment.dart';
+import 'package:finvo/features/chat/models/message_content_part.dart';
+import 'package:finvo/features/chat/models/tool_call_info.dart';
 
 /// Historical Message Processor
 ///

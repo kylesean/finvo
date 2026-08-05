@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import '../templates/templates.dart';
-import '../utils/utils.dart';
+import 'package:finvo/features/chat/genui/templates/templates.dart';
+import 'package:finvo/features/chat/genui/utils/utils.dart';
 
 /// Renders historical UI components from stored message data.
 ///

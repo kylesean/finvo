@@ -4,10 +4,10 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
-import '../../../shared/widgets/top_toast.dart';
-import '../../../app/theme/app_semantic_colors.dart';
-import '../services/budget_service.dart';
-import '../models/budget_models.dart';
+import 'package:finvo/shared/widgets/top_toast.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/features/budget/services/budget_service.dart';
+import 'package:finvo/features/budget/models/budget_models.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 

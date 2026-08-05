@@ -8,8 +8,8 @@ import 'package:finvo/features/chat/config/speech_config.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import '../models/speech_settings.dart';
-import '../providers/speech_settings_provider.dart';
+import 'package:finvo/features/profile/models/speech_settings.dart';
+import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
 
 /// Speech recognition settings page
 class SpeechSettingsPage extends ConsumerStatefulWidget {

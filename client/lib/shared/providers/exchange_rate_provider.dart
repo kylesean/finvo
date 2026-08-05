@@ -1,7 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../models/exchange_rate.dart';
-import '../services/exchange_rate_service.dart';
+import 'package:finvo/shared/models/exchange_rate.dart';
+import 'package:finvo/shared/services/exchange_rate_service.dart';
 
 part 'exchange_rate_provider.g.dart';
 
@@ -58,7 +58,14 @@ class ExchangeRate extends _$ExchangeRate {
     // Convert From -> Base
     // Amount(Base) = Amount(From) / Rate(Base->From)
     // Note: `Decimal / Decimal` yields a Rational, so convert back to Decimal.
-    final Decimal amountInBase = (amount / fromRate).toDecimal();
+    // `toDecimal()` without `scaleOnInfinite` throws `StateError` on
+    // non-terminating decimals (e.g. 100 / 7.2 = 13.888…), which is common
+    // for real-world exchange rates. Scale to 20 digits — far beyond any
+    // monetary precision — so the division never throws; the final result is
+    // rounded to 2 decimal places below anyway.
+    final Decimal amountInBase = (amount / fromRate).toDecimal(
+      scaleOnInfinitePrecision: 20,
+    );
 
     // Convert Base -> To
     // Amount(To) = Amount(Base) * Rate(Base->To)

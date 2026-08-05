@@ -110,6 +110,9 @@ class _Translations$common$en extends Translations$common$zh {
 	@override String get loadFailed => 'Loading failed';
 	@override String get history => 'Transactions';
 	@override String get reset => 'Reset';
+	@override String get cancelled => 'Cancelled';
+	@override String get saving => 'Saving...';
+	@override String get saveFailed => 'Save failed';
 }
 
 // Path: genui
@@ -146,6 +149,8 @@ class _Translations$time$en extends Translations$time$zh {
 	@override String hoursAgo({required Object count}) => '${count}h ago';
 	@override String daysAgo({required Object count}) => '${count}d ago';
 	@override String weeksAgo({required Object count}) => '${count}w ago';
+	@override String monthsAgo({required Object count}) => '${count}mo ago';
+	@override String yearsAgo({required Object count}) => '${count}y ago';
 }
 
 // Path: greeting
@@ -291,6 +296,12 @@ class _Translations$comment$en extends Translations$comment$zh {
 	@override String get commentFailed => 'Comment failed';
 	@override String replyToPrefix({required Object name}) => 'Reply to @${name}:';
 	@override String get reply => 'Reply';
+	@override String get contentRequired => 'Comment content is required';
+	@override String get copyContent => 'Copy content';
+	@override String get contentCopied => 'Comment content copied';
+	@override String get collapseReplies => 'Collapse replies';
+	@override String expandMoreReplies({required Object count}) => 'Show ${count} more replies';
+	@override String get recordedBy => 'Recorded by';
 	@override String get addNote => 'Add a note...';
 	@override String get addNoteWithMention => 'Comment or @mention members...';
 	@override String get confirmDeleteTitle => 'Confirm Delete';
@@ -389,6 +400,7 @@ class _Translations$settings$en extends Translations$settings$zh {
 	@override String get checkingUpdate => 'Checking for updates...';
 	@override String get latestVersionToast => 'You are on the latest version';
 	@override String get newVersionTitle => 'New Version Available';
+	@override String currentVersion({required Object version}) => 'Current version: v${version}';
 	@override String get updateNow => 'Update Now';
 	@override String get updateLater => 'Later';
 	@override String get fetchUpdateFailed => 'Failed to check for updates, please try again later';
@@ -710,6 +722,10 @@ class _Translations$chat$en extends Translations$chat$zh {
 	@override late final _Translations$chat$transferWizard$en transferWizard = _Translations$chat$transferWizard$en._(_root);
 	@override late final _Translations$chat$genui$en genui = _Translations$chat$genui$en._(_root);
 	@override late final _Translations$chat$welcome$en welcome = _Translations$chat$welcome$en._(_root);
+	@override String get shareComingSoon => 'Share feature coming soon...';
+	@override String get invalidAttachmentLink => 'Invalid attachment link';
+	@override String get unableToOpenAttachmentLink => 'Unable to open attachment link';
+	@override String aiCommunicationError({required Object error}) => 'Sorry, AI assistant communication error: ${error}';
 }
 
 // Path: image
@@ -782,6 +798,16 @@ class _Translations$error$en extends Translations$error$zh {
 	@override String get unknownError => 'Unknown Error';
 	@override String get unknownErrorHint => 'An unexpected error occurred. Please try again or contact support.';
 	@override String get registrationMissingInfo => 'Registration flow error, missing required information.';
+	@override String get accountInfoMissing => 'Account information missing';
+	@override String get sharedSpaceInfoMissing => 'Shared space information missing';
+	@override String get settingsSteps => 'Settings steps:';
+	@override String get suggestions => 'Suggestions:';
+	@override String get fileNotFound => 'File not found';
+	@override String get fileNotFoundHint => 'Please confirm the file exists or select another file.';
+	@override String get selectAgain => 'Select again';
+	@override String get thumbnailGenerationFailed => 'Thumbnail generation failed';
+	@override String get thumbnailGenerationHint => 'Failed to generate thumbnail for the image, but the file has been selected. You can still continue using this file.';
+	@override String get help => 'Help:';
 	@override late final _Translations$error$genui$en genui = _Translations$error$genui$en._(_root);
 }
 
@@ -896,6 +922,8 @@ class _Translations$financial$en extends Translations$financial$zh {
 	@override String get dailyBurnRateSaved => 'Daily burn rate saved';
 	@override String get dayUnit => 'day';
 	@override String get saveFailed => 'Save failed';
+	@override String get deleteFailed => 'Delete failed, please try again later';
+	@override String missingExchangeRates({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}';
 }
 
 // Path: app
@@ -2488,6 +2516,9 @@ extension on TranslationsEn {
 			'common.loadFailed' => 'Loading failed',
 			'common.history' => 'Transactions',
 			'common.reset' => 'Reset',
+			'common.cancelled' => 'Cancelled',
+			'common.saving' => 'Saving...',
+			'common.saveFailed' => 'Save failed',
 			'genui.errorBusy' => 'Sorry, the service is temporarily busy, please try again later',
 			'genui.errorTimeout' => 'Request timed out, please check your network and retry',
 			'genui.errorNetwork' => 'Network connection issue, please check and retry',
@@ -2506,6 +2537,8 @@ extension on TranslationsEn {
 			'time.hoursAgo' => ({required Object count}) => '${count}h ago',
 			'time.daysAgo' => ({required Object count}) => '${count}d ago',
 			'time.weeksAgo' => ({required Object count}) => '${count}w ago',
+			'time.monthsAgo' => ({required Object count}) => '${count}mo ago',
+			'time.yearsAgo' => ({required Object count}) => '${count}y ago',
 			'greeting.morning' => 'Good Morning',
 			'greeting.afternoon' => 'Good Afternoon',
 			'greeting.evening' => 'Good Evening',
@@ -2613,6 +2646,12 @@ extension on TranslationsEn {
 			'comment.commentFailed' => 'Comment failed',
 			'comment.replyToPrefix' => ({required Object name}) => 'Reply to @${name}:',
 			'comment.reply' => 'Reply',
+			'comment.contentRequired' => 'Comment content is required',
+			'comment.copyContent' => 'Copy content',
+			'comment.contentCopied' => 'Comment content copied',
+			'comment.collapseReplies' => 'Collapse replies',
+			'comment.expandMoreReplies' => ({required Object count}) => 'Show ${count} more replies',
+			'comment.recordedBy' => 'Recorded by',
 			'comment.addNote' => 'Add a note...',
 			'comment.addNoteWithMention' => 'Comment or @mention members...',
 			'comment.confirmDeleteTitle' => 'Confirm Delete',
@@ -2690,6 +2729,7 @@ extension on TranslationsEn {
 			'settings.checkingUpdate' => 'Checking for updates...',
 			'settings.latestVersionToast' => 'You are on the latest version',
 			'settings.newVersionTitle' => 'New Version Available',
+			'settings.currentVersion' => ({required Object version}) => 'Current version: v${version}',
 			'settings.updateNow' => 'Update Now',
 			'settings.updateLater' => 'Later',
 			'settings.fetchUpdateFailed' => 'Failed to check for updates, please try again later',
@@ -2963,6 +3003,8 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.daily' => 'Daily',
 			'forecast.recurringTransaction.weekly' => 'Weekly',
 			'forecast.recurringTransaction.monthly' => 'Monthly',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.yearly' => 'Yearly',
 			'forecast.recurringTransaction.custom' => 'Custom',
 			'forecast.recurringTransaction.cycle' => 'Cycle',
@@ -2975,8 +3017,6 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.monthlyLastDay' => 'Monthly on the last day',
 			'forecast.recurringTransaction.everyMonthsLastDay' => ({required Object count}) => 'Every ${count} months on the last day',
 			'forecast.recurringTransaction.yearlyOn' => ({required Object month, required Object day}) => 'Yearly on ${month}/${day}',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.everyYearsOn' => ({required Object count, required Object month, required Object day}) => 'Every ${count} years on ${month}/${day}',
 			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => 'Weekly on ${day}',
 			'forecast.recurringTransaction.weekdayMon' => 'Mon',
@@ -3315,6 +3355,10 @@ extension on TranslationsEn {
 			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
 			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
 			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'chat.shareComingSoon' => 'Share feature coming soon...',
+			'chat.invalidAttachmentLink' => 'Invalid attachment link',
+			'chat.unableToOpenAttachmentLink' => 'Unable to open attachment link',
+			'chat.aiCommunicationError' => ({required Object error}) => 'Sorry, AI assistant communication error: ${error}',
 			'image.deleteTitle' => 'Delete Image',
 			'image.deleteConfirm' => 'Are you sure you want to delete this image? This action cannot be undone.',
 			'footprint.searchIn' => 'Search',
@@ -3351,6 +3395,16 @@ extension on TranslationsEn {
 			'error.unknownError' => 'Unknown Error',
 			'error.unknownErrorHint' => 'An unexpected error occurred. Please try again or contact support.',
 			'error.registrationMissingInfo' => 'Registration flow error, missing required information.',
+			'error.accountInfoMissing' => 'Account information missing',
+			'error.sharedSpaceInfoMissing' => 'Shared space information missing',
+			'error.settingsSteps' => 'Settings steps:',
+			'error.suggestions' => 'Suggestions:',
+			'error.fileNotFound' => 'File not found',
+			'error.fileNotFoundHint' => 'Please confirm the file exists or select another file.',
+			'error.selectAgain' => 'Select again',
+			'error.thumbnailGenerationFailed' => 'Thumbnail generation failed',
+			'error.thumbnailGenerationHint' => 'Failed to generate thumbnail for the image, but the file has been selected. You can still continue using this file.',
+			'error.help' => 'Help:',
 			'error.genui.loadingFailed' => 'Component loading failed',
 			'error.genui.schemaFailed' => 'Schema validation failed',
 			'error.genui.schemaDescription' => 'Component definition does not comply with GenUI specifications, degraded to plain text display',
@@ -3442,6 +3496,8 @@ extension on TranslationsEn {
 			'financial.dailyBurnRateSaved' => 'Daily burn rate saved',
 			'financial.dayUnit' => 'day',
 			'financial.saveFailed' => 'Save failed',
+			'financial.deleteFailed' => 'Delete failed, please try again later',
+			'financial.missingExchangeRates' => ({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}',
 			'app.splashTitle' => 'Finvo: Intelligence that Grows.',
 			'app.splashSubtitle' => 'Smart Financial Assistant',
 			'statistics.title' => 'Analysis',
@@ -3461,6 +3517,8 @@ extension on TranslationsEn {
 			'statistics.analysis.total' => 'Total',
 			'statistics.analysis.breakdown' => 'Expense Breakdown',
 			'statistics.analysis.radarNeedMoreData' => 'Radar chart requires at least 3 categories',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.filter.accountType' => 'Account Type',
 			'statistics.filter.allAccounts' => 'All Accounts',
 			'statistics.filter.apply' => 'Apply',
@@ -3489,8 +3547,6 @@ extension on TranslationsEn {
 			'budgetSuggestion.financialInsights' => 'Financial Insights',
 			'server.title' => 'Connect to Server',
 			'server.subtitle' => 'Enter your self-hosted server address or scan the QR code displayed when starting the server',
-			_ => null,
-		} ?? switch (path) {
 			'server.urlLabel' => 'Server Address',
 			'server.urlPlaceholder' => 'e.g. https://api.example.com or 192.168.1.100:8000',
 			'server.scanQr' => 'Scan QR Code',

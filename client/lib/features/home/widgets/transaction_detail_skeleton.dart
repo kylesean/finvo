@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:forui/forui.dart';
-import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 
 class TransactionDetailSkeleton extends StatelessWidget {
   const TransactionDetailSkeleton({super.key});

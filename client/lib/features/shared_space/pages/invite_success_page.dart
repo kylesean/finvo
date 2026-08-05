@@ -5,11 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../../shared/services/toast_service.dart';
-import '../models/shared_space_models.dart';
-import '../services/shared_space_service.dart';
+import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/features/shared_space/services/shared_space_service.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('InviteSuccessPage');
 
 class InviteSuccessPage extends ConsumerStatefulWidget {
   final SharedSpace space;
@@ -42,7 +45,7 @@ class _InviteSuccessPageState extends ConsumerState<InviteSuccessPage> {
         });
       }
     } catch (e) {
-      debugPrint('[InviteSuccessPage] Error: $e');
+      _logger.severe('Failed to load invite code', e);
       if (mounted) {
         setState(() {
           _error = t.sharedSpace.inviteSuccess.generateFailed;

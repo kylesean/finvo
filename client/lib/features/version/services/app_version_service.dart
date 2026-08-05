@@ -5,8 +5,8 @@ import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/network/network_client.dart';
-import '../models/update_info.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/features/version/models/update_info.dart';
 
 final appVersionServiceProvider = Provider<AppVersionService>((ref) {
   return AppVersionService(ref.watch(networkClientProvider));

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/transaction_model.dart';
-import '../services/home_service.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/services/home_service.dart';
 
 // Transaction detail state
 class TransactionDetailState {

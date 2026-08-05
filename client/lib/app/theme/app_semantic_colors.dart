@@ -31,6 +31,16 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// Warning state background color
   final Color warningBackground;
 
+  /// Base color for shimmer/skeleton placeholders.
+  ///
+  /// Replaces the per-file `Color(0xFF2A2A2A)`/`Colors.grey[300]` literals
+  /// that were duplicated across loading states, so a theme switch recolors
+  /// every skeleton consistently.
+  final Color shimmerBase;
+
+  /// Highlight color for shimmer/skeleton placeholders.
+  final Color shimmerHighlight;
+
   const AppSemanticColors({
     required this.sharedSpaceAccent,
     required this.sharedSpaceBackground,
@@ -38,6 +48,8 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.successBackground,
     required this.warningAccent,
     required this.warningBackground,
+    required this.shimmerBase,
+    required this.shimmerHighlight,
   });
 
   /// Light theme definitions
@@ -48,6 +60,8 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     successBackground: Color(0xFFF0FDF4), // green-50
     warningAccent: Color(0xFFD97706), // amber-600
     warningBackground: Color(0xFFFFFBEB), // amber-50
+    shimmerBase: Color(0xFFE0E0E0), // grey[300]
+    shimmerHighlight: Color(0xFFF5F5F5), // grey[100]
   );
 
   /// Dark theme definitions
@@ -58,6 +72,8 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     successBackground: Color(0xFF14532D), // green-900
     warningAccent: Color(0xFFFBBF24), // amber-400
     warningBackground: Color(0xFF78350F), // amber-900
+    shimmerBase: Color(0xFF2A2A2A),
+    shimmerHighlight: Color(0xFF424242),
   );
 
   @override
@@ -68,6 +84,8 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? successBackground,
     Color? warningAccent,
     Color? warningBackground,
+    Color? shimmerBase,
+    Color? shimmerHighlight,
   }) => AppSemanticColors(
     sharedSpaceAccent: sharedSpaceAccent ?? this.sharedSpaceAccent,
     sharedSpaceBackground: sharedSpaceBackground ?? this.sharedSpaceBackground,
@@ -75,6 +93,8 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     successBackground: successBackground ?? this.successBackground,
     warningAccent: warningAccent ?? this.warningAccent,
     warningBackground: warningBackground ?? this.warningBackground,
+    shimmerBase: shimmerBase ?? this.shimmerBase,
+    shimmerHighlight: shimmerHighlight ?? this.shimmerHighlight,
   );
 
   @override
@@ -101,6 +121,12 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warningBackground: Color.lerp(
         warningBackground,
         other.warningBackground,
+        t,
+      )!,
+      shimmerBase: Color.lerp(shimmerBase, other.shimmerBase, t)!,
+      shimmerHighlight: Color.lerp(
+        shimmerHighlight,
+        other.shimmerHighlight,
         t,
       )!,
     );

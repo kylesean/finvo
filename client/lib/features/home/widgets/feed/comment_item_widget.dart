@@ -6,11 +6,11 @@ import 'package:forui/forui.dart';
 import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
-import 'package:timeago/timeago.dart' as timeago;
 import 'dart:async';
+import 'package:finvo/shared/utils/time_utils.dart';
 
-import '../../models/comment_model.dart';
-import '../../providers/comment_providers.dart';
+import 'package:finvo/features/home/models/comment_model.dart';
+import 'package:finvo/features/home/providers/comment_providers.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 
@@ -77,13 +77,13 @@ class CommentItemWidget extends ConsumerWidget {
 
     final List<ActionItem> primaryActions = [
       ActionItem(
-        title: '复制内容',
+        title: t.comment.copyContent,
         icon: FLucideIcons.copy,
         onTap: () {
           unawaited(
             Clipboard.setData(ClipboardData(text: comment.commentText)),
           );
-          TopToast.success(context, '已复制评论内容');
+          TopToast.success(context, t.comment.contentCopied);
         },
       ),
     ];
@@ -219,7 +219,7 @@ class CommentItemWidget extends ConsumerWidget {
                       Expanded(child: buildUserNameDisplay()),
                       const SizedBox(width: 6),
                       Text(
-                        timeago.format(comment.createdAt, locale: 'zh_CN'),
+                        relativeTime(comment.createdAt),
                         style: theme.typography.body.xs.copyWith(
                           color: colorScheme.mutedForeground,
                         ),

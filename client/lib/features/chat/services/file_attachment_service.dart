@@ -1,10 +1,10 @@
 import 'package:logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/network/network_client.dart';
-import '../../../core/network/exceptions/app_exception.dart';
-import '../models/attachment_signed_url_result.dart';
-import '../models/chat_message_attachment.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/chat/models/attachment_signed_url_result.dart';
+import 'package:finvo/features/chat/models/chat_message_attachment.dart';
 
 final _logger = Logger('FileAttachmentService');
 
@@ -17,7 +17,7 @@ class FileAttachmentService {
     List<ChatMessageAttachment> attachments,
   ) async {
     if (attachments.isEmpty) {
-      return AttachmentSignedUrlResult.empty;
+      return emptyAttachmentSignedUrlResult;
     }
 
     try {
@@ -29,7 +29,9 @@ class FileAttachmentService {
               .map(
                 (attachment) => {
                   'attachment_id': attachment.id,
-                  'object_key': attachment.filename,
+                  // Prefer the server-provided storage key; fall back to the
+                  // display filename only when the key is unknown.
+                  'object_key': attachment.objectKey ?? attachment.filename,
                 },
               )
               .toList(),
@@ -44,7 +46,7 @@ class FileAttachmentService {
         },
       );
 
-      return AttachmentSignedUrlResult.fromJson(response);
+      return attachmentSignedUrlResultFromJson(response);
     } on AppException {
       rethrow;
     } catch (e, stackTrace) {

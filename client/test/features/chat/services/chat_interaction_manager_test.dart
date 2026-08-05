@@ -138,13 +138,13 @@ void main() {
       expect(messages[0].attachments.length, 1);
       expect(messages[0].attachments[0].id, 'att-1');
 
-      // Wait for unawaited async call and data uri conversion
+      // Wait for unawaited async call
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      // Verify request sent with attachment payload
-      // DataUriService converts to data uri, we expect base64 encoded [0,1,2,3]
-      // AAECAw==
-
+      // Verify request sent with reference-only attachment payload: files are
+      // already uploaded via /files/upload, so the payload carries just the
+      // attachment id (server's AttachmentRef schema resolves by id) instead
+      // of a second base64 transfer of the file bytes.
       final capturedPayload =
           verify(
                 mockConversation.sendRequestWithAttachments(
@@ -157,8 +157,7 @@ void main() {
       expect(capturedPayload, isNotNull);
       expect(capturedPayload!.length, 1);
       expect(capturedPayload[0]['id'], 'att-1');
-      expect(capturedPayload[0]['type'], 'image/jpeg');
-      expect(capturedPayload[0]['data'], contains('base64,AAECAw=='));
+      expect(capturedPayload[0], hasLength(1)); // id only — no type/data
     });
 
     test('handleOptimisticUserMessage basic flow', () async {

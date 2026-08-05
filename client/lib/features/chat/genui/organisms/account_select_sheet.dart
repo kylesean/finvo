@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import '../molecules/molecules.dart';
+import 'package:finvo/features/chat/genui/molecules/molecules.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Account selection sheet (bottom sheet)

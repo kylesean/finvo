@@ -169,6 +169,61 @@ abstract class _$SelectedDate extends $Notifier<DateTime?> {
   }
 }
 
+/// Subscribes the home feature to cross-feature transaction events and
+/// invalidates the affected home providers.
+///
+/// This keeps the dependency direction feature -> core: producers (e.g. the
+/// chat feature) only publish [TransactionCreatedEvent]s on the shared bus
+/// and never touch home providers directly.
+
+@ProviderFor(transactionEventSubscriber)
+final transactionEventSubscriberProvider =
+    TransactionEventSubscriberProvider._();
+
+/// Subscribes the home feature to cross-feature transaction events and
+/// invalidates the affected home providers.
+///
+/// This keeps the dependency direction feature -> core: producers (e.g. the
+/// chat feature) only publish [TransactionCreatedEvent]s on the shared bus
+/// and never touch home providers directly.
+
+final class TransactionEventSubscriberProvider
+    extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
+    with $FutureModifier<void>, $FutureProvider<void> {
+  /// Subscribes the home feature to cross-feature transaction events and
+  /// invalidates the affected home providers.
+  ///
+  /// This keeps the dependency direction feature -> core: producers (e.g. the
+  /// chat feature) only publish [TransactionCreatedEvent]s on the shared bus
+  /// and never touch home providers directly.
+  TransactionEventSubscriberProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transactionEventSubscriberProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionEventSubscriberHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<void> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<void> create(Ref ref) {
+    return transactionEventSubscriber(ref);
+  }
+}
+
+String _$transactionEventSubscriberHash() =>
+    r'0df6b793a7b7bbf116307171315e7f68acff79b5';
+
 @ProviderFor(totalExpense)
 final totalExpenseProvider = TotalExpenseProvider._();
 
@@ -283,86 +338,6 @@ final class CalendarMonthDataFamily extends $Family
 
   @override
   String toString() => r'calendarMonthDataProvider';
-}
-
-@ProviderFor(transactionsForSelectedDate)
-final transactionsForSelectedDateProvider =
-    TransactionsForSelectedDateFamily._();
-
-final class TransactionsForSelectedDateProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<List<TransactionModel>>,
-          List<TransactionModel>,
-          FutureOr<List<TransactionModel>>
-        >
-    with
-        $FutureModifier<List<TransactionModel>>,
-        $FutureProvider<List<TransactionModel>> {
-  TransactionsForSelectedDateProvider._({
-    required TransactionsForSelectedDateFamily super.from,
-    required DateTime super.argument,
-  }) : super(
-         retry: null,
-         name: r'transactionsForSelectedDateProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$transactionsForSelectedDateHash();
-
-  @override
-  String toString() {
-    return r'transactionsForSelectedDateProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $FutureProviderElement<List<TransactionModel>> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<List<TransactionModel>> create(Ref ref) {
-    final argument = this.argument as DateTime;
-    return transactionsForSelectedDate(ref, argument);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is TransactionsForSelectedDateProvider &&
-        other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$transactionsForSelectedDateHash() =>
-    r'7ecacf8340fdd6f817319b9521a02fcd27848b04';
-
-final class TransactionsForSelectedDateFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<List<TransactionModel>>, DateTime> {
-  TransactionsForSelectedDateFamily._()
-    : super(
-        retry: null,
-        name: r'transactionsForSelectedDateProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  TransactionsForSelectedDateProvider call(DateTime date) =>
-      TransactionsForSelectedDateProvider._(argument: date, from: this);
-
-  @override
-  String toString() => r'transactionsForSelectedDateProvider';
 }
 
 @ProviderFor(TransactionFeed)

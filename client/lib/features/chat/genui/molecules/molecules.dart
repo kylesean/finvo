@@ -4,8 +4,8 @@
 /// recognizable UI patterns.
 library;
 
-export 'account_card.dart';
-export 'transaction_item.dart';
-export 'stat_card.dart';
-export 'action_button.dart';
-export 'budget_item_card.dart';
+export 'package:finvo/features/chat/genui/molecules/account_card.dart';
+export 'package:finvo/features/chat/genui/molecules/transaction_item.dart';
+export 'package:finvo/features/chat/genui/molecules/stat_card.dart';
+export 'package:finvo/features/chat/genui/molecules/action_button.dart';
+export 'package:finvo/features/chat/genui/molecules/budget_item_card.dart';

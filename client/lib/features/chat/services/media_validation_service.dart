@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import '../models/media_file.dart';
-import '../models/media_upload_exception.dart';
+import 'package:finvo/features/chat/models/media_file.dart';
+import 'package:finvo/features/chat/models/media_upload_exception.dart';
 
 /// Media file validation service
 /// Provides file size validation, format recognition, and utility methods

@@ -1,7 +1,8 @@
 // features/chat/services/media_picker_service.dart
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
-import '../models/media_upload_exception.dart';
+import 'package:finvo/features/chat/models/media_upload_exception.dart';
 
 /// Media picker service
 /// Uses built-in permission handling of image_picker and file_picker
@@ -66,8 +67,27 @@ class MediaPickerService {
       // Convert to XFile list
       final List<XFile> files = [];
       for (final platformFile in result.files) {
-        if (platformFile.path != null) {
-          files.add(XFile(platformFile.path!));
+        final path = platformFile.path;
+        if (path != null && path.isNotEmpty) {
+          files.add(XFile(path));
+        } else if (platformFile.bytes != null) {
+          // Web: PlatformFile.path is null; the bytes live in `bytes`.
+          // Without this branch, every selected file was silently dropped
+          // on web platforms.
+          files.add(
+            XFile.fromData(
+              platformFile.bytes!,
+              name: platformFile.name,
+              mimeType: platformFile.extension != null
+                  ? 'application/${platformFile.extension}'
+                  : null,
+            ),
+          );
+        } else {
+          debugPrint(
+            'MediaPickerService: skipping file "${platformFile.name}" '
+            '(no path and no bytes)',
+          );
         }
       }
 

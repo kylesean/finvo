@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import '../../../i18n/strings.g.dart';
-import '../../../shared/widgets/app_filter_chip.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Filter bottom sheet for account type selection

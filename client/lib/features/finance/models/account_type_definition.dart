@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
-import '../../profile/models/financial_account.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
 
 /// UI-layer account nature classification (for grouped display)
 enum AccountNature {

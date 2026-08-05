@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'app_theme_palette.dart';
-import 'app_font_config.dart';
-import 'app_semantic_colors.dart';
+import 'package:finvo/app/theme/app_theme_palette.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 /// Forui theme configuration helpers with global typography adjustments.
 class ForuiThemeConfig {
@@ -31,7 +31,7 @@ class ForuiThemeConfig {
   static FTypography _createGlobalTypography({
     required FTypography baseTypography,
   }) {
-    final fontFamily = AppFontConfig.primaryFontFamily;
+    const fontFamily = AppFontConfig.primaryFontFamily;
     final fallbacks = AppFontConfig.getGlobalFontFallbacks();
 
     FTypeface overrideTypeface(FTypeface base) {

@@ -12,10 +12,11 @@
 import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../models/chat_message_attachment.dart';
-import '../repositories/message_repository.dart';
-import '../services/file_attachment_service.dart';
-import '../../../core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/chat/models/attachment_signed_url_result.dart';
+import 'package:finvo/features/chat/models/chat_message_attachment.dart';
+import 'package:finvo/features/chat/repositories/message_repository.dart';
+import 'package:finvo/features/chat/services/file_attachment_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 final _logger = Logger('AttachmentManager');
 

@@ -4,11 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
-import '../../../../core/constants/category_constants.dart';
-import '../atoms/budget_progress_bar.dart';
-import '../atoms/empty_state_alert.dart';
-import '../molecules/budget_item_card.dart';
-import '../utils/genui_num_utils.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/features/chat/genui/atoms/budget_progress_bar.dart';
+import 'package:finvo/features/chat/genui/atoms/empty_state_alert.dart';
+import 'package:finvo/features/chat/genui/molecules/budget_item_card.dart';
+import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Budget status card template

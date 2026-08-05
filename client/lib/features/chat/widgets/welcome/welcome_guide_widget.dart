@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../providers/welcome_guide_provider.dart';
-import 'greeting_header.dart';
-import 'suggestion_card.dart';
+import 'package:finvo/features/chat/providers/welcome_guide_provider.dart';
+import 'package:finvo/features/chat/widgets/welcome/greeting_header.dart';
+import 'package:finvo/features/chat/widgets/welcome/suggestion_card.dart';
 
 /// Welcome guide component
 /// Displayed when chat page has no messages, provides contextual suggestions based on time of day

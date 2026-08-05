@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Upload progress status
 enum UploadStatus { uploading, success, failed, cancelled }
@@ -268,7 +269,7 @@ class UploadProgressWidget extends StatelessWidget {
           children: [
             Icon(FLucideIcons.ban, size: 16, color: colors.mutedForeground),
             const SizedBox(width: 4),
-            Text('Cancelled', style: AppTextStyles.detailLabel(theme)),
+            Text(t.common.cancelled, style: AppTextStyles.detailLabel(theme)),
           ],
         );
     }

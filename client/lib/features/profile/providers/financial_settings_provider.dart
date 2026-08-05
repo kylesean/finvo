@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:decimal/decimal.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
-import '../models/financial_settings.dart';
-import '../services/profile_service.dart';
-import '../../../core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/profile/models/financial_settings.dart';
+import 'package:finvo/features/profile/services/profile_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 part 'financial_settings_provider.g.dart';
 

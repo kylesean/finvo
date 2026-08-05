@@ -1,8 +1,8 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../services/profile_service.dart';
-import '../models/user_info.dart';
-import '../../chat/services/file_upload_service.dart';
+import 'package:finvo/features/profile/services/profile_service.dart';
+import 'package:finvo/features/profile/models/user_info.dart';
+import 'package:finvo/features/chat/services/file_upload_service.dart';
 import 'dart:async';
 
 part 'user_profile_provider.g.dart';

@@ -1,6 +1,6 @@
 // features/chat/models/paginated_conversations.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'conversation_info.dart';
+import 'package:finvo/features/chat/models/conversation_info.dart';
 
 part 'paginated_conversations.freezed.dart';
 part 'paginated_conversations.g.dart';

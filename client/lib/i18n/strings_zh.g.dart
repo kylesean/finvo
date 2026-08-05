@@ -161,6 +161,15 @@ class Translations$common$zh {
 
 	/// zh: '重置'
 	String get reset => '重置';
+
+	/// zh: '已取消'
+	String get cancelled => '已取消';
+
+	/// zh: '保存中...'
+	String get saving => '保存中...';
+
+	/// zh: '保存失败'
+	String get saveFailed => '保存失败';
 }
 
 // Path: genui
@@ -233,6 +242,12 @@ class Translations$time$zh {
 
 	/// zh: '$count周前'
 	String weeksAgo({required Object count}) => '${count}周前';
+
+	/// zh: '$count个月前'
+	String monthsAgo({required Object count}) => '${count}个月前';
+
+	/// zh: '$count年前'
+	String yearsAgo({required Object count}) => '${count}年前';
 }
 
 // Path: greeting
@@ -559,6 +574,24 @@ class Translations$comment$zh {
 	/// zh: '回复'
 	String get reply => '回复';
 
+	/// zh: '评论内容不能为空'
+	String get contentRequired => '评论内容不能为空';
+
+	/// zh: '复制内容'
+	String get copyContent => '复制内容';
+
+	/// zh: '已复制评论内容'
+	String get contentCopied => '已复制评论内容';
+
+	/// zh: '收起回复'
+	String get collapseReplies => '收起回复';
+
+	/// zh: '展开额外 $count 条回复'
+	String expandMoreReplies({required Object count}) => '展开额外 ${count} 条回复';
+
+	/// zh: '记录人'
+	String get recordedBy => '记录人';
+
 	/// zh: '添加备注...'
 	String get addNote => '添加备注...';
 
@@ -797,6 +830,9 @@ class Translations$settings$zh {
 
 	/// zh: '发现新版本'
 	String get newVersionTitle => '发现新版本';
+
+	/// zh: '当前版本: v$version'
+	String currentVersion({required Object version}) => '当前版本: v${version}';
 
 	/// zh: '立即更新'
 	String get updateNow => '立即更新';
@@ -1608,6 +1644,18 @@ class Translations$chat$zh {
 	late final Translations$chat$transferWizard$zh transferWizard = Translations$chat$transferWizard$zh.internal(_root);
 	late final Translations$chat$genui$zh genui = Translations$chat$genui$zh.internal(_root);
 	late final Translations$chat$welcome$zh welcome = Translations$chat$welcome$zh.internal(_root);
+
+	/// zh: '分享功能即将上线...'
+	String get shareComingSoon => '分享功能即将上线...';
+
+	/// zh: '无效的附件链接'
+	String get invalidAttachmentLink => '无效的附件链接';
+
+	/// zh: '无法打开附件链接'
+	String get unableToOpenAttachmentLink => '无法打开附件链接';
+
+	/// zh: '抱歉，AI 助手通信错误：$error'
+	String aiCommunicationError({required Object error}) => '抱歉，AI 助手通信错误：${error}';
 }
 
 // Path: image
@@ -1752,6 +1800,36 @@ class Translations$error$zh {
 
 	/// zh: '注册流程错误，缺少必要信息。'
 	String get registrationMissingInfo => '注册流程错误，缺少必要信息。';
+
+	/// zh: '账户信息缺失'
+	String get accountInfoMissing => '账户信息缺失';
+
+	/// zh: '共享空间信息缺失'
+	String get sharedSpaceInfoMissing => '共享空间信息缺失';
+
+	/// zh: '设置步骤：'
+	String get settingsSteps => '设置步骤：';
+
+	/// zh: '建议：'
+	String get suggestions => '建议：';
+
+	/// zh: '文件未找到'
+	String get fileNotFound => '文件未找到';
+
+	/// zh: '请确认文件存在或重新选择文件。'
+	String get fileNotFoundHint => '请确认文件存在或重新选择文件。';
+
+	/// zh: '重新选择'
+	String get selectAgain => '重新选择';
+
+	/// zh: '缩略图生成失败'
+	String get thumbnailGenerationFailed => '缩略图生成失败';
+
+	/// zh: '缩略图生成失败，但文件已成功选择，仍可继续使用该文件。'
+	String get thumbnailGenerationHint => '缩略图生成失败，但文件已成功选择，仍可继续使用该文件。';
+
+	/// zh: '帮助：'
+	String get help => '帮助：';
 
 	late final Translations$error$genui$zh genui = Translations$error$genui$zh.internal(_root);
 }
@@ -2002,6 +2080,12 @@ class Translations$financial$zh {
 
 	/// zh: '保存失败'
 	String get saveFailed => '保存失败';
+
+	/// zh: '删除失败，请稍后重试'
+	String get deleteFailed => '删除失败，请稍后重试';
+
+	/// zh: '部分币种缺少汇率，相关账户未计入总额：$currencies'
+	String missingExchangeRates({required Object currencies}) => '部分币种缺少汇率，相关账户未计入总额：${currencies}';
 }
 
 // Path: app
@@ -5007,6 +5091,9 @@ extension on Translations {
 			'common.loadFailed' => '加载失败',
 			'common.history' => '交易记录',
 			'common.reset' => '重置',
+			'common.cancelled' => '已取消',
+			'common.saving' => '保存中...',
+			'common.saveFailed' => '保存失败',
 			'genui.errorBusy' => '抱歉，服务暂时繁忙，请稍后重试',
 			'genui.errorTimeout' => '请求超时，请检查网络后重试',
 			'genui.errorNetwork' => '网络连接异常，请检查后重试',
@@ -5025,6 +5112,8 @@ extension on Translations {
 			'time.hoursAgo' => ({required Object count}) => '${count}小时前',
 			'time.daysAgo' => ({required Object count}) => '${count}天前',
 			'time.weeksAgo' => ({required Object count}) => '${count}周前',
+			'time.monthsAgo' => ({required Object count}) => '${count}个月前',
+			'time.yearsAgo' => ({required Object count}) => '${count}年前',
 			'greeting.morning' => '上午好',
 			'greeting.afternoon' => '下午好',
 			'greeting.evening' => '晚上好',
@@ -5133,6 +5222,12 @@ extension on Translations {
 			'comment.commentFailed' => '评论失败',
 			'comment.replyToPrefix' => ({required Object name}) => '回复 @${name}:',
 			'comment.reply' => '回复',
+			'comment.contentRequired' => '评论内容不能为空',
+			'comment.copyContent' => '复制内容',
+			'comment.contentCopied' => '已复制评论内容',
+			'comment.collapseReplies' => '收起回复',
+			'comment.expandMoreReplies' => ({required Object count}) => '展开额外 ${count} 条回复',
+			'comment.recordedBy' => '记录人',
 			'comment.addNote' => '添加备注...',
 			'comment.addNoteWithMention' => '评论或 @提及成员...',
 			'comment.confirmDeleteTitle' => '确认删除',
@@ -5210,6 +5305,7 @@ extension on Translations {
 			'settings.checkingUpdate' => '正在检查更新...',
 			'settings.latestVersionToast' => '当前已是最新版本',
 			'settings.newVersionTitle' => '发现新版本',
+			'settings.currentVersion' => ({required Object version}) => '当前版本: v${version}',
 			'settings.updateNow' => '立即更新',
 			'settings.updateLater' => '暂不更新',
 			'settings.fetchUpdateFailed' => '检查更新失败，请稍后重试',
@@ -5482,6 +5578,8 @@ extension on Translations {
 			'forecast.recurringTransaction.preview' => '规则预览',
 			'forecast.recurringTransaction.daily' => '每天',
 			'forecast.recurringTransaction.weekly' => '每周',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.monthly' => '每月',
 			'forecast.recurringTransaction.yearly' => '每年',
 			'forecast.recurringTransaction.custom' => '自定义',
@@ -5494,8 +5592,6 @@ extension on Translations {
 			'forecast.recurringTransaction.everyMonthsOnDay' => ({required Object count, required Object day, required Object suffix}) => '每 ${count} 个月的 ${day} 号${suffix}',
 			'forecast.recurringTransaction.monthlyLastDay' => '每月最后一天',
 			'forecast.recurringTransaction.everyMonthsLastDay' => ({required Object count}) => '每 ${count} 个月的最后一天',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.yearlyOn' => ({required Object month, required Object day}) => '每年 ${month}/${day}',
 			'forecast.recurringTransaction.everyYearsOn' => ({required Object count, required Object month, required Object day}) => '每 ${count} 年 ${month}/${day}',
 			'forecast.recurringTransaction.weeklyOnDay' => ({required Object day}) => '每周的${day}',
@@ -5832,6 +5928,10 @@ extension on Translations {
 			'chat.welcome.night.financialThinking.title' => '未来预测',
 			'chat.welcome.night.financialThinking.prompt' => '预测未来 30 天余额',
 			'chat.welcome.night.financialThinking.description' => '看清未来的财务趋势',
+			'chat.shareComingSoon' => '分享功能即将上线...',
+			'chat.invalidAttachmentLink' => '无效的附件链接',
+			'chat.unableToOpenAttachmentLink' => '无法打开附件链接',
+			'chat.aiCommunicationError' => ({required Object error}) => '抱歉，AI 助手通信错误：${error}',
 			'image.deleteTitle' => '删除图片',
 			'image.deleteConfirm' => '确定要删除这张图片吗？此操作无法撤销。',
 			'footprint.searchIn' => '搜索',
@@ -5868,6 +5968,16 @@ extension on Translations {
 			'error.unknownError' => '未知错误',
 			'error.unknownErrorHint' => '发生了意外错误，请重试或联系技术支持。',
 			'error.registrationMissingInfo' => '注册流程错误，缺少必要信息。',
+			'error.accountInfoMissing' => '账户信息缺失',
+			'error.sharedSpaceInfoMissing' => '共享空间信息缺失',
+			'error.settingsSteps' => '设置步骤：',
+			'error.suggestions' => '建议：',
+			'error.fileNotFound' => '文件未找到',
+			'error.fileNotFoundHint' => '请确认文件存在或重新选择文件。',
+			'error.selectAgain' => '重新选择',
+			'error.thumbnailGenerationFailed' => '缩略图生成失败',
+			'error.thumbnailGenerationHint' => '缩略图生成失败，但文件已成功选择，仍可继续使用该文件。',
+			'error.help' => '帮助：',
 			'error.genui.loadingFailed' => '组件加载失败',
 			'error.genui.schemaFailed' => '架构验证失败',
 			'error.genui.schemaDescription' => '组件定义不符合 GenUI 规范，降级为纯文本显示',
@@ -5959,6 +6069,8 @@ extension on Translations {
 			'financial.dailyBurnRateSaved' => '日常消费预估已保存',
 			'financial.dayUnit' => '天',
 			'financial.saveFailed' => '保存失败',
+			'financial.deleteFailed' => '删除失败，请稍后重试',
+			'financial.missingExchangeRates' => ({required Object currencies}) => '部分币种缺少汇率，相关账户未计入总额：${currencies}',
 			'app.splashTitle' => '智见增长，格物致富。',
 			'app.splashSubtitle' => '智能财务助手',
 			'statistics.title' => '统计分析',
@@ -5980,6 +6092,8 @@ extension on Translations {
 			'statistics.analysis.radarNeedMoreData' => '雷达图需要至少3个分类数据',
 			'statistics.filter.accountType' => '账户类型',
 			'statistics.filter.allAccounts' => '全部账户',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.filter.apply' => '确认应用',
 			'statistics.sort.amount' => '按金额排序',
 			'statistics.sort.date' => '按时间排序',
@@ -6008,8 +6122,6 @@ extension on Translations {
 			'server.subtitle' => '输入您自部署的服务器地址，或扫描服务器启动时显示的二维码',
 			'server.urlLabel' => '服务器地址',
 			'server.urlPlaceholder' => '例如：https://api.example.com 或 192.168.1.100:8000',
-			_ => null,
-		} ?? switch (path) {
 			'server.scanQr' => '扫描二维码',
 			'server.scanQrInstruction' => '对准服务器终端显示的二维码',
 			'server.testConnection' => '测试连接',

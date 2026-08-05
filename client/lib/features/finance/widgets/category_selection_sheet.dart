@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../models/recurring_transaction.dart';
+import 'package:finvo/features/finance/models/recurring_transaction.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Category selection result

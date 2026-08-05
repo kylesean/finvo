@@ -2,34 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'app_routes.dart';
-import 'branches/finance_branch.dart';
-import 'branches/profile_branch.dart';
-import '../../features/auth/pages/login_page.dart';
-import '../../features/auth/pages/register_step_1_page.dart';
-import '../../features/auth/pages/register_step_2_page.dart';
-import '../../features/auth/providers/auth_provider.dart';
-import '../../features/chat/pages/ai_chat_page.dart';
-import '../../features/layout/pages/bottom_page.dart';
-import '../../features/home/pages/home_page.dart';
-import '../../features/home/pages/transaction_detail_page.dart';
-import '../../features/report/pages/report_page.dart';
-import '../../features/notification/pages/notification_center_page.dart';
-import '../../features/server/pages/server_setup_page.dart';
-import '../../core/services/server_config_service.dart';
+import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/app/router/branches/finance_branch.dart';
+import 'package:finvo/app/router/branches/profile_branch.dart';
+import 'package:finvo/features/auth/pages/login_page.dart';
+import 'package:finvo/features/auth/pages/register_step_1_page.dart';
+import 'package:finvo/features/auth/pages/register_step_2_page.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/features/chat/pages/ai_chat_page.dart';
+import 'package:finvo/features/layout/pages/bottom_page.dart';
+import 'package:finvo/features/home/pages/home_page.dart';
+import 'package:finvo/features/home/pages/transaction_detail_page.dart';
+import 'package:finvo/features/report/pages/report_page.dart';
+import 'package:finvo/features/notification/pages/notification_center_page.dart';
+import 'package:finvo/features/server/pages/server_setup_page.dart';
+import 'package:finvo/core/services/server_config_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  // Watch only the auth *status* (login state flip), not the whole AuthState.
+  // AuthState is an immutable freezed object whose every copyWith (e.g. a
+  // background refreshUser) would otherwise rebuild the entire GoRouter and
+  // reset the navigation stack back to '/home'.
+  final authStatus = ref.watch(authStatusProvider);
   final isServerConfigured = ref.watch(isServerConfiguredProvider);
 
   return GoRouter(
     navigatorKey: navigatorKey,
     initialLocation: '/home',
     redirect: (BuildContext context, GoRouterState state) {
-      final authStatus = authState.status;
-      final String location = state.matchedLocation;
+      final location = state.matchedLocation;
 
       if (location.startsWith('/server-setup')) {
         return null;
@@ -43,6 +46,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       );
       if (isPublicRoute) {
         if (authStatus == AuthStatus.authenticated) {
+          // After login, if a 'from' param was stashed by the redirect below
+          // (e.g. /join-space?code=xxx), send the user there instead of /home.
+          final from = state.uri.queryParameters['from'];
+          if (from != null &&
+              from.isNotEmpty &&
+              from.startsWith('/') &&
+              !from.startsWith('/login') &&
+              !from.startsWith('/register')) {
+            return from;
+          }
           return '/home';
         }
         return null;
@@ -53,6 +66,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
       final bool loggedIn = authStatus == AuthStatus.authenticated;
       if (!loggedIn) {
+        // Preserve the intended destination (including query params like
+        // join_code) so the login page can redirect back after success.
+        final fullLocation = state.uri.toString();
+        if (fullLocation != '/' && fullLocation != '/home') {
+          return '/login?from=${Uri.encodeComponent(fullLocation)}';
+        }
         return '/login';
       }
       return null;

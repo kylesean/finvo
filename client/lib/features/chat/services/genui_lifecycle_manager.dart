@@ -5,15 +5,15 @@ import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../../core/storage/secure_storage_service.dart';
-import '../genui/app_catalog.dart';
-import '../models/chat_message.dart';
-import '../models/genui_surface_info.dart';
-import '../models/tool_call_info.dart';
-import '../repositories/message_repository.dart';
-import '../services/genui_logger.dart';
-import '../services/genui_service.dart';
-import '../services/custom_content_generator.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/features/chat/genui/app_catalog.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/models/genui_surface_info.dart';
+import 'package:finvo/features/chat/models/tool_call_info.dart';
+import 'package:finvo/features/chat/repositories/message_repository.dart';
+import 'package:finvo/features/chat/services/genui_logger.dart';
+import 'package:finvo/features/chat/services/genui_service.dart';
+import 'package:finvo/features/chat/services/custom_content_generator.dart';
 
 final _logger = Logger('GenUiLifecycleManager');
 

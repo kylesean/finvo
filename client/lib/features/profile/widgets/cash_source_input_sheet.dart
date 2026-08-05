@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
-import '../../../shared/theme/form_text_styles.dart';
-import '../models/financial_account.dart';
-import '../../finance/models/account_type_definition.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 class FinancialAccountInputSheet extends StatefulWidget {
@@ -220,7 +220,7 @@ class _FinancialAccountInputSheetState
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                const Text('Saving...'),
+                                Text(t.common.saving),
                               ],
                             )
                           : Text(t.common.save),
@@ -277,12 +277,12 @@ class _FinancialAccountInputSheetState
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Save Failed'),
+              title: Text(t.common.saveFailed),
               content: Text(e.toString()),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
+                  child: Text(t.common.ok),
                 ),
               ],
             ),

@@ -297,7 +297,7 @@ mixin _$FinancialAccount {
  FinancialAccountType? get type;/// Currency code (Default: CNY)
  String get currencyCode;/// Initial balance
 @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson) Decimal get initialBalance;/// Current balance
-@JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero) Decimal? get currentBalance;/// Whether to include in net worth
+@JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero) Decimal? get currentBalance;/// Whether to include in net worth
  bool get includeInNetWorth;/// Whether to include in daily cash flow forecast (Liquidity tag)
  bool get includeInCashFlow;/// Display info (optional, used for cross-currency summary display)
  AccountDisplay? get display;/// Account status
@@ -336,7 +336,7 @@ abstract mixin class $FinancialAccountCopyWith<$Res>  {
   factory $FinancialAccountCopyWith(FinancialAccount value, $Res Function(FinancialAccount) _then) = _$FinancialAccountCopyWithImpl;
 @useResult
 $Res call({
- String? id, String name, FinancialNature nature, FinancialAccountType? type, String currencyCode,@JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson) Decimal initialBalance,@JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero) Decimal? currentBalance, bool includeInNetWorth, bool includeInCashFlow, AccountDisplay? display, AccountStatus status, String? createdAt, String? updatedAt
+ String? id, String name, FinancialNature nature, FinancialAccountType? type, String currencyCode,@JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson) Decimal initialBalance,@JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero) Decimal? currentBalance, bool includeInNetWorth, bool includeInCashFlow, AccountDisplay? display, AccountStatus status, String? createdAt, String? updatedAt
 });
 
 
@@ -465,7 +465,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FinancialAccount() when $default != null:
 return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_that.initialBalance,_that.currentBalance,_that.includeInNetWorth,_that.includeInCashFlow,_that.display,_that.status,_that.createdAt,_that.updatedAt);case _:
@@ -486,7 +486,7 @@ return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _FinancialAccount():
 return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_that.initialBalance,_that.currentBalance,_that.includeInNetWorth,_that.includeInCashFlow,_that.display,_that.status,_that.createdAt,_that.updatedAt);case _:
@@ -506,7 +506,7 @@ return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _FinancialAccount() when $default != null:
 return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_that.initialBalance,_that.currentBalance,_that.includeInNetWorth,_that.includeInCashFlow,_that.display,_that.status,_that.createdAt,_that.updatedAt);case _:
@@ -521,7 +521,7 @@ return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_
 @JsonSerializable()
 
 class _FinancialAccount implements FinancialAccount {
-  const _FinancialAccount({this.id, required this.name, required this.nature, this.type, this.currencyCode = 'CNY', @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson) required this.initialBalance, @JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero) this.currentBalance, this.includeInNetWorth = true, this.includeInCashFlow = false, this.display, this.status = AccountStatus.active, this.createdAt, this.updatedAt});
+  const _FinancialAccount({this.id, required this.name, required this.nature, this.type, this.currencyCode = 'CNY', @JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson) required this.initialBalance, @JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero) this.currentBalance, this.includeInNetWorth = true, this.includeInCashFlow = false, this.display, this.status = AccountStatus.active, this.createdAt, this.updatedAt});
   factory _FinancialAccount.fromJson(Map<String, dynamic> json) => _$FinancialAccountFromJson(json);
 
 /// Account ID (UUID from backend)
@@ -537,7 +537,7 @@ class _FinancialAccount implements FinancialAccount {
 /// Initial balance
 @override@JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson) final  Decimal initialBalance;
 /// Current balance
-@override@JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero) final  Decimal? currentBalance;
+@override@JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero) final  Decimal? currentBalance;
 /// Whether to include in net worth
 @override@JsonKey() final  bool includeInNetWorth;
 /// Whether to include in daily cash flow forecast (Liquidity tag)
@@ -584,7 +584,7 @@ abstract mixin class _$FinancialAccountCopyWith<$Res> implements $FinancialAccou
   factory _$FinancialAccountCopyWith(_FinancialAccount value, $Res Function(_FinancialAccount) _then) = __$FinancialAccountCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String name, FinancialNature nature, FinancialAccountType? type, String currencyCode,@JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson) Decimal initialBalance,@JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero) Decimal? currentBalance, bool includeInNetWorth, bool includeInCashFlow, AccountDisplay? display, AccountStatus status, String? createdAt, String? updatedAt
+ String? id, String name, FinancialNature nature, FinancialAccountType? type, String currencyCode,@JsonKey(fromJson: _decimalFromJson, toJson: _decimalToJson) Decimal initialBalance,@JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero) Decimal? currentBalance, bool includeInNetWorth, bool includeInCashFlow, AccountDisplay? display, AccountStatus status, String? createdAt, String? updatedAt
 });
 
 

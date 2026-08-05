@@ -60,9 +60,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       await Future<void>.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
 
-      // Use pushReplacement instead of go to avoid returning to login page
-      if (mounted) {
-        unawaited(GoRouter.of(this.context).pushReplacement('/home'));
+      // Use pushReplacement instead of go to avoid returning to login page.
+      // If a 'from' param was stashed by the router redirect (e.g. from a
+      // finvo://join-space?code=xxx deep link), navigate there instead of /home.
+      if (mounted && context.mounted) {
+        final from = GoRouterState.of(context).uri.queryParameters['from'];
+        final destination =
+            (from != null && from.isNotEmpty && from.startsWith('/'))
+            ? from
+            : '/home';
+        unawaited(GoRouter.of(context).pushReplacement(destination));
       }
     } on AppException catch (e) {
       if (!mounted) return;

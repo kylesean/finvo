@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Toast type
@@ -31,13 +32,14 @@ class TopToast {
 
     final theme = context.theme;
     final colors = theme.colors;
+    final semantic = theme.semantic;
 
     // Select color and icon based on type
     final (backgroundColor, iconData, iconColor) = switch (type) {
       ToastType.success => (
-        Colors.green.shade800,
+        semantic.successAccent,
         FLucideIcons.check,
-        Colors.green,
+        semantic.successAccent,
       ),
       ToastType.error => (
         colors.destructive,
@@ -45,9 +47,9 @@ class TopToast {
         colors.destructive,
       ),
       ToastType.warning => (
-        Colors.orange.shade800,
+        semantic.warningAccent,
         FLucideIcons.circleAlert,
-        Colors.orange,
+        semantic.warningAccent,
       ),
       ToastType.info => (colors.primary, FLucideIcons.info, colors.primary),
     };

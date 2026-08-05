@@ -1,7 +1,8 @@
 // features/home/widgets/calendar/daily_cell_widget.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import '../../models/daily_expense_summary_model.dart';
+import 'package:finvo/shared/utils/heat_colors.dart';
+import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
 
 class DailyCellWidget extends StatelessWidget {
   final DateTime day;
@@ -35,62 +36,35 @@ class DailyCellWidget extends StatelessWidget {
     final baseHotColor = colors.primary;
     final baseHotForegroundColor = colors.primaryForeground;
 
-    // Lowest heat background (near transparent or background color)
-    const baseColdBackgroundColor = Colors.transparent; // Or colors.background
-
     // Lowest heat text color
     final baseColdForegroundColor = colors.foreground;
 
-    // Define 5 heat levels for background and corresponding foreground text color
-    // Create increment effect by adjusting baseHotColor's opacity relative to baseColdBackgroundColor
-    switch (heatLevel) {
-      case ExpenseHeatLevel.none:
-        return (
-          backgroundColor: baseColdBackgroundColor,
-          textColor: baseColdForegroundColor.withValues(
-            alpha: 0.6,
-          ), // Dim text when no consumption
-        );
+    // Background resolved from the shared heat table (see HeatColorTables).
+    final backgroundColor = heatLevelColor(
+      heatLevel,
+      table: HeatColorTables.cell,
+      base: baseHotColor,
+      background: colors.background,
+      isDark: isDark,
+    );
 
-      case ExpenseHeatLevel.low:
-        return (
-          // Blend small amount of baseHotColor into background (or use low opacity baseHotColor directly)
-          backgroundColor: Color.alphaBlend(
-            baseHotColor.withValues(alpha: isDark ? 0.25 : 0.2),
-            colors.background,
-          ),
-          // Ensure text color is readable on light background
-          textColor: isDark
-              ? baseHotForegroundColor.withValues(alpha: 0.8)
-              : baseHotColor.withValues(alpha: 0.8),
-        );
-      case ExpenseHeatLevel.medium:
-        return (
-          backgroundColor: Color.alphaBlend(
-            baseHotColor.withValues(alpha: isDark ? 0.4 : 0.35),
-            colors.background,
-          ),
-          textColor: isDark
-              ? baseHotForegroundColor.withValues(alpha: 0.9)
-              : baseHotColor.withValues(alpha: 0.9),
-        );
-      case ExpenseHeatLevel.high:
-        return (
-          backgroundColor: Color.alphaBlend(
-            baseHotColor.withValues(alpha: isDark ? 0.6 : 0.55),
-            colors.background,
-          ),
-          textColor: baseHotForegroundColor,
-        );
-      case ExpenseHeatLevel.veryHigh:
-        // For highest heat level, use baseHotColor directly
-        return (
-          backgroundColor: baseHotColor.withValues(
-            alpha: isDark ? 0.85 : 0.8,
-          ), // Ensure not fully opaque unless needed
-          textColor: baseHotForegroundColor,
-        );
-    }
+    // Foreground text color per heat level (kept here; only the background is
+    // shared with the trend strip).
+    final textColor = switch (heatLevel) {
+      ExpenseHeatLevel.none => baseColdForegroundColor.withValues(alpha: 0.6),
+      ExpenseHeatLevel.low =>
+        isDark
+            ? baseHotForegroundColor.withValues(alpha: 0.8)
+            : baseHotColor.withValues(alpha: 0.8),
+      ExpenseHeatLevel.medium =>
+        isDark
+            ? baseHotForegroundColor.withValues(alpha: 0.9)
+            : baseHotColor.withValues(alpha: 0.9),
+      ExpenseHeatLevel.high => baseHotForegroundColor,
+      ExpenseHeatLevel.veryHigh => baseHotForegroundColor,
+    };
+
+    return (backgroundColor: backgroundColor, textColor: textColor);
   }
 
   @override

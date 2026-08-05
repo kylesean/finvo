@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/speech_recognition_service.dart';
-import '../services/speech_session_manager.dart';
-import '../services/file_upload_service.dart';
-import '../models/message_attachments.dart';
+import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/features/chat/services/speech_session_manager.dart';
+import 'package:finvo/features/chat/services/file_upload_service.dart';
+import 'package:finvo/features/chat/models/message_attachments.dart';
 import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
-import 'chat_input_state.dart';
+import 'package:finvo/features/chat/providers/chat_input_state.dart';
 
 part 'chat_input_provider.g.dart';
 
@@ -166,14 +166,30 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   }
 
   void _onSpeechResult(String recognizedText) {
-    final newText = _textBeforeSpeechSession.isEmpty
-        ? recognizedText
-        : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
-    _logger.fine(
-      "Speech result: '$recognizedText', concatenated text: '$newText'",
-    );
-    state = state.copyWith(text: newText.trim());
-    _textBeforeSpeechSession = newText.trim();
+    if (_speechSession.isIncrementalResult) {
+      // Incremental (WebSocket) mode: every partial already contains the full
+      // utterance recognized so far, so REPLACE the recognized part on top of
+      // the fixed pre-session base. Folding each partial back into the base
+      // would duplicate the accumulated text.
+      final newText = _textBeforeSpeechSession.trim().isEmpty
+          ? recognizedText
+          : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
+      _logger.fine(
+        "Speech result (incremental): '$recognizedText', text: '$newText'",
+      );
+      state = state.copyWith(text: newText.trim());
+    } else {
+      // Discrete-finals mode (system speech): each final result is a separate
+      // utterance (pause-then-continue), so append to the accumulated text.
+      final newText = _textBeforeSpeechSession.trim().isEmpty
+          ? recognizedText
+          : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
+      _logger.fine(
+        "Speech result (final): '$recognizedText', concatenated text: '$newText'",
+      );
+      state = state.copyWith(text: newText.trim());
+      _textBeforeSpeechSession = newText.trim();
+    }
   }
 
   Future<void> onMainButtonPressed() async {
@@ -419,10 +435,34 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       );
     }
 
+    // Pair server upload results back to the local files. The old
+    // `firstWhere((f) => f.name == upload.originalName)` threw a StateError
+    // (aborting the whole batch as failed) whenever the server-returned name
+    // differed from the local name, and mapped duplicate file names onto the
+    // same file. Instead: prefer an exact name match, consume each file at
+    // most once, and fall back to the next unmatched file in request order
+    // (the server response order mirrors the request order).
+    final usedIndices = <int>{};
     for (final upload in result.uploads) {
-      final file = originalFiles.firstWhere(
-        (f) => f.name == upload.originalName,
-      );
+      int fileIndex = -1;
+      for (var i = 0; i < originalFiles.length; i++) {
+        if (usedIndices.contains(i)) continue;
+        if (originalFiles[i].name == upload.originalName) {
+          fileIndex = i;
+          break;
+        }
+      }
+      if (fileIndex == -1) {
+        for (var i = 0; i < originalFiles.length; i++) {
+          if (usedIndices.contains(i)) continue;
+          fileIndex = i;
+          break;
+        }
+      }
+      if (fileIndex == -1) break; // no files left to pair
+
+      usedIndices.add(fileIndex);
+      final file = originalFiles[fileIndex];
       _uploadedInfos[file.path] = UploadedAttachmentInfo(
         id: upload.id,
         attachmentId: upload.attachmentId,

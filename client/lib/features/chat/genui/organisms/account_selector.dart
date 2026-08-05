@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../molecules/molecules.dart';
-import '../events/interaction_events.dart';
-import '../../../../shared/widgets/app_card.dart';
+import 'package:finvo/features/chat/genui/molecules/molecules.dart';
+import 'package:finvo/features/chat/genui/events/interaction_events.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A complete account selection widget with search functionality

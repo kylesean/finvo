@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:forui/forui.dart';
 
-import '../utils/identicon.dart';
+import 'package:finvo/shared/utils/identicon.dart';
 
 /// A deterministic GitHub-style identicon avatar.
 ///
@@ -95,7 +95,20 @@ class _IdenticonPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_IdenticonPainter oldDelegate) =>
-      !identical(oldDelegate.matrix, matrix) ||
+      !_sameMatrix(oldDelegate.matrix, matrix) ||
       oldDelegate.foreground != foreground ||
       oldDelegate.background != background;
+
+  /// `identical()` on [List] is always false because a fresh matrix is built on
+  /// every build; compare cell-by-cell instead (grid is tiny, e.g. 5×5).
+  static bool _sameMatrix(List<List<bool>> a, List<List<bool>> b) {
+    if (a.length != b.length) return false;
+    for (var r = 0; r < a.length; r++) {
+      if (a[r].length != b[r].length) return false;
+      for (var c = 0; c < a[r].length; c++) {
+        if (a[r][c] != b[r][c]) return false;
+      }
+    }
+    return true;
+  }
 }

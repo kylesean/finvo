@@ -35,6 +35,13 @@ enum NotificationType {
   memberLeft,
   @JsonValue('bill_comment')
   billComment,
+
+  /// Fallback for unknown/unsupported notification types coming from the
+  /// backend. Previously the mapper defaulted to [spaceInvite], which caused
+  /// non-invite notifications to render accept/reject actions. Mapped here
+  /// instead so the UI renders a neutral card with no invite actions.
+  @JsonValue('other')
+  other,
 }
 
 @freezed

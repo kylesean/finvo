@@ -1,13 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/media_upload_exception.dart';
-import 'retry_policy.dart';
+import 'package:finvo/features/chat/models/media_upload_exception.dart';
+import 'package:finvo/features/chat/services/retry_policy.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
-import 'dart:async';
 
 /// Media upload error handling service
 /// Provides user-friendly error handling and guidance functionality
@@ -79,92 +79,36 @@ class MediaErrorHandler {
       exception.originalError,
     );
 
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                Icons.security,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(t.error.permissionRequired),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(exception.message),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.settings,
-                          size: 16,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Settings steps:',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                              ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      t.error.permissionInstructions,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _logger.info('User chose to open app settings');
-                unawaited(_openAppSettings());
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.settings, size: 16),
-                  const SizedBox(width: 4),
-                  Text(t.error.openSettings),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+    final scheme = Theme.of(context).colorScheme;
+    await _showMediaErrorDialog(
+      context,
+      title: t.error.permissionRequired,
+      icon: Icons.security,
+      iconColor: scheme.primary,
+      content: [
+        Text(exception.message),
+        const SizedBox(height: 16),
+        _highlightBoxWithHeading(
+          context,
+          icon: Icons.settings,
+          heading: t.error.settingsSteps,
+          body: t.error.permissionInstructions,
+          containerColor: scheme.primaryContainer,
+          onContainerColor: scheme.onPrimaryContainer,
+        ),
+      ],
+      actions: [
+        _dialogCancelButton(context),
+        _dialogIconButton(
+          context,
+          icon: Icons.settings,
+          label: t.error.openSettings,
+          onPressed: () {
+            _logger.info('User chose to open app settings');
+            unawaited(_openAppSettings());
+          },
+        ),
+      ],
     );
   }
 
@@ -179,99 +123,25 @@ class MediaErrorHandler {
       exception.originalError,
     );
 
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                Icons.file_present,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(width: 8),
-              Text(t.error.fileTooLarge),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        exception.message,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.lightbulb_outline,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Suggestions:',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      t.error.fileSizeHint,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.ok),
-            ),
-          ],
-        );
-      },
+    final scheme = Theme.of(context).colorScheme;
+    await _showMediaErrorDialog(
+      context,
+      title: t.error.fileTooLarge,
+      icon: Icons.file_present,
+      iconColor: scheme.error,
+      content: [
+        _errorMessageBox(context, message: exception.message),
+        const SizedBox(height: 16),
+        _highlightBoxWithHeading(
+          context,
+          icon: Icons.lightbulb_outline,
+          heading: t.error.suggestions,
+          body: t.error.fileSizeHint,
+          containerColor: scheme.surfaceContainerHighest,
+          onContainerColor: scheme.onSurfaceVariant,
+        ),
+      ],
+      actions: [_dialogOkButton(context)],
     );
   }
 
@@ -280,31 +150,18 @@ class MediaErrorHandler {
     BuildContext context,
     MediaUploadException exception,
   ) async {
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(t.media.unsupportedFormat),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(exception.message),
-              const SizedBox(height: 16),
-              Text(
-                t.error.supportedFormatsHint,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.ok),
-            ),
-          ],
-        );
-      },
+    await _showMediaErrorDialog(
+      context,
+      title: t.media.unsupportedFormat,
+      content: [
+        Text(exception.message),
+        const SizedBox(height: 16),
+        Text(
+          t.error.supportedFormatsHint,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+      actions: [_dialogOkButton(context)],
     );
   }
 
@@ -313,31 +170,18 @@ class MediaErrorHandler {
     BuildContext context,
     MediaUploadException exception,
   ) async {
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(t.media.storageInsufficient),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(exception.message),
-              const SizedBox(height: 16),
-              Text(
-                t.error.storageCleanupHint,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.ok),
-            ),
-          ],
-        );
-      },
+    await _showMediaErrorDialog(
+      context,
+      title: t.media.storageInsufficient,
+      content: [
+        Text(exception.message),
+        const SizedBox(height: 16),
+        Text(
+          t.error.storageCleanupHint,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+      actions: [_dialogOkButton(context)],
     );
   }
 
@@ -353,74 +197,36 @@ class MediaErrorHandler {
       exception.originalError,
     );
 
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.wifi_off, color: Theme.of(context).colorScheme.error),
-              const SizedBox(width: 8),
-              Text(t.media.networkError),
-            ],
+    final scheme = Theme.of(context).colorScheme;
+    await _showMediaErrorDialog(
+      context,
+      title: t.media.networkError,
+      icon: Icons.wifi_off,
+      iconColor: scheme.error,
+      content: [
+        Text(exception.message),
+        const SizedBox(height: 16),
+        _highlightBox(
+          context,
+          icon: Icons.info_outline,
+          body: t.error.networkErrorHint,
+          containerColor: scheme.surfaceContainerHighest,
+          onContainerColor: scheme.onSurfaceVariant,
+        ),
+      ],
+      actions: [
+        _dialogCancelButton(context),
+        if (onRetry != null)
+          _dialogIconButton(
+            context,
+            icon: Icons.refresh,
+            label: t.common.retry,
+            onPressed: () {
+              _logger.info('User chose to retry network operation');
+              onRetry();
+            },
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(exception.message),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        t.error.networkErrorHint,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.cancel),
-            ),
-            if (onRetry != null)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _logger.info('User chose to retry network operation');
-                  onRetry();
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.refresh, size: 16),
-                    const SizedBox(width: 4),
-                    Text(t.common.retry),
-                  ],
-                ),
-              ),
-          ],
-        );
-      },
+      ],
     );
   }
 
@@ -429,20 +235,11 @@ class MediaErrorHandler {
     BuildContext context,
     MediaUploadException exception,
   ) async {
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(t.error.platformNotSupported),
-          content: Text(exception.message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.ok),
-            ),
-          ],
-        );
-      },
+    await _showMediaErrorDialog(
+      context,
+      title: t.error.platformNotSupported,
+      content: [Text(exception.message)],
+      actions: [_dialogOkButton(context)],
     );
   }
 
@@ -452,39 +249,22 @@ class MediaErrorHandler {
     MediaUploadException exception,
     VoidCallback? onRetry,
   ) async {
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(t.error.fileReadError),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(exception.message),
-              const SizedBox(height: 16),
-              Text(
-                t.error.fileReadErrorHint,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.cancel),
-            ),
-            if (onRetry != null)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onRetry();
-                },
-                child: Text(t.common.retry),
-              ),
-          ],
-        );
-      },
+    await _showMediaErrorDialog(
+      context,
+      title: t.error.fileReadError,
+      content: [
+        Text(exception.message),
+        const SizedBox(height: 16),
+        Text(
+          t.error.fileReadErrorHint,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+      actions: [
+        _dialogCancelButton(context),
+        if (onRetry != null)
+          _dialogTextButton(context, label: t.common.retry, onPressed: onRetry),
+      ],
     );
   }
 
@@ -494,72 +274,29 @@ class MediaErrorHandler {
     MediaUploadException exception,
     VoidCallback? onRetry,
   ) async {
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                Icons.file_present,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(width: 8),
-              const Text('File not found'),
-            ],
+    final scheme = Theme.of(context).colorScheme;
+    await _showMediaErrorDialog(
+      context,
+      title: t.error.fileNotFound,
+      icon: Icons.file_present,
+      iconColor: scheme.error,
+      content: [
+        _errorMessageBox(context, message: exception.message),
+        const SizedBox(height: 16),
+        Text(
+          t.error.fileNotFoundHint,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+      actions: [
+        _dialogCancelButton(context),
+        if (onRetry != null)
+          _dialogTextButton(
+            context,
+            label: t.error.selectAgain,
+            onPressed: onRetry,
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        exception.message,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Please confirm the file exists or select another file.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.cancel),
-            ),
-            if (onRetry != null)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onRetry();
-                },
-                child: const Text('Select again'),
-              ),
-          ],
-        );
-      },
+      ],
     );
   }
 
@@ -568,20 +305,11 @@ class MediaErrorHandler {
     BuildContext context,
     MediaUploadException exception,
   ) async {
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(t.error.validationError),
-          content: Text(exception.message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.ok),
-            ),
-          ],
-        );
-      },
+    await _showMediaErrorDialog(
+      context,
+      title: t.error.validationError,
+      content: [Text(exception.message)],
+      actions: [_dialogOkButton(context)],
     );
   }
 
@@ -596,68 +324,30 @@ class MediaErrorHandler {
       exception.originalError,
     );
 
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                Icons.image_not_supported,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              const Text('Thumbnail generation failed'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Failed to generate thumbnail for image, but file has been successfully selected. You can still continue using this file.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                exception.message,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+    final scheme = Theme.of(context).colorScheme;
+    await _showMediaErrorDialog(
+      context,
+      title: t.error.thumbnailGenerationFailed,
+      icon: Icons.image_not_supported,
+      iconColor: scheme.primary,
+      content: [
+        _highlightBox(
+          context,
+          icon: Icons.info,
+          body: t.error.thumbnailGenerationHint,
+          containerColor: scheme.primaryContainer,
+          onContainerColor: scheme.onPrimaryContainer,
+          bodyStyle: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          exception.message,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+      ],
+      actions: [_dialogOkButton(context)],
     );
   }
 
@@ -680,115 +370,247 @@ class MediaErrorHandler {
       exception.originalError,
     );
 
-    await showDialog<void>(
+    final scheme = Theme.of(context).colorScheme;
+    await _showMediaErrorDialog(
+      context,
+      title: t.error.unknownError,
+      icon: Icons.error_outline,
+      iconColor: scheme.error,
+      content: [
+        _errorMessageBox(context, message: exception.message),
+        const SizedBox(height: 16),
+        _highlightBoxWithHeading(
+          context,
+          icon: Icons.support_agent,
+          heading: t.error.help,
+          body: t.error.unknownErrorHint,
+          containerColor: scheme.surfaceContainerHighest,
+          onContainerColor: scheme.onSurfaceVariant,
+        ),
+      ],
+      actions: [
+        _dialogCancelButton(context),
+        if (onRetry != null)
+          _dialogIconButton(
+            context,
+            icon: Icons.refresh,
+            label: t.common.retry,
+            onPressed: () {
+              _logger.info('User chose to retry unknown error operation');
+              onRetry();
+            },
+          ),
+      ],
+    );
+  }
+
+  // ==========================================================================
+  // Shared dialog building blocks
+  // ==========================================================================
+
+  /// Opens an [AlertDialog] with a consistent title row, content column and
+  /// action buttons. Handlers only supply their payload, removing the
+  /// duplicated dialog scaffolding.
+  static Future<void> _showMediaErrorDialog(
+    BuildContext context, {
+    required String title,
+    IconData? icon,
+    Color? iconColor,
+    required List<Widget> content,
+    List<Widget> actions = const [],
+  }) {
+    return showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(width: 8),
-              Text(t.error.unknownError),
-            ],
+          title: _buildDialogTitle(
+            dialogContext,
+            title: title,
+            icon: icon,
+            iconColor: iconColor,
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
+            children: content,
+          ),
+          actions: actions,
+        );
+      },
+    );
+  }
+
+  /// Title row: icon + text when [icon] is provided, plain text otherwise.
+  static Widget _buildDialogTitle(
+    BuildContext context, {
+    required String title,
+    IconData? icon,
+    Color? iconColor,
+  }) {
+    if (icon == null) {
+      return Text(title);
+    }
+    return Row(
+      children: [
+        Icon(icon, color: iconColor ?? Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 8),
+        Expanded(child: Text(title)),
+      ],
+    );
+  }
+
+  /// Error-styled box (errorContainer) with a warning icon and the raw message.
+  static Widget _errorMessageBox(
+    BuildContext context, {
+    required String message,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning, size: 16, color: scheme.onErrorContainer),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: scheme.onErrorContainer),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Icon + single-line body box (no heading), e.g. network/thumbnail hints.
+  static Widget _highlightBox(
+    BuildContext context, {
+    required IconData icon,
+    required String body,
+    required Color containerColor,
+    required Color onContainerColor,
+    TextStyle? bodyStyle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: containerColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: onContainerColor),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              body,
+              style: (bodyStyle ?? Theme.of(context).textTheme.bodySmall)
+                  ?.copyWith(color: onContainerColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Icon + bold heading + body box, e.g. "Settings steps:" / "Suggestions:".
+  static Widget _highlightBoxWithHeading(
+    BuildContext context, {
+    required IconData icon,
+    required String heading,
+    required String body,
+    required Color containerColor,
+    required Color onContainerColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: containerColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.bug_report,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        exception.message,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.support_agent,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Help:',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      t.error.unknownErrorHint,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+              Icon(icon, size: 16, color: onContainerColor),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  heading,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: onContainerColor,
+                  ),
                 ),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.common.cancel),
-            ),
-            if (onRetry != null)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _logger.info('User chose to retry unknown error operation');
-                  onRetry();
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.refresh, size: 16),
-                    const SizedBox(width: 4),
-                    Text(t.common.retry),
-                  ],
-                ),
-              ),
-          ],
-        );
+          const SizedBox(height: 8),
+          Text(
+            body,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: onContainerColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Primary "OK" button that closes the dialog.
+  static Widget _dialogOkButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: Text(t.common.ok),
+    );
+  }
+
+  /// Neutral "Cancel" button that closes the dialog.
+  static Widget _dialogCancelButton(BuildContext context) {
+    return TextButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: Text(t.common.cancel),
+    );
+  }
+
+  /// Elevated button with leading icon; closes the dialog then runs [onPressed].
+  static Widget _dialogIconButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+        onPressed();
       },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [Icon(icon, size: 16), const SizedBox(width: 4), Text(label)],
+      ),
+    );
+  }
+
+  /// Plain elevated action button; closes the dialog then runs [onPressed].
+  static Widget _dialogTextButton(
+    BuildContext context, {
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+        onPressed();
+      },
+      child: Text(label),
     );
   }
 

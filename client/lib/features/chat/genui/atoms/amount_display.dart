@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import '../utils/formatters.dart';
+import 'package:finvo/features/chat/genui/utils/formatters.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// A formatted currency amount display

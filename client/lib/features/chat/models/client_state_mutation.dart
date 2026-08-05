@@ -1,30 +1,29 @@
-/// Client State Mutation Models
-///
-/// Corresponding Dart models for backend `app/schemas/client_state.py`.
-/// Defines the subset of state operations allowed by the client for GenUI atomic mode.
-library;
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'client_state_mutation.freezed.dart';
 
 /// Client state mutation
 ///
 /// GenUI atomic mode protocol:
 /// - Client attaches state mutation in message request
 /// - Server atomically applies mutation before graph execution
-class ClientStateMutation {
-  /// UI mode: Controls graph entry routing
-  /// - 'idle': Goes through agent node
-  /// - 'direct_execute': Skips LLM, executes tool_name directly
-  final String? uiMode;
+@freezed
+abstract class ClientStateMutation with _$ClientStateMutation {
+  const factory ClientStateMutation({
+    /// UI mode: Controls graph entry routing
+    /// - 'idle': Goes through agent node
+    /// - 'direct_execute': Skips LLM, executes tool_name directly
+    String? uiMode,
 
-  /// Tool name to execute directly (must be registered in INTERNAL_TOOLS)
-  final String? toolName;
+    /// Tool name to execute directly (must be registered in INTERNAL_TOOLS)
+    String? toolName,
 
-  /// Tool parameters
-  final Map<String, dynamic>? toolParams;
-
-  const ClientStateMutation({this.uiMode, this.toolName, this.toolParams});
+    /// Tool parameters
+    Map<String, dynamic>? toolParams,
+  }) = _ClientStateMutation;
 
   /// Quick creation for transfer execution
-  factory ClientStateMutation.forTransfer({
+  static ClientStateMutation forTransfer({
     String? surfaceId,
     required String sourceAccountId,
     required String targetAccountId,
@@ -50,7 +49,7 @@ class ClientStateMutation {
   }
 
   /// Quick creation for space association (direct_execute)
-  factory ClientStateMutation.forSpaceAssociation({
+  static ClientStateMutation forSpaceAssociation({
     String? surfaceId,
     required int spaceId,
     required List<String> transactionIds,
@@ -65,7 +64,9 @@ class ClientStateMutation {
       },
     );
   }
+}
 
+extension ClientStateMutationX on ClientStateMutation {
   Map<String, dynamic> toJson() {
     final result = <String, dynamic>{};
     if (uiMode != null) {

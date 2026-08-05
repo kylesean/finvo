@@ -1,7 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../network/exceptions/app_exception.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 const String _authTokenKey = 'auth_token';
 const String _authRefreshTokenKey = 'auth_refresh_token';
@@ -74,7 +74,14 @@ class SecureStorageService {
       _tokenCacheInitialized = true;
       _logger.info('SecureStorageService: Token deleted');
     } catch (e) {
-      _logger.info('SecureStorageService: Failed to delete token: $e');
+      // A failed delete can leave the token in Keychain/Keystore AND in the
+      // memory cache, so `getToken()` would keep returning the stale cached
+      // value — contradicting the fail-closed policy used on writes.
+      // Invalidate the cache (next read re-reads the real value from storage)
+      // and surface the failure as a warning instead of swallowing it.
+      _cachedToken = null;
+      _tokenCacheInitialized = false;
+      _logger.warning('SecureStorageService: Failed to delete token: $e');
     }
   }
 
@@ -122,7 +129,13 @@ class SecureStorageService {
       _refreshTokenCacheInitialized = true;
       _logger.info('SecureStorageService: Refresh token deleted');
     } catch (e) {
-      _logger.info('SecureStorageService: Failed to delete refresh token: $e');
+      // Mirror deleteToken: invalidate the cache so a later read does not
+      // serve a stale value from memory, and log the failure visibly.
+      _cachedRefreshToken = null;
+      _refreshTokenCacheInitialized = false;
+      _logger.warning(
+        'SecureStorageService: Failed to delete refresh token: $e',
+      );
     }
   }
 

@@ -1,6 +1,6 @@
 // shared/widgets/dialogs/action_bottom_sheet.dart
 import 'package:flutter/material.dart';
-import '../../models/action_item_model.dart';
+import 'package:finvo/shared/models/action_item_model.dart';
 import 'package:forui/forui.dart'; // 1. Import forui
 import 'package:finvo/shared/theme/form_text_styles.dart';
 

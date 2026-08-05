@@ -29,9 +29,6 @@ abstract class AppRouteNames {
   static const profile = 'profile';
   static const appearanceSettings = 'appearanceSettings';
   static const languageSettings = 'languageSettings';
-  static const authDebug = 'authDebug';
-  static const fontTest = 'fontTest';
-  static const speechTest = 'speechTest';
   static const speechSettings = 'speechSettings';
   static const currencySettings = 'currencySettings';
   static const amountStyleSettings = 'amountStyleSettings';
@@ -40,9 +37,6 @@ abstract class AppRouteNames {
   static const inviteSuccess = 'inviteSuccess';
   static const sharedSpaceDetail = 'sharedSpaceDetail';
   static const sharedSpaceSettings = 'sharedSpaceSettings';
-  static const notificationList = 'notificationList';
-
-  static const joinSharedSpace = 'joinSharedSpace';
 }
 
 abstract class AppRoutePaths {

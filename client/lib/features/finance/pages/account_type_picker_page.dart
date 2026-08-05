@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 
-import '../models/account_type_definition.dart';
-import 'account_add_page.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/features/finance/pages/account_add_page.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 

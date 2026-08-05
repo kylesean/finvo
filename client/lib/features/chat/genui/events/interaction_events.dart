@@ -24,8 +24,8 @@ library;
 
 import 'package:genui/genui.dart' as genui;
 
-import 'event_names.dart';
-import 'space_events.dart';
+import 'package:finvo/features/chat/genui/events/event_names.dart';
+import 'package:finvo/features/chat/genui/events/space_events.dart';
 
 /// Safely convert wire amount field (num or String) to double.
 double _amountToDouble(Object? raw) {

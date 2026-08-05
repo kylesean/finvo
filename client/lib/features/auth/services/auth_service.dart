@@ -4,34 +4,39 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
-import '../../../core/network/network_client.dart';
+import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/features/auth/models/user.dart';
 import 'package:finvo/core/utils/map_require.dart';
 import 'package:finvo/core/services/server_config_service.dart';
-import '../../../shared/services/timezone_service.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/shared/services/timezone_service.dart';
 
 class AuthService {
   final NetworkClient _networkClient;
   final TimezoneService _timezoneService;
-  final FlutterSecureStorage _storage;
+  final SecureStorageService _storageService;
   final SharedPreferences _prefs;
   final _logger = Logger('AuthService');
 
-  // Keys for secure storage
-  static const String _tokenKey = 'auth_token';
-  static const String _refreshTokenKey = 'auth_refresh_token';
-  static const String _userIdKey = 'user_id'; // Store user ID securely
-
-  // Keys for shared preferences
+  // Keys for shared preferences (non-sensitive user data)
+  static const String _userIdKey = 'user_id';
   static const String _userNameKey = 'user_name';
   static const String _userEmailKey = 'user_email';
   static const String _userPhoneKey = 'user_phone';
 
-  AuthService(this._networkClient, this._timezoneService, this._prefs)
-    : _storage = const FlutterSecureStorage();
+  /// [storageService] is the single secure-storage entry point for
+  /// credentials. Previously this class kept its own `FlutterSecureStorage`
+  /// instance (default namespace) alongside `SecureStorageService` (Finvo_
+  /// namespace) — a dual-write scheme whose cleanup paths could diverge,
+  /// leaving tokens behind after logout/session expiry.
+  AuthService(
+    this._networkClient,
+    this._timezoneService,
+    this._prefs,
+    this._storageService,
+  );
 
   // Helper to save authentication data
   Future<void> _saveAuthData(
@@ -39,23 +44,14 @@ class AuthService {
     String refreshToken,
     UserModel user,
   ) async {
-    // Save sensitive data to secure storage. Deliberately fail closed: if
-    // Keychain/Keystore is unavailable, throw instead of falling back to
-    // plaintext SharedPreferences (product decision for P1-1).
-    try {
-      await _storage.write(key: _tokenKey, value: token);
-      await _storage.write(key: _refreshTokenKey, value: refreshToken);
-      await _storage.write(key: _userIdKey, value: user.id);
-    } catch (e) {
-      _logger.severe(
-        'SecureStorage write failed, refusing plaintext fallback: $e',
-      );
-      throw SecureStorageUnavailableException(
-        'Failed to store credentials securely on this device.',
-      );
-    }
+    // Save sensitive data through the single secure-storage entry point.
+    // Deliberately fail closed: if Keychain/Keystore is unavailable, throw
+    // instead of falling back to plaintext SharedPreferences.
+    await _storageService.saveToken(token);
+    await _storageService.saveRefreshToken(refreshToken);
 
     // Save non-sensitive data to shared preferences
+    await _prefs.setString(_userIdKey, user.id);
     await _prefs.setString(_userNameKey, user.username?.toString() ?? '');
     if (user.email != null) {
       await _prefs.setString(_userEmailKey, user.email!);
@@ -72,17 +68,15 @@ class AuthService {
 
   // Helper to delete authentication data
   Future<void> _deleteAuthData() async {
-    // Clear sensitive data from secure storage
+    // Clear sensitive data through the single secure-storage entry point
     try {
-      await _storage.delete(key: _tokenKey);
-      await _storage.delete(key: _refreshTokenKey);
-      await _storage.delete(key: _userIdKey);
-    } catch (e) {
-      _logger.warning('SecureStorage delete failed: $e');
+      await _storageService.deleteToken();
+      await _storageService.deleteRefreshToken();
+    } catch (e, stackTrace) {
+      _logger.warning('SecureStorage delete failed', e, stackTrace);
     }
 
     // Clear non-sensitive data from shared preferences
-    await _prefs.remove(_tokenKey);
     await _prefs.remove(_userIdKey);
     await _prefs.remove(_userNameKey);
     await _prefs.remove(_userEmailKey);
@@ -97,11 +91,13 @@ class AuthService {
     String? token;
     String? userId;
     try {
-      token = await _storage.read(key: _tokenKey);
-      userId = await _storage.read(key: _userIdKey);
-    } catch (e) {
+      token = await _storageService.getToken();
+      userId = _prefs.getString(_userIdKey);
+    } catch (e, stackTrace) {
       _logger.severe(
-        'SecureStorage read failed, refusing plaintext fallback: $e',
+        'SecureStorage read failed, refusing plaintext fallback',
+        e,
+        stackTrace,
       );
       throw SecureStorageUnavailableException(
         'Failed to read credentials from secure storage on this device.',
@@ -129,6 +125,13 @@ class AuthService {
     return null;
   }
 
+  /// Detect account type from its format. Mirrors the registration UI which
+  /// accepts either a phone number or an email address.
+  static String _accountType(String account) {
+    final phoneRegex = RegExp(r'^1[3-9]\d{9}$');
+    return phoneRegex.hasMatch(account.trim()) ? 'phone' : 'email';
+  }
+
   Future<({UserModel user, String token})> login(
     String account,
     String password,
@@ -142,7 +145,7 @@ class AuthService {
       data: {
         'account': account,
         'password': password,
-        'type': 'email',
+        'type': _accountType(account),
         'timezone': timezone, // Add timezone information
       },
       fromJsonT: (json) => json as Map<String, dynamic>,
@@ -167,7 +170,7 @@ class AuthService {
     await _networkClient.request<void>(
       '/auth/send-code',
       method: HttpMethod.post,
-      data: {'account': account, 'type': 'email'},
+      data: {'account': account, 'type': _accountType(account)},
     );
     _logger.info('Verification code sent to $account (API call successful)');
   }
@@ -188,7 +191,7 @@ class AuthService {
       '/auth/register',
       method: HttpMethod.post,
       data: {
-        'type': 'email',
+        'type': _accountType(account),
         'account': account,
         'password': password,
         'code': verificationCode,
@@ -233,8 +236,8 @@ class AuthService {
       final locale = Platform.localeName;
       _logger.fine('Device locale detected: $locale');
       return locale;
-    } catch (e) {
-      _logger.warning('Failed to get device locale: $e');
+    } catch (e, stackTrace) {
+      _logger.warning('Failed to get device locale', e, stackTrace);
       return 'zh_CN'; // Fallback to Chinese
     }
   }
@@ -257,5 +260,6 @@ final authServiceProvider = Provider<AuthService>((ref) {
     timezoneServiceProvider,
   ); // Get timezone service
   final prefs = ref.watch(sharedPreferencesProvider);
-  return AuthService(networkClient, timezoneService, prefs);
+  final storageService = ref.watch(secureStorageServiceProvider);
+  return AuthService(networkClient, timezoneService, prefs, storageService);
 });

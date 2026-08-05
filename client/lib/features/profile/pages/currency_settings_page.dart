@@ -7,7 +7,7 @@ import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../providers/financial_settings_provider.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 
 class CurrencySettingsPage extends ConsumerWidget {
   const CurrencySettingsPage({super.key});

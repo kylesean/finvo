@@ -8,14 +8,13 @@ import 'package:finvo/shared/widgets/dialogs/action_bottom_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import 'package:timeago/timeago.dart' as timeago;
-import 'package:intl/intl.dart';
-import '../models/transaction_model.dart';
-import '../widgets/feed/comment_section_widget.dart';
-import '../widgets/feed/comment_input_bar.dart';
-import '../widgets/feed/attachment_section_widget.dart';
-import '../providers/transaction_detail_provider.dart';
-import '../widgets/transaction_detail_skeleton.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/widgets/feed/comment_section_widget.dart';
+import 'package:finvo/features/home/widgets/feed/comment_input_bar.dart';
+import 'package:finvo/features/home/widgets/feed/attachment_section_widget.dart';
+import 'package:finvo/features/home/providers/transaction_detail_provider.dart';
+import 'package:finvo/features/home/widgets/transaction_detail_skeleton.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/core/constants/category_constants.dart';
@@ -184,10 +183,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          timeago.format(
-                                            transaction.timestamp,
-                                            locale: 'zh_CN',
-                                          ),
+                                          relativeTime(transaction.timestamp),
                                           style: theme.typography.body.sm
                                               .copyWith(
                                                 color: colors.mutedForeground,
@@ -229,8 +225,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                   child: AmountText.large(
                                     amount: transaction.amount,
                                     type: transaction.type,
-                                    currency:
-                                        transaction.paymentMethod ?? 'CNY',
+                                    currency: transaction.currency ?? 'CNY',
                                   ),
                                 ),
                               ),
@@ -322,10 +317,9 @@ class TransactionDetailPage extends ConsumerWidget {
                                 icon: FLucideIcons.calendarClock,
                                 label: t.transaction.time,
                                 valueWidget: Text(
-                                  DateFormat(
-                                    'yyyy年M月d日 HH:mm:ss',
-                                    'zh_CN',
-                                  ).format(transaction.timestamp),
+                                  appDateTimeFormat().format(
+                                    transaction.timestamp,
+                                  ),
                                   style: theme.typography.body.sm.copyWith(
                                     color: colors.foreground,
                                     fontWeight: FontWeight.normal,
@@ -674,7 +668,7 @@ class TransactionDetailPage extends ConsumerWidget {
           accounts: accounts,
           selectedId: currentAccountId,
           title: t.transaction.selectLinkedAccount,
-          transactionCurrency: transaction.paymentMethod ?? 'CNY',
+          transactionCurrency: transaction.currency ?? 'CNY',
           onSelect: (id) => Navigator.pop(context, id),
           onConfirm: () {},
         ),

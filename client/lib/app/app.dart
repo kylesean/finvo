@@ -4,16 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
-import 'assets/app_vectors.dart';
+import 'package:finvo/app/assets/app_vectors.dart';
 
-import '../app/router/app_router.dart';
+import 'package:finvo/app/router/app_router.dart';
 
-import '../app/theme/app_font_config.dart';
-import '../app/theme/theme_provider.dart';
-import '../app/theme/app_theme_pair_provider.dart';
-import '../features/auth/providers/auth_provider.dart';
-import '../features/notification/providers/notification_provider.dart';
-import '../i18n/strings.g.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
+import 'package:finvo/app/theme/theme_provider.dart';
+import 'package:finvo/app/theme/app_theme_pair_provider.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/features/home/providers/home_providers.dart';
+import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
@@ -26,6 +27,10 @@ class MyApp extends ConsumerWidget {
     // Hold the WebSocket notification service (keepAlive) so the long-lived
     // connection is not torn down after this frame completes.
     ref.watch(notificationWsProvider);
+
+    // Keep the cross-feature transaction event subscription alive so the
+    // home feature refreshes when other features (e.g. chat) create data.
+    ref.watch(transactionEventSubscriberProvider);
 
     return MaterialApp.router(
       title: 'Finvo',

@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../models/chat_message.dart';
-import '../models/tool_call_info.dart';
-import '../providers/chat_history_provider.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/models/tool_call_info.dart';
+import 'package:finvo/features/chat/providers/chat_history_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 part 'conversation_expense_provider.g.dart';

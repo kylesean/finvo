@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -147,7 +148,7 @@ class MentionPickerWidget extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  '记录人',
+                                  t.comment.recordedBy,
                                   style: theme.typography.body.xs.copyWith(
                                     color: colors.primary,
                                     fontSize: 10,

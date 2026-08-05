@@ -6,10 +6,10 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
-import '../atoms/budget_progress_bar.dart';
-import '../../../../shared/widgets/app_card.dart';
+import 'package:finvo/features/chat/genui/atoms/budget_progress_bar.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 
-import '../utils/genui_num_utils.dart';
+import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class BudgetItemCard extends ConsumerWidget {

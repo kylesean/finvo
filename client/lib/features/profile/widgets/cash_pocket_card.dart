@@ -7,8 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
 import 'package:decimal/decimal.dart';
-import '../providers/financial_account_provider.dart';
-import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 
 class CashPocketCard extends ConsumerStatefulWidget {
   const CashPocketCard({super.key});

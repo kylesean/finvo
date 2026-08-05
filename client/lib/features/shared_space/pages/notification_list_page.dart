@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../providers/notification_provider.dart';
-import '../providers/shared_space_provider.dart';
-import '../widgets/notification_card.dart';
-import '../models/shared_space_models.dart';
-import '../../../shared/services/toast_service.dart';
+import 'package:finvo/features/shared_space/providers/notification_provider.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
+import 'package:finvo/features/shared_space/widgets/notification_card.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/shared/services/toast_service.dart';
 
 class NotificationListPage extends ConsumerStatefulWidget {
   const NotificationListPage({super.key});
@@ -220,6 +220,9 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
         if (spaceId != null) {
           unawaited(context.push('/profile/shared-space/$spaceId/settings'));
         }
+        break;
+      case NotificationType.other:
+        // Unknown notification type; no dedicated navigation.
         break;
     }
   }

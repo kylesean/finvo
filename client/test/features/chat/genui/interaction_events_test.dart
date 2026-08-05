@@ -1,5 +1,6 @@
 import 'package:finvo/features/chat/genui/events/interaction_events.dart';
 import 'package:finvo/features/chat/genui/genui_event_registry.dart';
+import 'package:finvo/features/chat/models/client_state_mutation.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 

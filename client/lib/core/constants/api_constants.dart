@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/server_config_service.dart';
+import 'package:finvo/core/services/server_config_service.dart';
 
 /// API Configuration Constants
 ///
@@ -52,16 +52,6 @@ class ApiConstants {
     return '';
   }
 
-  /// Ensure server is configured before making network requests
-  /// Throws StateError if not configured
-  void ensureConfigured() {
-    if (!isConfigured) {
-      throw StateError(
-        'Server not configured. Please set server URL in settings.',
-      );
-    }
-  }
-
   /// SSE Base URL (for AI chat streaming)
   String get sseBaseUrl {
     // 1. Dynamic configuration
@@ -100,9 +90,4 @@ class ApiConstants {
 /// Provider for ApiConstants instance
 final apiConstantsProvider = Provider<ApiConstants>((ref) {
   return ApiConstants(ref);
-});
-
-/// Provider for checking if server is configured
-final isServerReadyProvider = Provider<bool>((ref) {
-  return ref.watch(apiConstantsProvider).isConfigured;
 });

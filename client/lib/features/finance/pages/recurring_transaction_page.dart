@@ -8,18 +8,18 @@ import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
-import '../models/recurring_transaction.dart';
-import '../providers/recurring_transaction_provider.dart';
-import '../services/recurring_transaction_service.dart';
-import '../widgets/recurrence_rule_sheet.dart';
-import '../widgets/account_selection_sheet.dart';
-import '../widgets/category_selection_sheet.dart';
-import '../widgets/date_picker_sheet.dart';
+import 'package:finvo/features/finance/models/recurring_transaction.dart';
+import 'package:finvo/features/finance/providers/recurring_transaction_provider.dart';
+import 'package:finvo/features/finance/services/recurring_transaction_service.dart';
+import 'package:finvo/features/finance/widgets/recurrence_rule_sheet.dart';
+import 'package:finvo/features/finance/widgets/account_selection_sheet.dart';
+import 'package:finvo/features/finance/widgets/category_selection_sheet.dart';
+import 'package:finvo/features/finance/widgets/date_picker_sheet.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../profile/providers/financial_account_provider.dart';
-import '../../../shared/widgets/app_filter_chip.dart';
-import '../../../shared/theme/form_text_styles.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/shared/widgets/app_filter_chip.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Recurring transaction create/edit page
 class RecurringTransactionPage extends ConsumerStatefulWidget {
@@ -176,8 +176,14 @@ class _RecurringTransactionPageState
       final interval = intervalMatch != null
           ? int.tryParse(intervalMatch.group(1)!) ?? 1
           : 1;
-      final dayMatch = RegExp(r'BYMONTHDAY=(\d+)').firstMatch(rule);
+      // BYMONTHDAY can be negative: -1 is the "last day of month" sentinel.
+      final dayMatch = RegExp(r'BYMONTHDAY=(-?\d+)').firstMatch(rule);
       final day = dayMatch != null ? dayMatch.group(1) : '';
+      if (day == '-1') {
+        return interval == 1
+            ? rt.monthlyLastDay
+            : rt.everyMonthsLastDay(count: interval);
+      }
       if (interval == 1) {
         return day!.isNotEmpty
             ? rt.monthlyOnDay(day: day, suffix: _monthDaySuffix(day))
@@ -953,7 +959,20 @@ class _RecurringTransactionPageState
       bool success;
 
       if (widget.editId != null) {
-        // Edit mode - call update
+        // Edit mode - call update. Fields the user cleared in the form must
+        // be sent as explicit nulls (tracked via clearedFields), otherwise
+        // the backend's exclude_unset handling would silently keep the old
+        // values and the user's clearing would have no effect.
+        final cleared = <UpdateClearableField>{};
+        if (_endDate == null) cleared.add(UpdateClearableField.endDate);
+        if (_tags.isEmpty) cleared.add(UpdateClearableField.tags);
+        if (_descriptionController.text.isEmpty) {
+          cleared.add(UpdateClearableField.description);
+        }
+        if (_targetAccountId == null) {
+          cleared.add(UpdateClearableField.targetAccountId);
+        }
+
         final updateRequest = RecurringTransactionUpdateRequest(
           type: _selectedType,
           amount: amount,
@@ -970,6 +989,7 @@ class _RecurringTransactionPageState
               ? null
               : _descriptionController.text,
           isActive: _isActive,
+          clearedFields: cleared,
         );
         success = await ref
             .read(recurringTransactionProvider.notifier)

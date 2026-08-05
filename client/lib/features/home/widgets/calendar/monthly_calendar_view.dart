@@ -9,6 +9,7 @@ import 'package:forui/forui.dart'; // Import forui
 import 'package:intl/intl.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/utils/heat_colors.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 
@@ -48,7 +49,8 @@ class MonthlyCalendarView extends ConsumerWidget {
     );
   }
 
-  // Helper method: Get color for the bottom trend strip (logic similar to cell background)
+  // Helper method: Get color for the bottom trend strip (logic similar to cell
+  // background, using the shared strip alpha table).
   Color _getStripColorForHeatLevel(
     BuildContext context,
     ExpenseHeatLevel level,
@@ -56,30 +58,13 @@ class MonthlyCalendarView extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
     final isDark = colors.brightness == Brightness.dark;
-    final baseHotColor = colors.primary;
-    final baseColdBackgroundColor = colors.background; // Use background color
-
-    switch (level) {
-      case ExpenseHeatLevel.none: // Usually not shown in the trend strip
-        return Colors.transparent;
-      case ExpenseHeatLevel.low:
-        return Color.alphaBlend(
-          baseHotColor.withValues(alpha: isDark ? 0.15 : 0.12),
-          baseColdBackgroundColor,
-        );
-      case ExpenseHeatLevel.medium:
-        return Color.alphaBlend(
-          baseHotColor.withValues(alpha: isDark ? 0.3 : 0.25),
-          baseColdBackgroundColor,
-        );
-      case ExpenseHeatLevel.high:
-        return Color.alphaBlend(
-          baseHotColor.withValues(alpha: isDark ? 0.5 : 0.45),
-          baseColdBackgroundColor,
-        );
-      case ExpenseHeatLevel.veryHigh:
-        return baseHotColor.withValues(alpha: isDark ? 0.75 : 0.7);
-    }
+    return heatLevelColor(
+      level,
+      table: HeatColorTables.strip,
+      base: colors.primary,
+      background: colors.background,
+      isDark: isDark,
+    );
   }
 
   @override

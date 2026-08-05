@@ -7,9 +7,9 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'dart:async';
 
-import '../../providers/comment_providers.dart';
-import '../../models/transaction_model.dart';
-import 'mention_picker_widget.dart';
+import 'package:finvo/features/home/providers/comment_providers.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/features/home/widgets/feed/mention_picker_widget.dart';
 
 class CommentInputBar extends ConsumerStatefulWidget {
   final String transactionId;
@@ -160,7 +160,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
         .replaceAll(RegExp(r'@[^\s]+'), '')
         .trim();
     if (bodyWithoutMentions.isEmpty) {
-      TopToast.error(context, '评论内容不能为空');
+      TopToast.error(context, t.comment.contentRequired);
       return;
     }
 
@@ -276,7 +276,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                     Icon(FLucideIcons.reply, size: 13, color: colors.primary),
                     const SizedBox(width: 6),
                     Text(
-                      '回复 @$replyingToName',
+                      t.comment.replyToPrefix(name: replyingToName),
                       style: theme.typography.body.xs.copyWith(
                         color: colors.primary,
                         fontWeight: FontWeight.w600,

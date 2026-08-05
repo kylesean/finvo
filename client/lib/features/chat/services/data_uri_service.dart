@@ -5,8 +5,8 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
 
-import '../models/message_attachments.dart';
-import '../../../shared/utils/mime_type_mapper.dart';
+import 'package:finvo/features/chat/models/message_attachments.dart';
+import 'package:finvo/shared/utils/mime_type_mapper.dart';
 
 /// DataUri format media file wrapper
 class DataUriFile {

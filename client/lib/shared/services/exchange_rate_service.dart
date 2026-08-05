@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/network/network_client.dart';
-import '../../core/network/exceptions/app_exception.dart';
-import '../models/exchange_rate.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/shared/models/exchange_rate.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 
 class ExchangeRateService {
   final NetworkClient _networkClient;
@@ -12,15 +12,8 @@ class ExchangeRateService {
     return await _networkClient.request<ExchangeRateResponse>(
       '/exchange-rates',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            return ExchangeRateResponse.fromJson(data);
-          }
-        }
-        throw DataParsingException('Invalid exchange rate response format');
-      },
+      fromJsonT: (json) =>
+          ResponseParser.parseItem(json, ExchangeRateResponse.fromJson),
     );
   }
 }

@@ -5,13 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../models/shared_space_models.dart';
-import '../../services/shared_space_service.dart';
-import '../../providers/shared_space_provider.dart';
-import '../../../notification/providers/notification_provider.dart';
-import '../../../../shared/services/toast_service.dart';
-import '../../../../core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/features/shared_space/services/shared_space_service.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
+import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('SpaceInviteCodeSheet');
 
 /// Bottom sheet that shows invite code for current space AND allows joining
 /// another space via invite code.
@@ -88,7 +91,7 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
         });
       }
     } catch (e) {
-      debugPrint('[SpaceInviteCodeSheet] Error: $e');
+      _logger.severe('Failed to load invite code', e);
       if (mounted) {
         setState(() {
           _error = t.sharedSpace.detail.loadFailed;

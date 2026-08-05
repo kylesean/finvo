@@ -1,6 +1,40 @@
 import 'package:decimal/decimal.dart';
-import '../../../core/constants/category_constants.dart';
+import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
+
+/// Shared compact budget amount formatting: localized 万-suffix + thousands
+/// separators + trailing `.00` omission + negative sign.
+///
+/// Previously duplicated (with inconsistent behavior — the detail page dropped
+/// the separators and swallowed the sign) in the overview and detail pages.
+String formatBudgetCompactAmount(Decimal amount) {
+  final value = double.tryParse(amount.toString()) ?? 0.0;
+  final absValue = value.abs();
+
+  if (absValue >= 10000) {
+    return '${(absValue / 10000).toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
+  }
+
+  final parts = absValue.toStringAsFixed(2).split('.');
+  final intPart = parts[0];
+  final decPart = parts[1];
+
+  var formatted = '';
+  var count = 0;
+  for (int i = intPart.length - 1; i >= 0; i--) {
+    if (count > 0 && count % 3 == 0) {
+      formatted = ',$formatted';
+    }
+    formatted = intPart[i] + formatted;
+    count++;
+  }
+
+  final sign = value < 0 ? '-' : '';
+  if (decPart == '00') {
+    return '$sign$formatted';
+  }
+  return '$sign$formatted.$decPart';
+}
 
 enum BudgetScope {
   total('TOTAL'),
@@ -95,6 +129,11 @@ class Budget {
   final Decimal amount;
   final String currencyCode;
   final BudgetPeriodType periodType;
+
+  /// Day of month (1-31) when a new budget period starts.
+  /// Defaults to 1 to match the backend server_default.
+  final int periodAnchorDay;
+
   final BudgetStatus status;
   final bool rolloverEnabled;
   final Decimal rolloverBalance;
@@ -109,6 +148,7 @@ class Budget {
     required this.amount,
     required this.currencyCode,
     required this.periodType,
+    this.periodAnchorDay = 1,
     required this.status,
     required this.rolloverEnabled,
     required this.rolloverBalance,
@@ -132,6 +172,7 @@ class Budget {
       amount: Decimal.parse(json['amount'].toString()),
       currencyCode: json['currency_code'] as String? ?? 'CNY',
       periodType: BudgetPeriodType.fromString(json['period_type'] as String),
+      periodAnchorDay: json['period_anchor_day'] as int? ?? 1,
       status: BudgetStatus.fromString(json['status'] as String),
       rolloverEnabled: json['rollover_enabled'] as bool? ?? true,
       rolloverBalance: Decimal.parse(
@@ -151,6 +192,7 @@ class Budget {
       'amount': amount.toString(),
       'currency_code': currencyCode,
       'period_type': periodType.value,
+      'period_anchor_day': periodAnchorDay,
       'status': status.value,
       'rollover_enabled': rolloverEnabled,
       'rollover_balance': rolloverBalance.toString(),

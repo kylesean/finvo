@@ -9,8 +9,8 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
-import '../../../../core/constants/category_constants.dart';
-import '../utils/genui_num_utils.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Budget analysis card (Layer 4: Template)

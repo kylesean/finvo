@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:forui/forui.dart';
-import '../../../i18n/strings.g.dart';
-import '../models/statistics_models.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Category detail bottom sheet showing all categories

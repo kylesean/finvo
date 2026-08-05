@@ -3,33 +3,33 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:genui/genui.dart' as genui;
 import 'package:finvo/i18n/strings.g.dart';
-import '../models/chat_history_state.dart';
-import '../models/chat_message.dart';
-import '../models/chat_message_attachment.dart';
-import '../models/message_attachments.dart';
-import '../models/tool_call_info.dart';
+import 'package:finvo/features/chat/models/chat_history_state.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/models/chat_message_attachment.dart';
+import 'package:finvo/features/chat/models/message_attachments.dart';
+import 'package:finvo/features/chat/models/tool_call_info.dart';
 
-import '../services/ai_service.dart';
-import '../services/genui_service.dart';
+import 'package:finvo/features/chat/services/ai_service.dart';
+import 'package:finvo/features/chat/services/genui_service.dart';
 
-import '../../../core/network/exceptions/app_exception.dart';
-import '../../../core/storage/secure_storage_service.dart';
-import '../services/conversation_service.dart';
-import '../services/file_attachment_service.dart';
-import '../providers/paginated_conversation_provider.dart';
-import '../providers/conversation_expense_provider.dart';
-import '../models/conversation_info.dart';
-import '../../home/providers/home_providers.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/features/chat/services/conversation_service.dart';
+import 'package:finvo/features/chat/services/file_attachment_service.dart';
+import 'package:finvo/features/chat/providers/paginated_conversation_provider.dart';
+import 'package:finvo/features/chat/providers/conversation_expense_provider.dart';
+import 'package:finvo/features/chat/models/conversation_info.dart';
+import 'package:finvo/core/events/domain_events.dart';
 
-import '../state_controllers/stream_state_controller.dart';
-import '../state_controllers/streaming_controller.dart';
-import '../repositories/message_repository.dart';
-import '../services/historical_message_processor.dart';
-import '../services/attachment_manager.dart';
-import '../services/genui_lifecycle_manager.dart';
-import '../services/chat_interaction_manager.dart';
-import '../../../core/network/dio_provider.dart' show sseDioProvider;
-import '../../../core/constants/api_constants.dart';
+import 'package:finvo/features/chat/state_controllers/stream_state_controller.dart';
+import 'package:finvo/features/chat/state_controllers/streaming_controller.dart';
+import 'package:finvo/features/chat/repositories/message_repository.dart';
+import 'package:finvo/features/chat/services/historical_message_processor.dart';
+import 'package:finvo/features/chat/services/attachment_manager.dart';
+import 'package:finvo/features/chat/services/genui_lifecycle_manager.dart';
+import 'package:finvo/features/chat/services/chat_interaction_manager.dart';
+import 'package:finvo/core/network/dio_provider.dart' show sseDioProvider;
+import 'package:finvo/core/constants/api_constants.dart';
 
 part 'chat_history_provider.g.dart';
 
@@ -222,7 +222,7 @@ class ChatHistory extends _$ChatHistory {
 
     if (isNewSession) {
       state = state.copyWith(currentConversationId: sessionId);
-      final newTitle = state.currentConversationTitle ?? 'New Chat';
+      final newTitle = state.currentConversationTitle ?? t.chat.newChat;
       ref
           .read(paginatedConversationProvider.notifier)
           .addNewSession(
@@ -322,19 +322,25 @@ class ChatHistory extends _$ChatHistory {
   }
 
   /// Handle transaction created event
+  ///
+  /// Publishes a domain event instead of invalidating home providers
+  /// directly: the home feature subscribes to the event bus and refreshes
+  /// its own data, keeping feature boundaries intact.
   void _handleTransactionCreated(
     double amount,
     String transactionType,
     String currency,
   ) {
-    unawaited(ref.read(transactionFeedProvider.notifier).refreshFeed());
-    ref.invalidate(totalExpenseProvider);
-    final currentMonth = ref.read(currentDisplayMonthProvider);
-    ref.invalidate(calendarMonthDataProvider(currentMonth));
-    final selectedDate = ref.read(selectedDateProvider);
-    if (selectedDate != null) {
-      ref.invalidate(transactionsForSelectedDateProvider(selectedDate));
-    }
+    ref
+        .read(transactionCreatedEventsProvider)
+        .add(
+          TransactionCreatedEvent(
+            amount: amount,
+            transactionType: transactionType,
+            currency: currency,
+            occurredAt: DateTime.now(),
+          ),
+        );
   }
 
   /// Handle text response from GenUI
@@ -375,7 +381,7 @@ class ChatHistory extends _$ChatHistory {
       messages: [],
       isLoadingHistory: true,
       historyError: null,
-      currentConversationTitle: 'Loading...',
+      currentConversationTitle: t.common.loading,
       isStreamingResponse: false,
     );
 
@@ -386,6 +392,17 @@ class ChatHistory extends _$ChatHistory {
       final conversationService = ref.read(conversationServiceProvider);
       final conversationDetail = await conversationService
           .getConversationDetail(conversationId);
+
+      // Guard against the switch-race: if the user switched to another
+      // conversation while this request was in flight, a stale response must
+      // not overwrite the newer conversation's messages/title.
+      if (conversationId != state.currentConversationId) {
+        _logger.info(
+          'ChatHistory: discarding stale conversation detail for $conversationId '
+          '(current is ${state.currentConversationId})',
+        );
+        return;
+      }
 
       final processedMessages = _processHistoricalMessages(
         conversationDetail.messages,
@@ -403,11 +420,14 @@ class ChatHistory extends _$ChatHistory {
 
       await _checkAndResumeIfNeeded(conversationId);
     } catch (e) {
-      state = state.copyWith(
-        isLoadingHistory: false,
-        historyError: e.toString(),
-        currentConversationTitle: t.common.loadFailed,
-      );
+      // Only surface errors for the conversation that is still current.
+      if (conversationId == state.currentConversationId) {
+        state = state.copyWith(
+          isLoadingHistory: false,
+          historyError: e.toString(),
+          currentConversationTitle: t.common.loadFailed,
+        );
+      }
     }
   }
 
@@ -435,7 +455,7 @@ class ChatHistory extends _$ChatHistory {
     if (_genUiService != null && _genUiService!.isInitialized) {
       _genUiService!.conversation.clearSession();
     }
-    state = const ChatHistoryState(currentConversationTitle: 'New Chat');
+    state = ChatHistoryState(currentConversationTitle: t.chat.newChat);
     ref.read(conversationExpenseProvider.notifier).switchConversation(null);
   }
 
@@ -471,12 +491,11 @@ class ChatHistory extends _$ChatHistory {
     _messageRepository.updateMessageId(oldId, newId);
   }
 
-  void _handleStreamError(dynamic error) {
+  void _handleStreamError(Object error) {
     final errorMessageText = error is AppException
         ? error.message
         : 'An unknown error occurred: ${error.toString()}';
-    final displayError =
-        'Sorry, AI assistant communication error: $errorMessageText';
+    final displayError = t.chat.aiCommunicationError(error: errorMessageText);
 
     final currentText = state.messages
         .firstWhere(

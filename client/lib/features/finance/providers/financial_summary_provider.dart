@@ -1,8 +1,8 @@
 import 'package:decimal/decimal.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../profile/models/financial_account.dart';
-import '../../profile/providers/financial_account_provider.dart';
-import '../../../shared/providers/exchange_rate_provider.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 
 part 'financial_summary_provider.g.dart';
 
@@ -13,12 +13,18 @@ class FinancialSummary {
   final String currencyCode;
   final bool isLoading;
 
+  /// Currency codes of accounts excluded from the totals because no exchange
+  /// rate was available for them. Empty when every account converted cleanly.
+  /// UI layers can surface a hint instead of silently treating them as zero.
+  final Set<String> missingRateCurrencies;
+
   const FinancialSummary({
     required this.totalNetWorth,
     required this.totalAssets,
     required this.totalLiabilities,
     required this.currencyCode,
     this.isLoading = false,
+    this.missingRateCurrencies = const {},
   });
 
   static final empty = FinancialSummary(
@@ -60,23 +66,40 @@ class FinancialSummaryNotifier extends _$FinancialSummaryNotifier {
     var totalAssets = Decimal.zero;
     var totalLiabilities = Decimal.zero;
     var totalNetWorth = Decimal.zero;
+    final missingRateCurrencies = <String>{};
 
     for (final account in accountsState.accounts) {
+      // Keep the eligibility rules aligned with _netWorthOf in
+      // financial_account_provider: only active accounts opted into net
+      // worth contribute to the totals.
+      if (account.status != AccountStatus.active) continue;
       if (!account.includeInNetWorth) continue;
 
       final currency = account.currencyCode;
 
-      final convertedAmount =
-          ratesNotifier.convert(
-            account.currentBalance ?? account.initialBalance,
-            currency,
-            targetCurrency,
-          ) ??
-          Decimal.zero;
+      final convertedAmount = ratesNotifier.convert(
+        account.currentBalance ?? account.initialBalance,
+        currency,
+        targetCurrency,
+      );
+
+      if (convertedAmount == null) {
+        // No usable exchange rate for this currency: exclude the account
+        // from the totals entirely rather than silently counting it as 0,
+        // and record it so the UI can warn the user.
+        missingRateCurrencies.add(currency);
+        continue;
+      }
 
       if (account.nature == FinancialNature.liability) {
-        totalLiabilities += convertedAmount;
-        totalNetWorth -= convertedAmount;
+        // Liability balances may arrive as negative values depending on the
+        // backend convention. Take the absolute value so that a negative
+        // liability never inflates net worth (subtracting a negative would
+        // add to it). Both the liability total and the net-worth deduction
+        // use the same magnitude.
+        final absAmount = convertedAmount.abs();
+        totalLiabilities += absAmount;
+        totalNetWorth -= absAmount;
       } else {
         totalAssets += convertedAmount;
         totalNetWorth += convertedAmount;
@@ -89,6 +112,7 @@ class FinancialSummaryNotifier extends _$FinancialSummaryNotifier {
       totalLiabilities: totalLiabilities,
       currencyCode: targetCurrency,
       isLoading: false,
+      missingRateCurrencies: missingRateCurrencies,
     );
   }
 }
@@ -100,6 +124,7 @@ extension FinancialSummaryCopy on FinancialSummary {
     Decimal? totalLiabilities,
     String? currencyCode,
     bool? isLoading,
+    Set<String>? missingRateCurrencies,
   }) {
     return FinancialSummary(
       totalNetWorth: totalNetWorth ?? this.totalNetWorth,
@@ -107,6 +132,8 @@ extension FinancialSummaryCopy on FinancialSummary {
       totalLiabilities: totalLiabilities ?? this.totalLiabilities,
       currencyCode: currencyCode ?? this.currencyCode,
       isLoading: isLoading ?? this.isLoading,
+      missingRateCurrencies:
+          missingRateCurrencies ?? this.missingRateCurrencies,
     );
   }
 }

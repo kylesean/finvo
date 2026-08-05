@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/features/notification/providers/notification_provider.dart';
 
 part 'server_config_provider.freezed.dart';
 
@@ -35,37 +36,6 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     return const ServerConfigState.notConfigured();
   }
 
-  /// Validate and test connection to a server URL
-  Future<bool> testConnection(String url) async {
-    final configService = ref.read(serverConfigServiceProvider);
-
-    // Validate URL format first
-    final validationError = configService.validateUrl(url);
-    if (validationError != null) {
-      state = ServerConfigState.error(validationError);
-      return false;
-    }
-
-    state = const ServerConfigState.checking();
-
-    // Check health
-    final result = await configService.checkHealth(url);
-
-    if (result.isHealthy) {
-      state = ServerConfigState.configured(
-        serverUrl: url,
-        version: result.version,
-        environment: result.environment,
-      );
-      return true;
-    } else {
-      state = ServerConfigState.error(
-        result.errorMessage ?? 'Connection failed',
-      );
-      return false;
-    }
-  }
-
   /// Save the server URL and mark as configured
   ///
   /// If switching to a different server, local authentication data
@@ -93,6 +63,11 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     ref.invalidate(isServerConfiguredProvider);
     ref.invalidate(apiBaseUrlProvider);
     ref.invalidate(serverUrlProvider);
+
+    // Rebuild the notification WebSocket: it captures the baseUrl once at
+    // build time, so without this invalidation it would keep connecting to
+    // (and reconnect-looping towards) the old server after a server switch.
+    ref.invalidate(notificationWsProvider);
   }
 
   /// Clear server configuration
@@ -107,6 +82,7 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     ref.invalidate(isServerConfiguredProvider);
     ref.invalidate(apiBaseUrlProvider);
     ref.invalidate(serverUrlProvider);
+    ref.invalidate(notificationWsProvider);
   }
 
   /// Reset to initial state (for retry)

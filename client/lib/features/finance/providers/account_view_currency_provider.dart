@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 
 part 'account_view_currency_provider.freezed.dart';
 part 'account_view_currency_provider.g.dart';

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../models/shared_space_models.dart';
-import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationModel notification;
@@ -179,6 +180,8 @@ class NotificationCard extends StatelessWidget {
         return FLucideIcons.userCheck;
       case NotificationType.memberLeft:
         return FLucideIcons.userMinus;
+      case NotificationType.other:
+        return FLucideIcons.bell;
     }
   }
 
@@ -196,22 +199,13 @@ class NotificationCard extends StatelessWidget {
         return Colors.teal;
       case NotificationType.memberLeft:
         return Colors.red;
+      case NotificationType.other:
+        return Colors.grey;
     }
   }
 
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) return t.sharedSpace.notificationCard.unknownTime;
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays} days ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} hours ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} minutes ago';
-    } else {
-      return t.sharedSpace.notificationCard.justNow;
-    }
+    return relativeTime(dateTime);
   }
 }

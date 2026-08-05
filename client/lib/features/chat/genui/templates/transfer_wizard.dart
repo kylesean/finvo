@@ -4,10 +4,10 @@ import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
-import '../organisms/organisms.dart';
+import 'package:finvo/features/chat/genui/organisms/organisms.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../services/genui_cache_service.dart';
-import '../events/interaction_events.dart';
+import 'package:finvo/features/chat/services/genui_cache_service.dart';
+import 'package:finvo/features/chat/genui/events/interaction_events.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 

@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'chat_message.dart'; // Import ChatMessage model
+import 'package:finvo/features/chat/models/chat_message.dart';
 
 part 'conversation_detail.freezed.dart';
 

@@ -10,16 +10,16 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/models/currency.dart';
-import '../providers/financial_settings_provider.dart';
-import '../providers/user_profile_provider.dart';
-import '../models/user_info.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/profile/providers/user_profile_provider.dart';
+import 'package:finvo/features/profile/models/user_info.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
-import '../../auth/providers/auth_provider.dart';
-import '../../../core/services/server_config_service.dart';
-import '../../version/providers/version_provider.dart';
-import '../../version/services/app_version_service.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/core/services/server_config_service.dart';
+import 'package:finvo/features/version/providers/version_provider.dart';
+import 'package:finvo/features/version/services/app_version_service.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -592,7 +592,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '当前版本: v${updateInfo.currentVersion}',
+                  t.settings.currentVersion(version: updateInfo.currentVersion),
                   style: dialogStyle.bodyTextStyle.copyWith(fontSize: 12),
                 ),
                 if (updateInfo.changelog.isNotEmpty) ...[

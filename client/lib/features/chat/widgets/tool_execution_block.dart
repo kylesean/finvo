@@ -1,8 +1,8 @@
 // features/chat/widgets/tool_execution_block.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import '../models/tool_call_info.dart';
-import '../../../i18n/strings.g.dart';
+import 'package:finvo/features/chat/models/tool_call_info.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 

@@ -81,7 +81,7 @@ abstract class FinancialAccount with _$FinancialAccount {
     required Decimal initialBalance,
 
     /// Current balance
-    @JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonOrZero)
+    @JsonKey(fromJson: _decimalOrNullFromJson, toJson: _decimalToJsonOrZero)
     Decimal? currentBalance,
 
     /// Whether to include in net worth
@@ -155,6 +155,16 @@ Decimal _decimalFromJson(dynamic value) {
 
 Decimal _decimalFromJsonNullable(dynamic value) {
   if (value == null) return Decimal.zero;
+  return _decimalFromJson(value);
+}
+
+/// Like [_decimalFromJsonNullable] but returns `null` (instead of zero) when
+/// the JSON value is absent. Used for fields where null is a meaningful
+/// "not yet set" state that callers distinguish from zero — e.g.
+/// [FinancialAccount.currentBalance], where null means "fall back to
+/// initialBalance" rather than "the balance is literally zero".
+Decimal? _decimalOrNullFromJson(dynamic value) {
+  if (value == null) return null;
   return _decimalFromJson(value);
 }
 

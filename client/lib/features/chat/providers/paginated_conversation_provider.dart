@@ -1,8 +1,8 @@
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../models/conversation_info.dart';
-import '../services/conversation_service.dart';
+import 'package:finvo/features/chat/models/conversation_info.dart';
+import 'package:finvo/features/chat/services/conversation_service.dart';
 
 part 'paginated_conversation_provider.freezed.dart';
 part 'paginated_conversation_provider.g.dart';

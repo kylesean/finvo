@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import '../models/media_file.dart';
-import 'media_thumbnail_service.dart';
+import 'package:finvo/features/chat/models/media_file.dart';
+import 'package:finvo/features/chat/services/media_thumbnail_service.dart';
 
 final _logger = Logger('MediaMemoryManager');
 

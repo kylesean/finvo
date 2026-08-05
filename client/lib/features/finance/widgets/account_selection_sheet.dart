@@ -7,10 +7,10 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'dart:async';
 
-import '../../profile/models/financial_account.dart';
-import '../../profile/providers/financial_account_provider.dart';
-import '../models/account_type_definition.dart';
-import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Account selection result

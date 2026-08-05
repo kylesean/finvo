@@ -9,15 +9,15 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../models/recurring_transaction.dart';
-import '../providers/recurring_transaction_provider.dart';
-import '../services/recurring_transaction_service.dart';
-import '../../../shared/models/currency.dart';
-import '../../profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/finance/models/recurring_transaction.dart';
+import 'package:finvo/features/finance/providers/recurring_transaction_provider.dart';
+import 'package:finvo/features/finance/services/recurring_transaction_service.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
-import '../../../shared/widgets/app_filter_chip.dart';
+import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Recurring transaction list page
@@ -263,13 +263,9 @@ class _RecurringTransactionListPageState
     try {
       final service = ref.read(recurringTransactionServiceProvider);
       await service.confirmPending(id);
+      if (!mounted) return;
       setState(() => _pendingTransactions.removeWhere((t) => t.id == id));
-      if (mounted) {
-        TopToast.success(
-          context,
-          t.forecast.recurringTransaction.confirmSuccess,
-        );
-      }
+      TopToast.success(context, t.forecast.recurringTransaction.confirmSuccess);
     } catch (e) {
       if (mounted) TopToast.error(context, e.toString());
     }
@@ -279,10 +275,9 @@ class _RecurringTransactionListPageState
     try {
       final service = ref.read(recurringTransactionServiceProvider);
       await service.skipPending(id);
+      if (!mounted) return;
       setState(() => _pendingTransactions.removeWhere((t) => t.id == id));
-      if (mounted) {
-        TopToast.success(context, t.forecast.recurringTransaction.skipSuccess);
-      }
+      TopToast.success(context, t.forecast.recurringTransaction.skipSuccess);
     } catch (e) {
       if (mounted) TopToast.error(context, e.toString());
     }
@@ -669,19 +664,25 @@ class _RecurringTransactionListPageState
 
     if (confirmed) {
       unawaited(HapticFeedback.mediumImpact());
-      unawaited(
-        ref
-            .read(recurringTransactionProvider.notifier)
-            .toggleActive(transaction.id, newState),
-      );
 
-      if (mounted) {
+      // Wait for the optimistic update to settle: showing the success toast
+      // before the request finishes misreports failures as successes.
+      final success = await ref
+          .read(recurringTransactionProvider.notifier)
+          .toggleActive(transaction.id, newState);
+
+      if (!mounted) return;
+      if (success) {
         TopToast.success(
           context,
           newState
               ? t.forecast.recurringTransaction.activated
               : t.forecast.recurringTransaction.paused,
         );
+      } else {
+        final message =
+            ref.read(recurringTransactionProvider).error ?? t.common.error;
+        TopToast.error(context, message);
       }
     }
   }

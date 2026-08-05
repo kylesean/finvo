@@ -1,9 +1,9 @@
 import 'package:logging/logging.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/network/dio_provider.dart' show dioProvider;
-import '../../../core/constants/api_constants.dart';
-import '../../../core/storage/secure_storage_service.dart';
+import 'package:finvo/core/network/dio_provider.dart' show dioProvider;
+import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
 
 /// AI Service for chat operations against the backend.
 ///
@@ -55,8 +55,8 @@ class AIService {
       }
       _logger.info('AIService: Cancel failed - ${response.statusMessage}');
       return false;
-    } catch (e) {
-      _logger.info('AIService: cancelLastTurn error - $e');
+    } catch (e, stackTrace) {
+      _logger.info('AIService: cancelLastTurn error', e, stackTrace);
       return false;
     }
   }

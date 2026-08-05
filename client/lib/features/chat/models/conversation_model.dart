@@ -1,11 +1,10 @@
-class Conversation {
-  final String id;
-  String title;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  Conversation({required this.id, required this.title});
+part 'conversation_model.freezed.dart';
 
-  // For simplicity, we'll just use a basic copyWith for now
-  Conversation copyWith({String? id, String? title}) {
-    return Conversation(id: id ?? this.id, title: title ?? this.title);
-  }
+/// A minimal conversation record.
+@freezed
+abstract class Conversation with _$Conversation {
+  const factory Conversation({required String id, required String title}) =
+      _Conversation;
 }

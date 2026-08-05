@@ -10,16 +10,17 @@ import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import '../models/chat_message.dart';
-import '../models/chat_message_attachment.dart';
-import '../providers/chat_history_provider.dart';
-import '../services/data_uri_service.dart';
-import 'authenticated_image.dart';
-import '../services/genui_cache_service.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/models/chat_message_attachment.dart';
+import 'package:finvo/features/chat/providers/chat_history_provider.dart';
+import 'package:finvo/features/chat/services/data_uri_service.dart';
+import 'package:finvo/features/chat/widgets/authenticated_image.dart';
+import 'package:finvo/features/chat/services/genui_cache_service.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/chat/widgets/image_preview_page.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// User message bubble widget
 /// Supports displaying text and multimedia attachments
@@ -627,7 +628,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Invalid attachment link')));
+      ).showSnackBar(SnackBar(content: Text(t.chat.invalidAttachmentLink)));
       return;
     }
 
@@ -635,7 +636,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
 
     if (!launched && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to open attachment link')),
+        SnackBar(content: Text(t.chat.unableToOpenAttachmentLink)),
       );
     }
   }

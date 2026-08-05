@@ -5,6 +5,7 @@ import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:finvo/features/home/widgets/feed/transaction_card.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
@@ -15,20 +16,11 @@ class SliverTransactionFeedView extends ConsumerWidget {
 
   // Build skeleton for a single transaction card
   Widget _buildTransactionCardSkeleton(BuildContext context) {
-    // theme variable was unused, removed
-    final brightness = Theme.of(context).brightness;
-    final isDark = brightness == Brightness.dark;
+    final semantic = context.theme.semantic;
 
-    // Increase contrast to avoid overlapping with background color
-    final Color shimmerBaseColor = isDark
-        ? const Color(0xFF2A2A2A)
-        : Colors.grey[300]!;
-    final Color shimmerHighlightColor = isDark
-        ? const Color(0xFF424242)
-        : Colors.grey[100]!;
-    final Color placeholderShapeColor = isDark
-        ? const Color(0xFF2A2A2A)
-        : Colors.grey[300]!;
+    final Color shimmerBaseColor = semantic.shimmerBase;
+    final Color shimmerHighlightColor = semantic.shimmerHighlight;
+    final Color placeholderShapeColor = semantic.shimmerBase;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -158,7 +150,7 @@ class SliverTransactionFeedView extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Failed to load: ${feedState.errorMessage}',
+                '${t.common.loadFailed}: ${feedState.errorMessage}',
                 style: AppTextStyles.listSubtitle(theme),
                 textAlign: TextAlign.center,
               ),
@@ -167,7 +159,7 @@ class SliverTransactionFeedView extends ConsumerWidget {
                 variant: .outline,
                 onPress: () =>
                     ref.read(transactionFeedProvider.notifier).refreshFeed(),
-                child: const Text('Retry'),
+                child: Text(t.common.retry),
               ),
             ],
           ),

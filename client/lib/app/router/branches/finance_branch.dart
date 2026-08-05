@@ -1,20 +1,21 @@
 // app/router/branches/finance_branch.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
-import '../app_routes.dart';
-import '../../../features/finance/pages/financial_accounts_page.dart';
-import '../../../features/finance/pages/account_sources_page.dart';
-import '../../../features/finance/pages/account_type_picker_page.dart';
-import '../../../features/finance/pages/account_add_page.dart';
-import '../../../features/finance/pages/account_edit_page.dart';
-import '../../../features/finance/pages/account_detail_page.dart';
-import '../../../features/finance/pages/recurring_transaction_list_page.dart';
-import '../../../features/finance/pages/recurring_transaction_page.dart';
-import '../../../features/budget/pages/budget_overview_page.dart';
-import '../../../features/budget/pages/budget_form_page.dart';
-import '../../../features/budget/pages/budget_settings_page.dart';
-import '../../../features/budget/pages/budget_detail_page.dart';
+import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/features/finance/pages/financial_accounts_page.dart';
+import 'package:finvo/features/finance/pages/account_sources_page.dart';
+import 'package:finvo/features/finance/pages/account_type_picker_page.dart';
+import 'package:finvo/features/finance/pages/account_add_page.dart';
+import 'package:finvo/features/finance/pages/account_edit_page.dart';
+import 'package:finvo/features/finance/pages/account_detail_page.dart';
+import 'package:finvo/features/finance/pages/recurring_transaction_list_page.dart';
+import 'package:finvo/features/finance/pages/recurring_transaction_page.dart';
+import 'package:finvo/features/budget/pages/budget_overview_page.dart';
+import 'package:finvo/features/budget/pages/budget_form_page.dart';
+import 'package:finvo/features/budget/pages/budget_settings_page.dart';
+import 'package:finvo/features/budget/pages/budget_detail_page.dart';
 
 /// The finance [StatefulShellBranch]: financial accounts, recurring
 /// transactions and budgets. Extracted to keep the root router concise.
@@ -47,8 +48,8 @@ StatefulShellBranch buildFinanceBranch() {
                 builder: (context, state) {
                   final args = state.extra as FinancialAccountAddArgs?;
                   if (args == null) {
-                    return const Scaffold(
-                      body: Center(child: Text('Account information missing')),
+                    return Scaffold(
+                      body: Center(child: Text(t.error.accountInfoMissing)),
                     );
                   }
                   return FinancialAccountAddPage(args: args);
@@ -60,8 +61,8 @@ StatefulShellBranch buildFinanceBranch() {
                 builder: (context, state) {
                   final args = state.extra as FinancialAccountEditArgs?;
                   if (args == null) {
-                    return const Scaffold(
-                      body: Center(child: Text('Account information missing')),
+                    return Scaffold(
+                      body: Center(child: Text(t.error.accountInfoMissing)),
                     );
                   }
                   return FinancialAccountEditPage(args: args);
@@ -74,8 +75,8 @@ StatefulShellBranch buildFinanceBranch() {
                 builder: (context, state) {
                   final args = state.extra as FinancialAccountDetailArgs?;
                   if (args == null) {
-                    return const Scaffold(
-                      body: Center(child: Text('Account information missing')),
+                    return Scaffold(
+                      body: Center(child: Text(t.error.accountInfoMissing)),
                     );
                   }
                   return FinancialAccountDetailPage(args: args);

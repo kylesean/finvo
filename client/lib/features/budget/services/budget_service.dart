@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/network/network_client.dart';
-import '../models/budget_models.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/budget/models/budget_models.dart';
 
 class BudgetService {
   final NetworkClient _networkClient;
@@ -175,15 +176,6 @@ class BudgetService {
       },
     );
   }
-}
-
-/// Data parsing exception
-class DataParsingException implements Exception {
-  final String message;
-  DataParsingException(this.message);
-
-  @override
-  String toString() => 'DataParsingException: $message';
 }
 
 /// BudgetService Provider

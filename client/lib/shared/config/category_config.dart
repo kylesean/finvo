@@ -49,22 +49,6 @@ class CategoryConfig {
     return _categoryIdToIcon[categoryId] ?? FLucideIcons.shoppingBag;
   }
 
-  /// Get category icon based on category name (backward compatibility)
-  static IconData getCategoryIconByName(String categoryName) {
-    // Reverse mapping from name to ID
-    const Map<String, IconData> nameToIcon = {
-      'Daily Expenses': FLucideIcons.shoppingBag,
-      'Transportation': FLucideIcons.carTaxiFront,
-      'Healthcare': FLucideIcons.briefcaseMedical,
-      'Housing': FLucideIcons.housePlus,
-      'Education': FLucideIcons.libraryBig,
-      'Income': FLucideIcons.walletCards,
-      'Social Gifts': FLucideIcons.gift,
-      'Money Transfer': FLucideIcons.folderSync,
-    };
-    return nameToIcon[categoryName] ?? FLucideIcons.shoppingBag;
-  }
-
   /// Get all categories list
   static List<CategoryItem> getAllCategories() {
     return [

@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../core/network/exceptions/app_exception.dart';
-import '../models/shared_space_models.dart';
-import '../services/shared_space_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/features/shared_space/services/shared_space_service.dart';
 
 part 'shared_space_provider.g.dart';
 

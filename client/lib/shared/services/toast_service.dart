@@ -1,7 +1,7 @@
 // shared/services/toast_service.dart
 import 'package:flutter/material.dart';
-import '../../app/router/app_router.dart';
-import '../widgets/top_toast.dart';
+import 'package:finvo/app/router/app_router.dart';
+import 'package:finvo/shared/widgets/top_toast.dart';
 
 class ToastService {
   ToastService._(); // Private constructor

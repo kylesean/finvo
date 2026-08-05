@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'app_exception.dart';
-import '../../../i18n/strings.g.dart';
-import '../../utils/error_translator.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/core/utils/error_translator.dart';
 
 /// Unified conversion of DioException to custom AppException.
 ///
@@ -22,8 +22,11 @@ class AppExceptionFactory {
       if (responseData is Map<String, dynamic>) {
         final code = responseData['code'];
         if (code is int && code != 0) {
-          final message =
-              (responseData['message'] as String?) ?? 'Unknown business error';
+          // Safe read: the backend message is not guaranteed to be a String.
+          final rawMessage = responseData['message'];
+          final message = rawMessage is String
+              ? rawMessage
+              : rawMessage?.toString() ?? 'Unknown business error';
           final localizedMessage = ErrorTranslator.translate(code, message);
           return BusinessException(localizedMessage, code);
         }

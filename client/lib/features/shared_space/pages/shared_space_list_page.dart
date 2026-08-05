@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import '../providers/shared_space_provider.dart';
-import '../models/shared_space_models.dart';
-import '../widgets/shared_space_card.dart';
-import '../widgets/create_space_sheet.dart';
-import '../widgets/join_space_sheet.dart';
-import '../../../shared/services/toast_service.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/features/shared_space/widgets/shared_space_card.dart';
+import 'package:finvo/features/shared_space/widgets/create_space_sheet.dart';
+import 'package:finvo/features/shared_space/widgets/join_space_sheet.dart';
+import 'package:finvo/shared/services/toast_service.dart';
 import 'dart:async';
 
 class SharedSpaceListPage extends ConsumerStatefulWidget {

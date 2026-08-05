@@ -4,11 +4,11 @@
 /// of the composable widget system.
 library;
 
-export 'icon_badge.dart';
-export 'amount_display.dart';
-export 'status_chip.dart';
-export 'progress_indicator.dart';
-export 'badge.dart';
-export 'tag.dart';
-export 'budget_progress_bar.dart';
-export 'empty_state_alert.dart';
+export 'package:finvo/features/chat/genui/atoms/icon_badge.dart';
+export 'package:finvo/features/chat/genui/atoms/amount_display.dart';
+export 'package:finvo/features/chat/genui/atoms/status_chip.dart';
+export 'package:finvo/features/chat/genui/atoms/progress_indicator.dart';
+export 'package:finvo/features/chat/genui/atoms/badge.dart';
+export 'package:finvo/features/chat/genui/atoms/tag.dart';
+export 'package:finvo/features/chat/genui/atoms/budget_progress_bar.dart';
+export 'package:finvo/features/chat/genui/atoms/empty_state_alert.dart';

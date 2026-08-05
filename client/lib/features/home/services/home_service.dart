@@ -56,41 +56,11 @@ class HomeService {
     );
   }
 
-  // Get transactions for a specific date (for bottom modal)
-  Future<List<TransactionModel>> getTransactionsForDate(DateTime date) async {
-    final dateStr =
-        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-
-    return await _networkClient.request<List<TransactionModel>>(
-      '/transactions',
-      method: HttpMethod.get,
-      queryParameters: {
-        'date': dateStr,
-        'size': 100,
-      }, // Fetch enough for a day view
-      fromJsonT: (json) =>
-          _parseListResponse(json, TransactionModel.fromApiJson),
-    );
-  }
-
   // Get transaction details
   Future<TransactionModel> getTransactionDetail(String transactionId) async {
     return await _networkClient.request<TransactionModel>(
       '/transactions/$transactionId',
       method: HttpMethod.get,
-      fromJsonT: (json) =>
-          _parseItemResponse(json, TransactionModel.fromApiJson),
-    );
-  }
-
-  // Create a transaction record
-  Future<TransactionModel> createTransaction(
-    Map<String, dynamic> transactionData,
-  ) async {
-    return await _networkClient.request<TransactionModel>(
-      '/transactions',
-      method: HttpMethod.post,
-      data: transactionData,
       fromJsonT: (json) =>
           _parseItemResponse(json, TransactionModel.fromApiJson),
     );

@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../models/update_info.dart';
-import '../services/app_version_service.dart';
+import 'package:finvo/features/version/models/update_info.dart';
+import 'package:finvo/features/version/services/app_version_service.dart';
 part 'version_provider.g.dart';
 
 class VersionCheckState {

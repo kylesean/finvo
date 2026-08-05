@@ -7,14 +7,15 @@ import 'package:genui/genui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
-import '../../../profile/models/financial_account.dart';
-import '../../../profile/providers/financial_account_provider.dart';
-import '../organisms/account_picker_card.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/features/chat/genui/organisms/account_picker_card.dart';
+import 'package:finvo/features/chat/genui/templates/transaction_group_receipt_sheets.dart';
 
-import '../../../../app/router/app_routes.dart';
-import '../../../../app/theme/app_semantic_colors.dart';
-import '../../../../core/network/network_client.dart';
-import '../../../../core/constants/category_constants.dart';
+import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
@@ -820,163 +821,33 @@ class _TransactionGroupReceiptState
           ),
         ),
       ).then((selectedId) async {
-        if (selectedId != null) {
-          // Get selected account
-          final selectedAccount = accountState.accounts
-              .where((a) => a.id == selectedId)
-              .firstOrNull;
+        if (selectedId == null) return;
+        if (!mounted) return;
+        // Get selected account
+        final selectedAccount = accountState.accounts
+            .where((a) => a.id == selectedId)
+            .firstOrNull;
 
-          if (selectedAccount != null) {
-            final accountCurrency = selectedAccount.currencyCode.toUpperCase();
-            final transactionCurrency = txCurrency.toUpperCase();
+        if (selectedAccount != null) {
+          final accountCurrency = selectedAccount.currencyCode.toUpperCase();
+          final transactionCurrency = txCurrency.toUpperCase();
 
-            // Currency mismatch, show confirmation dialog
-            if (accountCurrency != transactionCurrency) {
-              final confirmed = await _showCurrencyMismatchConfirmDialog(
-                txAmount ?? 0,
-                transactionCurrency,
-                accountCurrency,
-                selectedAccount.name,
-              );
+          // Currency mismatch, show confirmation dialog
+          if (accountCurrency != transactionCurrency) {
+            final confirmed = await showCurrencyMismatchConfirmDialog(
+              context,
+              amount: txAmount ?? 0,
+              fromCurrency: transactionCurrency,
+              toCurrency: accountCurrency,
+              accountName: selectedAccount.name,
+            );
 
-              if (confirmed != true) return;
-            }
+            if (confirmed != true) return;
           }
-
-          await _updateTransactionAccount(txId, selectedId);
         }
+
+        await _updateTransactionAccount(txId, selectedId);
       }),
-    );
-  }
-
-  /// Show currency mismatch confirmation dialog
-  Future<bool?> _showCurrencyMismatchConfirmDialog(
-    double amount,
-    String fromCurrency,
-    String toCurrency,
-    String accountName,
-  ) async {
-    final theme = context.theme;
-    final colors = theme.colors;
-    bool confirmed = false;
-
-    await showFDialog<void>(
-      context: context,
-      builder: (dialogContext, style, animation) => FDialog(
-        animation: animation,
-        builder: (context, dialogStyle) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    FLucideIcons.triangleAlert,
-                    color: theme.semantic.warningAccent,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    t.chat.genui.transactionGroupReceipt.currencyMismatchTitle,
-                    style: dialogStyle.titleTextStyle,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    t.chat.genui.transactionGroupReceipt.currencyMismatchDesc,
-                    style: AppTextStyles.listSubtitle(theme),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: colors.muted.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildInfoRow(
-                          theme,
-                          colors,
-                          t
-                              .chat
-                              .genui
-                              .transactionGroupReceipt
-                              .transactionAmount,
-                          '${amount.toStringAsFixed(2)} $fromCurrency',
-                        ),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                          theme,
-                          colors,
-                          t.chat.genui.transactionGroupReceipt.accountCurrency,
-                          toCurrency,
-                        ),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                          theme,
-                          colors,
-                          t.chat.genui.transactionGroupReceipt.targetAccount,
-                          accountName,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    t.chat.genui.transactionGroupReceipt.currencyMismatchNote,
-                    style: theme.typography.body.xs.copyWith(
-                      color: theme.semantic.warningAccent,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              FButton(
-                variant: .outline,
-                onPress: () => Navigator.pop(dialogContext),
-                child: Text(t.common.cancel),
-              ),
-              const SizedBox(height: 8),
-              FButton(
-                onPress: () {
-                  confirmed = true;
-                  Navigator.pop(dialogContext);
-                },
-                child: Text(
-                  t.chat.genui.transactionGroupReceipt.confirmAssociate,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    return confirmed;
-  }
-
-  Widget _buildInfoRow(
-    FThemeData theme,
-    FColors colors,
-    String label,
-    String value,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: AppTextStyles.listSubtitle(theme)),
-        Text(value, style: AppTextStyles.listTrailing(theme)),
-      ],
     );
   }
 
@@ -1044,9 +915,6 @@ class _TransactionGroupReceiptState
     final txId = tx['id']?.toString();
     if (txId == null) return;
 
-    final theme = context.theme;
-    final colors = theme.colors;
-
     if (_cachedSpaces == null) {
       try {
         final networkClient = ref.read(networkClientProvider);
@@ -1086,83 +954,10 @@ class _TransactionGroupReceiptState
     if (!mounted) return;
 
     unawaited(
-      showModalBottomSheet<dynamic>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => Container(
-          decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                t.chat.genui.transactionGroupReceipt.selectSpace,
-                style: AppTextStyles.listTitle(theme),
-              ),
-              const SizedBox(height: 16),
-              ..._cachedSpaces!.map((space) {
-                final spaceId = space['id'];
-                final isSelected = associatedIds.contains(spaceId?.toString());
-                final name = space['name'] as String? ?? 'unnamed';
-
-                return GestureDetector(
-                  onTap: () => Navigator.pop(context, spaceId),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? context.theme.semantic.sharedSpaceBackground
-                          : colors.muted.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected
-                            ? context.theme.semantic.sharedSpaceAccent
-                                  .withValues(alpha: 0.5)
-                            : colors.border.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          FLucideIcons.users,
-                          size: 18,
-                          color: isSelected
-                              ? context.theme.semantic.sharedSpaceAccent
-                              : colors.mutedForeground,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            name,
-                            style: theme.typography.body.sm.copyWith(
-                              fontWeight: isSelected ? FontWeight.bold : null,
-                              color: isSelected
-                                  ? context.theme.semantic.sharedSpaceAccent
-                                  : null,
-                            ),
-                          ),
-                        ),
-                        if (isSelected)
-                          Icon(
-                            Icons.check,
-                            color: context.theme.semantic.sharedSpaceAccent,
-                            size: 18,
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
+      showSpacePickerSheet(
+        context,
+        spaces: _cachedSpaces!,
+        associatedIds: associatedIds,
       ).then((selectedId) async {
         if (selectedId != null) {
           await _updateTransactionSpace(txId, selectedId);

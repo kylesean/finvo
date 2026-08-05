@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
-import '../../../core/network/network_client.dart';
-import '../../../core/network/exceptions/app_exception.dart';
-import '../../notification/repositories/notification_repository.dart';
-import '../../notification/providers/notification_provider.dart';
-import '../models/shared_space_models.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/notification/repositories/notification_repository.dart';
+import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 
 part 'notification_provider.g.dart';
 
@@ -120,20 +120,17 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
     }
   }
 
-  /// Load unread count (syncs with central provider)
-  Future<void> loadUnreadCount() async {
-    try {
-      final count = await _repository.getUnreadCount();
-      state = state.copyWith(unreadCount: count);
-    } catch (e) {
-      _logger.warning('Failed to load unread count', e);
-    }
-  }
-
   /// Mark notification as read
   Future<void> markAsRead(String notificationId) async {
     final success = await _repository.markAsRead(notificationId);
     if (success) {
+      // Only decrement the badge when this item actually transitioned from
+      // unread to read; repeated calls must not undercount the badge.
+      final target = state.notifications
+          .where((n) => n.id == notificationId)
+          .firstOrNull;
+      final wasUnread = target != null && !target.isRead;
+
       final updated = state.notifications.map((n) {
         if (n.id == notificationId && !n.isRead) {
           return n.copyWith(isRead: true, readAt: DateTime.now());
@@ -141,7 +138,9 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
         return n;
       }).toList();
 
-      final newUnreadCount = state.unreadCount > 0 ? state.unreadCount - 1 : 0;
+      final newUnreadCount = wasUnread && state.unreadCount > 0
+          ? state.unreadCount - 1
+          : state.unreadCount;
       state = state.copyWith(
         notifications: updated,
         unreadCount: newUnreadCount,
@@ -227,13 +226,7 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
       'settlement_update' => NotificationType.settlementUpdate,
       'member_joined' || 'space_activity' => NotificationType.memberJoined,
       'member_left' => NotificationType.memberLeft,
-      _ => NotificationType.spaceInvite,
+      _ => NotificationType.other,
     };
   }
-}
-
-/// Unread count derived from central notification provider
-@riverpod
-int sharedSpaceUnreadCount(Ref ref) {
-  return ref.watch(notificationProvider).unreadCount;
 }

@@ -1,6 +1,6 @@
 // features/chat/providers/chat_history_state.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'chat_message.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
 
 part 'chat_history_state.freezed.dart';
 

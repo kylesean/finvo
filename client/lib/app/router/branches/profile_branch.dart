@@ -1,19 +1,20 @@
 // app/router/branches/profile_branch.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
-import '../app_routes.dart';
-import '../../../features/profile/pages/profile_page.dart';
-import '../../../features/profile/pages/appearance_settings_page.dart';
-import '../../../features/profile/pages/language_settings_page.dart';
-import '../../../features/profile/pages/speech_settings_page.dart';
-import '../../../features/profile/pages/currency_settings_page.dart';
-import '../../../features/profile/pages/amount_settings_page.dart';
-import '../../../features/shared_space/pages/shared_space_list_page.dart';
-import '../../../features/shared_space/pages/shared_space_detail_page.dart';
-import '../../../features/shared_space/pages/shared_space_settings_page.dart';
-import '../../../features/shared_space/pages/invite_success_page.dart';
-import '../../../features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/features/profile/pages/profile_page.dart';
+import 'package:finvo/features/profile/pages/appearance_settings_page.dart';
+import 'package:finvo/features/profile/pages/language_settings_page.dart';
+import 'package:finvo/features/profile/pages/speech_settings_page.dart';
+import 'package:finvo/features/profile/pages/currency_settings_page.dart';
+import 'package:finvo/features/profile/pages/amount_settings_page.dart';
+import 'package:finvo/features/shared_space/pages/shared_space_list_page.dart';
+import 'package:finvo/features/shared_space/pages/shared_space_detail_page.dart';
+import 'package:finvo/features/shared_space/pages/shared_space_settings_page.dart';
+import 'package:finvo/features/shared_space/pages/invite_success_page.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 
 /// The profile [StatefulShellBranch]: settings and shared spaces.
 ///
@@ -66,10 +67,8 @@ StatefulShellBranch buildProfileBranch() {
                   if (space == null) {
                     // Guard against deep links / invalid navigation that omit
                     // the required SharedSpace payload.
-                    return const Scaffold(
-                      body: Center(
-                        child: Text('Shared space information missing'),
-                      ),
+                    return Scaffold(
+                      body: Center(child: Text(t.error.sharedSpaceInfoMissing)),
                     );
                   }
                   return InviteSuccessPage(space: space);

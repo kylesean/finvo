@@ -24,15 +24,15 @@
 library;
 
 // Layer 1: Atoms
-export 'atoms/atoms.dart';
+export 'package:finvo/features/chat/genui/atoms/atoms.dart';
 
 // Layer 2: Molecules
-export 'molecules/molecules.dart';
+export 'package:finvo/features/chat/genui/molecules/molecules.dart';
 
 // Layer 3: Organisms
-export 'organisms/organisms.dart';
+export 'package:finvo/features/chat/genui/organisms/organisms.dart';
 
 // Utilities
-export 'utils/formatters.dart';
-export 'utils/theme_helpers.dart';
-export 'utils/genui_data_paths.dart';
+export 'package:finvo/features/chat/genui/utils/formatters.dart';
+export 'package:finvo/features/chat/genui/utils/theme_helpers.dart';
+export 'package:finvo/features/chat/genui/utils/genui_data_paths.dart';

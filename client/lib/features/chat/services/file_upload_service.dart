@@ -7,9 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/network/network_client.dart';
-import '../../../core/network/exceptions/app_exception.dart';
-import '../../../shared/utils/mime_type_mapper.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/shared/utils/mime_type_mapper.dart';
 
 /// Upload progress listener
 typedef ProgressCallback = void Function(int bytes, int total);
@@ -55,8 +55,12 @@ class FileUploadService {
         '/files/upload',
         data: formData,
         onSendProgress: (sent, total) {
+          // Guard against total == 0 (unknown Content-Length): an unbounded
+          // sent/total becomes Infinity and toStringAsFixed would throw,
+          // aborting the upload from inside the progress callback.
+          final percent = total == 0 ? 0 : (sent / total * 100);
           _logger.fine(
-            'Upload progress: $sent / $total (${(sent / total * 100).toStringAsFixed(1)}%)',
+            'Upload progress: $sent / $total (${percent.toStringAsFixed(1)}%)',
           );
           onProgress?.call(sent, total);
         },

@@ -1,7 +1,7 @@
 // shared/providers/locale_provider.dart
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../i18n/strings.g.dart';
-import '../services/locale_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/services/locale_service.dart';
 part 'locale_provider.g.dart';
 
 /// Language state management - Use slang's AppLocale

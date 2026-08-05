@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
-import 'image_preview_page.dart';
+import 'package:finvo/features/chat/widgets/image_preview_page.dart';
 
 /// Simplified media file list preview component
 /// Displays selected files directly using XFile

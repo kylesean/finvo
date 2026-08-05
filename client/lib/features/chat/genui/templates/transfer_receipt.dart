@@ -6,7 +6,7 @@ import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
-import '../atoms/atoms.dart';
+import 'package:finvo/features/chat/genui/atoms/atoms.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Transfer success receipt card widget - concise three-section design

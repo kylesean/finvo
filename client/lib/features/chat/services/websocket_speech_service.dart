@@ -6,10 +6,10 @@ import 'package:logging/logging.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../config/speech_config.dart';
-import 'audio_recorder_service.dart';
-import 'speech_recognition_service.dart';
-import 'sound_feedback_service.dart';
+import 'package:finvo/features/chat/config/speech_config.dart';
+import 'package:finvo/features/chat/services/audio_recorder_service.dart';
+import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/features/chat/services/sound_feedback_service.dart';
 
 class WebSocketSpeechService implements SpeechRecognitionService {
   static final _logger = Logger('WebSocketSpeechService');
@@ -168,6 +168,11 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   /// Start speech recognition
   @override
   Future<void> startListening() async {
+    // Defensive reset: a stale manual-stop flag from a previous session (whose
+    // connection stayed open and never hit _onError/_onDisconnected) would
+    // otherwise swallow the real errors of this new session.
+    _isManualStop = false;
+
     if (!_isConnected) {
       _logger.warning('WebSocket not connected, cannot start listening');
       _errorController.add('WebSocket not connected');
@@ -269,6 +274,11 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       // Do not send JSON control messages as they will be misinterpreted as audio data
 
       _isListening = false;
+      // Reset the manual-stop flag once the stop sequence completes. The WS
+      // connection usually stays open (keep-alive), so _onError/_onDisconnected
+      // may never fire to clear it — leaving it set would swallow the real
+      // errors of the next listening session.
+      _isManualStop = false;
       _statusController.add('stopped');
       _logger.info('Speech recognition stopped');
 

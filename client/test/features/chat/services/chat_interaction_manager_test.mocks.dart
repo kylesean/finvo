@@ -458,7 +458,7 @@ class MockStreamingController extends _i1.Mock
   _i2.OnStreamErrorCallback get onStreamError =>
       (super.noSuchMethod(
             Invocation.getter(#onStreamError),
-            returnValue: (dynamic error) {},
+            returnValue: (Object error) {},
           )
           as _i2.OnStreamErrorCallback);
 
@@ -575,7 +575,7 @@ class MockStreamingController extends _i1.Mock
   );
 
   @override
-  void handleStreamError(dynamic error) => super.noSuchMethod(
+  void handleStreamError(Object? error) => super.noSuchMethod(
     Invocation.method(#handleStreamError, [error]),
     returnValueForMissingStub: null,
   );

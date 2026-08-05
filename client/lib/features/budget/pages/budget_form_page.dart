@@ -7,15 +7,15 @@ import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
-import '../../../core/constants/category_constants.dart';
-import '../../finance/widgets/category_selection_sheet.dart';
-import '../../finance/models/recurring_transaction.dart';
-import '../models/budget_models.dart';
-import '../providers/budget_provider.dart';
-import '../services/budget_service.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/features/finance/widgets/category_selection_sheet.dart';
+import 'package:finvo/features/finance/models/recurring_transaction.dart';
+import 'package:finvo/features/budget/models/budget_models.dart';
+import 'package:finvo/features/budget/providers/budget_provider.dart';
+import 'package:finvo/features/budget/services/budget_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../../shared/widgets/app_filter_chip.dart';
-import '../../../shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/widgets/app_filter_chip.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class BudgetFormPage extends ConsumerStatefulWidget {
   final String? editId;
@@ -71,6 +71,9 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           _scope = budget.scope;
           _amountController.text = budget.amount.toString();
           _periodType = budget.periodType;
+          // Keep the existing anchor day: dropping it here silently reset every
+          // edited budget's cycle start back to day 1 on the next save.
+          _periodAnchorDay = budget.periodAnchorDay;
           _rolloverEnabled = budget.rolloverEnabled;
           _nameController.text = budget.displayName;
 
@@ -81,6 +84,10 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           _periodPickerController.dispose();
           _periodPickerController = FPickerController(
             indexes: [periodIndex >= 0 ? periodIndex : 2],
+          );
+          _anchorDayPickerController.dispose();
+          _anchorDayPickerController = FPickerController(
+            indexes: [(_periodAnchorDay - 1).clamp(0, 30)],
           );
 
           _isLoadingEdit = false;
@@ -502,6 +509,9 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
   }
 
   Future<void> _showPeriodTypePicker() async {
+    // The period type is immutable after creation: switching it would
+    // invalidate all already-aggregated usage history of this budget.
+    if (widget.editId != null) return;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -554,6 +564,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
         final request = BudgetUpdateRequest(
           name: _nameController.text.isNotEmpty ? _nameController.text : null,
           amount: amount,
+          periodAnchorDay: _periodAnchorDay,
           rolloverEnabled: _rolloverEnabled,
         );
         await service.update(widget.editId!, request);

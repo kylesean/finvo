@@ -86,7 +86,9 @@ class StreamStateController {
 
   /// Start a new streaming session
   void startStreaming(String messageId) {
-    _logger.info(
+    // Routine state transition: keep at `fine` so info-level logs stay
+    // reserved for genuinely notable events.
+    _logger.fine(
       'StreamStateController: Starting streaming for message $messageId',
     );
     _currentMessageId = messageId;
@@ -96,7 +98,7 @@ class StreamStateController {
   /// Mark first chunk received
   void markFirstChunkReceived() {
     if (_currentPhase == StreamPhase.waitingForFirstChunk) {
-      _logger.info('StreamStateController: First chunk received');
+      _logger.fine('StreamStateController: First chunk received');
       _currentPhase = StreamPhase.streaming;
     }
   }
@@ -107,7 +109,7 @@ class StreamStateController {
   /// replacing the optimistic temporary ID. Phase transitions are unaffected.
   void updateMessageId(String messageId) {
     if (messageId.isEmpty || _currentMessageId == messageId) return;
-    _logger.info(
+    _logger.fine(
       'StreamStateController: Updating message ID $_currentMessageId -> $messageId',
     );
     _currentMessageId = messageId;
@@ -115,25 +117,25 @@ class StreamStateController {
 
   /// Mark stream as completed
   void markCompleted() {
-    _logger.info('StreamStateController: Stream completed');
+    _logger.fine('StreamStateController: Stream completed');
     _currentPhase = StreamPhase.completed;
   }
 
   /// Mark stream as error
   void markError() {
-    _logger.info('StreamStateController: Stream error');
+    _logger.warning('StreamStateController: Stream error');
     _currentPhase = StreamPhase.error;
   }
 
   /// Mark stream as cancelled by user
   void markCancelled() {
-    _logger.info('StreamStateController: Stream cancelled by user');
+    _logger.fine('StreamStateController: Stream cancelled by user');
     _currentPhase = StreamPhase.cancelled;
   }
 
   /// Reset to idle state
   void reset() {
-    _logger.info('StreamStateController: Reset to idle');
+    _logger.fine('StreamStateController: Reset to idle');
     _currentPhase = StreamPhase.idle;
     _currentMessageId = '';
   }

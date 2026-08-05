@@ -1,5 +1,5 @@
-import '../../i18n/strings.g.dart';
-import '../constants/error_codes.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/core/constants/error_codes.dart';
 
 /// Utility class for translating backend error codes to localized messages.
 ///

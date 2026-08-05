@@ -10,6 +10,7 @@ import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/features/home/providers/transaction_feed_state.dart';
 export 'package:finvo/features/home/providers/transaction_feed_state.dart';
 import 'package:finvo/features/home/services/home_service.dart';
+import 'package:finvo/core/events/domain_events.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/features/profile/models/financial_settings.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
@@ -52,6 +53,22 @@ class SelectedDate extends _$SelectedDate {
   void set(DateTime? date) => state = date;
 }
 
+/// Subscribes the home feature to cross-feature transaction events and
+/// invalidates the affected home providers.
+///
+/// This keeps the dependency direction feature -> core: producers (e.g. the
+/// chat feature) only publish [TransactionCreatedEvent]s on the shared bus
+/// and never touch home providers directly.
+@Riverpod(keepAlive: true)
+Future<void> transactionEventSubscriber(Ref ref) async {
+  await for (final _ in ref.watch(transactionCreatedEventsProvider).stream) {
+    unawaited(ref.read(transactionFeedProvider.notifier).refreshFeed());
+    ref.invalidate(totalExpenseProvider);
+    final currentMonth = ref.read(currentDisplayMonthProvider);
+    ref.invalidate(calendarMonthDataProvider(currentMonth));
+  }
+}
+
 @riverpod
 Future<TotalExpenseData> totalExpense(Ref ref) async {
   final token = ref.watch(authTokenProvider);
@@ -75,17 +92,6 @@ Future<CalendarMonthData> calendarMonthData(Ref ref, DateTime monthYear) async {
 
   final homeService = ref.read(homeServiceProvider);
   return homeService.getCalendarMonthDetails(monthYear.year, monthYear.month);
-}
-
-@riverpod
-Future<List<TransactionModel>> transactionsForSelectedDate(
-  Ref ref,
-  DateTime date,
-) async {
-  ref.watch(financialSettingsProvider).primaryCurrency;
-
-  final homeService = ref.read(homeServiceProvider);
-  return homeService.getTransactionsForDate(date);
 }
 
 @riverpod

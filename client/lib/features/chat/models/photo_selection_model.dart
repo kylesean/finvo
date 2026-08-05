@@ -1,18 +1,21 @@
 // features/chat/models/photo_selection_model.dart
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 
+part 'photo_selection_model.freezed.dart';
+
 /// Photo selection item model
-class PhotoSelectionItem {
-  final XFile photo;
-  final int selectionOrder; // Selection order, starting from 1
-  final String id;
+@freezed
+@Freezed(makeCollectionsUnmodifiable: false)
+abstract class PhotoSelectionItem with _$PhotoSelectionItem {
+  const factory PhotoSelectionItem({
+    required XFile photo,
+    required int selectionOrder, // Selection order, starting from 1
+    required String id,
+  }) = _PhotoSelectionItem;
+}
 
-  const PhotoSelectionItem({
-    required this.photo,
-    required this.selectionOrder,
-    required this.id,
-  });
-
+extension PhotoSelectionItemX on PhotoSelectionItem {
   /// Get photo path
   String get path => photo.path;
 
@@ -21,44 +24,24 @@ class PhotoSelectionItem {
 
   /// Get file size
   Future<int> get size => photo.length();
-
-  PhotoSelectionItem copyWith({XFile? photo, int? selectionOrder, String? id}) {
-    return PhotoSelectionItem(
-      photo: photo ?? this.photo,
-      selectionOrder: selectionOrder ?? this.selectionOrder,
-      id: id ?? this.id,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is PhotoSelectionItem && other.id == id;
-  }
-
-  @override
-  int get hashCode => id.hashCode;
 }
 
 /// Photo selection state model
-class PhotoSelectionState {
-  final List<XFile> availablePhotos; // List of available photos
-  final Map<String, PhotoSelectionItem>
-  selectedPhotos; // Selected photos, key is photo.path
-  final bool isLoading;
-  final String? errorMessage;
-  final bool hasPermission;
-  final int maxSelectionCount; // Maximum selection count
+@freezed
+@Freezed(makeCollectionsUnmodifiable: false)
+abstract class PhotoSelectionState with _$PhotoSelectionState {
+  const factory PhotoSelectionState({
+    @Default(<XFile>[]) List<XFile> availablePhotos,
+    @Default(<String, PhotoSelectionItem>{})
+    Map<String, PhotoSelectionItem> selectedPhotos, // key is photo.path
+    @Default(false) bool isLoading,
+    String? errorMessage,
+    @Default(false) bool hasPermission,
+    @Default(9) int maxSelectionCount, // Default maximum 9 selections
+  }) = _PhotoSelectionState;
+}
 
-  const PhotoSelectionState({
-    this.availablePhotos = const [],
-    this.selectedPhotos = const {},
-    this.isLoading = false,
-    this.errorMessage,
-    this.hasPermission = false,
-    this.maxSelectionCount = 9, // Default maximum 9 selections
-  });
-
+extension PhotoSelectionStateX on PhotoSelectionState {
   /// Get selected photo count
   int get selectedCount => selectedPhotos.length;
 
@@ -129,48 +112,5 @@ class PhotoSelectionState {
   /// Clear all selections
   PhotoSelectionState clearSelection() {
     return copyWith(selectedPhotos: {});
-  }
-
-  PhotoSelectionState copyWith({
-    List<XFile>? availablePhotos,
-    Map<String, PhotoSelectionItem>? selectedPhotos,
-    bool? isLoading,
-    String? errorMessage,
-    bool? hasPermission,
-    int? maxSelectionCount,
-    bool clearError = false,
-  }) {
-    return PhotoSelectionState(
-      availablePhotos: availablePhotos ?? this.availablePhotos,
-      selectedPhotos: selectedPhotos ?? this.selectedPhotos,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      hasPermission: hasPermission ?? this.hasPermission,
-      maxSelectionCount: maxSelectionCount ?? this.maxSelectionCount,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is PhotoSelectionState &&
-        other.availablePhotos == availablePhotos &&
-        other.selectedPhotos == selectedPhotos &&
-        other.isLoading == isLoading &&
-        other.errorMessage == errorMessage &&
-        other.hasPermission == hasPermission &&
-        other.maxSelectionCount == maxSelectionCount;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      availablePhotos,
-      selectedPhotos,
-      isLoading,
-      errorMessage,
-      hasPermission,
-      maxSelectionCount,
-    );
   }
 }

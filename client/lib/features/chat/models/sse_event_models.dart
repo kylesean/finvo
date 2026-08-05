@@ -4,118 +4,101 @@
 /// CustomContentGenerator.
 library;
 
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'sse_event_models.freezed.dart';
+
 /// Tool call start event
-class ToolCallStartEvent {
-  final String id;
-  final String name;
-  final Map<String, dynamic> args;
-  final String? timestamp;
+@freezed
+abstract class ToolCallStartEvent with _$ToolCallStartEvent {
+  const factory ToolCallStartEvent({
+    @Default('') String id,
+    @Default('unknown') String name,
+    @Default(<String, dynamic>{}) Map<String, dynamic> args,
+    String? timestamp,
+  }) = _ToolCallStartEvent;
+}
 
-  const ToolCallStartEvent({
-    required this.id,
-    required this.name,
-    required this.args,
-    this.timestamp,
-  });
-
-  factory ToolCallStartEvent.fromJson(Map<String, dynamic> json) {
-    return ToolCallStartEvent(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? 'unknown',
-      args: json['args'] as Map<String, dynamic>? ?? {},
-      timestamp: json['timestamp'] as String?,
-    );
-  }
+/// Tolerant parsing (top-level: extensions cannot declare constructors).
+ToolCallStartEvent toolCallStartEventFromJson(Map<String, dynamic> json) {
+  return ToolCallStartEvent(
+    id: json['id'] as String? ?? '',
+    name: json['name'] as String? ?? 'unknown',
+    args: json['args'] as Map<String, dynamic>? ?? {},
+    timestamp: json['timestamp'] as String?,
+  );
 }
 
 /// Tool call end event
-class ToolCallEndEvent {
-  final String id;
-  final String name;
-  final String status;
-  final int? durationMs;
-  final String? resultPreview;
-  final String? error;
+@freezed
+abstract class ToolCallEndEvent with _$ToolCallEndEvent {
+  const factory ToolCallEndEvent({
+    @Default('') String id,
+    @Default('unknown') String name,
+    @Default('success') String status,
+    int? durationMs,
+    String? resultPreview,
+    String? error,
+  }) = _ToolCallEndEvent;
+}
 
-  const ToolCallEndEvent({
-    required this.id,
-    required this.name,
-    required this.status,
-    this.durationMs,
-    this.resultPreview,
-    this.error,
-  });
-
-  factory ToolCallEndEvent.fromJson(Map<String, dynamic> json) {
-    return ToolCallEndEvent(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? 'unknown',
-      status: json['status'] as String? ?? 'success',
-      durationMs: json['duration_ms'] as int?,
-      resultPreview: json['result'] as String?,
-      error: json['error'] as String?,
-    );
-  }
+/// Tolerant parsing (top-level: extensions cannot declare constructors).
+ToolCallEndEvent toolCallEndEventFromJson(Map<String, dynamic> json) {
+  return ToolCallEndEvent(
+    id: json['id'] as String? ?? '',
+    name: json['name'] as String? ?? 'unknown',
+    status: json['status'] as String? ?? 'success',
+    durationMs: json['duration_ms'] as int?,
+    resultPreview: json['result'] as String?,
+    error: json['error'] as String?,
+  );
 }
 
 /// Tool info
-class ToolInfo {
-  final String name;
-  final String displayName;
-  final String toolType;
-  final bool cancellable;
-  final String? warningOnCancel;
-  final String? surfaceId;
+@freezed
+abstract class ToolInfo with _$ToolInfo {
+  const factory ToolInfo({
+    @Default('unknown') String name,
+    @Default('') String displayName,
+    @Default('readonly') String toolType,
+    @Default(true) bool cancellable,
+    String? warningOnCancel,
+    String? surfaceId,
+  }) = _ToolInfo;
+}
 
-  const ToolInfo({
-    required this.name,
-    required this.displayName,
-    required this.toolType,
-    this.cancellable = true,
-    this.warningOnCancel,
-    this.surfaceId,
-  });
-
-  factory ToolInfo.fromJson(Map<String, dynamic> json) {
-    return ToolInfo(
-      name: json['name'] as String? ?? 'unknown',
-      displayName: json['display_name'] as String? ?? '',
-      toolType: json['tool_type'] as String? ?? 'readonly',
-      cancellable: json['cancellable'] as bool? ?? true,
-      warningOnCancel: json['warning_on_cancel'] as String?,
-      surfaceId: json['surface_id'] as String?,
-    );
-  }
-
+extension ToolInfoX on ToolInfo {
   bool get isWriteOperation => toolType == 'write';
   bool get isReadonly => toolType == 'readonly';
   bool get isHitl => toolType == 'hitl';
 }
 
-/// SSE event callback collection
-class SseEventCallbacks {
-  final void Function(String sessionId, String? messageId)? onSessionInit;
-  final void Function(String text)? onTextChunk;
-  final void Function()? onStreamComplete;
-  final void Function(String title)? onTitleUpdate;
-  final void Function(String error)? onError;
-  final void Function(String localId, String serverId)? onMessageIdUpdate;
-  final void Function(String surfaceId)? onSurfaceCreated;
-  final void Function(ToolCallStartEvent event)? onToolCallStart;
-  final void Function(ToolCallEndEvent event)? onToolCallEnd;
-  final void Function(double amount, String type, String currency)?
-  onTransactionCreated;
+/// Tolerant parsing (top-level: extensions cannot declare constructors).
+ToolInfo toolInfoFromJson(Map<String, dynamic> json) {
+  return ToolInfo(
+    name: json['name'] as String? ?? 'unknown',
+    displayName: json['display_name'] as String? ?? '',
+    toolType: json['tool_type'] as String? ?? 'readonly',
+    cancellable: json['cancellable'] as bool? ?? true,
+    warningOnCancel: json['warning_on_cancel'] as String?,
+    surfaceId: json['surface_id'] as String?,
+  );
+}
 
-  const SseEventCallbacks({
-    this.onSessionInit,
-    this.onTextChunk,
-    this.onStreamComplete,
-    this.onTitleUpdate,
-    this.onError,
-    this.onMessageIdUpdate,
-    this.onSurfaceCreated,
-    this.onToolCallStart,
-    this.onToolCallEnd,
-    this.onTransactionCreated,
-  });
+/// SSE event callback collection
+@freezed
+abstract class SseEventCallbacks with _$SseEventCallbacks {
+  const factory SseEventCallbacks({
+    void Function(String sessionId, String? messageId)? onSessionInit,
+    void Function(String text)? onTextChunk,
+    void Function()? onStreamComplete,
+    void Function(String title)? onTitleUpdate,
+    void Function(String error)? onError,
+    void Function(String localId, String serverId)? onMessageIdUpdate,
+    void Function(String surfaceId)? onSurfaceCreated,
+    void Function(ToolCallStartEvent event)? onToolCallStart,
+    void Function(ToolCallEndEvent event)? onToolCallEnd,
+    void Function(double amount, String type, String currency)?
+    onTransactionCreated,
+  }) = _SseEventCallbacks;
 }

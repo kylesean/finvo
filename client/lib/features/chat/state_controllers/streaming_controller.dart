@@ -12,9 +12,10 @@
 import 'dart:async';
 import 'package:logging/logging.dart';
 
-import '../models/chat_message.dart' show StreamingStatus;
-import '../services/genui_service.dart';
-import 'stream_state_controller.dart';
+import 'package:finvo/features/chat/models/chat_message.dart'
+    show StreamingStatus;
+import 'package:finvo/features/chat/services/genui_service.dart';
+import 'package:finvo/features/chat/state_controllers/stream_state_controller.dart';
 
 final _logger = Logger('StreamingController');
 
@@ -22,7 +23,7 @@ final _logger = Logger('StreamingController');
 typedef OnStreamingStartCallback = void Function();
 typedef OnTextReceivedCallback = void Function(String text);
 typedef OnStreamCompleteCallback = void Function(String? finalTextOverride);
-typedef OnStreamErrorCallback = void Function(dynamic error);
+typedef OnStreamErrorCallback = void Function(Object error);
 typedef OnStreamCancelledCallback = void Function(bool hasContent);
 typedef OnInitialDelayExceededCallback = void Function();
 typedef UpdateMessageStateCallback =
@@ -235,7 +236,7 @@ class StreamingController {
   }
 
   /// Handle stream error
-  void handleStreamError(dynamic error) {
+  void handleStreamError(Object error) {
     _initialResponseDelayTimer?.cancel();
     streamState.markError();
 

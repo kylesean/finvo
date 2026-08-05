@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Per-app language preferences for Android 13+ (API 33+).
+  The system Settings > Languages > App Language picker reads this file to
+  offer the same locales the app supports in its in-app language switcher.
+  Must stay in sync with AppLocale in lib/i18n/strings.g.dart.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="zh" />
+    <locale android:name="en" />
+    <locale android:name="ja" />
+    <locale android:name="ko" />
+    <locale android:name="zh-Hant" />
+</locale-config>

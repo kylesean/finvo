@@ -1,17 +1,22 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
-import '../../../core/network/network_client.dart';
-import '../../../core/services/notification_ws_service.dart';
-import '../../../core/storage/secure_storage_service.dart';
-import '../../../core/constants/api_constants.dart';
-import '../../home/providers/comment_providers.dart';
-import '../models/notification_item.dart';
-import '../repositories/notification_repository.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/core/services/notification_ws_service.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/features/home/providers/comment_providers.dart';
+import 'package:finvo/features/notification/models/notification_item.dart';
+import 'package:finvo/features/notification/repositories/notification_repository.dart';
 
 part 'notification_provider.g.dart';
 
 final _logger = Logger('NotificationNotifier');
+
+/// Monotonic counter for realtime-notification ids. Milliseconds-since-epoch
+/// can collide when several notifications arrive within the same millisecond,
+/// and the id is used as a [Dismissible] key in the notification center.
+int _realtimeNotificationSeq = 0;
 
 /// State object for Notifications feature
 class NotificationState {
@@ -129,6 +134,12 @@ class NotificationNotifier extends _$NotificationNotifier {
     final repository = ref.read(notificationRepositoryProvider);
     final success = await repository.markAsRead(id);
     if (success) {
+      // Only decrement the badge when this item actually transitioned from
+      // unread to read; repeated calls on an already-read item must not
+      // undercount the badge.
+      final target = state.items.where((item) => item.id == id).firstOrNull;
+      final wasUnread = target != null && !target.isRead;
+
       final updatedItems = state.items.map((item) {
         if (item.id == id) {
           return item.copyWith(isRead: true, readAt: DateTime.now());
@@ -136,7 +147,9 @@ class NotificationNotifier extends _$NotificationNotifier {
         return item;
       }).toList();
 
-      final newUnreadCount = (state.unreadCount - 1).clamp(0, 999);
+      final newUnreadCount = wasUnread
+          ? (state.unreadCount - 1).clamp(0, 999)
+          : state.unreadCount;
       state = state.copyWith(items: updatedItems, unreadCount: newUnreadCount);
     }
   }
@@ -216,7 +229,7 @@ NotificationWsService notificationWs(Ref ref) {
     }
 
     final item = NotificationItem(
-      id: 'rt_${DateTime.now().millisecondsSinceEpoch}',
+      id: 'rt_${DateTime.now().millisecondsSinceEpoch}_${_realtimeNotificationSeq++}',
       userId: '',
       type: type,
       title: payload['title']?.toString() ?? '',

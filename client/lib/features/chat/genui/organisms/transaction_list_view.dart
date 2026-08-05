@@ -3,11 +3,11 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../../../shared/widgets/amount_text.dart';
-import '../../../../shared/widgets/themed_icon.dart';
-import '../../../home/services/home_service.dart';
-import '../../../home/models/transaction_model.dart';
-import '../../../../core/constants/category_constants.dart';
+import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
+import 'package:finvo/features/home/services/home_service.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/core/constants/category_constants.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 

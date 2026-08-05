@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'tool_call_info.dart';
+import 'package:finvo/features/chat/models/tool_call_info.dart';
 
 part 'message_content_part.freezed.dart';
 part 'message_content_part.g.dart';

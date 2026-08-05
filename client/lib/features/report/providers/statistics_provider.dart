@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import '../models/statistics_models.dart';
-import '../services/statistics_service.dart';
+import 'package:finvo/features/report/models/statistics_models.dart';
+import 'package:finvo/features/report/services/statistics_service.dart';
 
 part 'statistics_provider.g.dart';
 
@@ -93,6 +93,12 @@ class StatisticsState {
 /// Statistics state notifier
 @riverpod
 class Statistics extends _$Statistics {
+  /// Monotonically increasing request generation. Any filter/range/sort change
+  /// bumps it; responses whose generation no longer matches the latest one are
+  /// stale and must be discarded so a fast filter switch can't be overwritten
+  /// by an older, slower response.
+  int _loadGeneration = 0;
+
   @override
   StatisticsState build() {
     return const StatisticsState();
@@ -100,6 +106,7 @@ class Statistics extends _$Statistics {
 
   /// Load all statistics data
   Future<void> loadStatistics() async {
+    final generation = ++_loadGeneration;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -175,6 +182,14 @@ class Statistics extends _$Statistics {
             .catchError((_) => null),
       ).wait;
 
+      // Discard stale responses from superseded filter/sort/range changes.
+      if (generation != _loadGeneration) {
+        _logger.fine(
+          'Statistics: discarding stale response (generation $generation)',
+        );
+        return;
+      }
+
       state = state.copyWith(
         isLoading: false,
         overview: overview,
@@ -185,7 +200,11 @@ class Statistics extends _$Statistics {
         healthScore: healthScore,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      // Only surface errors for the latest generation; older failures belong
+      // to superseded requests.
+      if (generation == _loadGeneration) {
+        state = state.copyWith(isLoading: false, error: e.toString());
+      }
     }
   }
 
@@ -211,6 +230,7 @@ class Statistics extends _$Statistics {
 
   /// Change chart type and reload trend data
   Future<void> setChartType(ChartType chartType) async {
+    final generation = ++_loadGeneration;
     state = state.copyWith(chartType: chartType);
     try {
       final service = ref.read(statisticsServiceProvider);
@@ -223,14 +243,18 @@ class Statistics extends _$Statistics {
             ? state.selectedAccountTypes
             : null,
       );
+      if (generation != _loadGeneration) return;
       state = state.copyWith(trendData: trendData);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      if (generation == _loadGeneration) {
+        state = state.copyWith(error: e.toString());
+      }
     }
   }
 
   /// Change sort type and reload top transactions
   Future<void> setSortType(SortType sortType) async {
+    final generation = ++_loadGeneration;
     state = state.copyWith(sortType: sortType);
     try {
       final service = ref.read(statisticsServiceProvider);
@@ -245,9 +269,12 @@ class Statistics extends _$Statistics {
         page: 1,
         pageSize: 15,
       );
+      if (generation != _loadGeneration) return;
       state = state.copyWith(topTransactions: topTransactions);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      if (generation == _loadGeneration) {
+        state = state.copyWith(error: e.toString());
+      }
     }
   }
 

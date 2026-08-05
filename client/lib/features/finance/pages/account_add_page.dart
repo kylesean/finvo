@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 
-import '../../profile/models/financial_account.dart';
-import '../models/account_type_definition.dart';
-import '../../../shared/models/currency.dart';
-import '../../../shared/theme/form_text_styles.dart';
-import '../widgets/currency_selection_sheet.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/finance/widgets/account_form_widgets.dart';
+import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 class FinancialAccountAddArgs {
@@ -47,7 +48,7 @@ class _FinancialAccountAddPageState
     final initial = widget.args.initialAccount;
     _nameController = TextEditingController(text: initial?.name ?? '');
     _balanceController = TextEditingController(
-      text: initial != null ? _formatAmount(initial.initialBalance) : '',
+      text: initial != null ? formatAccountAmount(initial.initialBalance) : '',
     );
     _selectedCurrency = initial != null
         ? Currency.fromCode(initial.currencyCode) ?? Currency.cny
@@ -104,8 +105,11 @@ class _FinancialAccountAddPageState
           ],
         ),
       ),
-      // Save button pinned to bottom
-      bottomNavigationBar: _buildSaveButton(theme, colors),
+      bottomNavigationBar: buildAccountSaveButton(
+        theme,
+        colors,
+        onSave: _handleSave,
+      ),
     );
   }
 
@@ -127,7 +131,7 @@ class _FinancialAccountAddPageState
       child: Column(
         children: [
           // Account name
-          _buildInputRow(
+          buildAccountInputRow(
             theme: theme,
             colors: colors,
             icon: SizedBox(
@@ -162,10 +166,10 @@ class _FinancialAccountAddPageState
             ),
           ),
 
-          _buildDivider(colors),
+          buildAccountFormDivider(colors),
 
           // Initial balance
-          _buildInputRow(
+          buildAccountInputRow(
             theme: theme,
             colors: colors,
             icon: SizedBox(
@@ -201,17 +205,13 @@ class _FinancialAccountAddPageState
             ),
           ),
 
-          _buildDivider(colors),
+          buildAccountFormDivider(colors),
 
           // Currency selection
-          _buildTapRow(
+          buildAccountTapRow(
             theme: theme,
             colors: colors,
-            icon: Icon(
-              FLucideIcons.globe,
-              size: 20,
-              color: colors.primary,
-            ), // Use theme color
+            icon: Icon(FLucideIcons.globe, size: 20, color: colors.primary),
             label: t.account.currencyLabel,
             value:
                 '${_selectedCurrency.code} - ${_selectedCurrency.localizedName}',
@@ -219,10 +219,10 @@ class _FinancialAccountAddPageState
             onTap: _openCurrencyPicker,
           ),
 
-          _buildDivider(colors),
+          buildAccountFormDivider(colors),
 
           // Hidden toggle
-          _buildSwitchRow(
+          buildAccountSwitchRow(
             theme: theme,
             colors: colors,
             title: t.account.hiddenLabel,
@@ -231,10 +231,10 @@ class _FinancialAccountAddPageState
             onChanged: (value) => setState(() => _hidden = value),
           ),
 
-          _buildDivider(colors),
+          buildAccountFormDivider(colors),
 
           // Include in assets toggle
-          _buildSwitchRow(
+          buildAccountSwitchRow(
             theme: theme,
             colors: colors,
             title: t.account.includeInNetWorthLabel,
@@ -244,146 +244,6 @@ class _FinancialAccountAddPageState
             isLast: true,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDivider(FColors colors) {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      indent: 56,
-      color: colors.border.withValues(alpha: 0.3),
-    );
-  }
-
-  /// Input row widget
-  Widget _buildInputRow({
-    required FThemeData theme,
-    required FColors colors,
-    required Widget icon,
-    required String label,
-    required Widget child,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
-        children: [
-          SizedBox(width: 36, height: 36, child: Center(child: icon)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(label, style: AppTextStyles.formLabel(theme)),
-                const SizedBox(height: 2),
-                child,
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Tap row widget
-  Widget _buildTapRow({
-    required FThemeData theme,
-    required FColors colors,
-    required Widget icon,
-    required String label,
-    required String value,
-    bool showArrow = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Row(
-          children: [
-            SizedBox(width: 36, height: 36, child: Center(child: icon)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(label, style: AppTextStyles.formLabel(theme)),
-                  const SizedBox(height: 2),
-                  Text(value, style: AppTextStyles.formValue(theme)),
-                ],
-              ),
-            ),
-            if (showArrow)
-              Icon(
-                FLucideIcons.chevronRight,
-                size: 16,
-                color: colors.mutedForeground,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Switch row widget
-  Widget _buildSwitchRow({
-    required FThemeData theme,
-    required FColors colors,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    bool isLast = false,
-  }) {
-    return InkWell(
-      onTap: () => onChanged(!value),
-      borderRadius: isLast
-          ? const BorderRadius.vertical(bottom: Radius.circular(16))
-          : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(title, style: AppTextStyles.switchTitle(theme)),
-                  Text(subtitle, style: AppTextStyles.switchSubtitle(theme)),
-                ],
-              ),
-            ),
-            FSwitch(value: value, onChange: onChanged),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSaveButton(FThemeData theme, FColors colors) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      decoration: BoxDecoration(
-        color: colors.background,
-        border: Border(
-          top: BorderSide(
-            color: colors.border.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.only(bottom: 8),
-        child: SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: FButton(onPress: _handleSave, child: Text(t.account.save)),
-        ),
       ),
     );
   }
@@ -428,11 +288,6 @@ class _FinancialAccountAddPageState
     );
 
     context.pop(newAccount);
-  }
-
-  String _formatAmount(Decimal balance) {
-    final value = double.tryParse(balance.toString()) ?? 0.0;
-    return value.toStringAsFixed(2);
   }
 
   String _getDefaultName(AccountTypeDefinition definition) {

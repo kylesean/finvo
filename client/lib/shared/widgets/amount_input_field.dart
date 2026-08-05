@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/models/currency.dart';
@@ -40,6 +41,11 @@ class AmountInputField extends ConsumerWidget {
           child: TextField(
             controller: controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            // Restrict input to digits with at most one decimal separator so
+            // pasted/typed values like "1.2.3" can never reach a double.parse.
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+            ],
             textAlign: TextAlign.start,
             style: TextStyle(
               fontSize: fontSize,

@@ -1,17 +1,18 @@
 // features/home/pages/home_page.dart
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../widgets/calendar/monthly_calendar_view.dart';
-import '../widgets/feed/sliver_transaction_feed_view.dart';
-import '../providers/home_providers.dart';
+import 'package:finvo/features/home/widgets/calendar/monthly_calendar_view.dart';
+import 'package:finvo/features/home/widgets/feed/sliver_transaction_feed_view.dart';
+import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:forui/forui.dart';
-import '../../shared_space/widgets/notification_icon.dart';
+import 'package:finvo/features/shared_space/widgets/notification_icon.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
-import '../models/total_expense_model.dart';
+import 'package:finvo/features/home/models/total_expense_model.dart';
 import 'dart:async';
 
 class HomePage extends ConsumerWidget {
@@ -63,7 +64,11 @@ class HomePage extends ConsumerWidget {
                 // via dragDetails in ScrollUpdateNotification, not via
                 // negative scroll pixels.
                 // Android keeps default ClampingScrollPhysics (no change).
-                physics: Platform.isIOS ? const ClampingScrollPhysics() : null,
+                // Guard with kIsWeb: dart:io Platform is unavailable on web
+                // and would throw UnsupportedError at build time.
+                physics: !kIsWeb && Platform.isIOS
+                    ? const ClampingScrollPhysics()
+                    : null,
                 slivers: [
                   // Header - SliverAppBar (black)
                   SliverAppBar(

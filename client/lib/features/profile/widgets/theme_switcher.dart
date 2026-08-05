@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import '../../../app/theme/theme_notifier.dart';
-import '../../../app/theme/app_theme_palette.dart';
-import '../../../app/theme/theme_palette_provider.dart';
-import '../../../app/theme/theme_provider.dart';
+import 'package:finvo/app/theme/theme_notifier.dart';
+import 'package:finvo/app/theme/app_theme_palette.dart';
+import 'package:finvo/app/theme/theme_palette_provider.dart';
+import 'package:finvo/app/theme/theme_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'theme_preview.dart';
+import 'package:finvo/features/profile/widgets/theme_preview.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ThemeSwitcher extends ConsumerWidget {
@@ -239,7 +239,10 @@ class _PaletteOption extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Text('Light / Dark', style: AppTextStyles.detailLabel(theme)),
+            Text(
+              '${t.appearance.light} / ${t.appearance.dark}',
+              style: AppTextStyles.detailLabel(theme),
+            ),
           ],
         ),
       ),

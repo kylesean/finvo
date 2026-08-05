@@ -6,7 +6,7 @@ import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/services/home_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../../../core/constants/category_constants.dart';
+import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';

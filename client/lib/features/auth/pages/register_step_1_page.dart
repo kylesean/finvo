@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import '../providers/verification_provider.dart';
+import 'package:finvo/features/auth/providers/verification_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
@@ -136,7 +136,13 @@ class _RegisterStep1PageState extends ConsumerState<RegisterStep1Page> {
                                   ),
                                 ),
                               ),
-                          validator: (value) => null,
+                          validator: (value) {
+                            final trimmedValue = value?.trim() ?? '';
+                            if (trimmedValue.isEmpty) {
+                              return t.auth.verificationCode.required;
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 32),
                         FButton(

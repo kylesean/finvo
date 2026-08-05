@@ -4,7 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
-import '../models/shared_space_models.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class SpaceDashboardCard extends StatelessWidget {

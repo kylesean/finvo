@@ -24,7 +24,10 @@
     "noMore": "더 이상 없습니다",
     "loadFailed": "불러오기 실패",
     "history": "거래 내역",
-    "reset": "초기화"
+    "reset": "초기화",
+    "cancelled": "취소됨",
+    "saving": "저장 중...",
+    "saveFailed": "저장 실패"
   },
   "genui": {
     "errorBusy": "죄송합니다. 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요",
@@ -46,7 +49,9 @@
     "minutesAgo": "$count분 전",
     "hoursAgo": "$count시간 전",
     "daysAgo": "$count일 전",
-    "weeksAgo": "$count주 전"
+    "weeksAgo": "$count주 전",
+    "monthsAgo": "$count개월 전",
+    "yearsAgo": "$count년 전"
   },
   "greeting": {
     "morning": "좋은 아침입니다",
@@ -169,6 +174,12 @@
     "commentFailed": "댓글 작성 실패",
     "replyToPrefix": "@$name 님에게 답글:",
     "reply": "답글",
+    "contentRequired": "댓글 내용을 입력하세요",
+    "copyContent": "내용 복사",
+    "contentCopied": "댓글 내용을 복사했습니다",
+    "collapseReplies": "답글 접기",
+    "expandMoreReplies": "추가 답글 $count개 보기",
+    "recordedBy": "기록자",
     "addNote": "메모 추가...",
     "confirmDeleteTitle": "삭제 확인",
     "confirmDeleteContent": "댓글을 삭제하시겠습니까? 복구할 수 없습니다.",
@@ -253,6 +264,7 @@
     "checkingUpdate": "업데이트 확인 중...",
     "latestVersionToast": "최신 버전을 사용 중입니다",
     "newVersionTitle": "새 버전 출시",
+    "currentVersion": "현재 버전: v$version",
     "updateNow": "지금 업데이트",
     "updateLater": "나중에",
     "fetchUpdateFailed": "업데이트 확인 실패",
@@ -988,7 +1000,11 @@
           "description": "Get AI-powered financial insights"
         }
       }
-    }
+    },
+    "shareComingSoon": "공유 기능은 곧 출시될 예정입니다...",
+    "invalidAttachmentLink": "잘못된 첨부 파일 링크",
+    "unableToOpenAttachmentLink": "첨부 파일 링크를 열 수 없습니다",
+    "aiCommunicationError": "죄송합니다. AI 어시스턴트 통신 오류: $error"
   },
   "image": {
     "deleteTitle": "이미지 삭제",
@@ -1033,6 +1049,16 @@
     "unknownError": "알 수 없는 오류",
     "unknownErrorHint": "예기치 않은 오류가 발생했습니다. 다시 시도하거나 고객 지원에 문의하세요.",
     "registrationMissingInfo": "가입 절차 오류, 필수 정보가 없습니다.",
+    "accountInfoMissing": "계좌 정보가 없습니다",
+    "sharedSpaceInfoMissing": "공유 공간 정보가 없습니다",
+    "settingsSteps": "설정 단계:",
+    "suggestions": "제안:",
+    "fileNotFound": "파일을 찾을 수 없습니다",
+    "fileNotFoundHint": "파일이 존재하는지 확인하거나 다른 파일을 선택하세요.",
+    "selectAgain": "다시 선택",
+    "thumbnailGenerationFailed": "썸네일 생성 실패",
+    "thumbnailGenerationHint": "썸네일 생성에 실패했지만 파일은 선택되었으며 계속 사용할 수 있습니다.",
+    "help": "도움말:",
     "genui": {
       "loadingFailed": "컴포넌트 로드 실패",
       "schemaFailed": "스키마 검증 실패",
@@ -1137,7 +1163,9 @@
     "setDailyBurnRate": "일일 예상 소비 금액 설정",
     "dailyBurnRateSaved": "일일 지출 추정치 저장됨",
     "dayUnit": "일",
-    "saveFailed": "저장 실패"
+    "saveFailed": "저장 실패",
+    "deleteFailed": "삭제에 실패했습니다. 잠시 후 다시 시도해 주세요",
+    "missingExchangeRates": "일부 통화의 환율을 가져올 수 없어 해당 계정은 합계에 포함되지 않았습니다: $currencies"
   },
   "app": {
     "splashTitle": "지혜로운 성장, 가치 있는 부.",

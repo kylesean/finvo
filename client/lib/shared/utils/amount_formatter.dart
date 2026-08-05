@@ -1,6 +1,7 @@
 // lib/shared/utils/amount_formatter.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/models/currency.dart';
@@ -33,6 +34,17 @@ class AmountFormatter {
 
   /// Maximum number of cached [NumberFormat] instances.
   static const int _maxCacheSize = 64;
+
+  /// Parse a backend amount string into a [Decimal], falling back to zero.
+  ///
+  /// Centralizes the string→Decimal conversion so callers don't each
+  /// reimplement `double.tryParse(x) ?? 0`. Parsing through [Decimal] (instead
+  /// of [double]) preserves precision for aggregation: summing many
+  /// `double.tryParse` results accumulates floating-point error, while
+  /// `Decimal` is exact. Convert to [double] only at the display boundary
+  /// (e.g. [AmountText]) via [Decimal.toDouble].
+  static Decimal parseDecimal(String? amount) =>
+      Decimal.tryParse(amount ?? '') ?? Decimal.zero;
 
   /// Get currency formatter.
   ///

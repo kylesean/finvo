@@ -1,7 +1,7 @@
 // features/chat/services/speech_service_factory.dart
-import 'speech_recognition_service.dart';
-import 'system_speech_service.dart';
-import 'websocket_speech_service.dart';
+import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/features/chat/services/system_speech_service.dart';
+import 'package:finvo/features/chat/services/websocket_speech_service.dart';
 
 /// Speech recognition service factory
 ///

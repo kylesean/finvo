@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'dart:async';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Shows a standardized confirmation dialog with title, message,
 /// cancel and confirm buttons.
@@ -34,7 +35,7 @@ Future<bool> showConfirmDialog({
             FButton(
               variant: .outline,
               onPress: () => Navigator.of(dialogContext).pop(false),
-              child: Text(cancelLabel ?? 'Cancel'),
+              child: Text(cancelLabel ?? t.common.cancel),
             ),
             const SizedBox(height: 8),
             FButton(
@@ -43,7 +44,7 @@ Future<bool> showConfirmDialog({
                 Navigator.of(dialogContext).pop(true);
                 await onConfirm?.call();
               },
-              child: Text(confirmLabel ?? 'Confirm'),
+              child: Text(confirmLabel ?? t.common.confirm),
             ),
           ],
         ),

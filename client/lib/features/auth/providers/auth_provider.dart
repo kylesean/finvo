@@ -5,12 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/features/auth/models/user.dart';
-import '../services/auth_service.dart';
-import 'auth_state.dart';
+import 'package:finvo/features/auth/services/auth_service.dart';
+import 'package:finvo/features/auth/providers/auth_state.dart';
 import 'dart:async';
 
 // Re-export AuthState and AuthStatus for convenience
-export 'auth_state.dart';
+export 'package:finvo/features/auth/providers/auth_state.dart';
 
 part 'auth_provider.g.dart';
 

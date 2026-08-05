@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
-import 'app_font_config.dart';
-import 'forui_theme_config.dart';
-import 'theme_palette_provider.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
+import 'package:finvo/app/theme/forui_theme_config.dart';
+import 'package:finvo/app/theme/theme_palette_provider.dart';
 
 /// Resolved light/dark theme pair.
 typedef AppThemePair = ({

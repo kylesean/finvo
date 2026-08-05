@@ -24,7 +24,10 @@
     "noMore": "これ以上ありません",
     "loadFailed": "読み込み失敗",
     "history": "履歴",
-    "reset": "リセット"
+    "reset": "リセット",
+    "cancelled": "キャンセル済み",
+    "saving": "保存中...",
+    "saveFailed": "保存に失敗しました"
   },
   "genui": {
     "errorBusy": "申し訳ございません。サービスが一時的に混雑しています。後ほどお試しください",
@@ -46,7 +49,9 @@
     "minutesAgo": "$count分前",
     "hoursAgo": "$count時間前",
     "daysAgo": "$count日前",
-    "weeksAgo": "$count週間前"
+    "weeksAgo": "$count週間前",
+    "monthsAgo": "$countヶ月前",
+    "yearsAgo": "$count年前"
   },
   "greeting": {
     "morning": "おはようございます",
@@ -169,6 +174,12 @@
     "commentFailed": "コメントに失敗しました",
     "replyToPrefix": "@$name さんに返信:",
     "reply": "返信",
+    "contentRequired": "コメント内容を入力してください",
+    "copyContent": "内容をコピー",
+    "contentCopied": "コメント内容をコピーしました",
+    "collapseReplies": "返信を折りたたむ",
+    "expandMoreReplies": "さらに返信 $count 件を表示",
+    "recordedBy": "記録者",
     "addNote": "備考を追加...",
     "confirmDeleteTitle": "削除の確認",
     "confirmDeleteContent": "このコメントを削除してもよろしいですか？この操作は取り消せません。",
@@ -253,6 +264,7 @@
     "checkingUpdate": "アップデートを確認中...",
     "latestVersionToast": "最新バージョンを使用中です",
     "newVersionTitle": "新しいバージョンがあります",
+    "currentVersion": "現在のバージョン: v$version",
     "updateNow": "今すぐアップデート",
     "updateLater": "後で",
     "fetchUpdateFailed": "アップデートの確認に失敗しました",
@@ -987,7 +999,11 @@
           "description": "Get AI-powered financial insights"
         }
       }
-    }
+    },
+    "shareComingSoon": "共有機能は近日公開予定です...",
+    "invalidAttachmentLink": "無効な添付ファイルリンク",
+    "unableToOpenAttachmentLink": "添付ファイルリンクを開けません",
+    "aiCommunicationError": "申し訳ありません、AIアシスタントとの通信エラーが発生しました：$error"
   },
   "image": {
     "deleteTitle": "画像を削除",
@@ -1032,6 +1048,16 @@
     "unknownError": "不明なエラー",
     "unknownErrorHint": "予期せぬエラーが発生しました。",
     "registrationMissingInfo": "登録フローエラー、必要な情報がありません。",
+    "accountInfoMissing": "口座情報がありません",
+    "sharedSpaceInfoMissing": "共有スペース情報がありません",
+    "settingsSteps": "設定手順：",
+    "suggestions": "提案：",
+    "fileNotFound": "ファイルが見つかりません",
+    "fileNotFoundHint": "ファイルの存在を確認するか、別のファイルを選択してください。",
+    "selectAgain": "再選択",
+    "thumbnailGenerationFailed": "サムネイル生成に失敗しました",
+    "thumbnailGenerationHint": "サムネイルの生成に失敗しましたが、ファイルは選択済みで引き続き使用できます。",
+    "help": "ヘルプ：",
     "genui": {
       "loadingFailed": "読み込み失敗",
       "schemaFailed": "検証失敗",
@@ -1136,7 +1162,9 @@
     "setDailyBurnRate": "1日の支出見積もりを設定",
     "dailyBurnRateSaved": "支出見積もりを保存しました",
     "dayUnit": "日",
-    "saveFailed": "保存に失敗しました"
+    "saveFailed": "保存に失敗しました",
+    "deleteFailed": "削除に失敗しました。しばらくしてから再試行してください",
+    "missingExchangeRates": "一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：$currencies"
   },
   "app": {
     "splashTitle": "スマートに、豊かに。",

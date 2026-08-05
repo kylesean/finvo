@@ -60,7 +60,7 @@ final class FinancialSummaryNotifierProvider
 }
 
 String _$financialSummaryNotifierHash() =>
-    r'2212b085c25bc46f1344e8081ef83c84cff5ad5a';
+    r'ab519dac82c94851c6643cfbd314c0f6b934d3e5';
 
 final class FinancialSummaryNotifierFamily extends $Family
     with

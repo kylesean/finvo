@@ -32,7 +32,7 @@ _FinancialAccount _$FinancialAccountFromJson(Map<String, dynamic> json) =>
       type: $enumDecodeNullable(_$FinancialAccountTypeEnumMap, json['type']),
       currencyCode: json['currencyCode'] as String? ?? 'CNY',
       initialBalance: _decimalFromJson(json['initialBalance']),
-      currentBalance: _decimalFromJsonNullable(json['currentBalance']),
+      currentBalance: _decimalOrNullFromJson(json['currentBalance']),
       includeInNetWorth: json['includeInNetWorth'] as bool? ?? true,
       includeInCashFlow: json['includeInCashFlow'] as bool? ?? false,
       display: json['display'] == null

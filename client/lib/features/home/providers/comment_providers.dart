@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../models/comment_model.dart';
-import '../services/comment_service.dart';
+import 'package:finvo/features/home/models/comment_model.dart';
+import 'package:finvo/features/home/services/comment_service.dart';
 
 part 'comment_providers.g.dart';
 
@@ -42,7 +42,13 @@ class TransactionComments extends _$TransactionComments {
         state = AsyncData(updated);
       }
     } catch (e, st) {
-      state = AsyncError(e, st);
+      // Keep the already-loaded list visible: replacing it with AsyncError
+      // would blank out existing comments just because one send failed.
+      // The error is rethrown so the caller can surface a toast.
+      if (state.value == null) {
+        state = AsyncError(e, st);
+      }
+      rethrow;
     }
   }
 

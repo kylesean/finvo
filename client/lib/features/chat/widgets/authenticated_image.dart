@@ -6,8 +6,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'dart:async';
 
-import '../../../core/storage/secure_storage_service.dart';
-import '../../../core/constants/api_constants.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/core/constants/api_constants.dart';
 
 /// Authenticated image loading component
 /// Automatically attaches JWT token when requesting images

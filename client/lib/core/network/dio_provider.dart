@@ -4,13 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:finvo/core/network/interceptors/business_interceptor.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/api_constants.dart';
-import './interceptors/auth_interceptor.dart';
-import './interceptors/logging_interceptor.dart';
-import './interceptors/error_interceptor.dart';
-import './interceptors/locale_interceptor.dart';
-import '../storage/secure_storage_service.dart';
-import 'exceptions/app_exception.dart';
+import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/core/network/interceptors/auth_interceptor.dart';
+import 'package:finvo/core/network/interceptors/logging_interceptor.dart';
+import 'package:finvo/core/network/interceptors/error_interceptor.dart';
+import 'package:finvo/core/network/interceptors/locale_interceptor.dart';
+import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 /// Riverpod Provider for Dio instance
 final _logger = Logger('DioProvider');
@@ -63,12 +63,11 @@ final sseDioProvider = Provider<Dio>((ref) {
   final apiConstants = ref.watch(apiConstantsProvider);
   final dio = Dio();
 
-  // SSE connection configuration: only set connectTimeout, do not set receiveTimeout
-  // baseUrl is set dynamically by ConfigurationCheckInterceptor on each request
+  // SSE connection configuration: only set connectTimeout; the receive/send
+  // timeouts are relaxed (1h) because SSE streams may legitimately idle for a
+  // long time while waiting for the AI to execute long-running tasks.
   dio.options.baseUrl = apiConstants.baseUrl;
   dio.options.connectTimeout = ApiConstants.connectTimeout;
-  // do not set receiveTimeout - SSE stream may last for a long time
-  // receiveTimeout: Duration.zero means no limit
   dio.options.receiveTimeout = const Duration(hours: 1);
   dio.options.sendTimeout = const Duration(hours: 1);
   dio.options.headers = {
@@ -106,7 +105,7 @@ final dioProvider = Provider<Dio>((ref) {
   dio.options.baseUrl = baseUrl.isNotEmpty ? baseUrl : 'http://placeholder';
   dio.options.connectTimeout = ApiConstants.connectTimeout;
   dio.options.receiveTimeout = ApiConstants.receiveTimeout;
-  // dio.options.sendTimeout = ApiConstants.sendTimeout;
+  dio.options.sendTimeout = ApiConstants.sendTimeout;
   dio.options.headers = {
     ApiConstants.contentTypeHeader: ApiConstants.applicationJson,
     ApiConstants.acceptHeader: ApiConstants.applicationJson,

@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/features/auth/widgets/brand_header.dart';
-import '../../../core/network/exceptions/app_exception.dart';
-import '../providers/auth_provider.dart';
-import '../providers/verification_provider.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/features/auth/providers/verification_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 

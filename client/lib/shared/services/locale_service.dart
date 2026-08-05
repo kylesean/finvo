@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Language management service
 /// Responsible for persistent storage and management of language settings, integrated with slang

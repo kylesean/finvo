@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
 import 'package:finvo/core/constants/api_constants.dart';
-import 'identicon_avatar.dart';
+import 'package:finvo/shared/widgets/identicon_avatar.dart';
 
 /// A circular user avatar loaded from the public ``/avatars/{userId}``
 /// endpoint, with a deterministic identicon as the offline / error fallback.
@@ -43,6 +43,12 @@ class UserAvatar extends ConsumerWidget {
     super.key,
   });
 
+  // Hoisted out of build() so the pattern is compiled once instead of on every
+  // widget rebuild.
+  static final _uuidPattern = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final background = backgroundColor ?? context.theme.colors.muted;
@@ -53,9 +59,7 @@ class UserAvatar extends ConsumerWidget {
     );
 
     final baseUrl = ref.read(apiConstantsProvider).baseUrl;
-    final isUuid = RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-    ).hasMatch(userId);
+    final isUuid = _uuidPattern.hasMatch(userId);
 
     final Widget content;
     if (baseUrl.isEmpty || !isUuid) {

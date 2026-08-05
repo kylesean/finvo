@@ -7,15 +7,15 @@ import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
-import '../../../core/constants/category_constants.dart';
-import '../../../shared/models/currency.dart';
-import '../../profile/providers/financial_settings_provider.dart';
-import '../models/budget_models.dart';
-import '../providers/budget_provider.dart';
-import '../services/budget_service.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/budget/models/budget_models.dart';
+import 'package:finvo/features/budget/providers/budget_provider.dart';
+import 'package:finvo/features/budget/services/budget_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
-import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class BudgetDetailPage extends ConsumerStatefulWidget {
@@ -47,8 +47,10 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
   }
 
   Future<void> _loadBudgetDetail() async {
+    final hasCachedContent = _budgetWithUsage != null;
     setState(() {
-      _isLoading = true;
+      // Don't blank out already-loaded content while refreshing.
+      _isLoading = !hasCachedContent;
       _error = null;
     });
 
@@ -63,12 +65,19 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _error = '${t.budget.loadFailed}: $e';
-        });
+      if (!mounted) return;
+      if (_budgetWithUsage != null) {
+        // Refresh failed with stale content on screen: keep showing the
+        // previous data and surface the failure as a transient toast instead
+        // of replacing the whole page with an error screen.
+        setState(() => _isLoading = false);
+        TopToast.error(context, '${t.budget.loadFailed}: $e');
+        return;
       }
+      setState(() {
+        _isLoading = false;
+        _error = '${t.budget.loadFailed}: $e';
+      });
     }
   }
 
@@ -607,13 +616,6 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
   }
 
   String _formatAmount(Decimal amount) {
-    final value = double.tryParse(amount.toString()) ?? 0.0;
-    final absValue = value.abs();
-
-    if (absValue >= 10000) {
-      return '${(absValue / 10000).toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
-    }
-
-    return absValue.toStringAsFixed(2);
+    return formatBudgetCompactAmount(amount);
   }
 }

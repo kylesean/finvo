@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../core/network/network_client.dart';
-import '../models/statistics_models.dart';
-import '../../../shared/services/response_parser.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/features/report/models/statistics_models.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 
 part 'statistics_service.g.dart';
 

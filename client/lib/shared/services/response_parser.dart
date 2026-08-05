@@ -6,6 +6,24 @@ import 'package:finvo/core/network/exceptions/app_exception.dart';
 /// All services should route their response decoding through these helpers
 /// instead of re-implementing inline `as List<dynamic>` casts.
 abstract final class ResponseParser {
+  /// Unwraps the envelope's `data` field and casts it to [T].
+  ///
+  /// Use this when the payload carries pagination metadata or a non-standard
+  /// shape that [parseItem]/[parseList] cannot express. When `data` is null,
+  /// [whenNull] decides the outcome: throw for strict endpoints or return a
+  /// sentinel value for tolerant ones.
+  static T parseData<T>(dynamic json, {required T Function() whenNull}) {
+    if (json is Map<String, dynamic>) {
+      final dataField = json['data'];
+      if (dataField == null) return whenNull();
+      if (dataField is T) return dataField;
+      throw DataParsingException(
+        'Expected data to be $T, got ${dataField.runtimeType}',
+      );
+    }
+    throw DataParsingException('Expected JSON Object, got ${json.runtimeType}');
+  }
+
   /// Parses a single item: `{ data: {...} }` or a direct root object
   /// (legacy shape). Throws [DataParsingException] on mismatch.
   static T parseItem<T>(

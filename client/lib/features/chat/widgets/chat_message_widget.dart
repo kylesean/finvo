@@ -7,15 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:genui/genui.dart' as genui;
 import 'package:gpt_markdown/gpt_markdown.dart';
-import '../models/chat_message.dart' as app;
-import '../genui/components/historical_component_renderer.dart';
-import '../genui/utils/genui_error_boundary.dart';
-import 'authenticated_image.dart';
-import 'tool_execution_block.dart';
-import '../models/tool_call_info.dart';
-import '../models/message_content_part.dart';
-import '../../../app/theme/app_font_config.dart';
-import '../../../i18n/strings.g.dart';
+import 'package:finvo/features/chat/models/chat_message.dart' as app;
+import 'package:finvo/features/chat/genui/components/historical_component_renderer.dart';
+import 'package:finvo/features/chat/genui/utils/genui_error_boundary.dart';
+import 'package:finvo/features/chat/widgets/authenticated_image.dart';
+import 'package:finvo/features/chat/widgets/tool_execution_block.dart';
+import 'package:finvo/features/chat/models/tool_call_info.dart';
+import 'package:finvo/features/chat/models/message_content_part.dart';
+import 'package:finvo/app/theme/app_font_config.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 final _logger = Logger('ChatMessageWidget');
 
@@ -455,7 +455,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   /// Get Markdown theme configuration
   GptMarkdownThemeData _gptThemeData(FThemeData theme) {
     final fallbacks = AppFontConfig.getGlobalFontFallbacks();
-    final family = AppFontConfig.primaryFontFamily;
+    const family = AppFontConfig.primaryFontFamily;
     // MiSansVF is a variable font; the wght axis faithfully applies font weight.
     // Headings already differentiate hierarchy via font size + color; weight stays
     // lightweight to match the harmonious feel of MiSans-L3 (static light).

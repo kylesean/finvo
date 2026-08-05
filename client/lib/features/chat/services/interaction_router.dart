@@ -21,8 +21,9 @@ import 'dart:convert';
 
 import 'package:genui/genui.dart' as genui;
 
-import '../genui/events/interaction_events.dart';
-import '../genui/genui_event_registry.dart';
+import 'package:finvo/features/chat/genui/events/interaction_events.dart';
+import 'package:finvo/features/chat/genui/genui_event_registry.dart';
+import 'package:finvo/features/chat/models/client_state_mutation.dart';
 
 /// Typed result of an outbound message.
 ///

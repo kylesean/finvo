@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+import 'package:decimal/decimal.dart';
 
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
@@ -319,6 +320,52 @@ void main() {
         AmountFormatter.isPositiveAmount(TransactionType.transfer),
         isFalse,
       );
+    });
+  });
+
+  group('AmountFormatter.parseDecimal', () {
+    test('parses a plain decimal string', () {
+      expect(AmountFormatter.parseDecimal('123.45'), Decimal.parse('123.45'));
+    });
+
+    test('parses an integer string', () {
+      expect(AmountFormatter.parseDecimal('100'), Decimal.fromInt(100));
+    });
+
+    test('parses negative amounts', () {
+      expect(AmountFormatter.parseDecimal('-50.5'), Decimal.parse('-50.5'));
+    });
+
+    test('falls back to zero for null', () {
+      expect(AmountFormatter.parseDecimal(null), Decimal.zero);
+    });
+
+    test('falls back to zero for empty string', () {
+      expect(AmountFormatter.parseDecimal(''), Decimal.zero);
+    });
+
+    test('falls back to zero for non-numeric input', () {
+      expect(AmountFormatter.parseDecimal('abc'), Decimal.zero);
+    });
+
+    // Regression guard for H-1: summing many backend amount strings through
+    // Decimal (instead of double.tryParse) must not accumulate the classic
+    // 0.1 + 0.2 floating-point error.
+    test('summation stays exact (no float drift)', () {
+      final amounts = ['0.1', '0.2', '0.1', '0.2', '0.1', '0.2'];
+      final decimalSum = amounts.fold<Decimal>(
+        Decimal.zero,
+        (acc, s) => acc + AmountFormatter.parseDecimal(s),
+      );
+      // Decimal accumulation is exact.
+      expect(decimalSum, Decimal.parse('0.9'));
+
+      // Contrast: the same sum through double.tryParse drifts away from 0.9.
+      final doubleSum = amounts.fold<double>(
+        0,
+        (acc, s) => acc + (double.tryParse(s) ?? 0),
+      );
+      expect(doubleSum, isNot(equals(0.9)));
     });
   });
 }

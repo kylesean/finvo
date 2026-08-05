@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import '../models/media_file.dart';
+import 'package:finvo/features/chat/models/media_file.dart';
 
 /// Media thumbnail generation service
 /// Responsible for generating thumbnails for images to improve preview performance

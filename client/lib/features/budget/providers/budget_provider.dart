@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../models/budget_models.dart';
-import '../services/budget_service.dart';
+import 'package:finvo/features/budget/models/budget_models.dart';
+import 'package:finvo/features/budget/services/budget_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 part 'budget_provider.g.dart';
@@ -27,14 +27,17 @@ extension BudgetFilterExtension on BudgetFilter {
 class BudgetSummaryState {
   final BudgetSummary? summary;
   final bool isLoading;
-  final String? error;
+
+  /// Typed error (e.g. [AppException]) so UI can branch on the concrete type.
+  /// Previously flattened to `String`, which destroyed that information.
+  final Object? error;
 
   const BudgetSummaryState({this.summary, this.isLoading = false, this.error});
 
   BudgetSummaryState copyWith({
     BudgetSummary? summary,
     bool? isLoading,
-    String? error,
+    Object? error,
   }) {
     return BudgetSummaryState(
       summary: summary ?? this.summary,
@@ -66,7 +69,8 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
       );
       state = state.copyWith(summary: summary, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      // Preserve the typed exception (AppException) instead of flattening it.
+      state = state.copyWith(isLoading: false, error: e);
     }
   }
 
@@ -75,15 +79,19 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
     await load();
   }
 
-  Future<bool> deleteBudget(String id) async {
+  /// Deletes a budget and refreshes the summary.
+  ///
+  /// On failure the exception is rethrown (instead of being swallowed into a
+  /// `bool` return) so callers like `_handleDelete` can react to the failure
+  /// and avoid showing a false "deleted successfully" toast.
+  Future<void> deleteBudget(String id) async {
     final service = ref.read(budgetServiceProvider);
     try {
       await service.delete(id);
-      await refresh();
-      return true;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
-      return false;
+      state = state.copyWith(error: e);
+      rethrow;
     }
+    await refresh();
   }
 }

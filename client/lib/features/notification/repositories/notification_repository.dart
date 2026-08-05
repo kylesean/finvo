@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
-import '../../../core/network/network_client.dart';
-import '../models/notification_item.dart';
+import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/features/notification/models/notification_item.dart';
 
 class NotificationRepository {
   final NetworkClient _networkClient;
@@ -42,21 +42,6 @@ class NotificationRepository {
     } catch (e, stackTrace) {
       _logger.severe('Failed to fetch notifications', e, stackTrace);
       rethrow;
-    }
-  }
-
-  /// Get total unread notifications count
-  Future<int> getUnreadCount() async {
-    try {
-      final response = await _networkClient.request<Map<String, dynamic>>(
-        '/notifications/unread-count',
-        method: HttpMethod.get,
-      );
-      final data = response['data'] as Map<String, dynamic>? ?? response;
-      return data['count'] as int? ?? 0;
-    } catch (e) {
-      _logger.warning('Failed to get unread count: $e');
-      return 0;
     }
   }
 

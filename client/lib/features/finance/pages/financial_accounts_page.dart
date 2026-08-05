@@ -4,24 +4,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
-import 'dart:math' as math;
 
-import '../../profile/models/financial_account.dart';
-import '../../profile/providers/financial_account_provider.dart';
-import '../../profile/providers/financial_settings_provider.dart';
-import '../../profile/models/financial_settings.dart';
-import '../models/account_type_definition.dart';
-import '../../../shared/models/currency.dart';
-import 'account_edit_page.dart';
-import '../providers/financial_summary_provider.dart';
-import '../providers/account_view_currency_provider.dart';
-import '../../../shared/providers/exchange_rate_provider.dart';
-import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/features/finance/pages/account_edit_page.dart';
+import 'package:finvo/features/finance/providers/financial_summary_provider.dart';
+import 'package:finvo/features/finance/providers/account_view_currency_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
-import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
-import '../widgets/currency_selection_sheet.dart';
+import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
+import 'package:finvo/features/finance/widgets/financial_account_card.dart';
+import 'package:finvo/features/finance/widgets/financial_accounts_drawer.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class FinancialAccountsPage extends ConsumerStatefulWidget {
@@ -98,12 +94,13 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                 totalAssets,
                 totalLiabilities,
                 viewCurrency,
+                summary.missingRateCurrencies,
               ),
             ),
           ],
         ),
       ),
-      drawer: _buildDrawer(context),
+      drawer: const FinancialAccountsDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: _addAccount,
         backgroundColor: colorScheme.primary,
@@ -126,6 +123,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     Decimal totalAssets,
     Decimal totalLiabilities,
     String viewCurrency,
+    Set<String> missingRateCurrencies,
   ) {
     // loading state
     if (state.isLoading && accounts.isEmpty) {
@@ -185,6 +183,11 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                 viewCurrency,
               ),
 
+            // Warn when some accounts were excluded from the totals because
+            // their currency has no usable exchange rate.
+            if (missingRateCurrencies.isNotEmpty)
+              _buildMissingRateHint(theme, colors, missingRateCurrencies),
+
             // Account list
             Expanded(
               child: RefreshIndicator(
@@ -205,8 +208,11 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                               t.financial.assetAccounts,
                             ),
                             ...assetAccounts.map(
-                              (account) =>
-                                  _buildAccountCard(theme, colors, account),
+                              (account) => FinancialAccountCard(
+                                account: account,
+                                hideAmounts: _hideAmounts,
+                                onEdit: _editAccount,
+                              ),
                             ),
                           ],
                           if (liabilityAccounts.isNotEmpty) ...[
@@ -216,8 +222,11 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                               t.financial.liabilityAccounts,
                             ),
                             ...liabilityAccounts.map(
-                              (account) =>
-                                  _buildAccountCard(theme, colors, account),
+                              (account) => FinancialAccountCard(
+                                account: account,
+                                hideAmounts: _hideAmounts,
+                                onEdit: _editAccount,
+                              ),
                             ),
                           ],
                           const SizedBox(height: 80), // Space for FAB
@@ -228,6 +237,37 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildMissingRateHint(
+    FThemeData theme,
+    FColors colors,
+    Set<String> missingRateCurrencies,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colors.destructive.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(FLucideIcons.circleAlert, size: 14, color: colors.destructive),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              t.financial.missingExchangeRates(
+                currencies: missingRateCurrencies.join(', '),
+              ),
+              style: theme.typography.body.xs.copyWith(
+                color: colors.destructive,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -487,196 +527,12 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     );
   }
 
-  Widget _buildAccountCard(
-    FThemeData theme,
-    FColors colors,
-    FinancialAccount account,
-  ) {
-    final definition = AccountTypeRegistry.resolveByApiType(account.type);
-
-    // Use nature field to determine if liability
-    final isLiabilityAccount = account.nature == FinancialNature.liability;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8), // Reduced bottom padding
-      child: AppCard(
-        child: Material(
-          type: MaterialType.transparency,
-          borderRadius: BorderRadius.circular(10), // Match FCard radius
-          child: InkWell(
-            onTap: () => _editAccount(account, definition),
-            borderRadius: BorderRadius.circular(10),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              child: Row(
-                children: [
-                  // Icon - Using ThemedIcon for consistency
-                  ThemedIcon(
-                    icon: _getAccountTypeIcon(
-                      definition?.id,
-                      isLiabilityAccount,
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  // Name and type
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          account.name,
-                          style: AppTextStyles.listTitle(theme),
-                        ),
-                        Text(
-                          definition != null
-                              ? _getTypeDisplayName(definition)
-                              : (isLiabilityAccount
-                                    ? t.financial.liabilityAccounts
-                                    : t.financial.assetAccounts),
-                          style: theme.typography.body.sm.copyWith(
-                            // Revert to sm
-                            color: colors.mutedForeground,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Amount
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _hideAmounts
-                          ? const Text('****')
-                          : AmountText(
-                              amount:
-                                  (account.currentBalance ??
-                                          account.initialBalance)
-                                      .toDouble(),
-                              type: isLiabilityAccount
-                                  ? TransactionType.expense
-                                  : TransactionType.income,
-                              semantic: AmountSemantic.status,
-                              currency: account.currencyCode,
-                              style: AppTextStyles.listTitle(theme),
-                            ),
-                      Text(
-                        account.currencyCode,
-                        style: AppTextStyles.listSubtitle(theme),
-                      ),
-                      if (!_hideAmounts) ...[
-                        Builder(
-                          builder: (context) {
-                            final viewCurrency = ref.watch(
-                              effectiveViewCurrencyProvider,
-                            );
-                            if (viewCurrency.toUpperCase() ==
-                                account.currencyCode.toUpperCase()) {
-                              return const SizedBox.shrink();
-                            }
-                            final rawBalance =
-                                account.currentBalance ??
-                                account.initialBalance;
-                            final ratesNotifier = ref.watch(
-                              exchangeRateProvider.notifier,
-                            );
-                            final converted = ratesNotifier.convert(
-                              rawBalance,
-                              account.currencyCode,
-                              viewCurrency,
-                            );
-                            if (converted == null) {
-                              return const SizedBox.shrink();
-                            }
-                            final symbol =
-                                Currency.fromCode(viewCurrency)?.symbol ?? '';
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                '≈ $symbol${converted.toDouble().toStringAsFixed(2)} $viewCurrency',
-                                style: theme.typography.body.xs.copyWith(
-                                  color: colors.mutedForeground.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                  fontSize: 11,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ],
-                  ),
-                  // const SizedBox(width: 8),
-                  // Icon(
-                  //   FLucideIcons.chevronRight,
-                  //   size: 16,
-                  //   color: colors.mutedForeground.withValues(alpha: 0.5),
-                  // ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<void> _showCurrencyPicker() async {
     final currentCurrency = ref.read(effectiveViewCurrencyProvider);
 
     final result = await CurrencySelectionSheet.show(context, currentCurrency);
     if (result != null && mounted) {
       ref.read(accountViewCurrencyProvider.notifier).setTemporary(result);
-    }
-  }
-
-  String _getTypeDisplayName(AccountTypeDefinition definition) {
-    switch (definition.id) {
-      case 'cash':
-        return t.account.cash;
-      case 'deposit':
-        return t.account.deposit;
-      case 'e_money':
-        return t.account.eWallet;
-      case 'investment':
-        return t.account.investment;
-      case 'receivable':
-        return t.account.receivable;
-      case 'credit_card':
-        return t.account.creditCard;
-      case 'loan':
-        return t.account.loan;
-      case 'payable':
-        return t.account.payable;
-      default:
-        return definition.title;
-    }
-  }
-
-  /// Get Forui icon for account type ID
-  IconData _getAccountTypeIcon(String? typeId, bool isLiability) {
-    switch (typeId) {
-      case 'cash':
-        return FLucideIcons.wallet;
-      case 'deposit':
-        return FLucideIcons.landmark;
-      case 'e_money':
-        return FLucideIcons.smartphone;
-      case 'investment':
-        return FLucideIcons.trendingUp;
-      case 'receivable':
-        return FLucideIcons.arrowRight;
-      case 'credit_card':
-        return FLucideIcons.creditCard;
-      case 'loan':
-        return FLucideIcons.building;
-      case 'payable':
-        return FLucideIcons.arrowLeft;
-      default:
-        return isLiability ? FLucideIcons.creditCard : FLucideIcons.wallet;
     }
   }
 
@@ -719,531 +575,5 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
       ),
     );
     // Refresh is handled by the edit page's provider interaction
-  }
-
-  /// Build left drawer content
-  Widget _buildDrawer(BuildContext context) {
-    final theme = context.theme;
-    final colorScheme = theme.colors;
-
-    return Drawer(
-      backgroundColor: colorScheme.background,
-      shape: const RoundedRectangleBorder(), // Remove rounded corners
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Top: title
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(
-                    FLucideIcons.wallet,
-                    size: 24,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      t.financial.management,
-                      style: AppTextStyles.pageTitle(theme),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Middle: feature list
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Financial settings group
-                    Text(
-                      t.financial.settings,
-                      style: AppTextStyles.sectionHeader(theme),
-                    ),
-                    const SizedBox(height: 8),
-                    FItemGroup(
-                      children: [
-                        FItem(
-                          prefix: const ThemedIcon(
-                            icon: FLucideIcons.dollarSign,
-                          ),
-                          title: Text(t.financial.budgetManagement),
-                          suffix: const Icon(FLucideIcons.chevronRight),
-                          onPress: () {
-                            Navigator.of(context).pop(); // Close drawer
-                            // Delay navigation to wait for drawer close animation
-                            unawaited(
-                              Future<void>.delayed(
-                                const Duration(milliseconds: 100),
-                                () {
-                                  if (context.mounted) {
-                                    unawaited(
-                                      context.pushNamed('budgetOverview'),
-                                    );
-                                  }
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                        FItem(
-                          prefix: const ThemedIcon(icon: FLucideIcons.repeat),
-                          title: Text(t.financial.recurringTransactions),
-                          suffix: const Icon(FLucideIcons.chevronRight),
-                          onPress: () {
-                            Navigator.of(context).pop(); // Close drawer
-                            // Delay navigation to wait for drawer close animation
-                            unawaited(
-                              Future<void>.delayed(
-                                const Duration(milliseconds: 100),
-                                () {
-                                  if (context.mounted) {
-                                    unawaited(
-                                      context.pushNamed(
-                                        'recurringTransactions',
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                        FItem(
-                          prefix: const ThemedIcon(icon: FLucideIcons.shield),
-                          title: Text(t.financial.safetyThreshold),
-                          suffix: const Icon(FLucideIcons.chevronRight),
-                          onPress: () {
-                            Navigator.of(context).pop(); // Close drawer
-                            _showSafetyThresholdSettings(context);
-                          },
-                        ),
-                        FItem(
-                          prefix: const ThemedIcon(
-                            icon: FLucideIcons.calculator,
-                          ),
-                          title: Text(t.financial.dailyBurnRate),
-                          suffix: const Icon(FLucideIcons.chevronRight),
-                          onPress: () {
-                            Navigator.of(context).pop(); // Close drawer
-                            _showDailySpendingSettings(context);
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Bottom: user info (optional)
-            Container(
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: colorScheme.border)),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    // Navigate to profile page or other features
-                    Navigator.of(context).pop();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Icon(
-                            FLucideIcons.user,
-                            size: 16,
-                            color: colorScheme.primaryForeground,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                t.financial.financialAssistant,
-                                style: AppTextStyles.listTrailing(theme),
-                              ),
-                              Text(
-                                t.financial.manageFinancialSettings,
-                                style: theme.typography.body.xs.copyWith(
-                                  color: colorScheme.mutedForeground,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          FLucideIcons.chevronRight,
-                          size: 16,
-                          color: colorScheme.mutedForeground,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Show safety threshold settings
-  void _showSafetyThresholdSettings(BuildContext context) {
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder: (BuildContext sheetContext) {
-          return const _SafetyThresholdBottomSheet();
-        },
-      ),
-    );
-  }
-
-  /// Show daily spending settings
-  void _showDailySpendingSettings(BuildContext context) {
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder: (BuildContext sheetContext) {
-          return const _DailySpendingBottomSheet();
-        },
-      ),
-    );
-  }
-}
-
-// Bottom sheet components below
-
-/// Shared slider-based amount input bottom sheet, used by both the safety
-/// threshold and daily spending settings (previously near-duplicated).
-class _AmountSliderBottomSheet extends ConsumerStatefulWidget {
-  const _AmountSliderBottomSheet({
-    required this.title,
-    required this.subtitle,
-    required this.successMessage,
-    required this.fallbackValue,
-    required this.maxSliderLimit,
-    required this.initialValueOf,
-    required this.onSave,
-    this.textFieldWidth = 140,
-    this.unitLabel,
-  });
-
-  final String title;
-  final String subtitle;
-  final String successMessage;
-  final double fallbackValue;
-  final double maxSliderLimit;
-
-  /// Returns the persisted value used to prefill the field, or null if none is set.
-  final double? Function(FinancialSettingsState state) initialValueOf;
-
-  /// Persists the value; returns true on success, false on failure.
-  final Future<bool> Function(double value) onSave;
-  final double textFieldWidth;
-  final String? unitLabel;
-
-  @override
-  ConsumerState<_AmountSliderBottomSheet> createState() =>
-      _AmountSliderBottomSheetState();
-}
-
-class _AmountSliderBottomSheetState
-    extends ConsumerState<_AmountSliderBottomSheet> {
-  late double _currentValue;
-  bool _hasInitialized = false;
-  bool _isUpdatingFromSlider = false;
-  late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentValue = widget.fallbackValue;
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onSliderChanged(double val) {
-    _isUpdatingFromSlider = true;
-    setState(() {
-      _currentValue = val;
-      _controller.text = val.toStringAsFixed(0);
-    });
-    _isUpdatingFromSlider = false;
-  }
-
-  void _onTextChanged(String text) {
-    if (_isUpdatingFromSlider) return;
-    final parsed = double.tryParse(text) ?? 0.0;
-    setState(() {
-      _currentValue = math.max(0.0, parsed);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    final colorScheme = theme.colors;
-    final settingsState = ref.watch(financialSettingsProvider);
-    final primaryCurrency = settingsState.primaryCurrency;
-    final symbol = Currency.fromCode(primaryCurrency)?.symbol ?? '¥';
-
-    if (!_hasInitialized) {
-      final initial = widget.initialValueOf(settingsState);
-      if (initial != null) {
-        _currentValue = initial;
-        _controller.text = _currentValue.toStringAsFixed(0);
-      }
-      _hasInitialized = true;
-    }
-
-    final double sliderValue = _currentValue.clamp(0.0, widget.maxSliderLimit);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 32,
-                height: 4,
-                margin: const EdgeInsets.only(top: 12.0, bottom: 16.0),
-                decoration: BoxDecoration(
-                  color: colorScheme.border.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Title area
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
-                    Text(widget.title, style: AppTextStyles.pageTitle(theme)),
-                    const SizedBox(height: 6),
-                    Text(
-                      widget.subtitle,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colorScheme.mutedForeground,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Minimal Underline Amount Input Area
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(symbol, style: AppTextStyles.actionText(theme)),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: widget.textFieldWidth,
-                      child: TextField(
-                        controller: _controller,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: false,
-                        ),
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.statValue(theme),
-                        decoration: InputDecoration(
-                          isDense: true,
-                          contentPadding: const EdgeInsets.only(bottom: 4),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: colorScheme.border,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: theme.colors.primary,
-                              width: 2.0,
-                            ),
-                          ),
-                        ),
-                        onChanged: _onTextChanged,
-                      ),
-                    ),
-                    if (widget.unitLabel != null) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        widget.unitLabel!,
-                        style: AppTextStyles.listTitle(theme),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Slider Area
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
-                    Slider(
-                      value: sliderValue,
-                      min: 0.0,
-                      max: widget.maxSliderLimit,
-                      activeColor: theme.colors.primary,
-                      onChanged: settingsState.isLoading
-                          ? null
-                          : _onSliderChanged,
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // Button area
-                    Row(
-                      children: [
-                        Expanded(
-                          child: FButton(
-                            variant: .outline,
-                            onPress: () => Navigator.of(context).pop(),
-                            child: Text(t.common.cancel),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FButton(
-                            onPress: settingsState.isLoading
-                                ? null
-                                : _handleSave,
-                            child: settingsState.isLoading
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(t.common.save),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handleSave() async {
-    final success = await widget.onSave(_currentValue);
-    if (!success) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(t.financial.saveFailed)));
-      }
-      return;
-    }
-    if (mounted) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(widget.successMessage)));
-    }
-  }
-}
-
-class _SafetyThresholdBottomSheet extends ConsumerWidget {
-  const _SafetyThresholdBottomSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return _AmountSliderBottomSheet(
-      title: t.financial.safetyThresholdSettings,
-      subtitle: t.financial.setSafetyThreshold,
-      successMessage: t.financial.safetyThresholdSaved,
-      fallbackValue: 1000.0,
-      maxSliderLimit: 50000.0,
-      initialValueOf: (s) => s.safetyThreshold != null
-          ? s.effectiveSafetyThreshold.toDouble()
-          : null,
-      onSave: (value) async {
-        final notifier = ref.read(financialSettingsProvider.notifier);
-        notifier.updateSafetyThreshold(Decimal.parse(value.toStringAsFixed(0)));
-        try {
-          return await notifier.saveFinancialSettings();
-        } catch (_) {
-          return false;
-        }
-      },
-    );
-  }
-}
-
-class _DailySpendingBottomSheet extends ConsumerWidget {
-  const _DailySpendingBottomSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return _AmountSliderBottomSheet(
-      title: t.financial.dailyBurnRateSettings,
-      subtitle: t.financial.setDailyBurnRate,
-      successMessage: t.financial.dailyBurnRateSaved,
-      fallbackValue: 100.0,
-      maxSliderLimit: 2000.0,
-      textFieldWidth: 130,
-      unitLabel: t.financial.dayUnit,
-      initialValueOf: (s) =>
-          s.dailyBurnRate != null ? s.effectiveDailyBurnRate.toDouble() : null,
-      onSave: (value) async {
-        final notifier = ref.read(financialSettingsProvider.notifier);
-        notifier.updateDailyBurnRate(Decimal.parse(value.toStringAsFixed(0)));
-        try {
-          return await notifier.saveFinancialSettings();
-        } catch (_) {
-          return false;
-        }
-      },
-    );
   }
 }

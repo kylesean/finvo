@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import '../exceptions/app_exception.dart';
-import '../exceptions/app_exception_factory.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/core/network/exceptions/app_exception_factory.dart';
 
 class ErrorInterceptor extends Interceptor {
   @override

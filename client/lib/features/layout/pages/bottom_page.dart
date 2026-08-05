@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 
-import '../widgets/nav_icon.dart';
+import 'package:finvo/features/layout/widgets/nav_icon.dart';
 
 /// Bottom navigation page - using Forui design system
 ///

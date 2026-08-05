@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'conversation_search_state.dart';
-import '../services/conversation_search_service.dart';
+import 'package:finvo/features/chat/providers/conversation_search_state.dart';
+import 'package:finvo/features/chat/services/conversation_search_service.dart';
 
 part 'conversation_search_provider.g.dart';
 

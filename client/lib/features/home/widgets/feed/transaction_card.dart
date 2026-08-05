@@ -16,6 +16,7 @@ import 'package:finvo/shared/config/category_config.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
@@ -62,26 +63,13 @@ class TransactionCard extends ConsumerWidget {
     return AmountFormatter.formatTransaction(
       type: transaction.type,
       amount: transaction.amount,
-      currency: transaction.paymentMethod ?? 'CNY',
+      currency: transaction.currency ?? 'CNY',
       showSign: true,
     );
   }
 
   String _getTimeDisplay(DateTime timestamp) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inSeconds < 60) {
-      return t.time.justNow;
-    } else if (difference.inMinutes < 60) {
-      return t.time.minutesAgo(count: difference.inMinutes);
-    } else if (difference.inHours < 24) {
-      return t.time.hoursAgo(count: difference.inHours);
-    } else if (difference.inDays < 7) {
-      return t.time.daysAgo(count: difference.inDays);
-    } else {
-      return t.time.weeksAgo(count: (difference.inDays / 7).floor());
-    }
+    return relativeTime(timestamp);
   }
 
   Future<bool> _showDeleteConfirmation(BuildContext context) async {

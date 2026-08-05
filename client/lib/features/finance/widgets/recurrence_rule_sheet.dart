@@ -1,10 +1,32 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:logging/logging.dart';
 import 'package:rrule/rrule.dart' as rrule_lib;
 import 'package:finvo/shared/widgets/app_calendar.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+
+final _logger = Logger('RecurrenceRuleSheet');
+
+/// Resolve a date for [monthDay] within [year]/[month].
+///
+/// [monthDay] == -1 is the "last day of month" sentinel and resolves to the
+/// real last day (day 0 of the next month); values 29-31 are clamped so
+/// short months (e.g. February) don't overflow into the next month.
+///
+/// Exposed at top level (not as a private method) so it can be regression
+/// tested: Dart normalizes negative days into the PREVIOUS month
+/// (DateTime(2026, 8, -1) == 2026-07-30), which silently produced wrong
+/// first-execution dates for "last day of month" rules.
+@visibleForTesting
+DateTime recurrenceDateForMonthDay(int year, int month, int monthDay) {
+  if (monthDay == -1) {
+    return DateTime(year, month + 1, 0);
+  }
+  final lastDay = DateTime(year, month + 1, 0).day;
+  return DateTime(year, month, monthDay.clamp(1, lastDay));
+}
 
 /// Recurrence rule result
 class RecurrenceRuleResult {
@@ -156,9 +178,21 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     _startDate = widget.initialStartDate;
     _monthDay = _startDate.day;
 
-    // Parse initial rule (if any)
+    // Parse initial rule (if any). The rule string is persisted server-side,
+    // so it must never crash this sheet: fall back to defaults on bad input.
     if (widget.initialRule != null) {
-      _parseInitialRule(widget.initialRule!);
+      try {
+        _parseInitialRule(widget.initialRule!);
+      } catch (e, stackTrace) {
+        _logger.warning(
+          'Failed to parse initial recurrence rule "${widget.initialRule}", falling back to defaults',
+          e,
+          stackTrace,
+        );
+        final today = DateTime.now().weekday;
+        final weekday = Weekday.values.firstWhere((w) => w.isoWeekday == today);
+        _selectedWeekdays.add(weekday);
+      }
     } else {
       // Default to selecting current weekday
       final today = DateTime.now().weekday;
@@ -876,8 +910,12 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
 
     switch (_frequency) {
       case RecurrenceFrequency.monthly:
-        // Calculate next occurrence of _monthDay
-        DateTime targetDate = DateTime(
+        // Calculate next occurrence of _monthDay.
+        // `_monthDay == -1` means "last day of month" and must NOT be passed
+        // to the DateTime constructor: Dart normalizes negative days into the
+        // PREVIOUS month (DateTime(2026, 8, -1) == 2026-07-30), which would
+        // shift the first execution date into the wrong month.
+        DateTime targetDate = _dateForMonthDay(
           _startDate.year,
           _startDate.month,
           _monthDay,
@@ -885,7 +923,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
 
         // If target date has passed, move to next month
         if (targetDate.isBefore(today)) {
-          targetDate = DateTime(
+          targetDate = _dateForMonthDay(
             _startDate.year,
             _startDate.month + 1,
             _monthDay,
@@ -930,4 +968,8 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         return targetDate;
     }
   }
+
+  /// Delegates to the top-level [recurrenceDateForMonthDay] (see its docs).
+  DateTime _dateForMonthDay(int year, int month, int monthDay) =>
+      recurrenceDateForMonthDay(year, month, monthDay);
 }

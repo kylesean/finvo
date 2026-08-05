@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
-import '../models/shared_space_models.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class SharedSpaceCard extends ConsumerWidget {

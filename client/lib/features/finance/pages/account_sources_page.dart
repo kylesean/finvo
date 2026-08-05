@@ -4,17 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'dart:async';
 
-import '../../profile/models/financial_account.dart';
-import '../../profile/providers/financial_account_provider.dart';
-import '../models/account_type_definition.dart';
-import '../../../shared/models/currency.dart';
-import '../../../shared/widgets/themed_icon.dart';
-import 'account_edit_page.dart';
-import '../providers/financial_summary_provider.dart';
-import '../widgets/currency_selection_sheet.dart';
-import '../../../shared/widgets/app_card.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/features/finance/pages/account_edit_page.dart';
+import 'package:finvo/features/finance/providers/financial_summary_provider.dart';
+import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Account management page - strictly following design spec
@@ -86,6 +88,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
         totalNetWorth,
         totalAssets,
         totalLiabilities,
+        summary.missingRateCurrencies,
       ),
     );
   }
@@ -101,6 +104,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
     Decimal totalNetWorth,
     Decimal totalAssets,
     Decimal totalLiabilities,
+    Set<String> missingRateCurrencies,
   ) {
     // Loading state
     if (state.isLoading && accounts.isEmpty) {
@@ -136,7 +140,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                         .loadFinancialAccounts(),
                   );
                 },
-                child: const Text('Retry'),
+                child: Text(t.common.retry),
               ),
             ],
           ),
@@ -161,6 +165,11 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                 totalAssets,
                 totalLiabilities,
               ),
+
+            // Warn when some accounts were excluded from the totals because
+            // their currency has no usable exchange rate.
+            if (missingRateCurrencies.isNotEmpty)
+              _buildMissingRateHint(theme, colors, missingRateCurrencies),
 
             // Account list
             Expanded(
@@ -205,6 +214,37 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildMissingRateHint(
+    FThemeData theme,
+    FColors colors,
+    Set<String> missingRateCurrencies,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colors.destructive.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(FLucideIcons.circleAlert, size: 14, color: colors.destructive),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              t.financial.missingExchangeRates(
+                currencies: missingRateCurrencies.join(', '),
+              ),
+              style: theme.typography.body.xs.copyWith(
+                color: colors.destructive,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -350,7 +390,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
                       _hideAmounts ? '****' : '+${_formatAmount(assets)}',
                       style: AppTextStyles.listTitle(
                         theme,
-                      ).copyWith(color: const Color(0xFF4CAF50)),
+                      ).copyWith(color: theme.semantic.successAccent),
                     ),
                   ],
                 ),
@@ -518,27 +558,30 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
 
   String _formatAmount(Decimal amount) {
     final value = double.tryParse(amount.toString()) ?? 0.0;
-    return AmountFormatter.getNumberFormat('CNY').format(value);
+    // Format with the currency the user is currently viewing, not a fixed
+    // CNY: the summary above is already converted into _viewCurrency.
+    return AmountFormatter.getNumberFormat(_viewCurrency).format(value);
   }
 
   String _getTypeDisplayName(AccountTypeDefinition definition) {
+    final account = t.account;
     switch (definition.id) {
       case 'cash':
-        return 'Cash Wallet';
+        return account.cash;
       case 'deposit':
-        return 'Bank Deposit';
+        return account.deposit;
       case 'e_money':
-        return 'E-Wallet';
+        return account.eWallet;
       case 'investment':
-        return 'Investment';
+        return account.investment;
       case 'receivable':
-        return 'Receivable';
+        return account.receivable;
       case 'credit_card':
-        return 'Credit Card';
+        return account.creditCard;
       case 'loan':
-        return 'Loan';
+        return account.loan;
       case 'payable':
-        return 'Payable';
+        return account.payable;
       default:
         return definition.title;
     }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../providers/shared_space_provider.dart';
-import '../models/shared_space_models.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class CreateSpaceSheet extends ConsumerStatefulWidget {

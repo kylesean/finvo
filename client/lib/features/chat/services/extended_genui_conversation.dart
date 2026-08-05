@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:genui/genui.dart' as genui;
-import 'custom_content_generator.dart';
+import 'package:finvo/features/chat/services/custom_content_generator.dart';
 
 final _logger = Logger('ExtendedGenUiConversation');
 

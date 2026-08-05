@@ -1,10 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 // ignore_for_file: invalid_annotation_target
-import 'chat_message_attachment.dart';
-import '../services/data_uri_service.dart';
-import 'tool_call_info.dart';
-import 'message_content_part.dart';
+import 'package:finvo/features/chat/models/chat_message_attachment.dart';
+import 'package:finvo/features/chat/services/data_uri_service.dart';
+import 'package:finvo/features/chat/models/tool_call_info.dart';
+import 'package:finvo/features/chat/models/message_content_part.dart';
 
 part 'chat_message.freezed.dart';
 part 'chat_message.g.dart';
@@ -169,9 +169,9 @@ List<ChatMessageAttachment> _attachmentsFromJson(dynamic json) {
   if (json is List) {
     return json.map((item) {
       if (item is Map<String, dynamic>) {
-        return ChatMessageAttachment.fromJson(item);
+        return chatMessageAttachmentFromJson(item);
       } else if (item is Map) {
-        return ChatMessageAttachment.fromJson(Map<String, dynamic>.from(item));
+        return chatMessageAttachmentFromJson(Map<String, dynamic>.from(item));
       }
       throw FormatException('Invalid ChatMessageAttachment format: $item');
     }).toList();

@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../i18n/strings.g.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'statistics_models.freezed.dart';
 part 'statistics_models.g.dart';

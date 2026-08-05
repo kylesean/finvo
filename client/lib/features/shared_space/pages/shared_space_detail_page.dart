@@ -4,19 +4,21 @@ import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import '../providers/shared_space_provider.dart';
-import '../widgets/space_dashboard_card.dart';
-import '../models/shared_space_models.dart';
-import '../../../shared/widgets/amount_text.dart';
-import '../../../shared/utils/amount_formatter.dart';
-import '../../../shared/providers/amount_theme_provider.dart';
-import '../../../features/home/models/transaction_model.dart';
-import '../../../core/constants/category_constants.dart';
-import '../../../shared/config/category_config.dart';
-import '../../../i18n/strings.g.dart';
-import '../widgets/detail/space_invite_code_sheet.dart';
-import '../../../shared/widgets/dialogs/action_bottom_sheet.dart';
-import '../../../shared/models/action_item_model.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
+import 'package:finvo/features/shared_space/widgets/space_dashboard_card.dart';
+import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
+import 'package:finvo/shared/providers/amount_theme_provider.dart';
+import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/shared/config/category_config.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/features/shared_space/widgets/detail/space_invite_code_sheet.dart';
+import 'package:finvo/shared/widgets/dialogs/action_bottom_sheet.dart';
+import 'package:finvo/shared/models/action_item_model.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -313,17 +315,11 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
   Widget _buildSettlementLoading(BuildContext context) {
     final theme = context.theme;
     final colors = theme.colors;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final semantic = theme.semantic;
 
-    final Color shimmerBaseColor = isDark
-        ? const Color(0xFF2A2A2A)
-        : Colors.grey[200]!;
-    final Color shimmerHighlightColor = isDark
-        ? const Color(0xFF424242)
-        : Colors.grey[50]!;
-    final Color placeholderShapeColor = isDark
-        ? const Color(0xFF2A2A2A)
-        : Colors.grey[200]!;
+    final Color shimmerBaseColor = semantic.shimmerBase;
+    final Color shimmerHighlightColor = semantic.shimmerHighlight;
+    final Color placeholderShapeColor = semantic.shimmerBase;
 
     return Container(
       width: double.infinity,
@@ -459,16 +455,10 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
   }
 
   Widget _buildTransactionCardSkeleton(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color shimmerBaseColor = isDark
-        ? const Color(0xFF2A2A2A)
-        : Colors.grey[200]!;
-    final Color shimmerHighlightColor = isDark
-        ? const Color(0xFF424242)
-        : Colors.grey[50]!;
-    final Color placeholderShapeColor = isDark
-        ? const Color(0xFF2A2A2A)
-        : Colors.grey[200]!;
+    final semantic = context.theme.semantic;
+    final Color shimmerBaseColor = semantic.shimmerBase;
+    final Color shimmerHighlightColor = semantic.shimmerHighlight;
+    final Color placeholderShapeColor = semantic.shimmerBase;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -625,19 +615,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
     // Format time
     String timeDisplay = '';
     if (tx.transactionAt != null) {
-      final now = DateTime.now();
-      final diff = now.difference(tx.transactionAt!);
-      if (diff.inMinutes < 1) {
-        timeDisplay = t.notification.justNow;
-      } else if (diff.inMinutes < 60) {
-        timeDisplay = t.notification.minutesAgo(minutes: diff.inMinutes);
-      } else if (diff.inHours < 24) {
-        timeDisplay = t.notification.hoursAgo(hours: diff.inHours);
-      } else if (diff.inDays < 7) {
-        timeDisplay = t.notification.daysAgo(days: diff.inDays);
-      } else {
-        timeDisplay = '${tx.transactionAt!.month}/${tx.transactionAt!.day}';
-      }
+      timeDisplay = relativeTime(tx.transactionAt!);
     }
 
     return GestureDetector(

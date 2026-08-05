@@ -24,7 +24,10 @@
     "noMore": "没有更多了",
     "loadFailed": "加载失败",
     "history": "交易记录",
-    "reset": "重置"
+    "reset": "重置",
+    "cancelled": "已取消",
+    "saving": "保存中...",
+    "saveFailed": "保存失败"
   },
   "genui": {
     "errorBusy": "抱歉，服务暂时繁忙，请稍后重试",
@@ -46,7 +49,9 @@
     "minutesAgo": "$count分钟前",
     "hoursAgo": "$count小时前",
     "daysAgo": "$count天前",
-    "weeksAgo": "$count周前"
+    "weeksAgo": "$count周前",
+    "monthsAgo": "$count个月前",
+    "yearsAgo": "$count年前"
   },
   "greeting": {
     "morning": "上午好",
@@ -173,6 +178,12 @@
     "commentFailed": "评论失败",
     "replyToPrefix": "回复 @$name:",
     "reply": "回复",
+    "contentRequired": "评论内容不能为空",
+    "copyContent": "复制内容",
+    "contentCopied": "已复制评论内容",
+    "collapseReplies": "收起回复",
+    "expandMoreReplies": "展开额外 $count 条回复",
+    "recordedBy": "记录人",
     "addNote": "添加备注...",
     "addNoteWithMention": "评论或 @提及成员...",
     "confirmDeleteTitle": "确认删除",
@@ -258,6 +269,7 @@
     "checkingUpdate": "正在检查更新...",
     "latestVersionToast": "当前已是最新版本",
     "newVersionTitle": "发现新版本",
+    "currentVersion": "当前版本: v$version",
     "updateNow": "立即更新",
     "updateLater": "暂不更新",
     "fetchUpdateFailed": "检查更新失败，请稍后重试",
@@ -991,7 +1003,11 @@
           "description": "看清未来的财务趋势"
         }
       }
-    }
+    },
+    "shareComingSoon": "分享功能即将上线...",
+    "invalidAttachmentLink": "无效的附件链接",
+    "unableToOpenAttachmentLink": "无法打开附件链接",
+    "aiCommunicationError": "抱歉，AI 助手通信错误：$error"
   },
   "image": {
     "deleteTitle": "删除图片",
@@ -1036,6 +1052,16 @@
     "unknownError": "未知错误",
     "unknownErrorHint": "发生了意外错误，请重试或联系技术支持。",
     "registrationMissingInfo": "注册流程错误，缺少必要信息。",
+    "accountInfoMissing": "账户信息缺失",
+    "sharedSpaceInfoMissing": "共享空间信息缺失",
+    "settingsSteps": "设置步骤：",
+    "suggestions": "建议：",
+    "fileNotFound": "文件未找到",
+    "fileNotFoundHint": "请确认文件存在或重新选择文件。",
+    "selectAgain": "重新选择",
+    "thumbnailGenerationFailed": "缩略图生成失败",
+    "thumbnailGenerationHint": "缩略图生成失败，但文件已成功选择，仍可继续使用该文件。",
+    "help": "帮助：",
     "genui": {
       "loadingFailed": "组件加载失败",
       "schemaFailed": "架构验证失败",
@@ -1140,7 +1166,9 @@
     "setDailyBurnRate": "设置您的日常消费预估金额",
     "dailyBurnRateSaved": "日常消费预估已保存",
     "dayUnit": "天",
-    "saveFailed": "保存失败"
+    "saveFailed": "保存失败",
+    "deleteFailed": "删除失败，请稍后重试",
+    "missingExchangeRates": "部分币种缺少汇率，相关账户未计入总额：$currencies"
   },
   "app": {
     "splashTitle": "智见增长，格物致富。",

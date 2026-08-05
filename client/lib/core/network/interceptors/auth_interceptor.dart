@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
-import '../../constants/api_constants.dart';
+import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 
 /// Authentication Interceptor
@@ -31,6 +31,12 @@ class AuthInterceptor extends Interceptor {
     '/auth/send-code',
     '/auth/refresh',
   ];
+
+  /// Extra key used to mark a request that has already been retried after a
+  /// token refresh. Without this guard, a retried request that gets a *second*
+  /// 401 would re-enter the refresh flow, causing a 401→refresh→retry→401
+  /// cascade that hammers the backend until the refresh token is exhausted.
+  static const _refreshedKey = '__refreshed';
 
   AuthInterceptor(this.storageService, {this.onUnauthorized, Dio? dio})
     : _dio = dio ?? Dio();
@@ -70,44 +76,68 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final bool isStatus401 = err.response?.statusCode == 401;
     final bool isRefreshPath = err.requestOptions.path == '/auth/refresh';
+    // Public endpoints (login/register/send-code) must NOT trigger the
+    // refresh-and-replay flow: a 401 there means "bad credentials", not "token
+    // expired". Without this guard, a wrong-password login could attempt a
+    // token refresh and, on failure, call onUnauthorized to wipe the local
+    // login state.
+    final bool isPublicPath = _publicPaths.contains(err.requestOptions.path);
+    // A retried request that already went through token refresh must not
+    // re-enter the refresh flow — that would cause a 401→refresh→retry→401
+    // cascade until the refresh token is exhausted.
+    final bool alreadyRefreshed =
+        err.requestOptions.extra[_refreshedKey] == true;
 
-    if (isStatus401 && !isRefreshPath) {
-      _logger.warning(
-        'Received 401 Unauthorized error for ${err.requestOptions.path}',
-      );
-
-      final String? refreshToken = await storageService.getRefreshToken();
-      if (refreshToken != null && refreshToken.isNotEmpty) {
-        final _RefreshResult? result = await _singleFlightRefresh(
-          refreshToken,
-          err.requestOptions.baseUrl,
+    if (isStatus401 && !isRefreshPath && !isPublicPath) {
+      if (alreadyRefreshed) {
+        _logger.warning(
+          '401 after token-refresh retry for ${err.requestOptions.path}, '
+          'signing out',
+        );
+      } else {
+        _logger.warning(
+          'Received 401 Unauthorized error for ${err.requestOptions.path}',
         );
 
-        if (result != null) {
-          await storageService.saveToken(result.accessToken);
-          await storageService.saveRefreshToken(result.refreshToken);
-          _logger.info('Token refreshed, replaying original request');
+        final String? refreshToken = await storageService.getRefreshToken();
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          final _RefreshResult? result = await _singleFlightRefresh(
+            refreshToken,
+            err.requestOptions.baseUrl,
+          );
 
-          try {
-            final opts = err.requestOptions;
-            opts.headers[ApiConstants.authorizationHeader] =
-                'Bearer ${result.accessToken}';
-            final Response<dynamic> response = await _dio.fetch<dynamic>(opts);
-            handler.resolve(response);
-            return;
-          } catch (retryErr) {
-            _logger.warning('Retry after refresh failed: $retryErr');
+          if (result != null) {
+            await storageService.saveToken(result.accessToken);
+            await storageService.saveRefreshToken(result.refreshToken);
+            _logger.info('Token refreshed, replaying original request');
+
+            try {
+              final opts = err.requestOptions;
+              // Mark this request as already refreshed so a second 401 on the
+              // retry skips the refresh flow and goes straight to sign-out.
+              opts.extra[_refreshedKey] = true;
+              opts.headers[ApiConstants.authorizationHeader] =
+                  'Bearer ${result.accessToken}';
+              final Response<dynamic> response = await _dio.fetch<dynamic>(
+                opts,
+              );
+              handler.resolve(response);
+              return;
+            } catch (retryErr) {
+              _logger.warning('Retry after refresh failed: $retryErr');
+            }
+          } else {
+            _logger.warning('Token refresh rejected, signing out');
           }
-        } else {
-          _logger.warning('Token refresh rejected, signing out');
         }
       }
 
-      // Refresh not possible — sign out locally; the router redirects to login.
+      // Refresh not possible (or already tried) — sign out locally; the
+      // router redirects to login.
       try {
         await onUnauthorized?.call();
-      } catch (e) {
-        _logger.warning('onUnauthorized callback failed: $e');
+      } catch (e, stackTrace) {
+        _logger.warning('onUnauthorized callback failed', e, stackTrace);
       }
     }
     super.onError(err, handler);
@@ -148,8 +178,8 @@ class AuthInterceptor extends Interceptor {
         }
       }
       return null;
-    } catch (e) {
-      _logger.warning('Token refresh failed: $e');
+    } catch (e, stackTrace) {
+      _logger.warning('Token refresh failed', e, stackTrace);
       return null;
     }
   }

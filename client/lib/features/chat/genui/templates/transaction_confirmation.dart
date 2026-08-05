@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import '../../services/genui_cache_service.dart';
-import '../events/interaction_events.dart';
-import '../organisms/organisms.dart';
-import '../../../../shared/widgets/app_card.dart';
+import 'package:finvo/features/chat/services/genui_cache_service.dart';
+import 'package:finvo/features/chat/genui/events/interaction_events.dart';
+import 'package:finvo/features/chat/genui/organisms/organisms.dart';
+import 'package:finvo/shared/widgets/app_card.dart';
 
 /// Submission cache
 class _ConfirmationCache {

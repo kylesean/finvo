@@ -7,12 +7,14 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'dart:async';
 
-import '../../profile/models/financial_account.dart';
-import '../../profile/providers/financial_account_provider.dart';
-import '../models/account_type_definition.dart';
-import '../../../shared/models/currency.dart';
-import '../../../shared/theme/form_text_styles.dart';
-import '../widgets/currency_selection_sheet.dart';
+import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/finance/widgets/account_form_widgets.dart';
+import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
+import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 class FinancialAccountEditArgs {
@@ -50,7 +52,9 @@ class _FinancialAccountEditPageState
     final account = widget.args.account;
     _nameController = TextEditingController(text: account.name);
     _balanceController = TextEditingController(
-      text: _formatAmount(account.currentBalance ?? account.initialBalance),
+      text: formatAccountAmount(
+        account.currentBalance ?? account.initialBalance,
+      ),
     );
     _selectedCurrency = Currency.fromCode(account.currencyCode) ?? Currency.cny;
     _hidden = account.status == AccountStatus.inactive;
@@ -114,8 +118,11 @@ class _FinancialAccountEditPageState
           ],
         ),
       ),
-      // Fixed save button at the bottom
-      bottomNavigationBar: _buildSaveButton(theme, colors),
+      bottomNavigationBar: buildAccountSaveButton(
+        theme,
+        colors,
+        onSave: _handleSave,
+      ),
     );
   }
 
@@ -137,7 +144,7 @@ class _FinancialAccountEditPageState
       child: Column(
         children: [
           // Account name
-          _buildInputRow(
+          buildAccountInputRow(
             theme: theme,
             colors: colors,
             icon: SizedBox(
@@ -172,10 +179,10 @@ class _FinancialAccountEditPageState
             ),
           ),
 
-          _buildDivider(colors),
+          buildAccountFormDivider(colors),
 
           // Current balance
-          _buildInputRow(
+          buildAccountInputRow(
             theme: theme,
             colors: colors,
             icon: SizedBox(
@@ -211,10 +218,10 @@ class _FinancialAccountEditPageState
             ),
           ),
 
-          _buildDivider(colors),
+          buildAccountFormDivider(colors),
 
           // Currency selection
-          _buildTapRow(
+          buildAccountTapRow(
             theme: theme,
             colors: colors,
             icon: Icon(FLucideIcons.globe, size: 20, color: colors.primary),
@@ -225,10 +232,10 @@ class _FinancialAccountEditPageState
             onTap: _openCurrencyPicker,
           ),
 
-          _buildDivider(colors),
+          buildAccountFormDivider(colors),
 
           // Hidden switch
-          _buildSwitchRow(
+          buildAccountSwitchRow(
             theme: theme,
             colors: colors,
             title: t.account.hiddenLabel,
@@ -237,10 +244,10 @@ class _FinancialAccountEditPageState
             onChanged: (value) => setState(() => _hidden = value),
           ),
 
-          _buildDivider(colors),
+          buildAccountFormDivider(colors),
 
           // Include in net worth switch
-          _buildSwitchRow(
+          buildAccountSwitchRow(
             theme: theme,
             colors: colors,
             title: t.account.includeInNetWorthLabel,
@@ -250,146 +257,6 @@ class _FinancialAccountEditPageState
             isLast: true,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDivider(FColors colors) {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      indent: 56,
-      color: colors.border.withValues(alpha: 0.3),
-    );
-  }
-
-  /// Input row component
-  Widget _buildInputRow({
-    required FThemeData theme,
-    required FColors colors,
-    required Widget icon,
-    required String label,
-    required Widget child,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
-        children: [
-          SizedBox(width: 36, height: 36, child: Center(child: icon)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(label, style: AppTextStyles.formLabel(theme)),
-                const SizedBox(height: 2),
-                child,
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Clickable row component
-  Widget _buildTapRow({
-    required FThemeData theme,
-    required FColors colors,
-    required Widget icon,
-    required String label,
-    required String value,
-    bool showArrow = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Row(
-          children: [
-            SizedBox(width: 36, height: 36, child: Center(child: icon)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(label, style: AppTextStyles.formLabel(theme)),
-                  const SizedBox(height: 2),
-                  Text(value, style: AppTextStyles.formValue(theme)),
-                ],
-              ),
-            ),
-            if (showArrow)
-              Icon(
-                FLucideIcons.chevronRight,
-                size: 16,
-                color: colors.mutedForeground,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Switch row component
-  Widget _buildSwitchRow({
-    required FThemeData theme,
-    required FColors colors,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    bool isLast = false,
-  }) {
-    return InkWell(
-      onTap: () => onChanged(!value),
-      borderRadius: isLast
-          ? const BorderRadius.vertical(bottom: Radius.circular(16))
-          : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(title, style: AppTextStyles.switchTitle(theme)),
-                  Text(subtitle, style: AppTextStyles.switchSubtitle(theme)),
-                ],
-              ),
-            ),
-            FSwitch(value: value, onChange: onChanged),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSaveButton(FThemeData theme, FColors colors) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      decoration: BoxDecoration(
-        color: colors.background,
-        border: Border(
-          top: BorderSide(
-            color: colors.border.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.only(bottom: 8),
-        child: SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: FButton(onPress: _handleSave, child: Text(t.account.save)),
-        ),
       ),
     );
   }
@@ -439,10 +306,16 @@ class _FinancialAccountEditPageState
         .read(financialAccountProvider.notifier)
         .saveFinancialAccounts(updatedList);
 
-    // Save successfully, refresh list
-    if (success && mounted) {
-      await ref.read(financialAccountProvider.notifier).loadFinancialAccounts();
+    if (!mounted) return;
+
+    // Never pop on failure: the account is still there and silently closing
+    // the page would make the user believe the delete succeeded.
+    if (!success) {
+      TopToast.error(context, t.financial.deleteFailed);
+      return;
     }
+
+    await ref.read(financialAccountProvider.notifier).loadFinancialAccounts();
 
     if (mounted) {
       context.pop();
@@ -478,18 +351,18 @@ class _FinancialAccountEditPageState
         .read(financialAccountProvider.notifier)
         .saveFinancialAccounts(updatedList);
 
-    // Save successfully, refresh list
-    if (success && mounted) {
-      await ref.read(financialAccountProvider.notifier).loadFinancialAccounts();
+    if (!mounted) return;
+
+    // Keep the page open on failure so the user's edits are not lost.
+    if (!success) {
+      TopToast.error(context, t.financial.saveFailed);
+      return;
     }
+
+    await ref.read(financialAccountProvider.notifier).loadFinancialAccounts();
 
     if (mounted) {
       context.pop(updatedAccount);
     }
-  }
-
-  String _formatAmount(Decimal balance) {
-    final value = double.tryParse(balance.toString()) ?? 0.0;
-    return value.toStringAsFixed(2);
   }
 }

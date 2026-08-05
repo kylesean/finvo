@@ -1,7 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
-import '../models/chat_message.dart';
-import '../widgets/genui_error_widget.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/widgets/genui_error_widget.dart';
 
 /// Error recovery for GenUI rendering failures.
 ///

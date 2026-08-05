@@ -1,36 +1,120 @@
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/core/network/network_client.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 import 'package:finvo/features/chat/models/conversation_info.dart';
 import 'package:finvo/features/chat/models/paginated_conversations.dart';
-import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/chat/models/conversation_detail.dart';
-import '../../auth/providers/auth_provider.dart';
-import '../models/chat_message.dart';
-import 'package:finvo/features/chat/models/paginated_messages.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/features/chat/models/chat_message.dart';
 
 part 'conversation_service.g.dart';
 
 final _logger = Logger('ConversationService');
 
 /// Parse datetime string with compatibility for non-standard ISO 8601 formats.
-/// Handles formats like "2025-12-27T07:07:20.586784+00:00Z" where both offset and Z are present.
+/// Handles formats like "2025-12-27T07:07:20.586784+00:00Z" where both offset
+/// and Z are present.
+///
+/// Prefer parsing directly; only fall back to stripping a redundant trailing
+/// 'Z' when the standard parser rejects the input. This avoids the previous
+/// heuristic string scanning, which could misfire on unrelated characters.
 DateTime _parseDateTime(String dateStr) {
-  // Remove redundant trailing 'Z' if offset is already present (e.g., +00:00Z -> +00:00)
-  String normalized = dateStr;
-  if (dateStr.contains('+') || dateStr.contains('-', 10)) {
-    // Has timezone offset, remove trailing Z if present
+  try {
+    return DateTime.parse(dateStr);
+  } on FormatException {
     if (dateStr.endsWith('Z')) {
-      normalized = dateStr.substring(0, dateStr.length - 1);
+      return DateTime.parse(dateStr.substring(0, dateStr.length - 1));
     }
+    rethrow;
   }
-  return DateTime.parse(normalized);
 }
 
 class ConversationService {
   final NetworkClient _networkClient;
 
   ConversationService(this._networkClient);
+
+  static const PaginatedConversations _emptyConversations =
+      PaginatedConversations(
+        data: [],
+        meta: ConversationMeta(
+          currentPage: 1,
+          lastPage: 1,
+          perPage: 10,
+          total: 0,
+          hasMore: false,
+        ),
+      );
+
+  /// Parse a session list payload into a [PaginatedConversations].
+  ///
+  /// Accepts both an empty/null payload (yielding an empty page) and the
+  /// unified pagination envelope produced by the backend
+  /// (`items` / `page` / `size` / `total` / `pages` / `hasMore`).
+  PaginatedConversations _parseConversationsData(
+    Map<String, dynamic> data, {
+    required int page,
+    required int perPage,
+  }) {
+    if (data.isEmpty) return _emptyConversations;
+
+    final itemsData = data['items'] as List<dynamic>? ?? [];
+    final conversations = itemsData
+        .map(
+          (session) => _parseConversationInfo(session as Map<String, dynamic>),
+        )
+        .toList();
+
+    final int totalPages = data['pages'] as int? ?? 1;
+    final int size = data['size'] as int? ?? perPage;
+    final int total = data['total'] as int? ?? conversations.length;
+
+    return PaginatedConversations(
+      data: conversations,
+      meta: ConversationMeta(
+        currentPage: data['page'] as int? ?? page,
+        lastPage: totalPages,
+        perPage: size,
+        total: total,
+        // Backend may omit hasMore; derive it from the page window instead of
+        // silently defaulting to false (which would hide further pages).
+        hasMore: data['hasMore'] as bool? ?? (page < totalPages),
+      ),
+    );
+  }
+
+  ConversationInfo _parseConversationInfo(Map<String, dynamic> session) {
+    DateTime createdAt = DateTime.now();
+    DateTime updatedAt = DateTime.now();
+
+    if (session['created_at'] != null &&
+        session['created_at'].toString().isNotEmpty) {
+      try {
+        createdAt = _parseDateTime(session['created_at'] as String);
+      } catch (e, stackTrace) {
+        _logger.warning('Error parsing created_at', e, stackTrace);
+      }
+    }
+
+    if (session['updated_at'] != null &&
+        session['updated_at'].toString().isNotEmpty) {
+      try {
+        updatedAt = _parseDateTime(session['updated_at'] as String);
+      } catch (e, stackTrace) {
+        _logger.warning('Error parsing updated_at', e, stackTrace);
+      }
+    }
+
+    return ConversationInfo(
+      id: session['session_id'] as String,
+      title: session['name'] as String? ?? 'New Chat',
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      token: session['token'] as String?,
+    );
+  }
 
   /// Get paginated conversation list
   Future<PaginatedConversations> getConversationList({
@@ -40,107 +124,16 @@ class ConversationService {
     _logger.info(
       'ConversationService: Starting getConversationList API call for page $page...',
     );
-    try {
-      final result = await _networkClient.request<PaginatedConversations>(
-        '/auth/sessions',
-        method: HttpMethod.get,
-        queryParameters: {'page': page, 'size': perPage},
-        fromJsonT: (json) {
-          if (json == null) {
-            return const PaginatedConversations(
-              data: [],
-              meta: ConversationMeta(
-                currentPage: 1,
-                lastPage: 1,
-                perPage: 10,
-                total: 0,
-                hasMore: false,
-              ),
-            );
-          }
-
-          if (json is Map<String, dynamic>) {
-            try {
-              final data = json['data'] as Map<String, dynamic>?;
-              if (data == null) {
-                return const PaginatedConversations(
-                  data: [],
-                  meta: ConversationMeta(
-                    currentPage: 1,
-                    lastPage: 1,
-                    perPage: 10,
-                    total: 0,
-                    hasMore: false,
-                  ),
-                );
-              }
-
-              final List<dynamic> itemsData =
-                  data['items'] as List<dynamic>? ?? [];
-
-              final conversations = itemsData.map((session) {
-                DateTime createdAt = DateTime.now();
-                DateTime updatedAt = DateTime.now();
-
-                if (session['created_at'] != null &&
-                    session['created_at'].toString().isNotEmpty) {
-                  try {
-                    createdAt = _parseDateTime(session['created_at'] as String);
-                  } catch (e) {
-                    _logger.warning('Error parsing created_at: $e');
-                  }
-                }
-
-                if (session['updated_at'] != null &&
-                    session['updated_at'].toString().isNotEmpty) {
-                  try {
-                    updatedAt = _parseDateTime(session['updated_at'] as String);
-                  } catch (e) {
-                    _logger.warning('Error parsing updated_at: $e');
-                  }
-                }
-
-                return ConversationInfo(
-                  id: session['session_id'] as String,
-                  title: session['name'] as String? ?? 'New Chat',
-                  createdAt: createdAt,
-                  updatedAt: updatedAt,
-                  token: session['token'] as String?,
-                );
-              }).toList();
-
-              final int currentPage = data['page'] as int? ?? page;
-              final int totalPages = data['pages'] as int? ?? 1;
-              final int size = data['size'] as int? ?? perPage;
-              final int total = data['total'] as int? ?? conversations.length;
-              final bool hasMore = data['hasMore'] as bool? ?? false;
-
-              return PaginatedConversations(
-                data: conversations,
-                meta: ConversationMeta(
-                  currentPage: currentPage,
-                  lastPage: totalPages,
-                  perPage: size,
-                  total: total,
-                  hasMore: hasMore,
-                ),
-              );
-            } catch (e) {
-              _logger.warning('Error parsing sessions: $e');
-              rethrow;
-            }
-          }
-
-          throw DataParsingException(
-            'API /api/v1/auth/sessions expected object, but received ${json.runtimeType}',
-          );
-        },
-      );
-      return result;
-    } catch (e) {
-      _logger.warning('getConversationList failed with error: $e');
-      rethrow;
-    }
+    final envelope = await _networkClient.requestMap(
+      '/auth/sessions',
+      method: HttpMethod.get,
+      queryParameters: {'page': page, 'size': perPage},
+    );
+    final data = ResponseParser.parseData<Map<String, dynamic>>(
+      envelope,
+      whenNull: () => {},
+    );
+    return _parseConversationsData(data, page: page, perPage: perPage);
   }
 
   Future<List<ConversationInfo>> getSimpleConversationList({
@@ -159,92 +152,58 @@ class ConversationService {
   ) async {
     _logger.info('Fetching conversation detail for: $conversationId');
 
-    return await _networkClient.request<ConversationDetail>(
+    final envelope = await _networkClient.requestMap(
       '/chatbot/sessions/$conversationId/messages',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'] as Map<String, dynamic>?;
-          if (data == null) {
-            throw DataParsingException('Response data field is null');
-          }
-
-          final messages = (data['messages'] as List? ?? []).map((msg) {
-            if (msg is Map<String, dynamic>) {
-              return ChatMessage.fromJson(msg);
-            }
-            throw DataParsingException('Invalid message format');
-          }).toList();
-
-          // Parse the server-provided updated_at timestamp. Fall back to now if
-          // it is missing or malformed so conversation ordering stays accurate.
-          DateTime updatedAt = DateTime.now();
-          if (data['updated_at'] != null &&
-              data['updated_at'].toString().isNotEmpty) {
-            try {
-              updatedAt = _parseDateTime(data['updated_at'] as String);
-            } catch (e) {
-              _logger.warning('Error parsing conversation updated_at: $e');
-            }
-          }
-
-          return ConversationDetail(
-            id: data['session_id'] as String? ?? conversationId,
-            title: data['title'] as String? ?? 'Chat',
-            updatedAt: updatedAt,
-            messages: messages,
-          );
-        }
-        throw DataParsingException(
-          'API response expected Map, but got ${json.runtimeType}',
-        );
-      },
     );
-  }
+    final data = ResponseParser.parseItem<Map<String, dynamic>>(
+      envelope,
+      (map) => map,
+    );
 
-  Future<PaginatedMessages> getConversationMessagesPage(
-    String conversationId, {
-    required int page,
-    int limit = 20,
-  }) async {
-    return await _networkClient.request<PaginatedMessages>(
-      '/chat/conversations/$conversationId/messages',
-      method: HttpMethod.get,
-      queryParameters: {'page': page, 'limit': limit},
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          return PaginatedMessages.fromJson(json);
-        }
-        throw DataParsingException(
-          'API .../messages expected Map, but received ${json.runtimeType}',
-        );
-      },
+    final messages = (data['messages'] as List? ?? []).map((msg) {
+      if (msg is Map<String, dynamic>) {
+        return ChatMessage.fromJson(msg);
+      }
+      throw DataParsingException('Invalid message format');
+    }).toList();
+
+    // Parse the server-provided updated_at timestamp. Fall back to now if
+    // it is missing or malformed so conversation ordering stays accurate.
+    DateTime updatedAt = DateTime.now();
+    if (data['updated_at'] != null &&
+        data['updated_at'].toString().isNotEmpty) {
+      try {
+        updatedAt = _parseDateTime(data['updated_at'] as String);
+      } catch (e, stackTrace) {
+        _logger.warning('Error parsing conversation updated_at', e, stackTrace);
+      }
+    }
+
+    return ConversationDetail(
+      id: data['session_id'] as String? ?? conversationId,
+      title: data['title'] as String? ?? 'Chat',
+      updatedAt: updatedAt,
+      messages: messages,
     );
   }
 
   Future<ResumeStatus> getResumeStatus(String sessionId) async {
-    return await _networkClient.request<ResumeStatus>(
+    final envelope = await _networkClient.requestMap(
       '/chatbot/sessions/$sessionId/resume-status',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'] as Map<String, dynamic>?;
-          if (data == null) {
-            return const ResumeStatus(canResume: false, nextNodes: []);
-          }
-          return ResumeStatus(
-            canResume: data['canResume'] as bool? ?? false,
-            nextNodes:
-                (data['nextNodes'] as List<dynamic>?)
-                    ?.map((e) => e.toString())
-                    .toList() ??
-                [],
-          );
-        }
-        throw DataParsingException(
-          'API resume-status expected Map, but got ${json.runtimeType}',
-        );
-      },
+    );
+    final data = ResponseParser.parseData<Map<String, dynamic>>(
+      envelope,
+      whenNull: () => {},
+    );
+    return ResumeStatus(
+      canResume: data['canResume'] as bool? ?? false,
+      nextNodes:
+          (data['nextNodes'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
     );
   }
 
@@ -253,18 +212,15 @@ class ConversationService {
   /// - Session metadata
   /// - LangGraph checkpoints
   /// - Searchable messages
-  Future<bool> deleteConversation(String sessionId) async {
-    try {
-      await _networkClient.requestMap(
-        '/auth/session/$sessionId',
-        method: HttpMethod.delete,
-      );
-      _logger.info('Conversation deleted: $sessionId');
-      return true;
-    } catch (e) {
-      _logger.warning('Failed to delete conversation $sessionId: $e');
-      return false;
-    }
+  ///
+  /// Throws on failure instead of returning a bool: swallowing the exception
+  /// here would hide the concrete error cause from every call site.
+  Future<void> deleteConversation(String sessionId) async {
+    await _networkClient.requestMap(
+      '/auth/session/$sessionId',
+      method: HttpMethod.delete,
+    );
+    _logger.info('Conversation deleted: $sessionId');
   }
 }
 
@@ -284,26 +240,6 @@ ConversationService conversationService(Ref ref) {
 @riverpod
 Future<List<ConversationInfo>> conversationList(Ref ref) async {
   ref.watch(authTokenProvider);
-  final service = ref.watch(conversationServiceProvider);
-  try {
-    return await service.getSimpleConversationList();
-  } catch (e) {
-    _logger.warning('Error fetching conversations: $e');
-    rethrow;
-  }
-}
-
-@riverpod
-class ConversationListRefresh extends _$ConversationListRefresh {
-  @override
-  int build() => 0;
-
-  void refresh() => state++;
-}
-
-@riverpod
-Future<List<ConversationInfo>> refreshableConversationList(Ref ref) async {
-  ref.watch(conversationListRefreshProvider);
   final service = ref.watch(conversationServiceProvider);
   return service.getSimpleConversationList();
 }
