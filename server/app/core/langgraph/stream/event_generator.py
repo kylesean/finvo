@@ -93,6 +93,8 @@ class EventGenerator:
         self._tool_id_to_name: dict[str, str] = {}
         # Processed tool call IDs (prevents duplicate tool_call_start events)
         self._processed_tool_calls: set[str] = set()
+        # Created surface IDs (prevents duplicate createSurface events)
+        self._created_surfaces: set[str] = set()
         # Accumulated streaming AI response parts (for history recording)
         self._ai_response_parts: list[str] = []
         # Surface tracker (for incremental updates and Surface reuse)
@@ -103,6 +105,7 @@ class EventGenerator:
         self._tool_start_times.clear()
         self._tool_id_to_name.clear()
         self._processed_tool_calls.clear()
+        self._created_surfaces.clear()
         self._ai_response_parts.clear()
 
     def get_collected_response(self) -> str:
@@ -451,8 +454,10 @@ class EventGenerator:
             tool_call_id=tool_call_id,
         )
 
-        create_msg = CreateSurface(createSurface=CreateSurfacePayload(surfaceId=surface_id))
-        yield GenUIEvent(type="a2ui_message", data=create_msg.model_dump())
+        if surface_id not in self._created_surfaces:
+            self._created_surfaces.add(surface_id)
+            create_msg = CreateSurface(createSurface=CreateSurfacePayload(surfaceId=surface_id))
+            yield GenUIEvent(type="a2ui_message", data=create_msg.model_dump())
 
         clean_props = (
             {k: v for k, v in tool_result.items() if not k.startswith("_")}
