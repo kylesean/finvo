@@ -1,14 +1,16 @@
+import 'dart:async';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:finvo/features/profile/services/profile_service.dart';
+import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/profile/models/user_info.dart';
+import 'package:finvo/features/profile/services/profile_service.dart';
 import 'package:finvo/features/chat/services/file_upload_service.dart';
 
 part 'user_profile_provider.freezed.dart';
 part 'user_profile_provider.g.dart';
 
-/// User profile state
 @freezed
 abstract class UserProfileState with _$UserProfileState {
   const factory UserProfileState({
@@ -20,21 +22,19 @@ abstract class UserProfileState with _$UserProfileState {
   }) = _UserProfileState;
 }
 
-/// User profile notifier
-///
-/// [keepAlive] so the logged-in user is loaded once on login and reused across
-/// screens without being torn down when a consuming screen leaves the tree.
-@Riverpod(keepAlive: true)
+@riverpod
 class UserProfile extends _$UserProfile {
   @override
   UserProfileState build() {
-    // Pure build: MyApp triggers [loadUser] explicitly on successful login
-    // instead of firing a network side-effect from build().
     return const UserProfileState();
   }
 
   ProfileService get _service => ref.read(profileServiceProvider);
   FileUploadService get _uploadService => ref.read(fileUploadServiceProvider);
+
+  void _syncUserWithAuth() {
+    unawaited(ref.read(authProvider.notifier).refreshUser());
+  }
 
   /// Load current user info
   Future<void> loadUser() async {
@@ -43,7 +43,7 @@ class UserProfile extends _$UserProfile {
       final user = await _service.getCurrentUser();
       state = state.copyWith(user: user, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
   }
 
@@ -55,9 +55,10 @@ class UserProfile extends _$UserProfile {
     try {
       final updatedUser = await _service.updateProfile(username: newUsername);
       state = state.copyWith(user: updatedUser, isSaving: false);
+      _syncUserWithAuth();
       return true;
     } catch (e) {
-      state = state.copyWith(isSaving: false, error: e.toString());
+      state = state.copyWith(isSaving: false, error: safeErrorMessage(e));
       return false;
     }
   }
@@ -81,9 +82,13 @@ class UserProfile extends _$UserProfile {
       final updatedUser = await _service.updateProfile(avatarUrl: avatarUrl);
 
       state = state.copyWith(user: updatedUser, isUploadingAvatar: false);
+      _syncUserWithAuth();
       return true;
     } catch (e) {
-      state = state.copyWith(isUploadingAvatar: false, error: e.toString());
+      state = state.copyWith(
+        isUploadingAvatar: false,
+        error: safeErrorMessage(e),
+      );
       return false;
     }
   }
@@ -94,9 +99,10 @@ class UserProfile extends _$UserProfile {
     try {
       final updatedUser = await _service.updateProfile(avatarUrl: avatarUrl);
       state = state.copyWith(user: updatedUser, isSaving: false);
+      _syncUserWithAuth();
       return true;
     } catch (e) {
-      state = state.copyWith(isSaving: false, error: e.toString());
+      state = state.copyWith(isSaving: false, error: safeErrorMessage(e));
       return false;
     }
   }

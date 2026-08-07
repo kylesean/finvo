@@ -18,6 +18,25 @@ void main() {
       expect(acc.addLine(''), '{"type":"text",\n"chunk":"hi"}');
     });
 
+    test('accepts the space-less `data:value` variant', () {
+      final acc = SseEventAccumulator();
+      expect(acc.addLine('data:{"type":"text","v":1}'), isNull);
+      expect(acc.addLine(''), '{"type":"text","v":1}');
+    });
+
+    test('preserves payload whitespace verbatim (no trim)', () {
+      final acc = SseEventAccumulator();
+      expect(acc.addLine('data:  {"type":"text","v":1}  '), isNull);
+      expect(acc.addLine(''), ' {"type":"text","v":1}  ');
+    });
+
+    test('bare `data:` line contributes an empty segment', () {
+      final acc = SseEventAccumulator();
+      acc.addLine('data: first');
+      acc.addLine('data:');
+      expect(acc.addLine(''), 'first\n');
+    });
+
     test('ignores non-data SSE fields and comments', () {
       final acc = SseEventAccumulator();
       expect(acc.addLine('event: message'), isNull);

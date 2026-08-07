@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/features/chat/providers/conversation_search_state.dart';
 import 'package:finvo/features/chat/services/conversation_search_service.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 part 'conversation_search_provider.g.dart';
 
@@ -115,7 +116,7 @@ class ConversationSearch extends _$ConversationSearch {
     } catch (e) {
       if (requestToken != _searchToken || !ref.mounted) return;
       state = state.copyWith(
-        error: e.toString(),
+        error: safeErrorMessage(e),
         isLoading: false,
         hasSearched: true,
       );

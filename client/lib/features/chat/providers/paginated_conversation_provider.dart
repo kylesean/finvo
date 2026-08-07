@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/features/chat/models/conversation_info.dart';
 import 'package:finvo/features/chat/services/conversation_service.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 part 'paginated_conversation_provider.freezed.dart';
 part 'paginated_conversation_provider.g.dart';
@@ -79,7 +80,7 @@ class PaginatedConversation extends _$PaginatedConversation {
     } catch (e) {
       _logger.warning('PaginatedConversation: Error loading first page: $e');
       if (!ref.mounted || generation != _generation) return;
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
   }
 
@@ -116,7 +117,7 @@ class PaginatedConversation extends _$PaginatedConversation {
     } catch (e) {
       _logger.warning('PaginatedConversation: Error loading next page: $e');
       if (!ref.mounted || generation != _generation) return;
-      state = state.copyWith(isLoadingMore: false, error: e.toString());
+      state = state.copyWith(isLoadingMore: false, error: safeErrorMessage(e));
     }
   }
 

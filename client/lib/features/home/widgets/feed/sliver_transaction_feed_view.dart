@@ -122,9 +122,14 @@ class SliverTransactionFeedView extends ConsumerWidget {
     final shouldShowSkeletonDueToTypeMismatch =
         intendedFeedType != globalCurrentFeedType;
 
-    // Skeleton state
+    // Skeleton state: only replace the list with skeletons when there is
+    // nothing to show yet. A pull-to-refresh (isLoading with data already
+    // present) must keep the current rows visible — the RefreshIndicator's
+    // own spinner already communicates progress.
     if (shouldShowSkeletonDueToTypeMismatch ||
-        (feedState.isLoading && intendedFeedType == globalCurrentFeedType) ||
+        (feedState.isLoading &&
+            transactions.isEmpty &&
+            intendedFeedType == globalCurrentFeedType) ||
         (feedState.isLoadingMore &&
             transactions.isEmpty &&
             !feedState.hasReachedMax)) {

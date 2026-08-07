@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/utils/tolerant_json.dart';
 
 part 'statistics_models.freezed.dart';
 part 'statistics_models.g.dart';
@@ -71,9 +72,9 @@ abstract class StatisticsOverview with _$StatisticsOverview {
     required String totalBalance,
     required String totalIncome,
     required String totalExpense,
-    required double incomeChangePercent,
-    required double expenseChangePercent,
-    required double netChangePercent,
+    @JsonKey(fromJson: tryDouble) required double incomeChangePercent,
+    @JsonKey(fromJson: tryDouble) required double expenseChangePercent,
+    @JsonKey(fromJson: tryDouble) required double netChangePercent,
     @Default('') String balanceNote,
     required DateTime periodStart,
     required DateTime periodEnd,

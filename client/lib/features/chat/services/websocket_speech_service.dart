@@ -165,6 +165,11 @@ class WebSocketSpeechService implements SpeechRecognitionService {
 
       return true;
     } catch (e, stackTrace) {
+      // The channel is unusable after a failed handshake (timeout or
+      // network error): close it so a later initialize() starts from a
+      // clean slate instead of waking a half-open socket.
+      await _cleanup();
+
       final speechException = SpeechServiceException(
         'WebSocket connection failed: $e',
       );

@@ -160,26 +160,47 @@ void main() {
       expect(capturedPayload[0], hasLength(1)); // id only — no type/data
     });
 
-    test('handleOptimisticUserMessage basic flow', () async {
-      const text = 'Optimistic Msg';
+    test(
+      'handleOptimisticUserMessage only mirrors UI, never re-sends',
+      () async {
+        const text = 'Optimistic Msg';
 
-      await manager.handleOptimisticUserMessage(text);
+        await manager.handleOptimisticUserMessage(text);
 
-      // 1. Cancel previous
-      verify(mockStreamingController.cancelStreamAndTimers()).called(1);
+        // 1. Cancel previous
+        verify(mockStreamingController.cancelStreamAndTimers()).called(1);
 
-      // 2. Reset status
-      verify(mockStreamingController.resetForNewMessage(any)).called(1);
+        // 2. Reset status
+        verify(mockStreamingController.resetForNewMessage(any)).called(1);
 
-      // 3. Add messages
-      verify(mockMessageRepository.addMessages(any)).called(1);
+        // 3. Add messages to repo
+        verify(mockMessageRepository.addMessages(any)).called(1);
 
-      // 4. Send request (internal)
-      // Wait for unawaited async call
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      verify(
-        mockConversation.sendRequestWithAttachments(text, attachments: null),
-      ).called(1);
+        // 4. Streaming status starts
+        expect(lastIsStreaming, true);
+        verify(mockStreamingController.startInitialDelayTimer()).called(1);
+
+        // CRITICAL: the request is already sent by the transport — the manager
+        // must NOT fire a second request (it would cancel the in-flight one and
+        // drop its metadata/client_state).
+        verifyNever(mockConversation.sendRequestWithAttachments(any));
+      },
+    );
+
+    test('handleOptimisticUserMessage strips the internal marker before '
+        'displaying', () async {
+      await manager.handleOptimisticUserMessage(
+        '[GENUI_INTERNAL]I selected account ID: acc-1 (checking)',
+      );
+
+      final captured =
+          verify(mockMessageRepository.addMessages(captureAny)).captured.first
+              as List<ChatMessage>;
+      expect(captured[0].content, 'I selected account ID: acc-1 (checking)');
+      expect(captured[0].content, isNot(contains('[GENUI_INTERNAL]')));
+
+      // Never re-sends even when content is engine-generated.
+      verifyNever(mockConversation.sendRequestWithAttachments(any));
     });
 
     test('Send logic respects current conversation ID', () async {

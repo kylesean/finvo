@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:meta/meta.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
@@ -78,13 +79,24 @@ class NotificationWsService {
   String? _baseUrl;
   SecureStorageService? _storageService;
 
-  static const _heartbeatInterval = Duration(seconds: 30);
+  static const _heartbeatIntervalProduction = Duration(seconds: 30);
   static const _maxReconnectDelay = Duration(seconds: 30);
   // Bounded reconnect attempts: once exceeded, automatic reconnection stops so
   // a permanently unreachable server doesn't keep waking the device every
   // backoff interval forever. connect() is still re-invoked externally when
   // the auth token changes (provider rebuild) or the server config is edited.
   static const _maxReconnectAttempts = 5;
+
+  /// Heartbeat cadence. Declared as an instance field (not a const) so tests
+  /// can shrink it to make the half-open connection detection observable;
+  /// production uses the 30s default.
+  Duration heartbeatInterval = _heartbeatIntervalProduction;
+
+  /// Test seam: replaces the platform [connectWs] so tests can inject a fake
+  /// channel without opening a real socket. Production code never sets this.
+  @visibleForTesting
+  WebSocketChannel Function(String wsUrl, {required String token})?
+  connectChannelFactory;
 
   NotificationCallback? onNotification;
 
@@ -152,7 +164,9 @@ class NotificationWsService {
 
     try {
       // Token is sent via Authorization header (IO) or query param (web).
-      _channel = connectWs(wsBase, token: token);
+      // connectChannelFactory lets tests inject a fake channel; production
+      // always falls through to the platform connectWs.
+      _channel = (connectChannelFactory ?? connectWs)(wsBase, token: token);
       // Guard against a half-open TCP connection where the server accepts
       // the socket but never completes the WebSocket upgrade. Without a
       // timeout, `ready` would hang forever, blocking connect() and
@@ -234,11 +248,11 @@ class NotificationWsService {
 
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(_heartbeatInterval, (_) {
+    _heartbeatTimer = Timer.periodic(heartbeatInterval, (_) {
       // Detect half-open connections: if the server has not responded within
       // several heartbeat intervals, drop the socket and reconnect instead of
       // silently keeping an unresponsive connection alive.
-      if (_sinceLastServerMessage.elapsed > _heartbeatInterval * 3) {
+      if (_sinceLastServerMessage.elapsed > heartbeatInterval * 3) {
         _logger.warning('Heartbeat pong timeout, reconnecting');
         _cleanup();
         _setStatus(NotificationWsConnectionStatus.reconnecting);

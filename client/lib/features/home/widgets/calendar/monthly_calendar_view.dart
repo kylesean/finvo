@@ -24,8 +24,8 @@ class MonthlyCalendarView extends ConsumerWidget {
       child: Container(
         margin: const EdgeInsets.all(1.0),
         decoration: BoxDecoration(
-          color: Colors.grey.shade200, // Use theme color
-          borderRadius: theme.style.borderRadius.md, // Use theme border radius
+          color: theme.colors.muted,
+          borderRadius: theme.style.borderRadius.md,
         ),
       ),
     );
@@ -33,9 +33,10 @@ class MonthlyCalendarView extends ConsumerWidget {
 
   // Calendar skeleton
   Widget _buildCalendarSkeleton(BuildContext context) {
+    final theme = context.theme;
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade200,
-      highlightColor: Colors.grey.shade50,
+      baseColor: theme.colors.muted,
+      highlightColor: theme.colors.secondary,
       child: GridView.count(
         crossAxisCount: 7,
         shrinkWrap: true,

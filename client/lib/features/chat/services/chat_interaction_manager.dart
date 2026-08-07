@@ -7,6 +7,7 @@ import 'package:finvo/features/chat/models/chat_message.dart';
 import 'package:finvo/features/chat/models/message_attachments.dart';
 import 'package:finvo/features/chat/models/chat_message_attachment.dart';
 import 'package:finvo/features/chat/repositories/message_repository.dart';
+import 'package:finvo/features/chat/constants/genui_markers.dart';
 import 'package:finvo/features/chat/state_controllers/streaming_controller.dart';
 import 'package:finvo/features/chat/services/genui_lifecycle_manager.dart';
 
@@ -113,23 +114,24 @@ class ChatInteractionManager {
     unawaited(_sendRequestInternal(text, aiMessageId, attachmentList));
   }
 
-  /// Handle optimistic user message (triggered internally by GenUI components)
+  /// Display an optimistic user message triggered by an internal GenUI
+  /// interaction (e.g. a surface element click).
   ///
-  /// If content starts with [GENUI_INTERNAL], it means the request is already
-  /// being sent by CustomContentGenerator.sendRequest(), so we only add the
-  /// user message to UI without sending a duplicate request.
+  /// The request is ALWAYS already sent by CustomContentGenerator.sendRequest
+  /// (the single sender), so this method only mirrors the message into the UI:
+  /// it adds the user bubble + AI placeholder and starts the streaming
+  /// lifecycle. The [genuiInternalMarker] prefix is stripped but otherwise
+  /// ignored — a second send here would cancel the in-flight request and drop
+  /// its metadata/client_state.
   Future<void> handleOptimisticUserMessage(String content) async {
     if (content.isEmpty) return;
 
-    // Check for GenUI internal marker
-    const marker = '[GENUI_INTERNAL]';
-    final bool isInternalEvent = content.startsWith(marker);
-    final String displayContent = isInternalEvent
-        ? content.substring(marker.length)
+    final String displayContent = content.startsWith(genuiInternalMarker)
+        ? content.substring(genuiInternalMarker.length)
         : content;
 
     _logger.info(
-      'ChatInteractionManager: Handling optimistic user message: $displayContent (internal: $isInternalEvent)',
+      'ChatInteractionManager: Handling optimistic user message: $displayContent',
     );
 
     // Similar flow to addUserMessageAndGetResponse but simpler
@@ -160,12 +162,6 @@ class ChatInteractionManager {
 
     _setStreamingStatus(true);
     _streamingController.startInitialDelayTimer();
-
-    // CRITICAL: Only send request for regular messages, NOT for internal events
-    // (internal events are already being sent by CustomContentGenerator.sendRequest)
-    if (!isInternalEvent) {
-      unawaited(_sendRequestInternal(displayContent, aiMessageId, const []));
-    }
   }
 
   /// Internal method to process attachments and send request

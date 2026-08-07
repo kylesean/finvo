@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/features/finance/models/recurring_transaction.dart';
 import 'package:finvo/features/finance/services/recurring_transaction_service.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 part 'recurring_transaction_provider.g.dart';
 
@@ -69,7 +70,7 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
       );
     } catch (e) {
       if (!ref.mounted || generation != _generation) return;
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
   }
 
@@ -82,7 +83,7 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
       await loadList(type: state.filterType);
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
       return false;
     }
   }
@@ -96,7 +97,7 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
       await loadList(type: state.filterType);
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
       return false;
     }
   }
@@ -110,7 +111,7 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
       await loadList(type: state.filterType);
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
       return false;
     }
   }
@@ -136,7 +137,7 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
       return true;
     } catch (e) {
       // 4. Rollback on failure.
-      state = state.copyWith(items: originalItems, error: e.toString());
+      state = state.copyWith(items: originalItems, error: safeErrorMessage(e));
       return false;
     }
   }

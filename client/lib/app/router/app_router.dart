@@ -20,6 +20,63 @@ import 'package:finvo/core/services/server_config_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+/// Pure redirect decision used by [appRouterProvider].
+///
+/// Extracted (identical behavior) so the auth/server-route matrix can be unit
+/// tested without inflating the widget tree: tests build a bare
+/// [GoRouterState] and call this directly.
+String? appRedirect(
+  GoRouterState state, {
+  required bool isServerConfigured,
+  required AuthStatus authStatus,
+}) {
+  final location = state.matchedLocation;
+
+  if (location.startsWith(AppRoutePaths.serverSetup)) {
+    return null;
+  }
+  if (!isServerConfigured) {
+    return AppRoutePaths.serverSetup;
+  }
+
+  // Match on a path-segment boundary (exact match or prefix followed by
+  // '/') so that e.g. '/register' matches '/register' and
+  // '/register/step2' but not a hypothetical '/registrar'.
+  final bool isPublicRoute = publicRoutePrefixes.any(
+    (route) => location == route || location.startsWith('$route/'),
+  );
+  if (isPublicRoute) {
+    if (authStatus == AuthStatus.authenticated) {
+      // After login, if a 'from' param was stashed by the redirect below
+      // (e.g. /join-space?code=xxx), send the user there instead of /home.
+      final from = state.uri.queryParameters['from'];
+      if (from != null &&
+          from.isNotEmpty &&
+          from.startsWith('/') &&
+          !from.startsWith(AppRoutePaths.login) &&
+          !from.startsWith(AppRoutePaths.register)) {
+        return from;
+      }
+      return AppRoutePaths.home;
+    }
+    return null;
+  }
+  if (authStatus == AuthStatus.loading || authStatus == AuthStatus.initial) {
+    return null;
+  }
+  final bool loggedIn = authStatus == AuthStatus.authenticated;
+  if (!loggedIn) {
+    // Preserve the intended destination (including query params like
+    // join_code) so the login page can redirect back after success.
+    final fullLocation = state.uri.toString();
+    if (fullLocation != '/' && fullLocation != AppRoutePaths.home) {
+      return '${AppRoutePaths.login}?from=${Uri.encodeComponent(fullLocation)}';
+    }
+    return AppRoutePaths.login;
+  }
+  return null;
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Watch only the auth *status* (login state flip), not the whole AuthState.
   // AuthState is an immutable freezed object whose every copyWith (e.g. a
@@ -72,52 +129,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       );
     },
     redirect: (BuildContext context, GoRouterState state) {
-      final location = state.matchedLocation;
-
-      if (location.startsWith(AppRoutePaths.serverSetup)) {
-        return null;
-      }
-      if (!isServerConfigured) {
-        return AppRoutePaths.serverSetup;
-      }
-
-      // Match on a path-segment boundary (exact match or prefix followed by
-      // '/') so that e.g. '/register' matches '/register' and
-      // '/register/step2' but not a hypothetical '/registrar'.
-      final bool isPublicRoute = publicRoutePrefixes.any(
-        (route) => location == route || location.startsWith('$route/'),
+      return appRedirect(
+        state,
+        isServerConfigured: isServerConfigured,
+        authStatus: authStatus,
       );
-      if (isPublicRoute) {
-        if (authStatus == AuthStatus.authenticated) {
-          // After login, if a 'from' param was stashed by the redirect below
-          // (e.g. /join-space?code=xxx), send the user there instead of /home.
-          final from = state.uri.queryParameters['from'];
-          if (from != null &&
-              from.isNotEmpty &&
-              from.startsWith('/') &&
-              !from.startsWith(AppRoutePaths.login) &&
-              !from.startsWith(AppRoutePaths.register)) {
-            return from;
-          }
-          return AppRoutePaths.home;
-        }
-        return null;
-      }
-      if (authStatus == AuthStatus.loading ||
-          authStatus == AuthStatus.initial) {
-        return null;
-      }
-      final bool loggedIn = authStatus == AuthStatus.authenticated;
-      if (!loggedIn) {
-        // Preserve the intended destination (including query params like
-        // join_code) so the login page can redirect back after success.
-        final fullLocation = state.uri.toString();
-        if (fullLocation != '/' && fullLocation != AppRoutePaths.home) {
-          return '${AppRoutePaths.login}?from=${Uri.encodeComponent(fullLocation)}';
-        }
-        return AppRoutePaths.login;
-      }
-      return null;
     },
 
     routes: [

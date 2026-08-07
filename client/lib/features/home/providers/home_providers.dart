@@ -15,6 +15,7 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import 'package:finvo/features/profile/models/financial_settings.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 part 'home_providers.g.dart';
 
@@ -113,14 +114,15 @@ class TransactionFeed extends _$TransactionFeed {
     ) {
       if (previous != next) {
         ref.read(selectedDateProvider.notifier).set(null);
-        unawaited(refreshFeed());
+        // Semantic change: clear the old list so the skeleton marks the switch.
+        unawaited(refreshFeed(clearList: true));
       }
     });
 
     // Listen to selected date changes
     ref.listen<DateTime?>(selectedDateProvider, (previous, next) {
       if (previous != next) {
-        unawaited(refreshFeed());
+        unawaited(refreshFeed(clearList: true));
       }
     });
 
@@ -170,7 +172,10 @@ class TransactionFeed extends _$TransactionFeed {
     }
   }
 
-  Future<void> _fetchInitialTransactions({bool isRefresh = false}) async {
+  Future<void> _fetchInitialTransactions({
+    bool isRefresh = false,
+    bool clearList = false,
+  }) async {
     // Check if provider is still valid
     if (!ref.mounted) {
       _logger.warning('Provider disposed before fetch, aborting');
@@ -191,7 +196,10 @@ class TransactionFeed extends _$TransactionFeed {
       isLoading: true,
       isLoadingMore: true,
       currentPage: 1,
-      transactions: isRefresh ? [] : state.transactions,
+      // Only a semantic filter change (feed type / date) clears the list.
+      // Plain refreshes keep the visible transactions so pull-to-refresh does
+      // not flash a full skeleton over data the user is still reading.
+      transactions: clearList ? [] : state.transactions,
       hasReachedMax: false,
       hasLoadMoreError: false,
       errorMessage: null,
@@ -230,7 +238,7 @@ class TransactionFeed extends _$TransactionFeed {
         isLoading: false,
         isLoadingMore: false,
         hasReachedMax: false,
-        errorMessage: e.toString(),
+        errorMessage: safeErrorMessage(e),
       );
     }
   }
@@ -290,13 +298,13 @@ class TransactionFeed extends _$TransactionFeed {
       state = state.copyWith(
         isLoadingMore: false,
         hasLoadMoreError: true,
-        errorMessage: e.toString(),
+        errorMessage: safeErrorMessage(e),
       );
     }
   }
 
-  Future<void> refreshFeed() async {
-    await _fetchInitialTransactions(isRefresh: true);
+  Future<void> refreshFeed({bool clearList = false}) async {
+    await _fetchInitialTransactions(isRefresh: true, clearList: clearList);
   }
 
   Future<bool> deleteTransaction(String transactionId) async {

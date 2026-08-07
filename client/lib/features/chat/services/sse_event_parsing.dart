@@ -24,14 +24,22 @@ class SseEventAccumulator {
       return event;
     }
 
-    if (!line.startsWith('data: ')) {
+    if (!line.startsWith('data:')) {
       // Ignore other SSE fields (event:/id:/retry:) and comments; the
       // backend protocol only relies on data fields.
       return null;
     }
 
+    // Field value per the SSE spec: the optional single space after the
+    // colon is stripped, everything else is preserved byte-for-byte.
+    // Accept both `data: value` and the space-less `data:value` variant;
+    // a bare `data:` line contributes an empty segment.
+    final String value = line.length > 5 && line[5] == ' '
+        ? line.substring(6)
+        : line.substring(5);
+
     if (_buffer.isNotEmpty) _buffer.write('\n');
-    _buffer.write(line.substring(6).trim());
+    _buffer.write(value);
     return null;
   }
 

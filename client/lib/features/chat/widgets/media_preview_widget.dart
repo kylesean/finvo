@@ -53,6 +53,7 @@ class MediaPreviewWidget extends StatelessWidget {
     int index,
     bool isUploading,
   ) {
+    final theme = context.theme;
     final isImage = _isImage(file.name);
 
     return Stack(
@@ -66,7 +67,7 @@ class MediaPreviewWidget extends StatelessWidget {
             height: 80,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: theme.colors.border),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),

@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/features/chat/constants/a2ui_component_types.dart';
+import 'package:finvo/features/chat/constants/genui_markers.dart';
 import 'package:finvo/features/chat/models/sse_event_models.dart';
 import 'package:finvo/features/chat/services/interaction_router.dart';
 import 'package:finvo/features/chat/services/sse_event_parsing.dart';
@@ -181,14 +182,14 @@ class CustomContentGenerator implements genui.Transport {
       return;
     }
 
-    // Optimistic UI update. The [GENUI_INTERNAL] prefix tells the upper layer
-    // to display the message without sending a duplicate request (the request
-    // is already being sent below together with the atomic client_state).
+    // Optimistic UI update. The request is always initiated below by this
+    // transport (the single sender), so the [genuiInternalMarker] prefix
+    // unconditionally tells the upper layer to only display the message —
+    // never to re-send it. A second send would cancel this in-flight request
+    // via _internalCancel and silently drop its metadata/client_state.
     final content = outgoing.displayContent;
     if (content != null && content.isNotEmpty) {
-      onUserMessageSent?.call(
-        outgoing.clientState != null ? '[GENUI_INTERNAL]$content' : content,
-      );
+      onUserMessageSent?.call('$genuiInternalMarker$content');
     }
 
     // Execute unified request logic.
