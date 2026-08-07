@@ -589,7 +589,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     final storageService = ref.read(secureStorageServiceProvider);
     final token = await storageService.getToken();
     if (token == null || token.isEmpty) return;
-    final apiConstants = ref.read(apiConstantsProvider);
+    final baseUrl = ref.read(apiBaseUrlProvider);
     if (!mounted) return;
 
     await Navigator.of(context).push(
@@ -598,7 +598,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
           itemCount: 1,
           heroTag: (_) => 'history_attachment_${attachment.id}',
           imageProvider: (_) => NetworkImage(
-            '${apiConstants.baseUrl}/files/view/${attachment.id}',
+            '$baseUrl/files/view/${attachment.id}',
             headers: {'Authorization': 'Bearer $token'},
           ),
         ),

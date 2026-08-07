@@ -2,6 +2,7 @@ import 'package:finvo/features/chat/genui/events/interaction_events.dart';
 import 'package:finvo/features/chat/genui/genui_event_registry.dart';
 import 'package:finvo/features/chat/models/client_state_mutation.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 类型化交互事件模型单元测试。
@@ -36,7 +37,7 @@ void main() {
       expect(transfer.surfaceId, 'surface_abc');
       expect(transfer.sourceAccountId, 'src-1');
       expect(transfer.targetAccountId, 'tgt-1');
-      expect(transfer.amount, 50.0);
+      expect(transfer.amount, Decimal.parse('50'));
       expect(transfer.currency, 'CNY');
       expect(transfer.memo, '午餐');
     });
@@ -50,7 +51,7 @@ void main() {
               })!
               as TransferPathConfirmedEvent;
 
-      expect(event.amount, 88.5);
+      expect(event.amount, Decimal.parse('88.5'));
       // 缺省字段降级为默认值。
       expect(event.sourceAccountName, 'Source Account');
       expect(event.targetAccountName, 'Target Account');
@@ -73,8 +74,6 @@ void main() {
     });
 
     test('parses account_selected using dispatcher keys (regression fix)', () {
-      // 重构前注册表误读 selected_account_id/selection_type，导致显示 null。
-      // 类型化后统一使用 dispatcher 实际发出的 account_id/account_type 键。
       final event = GenUiInteractionEvent.tryParse('account_selected', {
         'account_id': 'acc-1',
         'account_name': '招商银行',
@@ -118,13 +117,13 @@ void main() {
 
   group('encode/decode round-trip', () {
     test('transfer event survives toContext -> fromContext', () {
-      const original = TransferPathConfirmedEvent(
+      final original = TransferPathConfirmedEvent(
         surfaceId: 'surface_abc',
         sourceAccountId: 'src-1',
         targetAccountId: 'tgt-1',
         sourceAccountName: '现金钱包',
         targetAccountName: '储蓄卡',
-        amount: 50.0,
+        amount: Decimal.fromInt(50),
         currency: 'CNY',
         memo: '午餐',
       );
@@ -144,12 +143,12 @@ void main() {
     });
 
     test('toUserActionEvent produces protocol wire format', () {
-      const event = TransferPathConfirmedEvent(
+      final event = TransferPathConfirmedEvent(
         sourceAccountId: 'src-1',
         targetAccountId: 'tgt-1',
         sourceAccountName: '现金钱包',
         targetAccountName: '储蓄卡',
-        amount: 50.0,
+        amount: Decimal.fromInt(50),
       );
 
       final uiEvent = event.toUserActionEvent(
@@ -160,19 +159,19 @@ void main() {
       expect(uiEvent.sourceComponentId, 'TransferWizard');
       expect(uiEvent.context['source_account_id'], 'src-1');
       expect(uiEvent.context['target_account_id'], 'tgt-1');
-      expect(uiEvent.context['amount'], 50.0);
+      expect(uiEvent.context['amount'], '50');
     });
   });
 
   group('GenUiEventRegistry.handle', () {
     test('transfer yields direct_execute mutation and readable content', () {
-      const event = TransferPathConfirmedEvent(
+      final event = TransferPathConfirmedEvent(
         surfaceId: 'surface_abc',
         sourceAccountId: 'src-1',
         targetAccountId: 'tgt-1',
         sourceAccountName: '现金钱包',
         targetAccountName: '储蓄卡',
-        amount: 50.0,
+        amount: Decimal.fromInt(50),
       );
 
       final result = GenUiEventRegistry.handle(event);

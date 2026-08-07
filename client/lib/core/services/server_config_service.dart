@@ -294,9 +294,3 @@ bool isServerConfigured(Ref ref) {
 String? serverUrl(Ref ref) {
   return ref.watch(serverConfigServiceProvider).serverUrl;
 }
-
-/// Provider for API base URL
-@Riverpod(keepAlive: true)
-String? apiBaseUrl(Ref ref) {
-  return ref.watch(serverConfigServiceProvider).baseUrl;
-}

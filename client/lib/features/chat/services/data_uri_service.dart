@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 
 import 'package:finvo/features/chat/models/message_attachments.dart';
 import 'package:finvo/shared/utils/mime_type_mapper.dart';
+import 'package:finvo/shared/utils/format_file_size.dart' as file_size;
 
 final _logger = Logger('DataUriService');
 
@@ -198,15 +199,5 @@ class DataUriService {
   }
 
   /// Format file size as readable string
-  static String formatFileSize(int bytes) {
-    if (bytes < 1024) {
-      return '$bytes B';
-    } else if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    } else if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    } else {
-      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
-    }
-  }
+  static String formatFileSize(int bytes) => file_size.formatFileSize(bytes);
 }

@@ -233,6 +233,36 @@ class _WelcomeHeader extends ConsumerStatefulWidget {
 
 class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
   bool _isAmountVisible = true;
+  Timer? _midnightTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleMidnightRefresh();
+  }
+
+  @override
+  void dispose() {
+    _midnightTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Re-render at the next local midnight so the year countdown and any
+  /// date-derived labels stay fresh without requiring a manual rebuild.
+  void _scheduleMidnightRefresh() {
+    _midnightTimer?.cancel();
+    final now = DateTime.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    _midnightTimer = Timer(
+      nextMidnight.difference(now) + const Duration(seconds: 1),
+      () {
+        if (mounted) {
+          setState(() {});
+          _scheduleMidnightRefresh();
+        }
+      },
+    );
+  }
 
   // Calculate yearly remaining time (countdown)
   ({
@@ -263,8 +293,8 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
       return data.display!.fullString;
     }
 
-    // Fallback to local formatting
-    return AmountFormatter.formatCommon(
+    // Fallback to local formatting (totalExpense is a server-serialized string)
+    return AmountFormatter.formatWithCurrency(
       data.totalExpense,
       currencyCode: data.currency,
     );
@@ -464,7 +494,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
 
 class _QuickStatItem extends StatelessWidget {
   final String label;
-  final double amount;
+  final String amount;
   final String currency;
   final bool isVisible;
 
@@ -479,7 +509,7 @@ class _QuickStatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.theme;
 
-    final displayString = AmountFormatter.formatCommon(
+    final displayString = AmountFormatter.formatWithCurrency(
       amount,
       currencyCode: currency,
     );

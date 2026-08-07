@@ -166,7 +166,7 @@ class NetworkClient {
     // throw were dead code and are removed.
     final failure = lastException!;
     // Run network diagnostics before final failure
-    await _handleFinalFailure(failure, path);
+    _handleFinalFailure(failure, path);
 
     // ErrorInterceptor should have filled e.error with AppException subclass
     if (failure.error is AppException) {
@@ -218,14 +218,9 @@ class NetworkClient {
   }
 
   /// Handle final failure, log error details
-  Future<void> _handleFinalFailure(DioException e, String path) async {
-    try {
-      _logger.info('Final failure for path: $path');
-      _logger.info('Error type: ${e.type}, Message: ${e.message}');
-      // Note: Network diagnostics removed - requires dynamic baseUrl
-    } catch (diagnosticError) {
-      _logger.warning('Error logging failure details', diagnosticError);
-    }
+  void _handleFinalFailure(DioException e, String path) {
+    _logger.info('Final failure for path: $path');
+    _logger.info('Error type: ${e.type}, Message: ${e.message}');
   }
 
   Future<Map<String, dynamic>> requestMap(

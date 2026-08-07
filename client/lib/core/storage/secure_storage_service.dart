@@ -177,19 +177,23 @@ class SecureStorageService {
     });
   }
 
-  /// Clear memory cache (for scenarios such as server switching)
-  void invalidateCache() {
-    _cachedToken = null;
-    _tokenCacheInitialized = false;
-    _cachedRefreshToken = null;
-    _refreshTokenCacheInitialized = false;
-    _logger.info('SecureStorageService: Cache invalidated');
+  /// Clear memory cache (for scenarios such as server switching).
+  /// Runs inside the serialized [_synchronized] queue so it cannot interleave
+  /// with an in-flight read/write that might re-populate the cache afterwards.
+  Future<void> invalidateCache() {
+    return _synchronized(() async {
+      _cachedToken = null;
+      _tokenCacheInitialized = false;
+      _cachedRefreshToken = null;
+      _refreshTokenCacheInitialized = false;
+      _logger.info('SecureStorageService: Cache invalidated');
+    });
   }
 
   Future<void> clearAllData() async {
     await deleteToken();
     await deleteRefreshToken();
-    invalidateCache();
+    await invalidateCache();
     // Clear other authentication-related data
   }
 }

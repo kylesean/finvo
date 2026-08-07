@@ -41,7 +41,7 @@ final class ChatHistoryProvider
   }
 }
 
-String _$chatHistoryHash() => r'ae28ee9953d20b0d27f63fe8613a674bc252ba23';
+String _$chatHistoryHash() => r'726397826d60b81465db0f99456b2289c451719f';
 
 abstract class _$ChatHistory extends $Notifier<ChatHistoryState> {
   ChatHistoryState build();

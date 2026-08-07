@@ -14,8 +14,8 @@ import 'package:finvo/features/finance/utils/recurring_transaction_display.dart'
     show formatShortDate, recurringTransactionDisplayName;
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 
 /// Swipeable recurring-transaction row for the list page.
@@ -201,7 +201,7 @@ class RecurringTransactionCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '$amountSign${Currency.fromCode(ref.watch(financialSettingsProvider).primaryCurrency)?.symbol ?? '¥'}${transaction.amount.toDouble().toStringAsFixed(2)}',
+                      '$amountSign${AmountFormatter.getCurrencySymbol(ref.watch(financialSettingsProvider).primaryCurrency)}${transaction.amount.toDouble().toStringAsFixed(2)}',
                       style: AppTextStyles.listTitle(
                         theme,
                       ).copyWith(color: typeColor),

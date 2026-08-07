@@ -4,7 +4,6 @@ import 'package:forui/forui.dart';
 import 'package:finvo/app/theme/theme_notifier.dart';
 import 'package:finvo/app/theme/app_theme_palette.dart';
 import 'package:finvo/app/theme/theme_palette_provider.dart';
-import 'package:finvo/app/theme/theme_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/profile/widgets/theme_preview.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'notification_provider.dart';
+part of 'shared_space_notification_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -58,7 +58,7 @@ final class SharedSpaceNotificationProvider
 }
 
 String _$sharedSpaceNotificationHash() =>
-    r'175215bad3e9884af63f161e2919bb14f032205b';
+    r'573ebe2d18335711d648cda73ba934f2f5afc6d7';
 
 /// Shared-space notification provider.
 ///

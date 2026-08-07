@@ -284,7 +284,7 @@ as String,
 /// @nodoc
 mixin _$TotalExpenseData {
 
-@JsonKey(name: 'total_expense') double get totalExpense;@JsonKey(name: 'today_expense') double get todayExpense;@JsonKey(name: 'month_expense') double get monthExpense;@JsonKey(name: 'year_expense') double get yearExpense; String get currency; TotalExpenseDisplay? get display;
+@JsonKey(name: 'total_expense') String get totalExpense;@JsonKey(name: 'today_expense') String get todayExpense;@JsonKey(name: 'month_expense') String get monthExpense;@JsonKey(name: 'year_expense') String get yearExpense; String get currency; TotalExpenseDisplay? get display;
 /// Create a copy of TotalExpenseData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -317,7 +317,7 @@ abstract mixin class $TotalExpenseDataCopyWith<$Res>  {
   factory $TotalExpenseDataCopyWith(TotalExpenseData value, $Res Function(TotalExpenseData) _then) = _$TotalExpenseDataCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'total_expense') double totalExpense,@JsonKey(name: 'today_expense') double todayExpense,@JsonKey(name: 'month_expense') double monthExpense,@JsonKey(name: 'year_expense') double yearExpense, String currency, TotalExpenseDisplay? display
+@JsonKey(name: 'total_expense') String totalExpense,@JsonKey(name: 'today_expense') String todayExpense,@JsonKey(name: 'month_expense') String monthExpense,@JsonKey(name: 'year_expense') String yearExpense, String currency, TotalExpenseDisplay? display
 });
 
 
@@ -337,10 +337,10 @@ class _$TotalExpenseDataCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? totalExpense = null,Object? todayExpense = null,Object? monthExpense = null,Object? yearExpense = null,Object? currency = null,Object? display = freezed,}) {
   return _then(_self.copyWith(
 totalExpense: null == totalExpense ? _self.totalExpense : totalExpense // ignore: cast_nullable_to_non_nullable
-as double,todayExpense: null == todayExpense ? _self.todayExpense : todayExpense // ignore: cast_nullable_to_non_nullable
-as double,monthExpense: null == monthExpense ? _self.monthExpense : monthExpense // ignore: cast_nullable_to_non_nullable
-as double,yearExpense: null == yearExpense ? _self.yearExpense : yearExpense // ignore: cast_nullable_to_non_nullable
-as double,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
+as String,todayExpense: null == todayExpense ? _self.todayExpense : todayExpense // ignore: cast_nullable_to_non_nullable
+as String,monthExpense: null == monthExpense ? _self.monthExpense : monthExpense // ignore: cast_nullable_to_non_nullable
+as String,yearExpense: null == yearExpense ? _self.yearExpense : yearExpense // ignore: cast_nullable_to_non_nullable
+as String,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,display: freezed == display ? _self.display : display // ignore: cast_nullable_to_non_nullable
 as TotalExpenseDisplay?,
   ));
@@ -439,7 +439,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'total_expense')  double totalExpense, @JsonKey(name: 'today_expense')  double todayExpense, @JsonKey(name: 'month_expense')  double monthExpense, @JsonKey(name: 'year_expense')  double yearExpense,  String currency,  TotalExpenseDisplay? display)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'total_expense')  String totalExpense, @JsonKey(name: 'today_expense')  String todayExpense, @JsonKey(name: 'month_expense')  String monthExpense, @JsonKey(name: 'year_expense')  String yearExpense,  String currency,  TotalExpenseDisplay? display)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TotalExpenseData() when $default != null:
 return $default(_that.totalExpense,_that.todayExpense,_that.monthExpense,_that.yearExpense,_that.currency,_that.display);case _:
@@ -460,7 +460,7 @@ return $default(_that.totalExpense,_that.todayExpense,_that.monthExpense,_that.y
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'total_expense')  double totalExpense, @JsonKey(name: 'today_expense')  double todayExpense, @JsonKey(name: 'month_expense')  double monthExpense, @JsonKey(name: 'year_expense')  double yearExpense,  String currency,  TotalExpenseDisplay? display)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'total_expense')  String totalExpense, @JsonKey(name: 'today_expense')  String todayExpense, @JsonKey(name: 'month_expense')  String monthExpense, @JsonKey(name: 'year_expense')  String yearExpense,  String currency,  TotalExpenseDisplay? display)  $default,) {final _that = this;
 switch (_that) {
 case _TotalExpenseData():
 return $default(_that.totalExpense,_that.todayExpense,_that.monthExpense,_that.yearExpense,_that.currency,_that.display);case _:
@@ -480,7 +480,7 @@ return $default(_that.totalExpense,_that.todayExpense,_that.monthExpense,_that.y
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'total_expense')  double totalExpense, @JsonKey(name: 'today_expense')  double todayExpense, @JsonKey(name: 'month_expense')  double monthExpense, @JsonKey(name: 'year_expense')  double yearExpense,  String currency,  TotalExpenseDisplay? display)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'total_expense')  String totalExpense, @JsonKey(name: 'today_expense')  String todayExpense, @JsonKey(name: 'month_expense')  String monthExpense, @JsonKey(name: 'year_expense')  String yearExpense,  String currency,  TotalExpenseDisplay? display)?  $default,) {final _that = this;
 switch (_that) {
 case _TotalExpenseData() when $default != null:
 return $default(_that.totalExpense,_that.todayExpense,_that.monthExpense,_that.yearExpense,_that.currency,_that.display);case _:
@@ -498,10 +498,10 @@ class _TotalExpenseData implements TotalExpenseData {
   const _TotalExpenseData({@JsonKey(name: 'total_expense') required this.totalExpense, @JsonKey(name: 'today_expense') required this.todayExpense, @JsonKey(name: 'month_expense') required this.monthExpense, @JsonKey(name: 'year_expense') required this.yearExpense, required this.currency, this.display});
   factory _TotalExpenseData.fromJson(Map<String, dynamic> json) => _$TotalExpenseDataFromJson(json);
 
-@override@JsonKey(name: 'total_expense') final  double totalExpense;
-@override@JsonKey(name: 'today_expense') final  double todayExpense;
-@override@JsonKey(name: 'month_expense') final  double monthExpense;
-@override@JsonKey(name: 'year_expense') final  double yearExpense;
+@override@JsonKey(name: 'total_expense') final  String totalExpense;
+@override@JsonKey(name: 'today_expense') final  String todayExpense;
+@override@JsonKey(name: 'month_expense') final  String monthExpense;
+@override@JsonKey(name: 'year_expense') final  String yearExpense;
 @override final  String currency;
 @override final  TotalExpenseDisplay? display;
 
@@ -538,7 +538,7 @@ abstract mixin class _$TotalExpenseDataCopyWith<$Res> implements $TotalExpenseDa
   factory _$TotalExpenseDataCopyWith(_TotalExpenseData value, $Res Function(_TotalExpenseData) _then) = __$TotalExpenseDataCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'total_expense') double totalExpense,@JsonKey(name: 'today_expense') double todayExpense,@JsonKey(name: 'month_expense') double monthExpense,@JsonKey(name: 'year_expense') double yearExpense, String currency, TotalExpenseDisplay? display
+@JsonKey(name: 'total_expense') String totalExpense,@JsonKey(name: 'today_expense') String todayExpense,@JsonKey(name: 'month_expense') String monthExpense,@JsonKey(name: 'year_expense') String yearExpense, String currency, TotalExpenseDisplay? display
 });
 
 
@@ -558,10 +558,10 @@ class __$TotalExpenseDataCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? totalExpense = null,Object? todayExpense = null,Object? monthExpense = null,Object? yearExpense = null,Object? currency = null,Object? display = freezed,}) {
   return _then(_TotalExpenseData(
 totalExpense: null == totalExpense ? _self.totalExpense : totalExpense // ignore: cast_nullable_to_non_nullable
-as double,todayExpense: null == todayExpense ? _self.todayExpense : todayExpense // ignore: cast_nullable_to_non_nullable
-as double,monthExpense: null == monthExpense ? _self.monthExpense : monthExpense // ignore: cast_nullable_to_non_nullable
-as double,yearExpense: null == yearExpense ? _self.yearExpense : yearExpense // ignore: cast_nullable_to_non_nullable
-as double,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
+as String,todayExpense: null == todayExpense ? _self.todayExpense : todayExpense // ignore: cast_nullable_to_non_nullable
+as String,monthExpense: null == monthExpense ? _self.monthExpense : monthExpense // ignore: cast_nullable_to_non_nullable
+as String,yearExpense: null == yearExpense ? _self.yearExpense : yearExpense // ignore: cast_nullable_to_non_nullable
+as String,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,display: freezed == display ? _self.display : display // ignore: cast_nullable_to_non_nullable
 as TotalExpenseDisplay?,
   ));

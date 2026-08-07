@@ -23,10 +23,10 @@ Map<String, dynamic> _$TotalExpenseDisplayToJson(
 
 _TotalExpenseData _$TotalExpenseDataFromJson(Map<String, dynamic> json) =>
     _TotalExpenseData(
-      totalExpense: (json['total_expense'] as num).toDouble(),
-      todayExpense: (json['today_expense'] as num).toDouble(),
-      monthExpense: (json['month_expense'] as num).toDouble(),
-      yearExpense: (json['year_expense'] as num).toDouble(),
+      totalExpense: json['total_expense'] as String,
+      todayExpense: json['today_expense'] as String,
+      monthExpense: json['month_expense'] as String,
+      yearExpense: json['year_expense'] as String,
       currency: json['currency'] as String,
       display: json['display'] == null
           ? null

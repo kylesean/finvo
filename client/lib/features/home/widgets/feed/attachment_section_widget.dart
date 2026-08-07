@@ -28,7 +28,7 @@ class AttachmentSectionWidget extends ConsumerWidget {
 
     final theme = context.theme;
     final colors = theme.colors;
-    final baseUrl = ref.read(apiConstantsProvider).baseUrl;
+    final baseUrl = ref.read(apiBaseUrlProvider);
     final token = ref.watch(authProvider).token;
 
     final imageAttachments = attachments.where((a) => a.isImage).toList();

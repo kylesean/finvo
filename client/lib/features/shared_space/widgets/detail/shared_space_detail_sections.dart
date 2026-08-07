@@ -557,7 +557,7 @@ class SpaceTransactionItem extends ConsumerWidget {
                     style: AppTextStyles.listTitle(theme),
                   )
                 : AmountText(
-                    amount: double.tryParse(tx.amount) ?? 0.0,
+                    amount: AmountFormatter.parseDecimal(tx.amount),
                     type: transactionType,
                     currency: tx.currency,
                     style: AppTextStyles.listTitle(theme),

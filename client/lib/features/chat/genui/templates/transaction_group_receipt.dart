@@ -17,6 +17,8 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -183,7 +185,7 @@ class _TransactionGroupReceiptState
     FColors colors,
     TransactionCategory category,
     List<String> tags,
-    double amount,
+    Decimal amount,
     bool isExpense, {
     double iconSize = 44,
     String? currency,
@@ -286,7 +288,7 @@ class _TransactionGroupReceiptState
   /// Molecule 2: Amount
   Widget _moleculeAmount(
     FThemeData theme,
-    double amount,
+    Decimal amount,
     bool isExpense, {
     TextStyle? style,
     String? currency,
@@ -407,13 +409,12 @@ class _TransactionGroupReceiptState
     final colors = theme.colors;
     final transactions = (widget.data['transactions'] as List? ?? []);
 
-    double totalAmount = 0;
+    Decimal totalAmount = Decimal.zero;
     for (final tx in transactions) {
       // AI-provided payloads are untrusted: an element that is not a Map
       // must not crash the whole card during build.
       if (tx is! Map) continue;
-      final amountValue = double.tryParse(tx['amount']?.toString() ?? '0') ?? 0;
-      totalAmount += amountValue.abs();
+      totalAmount += AmountFormatter.parseDecimal(tx['amount']?.toString());
     }
 
     if (transactions.isEmpty) return const SizedBox.shrink();
@@ -457,7 +458,7 @@ class _TransactionGroupReceiptState
     FThemeData theme,
     FColors colors,
     int count,
-    double totalAmount,
+    Decimal totalAmount,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -618,14 +619,13 @@ class _TransactionGroupReceiptState
     // Prefer original currency and amount (for exchange rate conversion scenarios)
     // Backend returns camelCase: originalAmount, originalCurrency
     final originalAmount = tx['originalAmount'] != null
-        ? double.tryParse(tx['originalAmount'].toString())
+        ? AmountFormatter.parseDecimal(tx['originalAmount'].toString())
         : null;
     final originalCurrency = tx['originalCurrency']?.toString();
 
     final amount =
         originalAmount ??
-        double.tryParse(tx['amount']?.toString() ?? '0') ??
-        0.0;
+        AmountFormatter.parseDecimal(tx['amount']?.toString());
     final isExpense = tx['type']?.toString().toUpperCase() != 'INCOME';
     // Parenthesize: `as` binds tighter than `??`, so the un-parenthesized
     // form (`a ?? b as T`) would leave `a` untyped dynamic on the left.
@@ -703,14 +703,13 @@ class _TransactionGroupReceiptState
     // Prefer original currency and amount (for exchange rate conversion scenarios)
     // Backend returns camelCase: originalAmount, originalCurrency
     final originalAmount = tx['originalAmount'] != null
-        ? double.tryParse(tx['originalAmount'].toString())
+        ? AmountFormatter.parseDecimal(tx['originalAmount'].toString())
         : null;
     final originalCurrency = tx['originalCurrency']?.toString();
 
     final amount =
         originalAmount ??
-        double.tryParse(tx['amount']?.toString() ?? '0') ??
-        0.0;
+        AmountFormatter.parseDecimal(tx['amount']?.toString());
     final isExpense = tx['type']?.toString().toUpperCase() != 'INCOME';
     final currency = originalCurrency ?? tx['currency']?.toString();
 
@@ -774,8 +773,8 @@ class _TransactionGroupReceiptState
 
     // Get transaction amount
     final txAmount = tx['originalAmount'] != null
-        ? double.tryParse(tx['originalAmount'].toString())
-        : double.tryParse(tx['amount']?.toString() ?? '0');
+        ? AmountFormatter.parseDecimal(tx['originalAmount'].toString())
+        : AmountFormatter.parseDecimal(tx['amount']?.toString());
 
     var accountState = ref.read(financialAccountProvider);
     if (accountState.accounts.isEmpty && !accountState.isLoading) {
@@ -853,7 +852,7 @@ class _TransactionGroupReceiptState
       if (accountCurrency != transactionCurrency) {
         final confirmed = await showCurrencyMismatchConfirmDialog(
           context,
-          amount: txAmount ?? 0,
+          amount: txAmount,
           fromCurrency: transactionCurrency,
           toCurrency: accountCurrency,
           accountName: selectedAccount.name,

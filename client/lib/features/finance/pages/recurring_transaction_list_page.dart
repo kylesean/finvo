@@ -15,8 +15,8 @@ import 'package:finvo/features/finance/services/recurring_transaction_service.da
 import 'package:finvo/features/finance/utils/recurring_transaction_display.dart';
 import 'package:finvo/features/finance/widgets/recurring_transaction_card.dart';
 import 'package:finvo/core/constants/category_constants.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/utils/error_message.dart';
@@ -219,7 +219,7 @@ class _RecurringTransactionListPageState
     FColors colors,
     PendingTransaction tx,
   ) {
-    final currencySymbol = Currency.fromCode(tx.currency)?.symbol ?? '¥';
+    final currencySymbol = AmountFormatter.getCurrencySymbol(tx.currency);
     final desc =
         tx.description ??
         TransactionCategory.fromKey(tx.categoryKey).displayText;

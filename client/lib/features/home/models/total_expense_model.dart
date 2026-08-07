@@ -21,10 +21,12 @@ abstract class TotalExpenseDisplay with _$TotalExpenseDisplay {
 @freezed
 abstract class TotalExpenseData with _$TotalExpenseData {
   const factory TotalExpenseData({
-    @JsonKey(name: 'total_expense') required double totalExpense,
-    @JsonKey(name: 'today_expense') required double todayExpense,
-    @JsonKey(name: 'month_expense') required double monthExpense,
-    @JsonKey(name: 'year_expense') required double yearExpense,
+    // Server serializes money fields as strings so the client can parse them
+    // into Decimal without precision loss (see parseDecimal).
+    @JsonKey(name: 'total_expense') required String totalExpense,
+    @JsonKey(name: 'today_expense') required String todayExpense,
+    @JsonKey(name: 'month_expense') required String monthExpense,
+    @JsonKey(name: 'year_expense') required String yearExpense,
     required String currency,
     TotalExpenseDisplay? display,
   }) = _TotalExpenseData;

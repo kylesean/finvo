@@ -60,6 +60,11 @@ class Auth extends _$Auth {
             'Token found but no cached user data; falling back to '
             'unauthenticated',
           );
+          // The persisted auth cache is inconsistent (token without user
+          // data). Wipe the orphaned token so a subsequent cold start does not
+          // hit this fallback branch again and repeatedly log the warning.
+          await _storageService.deleteToken();
+          await _storageService.deleteRefreshToken();
           state = state.copyWith(status: AuthStatus.unauthenticated);
         }
       } else {
@@ -147,10 +152,10 @@ class Auth extends _$Auth {
     } catch (e) {
       _logger.warning('Error during logout, but local state cleared', e);
     }
-    // Whether the server call succeeded or not, always clear local credentials
-    // so the user is never left in a half-logged-in state.
-    await _storageService.deleteToken();
-    await _storageService.deleteRefreshToken();
+    // logout() clears the secure-storage tokens and shared-preference user PII
+    // internally (via _deleteAuthData). Whether the call succeeded or not, the
+    // local credentials are already removed, so the user is never left in a
+    // half-logged-in state.
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 

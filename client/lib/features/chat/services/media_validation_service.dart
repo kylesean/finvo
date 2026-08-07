@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:finvo/features/chat/models/media_file.dart';
 import 'package:finvo/features/chat/models/media_upload_exception.dart';
+import 'package:finvo/shared/utils/format_file_size.dart' as file_size;
 
 /// Media file validation service
 /// Provides file size validation, format recognition, and utility methods
@@ -179,25 +180,7 @@ class MediaValidationService {
   ///
   /// Convert bytes to KB, MB, GB, etc.
   /// Returns formatted string, e.g. "1.5 MB"
-  static String formatFileSize(int bytes) {
-    if (bytes < 0) return '0 B';
-
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    int unitIndex = 0;
-    double size = bytes.toDouble();
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-
-    // Display as integer for bytes; otherwise display with one decimal place
-    if (unitIndex == 0) {
-      return '${size.toInt()} ${units[unitIndex]}';
-    } else {
-      return '${size.toStringAsFixed(1)} ${units[unitIndex]}';
-    }
-  }
+  static String formatFileSize(int bytes) => file_size.formatFileSize(bytes);
 
   /// Determine media type based on file information
   ///

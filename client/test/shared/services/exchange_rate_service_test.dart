@@ -111,8 +111,8 @@ void main() {
         ),
       ).thenThrow(NetworkException('Connection failed'));
 
-      expect(
-        () => service.getExchangeRates(),
+      await expectLater(
+        service.getExchangeRates(),
         throwsA(isA<NetworkException>()),
       );
     });

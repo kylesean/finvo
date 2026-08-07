@@ -14,6 +14,8 @@ import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
@@ -64,9 +66,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final theme = context.theme;
     final colors = theme.colors;
 
-    final amount = (widget.data['amount'] is num
-        ? (widget.data['amount'] as num).toDouble()
-        : double.tryParse(widget.data['amount']?.toString() ?? '0') ?? 0.0);
+    final amount = AmountFormatter.parseDecimal(
+      (widget.data['amount'] as num?)?.toString(),
+    );
     final currency = widget.data['currency']?.toString() ?? 'CNY';
     final categoryKey = widget.data['category_key']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
@@ -193,7 +195,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     String category,
     TransactionCategory categoryEnum,
     String currency,
-    double amount,
+    Decimal amount,
     TransactionType transactionType,
     List<String> tags,
   ) {

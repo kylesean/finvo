@@ -68,10 +68,11 @@ class NotificationWsService {
     }
   }
 
-  /// Last time a pong (or any server message) was received, used to detect
-  /// half-open connections where the TCP socket is alive but the peer is not
-  /// responding.
-  DateTime _lastServerMessage = DateTime.now();
+  /// Elapsed time since the last pong (or any server message) was received,
+  /// used to detect half-open connections where the TCP socket is alive but
+  /// the peer is not responding. A monotonic [Stopwatch] is used instead of a
+  /// wall-clock [DateTime] so system clock changes cannot corrupt the timeout.
+  final Stopwatch _sinceLastServerMessage = Stopwatch()..start();
 
   // Retained so a dropped connection can be re-established.
   String? _baseUrl;
@@ -169,7 +170,7 @@ class NotificationWsService {
         return;
       }
       _reconnectAttempts = 0;
-      _lastServerMessage = DateTime.now();
+      _sinceLastServerMessage.reset();
       _logger.info('WebSocket connected');
       _setStatus(NotificationWsConnectionStatus.connected);
 
@@ -188,7 +189,7 @@ class NotificationWsService {
   void _listen() {
     _subscription = _channel?.stream.listen(
       (message) {
-        _lastServerMessage = DateTime.now();
+        _sinceLastServerMessage.reset();
         // Parse first, dispatch second: a failure in the callback is NOT a
         // parse failure. Keeping them in one try/catch would mislabel a
         // callback exception as "Failed to parse WS message" and mask the
@@ -237,8 +238,7 @@ class NotificationWsService {
       // Detect half-open connections: if the server has not responded within
       // several heartbeat intervals, drop the socket and reconnect instead of
       // silently keeping an unresponsive connection alive.
-      if (DateTime.now().difference(_lastServerMessage) >
-          _heartbeatInterval * 3) {
+      if (_sinceLastServerMessage.elapsed > _heartbeatInterval * 3) {
         _logger.warning('Heartbeat pong timeout, reconnecting');
         _cleanup();
         _setStatus(NotificationWsConnectionStatus.reconnecting);

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:decimal/decimal.dart';
 
 import 'package:finvo/shared/models/transaction_type.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
@@ -45,8 +46,11 @@ enum AmountSemantic {
 /// // Display: +¥1,000.00 (income color, dimmed decimals)
 /// ```
 class AmountText extends ConsumerWidget {
-  /// Amount value (always use positive/absolute value)
-  final double amount;
+  /// Amount value (always use positive/absolute value).
+  ///
+  /// Stored as [Decimal] to preserve precision end-to-end; converted to
+  /// [double] only at the display boundary (see [build]).
+  final Decimal amount;
 
   /// Transaction type
   final TransactionType type;
@@ -92,7 +96,7 @@ class AmountText extends ConsumerWidget {
   /// Large amount display (for detail pages, receipts, etc.)
   factory AmountText.large({
     Key? key,
-    required double amount,
+    required Decimal amount,
     required TransactionType type,
     AmountSemantic semantic = AmountSemantic.transaction,
     String? currency,
@@ -116,7 +120,7 @@ class AmountText extends ConsumerWidget {
   /// Small amount display (for list items)
   factory AmountText.small({
     Key? key,
-    required double amount,
+    required Decimal amount,
     required TransactionType type,
     AmountSemantic semantic = AmountSemantic.transaction,
     String? currency,
@@ -136,7 +140,7 @@ class AmountText extends ConsumerWidget {
   /// Compact amount display (for statistic cards)
   factory AmountText.compact({
     Key? key,
-    required double amount,
+    required Decimal amount,
     required TransactionType type,
     AmountSemantic semantic = AmountSemantic.transaction,
     String? currency,
@@ -187,9 +191,13 @@ class AmountText extends ConsumerWidget {
     final sign = showSign ? AmountFormatter.getAmountSign(type) : '';
     final symbol = AmountFormatter.getCurrencySymbol(effectiveCurrency);
     final absAmount = amount.abs();
+    // Convert to double only at the display boundary (intl NumberFormat accepts
+    // num but delegates to double-specific getters like isNegative).
     final formattedValue = compact
-        ? AmountFormatter.formatCompact(absAmount)
-        : AmountFormatter.getNumberFormat(effectiveCurrency).format(absAmount);
+        ? AmountFormatter.formatCompact(absAmount.toDouble())
+        : AmountFormatter.getNumberFormat(
+            effectiveCurrency,
+          ).format(absAmount.toDouble());
 
     // Resolve color based on semantic
     Color color;

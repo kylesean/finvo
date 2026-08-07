@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/services/home_service.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
@@ -249,7 +250,9 @@ class _TransactionListItem extends StatelessWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
+    final amount = AmountFormatter.parseDecimal(
+      (data['amount'] as num?)?.toString(),
+    );
     final currency = data['currency'] as String? ?? 'CNY';
     final categoryKey = data['category'] as String?;
     final categoryEnum = TransactionCategory.fromKey(categoryKey);

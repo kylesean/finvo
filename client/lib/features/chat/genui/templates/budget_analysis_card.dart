@@ -5,6 +5,7 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
@@ -35,7 +36,9 @@ class BudgetAnalysisCard extends ConsumerWidget {
       final theme = context.theme;
       final colors = theme.colors;
 
-      final totalExpense = GenUiNumUtils.toDouble(data['total_expense']);
+      final totalExpense = AmountFormatter.parseDecimal(
+        data['total_expense']?.toString(),
+      );
       final currency =
           data['currency']?.toString() ??
           ref.watch(financialSettingsProvider).primaryCurrency;
@@ -171,7 +174,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
   Widget _buildTotalSection(
     FThemeData theme,
     FColors colors,
-    double totalExpense,
+    Decimal totalExpense,
     Map<String, dynamic> trends,
     String currency,
   ) {
@@ -324,7 +327,9 @@ class BudgetAnalysisCard extends ConsumerWidget {
                 ? Map<String, dynamic>.from(entry.value as Map)
                 : <String, dynamic>{};
             final percentage = GenUiNumUtils.toDouble(catData['percentage']);
-            final total = GenUiNumUtils.toDouble(catData['total']);
+            final total = AmountFormatter.parseDecimal(
+              catData['total']?.toString(),
+            );
             final category = TransactionCategory.fromKey(entry.key);
             final chartColor = theme.chartColorAt(index);
 
@@ -393,7 +398,9 @@ class BudgetAnalysisCard extends ConsumerWidget {
             final spender = mapEntry.value is Map
                 ? Map<String, dynamic>.from(mapEntry.value as Map)
                 : <String, dynamic>{};
-            final amount = GenUiNumUtils.toDouble(spender['amount']);
+            final amount = AmountFormatter.parseDecimal(
+              spender['amount']?.toString(),
+            );
             final categoryKey = spender['category']?.toString() ?? 'OTHERS';
             final description = spender['description']?.toString() ?? '';
             final date = spender['date']?.toString() ?? '';
@@ -553,10 +560,10 @@ class BudgetAnalysisCard extends ConsumerWidget {
     }
   }
 
-  String _formatAmount(double amount) {
-    if (amount >= 10000) {
+  String _formatAmount(Decimal amount) {
+    if (amount >= Decimal.fromInt(10000)) {
       return t.chat.genui.budgetAnalysis.amountWan(
-        amount: (amount / 10000).toStringAsFixed(1),
+        amount: (amount / Decimal.fromInt(10000)).toDouble().toStringAsFixed(1),
       );
     }
     return amount.toStringAsFixed(0);

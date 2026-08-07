@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
@@ -35,8 +34,7 @@ class MetricComparisonCard extends ConsumerWidget {
     final amountTheme = ref.watch(currentAmountThemeProvider);
     final isPositive = changePercent >= 0;
     final currencyCode = ref.watch(financialSettingsProvider).primaryCurrency;
-    final currencySymbol =
-        Currency.fromCode(currencyCode)?.symbol ?? currencyCode;
+    final currencySymbol = AmountFormatter.getCurrencySymbol(currencyCode);
 
     final displayColor = isExpense
         ? amountTheme.expenseColor
@@ -66,9 +64,7 @@ class MetricComparisonCard extends ConsumerWidget {
                     const SizedBox(width: 2),
                     Flexible(
                       child: AmountText(
-                        amount: AmountFormatter.parseDecimal(
-                          currentAmount,
-                        ).toDouble(),
+                        amount: AmountFormatter.parseDecimal(currentAmount),
                         type: isExpense
                             ? TransactionType.expense
                             : TransactionType.income,

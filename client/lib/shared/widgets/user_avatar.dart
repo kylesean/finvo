@@ -58,7 +58,7 @@ class UserAvatar extends ConsumerWidget {
       backgroundColor: background,
     );
 
-    final baseUrl = ref.read(apiConstantsProvider).baseUrl;
+    final baseUrl = ref.read(apiBaseUrlProvider);
     final isUuid = _uuidPattern.hasMatch(userId);
 
     final Widget content;

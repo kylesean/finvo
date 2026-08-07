@@ -3,15 +3,12 @@ import 'package:finvo/core/services/server_config_service.dart';
 
 /// API Configuration Constants
 ///
-/// Supports dynamic server configuration and compile-time environment variables:
-///
-/// Priority:
-/// 1. Dynamically configured server URL (via ServerConfigService)
-/// 2. Compile-time environment variables (--dart-define=API_BASE_URL=xxx)
+/// Holds compile-time/default configuration as pure static constants, plus the
+/// providers that resolve the effective base URLs (dynamic server config >
+/// compile-time env). Keeping the constants free of any [Ref] dependency makes
+/// them usable from pure logic and tests without building a Riverpod container.
 class ApiConstants {
-  final Ref _ref;
-
-  ApiConstants(this._ref);
+  ApiConstants._();
 
   static const String _envBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
@@ -22,53 +19,6 @@ class ApiConstants {
     'SSE_BASE_URL',
     defaultValue: '',
   );
-
-  /// Check if server is configured
-  bool get isConfigured {
-    if (_envBaseUrl.isNotEmpty) return true;
-    final configService = _ref.read(serverConfigServiceProvider);
-    return configService.isConfigured;
-  }
-
-  /// API Base URL
-  ///
-  /// Priority: Dynamic Config > Compile-time Env
-  /// Returns empty string if not configured (allows app startup to show config page)
-  String get baseUrl {
-    // 1. Dynamic configuration
-    final configService = _ref.read(serverConfigServiceProvider);
-    final dynamicUrl = configService.baseUrl;
-    if (dynamicUrl != null && dynamicUrl.isNotEmpty) {
-      return dynamicUrl;
-    }
-
-    // 2. Compile-time environment variables
-    if (_envBaseUrl.isNotEmpty) {
-      return _envBaseUrl;
-    }
-
-    // Return empty placeholder to allow app startup
-    // The router will redirect to server-setup page
-    return '';
-  }
-
-  /// SSE Base URL (for AI chat streaming)
-  String get sseBaseUrl {
-    // 1. Dynamic configuration
-    final configService = _ref.read(serverConfigServiceProvider);
-    final dynamicSseUrl = configService.sseBaseUrl;
-    if (dynamicSseUrl != null && dynamicSseUrl.isNotEmpty) {
-      return dynamicSseUrl;
-    }
-
-    // 2. Compile-time environment variables
-    if (_envSseBaseUrl.isNotEmpty) {
-      return _envSseBaseUrl;
-    }
-
-    // 3. Derived from baseUrl
-    return '$baseUrl/chatbot/chat';
-  }
 
   // SSE Endpoint Paths
   static const String aiChatSseEndpoint = '/stream';
@@ -103,7 +53,34 @@ class ApiConstants {
   static const String applicationJson = 'application/json';
 }
 
-/// Provider for ApiConstants instance
-final apiConstantsProvider = Provider<ApiConstants>((ref) {
-  return ApiConstants(ref);
+/// Whether the API server is configured (dynamic config or compile-time env).
+final apiConfiguredProvider = Provider<bool>((ref) {
+  if (ApiConstants._envBaseUrl.isNotEmpty) return true;
+  return ref.watch(serverConfigServiceProvider).isConfigured;
+});
+
+/// Effective API base URL.
+///
+/// Priority: Dynamic Config > Compile-time Env.
+/// Returns an empty string if not configured (allows app startup to show the
+/// config page; the router redirects to the server-setup page in that case).
+final apiBaseUrlProvider = Provider<String>((ref) {
+  final configService = ref.watch(serverConfigServiceProvider);
+  final dynamicUrl = configService.baseUrl;
+  if (dynamicUrl != null && dynamicUrl.isNotEmpty) return dynamicUrl;
+  if (ApiConstants._envBaseUrl.isNotEmpty) return ApiConstants._envBaseUrl;
+  return '';
+});
+
+/// Effective SSE base URL (for AI chat streaming).
+///
+/// Priority: Dynamic Config > Compile-time Env > Derived from [apiBaseUrlProvider].
+final sseBaseUrlProvider = Provider<String>((ref) {
+  final configService = ref.watch(serverConfigServiceProvider);
+  final dynamicSseUrl = configService.sseBaseUrl;
+  if (dynamicSseUrl != null && dynamicSseUrl.isNotEmpty) return dynamicSseUrl;
+  if (ApiConstants._envSseBaseUrl.isNotEmpty) {
+    return ApiConstants._envSseBaseUrl;
+  }
+  return '${ref.watch(apiBaseUrlProvider)}/chatbot/chat';
 });

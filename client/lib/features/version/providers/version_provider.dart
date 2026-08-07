@@ -45,15 +45,22 @@ class VersionNotifier extends _$VersionNotifier {
 
   Future<UpdateInfo?> checkUpdate() async {
     state = state.copyWith(isChecking: true, error: null);
-    final result = await _service.checkUpdate();
-    if (result != null) {
-      state = state.copyWith(isChecking: false, updateInfo: result);
-    } else {
-      state = state.copyWith(
-        isChecking: false,
-        error: 'Failed to fetch update information',
-      );
+    try {
+      final result = await _service.checkUpdate();
+      if (result != null) {
+        state = state.copyWith(isChecking: false, updateInfo: result);
+      } else {
+        state = state.copyWith(
+          isChecking: false,
+          error: 'Failed to fetch update information',
+        );
+      }
+      return result;
+    } catch (e) {
+      // Reset the in-flight flag even on failure so the caller is never stuck
+      // in a perpetual checking state, then surface the original error.
+      state = state.copyWith(isChecking: false, error: e.toString());
+      rethrow;
     }
-    return result;
   }
 }

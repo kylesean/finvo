@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/services/home_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -236,10 +237,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
     FColors colors,
     Map<String, dynamic> item,
   ) {
-    final amountRaw = item['amount'];
-    final amount = amountRaw is num
-        ? amountRaw.toDouble()
-        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final amount = AmountFormatter.parseDecimal(item['amount']?.toString());
     final currency = item['currency']?.toString() ?? 'CNY';
     final categoryKey = item['category']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);

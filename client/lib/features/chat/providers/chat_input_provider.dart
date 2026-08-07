@@ -39,8 +39,16 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   String _textBeforeSpeechSession = '';
   bool _isManualStop = false;
 
+  /// The current send-message callback. Stored as a mutable field (instead of
+  /// relying only on the build parameter) so a reused widget State can swap in
+  /// a fresher callback via [updateOnSendMessage] without resetting the whole
+  /// provider and losing the draft/isiVoice state.
+  late OnSendMessageCallback _onSendMessage;
+
   @override
   ChatInputState build(OnSendMessageCallback onSendMessage) {
+    _onSendMessage = onSendMessage;
+
     // Service initialization
     _fileUploadService = ref.watch(fileUploadServiceProvider);
 
@@ -67,6 +75,13 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     });
 
     return const ChatInputState(isSpeechAvailable: true);
+  }
+
+  /// Update the send-message callback in place. Called from the widget's
+  /// `didUpdateWidget` when the parent supplies a new callback, so a reused
+  /// State never submits through a stale closure captured at init time.
+  void updateOnSendMessage(OnSendMessageCallback onSendMessage) {
+    _onSendMessage = onSendMessage;
   }
 
   void _onSpeechStatus(String status) {
@@ -306,7 +321,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     );
 
     try {
-      await onSendMessage(
+      await _onSendMessage(
         currentTextAfterStop,
         attachments: pendingAttachments.isEmpty ? null : pendingAttachments,
       );

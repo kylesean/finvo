@@ -9,8 +9,8 @@ import 'package:forui/forui.dart';
 import 'package:finvo/features/profile/models/financial_settings.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger('FinancialSettingSheets');
@@ -122,7 +122,7 @@ class _AmountSliderBottomSheetState
     final colorScheme = theme.colors;
     final settingsState = ref.watch(financialSettingsProvider);
     final primaryCurrency = settingsState.primaryCurrency;
-    final symbol = Currency.fromCode(primaryCurrency)?.symbol ?? '¥';
+    final symbol = AmountFormatter.getCurrencySymbol(primaryCurrency);
 
     if (!_hasInitialized && !settingsState.isLoading) {
       // Prefill the persisted value only once the provider has finished loading.

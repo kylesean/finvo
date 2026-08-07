@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 import 'package:finvo/features/chat/genui/atoms/budget_progress_bar.dart';
@@ -11,6 +10,8 @@ import 'package:finvo/shared/widgets/app_card.dart';
 
 import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 
 class BudgetItemCard extends ConsumerWidget {
   final String? budgetId;
@@ -21,11 +22,11 @@ class BudgetItemCard extends ConsumerWidget {
 
   final String status;
 
-  final double spent;
+  final Decimal? spent;
 
-  final double amount;
+  final Decimal? amount;
 
-  final double remaining;
+  final Decimal? remaining;
 
   final VoidCallback? onTap;
 
@@ -37,9 +38,9 @@ class BudgetItemCard extends ConsumerWidget {
     required this.name,
     required this.percentage,
     this.status = 'ON_TRACK',
-    this.spent = 0,
-    this.amount = 0,
-    this.remaining = 0,
+    this.spent,
+    this.amount,
+    this.remaining,
     this.onTap,
     this.compact = false,
   });
@@ -53,9 +54,9 @@ class BudgetItemCard extends ConsumerWidget {
       name: json['name'] as String? ?? t.budget.budget,
       percentage: GenUiNumUtils.toDouble(json['percentage']),
       status: json['status'] as String? ?? 'ON_TRACK',
-      spent: GenUiNumUtils.toDouble(json['spent']),
-      amount: GenUiNumUtils.toDouble(json['amount']),
-      remaining: GenUiNumUtils.toDouble(json['remaining']),
+      spent: AmountFormatter.parseDecimal(json['spent']?.toString()),
+      amount: AmountFormatter.parseDecimal(json['amount']?.toString()),
+      remaining: AmountFormatter.parseDecimal(json['remaining']?.toString()),
       onTap: onTap,
     );
   }
@@ -65,8 +66,9 @@ class BudgetItemCard extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
     final financialSettings = ref.watch(financialSettingsProvider);
-    final currencySymbol =
-        Currency.fromCode(financialSettings.primaryCurrency)?.symbol ?? '¥';
+    final currencySymbol = AmountFormatter.getCurrencySymbol(
+      financialSettings.primaryCurrency,
+    );
 
     if (compact) {
       return _buildCompactView(theme, colors);
@@ -182,7 +184,7 @@ class BudgetItemCard extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '$currencySymbol${_formatAmount(spent)} / $currencySymbol${_formatAmount(amount)}',
+                    '$currencySymbol${_formatAmount(spent ?? Decimal.zero)} / $currencySymbol${_formatAmount(amount ?? Decimal.zero)}',
                     style: AppTextStyles.listSubtitle(theme),
                   ),
                 ],
@@ -224,10 +226,11 @@ class BudgetItemCard extends ConsumerWidget {
     }
   }
 
-  String _formatAmount(double amount) {
+  String _formatAmount(Decimal amount) {
     final absAmount = amount.abs();
-    if (absAmount >= 10000) {
-      return '${(absAmount / 10000).toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
+    final tenThousand = Decimal.fromInt(10000);
+    if (absAmount >= tenThousand) {
+      return '${(absAmount / tenThousand).toDouble().toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
     }
     return absAmount.toStringAsFixed(0);
   }

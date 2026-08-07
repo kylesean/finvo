@@ -143,54 +143,6 @@ Map<String, dynamic> _$TopTransactionsResponseToJson(
   'hasMore': instance.hasMore,
 };
 
-_StatisticsQuery _$StatisticsQueryFromJson(Map<String, dynamic> json) =>
-    _StatisticsQuery(
-      timeRange:
-          $enumDecodeNullable(_$TimeRangeEnumMap, json['timeRange']) ??
-          TimeRange.month,
-      chartType:
-          $enumDecodeNullable(_$ChartTypeEnumMap, json['chartType']) ??
-          ChartType.expense,
-      sortType:
-          $enumDecodeNullable(_$SortTypeEnumMap, json['sortType']) ??
-          SortType.amount,
-      startDate: json['startDate'] == null
-          ? null
-          : DateTime.parse(json['startDate'] as String),
-      endDate: json['endDate'] == null
-          ? null
-          : DateTime.parse(json['endDate'] as String),
-      accountTypes:
-          (json['accountTypes'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-    );
-
-Map<String, dynamic> _$StatisticsQueryToJson(_StatisticsQuery instance) =>
-    <String, dynamic>{
-      'timeRange': _$TimeRangeEnumMap[instance.timeRange]!,
-      'chartType': _$ChartTypeEnumMap[instance.chartType]!,
-      'sortType': _$SortTypeEnumMap[instance.sortType]!,
-      'startDate': instance.startDate?.toIso8601String(),
-      'endDate': instance.endDate?.toIso8601String(),
-      'accountTypes': instance.accountTypes,
-    };
-
-const _$TimeRangeEnumMap = {
-  TimeRange.week: 'week',
-  TimeRange.month: 'month',
-  TimeRange.year: 'year',
-  TimeRange.custom: 'custom',
-};
-
-const _$ChartTypeEnumMap = {
-  ChartType.expense: 'expense',
-  ChartType.income: 'income',
-};
-
-const _$SortTypeEnumMap = {SortType.amount: 'amount', SortType.date: 'date'};
-
 _CashFlowAnalysis _$CashFlowAnalysisFromJson(Map<String, dynamic> json) =>
     _CashFlowAnalysis(
       totalIncome: json['totalIncome'] as String,

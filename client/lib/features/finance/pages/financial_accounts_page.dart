@@ -430,7 +430,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                       ).copyWith(color: colors.primaryForeground),
                     )
                   : AmountText(
-                      amount: netWorth.toDouble().abs(),
+                      amount: netWorth.abs(),
                       type: netWorth >= Decimal.zero
                           ? TransactionType.income
                           : TransactionType.expense,
@@ -515,7 +515,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                   ),
                 )
               : AmountText(
-                  amount: amount.toDouble(),
+                  amount: amount,
                   type: type,
                   semantic: AmountSemantic.status, // Changed to status
                   currency: currency,

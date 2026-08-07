@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
@@ -26,10 +28,7 @@ class TransferReceipt extends StatelessWidget {
     final colors = theme.colors;
 
     // Extract data (AI-provided payloads are untrusted; coerce types)
-    final amountRaw = data['amount'];
-    final amount = amountRaw is num
-        ? amountRaw.toDouble()
-        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final amount = AmountFormatter.parseDecimal(data['amount']?.toString());
     final currency = data['currency']?.toString() ?? 'CNY';
     final time = data['transaction_at']?.toString() ?? '';
     final tagsRaw = data['tags'];
@@ -130,7 +129,7 @@ class TransferReceipt extends StatelessWidget {
     FThemeData theme,
     FColors colors,
     String currency,
-    double amount,
+    Decimal amount,
     List<String> tags,
   ) {
     return Container(

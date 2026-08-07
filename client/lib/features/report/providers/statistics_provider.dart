@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/features/report/services/statistics_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
 
 part 'statistics_provider.g.dart';
 
@@ -236,8 +236,7 @@ class Statistics extends _$Statistics {
   }) async {
     String? displayText;
     if (timeRange == TimeRange.custom && startDate != null && endDate != null) {
-      final format = DateFormat('yyyy.MM.dd');
-      displayText = '${format.format(startDate)} - ${format.format(endDate)}';
+      displayText = formatDateRange(startDate, endDate);
     }
     state = state.copyWith(
       timeRange: timeRange,

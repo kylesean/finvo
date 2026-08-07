@@ -191,22 +191,6 @@ abstract class TopTransactionsResponse with _$TopTransactionsResponse {
       _$TopTransactionsResponseFromJson(json);
 }
 
-/// Statistics query parameters
-@freezed
-abstract class StatisticsQuery with _$StatisticsQuery {
-  const factory StatisticsQuery({
-    @Default(TimeRange.month) TimeRange timeRange,
-    @Default(ChartType.expense) ChartType chartType,
-    @Default(SortType.amount) SortType sortType,
-    DateTime? startDate,
-    DateTime? endDate,
-    @Default([]) List<String> accountTypes,
-  }) = _StatisticsQuery;
-
-  factory StatisticsQuery.fromJson(Map<String, dynamic> json) =>
-      _$StatisticsQueryFromJson(json);
-}
-
 /// Cash flow analysis response
 @freezed
 abstract class CashFlowAnalysis with _$CashFlowAnalysis {

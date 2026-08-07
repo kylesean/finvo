@@ -1,5 +1,15 @@
 import 'package:decimal/decimal.dart';
 
+/// Parses a JSON value into a [Decimal], tolerating null/empty/missing values
+/// (treated as zero) and non-numeric strings (fall back to zero) so a single
+/// malformed field can't crash an entire model parse.
+Decimal _parseDecimal(dynamic value) {
+  if (value == null) return Decimal.zero;
+  final text = value.toString().trim();
+  if (text.isEmpty) return Decimal.zero;
+  return Decimal.tryParse(text) ?? Decimal.zero;
+}
+
 /// Recurring transaction type
 enum RecurringTransactionType {
   expense('EXPENSE', 'Expense'),
@@ -94,7 +104,7 @@ class RecurringTransaction {
       targetAccountId: json['target_account_id'] as String?,
       amountType: AmountType.fromValue(json['amount_type'] as String),
       requiresConfirmation: json['requires_confirmation'] as bool,
-      amount: Decimal.parse(json['amount'] as String),
+      amount: _parseDecimal(json['amount']),
       currency: json['currency'] as String,
       categoryKey: json['category_key'] as String?,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>(),
@@ -367,7 +377,7 @@ class PendingTransaction {
     return PendingTransaction(
       id: json['id'] as String,
       type: json['type'] as String,
-      amount: Decimal.parse((json['amount'] ?? '0').toString()),
+      amount: _parseDecimal(json['amount']),
       currency: json['currency'] as String? ?? 'CNY',
       categoryKey: json['category_key'] as String?,
       description: json['description'] as String?,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:intl/intl.dart';
 import 'package:finvo/shared/widgets/app_calendar.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
 
 class DateRangePickerSheet extends StatefulWidget {
   final DateTime? initialStart;
@@ -53,8 +53,7 @@ class _DateRangePickerSheetState extends State<DateRangePickerSheet> {
 
   String _formatDateRange((DateTime, DateTime)? range) {
     if (range == null) return t.dateRange.hint;
-    final format = DateFormat('yyyy.MM.dd');
-    return '${format.format(range.$1)} - ${format.format(range.$2)}';
+    return formatDateRange(range.$1, range.$2);
   }
 
   @override

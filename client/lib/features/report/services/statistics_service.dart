@@ -10,13 +10,15 @@ class StatisticsService {
 
   StatisticsService(this._networkClient);
 
-  /// Get statistics overview
-  Future<StatisticsOverview> getOverview({
-    TimeRange timeRange = TimeRange.month,
+  /// Build the shared time-range + date + account-type query parameters that
+  /// every statistics endpoint accepts, so the repeated per-method construction
+  /// is expressed once.
+  Map<String, String> _baseQuery({
+    required TimeRange timeRange,
     DateTime? startDate,
     DateTime? endDate,
     List<String>? accountTypes,
-  }) async {
+  }) {
     final queryParams = <String, String>{'time_range': timeRange.name};
     if (startDate != null) {
       queryParams['start_date'] = startDate.toIso8601String();
@@ -27,6 +29,22 @@ class StatisticsService {
     if (accountTypes != null && accountTypes.isNotEmpty) {
       queryParams['account_types'] = accountTypes.join(',');
     }
+    return queryParams;
+  }
+
+  /// Get statistics overview
+  Future<StatisticsOverview> getOverview({
+    TimeRange timeRange = TimeRange.month,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? accountTypes,
+  }) async {
+    final queryParams = _baseQuery(
+      timeRange: timeRange,
+      startDate: startDate,
+      endDate: endDate,
+      accountTypes: accountTypes,
+    );
 
     return await _networkClient.request<StatisticsOverview>(
       '/statistics/overview',
@@ -45,19 +63,12 @@ class StatisticsService {
     DateTime? endDate,
     List<String>? accountTypes,
   }) async {
-    final queryParams = <String, String>{
-      'time_range': timeRange.name,
-      'transaction_type': chartType.name,
-    };
-    if (startDate != null) {
-      queryParams['start_date'] = startDate.toIso8601String();
-    }
-    if (endDate != null) {
-      queryParams['end_date'] = endDate.toIso8601String();
-    }
-    if (accountTypes != null && accountTypes.isNotEmpty) {
-      queryParams['account_types'] = accountTypes.join(',');
-    }
+    final queryParams = _baseQuery(
+      timeRange: timeRange,
+      startDate: startDate,
+      endDate: endDate,
+      accountTypes: accountTypes,
+    )..['transaction_type'] = chartType.name;
 
     return await _networkClient.request<TrendDataResponse>(
       '/statistics/trends',
@@ -76,19 +87,12 @@ class StatisticsService {
     List<String>? accountTypes,
     int limit = 10,
   }) async {
-    final queryParams = <String, String>{
-      'time_range': timeRange.name,
-      'limit': limit.toString(),
-    };
-    if (startDate != null) {
-      queryParams['start_date'] = startDate.toIso8601String();
-    }
-    if (endDate != null) {
-      queryParams['end_date'] = endDate.toIso8601String();
-    }
-    if (accountTypes != null && accountTypes.isNotEmpty) {
-      queryParams['account_types'] = accountTypes.join(',');
-    }
+    final queryParams = _baseQuery(
+      timeRange: timeRange,
+      startDate: startDate,
+      endDate: endDate,
+      accountTypes: accountTypes,
+    )..['limit'] = limit.toString();
 
     return await _networkClient.request<CategoryBreakdownResponse>(
       '/statistics/categories',
@@ -109,21 +113,16 @@ class StatisticsService {
     int page = 1,
     int pageSize = 10,
   }) async {
-    final queryParams = <String, String>{
-      'time_range': timeRange.name,
-      'sort_by': sortBy.name,
-      'page': page.toString(),
-      'size': pageSize.toString(),
-    };
-    if (startDate != null) {
-      queryParams['start_date'] = startDate.toIso8601String();
-    }
-    if (endDate != null) {
-      queryParams['end_date'] = endDate.toIso8601String();
-    }
-    if (accountTypes != null && accountTypes.isNotEmpty) {
-      queryParams['account_types'] = accountTypes.join(',');
-    }
+    final queryParams =
+        _baseQuery(
+            timeRange: timeRange,
+            startDate: startDate,
+            endDate: endDate,
+            accountTypes: accountTypes,
+          )
+          ..['sort_by'] = sortBy.name
+          ..['page'] = page.toString()
+          ..['size'] = pageSize.toString();
 
     return await _networkClient.request<TopTransactionsResponse>(
       '/statistics/top-transactions',
@@ -141,16 +140,12 @@ class StatisticsService {
     DateTime? endDate,
     List<String>? accountTypes,
   }) async {
-    final queryParams = <String, String>{'time_range': timeRange.name};
-    if (startDate != null) {
-      queryParams['start_date'] = startDate.toIso8601String();
-    }
-    if (endDate != null) {
-      queryParams['end_date'] = endDate.toIso8601String();
-    }
-    if (accountTypes != null && accountTypes.isNotEmpty) {
-      queryParams['account_types'] = accountTypes.join(',');
-    }
+    final queryParams = _baseQuery(
+      timeRange: timeRange,
+      startDate: startDate,
+      endDate: endDate,
+      accountTypes: accountTypes,
+    );
 
     return await _networkClient.request<CashFlowAnalysis>(
       '/statistics/cash-flow',
@@ -168,16 +163,12 @@ class StatisticsService {
     DateTime? endDate,
     List<String>? accountTypes,
   }) async {
-    final queryParams = <String, String>{'time_range': timeRange.name};
-    if (startDate != null) {
-      queryParams['start_date'] = startDate.toIso8601String();
-    }
-    if (endDate != null) {
-      queryParams['end_date'] = endDate.toIso8601String();
-    }
-    if (accountTypes != null && accountTypes.isNotEmpty) {
-      queryParams['account_types'] = accountTypes.join(',');
-    }
+    final queryParams = _baseQuery(
+      timeRange: timeRange,
+      startDate: startDate,
+      endDate: endDate,
+      accountTypes: accountTypes,
+    );
 
     return await _networkClient.request<HealthScore>(
       '/statistics/health-score',

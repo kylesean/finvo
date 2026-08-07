@@ -25,9 +25,26 @@ class CategoryDetailSheet extends ConsumerWidget {
     );
   }
 
+  /// Parse a hex color string (e.g. `#ff0000` or `ff0000`) into a [Color].
+  ///
+  /// Returns a neutral fallback when the input is absent, malformed, or out of
+  /// range instead of throwing, so a bad server-provided color can never crash
+  /// the report sheet.
   Color _parseColor(String hex) {
-    return Color(int.parse(hex.replaceFirst('#', '0xFF')));
+    final cleaned = hex.replaceFirst('#', '');
+    // Accept 6-digit RRGGBB (prefixed with full opacity) or 8-digit AARRGGBB.
+    final value = int.tryParse(cleaned, radix: 16);
+    if (value == null) return _fallbackColor;
+    if (cleaned.length == 6) {
+      return Color(0xFF000000 | value);
+    }
+    if (cleaned.length == 8) {
+      return Color(value);
+    }
+    return _fallbackColor;
   }
+
+  static const Color _fallbackColor = Color(0xFF9E9E9E);
 
   String _formatAmount(String amount, String currencyCode) {
     // Follow the report page's currency instead of a hardcoded CNY symbol.

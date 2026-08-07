@@ -65,9 +65,7 @@ class TopTransactionCard extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             AmountText(
-              amount: AmountFormatter.parseDecimal(
-                transaction.amount,
-              ).toDouble(),
+              amount: AmountFormatter.parseDecimal(transaction.amount),
               type: TransactionType.expense,
               semantic: AmountSemantic.status,
               currency: currencyCode,

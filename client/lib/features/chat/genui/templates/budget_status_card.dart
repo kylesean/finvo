@@ -11,6 +11,8 @@ import 'package:finvo/features/chat/genui/molecules/budget_item_card.dart';
 import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 
 /// Budget status card template
 ///
@@ -94,9 +96,9 @@ class BudgetStatusCard extends StatelessWidget {
       name: budget['name']?.toString() ?? t.chat.genui.budgetStatusCard.budget,
       percentage: GenUiNumUtils.toDouble(budget['percentage']),
       status: budget['status']?.toString() ?? 'ON_TRACK',
-      spent: GenUiNumUtils.toDouble(budget['spent']),
-      amount: GenUiNumUtils.toDouble(budget['amount']),
-      remaining: GenUiNumUtils.toDouble(budget['remaining']),
+      spent: AmountFormatter.parseDecimal(budget['spent']?.toString()),
+      amount: AmountFormatter.parseDecimal(budget['amount']?.toString()),
+      remaining: AmountFormatter.parseDecimal(budget['remaining']?.toString()),
       compact: false,
       onTap: budgetId != null
           ? () => context.pushNamed(
@@ -113,8 +115,12 @@ class BudgetStatusCard extends StatelessWidget {
     FThemeData theme,
     FColors colors,
   ) {
-    final overallSpent = GenUiNumUtils.toDouble(data['overall_spent']);
-    final overallRemaining = GenUiNumUtils.toDouble(data['overall_remaining']);
+    final overallSpent = AmountFormatter.parseDecimal(
+      data['overall_spent']?.toString(),
+    );
+    final overallRemaining = AmountFormatter.parseDecimal(
+      data['overall_remaining']?.toString(),
+    );
     final overallPercentage = GenUiNumUtils.toDouble(
       data['overall_percentage'],
     );
@@ -212,8 +218,8 @@ class BudgetStatusCard extends StatelessWidget {
     FColors colors,
     Map<String, dynamic>? totalBudget,
     double percentage,
-    double spent,
-    double remaining,
+    Decimal spent,
+    Decimal remaining,
   ) {
     final semantic = theme.semantic;
     final status = _getPercentageStatus(percentage);
@@ -456,9 +462,10 @@ class BudgetStatusCard extends StatelessWidget {
     return 'ON_TRACK';
   }
 
-  String _formatAmount(double amount) {
-    if (amount >= 10000) {
-      return '${(amount / 10000).toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
+  String _formatAmount(Decimal amount) {
+    final tenThousand = Decimal.fromInt(10000);
+    if (amount >= tenThousand) {
+      return '${(amount / tenThousand).toDouble().toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
     }
     return amount.toStringAsFixed(0);
   }

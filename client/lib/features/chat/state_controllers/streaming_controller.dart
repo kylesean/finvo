@@ -77,6 +77,8 @@ class StreamingController {
   /// Pending cancel completer (for tracking cancel operation)
   Completer<void>? _pendingCancelCompleter;
 
+  bool _isDisposed = false;
+
   // ============================================================
   // Callbacks
   // ============================================================
@@ -350,9 +352,15 @@ class StreamingController {
     }
   }
 
-  /// Dispose controller
-  void dispose() {
-    unawaited(cancelStreamAndTimers());
+  /// Dispose controller.
+  ///
+  /// Awaits any in-flight cancel so a keepAlive rebuild fully tears down the
+  /// old stream before a new controller is created, avoiding a short window in
+  /// which two controllers coexist. Idempotent: a second call no-ops.
+  Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    await cancelStreamAndTimers();
     _pendingCancelCompleter = null;
   }
 }

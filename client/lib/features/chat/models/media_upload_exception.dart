@@ -1,5 +1,7 @@
-/// Media upload error type enum
-/// Defines all possible media upload error types
+// Media upload error type enum
+// Defines all possible media upload error types
+import 'package:finvo/shared/utils/format_file_size.dart';
+
 enum MediaUploadError {
   /// File size exceeds limit
   fileSizeExceeded,
@@ -234,23 +236,5 @@ class MediaUploadException implements Exception {
   ///
   /// [bytes] Number of bytes
   /// Returns: Formatted string, e.g., "1.5 MB"
-  static String _formatFileSize(int bytes) {
-    if (bytes < 0) return '0 B';
-
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    int unitIndex = 0;
-    double size = bytes.toDouble();
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-
-    // If bytes, display as integer; otherwise display with one decimal place
-    if (unitIndex == 0) {
-      return '${size.toInt()} ${units[unitIndex]}';
-    } else {
-      return '${size.toStringAsFixed(1)} ${units[unitIndex]}';
-    }
-  }
+  static String _formatFileSize(int bytes) => formatFileSize(bytes);
 }

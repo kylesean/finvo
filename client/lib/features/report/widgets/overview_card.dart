@@ -9,6 +9,7 @@ import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 
 /// A premium overview that uses large typography and subtle depth
 class OverviewCard extends ConsumerWidget {
@@ -77,12 +78,10 @@ class OverviewCard extends ConsumerWidget {
                     child: AmountText(
                       amount: AmountFormatter.parseDecimal(
                         overview.totalBalance,
-                      ).toDouble(),
+                      ),
                       type:
-                          AmountFormatter.parseDecimal(
-                                overview.totalBalance,
-                              ).toDouble() >=
-                              0
+                          AmountFormatter.parseDecimal(overview.totalBalance) >=
+                              Decimal.zero
                           ? TransactionType.income
                           : TransactionType.expense,
                       semantic: AmountSemantic.status,
@@ -104,6 +103,7 @@ class OverviewCard extends ConsumerWidget {
                         context,
                         ref,
                         theme,
+                        TransactionType.income,
                         t.statistics.overview.income,
                         overview.totalIncome,
                         overview.incomeChangePercent,
@@ -118,6 +118,7 @@ class OverviewCard extends ConsumerWidget {
                         context,
                         ref,
                         theme,
+                        TransactionType.expense,
                         t.statistics.overview.expense,
                         overview.totalExpense,
                         overview.expenseChangePercent,
@@ -140,6 +141,7 @@ class OverviewCard extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     FThemeData theme,
+    TransactionType type,
     String label,
     String amount,
     double change,
@@ -170,10 +172,8 @@ class OverviewCard extends ConsumerWidget {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: AmountText(
-                amount: AmountFormatter.parseDecimal(amount).toDouble(),
-                type: label == t.statistics.overview.income
-                    ? TransactionType.income
-                    : TransactionType.expense,
+                amount: AmountFormatter.parseDecimal(amount),
+                type: type,
                 semantic: AmountSemantic.transaction,
                 // AmountText resolves the symbol from the currency code, so pass
                 // the code (not a pre-resolved symbol) here.
@@ -189,7 +189,7 @@ class OverviewCard extends ConsumerWidget {
             const SizedBox(width: 4),
             AmountChangeIndicator(
               changePercent: change,
-              inverseColor: label == t.statistics.overview.expense,
+              inverseColor: type == TransactionType.expense,
               theme: ref.watch(currentAmountThemeProvider),
               style: theme.typography.body.xs.copyWith(
                 fontSize: 9,

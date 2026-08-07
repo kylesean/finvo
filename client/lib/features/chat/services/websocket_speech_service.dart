@@ -107,6 +107,14 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   /// Initialize WebSocket connection
   @override
   Future<bool> initialize() async {
+    // Guard against use after dispose: dispose() closes the stream
+    // controllers, so any later add() would raise StateError. No reconnect
+    // (timer callback or caller) may resurrect a released service.
+    if (_isDisposed) {
+      _logger.warning('WebSocket already disposed, cannot initialize');
+      return false;
+    }
+
     // If already connected, return success directly (simplified logic, avoid ping test issues)
     if (_isConnected && _channel != null) {
       _logger.info('WebSocket already connected, reusing existing connection');
@@ -119,7 +127,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
     try {
       final wsUrl = _buildWsUrl();
       _logger.info('Connecting to WebSocket server: $wsUrl');
-      _statusController.add('connecting');
+      if (!_statusController.isClosed) _statusController.add('connecting');
 
       // WebSocketChannel.connect is cross-platform (IO + web) and supports
       // both ws:// and wss://, unlike the previous IOWebSocketChannel.
@@ -134,7 +142,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       );
       _isConnected = true;
       _reconnectAttempts = 0;
-      _statusController.add('connected');
+      if (!_statusController.isClosed) _statusController.add('connected');
       _logger.info('WebSocket connected successfully');
 
       // Listen to messages
@@ -147,8 +155,12 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       return true;
     } catch (e) {
       _logger.severe('WebSocket connection failed: $e');
-      _errorController.add('speech_connection_failed');
-      _statusController.add('disconnected');
+      if (!_errorController.isClosed) {
+        _errorController.add('speech_connection_failed');
+      }
+      if (!_statusController.isClosed) {
+        _statusController.add('disconnected');
+      }
       _isConnected = false;
       return false;
     }

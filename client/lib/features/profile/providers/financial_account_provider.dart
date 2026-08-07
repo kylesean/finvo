@@ -12,14 +12,20 @@ part 'financial_account_provider.g.dart';
 final _logger = Logger('FinancialAccountProvider');
 
 /// Calculate net worth as (assets - liabilities) over active, included accounts.
+///
+/// Balance source is kept consistent with [FinancialSummaryNotifier]: prefer the
+/// server-provided [FinancialAccount.currentBalance] and only fall back to
+/// [FinancialAccount.initialBalance] when the current balance is unknown, so the
+/// two net-worth views never diverge.
 Decimal _netWorthOf(List<FinancialAccount> accounts) {
   return accounts.fold(Decimal.zero, (sum, account) {
     // Only count active accounts included in net worth
     if (account.status == AccountStatus.active && account.includeInNetWorth) {
+      final balance = account.currentBalance ?? account.initialBalance;
       if (account.nature == FinancialNature.asset) {
-        return sum + account.initialBalance;
+        return sum + balance;
       } else {
-        return sum - account.initialBalance.abs();
+        return sum - balance.abs();
       }
     }
     return sum;

@@ -6,7 +6,6 @@ import 'package:logging/logging.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
@@ -142,9 +141,9 @@ class TrendChart extends ConsumerWidget {
                       final currencyCode = ref
                           .read(financialSettingsProvider)
                           .primaryCurrency;
-                      final currencySymbol =
-                          Currency.fromCode(currencyCode)?.symbol ??
-                          currencyCode;
+                      final currencySymbol = AmountFormatter.getCurrencySymbol(
+                        currencyCode,
+                      );
                       return touchedSpots.map((spot) {
                         final label = chartType == ChartType.expense
                             ? t.statistics.trend.expense
@@ -193,7 +192,8 @@ class TrendChart extends ConsumerWidget {
           strokeWidth: 2,
           strokeColor: color,
         ),
-        checkToShowDot: (spot, barData) => spot.x == barData.spots.last.x,
+        checkToShowDot: (spot, barData) =>
+            barData.spots.isNotEmpty && spot.x == barData.spots.last.x,
       ),
       belowBarData: BarAreaData(
         show: true,

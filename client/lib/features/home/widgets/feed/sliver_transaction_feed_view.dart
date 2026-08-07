@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -160,8 +162,9 @@ class SliverTransactionFeedView extends ConsumerWidget {
               const SizedBox(height: 16),
               FButton(
                 variant: .outline,
-                onPress: () =>
-                    ref.read(transactionFeedProvider.notifier).refreshFeed(),
+                onPress: () => unawaited(
+                  ref.read(transactionFeedProvider.notifier).refreshFeed(),
+                ),
                 child: Text(t.common.retry),
               ),
             ],
@@ -190,8 +193,9 @@ class SliverTransactionFeedView extends ConsumerWidget {
               const SizedBox(height: 16),
               FButton(
                 mainAxisSize: MainAxisSize.min,
-                onPress: () =>
-                    ref.read(transactionFeedProvider.notifier).refreshFeed(),
+                onPress: () => unawaited(
+                  ref.read(transactionFeedProvider.notifier).refreshFeed(),
+                ),
                 child: Text(t.home.tryRefresh),
               ),
             ],

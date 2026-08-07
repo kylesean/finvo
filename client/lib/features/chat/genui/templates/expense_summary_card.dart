@@ -9,6 +9,8 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 
 import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 
@@ -28,7 +30,9 @@ class ExpenseSummaryCard extends ConsumerWidget {
       final summary = summaryRaw is Map
           ? Map<String, dynamic>.from(summaryRaw)
           : <String, dynamic>{};
-      final totalExpense = GenUiNumUtils.toDouble(summary['total_expense']);
+      final totalExpense = AmountFormatter.parseDecimal(
+        summary['total_expense']?.toString(),
+      );
       final distributionRaw = summary['distribution'];
       final distribution = distributionRaw is List
           ? distributionRaw
@@ -95,7 +99,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
     BuildContext context,
     FThemeData theme,
     FColors colors,
-    double amount,
+    Decimal amount,
   ) {
     final t = Translations.of(context);
     return Container(
@@ -220,7 +224,9 @@ class ExpenseSummaryCard extends ConsumerWidget {
             final item = mapEntry.value;
             final categoryKey = item['category'] as String?;
             final category = TransactionCategory.fromKey(categoryKey);
-            final amount = (item['amount'] as num?)?.toDouble() ?? 0.0;
+            final amount = AmountFormatter.parseDecimal(
+              item['amount']?.toString(),
+            );
             final tags = (item['tags'] as List?)?.join(' · ') ?? '';
             final chartColor = theme.chartColorAt(index);
 

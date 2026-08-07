@@ -36,8 +36,11 @@ String formatBudgetCompactAmount(Decimal amount) {
   final absValue = amount.abs();
 
   if (absValue >= Decimal.fromInt(10000)) {
-    final value = absValue.toDouble() / 10000;
-    return '$sign${value.toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
+    // Divide in Decimal to avoid double-precision loss on large values.
+    final wanValue = (absValue / Decimal.fromInt(10000)).toDecimal();
+    // toStringAsFixed on Decimal is exact (no binary floating point), so the
+    // single-decimal rendering is stable for large amounts.
+    return '$sign${wanValue.toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
   }
 
   final parts = absValue.toStringAsFixed(2).split('.');

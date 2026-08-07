@@ -4,10 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:async';
 
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/core/constants/api_constants.dart';
+
+part 'authenticated_image.g.dart';
 
 /// Authenticated image loading component
 /// Automatically attaches JWT token when requesting images
@@ -66,8 +69,8 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
       }
 
       final dio = Dio();
-      final apiConstants = ref.read(apiConstantsProvider);
-      final url = '${apiConstants.baseUrl}/files/view/${widget.attachmentId}';
+      final url =
+          '${ref.read(apiBaseUrlProvider)}/files/view/${widget.attachmentId}';
 
       final response = await dio.get<List<int>>(
         url,
@@ -127,10 +130,8 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
 
 /// Authenticated network image provider
 /// Used to cache loaded image data
-final authenticatedImageProvider = FutureProvider.family<Uint8List, String>((
-  ref,
-  attachmentId,
-) async {
+@riverpod
+Future<Uint8List> authenticatedImage(Ref ref, String attachmentId) async {
   final storageService = ref.watch(secureStorageServiceProvider);
   final token = await storageService.getToken();
 
@@ -139,8 +140,7 @@ final authenticatedImageProvider = FutureProvider.family<Uint8List, String>((
   }
 
   final dio = Dio();
-  final apiConstants = ref.watch(apiConstantsProvider);
-  final url = '${apiConstants.baseUrl}/files/view/$attachmentId';
+  final url = '${ref.watch(apiBaseUrlProvider)}/files/view/$attachmentId';
 
   final response = await dio.get<List<int>>(
     url,
@@ -155,4 +155,4 @@ final authenticatedImageProvider = FutureProvider.family<Uint8List, String>((
   }
 
   return Uint8List.fromList(response.data!);
-});
+}

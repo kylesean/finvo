@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:decimal/decimal.dart';
 
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -30,7 +31,7 @@ Widget _buildInfoRow(
 /// from the transaction's currency. Returns true when the user accepts.
 Future<bool> showCurrencyMismatchConfirmDialog(
   BuildContext context, {
-  required double amount,
+  required Decimal amount,
   required String fromCurrency,
   required String toCurrency,
   required String accountName,

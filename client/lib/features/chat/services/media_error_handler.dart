@@ -690,20 +690,20 @@ class MediaErrorHandler {
   ///
   /// [operation] Operation to retry
   /// [maxRetries] Maximum retry attempts
-  /// [initialDelay] Initial delay time (milliseconds)
+  /// [initialDelay] Initial delay before the first retry
   /// [onRetryAttempt] Retry attempt callback (optional)
   ///
   /// Delegates to the shared [RetryPolicy] so retry mechanics live in one place.
   static Future<T> retryNetworkOperation<T>(
     Future<T> Function() operation, {
     int maxRetries = 3,
-    int initialDelay = 1000,
+    Duration initialDelay = const Duration(milliseconds: 1000),
     void Function(int attempt, Duration delay)? onRetryAttempt,
   }) {
     return RetryPolicy().retryWithBackoff<T>(
       operation: operation,
       maxAttempts: maxRetries,
-      initialDelay: Duration(milliseconds: initialDelay),
+      initialDelay: initialDelay,
       onRetry: onRetryAttempt,
     );
   }

@@ -24,10 +24,8 @@ class ConfigurationCheckInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final apiConstants = _ref.read(apiConstantsProvider);
-
     // Check if server is configured
-    if (!apiConstants.isConfigured) {
+    if (!_ref.read(apiConfiguredProvider)) {
       handler.reject(
         DioException(
           requestOptions: options,
@@ -41,7 +39,7 @@ class ConfigurationCheckInterceptor extends Interceptor {
     }
 
     // Update baseUrl dynamically in case it changed
-    final baseUrl = apiConstants.baseUrl;
+    final baseUrl = _ref.read(apiBaseUrlProvider);
     if (baseUrl.isNotEmpty && options.baseUrl != baseUrl) {
       options.baseUrl = baseUrl;
     }
@@ -61,13 +59,11 @@ Future<void> handleUnauthorized(Ref ref) async {
 /// [forSse] selects the SSE profile (relaxed streaming timeouts, no
 /// Error/Business interceptors, `text/event-stream` accept header).
 ///
-/// The provider watches [serverConfigServiceProvider] (not just
-/// [apiConstantsProvider], which never changes) so that saving a new server
-/// URL — which invalidates `serverConfigServiceProvider` — rebuilds the Dio
+/// The provider watches [serverConfigServiceProvider] (via
+/// [apiBaseUrlProvider]) so that saving a new server URL rebuilds the Dio
 /// instance. That rebuild triggers `ref.onDispose(dio.close)` and releases the
 /// stale idle connection pool.
 Dio _buildDio(Ref ref, {required bool forSse}) {
-  final apiConstants = ref.watch(apiConstantsProvider);
   ref.watch(serverConfigServiceProvider);
 
   final dio = Dio();
@@ -88,7 +84,7 @@ Dio _buildDio(Ref ref, {required bool forSse}) {
 
   // Use baseUrl or empty placeholder (will be set dynamically by
   // ConfigurationCheckInterceptor on each request).
-  final baseUrl = apiConstants.baseUrl;
+  final baseUrl = ref.watch(apiBaseUrlProvider);
   dio.options.baseUrl = baseUrl.isNotEmpty ? baseUrl : 'http://placeholder';
   dio.options.connectTimeout = connectTimeout;
   dio.options.receiveTimeout = receiveTimeout;

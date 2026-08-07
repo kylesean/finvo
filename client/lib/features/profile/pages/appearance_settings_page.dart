@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/app/theme/app_theme_palette.dart';
 import 'package:finvo/app/theme/theme_palette_provider.dart';
-import 'package:finvo/app/theme/theme_provider.dart';
 import 'package:finvo/app/theme/theme_notifier.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';

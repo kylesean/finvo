@@ -6,180 +6,111 @@ import 'package:finvo/core/constants/error_codes.dart';
 /// Uses the generated i18n [t] object to provide localized strings based on
 /// specific backend business error codes.
 class ErrorTranslator {
+  /// Lazy lookup map from backend error code to localized message. Built on
+  /// first access so the generated i18n object is already initialized, and
+  /// avoids the linear scan of a large switch on every translation.
+  static final Map<int, String> _translations = _buildTranslations();
+
+  static Map<int, String> _buildTranslations() {
+    final e = t.errorMapping;
+    return {
+      // Generic Errors
+      400: e.generic.badRequest,
+      ErrorCodes.authFailed: e.generic.authFailed,
+      ErrorCodes.permissionDenied: e.generic.permissionDenied,
+      ErrorCodes.notFound: e.generic.notFound,
+      ErrorCodes.serverError: e.generic.serverError,
+      ErrorCodes.systemInvalid: e.generic.systemError,
+      ErrorCodes.validationError: e.generic.validationFailed,
+
+      // Authentication (1000-1012)
+      ErrorCodes.authenticateFailed: e.auth.failed,
+      ErrorCodes.emailWrong: e.auth.emailWrong,
+      ErrorCodes.phoneNumberWrong: e.auth.phoneWrong,
+      ErrorCodes.phoneNumberRegistered: e.auth.phoneRegistered,
+      ErrorCodes.emailRegistered: e.auth.emailRegistered,
+      ErrorCodes.sendCodeFailed: e.auth.sendFailed,
+      ErrorCodes.codeExpired: e.auth.expired,
+      ErrorCodes.codeSendTooFrequently: e.auth.tooFrequent,
+      ErrorCodes.unsupportedCodeType: e.auth.unsupportedType,
+      ErrorCodes.userNotMatchPassword: e.auth.wrongPassword,
+      ErrorCodes.userNotExist: e.auth.userNotFound,
+      ErrorCodes.noPreferencesParams: e.auth.prefsMissing,
+      ErrorCodes.invalidClientTimezone: e.auth.invalidTimezone,
+
+      // Transaction (3000-3006)
+      ErrorCodes.transactionCommentNull: e.transaction.commentEmpty,
+      ErrorCodes.invalidParentCommentId: e.transaction.invalidParent,
+      ErrorCodes.storeCommentFailed: e.transaction.saveFailed,
+      ErrorCodes.deleteCommentFailed: e.transaction.deleteFailed,
+      ErrorCodes.transactionNotExists: e.transaction.notExists,
+      ErrorCodes.invalidAccountId: e.transaction.invalidAccountId,
+      ErrorCodes.exchangeRateUnavailable: e.transaction.exchangeRateUnavailable,
+
+      // Shared Space (3100-3113)
+      ErrorCodes.sharedSpaceNotExistsOrNoAccess: e.space.notFound,
+      ErrorCodes.noPermissionToInviteMembers: e.space.inviteDenied,
+      ErrorCodes.cannotInviteYourself: e.space.inviteSelf,
+      ErrorCodes.invitationSent: e.space.inviteSent,
+      ErrorCodes.alreadyMemberOrHasBeenInvited: e.space.alreadyMember,
+      ErrorCodes.invalidAction: e.space.invalidAction,
+      ErrorCodes.invitationNotExists: e.space.invitationNotFound,
+      ErrorCodes.onlyOwnerCanDo: e.space.onlyOwner,
+      ErrorCodes.ownerCannotBeRemoved: e.space.ownerNotRemovable,
+      ErrorCodes.memberNotExist: e.space.memberNotFound,
+      ErrorCodes.notMemberInThisSpace: e.space.notMember,
+      ErrorCodes.ownerCannotLeaveDirectly: e.space.ownerCantLeave,
+      ErrorCodes.invalidInvitationCode: e.space.invalidCode,
+      ErrorCodes.invitationCodeExpiredOrLimited: e.space.codeExpired,
+      ErrorCodes.transactionAlreadyInSpace: e.space.transactionAlreadyInSpace,
+
+      // Recurring (3200-3201)
+      ErrorCodes.invalidRecurrenceRule: e.recurring.invalidRule,
+      ErrorCodes.recurrenceRuleNotFound: e.recurring.ruleNotFound,
+
+      // File Upload (4001-4022)
+      ErrorCodes.noFileUploaded: e.upload.noFile,
+      ErrorCodes.invalidFileUploaded: e.upload.invalidFile,
+      ErrorCodes.fileTooLarge: e.upload.tooLarge,
+      ErrorCodes.invalidFileType: e.upload.unsupportedType,
+      ErrorCodes.invalidMimeType: e.upload.invalidMimeType,
+      ErrorCodes.invalidImageContent: e.upload.invalidImageContent,
+      ErrorCodes.imageTooWide: e.upload.imageTooWide,
+      ErrorCodes.imageTooHigh: e.upload.imageTooHigh,
+      ErrorCodes.tooManyFiles: e.upload.tooManyFiles,
+      ErrorCodes.totalSizeTooLarge: e.upload.totalSizeTooLarge,
+      ErrorCodes.fileReadError: e.upload.readError,
+      ErrorCodes.filesystemError: e.upload.filesystemError,
+      ErrorCodes.uploadVerificationFailed: e.upload.verificationFailed,
+      ErrorCodes.uploadAllFailed: e.upload.allFailed,
+      ErrorCodes.invalidImageUrls: e.upload.invalidImageUrls,
+      ErrorCodes.fileNotFound: e.upload.fileNotFound,
+      ErrorCodes.imageCompressionFailed: e.upload.imageCompressionFailed,
+      ErrorCodes.fileAccessError: e.upload.accessError,
+      ErrorCodes.fileDeleteError: e.upload.deleteError,
+      ErrorCodes.noFiles: e.upload.noFiles,
+      ErrorCodes.fileEmpty: e.upload.fileEmpty,
+      ErrorCodes.invalidFilename: e.upload.invalidFilename,
+
+      // Storage config (4500-4502)
+      ErrorCodes.invalidProviderType: e.storage.invalidProviderType,
+      ErrorCodes.configNotFound: e.storage.configNotFound,
+      ErrorCodes.configInUse: e.storage.configInUse,
+
+      // AI/LLM (9000-9004)
+      ErrorCodes.aiContextLimitExceeded: e.ai.contextLimit,
+      ErrorCodes.conversationIdInvalid: e.ai.conversationIdInvalid,
+      ErrorCodes.conversationIdNotOwner: e.ai.conversationIdNotOwner,
+      ErrorCodes.tokensLimited: e.ai.tokenLimit,
+      ErrorCodes.noUserMessage: e.ai.emptyMessage,
+    };
+  }
+
   /// Translates a numeric error code from the backend to a localized message.
   ///
   /// [code] The error code returned by the API.
   /// [defaultMessage] The fallback message (e.g., from the backend) if the code is not recognized.
   static String translate(int code, String defaultMessage) {
-    final e = t.errorMapping;
-
-    switch (code) {
-      // Generic Errors
-      case 400:
-        return e.generic.badRequest;
-      case ErrorCodes.authFailed:
-        return e.generic.authFailed;
-      case ErrorCodes.permissionDenied:
-        return e.generic.permissionDenied;
-      case ErrorCodes.notFound:
-        return e.generic.notFound;
-      case ErrorCodes.serverError:
-        return e.generic.serverError;
-      case ErrorCodes.systemInvalid:
-        return e.generic.systemError;
-      case ErrorCodes.validationError:
-        return e.generic.validationFailed;
-
-      // Authentication (1000-1012)
-      case ErrorCodes.authenticateFailed:
-        return e.auth.failed;
-      case ErrorCodes.emailWrong:
-        return e.auth.emailWrong;
-      case ErrorCodes.phoneNumberWrong:
-        return e.auth.phoneWrong;
-      case ErrorCodes.phoneNumberRegistered:
-        return e.auth.phoneRegistered;
-      case ErrorCodes.emailRegistered:
-        return e.auth.emailRegistered;
-      case ErrorCodes.sendCodeFailed:
-        return e.auth.sendFailed;
-      case ErrorCodes.codeExpired:
-        return e.auth.expired;
-      case ErrorCodes.codeSendTooFrequently:
-        return e.auth.tooFrequent;
-      case ErrorCodes.unsupportedCodeType:
-        return e.auth.unsupportedType;
-      case ErrorCodes.userNotMatchPassword:
-        return e.auth.wrongPassword;
-      case ErrorCodes.userNotExist:
-        return e.auth.userNotFound;
-      case ErrorCodes.noPreferencesParams:
-        return e.auth.prefsMissing;
-      case ErrorCodes.invalidClientTimezone:
-        return e.auth.invalidTimezone;
-
-      // Transaction (3000-3006)
-      case ErrorCodes.transactionCommentNull:
-        return e.transaction.commentEmpty;
-      case ErrorCodes.invalidParentCommentId:
-        return e.transaction.invalidParent;
-      case ErrorCodes.storeCommentFailed:
-        return e.transaction.saveFailed;
-      case ErrorCodes.deleteCommentFailed:
-        return e.transaction.deleteFailed;
-      case ErrorCodes.transactionNotExists:
-        return e.transaction.notExists;
-      case ErrorCodes.invalidAccountId:
-        return e.transaction.invalidAccountId;
-      case ErrorCodes.exchangeRateUnavailable:
-        return e.transaction.exchangeRateUnavailable;
-
-      // Shared Space (3100-3113)
-      case ErrorCodes.sharedSpaceNotExistsOrNoAccess:
-        return e.space.notFound;
-      case ErrorCodes.noPermissionToInviteMembers:
-        return e.space.inviteDenied;
-      case ErrorCodes.cannotInviteYourself:
-        return e.space.inviteSelf;
-      case ErrorCodes.invitationSent:
-        return e.space.inviteSent;
-      case ErrorCodes.alreadyMemberOrHasBeenInvited:
-        return e.space.alreadyMember;
-      case ErrorCodes.invalidAction:
-        return e.space.invalidAction;
-      case ErrorCodes.invitationNotExists:
-        return e.space.invitationNotFound;
-      case ErrorCodes.onlyOwnerCanDo:
-        return e.space.onlyOwner;
-      case ErrorCodes.ownerCannotBeRemoved:
-        return e.space.ownerNotRemovable;
-      case ErrorCodes.memberNotExist:
-        return e.space.memberNotFound;
-      case ErrorCodes.notMemberInThisSpace:
-        return e.space.notMember;
-      case ErrorCodes.ownerCannotLeaveDirectly:
-        return e.space.ownerCantLeave;
-      case ErrorCodes.invalidInvitationCode:
-        return e.space.invalidCode;
-      case ErrorCodes.invitationCodeExpiredOrLimited:
-        return e.space.codeExpired;
-      case ErrorCodes.transactionAlreadyInSpace:
-        return e.space.transactionAlreadyInSpace;
-
-      // Recurring (3200-3201)
-      case ErrorCodes.invalidRecurrenceRule:
-        return e.recurring.invalidRule;
-      case ErrorCodes.recurrenceRuleNotFound:
-        return e.recurring.ruleNotFound;
-
-      // File Upload (4001-4022)
-      case ErrorCodes.noFileUploaded:
-        return e.upload.noFile;
-      case ErrorCodes.invalidFileUploaded:
-        return e.upload.invalidFile;
-      case ErrorCodes.fileTooLarge:
-        return e.upload.tooLarge;
-      case ErrorCodes.invalidFileType:
-        return e.upload.unsupportedType;
-      case ErrorCodes.invalidMimeType:
-        return e.upload.invalidMimeType;
-      case ErrorCodes.invalidImageContent:
-        return e.upload.invalidImageContent;
-      case ErrorCodes.imageTooWide:
-        return e.upload.imageTooWide;
-      case ErrorCodes.imageTooHigh:
-        return e.upload.imageTooHigh;
-      case ErrorCodes.tooManyFiles:
-        return e.upload.tooManyFiles;
-      case ErrorCodes.totalSizeTooLarge:
-        return e.upload.totalSizeTooLarge;
-      case ErrorCodes.fileReadError:
-        return e.upload.readError;
-      case ErrorCodes.filesystemError:
-        return e.upload.filesystemError;
-      case ErrorCodes.uploadVerificationFailed:
-        return e.upload.verificationFailed;
-      case ErrorCodes.uploadAllFailed:
-        return e.upload.allFailed;
-      case ErrorCodes.invalidImageUrls:
-        return e.upload.invalidImageUrls;
-      case ErrorCodes.fileNotFound:
-        return e.upload.fileNotFound;
-      case ErrorCodes.imageCompressionFailed:
-        return e.upload.imageCompressionFailed;
-      case ErrorCodes.fileAccessError:
-        return e.upload.accessError;
-      case ErrorCodes.fileDeleteError:
-        return e.upload.deleteError;
-      case ErrorCodes.noFiles:
-        return e.upload.noFiles;
-      case ErrorCodes.fileEmpty:
-        return e.upload.fileEmpty;
-      case ErrorCodes.invalidFilename:
-        return e.upload.invalidFilename;
-
-      // Storage config (4500-4502)
-      case ErrorCodes.invalidProviderType:
-        return e.storage.invalidProviderType;
-      case ErrorCodes.configNotFound:
-        return e.storage.configNotFound;
-      case ErrorCodes.configInUse:
-        return e.storage.configInUse;
-
-      // AI/LLM (9000-9004)
-      case ErrorCodes.aiContextLimitExceeded:
-        return e.ai.contextLimit;
-      case ErrorCodes.conversationIdInvalid:
-        return e.ai.conversationIdInvalid;
-      case ErrorCodes.conversationIdNotOwner:
-        return e.ai.conversationIdNotOwner;
-      case ErrorCodes.tokensLimited:
-        return e.ai.tokenLimit;
-      case ErrorCodes.noUserMessage:
-        return e.ai.emptyMessage;
-
-      default:
-        return defaultMessage;
-    }
+    return _translations[code] ?? defaultMessage;
   }
 }

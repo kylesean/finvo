@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/core/services/server_config_service.dart'
     show sharedPreferencesProvider;
+
+part 'theme_notifier.g.dart';
 
 /// App theme mode enum
 enum AppThemeMode { system, light, dark }
@@ -12,7 +14,8 @@ enum AppThemeMode { system, light, dark }
 ///
 /// Converts [AppThemeMode] to Flutter's [ThemeMode] and persists the user's
 /// choice to SharedPreferences so it survives app restarts.
-class ThemeNotifier extends Notifier<ThemeMode> {
+@Riverpod(keepAlive: true)
+class ThemeNotifier extends _$ThemeNotifier {
   static const _storageKey = 'theme_mode';
 
   @override

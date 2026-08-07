@@ -38,6 +38,12 @@ class RecurringTransactionState {
 /// The recurring transaction list state manager.
 @riverpod
 class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
+  /// Monotonic request generation. Incremented on every [loadList] so that a
+  /// slower in-flight response is discarded when a newer load (e.g. a quick
+  /// filter switch) has already replaced the list, preventing a stale response
+  /// from overwriting the newer data.
+  int _generation = 0;
+
   @override
   RecurringTransactionState build() {
     return const RecurringTransactionState();
@@ -45,10 +51,16 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
 
   /// Load the list of recurring transactions.
   Future<void> loadList({RecurringTransactionType? type}) async {
+    // Bump the generation: any in-flight load starts a new epoch.
+    final generation = ++_generation;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final service = ref.read(recurringTransactionServiceProvider);
       final items = await service.getList(type: type);
+
+      // Discard stale responses (provider disposed or superseded by a newer load).
+      if (!ref.mounted || generation != _generation) return;
+
       state = state.copyWith(
         items: items,
         isLoading: false,
@@ -56,6 +68,7 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
         clearFilterType: type == null,
       );
     } catch (e) {
+      if (!ref.mounted || generation != _generation) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }

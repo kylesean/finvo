@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/features/chat/models/media_file.dart';
 import 'package:finvo/features/chat/services/media_thumbnail_service.dart';
+import 'package:finvo/shared/utils/format_file_size.dart';
 
 final _logger = Logger('MediaMemoryManager');
 
@@ -247,30 +248,6 @@ class MediaMemoryManager {
     }
   }
 
-  /// Get memory usage statistics (compatibility method)
-  ///
-  /// Returns: Map containing memory usage information
-  Map<String, dynamic> getMemoryUsage() {
-    return {
-      'trackedItemsCount': _activeMediaFiles.length,
-      'currentMemoryUsage': _currentMemoryUsage,
-      'currentMemoryUsageMB': (_currentMemoryUsage / (1024 * 1024))
-          .toStringAsFixed(2),
-      'memoryThresholdMB': (memoryThresholdBytes / (1024 * 1024))
-          .toStringAsFixed(2),
-      'memoryUsagePercentage':
-          ((_currentMemoryUsage / memoryThresholdBytes) * 100).toStringAsFixed(
-            1,
-          ),
-      'lastCleanupTime': _lastCleanupTime?.toIso8601String(),
-    };
-  }
-
-  /// Clear all registered media files (compatibility method)
-  void clearAll() {
-    clearAllMediaFiles();
-  }
-
   /// Get memory usage statistics
   ///
   /// Returns: Map containing memory usage information
@@ -404,23 +381,5 @@ class MediaMemoryManager {
   ///
   /// [bytes] Number of bytes
   /// Returns: Formatted string, e.g. "1.5 MB"
-  String _formatFileSize(int bytes) {
-    if (bytes < 0) return '0 B';
-
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    int unitIndex = 0;
-    double size = bytes.toDouble();
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-
-    // Display as integer for bytes; otherwise display with one decimal place
-    if (unitIndex == 0) {
-      return '${size.toInt()} ${units[unitIndex]}';
-    } else {
-      return '${size.toStringAsFixed(1)} ${units[unitIndex]}';
-    }
-  }
+  String _formatFileSize(int bytes) => formatFileSize(bytes);
 }

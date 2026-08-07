@@ -41,6 +41,7 @@ class GenUiLifecycleManager {
   final void Function(ToolCallInfo)? _onToolCallEnd;
 
   GenUiService? _genUiService;
+  bool _isDisposed = false;
 
   // Surface lifecycle tracking (surfaceId -> SurfaceInfo)
   final Map<String, GenUiSurfaceInfo> _surfaceRegistry = {};
@@ -151,8 +152,20 @@ class GenUiLifecycleManager {
     }
   }
 
-  void dispose() {
-    unawaited(_genUiService?.dispose());
+  /// Release the GenUI service.
+  ///
+  /// Awaiting the underlying async cleanup guarantees the SSE controller and
+  /// conversation are fully torn down before a keepAlive rebuild re-creates a
+  /// new manager, so two live services can never coexist in the rebuild window.
+  /// Idempotent: a second call no-ops.
+  Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    try {
+      await _genUiService?.dispose();
+    } finally {
+      _genUiService = null;
+    }
     _clearAllSurfaces();
   }
 
@@ -208,14 +221,6 @@ class GenUiLifecycleManager {
         _totalReactiveUpdates++;
       }
     }
-  }
-
-  /// Handle DataModelUpdate - mark surface as updated
-  void handleDataModelUpdate(String surfaceId, String path) {
-    updateSurfaceStatus(surfaceId, SurfaceStatus.updated);
-    _logger.info(
-      'GenUiLifecycleManager: DataModelUpdate for $surfaceId at path $path',
-    );
   }
 
   /// Handle DeleteSurface event

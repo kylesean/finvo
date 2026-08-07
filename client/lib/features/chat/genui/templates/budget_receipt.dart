@@ -2,20 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:decimal/decimal.dart';
 
 /// Budget creation success receipt card
 ///
 /// Displays newly created budget information.
-/// Reference design:
-/// ┌─────────────────────────────────────────────────┐
-/// │ ✓ Budget Created                       14:30   │  ← Top: success status bar
-/// ├─────────────────────────────────────────────────┤
-/// │                    📊                           │
-/// │               ¥10,000                           │  ← Middle: budget amount
-/// │            Dec 2024 Total Budget                │
-/// ├─────────────────────────────────────────────────┤
-/// │ Period: Dec 1 - Dec 31             Rollover    │  ← Bottom: details
-/// └─────────────────────────────────────────────────┘
 class BudgetReceipt extends StatelessWidget {
   final Map<String, dynamic> data;
 
@@ -39,10 +31,7 @@ class BudgetReceipt extends StatelessWidget {
   Widget _buildSuccessCard(FThemeData theme, FColors colors) {
     final name =
         data['name']?.toString() ?? t.chat.genui.budgetReceipt.newBudget;
-    final amountRaw = data['amount'];
-    final amount = amountRaw is num
-        ? amountRaw.toDouble()
-        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final amount = AmountFormatter.parseDecimal(data['amount']?.toString());
     final scope = data['scope']?.toString() ?? 'TOTAL';
     final categoryKey = data['category_key']?.toString();
     final periodStart = data['period_start']?.toString();
@@ -129,7 +118,7 @@ class BudgetReceipt extends StatelessWidget {
     FThemeData theme,
     FColors colors,
     String name,
-    double amount,
+    Decimal amount,
     String scope,
     String? categoryKey,
   ) {
@@ -278,16 +267,18 @@ class BudgetReceipt extends StatelessWidget {
   }
 
   /// Format amount
-  String _formatAmount(double amount) {
-    if (amount >= 10000) {
-      final wan = amount / 10000;
-      if (wan == wan.truncate()) {
-        return '${wan.truncate()}${t.budget.tenThousandSuffix}';
+  String _formatAmount(Decimal amount) {
+    final tenThousand = Decimal.fromInt(10000);
+    if (amount >= tenThousand) {
+      final wan = (amount / tenThousand).toDouble();
+      if (wan == wan.truncateToDouble()) {
+        return '${wan.truncateToDouble().toInt()}${t.budget.tenThousandSuffix}';
       }
       return '${wan.toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
     }
-    if (amount == amount.truncate()) {
-      return amount.truncate().toString();
+    final whole = amount.toDouble();
+    if (whole == whole.truncateToDouble()) {
+      return whole.truncateToDouble().toInt().toString();
     }
     return amount.toStringAsFixed(2);
   }

@@ -98,7 +98,7 @@ final class NotificationNotifierProvider
 }
 
 String _$notificationNotifierHash() =>
-    r'a30d899434bd3427056dfe975fa76d143faa1896';
+    r'545c3ca518d98d13a8572c14db8d9f0a0fb377c5';
 
 /// Notification State Notifier Provider
 
@@ -194,4 +194,4 @@ final class NotificationWsProvider
   }
 }
 
-String _$notificationWsHash() => r'6ed08336330654b9fd415efe088d13cde3f38f42';
+String _$notificationWsHash() => r'e625145cc9b8d990bc1342279f9dd1a91899ed6f';

@@ -23,15 +23,18 @@
 library;
 
 import 'package:genui/genui.dart' as genui;
+import 'package:decimal/decimal.dart';
 
 import 'package:finvo/features/chat/genui/events/event_names.dart';
 import 'package:finvo/features/chat/genui/events/space_events.dart';
 
-/// Safely convert wire amount field (num or String) to double.
-double _amountToDouble(Object? raw) {
-  if (raw is num) return raw.toDouble();
-  if (raw is String) return double.tryParse(raw) ?? 0.0;
-  return 0.0;
+/// Safely convert wire amount field (num or String) to Decimal.
+///
+/// Backend money fields are serialized as strings (or sometimes numbers); parse
+/// them back into [Decimal] so downstream arithmetic preserves full precision.
+Decimal _amountToDecimal(Object? raw) {
+  if (raw == null) return Decimal.zero;
+  return Decimal.tryParse(raw.toString()) ?? Decimal.zero;
 }
 
 /// GenUI interaction event base class.
@@ -93,7 +96,7 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
   final String targetAccountId;
   final String sourceAccountName;
   final String targetAccountName;
-  final double amount;
+  final Decimal amount;
   final String currency;
   final String? memo;
   @override
@@ -118,7 +121,7 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
           context['source_account_name'] as String? ?? 'Source Account',
       targetAccountName:
           context['target_account_name'] as String? ?? 'Target Account',
-      amount: _amountToDouble(context['amount']),
+      amount: _amountToDecimal(context['amount']),
       currency: context['currency'] as String? ?? 'CNY',
       memo: context['memo'] as String?,
       surfaceId: context['surface_id'] as String?,
@@ -135,7 +138,8 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
     'target_account_id': targetAccountId,
     'source_account_name': sourceAccountName,
     'target_account_name': targetAccountName,
-    'amount': amount,
+    // Decimal is not JSON-serializable; serialize to string at the wire boundary.
+    'amount': amount.toString(),
     'currency': currency,
     'memo': memo,
   };

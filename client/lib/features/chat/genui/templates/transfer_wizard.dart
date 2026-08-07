@@ -10,10 +10,11 @@ import 'package:finvo/features/chat/services/genui_cache_service.dart';
 import 'package:finvo/features/chat/genui/events/interaction_events.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:decimal/decimal.dart';
 
 /// Transfer wizard data model (Data Layer)
 class TransferWizardData {
-  final double amount;
+  final Decimal amount;
   final String currency;
   final List<Map<String, dynamic>> sourceAccounts;
   final List<Map<String, dynamic>> targetAccounts;
@@ -46,10 +47,7 @@ class TransferWizardData {
           .toList();
     }
 
-    final amountRaw = json['amount'];
-    final amount = amountRaw is num
-        ? amountRaw.toDouble()
-        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final amount = AmountFormatter.parseDecimal(json['amount']?.toString());
 
     return TransferWizardData(
       amount: amount,
@@ -122,7 +120,9 @@ class _TransferWizardState extends State<TransferWizard> {
       _sourceId = _model.preselectedSourceId;
       _targetId = _model.preselectedTargetId;
       _amountController = TextEditingController(
-        text: _model.amount > 0 ? _model.amount.toStringAsFixed(2) : '',
+        text: _model.amount > Decimal.zero
+            ? _model.amount.toStringAsFixed(2)
+            : '',
       );
       _isConfirmed = true;
     } else {
@@ -130,7 +130,9 @@ class _TransferWizardState extends State<TransferWizard> {
       _sourceId = _model.preselectedSourceId;
       _targetId = _model.preselectedTargetId;
       _amountController = TextEditingController(
-        text: _model.amount > 0 ? _model.amount.toStringAsFixed(2) : '',
+        text: _model.amount > Decimal.zero
+            ? _model.amount.toStringAsFixed(2)
+            : '',
       );
 
       if (_model.isHistorical) {
@@ -525,7 +527,8 @@ class _TransferWizardState extends State<TransferWizard> {
 
   void _onConfirm() {
     setState(() => _isConfirmed = true);
-    final finalAmount = double.tryParse(_amountController.text) ?? 0;
+    final finalAmount =
+        Decimal.tryParse(_amountController.text) ?? Decimal.zero;
 
     // Save user selection to cache to prevent state loss on widget rebuild
     GenUiCacheService().put(

@@ -67,6 +67,5 @@ final aiServiceProvider = Provider<AIService>((ref) {
   final storageService = ref.watch(secureStorageServiceProvider);
   // Use the main Dio instance so error mapping / interceptors apply.
   final dio = ref.watch(dioProvider);
-  final apiConstants = ref.watch(apiConstantsProvider);
-  return AIService(storageService, dio, baseUrl: apiConstants.baseUrl);
+  return AIService(storageService, dio, baseUrl: ref.watch(apiBaseUrlProvider));
 });

@@ -5,9 +5,10 @@ import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/notification/repositories/notification_repository.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/features/notification/utils/notification_list_mutations.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 
-part 'notification_provider.g.dart';
+part 'shared_space_notification_provider.g.dart';
 
 final _logger = Logger('SharedSpaceNotification');
 
@@ -123,43 +124,37 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
   /// Mark notification as read
   Future<void> markAsRead(String notificationId) async {
     final success = await _repository.markAsRead(notificationId);
-    if (success) {
-      // Only decrement the badge when this item actually transitioned from
-      // unread to read; repeated calls must not undercount the badge.
-      final target = state.notifications
-          .where((n) => n.id == notificationId)
-          .firstOrNull;
-      final wasUnread = target != null && !target.isRead;
+    if (!success) return;
 
-      final updated = state.notifications.map((n) {
-        if (n.id == notificationId && !n.isRead) {
-          return n.copyWith(isRead: true, readAt: DateTime.now());
-        }
-        return n;
-      }).toList();
-
-      final newUnreadCount = wasUnread && state.unreadCount > 0
-          ? state.unreadCount - 1
-          : state.unreadCount;
-      state = state.copyWith(
-        notifications: updated,
-        unreadCount: newUnreadCount,
-      );
-    }
+    final result = NotificationListMutations.markAsRead(
+      items: state.notifications,
+      unreadCount: state.unreadCount,
+      id: notificationId,
+      idOf: (n) => n.id,
+      isReadOf: (n) => n.isRead,
+      withReadAt: (n) =>
+          n.isRead ? n : n.copyWith(isRead: true, readAt: DateTime.now()),
+    );
+    state = state.copyWith(
+      notifications: result.items,
+      unreadCount: result.unreadCount,
+    );
   }
 
   /// Mark all as read
   Future<void> markAllAsRead() async {
     final success = await _repository.markAllAsRead();
-    if (success) {
-      final updated = state.notifications
-          .map(
-            (n) =>
-                n.isRead ? n : n.copyWith(isRead: true, readAt: DateTime.now()),
-          )
-          .toList();
-      state = state.copyWith(notifications: updated, unreadCount: 0);
-    }
+    if (!success) return;
+
+    final result = NotificationListMutations.markAllAsRead(
+      items: state.notifications,
+      withRead: (n) =>
+          n.isRead ? n : n.copyWith(isRead: true, readAt: DateTime.now()),
+    );
+    state = state.copyWith(
+      notifications: result.items,
+      unreadCount: result.unreadCount,
+    );
   }
 
   /// Delete notification
@@ -170,18 +165,19 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
     if (item == null) return;
 
     final success = await _repository.deleteNotification(notificationId);
-    if (success) {
-      final updated = state.notifications
-          .where((n) => n.id != notificationId)
-          .toList();
-      final newUnreadCount = !item.isRead && state.unreadCount > 0
-          ? state.unreadCount - 1
-          : state.unreadCount;
-      state = state.copyWith(
-        notifications: updated,
-        unreadCount: newUnreadCount,
-      );
-    }
+    if (!success) return;
+
+    final result = NotificationListMutations.delete(
+      items: state.notifications,
+      unreadCount: state.unreadCount,
+      id: notificationId,
+      idOf: (n) => n.id,
+      isReadOf: (n) => n.isRead,
+    );
+    state = state.copyWith(
+      notifications: result.items,
+      unreadCount: result.unreadCount,
+    );
   }
 
   /// Respond to a space invite (space-specific action)

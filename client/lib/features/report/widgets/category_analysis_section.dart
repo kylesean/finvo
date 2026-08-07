@@ -6,7 +6,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/core/constants/category_constants.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
@@ -165,8 +164,9 @@ class _CategoryAnalysisSectionState
                   final currencyCode = ref
                       .read(financialSettingsProvider)
                       .primaryCurrency;
-                  final currencySymbol =
-                      Currency.fromCode(currencyCode)?.symbol ?? currencyCode;
+                  final currencySymbol = AmountFormatter.getCurrencySymbol(
+                    currencyCode,
+                  );
                   return BarTooltipItem(
                     '${category.displayText}\n$currencySymbol${_formatAmount(item.amount, currencyCode)}',
                     theme.typography.body.xs.copyWith(
@@ -294,7 +294,7 @@ class _CategoryAnalysisSectionState
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${Currency.fromCode(ref.read(financialSettingsProvider).primaryCurrency)?.symbol ?? ""}${_formatAmount(total.toStringAsFixed(0), ref.read(financialSettingsProvider).primaryCurrency)}',
+                          '${AmountFormatter.getCurrencySymbol(ref.read(financialSettingsProvider).primaryCurrency)}${_formatAmount(total.toStringAsFixed(0), ref.read(financialSettingsProvider).primaryCurrency)}',
                           style: AppTextStyles.listTitle(
                             theme,
                           ).copyWith(letterSpacing: -0.5),
@@ -468,9 +468,7 @@ class _CategoryAnalysisSectionState
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       AmountText(
-                        amount: AmountFormatter.parseDecimal(
-                          item.amount,
-                        ).toDouble(),
+                        amount: AmountFormatter.parseDecimal(item.amount),
                         type: TransactionType.expense,
                         semantic: AmountSemantic.status,
                         currency: ref

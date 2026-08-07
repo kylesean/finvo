@@ -86,6 +86,16 @@ class ConversationService {
   }
 
   ConversationInfo _parseConversationInfo(Map<String, dynamic> session) {
+    final sessionId = session['session_id'];
+    if (sessionId is! String || sessionId.isEmpty) {
+      // A conversation without an id is unusable downstream (delete, detail
+      // fetch, resume all key off it). Fail loudly instead of producing a
+      // broken entry that would surface as a confusing runtime error later.
+      throw DataParsingException(
+        'Invalid session_id in conversation info: ${session['session_id']}',
+      );
+    }
+
     DateTime createdAt = DateTime.now();
     DateTime updatedAt = DateTime.now();
 
@@ -108,7 +118,7 @@ class ConversationService {
     }
 
     return ConversationInfo(
-      id: session['session_id'] as String,
+      id: sessionId,
       title: session['name'] as String? ?? 'New Chat',
       createdAt: createdAt,
       updatedAt: updatedAt,

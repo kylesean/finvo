@@ -6,8 +6,8 @@ import 'package:forui/forui.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -74,8 +74,7 @@ class _FinancialAccountInputSheetState
     final primaryCurrency = ref
         .watch(financialSettingsProvider)
         .primaryCurrency;
-    final currencySymbol =
-        Currency.fromCode(primaryCurrency)?.symbol ?? primaryCurrency;
+    final currencySymbol = AmountFormatter.getCurrencySymbol(primaryCurrency);
 
     return Material(
       color: Colors.transparent,

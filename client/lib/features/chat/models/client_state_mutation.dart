@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:decimal/decimal.dart';
 
 part 'client_state_mutation.freezed.dart';
 
@@ -29,7 +30,7 @@ abstract class ClientStateMutation with _$ClientStateMutation {
     required String targetAccountId,
     required String sourceAccountName,
     required String targetAccountName,
-    required double amount,
+    required Decimal amount,
     String currency = 'CNY',
   }) {
     return ClientStateMutation(

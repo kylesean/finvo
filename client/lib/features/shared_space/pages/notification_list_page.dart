@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/features/shared_space/providers/notification_provider.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_notification_provider.dart';
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'package:finvo/features/shared_space/widgets/notification_card.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';

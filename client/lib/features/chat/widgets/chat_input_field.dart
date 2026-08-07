@@ -208,6 +208,17 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
   }
 
   @override
+  void didUpdateWidget(ChatInputField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The provider's send-message callback is captured at first access. On a
+    // State reuse the parent may supply a new callback, so propagate it to the
+    // notifier to avoid submitting through a stale closure.
+    if (!identical(oldWidget.onSendMessage, widget.onSendMessage)) {
+      ref.read(provider.notifier).updateOnSendMessage(widget.onSendMessage);
+    }
+  }
+
+  @override
   void dispose() {
     _breathingController.dispose();
     _textController.dispose();

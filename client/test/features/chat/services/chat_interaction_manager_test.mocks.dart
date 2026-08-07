@@ -323,10 +323,13 @@ class MockGenUiLifecycleManager extends _i1.Mock
       );
 
   @override
-  void dispose() => super.noSuchMethod(
-    Invocation.method(#dispose, []),
-    returnValueForMissingStub: null,
-  );
+  _i14.Future<void> dispose() =>
+      (super.noSuchMethod(
+            Invocation.method(#dispose, []),
+            returnValue: _i14.Future<void>.value(),
+            returnValueForMissingStub: _i14.Future<void>.value(),
+          )
+          as _i14.Future<void>);
 
   @override
   void clearSession() => super.noSuchMethod(
@@ -351,13 +354,6 @@ class MockGenUiLifecycleManager extends _i1.Mock
   void updateSurfaceStatus(String? surfaceId, _i16.SurfaceStatus? status) =>
       super.noSuchMethod(
         Invocation.method(#updateSurfaceStatus, [surfaceId, status]),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void handleDataModelUpdate(String? surfaceId, String? path) =>
-      super.noSuchMethod(
-        Invocation.method(#handleDataModelUpdate, [surfaceId, path]),
         returnValueForMissingStub: null,
       );
 
@@ -614,10 +610,13 @@ class MockStreamingController extends _i1.Mock
           as _i14.Future<void>);
 
   @override
-  void dispose() => super.noSuchMethod(
-    Invocation.method(#dispose, []),
-    returnValueForMissingStub: null,
-  );
+  _i14.Future<void> dispose() =>
+      (super.noSuchMethod(
+            Invocation.method(#dispose, []),
+            returnValue: _i14.Future<void>.value(),
+            returnValueForMissingStub: _i14.Future<void>.value(),
+          )
+          as _i14.Future<void>);
 }
 
 /// A class which mocks [GenUiService].

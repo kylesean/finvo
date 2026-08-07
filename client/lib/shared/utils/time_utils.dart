@@ -52,3 +52,12 @@ DateFormat appDateTimeFormat() {
       return DateFormat('MMM d, yyyy HH:mm:ss', 'en');
   }
 }
+
+/// Compact date-only range label (e.g. `2026.08.01 - 2026.08.08`).
+///
+/// Centralizes the `yyyy.MM.dd` range formatting that was previously
+/// duplicated between the report screen and the date-range picker.
+String formatDateRange(DateTime start, DateTime end) {
+  final format = DateFormat('yyyy.MM.dd');
+  return '${format.format(start)} - ${format.format(end)}';
+}

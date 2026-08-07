@@ -11,7 +11,7 @@ import 'package:finvo/app/assets/app_vectors.dart';
 import 'package:finvo/app/router/app_router.dart';
 
 import 'package:finvo/app/theme/app_font_config.dart';
-import 'package:finvo/app/theme/theme_provider.dart';
+import 'package:finvo/app/theme/theme_notifier.dart';
 import 'package:finvo/app/theme/app_theme_pair_provider.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
@@ -28,8 +28,12 @@ class MyApp extends ConsumerWidget {
     final appThemeMode = ref.watch(themeProvider);
     final themes = ref.watch(appThemePairProvider);
 
-    // Hold the WebSocket notification service (keepAlive) so the long-lived
-    // connection is not torn down after this frame completes.
+    // Keep the real-time notification WebSocket alive for the whole app
+    // lifetime. The provider is `keepAlive`; reading it here instantiates the
+    // service (and its connect()-side-effect) once at startup and keeps it from
+    // being disposed as soon as this frame completes. The connection itself is
+    // lifecycle-driven by the auth token (see notificationWs), so this watch is
+    // intentionally a side-effect bearer rather than a pure data read.
     ref.watch(notificationWsProvider);
 
     // Keep the cross-feature transaction event subscription alive so the

@@ -7,9 +7,9 @@ import 'package:finvo/features/finance/providers/account_view_currency_provider.
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
@@ -98,9 +98,8 @@ class FinancialAccountCard extends ConsumerWidget {
                           ? const Text('****')
                           : AmountText(
                               amount:
-                                  (account.currentBalance ??
-                                          account.initialBalance)
-                                      .toDouble(),
+                                  account.currentBalance ??
+                                  account.initialBalance,
                               type: isLiabilityAccount
                                   ? TransactionType.expense
                                   : TransactionType.income,
@@ -136,8 +135,9 @@ class FinancialAccountCard extends ConsumerWidget {
                             if (converted == null) {
                               return const SizedBox.shrink();
                             }
-                            final symbol =
-                                Currency.fromCode(viewCurrency)?.symbol ?? '';
+                            final symbol = AmountFormatter.getCurrencySymbol(
+                              viewCurrency,
+                            );
                             return Padding(
                               padding: const EdgeInsets.only(top: 2),
                               child: Text(

@@ -10,6 +10,7 @@ import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/home/providers/comment_providers.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
 import 'package:finvo/features/notification/repositories/notification_repository.dart';
+import 'package:finvo/features/notification/utils/notification_list_mutations.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 
 part 'notification_provider.freezed.dart';
@@ -107,37 +108,36 @@ class NotificationNotifier extends _$NotificationNotifier {
   Future<void> markAsRead(String id) async {
     final repository = ref.read(notificationRepositoryProvider);
     final success = await repository.markAsRead(id);
-    if (success) {
-      // Only decrement the badge when this item actually transitioned from
-      // unread to read; repeated calls on an already-read item must not
-      // undercount the badge.
-      final target = state.items.where((item) => item.id == id).firstOrNull;
-      final wasUnread = target != null && !target.isRead;
+    if (!success) return;
 
-      final updatedItems = state.items.map((item) {
-        if (item.id == id) {
-          return item.copyWith(isRead: true, readAt: DateTime.now());
-        }
-        return item;
-      }).toList();
-
-      final newUnreadCount = wasUnread
-          ? (state.unreadCount - 1).clamp(0, 999)
-          : state.unreadCount;
-      state = state.copyWith(items: updatedItems, unreadCount: newUnreadCount);
-    }
+    final result = NotificationListMutations.markAsRead(
+      items: state.items,
+      unreadCount: state.unreadCount,
+      id: id,
+      idOf: (item) => item.id,
+      isReadOf: (item) => item.isRead,
+      withReadAt: (item) => item.copyWith(isRead: true, readAt: DateTime.now()),
+    );
+    state = state.copyWith(
+      items: result.items,
+      unreadCount: result.unreadCount,
+    );
   }
 
   /// Mark all notifications as read
   Future<void> markAllAsRead() async {
     final repository = ref.read(notificationRepositoryProvider);
     final success = await repository.markAllAsRead();
-    if (success) {
-      final updatedItems = state.items
-          .map((item) => item.copyWith(isRead: true))
-          .toList();
-      state = state.copyWith(items: updatedItems, unreadCount: 0);
-    }
+    if (!success) return;
+
+    final result = NotificationListMutations.markAllAsRead(
+      items: state.items,
+      withRead: (item) => item.copyWith(isRead: true),
+    );
+    state = state.copyWith(
+      items: result.items,
+      unreadCount: result.unreadCount,
+    );
   }
 
   /// Delete a notification
@@ -148,17 +148,20 @@ class NotificationNotifier extends _$NotificationNotifier {
 
     final repository = ref.read(notificationRepositoryProvider);
     final success = await repository.deleteNotification(id);
-    if (success) {
-      final updatedItems = state.items.where((item) => item.id != id).toList();
-      final newUnreadCount = !itemToDelete.isRead
-          ? (state.unreadCount - 1).clamp(0, 999)
-          : state.unreadCount;
-      state = state.copyWith(
-        items: updatedItems,
-        total: (state.total - 1).clamp(0, 9999),
-        unreadCount: newUnreadCount,
-      );
-    }
+    if (!success) return;
+
+    final result = NotificationListMutations.delete(
+      items: state.items,
+      unreadCount: state.unreadCount,
+      id: id,
+      idOf: (item) => item.id,
+      isReadOf: (item) => item.isRead,
+    );
+    state = state.copyWith(
+      items: result.items,
+      total: (state.total - 1).clamp(0, 9999),
+      unreadCount: result.unreadCount,
+    );
   }
 
   /// Add a real-time notification received via WebSocket.
@@ -183,7 +186,6 @@ class NotificationNotifier extends _$NotificationNotifier {
 @Riverpod(keepAlive: true)
 NotificationWsService notificationWs(Ref ref) {
   final wsService = NotificationWsService();
-  final apiConstants = ref.read(apiConstantsProvider);
   final storageService = ref.read(secureStorageServiceProvider);
 
   // Watch the auth token so the connection lifecycle tracks login state.
@@ -231,7 +233,7 @@ NotificationWsService notificationWs(Ref ref) {
   // Connect
   unawaited(
     wsService.connect(
-      baseUrl: apiConstants.baseUrl,
+      baseUrl: ref.read(apiBaseUrlProvider),
       storageService: storageService,
     ),
   );

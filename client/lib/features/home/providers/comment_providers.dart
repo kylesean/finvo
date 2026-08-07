@@ -11,6 +11,12 @@ int _compareByCreatedAt(CommentModel a, CommentModel b) {
 
 @riverpod
 class TransactionComments extends _$TransactionComments {
+  /// Monotonic mutation generation. Each optimistic mutation bumps it; a slower
+  /// in-flight response that returns after a newer mutation has already applied
+  /// is discarded so stale orderings can't clobber newer ones. This mirrors the
+  /// generation-token pattern used elsewhere in the codebase.
+  int _generation = 0;
+
   @override
   FutureOr<List<CommentModel>> build(String transactionId) async {
     final service = ref.watch(commentServiceProvider);
@@ -25,6 +31,7 @@ class TransactionComments extends _$TransactionComments {
     List<String>? mentionedUserIds,
   ) async {
     final service = ref.read(commentServiceProvider);
+    final generation = ++_generation;
 
     try {
       final created = await service.addComment(
@@ -34,12 +41,17 @@ class TransactionComments extends _$TransactionComments {
         mentionedUserIds: mentionedUserIds,
       );
 
+      // A newer mutation (delete/add) landed while this request was in flight:
+      // reconcile from the server instead of clobbering the newer state.
+      if (generation != _generation) {
+        await _reload(service);
+        return;
+      }
+
       final current = state.value;
       if (current == null) {
         // List not loaded yet; reload to pick up the new comment.
-        final comments = await service.getComments(transactionId);
-        comments.sort(_compareByCreatedAt);
-        state = AsyncData(comments);
+        await _reload(service);
       } else {
         // Optimistically append the server-created comment without a full reload.
         final updated = [...current, created]..sort(_compareByCreatedAt);
@@ -58,6 +70,7 @@ class TransactionComments extends _$TransactionComments {
 
   Future<void> deleteComment(String commentId) async {
     final service = ref.read(commentServiceProvider);
+    final generation = ++_generation;
 
     final current = state.value;
     if (current != null) {
@@ -67,14 +80,24 @@ class TransactionComments extends _$TransactionComments {
 
     try {
       await service.deleteComment(commentId);
+      // If a newer mutation intervened, reconcile with server truth.
+      if (generation != _generation) {
+        await _reload(service);
+      }
     } catch (e) {
-      // Reconcile with the server truth if the delete failed.
-      state = await AsyncValue.guard(() async {
-        final comments = await service.getComments(transactionId);
-        comments.sort(_compareByCreatedAt);
-        return comments;
-      });
+      // A stale delete that raced a newer mutation should defer to the server
+      // state; only reconcile if this delete is still the latest mutation.
+      if (generation == _generation) {
+        await _reload(service);
+      }
     }
+  }
+
+  /// Reload the full comment list from the server and sort it.
+  Future<void> _reload(CommentService service) async {
+    final comments = await service.getComments(transactionId);
+    comments.sort(_compareByCreatedAt);
+    state = AsyncData(comments);
   }
 }
 

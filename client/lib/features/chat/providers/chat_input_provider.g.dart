@@ -58,7 +58,7 @@ final class ChatInputNotifierProvider
   }
 }
 
-String _$chatInputNotifierHash() => r'53a721c3989ca0c6635055f69efe2ceaebae9700';
+String _$chatInputNotifierHash() => r'e1d9420616adb0988424a06b34eb50e89848e2f9';
 
 final class ChatInputNotifierFamily extends $Family
     with
