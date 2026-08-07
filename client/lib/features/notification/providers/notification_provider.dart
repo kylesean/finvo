@@ -108,8 +108,12 @@ class NotificationNotifier extends _$NotificationNotifier {
   Future<void> markAsRead(String id) async {
     final repository = ref.read(notificationRepositoryProvider);
     final success = await repository.markAsRead(id);
-    if (!success) return;
-
+    if (!success) {
+      // Failure is deliberately silent at the UI level (the item just stays
+      // unread), but log it so repeat failures are diagnosable.
+      _logger.warning('markAsRead failed for notification $id');
+      return;
+    }
     final result = NotificationListMutations.markAsRead(
       items: state.items,
       unreadCount: state.unreadCount,
@@ -128,8 +132,10 @@ class NotificationNotifier extends _$NotificationNotifier {
   Future<void> markAllAsRead() async {
     final repository = ref.read(notificationRepositoryProvider);
     final success = await repository.markAllAsRead();
-    if (!success) return;
-
+    if (!success) {
+      _logger.warning('markAllAsRead failed');
+      return;
+    }
     final result = NotificationListMutations.markAllAsRead(
       items: state.items,
       withRead: (item) => item.copyWith(isRead: true),
@@ -148,8 +154,10 @@ class NotificationNotifier extends _$NotificationNotifier {
 
     final repository = ref.read(notificationRepositoryProvider);
     final success = await repository.deleteNotification(id);
-    if (!success) return;
-
+    if (!success) {
+      _logger.warning('deleteNotification failed for notification $id');
+      return;
+    }
     final result = NotificationListMutations.delete(
       items: state.items,
       unreadCount: state.unreadCount,

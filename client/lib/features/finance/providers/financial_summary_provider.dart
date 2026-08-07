@@ -111,24 +111,3 @@ class FinancialSummaryNotifier extends _$FinancialSummaryNotifier {
     );
   }
 }
-
-extension FinancialSummaryCopy on FinancialSummary {
-  FinancialSummary copyWith({
-    Decimal? totalNetWorth,
-    Decimal? totalAssets,
-    Decimal? totalLiabilities,
-    String? currencyCode,
-    bool? isLoading,
-    Set<String>? missingRateCurrencies,
-  }) {
-    return FinancialSummary(
-      totalNetWorth: totalNetWorth ?? this.totalNetWorth,
-      totalAssets: totalAssets ?? this.totalAssets,
-      totalLiabilities: totalLiabilities ?? this.totalLiabilities,
-      currencyCode: currencyCode ?? this.currencyCode,
-      isLoading: isLoading ?? this.isLoading,
-      missingRateCurrencies:
-          missingRateCurrencies ?? this.missingRateCurrencies,
-    );
-  }
-}

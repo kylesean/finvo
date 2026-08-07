@@ -15,6 +15,21 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import 'package:finvo/features/home/models/total_expense_model.dart';
 import 'dart:async';
 
+/// Height factor for the top overscroll cover layer (see [HomePage]).
+const double _overscrollCoverFactor = 0.5;
+
+/// Resolve the scroll physics for the home feed.
+///
+/// On iOS, use ClampingScrollPhysics to prevent excessive bouncing overscroll
+/// that causes large visual gaps. RefreshIndicator still works because it
+/// detects pull-down via dragDetails in ScrollUpdateNotification, not via
+/// negative scroll pixels. Android keeps default ClampingScrollPhysics.
+/// Guarded with kIsWeb: dart:io Platform is unavailable on web and would throw
+/// UnsupportedError at build time.
+ScrollPhysics? _resolveHomeScrollPhysics() {
+  return !kIsWeb && Platform.isIOS ? const ClampingScrollPhysics() : null;
+}
+
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -46,7 +61,8 @@ class HomePage extends ConsumerWidget {
               top: 0,
               left: 0,
               right: 0,
-              height: MediaQuery.of(context).size.height * 0.5,
+              height:
+                  MediaQuery.of(context).size.height * _overscrollCoverFactor,
               child: Container(color: theme.colors.primary),
             ),
             // Main content layer
@@ -58,17 +74,7 @@ class HomePage extends ConsumerWidget {
                 await ref.read(transactionFeedProvider.notifier).refreshFeed();
               },
               child: CustomScrollView(
-                // On iOS, use ClampingScrollPhysics to prevent excessive
-                // bouncing overscroll that causes large visual gaps.
-                // RefreshIndicator still works because it detects pull-down
-                // via dragDetails in ScrollUpdateNotification, not via
-                // negative scroll pixels.
-                // Android keeps default ClampingScrollPhysics (no change).
-                // Guard with kIsWeb: dart:io Platform is unavailable on web
-                // and would throw UnsupportedError at build time.
-                physics: !kIsWeb && Platform.isIOS
-                    ? const ClampingScrollPhysics()
-                    : null,
+                physics: _resolveHomeScrollPhysics(),
                 slivers: [
                   // Header - SliverAppBar (black)
                   SliverAppBar(
@@ -163,14 +169,20 @@ class HomePage extends ConsumerWidget {
 class _FixedTabBar extends ConsumerWidget {
   const _FixedTabBar();
 
-  // Define Tab data structure - needs dynamic generation at build time for i18n support
-  List<({TransactionFeedType type, String label})> _getTabData() {
-    return [
-      (type: TransactionFeedType.all, label: t.common.all),
-      (type: TransactionFeedType.expense, label: t.transaction.expense),
-      (type: TransactionFeedType.income, label: t.transaction.income),
-    ];
-  }
+  // Feed types are a compile-time constant; only the i18n label is resolved at
+  // build time so locale switches still refresh the text. Keeping the type list
+  // static avoids re-allocating a record list on every build.
+  static const List<TransactionFeedType> _types = [
+    TransactionFeedType.all,
+    TransactionFeedType.expense,
+    TransactionFeedType.income,
+  ];
+
+  String _labelFor(TransactionFeedType type) => switch (type) {
+    TransactionFeedType.all => t.common.all,
+    TransactionFeedType.expense => t.transaction.expense,
+    TransactionFeedType.income => t.transaction.income,
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -180,8 +192,8 @@ class _FixedTabBar extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-        children: _getTabData().map((tabInfo) {
-          final isSelected = tabInfo.type == currentSelectedType;
+        children: _types.map((type) {
+          final isSelected = type == currentSelectedType;
 
           if (isSelected) {
             return Expanded(
@@ -191,7 +203,7 @@ class _FixedTabBar extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   onPress: () {}, // Empty function to keep button enabled
                   child: Text(
-                    tabInfo.label,
+                    _labelFor(type),
                     style: AppTextStyles.tabSelected(theme),
                   ),
                 ),
@@ -207,10 +219,10 @@ class _FixedTabBar extends ConsumerWidget {
                   onPress: () {
                     ref
                         .read(currentTransactionFeedTypeProvider.notifier)
-                        .set(tabInfo.type);
+                        .set(type);
                   },
                   child: Text(
-                    tabInfo.label,
+                    _labelFor(type),
                     style: AppTextStyles.tabUnselected(theme),
                   ),
                 ),

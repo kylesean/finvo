@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 final _logger = Logger('SoundFeedbackService');
 
@@ -87,8 +88,15 @@ class SoundFeedbackService {
       _isInitialized = true;
       _useHapticFallback = false;
       _logger.info('Sound feedback service initialized with audio files');
-    } catch (e) {
-      _logger.warning('Failed to load audio files, using haptic fallback: $e');
+    } catch (e, stackTrace) {
+      final audioException = AudioServiceException(
+        'Failed to load audio files, using haptic fallback: $e',
+      );
+      _logger.warning(
+        'Sound feedback initialization fallback',
+        audioException,
+        stackTrace,
+      );
       // Sound files not found, use haptic feedback as fallback
       _useHapticFallback = true;
       _isInitialized = true;
@@ -128,8 +136,8 @@ class SoundFeedbackService {
       await _startPlayer?.seek(Duration.zero);
       await _startPlayer?.play();
       _logger.info('Start sound played successfully');
-    } catch (e) {
-      _logger.warning('Failed to play start sound: $e');
+    } catch (e, stackTrace) {
+      _logger.warning('Failed to play start sound', e, stackTrace);
       // Play failed, try haptic feedback
       await HapticFeedback.mediumImpact();
     }
@@ -156,8 +164,8 @@ class SoundFeedbackService {
       await _stopPlayer?.seek(Duration.zero);
       await _stopPlayer?.play();
       _logger.info('Stop sound played successfully');
-    } catch (e) {
-      _logger.warning('Failed to play stop sound: $e');
+    } catch (e, stackTrace) {
+      _logger.warning('Failed to play stop sound', e, stackTrace);
       // Play failed, try haptic feedback
       await HapticFeedback.lightImpact();
     }

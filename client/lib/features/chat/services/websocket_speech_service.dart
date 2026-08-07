@@ -10,6 +10,7 @@ import 'package:finvo/features/chat/config/speech_config.dart';
 import 'package:finvo/features/chat/services/audio_recorder_service.dart';
 import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 final _logger = Logger('WebSocketSpeechService');
 
@@ -86,8 +87,8 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   Future<bool> hasPermission() async {
     try {
       return await _audioRecorder.hasPermission();
-    } catch (e) {
-      _logger.severe('Failed to check microphone permission: $e');
+    } catch (e, stackTrace) {
+      _logger.severe('Failed to check microphone permission', e, stackTrace);
       return false;
     }
   }
@@ -98,8 +99,8 @@ class WebSocketSpeechService implements SpeechRecognitionService {
     try {
       final status = await Permission.microphone.request();
       return status == PermissionStatus.granted;
-    } catch (e) {
-      _logger.severe('Failed to request microphone permission: $e');
+    } catch (e, stackTrace) {
+      _logger.severe('Failed to request microphone permission', e, stackTrace);
       return false;
     }
   }
@@ -137,7 +138,9 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       await _channel!.ready.timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          throw TimeoutException('WebSocket connection timeout (10 seconds)');
+          throw SpeechServiceException(
+            'WebSocket connection timeout (10 seconds)',
+          );
         },
       );
       _isConnected = true;
@@ -153,8 +156,15 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       );
 
       return true;
-    } catch (e) {
-      _logger.severe('WebSocket connection failed: $e');
+    } catch (e, stackTrace) {
+      final speechException = SpeechServiceException(
+        'WebSocket connection failed: $e',
+      );
+      _logger.severe(
+        'WebSocket connection failed',
+        speechException,
+        stackTrace,
+      );
       if (!_errorController.isClosed) {
         _errorController.add('speech_connection_failed');
       }

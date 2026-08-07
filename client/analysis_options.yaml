@@ -24,18 +24,14 @@ linter:
     always_use_package_imports: true
     use_null_aware_elements: false
 
-    # ============================================================
-    # Strict rules for better code quality (enable progressively)
-    # Uncomment these after cleaning up existing warnings
-    # ============================================================
+    # Strict rules for production code quality
     prefer_const_constructors: true
     prefer_const_declarations: true
     prefer_final_locals: true
     unawaited_futures: true
     avoid_void_async: true
     discarded_futures: true
-
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    avoid_print: true
     prefer_single_quotes: true
 
 # Additional information about this file can be found at

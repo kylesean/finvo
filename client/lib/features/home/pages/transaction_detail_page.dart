@@ -70,53 +70,7 @@ class TransactionDetailPage extends ConsumerWidget {
 
     // Show error state
     if (detailState.hasError && detailState.value == null) {
-      return Scaffold(
-        backgroundColor: colors.background,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildPageHeader(context, theme, colors, null),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        FLucideIcons.ellipsis,
-                        size: 48,
-                        color: colors.destructive,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(t.home.loadFailed, style: theme.typography.body.xl2),
-                      const SizedBox(height: 8),
-                      Text(
-                        detailState.error.toString(),
-                        style: AppTextStyles.listSubtitle(theme),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      FButton(
-                        onPress: () {
-                          unawaited(
-                            ref
-                                .read(
-                                  transactionDetailProvider(
-                                    transactionId,
-                                  ).notifier,
-                                )
-                                .reload(),
-                          );
-                        },
-                        child: Text(t.common.retry),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildErrorState(context, theme, colors, ref, detailState);
     }
 
     final transaction = detailState.value;
@@ -124,6 +78,17 @@ class TransactionDetailPage extends ConsumerWidget {
       return const TransactionDetailSkeleton();
     }
 
+    return _buildDetailContent(context, theme, colors, ref, transaction);
+  }
+
+  /// Main content for a loaded transaction detail.
+  Widget _buildDetailContent(
+    BuildContext context,
+    FThemeData theme,
+    FColors colors,
+    WidgetRef ref,
+    TransactionModel transaction,
+  ) {
     // Page header
     final pageHeader = _buildPageHeader(context, theme, colors, transaction);
 
@@ -409,6 +374,63 @@ class TransactionDetailPage extends ConsumerWidget {
         recorderUserId: transaction.sharedWith.isNotEmpty
             ? transaction.sharedWith.first.userId
             : null,
+      ),
+    );
+  }
+
+  /// Full-screen error state with a retry button.
+  Widget _buildErrorState(
+    BuildContext context,
+    FThemeData theme,
+    FColors colors,
+    WidgetRef ref,
+    AsyncValue<TransactionModel> detailState,
+  ) {
+    return Scaffold(
+      backgroundColor: colors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildPageHeader(context, theme, colors, null),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      FLucideIcons.ellipsis,
+                      size: 48,
+                      color: colors.destructive,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(t.home.loadFailed, style: theme.typography.body.xl2),
+                    const SizedBox(height: 8),
+                    Text(
+                      detailState.error.toString(),
+                      style: AppTextStyles.listSubtitle(theme),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    FButton(
+                      onPress: () {
+                        unawaited(
+                          ref
+                              .read(
+                                transactionDetailProvider(
+                                  transactionId,
+                                ).notifier,
+                              )
+                              .reload(),
+                        );
+                      },
+                      child: Text(t.common.retry),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

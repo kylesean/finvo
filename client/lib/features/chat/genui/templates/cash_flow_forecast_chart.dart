@@ -17,6 +17,80 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 /// - Line chart (predicted balance curve + confidence interval)
 /// - Key event markers
 /// - Warning information
+/// Cached ViewModel for CashFlowForecastChart data payload
+@immutable
+class _CashFlowForecastViewModel {
+  final String title;
+  final List<_ForecastDataPoint> dataPoints;
+  final List<_ForecastWarning> warnings;
+  final Map<String, dynamic>? summary;
+  final Map<String, dynamic>? forecastPeriod;
+  final double currentBalance;
+
+  const _CashFlowForecastViewModel({
+    required this.title,
+    required this.dataPoints,
+    required this.warnings,
+    required this.summary,
+    required this.forecastPeriod,
+    required this.currentBalance,
+  });
+
+  factory _CashFlowForecastViewModel.fromRawMap(Map<String, dynamic> data) {
+    final title = data['title']?.toString() ?? '';
+
+    final points = data['data_points'];
+    final dataPoints = points is List
+        ? points
+              .whereType<Map<dynamic, dynamic>>()
+              .map(
+                (p) =>
+                    _ForecastDataPoint.fromJson(Map<String, dynamic>.from(p)),
+              )
+              .toList()
+        : const <_ForecastDataPoint>[];
+
+    final warningsRaw = data['warnings'];
+    final warnings = warningsRaw is List
+        ? warningsRaw
+              .whereType<Map<dynamic, dynamic>>()
+              .map(
+                (w) => _ForecastWarning.fromJson(Map<String, dynamic>.from(w)),
+              )
+              .toList()
+        : const <_ForecastWarning>[];
+
+    final summaryRaw = data['summary'];
+    final summary = summaryRaw is Map
+        ? Map<String, dynamic>.from(summaryRaw)
+        : null;
+
+    final periodRaw = data['forecast_period'];
+    final forecastPeriod = periodRaw is Map
+        ? Map<String, dynamic>.from(periodRaw)
+        : null;
+
+    final balance = data['current_balance'];
+    final double currentBalance;
+    if (balance is num) {
+      currentBalance = balance.toDouble();
+    } else if (balance is String) {
+      currentBalance = double.tryParse(balance) ?? 0;
+    } else {
+      currentBalance = 0;
+    }
+
+    return _CashFlowForecastViewModel(
+      title: title,
+      dataPoints: dataPoints,
+      warnings: warnings,
+      summary: summary,
+      forecastPeriod: forecastPeriod,
+      currentBalance: currentBalance,
+    );
+  }
+}
+
 class CashFlowForecastChart extends StatefulWidget {
   final Map<String, dynamic> data;
 
@@ -27,44 +101,33 @@ class CashFlowForecastChart extends StatefulWidget {
 }
 
 class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
+  late _CashFlowForecastViewModel _viewModel;
   bool _isExpanded = false;
   final bool _showConfidenceInterval = true;
 
-  // Parse data points from the response
-  List<_ForecastDataPoint> get _dataPoints {
-    final points = widget.data['data_points'];
-    if (points is! List) return const [];
-    return points
-        .whereType<Map<dynamic, dynamic>>()
-        .map((p) => _ForecastDataPoint.fromJson(Map<String, dynamic>.from(p)))
-        .toList();
+  @override
+  void initState() {
+    super.initState();
+    _parseViewModel();
   }
 
-  List<_ForecastWarning> get _warnings {
-    final warnings = widget.data['warnings'];
-    if (warnings is! List) return const [];
-    return warnings
-        .whereType<Map<dynamic, dynamic>>()
-        .map((w) => _ForecastWarning.fromJson(Map<String, dynamic>.from(w)))
-        .toList();
+  @override
+  void didUpdateWidget(covariant CashFlowForecastChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data != widget.data) {
+      _parseViewModel();
+    }
   }
 
-  Map<String, dynamic>? get _summary {
-    final raw = widget.data['summary'];
-    return raw is Map ? Map<String, dynamic>.from(raw) : null;
+  void _parseViewModel() {
+    _viewModel = _CashFlowForecastViewModel.fromRawMap(widget.data);
   }
 
-  Map<String, dynamic>? get _forecastPeriod {
-    final raw = widget.data['forecast_period'];
-    return raw is Map ? Map<String, dynamic>.from(raw) : null;
-  }
-
-  double get _currentBalance {
-    final balance = widget.data['current_balance'];
-    if (balance is num) return balance.toDouble();
-    if (balance is String) return double.tryParse(balance) ?? 0;
-    return 0;
-  }
+  List<_ForecastDataPoint> get _dataPoints => _viewModel.dataPoints;
+  List<_ForecastWarning> get _warnings => _viewModel.warnings;
+  Map<String, dynamic>? get _summary => _viewModel.summary;
+  Map<String, dynamic>? get _forecastPeriod => _viewModel.forecastPeriod;
+  double get _currentBalance => _viewModel.currentBalance;
 
   String _formatAmount(dynamic amount) {
     final numberFormat = AmountFormatter.getNumberFormat(
