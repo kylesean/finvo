@@ -1,94 +1,41 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/features/report/services/statistics_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
 
+part 'statistics_provider.freezed.dart';
 part 'statistics_provider.g.dart';
 
 final _logger = Logger('Statistics');
 
 /// Statistics state
-class StatisticsState {
-  final TimeRange timeRange;
-  final ChartType chartType;
-  final SortType sortType;
-  final List<String> selectedAccountTypes;
-  final DateTime? customStartDate;
-  final DateTime? customEndDate;
-  final bool isLoading;
-  final bool isLoadingMoreTopTransactions;
-  final String? error;
-
-  /// The date range text used for display in the UI (only has a value in custom mode).
-  final String? dateRangeDisplayText;
-
-  // Data
-  final StatisticsOverview? overview;
-  final TrendDataResponse? trendData;
-  final CategoryBreakdownResponse? categoryBreakdown;
-  final TopTransactionsResponse? topTransactions;
-  final CashFlowAnalysis? cashFlow;
-  final HealthScore? healthScore;
-
-  const StatisticsState({
-    this.timeRange = TimeRange.month,
-    this.chartType = ChartType.expense,
-    this.sortType = SortType.amount,
-    this.selectedAccountTypes = const [],
-    this.customStartDate,
-    this.customEndDate,
-    this.isLoading = false,
-    this.isLoadingMoreTopTransactions = false,
-    this.error,
-    this.dateRangeDisplayText,
-    this.overview,
-    this.trendData,
-    this.categoryBreakdown,
-    this.topTransactions,
-    this.cashFlow,
-    this.healthScore,
-  });
-
-  StatisticsState copyWith({
-    TimeRange? timeRange,
-    ChartType? chartType,
-    SortType? sortType,
-    List<String>? selectedAccountTypes,
+@freezed
+abstract class StatisticsState with _$StatisticsState {
+  const factory StatisticsState({
+    @Default(TimeRange.month) TimeRange timeRange,
+    @Default(ChartType.expense) ChartType chartType,
+    @Default(SortType.amount) SortType sortType,
+    @Default(<String>[]) List<String> selectedAccountTypes,
     DateTime? customStartDate,
     DateTime? customEndDate,
-    bool? isLoading,
-    bool? isLoadingMoreTopTransactions,
+    @Default(false) bool isLoading,
+    @Default(false) bool isLoadingMoreTopTransactions,
     String? error,
+
+    /// The date range text used for display in the UI (only has a value in custom mode).
     String? dateRangeDisplayText,
+
+    // Data
     StatisticsOverview? overview,
     TrendDataResponse? trendData,
     CategoryBreakdownResponse? categoryBreakdown,
     TopTransactionsResponse? topTransactions,
     CashFlowAnalysis? cashFlow,
     HealthScore? healthScore,
-  }) {
-    return StatisticsState(
-      timeRange: timeRange ?? this.timeRange,
-      chartType: chartType ?? this.chartType,
-      sortType: sortType ?? this.sortType,
-      selectedAccountTypes: selectedAccountTypes ?? this.selectedAccountTypes,
-      customStartDate: customStartDate ?? this.customStartDate,
-      customEndDate: customEndDate ?? this.customEndDate,
-      isLoading: isLoading ?? this.isLoading,
-      isLoadingMoreTopTransactions:
-          isLoadingMoreTopTransactions ?? this.isLoadingMoreTopTransactions,
-      error: error,
-      dateRangeDisplayText: dateRangeDisplayText ?? this.dateRangeDisplayText,
-      overview: overview ?? this.overview,
-      trendData: trendData ?? this.trendData,
-      categoryBreakdown: categoryBreakdown ?? this.categoryBreakdown,
-      topTransactions: topTransactions ?? this.topTransactions,
-      cashFlow: cashFlow ?? this.cashFlow,
-      healthScore: healthScore ?? this.healthScore,
-    );
-  }
+  }) = _StatisticsState;
 }
 
 /// Statistics state notifier
@@ -103,6 +50,19 @@ class Statistics extends _$Statistics {
   @override
   StatisticsState build() {
     return const StatisticsState();
+  }
+
+  /// Bump the load generation and clear the loading flag.
+  ///
+  /// Orphans any in-flight [loadStatistics] so it can't overwrite the state set
+  /// by the caller, and resets `isLoading` because the orphaned request's own
+  /// completion path (which normally clears it) will be skipped — otherwise the
+  /// report would get stuck in a permanent loading state. Returns the new
+  /// generation to compare against after the awaited fetch.
+  int _orphanInFlight() {
+    final generation = ++_loadGeneration;
+    state = state.copyWith(isLoading: false);
+    return generation;
   }
 
   /// Load all statistics data
@@ -251,12 +211,8 @@ class Statistics extends _$Statistics {
   Future<void> setChartType(ChartType chartType) async {
     // Bump the shared generation so any in-flight loadStatistics for the old
     // chart type is discarded (otherwise it would overwrite the new chart).
-    final generation = ++_loadGeneration;
-    // Reset isLoading here: bumping the generation orphans the previous
-    // loadStatistics, whose own completion path (which normally clears
-    // isLoading) will be skipped — otherwise the report would stuck in a
-    // permanent loading state.
-    state = state.copyWith(chartType: chartType, isLoading: false);
+    final generation = _orphanInFlight();
+    state = state.copyWith(chartType: chartType);
     try {
       final service = ref.read(statisticsServiceProvider);
       final trendData = await service.getTrendData(
@@ -282,8 +238,8 @@ class Statistics extends _$Statistics {
     // Same generation bump + isLoading reset as setChartType: orphan the
     // in-flight loadStatistics rather than let it clobber the new sort while
     // leaving isLoading stuck true.
-    final generation = ++_loadGeneration;
-    state = state.copyWith(sortType: sortType, isLoading: false);
+    final generation = _orphanInFlight();
+    state = state.copyWith(sortType: sortType);
     try {
       final service = ref.read(statisticsServiceProvider);
       final topTransactions = await service.getTopTransactions(
