@@ -891,32 +891,13 @@ class TransactionCRUDService:
             # Reverse the old account's effect and apply the new account's
             # effect. Both go through the SAME row-locked, snapshot-converted
             # ledger helper as create/delete, so a TRANSFER re-association
-            # credits the old source back and debits the new one (previously
-            # this path skipped TRANSFER entirely and silently drifted).
+            # credits the old source back and debits the new one.
             if old_account_id:
-                await self.ledger.apply_account_balance_effect(
-                    transaction,
-                    account_id=old_account_id,
-                    user_uuid=user_uuid,
-                    user_base_currency=user_base_currency,
-                    sign=-1,
-                    for_update=True,
-                )
+                await self._rollback_old_account_balance(transaction, old_account_id, user_uuid, user_base_currency)
             if new_account_id:
-                await self.ledger.apply_account_balance_effect(
-                    transaction,
-                    account_id=new_account_id,
-                    user_uuid=user_uuid,
-                    user_base_currency=user_base_currency,
-                    sign=1,
-                    for_update=True,
-                )
+                await self._apply_new_account_balance(transaction, new_account_id, user_uuid, user_base_currency)
 
-        if is_income:
-            transaction.target_account_id = new_account_id
-        else:
-            transaction.source_account_id = new_account_id
-        transaction.updated_at = utc_now()
+        self._update_account_association(transaction, new_account_id, is_income)
 
         await self.db.commit()
 
@@ -928,6 +909,53 @@ class TransactionCRUDService:
         )
 
         return await self.get_transaction_detail(transaction_id, user_uuid)
+
+    async def _rollback_old_account_balance(
+        self,
+        transaction: Transaction,
+        old_account_id: UUID,
+        user_uuid: UUID,
+        user_base_currency: str,
+    ) -> None:
+        """Reverse the old account's booked balance effect on re-association."""
+        await self.ledger.apply_account_balance_effect(
+            transaction,
+            account_id=old_account_id,
+            user_uuid=user_uuid,
+            user_base_currency=user_base_currency,
+            sign=-1,
+            for_update=True,
+        )
+
+    async def _apply_new_account_balance(
+        self,
+        transaction: Transaction,
+        new_account_id: UUID,
+        user_uuid: UUID,
+        user_base_currency: str,
+    ) -> None:
+        """Apply the new account's booked balance effect on re-association."""
+        await self.ledger.apply_account_balance_effect(
+            transaction,
+            account_id=new_account_id,
+            user_uuid=user_uuid,
+            user_base_currency=user_base_currency,
+            sign=1,
+            for_update=True,
+        )
+
+    def _update_account_association(
+        self,
+        transaction: Transaction,
+        new_account_id: UUID | None,
+        is_income: bool,
+    ) -> None:
+        """Point the transaction's account association at the new account."""
+        if is_income:
+            transaction.target_account_id = new_account_id
+        else:
+            transaction.source_account_id = new_account_id
+        transaction.updated_at = utc_now()
 
     # ===== Comment Operations =====
 

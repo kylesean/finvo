@@ -24,7 +24,6 @@ from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
 from app.core.database import get_session_context
 from app.core.dependencies import (
-    get_current_user,
     get_redis_client,
     is_token_revoked,
     revoke_token,
@@ -55,14 +54,6 @@ from app.utils.sanitization import sanitize_string
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
-
-
-# `get_current_user` is re-exported from `app.core.dependencies` to keep this
-# module as the historical import site for the 13 API routers that already
-# import it from here. The canonical implementation lives in
-# `app.core.dependencies.get_current_user` (split into `get_current_user_uuid`
-# + `get_current_user`, with `bind_context` and a 500 fallback).
-__all__ = ["get_current_user"]
 
 
 async def get_authorized_session(
