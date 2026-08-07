@@ -825,10 +825,12 @@ class StatisticsService:
         total_expense = row.total if isinstance(row.total, Decimal) else Decimal(str(row.total or "0.0"))
 
         return {
-            "total_expense": total_expense,
-            "today_expense": today_expense,
-            "month_expense": month_expense,
-            "year_expense": year_expense,
+            # Money fields are serialized as strings (matching the statistics series)
+            # so the client can parse them into Decimal without precision loss.
+            "total_expense": f"{total_expense:.2f}",
+            "today_expense": f"{today_expense:.2f}",
+            "month_expense": f"{month_expense:.2f}",
+            "year_expense": f"{year_expense:.2f}",
             "display_currency": display_currency,
             "currency": display_currency,
             "display": {
