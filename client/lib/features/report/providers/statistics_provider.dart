@@ -1,12 +1,28 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:dio/dio.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/features/report/services/statistics_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'statistics_provider.g.dart';
 
 final _logger = Logger('Statistics');
+
+/// Extracts a safe, user-displayable error message from [error], preferring a
+/// typed/localized [AppException] message and never leaking raw exception text
+/// (which may contain internal details) to the UI.
+String _safeError(Object error) {
+  if (error is DioException && error.error is AppException) {
+    return (error.error as AppException).message;
+  }
+  if (error is AppException) {
+    return error.message;
+  }
+  return t.common.error;
+}
 
 /// Statistics state
 class StatisticsState {
@@ -222,7 +238,7 @@ class Statistics extends _$Statistics {
       // Only surface errors for the latest generation; older failures belong
       // to superseded requests.
       if (generation == _loadGeneration) {
-        state = state.copyWith(isLoading: false, error: e.toString());
+        state = state.copyWith(isLoading: false, error: _safeError(e));
       }
     }
   }
@@ -272,7 +288,7 @@ class Statistics extends _$Statistics {
       state = state.copyWith(trendData: trendData);
     } catch (e) {
       if (generation == _loadGeneration) {
-        state = state.copyWith(error: e.toString());
+        state = state.copyWith(error: _safeError(e));
       }
     }
   }
@@ -301,7 +317,7 @@ class Statistics extends _$Statistics {
       state = state.copyWith(topTransactions: topTransactions);
     } catch (e) {
       if (generation == _loadGeneration) {
-        state = state.copyWith(error: e.toString());
+        state = state.copyWith(error: _safeError(e));
       }
     }
   }

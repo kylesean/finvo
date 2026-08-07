@@ -251,32 +251,33 @@ class ChatHistory extends _$ChatHistory {
     }
   }
 
-  /// Handle stream completion
+  /// Handle stream completion (GenUI onStreamComplete callback).
+  ///
+  /// The stream can be driven to completion through two callbacks: the GenUI
+  /// `onStreamComplete` (this method) and the SSE layer's `onStreamComplete`
+  /// (which calls `_handleStreamComplete`). Both must converge on the single
+  /// `_handleStreamComplete` path, which itself guards against running twice.
   void _onGenUiStreamComplete() {
-    if (!_streamingController.isMessageCompleted) {
-      if (_streamingController.isUserCancelled) {
-        _streamingController.markMessageCompleted();
-        _handleStreamComplete(null);
-      } else if (!_streamingController.isFirstChunkReceived) {
-        _streamingController.markMessageCompleted();
-        final currentMessage = state.messages.firstWhere(
-          (m) => m.id == _currentStreamingAiMessageId,
-          orElse: () => ChatMessage.empty(),
-        );
-
-        if (currentMessage.surfaceIds.isNotEmpty) {
-          _handleStreamComplete(null);
-        } else {
-          _handleStreamComplete(t.chat.errorRecover);
-        }
-      } else {
-        _streamingController.markMessageCompleted();
-        _handleStreamComplete(null);
-      }
-    } else {
+    if (_streamingController.isMessageCompleted) {
       if (state.isStreamingResponse) {
         state = state.copyWith(isStreamingResponse: false);
       }
+      return;
+    }
+    if (_streamingController.isUserCancelled) {
+      _handleStreamComplete(null);
+    } else if (!_streamingController.isFirstChunkReceived) {
+      final currentMessage = state.messages.firstWhere(
+        (m) => m.id == _currentStreamingAiMessageId,
+        orElse: () => ChatMessage.empty(),
+      );
+      if (currentMessage.surfaceIds.isNotEmpty) {
+        _handleStreamComplete(null);
+      } else {
+        _handleStreamComplete(t.chat.errorRecover);
+      }
+    } else {
+      _handleStreamComplete(null);
     }
   }
 
@@ -422,9 +423,12 @@ class ChatHistory extends _$ChatHistory {
     } catch (e) {
       // Only surface errors for the conversation that is still current.
       if (conversationId == state.currentConversationId) {
+        _logger.warning(
+          'ChatHistory: Failed to load conversation $conversationId: $e',
+        );
         state = state.copyWith(
           isLoadingHistory: false,
-          historyError: e.toString(),
+          historyError: e is AppException ? e.message : t.common.error,
           currentConversationTitle: t.common.loadFailed,
         );
       }
@@ -517,6 +521,21 @@ class ChatHistory extends _$ChatHistory {
   }
 
   void _handleStreamComplete(String? finalTextOverride) {
+    // Guard against double-completion. Both the GenUI onStreamComplete and the
+    // SSE layer's onStreamComplete can reach here, and in some interleavings
+    // BOTH fire for the same message. The first pass already clears the
+    // incremental content buffer (see MessageRepository), so a second pass would
+    // read an empty buffer and inadvertently blank the message content. Keeping
+    // the terminal bookkeeping on a single guarded path also avoids redundant
+    // message-list rebuilds and tool-call sweeps.
+    if (_streamingController.isMessageCompleted) {
+      if (state.isStreamingResponse) {
+        state = state.copyWith(isStreamingResponse: false);
+      }
+      return;
+    }
+    _streamingController.markMessageCompleted();
+
     final messageIndex = state.messages.indexWhere(
       (m) => m.id == _currentStreamingAiMessageId,
     );

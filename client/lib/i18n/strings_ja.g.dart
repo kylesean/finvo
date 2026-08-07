@@ -173,6 +173,9 @@ class _Translations$navigation$ja extends Translations$navigation$zh {
 
 	// Translations
 	@override String get home => 'ホーム';
+	@override String get budget => '予算';
+	@override String get chat => 'AI チャット';
+	@override String get statistics => '統計';
 	@override String get forecast => '予測';
 	@override String get footprint => 'フットプリント';
 	@override String get profile => 'マイページ';
@@ -2557,6 +2560,9 @@ extension on TranslationsJa {
 			'greeting.afternoon' => 'こんにちは',
 			'greeting.evening' => 'こんばんは',
 			'navigation.home' => 'ホーム',
+			'navigation.budget' => '予算',
+			'navigation.chat' => 'AI チャット',
+			'navigation.statistics' => '統計',
 			'navigation.forecast' => '予測',
 			'navigation.footprint' => 'フットプリント',
 			'navigation.profile' => 'マイページ',
@@ -3014,11 +3020,11 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.daily' => '毎日',
 			'forecast.recurringTransaction.weekly' => '毎週',
 			'forecast.recurringTransaction.monthly' => '毎月',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.yearly' => '毎年',
 			'forecast.recurringTransaction.custom' => 'カスタム',
 			'forecast.recurringTransaction.cycle' => 'サイクル',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count} 日ごと',
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '${count} 週ごと',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '${count} か月ごと',
@@ -3528,11 +3534,11 @@ extension on TranslationsJa {
 			'statistics.noData' => 'データなし',
 			'statistics.overview.balance' => '残高',
 			'statistics.overview.income' => '総収入',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.overview.expense' => '総支出',
 			'statistics.trend.title' => '収支推移',
 			'statistics.trend.expense' => '支出',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.trend.income' => '収入',
 			'statistics.analysis.title' => '支出分析',
 			'statistics.analysis.expenseTitle' => '支出分析',

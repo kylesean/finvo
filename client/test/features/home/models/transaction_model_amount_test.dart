@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finvo/features/home/models/transaction_model.dart';
@@ -14,65 +15,64 @@ TransactionModel _parse(Map<String, dynamic> overrides) {
   });
 }
 
+/// Assert the parsed Decimal amount equals an expected decimal string.
+void _expectAmount(Map<String, dynamic> overrides, String expected) {
+  expect(_parse(overrides).amount, Decimal.parse(expected));
+}
+
 void main() {
   group('TransactionModel.fromApiJson amount parsing', () {
     test('numeric amounts pass through', () {
-      expect(_parse({'amount': 12.34}).amount, closeTo(12.34, 1e-9));
-      expect(_parse({'amount': 0}).amount, 0.0);
-      expect(_parse({'amount': -3}).amount, -3.0);
+      _expectAmount({'amount': 12.34}, '12.34');
+      _expectAmount({'amount': 0}, '0');
+      _expectAmount({'amount': -3}, '-3');
     });
 
     test('plain string amounts parse', () {
-      expect(_parse({'amount': '12.34'}).amount, closeTo(12.34, 1e-9));
-      expect(_parse({'amount': '-7.5'}).amount, closeTo(-7.5, 1e-9));
+      _expectAmount({'amount': '12.34'}, '12.34');
+      _expectAmount({'amount': '-7.5'}, '-7.5');
     });
 
     test('US grouping: commas are thousands separators', () {
-      expect(_parse({'amount': '1,234.56'}).amount, closeTo(1234.56, 1e-9));
-      expect(_parse({'amount': '1,234'}).amount, closeTo(1234, 1e-9));
-      expect(
-        _parse({'amount': '1,234,567.89'}).amount,
-        closeTo(1234567.89, 1e-6),
-      );
+      _expectAmount({'amount': '1,234.56'}, '1234.56');
+      _expectAmount({'amount': '1,234'}, '1234');
+      _expectAmount({'amount': '1,234,567.89'}, '1234567.89');
     });
 
     test('EU grouping: dots are thousands separators, comma is decimal', () {
-      expect(_parse({'amount': '1.234,56'}).amount, closeTo(1234.56, 1e-9));
-      expect(_parse({'amount': '1.234.567'}).amount, closeTo(1234567, 1e-6));
+      _expectAmount({'amount': '1.234,56'}, '1234.56');
+      _expectAmount({'amount': '1.234.567'}, '1234567');
     });
 
     test('comma-only decimals', () {
-      expect(_parse({'amount': '12,5'}).amount, closeTo(12.5, 1e-9));
-      expect(_parse({'amount': '-5,50'}).amount, closeTo(-5.5, 1e-9));
+      _expectAmount({'amount': '12,5'}, '12.5');
+      _expectAmount({'amount': '-5,50'}, '-5.5');
     });
 
     test('currency symbols and whitespace are stripped', () {
-      expect(_parse({'amount': '¥1,234.56'}).amount, closeTo(1234.56, 1e-9));
-      expect(_parse({'amount': ' 12.5 € '}).amount, closeTo(12.5, 1e-9));
+      _expectAmount({'amount': '¥1,234.56'}, '1234.56');
+      _expectAmount({'amount': ' 12.5 € '}, '12.5');
     });
 
     test('single dot stays a decimal point (backward compatibility)', () {
-      expect(_parse({'amount': '1.234'}).amount, closeTo(1.234, 1e-9));
+      _expectAmount({'amount': '1.234'}, '1.234');
     });
 
     test('missing or empty amounts degrade to zero', () {
-      expect(_parse(<String, dynamic>{}).amount, 0.0);
-      expect(_parse({'amount': null}).amount, 0.0);
-      expect(_parse({'amount': ''}).amount, 0.0);
+      _expectAmount(<String, dynamic>{}, '0');
+      _expectAmount({'amount': null}, '0');
+      _expectAmount({'amount': ''}, '0');
     });
 
     test('unparseable amounts degrade to zero instead of throwing', () {
-      expect(_parse({'amount': 'abc'}).amount, 0.0);
-      expect(_parse({'amount': '12.34.56,78.9'}).amount, 0.0);
+      _expectAmount({'amount': 'abc'}, '0');
+      _expectAmount({'amount': '12.34.56,78.9'}, '0');
     });
 
     test('unexpected amount types degrade to zero', () {
-      expect(
-        _parse({
-          'amount': ['12'],
-        }).amount,
-        0.0,
-      );
+      _expectAmount({
+        'amount': ['12'],
+      }, '0');
     });
   });
 }

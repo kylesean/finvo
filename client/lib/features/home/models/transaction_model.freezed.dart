@@ -1665,7 +1665,7 @@ as DateTime?,
 /// @nodoc
 mixin _$TransactionModel {
 
- String get id; TransactionType get type; String get category; String? get categoryKey; String? get categoryText; String get iconUrl; double get amount; DateTime get timestamp; double? get amountOriginal; String? get originalCurrency; String? get exchangeRate; String? get description; bool get isShared; List<SharedUserInfo> get sharedWith; String? get paymentMethod; String? get paymentMethodText; String? get location; List<String> get tags; String? get rawInput; String get status; FinancialAccountInfo? get financialAccount; AmountDisplay? get display; DateTime? get createdAt; DateTime? get updatedAt; String? get photoPath; String? get geoLocation; List<TransactionCommentModel> get comments; String? get sourceAccountId; String? get targetAccountId; List<SpaceInfo> get spaces; String? get sourceThreadId; List<TransactionAttachment> get attachments;
+ String get id; TransactionType get type; String get category; String? get categoryKey; String? get categoryText; String get iconUrl; Decimal get amount; DateTime get timestamp; Decimal? get amountOriginal; String? get originalCurrency; String? get exchangeRate; String? get description; bool get isShared; List<SharedUserInfo> get sharedWith; String? get paymentMethod; String? get paymentMethodText; String? get location; List<String> get tags; String? get rawInput; String get status; FinancialAccountInfo? get financialAccount; AmountDisplay? get display; DateTime? get createdAt; DateTime? get updatedAt; String? get photoPath; String? get geoLocation; List<TransactionCommentModel> get comments; String? get sourceAccountId; String? get targetAccountId; List<SpaceInfo> get spaces; String? get sourceThreadId; List<TransactionAttachment> get attachments;
 /// Create a copy of TransactionModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1698,7 +1698,7 @@ abstract mixin class $TransactionModelCopyWith<$Res>  {
   factory $TransactionModelCopyWith(TransactionModel value, $Res Function(TransactionModel) _then) = _$TransactionModelCopyWithImpl;
 @useResult
 $Res call({
- String id, TransactionType type, String category, String? categoryKey, String? categoryText, String iconUrl, double amount, DateTime timestamp, double? amountOriginal, String? originalCurrency, String? exchangeRate, String? description, bool isShared, List<SharedUserInfo> sharedWith, String? paymentMethod, String? paymentMethodText, String? location, List<String> tags, String? rawInput, String status, FinancialAccountInfo? financialAccount, AmountDisplay? display, DateTime? createdAt, DateTime? updatedAt, String? photoPath, String? geoLocation, List<TransactionCommentModel> comments, String? sourceAccountId, String? targetAccountId, List<SpaceInfo> spaces, String? sourceThreadId, List<TransactionAttachment> attachments
+ String id, TransactionType type, String category, String? categoryKey, String? categoryText, String iconUrl, Decimal amount, DateTime timestamp, Decimal? amountOriginal, String? originalCurrency, String? exchangeRate, String? description, bool isShared, List<SharedUserInfo> sharedWith, String? paymentMethod, String? paymentMethodText, String? location, List<String> tags, String? rawInput, String status, FinancialAccountInfo? financialAccount, AmountDisplay? display, DateTime? createdAt, DateTime? updatedAt, String? photoPath, String? geoLocation, List<TransactionCommentModel> comments, String? sourceAccountId, String? targetAccountId, List<SpaceInfo> spaces, String? sourceThreadId, List<TransactionAttachment> attachments
 });
 
 
@@ -1724,9 +1724,9 @@ as String,categoryKey: freezed == categoryKey ? _self.categoryKey : categoryKey 
 as String?,categoryText: freezed == categoryText ? _self.categoryText : categoryText // ignore: cast_nullable_to_non_nullable
 as String?,iconUrl: null == iconUrl ? _self.iconUrl : iconUrl // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as double,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
+as Decimal,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
 as DateTime,amountOriginal: freezed == amountOriginal ? _self.amountOriginal : amountOriginal // ignore: cast_nullable_to_non_nullable
-as double?,originalCurrency: freezed == originalCurrency ? _self.originalCurrency : originalCurrency // ignore: cast_nullable_to_non_nullable
+as Decimal?,originalCurrency: freezed == originalCurrency ? _self.originalCurrency : originalCurrency // ignore: cast_nullable_to_non_nullable
 as String?,exchangeRate: freezed == exchangeRate ? _self.exchangeRate : exchangeRate // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,isShared: null == isShared ? _self.isShared : isShared // ignore: cast_nullable_to_non_nullable
@@ -1858,7 +1858,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  Decimal amount,  DateTime timestamp,  Decimal? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransactionModel() when $default != null:
 return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.status,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId,_that.attachments);case _:
@@ -1879,7 +1879,7 @@ return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categ
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  Decimal amount,  DateTime timestamp,  Decimal? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)  $default,) {final _that = this;
 switch (_that) {
 case _TransactionModel():
 return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.status,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId,_that.attachments);case _:
@@ -1899,7 +1899,7 @@ return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categ
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  double amount,  DateTime timestamp,  double? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  TransactionType type,  String category,  String? categoryKey,  String? categoryText,  String iconUrl,  Decimal amount,  DateTime timestamp,  Decimal? amountOriginal,  String? originalCurrency,  String? exchangeRate,  String? description,  bool isShared,  List<SharedUserInfo> sharedWith,  String? paymentMethod,  String? paymentMethodText,  String? location,  List<String> tags,  String? rawInput,  String status,  FinancialAccountInfo? financialAccount,  AmountDisplay? display,  DateTime? createdAt,  DateTime? updatedAt,  String? photoPath,  String? geoLocation,  List<TransactionCommentModel> comments,  String? sourceAccountId,  String? targetAccountId,  List<SpaceInfo> spaces,  String? sourceThreadId,  List<TransactionAttachment> attachments)?  $default,) {final _that = this;
 switch (_that) {
 case _TransactionModel() when $default != null:
 return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categoryText,_that.iconUrl,_that.amount,_that.timestamp,_that.amountOriginal,_that.originalCurrency,_that.exchangeRate,_that.description,_that.isShared,_that.sharedWith,_that.paymentMethod,_that.paymentMethodText,_that.location,_that.tags,_that.rawInput,_that.status,_that.financialAccount,_that.display,_that.createdAt,_that.updatedAt,_that.photoPath,_that.geoLocation,_that.comments,_that.sourceAccountId,_that.targetAccountId,_that.spaces,_that.sourceThreadId,_that.attachments);case _:
@@ -1923,9 +1923,9 @@ class _TransactionModel implements TransactionModel {
 @override final  String? categoryKey;
 @override final  String? categoryText;
 @override final  String iconUrl;
-@override final  double amount;
+@override final  Decimal amount;
 @override final  DateTime timestamp;
-@override final  double? amountOriginal;
+@override final  Decimal? amountOriginal;
 @override final  String? originalCurrency;
 @override final  String? exchangeRate;
 @override final  String? description;
@@ -2013,7 +2013,7 @@ abstract mixin class _$TransactionModelCopyWith<$Res> implements $TransactionMod
   factory _$TransactionModelCopyWith(_TransactionModel value, $Res Function(_TransactionModel) _then) = __$TransactionModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, TransactionType type, String category, String? categoryKey, String? categoryText, String iconUrl, double amount, DateTime timestamp, double? amountOriginal, String? originalCurrency, String? exchangeRate, String? description, bool isShared, List<SharedUserInfo> sharedWith, String? paymentMethod, String? paymentMethodText, String? location, List<String> tags, String? rawInput, String status, FinancialAccountInfo? financialAccount, AmountDisplay? display, DateTime? createdAt, DateTime? updatedAt, String? photoPath, String? geoLocation, List<TransactionCommentModel> comments, String? sourceAccountId, String? targetAccountId, List<SpaceInfo> spaces, String? sourceThreadId, List<TransactionAttachment> attachments
+ String id, TransactionType type, String category, String? categoryKey, String? categoryText, String iconUrl, Decimal amount, DateTime timestamp, Decimal? amountOriginal, String? originalCurrency, String? exchangeRate, String? description, bool isShared, List<SharedUserInfo> sharedWith, String? paymentMethod, String? paymentMethodText, String? location, List<String> tags, String? rawInput, String status, FinancialAccountInfo? financialAccount, AmountDisplay? display, DateTime? createdAt, DateTime? updatedAt, String? photoPath, String? geoLocation, List<TransactionCommentModel> comments, String? sourceAccountId, String? targetAccountId, List<SpaceInfo> spaces, String? sourceThreadId, List<TransactionAttachment> attachments
 });
 
 
@@ -2039,9 +2039,9 @@ as String,categoryKey: freezed == categoryKey ? _self.categoryKey : categoryKey 
 as String?,categoryText: freezed == categoryText ? _self.categoryText : categoryText // ignore: cast_nullable_to_non_nullable
 as String?,iconUrl: null == iconUrl ? _self.iconUrl : iconUrl // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as double,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
+as Decimal,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
 as DateTime,amountOriginal: freezed == amountOriginal ? _self.amountOriginal : amountOriginal // ignore: cast_nullable_to_non_nullable
-as double?,originalCurrency: freezed == originalCurrency ? _self.originalCurrency : originalCurrency // ignore: cast_nullable_to_non_nullable
+as Decimal?,originalCurrency: freezed == originalCurrency ? _self.originalCurrency : originalCurrency // ignore: cast_nullable_to_non_nullable
 as String?,exchangeRate: freezed == exchangeRate ? _self.exchangeRate : exchangeRate // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,isShared: null == isShared ? _self.isShared : isShared // ignore: cast_nullable_to_non_nullable

@@ -2,6 +2,26 @@ import 'package:decimal/decimal.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
+/// Parses a JSON value into a [Decimal], tolerating null/empty/missing values
+/// (treated as zero) and non-numeric strings (fall back to zero) so a single
+/// malformed field can't crash an entire model parse.
+Decimal _parseDecimal(dynamic value) {
+  if (value == null) return Decimal.zero;
+  final text = value.toString().trim();
+  if (text.isEmpty) return Decimal.zero;
+  return Decimal.tryParse(text) ?? Decimal.zero;
+}
+
+/// Parses a date value into a [DateTime], tolerating null/empty/missing values
+/// (falling back to the epoch) so a single malformed date can't crash parsing.
+DateTime _parseDate(dynamic value) {
+  final text = value?.toString().trim();
+  if (text == null || text.isEmpty) {
+    return DateTime.fromMillisecondsSinceEpoch(0);
+  }
+  return DateTime.tryParse(text) ?? DateTime.fromMillisecondsSinceEpoch(0);
+}
+
 /// Shared compact budget amount formatting: localized 万-suffix + thousands
 /// separators + trailing `.00` omission + negative sign.
 ///
@@ -173,15 +193,13 @@ class Budget {
       name: json['name'] as String,
       scope: BudgetScope.fromString(json['scope'] as String),
       categoryKey: json['category_key'] as String?,
-      amount: Decimal.parse(json['amount'].toString()),
+      amount: _parseDecimal(json['amount']),
       currencyCode: json['currency_code'] as String? ?? 'CNY',
       periodType: BudgetPeriodType.fromString(json['period_type'] as String),
       periodAnchorDay: json['period_anchor_day'] as int? ?? 1,
       status: BudgetStatus.fromString(json['status'] as String),
       rolloverEnabled: json['rollover_enabled'] as bool? ?? true,
-      rolloverBalance: Decimal.parse(
-        (json['rollover_balance'] ?? '0').toString(),
-      ),
+      rolloverBalance: _parseDecimal(json['rollover_balance']),
       createdAt: parseDate(json['created_at'] as String?),
       updatedAt: parseDate(json['updated_at'] as String?),
     );
@@ -248,10 +266,10 @@ class BudgetPeriodDetail {
     return BudgetPeriodDetail(
       id: json['id'] as String,
       budgetId: json['budget_id'] as String,
-      periodStart: DateTime.parse(json['period_start'] as String),
-      periodEnd: DateTime.parse(json['period_end'] as String),
-      spentAmount: Decimal.parse(json['spent_amount'].toString()),
-      adjustedTarget: Decimal.parse(json['adjusted_target'].toString()),
+      periodStart: _parseDate(json['period_start']),
+      periodEnd: _parseDate(json['period_end']),
+      spentAmount: _parseDecimal(json['spent_amount']),
+      adjustedTarget: _parseDecimal(json['adjusted_target']),
       status: BudgetPeriodStatus.fromString(json['status'] as String),
       usagePercentage: (json['usage_percentage'] as num?)?.toDouble() ?? 0.0,
     );
@@ -287,8 +305,8 @@ class BudgetWithUsage {
               json['current_period'] as Map<String, dynamic>,
             )
           : null,
-      spentAmount: Decimal.parse(json['spent_amount'].toString()),
-      remainingAmount: Decimal.parse(json['remaining_amount'].toString()),
+      spentAmount: _parseDecimal(json['spent_amount']),
+      remainingAmount: _parseDecimal(json['remaining_amount']),
       usagePercentage: (json['usage_percentage'] as num?)?.toDouble() ?? 0.0,
       periodStatus: BudgetPeriodStatus.fromString(
         json['period_status'] as String? ?? 'ON_TRACK',
@@ -302,10 +320,8 @@ class BudgetWithUsage {
       budget: Budget.fromJson(json), // BudgetResponse parsed directly as Budget
       currentPeriod:
           null, // BudgetResponse does not contain a separate period object
-      spentAmount: Decimal.parse((json['spent_amount'] ?? 0).toString()),
-      remainingAmount: Decimal.parse(
-        (json['remaining_amount'] ?? 0).toString(),
-      ),
+      spentAmount: _parseDecimal(json['spent_amount']),
+      remainingAmount: _parseDecimal(json['remaining_amount']),
       usagePercentage: (json['usage_percentage'] as num?)?.toDouble() ?? 0.0,
       periodStatus: BudgetPeriodStatus.fromString(
         json['period_status'] as String? ?? 'ON_TRACK',
@@ -356,12 +372,8 @@ class BudgetSummary {
     }
 
     // calculate total amount
-    final overallSpent = Decimal.parse(
-      (json['overall_spent'] ?? '0').toString(),
-    );
-    final overallRemaining = Decimal.parse(
-      (json['overall_remaining'] ?? '0').toString(),
-    );
+    final overallSpent = _parseDecimal(json['overall_spent']);
+    final overallRemaining = _parseDecimal(json['overall_remaining']);
     final totalAmount = overallSpent + overallRemaining;
 
     return BudgetSummary(

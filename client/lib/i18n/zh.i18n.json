@@ -60,6 +60,9 @@
   },
   "navigation": {
     "home": "首页",
+    "budget": "预算",
+    "chat": "AI 助手",
+    "statistics": "统计",
     "forecast": "预测",
     "footprint": "足迹",
     "profile": "我的"

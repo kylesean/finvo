@@ -54,7 +54,11 @@ class TopToast {
       ToastType.info => (colors.primary, FLucideIcons.info, colors.primary),
     };
 
-    _currentEntry = OverlayEntry(
+    // Each entry captures a reference to itself so its dismiss callback removes
+    // exactly *this* entry, never the current (possibly newer) toast. This avoids
+    // a stale toast's timer closing a freshly-shown one.
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
       builder: (context) => _TopToastWidget(
         message: message,
         backgroundColor: backgroundColor,
@@ -62,15 +66,19 @@ class TopToast {
         iconColor: iconColor,
         theme: theme,
         onDismiss: () {
-          _currentEntry?.remove();
-          _currentEntry = null;
+          entry.remove();
+          if (identical(_currentEntry, entry)) {
+            _currentEntry = null;
+          }
         },
         duration: duration,
       ),
     );
 
+    _currentEntry = entry;
+
     try {
-      overlay.insert(_currentEntry!);
+      overlay.insert(entry);
     } catch (e) {
       debugPrint('TopToast: Failed to insert overlay: $e');
     }

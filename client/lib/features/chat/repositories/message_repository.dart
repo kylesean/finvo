@@ -131,6 +131,15 @@ class MessageRepository {
       effectiveContent = _aggregatedContent(id);
     }
 
+    // When streaming reaches a terminal state, the incremental content buffer
+    // is no longer needed: release it to avoid leaking the accumulated text for
+    // every message that ever streamed. This keeps the buffer lifecycle tied to
+    // the stream instead of relying on callers to remember clearContentBuffer.
+    if (streamingStatus == StreamingStatus.completed ||
+        streamingStatus == StreamingStatus.error) {
+      clearContentBuffer(id);
+    }
+
     final messages = getCurrentMessages();
     final updatedMessages = messages.map((msg) {
       if (msg.id == id) {

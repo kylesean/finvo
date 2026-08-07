@@ -54,10 +54,19 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     // Start/stop the breathing animation whenever the waiting state changes.
     // The animation is driven purely by listeners (never from build) so build
     // stays side-effect free.
-    ref.listenManual(
-      chatHistoryProvider.select((s) => s.isStreamingResponse),
-      (_, _) => _syncBreathingAnimation(),
-    );
+    ref.listenManual(chatHistoryProvider.select((s) => s.isStreamingResponse), (
+      previous,
+      current,
+    ) {
+      _syncBreathingAnimation();
+      // When the AI stream ends (true -> false), release the input provider's
+      // "AI processing" lock so the user can send the next message.
+      // _submitMessage keeps isLoadingResponse locked until this fires, so the
+      // lock covers the whole streaming window instead of dropping mid-stream.
+      if (previous == true && current == false && mounted) {
+        ref.read(provider.notifier).resetLoadingState();
+      }
+    });
     ref.listenManual(
       provider.select((s) => s.isListening),
       (_, _) => _syncBreathingAnimation(),

@@ -66,7 +66,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
   }
 
   Future<void> _showDateRangePicker() async {
-    final state = ref.read(statisticsProvider);
+    final initial = ref.read(statisticsProvider);
     bool confirmed = false;
 
     await showModalBottomSheet<void>(
@@ -74,8 +74,8 @@ class _ReportPageState extends ConsumerState<ReportPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => DateRangePickerSheet(
-        initialStart: state.customStartDate,
-        initialEnd: state.customEndDate,
+        initialStart: initial.customStartDate,
+        initialEnd: initial.customEndDate,
         onConfirm: (startDate, endDate) {
           confirmed = true;
           unawaited(
@@ -90,12 +90,16 @@ class _ReportPageState extends ConsumerState<ReportPage> {
         },
       ),
     );
-    if (!confirmed &&
-        state.timeRange == TimeRange.custom &&
-        state.customStartDate == null) {
-      unawaited(
-        ref.read(statisticsProvider.notifier).setTimeRange(TimeRange.month),
-      );
+    // Re-read the provider after the await: the snapshot taken before the sheet
+    // may be stale if a time-range change was applied while it was open.
+    if (!confirmed) {
+      final latest = ref.read(statisticsProvider);
+      if (latest.timeRange == TimeRange.custom &&
+          latest.customStartDate == null) {
+        unawaited(
+          ref.read(statisticsProvider.notifier).setTimeRange(TimeRange.month),
+        );
+      }
     }
   }
 
@@ -246,10 +250,12 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     final colors = theme.colors;
 
     // Check if there is actual data to display
+    // Compare numerically (via the typed extensions) rather than string equality,
+    // so backend variants like "0", "0.0" or formatted values are handled.
     final hasNoData =
         state.overview == null ||
-        (state.overview!.totalIncome == '0.00' &&
-            state.overview!.totalExpense == '0.00' &&
+        (state.overview!.incomeNum == 0.0 &&
+            state.overview!.expenseNum == 0.0 &&
             (state.categoryBreakdown?.items.isEmpty ?? true));
 
     return RefreshIndicator(

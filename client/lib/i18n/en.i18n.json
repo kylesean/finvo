@@ -60,6 +60,9 @@
   },
   "navigation": {
     "home": "Home",
+    "budget": "Budget",
+    "chat": "AI Chat",
+    "statistics": "Statistics",
     "forecast": "Forecast",
     "footprint": "Footprint",
     "profile": "Profile"

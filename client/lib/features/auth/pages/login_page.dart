@@ -188,7 +188,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
             ),
           ),
-          const Positioned(top: 0, left: 0, child: SizedBox.shrink()),
         ],
       ),
     );

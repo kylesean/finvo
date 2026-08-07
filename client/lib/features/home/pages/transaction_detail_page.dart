@@ -222,7 +222,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: AmountText.large(
-                                    amount: transaction.amount,
+                                    amount: transaction.amount.toDouble(),
                                     type: transaction.type,
                                     currency: transaction.currency ?? 'CNY',
                                   ),

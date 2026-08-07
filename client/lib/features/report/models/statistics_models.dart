@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 
 part 'statistics_models.freezed.dart';
 part 'statistics_models.g.dart';
@@ -83,9 +84,16 @@ abstract class StatisticsOverview with _$StatisticsOverview {
 }
 
 extension StatisticsOverviewExtension on StatisticsOverview {
-  double get balanceNum => double.tryParse(totalBalance) ?? 0.0;
-  double get incomeNum => double.tryParse(totalIncome) ?? 0.0;
-  double get expenseNum => double.tryParse(totalExpense) ?? 0.0;
+  /// Parse through [Decimal] (via [AmountFormatter.parseDecimal]) instead of a
+  /// bare `double.tryParse`, so the report layer shares the same defensive,
+  /// precision-preserving string→number path as the rest of the app. The
+  /// [double] result is used only at the display/compare boundary (charts,
+  /// zero checks).
+  double get balanceNum =>
+      AmountFormatter.parseDecimal(totalBalance).toDouble();
+  double get incomeNum => AmountFormatter.parseDecimal(totalIncome).toDouble();
+  double get expenseNum =>
+      AmountFormatter.parseDecimal(totalExpense).toDouble();
 }
 
 /// Trend data point for chart
@@ -102,7 +110,7 @@ abstract class TrendDataPoint with _$TrendDataPoint {
 }
 
 extension TrendDataPointExtension on TrendDataPoint {
-  double get amountNum => double.tryParse(amount) ?? 0.0;
+  double get amountNum => AmountFormatter.parseDecimal(amount).toDouble();
 }
 
 /// Trend data response
@@ -135,7 +143,7 @@ abstract class CategoryBreakdownItem with _$CategoryBreakdownItem {
 }
 
 extension CategoryBreakdownItemExtension on CategoryBreakdownItem {
-  double get amountNum => double.tryParse(amount) ?? 0.0;
+  double get amountNum => AmountFormatter.parseDecimal(amount).toDouble();
 }
 
 /// Category breakdown response

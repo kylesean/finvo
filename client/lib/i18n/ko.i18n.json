@@ -60,6 +60,9 @@
   },
   "navigation": {
     "home": "홈",
+    "budget": "예산",
+    "chat": "AI 채팅",
+    "statistics": "통계",
     "forecast": "예측",
     "footprint": "발자취",
     "profile": "마이페이지"

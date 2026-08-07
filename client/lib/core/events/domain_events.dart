@@ -22,6 +22,23 @@ class TransactionCreatedEvent {
   });
 }
 
+/// Unified buffered item: either a data event or an error. Used so [add] and
+/// [addError] can share one ordered buffer and be replayed faithfully.
+sealed class _BufferedItem<T> {
+  const _BufferedItem();
+}
+
+class _BufferedData<T> extends _BufferedItem<T> {
+  const _BufferedData(this.event);
+  final T event;
+}
+
+class _BufferedError<T> extends _BufferedItem<T> {
+  const _BufferedError(this.error, this.stackTrace);
+  final Object error;
+  final StackTrace? stackTrace;
+}
+
 /// A buffering broadcast controller that never drops events.
 ///
 /// A raw `StreamController.broadcast()` silently discards events published
@@ -36,7 +53,13 @@ class TransactionCreatedEvent {
 /// be subclassed with `extends`.
 class BufferingBroadcastController<T> implements StreamController<T> {
   late final StreamController<T> _controller;
-  final List<T> _pending = <T>[];
+  final List<_BufferedItem<T>> _pending = <_BufferedItem<T>>[];
+
+  /// Upper bound on buffered events. If producers outpace the first listener
+  /// attaching, the buffer is capped instead of growing without limit (a
+  /// memory leak when a subscriber never arrives). The oldest events are
+  /// dropped to keep the newest.
+  static const int _maxPending = 200;
 
   BufferingBroadcastController() {
     _controller = StreamController<T>.broadcast(onListen: _replayPending);
@@ -46,10 +69,15 @@ class BufferingBroadcastController<T> implements StreamController<T> {
   /// a new listener subscribes; after the first replay the buffer is empty so
   /// later listeners only observe subsequent events.
   void _replayPending() {
-    final toReplay = List<T>.of(_pending);
+    final toReplay = List<_BufferedItem<T>>.of(_pending);
     _pending.clear();
-    for (final event in toReplay) {
-      _controller.add(event);
+    for (final item in toReplay) {
+      switch (item) {
+        case final _BufferedData<T> data:
+          _controller.add(data.event);
+        case final _BufferedError<T> error:
+          _controller.addError(error.error, error.stackTrace);
+      }
     }
   }
 
@@ -65,19 +93,35 @@ class BufferingBroadcastController<T> implements StreamController<T> {
   @override
   bool get hasListener => _controller.hasListener;
 
+  /// Buffer one [item] while no listener is attached, dropping the oldest item
+  /// if the buffer is at its cap so it can never grow unboundedly.
+  void _buffer(_BufferedItem<T> item) {
+    if (_pending.length >= _maxPending) {
+      _pending.removeAt(0);
+    }
+    _pending.add(item);
+  }
+
   @override
   void add(T event) {
     if (hasListener) {
       _controller.add(event);
     } else {
       // No listener attached yet: buffer instead of dropping.
-      _pending.add(event);
+      _buffer(_BufferedData<T>(event));
     }
   }
 
   @override
   void addError(Object error, [StackTrace? stackTrace]) {
-    _controller.addError(error, stackTrace);
+    if (hasListener) {
+      _controller.addError(error, stackTrace);
+    } else {
+      // Keep addError consistent with add: buffer errors too so an error
+      // emitted before the first listener is replayed (as an error) instead of
+      // being silently discarded.
+      _buffer(_BufferedError<T>(error, stackTrace));
+    }
   }
 
   @override

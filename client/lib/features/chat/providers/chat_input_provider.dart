@@ -173,28 +173,23 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   }
 
   void _onSpeechResult(String recognizedText) {
-    if (_speechSession.isIncrementalResult) {
-      // Incremental (WebSocket) mode: every partial already contains the full
-      // utterance recognized so far, so REPLACE the recognized part on top of
-      // the fixed pre-session base. Folding each partial back into the base
-      // would duplicate the accumulated text.
-      final newText = _textBeforeSpeechSession.trim().isEmpty
-          ? recognizedText
-          : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
-      _logger.fine(
-        "Speech result (incremental): '$recognizedText', text: '$newText'",
-      );
-      state = state.copyWith(text: newText.trim());
-    } else {
-      // Discrete-finals mode (system speech): each final result is a separate
-      // utterance (pause-then-continue), so append to the accumulated text.
-      final newText = _textBeforeSpeechSession.trim().isEmpty
-          ? recognizedText
-          : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
-      _logger.fine(
-        "Speech result (final): '$recognizedText', concatenated text: '$newText'",
-      );
-      state = state.copyWith(text: newText.trim());
+    final isIncremental = _speechSession.isIncrementalResult;
+    // Incremental (WebSocket) mode: every partial already contains the full
+    // utterance recognized so far, so REPLACE the recognized part on top of
+    // the fixed pre-session base. Folding each partial back into the base
+    // would duplicate the accumulated text. Discrete-finals mode (system
+    // speech): each final result is a separate utterance (pause-then-
+    // continue), so append. Both share the same fold logic; only the final
+    // branch persists the accumulated text for the next utterance.
+    final newText = _textBeforeSpeechSession.trim().isEmpty
+        ? recognizedText
+        : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
+    _logger.fine(
+      'Speech result (${isIncremental ? 'incremental' : 'final'}): '
+      "'$recognizedText', text: '$newText'",
+    );
+    state = state.copyWith(text: newText.trim());
+    if (!isIncremental) {
       _textBeforeSpeechSession = newText.trim();
     }
   }
@@ -315,12 +310,13 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       }
 
       _textBeforeSpeechSession = '';
-      state = state.copyWith(
-        text: '',
-        selectedFiles: [],
-        isLoadingResponse: false,
-        hintType: HintType.normal,
-      );
+      // Keep isLoadingResponse: true and hintType: aiProcessing after dispatch.
+      // addUserMessageAndGetResponse is fire-and-forget, so this await returns
+      // before the AI stream actually ends; resetting the lock here would drop
+      // the "AI processing" input state mid-stream. The lock is released by
+      // resetLoadingState(), driven from ChatInputField when
+      // ChatHistory.isStreamingResponse flips to false.
+      state = state.copyWith(text: '', selectedFiles: []);
     } catch (e, s) {
       _logger.severe('Message send failed: $e\n$s');
       state = state.copyWith(
@@ -362,7 +358,10 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     state = state.copyWith(showError: true, errorMessage: message);
   }
 
-  /// Reset loading state - called by ChatHistory when AI response stream ends
+  /// Reset the "AI processing" lock after the response stream ends.
+  ///
+  /// Driven from ChatInputField when ChatHistory.isStreamingResponse flips to
+  /// false (i.e. the stream reached a terminal state: completed/error/cancel).
   void resetLoadingState() {
     if (state.isLoadingResponse) {
       state = state.copyWith(
@@ -488,7 +487,14 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
   Future<void> _uploadFilesInBackground(List<XFile> files) async {
     try {
-      final uploadResult = await _fileUploadService!.uploadFiles(files);
+      // Resolve the service defensively instead of a bare `!` force-unwrap: if
+      // the provider hasn't initialized it (e.g. fired before build), surface
+      // a clear error through the shared catch path rather than crashing.
+      final service = _fileUploadService;
+      if (service == null) {
+        throw StateError('File upload service is not initialized');
+      }
+      final uploadResult = await service.uploadFiles(files);
       handleUploadCompleted(uploadResult, files);
     } catch (e, stackTrace) {
       _logger.severe('Background upload exception: $e\n$stackTrace');

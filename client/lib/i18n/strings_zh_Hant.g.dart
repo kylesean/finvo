@@ -173,6 +173,9 @@ class _Translations$navigation$zh_Hant extends Translations$navigation$zh {
 
 	// Translations
 	@override String get home => '首頁';
+	@override String get budget => '預算';
+	@override String get chat => 'AI 助手';
+	@override String get statistics => '統計';
 	@override String get forecast => '預測';
 	@override String get footprint => '足跡';
 	@override String get profile => '我的';
@@ -2556,6 +2559,9 @@ extension on TranslationsZhHant {
 			'greeting.afternoon' => '下午好',
 			'greeting.evening' => '晚上好',
 			'navigation.home' => '首頁',
+			'navigation.budget' => '預算',
+			'navigation.chat' => 'AI 助手',
+			'navigation.statistics' => '統計',
 			'navigation.forecast' => '預測',
 			'navigation.footprint' => '足跡',
 			'navigation.profile' => '我的',
@@ -3013,11 +3019,11 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.daily' => '每天',
 			'forecast.recurringTransaction.weekly' => '每週',
 			'forecast.recurringTransaction.monthly' => '每月',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.yearly' => '每年',
 			'forecast.recurringTransaction.custom' => '自訂',
 			'forecast.recurringTransaction.cycle' => '週期',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '每 ${count} 天',
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '每 ${count} 週',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '每 ${count} 個月',
@@ -3527,11 +3533,11 @@ extension on TranslationsZhHant {
 			'statistics.overview.balance' => '總結餘',
 			'statistics.overview.income' => '總收入',
 			'statistics.overview.expense' => '總支出',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.trend.title' => '收支趨勢',
 			'statistics.trend.expense' => '支出',
 			'statistics.trend.income' => '收入',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.analysis.title' => '支出分析',
 			'statistics.analysis.expenseTitle' => '支出分析',
 			'statistics.analysis.incomeTitle' => '收入分析',

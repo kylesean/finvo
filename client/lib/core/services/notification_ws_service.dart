@@ -44,6 +44,13 @@ class NotificationWsService {
   bool _isDisposed = false;
   int _reconnectAttempts = 0;
 
+  /// Monotonic token that invalidates stale async connect() callbacks. Each
+  /// call to [connect] bumps it; any awaited continuation that observes a
+  /// changed token (a newer connect or a dispose) must abort. Without this, two
+  /// concurrent connect() calls can tear each other down via [_cleanup] and
+  /// race to reinstate a half-open socket.
+  int _connectGeneration = 0;
+
   /// Broadcast stream of connection state transitions, and the current value.
   final _statusController =
       StreamController<NotificationWsConnectionStatus>.broadcast();
@@ -87,6 +94,11 @@ class NotificationWsService {
   }) async {
     if (_isDisposed) return;
 
+    // Claim this connect as the newest. A stale connect() that was already
+    // awaiting a token read / handshake will see the new generation and abort
+    // instead of stepping on the socket we are about to establish.
+    final generation = ++_connectGeneration;
+
     // Reconnect path (or server switch) may arrive while a previous channel
     // is still alive; tear it down first to avoid leaking the old socket.
     _cleanup();
@@ -107,9 +119,10 @@ class NotificationWsService {
       _scheduleReconnect();
       return;
     }
-    // Disposal can race with the awaited token read (e.g. logout during
-    // startup). Abort instead of resurrecting a socket on a disposed object.
-    if (_isDisposed) return;
+    // Disposal or a newer connect() can race with the awaited token read
+    // (e.g. logout during startup). Abort instead of resurrecting a socket on
+    // a stale generation / disposed object.
+    if (_isDisposed || generation != _connectGeneration) return;
 
     if (token == null || token.isEmpty) {
       _logger.warning('No auth token available, skipping WS connection');
@@ -136,8 +149,9 @@ class NotificationWsService {
           throw TimeoutException('WebSocket connection timed out after 15s');
         },
       );
-      // The socket may have been disposed while `ready` was pending.
-      if (_isDisposed) {
+      // The socket may have been disposed (or superseded by a newer connect)
+      // while `ready` was pending.
+      if (_isDisposed || generation != _connectGeneration) {
         _cleanup();
         return;
       }
@@ -220,6 +234,10 @@ class NotificationWsService {
   void _cleanup() {
     _heartbeatTimer?.cancel();
     _heartbeatTimer = null;
+    // Cancel any pending reconnect so a torn-down connection doesn't schedule
+    // a fresh one from a stale timer while a newer connect() is in flight.
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
     unawaited(_subscription?.cancel());
     _subscription = null;
     unawaited(_channel?.sink.close());

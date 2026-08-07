@@ -7,6 +7,7 @@ import 'package:finvo/core/utils/app_haptics.dart';
 import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
@@ -64,7 +65,7 @@ class TransactionCard extends ConsumerWidget {
 
     return AmountFormatter.formatTransaction(
       type: transaction.type,
-      amount: transaction.amount,
+      amount: transaction.amount.toDouble(),
       currency: transaction.currency ?? 'CNY',
       showSign: true,
     );
@@ -175,7 +176,7 @@ class TransactionCard extends ConsumerWidget {
         onTap: () {
           unawaited(
             context.pushNamed(
-              'transactionDetail',
+              AppRouteNames.transactionDetail,
               pathParameters: {'transactionId': transaction.id},
             ),
           );

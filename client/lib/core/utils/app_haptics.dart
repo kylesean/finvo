@@ -26,7 +26,7 @@ class AppHaptics {
 
   /// Feedback for a successful action.
   static Future<void> success() async {
-    await HapticFeedback.lightImpact(); // Double tap or specific pattern could be added if needed
+    await light(); // Double tap or specific pattern could be added if needed
   }
 
   /// Feedback for an error or warning.

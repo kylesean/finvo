@@ -278,7 +278,7 @@ final class SpaceTransactionNotifierProvider
 }
 
 String _$spaceTransactionNotifierHash() =>
-    r'7e1e19c9efd7eacece750f58c59befded260b189';
+    r'47b4e2e0f1dc2fc29e03512656c7f5945fe95290';
 
 /// Paginated transaction list for a shared space.
 ///

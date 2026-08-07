@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 
 import 'package:finvo/features/layout/widgets/nav_icon.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Bottom navigation page - using Forui design system
 ///
@@ -33,7 +34,7 @@ class BottomPage extends StatelessWidget {
                   ? colors.primary
                   : colors.mutedForeground,
             ),
-            label: const Text(''),
+            label: Text(t.navigation.home),
           ),
           FBottomNavigationBarItem(
             icon: NavIcon(
@@ -43,7 +44,7 @@ class BottomPage extends StatelessWidget {
                   ? colors.primary
                   : colors.mutedForeground,
             ),
-            label: const Text(''),
+            label: Text(t.navigation.budget),
           ),
           FBottomNavigationBarItem(
             icon: NavIcon(
@@ -53,7 +54,7 @@ class BottomPage extends StatelessWidget {
                   ? colors.primary
                   : colors.mutedForeground,
             ),
-            label: const Text(''),
+            label: Text(t.navigation.chat),
           ),
           FBottomNavigationBarItem(
             icon: NavIcon(
@@ -63,7 +64,7 @@ class BottomPage extends StatelessWidget {
                   ? colors.primary
                   : colors.mutedForeground,
             ),
-            label: const Text(''),
+            label: Text(t.navigation.statistics),
           ),
           FBottomNavigationBarItem(
             icon: NavIcon(
@@ -73,7 +74,7 @@ class BottomPage extends StatelessWidget {
                   ? colors.primary
                   : colors.mutedForeground,
             ),
-            label: const Text(''),
+            label: Text(t.navigation.profile),
           ),
         ],
       ),

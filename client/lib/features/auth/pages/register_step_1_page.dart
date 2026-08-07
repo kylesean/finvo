@@ -3,6 +3,7 @@ import 'package:finvo/features/auth/widgets/brand_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/features/auth/providers/verification_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
@@ -40,7 +41,7 @@ class _RegisterStep1PageState extends ConsumerState<RegisterStep1Page> {
     if (_formKey.currentState!.validate()) {
       unawaited(
         context.pushNamed(
-          'registerStep2',
+          AppRouteNames.registerStep2,
           extra: {
             'contact': _contactController.text,
             'verificationCode': _codeController.text,

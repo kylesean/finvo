@@ -53,6 +53,12 @@ abstract final class ResponseParser {
   /// - `{ data: { items: [...] } }` (standard pagination shape)
   /// - `{ data: [...] }` (plain list shape)
   /// - `{ data: null }` (empty result)
+  ///
+  /// Throws [DataParsingException] on a structurally-invalid response (e.g.
+  /// `data` is neither a List nor an items-bearing Map, or the root is not an
+  /// Object), so contract drift surfaces as an error instead of silently
+  /// rendering an "empty" list. Only `data: null` is tolerated as an empty
+  /// result.
   static List<T> parseList<T>(
     dynamic json,
     T Function(Map<String, dynamic>) fromJson,
@@ -65,12 +71,18 @@ abstract final class ResponseParser {
         if (items is List) {
           return _mapItems(items, fromJson);
         }
+        throw DataParsingException(
+          'Expected data.items to be a List, got ${items?.runtimeType ?? 'null'}',
+        );
       }
       if (dataField is List) {
         return _mapItems(dataField, fromJson);
       }
+      throw DataParsingException(
+        'Expected data to be a List or items-bearing Map, got ${dataField.runtimeType}',
+      );
     }
-    return [];
+    throw DataParsingException('Expected JSON Object, got ${json.runtimeType}');
   }
 
   static List<T> _mapItems<T>(

@@ -8,6 +8,11 @@ class VersionCheckState {
   final UpdateInfo? updateInfo;
   final String? error;
 
+  // Sentinel distinguishing "argument not passed" from "explicitly cleared"
+  // (null), giving [updateInfo] and [error] symmetric copy semantics: both
+  // keep their current value when omitted, and both can be cleared to null.
+  static const Object _unset = Object();
+
   const VersionCheckState({
     this.isChecking = false,
     this.updateInfo,
@@ -16,13 +21,15 @@ class VersionCheckState {
 
   VersionCheckState copyWith({
     bool? isChecking,
-    UpdateInfo? updateInfo,
-    String? error,
+    Object? updateInfo = _unset,
+    Object? error = _unset,
   }) {
     return VersionCheckState(
       isChecking: isChecking ?? this.isChecking,
-      updateInfo: updateInfo ?? this.updateInfo,
-      error: error,
+      updateInfo: identical(updateInfo, _unset)
+          ? this.updateInfo
+          : updateInfo as UpdateInfo?,
+      error: identical(error, _unset) ? this.error : error as String?,
     );
   }
 }

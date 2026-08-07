@@ -19,9 +19,24 @@ import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:dio/dio.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger('RecurringTransactionList');
+
+/// Extracts a safe, user-displayable error message from [error], preferring a
+/// typed/localized [AppException] message and never leaking raw exception text
+/// (which may contain internal details) to the UI.
+String _safeError(Object error) {
+  if (error is DioException && error.error is AppException) {
+    return (error.error as AppException).message;
+  }
+  if (error is AppException) {
+    return error.message;
+  }
+  return t.common.error;
+}
 
 /// Recurring transaction list page
 class RecurringTransactionListPage extends ConsumerStatefulWidget {
@@ -272,7 +287,7 @@ class _RecurringTransactionListPageState
       setState(() => _pendingTransactions.removeWhere((t) => t.id == id));
       TopToast.success(context, t.forecast.recurringTransaction.confirmSuccess);
     } catch (e) {
-      if (mounted) TopToast.error(context, e.toString());
+      if (mounted) TopToast.error(context, _safeError(e));
     }
   }
 
@@ -284,7 +299,7 @@ class _RecurringTransactionListPageState
       setState(() => _pendingTransactions.removeWhere((t) => t.id == id));
       TopToast.success(context, t.forecast.recurringTransaction.skipSuccess);
     } catch (e) {
-      if (mounted) TopToast.error(context, e.toString());
+      if (mounted) TopToast.error(context, _safeError(e));
     }
   }
 

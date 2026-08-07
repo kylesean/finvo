@@ -37,7 +37,11 @@ class AppExceptionFactory {
       case DioExceptionType.badResponse:
         return _fromHttpStatus(statusCode, backendMessage);
       case DioExceptionType.cancel:
-        return GeneralException(t.common.cancel);
+        // A user-initiated CancelToken abort is NOT a system error. Map it to
+        // the dedicated RequestCancelledException so callers can swallow it
+        // silently (consistent with the backoff-abort path in NetworkClient),
+        // instead of surfacing a misleading "System Error" toast.
+        return RequestCancelledException(t.common.cancel);
       case DioExceptionType.badCertificate:
         return NetworkException(t.server.error.sslError);
     }

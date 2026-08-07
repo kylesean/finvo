@@ -198,21 +198,17 @@ class AuthInterceptor extends Interceptor {
     String baseUrl,
   ) async {
     try {
-      Dio refreshDio = _refreshDio;
-      if (_refreshDio.options.baseUrl.isEmpty) {
-        // The shared refresh client is used without a fixed baseUrl, so create
-        // a per-call instance bound to the failing request's server.
-        refreshDio = Dio(
-          BaseOptions(
-            baseUrl: baseUrl,
-            connectTimeout: ApiConstants.connectTimeout,
-            receiveTimeout: ApiConstants.receiveTimeout,
-          ),
-        );
-      }
-      final Response<dynamic> response = await refreshDio.post(
-        ApiConstants.authRefreshPath,
+      // Reuse the shared refresh client for every call. A per-call Dio was
+      // previously created here when the shared client had no fixed baseUrl and
+      // was never closed, leaking its underlying HTTP connections. Instead of
+      // creating a new client, bind the failing request's server by building
+      // the full URL: dio's Options exposes no baseUrl field, so we can't
+      // repoint the shared instance per-request.
+      final Response<dynamic> response = await _refreshDio.post(
+        '$baseUrl${ApiConstants.authRefreshPath}',
         options: Options(
+          connectTimeout: ApiConstants.connectTimeout,
+          receiveTimeout: ApiConstants.receiveTimeout,
           headers: {ApiConstants.authorizationHeader: 'Bearer $refreshToken'},
         ),
       );

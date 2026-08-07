@@ -173,6 +173,9 @@ class _Translations$navigation$en extends Translations$navigation$zh {
 
 	// Translations
 	@override String get home => 'Home';
+	@override String get budget => 'Budget';
+	@override String get chat => 'AI Chat';
+	@override String get statistics => 'Statistics';
 	@override String get forecast => 'Forecast';
 	@override String get footprint => 'Footprint';
 	@override String get profile => 'Profile';
@@ -2563,6 +2566,9 @@ extension on TranslationsEn {
 			'greeting.afternoon' => 'Good Afternoon',
 			'greeting.evening' => 'Good Evening',
 			'navigation.home' => 'Home',
+			'navigation.budget' => 'Budget',
+			'navigation.chat' => 'AI Chat',
+			'navigation.statistics' => 'Statistics',
 			'navigation.forecast' => 'Forecast',
 			'navigation.footprint' => 'Footprint',
 			'navigation.profile' => 'Profile',
@@ -3020,11 +3026,11 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => 'Will execute on the ${day}${suffix} of each month (clamped for short months)',
 			'forecast.recurringTransaction.setEndDate' => 'Set End Date',
 			'forecast.recurringTransaction.selectEndDate' => 'Select End Date',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.preview' => 'Preview',
 			'forecast.recurringTransaction.daily' => 'Daily',
 			'forecast.recurringTransaction.weekly' => 'Weekly',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.monthly' => 'Monthly',
 			'forecast.recurringTransaction.yearly' => 'Yearly',
 			'forecast.recurringTransaction.custom' => 'Custom',
@@ -3534,11 +3540,11 @@ extension on TranslationsEn {
 			'app.splashTitle' => 'Finvo: Intelligence that Grows.',
 			'app.splashSubtitle' => 'Smart Financial Assistant',
 			'statistics.title' => 'Analysis',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.analyze' => 'Analysis',
 			'statistics.exportInProgress' => 'Export feature coming soon...',
 			'statistics.ranking' => 'Top Spending',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.noData' => 'No data available',
 			'statistics.overview.balance' => 'Total Balance',
 			'statistics.overview.income' => 'Total Income',

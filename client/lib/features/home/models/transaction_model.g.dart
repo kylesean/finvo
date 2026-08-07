@@ -125,9 +125,11 @@ _TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
       categoryKey: json['categoryKey'] as String?,
       categoryText: json['categoryText'] as String?,
       iconUrl: json['iconUrl'] as String,
-      amount: (json['amount'] as num).toDouble(),
+      amount: Decimal.fromJson(json['amount'] as String),
       timestamp: DateTime.parse(json['timestamp'] as String),
-      amountOriginal: (json['amountOriginal'] as num?)?.toDouble(),
+      amountOriginal: json['amountOriginal'] == null
+          ? null
+          : Decimal.fromJson(json['amountOriginal'] as String),
       originalCurrency: json['originalCurrency'] as String?,
       exchangeRate: json['exchangeRate'] as String?,
       description: json['description'] as String?,

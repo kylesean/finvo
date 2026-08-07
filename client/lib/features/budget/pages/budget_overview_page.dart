@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'dart:async';
 
 import 'package:finvo/core/constants/category_constants.dart';
@@ -14,7 +15,6 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import 'package:finvo/app/router/app_routes.dart';
 
 class BudgetOverviewPage extends ConsumerStatefulWidget {
   const BudgetOverviewPage({super.key});
@@ -119,7 +119,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
           if (state.summary!.totalBudgetDetail != null) ...[
             GestureDetector(
               onTap: () => context.pushNamed(
-                'budgetDetail',
+                AppRouteNames.budgetDetail,
                 pathParameters: {
                   'id': state.summary!.totalBudgetDetail!.budget.id,
                 },
@@ -147,7 +147,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
             ...state.summary!.categoryBudgets.map(
               (b) => GestureDetector(
                 onTap: () => context.pushNamed(
-                  'budgetDetail',
+                  AppRouteNames.budgetDetail,
                   pathParameters: {'id': b.budget.id},
                 ),
                 child: _buildBudgetCard(theme, colors, b),

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:finvo/features/finance/models/recurring_transaction.dart';
 import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/features/finance/utils/recurrence_rule_utils.dart';
 import 'package:finvo/features/finance/utils/recurring_transaction_display.dart'
     show formatShortDate, recurringTransactionDisplayName;
@@ -38,7 +39,7 @@ class RecurringTransactionCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
     final colors = theme.colors;
-    final typeColor = _getTypeColor(colors, transaction.type);
+    final typeColor = _getTypeColor(theme, transaction.type);
     final typeIcon = _getTypeIcon(transaction.type);
     final amountSign = transaction.type == RecurringTransactionType.income
         ? '+'
@@ -71,7 +72,9 @@ class RecurringTransactionCard extends ConsumerWidget {
       background: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: transaction.isActive ? colors.mutedForeground : Colors.green,
+          color: transaction.isActive
+              ? colors.mutedForeground
+              : theme.semantic.successAccent,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.centerLeft,
@@ -220,14 +223,14 @@ class RecurringTransactionCard extends ConsumerWidget {
     );
   }
 
-  Color _getTypeColor(FColors colors, RecurringTransactionType type) {
+  Color _getTypeColor(FThemeData theme, RecurringTransactionType type) {
     switch (type) {
       case RecurringTransactionType.expense:
-        return colors.destructive;
+        return theme.colors.destructive;
       case RecurringTransactionType.income:
-        return Colors.green;
+        return theme.semantic.successAccent;
       case RecurringTransactionType.transfer:
-        return colors.primary;
+        return theme.colors.primary;
     }
   }
 

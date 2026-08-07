@@ -60,6 +60,9 @@
   },
   "navigation": {
     "home": "首頁",
+    "budget": "預算",
+    "chat": "AI 助手",
+    "statistics": "統計",
     "forecast": "預測",
     "footprint": "足跡",
     "profile": "我的"

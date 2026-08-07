@@ -279,6 +279,15 @@ class Translations$navigation$zh {
 	/// zh: '首页'
 	String get home => '首页';
 
+	/// zh: '预算'
+	String get budget => '预算';
+
+	/// zh: 'AI 助手'
+	String get chat => 'AI 助手';
+
+	/// zh: '统计'
+	String get statistics => '统计';
+
 	/// zh: '预测'
 	String get forecast => '预测';
 
@@ -5158,6 +5167,9 @@ extension on Translations {
 			'greeting.afternoon' => '下午好',
 			'greeting.evening' => '晚上好',
 			'navigation.home' => '首页',
+			'navigation.budget' => '预算',
+			'navigation.chat' => 'AI 助手',
+			'navigation.statistics' => '统计',
 			'navigation.forecast' => '预测',
 			'navigation.footprint' => '足迹',
 			'navigation.profile' => '我的',
@@ -5615,11 +5627,11 @@ extension on Translations {
 			'forecast.recurringTransaction.lastDayExecution' => '将在每月最后一天执行',
 			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => '将在每月 ${day} 号${suffix}执行（短月份自动对齐月末）',
 			'forecast.recurringTransaction.setEndDate' => '设置结束日期',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.selectEndDate' => '选择结束日期',
 			'forecast.recurringTransaction.preview' => '规则预览',
 			'forecast.recurringTransaction.daily' => '每天',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.weekly' => '每周',
 			'forecast.recurringTransaction.monthly' => '每月',
 			'forecast.recurringTransaction.yearly' => '每年',
@@ -6129,11 +6141,11 @@ extension on Translations {
 			'statistics.title' => '统计分析',
 			'statistics.analyze' => '统计分析',
 			'statistics.exportInProgress' => '导出功能开发中...',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.ranking' => '大额消费排行',
 			'statistics.noData' => '暂无数据',
 			'statistics.overview.balance' => '总结余',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.overview.income' => '总收入',
 			'statistics.overview.expense' => '总支出',
 			'statistics.trend.title' => '收支趋势',

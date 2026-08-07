@@ -173,6 +173,9 @@ class _Translations$navigation$ko extends Translations$navigation$zh {
 
 	// Translations
 	@override String get home => '홈';
+	@override String get budget => '예산';
+	@override String get chat => 'AI 채팅';
+	@override String get statistics => '통계';
 	@override String get forecast => '예측';
 	@override String get footprint => '발자취';
 	@override String get profile => '마이페이지';
@@ -2558,6 +2561,9 @@ extension on TranslationsKo {
 			'greeting.afternoon' => '좋은 오후입니다',
 			'greeting.evening' => '좋은 저녁입니다',
 			'navigation.home' => '홈',
+			'navigation.budget' => '예산',
+			'navigation.chat' => 'AI 채팅',
+			'navigation.statistics' => '통계',
 			'navigation.forecast' => '예측',
 			'navigation.footprint' => '발자취',
 			'navigation.profile' => '마이페이지',
@@ -3015,11 +3021,11 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.daily' => '매일',
 			'forecast.recurringTransaction.weekly' => '매주',
 			'forecast.recurringTransaction.monthly' => '매월',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.yearly' => '매년',
 			'forecast.recurringTransaction.custom' => '사용자 지정',
 			'forecast.recurringTransaction.cycle' => '주기',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count}일마다',
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '${count}주마다',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '${count}개월마다',
@@ -3529,11 +3535,11 @@ extension on TranslationsKo {
 			'statistics.ranking' => '고액 소비 순위',
 			'statistics.noData' => '데이터 없음',
 			'statistics.overview.balance' => '총 잔액',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.overview.income' => '총 수입',
 			'statistics.overview.expense' => '총 지출',
 			'statistics.trend.title' => '수지 추세',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.trend.expense' => '지출',
 			'statistics.trend.income' => '수입',
 			'statistics.analysis.title' => '지출 분석',

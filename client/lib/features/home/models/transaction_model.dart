@@ -136,10 +136,10 @@ abstract class TransactionModel with _$TransactionModel {
     String? categoryKey, // Category ID
     String? categoryText, // Server-side localized category name
     required String iconUrl, // Category icon URL (or local path)
-    required double amount, // Display amount after conversion
+    required Decimal amount, // Display amount after conversion
     required DateTime timestamp, // Transaction time
     // Original amount information (historical data, immutable)
-    double? amountOriginal, // Original recorded amount
+    Decimal? amountOriginal, // Original recorded amount
     String? originalCurrency, // Original recorded currency (e.g., USD, CNY)
     String? exchangeRate, // Exchange rate snapshot at time of recording
     // Other fields
@@ -320,27 +320,27 @@ IconData lucideIconFromString(String raw) {
 // Parse amount field, supports numbers and strings (including localized
 // formats like "1.234,56" / "1,234.56").
 //
-// Missing values (null/empty) legitimately map to 0.0, but an UNPARSEABLE
-// non-empty value also degrades to 0.0 with a loud warning: silently zeroing
+// Missing values (null/empty) legitimately map to zero, but an UNPARSEABLE
+// non-empty value also degrades to zero with a loud warning: silently zeroing
 // financial amounts hides data corruption, so balance discrepancies must be
 // investigable via logs.
-double _parseAmount(dynamic value) {
-  if (value == null) return 0.0;
-  if (value is num) return value.toDouble();
+Decimal _parseAmount(dynamic value) {
+  if (value == null) return Decimal.zero;
+  if (value is num) return Decimal.parse(value.toString());
   if (value is String) {
     final normalized = _normalizeAmountString(value);
-    if (normalized.isEmpty) return 0.0;
-    // Parse through Decimal to preserve precision; convert to double only at
-    // this display boundary (same contract as AmountFormatter.parseDouble).
+    if (normalized.isEmpty) return Decimal.zero;
+    // Parse through Decimal to preserve precision end-to-end: the model now
+    // stores the amount as Decimal (like the budget model) so aggregation and
+    // display both stay exact. Conversion to double happens only at the
+    // display boundary (e.g. formatTransaction / AmountText).
     final decimal = Decimal.tryParse(normalized);
-    if (decimal != null) return decimal.toDouble();
-    final fallback = double.tryParse(normalized);
-    if (fallback != null) return fallback;
-    _logger.warning('Unparseable amount "$value" coerced to 0.0');
-    return 0.0;
+    if (decimal != null) return decimal;
+    _logger.warning('Unparseable amount "$value" coerced to 0');
+    return Decimal.zero;
   }
-  _logger.warning('Unexpected amount type ${value.runtimeType} coerced to 0.0');
-  return 0.0;
+  _logger.warning('Unexpected amount type ${value.runtimeType} coerced to 0');
+  return Decimal.zero;
 }
 
 /// Normalize a localized amount string to plain `[-]digits[.digits]` form.

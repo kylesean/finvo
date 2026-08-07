@@ -60,6 +60,9 @@
   },
   "navigation": {
     "home": "ホーム",
+    "budget": "予算",
+    "chat": "AI チャット",
+    "statistics": "統計",
     "forecast": "予測",
     "footprint": "フットプリント",
     "profile": "マイページ"
