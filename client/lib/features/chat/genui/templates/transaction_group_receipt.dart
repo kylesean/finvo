@@ -814,57 +814,54 @@ class _TransactionGroupReceiptState
 
     if (!mounted) return;
 
-    unawaited(
-      showModalBottomSheet<String>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => Container(
-          decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: AccountPickerCard(
-            accounts: printableAccounts,
-            selectedId: currentAccountId,
-            title: t.chat.genui.transactionCard.selectAccount,
-            transactionCurrency: txCurrency, // Pass transaction currency
-            onSelect: (id) {
-              Navigator.pop(context, id);
-            },
-            onConfirm: () {},
-          ),
+    final selectedId = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: colors.background,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-      ).then((selectedId) async {
-        if (selectedId == null) return;
-        if (!mounted) return;
-        // Get selected account
-        final selectedAccount = accountState.accounts
-            .where((a) => a.id == selectedId)
-            .firstOrNull;
-
-        if (selectedAccount != null) {
-          final accountCurrency = selectedAccount.currencyCode.toUpperCase();
-          final transactionCurrency = txCurrency.toUpperCase();
-
-          // Currency mismatch, show confirmation dialog
-          if (accountCurrency != transactionCurrency) {
-            final confirmed = await showCurrencyMismatchConfirmDialog(
-              context,
-              amount: txAmount ?? 0,
-              fromCurrency: transactionCurrency,
-              toCurrency: accountCurrency,
-              accountName: selectedAccount.name,
-            );
-
-            if (confirmed != true) return;
-          }
-        }
-
-        await _updateTransactionAccount(txId, selectedId);
-      }),
+        padding: const EdgeInsets.all(20),
+        child: AccountPickerCard(
+          accounts: printableAccounts,
+          selectedId: currentAccountId,
+          title: t.chat.genui.transactionCard.selectAccount,
+          transactionCurrency: txCurrency, // Pass transaction currency
+          onSelect: (id) {
+            Navigator.pop(context, id);
+          },
+          onConfirm: () {},
+        ),
+      ),
     );
+    if (selectedId == null) return;
+    if (!mounted) return;
+    // Get selected account
+    final selectedAccount = accountState.accounts
+        .where((a) => a.id == selectedId)
+        .firstOrNull;
+
+    if (selectedAccount != null) {
+      final accountCurrency = selectedAccount.currencyCode.toUpperCase();
+      final transactionCurrency = txCurrency.toUpperCase();
+
+      // Currency mismatch, show confirmation dialog
+      if (accountCurrency != transactionCurrency) {
+        final confirmed = await showCurrencyMismatchConfirmDialog(
+          context,
+          amount: txAmount ?? 0,
+          fromCurrency: transactionCurrency,
+          toCurrency: accountCurrency,
+          accountName: selectedAccount.name,
+        );
+
+        if (confirmed != true) return;
+      }
+    }
+
+    await _updateTransactionAccount(txId, selectedId);
   }
 
   Future<void> _updateTransactionAccount(
@@ -972,17 +969,14 @@ class _TransactionGroupReceiptState
 
     if (!mounted) return;
 
-    unawaited(
-      showSpacePickerSheet(
-        context,
-        spaces: _cachedSpaces!,
-        associatedIds: associatedIds,
-      ).then((selectedId) async {
-        if (selectedId != null) {
-          await _updateTransactionSpace(txId, selectedId);
-        }
-      }),
+    final selectedId = await showSpacePickerSheet(
+      context,
+      spaces: _cachedSpaces!,
+      associatedIds: associatedIds,
     );
+    if (selectedId != null) {
+      await _updateTransactionSpace(txId, selectedId);
+    }
   }
 
   Future<void> _updateTransactionSpace(

@@ -313,6 +313,12 @@ class TransactionFeed extends _$TransactionFeed {
     try {
       final homeService = ref.read(homeServiceProvider);
       await homeService.deleteTransaction(transactionId);
+      // Invalidate derived data so the total-expense and calendar views no
+      // longer reflect the just-deleted transaction (previously only the feed
+      // list was updated, leaving stale totals/calendar entries behind).
+      ref.invalidate(totalExpenseProvider);
+      final currentMonth = ref.read(currentDisplayMonthProvider);
+      ref.invalidate(calendarMonthDataProvider(currentMonth));
       return true;
     } catch (e) {
       final rollbackList = List<TransactionModel>.from(state.transactions);

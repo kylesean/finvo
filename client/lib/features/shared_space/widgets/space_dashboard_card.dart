@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
@@ -7,7 +9,7 @@ import 'package:finvo/shared/widgets/user_avatar.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
-class SpaceDashboardCard extends StatelessWidget {
+class SpaceDashboardCard extends ConsumerWidget {
   final SharedSpace space;
   final Settlement settlement;
 
@@ -18,9 +20,12 @@ class SpaceDashboardCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
     final colors = theme.colors;
+    // Non-currency logic: the dashboard aggregates the space's own currency,
+    // so the symbol follows the user's primary currency instead of a hardcoded ¥.
+    final currency = ref.watch(financialSettingsProvider).primaryCurrency;
 
     return Container(
       decoration: BoxDecoration(
@@ -60,7 +65,10 @@ class SpaceDashboardCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '¥${_formatAmount(space.totalExpense)}',
+                  AmountFormatter.formatWithCurrency(
+                    space.totalExpense,
+                    currencyCode: currency,
+                  ),
                   style: theme.typography.body.xl3.copyWith(
                     color: colors.primaryForeground,
                     fontWeight: AppFontConfig.amountBold,
@@ -81,7 +89,7 @@ class SpaceDashboardCard extends StatelessWidget {
                     _buildQuickStat(
                       context,
                       t.sharedSpace.dashboard.averagePerMember,
-                      '¥${_calculateAverage()}',
+                      _calculateAverage(currency),
                     ),
                   ],
                 ),
@@ -101,7 +109,7 @@ class SpaceDashboardCard extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildDistributionBar(context),
                 const SizedBox(height: 24),
-                ..._buildMemberList(context),
+                ..._buildMemberList(context, currency),
               ],
             ),
           ),
@@ -175,7 +183,7 @@ class SpaceDashboardCard extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMemberList(BuildContext context) {
+  List<Widget> _buildMemberList(BuildContext context, String currency) {
     final theme = context.theme;
     final colors = theme.colors;
     final members = space.members ?? [];
@@ -211,7 +219,10 @@ class SpaceDashboardCard extends StatelessWidget {
               ),
             ),
             Text(
-              '¥${_formatAmount(member.contributionAmount)}',
+              AmountFormatter.formatWithCurrency(
+                member.contributionAmount,
+                currencyCode: currency,
+              ),
               style: theme.typography.body.sm.copyWith(
                 fontWeight: AppFontConfig.amountBold,
                 color: colors.foreground,
@@ -232,16 +243,13 @@ class SpaceDashboardCard extends StatelessWidget {
     );
   }
 
-  String _formatAmount(dynamic amount) {
-    final valueStr = amount.toString();
-    final value = double.tryParse(valueStr) ?? 0.0;
-    return AmountFormatter.getNumberFormat('CNY').format(value);
-  }
-
-  String _calculateAverage() {
+  String _calculateAverage(String currency) {
     final total = double.tryParse(space.totalExpense) ?? 0.0;
     final memberCount = space.members?.length ?? 1;
     final avg = memberCount > 0 ? total / memberCount : total;
-    return _formatAmount(avg);
+    return AmountFormatter.formatWithCurrency(
+      avg.toString(),
+      currencyCode: currency,
+    );
   }
 }

@@ -10,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class _FakeSecureStorage extends FlutterSecureStorage {
   String? token;
+  String? refreshToken;
 
   @override
   Future<void> write({
@@ -23,6 +24,7 @@ class _FakeSecureStorage extends FlutterSecureStorage {
     WindowsOptions? wOptions,
   }) async {
     if (key == 'auth_token') token = value;
+    if (key == 'auth_refresh_token') refreshToken = value;
   }
 
   @override
@@ -36,6 +38,7 @@ class _FakeSecureStorage extends FlutterSecureStorage {
     WindowsOptions? wOptions,
   }) async {
     if (key == 'auth_token') return token;
+    if (key == 'auth_refresh_token') return refreshToken;
     return null;
   }
 
@@ -50,6 +53,7 @@ class _FakeSecureStorage extends FlutterSecureStorage {
     WindowsOptions? wOptions,
   }) async {
     if (key == 'auth_token') token = null;
+    if (key == 'auth_refresh_token') refreshToken = null;
   }
 }
 
@@ -167,6 +171,75 @@ void main() {
     });
   });
 
+  group('AuthInterceptor refresh-and-replay', () {
+    late _FakeSecureStorage fakeStorage;
+    late SecureStorageService storageService;
+    final unauthorizedCalls = <String>[];
+    late Dio refreshDio;
+
+    setUp(() {
+      fakeStorage = _FakeSecureStorage();
+      storageService = SecureStorageService(fakeStorage);
+      unauthorizedCalls.clear();
+      // A dedicated refresh client whose /auth/refresh returns fresh tokens.
+      // A non-empty baseUrl tells the interceptor to reuse this injected
+      // client instead of spinning up a fresh Dio bound to the failing host.
+      refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
+      refreshDio.httpClientAdapter = _RefreshAdapter();
+      // Seed a refresh token so the 401 path actually attempts a refresh.
+      fakeStorage.refreshToken = 'seed-refresh-token';
+    });
+
+    Dio makeInterceptorDio(HttpClientAdapter adapter) {
+      final d = Dio();
+      d.interceptors.add(
+        AuthInterceptor(
+          storageService,
+          onUnauthorized: () async => unauthorizedCalls.add('triggered'),
+          dio: d,
+          refreshDio: refreshDio,
+        ),
+      );
+      d.httpClientAdapter = adapter;
+      return d;
+    }
+
+    test(
+      'replay network failure does NOT sign out and propagates error (M1)',
+      () async {
+        // 1st call -> 401 (triggers refresh), replay -> network error.
+        final d = makeInterceptorDio(
+          _SequencedAdapter([_mockResponse(401), _mockNetworkError]),
+        );
+
+        await expectLater(
+          d.get<dynamic>('https://example.com/api'),
+          throwsA(
+            isA<DioException>().having(
+              (e) => e.type,
+              'type',
+              DioExceptionType.connectionError,
+            ),
+          ),
+        );
+        // Must NOT sign out: the session is still valid, only the network hiccuped.
+        expect(unauthorizedCalls, isEmpty);
+      },
+    );
+
+    test('replay still-401 DOES sign out (genuinely invalid token)', () async {
+      final d = makeInterceptorDio(
+        _SequencedAdapter([_mockResponse(401), _mockResponse(401)]),
+      );
+
+      await expectLater(
+        d.get<dynamic>('https://example.com/api'),
+        throwsA(isA<DioException>()),
+      );
+      expect(unauthorizedCalls, ['triggered']);
+    });
+  });
+
   group('SecureStorageService fail-closed', () {
     test(
       'saveToken throws when Keychain fails (no plaintext fallback)',
@@ -255,6 +328,96 @@ class _CaptureAdapter implements HttpClientAdapter {
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Adapter for the dedicated refresh client: always returns fresh tokens.
+class _RefreshAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString(
+      '{"code":0,"data":{"token":"new-access-token",'
+      '"refresh_token":"new-refresh-token"}}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Returns a 401 DioException for the given options.
+DioException _mockResponse(int statusCode) {
+  return DioException(
+    requestOptions: RequestOptions(path: '/api'),
+    response: Response<dynamic>(
+      requestOptions: RequestOptions(path: '/api'),
+      statusCode: statusCode,
+      statusMessage: 'error',
+      data: '{"code":1}',
+    ),
+    type: DioExceptionType.badResponse,
+  );
+}
+
+/// A connection-level error (no HTTP response).
+final DioException _mockNetworkError = DioException(
+  requestOptions: RequestOptions(path: '/api'),
+  type: DioExceptionType.connectionError,
+);
+
+/// Serves pre-built outcomes in order.
+///
+/// Critically, the thrown [DioException] is rebuilt with the *incoming*
+/// [options] as its `requestOptions` so any interceptor-set markers (e.g. the
+/// `_refreshedKey` extra flag) survive into the error handling chain — exactly
+/// as a real network failure would. Throwing a pre-built exception whose
+/// requestOptions is a fresh object would silently drop those markers and
+/// break interceptor logic.
+class _SequencedAdapter implements HttpClientAdapter {
+  final List<DioException> _outcomes;
+  int _index = 0;
+
+  _SequencedAdapter(List<DioException> outcomes) : _outcomes = outcomes;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (_index >= _outcomes.length) {
+      return ResponseBody.fromString(
+        '{"code":0,"data":{}}',
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
+    final e = _outcomes[_index++];
+    // Rebuild the exception against the real request options so extra flags
+    // set by interceptors survive.
+    throw DioException(
+      requestOptions: options,
+      response: Response<dynamic>(
+        requestOptions: options,
+        statusCode: e.response?.statusCode,
+        statusMessage: e.response?.statusMessage,
+        data: e.response?.data,
+      ),
+      type: e.type,
     );
   }
 

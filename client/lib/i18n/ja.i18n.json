@@ -325,6 +325,7 @@
     "enterAddress": "サーバーアドレスを入力してください",
     "enterValidPort": "有効なポート番号(1-65535)を入力してください",
     "configSaved": "設定を保存しました",
+    "configSaveFailed": "設定の保存に失敗しました",
     "systemVoiceRestrictedTitle": "システム音声が利用できません",
     "systemVoiceRestrictedContent": "端末の音声認識サービスが無効または利用できません。設定を確認するかWebSocket自作ASRを設定してください。",
     "dictationDisabledTitle": "音声入力（音声入力/音声聞き取り）が無効です",
@@ -589,6 +590,8 @@
       "selectIncomeAccount": "収入口座を選択",
       "amountNotFixed": "$typeごとの金額は固定されません",
       "selectBothAccounts": "振替元と振替先の口座を選択してください",
+      "sameAccount": "振替元と振替先の口座は同じにできません",
+      "endBeforeStart": "終了日は開始日より前には設定できません",
       "selectAccountForType": "$type口座を選択してください",
       "deleteConfirmGeneric": "この定期取引を削除してもよろしいですか？この操作は取り消せません。",
       "selectDate": "$date を選択",
@@ -718,6 +721,8 @@
     "noRelatedFound": "関連する会話が見つかりません",
     "tryOtherKeywords": "他のキーワードで検索してください",
     "searchFailed": "検索失敗",
+    "updatedAt": "更新日時: $time",
+    "createdAt": "作成日時: $time",
     "deleteConversation": "チャットを削除",
     "deleteConversationConfirm": "このチャットを削除してもよろしいですか？この操作は取り消せません。",
     "conversationDeleted": "チャットを削除しました",
@@ -1169,7 +1174,12 @@
     "dayUnit": "日",
     "saveFailed": "保存に失敗しました",
     "deleteFailed": "削除に失敗しました。しばらくしてから再試行してください",
-    "missingExchangeRates": "一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：$currencies"
+    "missingExchangeRates": "一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：$currencies",
+    "cashPocketTitle": "マイ現金口座",
+    "sourcesCount": "$count 口座",
+    "lastUpdatedAt": "最終更新：$time",
+    "neverUpdated": "未更新",
+    "updateNow": "今すぐ更新"
   },
   "app": {
     "splashTitle": "スマートに、豊かに。",
@@ -1299,7 +1309,8 @@
       "noTransactions": "取引はまだありません",
       "noTransactionsHint": "このスペースの取引がここに表示されます",
       "refreshCode": "コードを更新",
-      "joinOtherSpace": "他のスペースに参加"
+      "joinOtherSpace": "他のスペースに参加",
+      "noMoreTransactions": "これ以上の取引はありません"
     },
     "notifications": {
       "title": "お知らせ",

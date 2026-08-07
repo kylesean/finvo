@@ -10,6 +10,7 @@ import 'package:finvo/features/chat/genui/atoms/empty_state_alert.dart';
 import 'package:finvo/features/chat/genui/molecules/budget_item_card.dart';
 import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/app/router/app_routes.dart';
 
 /// Budget status card template
 ///
@@ -99,7 +100,7 @@ class BudgetStatusCard extends StatelessWidget {
       compact: false,
       onTap: budgetId != null
           ? () => context.pushNamed(
-              'budgetDetail',
+              AppRouteNames.budgetDetail,
               pathParameters: {'id': budgetId},
             )
           : null,
@@ -222,7 +223,7 @@ class BudgetStatusCard extends StatelessWidget {
     return InkWell(
       onTap: budgetId != null
           ? () => context.pushNamed(
-              'budgetDetail',
+              AppRouteNames.budgetDetail,
               pathParameters: {'id': budgetId},
             )
           : null,
@@ -318,7 +319,7 @@ class BudgetStatusCard extends StatelessWidget {
       compact: true,
       onTap: budgetId != null
           ? () => context.pushNamed(
-              'budgetDetail',
+              AppRouteNames.budgetDetail,
               pathParameters: {'id': budgetId},
             )
           : null,

@@ -114,6 +114,41 @@ class Statistics extends _$Statistics {
       // Fetch all data in parallel. Overview/trend/category/top-transactions are
       // core and fail together; cash-flow and health-score are supplementary and
       // degrade gracefully to null on error so the report still renders.
+      //
+      // Local helpers isolate each supplementary fetch so a failure degrades to
+      // null without aborting the parallel batch (replacing the former
+      // `.catchError((_) => null)` chain, which could swallow non-business
+      // errors and was hard to read).
+      Future<CashFlowAnalysis?> loadCashFlow() async {
+        try {
+          return await service.getCashFlow(
+            timeRange: state.timeRange.name,
+            startDate: state.customStartDate?.toIso8601String(),
+            endDate: state.customEndDate?.toIso8601String(),
+            accountTypes: state.selectedAccountTypes.isNotEmpty
+                ? state.selectedAccountTypes
+                : null,
+          );
+        } catch (_) {
+          return null;
+        }
+      }
+
+      Future<HealthScore?> loadHealthScore() async {
+        try {
+          return await service.getHealthScore(
+            timeRange: state.timeRange.name,
+            startDate: state.customStartDate?.toIso8601String(),
+            endDate: state.customEndDate?.toIso8601String(),
+            accountTypes: state.selectedAccountTypes.isNotEmpty
+                ? state.selectedAccountTypes
+                : null,
+          );
+        } catch (_) {
+          return null;
+        }
+      }
+
       final (
         StatisticsOverview overview,
         TrendDataResponse trendData,
@@ -158,28 +193,8 @@ class Statistics extends _$Statistics {
           page: 1,
           pageSize: 15,
         ),
-        service
-            .getCashFlow(
-              timeRange: state.timeRange.name,
-              startDate: state.customStartDate?.toIso8601String(),
-              endDate: state.customEndDate?.toIso8601String(),
-              accountTypes: state.selectedAccountTypes.isNotEmpty
-                  ? state.selectedAccountTypes
-                  : null,
-            )
-            .then<CashFlowAnalysis?>((res) => res)
-            .catchError((_) => null),
-        service
-            .getHealthScore(
-              timeRange: state.timeRange.name,
-              startDate: state.customStartDate?.toIso8601String(),
-              endDate: state.customEndDate?.toIso8601String(),
-              accountTypes: state.selectedAccountTypes.isNotEmpty
-                  ? state.selectedAccountTypes
-                  : null,
-            )
-            .then<HealthScore?>((res) => res)
-            .catchError((_) => null),
+        loadCashFlow(),
+        loadHealthScore(),
       ).wait;
 
       // Discard stale responses from superseded filter/sort/range changes.
@@ -230,8 +245,14 @@ class Statistics extends _$Statistics {
 
   /// Change chart type and reload trend data
   Future<void> setChartType(ChartType chartType) async {
+    // Bump the shared generation so any in-flight loadStatistics for the old
+    // chart type is discarded (otherwise it would overwrite the new chart).
     final generation = ++_loadGeneration;
-    state = state.copyWith(chartType: chartType);
+    // Reset isLoading here: bumping the generation orphans the previous
+    // loadStatistics, whose own completion path (which normally clears
+    // isLoading) will be skipped — otherwise the report would stuck in a
+    // permanent loading state.
+    state = state.copyWith(chartType: chartType, isLoading: false);
     try {
       final service = ref.read(statisticsServiceProvider);
       final trendData = await service.getTrendData(
@@ -254,8 +275,11 @@ class Statistics extends _$Statistics {
 
   /// Change sort type and reload top transactions
   Future<void> setSortType(SortType sortType) async {
+    // Same generation bump + isLoading reset as setChartType: orphan the
+    // in-flight loadStatistics rather than let it clobber the new sort while
+    // leaving isLoading stuck true.
     final generation = ++_loadGeneration;
-    state = state.copyWith(sortType: sortType);
+    state = state.copyWith(sortType: sortType, isLoading: false);
     try {
       final service = ref.read(statisticsServiceProvider);
       final topTransactions = await service.getTopTransactions(
@@ -292,6 +316,11 @@ class Statistics extends _$Statistics {
       return;
     }
 
+    // Capture the generation: a filter/range/sort switch invalidates this
+    // request. Without this guard, a stale page-2 response from the old filter
+    // would be appended to the new filter's list, producing a mixed view.
+    final generation = _loadGeneration;
+
     state = state.copyWith(isLoadingMoreTopTransactions: true);
 
     try {
@@ -310,6 +339,14 @@ class Statistics extends _$Statistics {
         pageSize: state.topTransactions?.pageSize ?? 15,
       );
 
+      // Drop stale responses from superseded filters/sorts. The whole list is
+      // about to be replaced by the newer loadStatistics, so also clear the
+      // in-flight flag to avoid a stuck "loading more" spinner.
+      if (generation != _loadGeneration) {
+        state = state.copyWith(isLoadingMoreTopTransactions: false);
+        return;
+      }
+
       state = state.copyWith(
         topTransactions: result.copyWith(
           items: [...state.topTransactions!.items, ...result.items],
@@ -317,9 +354,11 @@ class Statistics extends _$Statistics {
         isLoadingMoreTopTransactions: false,
       );
     } catch (e) {
-      state = state.copyWith(isLoadingMoreTopTransactions: false);
-      // Keep the already-loaded data visible; log the failure for diagnostics.
-      _logger.warning('Failed to load more top transactions: $e');
+      if (generation == _loadGeneration) {
+        state = state.copyWith(isLoadingMoreTopTransactions: false);
+        // Keep the already-loaded data visible; log the failure for diagnostics.
+        _logger.warning('Failed to load more top transactions: $e');
+      }
     }
   }
 }

@@ -254,6 +254,11 @@ class CustomContentGenerator implements genui.Transport {
         const error = 'Authentication token is missing';
         _logger.info('CustomContentGenerator: $error');
         onError?.call(error);
+        // The stream never started, but the caller still expects a terminal
+        // signal: without onStreamComplete the upper layer's isStreamingResponse
+        // stays true forever and the chat UI locks up (stop button stuck, new
+        // messages rejected).
+        onStreamComplete?.call();
         return;
       }
 
@@ -312,6 +317,9 @@ class CustomContentGenerator implements genui.Transport {
         final error = 'HTTP error: ${response.statusCode}';
         _logger.info('CustomContentGenerator: $error');
         onError?.call(error);
+        // Reset the streaming state on the error path too; otherwise
+        // isStreamingResponse stays stuck after a non-200 response.
+        onStreamComplete?.call();
         return;
       }
 
@@ -362,6 +370,10 @@ class CustomContentGenerator implements genui.Transport {
         stackTrace,
       );
       onError?.call(e.toString());
+      // Always terminate the stream on the error path so the upper layer can
+      // clear isStreamingResponse. Without this a mid-stream failure leaves
+      // the chat permanently in a streaming state.
+      onStreamComplete?.call();
     }
   }
 
@@ -483,6 +495,9 @@ class CustomContentGenerator implements genui.Transport {
     } catch (e, stackTrace) {
       _logger.severe('[A2UI] ERROR parsing message', e, stackTrace);
       onError?.call(e.toString());
+      // A malformed A2UI message is a terminal failure for this stream turn;
+      // notify completion so isStreamingResponse is not left stuck.
+      onStreamComplete?.call();
     }
   }
 

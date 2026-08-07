@@ -139,75 +139,66 @@ class _MediaSelectionSheet extends StatelessWidget {
   }
 
   /// Handle take photo
-  void _handleTakePhoto(BuildContext context) {
+  Future<void> _handleTakePhoto(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     final errorColor = context.theme.colors.destructive;
     Navigator.of(context).pop();
 
-    unawaited(
-      MediaPickerService.takePhoto()
-          .then((photo) {
-            onFilesSelected([photo]);
-          })
-          .catchError((Object e) {
-            if (!context.mounted) return;
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text('${t.common.error}: $e'),
-                backgroundColor: errorColor,
-              ),
-            );
-          }),
-    );
+    try {
+      final photo = await MediaPickerService.takePhoto();
+      onFilesSelected([photo]);
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${t.common.error}: $e'),
+          backgroundColor: errorColor,
+        ),
+      );
+    }
   }
 
   /// Handle select photos
-  void _handleSelectPhotos(BuildContext context) {
+  Future<void> _handleSelectPhotos(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     final errorColor = context.theme.colors.destructive;
     Navigator.of(context).pop();
 
-    unawaited(
-      MediaPickerService.pickGalleryPhotos()
-          .then((photos) {
-            if (photos.isNotEmpty) {
-              onFilesSelected(photos);
-            }
-          })
-          .catchError((Object e) {
-            if (!context.mounted) return;
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text('${t.common.error}: $e'),
-                backgroundColor: errorColor,
-              ),
-            );
-          }),
-    );
+    try {
+      final photos = await MediaPickerService.pickGalleryPhotos();
+      if (photos.isNotEmpty) {
+        onFilesSelected(photos);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${t.common.error}: $e'),
+          backgroundColor: errorColor,
+        ),
+      );
+    }
   }
 
   /// Handle select files
-  void _handleSelectFiles(BuildContext context) {
+  Future<void> _handleSelectFiles(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     final errorColor = context.theme.colors.destructive;
     Navigator.of(context).pop();
 
-    unawaited(
-      MediaPickerService.pickFiles()
-          .then((files) {
-            if (files.isNotEmpty) {
-              onFilesSelected(files);
-            }
-          })
-          .catchError((Object e) {
-            if (!context.mounted) return;
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text('${t.common.error}: $e'),
-                backgroundColor: errorColor,
-              ),
-            );
-          }),
-    );
+    try {
+      final files = await MediaPickerService.pickFiles();
+      if (files.isNotEmpty) {
+        onFilesSelected(files);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${t.common.error}: $e'),
+          backgroundColor: errorColor,
+        ),
+      );
+    }
   }
 }

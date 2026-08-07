@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 import 'package:finvo/features/shared_space/services/shared_space_service.dart';
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
@@ -136,7 +137,10 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
         );
         // Navigate to the newly joined space
         unawaited(
-          GoRouter.of(context).push('/profile/shared-space/${space.id}'),
+          GoRouter.of(context).pushNamed(
+            AppRouteNames.sharedSpaceDetail,
+            pathParameters: {'spaceId': space.id},
+          ),
         );
       }
     } on AppException catch (e) {

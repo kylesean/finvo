@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:finvo/features/finance/widgets/recurrence_rule_sheet.dart';
+import 'package:finvo/features/finance/widgets/recurrence_rule_types.dart';
 
 void main() {
   group('recurrenceDateForMonthDay (C-1 regression)', () {

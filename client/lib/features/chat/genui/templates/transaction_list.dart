@@ -10,6 +10,7 @@ import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/app/router/app_routes.dart';
 
 /// Transaction list component - supports waterfall pagination
 class TransactionList extends ConsumerStatefulWidget {
@@ -259,7 +260,10 @@ class _TransactionListState extends ConsumerState<TransactionList> {
 
     return InkWell(
       onTap: transactionId != null
-          ? () => context.push('/home/transaction/$transactionId')
+          ? () => context.pushNamed(
+              AppRouteNames.transactionDetail,
+              pathParameters: {'transactionId': transactionId},
+            )
           : null,
       borderRadius: BorderRadius.circular(8),
       child: Padding(

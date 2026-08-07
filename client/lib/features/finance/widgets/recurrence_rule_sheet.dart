@@ -3,122 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:logging/logging.dart';
 import 'package:rrule/rrule.dart' as rrule_lib;
-import 'package:finvo/shared/widgets/app_calendar.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/finance/utils/recurrence_rule_utils.dart';
+import 'package:finvo/features/finance/widgets/recurrence_rule_types.dart';
+import 'package:finvo/features/finance/widgets/recurrence_end_date_picker.dart';
 
 final _logger = Logger('RecurrenceRuleSheet');
-
-/// Resolve a date for [monthDay] within [year]/[month].
-///
-/// [monthDay] == -1 is the "last day of month" sentinel and resolves to the
-/// real last day (day 0 of the next month); values 29-31 are clamped so
-/// short months (e.g. February) don't overflow into the next month.
-///
-/// Exposed at top level (not as a private method) so it can be regression
-/// tested: Dart normalizes negative days into the PREVIOUS month
-/// (DateTime(2026, 8, -1) == 2026-07-30), which silently produced wrong
-/// first-execution dates for "last day of month" rules.
-@visibleForTesting
-DateTime recurrenceDateForMonthDay(int year, int month, int monthDay) {
-  if (monthDay == -1) {
-    return DateTime(year, month + 1, 0);
-  }
-  final lastDay = DateTime(year, month + 1, 0).day;
-  return DateTime(year, month, monthDay.clamp(1, lastDay));
-}
-
-/// Recurrence rule result
-class RecurrenceRuleResult {
-  final String rule;
-  final String description;
-  final DateTime startDate;
-  final DateTime? endDate;
-
-  const RecurrenceRuleResult({
-    required this.rule,
-    required this.description,
-    required this.startDate,
-    this.endDate,
-  });
-}
-
-/// Recurrence frequency type
-enum RecurrenceFrequency {
-  daily('DAILY'),
-  weekly('WEEKLY'),
-  monthly('MONTHLY'),
-  yearly('YEARLY');
-
-  final String rruleValue;
-
-  const RecurrenceFrequency(this.rruleValue);
-
-  String get label {
-    final rt = t.forecast.recurringTransaction;
-    switch (this) {
-      case daily:
-        return rt.daily;
-      case weekly:
-        return rt.weekly;
-      case monthly:
-        return rt.monthly;
-      case yearly:
-        return rt.yearly;
-    }
-  }
-
-  /// Unit label used after an interval count, e.g. "2 Days" / "2 天"
-  String unitLabel(int count) {
-    final rt = t.forecast.recurringTransaction;
-    switch (this) {
-      case daily:
-        return rt.dayUnit(count: count);
-      case weekly:
-        return rt.weekUnit(count: count);
-      case monthly:
-        return rt.monthUnit(count: count);
-      case yearly:
-        return rt.yearUnit(count: count);
-    }
-  }
-}
-
-/// Day of week
-enum Weekday {
-  monday('MO', 1),
-  tuesday('TU', 2),
-  wednesday('WE', 3),
-  thursday('TH', 4),
-  friday('FR', 5),
-  saturday('SA', 6),
-  sunday('SU', 7);
-
-  final String rruleValue;
-  final int isoWeekday;
-
-  const Weekday(this.rruleValue, this.isoWeekday);
-
-  String get label {
-    final rt = t.forecast.recurringTransaction;
-    switch (this) {
-      case monday:
-        return rt.weekdayMon;
-      case tuesday:
-        return rt.weekdayTue;
-      case wednesday:
-        return rt.weekdayWed;
-      case thursday:
-        return rt.weekdayThu;
-      case friday:
-        return rt.weekdayFri;
-      case saturday:
-        return rt.weekdaySat;
-      case sunday:
-        return rt.weekdaySun;
-    }
-  }
-}
 
 /// Recurrence rule settings bottom sheet
 class RecurrenceRuleSheet extends StatefulWidget {
@@ -262,111 +153,51 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     }
 
     switch (_frequency) {
+      case RecurrenceFrequency.daily:
+        break;
       case RecurrenceFrequency.weekly:
         if (_selectedWeekdays.isNotEmpty) {
           final days = _selectedWeekdays.map((w) => w.rruleValue).join(',');
           parts.add('BYDAY=$days');
         }
+        break;
       case RecurrenceFrequency.monthly:
         parts.add('BYMONTHDAY=$_monthDay');
-      default:
+        break;
+      case RecurrenceFrequency.yearly:
+        // Persist the concrete month/day so the rule round-trips the same
+        // specific date the preview shows (M-8: previously only FREQ=YEARLY
+        // was stored while the preview displayed a concrete date).
+        parts.add('BYMONTH=${_startDate.month}');
+        parts.add('BYMONTHDAY=${_startDate.day}');
         break;
     }
 
     if (_hasEndDate && _endDate != null) {
-      final until = _endDate!
-          .toUtc()
-          .toIso8601String()
-          .replaceAll('-', '')
-          .replaceAll(':', '')
-          .split('.')[0];
-      parts.add('UNTIL=${until}Z');
+      // Encode as a date-only value (RFC 5545 UNTIL=YYYYMMDD) using the
+      // *local* date. Converting to UTC here (as before) shifts the date by
+      // one day for non-UTC timezones (e.g. +08:00 2026-12-31 -> 2026-12-30T160000Z),
+      // which then round-trips back as 2026-12-30. Date-only avoids the skew.
+      final date = _endDate!;
+      parts.add(
+        'UNTIL=${date.year}'
+        '${date.month.toString().padLeft(2, '0')}'
+        '${date.day.toString().padLeft(2, '0')}',
+      );
     }
 
     return parts.join(';');
   }
 
   String _buildDescription() {
-    final rt = t.forecast.recurringTransaction;
-    final buffer = StringBuffer();
-
-    switch (_frequency) {
-      case RecurrenceFrequency.daily:
-        buffer.write(
-          _interval == 1 ? rt.daily : rt.everyDays(count: _interval),
-        );
-      case RecurrenceFrequency.weekly:
-        buffer.write(
-          _interval == 1 ? rt.weekly : rt.everyWeeks(count: _interval),
-        );
-        if (_selectedWeekdays.isNotEmpty) {
-          final sortedDays = _selectedWeekdays.toList()
-            ..sort((a, b) => a.isoWeekday.compareTo(b.isoWeekday));
-          buffer.write(rt.weeklyDaysPrefix);
-          buffer.write(
-            sortedDays
-                .map((w) => '${rt.weekdayOn}${w.label}')
-                .join(rt.weekdayJoiner),
-          );
-        }
-      case RecurrenceFrequency.monthly:
-        if (_monthDay == -1) {
-          buffer.write(
-            _interval == 1
-                ? rt.monthlyLastDay
-                : rt.everyMonthsLastDay(count: _interval),
-          );
-        } else {
-          if (_interval == 1) {
-            buffer.write(
-              rt.monthlyOnDay(
-                day: '$_monthDay',
-                suffix: _monthDaySuffix(_monthDay),
-              ),
-            );
-          } else {
-            buffer.write(
-              rt.everyMonthsOnDay(
-                count: _interval,
-                day: '$_monthDay',
-                suffix: _monthDaySuffix(_monthDay),
-              ),
-            );
-          }
-        }
-      case RecurrenceFrequency.yearly:
-        buffer.write(
-          _interval == 1
-              ? rt.yearlyOn(month: _startDate.month, day: _startDate.day)
-              : rt.everyYearsOn(
-                  count: _interval,
-                  month: _startDate.month,
-                  day: _startDate.day,
-                ),
-        );
-    }
-
-    return buffer.toString();
-  }
-
-  String _getDaySuffix(int day) {
-    if (day >= 11 && day <= 13) return 'th';
-    switch (day % 10) {
-      case 1:
-        return 'st';
-      case 2:
-        return 'nd';
-      case 3:
-        return 'rd';
-      default:
-        return 'th';
-    }
+    // M-8: delegate to the single shared formatter so the interactive preview
+    // and the read-only page description can never diverge again.
+    return describeRecurrenceRule(_buildRruleString());
   }
 
   /// English templates embed the ordinal suffix via [$suffix], other
   /// languages already include it in the template itself.
-  String _monthDaySuffix(int day) =>
-      LocaleSettings.currentLocale == AppLocale.en ? _getDaySuffix(day) : '';
+  String _monthDaySuffix(int day) => monthDaySuffix(day);
 
   @override
   Widget build(BuildContext context) {
@@ -706,7 +537,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 const SizedBox(height: 12),
                 // Tap to select end date
                 GestureDetector(
-                  onTap: () => _showEndDatePicker(theme, colors),
+                  onTap: () => _showEndDatePicker(),
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
@@ -783,90 +614,16 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     );
   }
 
-  /// Show end date picker (using FCalendar)
-  void _showEndDatePicker(FThemeData theme, FColors colors) {
-    final now = DateTime.now();
+  /// Show end date picker (delegates to [RecurrenceEndDatePicker]).
+  Future<void> _showEndDatePicker() async {
     final selectedDate = _endDate ?? _startDate.add(const Duration(days: 365));
-
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => Container(
-          decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Drag handle
-                Container(
-                  width: 32,
-                  height: 4,
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
-                  decoration: BoxDecoration(
-                    color: colors.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                // Title
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        t.dateRange.endDate,
-                        style: AppTextStyles.listTitle(theme),
-                      ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Icon(
-                          FLucideIcons.x,
-                          size: 20,
-                          color: colors.mutedForeground,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Calendar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Center(
-                    child: AppCalendar.grid(
-                      selectionControl: .liftedSingle(
-                        value: selectedDate,
-                        onChange: (date) {
-                          if (date != null) {
-                            setState(() => _endDate = date);
-                            Navigator.pop(context);
-                          }
-                        },
-                        toggleable: false,
-                      ),
-                      control: FGridCalendarControl(
-                        start: now,
-                        end: now.add(const Duration(days: 365 * 10)),
-                        initial: selectedDate,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-      ),
+    final picked = await RecurrenceEndDatePicker.show(
+      context,
+      selectedDate: selectedDate,
     );
+    if (picked != null && mounted) {
+      setState(() => _endDate = picked);
+    }
   }
 
   /// Bottom button bar

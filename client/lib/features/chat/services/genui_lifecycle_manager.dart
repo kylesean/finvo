@@ -331,6 +331,17 @@ class GenUiLifecycleManager {
         streamingStatus: StreamingStatus.error,
       );
     }
+
+    // H-1: Guarantee the streaming state is reset on every error path.
+    //
+    // CustomContentGenerator pairs onError with onStreamComplete, but the
+    // genui.ConversationError event (routed through ExtendedGenUiConversation)
+    // fires onError alone. Without this fallback, isStreamingResponse stays
+    // true forever and the chat UI locks up (stop button stuck, new messages
+    // rejected). onStreamComplete is idempotent: when the message is already
+    // marked completed it only clears isStreamingResponse, so double-firing is
+    // safe.
+    _onStreamComplete();
   }
 
   String _findTargetMessageIdForSurface(String surfaceId) {

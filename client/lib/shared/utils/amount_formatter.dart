@@ -125,6 +125,26 @@ class AmountFormatter {
     return '$symbol$formattedValue';
   }
 
+  /// Format a backend amount [String] with its currency symbol.
+  ///
+  /// Convenience for call sites that receive raw string amounts (e.g.
+  /// `totalExpense`, `contributionAmount`) and previously hand-prefixed a
+  /// hardcoded `'¥'`. Uses [getCurrencySymbol] + [getNumberFormat] so the
+  /// symbol follows [currencyCode] instead of a constant.
+  ///
+  /// [amount] - Backend amount string (parsed defensively, falls back to 0)
+  /// [currencyCode] - Currency code, default 'CNY'
+  ///
+  /// Returns e.g. `"¥1,234.56"`.
+  static String formatWithCurrency(
+    String amount, {
+    String currencyCode = 'CNY',
+  }) {
+    final symbol = getCurrencySymbol(currencyCode);
+    final value = double.tryParse(amount) ?? 0.0;
+    return '$symbol${getNumberFormat(currencyCode).format(value)}';
+  }
+
   /// Format as compact format based on system Locale
   ///
   /// For Chinese (zh): 10k, 100M

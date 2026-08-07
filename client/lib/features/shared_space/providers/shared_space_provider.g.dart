@@ -211,60 +211,64 @@ final class SpaceSettlementFamily extends $Family
   String toString() => r'spaceSettlementProvider';
 }
 
-@ProviderFor(spaceTransactions)
-final spaceTransactionsProvider = SpaceTransactionsFamily._();
+/// Paginated transaction list for a shared space.
+///
+/// Keyed by [spaceId] so each space keeps an independent, accumulated list.
+/// Mirrors [SharedSpaceNotifier]'s pagination contract (currentPage/hasMore)
+/// so the detail page can drive infinite-scroll through its scroll controller.
 
-final class SpaceTransactionsProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<SpaceTransactionListResponse>,
-          SpaceTransactionListResponse,
-          FutureOr<SpaceTransactionListResponse>
-        >
-    with
-        $FutureModifier<SpaceTransactionListResponse>,
-        $FutureProvider<SpaceTransactionListResponse> {
-  SpaceTransactionsProvider._({
-    required SpaceTransactionsFamily super.from,
-    required (String, {int page, int limit}) super.argument,
+@ProviderFor(SpaceTransactionNotifier)
+final spaceTransactionProvider = SpaceTransactionNotifierFamily._();
+
+/// Paginated transaction list for a shared space.
+///
+/// Keyed by [spaceId] so each space keeps an independent, accumulated list.
+/// Mirrors [SharedSpaceNotifier]'s pagination contract (currentPage/hasMore)
+/// so the detail page can drive infinite-scroll through its scroll controller.
+final class SpaceTransactionNotifierProvider
+    extends $NotifierProvider<SpaceTransactionNotifier, SpaceTransactionState> {
+  /// Paginated transaction list for a shared space.
+  ///
+  /// Keyed by [spaceId] so each space keeps an independent, accumulated list.
+  /// Mirrors [SharedSpaceNotifier]'s pagination contract (currentPage/hasMore)
+  /// so the detail page can drive infinite-scroll through its scroll controller.
+  SpaceTransactionNotifierProvider._({
+    required SpaceTransactionNotifierFamily super.from,
+    required String super.argument,
   }) : super(
          retry: null,
-         name: r'spaceTransactionsProvider',
+         name: r'spaceTransactionProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$spaceTransactionsHash();
+  String debugGetCreateSourceHash() => _$spaceTransactionNotifierHash();
 
   @override
   String toString() {
-    return r'spaceTransactionsProvider'
+    return r'spaceTransactionProvider'
         ''
-        '$argument';
+        '($argument)';
   }
 
   @$internal
   @override
-  $FutureProviderElement<SpaceTransactionListResponse> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+  SpaceTransactionNotifier create() => SpaceTransactionNotifier();
 
-  @override
-  FutureOr<SpaceTransactionListResponse> create(Ref ref) {
-    final argument = this.argument as (String, {int page, int limit});
-    return spaceTransactions(
-      ref,
-      argument.$1,
-      page: argument.page,
-      limit: argument.limit,
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SpaceTransactionState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SpaceTransactionState>(value),
     );
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SpaceTransactionsProvider && other.argument == argument;
+    return other is SpaceTransactionNotifierProvider &&
+        other.argument == argument;
   }
 
   @override
@@ -273,32 +277,70 @@ final class SpaceTransactionsProvider
   }
 }
 
-String _$spaceTransactionsHash() => r'58987d525e1c576b0b88b417238350da03600fa9';
+String _$spaceTransactionNotifierHash() =>
+    r'7e1e19c9efd7eacece750f58c59befded260b189';
 
-final class SpaceTransactionsFamily extends $Family
+/// Paginated transaction list for a shared space.
+///
+/// Keyed by [spaceId] so each space keeps an independent, accumulated list.
+/// Mirrors [SharedSpaceNotifier]'s pagination contract (currentPage/hasMore)
+/// so the detail page can drive infinite-scroll through its scroll controller.
+
+final class SpaceTransactionNotifierFamily extends $Family
     with
-        $FunctionalFamilyOverride<
-          FutureOr<SpaceTransactionListResponse>,
-          (String, {int page, int limit})
+        $ClassFamilyOverride<
+          SpaceTransactionNotifier,
+          SpaceTransactionState,
+          SpaceTransactionState,
+          SpaceTransactionState,
+          String
         > {
-  SpaceTransactionsFamily._()
+  SpaceTransactionNotifierFamily._()
     : super(
         retry: null,
-        name: r'spaceTransactionsProvider',
+        name: r'spaceTransactionProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  SpaceTransactionsProvider call(
-    String spaceId, {
-    int page = 1,
-    int limit = 20,
-  }) => SpaceTransactionsProvider._(
-    argument: (spaceId, page: page, limit: limit),
-    from: this,
-  );
+  /// Paginated transaction list for a shared space.
+  ///
+  /// Keyed by [spaceId] so each space keeps an independent, accumulated list.
+  /// Mirrors [SharedSpaceNotifier]'s pagination contract (currentPage/hasMore)
+  /// so the detail page can drive infinite-scroll through its scroll controller.
+
+  SpaceTransactionNotifierProvider call(String spaceId) =>
+      SpaceTransactionNotifierProvider._(argument: spaceId, from: this);
 
   @override
-  String toString() => r'spaceTransactionsProvider';
+  String toString() => r'spaceTransactionProvider';
+}
+
+/// Paginated transaction list for a shared space.
+///
+/// Keyed by [spaceId] so each space keeps an independent, accumulated list.
+/// Mirrors [SharedSpaceNotifier]'s pagination contract (currentPage/hasMore)
+/// so the detail page can drive infinite-scroll through its scroll controller.
+
+abstract class _$SpaceTransactionNotifier
+    extends $Notifier<SpaceTransactionState> {
+  late final _$args = ref.$arg as String;
+  String get spaceId => _$args;
+
+  SpaceTransactionState build(String spaceId);
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<SpaceTransactionState, SpaceTransactionState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<SpaceTransactionState, SpaceTransactionState>,
+              SpaceTransactionState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
+  }
 }

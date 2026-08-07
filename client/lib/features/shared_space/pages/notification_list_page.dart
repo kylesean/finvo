@@ -8,6 +8,7 @@ import 'package:finvo/features/shared_space/providers/notification_provider.dart
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'package:finvo/features/shared_space/widgets/notification_card.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 
 class NotificationListPage extends ConsumerStatefulWidget {
@@ -190,35 +191,56 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
         break;
       case NotificationType.newTransaction:
       case NotificationType.billComment:
-        // Transaction/comment notification, navigate to transaction detail
-        final transactionId =
-            (notification.data?['transactionId'] ??
-                    notification.data?['transaction_id'])
-                as String?;
-        final commentId =
-            (notification.data?['commentId'] ??
-                    notification.data?['comment_id'])
-                as String?;
+        // Transaction/comment notification, navigate to transaction detail.
+        // The id may arrive as a String or an int depending on the FE, so
+        // normalise with toString() instead of a strict `as String?` cast,
+        // which would throw a TypeError and crash the tap when the id is an int.
+        final rawTxnId =
+            notification.data?['transactionId'] ??
+            notification.data?['transaction_id'];
+        final transactionId = rawTxnId?.toString();
+        final rawCommentId =
+            notification.data?['commentId'] ?? notification.data?['comment_id'];
+        final commentId = rawCommentId?.toString();
         if (transactionId != null) {
-          final path = commentId != null && commentId.isNotEmpty
-              ? '/home/transaction/$transactionId?commentId=$commentId'
-              : '/home/transaction/$transactionId';
-          unawaited(context.push(path));
+          unawaited(
+            context.pushNamed(
+              AppRouteNames.transactionDetail,
+              pathParameters: {'transactionId': transactionId},
+              queryParameters: commentId != null && commentId.isNotEmpty
+                  ? {'commentId': commentId}
+                  : const {},
+            ),
+          );
         }
         break;
       case NotificationType.settlementUpdate:
         // Settlement update notification, navigate to space detail
-        final spaceId = notification.data?['spaceId'] as String?;
+        //
+        // The id may arrive as a String or an int depending on the FE, so
+        // normalise with toString() instead of a strict `as String?` cast,
+        // which would throw a TypeError and crash the tap when the id is an int.
+        final spaceId = notification.data?['spaceId']?.toString();
         if (spaceId != null) {
-          unawaited(context.push('/profile/shared-space/$spaceId'));
+          unawaited(
+            context.pushNamed(
+              AppRouteNames.sharedSpaceDetail,
+              pathParameters: {'spaceId': spaceId},
+            ),
+          );
         }
         break;
       case NotificationType.memberJoined:
       case NotificationType.memberLeft:
         // Member change notification, navigate to space settings
-        final spaceId = notification.data?['spaceId'] as String?;
+        final spaceId = notification.data?['spaceId']?.toString();
         if (spaceId != null) {
-          unawaited(context.push('/profile/shared-space/$spaceId/settings'));
+          unawaited(
+            context.pushNamed(
+              AppRouteNames.sharedSpaceSettings,
+              pathParameters: {'spaceId': spaceId},
+            ),
+          );
         }
         break;
       case NotificationType.other:
@@ -231,7 +253,7 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
     NotificationModel notification,
     String action,
   ) async {
-    final spaceId = notification.data?['spaceId'] as String?;
+    final spaceId = notification.data?['spaceId']?.toString();
     if (spaceId == null) {
       ToastService.showDestructive(
         description: Text(t.sharedSpace.notifications.incompleteInfo),
@@ -256,7 +278,12 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
 
         // Navigate to space detail
         if (mounted) {
-          unawaited(context.push('/profile/shared-space/$spaceId'));
+          unawaited(
+            context.pushNamed(
+              AppRouteNames.sharedSpaceDetail,
+              pathParameters: {'spaceId': spaceId},
+            ),
+          );
         }
       } else {
         ToastService.show(

@@ -5,6 +5,7 @@
 library;
 
 import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
 
 /// Formats a numeric amount with currency symbol
 ///
@@ -75,27 +76,15 @@ String formatTimeOnly(String isoTime) {
   }
 }
 
-/// Formats ISO time string to relative time (e.g., "3 minutes ago")
+/// Formats ISO time string to a localized relative time (e.g. "3 minutes ago").
+///
+/// Delegates to [relativeTime] so every locale is covered by the app's own i18n
+/// strings instead of a duplicated, hardcoded-English implementation. Unparseable
+/// input is returned unchanged.
 String formatRelativeTime(String isoTime) {
-  try {
-    final dateTime = DateTime.parse(isoTime);
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inMinutes < 1) {
-      return 'just now';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes} minutes ago';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours} hours ago';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else {
-      return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
-    }
-  } catch (e) {
-    return isoTime;
-  }
+  final dateTime = DateTime.tryParse(isoTime);
+  if (dateTime == null) return isoTime;
+  return relativeTime(dateTime);
 }
 
 /// Formats date to YYYY-MM-DD format

@@ -133,10 +133,11 @@ class NetworkClient {
             cancelToken.whenCancel,
           ]);
           if (cancelToken.isCancelled) {
-            throw DioException(
-              requestOptions: RequestOptions(path: path),
-              type: DioExceptionType.cancel,
-            );
+            // Throw a typed AppException (not a raw DioException) so the caller
+            // can distinguish "user cancelled" from "network failure" and
+            // swallow it silently. A raw DioException here would bypass the
+            // interceptor normalization chain and break the error contract.
+            throw RequestCancelledException('Request cancelled by user');
           }
         } else {
           await Future<void>.delayed(delay);

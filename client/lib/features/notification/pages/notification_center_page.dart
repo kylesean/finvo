@@ -193,11 +193,14 @@ class _NotificationCenterPageState
   void _handleNavigation(BuildContext context, NotificationItem item) {
     var targetPath = item.data?['target_path'] as String?;
     if (targetPath == null || targetPath.isEmpty) {
-      final transactionId =
-          (item.data?['transactionId'] ?? item.data?['transaction_id'])
-              as String?;
-      final commentId =
-          (item.data?['commentId'] ?? item.data?['comment_id']) as String?;
+      // The id may arrive as a String or an int depending on the FE, so
+      // normalise with toString() instead of a strict `as String?` cast,
+      // which would throw a TypeError and crash the tap when the id is an int.
+      final rawTxnId =
+          item.data?['transactionId'] ?? item.data?['transaction_id'];
+      final transactionId = rawTxnId?.toString();
+      final rawCommentId = item.data?['commentId'] ?? item.data?['comment_id'];
+      final commentId = rawCommentId?.toString();
       if (transactionId != null && transactionId.isNotEmpty) {
         if (commentId != null && commentId.isNotEmpty) {
           targetPath = '/home/transaction/$transactionId?commentId=$commentId';

@@ -461,6 +461,7 @@ class _Translations$speech$ko extends Translations$speech$zh {
 	@override String get enterAddress => '서버 주소를 입력하세요';
 	@override String get enterValidPort => '유효한 포트 번호를 입력하세요 (1-65535)';
 	@override String get configSaved => '구성이 저장되었습니다';
+	@override String get configSaveFailed => '구성 저장에 실패했습니다';
 	@override String get systemVoiceRestrictedTitle => '시스템 음성을 사용할 수 없음';
 	@override String get systemVoiceRestrictedContent => '기기 음성 인식 서비스를 사용할 수 없거나 비활성화되어 있습니다. 설정에서 활성화하거나 WebSocket 자체 ASR을 설정하세요.';
 	@override String get dictationDisabledTitle => '음성 받아쓰기 비활성화됨';
@@ -711,6 +712,8 @@ class _Translations$chat$ko extends Translations$chat$zh {
 	@override String get noRelatedFound => '관련 대화를 찾을 수 없습니다';
 	@override String get tryOtherKeywords => '다른 키워드로 검색해보세요';
 	@override String get searchFailed => '검색 실패';
+	@override String updatedAt({required Object time}) => '업데이트: ${time}';
+	@override String createdAt({required Object time}) => '생성: ${time}';
 	@override String get deleteConversation => '대화 삭제';
 	@override String get deleteConversationConfirm => '이 대화를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.';
 	@override String get conversationDeleted => '대화가 삭제되었습니다';
@@ -920,6 +923,11 @@ class _Translations$financial$ko extends Translations$financial$zh {
 	@override String get saveFailed => '저장 실패';
 	@override String get deleteFailed => '삭제에 실패했습니다. 잠시 후 다시 시도해 주세요';
 	@override String missingExchangeRates({required Object currencies}) => '일부 통화의 환율을 가져올 수 없어 해당 계정은 합계에 포함되지 않았습니다: ${currencies}';
+	@override String get cashPocketTitle => '내 현금 계좌';
+	@override String sourcesCount({required Object count}) => '${count} 계좌';
+	@override String lastUpdatedAt({required Object time}) => '마지막 업데이트: ${time}';
+	@override String get neverUpdated => '업데이트되지 않음';
+	@override String get updateNow => '지금 업데이트';
 }
 
 // Path: app
@@ -1247,6 +1255,8 @@ class _Translations$forecast$recurringTransaction$ko extends Translations$foreca
 	@override String get selectIncomeAccount => '수입 계좌 선택';
 	@override String amountNotFixed({required Object type}) => '${type}마다 금액이 고정되지 않음';
 	@override String get selectBothAccounts => '출금 및 입금 계좌를 선택하세요';
+	@override String get sameAccount => '출금 계좌와 입금 계좌는 같을 수 없습니다';
+	@override String get endBeforeStart => '종료일은 시작일보다 빠를 수 없습니다';
 	@override String selectAccountForType({required Object type}) => '${type} 계좌를 선택하세요';
 	@override String get deleteConfirmGeneric => '이 정기 거래를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
 	@override String selectDate({required Object date}) => '${date} 선택';
@@ -1609,6 +1619,7 @@ class _Translations$sharedSpace$detail$ko extends Translations$sharedSpace$detai
 	@override String get noTransactionsHint => '이 공간의 거래가 여기에 표시됩니다';
 	@override String get refreshCode => '코드 새로고침';
 	@override String get joinOtherSpace => '다른 공간 참여';
+	@override String get noMoreTransactions => '더 이상 거래가 없습니다';
 }
 
 // Path: sharedSpace.notifications
@@ -2788,6 +2799,7 @@ extension on TranslationsKo {
 			'speech.enterAddress' => '서버 주소를 입력하세요',
 			'speech.enterValidPort' => '유효한 포트 번호를 입력하세요 (1-65535)',
 			'speech.configSaved' => '구성이 저장되었습니다',
+			'speech.configSaveFailed' => '구성 저장에 실패했습니다',
 			'speech.systemVoiceRestrictedTitle' => '시스템 음성을 사용할 수 없음',
 			'speech.systemVoiceRestrictedContent' => '기기 음성 인식 서비스를 사용할 수 없거나 비활성화되어 있습니다. 설정에서 활성화하거나 WebSocket 자체 ASR을 설정하세요.',
 			'speech.dictationDisabledTitle' => '음성 받아쓰기 비활성화됨',
@@ -3010,9 +3022,9 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.yearly' => '매년',
 			'forecast.recurringTransaction.custom' => '사용자 지정',
 			'forecast.recurringTransaction.cycle' => '주기',
-			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count}일마다',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count}일마다',
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '${count}주마다',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '${count}개월마다',
 			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '${count}년마다',
@@ -3043,6 +3055,8 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.selectIncomeAccount' => '수입 계좌 선택',
 			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => '${type}마다 금액이 고정되지 않음',
 			'forecast.recurringTransaction.selectBothAccounts' => '출금 및 입금 계좌를 선택하세요',
+			'forecast.recurringTransaction.sameAccount' => '출금 계좌와 입금 계좌는 같을 수 없습니다',
+			'forecast.recurringTransaction.endBeforeStart' => '종료일은 시작일보다 빠를 수 없습니다',
 			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => '${type} 계좌를 선택하세요',
 			'forecast.recurringTransaction.deleteConfirmGeneric' => '이 정기 거래를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
 			'forecast.recurringTransaction.selectDate' => ({required Object date}) => '${date} 선택',
@@ -3151,6 +3165,8 @@ extension on TranslationsKo {
 			'chat.noRelatedFound' => '관련 대화를 찾을 수 없습니다',
 			'chat.tryOtherKeywords' => '다른 키워드로 검색해보세요',
 			'chat.searchFailed' => '검색 실패',
+			'chat.updatedAt' => ({required Object time}) => '업데이트: ${time}',
+			'chat.createdAt' => ({required Object time}) => '생성: ${time}',
 			'chat.deleteConversation' => '대화 삭제',
 			'chat.deleteConversationConfirm' => '이 대화를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.',
 			'chat.conversationDeleted' => '대화가 삭제되었습니다',
@@ -3504,6 +3520,11 @@ extension on TranslationsKo {
 			'financial.saveFailed' => '저장 실패',
 			'financial.deleteFailed' => '삭제에 실패했습니다. 잠시 후 다시 시도해 주세요',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '일부 통화의 환율을 가져올 수 없어 해당 계정은 합계에 포함되지 않았습니다: ${currencies}',
+			'financial.cashPocketTitle' => '내 현금 계좌',
+			'financial.sourcesCount' => ({required Object count}) => '${count} 계좌',
+			'financial.lastUpdatedAt' => ({required Object time}) => '마지막 업데이트: ${time}',
+			'financial.neverUpdated' => '업데이트되지 않음',
+			'financial.updateNow' => '지금 업데이트',
 			'app.splashTitle' => '지혜로운 성장, 가치 있는 부.',
 			'app.splashSubtitle' => '스마트 금융 비서',
 			'statistics.title' => '통계 분석',
@@ -3515,6 +3536,8 @@ extension on TranslationsKo {
 			'statistics.overview.income' => '총 수입',
 			'statistics.overview.expense' => '총 지출',
 			'statistics.trend.title' => '수지 추세',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.trend.expense' => '지출',
 			'statistics.trend.income' => '수입',
 			'statistics.analysis.title' => '지출 분석',
@@ -3525,8 +3548,6 @@ extension on TranslationsKo {
 			'statistics.analysis.radarNeedMoreData' => '레이더 차트는 3개 이상의 카테고리 데이터가 필요합니다',
 			'statistics.filter.accountType' => '계좌 유형',
 			'statistics.filter.allAccounts' => '모든 계좌',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.filter.apply' => '적용',
 			'statistics.sort.amount' => '금액순',
 			'statistics.sort.date' => '날짜순',
@@ -3605,6 +3626,7 @@ extension on TranslationsKo {
 			'sharedSpace.detail.noTransactionsHint' => '이 공간의 거래가 여기에 표시됩니다',
 			'sharedSpace.detail.refreshCode' => '코드 새로고침',
 			'sharedSpace.detail.joinOtherSpace' => '다른 공간 참여',
+			'sharedSpace.detail.noMoreTransactions' => '더 이상 거래가 없습니다',
 			'sharedSpace.notifications.title' => '알림',
 			'sharedSpace.notifications.empty' => '알림이 없습니다',
 			'sharedSpace.notifications.emptyHint' => '새로운 초대나 활동이 있으면\n여기에 알림이 표시됩니다',

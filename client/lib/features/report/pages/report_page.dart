@@ -304,7 +304,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                 duration: const Duration(milliseconds: 600),
                 child: PremiumEmptyState(
                   onAddTransaction: () {
-                    context.goNamed('ai');
+                    context.goNamed(AppRouteNames.ai);
                   },
                 ),
               ),

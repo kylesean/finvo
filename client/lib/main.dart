@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'dart:async';
 import 'package:finvo/app/app.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -116,6 +118,15 @@ void main() {
             ),
           ),
         );
+
+        // Explicitly trigger auth state restoration after the first frame so
+        // SecureStorage reads do not block the initial render. This replaces
+        // the former side-effect inside Auth.build() with an explicit startup
+        // step, keeping the provider build() pure and decoupled from the
+        // widget build cycle.
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          unawaited(container.read(authProvider.notifier).checkAuthStatus());
+        });
       },
       (Object error, StackTrace stackTrace) {
         // Last-resort handler for async errors that escape all try/catch blocks

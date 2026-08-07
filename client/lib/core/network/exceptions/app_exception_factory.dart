@@ -20,16 +20,8 @@ class AppExceptionFactory {
     // (InternalServerErrorException) rather than being treated as business errors.
     if (statusCode >= 200 && statusCode < 500) {
       if (responseData is Map<String, dynamic>) {
-        final code = responseData['code'];
-        if (code is int && code != 0) {
-          // Safe read: the backend message is not guaranteed to be a String.
-          final rawMessage = responseData['message'];
-          final message = rawMessage is String
-              ? rawMessage
-              : rawMessage?.toString() ?? 'Unknown business error';
-          final localizedMessage = ErrorTranslator.translate(code, message);
-          return BusinessException(localizedMessage, code);
-        }
+        final business = tryFromEnvelope(responseData);
+        if (business != null) return business;
       }
     }
 
@@ -49,6 +41,25 @@ class AppExceptionFactory {
       case DioExceptionType.badCertificate:
         return NetworkException(t.server.error.sslError);
     }
+  }
+
+  /// Extract a [BusinessException] from a `{code, message, data}` envelope.
+  ///
+  /// The server uses this envelope for both legacy 2xx business errors and
+  /// 4xx business errors. Returns null when the code is absent or zero
+  /// (success), so callers can fall through to HTTP-status mapping.
+  static BusinessException? tryFromEnvelope(Map<String, dynamic> data) {
+    final code = data['code'];
+    if (code is int && code != 0) {
+      // Safe read: the backend message is not guaranteed to be a String.
+      final rawMessage = data['message'];
+      final message = rawMessage is String
+          ? rawMessage
+          : rawMessage?.toString() ?? 'Unknown business error';
+      final localizedMessage = ErrorTranslator.translate(code, message);
+      return BusinessException(localizedMessage, code);
+    }
+    return null;
   }
 
   static AppException _fromHttpStatus(int statusCode, String message) {

@@ -8,7 +8,7 @@ part of 'domain_events.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Broadcast bus for [TransactionCreatedEvent].
+/// Buffering broadcast bus for [TransactionCreatedEvent].
 ///
 /// Kept alive for the whole app lifetime: events must not be dropped just
 /// because no listener happens to be attached at emit time.
@@ -16,7 +16,7 @@ part of 'domain_events.dart';
 @ProviderFor(transactionCreatedEvents)
 final transactionCreatedEventsProvider = TransactionCreatedEventsProvider._();
 
-/// Broadcast bus for [TransactionCreatedEvent].
+/// Buffering broadcast bus for [TransactionCreatedEvent].
 ///
 /// Kept alive for the whole app lifetime: events must not be dropped just
 /// because no listener happens to be attached at emit time.
@@ -29,7 +29,7 @@ final class TransactionCreatedEventsProvider
           StreamController<TransactionCreatedEvent>
         >
     with $Provider<StreamController<TransactionCreatedEvent>> {
-  /// Broadcast bus for [TransactionCreatedEvent].
+  /// Buffering broadcast bus for [TransactionCreatedEvent].
   ///
   /// Kept alive for the whole app lifetime: events must not be dropped just
   /// because no listener happens to be attached at emit time.
@@ -69,4 +69,4 @@ final class TransactionCreatedEventsProvider
 }
 
 String _$transactionCreatedEventsHash() =>
-    r'8d4479d5b7b755ab1f35485ee40a0fe72a090e74';
+    r'acaebc38d2fe719f3346d3496ab048ccae229f9a';

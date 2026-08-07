@@ -461,6 +461,7 @@ class _Translations$speech$zh_Hant extends Translations$speech$zh {
 	@override String get enterAddress => '請輸入服務器地址';
 	@override String get enterValidPort => '請輸入有效的端口 (1-65535)';
 	@override String get configSaved => '配置已儲存';
+	@override String get configSaveFailed => '配置儲存失敗，請重試';
 	@override String get systemVoiceRestrictedTitle => '系統語音不可用';
 	@override String get systemVoiceRestrictedContent => '您的手機系統語音引擎不可用或服務未開啟。建議在設定中開啟語音服務或配置 WebSocket 自建語音服務。';
 	@override String get dictationDisabledTitle => '語音聽寫未開啟';
@@ -711,6 +712,8 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override String get noRelatedFound => '未找到相關會話';
 	@override String get tryOtherKeywords => '嘗試搜尋其他關鍵詞';
 	@override String get searchFailed => '搜尋失敗';
+	@override String updatedAt({required Object time}) => '更新於 ${time}';
+	@override String createdAt({required Object time}) => '建立於 ${time}';
 	@override String get deleteConversation => '刪除對話';
 	@override String get deleteConversationConfirm => '確定要刪除這個對話嗎？此操作無法撤回。';
 	@override String get conversationDeleted => '對話已刪除';
@@ -920,6 +923,11 @@ class _Translations$financial$zh_Hant extends Translations$financial$zh {
 	@override String get saveFailed => '保存失敗';
 	@override String get deleteFailed => '刪除失敗，請稍後再試';
 	@override String missingExchangeRates({required Object currencies}) => '部分幣種缺少匯率，相關帳戶未計入總額：${currencies}';
+	@override String get cashPocketTitle => '我的現金帳戶';
+	@override String sourcesCount({required Object count}) => '${count} 個帳戶';
+	@override String lastUpdatedAt({required Object time}) => '上次更新：${time}';
+	@override String get neverUpdated => '從未更新';
+	@override String get updateNow => '立即更新';
 }
 
 // Path: app
@@ -1247,6 +1255,8 @@ class _Translations$forecast$recurringTransaction$zh_Hant extends Translations$f
 	@override String get selectIncomeAccount => '選擇收入帳戶';
 	@override String amountNotFixed({required Object type}) => '每次${type}金額不固定';
 	@override String get selectBothAccounts => '請選擇轉出和轉入帳戶';
+	@override String get sameAccount => '轉出和轉入帳戶不能相同';
+	@override String get endBeforeStart => '結束日期不能早於生效日期，請檢查';
 	@override String selectAccountForType({required Object type}) => '請選擇${type}帳戶';
 	@override String get deleteConfirmGeneric => '確定要刪除這個週期交易嗎？此操作不可撤銷。';
 	@override String selectDate({required Object date}) => '選擇 ${date}';
@@ -1608,6 +1618,7 @@ class _Translations$sharedSpace$detail$zh_Hant extends Translations$sharedSpace$
 	@override String get noTransactionsHint => '空間內的交易將顯示在這裡';
 	@override String get refreshCode => '重新產生新碼';
 	@override String get joinOtherSpace => '加入其他空間';
+	@override String get noMoreTransactions => '沒有更多交易';
 }
 
 // Path: sharedSpace.notifications
@@ -2786,6 +2797,7 @@ extension on TranslationsZhHant {
 			'speech.enterAddress' => '請輸入服務器地址',
 			'speech.enterValidPort' => '請輸入有效的端口 (1-65535)',
 			'speech.configSaved' => '配置已儲存',
+			'speech.configSaveFailed' => '配置儲存失敗，請重試',
 			'speech.systemVoiceRestrictedTitle' => '系統語音不可用',
 			'speech.systemVoiceRestrictedContent' => '您的手機系統語音引擎不可用或服務未開啟。建議在設定中開啟語音服務或配置 WebSocket 自建語音服務。',
 			'speech.dictationDisabledTitle' => '語音聽寫未開啟',
@@ -3008,9 +3020,9 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.yearly' => '每年',
 			'forecast.recurringTransaction.custom' => '自訂',
 			'forecast.recurringTransaction.cycle' => '週期',
-			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '每 ${count} 天',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '每 ${count} 天',
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '每 ${count} 週',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '每 ${count} 個月',
 			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '每 ${count} 年',
@@ -3041,6 +3053,8 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.selectIncomeAccount' => '選擇收入帳戶',
 			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => '每次${type}金額不固定',
 			'forecast.recurringTransaction.selectBothAccounts' => '請選擇轉出和轉入帳戶',
+			'forecast.recurringTransaction.sameAccount' => '轉出和轉入帳戶不能相同',
+			'forecast.recurringTransaction.endBeforeStart' => '結束日期不能早於生效日期，請檢查',
 			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => '請選擇${type}帳戶',
 			'forecast.recurringTransaction.deleteConfirmGeneric' => '確定要刪除這個週期交易嗎？此操作不可撤銷。',
 			'forecast.recurringTransaction.selectDate' => ({required Object date}) => '選擇 ${date}',
@@ -3149,6 +3163,8 @@ extension on TranslationsZhHant {
 			'chat.noRelatedFound' => '未找到相關會話',
 			'chat.tryOtherKeywords' => '嘗試搜尋其他關鍵詞',
 			'chat.searchFailed' => '搜尋失敗',
+			'chat.updatedAt' => ({required Object time}) => '更新於 ${time}',
+			'chat.createdAt' => ({required Object time}) => '建立於 ${time}',
 			'chat.deleteConversation' => '刪除對話',
 			'chat.deleteConversationConfirm' => '確定要刪除這個對話嗎？此操作無法撤回。',
 			'chat.conversationDeleted' => '對話已刪除',
@@ -3500,6 +3516,11 @@ extension on TranslationsZhHant {
 			'financial.saveFailed' => '保存失敗',
 			'financial.deleteFailed' => '刪除失敗，請稍後再試',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '部分幣種缺少匯率，相關帳戶未計入總額：${currencies}',
+			'financial.cashPocketTitle' => '我的現金帳戶',
+			'financial.sourcesCount' => ({required Object count}) => '${count} 個帳戶',
+			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',
+			'financial.neverUpdated' => '從未更新',
+			'financial.updateNow' => '立即更新',
 			'app.splashTitle' => '智見增長，格物致富。',
 			'app.splashSubtitle' => '智能財務助手',
 			'statistics.title' => '統計分析',
@@ -3513,6 +3534,8 @@ extension on TranslationsZhHant {
 			'statistics.trend.title' => '收支趨勢',
 			'statistics.trend.expense' => '支出',
 			'statistics.trend.income' => '收入',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.analysis.title' => '支出分析',
 			'statistics.analysis.expenseTitle' => '支出分析',
 			'statistics.analysis.incomeTitle' => '收入分析',
@@ -3523,8 +3546,6 @@ extension on TranslationsZhHant {
 			'statistics.filter.allAccounts' => '全部帳戶',
 			'statistics.filter.apply' => '確認應用',
 			'statistics.sort.amount' => '按金額排序',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.sort.date' => '按時間排序',
 			'statistics.exportList' => '導出列表',
 			'statistics.noMoreData' => '沒有更多數據了',
@@ -3601,6 +3622,7 @@ extension on TranslationsZhHant {
 			'sharedSpace.detail.noTransactionsHint' => '空間內的交易將顯示在這裡',
 			'sharedSpace.detail.refreshCode' => '重新產生新碼',
 			'sharedSpace.detail.joinOtherSpace' => '加入其他空間',
+			'sharedSpace.detail.noMoreTransactions' => '沒有更多交易',
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暫無通知',
 			'sharedSpace.notifications.emptyHint' => '當你收到新的邀請或動態時，\n通知將顯示在這裡',

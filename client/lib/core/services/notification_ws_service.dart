@@ -12,6 +12,26 @@ final _logger = Logger('NotificationWsService');
 /// Callback when a real-time notification is received.
 typedef NotificationCallback = void Function(Map<String, dynamic> payload);
 
+/// Observable connection lifecycle of [NotificationWsService]. Exposed so UI
+/// and diagnostics can react to connectivity (show a banner, log, etc.) instead
+/// of treating the WS as an opaque background connection.
+enum NotificationWsConnectionStatus {
+  /// No connection attempt is in flight (initial or after explicit dispose).
+  disconnected,
+
+  /// A socket handshake is in progress.
+  connecting,
+
+  /// The socket is open and being listened on.
+  connected,
+
+  /// A retry is scheduled after a dropped/failed connection.
+  reconnecting,
+
+  /// The reconnect budget was exhausted; automatic retries have stopped.
+  failed,
+}
+
 /// WebSocket service for real-time notification push.
 ///
 /// Connects to: ws(s)://host/api/ws/notifications?token=jwt
@@ -24,6 +44,23 @@ class NotificationWsService {
   bool _isDisposed = false;
   int _reconnectAttempts = 0;
 
+  /// Broadcast stream of connection state transitions, and the current value.
+  final _statusController =
+      StreamController<NotificationWsConnectionStatus>.broadcast();
+  NotificationWsConnectionStatus _status =
+      NotificationWsConnectionStatus.disconnected;
+  Stream<NotificationWsConnectionStatus> get statusStream =>
+      _statusController.stream;
+  NotificationWsConnectionStatus get status => _status;
+
+  void _setStatus(NotificationWsConnectionStatus newStatus) {
+    if (_status == newStatus) return;
+    _status = newStatus;
+    if (!_statusController.isClosed) {
+      _statusController.add(newStatus);
+    }
+  }
+
   /// Last time a pong (or any server message) was received, used to detect
   /// half-open connections where the TCP socket is alive but the peer is not
   /// responding.
@@ -35,6 +72,11 @@ class NotificationWsService {
 
   static const _heartbeatInterval = Duration(seconds: 30);
   static const _maxReconnectDelay = Duration(seconds: 30);
+  // Bounded reconnect attempts: once exceeded, automatic reconnection stops so
+  // a permanently unreachable server doesn't keep waking the device every
+  // backoff interval forever. connect() is still re-invoked externally when
+  // the auth token changes (provider rebuild) or the server config is edited.
+  static const _maxReconnectAttempts = 5;
 
   NotificationCallback? onNotification;
 
@@ -51,6 +93,7 @@ class NotificationWsService {
 
     _baseUrl = baseUrl;
     _storageService = storageService;
+    _setStatus(NotificationWsConnectionStatus.connecting);
 
     String? token;
     try {
@@ -101,6 +144,7 @@ class NotificationWsService {
       _reconnectAttempts = 0;
       _lastServerMessage = DateTime.now();
       _logger.info('WebSocket connected');
+      _setStatus(NotificationWsConnectionStatus.connected);
 
       _startHeartbeat();
       _listen();
@@ -109,6 +153,7 @@ class NotificationWsService {
       // Clean up the failed channel (closes its sink to release underlying
       // resources) before scheduling a reconnect.
       _cleanup();
+      _setStatus(NotificationWsConnectionStatus.reconnecting);
       _scheduleReconnect();
     }
   }
@@ -137,12 +182,14 @@ class NotificationWsService {
       onError: (Object error) {
         _logger.warning('WebSocket error: $error');
         _cleanup();
+        _setStatus(NotificationWsConnectionStatus.reconnecting);
         _scheduleReconnect();
       },
       onDone: () {
         _logger.info('WebSocket closed');
         _cleanup();
         // A dropped connection after initial connect must also be reconnected.
+        _setStatus(NotificationWsConnectionStatus.reconnecting);
         _scheduleReconnect();
       },
     );
@@ -158,6 +205,7 @@ class NotificationWsService {
           _heartbeatInterval * 3) {
         _logger.warning('Heartbeat pong timeout, reconnecting');
         _cleanup();
+        _setStatus(NotificationWsConnectionStatus.reconnecting);
         _scheduleReconnect();
         return;
       }
@@ -188,6 +236,19 @@ class NotificationWsService {
       );
       return;
     }
+
+    // Give up once the attempt budget is exhausted rather than reconnecting
+    // forever. A later connect() (e.g. after login or a server edit) restarts
+    // the counter because _reconnectAttempts is reset to 0 on success.
+    if (_reconnectAttempts >= _maxReconnectAttempts) {
+      _logger.severe(
+        'NotificationWsService: giving up after $_maxReconnectAttempts '
+        'reconnect attempts; call connect() again to retry',
+      );
+      _setStatus(NotificationWsConnectionStatus.failed);
+      return;
+    }
+
     _reconnectTimer?.cancel();
 
     // Exponential backoff: 1s, 2s, 4s, 8s, ... max 30s
@@ -218,5 +279,7 @@ class NotificationWsService {
     _channel = null;
     _baseUrl = null;
     _storageService = null;
+    _setStatus(NotificationWsConnectionStatus.disconnected);
+    unawaited(_statusController.close());
   }
 }

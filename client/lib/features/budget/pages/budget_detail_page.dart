@@ -13,6 +13,7 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import 'package:finvo/features/budget/models/budget_models.dart';
 import 'package:finvo/features/budget/providers/budget_provider.dart';
 import 'package:finvo/features/budget/services/budget_service.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
@@ -126,7 +127,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
             variant: .ghost,
             onPress: () async {
               await context.pushNamed(
-                'budgetEdit',
+                AppRouteNames.budgetEdit,
                 pathParameters: {'id': widget.budgetId},
               );
               if (mounted) {

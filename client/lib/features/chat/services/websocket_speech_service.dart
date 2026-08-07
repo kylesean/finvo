@@ -427,11 +427,13 @@ class WebSocketSpeechService implements SpeechRecognitionService {
     _isListening = false;
 
     // Clean up audio related resources
-    unawaited(
-      _audioRecorder.stopRecording().catchError((Object e) {
+    unawaited(() async {
+      try {
+        await _audioRecorder.stopRecording();
+      } catch (e) {
         _logger.warning('Error stopping recording: $e');
-      }),
-    );
+      }
+    }());
     unawaited(_audioSubscription?.cancel());
     _audioSubscription = null;
   }

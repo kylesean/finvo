@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'dart:async';
 
 class NotificationIcon extends ConsumerWidget {
@@ -52,6 +53,6 @@ class NotificationIcon extends ConsumerWidget {
   }
 
   void _navigateToNotifications(BuildContext context) {
-    unawaited(context.push('/notifications'));
+    unawaited(context.pushNamed(AppRouteNames.notifications));
   }
 }

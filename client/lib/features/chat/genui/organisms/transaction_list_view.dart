@@ -10,6 +10,7 @@ import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/app/router/app_routes.dart';
 
 /// Transaction list view component
 ///
@@ -144,7 +145,12 @@ class _TransactionListViewState extends ConsumerState<TransactionListView> {
                   onTap: () {
                     final id = item['id'] as String?;
                     if (id != null) {
-                      unawaited(context.push('/home/transaction/$id'));
+                      unawaited(
+                        context.pushNamed(
+                          AppRouteNames.transactionDetail,
+                          pathParameters: {'transactionId': id},
+                        ),
+                      );
                     }
                   },
                 );

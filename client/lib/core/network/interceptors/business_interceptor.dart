@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
-import 'package:finvo/core/utils/error_translator.dart';
+import 'package:finvo/core/network/exceptions/app_exception_factory.dart';
 
 typedef FromJsonT<T> = T Function(Object? json);
 
@@ -50,22 +50,14 @@ class BusinessInterceptor extends Interceptor {
       );
     }
 
-    final code = data['code'];
-    final rawMessage = data['message'];
-    final message = rawMessage is String
-        ? rawMessage
-        : rawMessage?.toString() ?? 'Unknown error';
-    final bool isSuccess = code == 0;
-    // If code is not 0, it's a business error
-    // Step 3: If it's a business error, throw directly
-    if (!isSuccess) {
-      final errorCode = code is int ? code : -1;
-      // Localize error message
-      final localizedMessage = ErrorTranslator.translate(errorCode, message);
+    // If code != 0, it's a business error. Reuse the shared envelope parsing
+    // from AppExceptionFactory instead of duplicating the extraction here.
+    final businessError = AppExceptionFactory.tryFromEnvelope(data);
+    if (businessError != null) {
       return handler.reject(
         DioException(
           requestOptions: response.requestOptions,
-          error: BusinessException(localizedMessage, errorCode),
+          error: businessError,
           type: DioExceptionType.badResponse,
         ),
       );

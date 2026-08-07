@@ -13,6 +13,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/app/router/app_routes.dart';
 
 final _logger = Logger('ServerSetupPage');
 
@@ -95,10 +96,10 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
       if (!mounted) return;
 
       TopToast.success(context, t.server.serverUrlSavedRedirectLogin);
-      context.go('/login');
+      context.go(AppRoutePaths.login);
     } else {
       // Navigate to login
-      context.go('/login');
+      context.go(AppRoutePaths.login);
     }
   }
 
@@ -348,6 +349,28 @@ class _ConnectionStatusCard extends StatelessWidget {
   }
 }
 
+/// Heuristic: is [value] shaped like a server address we should try to
+/// connect to? The previous `contains('.') || contains(':')` check accepted
+/// any stray text as an address; instead require a host (IP or name) with an
+/// optional numeric port, optionally prefixed by an http(s) scheme.
+bool _looksLikeServerAddress(String value) {
+  var candidate = value.trim();
+  if (candidate.isEmpty) return false;
+  // Host names / IPs cannot contain whitespace.
+  if (candidate.contains(RegExp(r'\s'))) return false;
+  if (!candidate.startsWith('http://') && !candidate.startsWith('https://')) {
+    candidate = 'https://$candidate';
+  }
+  final uri = Uri.tryParse(candidate);
+  if (uri == null || !uri.hasAuthority) return false;
+  if (uri.host.isEmpty) return false;
+  if (uri.hasPort) {
+    final port = uri.port;
+    if (port < 1 || port > 65535) return false;
+  }
+  return true;
+}
+
 /// QR Scanner view
 class _QrScannerView extends StatefulWidget {
   final void Function(String url) onDetected;
@@ -375,14 +398,14 @@ class _QrScannerViewState extends State<_QrScannerView> {
     final barcodes = capture.barcodes;
     for (final barcode in barcodes) {
       final value = barcode.rawValue;
-      if (value != null && value.isNotEmpty) {
-        // Check if it looks like a URL
-        if (value.contains('.') || value.contains(':')) {
-          _hasScanned = true;
-          unawaited(HapticFeedback.mediumImpact());
-          widget.onDetected(value);
-          return;
-        }
+      // Require a plausible host[:port] shape instead of the old
+      // `contains('.') || contains(':')` check, which mistook any stray text
+      // (e.g. "hello world: test.") for a server address.
+      if (value != null && value.isNotEmpty && _looksLikeServerAddress(value)) {
+        _hasScanned = true;
+        unawaited(HapticFeedback.mediumImpact());
+        widget.onDetected(value);
+        return;
       }
     }
   }

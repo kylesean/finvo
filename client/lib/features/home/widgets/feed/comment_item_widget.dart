@@ -72,7 +72,9 @@ class CommentItemWidget extends ConsumerWidget {
   }
 
   void _showCommentActions(BuildContext context, WidgetRef ref) {
-    final String currentLoggedInUserId = ref.watch(currentUserIdProvider);
+    // ref.read (not ref.watch): reading inside a callback is not a build
+    // context, and Riverpod 3 forbids watch outside build.
+    final String currentLoggedInUserId = ref.read(currentUserIdProvider);
     final bool canDelete = comment.userId == currentLoggedInUserId;
 
     final List<ActionItem> primaryActions = [

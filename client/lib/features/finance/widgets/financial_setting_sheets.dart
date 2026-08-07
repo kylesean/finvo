@@ -121,13 +121,19 @@ class _AmountSliderBottomSheetState
     final primaryCurrency = settingsState.primaryCurrency;
     final symbol = Currency.fromCode(primaryCurrency)?.symbol ?? '¥';
 
-    if (!_hasInitialized) {
+    if (!_hasInitialized && !settingsState.isLoading) {
+      // Prefill the persisted value only once the provider has finished loading.
+      // Guarding on isLoading avoids clobbering the field with the fallback value
+      // on the first frame, before the async load completes. Previously
+      // [_hasInitialized] was set true too early, so a real persisted value was
+      // never backfilled and a blind save silently overwrote it with the
+      // fallback value.
       final initial = widget.initialValueOf(settingsState);
       if (initial != null) {
         _currentValue = initial;
         _controller.text = _currentValue.toStringAsFixed(0);
+        _hasInitialized = true;
       }
-      _hasInitialized = true;
     }
 
     final double sliderValue = _currentValue.clamp(0.0, widget.maxSliderLimit);

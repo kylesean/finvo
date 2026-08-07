@@ -185,8 +185,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       size: 16,
                       color: colors.mutedForeground,
                     ),
-                    onPress: () =>
-                        context.push('/server-setup?reconfigure=true'),
+                    onPress: () => context.pushNamed(
+                      AppRouteNames.serverSetup,
+                      queryParameters: {'reconfigure': 'true'},
+                    ),
                   ),
                 ],
               ),

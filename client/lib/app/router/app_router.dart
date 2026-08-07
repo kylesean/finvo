@@ -31,14 +31,54 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: navigatorKey,
     initialLocation: '/home',
+    // Fail-safe page for unmatched routes / navigation errors. Without this,
+    // go_router throws a StateError for an unknown route and the app renders
+    // a red error screen (debug) or a blank screen (release).
+    errorBuilder: (context, state) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  t.error.unknownError,
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  t.error.unknownErrorHint,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  onPressed: () => context.go(AppRoutePaths.home),
+                  icon: const Icon(Icons.home),
+                  label: Text(t.common.retry),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
     redirect: (BuildContext context, GoRouterState state) {
       final location = state.matchedLocation;
 
-      if (location.startsWith('/server-setup')) {
+      if (location.startsWith(AppRoutePaths.serverSetup)) {
         return null;
       }
       if (!isServerConfigured) {
-        return '/server-setup';
+        return AppRoutePaths.serverSetup;
       }
 
       final bool isPublicRoute = publicRoutePrefixes.any(
@@ -52,11 +92,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           if (from != null &&
               from.isNotEmpty &&
               from.startsWith('/') &&
-              !from.startsWith('/login') &&
-              !from.startsWith('/register')) {
+              !from.startsWith(AppRoutePaths.login) &&
+              !from.startsWith(AppRoutePaths.register)) {
             return from;
           }
-          return '/home';
+          return AppRoutePaths.home;
         }
         return null;
       }
@@ -69,18 +109,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         // Preserve the intended destination (including query params like
         // join_code) so the login page can redirect back after success.
         final fullLocation = state.uri.toString();
-        if (fullLocation != '/' && fullLocation != '/home') {
-          return '/login?from=${Uri.encodeComponent(fullLocation)}';
+        if (fullLocation != '/' && fullLocation != AppRoutePaths.home) {
+          return '${AppRoutePaths.login}?from=${Uri.encodeComponent(fullLocation)}';
         }
-        return '/login';
+        return AppRoutePaths.login;
       }
       return null;
     },
 
     routes: [
       GoRoute(
-        path: '/server-setup',
-        name: 'serverSetup',
+        path: AppRoutePaths.serverSetup,
+        name: AppRouteNames.serverSetup,
         builder: (context, state) {
           final isReconfiguring =
               state.uri.queryParameters['reconfigure'] == 'true';
@@ -99,9 +139,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'step2',
-            name: 'registerStep2',
+            name: AppRouteNames.registerStep2,
             builder: (context, state) {
-              final args = state.extra as Map<String, dynamic>?;
+              // state.extra is typed Object; the cast below would throw a
+              // TypeError if a caller navigated with a non-map payload.
+              // Guard with an is-check so a mis-navigation degrades to the
+              // dedicated missing-info screen instead of crashing.
+              final extra = state.extra;
+              final args = extra is Map<String, dynamic> ? extra : null;
               final contact = args?['contact'] as String?;
               final verificationCode = args?['verificationCode'] as String?;
               if (contact == null || verificationCode == null) {
@@ -130,10 +175,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: 'transaction/:transactionId',
-                    name: 'transactionDetail',
+                    name: AppRouteNames.transactionDetail,
                     builder: (context, state) {
+                      // pathParameters is unmodifiable; '!' on a missing key
+                      // throws a null check error. Resolve safely and show a
+                      // fallback instead of crashing.
                       final transactionId =
-                          state.pathParameters['transactionId']!;
+                          state.pathParameters['transactionId'];
+                      if (transactionId == null) {
+                        return Scaffold(
+                          body: Center(child: Text(t.error.unknownError)),
+                        );
+                      }
                       final targetCommentId =
                           state.uri.queryParameters['commentId'];
                       return TransactionDetailPage(
@@ -145,8 +198,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 ],
               ),
               GoRoute(
-                path: '/notifications',
-                name: 'notifications',
+                path: AppRoutePaths.notifications,
+                name: AppRouteNames.notifications,
                 builder: (context, state) => const NotificationCenterPage(),
               ),
             ],
@@ -163,7 +216,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: ':conversationId',
-                    name: 'conversation',
+                    name: AppRouteNames.conversation,
                     builder: (context, state) {
                       return AIChatPage(
                         conversationId: state.pathParameters['conversationId'],
@@ -188,14 +241,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       GoRoute(
-        path: '/join-space',
-        name: 'joinSpace',
+        path: AppRoutePaths.joinSpace,
+        name: AppRouteNames.joinSpace,
         redirect: (context, state) {
           final code = state.uri.queryParameters['code'];
           if (code != null) {
-            return '/profile/shared-space?join_code=$code';
+            return '${AppRoutePaths.sharedSpaceList}?join_code=$code';
           }
-          return '/profile/shared-space';
+          return AppRoutePaths.sharedSpaceList;
         },
       ),
     ],

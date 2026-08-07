@@ -16,6 +16,8 @@ import 'package:finvo/features/budget/services/budget_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/budget/widgets/budget_period_type_picker.dart';
+import 'package:finvo/features/budget/widgets/budget_anchor_day_picker.dart';
 
 class BudgetFormPage extends ConsumerStatefulWidget {
   final String? editId;
@@ -75,7 +77,11 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           // edited budget's cycle start back to day 1 on the next save.
           _periodAnchorDay = budget.periodAnchorDay;
           _rolloverEnabled = budget.rolloverEnabled;
-          _nameController.text = budget.displayName;
+          // Use the raw server name, not the localised displayName: displayName
+          // resolves category/total budgets to a *localised* label which would
+          // overwrite the server's original name on save and stop the name from
+          // following locale changes.
+          _nameController.text = budget.name;
 
           if (budget.categoryKey != null) {
             _category = TransactionCategory.fromKey(budget.categoryKey!);
@@ -516,7 +522,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _PeriodTypePicker(
+      builder: (context) => BudgetPeriodTypePicker(
         selectedType: _periodType,
         onSelected: (type) {
           setState(() => _periodType = type);
@@ -531,7 +537,7 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _AnchorDayPicker(
+      builder: (context) => BudgetAnchorDayPicker(
         selectedDay: _periodAnchorDay,
         onSelected: (day) {
           setState(() => _periodAnchorDay = day);
@@ -566,6 +572,11 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           amount: amount,
           periodAnchorDay: _periodAnchorDay,
           rolloverEnabled: _rolloverEnabled,
+          // The scope is immutable during edit, but the category is editable.
+          // Passing [categoryKey] (and [scope] for safety) ensures a category
+          // change is actually persisted instead of being silently dropped.
+          scope: _scope,
+          categoryKey: _scope == BudgetScope.category ? _category.key : null,
         );
         await service.update(widget.editId!, request);
         if (mounted) TopToast.success(context, t.budget.updateSuccess);
@@ -603,170 +614,5 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
         setState(() => _isSaving = false);
       }
     }
-  }
-}
-
-class _PeriodTypePicker extends StatelessWidget {
-  final BudgetPeriodType selectedType;
-  final ValueChanged<BudgetPeriodType> onSelected;
-
-  const _PeriodTypePicker({
-    required this.selectedType,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 32,
-              height: 4,
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              decoration: BoxDecoration(
-                color: colors.border,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Text(
-              t.budget.selectPeriodType,
-              style: AppTextStyles.dialogTitle(theme),
-            ),
-            const SizedBox(height: 16),
-            ...BudgetPeriodType.values.map((type) {
-              final isSelected = type == selectedType;
-              return ListTile(
-                leading: Icon(
-                  isSelected ? FLucideIcons.check : FLucideIcons.calendarDays,
-                  color: isSelected ? colors.primary : colors.mutedForeground,
-                ),
-                title: Text(
-                  type.label,
-                  style: theme.typography.body.sm.copyWith(
-                    color: colors.foreground,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  ),
-                ),
-                onTap: () => onSelected(type),
-              );
-            }),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AnchorDayPicker extends StatefulWidget {
-  final int selectedDay;
-  final ValueChanged<int> onSelected;
-
-  const _AnchorDayPicker({required this.selectedDay, required this.onSelected});
-
-  @override
-  State<_AnchorDayPicker> createState() => _AnchorDayPickerState();
-}
-
-class _AnchorDayPickerState extends State<_AnchorDayPicker> {
-  late FPickerController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = FPickerController(indexes: [widget.selectedDay - 1]);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
-    return Container(
-      height: 360,
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              width: 32,
-              height: 4,
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              decoration: BoxDecoration(
-                color: colors.border,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Text(
-              t.budget.selectAnchorDay,
-              style: AppTextStyles.dialogTitle(theme),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: FPicker(
-                control: .managed(controller: _controller),
-                children: [
-                  FPickerWheel(
-                    loop: false,
-                    children: List.generate(31, (index) {
-                      final day = index + 1;
-                      return Center(
-                        child: Text(
-                          t.budget.dayOfMonth(day: day.toString()),
-                          style: AppTextStyles.pickerItem(theme),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FButton(
-                      variant: .outline,
-                      onPress: () => Navigator.pop(context),
-                      child: Text(t.common.cancel),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FButton(
-                      onPress: () {
-                        final index = _controller.value[0];
-                        widget.onSelected(index + 1);
-                      },
-                      child: Text(t.common.confirm),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

@@ -285,7 +285,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
     );
   }
 
-  void _saveWebsocketConfig() {
+  Future<void> _saveWebsocketConfig() async {
     final host = _hostController.text.trim();
     final portText = _portController.text.trim();
     final path = _pathController.text.trim();
@@ -301,16 +301,24 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
       return;
     }
 
-    unawaited(
-      ref
-          .read(speechSettingsProvider.notifier)
-          .updateWebsocketConfig(
-            host: host,
-            port: port,
-            path: path.isEmpty ? '/ws' : path,
-          ),
-    );
+    // Await the save and show the toast based on its real result: previously
+    // this fired the success toast immediately after an unawaited update, so a
+    // failing save still reported success.
+    final ok = await ref
+        .read(speechSettingsProvider.notifier)
+        .updateWebsocketConfig(
+          host: host,
+          port: port,
+          path: path.isEmpty ? '/ws' : path,
+        );
 
-    ToastService.success(description: Text(t.speech.configSaved));
+    if (!context.mounted) return;
+    if (ok) {
+      ToastService.success(description: Text(t.speech.configSaved));
+    } else {
+      ToastService.showDestructive(
+        description: Text(t.speech.configSaveFailed),
+      );
+    }
   }
 }

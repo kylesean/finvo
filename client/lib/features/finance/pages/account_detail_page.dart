@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
@@ -29,12 +29,11 @@ class FinancialAccountDetailPage extends ConsumerWidget {
     final colors = context.theme.colors;
     final theme = context.theme;
 
-    final amount = double.tryParse(args.account.initialBalance.toString()) ?? 0;
-    final formattedAmount = NumberFormat.currency(
-      locale: 'zh_CN',
-      symbol: '¥ ',
-      decimalDigits: 2,
-    ).format(amount);
+    // Use the account's own currency code instead of a hardcoded CNY symbol.
+    final formattedAmount = AmountFormatter.formatCommon(
+      args.account.initialBalance.toDouble(),
+      currencyCode: args.account.currencyCode,
+    );
 
     return Scaffold(
       backgroundColor: colors.background,

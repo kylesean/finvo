@@ -14,6 +14,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/app/router/app_routes.dart';
 
 class BudgetOverviewPage extends ConsumerStatefulWidget {
   const BudgetOverviewPage({super.key});
@@ -64,7 +65,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
         actions: [
           FButton.icon(
             variant: .ghost,
-            onPress: () => context.pushNamed('budgetSettings'),
+            onPress: () => context.pushNamed(AppRouteNames.budgetSettings),
             child: Icon(
               FLucideIcons.settings,
               color: colors.foreground,
@@ -75,7 +76,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
       ),
       body: _buildBody(theme, colors, state),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.pushNamed('budgetNew'),
+        onPressed: () => context.pushNamed(AppRouteNames.budgetNew),
         backgroundColor: colors.primary,
         foregroundColor: colors.primaryForeground,
         shape: const CircleBorder(),

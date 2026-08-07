@@ -245,6 +245,15 @@ class AuthService {
   // Removed unnecessary validateToken and getCurrentUser methods
   // Because login already retrieves complete user information and Token, no additional API calls needed
 
+  /// Clear locally stored auth data (secure tokens + shared-preference user
+  /// PII) without calling the server. Used on session expiry (401) so the
+  /// local state matches a full logout; otherwise cold-start would still find
+  /// leaked user PII in SharedPreferences after the session died.
+  Future<void> clearLocalAuthData() async {
+    await _deleteAuthData();
+    _logger.info('Local auth data cleared (session expiry).');
+  }
+
   Future<void> logout() async {
     await _deleteAuthData(); // Clear token and user data from secure storage and shared preferences
     _logger.info('User logged out and data cleared.');

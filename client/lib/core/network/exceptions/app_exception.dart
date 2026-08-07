@@ -87,3 +87,12 @@ class SecureStorageUnavailableException extends AppException {
   SecureStorageUnavailableException([String? message])
     : super(message, 'Secure Storage Unavailable: ');
 }
+
+/// Request cancelled exception: thrown when the caller cancels an in-flight
+/// request (e.g. via CancelToken) before it completes. Distinct from network
+/// failures so callers can swallow it silently instead of surfacing an
+/// alarming error toast.
+class RequestCancelledException extends AppException {
+  RequestCancelledException([String? message])
+    : super(message, 'Request Cancelled: ');
+}

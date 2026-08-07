@@ -51,13 +51,23 @@ class BudgetSummaryState {
 
 @riverpod
 class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
+  /// Generation token guarding against stale responses. Incremented on every
+  /// load/refresh; a response is discarded if its captured generation no
+  /// longer matches, so a fast filter switch can't have an old request
+  /// overwrite the newer selection's data.
+  int _loadGeneration = 0;
+
   @override
   BudgetSummaryState build() {
     return const BudgetSummaryState();
   }
 
   Future<void> load() async {
-    if (state.isLoading) return;
+    // No early-return on isLoading: a pending request for the previous filter
+    // must not cause the new filter's request to be silently dropped (which
+    // previously left the label showing "All" while the list still showed
+    // "Active" data).
+    final generation = ++_loadGeneration;
 
     state = state.copyWith(isLoading: true, error: null);
 
@@ -67,9 +77,13 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
       final summary = await service.getSummary(
         includePaused: filter.includePaused,
       );
+      // Discard a stale response if the user switched filters while this
+      // request was in flight.
+      if (generation != _loadGeneration) return;
       state = state.copyWith(summary: summary, isLoading: false);
     } catch (e) {
       // Preserve the typed exception (AppException) instead of flattening it.
+      if (generation != _loadGeneration) return;
       state = state.copyWith(isLoading: false, error: e);
     }
   }

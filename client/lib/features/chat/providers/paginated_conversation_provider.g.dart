@@ -46,7 +46,7 @@ final class PaginatedConversationProvider
 }
 
 String _$paginatedConversationHash() =>
-    r'53fa56643690b7ceff032b8eefd65c26ea134109';
+    r'2d2a1777ad0b4bb567d02260ebd3311cd064cb15';
 
 /// Paginated conversation list state management
 

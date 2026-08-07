@@ -326,11 +326,15 @@ class _FinancialAccountEditPageState
     final name = _nameController.text.trim();
     final balanceText = _balanceController.text.trim();
 
-    Decimal balance;
-    try {
-      balance = Decimal.parse(balanceText.isEmpty ? '0' : balanceText);
-    } catch (_) {
-      balance = Decimal.zero;
+    // Parse the balance explicitly instead of silently coercing a bad input to
+    // zero: an invalid amount would otherwise be saved as 0 without any
+    // feedback, silently discarding the user's intended value.
+    final Decimal? balance = balanceText.isEmpty
+        ? Decimal.zero
+        : Decimal.tryParse(balanceText);
+    if (balance == null) {
+      TopToast.error(context, t.transaction.pleaseEnterAmount);
+      return;
     }
 
     final updatedAccount = widget.args.account.copyWith(

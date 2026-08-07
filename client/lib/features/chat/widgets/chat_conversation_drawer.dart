@@ -13,9 +13,11 @@ import 'package:finvo/features/chat/providers/paginated_conversation_provider.da
 import 'package:finvo/features/chat/models/conversation_info.dart';
 import 'package:finvo/features/chat/services/conversation_service.dart';
 import 'package:finvo/features/chat/widgets/chat_conversation_drawer_search_field.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/chat/widgets/conversation_item_skeleton.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
@@ -317,7 +319,7 @@ class _ChatConversationDrawerState
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            context.go('/profile');
+            context.goNamed(AppRouteNames.profile);
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
             }
@@ -443,7 +445,7 @@ class _ChatConversationDrawerState
           onTap: () {
             if (!isSelected) {
               context.goNamed(
-                'conversation',
+                AppRouteNames.conversation,
                 pathParameters: {'conversationId': conversation.id},
               );
             }
@@ -568,7 +570,7 @@ class _ChatConversationDrawerState
         unawaited(
           ref.read(chatHistoryProvider.notifier).createNewConversation(),
         );
-        context.goNamed('chat');
+        context.goNamed(AppRouteNames.ai);
       }
 
       // Show success toast
@@ -756,13 +758,13 @@ class _ChatConversationDrawerState
         // If there's a messageId, navigate to specific message, otherwise navigate to conversation
         if (result.messageId != null) {
           context.goNamed(
-            'conversation',
+            AppRouteNames.conversation,
             pathParameters: {'conversationId': result.id},
             queryParameters: {'messageId': result.messageId},
           );
         } else {
           context.goNamed(
-            'conversation',
+            AppRouteNames.conversation,
             pathParameters: {'conversationId': result.id},
           );
         }
@@ -818,12 +820,14 @@ class _ChatConversationDrawerState
               maxLines: 2,
             ),
             const SizedBox(height: 6),
-            // Time
+            // Time — converged onto the shared relative-time formatter so all
+            // locales (via `time_utils.relativeTime`) and the i18n prefix labels
+            // are honored instead of hardcoded English.
             Text(
               result.updatedAt != null
-                  ? 'Updated ${_formatDate(result.updatedAt!)}'
+                  ? t.chat.updatedAt(time: relativeTime(result.updatedAt!))
                   : result.createdAt != null
-                  ? 'Created ${_formatDate(result.createdAt!)}'
+                  ? t.chat.createdAt(time: relativeTime(result.createdAt!))
                   : '',
               style: theme.typography.body.xs.copyWith(
                 color: theme.colors.mutedForeground.withValues(alpha: 0.7),
@@ -977,21 +981,5 @@ class _ChatConversationDrawerState
         ),
       ],
     );
-  }
-
-  // Format date display
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      return 'today';
-    } else if (difference.inDays == 1) {
-      return 'yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else {
-      return '${date.month}/${date.day}';
-    }
   }
 }

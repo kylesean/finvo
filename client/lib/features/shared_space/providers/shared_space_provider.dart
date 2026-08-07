@@ -214,13 +214,129 @@ Future<Settlement> spaceSettlement(Ref ref, String spaceId) async {
   return service.getSpaceSettlement(spaceId);
 }
 
+/// Paginated state for a single space's transaction list.
+class SpaceTransactionState {
+  final List<SpaceTransaction> transactions;
+  final bool isLoading;
+  final String? error;
+  final int currentPage;
+  final bool hasMore;
+  final int total;
+
+  const SpaceTransactionState({
+    this.transactions = const [],
+    this.isLoading = false,
+    this.error,
+    this.currentPage = 1,
+    this.hasMore = true,
+    this.total = 0,
+  });
+
+  SpaceTransactionState copyWith({
+    List<SpaceTransaction>? transactions,
+    bool? isLoading,
+    String? error,
+    int? currentPage,
+    bool? hasMore,
+    int? total,
+  }) {
+    return SpaceTransactionState(
+      transactions: transactions ?? this.transactions,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      currentPage: currentPage ?? this.currentPage,
+      hasMore: hasMore ?? this.hasMore,
+      total: total ?? this.total,
+    );
+  }
+}
+
+/// Paginated transaction list for a shared space.
+///
+/// Keyed by [spaceId] so each space keeps an independent, accumulated list.
+/// Mirrors [SharedSpaceNotifier]'s pagination contract (currentPage/hasMore)
+/// so the detail page can drive infinite-scroll through its scroll controller.
 @riverpod
-Future<SpaceTransactionListResponse> spaceTransactions(
-  Ref ref,
-  String spaceId, {
-  int page = 1,
-  int limit = 20,
-}) async {
-  final service = ref.watch(sharedSpaceServiceProvider);
-  return service.getSpaceTransactions(spaceId, page: page, limit: limit);
+class SpaceTransactionNotifier extends _$SpaceTransactionNotifier {
+  static const _pageSize = 20;
+
+  @override
+  SpaceTransactionState build(String spaceId) {
+    return const SpaceTransactionState();
+  }
+
+  /// Generation token guarding against stale pagination responses.
+  /// Incremented on every refresh; a response whose captured generation no
+  /// longer matches is discarded, so a refresh racing an in-flight loadMore
+  /// can't append an old page onto the freshly reset page-1 list.
+  int _loadGeneration = 0;
+
+  SharedSpaceService get _service => ref.read(sharedSpaceServiceProvider);
+
+  /// Load transactions with pagination.
+  ///
+  /// [refresh] resets to page 1 (replaces the accumulated list); otherwise the
+  /// next page is appended. Overlapping ids from a refresh racing an in-flight
+  /// load are collapsed so the list can't contain duplicates.
+  Future<void> loadTransactions({bool refresh = false}) async {
+    if (refresh) {
+      // Invalidate any in-flight request so its response can't append stale
+      // pages onto the refreshed list.
+      ++_loadGeneration;
+      state = const SpaceTransactionState(isLoading: true);
+    } else if (state.isLoading || !state.hasMore) {
+      return;
+    } else {
+      state = state.copyWith(isLoading: true, error: null);
+    }
+
+    final generation = _loadGeneration;
+    try {
+      final page = refresh ? 1 : state.currentPage;
+      final res = await _service.getSpaceTransactions(
+        spaceId,
+        page: page,
+        limit: _pageSize,
+      );
+      // Discard a stale response that raced a more recent refresh.
+      if (generation != _loadGeneration) return;
+
+      final newTransactions = refresh
+          ? res.transactions
+          : _appendUnique(state.transactions, res.transactions);
+      final hasMore = newTransactions.length < res.total;
+
+      state = state.copyWith(
+        transactions: newTransactions,
+        isLoading: false,
+        error: null,
+        currentPage: page + 1,
+        hasMore: hasMore,
+        total: res.total,
+      );
+    } catch (e) {
+      if (generation != _loadGeneration) return;
+      String errorMessage = 'Failed to load space transactions';
+      if (e is AppException) {
+        errorMessage = e.message;
+      }
+      state = state.copyWith(isLoading: false, error: errorMessage);
+    }
+  }
+
+  /// Load the next page (no-op when already loading or exhausted).
+  Future<void> loadMore() => loadTransactions();
+
+  void clearError() {
+    state = state.copyWith(error: null);
+  }
+
+  /// Append [incoming] to [existing], skipping ids already present.
+  List<SpaceTransaction> _appendUnique(
+    List<SpaceTransaction> existing,
+    List<SpaceTransaction> incoming,
+  ) {
+    final existingIds = existing.map((t) => t.id).toSet();
+    return [...existing, ...incoming.where((t) => !existingIds.contains(t.id))];
+  }
 }

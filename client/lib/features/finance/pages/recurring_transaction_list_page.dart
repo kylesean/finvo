@@ -6,17 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import 'package:finvo/features/finance/models/recurring_transaction.dart';
 import 'package:finvo/features/finance/providers/recurring_transaction_provider.dart';
 import 'package:finvo/features/finance/services/recurring_transaction_service.dart';
-import 'package:finvo/shared/models/currency.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/features/finance/utils/recurring_transaction_display.dart';
+import 'package:finvo/features/finance/widgets/recurring_transaction_card.dart';
 import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
@@ -95,7 +95,7 @@ class _RecurringTransactionListPageState
               context.pop();
             } else {
               // If cannot pop, navigate to finance page
-              context.go('/finance');
+              context.goNamed(AppRouteNames.finance);
             }
           },
           child: Icon(
@@ -122,7 +122,8 @@ class _RecurringTransactionListPageState
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/finance/recurring-transactions/new'),
+        onPressed: () =>
+            context.pushNamed(AppRouteNames.recurringTransactionNew),
         backgroundColor: colors.primary,
         foregroundColor: colors.primaryForeground,
         shape: const CircleBorder(),
@@ -340,7 +341,11 @@ class _RecurringTransactionListPageState
           const SizedBox(height: 12),
           // List items
           ...sortedItems.map(
-            (item) => _buildTransactionCard(theme, colors, item),
+            (item) => RecurringTransactionCard(
+              transaction: item,
+              onDelete: _showDeleteConfirmDialog,
+              onToggleActive: _showToggleActiveDialog,
+            ),
           ),
         ],
       ),
@@ -406,199 +411,11 @@ class _RecurringTransactionListPageState
               width: double.infinity,
               child: FButton(
                 onPress: () =>
-                    context.push('/finance/recurring-transactions/new'),
+                    context.pushNamed(AppRouteNames.recurringTransactionNew),
                 child: Text(t.forecast.recurringTransaction.create),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTransactionCard(
-    FThemeData theme,
-    FColors colors,
-    RecurringTransaction transaction,
-  ) {
-    final typeColor = _getTypeColor(colors, transaction.type);
-    final typeIcon = _getTypeIcon(transaction.type);
-    final amountSign = transaction.type == RecurringTransactionType.income
-        ? '+'
-        : transaction.type == RecurringTransactionType.expense
-        ? '-'
-        : '';
-
-    // Get next execution date (prefer nextExecutionAt, fallback to startDate)
-    final nextDate = transaction.nextExecutionAt ?? transaction.startDate;
-
-    return Dismissible(
-      key: Key('recurring_${transaction.id}'),
-      direction: DismissDirection.horizontal, // Support horizontal swipe
-      dismissThresholds: const {
-        DismissDirection.endToStart: 0.4,
-        DismissDirection.startToEnd: 0.4,
-      },
-      confirmDismiss: (direction) async {
-        unawaited(HapticFeedback.selectionClick());
-        if (direction == DismissDirection.endToStart) {
-          // Swipe left → delete
-          return await _showDeleteConfirmDialog(transaction);
-        } else {
-          // Swipe right → toggle active state
-          await _showToggleActiveDialog(transaction);
-          return false; // Don't dismiss card
-        }
-      },
-      // Left swipe background (pause/resume)
-      background: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: transaction.isActive ? colors.mutedForeground : Colors.green,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 24),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              transaction.isActive ? FLucideIcons.pause : FLucideIcons.play,
-              color: Colors.white,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              transaction.isActive
-                  ? t.forecast.recurringTransaction.paused
-                  : t.forecast.recurringTransaction.activated,
-              style: theme.typography.body.sm.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-      // Right swipe background (delete)
-      secondaryBackground: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: colors.destructive,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 24),
-        child: const Icon(FLucideIcons.trash2, color: Colors.white, size: 24),
-      ),
-      child: GestureDetector(
-        onTap: () => context.push(
-          '/finance/recurring-transactions/${transaction.id}/edit',
-        ),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: colors.border),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Left: type icon
-                ThemedIcon.large(icon: typeIcon),
-                const SizedBox(width: 14),
-                // Center: title + tags
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getDisplayName(transaction),
-                        style: AppTextStyles.listTitle(theme),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: [
-                          // Rule tag
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.muted,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              _getShortFrequencyLabel(
-                                transaction.recurrenceRule,
-                              ),
-                              style: AppTextStyles.statLabel(theme),
-                            ),
-                          ),
-                          // Dynamic amount tag
-                          if (transaction.amountType == AmountType.estimate)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    FLucideIcons.circleAlert,
-                                    size: 12,
-                                    color: colors.primary,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    t
-                                        .forecast
-                                        .recurringTransaction
-                                        .dynamicAmount,
-                                    style: AppTextStyles.badge(theme),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                // Right: amount + next date
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '$amountSign${Currency.fromCode(ref.watch(financialSettingsProvider).primaryCurrency)?.symbol ?? '¥'}${transaction.amount.toDouble().toStringAsFixed(2)}',
-                      style: AppTextStyles.listTitle(
-                        theme,
-                      ).copyWith(color: typeColor),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${t.forecast.recurringTransaction.nextTime}: ${_formatShortDate(nextDate)}',
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
@@ -614,7 +431,7 @@ class _RecurringTransactionListPageState
       context: context,
       title: t.forecast.recurringTransaction.confirmDelete,
       message: t.forecast.recurringTransaction.deleteConfirm(
-        name: _getDisplayName(transaction),
+        name: recurringTransactionDisplayName(transaction),
       ),
       cancelLabel: t.common.cancel,
       confirmVariant: FButtonVariant.destructive,
@@ -651,10 +468,10 @@ class _RecurringTransactionListPageState
           : t.forecast.recurringTransaction.confirmPause,
       message: newState
           ? t.forecast.recurringTransaction.activateConfirm(
-              name: _getDisplayName(transaction),
+              name: recurringTransactionDisplayName(transaction),
             )
           : t.forecast.recurringTransaction.pauseConfirm(
-              name: _getDisplayName(transaction),
+              name: recurringTransactionDisplayName(transaction),
             ),
       cancelLabel: t.common.cancel,
       confirmLabel: newState
@@ -685,79 +502,5 @@ class _RecurringTransactionListPageState
         TopToast.error(context, message);
       }
     }
-  }
-
-  Color _getTypeColor(FColors colors, RecurringTransactionType type) {
-    switch (type) {
-      case RecurringTransactionType.expense:
-        return colors.destructive;
-      case RecurringTransactionType.income:
-        return Colors.green;
-      case RecurringTransactionType.transfer:
-        return colors.primary;
-    }
-  }
-
-  IconData _getTypeIcon(RecurringTransactionType type) {
-    switch (type) {
-      case RecurringTransactionType.expense:
-        return FLucideIcons.arrowUpRight;
-      case RecurringTransactionType.income:
-        return FLucideIcons.arrowDownLeft;
-      case RecurringTransactionType.transfer:
-        return FLucideIcons.arrowRightLeft;
-    }
-  }
-
-  /// Get short frequency label
-  String _getShortFrequencyLabel(String rule) {
-    final rt = t.forecast.recurringTransaction;
-    if (rule.contains('FREQ=DAILY')) {
-      return rt.daily;
-    } else if (rule.contains('FREQ=WEEKLY')) {
-      return rt.weekly;
-    } else if (rule.contains('FREQ=MONTHLY')) {
-      return rt.monthly;
-    } else if (rule.contains('FREQ=YEARLY')) {
-      return rt.yearly;
-    }
-    return rt.cycle;
-  }
-
-  /// Format short date (i18n support)
-  /// Uses switch expression for easy addition of more language support
-  String _formatShortDate(DateTime date) {
-    final locale = LocaleSettings.currentLocale;
-    // Return corresponding DateFormat locale and format based on language
-    final (dateFormatLocale, pattern) = switch (locale) {
-      AppLocale.zh => ('zh_CN', 'M 月 d 日'),
-      AppLocale.en => ('en', 'MMM d'),
-      AppLocale.ja => ('ja', 'M月d日'),
-      AppLocale.ko => ('ko', 'M월 d일'),
-      AppLocale.zhHant => ('zh_TW', 'M 月 d 日'),
-    };
-    return DateFormat(pattern, dateFormatLocale).format(date);
-  }
-
-  /// Generate display name for transaction
-  /// Uses description if available, otherwise uses localized category name
-  String _getDisplayName(RecurringTransaction transaction) {
-    if (transaction.description != null &&
-        transaction.description!.isNotEmpty) {
-      return transaction.description!;
-    }
-
-    // Use localized category display name (already internationalized)
-    if (transaction.categoryKey != null) {
-      final category = TransactionCategory.fromKey(transaction.categoryKey!);
-      return category.displayText;
-    }
-
-    // Default name: return based on type
-    return switch (transaction.type) {
-      RecurringTransactionType.expense => t.transaction.expense,
-      RecurringTransactionType.income => t.transaction.income,
-      RecurringTransactionType.transfer => t.transaction.transfer,
-    };
   }
 }

@@ -5,9 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import 'package:intl/intl.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/utils/time_utils.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
 
 class CashPocketCard extends ConsumerStatefulWidget {
@@ -80,37 +84,12 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
     }
   }
 
-  String _formatCurrency(double amount) {
-    final formatter = NumberFormat.currency(
-      locale: 'zh_CN',
-      symbol: '¥ ',
-      decimalDigits: 2,
-    );
-    return formatter.format(amount);
-  }
-
-  String _formatLastUpdated(DateTime? dateTime) {
-    if (dateTime == null) return 'Never updated';
-
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
     final colors = theme.colors;
     final state = ref.watch(financialAccountProvider);
+    final currency = ref.watch(financialSettingsProvider).primaryCurrency;
 
     // Trigger balance animation
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -120,7 +99,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
     return GestureDetector(
       onTap: () {
         // Navigate to account management on tap
-        unawaited(context.push('/forecast', extra: 1));
+        unawaited(context.pushNamed(AppRouteNames.financialAccounts));
       },
       child: AppCard(
         style: const .delta(padding: .value(EdgeInsets.zero)),
@@ -157,7 +136,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'My Cash Pockets',
+                        t.financial.cashPocketTitle,
                         style: theme.typography.body.xl.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -189,7 +168,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Loading...',
+                      t.common.loading,
                       style: theme.typography.body.sm.copyWith(
                         color: Colors.white.withValues(alpha: 0.8),
                       ),
@@ -201,7 +180,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Load Failed',
+                      t.common.loadFailed,
                       style: theme.typography.body.xl.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -225,7 +204,10 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                       animation: _balanceAnimation,
                       builder: (context, child) {
                         return Text(
-                          _formatCurrency(_balanceAnimation.value),
+                          AmountFormatter.formatCommon(
+                            _balanceAnimation.value,
+                            currencyCode: currency,
+                          ),
                           style: theme.typography.body.xl.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -241,7 +223,11 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                     Row(
                       children: [
                         Text(
-                          'Last updated: ${_formatLastUpdated(state.lastUpdatedAt)}',
+                          t.financial.lastUpdatedAt(
+                            time: state.lastUpdatedAt == null
+                                ? t.financial.neverUpdated
+                                : relativeTime(state.lastUpdatedAt!),
+                          ),
                           style: theme.typography.body.sm.copyWith(
                             color: Colors.white.withValues(alpha: 0.8),
                           ),
@@ -258,7 +244,9 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              '${state.accounts.length} Sources',
+                              t.financial.sourcesCount(
+                                count: state.accounts.length,
+                              ),
                               style: theme.typography.body.sm.copyWith(
                                 color: Colors.white,
                                 fontSize: 10,
@@ -276,9 +264,11 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
               // Update Now button
               FButton(
                 variant: .outline,
-                onPress: () => unawaited(context.push('/forecast', extra: 1)),
+                onPress: () => unawaited(
+                  context.pushNamed(AppRouteNames.financialAccounts),
+                ),
                 child: Text(
-                  'Update Now',
+                  t.financial.updateNow,
                   style: TextStyle(
                     color: colors.primary,
                     fontWeight: FontWeight.w500,

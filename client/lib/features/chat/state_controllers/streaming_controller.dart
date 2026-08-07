@@ -283,27 +283,30 @@ class StreamingController {
       _pendingCancelCompleter = Completer<void>();
       final completer = _pendingCancelCompleter!;
 
-      unawaited(
-        cancelLastTurn(sessionId)
-            .then((success) {
-              if (success) {
-                _logger.info(
-                  'StreamingController: Checkpoint cleaned successfully',
-                );
-              } else {
-                _logger.info('StreamingController: Checkpoint cleanup failed');
-              }
-            })
-            .catchError((Object e) {
-              _logger.warning('StreamingController: Cancel error: $e');
-            })
-            .whenComplete(() {
-              if (!completer.isCompleted) {
-                completer.complete();
-              }
-              _pendingCancelCompleter = null;
-            }),
-      );
+      // Fire-and-forget checkpoint cleanup. Extract the chain into a local
+      // async closure so the completion bookkeeping lives in `finally` and
+      // every error is funneled through a single try/catch (M13).
+      Future<void> cleanCheckpoint() async {
+        try {
+          final success = await cancelLastTurn(sessionId);
+          if (success) {
+            _logger.info(
+              'StreamingController: Checkpoint cleaned successfully',
+            );
+          } else {
+            _logger.info('StreamingController: Checkpoint cleanup failed');
+          }
+        } catch (e) {
+          _logger.warning('StreamingController: Cancel error: $e');
+        } finally {
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+          _pendingCancelCompleter = null;
+        }
+      }
+
+      unawaited(cleanCheckpoint());
     }
 
     _logger.info('StreamingController: Pending operation cancelled');
@@ -328,9 +331,23 @@ class StreamingController {
     }
   }
 
-  /// Cancel stream timers
+  /// Cancel stream timers and any in-flight GenUI SSE request.
+  ///
+  /// Switching or creating a new conversation MUST tear down an in-flight
+  /// stream, otherwise late SSE events (session_init, text_delta) would arrive
+  /// after the switch and hijack the new conversation's state (stale sessionId
+  /// written back, text appended to the wrong message). `cancel()` is
+  /// idempotent: it no-ops when no request is in flight and drives the stream
+  /// to its terminal state (onStreamComplete) instead of leaving it dangling.
   Future<void> cancelStreamAndTimers() async {
     _initialResponseDelayTimer?.cancel();
+
+    if (_genUiService != null && _genUiService!.isInitialized) {
+      _logger.info(
+        'StreamingController: Cancelling in-flight GenUI stream on switch',
+      );
+      _genUiService!.conversation.cancel();
+    }
   }
 
   /// Dispose controller

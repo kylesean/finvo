@@ -281,13 +281,13 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
     }
 
     // Calculate Y axis range
-    final allValues = [
+    final range = _safeChartRange([
       ..._dataPoints.map((p) => p.predictedBalance),
       ..._dataPoints.map((p) => p.lowerBound),
       ..._dataPoints.map((p) => p.upperBound),
-    ];
-    final minY = allValues.reduce((a, b) => a < b ? a : b);
-    final maxY = allValues.reduce((a, b) => a > b ? a : b);
+    ]);
+    final minY = range.minY;
+    final maxY = range.maxY;
     final padding = (maxY - minY) * 0.1;
 
     return LineChart(
@@ -740,4 +740,19 @@ class _ForecastWarning {
       message: json['message']?.toString() ?? '',
     );
   }
+}
+
+/// Computes a safe Y-axis [minY, maxY] range for the forecast curve.
+///
+/// Guards against a flat prediction curve (minY == maxY): without a baseline
+/// span the range would be zero, producing a division-by-zero in the grid
+/// interval and an invisible chart. Expands the range symmetrically instead.
+({double minY, double maxY}) _safeChartRange(List<double> allValues) {
+  var minY = allValues.reduce((a, b) => a < b ? a : b);
+  var maxY = allValues.reduce((a, b) => a > b ? a : b);
+  if (maxY == minY) {
+    maxY += 100;
+    minY -= 100;
+  }
+  return (minY: minY, maxY: maxY);
 }

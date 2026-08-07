@@ -10,10 +10,11 @@ import 'dart:async';
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/features/finance/pages/account_edit_navigation.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/features/finance/pages/account_edit_page.dart';
 import 'package:finvo/features/finance/providers/financial_summary_provider.dart';
 import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
@@ -479,7 +480,7 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
           type: MaterialType.transparency,
           borderRadius: BorderRadius.circular(10), // Match FCard radius
           child: InkWell(
-            onTap: () => _editAccount(account, definition),
+            onTap: () => pushAccountEditPage(context, account, definition),
             borderRadius: BorderRadius.circular(10),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -588,7 +589,9 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
   }
 
   Future<void> _addAccount() async {
-    final typeResult = await context.pushNamed('financialAccountTypePicker');
+    final typeResult = await context.pushNamed(
+      AppRouteNames.financialAccountTypePicker,
+    );
     if (!mounted || typeResult == null) return;
 
     if (typeResult is FinancialAccount) {
@@ -606,25 +609,5 @@ class _AccountSourcesPageState extends ConsumerState<AccountSourcesPage> {
             .loadFinancialAccounts();
       }
     }
-  }
-
-  Future<void> _editAccount(
-    FinancialAccount account,
-    AccountTypeDefinition? definition,
-  ) async {
-    // If no matching definition found, try to get default definition based on account.type
-    final accountDefinition =
-        definition ??
-        AccountTypeRegistry.resolveByApiType(account.type) ??
-        AccountTypeRegistry.getDefaultDefinition(account.nature);
-
-    await context.pushNamed(
-      'financialAccountEdit',
-      extra: FinancialAccountEditArgs(
-        definition: accountDefinition,
-        account: account,
-      ),
-    );
-    // Refresh is handled by the edit page's provider interaction
   }
 }

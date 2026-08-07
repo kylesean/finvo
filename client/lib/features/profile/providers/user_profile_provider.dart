@@ -1,43 +1,24 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/features/profile/services/profile_service.dart';
 import 'package:finvo/features/profile/models/user_info.dart';
 import 'package:finvo/features/chat/services/file_upload_service.dart';
 import 'dart:async';
 
+part 'user_profile_provider.freezed.dart';
 part 'user_profile_provider.g.dart';
 
 /// User profile state
-class UserProfileState {
-  final UserInfo? user;
-  final bool isLoading;
-  final bool isSaving;
-  final bool isUploadingAvatar;
-  final String? error;
-
-  const UserProfileState({
-    this.user,
-    this.isLoading = false,
-    this.isSaving = false,
-    this.isUploadingAvatar = false,
-    this.error,
-  });
-
-  UserProfileState copyWith({
+@freezed
+abstract class UserProfileState with _$UserProfileState {
+  const factory UserProfileState({
     UserInfo? user,
-    bool? isLoading,
-    bool? isSaving,
-    bool? isUploadingAvatar,
+    @Default(false) bool isLoading,
+    @Default(false) bool isSaving,
+    @Default(false) bool isUploadingAvatar,
     String? error,
-  }) {
-    return UserProfileState(
-      user: user ?? this.user,
-      isLoading: isLoading ?? this.isLoading,
-      isSaving: isSaving ?? this.isSaving,
-      isUploadingAvatar: isUploadingAvatar ?? this.isUploadingAvatar,
-      error: error,
-    );
-  }
+  }) = _UserProfileState;
 }
 
 /// User profile notifier

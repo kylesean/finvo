@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/services/notification_ws_service.dart';
@@ -10,6 +11,7 @@ import 'package:finvo/features/home/providers/comment_providers.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
 import 'package:finvo/features/notification/repositories/notification_repository.dart';
 
+part 'notification_provider.freezed.dart';
 part 'notification_provider.g.dart';
 
 final _logger = Logger('NotificationNotifier');
@@ -20,48 +22,18 @@ final _logger = Logger('NotificationNotifier');
 int _realtimeNotificationSeq = 0;
 
 /// State object for Notifications feature
-class NotificationState {
-  final List<NotificationItem> items;
-  final int total;
-  final int unreadCount;
-  final int currentPage;
-  final bool isLoading;
-  final bool isLoadingMore;
-  final bool hasReachedMax;
-  final String? error;
-
-  const NotificationState({
-    this.items = const [],
-    this.total = 0,
-    this.unreadCount = 0,
-    this.currentPage = 1,
-    this.isLoading = false,
-    this.isLoadingMore = false,
-    this.hasReachedMax = false,
-    this.error,
-  });
-
-  NotificationState copyWith({
-    List<NotificationItem>? items,
-    int? total,
-    int? unreadCount,
-    int? currentPage,
-    bool? isLoading,
-    bool? isLoadingMore,
-    bool? hasReachedMax,
+@freezed
+abstract class NotificationState with _$NotificationState {
+  const factory NotificationState({
+    @Default([]) List<NotificationItem> items,
+    @Default(0) int total,
+    @Default(0) int unreadCount,
+    @Default(1) int currentPage,
+    @Default(false) bool isLoading,
+    @Default(false) bool isLoadingMore,
+    @Default(false) bool hasReachedMax,
     String? error,
-  }) {
-    return NotificationState(
-      items: items ?? this.items,
-      total: total ?? this.total,
-      unreadCount: unreadCount ?? this.unreadCount,
-      currentPage: currentPage ?? this.currentPage,
-      isLoading: isLoading ?? this.isLoading,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      error: error,
-    );
-  }
+  }) = _NotificationState;
 }
 
 /// Notification Repository Provider

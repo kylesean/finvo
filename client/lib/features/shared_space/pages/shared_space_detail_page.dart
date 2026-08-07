@@ -4,25 +4,17 @@ import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
-import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'package:finvo/features/shared_space/widgets/space_dashboard_card.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
-import 'package:finvo/shared/widgets/amount_text.dart';
-import 'package:finvo/shared/utils/amount_formatter.dart';
-import 'package:finvo/shared/utils/time_utils.dart';
-import 'package:finvo/shared/providers/amount_theme_provider.dart';
-import 'package:finvo/features/home/models/transaction_model.dart';
-import 'package:finvo/core/constants/category_constants.dart';
-import 'package:finvo/shared/config/category_config.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/shared_space/widgets/detail/space_invite_code_sheet.dart';
 import 'package:finvo/shared/widgets/dialogs/action_bottom_sheet.dart';
 import 'package:finvo/shared/models/action_item_model.dart';
-import 'package:shimmer/shimmer.dart';
-import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/features/shared_space/widgets/detail/shared_space_detail_sections.dart';
+import 'dart:async';
 
 class SharedSpaceDetailPage extends ConsumerStatefulWidget {
   final String spaceId;
@@ -42,9 +34,10 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scrollController.addListener(_onScroll);
     // Initial load data
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshAll();
+      unawaited(_refreshAll());
     });
   }
 
@@ -59,14 +52,25 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Layer 3: Auto-refresh when app returns to foreground
     if (state == AppLifecycleState.resumed) {
-      _refreshAll();
+      unawaited(_refreshAll());
     }
   }
 
-  void _refreshAll() {
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      unawaited(
+        ref.read(spaceTransactionProvider(widget.spaceId).notifier).loadMore(),
+      );
+    }
+  }
+
+  Future<void> _refreshAll() async {
     ref.invalidate(spaceDetailProvider(widget.spaceId));
     ref.invalidate(spaceSettlementProvider(widget.spaceId));
-    ref.invalidate(spaceTransactionsProvider(widget.spaceId));
+    await ref
+        .read(spaceTransactionProvider(widget.spaceId).notifier)
+        .loadTransactions(refresh: true);
   }
 
   @override
@@ -76,83 +80,21 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
 
     final spaceAsync = ref.watch(spaceDetailProvider(widget.spaceId));
     final settlementAsync = ref.watch(spaceSettlementProvider(widget.spaceId));
-    final transactionsAsync = ref.watch(
-      spaceTransactionsProvider(widget.spaceId),
-    );
+    final txState = ref.watch(spaceTransactionProvider(widget.spaceId));
 
     return Scaffold(
       backgroundColor: colorScheme.background,
       body: spaceAsync.when(
-        loading: () => _buildLoadingState(context),
-        error: (error, stack) => _buildErrorState(context, error.toString()),
-        data: (space) =>
-            _buildContent(context, space, settlementAsync, transactionsAsync),
-      ),
-    );
-  }
-
-  Widget _buildLoadingState(BuildContext context) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(t.sharedSpace.title, style: theme.typography.body.xl),
-        backgroundColor: colors.background,
-        foregroundColor: colors.foreground,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  Widget _buildErrorState(BuildContext context, String error) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(t.sharedSpace.title, style: theme.typography.body.xl),
-        backgroundColor: colors.background,
-        foregroundColor: colors.foreground,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                FLucideIcons.circleAlert,
-                size: 48,
-                color: colors.mutedForeground,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                t.sharedSpace.detail.loadFailed,
-                style: AppTextStyles.pageTitle(theme),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error,
-                style: AppTextStyles.listSubtitle(theme),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              FButton(
-                variant: .outline,
-                onPress: () {
-                  ref.invalidate(spaceDetailProvider(widget.spaceId));
-                  ref.invalidate(spaceSettlementProvider(widget.spaceId));
-                },
-                child: Text(t.sharedSpace.detail.retry),
-              ),
-            ],
-          ),
+        loading: () => const SpaceDetailLoadingState(),
+        error: (error, stack) => SpaceDetailErrorState(
+          error: error.toString(),
+          onRetry: () {
+            ref.invalidate(spaceDetailProvider(widget.spaceId));
+            ref.invalidate(spaceSettlementProvider(widget.spaceId));
+          },
         ),
+        data: (space) =>
+            _buildContent(context, space, settlementAsync, txState),
       ),
     );
   }
@@ -161,7 +103,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
     BuildContext context,
     SharedSpace space,
     AsyncValue<Settlement> settlementAsync,
-    AsyncValue<SpaceTransactionListResponse> transactionsAsync,
+    SpaceTransactionState txState,
   ) {
     final theme = context.theme;
     final colors = theme.colors;
@@ -252,8 +194,11 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
 
               // Financial Information Card
               settlementAsync.when(
-                loading: () => _buildSettlementLoading(context),
-                error: (error, stack) => _buildSettlementError(context),
+                loading: () => const SpaceSettlementLoadingCard(),
+                error: (error, stack) => SpaceSettlementErrorCard(
+                  onRetry: () =>
+                      ref.invalidate(spaceSettlementProvider(widget.spaceId)),
+                ),
                 data: (settlement) =>
                     SpaceDashboardCard(space: space, settlement: settlement),
               ),
@@ -299,405 +244,25 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
               ),
 
               // Transaction List
-              transactionsAsync.when(
-                loading: () => _buildTransactionListLoading(context),
-                error: (error, stack) => _buildTransactionListError(context),
-                data: (response) =>
-                    _buildTransactionList(context, response.transactions),
-              ),
+              if (txState.isLoading && txState.transactions.isEmpty)
+                const SpaceTransactionsLoadingList()
+              else if (txState.error != null && txState.transactions.isEmpty)
+                SpaceTransactionsErrorCard(
+                  onRetry: () => ref
+                      .read(spaceTransactionProvider(widget.spaceId).notifier)
+                      .loadTransactions(refresh: true),
+                )
+              else
+                SpaceTransactionList(
+                  transactions: txState.transactions,
+                  hasMore: txState.hasMore,
+                  isLoading: txState.isLoading,
+                  onTransactionReturned: _refreshAll,
+                ),
             ]),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSettlementLoading(BuildContext context) {
-    final theme = context.theme;
-    final colors = theme.colors;
-    final semantic = theme.semantic;
-
-    final Color shimmerBaseColor = semantic.shimmerBase;
-    final Color shimmerHighlightColor = semantic.shimmerHighlight;
-    final Color placeholderShapeColor = semantic.shimmerBase;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colors.border.withValues(alpha: 0.5)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Shimmer.fromColors(
-        baseColor: shimmerBaseColor,
-        highlightColor: shimmerHighlightColor,
-        period: const Duration(milliseconds: 1200),
-        child: Column(
-          children: [
-            // Top panel skeleton
-            Container(
-              height: 160,
-              width: double.infinity,
-              color: placeholderShapeColor,
-            ),
-            // Bottom content skeleton
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 16,
-                    width: 100,
-                    color: placeholderShapeColor,
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    height: 8,
-                    width: double.infinity,
-                    color: placeholderShapeColor,
-                  ),
-                  const SizedBox(height: 24),
-                  ...List.generate(
-                    2,
-                    (index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: placeholderShapeColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 14,
-                                  width: 80,
-                                  color: placeholderShapeColor,
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  height: 12,
-                                  width: 40,
-                                  color: placeholderShapeColor,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            height: 24,
-                            width: 60,
-                            color: placeholderShapeColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettlementError(BuildContext context) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colors.destructive.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.destructive.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            FLucideIcons.circleAlert,
-            size: 24,
-            color: colors.mutedForeground,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            t.sharedSpace.detail.loadFailed,
-            style: AppTextStyles.listSubtitle(theme),
-          ),
-          const SizedBox(height: 16),
-          FButton(
-            variant: .outline,
-            onPress: () =>
-                ref.invalidate(spaceSettlementProvider(widget.spaceId)),
-            child: Text(t.sharedSpace.detail.retry),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionListLoading(BuildContext context) {
-    return Column(
-      children: List.generate(
-        3,
-        (index) => _buildTransactionCardSkeleton(context),
-      ),
-    );
-  }
-
-  Widget _buildTransactionCardSkeleton(BuildContext context) {
-    final semantic = context.theme.semantic;
-    final Color shimmerBaseColor = semantic.shimmerBase;
-    final Color shimmerHighlightColor = semantic.shimmerHighlight;
-    final Color placeholderShapeColor = semantic.shimmerBase;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: context.theme.colors.border.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Shimmer.fromColors(
-        baseColor: shimmerBaseColor,
-        highlightColor: shimmerHighlightColor,
-        period: const Duration(milliseconds: 1200),
-        child: Row(
-          children: [
-            // Icon skeleton
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: placeholderShapeColor,
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Content skeleton
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 16,
-                    width: 120,
-                    color: placeholderShapeColor,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    height: 12,
-                    width: 80,
-                    color: placeholderShapeColor,
-                  ),
-                ],
-              ),
-            ),
-            // Amount skeleton
-            Container(height: 20, width: 60, color: placeholderShapeColor),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTransactionListError(BuildContext context) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colors.destructive.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.destructive.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            FLucideIcons.circleAlert,
-            size: 24,
-            color: colors.mutedForeground,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            t.sharedSpace.detail.loadFailed,
-            style: AppTextStyles.listSubtitle(theme),
-          ),
-          const SizedBox(height: 16),
-          FButton(
-            variant: .outline,
-            onPress: () =>
-                ref.invalidate(spaceTransactionsProvider(widget.spaceId)),
-            child: Text(t.sharedSpace.detail.retry),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionList(
-    BuildContext context,
-    List<SpaceTransaction> transactions,
-  ) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
-    // Empty state
-    if (transactions.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 48),
-        decoration: BoxDecoration(
-          color: colors.muted.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colors.border.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              FLucideIcons.receipt,
-              size: 40,
-              color: colors.mutedForeground.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              t.sharedSpace.detail.noTransactions,
-              style: AppTextStyles.listTitle(theme),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              t.sharedSpace.detail.noTransactionsHint,
-              style: theme.typography.body.sm.copyWith(
-                color: colors.mutedForeground.withValues(alpha: 0.6),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Transaction list
-    return Column(
-      children: transactions
-          .map((tx) => _buildTransactionItem(context, tx))
-          .toList(),
-    );
-  }
-
-  Widget _buildTransactionItem(BuildContext context, SpaceTransaction tx) {
-    final theme = context.theme;
-    final colors = theme.colors;
-
-    // Parse transaction type
-    final isExpense = tx.type.toUpperCase() == 'EXPENSE';
-    final isIncome = tx.type.toUpperCase() == 'INCOME';
-    final transactionType = isExpense
-        ? TransactionType.expense
-        : (isIncome ? TransactionType.income : TransactionType.transfer);
-    final amountTheme = ref.watch(currentAmountThemeProvider);
-    final amountColor = AmountFormatter.getAmountColor(
-      transactionType,
-      amountTheme,
-    );
-
-    // Format time
-    String timeDisplay = '';
-    if (tx.transactionAt != null) {
-      timeDisplay = relativeTime(tx.transactionAt!);
-    }
-
-    return GestureDetector(
-      onTap: () {
-        unawaited(
-          context.pushNamed(
-            AppRouteNames.transactionDetail,
-            pathParameters: {'transactionId': tx.id},
-          ),
-        );
-      },
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: colors.background,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colors.border.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: [
-            // Icon
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: amountColor.withValues(alpha: 0.1),
-              ),
-              child: Icon(
-                tx.categoryKey != null
-                    ? CategoryConfig.getCategoryIcon(tx.categoryKey)
-                    : (isExpense
-                          ? FLucideIcons.trendingDown
-                          : FLucideIcons.trendingUp),
-                size: 18,
-                color: amountColor,
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Description and added by
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tx.description != null && tx.description!.isNotEmpty
-                        ? tx.description!
-                        : (tx.categoryKey != null
-                              ? TransactionCategory.fromKey(
-                                  tx.categoryKey,
-                                ).displayText
-                              : t.category.other),
-                    style: AppTextStyles.listTitle(theme),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${tx.addedByUsername ?? "Unknown"} · $timeDisplay',
-                    style: AppTextStyles.detailLabel(theme),
-                  ),
-                ],
-              ),
-            ),
-            // Amount - using unified AmountText component
-            tx.display != null
-                ? AmountText.fromDisplay(
-                    display: tx.display!,
-                    type: transactionType,
-                    style: AppTextStyles.listTitle(theme),
-                  )
-                : AmountText(
-                    amount: double.tryParse(tx.amount) ?? 0.0,
-                    type: transactionType,
-                    currency: tx.currency,
-                    style: AppTextStyles.listTitle(theme),
-                  ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -714,8 +279,9 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
 
   void _navigateToSettings(SharedSpace space) {
     unawaited(
-      context.push(
-        '/profile/shared-space/${widget.spaceId}/settings',
+      context.pushNamed(
+        AppRouteNames.sharedSpaceSettings,
+        pathParameters: {'spaceId': widget.spaceId},
         extra: space,
       ),
     );

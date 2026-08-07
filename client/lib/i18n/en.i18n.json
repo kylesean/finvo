@@ -329,6 +329,7 @@
     "enterAddress": "Please enter server address",
     "enterValidPort": "Please enter a valid port (1-65535)",
     "configSaved": "Configuration saved",
+    "configSaveFailed": "Failed to save configuration",
     "systemVoiceRestrictedTitle": "System Speech Unavailable",
     "systemVoiceRestrictedContent": "System speech service is unavailable or disabled. You can check system settings or configure a custom WebSocket ASR in Speech Settings.",
     "dictationDisabledTitle": "Dictation Disabled",
@@ -593,6 +594,8 @@
       "selectIncomeAccount": "Income",
       "amountNotFixed": "Amount not fixed for each $type",
       "selectBothAccounts": "Please select source and target accounts",
+      "sameAccount": "Source and target accounts must be different",
+      "endBeforeStart": "End date cannot be earlier than start date",
       "selectAccountForType": "Please select $type account",
       "deleteConfirmGeneric": "Are you sure you want to delete this recurring transaction? This action cannot be undone.",
       "selectDate": "Select $date",
@@ -722,6 +725,8 @@
     "noRelatedFound": "No related conversations found",
     "tryOtherKeywords": "Try searching with other keywords",
     "searchFailed": "Search failed",
+    "updatedAt": "Updated $time",
+    "createdAt": "Created $time",
     "deleteConversation": "Delete Conversation",
     "deleteConversationConfirm": "Are you sure you want to delete this conversation? This action cannot be undone.",
     "conversationDeleted": "Conversation deleted",
@@ -1175,7 +1180,12 @@
     "dayUnit": "day",
     "saveFailed": "Save failed",
     "deleteFailed": "Delete failed, please try again later",
-    "missingExchangeRates": "Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: $currencies"
+    "missingExchangeRates": "Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: $currencies",
+    "cashPocketTitle": "My Cash Pockets",
+    "sourcesCount": "$count Sources",
+    "lastUpdatedAt": "Last updated: $time",
+    "neverUpdated": "Never updated",
+    "updateNow": "Update Now"
   },
   "app": {
     "splashTitle": "Finvo: Intelligence that Grows.",
@@ -1341,7 +1351,8 @@
       "noTransactions": "No transactions yet",
       "noTransactionsHint": "Transactions in this space will appear here",
       "refreshCode": "Refresh Code",
-      "joinOtherSpace": "Join Another Space"
+      "joinOtherSpace": "Join Another Space",
+      "noMoreTransactions": "No more transactions"
     },
     "notifications": {
       "title": "Notifications",

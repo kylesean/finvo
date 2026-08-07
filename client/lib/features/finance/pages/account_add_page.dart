@@ -11,6 +11,7 @@ import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/finance/widgets/account_form_widgets.dart';
 import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
+import 'package:finvo/shared/widgets/top_toast.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 class FinancialAccountAddArgs {
@@ -264,11 +265,15 @@ class _FinancialAccountAddPageState
     final name = _nameController.text.trim();
     final balanceText = _balanceController.text.trim();
 
-    Decimal balance;
-    try {
-      balance = Decimal.parse(balanceText.isEmpty ? '0' : balanceText);
-    } catch (_) {
-      balance = Decimal.zero;
+    // Parse the balance explicitly instead of silently coercing a bad input to
+    // zero: an invalid amount would otherwise be saved as 0 without any
+    // feedback, silently discarding the user's intended value.
+    final Decimal? balance = balanceText.isEmpty
+        ? Decimal.zero
+        : Decimal.tryParse(balanceText);
+    if (balance == null) {
+      TopToast.error(context, t.transaction.pleaseEnterAmount);
+      return;
     }
 
     final accountType = definition.apiType;

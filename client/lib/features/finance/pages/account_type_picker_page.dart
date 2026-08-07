@@ -5,6 +5,7 @@ import 'package:forui/forui.dart';
 
 import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/features/finance/pages/account_add_page.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
@@ -104,7 +105,7 @@ class AccountTypePickerPage extends ConsumerWidget {
     AccountTypeDefinition definition,
   ) async {
     final result = await context.pushNamed(
-      'financialAccountAdd',
+      AppRouteNames.financialAccountAdd,
       extra: FinancialAccountAddArgs(definition: definition),
     );
     if (!context.mounted) return;

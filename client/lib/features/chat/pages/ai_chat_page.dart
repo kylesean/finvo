@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 
 import 'package:finvo/features/chat/widgets/chat_input_field.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/chat/widgets/chat_message_widget.dart';
 import 'package:finvo/features/chat/widgets/genui_error_widget.dart';
 import 'package:finvo/features/chat/providers/chat_history_provider.dart';
@@ -385,7 +386,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
               unawaited(
                 ref.read(chatHistoryProvider.notifier).createNewConversation(),
               );
-              context.go('/ai');
+              context.goNamed(AppRouteNames.ai);
             },
             child: const Icon(FLucideIcons.plus),
           ),

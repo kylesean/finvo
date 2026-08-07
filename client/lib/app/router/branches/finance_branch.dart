@@ -98,7 +98,12 @@ StatefulShellBranch buildFinanceBranch() {
                 path: ':id/edit',
                 name: AppRouteNames.recurringTransactionEdit,
                 builder: (context, state) {
-                  final id = state.pathParameters['id']!;
+                  final id = state.pathParameters['id'];
+                  if (id == null) {
+                    return Scaffold(
+                      body: Center(child: Text(t.error.unknownError)),
+                    );
+                  }
                   return RecurringTransactionPage(editId: id);
                 },
               ),
@@ -123,7 +128,12 @@ StatefulShellBranch buildFinanceBranch() {
                 path: ':id',
                 name: AppRouteNames.budgetDetail,
                 builder: (context, state) {
-                  final id = state.pathParameters['id']!;
+                  final id = state.pathParameters['id'];
+                  if (id == null) {
+                    return Scaffold(
+                      body: Center(child: Text(t.error.unknownError)),
+                    );
+                  }
                   return BudgetDetailPage(budgetId: id);
                 },
                 routes: [
@@ -131,7 +141,12 @@ StatefulShellBranch buildFinanceBranch() {
                     path: 'edit',
                     name: AppRouteNames.budgetEdit,
                     builder: (context, state) {
-                      final id = state.pathParameters['id']!;
+                      final id = state.pathParameters['id'];
+                      if (id == null) {
+                        return Scaffold(
+                          body: Center(child: Text(t.error.unknownError)),
+                        );
+                      }
                       return BudgetFormPage(editId: id);
                     },
                   ),

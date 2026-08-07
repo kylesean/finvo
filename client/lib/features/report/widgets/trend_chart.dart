@@ -147,7 +147,7 @@ class TrendChart extends ConsumerWidget {
                             ? t.statistics.trend.expense
                             : t.statistics.trend.income;
                         return LineTooltipItem(
-                          '$label: $currencySymbol${AmountFormatter.getNumberFormat('CNY', decimalDigits: 0).format(spot.y)}',
+                          '$label: $currencySymbol${AmountFormatter.getNumberFormat(currencyCode, decimalDigits: 0).format(spot.y)}',
                           theme.typography.body.xs.copyWith(
                             color: colors.primaryForeground,
                             fontWeight: AppFontConfig.headingBold,

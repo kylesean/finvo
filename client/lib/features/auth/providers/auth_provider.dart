@@ -1,4 +1,3 @@
-import 'package:flutter/scheduler.dart';
 import 'package:logging/logging.dart';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -26,12 +25,11 @@ class Auth extends _$Auth {
     _authService = ref.read(authServiceProvider);
     _storageService = ref.read(secureStorageServiceProvider);
 
-    // Use addPostFrameCallback to ensure post-frame rendering before performing
-    // SecureStorage operations to avoid blocking the main thread during UI rendering
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      unawaited(_initializeAuthState());
-    });
-
+    // Auth state restoration is intentionally NOT triggered here (no side
+    // effect in build). It is kicked off explicitly from the app startup flow
+    // (main.dart) via [checkAuthStatus], so the SecureStorage reads happen
+    // after the first frame renders and are not coupled to the widget build
+    // cycle. Keeping build() pure makes the provider deterministic and testable.
     return const AuthState();
   }
 
@@ -145,15 +143,38 @@ class Auth extends _$Auth {
     }
   }
 
+  /// Called by the auth interceptor after a successful token refresh. Writes
+  /// the rotated access token back into the in-memory [AuthState] so the
+  /// memory copy and SecureStorage stay in sync, and so derived providers
+  /// (e.g. authToken → notificationWs) see the *new* token value and rebuild
+  /// their long-lived connections with it.
+  ///
+  /// The rotated refresh token lives only in SecureStorage (AuthState has no
+  /// refresh field), so only the access token is synced here.
+  Future<void> handleTokenRefreshed(String accessToken) async {
+    if (state.status != AuthStatus.authenticated) {
+      _logger.info(
+        'handleTokenRefreshed: not authenticated, skipping token sync',
+      );
+      return;
+    }
+    state = state.copyWith(token: accessToken);
+    _logger.info('Token refreshed, in-memory auth state synced');
+  }
+
   /// Called by the auth interceptor when a 401 is received: the token is
   /// invalid or expired. Clears local auth state immediately so the router
   /// redirects to the login page, without the simulated logout delay.
+  ///
+  /// Unlike the old path (which only dropped the secure-storage tokens), this
+  /// also wipes the user PII in SharedPreferences via [AuthService.logout]
+  /// equivalent local cleanup, keeping cold-start behaviour identical to a
+  /// full logout instead of leaving stale user data behind.
   Future<void> handleSessionExpired() async {
     try {
-      await _storageService.deleteToken();
-      await _storageService.deleteRefreshToken();
+      await _authService.clearLocalAuthData();
     } catch (e) {
-      _logger.warning('Failed to delete token on session expiry', e);
+      _logger.warning('Failed to clear local auth data on session expiry', e);
     }
     state = const AuthState(status: AuthStatus.unauthenticated);
     _logger.info('Session expired (401), auth state cleared');

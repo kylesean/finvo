@@ -87,13 +87,15 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
     }
   }
 
-  /// Update WebSocket configuration
-  Future<void> updateWebsocketConfig({
+  /// Update WebSocket configuration. Returns true on success, false when the
+  /// settings are not yet loaded (settings == null) or the save fails, so
+  /// callers can surface a truthful result instead of a fake success toast.
+  Future<bool> updateWebsocketConfig({
     String? host,
     int? port,
     String? path,
   }) async {
-    if (state.settings == null) return;
+    if (state.settings == null) return false;
 
     state = state.copyWith(isSaving: true, errorMessage: null);
 
@@ -112,6 +114,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
         errorMessage: 'Failed to save settings',
       );
     }
+    return success;
   }
 
   /// Update speech recognition language

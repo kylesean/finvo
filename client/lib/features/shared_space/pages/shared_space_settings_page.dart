@@ -54,22 +54,6 @@ class _SharedSpaceSettingsPageState
     }
   }
 
-  bool _isOwnerOrAdmin(SharedSpace space, String? currentUserId) {
-    if (currentUserId == null) return false;
-    if (space.creator.id == currentUserId) return true;
-    final members = space.members ?? [];
-    return members.any(
-      (m) =>
-          m.userId == currentUserId &&
-          (m.role == MemberRole.owner || m.role == MemberRole.admin),
-    );
-  }
-
-  bool _isOwner(SharedSpace space, String? currentUserId) {
-    if (currentUserId == null) return false;
-    return space.creator.id == currentUserId;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
@@ -135,8 +119,10 @@ class _SharedSpaceSettingsPageState
     final theme = context.theme;
     final colors = theme.colors;
     final currentUser = ref.watch(currentUserProvider);
-    final canEdit = _isOwnerOrAdmin(space, currentUser?.id);
-    final isOwner = _isOwner(space, currentUser?.id);
+    // Single source of truth: the server-provided role on the space object
+    // (SharedSpacePermissions extension) rather than re-deriving from members.
+    final canEdit = space.canManage;
+    final isOwner = space.isOwner;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -318,7 +304,7 @@ class _SharedSpaceSettingsPageState
     String? currentUserId,
   ) {
     final members = space.members ?? [];
-    final isOwner = _isOwner(space, currentUserId);
+    final isOwner = space.isOwner;
 
     return Container(
       decoration: BoxDecoration(

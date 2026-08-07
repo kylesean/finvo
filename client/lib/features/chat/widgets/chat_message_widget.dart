@@ -47,6 +47,16 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
+  // --- Item-level memo (M-5) ---
+  // Cache the built content subtree keyed by widget identity. When the message
+  // does not change (identical or value-equal via freezed), we skip re-building
+  // the whole content on the next frame. This avoids re-running rebuild (and
+  // re-parsing Markdown) for every surrounding message on each streamed chunk;
+  // only the actively-streaming message changes.
+  Widget? _cachedContent;
+  FThemeData? _cachedTheme;
+  bool _reuseCache = false;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +81,15 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
       _controller.stop();
       _controller.value = 0;
     }
+
+    // Item-level memo: reuse the cached content when the message is unchanged.
+    // `identical` covers the common case (the repository returns the same
+    // ChatMessage instance for untouched messages); `==` covers recreated-but-
+    // equal instances (freezed value equality).
+    final unchanged =
+        identical(oldWidget.message, widget.message) ||
+        oldWidget.message == widget.message;
+    _reuseCache = unchanged && oldWidget.genUiHost == widget.genUiHost;
   }
 
   @override
@@ -84,6 +103,26 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   Widget build(BuildContext context) {
     final theme = context.theme;
 
+    // Item-level memo (M-5): reuse the cached content subtree when the message
+    // is unchanged and the theme is the same, so that only the streaming
+    // message rebuilds on each chunk.
+    if (_reuseCache &&
+        _cachedContent != null &&
+        identical(_cachedTheme, theme)) {
+      return _cachedContent!;
+    }
+
+    final content = _buildContent(context, theme);
+    _cachedContent = content;
+    _cachedTheme = theme;
+    // After building, the cache is reusable on the next frame unless a new
+    // message arrives (didUpdateWidget resets [_reuseCache]).
+    _reuseCache = true;
+    return content;
+  }
+
+  /// Build the full message content subtree (text, tool calls, GenUI, …).
+  Widget _buildContent(BuildContext context, FThemeData theme) {
     // Access message from widget.message
     final message = widget.message;
 
@@ -117,7 +156,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
                   orElse: () => true, // Include Text and ToolCall
                 ),
               )
-              .map((part) => _buildContentPart(context, theme, part, message)),
+              .map((part) => _buildContentPart(context, theme, part)),
 
           // Result attachments: GenUI components (cards/results)
           // Sink large UI results to bottom, similar to email attachments or report display, avoiding interruption of text reading flow
@@ -128,7 +167,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
                   orElse: () => false,
                 ),
               )
-              .map((part) => _buildContentPart(context, theme, part, message)),
+              .map((part) => _buildContentPart(context, theme, part)),
 
           // If no tools are running and message is typing, show streaming indicator at the end
           if (_shouldShowStreamingIndicator())
@@ -152,7 +191,6 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     BuildContext context,
     FThemeData theme,
     MessageContentPart part,
-    app.ChatMessage message,
   ) {
     return part.when(
       text: (text) => Padding(
@@ -245,46 +283,22 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
       duration: const Duration(milliseconds: 50),
       curve: Curves.easeOut,
       alignment: Alignment.topLeft,
-      child: GptMarkdownTheme(
+      child: _ThrottledMarkdown(
+        text: _processContent(text),
+        theme: theme,
         gptThemeData: _gptThemeData(theme),
-        child: GptMarkdown(
-          _processContent(text),
-          style: TextStyle(
-            fontSize: 15,
-            color: theme.colors.foreground,
-            height: 1.5,
-            fontFamily: AppFontConfig.primaryFontFamily,
-            fontFamilyFallback: AppFontConfig.getGlobalFontFallbacks(),
-          ),
-          // Custom ordered list builder for proper number alignment
-          orderedListBuilder: (ctx, no, child, config) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 4.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Fixed-width container for right-aligned numbers
-                  SizedBox(
-                    width: 28,
-                    child: Text(
-                      '$no.',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: theme.colors.foreground,
-                        height: 1.5,
-                      ),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(child: child),
-                ],
-              ),
-            );
-          },
-        ),
+        isStreaming: _isStreaming(),
       ),
     );
+  }
+
+  /// Whether the current message is actively streaming text. While streaming,
+  /// Markdown re-parsing is throttled (see [_ThrottledMarkdown]) so the hot
+  /// path stays O(n) instead of O(n^2) over the streamed chunks.
+  bool _isStreaming() {
+    return widget.message.isTyping &&
+        (widget.message.streamingStatus == app.StreamingStatus.connecting ||
+            widget.message.streamingStatus == app.StreamingStatus.streaming);
   }
 
   /// Build attachments (images) for user messages
@@ -497,6 +511,125 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
         fontWeight: AppFontConfig.bodyMedium, // w400
         fontFamily: family,
         fontFamilyFallback: fallbacks,
+      ),
+    );
+  }
+}
+
+/// Throttled Markdown renderer (M-5).
+///
+/// During streaming the full text grows on every chunk, and re-parsing the
+/// whole string with [GptMarkdown] on each chunk is O(n^2). This widget only
+/// re-parses at most once per [_ThrottledMarkdownState.throttle] while
+/// streaming, reusing the most recently parsed widget within the window, and
+/// parses immediately once streaming finishes. Reusing the same [GptMarkdown]
+/// instance across frames lets Flutter skip the unchanged subtree (identical
+/// widget), so no redundant parse happens between throttled refreshes.
+class _ThrottledMarkdown extends StatefulWidget {
+  final String text;
+  final FThemeData theme;
+  final GptMarkdownThemeData gptThemeData;
+  final bool isStreaming;
+
+  const _ThrottledMarkdown({
+    required this.text,
+    required this.theme,
+    required this.gptThemeData,
+    required this.isStreaming,
+  });
+
+  @override
+  State<_ThrottledMarkdown> createState() => _ThrottledMarkdownState();
+}
+
+class _ThrottledMarkdownState extends State<_ThrottledMarkdown> {
+  static const throttle = Duration(milliseconds: 180);
+
+  Timer? _timer;
+  DateTime _lastRender = DateTime.fromMillisecondsSinceEpoch(0);
+  Widget? _cached;
+
+  @override
+  void didUpdateWidget(_ThrottledMarkdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text == widget.text) return;
+    if (widget.isStreaming) {
+      // Coalesce rapid chunks into a single throttled refresh.
+      _timer?.cancel();
+      _timer = Timer(throttle, () {
+        _timer = null;
+        if (mounted) setState(() {});
+      });
+    } else {
+      // Streaming finished -> parse on the next build.
+      _timer?.cancel();
+      _timer = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final staleEnough = now.difference(_lastRender) >= throttle;
+    // Reuse the cached Markdown within the throttle window while streaming.
+    // ``_timer == null`` means the throttled timer just fired (its callback
+    // nulls the field before setState), in which case we MUST render the very
+    // latest text even inside the window. Without this, a dense stream that
+    // keeps resetting the timer would never enter the ``!isStreaming`` branch
+    // and would freeze the text until the stream ends.
+    if (!widget.isStreaming || staleEnough || _timer == null) {
+      _lastRender = now;
+      _cached = _buildMarkdown(context);
+    }
+    // Within the throttle window while streaming, reuse the most recently
+    // parsed Markdown instead of re-parsing the full growing text.
+    return _cached ?? _buildMarkdown(context);
+  }
+
+  Widget _buildMarkdown(BuildContext context) {
+    return GptMarkdownTheme(
+      gptThemeData: widget.gptThemeData,
+      child: GptMarkdown(
+        widget.text,
+        style: TextStyle(
+          fontSize: 15,
+          color: widget.theme.colors.foreground,
+          height: 1.5,
+          fontFamily: AppFontConfig.primaryFontFamily,
+          fontFamilyFallback: AppFontConfig.getGlobalFontFallbacks(),
+        ),
+        // Custom ordered list builder for proper number alignment
+        orderedListBuilder: (ctx, no, child, config) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Fixed-width container for right-aligned numbers
+                SizedBox(
+                  width: 28,
+                  child: Text(
+                    '$no.',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: widget.theme.colors.foreground,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: child),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

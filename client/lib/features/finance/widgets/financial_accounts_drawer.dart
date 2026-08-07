@@ -5,6 +5,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:finvo/features/finance/widgets/financial_setting_sheets.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
@@ -75,7 +76,9 @@ class FinancialAccountsDrawer extends StatelessWidget {
                                 () {
                                   if (context.mounted) {
                                     unawaited(
-                                      context.pushNamed('budgetOverview'),
+                                      context.pushNamed(
+                                        AppRouteNames.budgetOverview,
+                                      ),
                                     );
                                   }
                                 },
@@ -97,7 +100,7 @@ class FinancialAccountsDrawer extends StatelessWidget {
                                   if (context.mounted) {
                                     unawaited(
                                       context.pushNamed(
-                                        'recurringTransactions',
+                                        AppRouteNames.recurringTransactions,
                                       ),
                                     );
                                   }

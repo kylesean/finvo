@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -6,7 +8,7 @@ import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Category detail bottom sheet showing all categories
-class CategoryDetailSheet extends StatelessWidget {
+class CategoryDetailSheet extends ConsumerWidget {
   final CategoryBreakdownResponse breakdown;
 
   const CategoryDetailSheet({super.key, required this.breakdown});
@@ -27,15 +29,19 @@ class CategoryDetailSheet extends StatelessWidget {
     return Color(int.parse(hex.replaceFirst('#', '0xFF')));
   }
 
-  String _formatAmount(String amount) {
-    final numberFormat = AmountFormatter.getNumberFormat('CNY');
-    return numberFormat.format(double.tryParse(amount) ?? 0);
+  String _formatAmount(String amount, String currencyCode) {
+    // Follow the report page's currency instead of a hardcoded CNY symbol.
+    return AmountFormatter.formatWithCurrency(
+      amount,
+      currencyCode: currencyCode,
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
     final colors = theme.colors;
+    final currency = ref.watch(financialSettingsProvider).primaryCurrency;
     final maxPercentage = breakdown.items.isEmpty
         ? 100.0
         : breakdown.items
@@ -107,7 +113,8 @@ class CategoryDetailSheet extends StatelessWidget {
                             item: item,
                             maxPercentage: maxPercentage,
                             parseColor: _parseColor,
-                            formatAmount: _formatAmount,
+                            formatAmount: (amount) =>
+                                _formatAmount(amount, currency),
                           );
                         },
                       ),
@@ -167,7 +174,7 @@ class _CategoryDetailItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '¥${formatAmount(item.amount)}',
+                  formatAmount(item.amount),
                   style: AppTextStyles.listTrailing(theme),
                 ),
                 Text(

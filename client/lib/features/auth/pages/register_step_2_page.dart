@@ -8,6 +8,7 @@ import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/auth/providers/verification_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/app/router/app_routes.dart';
 
 class RegisterStep2Page extends ConsumerStatefulWidget {
   final String contact;
@@ -61,7 +62,7 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
       await Future<void>.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
 
-      context.pushReplacement('/home');
+      context.pushReplacement(AppRoutePaths.home);
     } on AppException catch (e) {
       if (!mounted) return;
       ToastService.showDestructive(

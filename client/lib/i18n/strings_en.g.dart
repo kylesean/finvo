@@ -465,6 +465,7 @@ class _Translations$speech$en extends Translations$speech$zh {
 	@override String get enterAddress => 'Please enter server address';
 	@override String get enterValidPort => 'Please enter a valid port (1-65535)';
 	@override String get configSaved => 'Configuration saved';
+	@override String get configSaveFailed => 'Failed to save configuration';
 	@override String get systemVoiceRestrictedTitle => 'System Speech Unavailable';
 	@override String get systemVoiceRestrictedContent => 'System speech service is unavailable or disabled. You can check system settings or configure a custom WebSocket ASR in Speech Settings.';
 	@override String get dictationDisabledTitle => 'Dictation Disabled';
@@ -715,6 +716,8 @@ class _Translations$chat$en extends Translations$chat$zh {
 	@override String get noRelatedFound => 'No related conversations found';
 	@override String get tryOtherKeywords => 'Try searching with other keywords';
 	@override String get searchFailed => 'Search failed';
+	@override String updatedAt({required Object time}) => 'Updated ${time}';
+	@override String createdAt({required Object time}) => 'Created ${time}';
 	@override String get deleteConversation => 'Delete Conversation';
 	@override String get deleteConversationConfirm => 'Are you sure you want to delete this conversation? This action cannot be undone.';
 	@override String get conversationDeleted => 'Conversation deleted';
@@ -924,6 +927,11 @@ class _Translations$financial$en extends Translations$financial$zh {
 	@override String get saveFailed => 'Save failed';
 	@override String get deleteFailed => 'Delete failed, please try again later';
 	@override String missingExchangeRates({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}';
+	@override String get cashPocketTitle => 'My Cash Pockets';
+	@override String sourcesCount({required Object count}) => '${count} Sources';
+	@override String lastUpdatedAt({required Object time}) => 'Last updated: ${time}';
+	@override String get neverUpdated => 'Never updated';
+	@override String get updateNow => 'Update Now';
 }
 
 // Path: app
@@ -1251,6 +1259,8 @@ class _Translations$forecast$recurringTransaction$en extends Translations$foreca
 	@override String get selectIncomeAccount => 'Income';
 	@override String amountNotFixed({required Object type}) => 'Amount not fixed for each ${type}';
 	@override String get selectBothAccounts => 'Please select source and target accounts';
+	@override String get sameAccount => 'Source and target accounts must be different';
+	@override String get endBeforeStart => 'End date cannot be earlier than start date';
 	@override String selectAccountForType({required Object type}) => 'Please select ${type} account';
 	@override String get deleteConfirmGeneric => 'Are you sure you want to delete this recurring transaction? This action cannot be undone.';
 	@override String selectDate({required Object date}) => 'Select ${date}';
@@ -1628,6 +1638,7 @@ class _Translations$sharedSpace$detail$en extends Translations$sharedSpace$detai
 	@override String get noTransactionsHint => 'Transactions in this space will appear here';
 	@override String get refreshCode => 'Refresh Code';
 	@override String get joinOtherSpace => 'Join Another Space';
+	@override String get noMoreTransactions => 'No more transactions';
 }
 
 // Path: sharedSpace.notifications
@@ -2797,6 +2808,7 @@ extension on TranslationsEn {
 			'speech.enterAddress' => 'Please enter server address',
 			'speech.enterValidPort' => 'Please enter a valid port (1-65535)',
 			'speech.configSaved' => 'Configuration saved',
+			'speech.configSaveFailed' => 'Failed to save configuration',
 			'speech.systemVoiceRestrictedTitle' => 'System Speech Unavailable',
 			'speech.systemVoiceRestrictedContent' => 'System speech service is unavailable or disabled. You can check system settings or configure a custom WebSocket ASR in Speech Settings.',
 			'speech.dictationDisabledTitle' => 'Dictation Disabled',
@@ -3015,9 +3027,9 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.preview' => 'Preview',
 			'forecast.recurringTransaction.daily' => 'Daily',
 			'forecast.recurringTransaction.weekly' => 'Weekly',
-			'forecast.recurringTransaction.monthly' => 'Monthly',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.monthly' => 'Monthly',
 			'forecast.recurringTransaction.yearly' => 'Yearly',
 			'forecast.recurringTransaction.custom' => 'Custom',
 			'forecast.recurringTransaction.cycle' => 'Cycle',
@@ -3052,6 +3064,8 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.selectIncomeAccount' => 'Income',
 			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => 'Amount not fixed for each ${type}',
 			'forecast.recurringTransaction.selectBothAccounts' => 'Please select source and target accounts',
+			'forecast.recurringTransaction.sameAccount' => 'Source and target accounts must be different',
+			'forecast.recurringTransaction.endBeforeStart' => 'End date cannot be earlier than start date',
 			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => 'Please select ${type} account',
 			'forecast.recurringTransaction.deleteConfirmGeneric' => 'Are you sure you want to delete this recurring transaction? This action cannot be undone.',
 			'forecast.recurringTransaction.selectDate' => ({required Object date}) => 'Select ${date}',
@@ -3160,6 +3174,8 @@ extension on TranslationsEn {
 			'chat.noRelatedFound' => 'No related conversations found',
 			'chat.tryOtherKeywords' => 'Try searching with other keywords',
 			'chat.searchFailed' => 'Search failed',
+			'chat.updatedAt' => ({required Object time}) => 'Updated ${time}',
+			'chat.createdAt' => ({required Object time}) => 'Created ${time}',
 			'chat.deleteConversation' => 'Delete Conversation',
 			'chat.deleteConversationConfirm' => 'Are you sure you want to delete this conversation? This action cannot be undone.',
 			'chat.conversationDeleted' => 'Conversation deleted',
@@ -3514,12 +3530,19 @@ extension on TranslationsEn {
 			'financial.saveFailed' => 'Save failed',
 			'financial.deleteFailed' => 'Delete failed, please try again later',
 			'financial.missingExchangeRates' => ({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}',
+			'financial.cashPocketTitle' => 'My Cash Pockets',
+			'financial.sourcesCount' => ({required Object count}) => '${count} Sources',
+			'financial.lastUpdatedAt' => ({required Object time}) => 'Last updated: ${time}',
+			'financial.neverUpdated' => 'Never updated',
+			'financial.updateNow' => 'Update Now',
 			'app.splashTitle' => 'Finvo: Intelligence that Grows.',
 			'app.splashSubtitle' => 'Smart Financial Assistant',
 			'statistics.title' => 'Analysis',
 			'statistics.analyze' => 'Analysis',
 			'statistics.exportInProgress' => 'Export feature coming soon...',
 			'statistics.ranking' => 'Top Spending',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.noData' => 'No data available',
 			'statistics.overview.balance' => 'Total Balance',
 			'statistics.overview.income' => 'Total Income',
@@ -3530,8 +3553,6 @@ extension on TranslationsEn {
 			'statistics.analysis.title' => 'Expense Analysis',
 			'statistics.analysis.expenseTitle' => 'Expense Analysis',
 			'statistics.analysis.incomeTitle' => 'Income Analysis',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.analysis.total' => 'Total',
 			'statistics.analysis.breakdown' => 'Expense Breakdown',
 			'statistics.analysis.radarNeedMoreData' => 'Radar chart requires at least 3 categories',
@@ -3645,6 +3666,7 @@ extension on TranslationsEn {
 			'sharedSpace.detail.noTransactionsHint' => 'Transactions in this space will appear here',
 			'sharedSpace.detail.refreshCode' => 'Refresh Code',
 			'sharedSpace.detail.joinOtherSpace' => 'Join Another Space',
+			'sharedSpace.detail.noMoreTransactions' => 'No more transactions',
 			'sharedSpace.notifications.title' => 'Notifications',
 			'sharedSpace.notifications.empty' => 'No notifications',
 			'sharedSpace.notifications.emptyHint' => 'When you have new invites or activities,\nyou will receive notifications here',

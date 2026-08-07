@@ -86,6 +86,14 @@ final sseDioProvider = Provider<Dio>((ref) {
     AuthInterceptor(
       storageService,
       onUnauthorized: () => handleUnauthorized(ref),
+      onTokenRefreshed: (accessToken, _) {
+        // Keep the in-memory AuthState in sync after a silent token refresh so
+        // derived providers (authToken → notificationWs) rebuild their long-
+        // lived connections with the new token instead of the stale one.
+        return ref
+            .read(authProvider.notifier)
+            .handleTokenRefreshed(accessToken);
+      },
       dio: dio,
     ),
   );
@@ -123,6 +131,11 @@ final dioProvider = Provider<Dio>((ref) {
     AuthInterceptor(
       storageService,
       onUnauthorized: () => handleUnauthorized(ref),
+      onTokenRefreshed: (accessToken, _) {
+        return ref
+            .read(authProvider.notifier)
+            .handleTokenRefreshed(accessToken);
+      },
       dio: dio,
     ),
   ); // Auth interceptor

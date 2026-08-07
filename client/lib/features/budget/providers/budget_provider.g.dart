@@ -94,7 +94,7 @@ final class BudgetSummaryNotifierProvider
 }
 
 String _$budgetSummaryNotifierHash() =>
-    r'd1096ad0babd354632734a166f01a298ef59a3f4';
+    r'7955cf2c137afa44cdacdfb515872c4288d662a5';
 
 abstract class _$BudgetSummaryNotifier extends $Notifier<BudgetSummaryState> {
   BudgetSummaryState build();

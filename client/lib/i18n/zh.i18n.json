@@ -330,6 +330,7 @@
     "enterAddress": "请输入服务器地址",
     "enterValidPort": "请输入有效的端口 (1-65535)",
     "configSaved": "配置已保存",
+    "configSaveFailed": "配置保存失败，请重试",
     "systemVoiceRestrictedTitle": "系统语音不可用",
     "systemVoiceRestrictedContent": "您的手机系统语音引擎不可用或服务未开启。建议在设置中开启语音服务或配置 WebSocket 自建语音服务。",
     "dictationDisabledTitle": "语音听写未开启",
@@ -594,6 +595,8 @@
       "selectIncomeAccount": "选择收入账户",
       "amountNotFixed": "每次$type金额不固定",
       "selectBothAccounts": "请选择转出和转入账户",
+      "sameAccount": "转出和转入账户不能相同",
+      "endBeforeStart": "结束日期不能晚于生效日期，请检查",
       "selectAccountForType": "请选择$type账户",
       "deleteConfirmGeneric": "确定要删除这个周期交易吗？此操作不可撤销。",
       "selectDate": "选择 $date",
@@ -723,6 +726,8 @@
     "noRelatedFound": "未找到相关会话",
     "tryOtherKeywords": "尝试搜索其他关键词",
     "searchFailed": "搜索失败",
+    "updatedAt": "更新于 $time",
+    "createdAt": "创建于 $time",
     "deleteConversation": "删除会话",
     "deleteConversationConfirm": "确定要删除这个会话吗？此操作无法撤销。",
     "conversationDeleted": "会话已删除",
@@ -1173,7 +1178,12 @@
     "dayUnit": "天",
     "saveFailed": "保存失败",
     "deleteFailed": "删除失败，请稍后重试",
-    "missingExchangeRates": "部分币种缺少汇率，相关账户未计入总额：$currencies"
+    "missingExchangeRates": "部分币种缺少汇率，相关账户未计入总额：$currencies",
+    "cashPocketTitle": "我的现金账户",
+    "sourcesCount": "$count 个账户",
+    "lastUpdatedAt": "上次更新：$time",
+    "neverUpdated": "从未更新",
+    "updateNow": "立即更新"
   },
   "app": {
     "splashTitle": "智见增长，格物致富。",
@@ -1339,7 +1349,8 @@
       "noTransactions": "暂无交易记录",
       "noTransactionsHint": "空间内的交易将显示在这里",
       "refreshCode": "刷新生成新码",
-      "joinOtherSpace": "加入其他空间"
+      "joinOtherSpace": "加入其他空间",
+      "noMoreTransactions": "没有更多交易"
     },
     "notifications": {
       "title": "通知",

@@ -989,6 +989,9 @@ class Translations$speech$zh {
 	/// zh: '配置已保存'
 	String get configSaved => '配置已保存';
 
+	/// zh: '配置保存失败，请重试'
+	String get configSaveFailed => '配置保存失败，请重试';
+
 	/// zh: '系统语音不可用'
 	String get systemVoiceRestrictedTitle => '系统语音不可用';
 
@@ -1629,6 +1632,12 @@ class Translations$chat$zh {
 	/// zh: '搜索失败'
 	String get searchFailed => '搜索失败';
 
+	/// zh: '更新于 $time'
+	String updatedAt({required Object time}) => '更新于 ${time}';
+
+	/// zh: '创建于 $time'
+	String createdAt({required Object time}) => '创建于 ${time}';
+
 	/// zh: '删除会话'
 	String get deleteConversation => '删除会话';
 
@@ -2086,6 +2095,21 @@ class Translations$financial$zh {
 
 	/// zh: '部分币种缺少汇率，相关账户未计入总额：$currencies'
 	String missingExchangeRates({required Object currencies}) => '部分币种缺少汇率，相关账户未计入总额：${currencies}';
+
+	/// zh: '我的现金账户'
+	String get cashPocketTitle => '我的现金账户';
+
+	/// zh: '$count 个账户'
+	String sourcesCount({required Object count}) => '${count} 个账户';
+
+	/// zh: '上次更新：$time'
+	String lastUpdatedAt({required Object time}) => '上次更新：${time}';
+
+	/// zh: '从未更新'
+	String get neverUpdated => '从未更新';
+
+	/// zh: '立即更新'
+	String get updateNow => '立即更新';
 }
 
 // Path: app
@@ -2762,6 +2786,12 @@ class Translations$forecast$recurringTransaction$zh {
 
 	/// zh: '请选择转出和转入账户'
 	String get selectBothAccounts => '请选择转出和转入账户';
+
+	/// zh: '转出和转入账户不能相同'
+	String get sameAccount => '转出和转入账户不能相同';
+
+	/// zh: '结束日期不能晚于生效日期，请检查'
+	String get endBeforeStart => '结束日期不能晚于生效日期，请检查';
 
 	/// zh: '请选择$type账户'
 	String selectAccountForType({required Object type}) => '请选择${type}账户';
@@ -3481,6 +3511,9 @@ class Translations$sharedSpace$detail$zh {
 
 	/// zh: '加入其他空间'
 	String get joinOtherSpace => '加入其他空间';
+
+	/// zh: '没有更多交易'
+	String get noMoreTransactions => '没有更多交易';
 }
 
 // Path: sharedSpace.notifications
@@ -5379,6 +5412,7 @@ extension on Translations {
 			'speech.enterAddress' => '请输入服务器地址',
 			'speech.enterValidPort' => '请输入有效的端口 (1-65535)',
 			'speech.configSaved' => '配置已保存',
+			'speech.configSaveFailed' => '配置保存失败，请重试',
 			'speech.systemVoiceRestrictedTitle' => '系统语音不可用',
 			'speech.systemVoiceRestrictedContent' => '您的手机系统语音引擎不可用或服务未开启。建议在设置中开启语音服务或配置 WebSocket 自建语音服务。',
 			'speech.dictationDisabledTitle' => '语音听写未开启',
@@ -5596,9 +5630,9 @@ extension on Translations {
 			'forecast.recurringTransaction.selectEndDate' => '选择结束日期',
 			'forecast.recurringTransaction.preview' => '规则预览',
 			'forecast.recurringTransaction.daily' => '每天',
-			'forecast.recurringTransaction.weekly' => '每周',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.weekly' => '每周',
 			'forecast.recurringTransaction.monthly' => '每月',
 			'forecast.recurringTransaction.yearly' => '每年',
 			'forecast.recurringTransaction.custom' => '自定义',
@@ -5634,6 +5668,8 @@ extension on Translations {
 			'forecast.recurringTransaction.selectIncomeAccount' => '选择收入账户',
 			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => '每次${type}金额不固定',
 			'forecast.recurringTransaction.selectBothAccounts' => '请选择转出和转入账户',
+			'forecast.recurringTransaction.sameAccount' => '转出和转入账户不能相同',
+			'forecast.recurringTransaction.endBeforeStart' => '结束日期不能晚于生效日期，请检查',
 			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => '请选择${type}账户',
 			'forecast.recurringTransaction.deleteConfirmGeneric' => '确定要删除这个周期交易吗？此操作不可撤销。',
 			'forecast.recurringTransaction.selectDate' => ({required Object date}) => '选择 ${date}',
@@ -5742,6 +5778,8 @@ extension on Translations {
 			'chat.noRelatedFound' => '未找到相关会话',
 			'chat.tryOtherKeywords' => '尝试搜索其他关键词',
 			'chat.searchFailed' => '搜索失败',
+			'chat.updatedAt' => ({required Object time}) => '更新于 ${time}',
+			'chat.createdAt' => ({required Object time}) => '创建于 ${time}',
 			'chat.deleteConversation' => '删除会话',
 			'chat.deleteConversationConfirm' => '确定要删除这个会话吗？此操作无法撤销。',
 			'chat.conversationDeleted' => '会话已删除',
@@ -6093,6 +6131,11 @@ extension on Translations {
 			'financial.saveFailed' => '保存失败',
 			'financial.deleteFailed' => '删除失败，请稍后重试',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '部分币种缺少汇率，相关账户未计入总额：${currencies}',
+			'financial.cashPocketTitle' => '我的现金账户',
+			'financial.sourcesCount' => ({required Object count}) => '${count} 个账户',
+			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',
+			'financial.neverUpdated' => '从未更新',
+			'financial.updateNow' => '立即更新',
 			'app.splashTitle' => '智见增长，格物致富。',
 			'app.splashSubtitle' => '智能财务助手',
 			'statistics.title' => '统计分析',
@@ -6101,6 +6144,8 @@ extension on Translations {
 			'statistics.ranking' => '大额消费排行',
 			'statistics.noData' => '暂无数据',
 			'statistics.overview.balance' => '总结余',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.overview.income' => '总收入',
 			'statistics.overview.expense' => '总支出',
 			'statistics.trend.title' => '收支趋势',
@@ -6111,8 +6156,6 @@ extension on Translations {
 			'statistics.analysis.incomeTitle' => '收入分析',
 			'statistics.analysis.total' => '总计',
 			'statistics.analysis.breakdown' => '支出分类明细',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.analysis.radarNeedMoreData' => '雷达图需要至少3个分类数据',
 			'statistics.filter.accountType' => '账户类型',
 			'statistics.filter.allAccounts' => '全部账户',
@@ -6224,6 +6267,7 @@ extension on Translations {
 			'sharedSpace.detail.noTransactionsHint' => '空间内的交易将显示在这里',
 			'sharedSpace.detail.refreshCode' => '刷新生成新码',
 			'sharedSpace.detail.joinOtherSpace' => '加入其他空间',
+			'sharedSpace.detail.noMoreTransactions' => '没有更多交易',
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暂无通知',
 			'sharedSpace.notifications.emptyHint' => '当你收到新的邀请或动态时，\n通知将显示在这里',

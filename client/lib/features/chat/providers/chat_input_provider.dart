@@ -91,9 +91,16 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         return;
       }
 
-      final recognizedNewContent = state.text
-          .replaceFirst(_textBeforeSpeechSession, '')
-          .trim();
+      // Strip the pre-session base only if it is an actual PREFIX of the
+      // recognised text. replaceFirst would delete the first occurrence at any
+      // position, so if the pre-session text reappears inside the newly spoken
+      // content it would strip the wrong location. Because the speech callbacks
+      // fold the recognised text on top of the base, the prefix cut is exact.
+      final currentText = state.text;
+      final recognizedNewContent =
+          currentText.startsWith(_textBeforeSpeechSession)
+          ? currentText.substring(_textBeforeSpeechSession.length).trim()
+          : currentText.trim();
 
       if (recognizedNewContent.isEmpty && _textBeforeSpeechSession.isEmpty) {
         _logger.info('Listening ended, no speech recognized.');

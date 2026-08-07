@@ -422,6 +422,8 @@ class BudgetCreateRequest {
 
 class BudgetUpdateRequest {
   final String? name;
+  final String? categoryKey;
+  final BudgetScope? scope;
   final Decimal? amount;
   final bool? rolloverEnabled;
   final BudgetStatus? status;
@@ -429,6 +431,8 @@ class BudgetUpdateRequest {
 
   const BudgetUpdateRequest({
     this.name,
+    this.categoryKey,
+    this.scope,
     this.amount,
     this.rolloverEnabled,
     this.status,
@@ -438,6 +442,8 @@ class BudgetUpdateRequest {
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     if (name != null) json['name'] = name;
+    if (categoryKey != null) json['category_key'] = categoryKey;
+    if (scope != null) json['scope'] = scope!.value;
     if (amount != null) json['amount'] = amount.toString();
     if (rolloverEnabled != null) json['rollover_enabled'] = rolloverEnabled;
     if (status != null) json['status'] = status!.value;

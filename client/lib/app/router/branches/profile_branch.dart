@@ -78,7 +78,12 @@ StatefulShellBranch buildProfileBranch() {
                 path: ':spaceId',
                 name: AppRouteNames.sharedSpaceDetail,
                 builder: (context, state) {
-                  final spaceId = state.pathParameters['spaceId']!;
+                  final spaceId = state.pathParameters['spaceId'];
+                  if (spaceId == null) {
+                    return Scaffold(
+                      body: Center(child: Text(t.error.unknownError)),
+                    );
+                  }
                   return SharedSpaceDetailPage(spaceId: spaceId);
                 },
                 routes: [
@@ -86,7 +91,12 @@ StatefulShellBranch buildProfileBranch() {
                     path: 'settings',
                     name: AppRouteNames.sharedSpaceSettings,
                     builder: (context, state) {
-                      final spaceId = state.pathParameters['spaceId']!;
+                      final spaceId = state.pathParameters['spaceId'];
+                      if (spaceId == null) {
+                        return Scaffold(
+                          body: Center(child: Text(t.error.unknownError)),
+                        );
+                      }
                       return SharedSpaceSettingsPage(spaceId: spaceId);
                     },
                   ),

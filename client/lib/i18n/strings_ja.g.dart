@@ -461,6 +461,7 @@ class _Translations$speech$ja extends Translations$speech$zh {
 	@override String get enterAddress => 'サーバーアドレスを入力してください';
 	@override String get enterValidPort => '有効なポート番号(1-65535)を入力してください';
 	@override String get configSaved => '設定を保存しました';
+	@override String get configSaveFailed => '設定の保存に失敗しました';
 	@override String get systemVoiceRestrictedTitle => 'システム音声が利用できません';
 	@override String get systemVoiceRestrictedContent => '端末の音声認識サービスが無効または利用できません。設定を確認するかWebSocket自作ASRを設定してください。';
 	@override String get dictationDisabledTitle => '音声入力（音声入力/音声聞き取り）が無効です';
@@ -711,6 +712,8 @@ class _Translations$chat$ja extends Translations$chat$zh {
 	@override String get noRelatedFound => '関連する会話が見つかりません';
 	@override String get tryOtherKeywords => '他のキーワードで検索してください';
 	@override String get searchFailed => '検索失敗';
+	@override String updatedAt({required Object time}) => '更新日時: ${time}';
+	@override String createdAt({required Object time}) => '作成日時: ${time}';
 	@override String get deleteConversation => 'チャットを削除';
 	@override String get deleteConversationConfirm => 'このチャットを削除してもよろしいですか？この操作は取り消せません。';
 	@override String get conversationDeleted => 'チャットを削除しました';
@@ -920,6 +923,11 @@ class _Translations$financial$ja extends Translations$financial$zh {
 	@override String get saveFailed => '保存に失敗しました';
 	@override String get deleteFailed => '削除に失敗しました。しばらくしてから再試行してください';
 	@override String missingExchangeRates({required Object currencies}) => '一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：${currencies}';
+	@override String get cashPocketTitle => 'マイ現金口座';
+	@override String sourcesCount({required Object count}) => '${count} 口座';
+	@override String lastUpdatedAt({required Object time}) => '最終更新：${time}';
+	@override String get neverUpdated => '未更新';
+	@override String get updateNow => '今すぐ更新';
 }
 
 // Path: app
@@ -1247,6 +1255,8 @@ class _Translations$forecast$recurringTransaction$ja extends Translations$foreca
 	@override String get selectIncomeAccount => '収入口座を選択';
 	@override String amountNotFixed({required Object type}) => '${type}ごとの金額は固定されません';
 	@override String get selectBothAccounts => '振替元と振替先の口座を選択してください';
+	@override String get sameAccount => '振替元と振替先の口座は同じにできません';
+	@override String get endBeforeStart => '終了日は開始日より前には設定できません';
 	@override String selectAccountForType({required Object type}) => '${type}口座を選択してください';
 	@override String get deleteConfirmGeneric => 'この定期取引を削除してもよろしいですか？この操作は取り消せません。';
 	@override String selectDate({required Object date}) => '${date} を選択';
@@ -1608,6 +1618,7 @@ class _Translations$sharedSpace$detail$ja extends Translations$sharedSpace$detai
 	@override String get noTransactionsHint => 'このスペースの取引がここに表示されます';
 	@override String get refreshCode => 'コードを更新';
 	@override String get joinOtherSpace => '他のスペースに参加';
+	@override String get noMoreTransactions => 'これ以上の取引はありません';
 }
 
 // Path: sharedSpace.notifications
@@ -2787,6 +2798,7 @@ extension on TranslationsJa {
 			'speech.enterAddress' => 'サーバーアドレスを入力してください',
 			'speech.enterValidPort' => '有効なポート番号(1-65535)を入力してください',
 			'speech.configSaved' => '設定を保存しました',
+			'speech.configSaveFailed' => '設定の保存に失敗しました',
 			'speech.systemVoiceRestrictedTitle' => 'システム音声が利用できません',
 			'speech.systemVoiceRestrictedContent' => '端末の音声認識サービスが無効または利用できません。設定を確認するかWebSocket自作ASRを設定してください。',
 			'speech.dictationDisabledTitle' => '音声入力（音声入力/音声聞き取り）が無効です',
@@ -3009,9 +3021,9 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.yearly' => '毎年',
 			'forecast.recurringTransaction.custom' => 'カスタム',
 			'forecast.recurringTransaction.cycle' => 'サイクル',
-			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count} 日ごと',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.everyDays' => ({required Object count}) => '${count} 日ごと',
 			'forecast.recurringTransaction.everyWeeks' => ({required Object count}) => '${count} 週ごと',
 			'forecast.recurringTransaction.everyMonths' => ({required Object count}) => '${count} か月ごと',
 			'forecast.recurringTransaction.everyYears' => ({required Object count}) => '${count} 年ごと',
@@ -3042,6 +3054,8 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.selectIncomeAccount' => '収入口座を選択',
 			'forecast.recurringTransaction.amountNotFixed' => ({required Object type}) => '${type}ごとの金額は固定されません',
 			'forecast.recurringTransaction.selectBothAccounts' => '振替元と振替先の口座を選択してください',
+			'forecast.recurringTransaction.sameAccount' => '振替元と振替先の口座は同じにできません',
+			'forecast.recurringTransaction.endBeforeStart' => '終了日は開始日より前には設定できません',
 			'forecast.recurringTransaction.selectAccountForType' => ({required Object type}) => '${type}口座を選択してください',
 			'forecast.recurringTransaction.deleteConfirmGeneric' => 'この定期取引を削除してもよろしいですか？この操作は取り消せません。',
 			'forecast.recurringTransaction.selectDate' => ({required Object date}) => '${date} を選択',
@@ -3150,6 +3164,8 @@ extension on TranslationsJa {
 			'chat.noRelatedFound' => '関連する会話が見つかりません',
 			'chat.tryOtherKeywords' => '他のキーワードで検索してください',
 			'chat.searchFailed' => '検索失敗',
+			'chat.updatedAt' => ({required Object time}) => '更新日時: ${time}',
+			'chat.createdAt' => ({required Object time}) => '作成日時: ${time}',
 			'chat.deleteConversation' => 'チャットを削除',
 			'chat.deleteConversationConfirm' => 'このチャットを削除してもよろしいですか？この操作は取り消せません。',
 			'chat.conversationDeleted' => 'チャットを削除しました',
@@ -3502,6 +3518,11 @@ extension on TranslationsJa {
 			'financial.saveFailed' => '保存に失敗しました',
 			'financial.deleteFailed' => '削除に失敗しました。しばらくしてから再試行してください',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：${currencies}',
+			'financial.cashPocketTitle' => 'マイ現金口座',
+			'financial.sourcesCount' => ({required Object count}) => '${count} 口座',
+			'financial.lastUpdatedAt' => ({required Object time}) => '最終更新：${time}',
+			'financial.neverUpdated' => '未更新',
+			'financial.updateNow' => '今すぐ更新',
 			'app.splashTitle' => 'スマートに、豊かに。',
 			'app.splashSubtitle' => 'インテリジェント財務アシスタント',
 			'statistics.title' => '統計分析',
@@ -3514,6 +3535,8 @@ extension on TranslationsJa {
 			'statistics.overview.expense' => '総支出',
 			'statistics.trend.title' => '収支推移',
 			'statistics.trend.expense' => '支出',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.trend.income' => '収入',
 			'statistics.analysis.title' => '支出分析',
 			'statistics.analysis.expenseTitle' => '支出分析',
@@ -3524,8 +3547,6 @@ extension on TranslationsJa {
 			'statistics.filter.accountType' => '口座タイプ',
 			'statistics.filter.allAccounts' => 'すべての口座',
 			'statistics.filter.apply' => '適用',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.sort.amount' => '金額順',
 			'statistics.sort.date' => '日付順',
 			'statistics.exportList' => 'リストを書き出す',
@@ -3603,6 +3624,7 @@ extension on TranslationsJa {
 			'sharedSpace.detail.noTransactionsHint' => 'このスペースの取引がここに表示されます',
 			'sharedSpace.detail.refreshCode' => 'コードを更新',
 			'sharedSpace.detail.joinOtherSpace' => '他のスペースに参加',
+			'sharedSpace.detail.noMoreTransactions' => 'これ以上の取引はありません',
 			'sharedSpace.notifications.title' => 'お知らせ',
 			'sharedSpace.notifications.empty' => 'お知らせはありません',
 			'sharedSpace.notifications.emptyHint' => '新しい招待やアクティビティがあると、\nここにお知らせが表示されます',

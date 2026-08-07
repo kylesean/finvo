@@ -220,12 +220,13 @@ class MediaThumbnailService {
     for (final mediaFile in mediaFiles) {
       if (mediaFile.type == MediaType.image && !hasCachedThumbnail(mediaFile)) {
         // Generate asynchronously without waiting for result
-        unawaited(
-          generateThumbnail(mediaFile).catchError((Object error) {
-            _logger.warning('Failed to preload thumbnail', error);
-            return null;
-          }),
-        );
+        unawaited(() async {
+          try {
+            await generateThumbnail(mediaFile);
+          } catch (e) {
+            _logger.warning('Failed to preload thumbnail', e);
+          }
+        }());
       }
     }
   }

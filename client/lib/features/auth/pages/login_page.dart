@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/app/router/app_routes.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -68,7 +69,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         final destination =
             (from != null && from.isNotEmpty && from.startsWith('/'))
             ? from
-            : '/home';
+            : AppRoutePaths.home;
         unawaited(GoRouter.of(context).pushReplacement(destination));
       }
     } on AppException catch (e) {
@@ -174,7 +175,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           onPress: () {
                             // Reset verification code state to avoid state residue when entering registration process next time
                             ref.read(verificationProvider.notifier).reset();
-                            unawaited(context.pushNamed('registerStep1'));
+                            unawaited(
+                              context.pushNamed(AppRouteNames.registerStep1),
+                            );
                           },
                           child: Text(t.auth.noAccount),
                         ),

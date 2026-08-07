@@ -7,9 +7,9 @@ import 'dart:async';
 
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
-import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/shared/models/currency.dart';
-import 'package:finvo/features/finance/pages/account_edit_page.dart';
+import 'package:finvo/features/finance/pages/account_edit_navigation.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/finance/providers/financial_summary_provider.dart';
 import 'package:finvo/features/finance/providers/account_view_currency_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -211,7 +211,12 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                               (account) => FinancialAccountCard(
                                 account: account,
                                 hideAmounts: _hideAmounts,
-                                onEdit: _editAccount,
+                                onEdit: (account, definition) =>
+                                    pushAccountEditPage(
+                                      context,
+                                      account,
+                                      definition,
+                                    ),
                               ),
                             ),
                           ],
@@ -225,7 +230,12 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                               (account) => FinancialAccountCard(
                                 account: account,
                                 hideAmounts: _hideAmounts,
-                                onEdit: _editAccount,
+                                onEdit: (account, definition) =>
+                                    pushAccountEditPage(
+                                      context,
+                                      account,
+                                      definition,
+                                    ),
                               ),
                             ),
                           ],
@@ -537,7 +547,9 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   }
 
   Future<void> _addAccount() async {
-    final typeResult = await context.pushNamed('financialAccountTypePicker');
+    final typeResult = await context.pushNamed(
+      AppRouteNames.financialAccountTypePicker,
+    );
     if (!mounted || typeResult == null) return;
 
     if (typeResult is FinancialAccount) {
@@ -555,25 +567,5 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             .loadFinancialAccounts();
       }
     }
-  }
-
-  Future<void> _editAccount(
-    FinancialAccount account,
-    AccountTypeDefinition? definition,
-  ) async {
-    // If no matching definition found, try to get default based on account.type
-    final accountDefinition =
-        definition ??
-        AccountTypeRegistry.resolveByApiType(account.type) ??
-        AccountTypeRegistry.getDefaultDefinition(account.nature);
-
-    await context.pushNamed(
-      'financialAccountEdit',
-      extra: FinancialAccountEditArgs(
-        definition: accountDefinition,
-        account: account,
-      ),
-    );
-    // Refresh is handled by the edit page's provider interaction
   }
 }

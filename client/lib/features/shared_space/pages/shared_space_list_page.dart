@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 import 'package:finvo/features/shared_space/widgets/shared_space_card.dart';
@@ -282,12 +283,15 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
   }
 
   void _navigateToSpaceDetail(String spaceId) {
-    unawaited(context.push('/profile/shared-space/$spaceId'));
+    unawaited(
+      context.pushNamed(
+        AppRouteNames.sharedSpaceDetail,
+        pathParameters: {'spaceId': spaceId},
+      ),
+    );
   }
 
   void _navigateToInviteSuccess(SharedSpace space) {
-    unawaited(
-      context.push('/profile/shared-space/invite-success', extra: space),
-    );
+    unawaited(context.pushNamed(AppRouteNames.inviteSuccess, extra: space));
   }
 }
