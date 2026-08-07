@@ -65,9 +65,6 @@ class ChatHistory extends _$ChatHistory {
   /// dispose the previous disposable instances before re-creating them.
   bool _controllersInitialized = false;
 
-  /// Guards against re-entrant creation while an async rebuild is in flight.
-  bool _controllersRebuilding = false;
-
   String get _currentStreamingAiMessageId =>
       _streamingController.currentMessageId;
 
@@ -77,7 +74,7 @@ class ChatHistory extends _$ChatHistory {
     _initializeControllers();
 
     ref.onDispose(() {
-      unawaited(_disposeControllers());
+      _disposeControllersSync();
     });
 
     // Initialize GenUI
@@ -88,33 +85,18 @@ class ChatHistory extends _$ChatHistory {
 
   /// Initialize extracted controllers
   void _initializeControllers() {
-    if (_controllersRebuilding) return;
-    // On a keepAlive provider rebuild, dispose the previous disposable
-    // controllers before re-creating them to avoid leaking their resources.
-    // The teardown is awaited across a microtask so the old streams fully
-    // release before the new controllers are created (no dual-service window).
     if (_controllersInitialized) {
-      _controllersRebuilding = true;
-      unawaited(_rebuildControllers());
-      return;
+      _disposeControllersSync();
     }
     _createControllers();
     _controllersInitialized = true;
   }
 
-  /// Re-create controllers after a keepAlive rebuild, awaiting the previous
-  /// instances' teardown first so no two live controllers/services coexist.
-  Future<void> _rebuildControllers() async {
-    await _disposeControllers();
-    _createControllers();
-    _controllersInitialized = true;
-    _controllersRebuilding = false;
-  }
-
-  /// Dispose the current disposable controllers (stream + GenUI service).
-  Future<void> _disposeControllers() async {
-    await _streamingController.dispose();
-    await _genUiLifecycleManager.dispose();
+  /// Synchronously initiate teardown of current disposable controllers.
+  void _disposeControllersSync() {
+    if (!_controllersInitialized) return;
+    unawaited(_streamingController.dispose());
+    unawaited(_genUiLifecycleManager.dispose());
   }
 
   /// Create all extracted controllers that outlive a single build.
@@ -137,15 +119,17 @@ class ChatHistory extends _$ChatHistory {
     _genUiLifecycleManager = GenUiLifecycleManager(
       secureStorageService: ref.read(secureStorageServiceProvider),
       messageRepository: _messageRepository,
-      getCurrentStreamingMessageId: () => _currentStreamingAiMessageId,
-      onTransactionCreated: _handleTransactionCreated,
-      onSessionInit: _handleSessionInit,
-      onTextResponse: _handleTextResponse,
-      onStreamComplete: _onGenUiStreamComplete,
-      markFirstChunkReceived: _markFirstChunkReceived,
-      onTitleUpdate: _handleTitleUpdate,
-      onToolCallStart: _handleToolCallStart,
-      onToolCallEnd: _handleToolCallEnd,
+      callbacks: GenUiLifecycleCallbacks(
+        getCurrentStreamingMessageId: () => _currentStreamingAiMessageId,
+        onTransactionCreated: _handleTransactionCreated,
+        onSessionInit: _handleSessionInit,
+        onTextResponse: _handleTextResponse,
+        onStreamComplete: _onGenUiStreamComplete,
+        markFirstChunkReceived: _markFirstChunkReceived,
+        onTitleUpdate: _handleTitleUpdate,
+        onToolCallStart: _handleToolCallStart,
+        onToolCallEnd: _handleToolCallEnd,
+      ),
     );
 
     // Initialize StreamingController

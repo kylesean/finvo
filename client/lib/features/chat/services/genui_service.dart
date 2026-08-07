@@ -1,24 +1,17 @@
 import 'dart:async';
 import 'package:logging/logging.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genui/genui.dart' as genui;
 import 'package:a2ui_core/a2ui_core.dart' as a2ui;
+import 'package:finvo/features/chat/models/genui_config.dart';
 import 'package:finvo/features/chat/services/custom_content_generator.dart';
 import 'package:finvo/features/chat/services/extended_genui_conversation.dart';
-import 'package:finvo/core/storage/secure_storage_service.dart';
 
 final _logger = Logger('GenUiService');
 
-// Typedefs (Aligning with potential existing types in project)
-typedef OnSessionInit = void Function(String sessionId, String? messageId);
-typedef OnStreamComplete = void Function();
-typedef OnTitleUpdate = void Function(String title);
-typedef OnErrorCallback = void Function(String message, dynamic error);
-
 /// GenUI initialization and configuration service (Requirement 1.1, 1.4)
 ///
-/// Manages the lifecycle of GenUI 0.8.0 components.
+/// Manages the lifecycle of GenUI components using [GenUiConfig] and [GenUiCallbacks].
 class GenUiService {
   genui.SurfaceController? _controller;
   ExtendedGenUiConversation? _genUiConversation;
@@ -31,52 +24,40 @@ class GenUiService {
   void Function(String)? _onTextResponse;
   void Function(String surfaceId)? _onSurfaceIdAdded;
 
-  /// Initialize GenUI with the provided catalog and callbacks
+  /// Initialize GenUI with [GenUiConfig] and [GenUiCallbacks] DTOs.
   Future<void> initialize({
-    required genui.Catalog catalog,
-    required SecureStorageService storageService,
-    required String sseBaseUrl,
-    required void Function(String surfaceId) onSurfaceAdded,
-    required void Function(String surfaceId) onSurfaceRemoved,
-    required void Function(String) onTextResponse,
-    OnSessionInit? onSessionInit,
-    OnStreamComplete? onStreamComplete,
-    OnTitleUpdate? onTitleUpdate,
-    OnErrorCallback? onError,
-    void Function(String surfaceId)? onSurfaceIdAdded,
-    void Function(Map<String, dynamic>)? onTransactionCreated,
-    dynamic configuration,
-    Dio? dio,
+    required GenUiConfig config,
+    required GenUiCallbacks callbacks,
   }) async {
     try {
       _logger.info('GenUiService: Starting initialization');
 
-      _onSurfaceAdded = onSurfaceAdded;
-      _onSurfaceRemoved = onSurfaceRemoved;
-      _onTextResponse = onTextResponse;
-      _onSurfaceIdAdded = onSurfaceIdAdded;
+      _onSurfaceAdded = callbacks.onSurfaceAdded;
+      _onSurfaceRemoved = callbacks.onSurfaceRemoved;
+      _onTextResponse = callbacks.onTextResponse;
+      _onSurfaceIdAdded = callbacks.onSurfaceIdAdded;
 
-      // GenUI 0.8.0: SurfaceController manages surfaces and implements SurfaceHost
-      _controller = genui.SurfaceController(catalogs: [catalog]);
+      // GenUI SurfaceController manages surfaces and implements SurfaceHost
+      _controller = genui.SurfaceController(catalogs: [config.catalog]);
       _logger.info('GenUiService: SurfaceController created');
 
       // Create custom Transport (ContentGenerator)
       _contentGenerator = CustomContentGenerator(
-        storageService,
-        dio: dio,
-        sseBaseUrl: sseBaseUrl,
+        config.storageService,
+        dio: config.dio,
+        sseBaseUrl: config.sseBaseUrl,
       );
 
       // Wire up callbacks
-      _contentGenerator!.onTextChunk = onTextResponse;
-      _contentGenerator!.onStreamComplete = onStreamComplete;
-      _contentGenerator!.onTitleUpdate = onTitleUpdate;
+      _contentGenerator!.onTextChunk = callbacks.onTextResponse;
+      _contentGenerator!.onStreamComplete = callbacks.onStreamComplete;
+      _contentGenerator!.onTitleUpdate = callbacks.onTitleUpdate;
       _contentGenerator!.onError = (err) {
         _logger.warning('GenUiService: ContentGenerator error - $err');
-        onError?.call(err.toString(), err);
+        callbacks.onError?.call(err.toString(), err);
       };
       _contentGenerator!.onTransactionCreated = (amount, type, currency) {
-        onTransactionCreated?.call({
+        callbacks.onTransactionCreated?.call({
           'amount': amount,
           'transactionType': type,
           'currency': currency,
@@ -101,8 +82,9 @@ class GenUiService {
           _onSurfaceRemoved?.call(surfaceId);
         },
         onTextResponse: (text) => _onTextResponse?.call(text),
-        onError: (message, rawError) => onError?.call(message, rawError),
-        onSessionInit: onSessionInit,
+        onError: (message, rawError) =>
+            callbacks.onError?.call(message, rawError),
+        onSessionInit: callbacks.onSessionInit,
       );
 
       _isInitialized = true;
@@ -121,9 +103,7 @@ class GenUiService {
       throw StateError('GenUiService not initialized.');
     }
 
-    // GenUI 0.8.0: Construct ChatMessage with factory
     final userMessage = genui.ChatMessage.user(message);
-
     await _genUiConversation!.sendRequest(userMessage);
   }
 
@@ -155,7 +135,6 @@ class GenUiService {
     if (!_isInitialized || _controller == null) {
       throw StateError('GenUiService not initialized.');
     }
-    // In GenUI 0.8+, contextFor().definition returns ValueListenable<SurfaceDefinition?>
     return _controller!.contextFor(surfaceId).definition;
   }
 
@@ -166,26 +145,25 @@ class GenUiService {
   }
 
   /// Replay historical UI components (Requirement 7.1)
-  void replayHistoricalSurface({
+  /// Returns `true` if replayed successfully, `false` otherwise.
+  bool replayHistoricalSurface({
     required String surfaceId,
     required String componentType,
     required Map<String, dynamic> data,
   }) {
-    if (!_isInitialized || _controller == null) return;
+    if (!_isInitialized || _controller == null) return false;
 
     try {
       // Clean private/internal keys starting with '_' before replaying
       final cleanData = Map<String, dynamic>.from(data)
         ..removeWhere((key, _) => key.startsWith('_'));
 
-      // 0.10.x: Use a2ui_core message types with raw JSON components
       final createMsg = a2ui.CreateSurfaceMessage(
         surfaceId: surfaceId,
         catalogId: genui.basicCatalogId,
       );
       _controller!.handleMessage(createMsg);
 
-      // Components are raw JSON maps: {'id': 'root', 'component': 'TypeName', ...props}
       final updateMsg = a2ui.UpdateComponentsMessage(
         surfaceId: surfaceId,
         components: [
@@ -197,8 +175,10 @@ class GenUiService {
       _logger.info(
         'GenUiService: Surface $surfaceId replayed via handleMessage',
       );
+      return true;
     } catch (e) {
       _logger.warning('GenUiService: Replay failed: $e');
+      return false;
     }
   }
 

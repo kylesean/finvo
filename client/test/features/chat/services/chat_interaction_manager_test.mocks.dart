@@ -6,10 +6,10 @@
 import 'dart:async' as _i14;
 
 import 'package:dio/dio.dart' as _i15;
-import 'package:finvo/core/storage/secure_storage_service.dart' as _i18;
 import 'package:finvo/features/chat/models/chat_message.dart' as _i9;
 import 'package:finvo/features/chat/models/chat_message_attachment.dart'
     as _i11;
+import 'package:finvo/features/chat/models/genui_config.dart' as _i18;
 import 'package:finvo/features/chat/models/genui_surface_info.dart' as _i16;
 import 'package:finvo/features/chat/models/tool_call_info.dart' as _i12;
 import 'package:finvo/features/chat/repositories/message_repository.dart'
@@ -565,12 +565,6 @@ class MockStreamingController extends _i1.Mock
   );
 
   @override
-  void handleStreamComplete(String? finalTextOverride) => super.noSuchMethod(
-    Invocation.method(#handleStreamComplete, [finalTextOverride]),
-    returnValueForMissingStub: null,
-  );
-
-  @override
   void handleStreamError(Object? error) => super.noSuchMethod(
     Invocation.method(#handleStreamError, [error]),
     returnValueForMissingStub: null,
@@ -661,37 +655,13 @@ class MockGenUiService extends _i1.Mock implements _i17.GenUiService {
 
   @override
   _i14.Future<void> initialize({
-    required _i5.Catalog? catalog,
-    required _i18.SecureStorageService? storageService,
-    required String? sseBaseUrl,
-    required void Function(String)? onSurfaceAdded,
-    required void Function(String)? onSurfaceRemoved,
-    required void Function(String)? onTextResponse,
-    _i17.OnSessionInit? onSessionInit,
-    _i17.OnStreamComplete? onStreamComplete,
-    _i17.OnTitleUpdate? onTitleUpdate,
-    _i17.OnErrorCallback? onError,
-    void Function(String)? onSurfaceIdAdded,
-    void Function(Map<String, dynamic>)? onTransactionCreated,
-    dynamic configuration,
-    _i15.Dio? dio,
+    required _i18.GenUiConfig? config,
+    required _i18.GenUiCallbacks? callbacks,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#initialize, [], {
-              #catalog: catalog,
-              #storageService: storageService,
-              #sseBaseUrl: sseBaseUrl,
-              #onSurfaceAdded: onSurfaceAdded,
-              #onSurfaceRemoved: onSurfaceRemoved,
-              #onTextResponse: onTextResponse,
-              #onSessionInit: onSessionInit,
-              #onStreamComplete: onStreamComplete,
-              #onTitleUpdate: onTitleUpdate,
-              #onError: onError,
-              #onSurfaceIdAdded: onSurfaceIdAdded,
-              #onTransactionCreated: onTransactionCreated,
-              #configuration: configuration,
-              #dio: dio,
+              #config: config,
+              #callbacks: callbacks,
             }),
             returnValue: _i14.Future<void>.value(),
             returnValueForMissingStub: _i14.Future<void>.value(),
@@ -727,18 +697,20 @@ class MockGenUiService extends _i1.Mock implements _i17.GenUiService {
   );
 
   @override
-  void replayHistoricalSurface({
+  bool replayHistoricalSurface({
     required String? surfaceId,
     required String? componentType,
     required Map<String, dynamic>? data,
-  }) => super.noSuchMethod(
-    Invocation.method(#replayHistoricalSurface, [], {
-      #surfaceId: surfaceId,
-      #componentType: componentType,
-      #data: data,
-    }),
-    returnValueForMissingStub: null,
-  );
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#replayHistoricalSurface, [], {
+              #surfaceId: surfaceId,
+              #componentType: componentType,
+              #data: data,
+            }),
+            returnValue: false,
+          )
+          as bool);
 
   @override
   _i14.Future<void> dispose() =>

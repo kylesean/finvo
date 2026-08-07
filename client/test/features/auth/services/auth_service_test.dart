@@ -96,7 +96,7 @@ void main() {
 
   group('login', () {
     test(
-      'phone account is sent with type=phone and saves credentials',
+      'phone account is sent with type=mobile and saves credentials',
       () async {
         mockResponses({'/auth/login': _loginData});
 
@@ -106,8 +106,10 @@ void main() {
         expect(result.user.id, 'u1');
 
         // Request payload carries account type detection + timezone.
+        // The server schemas accept only 'email' | 'mobile' (see
+        // server/app/schemas/auth.py), so 'mobile' is the contract value.
         final data = lastRequest.data as Map<String, dynamic>;
-        expect(data['type'], 'phone');
+        expect(data['type'], 'mobile');
         expect(data['account'], '13812345678');
         expect(data['timezone'], 'Asia/Shanghai');
 
@@ -158,7 +160,7 @@ void main() {
 
       expect(result.token, 'access-token');
       final data = lastRequest.data as Map<String, dynamic>;
-      expect(data['type'], 'phone');
+      expect(data['type'], 'mobile');
       expect(data['code'], '8888');
       expect(data['timezone'], 'Asia/Shanghai');
       // locale is resolved from the host platform; only assert presence.
@@ -175,7 +177,7 @@ void main() {
       await service.sendVerificationCode('13812345678');
 
       final data = lastRequest.data as Map<String, dynamic>;
-      expect(data['type'], 'phone');
+      expect(data['type'], 'mobile');
       expect(data['account'], '13812345678');
     });
   });

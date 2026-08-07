@@ -22,7 +22,7 @@ linter:
   # producing the lint.
   rules:
     always_use_package_imports: true
-    use_null_aware_elements: false
+    use_null_aware_elements: true
 
     # Strict rules for production code quality
     prefer_const_constructors: true

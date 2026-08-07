@@ -128,9 +128,13 @@ class AuthService {
 
   /// Detect account type from its format. Mirrors the registration UI which
   /// accepts either a phone number or an email address.
+  ///
+  /// The value MUST be `mobile` (not `phone`): the server's
+  /// LoginRequest/RegisterRequest/SendCodeRequest schemas restrict `type` to
+  /// `Literal["email", "mobile"]`, so any other string is rejected with 422.
   static String _accountType(String account) {
     final phoneRegex = RegExp(r'^1[3-9]\d{9}$');
-    return phoneRegex.hasMatch(account.trim()) ? 'phone' : 'email';
+    return phoneRegex.hasMatch(account.trim()) ? 'mobile' : 'email';
   }
 
   Future<({UserModel user, String token})> login(

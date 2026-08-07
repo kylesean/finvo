@@ -14,8 +14,6 @@ import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/app/theme/theme_notifier.dart';
 import 'package:finvo/app/theme/app_theme_pair_provider.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
-import 'package:finvo/features/home/providers/home_providers.dart';
-import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -27,18 +25,6 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appThemeMode = ref.watch(themeProvider);
     final themes = ref.watch(appThemePairProvider);
-
-    // Keep the real-time notification WebSocket alive for the whole app
-    // lifetime. The provider is `keepAlive`; reading it here instantiates the
-    // service (and its connect()-side-effect) once at startup and keeps it from
-    // being disposed as soon as this frame completes. The connection itself is
-    // lifecycle-driven by the auth token (see notificationWs), so this watch is
-    // intentionally a side-effect bearer rather than a pure data read.
-    ref.watch(notificationWsProvider);
-
-    // Keep the cross-feature transaction event subscription alive so the
-    // home feature refreshes when other features (e.g. chat) create data.
-    ref.watch(transactionEventSubscriberProvider);
 
     // Once the user authenticates, warm the login-scoped data providers. We
     // react to the auth transition instead of firing network side-effects from
@@ -126,6 +112,12 @@ class _SplashScreen extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.textTheme.bodySmall?.color,
               ),
+            ),
+            const SizedBox(height: 32),
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator.adaptive(strokeWidth: 2.5),
             ),
           ],
         ),

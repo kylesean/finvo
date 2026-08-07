@@ -6,6 +6,7 @@ import 'package:a2ui_core/a2ui_core.dart' as a2ui;
 import 'package:dio/dio.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/features/chat/constants/a2ui_component_types.dart';
 import 'package:finvo/features/chat/models/sse_event_models.dart';
 import 'package:finvo/features/chat/services/interaction_router.dart';
 import 'package:finvo/features/chat/services/sse_event_parsing.dart';
@@ -96,6 +97,12 @@ class CustomContentGenerator implements genui.Transport {
   CancelToken? _cancelToken;
   // Cancellation flag - set to true when user clicks stop button
   bool _isCancelled = false;
+
+  /// Monotonic counter distinguishing successive requests. Every SSE event
+  /// dispatch and terminal callback (onError/onStreamComplete) is guarded by
+  /// the generation captured when the request started, so buffered lines from
+  /// a superseded request can never be applied to the newer one.
+  int _requestGeneration = 0;
 
   // URL configuration
   final String _sseBaseUrl;
@@ -251,6 +258,11 @@ class CustomContentGenerator implements genui.Transport {
     // Reset cancellation flag
     _isCancelled = false;
 
+    // Take a snapshot of the request generation. Every callback below is
+    // guarded by this value so that lines/events still draining from a
+    // previously cancelled request cannot leak into the new one.
+    final requestGeneration = ++_requestGeneration;
+
     try {
       // 1. Get user authentication token
       final token = await _storageService.getToken();
@@ -336,7 +348,9 @@ class CustomContentGenerator implements genui.Transport {
               .cast<List<int>>()
               .transform(utf8.decoder)
               .transform(const LineSplitter())) {
-        if (_isCancelled) {
+        // Stale request: either the user cancelled or a newer request has
+        // already taken over. Discard remaining lines either way.
+        if (_isCancelled || requestGeneration != _requestGeneration) {
           _logger.info(
             'CustomContentGenerator: Stream processing cancelled by user',
           );
@@ -350,7 +364,7 @@ class CustomContentGenerator implements genui.Transport {
       }
 
       // Flush a trailing event that was not terminated by a blank line.
-      if (!_isCancelled) {
+      if (!_isCancelled && requestGeneration == _requestGeneration) {
         final trailing = accumulator.flush();
         if (trailing != null) {
           await _dispatchSseEventData(trailing);
@@ -358,12 +372,12 @@ class CustomContentGenerator implements genui.Transport {
       }
 
       // Stream processing ended normally
-      if (!_isCancelled) {
+      if (!_isCancelled && requestGeneration == _requestGeneration) {
         _logger.info('CustomContentGenerator: Stream succeeded');
         onStreamComplete?.call();
       }
     } catch (e, stackTrace) {
-      if (_isCancelled || (e is DioException && CancelToken.isCancel(e))) {
+      if (_isCancelled || requestGeneration != _requestGeneration) {
         _logger.info('CustomContentGenerator: Request cancelled by user');
         return;
       }
@@ -473,6 +487,11 @@ class CustomContentGenerator implements genui.Transport {
 
       case 'done':
         _logger.info('CustomContentGenerator: Stream completed (done event)');
+        // The server signals logical completion with `done`. Relying solely
+        // on stream closure is fragile if the connection is ever kept alive
+        // after the event; completing here is idempotent (the lifecycle layer
+        // tolerates repeated onStreamComplete calls).
+        onStreamComplete?.call();
         break;
 
       default:
@@ -511,6 +530,11 @@ class CustomContentGenerator implements genui.Transport {
           // Also notify surface creation for UpdateComponents (backward compat)
           onSurfaceCreated?.call(a2uiMessage.surfaceId);
           _checkAndNotifyTransaction(a2uiMessage);
+        } else if (a2uiMessage is a2ui.UpdateDataModelMessage) {
+          onSurfaceCreated?.call(a2uiMessage.surfaceId);
+          _logger.fine(
+            '[A2UI] UpdateDataModel applied for surface: ${a2uiMessage.surfaceId}',
+          );
         }
       }
 
@@ -569,8 +593,8 @@ class CustomContentGenerator implements genui.Transport {
           ..remove('id')
           ..remove('component');
 
-        if (componentType == 'transaction_success' ||
-            componentType == 'TransactionSuccess') {
+        if (componentType == A2uiComponentTypes.transactionSuccess ||
+            componentType == A2uiComponentTypes.transactionSuccessLegacy) {
           final amount = (props['amount'] as num?)?.toDouble() ?? 0.0;
           final type = props['transaction_type'] as String? ?? 'expense';
           final currency = props['currency'] as String? ?? 'CNY';
@@ -580,7 +604,8 @@ class CustomContentGenerator implements genui.Transport {
           );
 
           onTransactionCreated?.call(amount, type, currency);
-        } else if (componentType == 'TransactionGroupReceipt') {
+        } else if (componentType ==
+            A2uiComponentTypes.transactionGroupReceipt) {
           final summary = props['summary'] as Map<String, dynamic>?;
           if (summary != null) {
             final expenseTotal =

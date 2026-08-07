@@ -11,6 +11,7 @@ import 'package:finvo/features/chat/services/audio_recorder_service.dart';
 import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
+// ignore_for_file: prefer_initializing_formals - private fields with public named ctor params
 
 final _logger = Logger('WebSocketSpeechService');
 
@@ -64,10 +65,17 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   @override
   bool get isIncrementalResult => true; // WebSocket is incremental mode
 
-  WebSocketSpeechService({String? host, int? port, String? path})
-    : host = host ?? SpeechConfig.host,
-      port = port ?? SpeechConfig.port,
-      path = path ?? SpeechConfig.path;
+  WebSocketSpeechService({
+    String? host,
+    int? port,
+    String? path,
+    required SoundFeedbackService soundFeedback,
+  }) : host = host ?? SpeechConfig.host,
+       port = port ?? SpeechConfig.port,
+       path = path ?? SpeechConfig.path,
+       _soundFeedback = soundFeedback;
+
+  final SoundFeedbackService _soundFeedback;
 
   /// Build the ASR endpoint URL, honoring an explicit scheme.
   ///
@@ -238,7 +246,13 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _logger.info('Starting speech recognition process...');
 
       // 1. Check permissions
-      final hasPermission = await this.hasPermission();
+      var hasPermission = await this.hasPermission();
+      if (!hasPermission) {
+        // Ask the user first instead of failing immediately: the OS prompt
+        // may simply have not been shown yet.
+        _logger.info('Requesting microphone permission');
+        hasPermission = await requestPermission();
+      }
       if (!hasPermission) {
         _logger.severe('Microphone permission denied');
         // Stable token mapped to a localized dialog by the chat input UI.
@@ -333,7 +347,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
 
       // Play stop recording sound (don't await to avoid blocking)
       _logger.info('Playing stop sound...');
-      unawaited(SoundFeedbackService.instance.playStopSound());
+      unawaited(_soundFeedback.playStopSound());
     } catch (e) {
       _logger.severe('Failed to stop listening: $e');
       _errorController.add('Failed to stop listening: $e');

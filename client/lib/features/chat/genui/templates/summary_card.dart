@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/chat/genui/atoms/streaming_typing_text.dart';
 
 /// Summary card Widget implementation
 class SummaryCard extends StatelessWidget {
@@ -35,8 +36,8 @@ class SummaryCard extends StatelessWidget {
             style: AppTextStyles.listTitle(theme),
           ),
           const SizedBox(height: 12),
-          Text(
-            data['summary']?.toString() ?? '',
+          StreamingTypingText(
+            text: data['summary']?.toString() ?? '',
             style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
               height: 1.5,

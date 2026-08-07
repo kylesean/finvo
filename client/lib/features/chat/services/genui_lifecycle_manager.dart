@@ -4,18 +4,46 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
-import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/features/chat/genui/app_catalog.dart';
 import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/features/chat/models/genui_config.dart';
 import 'package:finvo/features/chat/models/genui_surface_info.dart';
 import 'package:finvo/features/chat/models/tool_call_info.dart';
 import 'package:finvo/features/chat/repositories/message_repository.dart';
 import 'package:finvo/features/chat/services/genui_logger.dart';
 import 'package:finvo/features/chat/services/genui_service.dart';
 import 'package:finvo/features/chat/services/custom_content_generator.dart';
+import 'package:finvo/features/chat/services/genui_error_translator.dart';
+// ignore_for_file: prefer_initializing_formals - private fields with public named ctor params
 
 final _logger = Logger('GenUiLifecycleManager');
+
+/// Groups callbacks used by [GenUiLifecycleManager] to communicate state updates.
+class GenUiLifecycleCallbacks {
+  final String Function() getCurrentStreamingMessageId;
+  final void Function(double amount, String type, String currency)
+  onTransactionCreated;
+  final void Function(String sessionId, String? messageId) onSessionInit;
+  final void Function(String text) onTextResponse;
+  final void Function() onStreamComplete;
+  final void Function() markFirstChunkReceived;
+  final void Function(String title) onTitleUpdate;
+  final void Function(ToolCallInfo)? onToolCallStart;
+  final void Function(ToolCallInfo)? onToolCallEnd;
+
+  const GenUiLifecycleCallbacks({
+    required this.getCurrentStreamingMessageId,
+    required this.onTransactionCreated,
+    required this.onSessionInit,
+    required this.onTextResponse,
+    required this.onStreamComplete,
+    required this.markFirstChunkReceived,
+    required this.onTitleUpdate,
+    this.onToolCallStart,
+    this.onToolCallEnd,
+  });
+}
 
 /// Manages the lifecycle of the GenUI service and handles surface events.
 ///
@@ -27,18 +55,7 @@ final _logger = Logger('GenUiLifecycleManager');
 class GenUiLifecycleManager {
   final SecureStorageService _secureStorageService;
   final MessageRepository _messageRepository;
-
-  // Callbacks to interact with standard ChatNotifier state
-  final String Function() _getCurrentStreamingMessageId;
-  final void Function(double amount, String type, String currency)
-  _onTransactionCreated;
-  final void Function(String sessionId, String? messageId) _onSessionInit;
-  final void Function(String text) _onTextResponse;
-  final void Function() _onStreamComplete;
-  final void Function() _markFirstChunkReceived;
-  final void Function(String title) _onTitleUpdate;
-  final void Function(ToolCallInfo)? _onToolCallStart;
-  final void Function(ToolCallInfo)? _onToolCallEnd;
+  final GenUiLifecycleCallbacks _callbacks;
 
   GenUiService? _genUiService;
   bool _isDisposed = false;
@@ -55,18 +72,28 @@ class GenUiLifecycleManager {
   int _totalSurfacesDeleted = 0;
 
   GenUiLifecycleManager({
-    required this._secureStorageService,
-    required this._messageRepository,
-    required this._getCurrentStreamingMessageId,
-    required this._onTransactionCreated,
-    required this._onSessionInit,
-    required this._onTextResponse,
-    required this._onStreamComplete,
-    required this._markFirstChunkReceived,
-    required this._onTitleUpdate,
-    this._onToolCallStart,
-    this._onToolCallEnd,
-  });
+    required SecureStorageService secureStorageService,
+    required MessageRepository messageRepository,
+    required GenUiLifecycleCallbacks callbacks,
+  }) : _secureStorageService = secureStorageService,
+       _messageRepository = messageRepository,
+       _callbacks = callbacks;
+
+  // Callbacks getters for internal use
+  String Function() get _getCurrentStreamingMessageId =>
+      _callbacks.getCurrentStreamingMessageId;
+  void Function(double amount, String type, String currency)
+  get _onTransactionCreated => _callbacks.onTransactionCreated;
+  void Function(String sessionId, String? messageId) get _onSessionInit =>
+      _callbacks.onSessionInit;
+  void Function(String text) get _onTextResponse => _callbacks.onTextResponse;
+  void Function() get _onStreamComplete => _callbacks.onStreamComplete;
+  void Function() get _markFirstChunkReceived =>
+      _callbacks.markFirstChunkReceived;
+  void Function(String title) get _onTitleUpdate => _callbacks.onTitleUpdate;
+  void Function(ToolCallInfo)? get _onToolCallStart =>
+      _callbacks.onToolCallStart;
+  void Function(ToolCallInfo)? get _onToolCallEnd => _callbacks.onToolCallEnd;
 
   bool get isInitialized => _genUiService?.isInitialized ?? false;
   GenUiService? get service => _genUiService;
@@ -82,23 +109,27 @@ class GenUiLifecycleManager {
     try {
       _genUiService = GenUiService();
       await _genUiService!.initialize(
-        catalog: AppCatalog.build(),
-        storageService: _secureStorageService,
-        sseBaseUrl: sseBaseUrl,
-        onSurfaceAdded: _handleSurfaceAdded,
-        onSurfaceRemoved: _handleSurfaceRemoved,
-        onTextResponse: _onTextResponse,
-        onSessionInit: _onSessionInit,
-        onStreamComplete: _onStreamComplete,
-        onTitleUpdate: _onTitleUpdate,
-        onError: (msg, err) => _handleGenUiError(msg),
-        onSurfaceIdAdded: _handleSurfaceIdAdded,
-        onTransactionCreated: (data) => _onTransactionCreated(
-          (data['amount'] as num?)?.toDouble() ?? 0.0,
-          data['transactionType'] as String? ?? 'expense',
-          data['currency'] as String? ?? 'CNY',
+        config: GenUiConfig(
+          catalog: AppCatalog.build(),
+          storageService: _secureStorageService,
+          sseBaseUrl: sseBaseUrl,
+          dio: dio,
         ),
-        dio: dio,
+        callbacks: GenUiCallbacks(
+          onSurfaceAdded: _handleSurfaceAdded,
+          onSurfaceRemoved: _handleSurfaceRemoved,
+          onTextResponse: _onTextResponse,
+          onSessionInit: _onSessionInit,
+          onStreamComplete: _onStreamComplete,
+          onTitleUpdate: _onTitleUpdate,
+          onError: (msg, err) => _handleGenUiError(msg),
+          onSurfaceIdAdded: _handleSurfaceIdAdded,
+          onTransactionCreated: (data) => _onTransactionCreated(
+            (data['amount'] as num?)?.toDouble() ?? 0.0,
+            data['transactionType'] as String? ?? 'expense',
+            data['currency'] as String? ?? 'CNY',
+          ),
+        ),
       );
 
       // Wire up tool call event callbacks
@@ -313,25 +344,18 @@ class GenUiLifecycleManager {
     // Log and update message state
     _logger.warning('GenUiLifecycleManager: GenUI error: $error');
 
-    // Converter logic (localized via i18n)
-    String userFriendlyMessage;
-    if (error.contains('No generations') || error.contains('empty stream')) {
-      userFriendlyMessage = t.genui.errorBusy;
-    } else if (error.contains('timeout') || error.contains('Timeout')) {
-      userFriendlyMessage = t.genui.errorTimeout;
-    } else if (error.contains('network') || error.contains('connection')) {
-      userFriendlyMessage = t.genui.errorNetwork;
-    } else if (error.contains('Authentication') || error.contains('token')) {
-      userFriendlyMessage = t.genui.errorSessionExpired;
-    } else {
-      userFriendlyMessage = t.genui.errorGeneric;
-    }
+    // Converter logic (localized via i18n using GenUiErrorTranslator)
+    final userFriendlyMessage = GenUiErrorTranslator.translate(error);
 
     final currentId = _getCurrentStreamingMessageId();
     if (currentId.isNotEmpty) {
       _messageRepository.updateAiMessageState(
         id: currentId,
-        content: userFriendlyMessage,
+        // Append the error note instead of replacing the already-streamed
+        // content: the AI may have produced real paragraphs or a GenUI
+        // surface before failing, and wiping them on error would discard
+        // work the user already saw.
+        contentDelta: '\n\n$userFriendlyMessage',
         isTyping: false,
         streamingStatus: StreamingStatus.error,
       );
@@ -380,15 +404,17 @@ class GenUiLifecycleManager {
     final surfaceId = 'surface_$uuidV4';
 
     // Use replayHistoricalSurface which handles CreateSurface + UpdateComponents
-    _genUiService!.replayHistoricalSurface(
+    final success = _genUiService!.replayHistoricalSurface(
       surfaceId: surfaceId,
       componentType: componentName,
       data: componentData,
     );
 
-    final messageId = _getCurrentStreamingMessageId();
-    if (messageId.isNotEmpty) {
-      _registerSurface(surfaceId, messageId);
+    if (success) {
+      final messageId = _getCurrentStreamingMessageId();
+      if (messageId.isNotEmpty) {
+        _registerSurface(surfaceId, messageId);
+      }
     }
   }
 }

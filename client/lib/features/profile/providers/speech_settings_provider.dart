@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 import 'package:finvo/features/profile/models/speech_settings.dart';
 
@@ -31,7 +31,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = ref.read(sharedPreferencesProvider);
       final jsonString = prefs.getString(_speechSettingsKey);
 
       SpeechSettings settings;
@@ -61,7 +61,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
   /// Save settings to SharedPreferences
   Future<bool> _saveSettings(SpeechSettings settings) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = ref.read(sharedPreferencesProvider);
       final jsonString = jsonEncode(settings.toJson());
       await prefs.setString(_speechSettingsKey, jsonString);
       _logger.info('Saved speech settings successfully');
@@ -74,7 +74,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
 
   /// Update service type
   Future<void> updateServiceType(SpeechServiceType type) async {
-    if (state.settings == null) return;
+    if (state.isSaving || state.settings == null) return;
 
     state = state.copyWith(isSaving: true, errorMessage: null);
 
@@ -92,14 +92,15 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
   }
 
   /// Update WebSocket configuration. Returns true on success, false when the
-  /// settings are not yet loaded (settings == null) or the save fails, so
-  /// callers can surface a truthful result instead of a fake success toast.
+  /// settings are not yet loaded (settings == null), a save is already in
+  /// progress (isSaving == true), or the save fails, so callers can surface a
+  /// truthful result instead of a fake success toast.
   Future<bool> updateWebsocketConfig({
     String? host,
     int? port,
     String? path,
   }) async {
-    if (state.settings == null) return false;
+    if (state.isSaving || state.settings == null) return false;
 
     state = state.copyWith(isSaving: true, errorMessage: null);
 
@@ -123,7 +124,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
 
   /// Update speech recognition language
   Future<void> updateLocaleId(String localeId) async {
-    if (state.settings == null) return;
+    if (state.isSaving || state.settings == null) return;
 
     state = state.copyWith(isSaving: true, errorMessage: null);
 
@@ -142,6 +143,8 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
 
   /// Reset to default settings
   Future<void> resetToDefault() async {
+    if (state.isSaving) return;
+
     state = state.copyWith(isSaving: true, errorMessage: null);
 
     const defaultSettings = SpeechSettings();

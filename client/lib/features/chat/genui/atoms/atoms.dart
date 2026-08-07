@@ -12,3 +12,4 @@ export 'package:finvo/features/chat/genui/atoms/badge.dart';
 export 'package:finvo/features/chat/genui/atoms/tag.dart';
 export 'package:finvo/features/chat/genui/atoms/budget_progress_bar.dart';
 export 'package:finvo/features/chat/genui/atoms/empty_state_alert.dart';
+export 'package:finvo/features/chat/genui/atoms/streaming_typing_text.dart';

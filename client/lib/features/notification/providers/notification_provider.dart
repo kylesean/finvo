@@ -18,11 +18,6 @@ part 'notification_provider.g.dart';
 
 final _logger = Logger('NotificationNotifier');
 
-/// Monotonic counter for realtime-notification ids. Milliseconds-since-epoch
-/// can collide when several notifications arrive within the same millisecond,
-/// and the id is used as a [Dismissible] key in the notification center.
-int _realtimeNotificationSeq = 0;
-
 /// State object for Notifications feature
 @freezed
 abstract class NotificationState with _$NotificationState {
@@ -172,6 +167,8 @@ class NotificationNotifier extends _$NotificationNotifier {
     );
   }
 
+  int _realtimeNotificationSeq = 0;
+
   /// Add a real-time notification received via WebSocket.
   void addRealtimeNotification(NotificationItem item) {
     state = state.copyWith(
@@ -179,6 +176,26 @@ class NotificationNotifier extends _$NotificationNotifier {
       total: state.total + 1,
       unreadCount: state.unreadCount + 1,
     );
+  }
+
+  /// Construct and add a real-time notification from WebSocket payload.
+  void addRealtimeNotificationFromPayload(
+    Map<String, dynamic> payload,
+    String type,
+  ) {
+    final item = NotificationItem(
+      id: 'rt_${DateTime.now().millisecondsSinceEpoch}_${_realtimeNotificationSeq++}',
+      userId: '',
+      type: type,
+      title: payload['title']?.toString() ?? '',
+      message: payload['message']?.toString() ?? '',
+      data: payload['data'] is Map<String, dynamic>
+          ? payload['data'] as Map<String, dynamic>
+          : null,
+      isRead: false,
+      createdAt: DateTime.now(),
+    );
+    addRealtimeNotification(item);
   }
 }
 
@@ -223,19 +240,9 @@ NotificationWsService notificationWs(Ref ref) {
       if (type == 'comment_updated') return;
     }
 
-    final item = NotificationItem(
-      id: 'rt_${DateTime.now().millisecondsSinceEpoch}_${_realtimeNotificationSeq++}',
-      userId: '',
-      type: type,
-      title: payload['title']?.toString() ?? '',
-      message: payload['message']?.toString() ?? '',
-      data: payload['data'] is Map<String, dynamic>
-          ? payload['data'] as Map<String, dynamic>
-          : null,
-      isRead: false,
-      createdAt: DateTime.now(),
-    );
-    ref.read(notificationProvider.notifier).addRealtimeNotification(item);
+    ref
+        .read(notificationProvider.notifier)
+        .addRealtimeNotificationFromPayload(payload, type);
   };
 
   // Connect

@@ -87,9 +87,19 @@ class TransactionComments extends _$TransactionComments {
     } catch (e) {
       // A stale delete that raced a newer mutation should defer to the server
       // state; only reconcile if this delete is still the latest mutation.
+      // A reload failure must not mask the original delete error, so it is
+      // swallowed here — the delete error itself is rethrown below.
       if (generation == _generation) {
-        await _reload(service);
+        try {
+          await _reload(service);
+        } catch (_) {
+          // Keep the original delete error as the caller-visible failure.
+        }
       }
+      // Surface the failure so the caller can show a failure toast (mirrors
+      // addComment's contract). Previously the error was swallowed, so a
+      // failed delete reported success while the comment reappeared.
+      rethrow;
     }
   }
 

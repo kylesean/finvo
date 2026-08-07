@@ -1020,7 +1020,11 @@
     "shareComingSoon": "分享功能即将上线...",
     "invalidAttachmentLink": "无效的附件链接",
     "unableToOpenAttachmentLink": "无法打开附件链接",
-    "aiCommunicationError": "抱歉，AI 助手通信错误：$error"
+    "aiCommunicationError": "抱歉，AI 助手通信错误：$error",
+    "uploadStillInProgress": "附件仍在上传中，请稍后再试",
+    "sendFailed": "发送消息失败，请稍后再试",
+    "attachmentUploadFailed": "附件上传失败：$files",
+    "fileUploadFailed": "文件上传失败，请稍后再试"
   },
   "image": {
     "deleteTitle": "删除图片",

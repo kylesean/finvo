@@ -16,6 +16,7 @@ import 'package:finvo/features/home/widgets/feed/comment_section_widget.dart';
 import 'package:finvo/features/home/widgets/feed/comment_input_bar.dart';
 import 'package:finvo/features/home/widgets/feed/attachment_section_widget.dart';
 import 'package:finvo/features/home/providers/transaction_detail_provider.dart';
+import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:finvo/features/home/widgets/transaction_detail_skeleton.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
@@ -551,10 +552,31 @@ class TransactionDetailPage extends ConsumerWidget {
                   cancelLabel: t.common.cancel,
                   confirmLabel: t.common.delete,
                   onConfirm: () async {
-                    // Execute delete operation
+                    // Execute delete operation.
+                    // Route the deletion through the feed notifier so the
+                    // optimistic removal + total-expense/calendar
+                    // invalidation stay in sync with the home page (the
+                    // previous direct service call left the feed, monthly
+                    // total and calendar cells stale after returning).
                     try {
-                      final homeService = ref.read(homeServiceProvider);
-                      await homeService.deleteTransaction(transaction.id);
+                      final removedFromFeed = await ref
+                          .read(transactionFeedProvider.notifier)
+                          .deleteTransaction(transaction.id);
+                      if (!removedFromFeed) {
+                        // The transaction is not in the current feed (e.g.
+                        // filtered out or beyond the loaded pages): delete
+                        // via the service and invalidate the derived home
+                        // providers so no stale totals/calendar remain.
+                        await ref
+                            .read(homeServiceProvider)
+                            .deleteTransaction(transaction.id);
+                        ref.invalidate(transactionFeedProvider);
+                        ref.invalidate(totalExpenseProvider);
+                        final currentMonth = ref.read(
+                          currentDisplayMonthProvider,
+                        );
+                        ref.invalidate(calendarMonthDataProvider(currentMonth));
+                      }
 
                       ToastService.success(
                         description: Text(t.transaction.deleted),

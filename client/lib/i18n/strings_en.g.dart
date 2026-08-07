@@ -732,6 +732,10 @@ class _Translations$chat$en extends Translations$chat$zh {
 	@override String get invalidAttachmentLink => 'Invalid attachment link';
 	@override String get unableToOpenAttachmentLink => 'Unable to open attachment link';
 	@override String aiCommunicationError({required Object error}) => 'Sorry, AI assistant communication error: ${error}';
+	@override String get uploadStillInProgress => 'Attachment still uploading, please try again later';
+	@override String get sendFailed => 'Failed to send message, please try again later';
+	@override String attachmentUploadFailed({required Object files}) => 'Attachment upload failed: ${files}';
+	@override String get fileUploadFailed => 'File upload failed, please try again later';
 }
 
 // Path: image
@@ -3421,6 +3425,10 @@ extension on TranslationsEn {
 			'chat.invalidAttachmentLink' => 'Invalid attachment link',
 			'chat.unableToOpenAttachmentLink' => 'Unable to open attachment link',
 			'chat.aiCommunicationError' => ({required Object error}) => 'Sorry, AI assistant communication error: ${error}',
+			'chat.uploadStillInProgress' => 'Attachment still uploading, please try again later',
+			'chat.sendFailed' => 'Failed to send message, please try again later',
+			'chat.attachmentUploadFailed' => ({required Object files}) => 'Attachment upload failed: ${files}',
+			'chat.fileUploadFailed' => 'File upload failed, please try again later',
 			'image.deleteTitle' => 'Delete Image',
 			'image.deleteConfirm' => 'Are you sure you want to delete this image? This action cannot be undone.',
 			'footprint.searchIn' => 'Search',
@@ -3564,12 +3572,12 @@ extension on TranslationsEn {
 			'financial.dailyBurnRateSaved' => 'Daily burn rate saved',
 			'financial.dayUnit' => 'day',
 			'financial.saveFailed' => 'Save failed',
+			_ => null,
+		} ?? switch (path) {
 			'financial.deleteFailed' => 'Delete failed, please try again later',
 			'financial.missingExchangeRates' => ({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}',
 			'financial.cashPocketTitle' => 'My Cash Pockets',
 			'financial.sourcesCount' => ({required Object count}) => '${count} Sources',
-			_ => null,
-		} ?? switch (path) {
 			'financial.lastUpdatedAt' => ({required Object time}) => 'Last updated: ${time}',
 			'financial.neverUpdated' => 'Never updated',
 			'financial.updateNow' => 'Update Now',

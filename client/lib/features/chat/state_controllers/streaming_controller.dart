@@ -229,14 +229,6 @@ class StreamingController {
     }
   }
 
-  /// Handle stream completion
-  void handleStreamComplete(String? finalTextOverride) {
-    _initialResponseDelayTimer?.cancel();
-    streamState.markCompleted();
-
-    onStreamComplete(finalTextOverride);
-  }
-
   /// Handle stream error
   void handleStreamError(Object error) {
     _initialResponseDelayTimer?.cancel();

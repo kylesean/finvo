@@ -1,6 +1,7 @@
 // features/chat/providers/chat_input_state.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:finvo/features/chat/models/speech_error_type.dart';
 
 part 'chat_input_state.freezed.dart';
 
@@ -14,7 +15,8 @@ abstract class ChatInputState with _$ChatInputState {
     bool isSpeechAvailable, // Whether speech recognition service is available
     @Default(false) bool isLoadingResponse, // Whether waiting for AI response
     @Default(false) bool showError, // Whether to show error prompt
-    @Default('') String errorMessage, // Error message content
+    @Default('') String errorMessage, // Legacy error message string fallback
+    SpeechErrorType? speechErrorType, // Strongly-typed speech error
     @Default(HintType.normal)
     HintType hintType, // Used to control input box hint text type
     @Default([]) List<XFile> selectedFiles, // List of selected files

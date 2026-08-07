@@ -728,6 +728,10 @@ class _Translations$chat$ja extends Translations$chat$zh {
 	@override String get invalidAttachmentLink => '無効な添付ファイルリンク';
 	@override String get unableToOpenAttachmentLink => '添付ファイルリンクを開けません';
 	@override String aiCommunicationError({required Object error}) => '申し訳ありません、AIアシスタントとの通信エラーが発生しました：${error}';
+	@override String get uploadStillInProgress => '添付ファイルはまだアップロード中です。後でもう一度お試しください';
+	@override String get sendFailed => 'メッセージの送信に失敗しました。後でもう一度お試しください';
+	@override String attachmentUploadFailed({required Object files}) => '添付ファイルのアップロードに失敗しました: ${files}';
+	@override String get fileUploadFailed => 'ファイルのアップロードに失敗しました。後でもう一度お試しください';
 }
 
 // Path: image
@@ -3409,6 +3413,10 @@ extension on TranslationsJa {
 			'chat.invalidAttachmentLink' => '無効な添付ファイルリンク',
 			'chat.unableToOpenAttachmentLink' => '添付ファイルリンクを開けません',
 			'chat.aiCommunicationError' => ({required Object error}) => '申し訳ありません、AIアシスタントとの通信エラーが発生しました：${error}',
+			'chat.uploadStillInProgress' => '添付ファイルはまだアップロード中です。後でもう一度お試しください',
+			'chat.sendFailed' => 'メッセージの送信に失敗しました。後でもう一度お試しください',
+			'chat.attachmentUploadFailed' => ({required Object files}) => '添付ファイルのアップロードに失敗しました: ${files}',
+			'chat.fileUploadFailed' => 'ファイルのアップロードに失敗しました。後でもう一度お試しください',
 			'image.deleteTitle' => '画像を削除',
 			'image.deleteConfirm' => 'この画像を削除してもよろしいですか？この操作は元に戻せません。',
 			'footprint.searchIn' => '検索',
@@ -3558,12 +3566,12 @@ extension on TranslationsJa {
 			'financial.sourcesCount' => ({required Object count}) => '${count} 口座',
 			'financial.lastUpdatedAt' => ({required Object time}) => '最終更新：${time}',
 			'financial.neverUpdated' => '未更新',
+			_ => null,
+		} ?? switch (path) {
 			'financial.updateNow' => '今すぐ更新',
 			'app.splashTitle' => 'スマートに、豊かに。',
 			'app.splashSubtitle' => 'インテリジェント財務アシスタント',
 			'statistics.title' => '統計分析',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.analyze' => '分析',
 			'statistics.exportInProgress' => 'エクスポート機能は開発中です...',
 			'statistics.ranking' => '高額支出ランキング',

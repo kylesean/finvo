@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatInputState {
 
- String get text; bool get isListening; bool get isSpeechAvailable; bool get isLoadingResponse; bool get showError; String get errorMessage; HintType get hintType; List<XFile> get selectedFiles; Map<String, bool> get uploadingFiles;
+ String get text; bool get isListening; bool get isSpeechAvailable; bool get isLoadingResponse; bool get showError; String get errorMessage; SpeechErrorType? get speechErrorType; HintType get hintType; List<XFile> get selectedFiles; Map<String, bool> get uploadingFiles;
 /// Create a copy of ChatInputState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ChatInputStateCopyWith<ChatInputState> get copyWith => _$ChatInputStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatInputState&&(identical(other.text, text) || other.text == text)&&(identical(other.isListening, isListening) || other.isListening == isListening)&&(identical(other.isSpeechAvailable, isSpeechAvailable) || other.isSpeechAvailable == isSpeechAvailable)&&(identical(other.isLoadingResponse, isLoadingResponse) || other.isLoadingResponse == isLoadingResponse)&&(identical(other.showError, showError) || other.showError == showError)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.hintType, hintType) || other.hintType == hintType)&&const DeepCollectionEquality().equals(other.selectedFiles, selectedFiles)&&const DeepCollectionEquality().equals(other.uploadingFiles, uploadingFiles));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatInputState&&(identical(other.text, text) || other.text == text)&&(identical(other.isListening, isListening) || other.isListening == isListening)&&(identical(other.isSpeechAvailable, isSpeechAvailable) || other.isSpeechAvailable == isSpeechAvailable)&&(identical(other.isLoadingResponse, isLoadingResponse) || other.isLoadingResponse == isLoadingResponse)&&(identical(other.showError, showError) || other.showError == showError)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.speechErrorType, speechErrorType) || other.speechErrorType == speechErrorType)&&(identical(other.hintType, hintType) || other.hintType == hintType)&&const DeepCollectionEquality().equals(other.selectedFiles, selectedFiles)&&const DeepCollectionEquality().equals(other.uploadingFiles, uploadingFiles));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,text,isListening,isSpeechAvailable,isLoadingResponse,showError,errorMessage,hintType,const DeepCollectionEquality().hash(selectedFiles),const DeepCollectionEquality().hash(uploadingFiles));
+int get hashCode => Object.hash(runtimeType,text,isListening,isSpeechAvailable,isLoadingResponse,showError,errorMessage,speechErrorType,hintType,const DeepCollectionEquality().hash(selectedFiles),const DeepCollectionEquality().hash(uploadingFiles));
 
 @override
 String toString() {
-  return 'ChatInputState(text: $text, isListening: $isListening, isSpeechAvailable: $isSpeechAvailable, isLoadingResponse: $isLoadingResponse, showError: $showError, errorMessage: $errorMessage, hintType: $hintType, selectedFiles: $selectedFiles, uploadingFiles: $uploadingFiles)';
+  return 'ChatInputState(text: $text, isListening: $isListening, isSpeechAvailable: $isSpeechAvailable, isLoadingResponse: $isLoadingResponse, showError: $showError, errorMessage: $errorMessage, speechErrorType: $speechErrorType, hintType: $hintType, selectedFiles: $selectedFiles, uploadingFiles: $uploadingFiles)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ChatInputStateCopyWith<$Res>  {
   factory $ChatInputStateCopyWith(ChatInputState value, $Res Function(ChatInputState) _then) = _$ChatInputStateCopyWithImpl;
 @useResult
 $Res call({
- String text, bool isListening, bool isSpeechAvailable, bool isLoadingResponse, bool showError, String errorMessage, HintType hintType, List<XFile> selectedFiles, Map<String, bool> uploadingFiles
+ String text, bool isListening, bool isSpeechAvailable, bool isLoadingResponse, bool showError, String errorMessage, SpeechErrorType? speechErrorType, HintType hintType, List<XFile> selectedFiles, Map<String, bool> uploadingFiles
 });
 
 
@@ -62,7 +62,7 @@ class _$ChatInputStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatInputState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? isListening = null,Object? isSpeechAvailable = null,Object? isLoadingResponse = null,Object? showError = null,Object? errorMessage = null,Object? hintType = null,Object? selectedFiles = null,Object? uploadingFiles = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? isListening = null,Object? isSpeechAvailable = null,Object? isLoadingResponse = null,Object? showError = null,Object? errorMessage = null,Object? speechErrorType = freezed,Object? hintType = null,Object? selectedFiles = null,Object? uploadingFiles = null,}) {
   return _then(_self.copyWith(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,isListening: null == isListening ? _self.isListening : isListening // ignore: cast_nullable_to_non_nullable
@@ -70,7 +70,8 @@ as bool,isSpeechAvailable: null == isSpeechAvailable ? _self.isSpeechAvailable :
 as bool,isLoadingResponse: null == isLoadingResponse ? _self.isLoadingResponse : isLoadingResponse // ignore: cast_nullable_to_non_nullable
 as bool,showError: null == showError ? _self.showError : showError // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String,hintType: null == hintType ? _self.hintType : hintType // ignore: cast_nullable_to_non_nullable
+as String,speechErrorType: freezed == speechErrorType ? _self.speechErrorType : speechErrorType // ignore: cast_nullable_to_non_nullable
+as SpeechErrorType?,hintType: null == hintType ? _self.hintType : hintType // ignore: cast_nullable_to_non_nullable
 as HintType,selectedFiles: null == selectedFiles ? _self.selectedFiles : selectedFiles // ignore: cast_nullable_to_non_nullable
 as List<XFile>,uploadingFiles: null == uploadingFiles ? _self.uploadingFiles : uploadingFiles // ignore: cast_nullable_to_non_nullable
 as Map<String, bool>,
@@ -158,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text,  bool isListening,  bool isSpeechAvailable,  bool isLoadingResponse,  bool showError,  String errorMessage,  HintType hintType,  List<XFile> selectedFiles,  Map<String, bool> uploadingFiles)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text,  bool isListening,  bool isSpeechAvailable,  bool isLoadingResponse,  bool showError,  String errorMessage,  SpeechErrorType? speechErrorType,  HintType hintType,  List<XFile> selectedFiles,  Map<String, bool> uploadingFiles)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatInputState() when $default != null:
-return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoadingResponse,_that.showError,_that.errorMessage,_that.hintType,_that.selectedFiles,_that.uploadingFiles);case _:
+return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoadingResponse,_that.showError,_that.errorMessage,_that.speechErrorType,_that.hintType,_that.selectedFiles,_that.uploadingFiles);case _:
   return orElse();
 
 }
@@ -179,10 +180,10 @@ return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text,  bool isListening,  bool isSpeechAvailable,  bool isLoadingResponse,  bool showError,  String errorMessage,  HintType hintType,  List<XFile> selectedFiles,  Map<String, bool> uploadingFiles)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text,  bool isListening,  bool isSpeechAvailable,  bool isLoadingResponse,  bool showError,  String errorMessage,  SpeechErrorType? speechErrorType,  HintType hintType,  List<XFile> selectedFiles,  Map<String, bool> uploadingFiles)  $default,) {final _that = this;
 switch (_that) {
 case _ChatInputState():
-return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoadingResponse,_that.showError,_that.errorMessage,_that.hintType,_that.selectedFiles,_that.uploadingFiles);case _:
+return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoadingResponse,_that.showError,_that.errorMessage,_that.speechErrorType,_that.hintType,_that.selectedFiles,_that.uploadingFiles);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +200,10 @@ return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text,  bool isListening,  bool isSpeechAvailable,  bool isLoadingResponse,  bool showError,  String errorMessage,  HintType hintType,  List<XFile> selectedFiles,  Map<String, bool> uploadingFiles)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text,  bool isListening,  bool isSpeechAvailable,  bool isLoadingResponse,  bool showError,  String errorMessage,  SpeechErrorType? speechErrorType,  HintType hintType,  List<XFile> selectedFiles,  Map<String, bool> uploadingFiles)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatInputState() when $default != null:
-return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoadingResponse,_that.showError,_that.errorMessage,_that.hintType,_that.selectedFiles,_that.uploadingFiles);case _:
+return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoadingResponse,_that.showError,_that.errorMessage,_that.speechErrorType,_that.hintType,_that.selectedFiles,_that.uploadingFiles);case _:
   return null;
 
 }
@@ -214,7 +215,7 @@ return $default(_that.text,_that.isListening,_that.isSpeechAvailable,_that.isLoa
 
 
 class _ChatInputState implements ChatInputState {
-  const _ChatInputState({this.text = '', this.isListening = false, this.isSpeechAvailable = false, this.isLoadingResponse = false, this.showError = false, this.errorMessage = '', this.hintType = HintType.normal, final  List<XFile> selectedFiles = const [], final  Map<String, bool> uploadingFiles = const {}}): _selectedFiles = selectedFiles,_uploadingFiles = uploadingFiles;
+  const _ChatInputState({this.text = '', this.isListening = false, this.isSpeechAvailable = false, this.isLoadingResponse = false, this.showError = false, this.errorMessage = '', this.speechErrorType, this.hintType = HintType.normal, final  List<XFile> selectedFiles = const [], final  Map<String, bool> uploadingFiles = const {}}): _selectedFiles = selectedFiles,_uploadingFiles = uploadingFiles;
 
 
 @override@JsonKey() final  String text;
@@ -223,6 +224,7 @@ class _ChatInputState implements ChatInputState {
 @override@JsonKey() final  bool isLoadingResponse;
 @override@JsonKey() final  bool showError;
 @override@JsonKey() final  String errorMessage;
+@override final  SpeechErrorType? speechErrorType;
 @override@JsonKey() final  HintType hintType;
  final  List<XFile> _selectedFiles;
 @override@JsonKey() List<XFile> get selectedFiles {
@@ -249,16 +251,16 @@ _$ChatInputStateCopyWith<_ChatInputState> get copyWith => __$ChatInputStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatInputState&&(identical(other.text, text) || other.text == text)&&(identical(other.isListening, isListening) || other.isListening == isListening)&&(identical(other.isSpeechAvailable, isSpeechAvailable) || other.isSpeechAvailable == isSpeechAvailable)&&(identical(other.isLoadingResponse, isLoadingResponse) || other.isLoadingResponse == isLoadingResponse)&&(identical(other.showError, showError) || other.showError == showError)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.hintType, hintType) || other.hintType == hintType)&&const DeepCollectionEquality().equals(other._selectedFiles, _selectedFiles)&&const DeepCollectionEquality().equals(other._uploadingFiles, _uploadingFiles));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatInputState&&(identical(other.text, text) || other.text == text)&&(identical(other.isListening, isListening) || other.isListening == isListening)&&(identical(other.isSpeechAvailable, isSpeechAvailable) || other.isSpeechAvailable == isSpeechAvailable)&&(identical(other.isLoadingResponse, isLoadingResponse) || other.isLoadingResponse == isLoadingResponse)&&(identical(other.showError, showError) || other.showError == showError)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.speechErrorType, speechErrorType) || other.speechErrorType == speechErrorType)&&(identical(other.hintType, hintType) || other.hintType == hintType)&&const DeepCollectionEquality().equals(other._selectedFiles, _selectedFiles)&&const DeepCollectionEquality().equals(other._uploadingFiles, _uploadingFiles));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,text,isListening,isSpeechAvailable,isLoadingResponse,showError,errorMessage,hintType,const DeepCollectionEquality().hash(_selectedFiles),const DeepCollectionEquality().hash(_uploadingFiles));
+int get hashCode => Object.hash(runtimeType,text,isListening,isSpeechAvailable,isLoadingResponse,showError,errorMessage,speechErrorType,hintType,const DeepCollectionEquality().hash(_selectedFiles),const DeepCollectionEquality().hash(_uploadingFiles));
 
 @override
 String toString() {
-  return 'ChatInputState(text: $text, isListening: $isListening, isSpeechAvailable: $isSpeechAvailable, isLoadingResponse: $isLoadingResponse, showError: $showError, errorMessage: $errorMessage, hintType: $hintType, selectedFiles: $selectedFiles, uploadingFiles: $uploadingFiles)';
+  return 'ChatInputState(text: $text, isListening: $isListening, isSpeechAvailable: $isSpeechAvailable, isLoadingResponse: $isLoadingResponse, showError: $showError, errorMessage: $errorMessage, speechErrorType: $speechErrorType, hintType: $hintType, selectedFiles: $selectedFiles, uploadingFiles: $uploadingFiles)';
 }
 
 
@@ -269,7 +271,7 @@ abstract mixin class _$ChatInputStateCopyWith<$Res> implements $ChatInputStateCo
   factory _$ChatInputStateCopyWith(_ChatInputState value, $Res Function(_ChatInputState) _then) = __$ChatInputStateCopyWithImpl;
 @override @useResult
 $Res call({
- String text, bool isListening, bool isSpeechAvailable, bool isLoadingResponse, bool showError, String errorMessage, HintType hintType, List<XFile> selectedFiles, Map<String, bool> uploadingFiles
+ String text, bool isListening, bool isSpeechAvailable, bool isLoadingResponse, bool showError, String errorMessage, SpeechErrorType? speechErrorType, HintType hintType, List<XFile> selectedFiles, Map<String, bool> uploadingFiles
 });
 
 
@@ -286,7 +288,7 @@ class __$ChatInputStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatInputState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? isListening = null,Object? isSpeechAvailable = null,Object? isLoadingResponse = null,Object? showError = null,Object? errorMessage = null,Object? hintType = null,Object? selectedFiles = null,Object? uploadingFiles = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? isListening = null,Object? isSpeechAvailable = null,Object? isLoadingResponse = null,Object? showError = null,Object? errorMessage = null,Object? speechErrorType = freezed,Object? hintType = null,Object? selectedFiles = null,Object? uploadingFiles = null,}) {
   return _then(_ChatInputState(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,isListening: null == isListening ? _self.isListening : isListening // ignore: cast_nullable_to_non_nullable
@@ -294,7 +296,8 @@ as bool,isSpeechAvailable: null == isSpeechAvailable ? _self.isSpeechAvailable :
 as bool,isLoadingResponse: null == isLoadingResponse ? _self.isLoadingResponse : isLoadingResponse // ignore: cast_nullable_to_non_nullable
 as bool,showError: null == showError ? _self.showError : showError // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String,hintType: null == hintType ? _self.hintType : hintType // ignore: cast_nullable_to_non_nullable
+as String,speechErrorType: freezed == speechErrorType ? _self.speechErrorType : speechErrorType // ignore: cast_nullable_to_non_nullable
+as SpeechErrorType?,hintType: null == hintType ? _self.hintType : hintType // ignore: cast_nullable_to_non_nullable
 as HintType,selectedFiles: null == selectedFiles ? _self._selectedFiles : selectedFiles // ignore: cast_nullable_to_non_nullable
 as List<XFile>,uploadingFiles: null == uploadingFiles ? _self._uploadingFiles : uploadingFiles // ignore: cast_nullable_to_non_nullable
 as Map<String, bool>,

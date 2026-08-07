@@ -60,8 +60,11 @@ class LocaleService {
       final success = await _prefs.setString(_localeKey, locale.languageTag);
 
       if (success) {
-        // Apply new language settings
-        unawaited(LocaleSettings.setLocale(locale));
+        // Apply the new locale BEFORE syncing Intl: LocaleSettings.setLocale
+        // is asynchronous, so syncIntlLocale() running in parallel would read
+        // the still-active previous locale and Intl.defaultLocale would stay
+        // stale until the next save.
+        await LocaleSettings.setLocale(locale);
         syncIntlLocale();
       }
 

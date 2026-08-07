@@ -1,5 +1,4 @@
 // features/chat/pages/ai_chat_page.dart
-import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'dart:async';
 
@@ -22,6 +21,7 @@ import 'package:finvo/features/chat/widgets/chat_conversation_drawer.dart';
 import 'package:finvo/features/chat/widgets/welcome/welcome_guide_widget.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/chat/utils/chat_message_copy_utils.dart';
 
 class AIChatPage extends ConsumerStatefulWidget {
   final String? conversationId; // From GoRouter
@@ -95,90 +95,6 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
   void _showSidebar() {
     _logger.fine('_showSidebar called, opening drawer');
     _scaffoldKey.currentState?.openDrawer();
-  }
-
-  /// Get copyable content from a message
-  /// Returns CopyResult containing copy content and toast message
-  ({String content, String message}) _getCopyableContent(
-    app.ChatMessage message,
-    ChatHistory notifier,
-  ) {
-    // 1. If plain text content exists, return directly
-    if (message.content.trim().isNotEmpty) {
-      return (content: message.content, message: t.chat.contentCopied);
-    }
-
-    // 2. If GenUI component data exists (history messages), copy JSON data
-    if (message.uiComponents.isNotEmpty) {
-      try {
-        // Merge all UI component data into JSON
-        final componentsData = message.uiComponents
-            .map(
-              (comp) => {
-                'componentType': comp.componentType,
-                'surfaceId': comp.surfaceId,
-                'data': comp.data,
-                if (comp.userSelection != null)
-                  'userSelection': comp.userSelection,
-              },
-            )
-            .toList();
-
-        final jsonString = const JsonEncoder.withIndent('  ').convert(
-          componentsData.length == 1 ? componentsData.first : componentsData,
-        );
-        return (content: jsonString, message: t.chat.jsonCopied);
-      } catch (e) {
-        _logger.info('Failed to serialize UI components: $e');
-      }
-    }
-
-    // 3. If surfaceIds exist (real-time messages), get data from GenUI Host
-    if (message.surfaceIds.isNotEmpty) {
-      try {
-        final genUiHost = notifier.genUiHost;
-        if (genUiHost != null) {
-          final surfaceDataList = <Map<String, dynamic>>[];
-
-          for (final surfaceId in message.surfaceIds) {
-            // Try to get SurfaceDefinition from GenUI Host
-            final surfaceDefinition = genUiHost
-                .contextFor(surfaceId)
-                .definition
-                .value;
-
-            if (surfaceDefinition != null) {
-              // Extract component data
-              final components = surfaceDefinition.components;
-              if (components.isNotEmpty) {
-                for (final entry in components.entries) {
-                  surfaceDataList.add({
-                    'surfaceId': surfaceId,
-                    'componentId': entry.key,
-                    'componentType': entry.value.type,
-                    'componentProperties': entry.value.properties,
-                  });
-                }
-              }
-            }
-          }
-
-          if (surfaceDataList.isNotEmpty) {
-            final jsonString = const JsonEncoder.withIndent('  ').convert(
-              surfaceDataList.length == 1
-                  ? surfaceDataList.first
-                  : surfaceDataList,
-            );
-            return (content: jsonString, message: t.chat.jsonCopied);
-          }
-        }
-      } catch (e) {
-        _logger.info('Failed to get surface data from GenUI Host: $e');
-      }
-    }
-
-    // 4. No copyable content
-    return (content: '', message: '');
   }
 
   /// Build AI message with GenUI support
@@ -273,7 +189,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
             // 1. Plain text -> copy content
             // 2. GenUI components -> copy JSON data
             // 3. No content -> show hint
-            final copyResult = _getCopyableContent(message, notifier);
+            final copyResult = message.getCopyableContent(notifier.genUiHost);
 
             if (copyResult.content.isEmpty) {
               if (context.mounted) {
@@ -342,8 +258,13 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
   Widget build(BuildContext context) {
     final theme = context.theme;
     final colors = theme.colors;
-    final chatHistoryState = ref.watch(chatHistoryProvider);
-    final messages = chatHistoryState.messages;
+    final messages = ref.watch(chatHistoryProvider.select((s) => s.messages));
+    final isLoadingHistory = ref.watch(
+      chatHistoryProvider.select((s) => s.isLoadingHistory),
+    );
+    final historyError = ref.watch(
+      chatHistoryProvider.select((s) => s.historyError),
+    );
     final chatHistoryNotifier = ref.read(chatHistoryProvider.notifier);
 
     return Scaffold(
@@ -395,11 +316,11 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
       body: Column(
         children: [
           Expanded(
-            child: messages.isEmpty && !chatHistoryState.isLoadingHistory
-                ? chatHistoryState.historyError != null
+            child: messages.isEmpty && !isLoadingHistory
+                ? historyError != null
                       ? Center(
                           child: Text(
-                            '${t.chat.loadingFailed}: ${chatHistoryState.historyError}',
+                            '${t.chat.loadingFailed}: $historyError',
                             style: theme.typography.body.md,
                           ),
                         )

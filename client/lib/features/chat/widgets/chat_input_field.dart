@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/features/chat/models/speech_error_type.dart';
 import 'package:finvo/features/chat/providers/chat_input_provider.dart';
 import 'package:finvo/features/chat/providers/chat_input_state.dart';
 import 'package:finvo/features/chat/providers/chat_history_provider.dart';
@@ -59,10 +60,6 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
       current,
     ) {
       _syncBreathingAnimation();
-      // When the AI stream ends (true -> false), release the input provider's
-      // "AI processing" lock so the user can send the next message.
-      // _submitMessage keeps isLoadingResponse locked until this fires, so the
-      // lock covers the whole streaming window instead of dropping mid-stream.
       if (previous == true && current == false && mounted) {
         ref.read(provider.notifier).resetLoadingState();
       }
@@ -117,102 +114,119 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
       final bool wasShowingError = previousState?.showError ?? false;
       final bool isShowingError = currentState.showError;
       if (isShowingError && !wasShowingError) {
-        final errorMessage = currentState.errorMessage;
-        if (errorMessage.isNotEmpty) {
-          if (errorMessage == 'system_speech_restricted' ||
-              errorMessage == 'dictation_disabled' ||
-              errorMessage == 'permission_denied' ||
-              errorMessage == 'speech_not_configured' ||
-              errorMessage == 'speech_connection_failed') {
-            final String dialogTitle =
-                errorMessage == 'system_speech_restricted'
-                ? t.speech.systemVoiceRestrictedTitle
-                : errorMessage == 'dictation_disabled'
-                ? t.speech.dictationDisabledTitle
-                : errorMessage == 'permission_denied'
-                ? t.speech.permissionDeniedTitle
-                : t.speech.connectionFailedTitle;
-
-            final String dialogContent =
-                errorMessage == 'system_speech_restricted'
-                ? t.speech.systemVoiceRestrictedContent
-                : errorMessage == 'dictation_disabled'
-                ? t.speech.dictationDisabledContent
-                : errorMessage == 'permission_denied'
-                ? t.speech.permissionDeniedContent
-                : errorMessage == 'speech_not_configured'
-                ? t.speech.serviceNotConfigured
-                : t.speech.connectionFailed;
-
-            unawaited(
-              showFDialog<void>(
-                context: context,
-                builder: (dialogContext, style, animation) => FDialog(
-                  animation: animation,
-                  builder: (context, dialogStyle) => Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(dialogTitle, style: dialogStyle.titleTextStyle),
-                        const SizedBox(height: 12),
-                        Text(dialogContent, style: dialogStyle.bodyTextStyle),
-                        const SizedBox(height: 24),
-                        FButton(
-                          variant: .primary,
-                          onPress: () {
-                            Navigator.of(dialogContext).pop();
-                            unawaited(
-                              context.pushNamed(AppRouteNames.speechSettings),
-                            );
-                          },
-                          child: Text(t.speech.goToSettings),
-                        ),
-                        const SizedBox(height: 8),
-                        FButton(
-                          variant: .outline,
-                          onPress: () => Navigator.of(dialogContext).pop(),
-                          child: Text(t.common.cancel),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          } else {
-            final String displayMsg = errorMessage == 'no_speech_recognized'
-                ? t.speech.noSpeechRecognized
-                : errorMessage;
-            ScaffoldMessenger.of(context).removeCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(displayMsg),
-                duration: const Duration(seconds: 3),
-                action: SnackBarAction(
-                  label: t.common.ok,
-                  onPressed: () => ref.read(provider.notifier).clearError(),
-                ),
-              ),
-            );
-          }
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ref.read(provider.notifier).clearError();
-            }
-          });
+        final errorType = currentState.speechErrorType;
+        if (errorType != null) {
+          _handleSpeechError(errorType, currentState.errorMessage);
+        } else if (currentState.errorMessage.isNotEmpty) {
+          _showSnackBarError(currentState.errorMessage);
         }
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref.read(provider.notifier).clearError();
+          }
+        });
       }
     });
+  }
+
+  void _handleSpeechError(SpeechErrorType errorType, String rawMessage) {
+    switch (errorType) {
+      case SpeechErrorType.systemRestricted:
+      case SpeechErrorType.dictationDisabled:
+      case SpeechErrorType.permissionDenied:
+      case SpeechErrorType.notConfigured:
+      case SpeechErrorType.connectionFailed:
+        _showSpeechErrorDialog(errorType);
+        break;
+      case SpeechErrorType.noSpeechRecognized:
+        _showSnackBarError(t.speech.noSpeechRecognized);
+        break;
+      case SpeechErrorType.unknown:
+        _showSnackBarError(rawMessage.isEmpty ? t.common.error : rawMessage);
+        break;
+    }
+  }
+
+  void _showSpeechErrorDialog(SpeechErrorType errorType) {
+    final (dialogTitle, dialogContent) = switch (errorType) {
+      SpeechErrorType.systemRestricted => (
+        t.speech.systemVoiceRestrictedTitle,
+        t.speech.systemVoiceRestrictedContent,
+      ),
+      SpeechErrorType.dictationDisabled => (
+        t.speech.dictationDisabledTitle,
+        t.speech.dictationDisabledContent,
+      ),
+      SpeechErrorType.permissionDenied => (
+        t.speech.permissionDeniedTitle,
+        t.speech.permissionDeniedContent,
+      ),
+      SpeechErrorType.notConfigured => (
+        t.speech.connectionFailedTitle,
+        t.speech.serviceNotConfigured,
+      ),
+      SpeechErrorType.connectionFailed => (
+        t.speech.connectionFailedTitle,
+        t.speech.connectionFailed,
+      ),
+      _ => (t.speech.connectionFailedTitle, t.speech.connectionFailed),
+    };
+
+    unawaited(
+      showFDialog<void>(
+        context: context,
+        builder: (dialogContext, style, animation) => FDialog(
+          animation: animation,
+          builder: (context, dialogStyle) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(dialogTitle, style: dialogStyle.titleTextStyle),
+                const SizedBox(height: 12),
+                Text(dialogContent, style: dialogStyle.bodyTextStyle),
+                const SizedBox(height: 24),
+                FButton(
+                  variant: .primary,
+                  onPress: () {
+                    Navigator.of(dialogContext).pop();
+                    unawaited(context.pushNamed(AppRouteNames.speechSettings));
+                  },
+                  child: Text(t.speech.goToSettings),
+                ),
+                const SizedBox(height: 8),
+                FButton(
+                  variant: .outline,
+                  onPress: () => Navigator.of(dialogContext).pop(),
+                  child: Text(t.common.cancel),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSnackBarError(String message) {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: t.common.ok,
+          onPressed: () => ref.read(provider.notifier).clearError(),
+        ),
+      ),
+    );
   }
 
   @override
   void didUpdateWidget(ChatInputField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // The provider's send-message callback is captured at first access. On a
-    // State reuse the parent may supply a new callback, so propagate it to the
-    // notifier to avoid submitting through a stale closure.
     if (!identical(oldWidget.onSendMessage, widget.onSendMessage)) {
       ref.read(provider.notifier).updateOnSendMessage(widget.onSendMessage);
     }
@@ -249,7 +263,6 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     bool isListening, {
     bool isStreamingResponse = false,
   }) {
-    // Streaming response state takes priority - AI is replying
     if (isStreamingResponse) {
       return t.chat.aiThinking;
     }
@@ -268,17 +281,11 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     }
   }
 
-  /// Handle media file preview - temporarily removed complex preview functionality
-  // void _handleMediaPreview() {
-  //   // Simplified version temporarily doesn't need complex preview
-  // }
-
   @override
   Widget build(BuildContext context) {
     final chatInputState = ref.watch(provider);
     final chatInputNotifier = ref.read(provider.notifier);
 
-    // Listen to AI streaming response state - this state remains true throughout the stream
     final isStreamingResponse = ref.watch(
       chatHistoryProvider.select((state) => state.isStreamingResponse),
     );
@@ -289,37 +296,32 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     Color iconColor;
     VoidCallback? currentAction = chatInputNotifier.onMainButtonPressed;
 
-    // Disable input box during streaming response
     final canInteractWithTextField =
         !chatInputState.isListening && !isStreamingResponse;
     final canUseAddButton = !chatInputState.isListening && !isStreamingResponse;
 
-    // Whether in waiting state (requires breathing animation)
     final isWaitingState = isStreamingResponse || chatInputState.isListening;
 
-    // Get forui theme
     final theme = context.theme;
 
-    // AI streaming response: show square icon (stop button style), click to cancel
     if (isStreamingResponse) {
       currentIcon = Icons.square_rounded;
-      buttonBackgroundColor = theme.colors.primary; // Use theme color
+      buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
       currentAction = () => chatHistoryNotifier.cancelPendingOperation();
     } else if (chatInputState.isListening) {
       currentIcon = Icons.square_rounded;
-      buttonBackgroundColor = theme.colors.primary; // Use theme color
+      buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
     } else if (chatInputState.text.trim().isNotEmpty) {
       currentIcon = Icons.arrow_upward;
-      buttonBackgroundColor =
-          theme.colors.primary; // Also use theme color when there is text
+      buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
     } else {
       currentIcon = chatInputState.isSpeechAvailable
           ? Icons.mic_none_outlined
           : Icons.mic_off_outlined;
-      buttonBackgroundColor = theme.colors.muted; // Use theme's muted color
+      buttonBackgroundColor = theme.colors.muted;
       iconColor = chatInputState.isSpeechAvailable
           ? theme.colors.foreground
           : theme.colors.mutedForeground;
@@ -330,7 +332,6 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
       left: false,
       right: false,
       child: Container(
-        // Outer container: simple padding, no shadow
         padding: const EdgeInsets.only(
           left: 12.0,
           right: 12.0,
@@ -341,14 +342,11 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Media preview area
             MediaPreviewWidget(
               selectedFiles: chatInputState.selectedFiles,
               uploadingFiles: chatInputState.uploadingFiles,
               onRemove: (index) => chatInputNotifier.removeSelectedFile(index),
             ),
-
-            // Input box area - capsule-shaped border design
             Container(
               constraints: const BoxConstraints(minHeight: 52.0),
               padding: const EdgeInsets.symmetric(
@@ -356,17 +354,13 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                 vertical: 4.0,
               ),
               decoration: BoxDecoration(
-                // Background color
                 color: theme.colors.background,
-                // Full rounded corners - capsule shape
                 borderRadius: BorderRadius.circular(28.0),
-                // Light gray border
                 border: Border.all(color: theme.colors.border, width: 1.0),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  // Left + button
                   MediaUploadButton(
                     enabled: canUseAddButton,
                     chatInputProvider: provider,
@@ -404,7 +398,6 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Right action button: internal icon with breathing animation effect
                   InkWell(
                     onTap: currentAction,
                     borderRadius: BorderRadius.circular(22),
@@ -424,11 +417,9 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                                 child: child,
                               );
                             },
-                        // Breathing animation only acts on internal icon
                         child: AnimatedBuilder(
                           animation: _breathingAnimation,
                           builder: (context, child) {
-                            // Only apply breathing scale in waiting state
                             final scale = isWaitingState
                                 ? _breathingAnimation.value
                                 : 1.0;
@@ -452,7 +443,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
             ),
           ],
         ),
-      ), // Close Container
-    ); // Close SafeArea
+      ),
+    );
   }
 }

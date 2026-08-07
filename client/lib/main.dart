@@ -13,7 +13,9 @@ import 'package:logging/logging.dart';
 import 'package:finvo/core/utils/logger_setup.dart';
 import 'package:finvo/shared/services/locale_service.dart';
 import 'package:finvo/core/services/server_config_service.dart';
-import 'package:finvo/features/chat/services/sound_feedback_service.dart';
+import 'package:finvo/features/chat/providers/sound_feedback_provider.dart';
+import 'package:finvo/features/home/providers/home_providers.dart';
+import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
 
 final _logger = Logger('Main');
@@ -86,15 +88,6 @@ Future<void> _bootstrap() async {
     await initializeDateFormatting();
     _logger.info('Date format initialization completed for all locales');
 
-    // Initialize sound feedback service (for self-hosted ASR)
-    // Wrapped in try-catch to not block app launch if assets are missing
-    try {
-      await SoundFeedbackService.instance.initialize();
-      _logger.info('Sound feedback service initialization completed');
-    } catch (e) {
-      _logger.warning('Sound feedback service initialization failed: $e');
-    }
-
     // Pre-load Xiaomi MiSans font to bypass Skia fallback selecting NotoSansCJK
     try {
       await AppFontConfig.preloadMiSans();
@@ -146,6 +139,12 @@ Future<void> _bootstrap() async {
     // explicitly to keep the speech settings provider build() free of
     // side-effects.
     unawaited(container.read(speechSettingsProvider.notifier).loadSettings());
+    // Pre-warm sound feedback service for speech recognition ASR
+    container.read(soundFeedbackProvider);
+    // Warm notification WebSocket and transaction event subscriber for full app lifetime,
+    // avoiding side-effects inside MyApp.build().
+    container.read(notificationWsProvider);
+    container.read(transactionEventSubscriberProvider);
   });
 }
 

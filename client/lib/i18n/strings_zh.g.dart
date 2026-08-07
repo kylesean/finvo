@@ -1674,6 +1674,18 @@ class Translations$chat$zh {
 
 	/// zh: '抱歉，AI 助手通信错误：$error'
 	String aiCommunicationError({required Object error}) => '抱歉，AI 助手通信错误：${error}';
+
+	/// zh: '附件仍在上传中，请稍后再试'
+	String get uploadStillInProgress => '附件仍在上传中，请稍后再试';
+
+	/// zh: '发送消息失败，请稍后再试'
+	String get sendFailed => '发送消息失败，请稍后再试';
+
+	/// zh: '附件上传失败：$files'
+	String attachmentUploadFailed({required Object files}) => '附件上传失败：${files}';
+
+	/// zh: '文件上传失败，请稍后再试'
+	String get fileUploadFailed => '文件上传失败，请稍后再试';
 }
 
 // Path: image
@@ -6076,6 +6088,10 @@ extension on Translations {
 			'chat.invalidAttachmentLink' => '无效的附件链接',
 			'chat.unableToOpenAttachmentLink' => '无法打开附件链接',
 			'chat.aiCommunicationError' => ({required Object error}) => '抱歉，AI 助手通信错误：${error}',
+			'chat.uploadStillInProgress' => '附件仍在上传中，请稍后再试',
+			'chat.sendFailed' => '发送消息失败，请稍后再试',
+			'chat.attachmentUploadFailed' => ({required Object files}) => '附件上传失败：${files}',
+			'chat.fileUploadFailed' => '文件上传失败，请稍后再试',
 			'image.deleteTitle' => '删除图片',
 			'image.deleteConfirm' => '确定要删除这张图片吗？此操作无法撤销。',
 			'footprint.searchIn' => '搜索',
@@ -6221,12 +6237,12 @@ extension on Translations {
 			'financial.saveFailed' => '保存失败',
 			'financial.deleteFailed' => '删除失败，请稍后重试',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '部分币种缺少汇率，相关账户未计入总额：${currencies}',
+			_ => null,
+		} ?? switch (path) {
 			'financial.cashPocketTitle' => '我的现金账户',
 			'financial.sourcesCount' => ({required Object count}) => '${count} 个账户',
 			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',
 			'financial.neverUpdated' => '从未更新',
-			_ => null,
-		} ?? switch (path) {
 			'financial.updateNow' => '立即更新',
 			'app.splashTitle' => '智见增长，格物致富。',
 			'app.splashSubtitle' => '智能财务助手',

@@ -1015,7 +1015,11 @@
     "shareComingSoon": "分享功能即將上線...",
     "invalidAttachmentLink": "無效的附件連結",
     "unableToOpenAttachmentLink": "無法開啟附件連結",
-    "aiCommunicationError": "抱歉，AI 助手通訊錯誤：$error"
+    "aiCommunicationError": "抱歉，AI 助手通訊錯誤：$error",
+    "uploadStillInProgress": "附件仍在傳輸中，請稍後再試",
+    "sendFailed": "傳送訊息失敗，請稍後再試",
+    "attachmentUploadFailed": "附件上傳失敗：$files",
+    "fileUploadFailed": "檔案上傳失敗，請稍後再試"
   },
   "image": {
     "deleteTitle": "刪除圖片",

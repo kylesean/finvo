@@ -321,9 +321,25 @@ class TransactionFeed extends _$TransactionFeed {
       ref.invalidate(calendarMonthDataProvider(currentMonth));
       return true;
     } catch (e) {
-      final rollbackList = List<TransactionModel>.from(state.transactions);
-      rollbackList.insert(transactionIndex, deletedTransaction);
-      state = state.copyWith(transactions: rollbackList);
+      // Race-safe rollback: while the delete request was in flight, a
+      // concurrent refresh (WS-driven refreshFeed, fetchMore) may have
+      // rewritten state.transactions, so blindly inserting at the captured
+      // pre-delete index could land out of bounds or in the wrong slot.
+      // Recompute the insertion point from list order (timestamp desc,
+      // matching the server feed ordering) and clamp it as a final guard.
+      if (!ref.mounted) return false;
+      final current = List<TransactionModel>.from(state.transactions);
+      if (!current.any((t) => t.id == deletedTransaction.id)) {
+        int insertAt = current.indexWhere(
+          (t) =>
+              t.timestamp.isBefore(deletedTransaction.timestamp) ||
+              t.timestamp.isAtSameMomentAs(deletedTransaction.timestamp),
+        );
+        if (insertAt == -1) insertAt = current.length;
+        insertAt = insertAt.clamp(0, current.length);
+        current.insert(insertAt, deletedTransaction);
+        state = state.copyWith(transactions: current);
+      }
       return false;
     }
   }

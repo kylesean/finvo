@@ -33,7 +33,7 @@ class SharedSpaceService {
     return await _networkClient.request<SharedSpace>(
       '/shared-spaces',
       method: HttpMethod.post,
-      data: {'name': name, if (description != null) 'description': description},
+      data: {'name': name, 'description': ?description},
       fromJsonT: (json) => _parseItemResponse(json, SharedSpace.fromJson),
     );
   }

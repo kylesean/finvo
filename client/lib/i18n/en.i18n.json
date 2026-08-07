@@ -1022,7 +1022,11 @@
     "shareComingSoon": "Share feature coming soon...",
     "invalidAttachmentLink": "Invalid attachment link",
     "unableToOpenAttachmentLink": "Unable to open attachment link",
-    "aiCommunicationError": "Sorry, AI assistant communication error: $error"
+    "aiCommunicationError": "Sorry, AI assistant communication error: $error",
+    "uploadStillInProgress": "Attachment still uploading, please try again later",
+    "sendFailed": "Failed to send message, please try again later",
+    "attachmentUploadFailed": "Attachment upload failed: $files",
+    "fileUploadFailed": "File upload failed, please try again later"
   },
   "image": {
     "deleteTitle": "Delete Image",

@@ -11,23 +11,17 @@ final _logger = Logger('SoundFeedbackService');
 ///
 /// Used to play start/end recording prompt sounds in a custom ASR service,
 /// providing a user experience similar to system speech recognition.
+///
+/// Managed by a Riverpod `keepAlive` provider; do NOT instantiate directly
+/// outside of the provider. Callers that need sound feedback should receive
+/// the instance via constructor injection.
 class SoundFeedbackService {
-  static SoundFeedbackService? _instance;
-
   AudioPlayer? _startPlayer;
   AudioPlayer? _stopPlayer;
 
   bool _isInitialized = false;
   bool _useHapticFallback = false;
   bool _isEnabled = true;
-
-  SoundFeedbackService._();
-
-  /// Get singleton instance
-  static SoundFeedbackService get instance {
-    _instance ??= SoundFeedbackService._();
-    return _instance!;
-  }
 
   /// Initialize sound resources
   Future<void> initialize() async {
@@ -176,7 +170,6 @@ class SoundFeedbackService {
     await _startPlayer?.dispose();
     await _stopPlayer?.dispose();
     _isInitialized = false;
-    _instance = null;
     _logger.info('Sound feedback service disposed');
   }
 }

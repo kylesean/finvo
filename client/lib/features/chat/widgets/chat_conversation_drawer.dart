@@ -852,20 +852,26 @@ class _ChatConversationDrawerState
     int currentIndex = 0;
 
     for (final highlight in highlights) {
+      // Defensive clamp: highlight indexes are produced by the search service,
+      // but a malformed/out-of-range range must never crash the build with a
+      // RangeError (which would blank out the entire search results view).
+      final start = highlight.start.clamp(0, text.length);
+      final end = highlight.end.clamp(start, text.length);
+      if (end <= start || start < currentIndex) {
+        continue; // Skip empty, invalid, or overlapping ranges.
+      }
+
       // Add text before highlight
-      if (currentIndex < highlight.start) {
+      if (currentIndex < start) {
         spans.add(
-          TextSpan(
-            text: text.substring(currentIndex, highlight.start),
-            style: baseStyle,
-          ),
+          TextSpan(text: text.substring(currentIndex, start), style: baseStyle),
         );
       }
 
       // Add highlighted text
       spans.add(
         TextSpan(
-          text: text.substring(highlight.start, highlight.end),
+          text: text.substring(start, end),
           style: baseStyle.copyWith(
             backgroundColor: highlightColor,
             fontWeight: FontWeight.w500,
@@ -873,7 +879,7 @@ class _ChatConversationDrawerState
         ),
       );
 
-      currentIndex = highlight.end;
+      currentIndex = end;
     }
 
     // Add remaining text

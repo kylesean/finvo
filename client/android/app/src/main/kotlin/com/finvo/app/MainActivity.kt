@@ -3,12 +3,14 @@ package com.finvo.app
 import android.content.Intent
 import android.speech.RecognitionService
 import android.speech.SpeechRecognizer
+import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.finvo.app/speech_check"
+    private val TAG = "MainActivity"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -25,6 +27,7 @@ class MainActivity : FlutterActivity() {
                             result.success(resolveInfos.isNotEmpty())
                         }
                     } catch (e: Exception) {
+                        Log.w(TAG, "Failed to check speech availability", e)
                         result.success(false)
                     }
                 }
@@ -40,6 +43,7 @@ class MainActivity : FlutterActivity() {
                             result.success(null)
                         }
                     } catch (e: Exception) {
+                        Log.w(TAG, "Failed to get best speech component", e)
                         result.success(null)
                     }
                 }

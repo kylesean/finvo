@@ -1016,7 +1016,11 @@
     "shareComingSoon": "共有機能は近日公開予定です...",
     "invalidAttachmentLink": "無効な添付ファイルリンク",
     "unableToOpenAttachmentLink": "添付ファイルリンクを開けません",
-    "aiCommunicationError": "申し訳ありません、AIアシスタントとの通信エラーが発生しました：$error"
+    "aiCommunicationError": "申し訳ありません、AIアシスタントとの通信エラーが発生しました：$error",
+    "uploadStillInProgress": "添付ファイルはまだアップロード中です。後でもう一度お試しください",
+    "sendFailed": "メッセージの送信に失敗しました。後でもう一度お試しください",
+    "attachmentUploadFailed": "添付ファイルのアップロードに失敗しました: $files",
+    "fileUploadFailed": "ファイルのアップロードに失敗しました。後でもう一度お試しください"
   },
   "image": {
     "deleteTitle": "画像を削除",

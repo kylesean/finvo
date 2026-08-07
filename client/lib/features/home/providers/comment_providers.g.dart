@@ -51,7 +51,7 @@ final class TransactionCommentsProvider
 }
 
 String _$transactionCommentsHash() =>
-    r'8e2bbf4aebb59239651439ae46a9f79a58c47237';
+    r'c426d62bd6220a9aff776db20c3f09a66fe32ab0';
 
 final class TransactionCommentsFamily extends $Family
     with

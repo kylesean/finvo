@@ -69,8 +69,12 @@ class TopToast {
     OverlayState? overlayState,
     TopToastAction? action,
   }) {
-    // Remove previous toast
-    _currentEntry?.remove();
+    // Remove previous toast safely
+    try {
+      _currentEntry?.remove();
+    } catch (e) {
+      debugPrint('TopToast: Safe cleanup of previous overlay entry failed: $e');
+    }
     _currentEntry = null;
 
     final overlay = overlayState ?? Overlay.maybeOf(context);
@@ -117,7 +121,9 @@ class TopToast {
         iconColor: iconColor,
         theme: theme,
         onDismiss: () {
-          entry.remove();
+          try {
+            entry.remove();
+          } catch (_) {}
           if (identical(_currentEntry, entry)) {
             _currentEntry = null;
           }

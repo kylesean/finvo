@@ -44,6 +44,11 @@ class RecurrenceRuleSheet extends StatefulWidget {
 }
 
 class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
+  /// Upper bound for the repeat interval. Without it the stepper could grow
+  /// unbounded (e.g. "every 9999 weeks"), producing meaningless rules that
+  /// the backend may reject.
+  static const int _maxInterval = 365;
+
   // Currently selected frequency type
   RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
 
@@ -111,8 +116,9 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         _frequency = RecurrenceFrequency.monthly;
     }
 
-    // Parse interval
-    _interval = rrule.interval ?? 1;
+    // Parse interval (clamped: a malformed/legacy rule must not feed an
+    // unbounded value into the stepper and the generated rule).
+    _interval = (rrule.interval ?? 1).clamp(1, _maxInterval);
 
     // Parse weekdays (BYDAY)
     if (rrule.byWeekDays.isNotEmpty) {
@@ -355,7 +361,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
           const SizedBox(width: 16),
           // Increase button
           GestureDetector(
-            onTap: () => setState(() => _interval++),
+            onTap: () {
+              if (_interval < _maxInterval) {
+                setState(() => _interval++);
+              }
+            },
             child: Container(
               width: 32,
               height: 32,
@@ -403,7 +413,13 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
               onTap: () {
                 setState(() {
                   if (isSelected) {
-                    _selectedWeekdays.remove(weekday);
+                    // Guard the last selected weekday: a weekly rule without
+                    // any BYDAY entry falls back to parser-dependent defaults,
+                    // and the previous silent fallback to the (possibly past)
+                    // start date's weekday surprised users.
+                    if (_selectedWeekdays.length > 1) {
+                      _selectedWeekdays.remove(weekday);
+                    }
                   } else {
                     _selectedWeekdays.add(weekday);
                   }
@@ -644,6 +660,16 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   }
 
   void _handleConfirm() {
+    if (_frequency == RecurrenceFrequency.weekly && _selectedWeekdays.isEmpty) {
+      // Unreachable through the picker (last-selection guard) but possible
+      // when a malformed parsed rule cleared the selection: fall back to the
+      // start date's weekday instead of emitting an ambiguous BYDAY-less rule.
+      final fallback = _getWeekdayFromDartWeekday(_startDate.weekday);
+      if (fallback != null) {
+        _selectedWeekdays.add(fallback);
+      }
+    }
+
     // Calculate adjusted start date based on rule
     final adjustedStartDate = _calculateAdjustedStartDate();
 
@@ -709,21 +735,25 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         return _startDate.isBefore(today) ? today : _startDate;
 
       case RecurrenceFrequency.yearly:
-        // Yearly execution
-        DateTime targetDate = DateTime(
-          _startDate.year,
-          _startDate.month,
-          _startDate.day,
-        );
+        // Yearly execution. Feb 29 start dates need explicit handling: in a
+        // non-leap year Dart silently normalizes DateTime(year, 2, 29) to
+        // March 1, so pin those occurrences to Feb 28 instead.
+        DateTime targetDate = _yearlyDate(_startDate.year);
         if (targetDate.isBefore(today)) {
-          targetDate = DateTime(
-            _startDate.year + 1,
-            _startDate.month,
-            _startDate.day,
-          );
+          targetDate = _yearlyDate(_startDate.year + 1);
         }
         return targetDate;
     }
+  }
+
+  /// Builds the yearly occurrence for [year]. A Feb 29 start date is pinned
+  /// to Feb 28 in non-leap years (instead of Dart's implicit March 1
+  /// normalization) so the first execution date stays predictable.
+  DateTime _yearlyDate(int year) {
+    final isLeapDay = _startDate.month == 2 && _startDate.day == 29;
+    final isLeapYear = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    final day = isLeapDay && !isLeapYear ? 28 : _startDate.day;
+    return DateTime(year, _startDate.month, day);
   }
 
   /// Delegates to the top-level [recurrenceDateForMonthDay] (see its docs).

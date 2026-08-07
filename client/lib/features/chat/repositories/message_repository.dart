@@ -119,22 +119,13 @@ class MessageRepository {
   }) {
     if (id.isEmpty) return;
 
-    String effectiveContent;
-    if (contentDelta != null) {
-      effectiveContent = (_bufferFor(id)..write(contentDelta)).toString();
-    } else if (content != null) {
-      // Full-text update: reset the incremental buffer to stay consistent
-      // with subsequent contentDelta appends.
-      _contentBuffers[id] = StringBuffer(content);
-      effectiveContent = content;
-    } else {
-      effectiveContent = _aggregatedContent(id);
-    }
+    final String effectiveContent = _computeEffectiveContent(
+      id,
+      content,
+      contentDelta,
+    );
 
-    // When streaming reaches a terminal state, the incremental content buffer
-    // is no longer needed: release it to avoid leaking the accumulated text for
-    // every message that ever streamed. This keeps the buffer lifecycle tied to
-    // the stream instead of relying on callers to remember clearContentBuffer.
+    // Release the incremental buffer when streaming reaches a terminal state.
     if (streamingStatus == StreamingStatus.completed ||
         streamingStatus == StreamingStatus.error) {
       clearContentBuffer(id);
@@ -143,75 +134,71 @@ class MessageRepository {
     final messages = getCurrentMessages();
     final updatedMessages = messages.map((msg) {
       if (msg.id == id) {
-        // Handle fullContent updates for streaming text
-        final updatedFullContent = List<MessageContentPart>.from(
+        final updatedFullContent = _updateFullContentWithDelta(
           msg.fullContent,
+          msg.content,
+          effectiveContent,
         );
-        if (effectiveContent.isNotEmpty) {
-          // Calculate delta since last state
-          // effectiveContent is full aggregated text, msg.content is previous aggregated text
-          String delta = '';
-          if (effectiveContent.startsWith(msg.content)) {
-            delta = effectiveContent.substring(msg.content.length);
-          } else if (msg.content.isEmpty) {
-            delta = effectiveContent;
-          } else {
-            // Fallback: If content changed completely, treat as full update
-            delta = effectiveContent;
-          }
 
-          if (delta.isNotEmpty) {
-            // Find the position to insert text
-            // Design: UI components should ALWAYS stay at the END
-            // So we insert text BEFORE any trailing UIComponent parts
-
-            // Count trailing UIComponent parts
-            int trailingUiCount = 0;
-            for (int i = updatedFullContent.length - 1; i >= 0; i--) {
-              if (updatedFullContent[i] is UIComponentPart) {
-                trailingUiCount++;
-              } else {
-                break;
-              }
-            }
-
-            // Find the last TextPart before trailing UI components
-            final insertPosition = updatedFullContent.length - trailingUiCount;
-
-            if (insertPosition > 0 &&
-                updatedFullContent[insertPosition - 1] is TextPart) {
-              // Merge with existing TextPart
-              final lastTextPart =
-                  updatedFullContent[insertPosition - 1] as TextPart;
-              updatedFullContent[insertPosition - 1] = TextPart(
-                text: lastTextPart.text + delta,
-              );
-            } else {
-              // Insert new TextPart before trailing UI components
-              updatedFullContent.insert(insertPosition, TextPart(text: delta));
-            }
-          }
-        }
-
-        // Only update AI message, preserve all original data
         return msg.copyWith(
           content: effectiveContent,
           fullContent: updatedFullContent,
           isTyping: isTyping ?? msg.isTyping,
           streamingStatus: streamingStatus ?? msg.streamingStatus,
           timestamp: timestamp ?? msg.timestamp,
-          // CRITICAL: Preserve existing media files and surface IDs
           mediaFiles: msg.mediaFiles,
           surfaceIds: msg.surfaceIds,
           feedbackStatus: msg.feedbackStatus,
           conversationId: msg.conversationId,
         );
       }
-      // Don't modify non-target messages
       return msg;
     }).toList();
 
     onMessagesChanged(updatedMessages);
+  }
+
+  String _computeEffectiveContent(
+    String id,
+    String? content,
+    String? contentDelta,
+  ) {
+    if (contentDelta != null) {
+      return (_bufferFor(id)..write(contentDelta)).toString();
+    } else if (content != null) {
+      _contentBuffers[id] = StringBuffer(content);
+      return content;
+    }
+    return _aggregatedContent(id);
+  }
+
+  List<MessageContentPart> _updateFullContentWithDelta(
+    List<MessageContentPart> existingParts,
+    String previousContent,
+    String effectiveContent,
+  ) {
+    final updatedFullContent = List<MessageContentPart>.from(existingParts);
+    if (effectiveContent.isEmpty) return updatedFullContent;
+
+    String delta = '';
+    if (effectiveContent.startsWith(previousContent)) {
+      delta = effectiveContent.substring(previousContent.length);
+    } else {
+      delta = effectiveContent;
+    }
+
+    if (delta.isNotEmpty) {
+      if (updatedFullContent.isNotEmpty &&
+          updatedFullContent.last is TextPart) {
+        final lastTextPart = updatedFullContent.last as TextPart;
+        updatedFullContent[updatedFullContent.length - 1] = TextPart(
+          text: lastTextPart.text + delta,
+        );
+      } else {
+        updatedFullContent.add(TextPart(text: delta));
+      }
+    }
+    return updatedFullContent;
   }
 
   /// Update message ID (replace temp ID with persisted ID)
@@ -333,13 +320,24 @@ class MessageRepository {
             .where((id) => id != surfaceId)
             .toList();
 
-        final updatedMessage = message.copyWith(surfaceIds: updatedSurfaceIds);
+        final updatedFullContent = message.fullContent.where((part) {
+          if (part is UIComponentPart &&
+              part.component.surfaceId == surfaceId) {
+            return false;
+          }
+          return true;
+        }).toList();
+
+        final updatedMessage = message.copyWith(
+          surfaceIds: updatedSurfaceIds,
+          fullContent: updatedFullContent,
+        );
         final updatedMessages = [...messages];
         updatedMessages[i] = updatedMessage;
 
         onMessagesChanged(updatedMessages);
         _logger.info(
-          'MessageRepository: Removed surface $surfaceId from message ${message.id}',
+          'MessageRepository: Removed surface $surfaceId from message ${message.id} and fullContent',
         );
         return true;
       }
@@ -480,24 +478,11 @@ class MessageRepository {
       // Add new tool call
       updatedToolCalls = [...message.toolCalls, toolCall];
 
-      // Add as new part to fullContent
-      // IMPORTANT: Insert BEFORE any trailing UIComponentPart to keep UI at the end
-      int trailingUiCount = 0;
-      for (int i = updatedFullContent.length - 1; i >= 0; i--) {
-        if (updatedFullContent[i] is UIComponentPart) {
-          trailingUiCount++;
-        } else {
-          break;
-        }
-      }
-      final insertPosition = updatedFullContent.length - trailingUiCount;
-      updatedFullContent.insert(
-        insertPosition,
-        ToolCallPart(toolCall: toolCall),
-      );
+      // Add as new part to fullContent in true chronological stream order
+      updatedFullContent.add(ToolCallPart(toolCall: toolCall));
 
       _logger.info(
-        'MessageRepository: Added tool call ${toolCall.id} (${toolCall.name}) at position $insertPosition',
+        'MessageRepository: Added tool call ${toolCall.id} (${toolCall.name}) at end of fullContent',
       );
     }
 

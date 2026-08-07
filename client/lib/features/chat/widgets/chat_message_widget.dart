@@ -10,6 +10,7 @@ import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:finvo/features/chat/models/chat_message.dart' as app;
 import 'package:finvo/features/chat/genui/components/historical_component_renderer.dart';
 import 'package:finvo/features/chat/genui/utils/genui_error_boundary.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:finvo/features/chat/widgets/authenticated_image.dart';
 import 'package:finvo/features/chat/widgets/tool_execution_block.dart';
 import 'package:finvo/features/chat/models/tool_call_info.dart';
@@ -147,27 +148,11 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Main content stream: text + tool execution logs (process)
-          // Preserve original chronological order, ensuring loading states and execution logs appear in correct positions (e.g., "Querying..." should appear before results)
-          ...message.fullContent
-              .where(
-                (part) => part.maybeWhen(
-                  uiComponent: (_) => false, // Exclude UI components
-                  orElse: () => true, // Include Text and ToolCall
-                ),
-              )
-              .map((part) => _buildContentPart(context, theme, part)),
-
-          // Result attachments: GenUI components (cards/results)
-          // Sink large UI results to bottom, similar to email attachments or report display, avoiding interruption of text reading flow
-          ...message.fullContent
-              .where(
-                (part) => part.maybeWhen(
-                  uiComponent: (_) => true, // Only include UI components
-                  orElse: () => false,
-                ),
-              )
-              .map((part) => _buildContentPart(context, theme, part)),
+          // Render all content parts (Text, ToolCall, GenUI UIComponent) in true chronological stream order:
+          // Text -> ToolCall -> GenUI Component -> Text -> GenUI Component
+          ...message.fullContent.map(
+            (part) => _buildContentPart(context, theme, part),
+          ),
 
           // If no tools are running and message is typing, show streaming indicator at the end
           if (_shouldShowStreamingIndicator())
@@ -193,9 +178,11 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     MessageContentPart part,
   ) {
     return part.when(
-      text: (text) => Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: _buildTextContentFromPart(context, theme, text),
+      text: (text) => RepaintBoundary(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: _buildTextContentFromPart(context, theme, text),
+        ),
       ),
       toolCall: (toolCall) => ToolExecutionBlock(
         key: ValueKey('tool_${toolCall.id}'),
@@ -203,15 +190,17 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
       ),
       uiComponent: (component) {
         if (component.mode == UIComponentMode.live) {
-          // Live Real-time Surface (Streaming)
-          return Container(
-            key: ValueKey('live_${component.surfaceId}'),
-            margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
-            child: GenUiErrorBoundary(
-              componentName: 'LiveSurface_${component.surfaceId}',
-              data: component.data,
-              child: genui.Surface(
-                surfaceContext: widget.genUiHost.contextFor(
+          // Live Real-time Surface (Streaming with instant Shimmer Skeleton)
+          return RepaintBoundary(
+            child: Container(
+              key: ValueKey('live_${component.surfaceId}'),
+              margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
+              child: GenUiErrorBoundary(
+                componentName: 'LiveSurface_${component.surfaceId}',
+                data: component.data,
+                child: _buildLiveSurfaceWithSkeleton(
+                  context,
+                  theme,
                   component.surfaceId,
                 ),
               ),
@@ -511,6 +500,101 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
         fontWeight: AppFontConfig.bodyMedium, // w400
         fontFamily: family,
         fontFamilyFallback: fallbacks,
+      ),
+    );
+  }
+
+  /// Build live GenUI surface with immediate Shimmer skeleton fallback
+  Widget _buildLiveSurfaceWithSkeleton(
+    BuildContext context,
+    FThemeData theme,
+    String surfaceId,
+  ) {
+    final surfaceContext = widget.genUiHost.contextFor(surfaceId);
+    return ValueListenableBuilder<genui.SurfaceDefinition?>(
+      valueListenable: surfaceContext.definition,
+      builder: (context, definition, child) {
+        if (definition == null || definition.components.isEmpty) {
+          return _buildShimmerSkeletonCard(context, theme);
+        }
+        return genui.Surface(surfaceContext: surfaceContext);
+      },
+    );
+  }
+
+  /// Render Shimmer skeleton loading card for instant visual feedback on CreateSurface
+  Widget _buildShimmerSkeletonCard(BuildContext context, FThemeData theme) {
+    final colors = theme.colors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: colors.muted.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: colors.border.withValues(alpha: 0.4)),
+      ),
+      child: Shimmer.fromColors(
+        baseColor: colors.mutedForeground.withValues(alpha: 0.15),
+        highlightColor: colors.mutedForeground.withValues(alpha: 0.35),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 80,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              height: 12,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 180,
+              height: 12,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

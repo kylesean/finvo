@@ -728,6 +728,10 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override String get invalidAttachmentLink => '無效的附件連結';
 	@override String get unableToOpenAttachmentLink => '無法開啟附件連結';
 	@override String aiCommunicationError({required Object error}) => '抱歉，AI 助手通訊錯誤：${error}';
+	@override String get uploadStillInProgress => '附件仍在傳輸中，請稍後再試';
+	@override String get sendFailed => '傳送訊息失敗，請稍後再試';
+	@override String attachmentUploadFailed({required Object files}) => '附件上傳失敗：${files}';
+	@override String get fileUploadFailed => '檔案上傳失敗，請稍後再試';
 }
 
 // Path: image
@@ -3407,6 +3411,10 @@ extension on TranslationsZhHant {
 			'chat.invalidAttachmentLink' => '無效的附件連結',
 			'chat.unableToOpenAttachmentLink' => '無法開啟附件連結',
 			'chat.aiCommunicationError' => ({required Object error}) => '抱歉，AI 助手通訊錯誤：${error}',
+			'chat.uploadStillInProgress' => '附件仍在傳輸中，請稍後再試',
+			'chat.sendFailed' => '傳送訊息失敗，請稍後再試',
+			'chat.attachmentUploadFailed' => ({required Object files}) => '附件上傳失敗：${files}',
+			'chat.fileUploadFailed' => '檔案上傳失敗，請稍後再試',
 			'image.deleteTitle' => '刪除圖片',
 			'image.deleteConfirm' => '確定要刪除這張圖片嗎？此操作無法撤銷。',
 			'footprint.searchIn' => '搜尋',
@@ -3557,12 +3565,12 @@ extension on TranslationsZhHant {
 			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',
 			'financial.neverUpdated' => '從未更新',
 			'financial.updateNow' => '立即更新',
+			_ => null,
+		} ?? switch (path) {
 			'app.splashTitle' => '智見增長，格物致富。',
 			'app.splashSubtitle' => '智能財務助手',
 			'statistics.title' => '統計分析',
 			'statistics.analyze' => '統計分析',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.exportInProgress' => '導出功能開發中...',
 			'statistics.ranking' => '大額消費排行',
 			'statistics.noData' => '暫無數據',

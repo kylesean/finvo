@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:logging/logging.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -21,6 +22,8 @@ import 'package:finvo/features/chat/widgets/image_preview_page.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
+
+final _logger = Logger('EnhancedUserMessageBubble');
 
 /// User message bubble widget
 /// Supports displaying text and multimedia attachments
@@ -223,6 +226,9 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   ) {
     try {
       final bytes = _getImageBytesFromDataUri(dataUri);
+      if (bytes == null) {
+        return _buildAttachmentError(theme, attachment);
+      }
       return Hero(
         tag: 'history_attachment_${attachment.id}',
         child: GestureDetector(
@@ -485,6 +491,10 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     var bytes = GenUiCacheService().get<Uint8List>(_cacheCategory, cacheKey);
     if (bytes == null) {
       bytes = _getImageBytesFromDataUri(file.dataUri);
+      if (bytes == null) {
+        final category = DataUriService.getFileCategory(file.originalName);
+        return _buildFileInfo(context, file, category, theme);
+      }
       GenUiCacheService().put(_cacheCategory, cacheKey, bytes);
     }
 
@@ -572,14 +582,21 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     DataUriFile file,
   ) async {
     final heroTag = 'media_${_mediaCacheKey(file)}';
+    final bytes = _getImageBytesFromDataUri(file.dataUri);
+    if (bytes == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.chat.invalidAttachmentLink)));
+      return;
+    }
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => ImagePreviewPage(
           itemCount: 1,
           heroTag: (_) => heroTag,
-          imageProvider: (_) =>
-              MemoryImage(_getImageBytesFromDataUri(file.dataUri)),
+          imageProvider: (_) => MemoryImage(bytes),
         ),
       ),
     );
@@ -641,9 +658,28 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     }
   }
 
-  Uint8List _getImageBytesFromDataUri(String dataUri) {
-    final base64String = dataUri.split(',').last;
-    return base64Decode(base64String);
+  /// Decodes the payload of a `data:` URI. Returns `null` when the URI is
+  /// malformed or empty; callers must fall back instead of crashing the build.
+  Uint8List? _getImageBytesFromDataUri(String dataUri) {
+    if (!dataUri.startsWith('data:') || !dataUri.contains(',')) {
+      _logger.warning(
+        'EnhancedUserMessageBubble: data URI missing header or payload',
+      );
+      return null;
+    }
+    final base64String = dataUri.split(',').last.trim();
+    if (base64String.isEmpty) {
+      _logger.warning('EnhancedUserMessageBubble: empty data URI payload');
+      return null;
+    }
+    try {
+      return base64Decode(base64String);
+    } catch (e) {
+      _logger.warning(
+        'EnhancedUserMessageBubble: data URI payload is not valid base64: $e',
+      );
+      return null;
+    }
   }
 
   Color _getFileTypeColor(String fileCategory, FThemeData theme) {

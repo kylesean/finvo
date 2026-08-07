@@ -1,23 +1,21 @@
 /// Utility for safe type parsing in GenUI components
 class GenUiNumUtils {
-  /// Safely convert dynamic value to double
-  static double toDouble(dynamic val, [double defaultValue = 0.0]) {
-    if (val == null) return defaultValue;
-    if (val is num) return val.toDouble();
-    if (val is String) {
-      return double.tryParse(val) ?? defaultValue;
-    }
-    return defaultValue;
+  /// Safely convert Object? value to double
+  static double toDouble(Object? val, [double defaultValue = 0.0]) {
+    return switch (val) {
+      final num n => n.toDouble(),
+      final String s => double.tryParse(s) ?? defaultValue,
+      _ => defaultValue,
+    };
   }
 
-  /// Safely convert dynamic value to int
-  static int toInt(dynamic val, [int defaultValue = 0]) {
-    if (val == null) return defaultValue;
-    if (val is num) return val.toInt();
-    if (val is String) {
-      return int.tryParse(val) ??
-          (double.tryParse(val)?.toInt() ?? defaultValue);
-    }
-    return defaultValue;
+  /// Safely convert Object? value to int
+  static int toInt(Object? val, [int defaultValue = 0]) {
+    return switch (val) {
+      final num n => n.toInt(),
+      final String s =>
+        int.tryParse(s) ?? (double.tryParse(s)?.toInt() ?? defaultValue),
+      _ => defaultValue,
+    };
   }
 }

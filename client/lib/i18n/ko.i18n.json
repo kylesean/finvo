@@ -1017,7 +1017,11 @@
     "shareComingSoon": "공유 기능은 곧 출시될 예정입니다...",
     "invalidAttachmentLink": "잘못된 첨부 파일 링크",
     "unableToOpenAttachmentLink": "첨부 파일 링크를 열 수 없습니다",
-    "aiCommunicationError": "죄송합니다. AI 어시스턴트 통신 오류: $error"
+    "aiCommunicationError": "죄송합니다. AI 어시스턴트 통신 오류: $error",
+    "uploadStillInProgress": "첨부 파일이 아직 업로드 중입니다. 잠시 후 다시 시도해 주세요",
+    "sendFailed": "메시지 전송에 실패했습니다. 잠시 후 다시 시도해 주세요",
+    "attachmentUploadFailed": "첨부 파일 업로드에 실패했습니다: $files",
+    "fileUploadFailed": "파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요"
   },
   "image": {
     "deleteTitle": "이미지 삭제",

@@ -3,12 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:finvo/features/chat/models/speech_error_type.dart';
 import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/speech_session_manager.dart';
 import 'package:finvo/features/chat/services/file_upload_service.dart';
 import 'package:finvo/features/chat/models/message_attachments.dart';
+import 'package:finvo/features/profile/models/speech_settings.dart';
 import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
+import 'package:finvo/features/chat/providers/sound_feedback_provider.dart';
 import 'package:finvo/features/chat/providers/chat_input_state.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'chat_input_provider.g.dart';
 
@@ -31,13 +35,22 @@ extension ChatInputStateMediaHandling on ChatInputState {
 
 @riverpod
 class ChatInputNotifier extends _$ChatInputNotifier {
-  final SpeechSessionManager _speechSession = SpeechSessionManager();
+  SpeechSessionManager? _speechSessionInstance;
+  SpeechSessionManager get _speechSession => _speechSessionInstance ??=
+      SpeechSessionManager(soundFeedback: ref.read(soundFeedbackProvider));
   FileUploadService? _fileUploadService;
 
   final Map<String, UploadedAttachmentInfo> _uploadedInfos = {};
 
   String _textBeforeSpeechSession = '';
   bool _isManualStop = false;
+
+  /// Set when the provider is disposed. Long-running async flows
+  /// (_startNewSpeechSession, _submitMessage, _uploadFilesInBackground)
+  /// must not touch `state` after disposal: the notifier is recreated on the
+  /// next UI visit, so writing into a disposed instance would silently
+  /// corrupt the fresh one.
+  bool _disposed = false;
 
   /// The current send-message callback. Stored as a mutable field (instead of
   /// relying only on the build parameter) so a reused widget State can swap in
@@ -52,7 +65,30 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     // Service initialization
     _fileUploadService = ref.watch(fileUploadServiceProvider);
 
-    final settings = ref.watch(speechSettingsProvider).settings;
+    // Initial speech configuration. Follow-up changes are applied via
+    // ref.listen below; using ref.watch here would rebuild the whole
+    // provider (and re-run setServiceType) on every settings change.
+    _configureSpeech(ref.read(speechSettingsProvider).settings);
+
+    ref.listen(speechSettingsProvider, (previous, next) {
+      _configureSpeech(next.settings);
+    });
+
+    // Wire the speech manager callbacks to the UI state machine.
+    _speechSession.onResult = _onSpeechResult;
+    _speechSession.onStatus = _onSpeechStatus;
+    _speechSession.onError = _onSpeechError;
+
+    ref.onDispose(() {
+      _logger.info('Provider disposing, cleaning up speech session...');
+      _disposed = true;
+      _speechSession.disposeService();
+    });
+
+    return const ChatInputState(isSpeechAvailable: true);
+  }
+
+  void _configureSpeech(SpeechSettings? settings) {
     final newServiceType = settings?.serviceType ?? SpeechServiceType.system;
 
     // Select (create or swap) the underlying speech service.
@@ -63,18 +99,6 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       websocketPort: settings?.websocketPort,
       websocketPath: settings?.websocketPath,
     );
-
-    // Wire the speech manager callbacks to the UI state machine.
-    _speechSession.onResult = _onSpeechResult;
-    _speechSession.onStatus = _onSpeechStatus;
-    _speechSession.onError = _onSpeechError;
-
-    ref.onDispose(() {
-      _logger.info('Provider disposing, cleaning up speech session...');
-      _speechSession.disposeService();
-    });
-
-    return const ChatInputState(isSpeechAvailable: true);
   }
 
   /// Update the send-message callback in place. Called from the widget's
@@ -158,23 +182,21 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     }
   }
 
-  void _onSpeechError(String errorToken) {
-    _logger.severe('Speech error: $errorToken');
+  void _onSpeechError(SpeechErrorType errorType) {
+    _logger.severe('Speech error: $errorType');
 
     if (state.isLoadingResponse) {
-      _logger.info('Sending message, ignoring speech error: $errorToken');
+      _logger.info('Sending message, ignoring speech error: $errorType');
       return;
     }
 
     if (_isManualStop) {
-      _logger.info('Error caused by user manual stop, ignoring: $errorToken');
+      _logger.info('Error caused by user manual stop, ignoring: $errorType');
       _isManualStop = false;
       return;
     }
 
-    // The token is already classified by SpeechSessionManager; only the
-    // no-speech case additionally clears the draft text.
-    if (errorToken == 'no_speech_recognized') {
+    if (errorType == SpeechErrorType.noSpeechRecognized) {
       _textBeforeSpeechSession = '';
       state = state.copyWith(text: '');
     }
@@ -182,20 +204,14 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     state = state.copyWith(
       isListening: false,
       showError: true,
-      errorMessage: errorToken,
+      speechErrorType: errorType,
+      errorMessage: errorType.name,
       hintType: HintType.normal,
     );
   }
 
   void _onSpeechResult(String recognizedText) {
     final isIncremental = _speechSession.isIncrementalResult;
-    // Incremental (WebSocket) mode: every partial already contains the full
-    // utterance recognized so far, so REPLACE the recognized part on top of
-    // the fixed pre-session base. Folding each partial back into the base
-    // would duplicate the accumulated text. Discrete-finals mode (system
-    // speech): each final result is a separate utterance (pause-then-
-    // continue), so append. Both share the same fold logic; only the final
-    // branch persists the accumulated text for the next utterance.
     final newText = _textBeforeSpeechSession.trim().isEmpty
         ? recognizedText
         : '${_textBeforeSpeechSession.trim()} $recognizedText'.trim();
@@ -225,28 +241,24 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   Future<void> _startNewSpeechSession() async {
     _logger.info('Starting new speech recognition session');
 
-    // Reset any stale manual-stop flag from a previous session so a genuine
-    // error in this new session is not silently swallowed as a user-initiated
-    // stop (the flag may have been left set if the previous stop raced with a
-    // loading response).
     _isManualStop = false;
-
-    // Play haptic feedback immediately to give the user instant feedback.
     unawaited(HapticFeedback.lightImpact());
 
     try {
-      final errorToken = await _speechSession.startSession();
+      final errorType = await _speechSession.startSession();
+      if (_disposed) return;
 
-      if (errorToken != null) {
-        _logger.warning('Speech service not ready: $errorToken');
-        if (errorToken == 'no_speech_recognized') {
+      if (errorType != null) {
+        _logger.warning('Speech service not ready: $errorType');
+        if (errorType == SpeechErrorType.noSpeechRecognized) {
           _textBeforeSpeechSession = '';
           state = state.copyWith(text: '');
         }
         state = state.copyWith(
           isListening: false,
           showError: true,
-          errorMessage: errorToken,
+          speechErrorType: errorType,
+          errorMessage: errorType.name,
           hintType: HintType.normal,
         );
         return;
@@ -256,15 +268,18 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       state = state.copyWith(
         isListening: true,
         showError: false,
+        speechErrorType: null,
         errorMessage: '',
         hintType: HintType.listening,
       );
     } catch (e) {
+      if (_disposed) return;
       _logger.severe('Failed to start speech recognition session: $e');
       state = state.copyWith(
         isListening: false,
         showError: true,
-        errorMessage: 'speech_connection_failed',
+        speechErrorType: SpeechErrorType.connectionFailed,
+        errorMessage: t.speech.connectionFailed,
         hintType: HintType.normal,
       );
     }
@@ -304,7 +319,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         if (uploadInfo == null) {
           state = state.copyWith(
             showError: true,
-            errorMessage: 'Attachment still uploading, please try again later',
+            errorMessage: t.chat.uploadStillInProgress,
             hintType: HintType.normal,
           );
           return;
@@ -325,25 +340,21 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         currentTextAfterStop,
         attachments: pendingAttachments.isEmpty ? null : pendingAttachments,
       );
+      if (_disposed) return;
 
       for (final attachment in pendingAttachments) {
         _uploadedInfos.remove(attachment.file.path);
       }
 
       _textBeforeSpeechSession = '';
-      // Keep isLoadingResponse: true and hintType: aiProcessing after dispatch.
-      // addUserMessageAndGetResponse is fire-and-forget, so this await returns
-      // before the AI stream actually ends; resetting the lock here would drop
-      // the "AI processing" input state mid-stream. The lock is released by
-      // resetLoadingState(), driven from ChatInputField when
-      // ChatHistory.isStreamingResponse flips to false.
       state = state.copyWith(text: '', selectedFiles: []);
     } catch (e, s) {
+      if (_disposed) return;
       _logger.severe('Message send failed: $e\n$s');
       state = state.copyWith(
         isLoadingResponse: false,
         showError: true,
-        errorMessage: 'Send failed, please try again later',
+        errorMessage: t.chat.sendFailed,
         hintType: HintType.normal,
       );
     }
@@ -351,12 +362,14 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
   void clearError() {
     if (state.showError) {
-      state = state.copyWith(showError: false, errorMessage: '');
+      state = state.copyWith(
+        showError: false,
+        errorMessage: '',
+        speechErrorType: null,
+      );
     }
   }
 
-  /// Reset input text and media for a conversation switch, so a previous
-  /// conversation's draft doesn't leak into the newly opened one.
   void resetForConversationSwitch() {
     if (state.isListening) {
       unawaited(_speechSession.stopListening(manual: false));
@@ -370,6 +383,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       isLoadingResponse: false,
       isListening: false,
       showError: false,
+      speechErrorType: null,
       errorMessage: '',
       hintType: HintType.normal,
     );
@@ -379,10 +393,6 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     state = state.copyWith(showError: true, errorMessage: message);
   }
 
-  /// Reset the "AI processing" lock after the response stream ends.
-  ///
-  /// Driven from ChatInputField when ChatHistory.isStreamingResponse flips to
-  /// false (i.e. the stream reached a terminal state: completed/error/cancel).
   void resetLoadingState() {
     if (state.isLoadingResponse) {
       state = state.copyWith(
@@ -458,17 +468,12 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         selectedFiles: updatedFiles,
         uploadingFiles: uploadingMap,
         showError: true,
-        errorMessage: 'Attachment upload failed: ${failedNames.join(', ')}',
+        errorMessage: t.chat.attachmentUploadFailed(
+          files: failedNames.join(', '),
+        ),
       );
     }
 
-    // Pair server upload results back to the local files. The old
-    // `firstWhere((f) => f.name == upload.originalName)` threw a StateError
-    // (aborting the whole batch as failed) whenever the server-returned name
-    // differed from the local name, and mapped duplicate file names onto the
-    // same file. Instead: prefer an exact name match, consume each file at
-    // most once, and fall back to the next unmatched file in request order
-    // (the server response order mirrors the request order).
     final usedIndices = <int>{};
     for (final upload in result.uploads) {
       int fileIndex = -1;
@@ -486,7 +491,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
           break;
         }
       }
-      if (fileIndex == -1) break; // no files left to pair
+      if (fileIndex == -1) break;
 
       usedIndices.add(fileIndex);
       final file = originalFiles[fileIndex];
@@ -508,16 +513,15 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
   Future<void> _uploadFilesInBackground(List<XFile> files) async {
     try {
-      // Resolve the service defensively instead of a bare `!` force-unwrap: if
-      // the provider hasn't initialized it (e.g. fired before build), surface
-      // a clear error through the shared catch path rather than crashing.
       final service = _fileUploadService;
       if (service == null) {
         throw StateError('File upload service is not initialized');
       }
       final uploadResult = await service.uploadFiles(files);
+      if (_disposed) return;
       handleUploadCompleted(uploadResult, files);
     } catch (e, stackTrace) {
+      if (_disposed) return;
       _logger.severe('Background upload exception: $e\n$stackTrace');
       final uploadingMap = Map<String, bool>.from(state.uploadingFiles);
       for (final file in files) {
@@ -526,7 +530,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       state = state.copyWith(
         uploadingFiles: uploadingMap,
         showError: true,
-        errorMessage: 'File upload failed: $e',
+        errorMessage: t.chat.fileUploadFailed,
       );
     }
   }

@@ -117,46 +117,73 @@ class ConversationSearchService {
     return DateTime.tryParse(value is String ? value : value.toString());
   }
 
-  /// Generate highlight ranges
+  /// Generate highlight ranges.
+  ///
+  /// Indexes are computed on the ORIGINAL text via a per-code-unit
+  /// case-insensitive compare instead of searching inside a lowercased copy:
+  /// `toLowerCase()` can change a string's length (e.g. Turkish `İ` expands
+  /// to `i` + combining dot), which would shift every later index and make
+  /// the UI's `substring(start, end)` throw a RangeError.
   List<HighlightRange> _generateHighlights({
     required String query,
     required String title,
     required String snippet,
   }) {
     final highlights = <HighlightRange>[];
-    final queryLower = query.toLowerCase();
+    if (query.isEmpty) return highlights;
 
-    // Find matches in title
-    final titleLower = title.toLowerCase();
-    int titleIndex = 0;
-    while (titleIndex < titleLower.length) {
-      final index = titleLower.indexOf(queryLower, titleIndex);
-      if (index == -1) break;
-
-      highlights.add(
-        HighlightRange(start: index, end: index + query.length, field: 'title'),
-      );
-      titleIndex = index + query.length;
-    }
-
-    // Find matches in snippet
-    final snippetLower = snippet.toLowerCase();
-    int snippetIndex = 0;
-    while (snippetIndex < snippetLower.length) {
-      final index = snippetLower.indexOf(queryLower, snippetIndex);
-      if (index == -1) break;
-
-      highlights.add(
-        HighlightRange(
-          start: index,
-          end: index + query.length,
-          field: 'snippet',
-        ),
-      );
-      snippetIndex = index + query.length;
-    }
+    highlights.addAll(
+      _findCaseInsensitiveMatches(text: title, query: query, field: 'title'),
+    );
+    highlights.addAll(
+      _findCaseInsensitiveMatches(
+        text: snippet,
+        query: query,
+        field: 'snippet',
+      ),
+    );
 
     return highlights;
+  }
+
+  /// Find all case-insensitive occurrences of [query] in [text], returning
+  /// ranges indexed in the original text (never a transformed copy).
+  List<HighlightRange> _findCaseInsensitiveMatches({
+    required String text,
+    required String query,
+    required String field,
+  }) {
+    final ranges = <HighlightRange>[];
+    final textUnits = text.codeUnits;
+    final queryUnits = query.toLowerCase().codeUnits;
+    if (queryUnits.isEmpty || textUnits.length < queryUnits.length) {
+      return ranges;
+    }
+
+    int index = 0;
+    final lastStart = textUnits.length - queryUnits.length;
+    while (index <= lastStart) {
+      if (_matchesAt(textUnits, index, queryUnits)) {
+        final end = index + queryUnits.length;
+        ranges.add(HighlightRange(start: index, end: end, field: field));
+        index = end;
+      } else {
+        index++;
+      }
+    }
+    return ranges;
+  }
+
+  /// Whether [queryUnits] matches [textUnits] at [offset], comparing one code
+  /// unit at a time after lowercasing (keeps indexes valid for the original).
+  bool _matchesAt(List<int> textUnits, int offset, List<int> queryUnits) {
+    for (int i = 0; i < queryUnits.length; i++) {
+      final unit = String.fromCharCode(textUnits[offset + i]);
+      if (unit.toLowerCase().codeUnitAt(0) != queryUnits[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

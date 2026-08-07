@@ -728,6 +728,10 @@ class _Translations$chat$ko extends Translations$chat$zh {
 	@override String get invalidAttachmentLink => '잘못된 첨부 파일 링크';
 	@override String get unableToOpenAttachmentLink => '첨부 파일 링크를 열 수 없습니다';
 	@override String aiCommunicationError({required Object error}) => '죄송합니다. AI 어시스턴트 통신 오류: ${error}';
+	@override String get uploadStillInProgress => '첨부 파일이 아직 업로드 중입니다. 잠시 후 다시 시도해 주세요';
+	@override String get sendFailed => '메시지 전송에 실패했습니다. 잠시 후 다시 시도해 주세요';
+	@override String attachmentUploadFailed({required Object files}) => '첨부 파일 업로드에 실패했습니다: ${files}';
+	@override String get fileUploadFailed => '파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요';
 }
 
 // Path: image
@@ -3411,6 +3415,10 @@ extension on TranslationsKo {
 			'chat.invalidAttachmentLink' => '잘못된 첨부 파일 링크',
 			'chat.unableToOpenAttachmentLink' => '첨부 파일 링크를 열 수 없습니다',
 			'chat.aiCommunicationError' => ({required Object error}) => '죄송합니다. AI 어시스턴트 통신 오류: ${error}',
+			'chat.uploadStillInProgress' => '첨부 파일이 아직 업로드 중입니다. 잠시 후 다시 시도해 주세요',
+			'chat.sendFailed' => '메시지 전송에 실패했습니다. 잠시 후 다시 시도해 주세요',
+			'chat.attachmentUploadFailed' => ({required Object files}) => '첨부 파일 업로드에 실패했습니다: ${files}',
+			'chat.fileUploadFailed' => '파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요',
 			'image.deleteTitle' => '이미지 삭제',
 			'image.deleteConfirm' => '이 이미지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
 			'footprint.searchIn' => '검색',
@@ -3559,12 +3567,12 @@ extension on TranslationsKo {
 			'financial.cashPocketTitle' => '내 현금 계좌',
 			'financial.sourcesCount' => ({required Object count}) => '${count} 계좌',
 			'financial.lastUpdatedAt' => ({required Object time}) => '마지막 업데이트: ${time}',
+			_ => null,
+		} ?? switch (path) {
 			'financial.neverUpdated' => '업데이트되지 않음',
 			'financial.updateNow' => '지금 업데이트',
 			'app.splashTitle' => '지혜로운 성장, 가치 있는 부.',
 			'app.splashSubtitle' => '스마트 금융 비서',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.title' => '통계 분석',
 			'statistics.analyze' => '통계 분석',
 			'statistics.exportInProgress' => '내보내기 기능 개발 중...',

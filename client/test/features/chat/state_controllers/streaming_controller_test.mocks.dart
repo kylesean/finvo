@@ -5,8 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i6;
 
-import 'package:dio/dio.dart' as _i8;
-import 'package:finvo/core/storage/secure_storage_service.dart' as _i7;
+import 'package:finvo/features/chat/models/genui_config.dart' as _i7;
 import 'package:finvo/features/chat/services/extended_genui_conversation.dart'
     as _i2;
 import 'package:finvo/features/chat/services/genui_service.dart' as _i5;
@@ -88,37 +87,13 @@ class MockGenUiService extends _i1.Mock implements _i5.GenUiService {
 
   @override
   _i6.Future<void> initialize({
-    required _i3.Catalog? catalog,
-    required _i7.SecureStorageService? storageService,
-    required String? sseBaseUrl,
-    required void Function(String)? onSurfaceAdded,
-    required void Function(String)? onSurfaceRemoved,
-    required void Function(String)? onTextResponse,
-    _i5.OnSessionInit? onSessionInit,
-    _i5.OnStreamComplete? onStreamComplete,
-    _i5.OnTitleUpdate? onTitleUpdate,
-    _i5.OnErrorCallback? onError,
-    void Function(String)? onSurfaceIdAdded,
-    void Function(Map<String, dynamic>)? onTransactionCreated,
-    dynamic configuration,
-    _i8.Dio? dio,
+    required _i7.GenUiConfig? config,
+    required _i7.GenUiCallbacks? callbacks,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#initialize, [], {
-              #catalog: catalog,
-              #storageService: storageService,
-              #sseBaseUrl: sseBaseUrl,
-              #onSurfaceAdded: onSurfaceAdded,
-              #onSurfaceRemoved: onSurfaceRemoved,
-              #onTextResponse: onTextResponse,
-              #onSessionInit: onSessionInit,
-              #onStreamComplete: onStreamComplete,
-              #onTitleUpdate: onTitleUpdate,
-              #onError: onError,
-              #onSurfaceIdAdded: onSurfaceIdAdded,
-              #onTransactionCreated: onTransactionCreated,
-              #configuration: configuration,
-              #dio: dio,
+              #config: config,
+              #callbacks: callbacks,
             }),
             returnValue: _i6.Future<void>.value(),
             returnValueForMissingStub: _i6.Future<void>.value(),
@@ -154,18 +129,20 @@ class MockGenUiService extends _i1.Mock implements _i5.GenUiService {
   );
 
   @override
-  void replayHistoricalSurface({
+  bool replayHistoricalSurface({
     required String? surfaceId,
     required String? componentType,
     required Map<String, dynamic>? data,
-  }) => super.noSuchMethod(
-    Invocation.method(#replayHistoricalSurface, [], {
-      #surfaceId: surfaceId,
-      #componentType: componentType,
-      #data: data,
-    }),
-    returnValueForMissingStub: null,
-  );
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#replayHistoricalSurface, [], {
+              #surfaceId: surfaceId,
+              #componentType: componentType,
+              #data: data,
+            }),
+            returnValue: false,
+          )
+          as bool);
 
   @override
   _i6.Future<void> dispose() =>

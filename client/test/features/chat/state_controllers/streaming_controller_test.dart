@@ -138,15 +138,6 @@ void main() {
       expect(streamState.currentPhase, StreamPhase.streaming);
     });
 
-    test('handleStreamComplete should update flags and notify', () {
-      controller.handleStreamComplete('Final Text');
-
-      expect(controller.isStreamDone, true);
-      expect(controller.isMessageCompleted, true);
-      expect(streamState.currentPhase, StreamPhase.completed);
-      expect(lastStreamCompleteFinalText, 'Final Text');
-    });
-
     test('handleStreamError should update flags and notify', () {
       controller.handleStreamError('Error');
 

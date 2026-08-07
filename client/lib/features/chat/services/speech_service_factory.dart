@@ -2,6 +2,7 @@
 import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/system_speech_service.dart';
 import 'package:finvo/features/chat/services/websocket_speech_service.dart';
+import 'package:finvo/features/chat/services/sound_feedback_service.dart';
 
 /// Speech recognition service factory
 ///
@@ -14,8 +15,10 @@ class SpeechServiceFactory {
   /// [websocketPort] WebSocket server port (only required for websocket type)
   /// [websocketPath] WebSocket path (only required for websocket type)
   /// [localeId] Language recognition ID (only valid for system type)
+  /// [soundFeedback] Sound feedback service (required for websocket type)
   static SpeechRecognitionService create(
     SpeechServiceType type, {
+    required SoundFeedbackService soundFeedback,
     String? websocketHost,
     int? websocketPort,
     String? websocketPath,
@@ -29,6 +32,7 @@ class SpeechServiceFactory {
           host: websocketHost,
           port: websocketPort,
           path: websocketPath,
+          soundFeedback: soundFeedback,
         );
     }
   }

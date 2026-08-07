@@ -410,12 +410,27 @@ class _TransactionGroupReceiptState
     final transactions = (widget.data['transactions'] as List? ?? []);
 
     Decimal totalAmount = Decimal.zero;
+    // Bucket totals by transaction type: mixing income and expense in a single
+    // sum (the previous behaviour) produces a misleading financial figure, and
+    // the header used to hard-code expense styling regardless of content.
+    // The per-item type check mirrors the one used when rendering each row.
+    Decimal expenseTotal = Decimal.zero;
+    Decimal incomeTotal = Decimal.zero;
     for (final tx in transactions) {
       // AI-provided payloads are untrusted: an element that is not a Map
       // must not crash the whole card during build.
       if (tx is! Map) continue;
-      totalAmount += AmountFormatter.parseDecimal(tx['amount']?.toString());
+      final amount = AmountFormatter.parseDecimal(tx['amount']?.toString());
+      if (tx['type']?.toString().toUpperCase() == 'INCOME') {
+        incomeTotal += amount;
+      } else {
+        expenseTotal += amount;
+      }
     }
+    // Single-type groups show their own total; mixed groups show the dominant
+    // bucket with its correct type styling.
+    final bool totalIsExpense = expenseTotal >= incomeTotal;
+    totalAmount = totalIsExpense ? expenseTotal : incomeTotal;
 
     if (transactions.isEmpty) return const SizedBox.shrink();
 
@@ -438,7 +453,13 @@ class _TransactionGroupReceiptState
         mainAxisSize: MainAxisSize.min,
         children: [
           // Header
-          _buildHeader(theme, colors, transactions.length, totalAmount),
+          _buildHeader(
+            theme,
+            colors,
+            transactions.length,
+            totalAmount,
+            isExpenseTotal: totalIsExpense,
+          ),
 
           // Content
           AnimatedCrossFade(
@@ -458,8 +479,9 @@ class _TransactionGroupReceiptState
     FThemeData theme,
     FColors colors,
     int count,
-    Decimal totalAmount,
-  ) {
+    Decimal totalAmount, {
+    required bool isExpenseTotal,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
@@ -486,7 +508,9 @@ class _TransactionGroupReceiptState
                     ),
                     AmountText(
                       amount: totalAmount,
-                      type: TransactionType.expense,
+                      type: isExpenseTotal
+                          ? TransactionType.expense
+                          : TransactionType.income,
                       semantic: AmountSemantic.status,
                       showSign: false,
                       style: AppTextStyles.statLabel(theme),
