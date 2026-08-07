@@ -95,12 +95,22 @@ class SoundFeedbackService {
       _useHapticFallback = true;
       _isInitialized = true;
 
-      // Clean up players
-      unawaited(_startPlayer?.dispose());
-      unawaited(_stopPlayer?.dispose());
-      _startPlayer = null;
-      _stopPlayer = null;
+      // Clean up players safely
+      await _safeDisposePlayers();
     }
+  }
+
+  /// Safely dispose players ensuring async operations complete
+  Future<void> _safeDisposePlayers() async {
+    final start = _startPlayer;
+    final stop = _stopPlayer;
+    _startPlayer = null;
+    _stopPlayer = null;
+
+    await Future.wait([
+      if (start != null) start.dispose(),
+      if (stop != null) stop.dispose(),
+    ]);
   }
 
   /// Set whether sound feedback is enabled
