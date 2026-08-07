@@ -139,8 +139,11 @@ class SliverTransactionFeedView extends ConsumerWidget {
       );
     }
 
-    // Error state
+    // Error state: only when there is nothing to show. A load-more failure
+    // (hasLoadMoreError) must not wipe the already-rendered feed — it is
+    // surfaced via the retry footer instead.
     if (feedState.errorMessage != null &&
+        transactions.isEmpty &&
         intendedFeedType == globalCurrentFeedType) {
       return SliverFillRemaining(
         hasScrollBody: false,
@@ -227,6 +230,21 @@ class SliverTransactionFeedView extends ConsumerWidget {
                   ),
                 ),
               );
+            } else if (feedState.hasLoadMoreError && transactions.isNotEmpty) {
+              // Load-more failed: keep the rendered list, offer a retry
+              // instead of a misleading "no more data" footer.
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: FButton(
+                    variant: .outline,
+                    onPress: () => ref
+                        .read(transactionFeedProvider.notifier)
+                        .fetchMoreTransactions(),
+                    child: Text(t.common.retry),
+                  ),
+                ),
+              );
             }
             return const SizedBox.shrink();
           }
@@ -259,7 +277,8 @@ class SliverTransactionFeedView extends ConsumerWidget {
     if (transactionCount == 0) return 0;
     int count = transactionCount * 2 - 1;
     if ((state.isLoadingMore && transactionCount > 0) ||
-        (state.hasReachedMax && transactionCount > 0)) {
+        (state.hasReachedMax && transactionCount > 0) ||
+        (state.hasLoadMoreError && transactionCount > 0)) {
       count += 2; // +1 Divider +1 Footer
     }
     return count;
