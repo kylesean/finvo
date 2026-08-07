@@ -8,6 +8,8 @@ import 'package:finvo/features/chat/services/speech_service_factory.dart';
 import 'package:finvo/features/chat/services/system_speech_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
 
+final _logger = Logger('SpeechSessionManager');
+
 /// Classifies raw speech error strings into stable, user-facing tokens.
 ///
 /// Extracted from the chat input notifier so that error mapping is a pure,
@@ -56,8 +58,6 @@ class SpeechErrorClassifier {
 /// The owning notifier reacts to [onResult], [onStatus] and [onError] callbacks
 /// and keeps its own UI state machine.
 class SpeechSessionManager {
-  static final _logger = Logger('SpeechSessionManager');
-
   SpeechRecognitionService? _service;
   SpeechServiceType? _serviceType;
 
@@ -130,7 +130,8 @@ class SpeechSessionManager {
     bool isReady = false;
     try {
       isReady = await service.ensureReady();
-    } catch (_) {
+    } catch (e) {
+      _logger.warning('Speech service readiness check failed', e);
       isReady = false;
     }
 

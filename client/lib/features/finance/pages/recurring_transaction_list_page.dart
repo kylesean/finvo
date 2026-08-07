@@ -19,6 +19,9 @@ import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('RecurringTransactionList');
 
 /// Recurring transaction list page
 class RecurringTransactionListPage extends ConsumerStatefulWidget {
@@ -51,8 +54,9 @@ class _RecurringTransactionListPageState
       final service = ref.read(recurringTransactionServiceProvider);
       final pending = await service.getPending();
       if (mounted) setState(() => _pendingTransactions = pending);
-    } catch (_) {
-      // Non-critical
+    } catch (e) {
+      // Non-critical preview: keep the list usable but surface the failure.
+      _logger.warning('Failed to load pending recurring transactions', e);
     }
   }
 

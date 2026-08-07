@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
@@ -12,6 +13,8 @@ import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
+
+final _logger = Logger('TrendChart');
 
 /// Redesigned TrendChart with income/expense toggle using FTabs
 class TrendChart extends ConsumerWidget {
@@ -260,7 +263,9 @@ class TrendChart extends ConsumerWidget {
           // For custom range, return day/month format
           return '${date.day}/${date.month}';
       }
-    } catch (_) {
+    } catch (e) {
+      // Unparseable label (unexpected backend format): show the raw label.
+      _logger.fine('Could not format chart label "$label"', e);
       return label;
     }
   }

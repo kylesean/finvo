@@ -5,9 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/profile/services/profile_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:logging/logging.dart';
 
 part 'financial_account_provider.freezed.dart';
 part 'financial_account_provider.g.dart';
+
+final _logger = Logger('FinancialAccountProvider');
 
 /// Calculate net worth as (assets - liabilities) over active, included accounts.
 Decimal _netWorthOf(List<FinancialAccount> accounts) {
@@ -69,7 +72,13 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
       if (response.lastUpdatedAt.isNotEmpty) {
         try {
           parsedDate = DateTime.parse(response.lastUpdatedAt);
-        } catch (_) {
+        } catch (e) {
+          // Malformed timestamp from the server: fall back to now but keep
+          // the data issue diagnosable.
+          _logger.warning(
+            'Unparseable lastUpdatedAt "${response.lastUpdatedAt}"',
+            e,
+          );
           parsedDate = DateTime.now();
         }
       }

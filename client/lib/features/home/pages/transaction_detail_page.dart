@@ -505,16 +505,6 @@ class TransactionDetailPage extends ConsumerWidget {
     final List<ActionItem> primaryActions = [];
     final List<ActionItem> destructiveActions = [];
 
-    primaryActions.add(
-      ActionItem(
-        title: t.transaction.favorite,
-        icon: FLucideIcons.bookmark,
-        onTap: () {
-          // TODO: Implement favorite/bookmark functionality
-        },
-      ),
-    );
-
     destructiveActions.add(
       ActionItem(
         title: t.common.delete,

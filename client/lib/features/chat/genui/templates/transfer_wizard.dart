@@ -517,11 +517,10 @@ class _TransferWizardState extends State<TransferWizard> {
     List<Map<String, dynamic>> accounts,
   ) {
     if (id == null) return null;
-    try {
-      return accounts.firstWhere((acc) => acc['id'] == id);
-    } catch (_) {
-      return null;
+    for (final account in accounts) {
+      if (account['id'] == id) return account;
     }
+    return null;
   }
 
   void _onConfirm() {

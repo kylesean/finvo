@@ -1,19 +1,19 @@
 // features/chat/services/websocket_speech_service.dart
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/io.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:finvo/features/chat/config/speech_config.dart';
 import 'package:finvo/features/chat/services/audio_recorder_service.dart';
 import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
 
-class WebSocketSpeechService implements SpeechRecognitionService {
-  static final _logger = Logger('WebSocketSpeechService');
+final _logger = Logger('WebSocketSpeechService');
 
+class WebSocketSpeechService implements SpeechRecognitionService {
   final String host;
   final int port;
   final String path;
@@ -36,6 +36,16 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   final StreamController<String> _errorController =
       StreamController<String>.broadcast();
 
+  // Idle reconnect bookkeeping. Mirrors NotificationWsService: bounded
+  // exponential backoff so a dead ASR server is not polled forever, and no
+  // reconnect is ever attempted mid-session (a dropped socket during an
+  // active recording surfaces as an error to the user instead).
+  Timer? _reconnectTimer;
+  int _reconnectAttempts = 0;
+  bool _isDisposed = false;
+  static const _maxReconnectAttempts = 3;
+  static const _maxReconnectDelaySeconds = 8;
+
   // Public streams
   @override
   Stream<String> get onResult => _resultController.stream;
@@ -57,6 +67,19 @@ class WebSocketSpeechService implements SpeechRecognitionService {
     : host = host ?? SpeechConfig.host,
       port = port ?? SpeechConfig.port,
       path = path ?? SpeechConfig.path;
+
+  /// Build the ASR endpoint URL, honoring an explicit scheme.
+  ///
+  /// A [host] carrying its own scheme (ws:// or wss://) is used verbatim so
+  /// TLS-enabled deployments can be configured directly; otherwise the
+  /// configured [SpeechConfig.scheme] applies (defaults to ws:// for
+  /// backward compatibility with existing self-hosted setups).
+  String _buildWsUrl() {
+    if (host.startsWith('ws://') || host.startsWith('wss://')) {
+      return '$host$path';
+    }
+    return '${SpeechConfig.scheme}://$host:$port$path';
+  }
 
   /// Check microphone permission
   @override
@@ -94,11 +117,13 @@ class WebSocketSpeechService implements SpeechRecognitionService {
     await _cleanup();
 
     try {
-      _logger.info('Connecting to WebSocket server: ws://$host:$port$path');
+      final wsUrl = _buildWsUrl();
+      _logger.info('Connecting to WebSocket server: $wsUrl');
       _statusController.add('connecting');
 
-      final uri = Uri.parse('ws://$host:$port$path');
-      _channel = IOWebSocketChannel.connect(uri);
+      // WebSocketChannel.connect is cross-platform (IO + web) and supports
+      // both ws:// and wss://, unlike the previous IOWebSocketChannel.
+      _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
 
       // Listen to connection status, add timeout mechanism (10 seconds)
       await _channel!.ready.timeout(
@@ -108,6 +133,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
         },
       );
       _isConnected = true;
+      _reconnectAttempts = 0;
       _statusController.add('connected');
       _logger.info('WebSocket connected successfully');
 
@@ -175,7 +201,9 @@ class WebSocketSpeechService implements SpeechRecognitionService {
 
     if (!_isConnected) {
       _logger.warning('WebSocket not connected, cannot start listening');
-      _errorController.add('WebSocket not connected');
+      // Stable token (see SpeechErrorClassifier / chat_input_field dialog
+      // mapping) instead of a raw English sentence.
+      _errorController.add('speech_connection_failed');
       return;
     }
 
@@ -191,9 +219,8 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       final hasPermission = await this.hasPermission();
       if (!hasPermission) {
         _logger.severe('Microphone permission denied');
-        _errorController.add(
-          'Microphone permission denied, please authorize in system settings',
-        );
+        // Stable token mapped to a localized dialog by the chat input UI.
+        _errorController.add('permission_denied');
         return;
       }
 
@@ -400,10 +427,17 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       return;
     }
 
-    _errorController.add('Connection error: $error');
+    _errorController.add('speech_connection_failed');
     _statusController.add('error');
     _isConnected = false;
+    final wasListening = _isListening;
     _isListening = false;
+
+    // A drop outside an active session is transparently repaired in the
+    // background; mid-session drops already surfaced an error to the user.
+    if (!wasListening) {
+      _maybeScheduleReconnect();
+    }
   }
 
   /// Handle connection disconnect
@@ -416,7 +450,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _isManualStop = false; // Reset flag
     } else if (_isListening && !_errorController.isClosed) {
       // Only dispatch error if abnormal disconnect and currently listening
-      _errorController.add('Connection unexpectedly disconnected');
+      _errorController.add('speech_connection_failed');
     }
 
     // Only add status if controller is not closed (could be called after dispose)
@@ -424,6 +458,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _statusController.add('disconnected');
     }
     _isConnected = false;
+    final wasListening = _isListening;
     _isListening = false;
 
     // Clean up audio related resources
@@ -436,12 +471,53 @@ class WebSocketSpeechService implements SpeechRecognitionService {
     }());
     unawaited(_audioSubscription?.cancel());
     _audioSubscription = null;
+
+    // Restore the warm connection in the background when the drop happened
+    // outside an active session, so the next voice message does not pay the
+    // full connect latency (or fail) because of a silently dead socket.
+    if (!wasListening) {
+      _maybeScheduleReconnect();
+    }
+  }
+
+  /// Schedule a bounded, backoff-throttled reconnect for the idle state.
+  ///
+  /// Never reconnects mid-session ([_isListening]), after disposal, or after
+  /// [_maxReconnectAttempts] consecutive failures (a later user-initiated
+  /// [ensureReady]/[initialize] resets the counter on success).
+  void _maybeScheduleReconnect() {
+    if (_isDisposed || _isListening || _isManualStop) return;
+    if (_reconnectAttempts >= _maxReconnectAttempts) {
+      _logger.warning(
+        'Speech WS: giving up after $_maxReconnectAttempts reconnect '
+        'attempts; next session will retry from scratch',
+      );
+      return;
+    }
+
+    _reconnectTimer?.cancel();
+    final delaySeconds = min(
+      pow(2, _reconnectAttempts).toInt(),
+      _maxReconnectDelaySeconds,
+    );
+    _reconnectAttempts++;
+    _logger.info(
+      'Speech WS: reconnecting in ${delaySeconds}s '
+      '(attempt $_reconnectAttempts)',
+    );
+    _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
+      if (_isDisposed || _isListening || _isConnected) return;
+      unawaited(initialize());
+    });
   }
 
   /// Release resources
   @override
   Future<void> dispose() async {
     _logger.info('Releasing WebSocketSpeechService resources');
+    _isDisposed = true;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
 
     // Use unified cleanup method
     await _cleanup();

@@ -76,7 +76,10 @@ class _TransactionGroupReceiptState
   void _initializeAccountAssociations() {
     final transactions = (widget.data['transactions'] as List? ?? []);
     for (final tx in transactions) {
-      final txMap = tx as Map<String, dynamic>;
+      // AI-provided payloads are untrusted: skip malformed entries instead of
+      // throwing a TypeError during initState (same policy as build()).
+      final txMap = _toTxMap(tx);
+      if (txMap == null) continue;
       final id = txMap['id']?.toString();
       if (id != null) {
         // Prefer source_account_id (expense), otherwise use target_account_id (income)
@@ -102,7 +105,7 @@ class _TransactionGroupReceiptState
     if (transactions.isEmpty) return;
 
     final transactionIds = transactions
-        .map((tx) => (tx as Map)['id']?.toString())
+        .map((tx) => _toTxMap(tx)?['id']?.toString())
         .where((id) => id != null)
         .cast<String>()
         .toList();
@@ -160,11 +163,8 @@ class _TransactionGroupReceiptState
           }
         });
       }
-    } finally {
-      // Refresh UI after loading
-      if (mounted) {
-        setState(() {});
-      }
+    } catch (e) {
+      _log.warning('Failed to refresh account associations', e);
     }
   }
 
@@ -764,11 +764,13 @@ class _TransactionGroupReceiptState
     final theme = context.theme;
     final colors = theme.colors;
 
-    // Get transaction currency
+    // Get transaction currency. Fallback must match the app-wide default
+    // ('CNY', used by every other fallback site): 'USD' here made the
+    // currency-mismatch confirmation dialog fire incorrectly.
     final txCurrency =
         (tx['originalCurrency']?.toString()) ??
         (tx['currency']?.toString()) ??
-        'USD';
+        'CNY';
 
     // Get transaction amount
     final txAmount = tx['originalAmount'] != null
@@ -930,30 +932,27 @@ class _TransactionGroupReceiptState
     final txId = tx['id']?.toString();
     if (txId == null) return;
 
-    if (_cachedSpaces == null) {
-      try {
-        final networkClient = ref.read(networkClientProvider);
-        final result = await networkClient.requestMap(
-          '/shared-spaces',
-          method: HttpMethod.get,
-        );
+    // Always try to fetch fresh: a lifetime cache hides spaces created after
+    // the first open. On failure fall back to the last good cache.
+    try {
+      final networkClient = ref.read(networkClientProvider);
+      final result = await networkClient.requestMap(
+        '/shared-spaces',
+        method: HttpMethod.get,
+      );
 
-        if (result['code'] == 0 && result['data'] != null) {
-          final data = result['data'] as Map<String, dynamic>;
-          _cachedSpaces = (data['spaces'] as List? ?? [])
-              .whereType<Map<dynamic, dynamic>>()
-              .map((e) => Map<String, dynamic>.from(e))
-              .toList();
-        } else {
-          _cachedSpaces = [];
-        }
-      } catch (e) {
-        _log.warning('Failed to load spaces', e);
-        _cachedSpaces = [];
+      if (result['code'] == 0 && result['data'] != null) {
+        final data = result['data'] as Map<String, dynamic>;
+        _cachedSpaces = (data['spaces'] as List? ?? [])
+            .whereType<Map<dynamic, dynamic>>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
       }
+    } catch (e) {
+      _log.warning('Failed to load spaces, using cached list if any', e);
     }
 
-    if (_cachedSpaces!.isEmpty) {
+    if (_cachedSpaces == null || _cachedSpaces!.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

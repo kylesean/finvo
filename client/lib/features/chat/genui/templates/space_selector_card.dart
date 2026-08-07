@@ -106,13 +106,10 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
 
   Map<String, dynamic>? get _selectedSpace {
     if (_selectedSpaceId == null) return null;
-    try {
-      return _model.displaySpaces.firstWhere(
-        (s) => s['id'] == _selectedSpaceId,
-      );
-    } catch (_) {
-      return null;
+    for (final space in _model.displaySpaces) {
+      if (space['id'] == _selectedSpaceId) return space;
     }
+    return null;
   }
 
   @override

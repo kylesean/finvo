@@ -24,17 +24,6 @@ class AuthInterceptor extends Interceptor {
   final Dio _refreshDio;
   final _logger = Logger('AuthInterceptor');
 
-  /// Public paths that do not require authentication.
-  ///
-  /// `/auth/refresh` is included so the refresh flow never re-enters this
-  /// interceptor's 401 handling.
-  static const _publicPaths = [
-    '/auth/login',
-    '/auth/register',
-    '/auth/send-code',
-    '/auth/refresh',
-  ];
-
   /// Extra key used to mark a request that has already been retried after a
   /// token refresh. Without this guard, a retried request that gets a *second*
   /// 401 would re-enter the refresh flow, causing a 401→refresh→retry→401
@@ -61,7 +50,7 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     // Public paths do not require authentication
-    if (_publicPaths.contains(options.path)) {
+    if (ApiConstants.publicAuthPaths.contains(options.path)) {
       return handler.next(options);
     }
 
@@ -84,13 +73,16 @@ class AuthInterceptor extends Interceptor {
     ErrorInterceptorHandler handler,
   ) async {
     final bool isStatus401 = err.response?.statusCode == 401;
-    final bool isRefreshPath = err.requestOptions.path == '/auth/refresh';
+    final bool isRefreshPath =
+        err.requestOptions.path == ApiConstants.authRefreshPath;
     // Public endpoints (login/register/send-code) must NOT trigger the
     // refresh-and-replay flow: a 401 there means "bad credentials", not "token
     // expired". Without this guard, a wrong-password login could attempt a
     // token refresh and, on failure, call onUnauthorized to wipe the local
     // login state.
-    final bool isPublicPath = _publicPaths.contains(err.requestOptions.path);
+    final bool isPublicPath = ApiConstants.publicAuthPaths.contains(
+      err.requestOptions.path,
+    );
     // A retried request that already went through token refresh must not
     // re-enter the refresh flow — that would cause a 401→refresh→retry→401
     // cascade until the refresh token is exhausted.
@@ -219,7 +211,7 @@ class AuthInterceptor extends Interceptor {
         );
       }
       final Response<dynamic> response = await refreshDio.post(
-        '/auth/refresh',
+        ApiConstants.authRefreshPath,
         options: Options(
           headers: {ApiConstants.authorizationHeader: 'Bearer $refreshToken'},
         ),

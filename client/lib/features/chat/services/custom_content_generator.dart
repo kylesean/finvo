@@ -8,6 +8,7 @@ import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/features/chat/models/sse_event_models.dart';
 import 'package:finvo/features/chat/services/interaction_router.dart';
+import 'package:finvo/features/chat/services/sse_event_parsing.dart';
 
 export '../models/sse_event_models.dart'
     show ToolCallStartEvent, ToolCallEndEvent;
@@ -99,11 +100,16 @@ class CustomContentGenerator implements genui.Transport {
   // URL configuration
   final String _sseBaseUrl;
 
+  /// Whether [_dio] was created by this instance (vs. injected by the
+  /// provider layer). Only owned instances are closed on dispose; closing an
+  /// injected, container-managed Dio would break other consumers.
+  late final bool _ownsDio;
+
   CustomContentGenerator(
     this._storageService, {
     this._dio,
     required this._sseBaseUrl,
-  });
+  }) : _ownsDio = _dio == null;
 
   /// Get current session ID
   String? get currentSessionId => _currentSessionId;
@@ -294,6 +300,12 @@ class CustomContentGenerator implements genui.Transport {
       _logger.fine('CustomContentGenerator: Sending SSE request');
 
       // 3. Send request
+      //
+      // NOTE: no `validateStatus` override. Non-2xx responses must surface as
+      // DioException so the injected sseDio's AuthInterceptor can run its
+      // refresh-and-replay flow on 401 (a `validateStatus: (_) => true`
+      // bypass silently broke token refresh for the whole SSE path). The
+      // catch block below maps DioException back to a readable error.
       final response = await _dio!.post<ResponseBody>(
         uri.toString(),
         data: body,
@@ -305,7 +317,6 @@ class CustomContentGenerator implements genui.Transport {
             'Authorization': 'Bearer $token',
           },
           responseType: ResponseType.stream,
-          validateStatus: (status) => true,
           // Force extremely long timeout: SSE stream may last a long time (e.g. AI executing scripts)
           receiveTimeout: const Duration(hours: 1),
           sendTimeout: const Duration(hours: 1),
@@ -313,17 +324,13 @@ class CustomContentGenerator implements genui.Transport {
         cancelToken: _cancelToken,
       );
 
-      if (response.statusCode != 200) {
-        final error = 'HTTP error: ${response.statusCode}';
-        _logger.info('CustomContentGenerator: $error');
-        onError?.call(error);
-        // Reset the streaming state on the error path too; otherwise
-        // isStreamingResponse stays stuck after a non-200 response.
-        onStreamComplete?.call();
-        return;
-      }
-
-      // 4. Process SSE stream response
+      // 4. Process SSE stream response.
+      //
+      // Follows the SSE dispatch model: `data:` lines accumulate into one
+      // event and the event is dispatched on the blank-line boundary (a
+      // multi-line data field is joined with '\n'). Trailing events without
+      // a final blank line are flushed after the stream ends.
+      final accumulator = SseEventAccumulator();
       await for (final line
           in response.data!.stream
               .cast<List<int>>()
@@ -336,20 +343,17 @@ class CustomContentGenerator implements genui.Transport {
           break;
         }
 
-        if (line.isEmpty || !line.startsWith('data: ')) continue;
+        final event = accumulator.addLine(line);
+        if (event != null) {
+          await _dispatchSseEventData(event);
+        }
+      }
 
-        try {
-          final jsonStr = line.substring(6).trim();
-          if (jsonStr.isEmpty) continue;
-
-          final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-          final eventType = data['type'] as String?;
-
-          await _handleSseEvent(eventType, data);
-        } catch (e) {
-          _logger.warning(
-            'CustomContentGenerator: Error parsing SSE event: $e',
-          );
+      // Flush a trailing event that was not terminated by a blank line.
+      if (!_isCancelled) {
+        final trailing = accumulator.flush();
+        if (trailing != null) {
+          await _dispatchSseEventData(trailing);
         }
       }
 
@@ -369,11 +373,31 @@ class CustomContentGenerator implements genui.Transport {
         e,
         stackTrace,
       );
-      onError?.call(e.toString());
+      // Map non-2xx responses (now raised as DioException since the
+      // validateStatus bypass was removed) back to a readable error message.
+      final String errorMessage;
+      if (e is DioException && e.response != null) {
+        errorMessage = 'HTTP error: ${e.response!.statusCode}';
+      } else {
+        errorMessage = e.toString();
+      }
+      onError?.call(errorMessage);
       // Always terminate the stream on the error path so the upper layer can
       // clear isStreamingResponse. Without this a mid-stream failure leaves
       // the chat permanently in a streaming state.
       onStreamComplete?.call();
+    }
+  }
+
+  /// Parse and dispatch one accumulated SSE `data` event payload.
+  Future<void> _dispatchSseEventData(String jsonStr) async {
+    if (jsonStr.isEmpty) return;
+    try {
+      final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+      final eventType = data['type'] as String?;
+      await _handleSseEvent(eventType, data);
+    } catch (e) {
+      _logger.warning('CustomContentGenerator: Error parsing SSE event: $e');
     }
   }
 
@@ -564,15 +588,21 @@ class CustomContentGenerator implements genui.Transport {
             final incomeTotal =
                 (summary['income_total'] as num?)?.toDouble() ?? 0.0;
 
+            // Derive currency instead of hardcoding: prefer an explicit
+            // summary currency, otherwise fall back to the first entry's
+            // currency (backend attaches currency per transaction entry).
+            // 'CNY' stays only as the app-wide last-resort default.
+            final currency = deriveReceiptCurrency(summary, props);
+
             if (expenseTotal > 0) {
-              onTransactionCreated?.call(expenseTotal, 'expense', 'CNY');
+              onTransactionCreated?.call(expenseTotal, 'expense', currency);
             }
             if (incomeTotal > 0) {
-              onTransactionCreated?.call(incomeTotal, 'income', 'CNY');
+              onTransactionCreated?.call(incomeTotal, 'income', currency);
             }
 
             _logger.info(
-              'CustomContentGenerator: Detected TransactionGroupReceipt: expense=$expenseTotal, income=$incomeTotal',
+              'CustomContentGenerator: Detected TransactionGroupReceipt: expense=$expenseTotal, income=$incomeTotal, currency=$currency',
             );
           }
         }
@@ -589,5 +619,8 @@ class CustomContentGenerator implements genui.Transport {
     unawaited(_a2uiMessageController.close());
     unawaited(_textResponseController.close());
     _cancelToken?.cancel('Disposed');
+    if (_ownsDio) {
+      _dio?.close();
+    }
   }
 }

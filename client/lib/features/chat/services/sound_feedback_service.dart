@@ -4,12 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
 
+final _logger = Logger('SoundFeedbackService');
+
 /// Speech Recognition Audio Feedback Service
 ///
 /// Used to play start/end recording prompt sounds in a custom ASR service,
 /// providing a user experience similar to system speech recognition.
 class SoundFeedbackService {
-  static final _logger = Logger('SoundFeedbackService');
   static SoundFeedbackService? _instance;
 
   AudioPlayer? _startPlayer;

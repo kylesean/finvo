@@ -138,11 +138,7 @@ enum TransactionCategory {
   static TransactionCategory fromKey(String? key) {
     if (key == null || key.isEmpty) return others;
     final upperKey = key.toUpperCase();
-    try {
-      return values.firstWhere((e) => e.key == upperKey);
-    } catch (_) {
-      return others;
-    }
+    return values.firstWhere((e) => e.key == upperKey, orElse: () => others);
   }
 
   /// Retrieves a dynamic color based on the current theme (Recommended).

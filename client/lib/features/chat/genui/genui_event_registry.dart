@@ -27,6 +27,8 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/chat/models/client_state_mutation.dart';
 import 'package:finvo/features/chat/genui/events/interaction_events.dart';
 
+final _logger = Logger('GenUiEventRegistry');
+
 /// Event processing result
 ///
 /// Contains business mutation (ClientStateMutation) and optional payload extensions sent to LLM
@@ -44,8 +46,6 @@ class EventProcessingResult {
 /// Stateless dispatcher with sealed event types as input.
 class GenUiEventRegistry {
   GenUiEventRegistry._(); // Prevent instantiation
-
-  static final _logger = Logger('GenUiEventRegistry');
 
   /// Dispatch typed event, return business processing result.
   ///

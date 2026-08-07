@@ -1,5 +1,7 @@
 import 'package:logging/logging.dart';
 
+final _logger = Logger('GenUI');
+
 /// GenUI logging and monitoring service
 ///
 /// This class provides logging and performance monitoring for GenUI components.
@@ -14,8 +16,6 @@ import 'package:logging/logging.dart';
 class GenUiLogger {
   // Performance threshold (milliseconds)
   static const int _slowRenderingThresholdMs = 100;
-
-  static final _logger = Logger('GenUI');
 
   // Builder invocation statistics
   static final Map<String, BuilderStats> _builderStats = {};

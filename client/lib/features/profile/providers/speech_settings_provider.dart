@@ -8,14 +8,14 @@ import 'package:finvo/features/profile/models/speech_settings.dart';
 
 part 'speech_settings_provider.g.dart';
 
+final _logger = Logger('SpeechSettingsNotifier');
+
 /// SharedPreferences storage keys
 const String _speechSettingsKey = 'speech_settings';
 
 /// Speech settings Notifier
 @riverpod
 class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
-  static final _logger = Logger('SpeechSettingsNotifier');
-
   @override
   SpeechSettingsState build() {
     unawaited(Future<void>.microtask(() => unawaited(_loadSettings())));

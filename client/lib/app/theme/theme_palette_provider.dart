@@ -5,9 +5,10 @@ import 'package:finvo/core/services/server_config_service.dart'
     show sharedPreferencesProvider;
 import 'package:finvo/app/theme/app_theme_palette.dart';
 
+final _logger = Logger('ThemePaletteNotifier');
+
 class ThemePaletteNotifier extends Notifier<AppThemePalette> {
   static const _storageKey = 'theme_palette';
-  static final _logger = Logger('ThemePaletteNotifier');
 
   @override
   AppThemePalette build() {

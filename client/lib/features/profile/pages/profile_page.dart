@@ -197,19 +197,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               FTileGroup(
                 children: [
                   FTile(
-                    prefix: _buildSettingIcon(context, Icons.help_outline),
-                    title: Text(t.settings.helpAndFeedback),
-                    subtitle: Text(t.settings.helpAndFeedbackSubtitle),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () {
-                      // TODO: Implement help functionality
-                    },
-                  ),
-                  FTile(
                     prefix: _buildSettingIcon(context, FLucideIcons.info),
                     title: Text(t.settings.aboutApp),
                     subtitle: Text(t.settings.aboutAppSubtitle),

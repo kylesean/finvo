@@ -11,6 +11,9 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('FinancialSettingSheets');
 
 /// Show safety threshold settings
 void showSafetyThresholdSettings(BuildContext context) {
@@ -323,7 +326,8 @@ class _SafetyThresholdBottomSheet extends ConsumerWidget {
         notifier.updateSafetyThreshold(Decimal.parse(value.toStringAsFixed(0)));
         try {
           return await notifier.saveFinancialSettings();
-        } catch (_) {
+        } catch (e) {
+          _logger.warning('Failed to save safety threshold', e);
           return false;
         }
       },
@@ -351,7 +355,8 @@ class _DailySpendingBottomSheet extends ConsumerWidget {
         notifier.updateDailyBurnRate(Decimal.parse(value.toStringAsFixed(0)));
         try {
           return await notifier.saveFinancialSettings();
-        } catch (_) {
+        } catch (e) {
+          _logger.warning('Failed to save daily burn rate', e);
           return false;
         }
       },

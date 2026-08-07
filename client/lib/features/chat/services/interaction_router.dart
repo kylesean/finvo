@@ -20,10 +20,13 @@ library;
 import 'dart:convert';
 
 import 'package:genui/genui.dart' as genui;
+import 'package:logging/logging.dart';
 
 import 'package:finvo/features/chat/genui/events/interaction_events.dart';
 import 'package:finvo/features/chat/genui/genui_event_registry.dart';
 import 'package:finvo/features/chat/models/client_state_mutation.dart';
+
+final _logger = Logger('InteractionRouter');
 
 /// Typed result of an outbound message.
 ///
@@ -90,10 +93,8 @@ class InteractionRouter {
   /// `application/vnd.genui.interaction+json`, avoiding mis-parsing attachments
   /// or other DataParts (pre-refactoring manual byte parsing ignored mimeType).
   String? _extractInteraction(genui.ChatMessage message) {
-    for (final part in message.parts.uiInteractionParts) {
-      return part.interaction;
-    }
-    return null;
+    final parts = message.parts.uiInteractionParts;
+    return parts.isEmpty ? null : parts.first.interaction;
   }
 
   /// Parse interaction JSON and route.
@@ -101,7 +102,10 @@ class InteractionRouter {
     final Map<String, dynamic> inner;
     try {
       inner = jsonDecode(interactionJson) as Map<String, dynamic>;
-    } catch (_) {
+    } catch (e) {
+      // Malformed interaction payload from the AI layer: skip it, but keep
+      // the failure diagnosable.
+      _logger.warning('Skipping unparseable interaction JSON', e);
       return OutgoingMessage.skipped();
     }
 

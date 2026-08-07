@@ -8,6 +8,8 @@ import 'package:logging/logging.dart';
 import 'package:finvo/features/chat/models/message_attachments.dart';
 import 'package:finvo/shared/utils/mime_type_mapper.dart';
 
+final _logger = Logger('DataUriService');
+
 /// DataUri format media file wrapper
 class DataUriFile {
   final String dataUri;
@@ -82,8 +84,6 @@ class DataUriFile {
 /// DataUri conversion utility class
 /// Responsible for converting local files to dataUri format
 class DataUriService {
-  static final _logger = Logger('DataUriService');
-
   /// Convert XFile list to DataUri format
   static Future<List<DataUriFile>> convertFilesToDataUri(
     List<XFile> files, {

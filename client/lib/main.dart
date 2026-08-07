@@ -26,118 +26,118 @@ void main() {
   //
   // runZonedGuarded returns Future<void>? because the body is async; we
   // never await it — the zone must stay active for the app's entire lifetime.
+  // The bootstrap body lives in [_bootstrap] so the fatal-init retry screen
+  // can re-run it inside this SAME zone instead of calling main() again
+  // (which would nest a new guarded zone on every retry).
   unawaited(
-    runZonedGuarded(
-      () async {
-        setupLogging();
-        WidgetsFlutterBinding.ensureInitialized();
+    runZonedGuarded(_bootstrap, (Object error, StackTrace stackTrace) {
+      // Last-resort handler for async errors that escape all try/catch blocks
+      // in the app (unawaited Futures, timer callbacks, stream error events
+      // without listeners, microtasks). Without this they would crash the
+      // process in release mode or print an unhelpful "Unhandled exception"
+      // in debug mode.
+      _logger.severe('Uncaught async error', error, stackTrace);
+    }),
+  );
+}
 
-        // Catch Flutter framework errors (rendering, layout, assertions).
-        // Without this override, unhandled framework errors render a red error
-        // screen in debug and are silently dropped in release. We log every one
-        // and still forward to presentError so debug-mode keeps its assertion UI.
-        FlutterError.onError = (FlutterErrorDetails details) {
-          _logger.severe(
-            'Flutter framework error',
-            details.exception,
-            details.stack,
-          );
-          FlutterError.presentError(details);
-        };
+/// Full initialization + launch sequence. Re-entrant: the fatal-init error
+/// screen re-invokes it to retry startup without nesting error zones.
+Future<void> _bootstrap() async {
+  setupLogging();
+  WidgetsFlutterBinding.ensureInitialized();
 
-        final SharedPreferences prefs;
+  // Catch Flutter framework errors (rendering, layout, assertions).
+  // Without this override, unhandled framework errors render a red error
+  // screen in debug and are silently dropped in release. We log every one
+  // and still forward to presentError so debug-mode keeps its assertion UI.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    _logger.severe('Flutter framework error', details.exception, details.stack);
+    FlutterError.presentError(details);
+  };
 
-        try {
-          // Initialize persistent storage
-          prefs = await SharedPreferences.getInstance();
-          _logger.info('SharedPreferences initialization completed');
+  final SharedPreferences prefs;
 
-          // Initialize slang language service
-          // Try to restore language settings from storage, otherwise use device language
-          final savedLocale = prefs.getString('app_locale');
-          if (savedLocale != null) {
-            unawaited(LocaleSettings.setLocaleRaw(savedLocale));
-            _logger.info('Language settings restored: $savedLocale');
-          } else {
-            unawaited(LocaleSettings.useDeviceLocale());
-            _logger.info('Using device language');
-          }
-          // Keep Intl in sync so NumberFormat/DateFormat follow the app locale
-          LocaleService.syncIntlLocale();
+  try {
+    // Initialize persistent storage
+    prefs = await SharedPreferences.getInstance();
+    _logger.info('SharedPreferences initialization completed');
 
-          // Initialize date formatting. In intl 0.20.x the locale parameter is
-          // ignored — a single call loads symbols for ALL locales (zh, en, ja, ko,
-          // zh_Hant) at once. The previous double call was redundant.
-          await initializeDateFormatting();
-          _logger.info('Date format initialization completed for all locales');
+    // Initialize slang language service
+    // Try to restore language settings from storage, otherwise use device language
+    final savedLocale = prefs.getString('app_locale');
+    if (savedLocale != null) {
+      unawaited(LocaleSettings.setLocaleRaw(savedLocale));
+      _logger.info('Language settings restored: $savedLocale');
+    } else {
+      unawaited(LocaleSettings.useDeviceLocale());
+      _logger.info('Using device language');
+    }
+    // Keep Intl in sync so NumberFormat/DateFormat follow the app locale
+    LocaleService.syncIntlLocale();
 
-          // Initialize sound feedback service (for self-hosted ASR)
-          // Wrapped in try-catch to not block app launch if assets are missing
-          try {
-            await SoundFeedbackService.instance.initialize();
-            _logger.info('Sound feedback service initialization completed');
-          } catch (e) {
-            _logger.warning('Sound feedback service initialization failed: $e');
-          }
+    // Initialize date formatting. In intl 0.20.x the locale parameter is
+    // ignored — a single call loads symbols for ALL locales (zh, en, ja, ko,
+    // zh_Hant) at once. The previous double call was redundant.
+    await initializeDateFormatting();
+    _logger.info('Date format initialization completed for all locales');
 
-          // Pre-load Xiaomi MiSans font to bypass Skia fallback selecting NotoSansCJK
-          try {
-            await AppFontConfig.preloadMiSans();
-            _logger.info(
-              'MiSans preload result: loaded=${AppFontConfig.miSansLoaded}',
-            );
-          } catch (e) {
-            _logger.warning('MiSans preload failed (will use fallback): $e');
-          }
+    // Initialize sound feedback service (for self-hosted ASR)
+    // Wrapped in try-catch to not block app launch if assets are missing
+    try {
+      await SoundFeedbackService.instance.initialize();
+      _logger.info('Sound feedback service initialization completed');
+    } catch (e) {
+      _logger.warning('Sound feedback service initialization failed: $e');
+    }
 
-          _logger.info('Application initialization completed, launching app');
-        } catch (e, stackTrace) {
-          _logger.severe('Error during initialization', e, stackTrace);
-          // Never leave the user on a black screen: render a minimal fatal-error
-          // screen with a retry entry point so the failure is visible and recoverable.
-          runApp(FatalInitErrorApp(error: e, stackTrace: stackTrace));
-          return;
-        }
+    // Pre-load Xiaomi MiSans font to bypass Skia fallback selecting NotoSansCJK
+    try {
+      await AppFontConfig.preloadMiSans();
+      _logger.info(
+        'MiSans preload result: loaded=${AppFontConfig.miSansLoaded}',
+      );
+    } catch (e) {
+      _logger.warning('MiSans preload failed (will use fallback): $e');
+    }
 
-        // Create ProviderContainer
-        // Optimization: No longer synchronously warming up authProvider, allowing SecureStorage operations
-        // to happen asynchronously after the Splash Screen renders to avoid blocking the main thread
-        final container = ProviderContainer(
-          overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-        );
+    _logger.info('Application initialization completed, launching app');
+  } catch (e, stackTrace) {
+    _logger.severe('Error during initialization', e, stackTrace);
+    // Never leave the user on a black screen: render a minimal fatal-error
+    // screen with a retry entry point so the failure is visible and recoverable.
+    runApp(FatalInitErrorApp(error: e, stackTrace: stackTrace));
+    return;
+  }
 
-        _logger.info(
-          'ProviderContainer created, authentication will initialize on first access',
-        );
+  // Create ProviderContainer
+  // Optimization: No longer synchronously warming up authProvider, allowing SecureStorage operations
+  // to happen asynchronously after the Splash Screen renders to avoid blocking the main thread
+  final container = ProviderContainer(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+  );
 
-        runApp(
-          TranslationProvider(
-            child: UncontrolledProviderScope(
-              container: container,
-              child: const MyApp(),
-            ),
-          ),
-        );
+  _logger.info(
+    'ProviderContainer created, authentication will initialize on first access',
+  );
 
-        // Explicitly trigger auth state restoration after the first frame so
-        // SecureStorage reads do not block the initial render. This replaces
-        // the former side-effect inside Auth.build() with an explicit startup
-        // step, keeping the provider build() pure and decoupled from the
-        // widget build cycle.
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          unawaited(container.read(authProvider.notifier).checkAuthStatus());
-        });
-      },
-      (Object error, StackTrace stackTrace) {
-        // Last-resort handler for async errors that escape all try/catch blocks
-        // in the app (unawaited Futures, timer callbacks, stream error events
-        // without listeners, microtasks). Without this they would crash the
-        // process in release mode or print an unhelpful "Unhandled exception"
-        // in debug mode.
-        _logger.severe('Uncaught async error', error, stackTrace);
-      },
+  runApp(
+    TranslationProvider(
+      child: UncontrolledProviderScope(
+        container: container,
+        child: const MyApp(),
+      ),
     ),
   );
+
+  // Explicitly trigger auth state restoration after the first frame so
+  // SecureStorage reads do not block the initial render. This replaces
+  // the former side-effect inside Auth.build() with an explicit startup
+  // step, keeping the provider build() pure and decoupled from the
+  // widget build cycle.
+  SchedulerBinding.instance.addPostFrameCallback((_) {
+    unawaited(container.read(authProvider.notifier).checkAuthStatus());
+  });
 }
 
 /// Minimal fallback UI shown when core initialization fails, so users are not
@@ -189,8 +189,10 @@ class FatalInitErrorApp extends StatelessWidget {
                   const SizedBox(height: 24),
                   FilledButton.icon(
                     onPressed: () {
-                      // Full app restart: re-run the whole initialization flow.
-                      main();
+                      // Re-run the bootstrap inside the SAME guarded zone.
+                      // (Calling main() here would nest a fresh
+                      // runZonedGuarded on every retry.)
+                      unawaited(_bootstrap());
                     },
                     icon: const Icon(Icons.refresh),
                     label: Text(t.common.retry),

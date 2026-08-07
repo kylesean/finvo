@@ -350,13 +350,11 @@ class GenUiLifecycleManager {
       return messageId;
     }
 
-    // Fallback: find last AI message
+    // Fallback: find the last AI message (a surface arriving outside an
+    // active stream belongs to the most recent AI turn).
     final messages = _messageRepository.getCurrentMessages();
     for (int i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].sender != MessageSender.ai) {
-        continue;
-      }
-      if (messages[i].sender != MessageSender.user) {
+      if (messages[i].sender == MessageSender.ai) {
         return messages[i].id;
       }
     }

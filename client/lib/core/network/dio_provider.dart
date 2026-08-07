@@ -99,6 +99,10 @@ final sseDioProvider = Provider<Dio>((ref) {
   );
   // Note: SSE does not need ErrorInterceptor and BusinessInterceptor, because the streaming response handling is different
 
+  // Release the idle HTTP connection pool when the provider rebuilds
+  // (e.g. server URL change) or the container is disposed.
+  ref.onDispose(dio.close);
+
   _logger.info('SSE Dio instance created (baseUrl will be set dynamically)');
   return dio;
 });
@@ -141,6 +145,9 @@ final dioProvider = Provider<Dio>((ref) {
   ); // Auth interceptor
   dio.interceptors.add(ErrorInterceptor()); // Error handling interceptor
   dio.interceptors.add(BusinessInterceptor()); // Business logic interceptor
+  // Release the idle HTTP connection pool when the provider rebuilds
+  // (e.g. server URL change) or the container is disposed.
+  ref.onDispose(dio.close);
   _logger.info('Dio instance created (baseUrl will be set dynamically)');
   return dio;
 });

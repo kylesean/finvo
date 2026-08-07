@@ -127,7 +127,15 @@ class _ChatConversationDrawerState
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
-                    ref.invalidate(conversationListProvider);
+                    // The list (and its error state) is driven by
+                    // paginatedConversationProvider, so retry must re-run its
+                    // loader. Invalidating conversationListProvider here was a
+                    // no-op: nothing on this page watches it.
+                    unawaited(
+                      ref
+                          .read(paginatedConversationProvider.notifier)
+                          .loadFirstPage(),
+                    );
                   },
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
@@ -267,27 +275,6 @@ class _ChatConversationDrawerState
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              // Library button - Use Forui FItemGroup + FItem (title) style, maintain systematic spacing and divider
-              FItemGroup(
-                divider: FItemDivider.none,
-                children: [
-                  FItem(
-                    prefix: Icon(
-                      FLucideIcons.database,
-                      size: 16,
-                      color: theme.colors.mutedForeground,
-                    ),
-                    title: Text(
-                      t.chat.library,
-                      style: theme.typography.body.sm,
-                    ),
-                    onPress: () {
-                      // TODO: Open library
-                    },
-                  ),
-                ],
               ),
             ],
           ),

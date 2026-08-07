@@ -8,12 +8,13 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:finvo/features/chat/services/speech_recognition_service.dart';
 
+final _logger = Logger('SystemSpeechService');
+
 /// System speech recognition service
 ///
 /// Based on speech_to_text library implementation, using device's built-in speech recognition service.
 /// Supports iOS, Android, and Web platforms.
 class SystemSpeechService implements SpeechRecognitionService {
-  static final _logger = Logger('SystemSpeechService');
   static const _platformChannel = MethodChannel('com.finvo.app/speech_check');
 
   final SpeechToText _speech = SpeechToText();

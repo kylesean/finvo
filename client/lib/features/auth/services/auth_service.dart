@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/features/auth/models/user.dart';
@@ -140,7 +141,7 @@ class AuthService {
     final timezone = await _timezoneService.getCurrentTimezone();
 
     final response = await _networkClient.request<Map<String, dynamic>>(
-      '/auth/login',
+      ApiConstants.authLoginPath,
       method: HttpMethod.post,
       data: {
         'account': account,
@@ -168,7 +169,7 @@ class AuthService {
   // --- Connect to send verification code API ---
   Future<void> sendVerificationCode(String account) async {
     await _networkClient.request<void>(
-      '/auth/send-code',
+      ApiConstants.authSendCodePath,
       method: HttpMethod.post,
       data: {'account': account, 'type': _accountType(account)},
     );
@@ -188,7 +189,7 @@ class AuthService {
     final locale = _getDeviceLocale();
 
     final response = await _networkClient.request<Map<String, dynamic>>(
-      '/auth/register',
+      ApiConstants.authRegisterPath,
       method: HttpMethod.post,
       data: {
         'type': _accountType(account),

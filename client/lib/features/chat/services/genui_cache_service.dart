@@ -1,13 +1,14 @@
 import 'dart:collection';
 import 'package:logging/logging.dart';
 
+final _logger = Logger('GenUiCacheService');
+
 /// Centralized cache service for GenUI components to prevent memory leaks
 ///
 /// Many GenUI components need to persist state across rebuilds (e.g., when a user
 /// scrolls away and back). This service provides a size-limited cache to store
 /// these states without leaking memory over long sessions.
 class GenUiCacheService {
-  static final _logger = Logger('GenUiCacheService');
   static final GenUiCacheService _instance = GenUiCacheService._internal();
 
   factory GenUiCacheService() => _instance;

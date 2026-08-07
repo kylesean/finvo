@@ -44,13 +44,15 @@ class TransactionCard extends ConsumerWidget {
 
     if (transaction.categoryKey != null &&
         transaction.categoryKey!.isNotEmpty) {
-      try {
-        return TransactionCategory.fromKey(
-          transaction.categoryKey!,
-        ).displayText;
-      } catch (_) {
+      final category = TransactionCategory.fromKey(transaction.categoryKey!);
+      // fromKey maps unknown keys to `others`; for those, prefer the
+      // configured display name over a generic "Others" (restores the
+      // fallback the former catch branch provided).
+      if (category == TransactionCategory.others &&
+          transaction.categoryKey!.toUpperCase() != 'OTHERS') {
         return CategoryConfig.getCategoryName(transaction.categoryKey!);
       }
+      return category.displayText;
     }
     return transaction.category;
   }

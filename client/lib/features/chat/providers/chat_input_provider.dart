@@ -12,6 +12,8 @@ import 'package:finvo/features/chat/providers/chat_input_state.dart';
 
 part 'chat_input_provider.g.dart';
 
+final _logger = Logger('ChatInputNotifier');
+
 typedef OnSendMessageCallback =
     Future<void> Function(
       String, {
@@ -29,8 +31,6 @@ extension ChatInputStateMediaHandling on ChatInputState {
 
 @riverpod
 class ChatInputNotifier extends _$ChatInputNotifier {
-  static final _logger = Logger('ChatInputNotifier');
-
   final SpeechSessionManager _speechSession = SpeechSessionManager();
   FileUploadService? _fileUploadService;
 

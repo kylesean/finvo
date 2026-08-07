@@ -14,12 +14,29 @@ class SpeechConfig {
     return envPort;
   }
 
+  /// WebSocket scheme: 'ws' (plaintext, legacy default) or 'wss' (TLS).
+  ///
+  /// Voice data is sensitive; deployments behind TLS should set
+  /// SPEECH_WS_SCHEME=wss so the audio stream is encrypted in transit.
+  static String get scheme {
+    const envScheme = String.fromEnvironment(
+      'SPEECH_WS_SCHEME',
+      defaultValue: 'ws',
+    );
+    return envScheme == 'wss' ? 'wss' : 'ws';
+  }
+
   static String get path => '/ws';
 
   /// Full WebSocket URL (only valid if host is configured)
-  /// Returns empty string if host is not configured
+  /// Returns empty string if host is not configured.
+  /// A host value that already carries a scheme (ws:// or wss://) is used
+  /// verbatim so user-configured endpoints can opt into TLS directly.
   static String get fullUrl {
     if (host.isEmpty) return '';
-    return 'ws://$host:$port$path';
+    if (host.startsWith('ws://') || host.startsWith('wss://')) {
+      return '$host$path';
+    }
+    return '$scheme://$host:$port$path';
   }
 }

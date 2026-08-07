@@ -129,7 +129,9 @@ class Statistics extends _$Statistics {
                 ? state.selectedAccountTypes
                 : null,
           );
-        } catch (_) {
+        } catch (e) {
+          // Supplementary data: degrade to null but keep the failure visible.
+          _logger.warning('Cash-flow fetch failed, degrading to null', e);
           return null;
         }
       }
@@ -144,7 +146,9 @@ class Statistics extends _$Statistics {
                 ? state.selectedAccountTypes
                 : null,
           );
-        } catch (_) {
+        } catch (e) {
+          // Supplementary data: degrade to null but keep the failure visible.
+          _logger.warning('Health-score fetch failed, degrading to null', e);
           return null;
         }
       }

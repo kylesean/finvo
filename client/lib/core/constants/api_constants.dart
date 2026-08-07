@@ -74,6 +74,22 @@ class ApiConstants {
   static const String aiChatSseEndpoint = '/stream';
   static const String aiChatResumeEndpoint = '/resume';
 
+  // Auth endpoint paths (single source of truth for service calls and the
+  // auth interceptor's public-path / refresh-path checks).
+  static const String authLoginPath = '/auth/login';
+  static const String authRegisterPath = '/auth/register';
+  static const String authSendCodePath = '/auth/send-code';
+  static const String authRefreshPath = '/auth/refresh';
+
+  /// Paths that do not require an access token. Includes the refresh path
+  /// so the refresh flow never re-enters the interceptor's 401 handling.
+  static const List<String> publicAuthPaths = [
+    authLoginPath,
+    authRegisterPath,
+    authSendCodePath,
+    authRefreshPath,
+  ];
+
   // Timeout Configuration
   static const Duration connectTimeout = Duration(seconds: 10);
   static const Duration receiveTimeout = Duration(seconds: 30);

@@ -15,6 +15,9 @@ import 'package:finvo/shared/models/action_item_model.dart';
 import 'package:finvo/shared/widgets/dialogs/action_bottom_sheet.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('SharedSpaceSettings');
 
 class SharedSpaceSettingsPage extends ConsumerStatefulWidget {
   final String spaceId;
@@ -285,7 +288,8 @@ class _SharedSpaceSettingsPageState
           description: Text(t.sharedSpace.settings.saveFailed),
         );
       }
-    } catch (_) {
+    } catch (e) {
+      _logger.warning('Failed to save space settings', e);
       ToastService.showDestructive(
         description: Text(t.sharedSpace.settings.saveFailed),
       );
@@ -529,7 +533,8 @@ class _SharedSpaceSettingsPageState
       await service.updateMemberRole(space.id, member.userId, newRole);
       ref.invalidate(spaceDetailProvider(widget.spaceId));
       ToastService.show(description: Text(t.sharedSpace.settings.roleChanged));
-    } catch (_) {
+    } catch (e) {
+      _logger.warning('Failed to change member role', e);
       ToastService.showDestructive(
         description: Text(t.sharedSpace.settings.roleChangeFailed),
       );
@@ -563,7 +568,8 @@ class _SharedSpaceSettingsPageState
       await service.removeMember(space.id, member.userId);
       ref.invalidate(spaceDetailProvider(widget.spaceId));
       ToastService.show(description: Text(t.sharedSpace.settings.removed));
-    } catch (_) {
+    } catch (e) {
+      _logger.warning('Failed to remove member', e);
       ToastService.showDestructive(
         description: Text(t.sharedSpace.settings.removeFailed),
       );

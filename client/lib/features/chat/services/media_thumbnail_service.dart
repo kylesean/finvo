@@ -7,10 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/features/chat/models/media_file.dart';
 
+final _logger = Logger('MediaThumbnailService');
+
 /// Media thumbnail generation service
 /// Responsible for generating thumbnails for images to improve preview performance
 class MediaThumbnailService {
-  static final _logger = Logger('MediaThumbnailService');
   static const int _thumbnailSize = 200; // Maximum thumbnail size
 
   /// Maximum number of cached thumbnails before evicting oldest entries.

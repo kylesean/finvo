@@ -28,13 +28,11 @@ enum Currency {
 
   /// Get currency by code
   static Currency? fromCode(String code) {
-    try {
-      return Currency.values.firstWhere(
-        (c) => c.code.toUpperCase() == code.toUpperCase(),
-      );
-    } catch (_) {
-      return null;
-    }
+    final upperCode = code.toUpperCase();
+    final index = Currency.values.indexWhere(
+      (c) => c.code.toUpperCase() == upperCode,
+    );
+    return index == -1 ? null : Currency.values[index];
   }
 
   /// Get display name with symbol

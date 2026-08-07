@@ -60,7 +60,6 @@ dependencies:
   http_parser: ^4.1.0
   qr_flutter: ^4.1.0
   chinese_font_library: ^1.2.0
-  flutter_launcher_icons: ^0.14.4
   mobile_scanner: ^7.4.0
   just_audio: ^0.10.5
 
@@ -76,6 +75,8 @@ dev_dependencies:
   riverpod_generator: ^4.0.4
   freezed: ^3.0.6
   mockito: ^5.4.4
+  # CLI-only tooling (icon generation) must not ship in release builds
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true

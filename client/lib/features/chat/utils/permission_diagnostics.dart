@@ -3,9 +3,9 @@ import 'package:logging/logging.dart';
 import 'package:record/record.dart';
 import 'dart:io';
 
-class PermissionDiagnostics {
-  static final _logger = Logger('PermissionDiagnostics');
+final _logger = Logger('PermissionDiagnostics');
 
+class PermissionDiagnostics {
   /// Comprehensive permission diagnostics
   static Future<Map<String, dynamic>> diagnose() async {
     final result = <String, dynamic>{};

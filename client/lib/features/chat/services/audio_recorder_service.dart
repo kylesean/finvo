@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:record/record.dart';
 
-class AudioRecorderService {
-  static final _logger = Logger('AudioRecorderService');
+final _logger = Logger('AudioRecorderService');
 
+class AudioRecorderService {
   final AudioRecorder _recorder = AudioRecorder();
   Stream<Uint8List>? _audioStream;
   bool _isRecording = false;

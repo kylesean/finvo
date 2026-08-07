@@ -1,11 +1,15 @@
 // features/home/models/transaction_model.dart
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:forui/forui.dart';
+import 'package:logging/logging.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 part 'transaction_model.freezed.dart';
 part 'transaction_model.g.dart';
+
+final _logger = Logger('TransactionModel');
 
 // Transaction type enum
 enum TransactionType {
@@ -313,16 +317,71 @@ IconData lucideIconFromString(String raw) {
   return lucideIconMap[key] ?? FLucideIcons.shoppingBag;
 }
 
-// Parse amount field, support string and number format
+// Parse amount field, supports numbers and strings (including localized
+// formats like "1.234,56" / "1,234.56").
+//
+// Missing values (null/empty) legitimately map to 0.0, but an UNPARSEABLE
+// non-empty value also degrades to 0.0 with a loud warning: silently zeroing
+// financial amounts hides data corruption, so balance discrepancies must be
+// investigable via logs.
 double _parseAmount(dynamic value) {
   if (value == null) return 0.0;
   if (value is num) return value.toDouble();
   if (value is String) {
-    // Remove potential signs and currency symbols
-    final cleanValue = value.replaceAll(RegExp(r'[^\d.-]'), '');
-    return double.tryParse(cleanValue) ?? 0.0;
+    final normalized = _normalizeAmountString(value);
+    if (normalized.isEmpty) return 0.0;
+    // Parse through Decimal to preserve precision; convert to double only at
+    // this display boundary (same contract as AmountFormatter.parseDouble).
+    final decimal = Decimal.tryParse(normalized);
+    if (decimal != null) return decimal.toDouble();
+    final fallback = double.tryParse(normalized);
+    if (fallback != null) return fallback;
+    _logger.warning('Unparseable amount "$value" coerced to 0.0');
+    return 0.0;
   }
+  _logger.warning('Unexpected amount type ${value.runtimeType} coerced to 0.0');
   return 0.0;
+}
+
+/// Normalize a localized amount string to plain `[-]digits[.digits]` form.
+///
+/// Strips currency symbols/whitespace and reconciles ',' vs '.' conventions:
+/// - "¥1,234.56"  (US grouping)   -> "1234.56"
+/// - "1.234,56 €" (EU grouping)   -> "1234.56"
+/// - "1,234"      (3-digit group) -> "1234"
+/// - "12,5"       (comma decimal) -> "12.5"
+/// A lone dot ("1.234") is kept as a decimal point for backward
+/// compatibility with the previous parser.
+String _normalizeAmountString(String raw) {
+  var value = raw.trim().replaceAll(RegExp(r'[^\d,.\-]'), '');
+  if (value.isEmpty) return value;
+
+  final lastDot = value.lastIndexOf('.');
+  final lastComma = value.lastIndexOf(',');
+
+  if (lastDot >= 0 && lastComma >= 0) {
+    if (lastComma > lastDot) {
+      // Dots group thousands, comma is the decimal separator ("1.234,56").
+      value = value.replaceAll('.', '').replaceAll(',', '.');
+    } else {
+      // Commas group thousands, dot is the decimal separator ("1,234.56").
+      value = value.replaceAll(',', '');
+    }
+  } else if (lastComma >= 0) {
+    if (RegExp(r'^-?\d{1,3}(,\d{3})+$').hasMatch(value)) {
+      // Strict thousands grouping ("1,234" / "1,234,567").
+      value = value.replaceAll(',', '');
+    } else {
+      // Otherwise the comma is a decimal separator ("12,5").
+      value = value.replaceAll(',', '.');
+    }
+  } else if (RegExp(r'^-?\d{1,3}(\.\d{3}){2,}$').hasMatch(value)) {
+    // Dot-only with strictly repeated 3-digit groups ("1.234.567") can only
+    // be thousands grouping. Single dots stay decimal ("1.234" == 1.234).
+    value = value.replaceAll('.', '');
+  }
+
+  return value;
 }
 
 // If your API returns 0/1 instead of true/false for is_ai_build, you might need a custom fromJson
