@@ -34,12 +34,11 @@ class AIService {
 
       final response = await _dio.post<Map<String, dynamic>>(
         url,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-        ),
+        // No manual Authorization/Content-Type headers here: the shared
+        // AuthInterceptor attaches the Bearer token (and handles 401
+        // refresh-and-replay uniformly), while Dio's default headers already
+        // set application/json. The token pre-check above still short-circuits
+        // the request when no token exists, so we never fire a doomed call.
       );
 
       if (response.statusCode == 200) {

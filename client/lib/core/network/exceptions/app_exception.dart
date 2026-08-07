@@ -96,3 +96,15 @@ class RequestCancelledException extends AppException {
   RequestCancelledException([String? message])
     : super(message, 'Request Cancelled: ');
 }
+
+/// Audio service exception (playback, asset loading, hardware issues)
+class AudioServiceException extends AppException {
+  AudioServiceException([String? message])
+    : super(message, 'Audio Service Error: ');
+}
+
+/// Speech recognition service exception (ASR connection, permission, websocket issues)
+class SpeechServiceException extends AppException {
+  SpeechServiceException([String? message])
+    : super(message, 'Speech Service Error: ');
+}
