@@ -56,6 +56,7 @@ class SharedSpaceCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // space icon
                         Container(
@@ -89,28 +90,13 @@ class SharedSpaceCard extends ConsumerWidget {
                         ),
                         const SizedBox(width: 16),
 
-                        // space info
+                        // space name (vertically centered with icon)
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                space.name,
-                                style: AppTextStyles.pageTitle(theme),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                space.description ??
-                                    t.sharedSpace.spaceCard.noDescription,
-                                style: theme.typography.body.sm.copyWith(
-                                  color: colorScheme.mutedForeground,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                          child: Text(
+                            space.name,
+                            style: AppTextStyles.pageTitleLarge(theme),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
 
@@ -123,6 +109,19 @@ class SharedSpaceCard extends ConsumerWidget {
                           ),
                         ),
                       ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // space description
+                    Text(
+                      space.description ??
+                          t.sharedSpace.spaceCard.noDescription,
+                      style: theme.typography.body.sm.copyWith(
+                        color: colorScheme.mutedForeground,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
 
                     const SizedBox(height: 24),
@@ -175,6 +174,7 @@ class SharedSpaceCard extends ConsumerWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(icon, size: 14, color: colorScheme.mutedForeground),
         const SizedBox(width: 4),
@@ -223,12 +223,13 @@ class SharedSpaceCard extends ConsumerWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 12, color: fgColor),
+          Icon(icon, size: 14, color: fgColor),
           const SizedBox(width: 4),
           Text(
             label,
-            style: AppTextStyles.listTrailing(theme).copyWith(color: fgColor),
+            style: AppTextStyles.statLabel(theme).copyWith(color: fgColor),
           ),
         ],
       ),

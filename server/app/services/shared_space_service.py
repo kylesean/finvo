@@ -313,12 +313,10 @@ class SharedSpaceService:
         if not space:
             raise NotFoundError("shared space not found")
 
-        # Generate invite code: 8 chars, no ambiguous characters (0/O, 1/l/I),
-        # ~10^14 combinations vs 10^6 for the old 6-digit numeric code — resistant
-        # to brute-force enumeration.
-        # charset excludes ambiguous characters (0/O, 1/l/I)
-        charset = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz"  # pragma: allowlist secret
-        code = "".join(secrets.choice(charset) for _ in range(8))
+        # Generate 6-digit numeric invite code. A short numeric code keeps the
+        # join flow simple and copy-friendly; brute-force risk is bounded by the
+        # 1-day expiration window below.
+        code = "".join(secrets.choice("0123456789") for _ in range(6))
         expires_at = datetime.now(UTC) + timedelta(days=expires_days)
 
         # Update space with new invite code

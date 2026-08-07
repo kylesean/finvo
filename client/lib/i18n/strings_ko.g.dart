@@ -1547,7 +1547,7 @@ class _Translations$sharedSpace$create$ko extends Translations$sharedSpace$creat
 
 	// Translations
 	@override String get title => '공유 공간 만들기';
-	@override String get subtitle => '새로운 공유 공간을 만들어 친구와 함께 지출을 관리하세요';
+	@override String get subtitle => '공유 공간을 만들어 공유 재무를 조회·분석하세요';
 	@override String get nameLabel => '공간 이름';
 	@override String get nameHint => '예: 졸업 여행';
 	@override String get descLabel => '설명 (선택)';
@@ -1567,14 +1567,12 @@ class _Translations$sharedSpace$join$ko extends Translations$sharedSpace$join$zh
 
 	// Translations
 	@override String get title => '공유 공간 참여';
-	@override String get subtitle => '친구가 공유한 초대 코드를 입력하여 함께 가계를 관리하세요';
-	@override String get codeLabel => '초대 코드';
-	@override String get codeHint => '초대 코드 입력, 예: 123456';
+	@override String get subtitle => '초대 코드를 입력하여 공유 재무를 조회·분석하세요';
+	@override String get codeHint => '6자리 숫자 초대 코드 입력';
 	@override String get cancel => '취소';
 	@override String get submit => '참여';
 	@override String get codeRequired => '초대 코드를 입력하세요';
-	@override String get codeInvalid => '초대 코드 형식이 잘못되었습니다';
-	@override String get codeFormat => '초대 코드는 영문과 숫자만 사용할 수 있습니다';
+	@override String get codeInvalid => '6자리 숫자 초대 코드를 입력하세요';
 }
 
 // Path: sharedSpace.list
@@ -1584,8 +1582,8 @@ class _Translations$sharedSpace$list$ko extends Translations$sharedSpace$list$zh
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get emptyTitle => '협력 재무 공간 시작하기';
-	@override String get emptySubtitle => '공유 공간을 생성하거나 참여하여 가족, 파트너, 팀과 함께 재무 및 자산을 관리하세요';
+	@override String get emptyTitle => '공유 재무를 한눈에 파악';
+	@override String get emptySubtitle => '공유 공간을 만들거나 참여하여 가족, 친구와 함께 재무 조회·분석·요약을 공유하세요';
 	@override String get getStarted => '시작하기';
 	@override String get hasInviteCode => '초대 코드가 있으신가요? 탭하여 참여';
 	@override String joinedSuccess({required Object name}) => '"${name}"에 참여했습니다!';
@@ -1618,7 +1616,6 @@ class _Translations$sharedSpace$detail$ko extends Translations$sharedSpace$detai
 	@override String get noTransactions => '거래 내역이 없습니다';
 	@override String get noTransactionsHint => '이 공간의 거래가 여기에 표시됩니다';
 	@override String get refreshCode => '코드 새로고침';
-	@override String get joinOtherSpace => '다른 공간 참여';
 	@override String get noMoreTransactions => '더 이상 거래가 없습니다';
 }
 
@@ -1646,7 +1643,6 @@ class _Translations$sharedSpace$inviteCard$ko extends Translations$sharedSpace$i
 
 	// Translations
 	@override String get title => '초대 코드';
-	@override String get subtitle => '친구와 공유하여 공간에 참여';
 	@override String get copyCode => '초대 코드 복사';
 	@override String get shareLink => '초대 링크 공유';
 	@override String get codeCopied => '초대 코드 복사됨';
@@ -3581,7 +3577,7 @@ extension on TranslationsKo {
 			'sharedSpace.roles.member' => '멤버',
 			'sharedSpace.title' => '공유 공간',
 			'sharedSpace.create.title' => '공유 공간 만들기',
-			'sharedSpace.create.subtitle' => '새로운 공유 공간을 만들어 친구와 함께 지출을 관리하세요',
+			'sharedSpace.create.subtitle' => '공유 공간을 만들어 공유 재무를 조회·분석하세요',
 			'sharedSpace.create.nameLabel' => '공간 이름',
 			'sharedSpace.create.nameHint' => '예: 졸업 여행',
 			'sharedSpace.create.descLabel' => '설명 (선택)',
@@ -3592,16 +3588,14 @@ extension on TranslationsKo {
 			'sharedSpace.create.nameTooShort' => '공간 이름은 2자 이상이어야 합니다',
 			'sharedSpace.create.nameTooLong' => '공간 이름은 50자를 초과할 수 없습니다',
 			'sharedSpace.join.title' => '공유 공간 참여',
-			'sharedSpace.join.subtitle' => '친구가 공유한 초대 코드를 입력하여 함께 가계를 관리하세요',
-			'sharedSpace.join.codeLabel' => '초대 코드',
-			'sharedSpace.join.codeHint' => '초대 코드 입력, 예: 123456',
+			'sharedSpace.join.subtitle' => '초대 코드를 입력하여 공유 재무를 조회·분석하세요',
+			'sharedSpace.join.codeHint' => '6자리 숫자 초대 코드 입력',
 			'sharedSpace.join.cancel' => '취소',
 			'sharedSpace.join.submit' => '참여',
 			'sharedSpace.join.codeRequired' => '초대 코드를 입력하세요',
-			'sharedSpace.join.codeInvalid' => '초대 코드 형식이 잘못되었습니다',
-			'sharedSpace.join.codeFormat' => '초대 코드는 영문과 숫자만 사용할 수 있습니다',
-			'sharedSpace.list.emptyTitle' => '협력 재무 공간 시작하기',
-			'sharedSpace.list.emptySubtitle' => '공유 공간을 생성하거나 참여하여 가족, 파트너, 팀과 함께 재무 및 자산을 관리하세요',
+			'sharedSpace.join.codeInvalid' => '6자리 숫자 초대 코드를 입력하세요',
+			'sharedSpace.list.emptyTitle' => '공유 재무를 한눈에 파악',
+			'sharedSpace.list.emptySubtitle' => '공유 공간을 만들거나 참여하여 가족, 친구와 함께 재무 조회·분석·요약을 공유하세요',
 			'sharedSpace.list.getStarted' => '시작하기',
 			'sharedSpace.list.hasInviteCode' => '초대 코드가 있으신가요? 탭하여 참여',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '"${name}"에 참여했습니다!',
@@ -3625,7 +3619,6 @@ extension on TranslationsKo {
 			'sharedSpace.detail.noTransactions' => '거래 내역이 없습니다',
 			'sharedSpace.detail.noTransactionsHint' => '이 공간의 거래가 여기에 표시됩니다',
 			'sharedSpace.detail.refreshCode' => '코드 새로고침',
-			'sharedSpace.detail.joinOtherSpace' => '다른 공간 참여',
 			'sharedSpace.detail.noMoreTransactions' => '더 이상 거래가 없습니다',
 			'sharedSpace.notifications.title' => '알림',
 			'sharedSpace.notifications.empty' => '알림이 없습니다',
@@ -3635,7 +3628,6 @@ extension on TranslationsKo {
 			'sharedSpace.notifications.inviteRejected' => '초대를 거절했습니다',
 			'sharedSpace.notifications.allMarkedRead' => '모두 읽음으로 표시',
 			'sharedSpace.inviteCard.title' => '초대 코드',
-			'sharedSpace.inviteCard.subtitle' => '친구와 공유하여 공간에 참여',
 			'sharedSpace.inviteCard.copyCode' => '초대 코드 복사',
 			'sharedSpace.inviteCard.shareLink' => '초대 링크 공유',
 			'sharedSpace.inviteCard.codeCopied' => '초대 코드 복사됨',

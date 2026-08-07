@@ -1301,7 +1301,7 @@
     "title": "Shared Space",
     "create": {
       "title": "Create Shared Space",
-      "subtitle": "Create a new shared space to track expenses with friends",
+      "subtitle": "Create a shared space to view and analyze shared finances",
       "nameLabel": "Space Name",
       "nameHint": "e.g., Graduation Trip",
       "descLabel": "Description (Optional)",
@@ -1314,18 +1314,16 @@
     },
     "join": {
       "title": "Join Shared Space",
-      "subtitle": "Enter the invite code shared by a friend to start collaborative bookkeeping",
-      "codeLabel": "Invite Code",
-      "codeHint": "Enter invite code, e.g.: 123456",
+      "subtitle": "Enter the invite code to view and analyze shared finances",
+      "codeHint": "Enter your 6-digit invite code",
       "cancel": "Cancel",
       "submit": "Join",
       "codeRequired": "Please enter invite code",
-      "codeInvalid": "Invalid invite code format",
-      "codeFormat": "Invite code can only contain letters and numbers"
+      "codeInvalid": "Please enter a 6-digit invite code"
     },
     "list": {
-      "emptyTitle": "Start Collaborative Financial Spaces",
-      "emptySubtitle": "Create or join a space to manage shared accounts and assets with family, partners, or teams",
+      "emptyTitle": "Shared finances, clear at a glance",
+      "emptySubtitle": "Create or join a space to view, analyze, and summarize shared finances with family and friends",
       "getStarted": "Get Started",
       "hasInviteCode": "Have an invite code? Tap to join",
       "joinedSuccess": "Successfully joined \"${name}\"!"
@@ -1351,7 +1349,6 @@
       "noTransactions": "No transactions yet",
       "noTransactionsHint": "Transactions in this space will appear here",
       "refreshCode": "Refresh Code",
-      "joinOtherSpace": "Join Another Space",
       "noMoreTransactions": "No more transactions"
     },
     "notifications": {
@@ -1365,7 +1362,6 @@
     },
     "inviteCard": {
       "title": "Invite Code",
-      "subtitle": "Share with friends to join the space",
       "copyCode": "Copy Invite Code",
       "shareLink": "Share Invite Link",
       "codeCopied": "Invite code copied",

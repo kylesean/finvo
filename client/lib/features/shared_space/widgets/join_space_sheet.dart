@@ -31,7 +31,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
     super.initState();
     // If initial invite code exists, set it in the input field
     if (widget.initialCode != null) {
-      _codeController.text = widget.initialCode!.toUpperCase();
+      _codeController.text = widget.initialCode!;
     }
   }
 
@@ -42,17 +42,13 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
   }
 
   bool _validate() {
-    final code = _codeController.text.trim().toUpperCase();
+    final code = _codeController.text.trim();
     if (code.isEmpty) {
       setState(() => _codeError = t.sharedSpace.join.codeRequired);
       return false;
     }
-    if (code.length < 6 || code.length > 16) {
+    if (!RegExp(r'^\d{6}$').hasMatch(code)) {
       setState(() => _codeError = t.sharedSpace.join.codeInvalid);
-      return false;
-    }
-    if (!RegExp(r'^[A-Z0-9]+$').hasMatch(code)) {
-      setState(() => _codeError = t.sharedSpace.join.codeFormat);
       return false;
     }
     setState(() => _codeError = null);
@@ -110,18 +106,8 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
                         _errorMessage = null;
                       });
                     }
-                    final upperValue = value.text.toUpperCase();
-                    if (upperValue != value.text) {
-                      _codeController.value = _codeController.value.copyWith(
-                        text: upperValue,
-                        selection: TextSelection.collapsed(
-                          offset: upperValue.length,
-                        ),
-                      );
-                    }
                   },
                 ),
-                label: Text(t.sharedSpace.join.codeLabel),
                 hint: t.sharedSpace.join.codeHint,
               ),
               if (_codeError != null)
@@ -198,7 +184,7 @@ class _JoinSpaceSheetState extends ConsumerState<JoinSpaceSheet> {
     try {
       final space = await ref
           .read(sharedSpaceProvider.notifier)
-          .joinSpaceWithCode(_codeController.text.trim().toUpperCase());
+          .joinSpaceWithCode(_codeController.text.trim());
 
       if (space != null) {
         widget.onSpaceJoined(space);

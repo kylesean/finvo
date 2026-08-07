@@ -1259,7 +1259,7 @@
     "title": "共有スペース",
     "create": {
       "title": "共有スペースを作成",
-      "subtitle": "新しい共有スペースを作成して、友達と支出を管理しましょう",
+      "subtitle": "共有スペースを作成して、共有の財務を閲覧・分析",
       "nameLabel": "スペース名",
       "nameHint": "例：卒業旅行",
       "descLabel": "説明（任意）",
@@ -1272,18 +1272,16 @@
     },
     "join": {
       "title": "共有スペースに参加",
-      "subtitle": "友達から共有された招待コードを入力して、共同家計を始めましょう",
-      "codeLabel": "招待コード",
-      "codeHint": "招待コードを入力、例：123456",
+      "subtitle": "招待コードを入力して、共有の財務を閲覧・分析",
+      "codeHint": "6桁の数字招待コードを入力",
       "cancel": "キャンセル",
       "submit": "参加",
       "codeRequired": "招待コードを入力してください",
-      "codeInvalid": "招待コードの形式が無効です",
-      "codeFormat": "招待コードは英数字のみ使用できます"
+      "codeInvalid": "6桁の数字招待コードを入力してください"
     },
     "list": {
-      "emptyTitle": "共同財務スペースを開始",
-      "emptySubtitle": "共有スペースを作成・参加し、家族、パートナー、チームと共同の口座や資産を管理",
+      "emptyTitle": "共有の財務をみんなで俯瞰",
+      "emptySubtitle": "共有スペースを作成・参加して、家族や友達と財務の閲覧・分析・集計を共有",
       "getStarted": "始める",
       "hasInviteCode": "招待コードをお持ちですか？タップして参加",
       "joinedSuccess": "「${name}」に参加しました！"
@@ -1309,7 +1307,6 @@
       "noTransactions": "取引はまだありません",
       "noTransactionsHint": "このスペースの取引がここに表示されます",
       "refreshCode": "コードを更新",
-      "joinOtherSpace": "他のスペースに参加",
       "noMoreTransactions": "これ以上の取引はありません"
     },
     "notifications": {
@@ -1323,7 +1320,6 @@
     },
     "inviteCard": {
       "title": "招待コード",
-      "subtitle": "友達と共有してスペースに参加",
       "copyCode": "招待コードをコピー",
       "shareLink": "招待リンクを共有",
       "codeCopied": "招待コードをコピーしました",

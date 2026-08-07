@@ -1566,7 +1566,7 @@ class _Translations$sharedSpace$create$en extends Translations$sharedSpace$creat
 
 	// Translations
 	@override String get title => 'Create Shared Space';
-	@override String get subtitle => 'Create a new shared space to track expenses with friends';
+	@override String get subtitle => 'Create a shared space to view and analyze shared finances';
 	@override String get nameLabel => 'Space Name';
 	@override String get nameHint => 'e.g., Graduation Trip';
 	@override String get descLabel => 'Description (Optional)';
@@ -1586,14 +1586,12 @@ class _Translations$sharedSpace$join$en extends Translations$sharedSpace$join$zh
 
 	// Translations
 	@override String get title => 'Join Shared Space';
-	@override String get subtitle => 'Enter the invite code shared by a friend to start collaborative bookkeeping';
-	@override String get codeLabel => 'Invite Code';
-	@override String get codeHint => 'Enter invite code, e.g.: 123456';
+	@override String get subtitle => 'Enter the invite code to view and analyze shared finances';
+	@override String get codeHint => 'Enter your 6-digit invite code';
 	@override String get cancel => 'Cancel';
 	@override String get submit => 'Join';
 	@override String get codeRequired => 'Please enter invite code';
-	@override String get codeInvalid => 'Invalid invite code format';
-	@override String get codeFormat => 'Invite code can only contain letters and numbers';
+	@override String get codeInvalid => 'Please enter a 6-digit invite code';
 }
 
 // Path: sharedSpace.list
@@ -1603,8 +1601,8 @@ class _Translations$sharedSpace$list$en extends Translations$sharedSpace$list$zh
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get emptyTitle => 'Start Collaborative Financial Spaces';
-	@override String get emptySubtitle => 'Create or join a space to manage shared accounts and assets with family, partners, or teams';
+	@override String get emptyTitle => 'Shared finances, clear at a glance';
+	@override String get emptySubtitle => 'Create or join a space to view, analyze, and summarize shared finances with family and friends';
 	@override String get getStarted => 'Get Started';
 	@override String get hasInviteCode => 'Have an invite code? Tap to join';
 	@override String joinedSuccess({required Object name}) => 'Successfully joined "${name}"!';
@@ -1637,7 +1635,6 @@ class _Translations$sharedSpace$detail$en extends Translations$sharedSpace$detai
 	@override String get noTransactions => 'No transactions yet';
 	@override String get noTransactionsHint => 'Transactions in this space will appear here';
 	@override String get refreshCode => 'Refresh Code';
-	@override String get joinOtherSpace => 'Join Another Space';
 	@override String get noMoreTransactions => 'No more transactions';
 }
 
@@ -1665,7 +1662,6 @@ class _Translations$sharedSpace$inviteCard$en extends Translations$sharedSpace$i
 
 	// Translations
 	@override String get title => 'Invite Code';
-	@override String get subtitle => 'Share with friends to join the space';
 	@override String get copyCode => 'Copy Invite Code';
 	@override String get shareLink => 'Share Invite Link';
 	@override String get codeCopied => 'Invite code copied';
@@ -3621,7 +3617,7 @@ extension on TranslationsEn {
 			'sharedSpace.roles.member' => 'Member',
 			'sharedSpace.title' => 'Shared Space',
 			'sharedSpace.create.title' => 'Create Shared Space',
-			'sharedSpace.create.subtitle' => 'Create a new shared space to track expenses with friends',
+			'sharedSpace.create.subtitle' => 'Create a shared space to view and analyze shared finances',
 			'sharedSpace.create.nameLabel' => 'Space Name',
 			'sharedSpace.create.nameHint' => 'e.g., Graduation Trip',
 			'sharedSpace.create.descLabel' => 'Description (Optional)',
@@ -3632,16 +3628,14 @@ extension on TranslationsEn {
 			'sharedSpace.create.nameTooShort' => 'Space name must be at least 2 characters',
 			'sharedSpace.create.nameTooLong' => 'Space name cannot exceed 50 characters',
 			'sharedSpace.join.title' => 'Join Shared Space',
-			'sharedSpace.join.subtitle' => 'Enter the invite code shared by a friend to start collaborative bookkeeping',
-			'sharedSpace.join.codeLabel' => 'Invite Code',
-			'sharedSpace.join.codeHint' => 'Enter invite code, e.g.: 123456',
+			'sharedSpace.join.subtitle' => 'Enter the invite code to view and analyze shared finances',
+			'sharedSpace.join.codeHint' => 'Enter your 6-digit invite code',
 			'sharedSpace.join.cancel' => 'Cancel',
 			'sharedSpace.join.submit' => 'Join',
 			'sharedSpace.join.codeRequired' => 'Please enter invite code',
-			'sharedSpace.join.codeInvalid' => 'Invalid invite code format',
-			'sharedSpace.join.codeFormat' => 'Invite code can only contain letters and numbers',
-			'sharedSpace.list.emptyTitle' => 'Start Collaborative Financial Spaces',
-			'sharedSpace.list.emptySubtitle' => 'Create or join a space to manage shared accounts and assets with family, partners, or teams',
+			'sharedSpace.join.codeInvalid' => 'Please enter a 6-digit invite code',
+			'sharedSpace.list.emptyTitle' => 'Shared finances, clear at a glance',
+			'sharedSpace.list.emptySubtitle' => 'Create or join a space to view, analyze, and summarize shared finances with family and friends',
 			'sharedSpace.list.getStarted' => 'Get Started',
 			'sharedSpace.list.hasInviteCode' => 'Have an invite code? Tap to join',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => 'Successfully joined "${name}"!',
@@ -3665,7 +3659,6 @@ extension on TranslationsEn {
 			'sharedSpace.detail.noTransactions' => 'No transactions yet',
 			'sharedSpace.detail.noTransactionsHint' => 'Transactions in this space will appear here',
 			'sharedSpace.detail.refreshCode' => 'Refresh Code',
-			'sharedSpace.detail.joinOtherSpace' => 'Join Another Space',
 			'sharedSpace.detail.noMoreTransactions' => 'No more transactions',
 			'sharedSpace.notifications.title' => 'Notifications',
 			'sharedSpace.notifications.empty' => 'No notifications',
@@ -3675,7 +3668,6 @@ extension on TranslationsEn {
 			'sharedSpace.notifications.inviteRejected' => 'Invite rejected',
 			'sharedSpace.notifications.allMarkedRead' => 'All notifications marked as read',
 			'sharedSpace.inviteCard.title' => 'Invite Code',
-			'sharedSpace.inviteCard.subtitle' => 'Share with friends to join the space',
 			'sharedSpace.inviteCard.copyCode' => 'Copy Invite Code',
 			'sharedSpace.inviteCard.shareLink' => 'Share Invite Link',
 			'sharedSpace.inviteCard.codeCopied' => 'Invite code copied',

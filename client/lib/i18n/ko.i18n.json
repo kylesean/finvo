@@ -1260,7 +1260,7 @@
     "title": "공유 공간",
     "create": {
       "title": "공유 공간 만들기",
-      "subtitle": "새로운 공유 공간을 만들어 친구와 함께 지출을 관리하세요",
+      "subtitle": "공유 공간을 만들어 공유 재무를 조회·분석하세요",
       "nameLabel": "공간 이름",
       "nameHint": "예: 졸업 여행",
       "descLabel": "설명 (선택)",
@@ -1273,18 +1273,16 @@
     },
     "join": {
       "title": "공유 공간 참여",
-      "subtitle": "친구가 공유한 초대 코드를 입력하여 함께 가계를 관리하세요",
-      "codeLabel": "초대 코드",
-      "codeHint": "초대 코드 입력, 예: 123456",
+      "subtitle": "초대 코드를 입력하여 공유 재무를 조회·분석하세요",
+      "codeHint": "6자리 숫자 초대 코드 입력",
       "cancel": "취소",
       "submit": "참여",
       "codeRequired": "초대 코드를 입력하세요",
-      "codeInvalid": "초대 코드 형식이 잘못되었습니다",
-      "codeFormat": "초대 코드는 영문과 숫자만 사용할 수 있습니다"
+      "codeInvalid": "6자리 숫자 초대 코드를 입력하세요"
     },
     "list": {
-      "emptyTitle": "협력 재무 공간 시작하기",
-      "emptySubtitle": "공유 공간을 생성하거나 참여하여 가족, 파트너, 팀과 함께 재무 및 자산을 관리하세요",
+      "emptyTitle": "공유 재무를 한눈에 파악",
+      "emptySubtitle": "공유 공간을 만들거나 참여하여 가족, 친구와 함께 재무 조회·분석·요약을 공유하세요",
       "getStarted": "시작하기",
       "hasInviteCode": "초대 코드가 있으신가요? 탭하여 참여",
       "joinedSuccess": "\"${name}\"에 참여했습니다!"
@@ -1310,7 +1308,6 @@
       "noTransactions": "거래 내역이 없습니다",
       "noTransactionsHint": "이 공간의 거래가 여기에 표시됩니다",
       "refreshCode": "코드 새로고침",
-      "joinOtherSpace": "다른 공간 참여",
       "noMoreTransactions": "더 이상 거래가 없습니다"
     },
     "notifications": {
@@ -1324,7 +1321,6 @@
     },
     "inviteCard": {
       "title": "초대 코드",
-      "subtitle": "친구와 공유하여 공간에 참여",
       "copyCode": "초대 코드 복사",
       "shareLink": "초대 링크 공유",
       "codeCopied": "초대 코드 복사됨",

@@ -119,7 +119,12 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
           pinned: true,
           stretch: true,
           flexibleSpace: FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
+            // 显式固定为左对齐，避免 iOS/macOS 默认居中导致标题位置与 Android 不一致
+            centerTitle: false,
+            titlePadding: const EdgeInsetsDirectional.only(
+              start: 56,
+              bottom: 18,
+            ),
             title: Text(space.name, style: AppTextStyles.pageTitleLarge(theme)),
             background: Container(
               decoration: BoxDecoration(
@@ -147,7 +152,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
             FButton.icon(
               variant: .ghost,
               onPress: () => _showInviteSheet(space),
-              child: const Icon(FLucideIcons.userPlus, size: 20),
+              child: const Icon(FLucideIcons.share2, size: 20),
             ),
             // Settings - only for OWNER/ADMIN
             if (space.canManage)

@@ -1299,7 +1299,7 @@
     "title": "共享空间",
     "create": {
       "title": "创建共享空间",
-      "subtitle": "创建一个新的共享空间，与朋友一起记账",
+      "subtitle": "创建共享空间，共享查看与分析账目",
       "nameLabel": "空间名称",
       "nameHint": "例如：毕业旅行",
       "descLabel": "描述（可选）",
@@ -1312,18 +1312,16 @@
     },
     "join": {
       "title": "加入共享空间",
-      "subtitle": "输入朋友分享的邀请码，开始协作记账",
-      "codeLabel": "邀请码",
-      "codeHint": "输入邀请码，例如：123456",
+      "subtitle": "输入邀请码，查看与分析共享账目",
+      "codeHint": "输入 6 位数字邀请码",
       "cancel": "取消",
       "submit": "加入",
       "codeRequired": "请输入邀请码",
-      "codeInvalid": "邀请码格式无效",
-      "codeFormat": "邀请码只能包含字母和数字"
+      "codeInvalid": "请输入 6 位数字邀请码"
     },
     "list": {
-      "emptyTitle": "开启多方协同的财务空间",
-      "emptySubtitle": "创建或加入共享空间，与家人、伴侣或团队协同管理共享账目与资产",
+      "emptyTitle": "共享账目，一起看清财务",
+      "emptySubtitle": "创建或加入共享空间，与家人、朋友共享查看、分析与汇总账目",
       "getStarted": "开始使用",
       "hasInviteCode": "有邀请码？点击加入",
       "joinedSuccess": "成功加入「${name}」！"
@@ -1349,7 +1347,6 @@
       "noTransactions": "暂无交易记录",
       "noTransactionsHint": "空间内的交易将显示在这里",
       "refreshCode": "刷新生成新码",
-      "joinOtherSpace": "加入其他空间",
       "noMoreTransactions": "没有更多交易"
     },
     "notifications": {
@@ -1363,7 +1360,6 @@
     },
     "inviteCard": {
       "title": "邀请码",
-      "subtitle": "分享给朋友以加入空间",
       "copyCode": "复制邀请码",
       "shareLink": "分享邀请链接",
       "codeCopied": "邀请码已复制",

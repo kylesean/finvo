@@ -102,14 +102,11 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
         foregroundColor: colorScheme.foreground,
         elevation: 0,
         actions: [
-          FButton.icon(
-            variant: .ghost,
-            onPress: _showJoinSpaceSheet,
-            child: Icon(
-              FLucideIcons.userPlus,
-              size: 20,
-              color: colorScheme.foreground,
-            ),
+          IconButton(
+            tooltip: t.sharedSpace.join.title,
+            onPressed: _showJoinSpaceSheet,
+            icon: const Icon(FLucideIcons.userPlus),
+            color: colorScheme.primary,
           ),
           const SizedBox(width: 4),
         ],
@@ -231,6 +228,10 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
       showFSheet<void>(
         context: context,
         side: FLayout.btt,
+        // Android(adjustResize) 视图已被键盘压缩，forui 再上移会出现空隙；
+        // iOS 视图不被压缩，需要 forui 上移以避开键盘。
+        resizeToAvoidBottomInset:
+            Theme.of(context).platform != TargetPlatform.android,
         builder: (context) => CreateSpaceSheet(
           onSpaceCreated: (space) {
             Navigator.of(context).pop();
@@ -246,6 +247,10 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
       showFSheet<void>(
         context: context,
         side: FLayout.btt,
+        // Android(adjustResize) 视图已被键盘压缩，forui 再上移会出现空隙；
+        // iOS 视图不被压缩，需要 forui 上移以避开键盘。
+        resizeToAvoidBottomInset:
+            Theme.of(context).platform != TargetPlatform.android,
         builder: (context) => JoinSpaceSheet(
           onSpaceJoined: (space) {
             Navigator.of(context).pop();
@@ -266,6 +271,10 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
       showFSheet<void>(
         context: context,
         side: FLayout.btt,
+        // Android(adjustResize) 视图已被键盘压缩，forui 再上移会出现空隙；
+        // iOS 视图不被压缩，需要 forui 上移以避开键盘。
+        resizeToAvoidBottomInset:
+            Theme.of(context).platform != TargetPlatform.android,
         builder: (context) => JoinSpaceSheet(
           initialCode: inviteCode,
           onSpaceJoined: (space) {

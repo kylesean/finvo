@@ -1546,7 +1546,7 @@ class _Translations$sharedSpace$create$zh_Hant extends Translations$sharedSpace$
 
 	// Translations
 	@override String get title => '建立共享空間';
-	@override String get subtitle => '建立一個新的共享空間，與朋友一起記帳';
+	@override String get subtitle => '建立共享空間，共享查看與分析帳目';
 	@override String get nameLabel => '空間名稱';
 	@override String get nameHint => '例如：畢業旅行';
 	@override String get descLabel => '描述（選填）';
@@ -1566,14 +1566,12 @@ class _Translations$sharedSpace$join$zh_Hant extends Translations$sharedSpace$jo
 
 	// Translations
 	@override String get title => '加入共享空間';
-	@override String get subtitle => '輸入朋友分享的邀請碼，開始協作記帳';
-	@override String get codeLabel => '邀請碼';
-	@override String get codeHint => '輸入邀請碼，例如：123456';
+	@override String get subtitle => '輸入邀請碼，查看與分析共享帳目';
+	@override String get codeHint => '輸入 6 位數字邀請碼';
 	@override String get cancel => '取消';
 	@override String get submit => '加入';
 	@override String get codeRequired => '請輸入邀請碼';
-	@override String get codeInvalid => '邀請碼格式無效';
-	@override String get codeFormat => '邀請碼只能包含字母和數字';
+	@override String get codeInvalid => '請輸入 6 位數字邀請碼';
 }
 
 // Path: sharedSpace.list
@@ -1583,8 +1581,8 @@ class _Translations$sharedSpace$list$zh_Hant extends Translations$sharedSpace$li
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get emptyTitle => '開啟多方協同的財務空間';
-	@override String get emptySubtitle => '建立或加入共享空間，與家人、夥伴或團隊協同管理共享帳目與資產';
+	@override String get emptyTitle => '共享帳目，一起看清財務';
+	@override String get emptySubtitle => '建立或加入共享空間，與家人、朋友共享查看、分析與彙總帳目';
 	@override String get getStarted => '開始使用';
 	@override String get hasInviteCode => '有邀請碼？點擊加入';
 	@override String joinedSuccess({required Object name}) => '成功加入「${name}」！';
@@ -1617,7 +1615,6 @@ class _Translations$sharedSpace$detail$zh_Hant extends Translations$sharedSpace$
 	@override String get noTransactions => '暫無交易紀錄';
 	@override String get noTransactionsHint => '空間內的交易將顯示在這裡';
 	@override String get refreshCode => '重新產生新碼';
-	@override String get joinOtherSpace => '加入其他空間';
 	@override String get noMoreTransactions => '沒有更多交易';
 }
 
@@ -1645,7 +1642,6 @@ class _Translations$sharedSpace$inviteCard$zh_Hant extends Translations$sharedSp
 
 	// Translations
 	@override String get title => '邀請碼';
-	@override String get subtitle => '分享給朋友以加入空間';
 	@override String get copyCode => '複製邀請碼';
 	@override String get shareLink => '分享邀請連結';
 	@override String get codeCopied => '邀請碼已複製';
@@ -3577,7 +3573,7 @@ extension on TranslationsZhHant {
 			'sharedSpace.roles.member' => '成員',
 			'sharedSpace.title' => '共享空間',
 			'sharedSpace.create.title' => '建立共享空間',
-			'sharedSpace.create.subtitle' => '建立一個新的共享空間，與朋友一起記帳',
+			'sharedSpace.create.subtitle' => '建立共享空間，共享查看與分析帳目',
 			'sharedSpace.create.nameLabel' => '空間名稱',
 			'sharedSpace.create.nameHint' => '例如：畢業旅行',
 			'sharedSpace.create.descLabel' => '描述（選填）',
@@ -3588,16 +3584,14 @@ extension on TranslationsZhHant {
 			'sharedSpace.create.nameTooShort' => '空間名稱至少需要 2 個字元',
 			'sharedSpace.create.nameTooLong' => '空間名稱不能超過 50 個字元',
 			'sharedSpace.join.title' => '加入共享空間',
-			'sharedSpace.join.subtitle' => '輸入朋友分享的邀請碼，開始協作記帳',
-			'sharedSpace.join.codeLabel' => '邀請碼',
-			'sharedSpace.join.codeHint' => '輸入邀請碼，例如：123456',
+			'sharedSpace.join.subtitle' => '輸入邀請碼，查看與分析共享帳目',
+			'sharedSpace.join.codeHint' => '輸入 6 位數字邀請碼',
 			'sharedSpace.join.cancel' => '取消',
 			'sharedSpace.join.submit' => '加入',
 			'sharedSpace.join.codeRequired' => '請輸入邀請碼',
-			'sharedSpace.join.codeInvalid' => '邀請碼格式無效',
-			'sharedSpace.join.codeFormat' => '邀請碼只能包含字母和數字',
-			'sharedSpace.list.emptyTitle' => '開啟多方協同的財務空間',
-			'sharedSpace.list.emptySubtitle' => '建立或加入共享空間，與家人、夥伴或團隊協同管理共享帳目與資產',
+			'sharedSpace.join.codeInvalid' => '請輸入 6 位數字邀請碼',
+			'sharedSpace.list.emptyTitle' => '共享帳目，一起看清財務',
+			'sharedSpace.list.emptySubtitle' => '建立或加入共享空間，與家人、朋友共享查看、分析與彙總帳目',
 			'sharedSpace.list.getStarted' => '開始使用',
 			'sharedSpace.list.hasInviteCode' => '有邀請碼？點擊加入',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '成功加入「${name}」！',
@@ -3621,7 +3615,6 @@ extension on TranslationsZhHant {
 			'sharedSpace.detail.noTransactions' => '暫無交易紀錄',
 			'sharedSpace.detail.noTransactionsHint' => '空間內的交易將顯示在這裡',
 			'sharedSpace.detail.refreshCode' => '重新產生新碼',
-			'sharedSpace.detail.joinOtherSpace' => '加入其他空間',
 			'sharedSpace.detail.noMoreTransactions' => '沒有更多交易',
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暫無通知',
@@ -3631,7 +3624,6 @@ extension on TranslationsZhHant {
 			'sharedSpace.notifications.inviteRejected' => '已拒絕邀請',
 			'sharedSpace.notifications.allMarkedRead' => '全部標記為已讀',
 			'sharedSpace.inviteCard.title' => '邀請碼',
-			'sharedSpace.inviteCard.subtitle' => '分享給朋友以加入空間',
 			'sharedSpace.inviteCard.copyCode' => '複製邀請碼',
 			'sharedSpace.inviteCard.shareLink' => '分享邀請連結',
 			'sharedSpace.inviteCard.codeCopied' => '邀請碼已複製',

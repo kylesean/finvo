@@ -1546,7 +1546,7 @@ class _Translations$sharedSpace$create$ja extends Translations$sharedSpace$creat
 
 	// Translations
 	@override String get title => '共有スペースを作成';
-	@override String get subtitle => '新しい共有スペースを作成して、友達と支出を管理しましょう';
+	@override String get subtitle => '共有スペースを作成して、共有の財務を閲覧・分析';
 	@override String get nameLabel => 'スペース名';
 	@override String get nameHint => '例：卒業旅行';
 	@override String get descLabel => '説明（任意）';
@@ -1566,14 +1566,12 @@ class _Translations$sharedSpace$join$ja extends Translations$sharedSpace$join$zh
 
 	// Translations
 	@override String get title => '共有スペースに参加';
-	@override String get subtitle => '友達から共有された招待コードを入力して、共同家計を始めましょう';
-	@override String get codeLabel => '招待コード';
-	@override String get codeHint => '招待コードを入力、例：123456';
+	@override String get subtitle => '招待コードを入力して、共有の財務を閲覧・分析';
+	@override String get codeHint => '6桁の数字招待コードを入力';
 	@override String get cancel => 'キャンセル';
 	@override String get submit => '参加';
 	@override String get codeRequired => '招待コードを入力してください';
-	@override String get codeInvalid => '招待コードの形式が無効です';
-	@override String get codeFormat => '招待コードは英数字のみ使用できます';
+	@override String get codeInvalid => '6桁の数字招待コードを入力してください';
 }
 
 // Path: sharedSpace.list
@@ -1583,8 +1581,8 @@ class _Translations$sharedSpace$list$ja extends Translations$sharedSpace$list$zh
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get emptyTitle => '共同財務スペースを開始';
-	@override String get emptySubtitle => '共有スペースを作成・参加し、家族、パートナー、チームと共同の口座や資産を管理';
+	@override String get emptyTitle => '共有の財務をみんなで俯瞰';
+	@override String get emptySubtitle => '共有スペースを作成・参加して、家族や友達と財務の閲覧・分析・集計を共有';
 	@override String get getStarted => '始める';
 	@override String get hasInviteCode => '招待コードをお持ちですか？タップして参加';
 	@override String joinedSuccess({required Object name}) => '「${name}」に参加しました！';
@@ -1617,7 +1615,6 @@ class _Translations$sharedSpace$detail$ja extends Translations$sharedSpace$detai
 	@override String get noTransactions => '取引はまだありません';
 	@override String get noTransactionsHint => 'このスペースの取引がここに表示されます';
 	@override String get refreshCode => 'コードを更新';
-	@override String get joinOtherSpace => '他のスペースに参加';
 	@override String get noMoreTransactions => 'これ以上の取引はありません';
 }
 
@@ -1645,7 +1642,6 @@ class _Translations$sharedSpace$inviteCard$ja extends Translations$sharedSpace$i
 
 	// Translations
 	@override String get title => '招待コード';
-	@override String get subtitle => '友達と共有してスペースに参加';
 	@override String get copyCode => '招待コードをコピー';
 	@override String get shareLink => '招待リンクを共有';
 	@override String get codeCopied => '招待コードをコピーしました';
@@ -3579,7 +3575,7 @@ extension on TranslationsJa {
 			'sharedSpace.roles.member' => 'メンバー',
 			'sharedSpace.title' => '共有スペース',
 			'sharedSpace.create.title' => '共有スペースを作成',
-			'sharedSpace.create.subtitle' => '新しい共有スペースを作成して、友達と支出を管理しましょう',
+			'sharedSpace.create.subtitle' => '共有スペースを作成して、共有の財務を閲覧・分析',
 			'sharedSpace.create.nameLabel' => 'スペース名',
 			'sharedSpace.create.nameHint' => '例：卒業旅行',
 			'sharedSpace.create.descLabel' => '説明（任意）',
@@ -3590,16 +3586,14 @@ extension on TranslationsJa {
 			'sharedSpace.create.nameTooShort' => 'スペース名は2文字以上必要です',
 			'sharedSpace.create.nameTooLong' => 'スペース名は50文字以内にしてください',
 			'sharedSpace.join.title' => '共有スペースに参加',
-			'sharedSpace.join.subtitle' => '友達から共有された招待コードを入力して、共同家計を始めましょう',
-			'sharedSpace.join.codeLabel' => '招待コード',
-			'sharedSpace.join.codeHint' => '招待コードを入力、例：123456',
+			'sharedSpace.join.subtitle' => '招待コードを入力して、共有の財務を閲覧・分析',
+			'sharedSpace.join.codeHint' => '6桁の数字招待コードを入力',
 			'sharedSpace.join.cancel' => 'キャンセル',
 			'sharedSpace.join.submit' => '参加',
 			'sharedSpace.join.codeRequired' => '招待コードを入力してください',
-			'sharedSpace.join.codeInvalid' => '招待コードの形式が無効です',
-			'sharedSpace.join.codeFormat' => '招待コードは英数字のみ使用できます',
-			'sharedSpace.list.emptyTitle' => '共同財務スペースを開始',
-			'sharedSpace.list.emptySubtitle' => '共有スペースを作成・参加し、家族、パートナー、チームと共同の口座や資産を管理',
+			'sharedSpace.join.codeInvalid' => '6桁の数字招待コードを入力してください',
+			'sharedSpace.list.emptyTitle' => '共有の財務をみんなで俯瞰',
+			'sharedSpace.list.emptySubtitle' => '共有スペースを作成・参加して、家族や友達と財務の閲覧・分析・集計を共有',
 			'sharedSpace.list.getStarted' => '始める',
 			'sharedSpace.list.hasInviteCode' => '招待コードをお持ちですか？タップして参加',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '「${name}」に参加しました！',
@@ -3623,7 +3617,6 @@ extension on TranslationsJa {
 			'sharedSpace.detail.noTransactions' => '取引はまだありません',
 			'sharedSpace.detail.noTransactionsHint' => 'このスペースの取引がここに表示されます',
 			'sharedSpace.detail.refreshCode' => 'コードを更新',
-			'sharedSpace.detail.joinOtherSpace' => '他のスペースに参加',
 			'sharedSpace.detail.noMoreTransactions' => 'これ以上の取引はありません',
 			'sharedSpace.notifications.title' => 'お知らせ',
 			'sharedSpace.notifications.empty' => 'お知らせはありません',
@@ -3633,7 +3626,6 @@ extension on TranslationsJa {
 			'sharedSpace.notifications.inviteRejected' => '招待を拒否しました',
 			'sharedSpace.notifications.allMarkedRead' => 'すべて既読にしました',
 			'sharedSpace.inviteCard.title' => '招待コード',
-			'sharedSpace.inviteCard.subtitle' => '友達と共有してスペースに参加',
 			'sharedSpace.inviteCard.copyCode' => '招待コードをコピー',
 			'sharedSpace.inviteCard.shareLink' => '招待リンクを共有',
 			'sharedSpace.inviteCard.codeCopied' => '招待コードをコピーしました',

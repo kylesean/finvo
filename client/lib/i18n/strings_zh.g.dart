@@ -3350,8 +3350,8 @@ class Translations$sharedSpace$create$zh {
 	/// zh: '创建共享空间'
 	String get title => '创建共享空间';
 
-	/// zh: '创建一个新的共享空间，与朋友一起记账'
-	String get subtitle => '创建一个新的共享空间，与朋友一起记账';
+	/// zh: '创建共享空间，共享查看与分析账目'
+	String get subtitle => '创建共享空间，共享查看与分析账目';
 
 	/// zh: '空间名称'
 	String get nameLabel => '空间名称';
@@ -3392,14 +3392,11 @@ class Translations$sharedSpace$join$zh {
 	/// zh: '加入共享空间'
 	String get title => '加入共享空间';
 
-	/// zh: '输入朋友分享的邀请码，开始协作记账'
-	String get subtitle => '输入朋友分享的邀请码，开始协作记账';
+	/// zh: '输入邀请码，查看与分析共享账目'
+	String get subtitle => '输入邀请码，查看与分析共享账目';
 
-	/// zh: '邀请码'
-	String get codeLabel => '邀请码';
-
-	/// zh: '输入邀请码，例如：123456'
-	String get codeHint => '输入邀请码，例如：123456';
+	/// zh: '输入 6 位数字邀请码'
+	String get codeHint => '输入 6 位数字邀请码';
 
 	/// zh: '取消'
 	String get cancel => '取消';
@@ -3410,11 +3407,8 @@ class Translations$sharedSpace$join$zh {
 	/// zh: '请输入邀请码'
 	String get codeRequired => '请输入邀请码';
 
-	/// zh: '邀请码格式无效'
-	String get codeInvalid => '邀请码格式无效';
-
-	/// zh: '邀请码只能包含字母和数字'
-	String get codeFormat => '邀请码只能包含字母和数字';
+	/// zh: '请输入 6 位数字邀请码'
+	String get codeInvalid => '请输入 6 位数字邀请码';
 }
 
 // Path: sharedSpace.list
@@ -3425,11 +3419,11 @@ class Translations$sharedSpace$list$zh {
 
 	// Translations
 
-	/// zh: '开启多方协同的财务空间'
-	String get emptyTitle => '开启多方协同的财务空间';
+	/// zh: '共享账目，一起看清财务'
+	String get emptyTitle => '共享账目，一起看清财务';
 
-	/// zh: '创建或加入共享空间，与家人、伴侣或团队协同管理共享账目与资产'
-	String get emptySubtitle => '创建或加入共享空间，与家人、伴侣或团队协同管理共享账目与资产';
+	/// zh: '创建或加入共享空间，与家人、朋友共享查看、分析与汇总账目'
+	String get emptySubtitle => '创建或加入共享空间，与家人、朋友共享查看、分析与汇总账目';
 
 	/// zh: '开始使用'
 	String get getStarted => '开始使用';
@@ -3509,9 +3503,6 @@ class Translations$sharedSpace$detail$zh {
 	/// zh: '刷新生成新码'
 	String get refreshCode => '刷新生成新码';
 
-	/// zh: '加入其他空间'
-	String get joinOtherSpace => '加入其他空间';
-
 	/// zh: '没有更多交易'
 	String get noMoreTransactions => '没有更多交易';
 }
@@ -3556,9 +3547,6 @@ class Translations$sharedSpace$inviteCard$zh {
 
 	/// zh: '邀请码'
 	String get title => '邀请码';
-
-	/// zh: '分享给朋友以加入空间'
-	String get subtitle => '分享给朋友以加入空间';
 
 	/// zh: '复制邀请码'
 	String get copyCode => '复制邀请码';
@@ -6222,7 +6210,7 @@ extension on Translations {
 			'sharedSpace.roles.member' => '成员',
 			'sharedSpace.title' => '共享空间',
 			'sharedSpace.create.title' => '创建共享空间',
-			'sharedSpace.create.subtitle' => '创建一个新的共享空间，与朋友一起记账',
+			'sharedSpace.create.subtitle' => '创建共享空间，共享查看与分析账目',
 			'sharedSpace.create.nameLabel' => '空间名称',
 			'sharedSpace.create.nameHint' => '例如：毕业旅行',
 			'sharedSpace.create.descLabel' => '描述（可选）',
@@ -6233,16 +6221,14 @@ extension on Translations {
 			'sharedSpace.create.nameTooShort' => '空间名称至少需要 2 个字符',
 			'sharedSpace.create.nameTooLong' => '空间名称不能超过 50 个字符',
 			'sharedSpace.join.title' => '加入共享空间',
-			'sharedSpace.join.subtitle' => '输入朋友分享的邀请码，开始协作记账',
-			'sharedSpace.join.codeLabel' => '邀请码',
-			'sharedSpace.join.codeHint' => '输入邀请码，例如：123456',
+			'sharedSpace.join.subtitle' => '输入邀请码，查看与分析共享账目',
+			'sharedSpace.join.codeHint' => '输入 6 位数字邀请码',
 			'sharedSpace.join.cancel' => '取消',
 			'sharedSpace.join.submit' => '加入',
 			'sharedSpace.join.codeRequired' => '请输入邀请码',
-			'sharedSpace.join.codeInvalid' => '邀请码格式无效',
-			'sharedSpace.join.codeFormat' => '邀请码只能包含字母和数字',
-			'sharedSpace.list.emptyTitle' => '开启多方协同的财务空间',
-			'sharedSpace.list.emptySubtitle' => '创建或加入共享空间，与家人、伴侣或团队协同管理共享账目与资产',
+			'sharedSpace.join.codeInvalid' => '请输入 6 位数字邀请码',
+			'sharedSpace.list.emptyTitle' => '共享账目，一起看清财务',
+			'sharedSpace.list.emptySubtitle' => '创建或加入共享空间，与家人、朋友共享查看、分析与汇总账目',
 			'sharedSpace.list.getStarted' => '开始使用',
 			'sharedSpace.list.hasInviteCode' => '有邀请码？点击加入',
 			'sharedSpace.list.joinedSuccess' => ({required Object name}) => '成功加入「${name}」！',
@@ -6266,7 +6252,6 @@ extension on Translations {
 			'sharedSpace.detail.noTransactions' => '暂无交易记录',
 			'sharedSpace.detail.noTransactionsHint' => '空间内的交易将显示在这里',
 			'sharedSpace.detail.refreshCode' => '刷新生成新码',
-			'sharedSpace.detail.joinOtherSpace' => '加入其他空间',
 			'sharedSpace.detail.noMoreTransactions' => '没有更多交易',
 			'sharedSpace.notifications.title' => '通知',
 			'sharedSpace.notifications.empty' => '暂无通知',
@@ -6276,7 +6261,6 @@ extension on Translations {
 			'sharedSpace.notifications.inviteRejected' => '已拒绝邀请',
 			'sharedSpace.notifications.allMarkedRead' => '全部标记为已读',
 			'sharedSpace.inviteCard.title' => '邀请码',
-			'sharedSpace.inviteCard.subtitle' => '分享给朋友以加入空间',
 			'sharedSpace.inviteCard.copyCode' => '复制邀请码',
 			'sharedSpace.inviteCard.shareLink' => '分享邀请链接',
 			'sharedSpace.inviteCard.codeCopied' => '邀请码已复制',

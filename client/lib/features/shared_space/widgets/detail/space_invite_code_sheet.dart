@@ -2,23 +2,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 import 'package:finvo/features/shared_space/services/shared_space_service.dart';
-import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
-import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
-import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger('SpaceInviteCodeSheet');
 
-/// Bottom sheet that shows invite code for current space AND allows joining
-/// another space via invite code.
+/// Bottom sheet that shows the current space's invite code so members can
+/// share it with friends.
 class SpaceInviteCodeSheet extends ConsumerStatefulWidget {
   final SharedSpace space;
 
@@ -34,21 +29,10 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
   bool _isLoading = true;
   String? _error;
 
-  // Join space state
-  final _joinCodeController = TextEditingController();
-  bool _isJoining = false;
-  String? _joinError;
-
   @override
   void initState() {
     super.initState();
     _tryUseCachedCode();
-  }
-
-  @override
-  void dispose() {
-    _joinCodeController.dispose();
-    super.dispose();
   }
 
   /// Try to use the cached invite code from the space model first.
@@ -102,62 +86,13 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
     }
   }
 
-  Future<void> _joinSpace() async {
-    final code = _joinCodeController.text.trim().toUpperCase();
-    if (code.isEmpty) {
-      setState(() => _joinError = t.sharedSpace.join.codeRequired);
-      return;
-    }
-    if (!RegExp(r'^[A-Z0-9]+$').hasMatch(code)) {
-      setState(() => _joinError = t.sharedSpace.join.codeFormat);
-      return;
-    }
-
-    setState(() {
-      _isJoining = true;
-      _joinError = null;
-    });
-
-    try {
-      // Call service directly to get precise error messages
-      final service = ref.read(sharedSpaceServiceProvider);
-      final space = await service.joinSpaceWithCode(code);
-
-      // Also update the provider's space list
-      if (mounted) {
-        unawaited(
-          ref.read(sharedSpaceProvider.notifier).loadSpaces(refresh: true),
-        );
-        // Refresh notification badge (welcome notification was created)
-        ref.invalidate(notificationProvider);
-        // Pop the sheet first, then navigate to space detail
-        Navigator.of(context).pop();
-        ToastService.show(
-          description: Text(t.sharedSpace.list.joinedSuccess(name: space.name)),
-        );
-        // Navigate to the newly joined space
-        unawaited(
-          GoRouter.of(context).pushNamed(
-            AppRouteNames.sharedSpaceDetail,
-            pathParameters: {'spaceId': space.id},
-          ),
-        );
-      }
-    } on AppException catch (e) {
-      if (mounted) {
-        setState(() {
-          _joinError = e.message;
-          _isJoining = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _joinError = t.sharedSpace.detail.loadFailed;
-          _isJoining = false;
-        });
-      }
-    }
+  void _copyCode() {
+    final code = _inviteCode?.code;
+    if (code == null) return;
+    unawaited(Clipboard.setData(ClipboardData(text: code)));
+    ToastService.show(
+      description: Text(t.sharedSpace.detail.codeCopied(code: code)),
+    );
   }
 
   @override
@@ -171,7 +106,7 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -187,17 +122,12 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
               ),
               const SizedBox(height: 20),
 
-              // ===== Section 1: Current space invite code =====
+              // Title
               Text(
                 t.sharedSpace.detail.inviteCode,
                 style: AppTextStyles.pageTitleLarge(theme),
               ),
-              const SizedBox(height: 8),
-              Text(
-                t.sharedSpace.inviteCard.subtitle,
-                style: AppTextStyles.listSubtitle(theme),
-              ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
               // Invite code content
               if (_isLoading)
@@ -266,20 +196,7 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
                         Expanded(
                           child: FButton(
                             variant: .primary,
-                            onPress: () {
-                              unawaited(
-                                Clipboard.setData(
-                                  ClipboardData(text: _inviteCode!.code),
-                                ),
-                              );
-                              ToastService.show(
-                                description: Text(
-                                  t.sharedSpace.detail.codeCopied(
-                                    code: _inviteCode!.code,
-                                  ),
-                                ),
-                              );
-                            },
+                            onPress: _copyCode,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -319,79 +236,6 @@ class _SpaceInviteCodeSheetState extends ConsumerState<SpaceInviteCodeSheet> {
                   ],
                 ),
 
-              const SizedBox(height: 24),
-
-              // ===== Divider =====
-              Row(
-                children: [
-                  Expanded(child: Divider(color: colors.border)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      t.sharedSpace.detail.joinOtherSpace,
-                      style: AppTextStyles.detailLabel(theme),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: colors.border)),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // ===== Section 2: Join another space =====
-              FTextField(
-                control: .managed(
-                  controller: _joinCodeController,
-                  onChange: (value) {
-                    if (_joinError != null) {
-                      setState(() => _joinError = null);
-                    }
-                    final upper = value.text.toUpperCase();
-                    if (upper != value.text) {
-                      _joinCodeController.value = _joinCodeController.value
-                          .copyWith(
-                            text: upper,
-                            selection: TextSelection.collapsed(
-                              offset: upper.length,
-                            ),
-                          );
-                    }
-                  },
-                ),
-                label: Text(t.sharedSpace.join.codeLabel),
-                hint: t.sharedSpace.join.codeHint,
-              ),
-              if (_joinError != null)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 4, left: 4),
-                    child: Text(
-                      _joinError!,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.destructive,
-                      ),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              FButton(
-                variant: .outline,
-                onPress: _isJoining ? null : _joinSpace,
-                child: _isJoining
-                    ? const SizedBox.square(
-                        dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(FLucideIcons.logIn, size: 16),
-                          const SizedBox(width: 8),
-                          Text(t.sharedSpace.join.submit),
-                        ],
-                      ),
-              ),
               const SizedBox(height: 12),
             ],
           ),
