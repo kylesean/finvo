@@ -14,6 +14,7 @@ import 'package:finvo/shared/widgets/dialogs/action_bottom_sheet.dart';
 import 'package:finvo/shared/models/action_item_model.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/shared_space/widgets/detail/shared_space_detail_sections.dart';
+import 'package:finvo/shared/utils/route_utils.dart';
 import 'dart:async';
 
 class SharedSpaceDetailPage extends ConsumerStatefulWidget {
@@ -310,7 +311,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
             ).routerDelegate.navigatorKey.currentContext;
             if (rootContext == null) return;
             unawaited(
-              Future<void>.delayed(const Duration(milliseconds: 100), () {
+              waitForRouteSettle().then((_) {
                 if (!rootContext.mounted) return;
                 _showConfirmDialog(
                   context: rootContext,
@@ -345,7 +346,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
             ).routerDelegate.navigatorKey.currentContext;
             if (rootContext == null) return;
             unawaited(
-              Future<void>.delayed(const Duration(milliseconds: 100), () {
+              waitForRouteSettle().then((_) {
                 if (!rootContext.mounted) return;
                 _showConfirmDialog(
                   context: rootContext,

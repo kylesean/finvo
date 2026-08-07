@@ -1,31 +1,26 @@
 import 'package:decimal/decimal.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 
+part 'financial_summary_provider.freezed.dart';
 part 'financial_summary_provider.g.dart';
 
-class FinancialSummary {
-  final Decimal totalNetWorth;
-  final Decimal totalAssets;
-  final Decimal totalLiabilities;
-  final String currencyCode;
-  final bool isLoading;
-
-  /// Currency codes of accounts excluded from the totals because no exchange
-  /// rate was available for them. Empty when every account converted cleanly.
-  /// UI layers can surface a hint instead of silently treating them as zero.
-  final Set<String> missingRateCurrencies;
-
-  const FinancialSummary({
-    required this.totalNetWorth,
-    required this.totalAssets,
-    required this.totalLiabilities,
-    required this.currencyCode,
-    this.isLoading = false,
-    this.missingRateCurrencies = const {},
-  });
+@freezed
+abstract class FinancialSummary with _$FinancialSummary {
+  const factory FinancialSummary({
+    required Decimal totalNetWorth,
+    required Decimal totalAssets,
+    required Decimal totalLiabilities,
+    required String currencyCode,
+    @Default(false) bool isLoading,
+    // Currency codes of accounts excluded from the totals because no exchange
+    // rate was available for them. Empty when every account converted cleanly.
+    // UI layers can surface a hint instead of silently treating them as zero.
+    @Default(<String>{}) Set<String> missingRateCurrencies,
+  }) = _FinancialSummary;
 
   static final empty = FinancialSummary(
     totalNetWorth: Decimal.zero,

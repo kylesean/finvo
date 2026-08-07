@@ -1962,6 +1962,24 @@ class Translations$account$zh {
 	/// zh: '例如：工资卡'
 	String get nameHint => '例如：工资卡';
 
+	/// zh: '请输入账户名称'
+	String get nameRequired => '请输入账户名称';
+
+	/// zh: '账户名称至少需要 2 个字符'
+	String get nameTooShort => '账户名称至少需要 2 个字符';
+
+	/// zh: '请输入当前余额'
+	String get amountRequired => '请输入当前余额';
+
+	/// zh: '请输入有效金额'
+	String get invalidAmount => '请输入有效金额';
+
+	/// zh: '余额不能为负数'
+	String get negativeBalance => '余额不能为负数';
+
+	/// zh: '余额不能超过 999,999,999.99'
+	String get amountTooLarge => '余额不能超过 999,999,999.99';
+
 	/// zh: '0.00'
 	String get amountHint => '0.00';
 
@@ -3877,6 +3895,12 @@ class Translations$errorMapping$transaction$zh {
 
 	/// zh: '交易记录不存在'
 	String get notExists => '交易记录不存在';
+
+	/// zh: '账户ID无效'
+	String get invalidAccountId => '账户ID无效';
+
+	/// zh: '该币种汇率暂不可用'
+	String get exchangeRateUnavailable => '该币种汇率暂不可用';
 }
 
 // Path: errorMapping.space
@@ -3967,6 +3991,60 @@ class Translations$errorMapping$upload$zh {
 
 	/// zh: '文件数量过多'
 	String get tooManyFiles => '文件数量过多';
+
+	/// zh: '上传的文件无效'
+	String get invalidFile => '上传的文件无效';
+
+	/// zh: '文件MIME类型无效'
+	String get invalidMimeType => '文件MIME类型无效';
+
+	/// zh: '图片内容无效'
+	String get invalidImageContent => '图片内容无效';
+
+	/// zh: '图片过宽'
+	String get imageTooWide => '图片过宽';
+
+	/// zh: '图片过高'
+	String get imageTooHigh => '图片过高';
+
+	/// zh: '文件总大小过大'
+	String get totalSizeTooLarge => '文件总大小过大';
+
+	/// zh: '读取文件失败'
+	String get readError => '读取文件失败';
+
+	/// zh: '文件系统错误'
+	String get filesystemError => '文件系统错误';
+
+	/// zh: '上传校验失败'
+	String get verificationFailed => '上传校验失败';
+
+	/// zh: '所有文件上传失败'
+	String get allFailed => '所有文件上传失败';
+
+	/// zh: '图片URL无效'
+	String get invalidImageUrls => '图片URL无效';
+
+	/// zh: '文件不存在'
+	String get fileNotFound => '文件不存在';
+
+	/// zh: '图片压缩失败'
+	String get imageCompressionFailed => '图片压缩失败';
+
+	/// zh: '文件访问错误'
+	String get accessError => '文件访问错误';
+
+	/// zh: '删除文件失败'
+	String get deleteError => '删除文件失败';
+
+	/// zh: '未提供文件'
+	String get noFiles => '未提供文件';
+
+	/// zh: '文件为空'
+	String get fileEmpty => '文件为空';
+
+	/// zh: '文件名无效'
+	String get invalidFilename => '文件名无效';
 }
 
 // Path: errorMapping.storage
@@ -4003,6 +4081,12 @@ class Translations$errorMapping$ai$zh {
 
 	/// zh: '用户消息为空'
 	String get emptyMessage => '用户消息为空';
+
+	/// zh: '会话无效'
+	String get conversationIdInvalid => '会话无效';
+
+	/// zh: '您无权访问该会话'
+	String get conversationIdNotOwner => '您无权访问该会话';
 }
 
 // Path: notification.types
@@ -6069,6 +6153,12 @@ extension on Translations {
 			'account.includeInNetWorthLabel' => '计入资产',
 			'account.includeInNetWorthDesc' => '用于净资产统计',
 			'account.nameHint' => '例如：工资卡',
+			'account.nameRequired' => '请输入账户名称',
+			'account.nameTooShort' => '账户名称至少需要 2 个字符',
+			'account.amountRequired' => '请输入当前余额',
+			'account.invalidAmount' => '请输入有效金额',
+			'account.negativeBalance' => '余额不能为负数',
+			'account.amountTooLarge' => '余额不能超过 999,999,999.99',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '删除账户',
 			'account.deleteConfirm' => '确定要删除该账户吗？此操作无法撤销。',
@@ -6135,14 +6225,14 @@ extension on Translations {
 			'financial.sourcesCount' => ({required Object count}) => '${count} 个账户',
 			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',
 			'financial.neverUpdated' => '从未更新',
+			_ => null,
+		} ?? switch (path) {
 			'financial.updateNow' => '立即更新',
 			'app.splashTitle' => '智见增长，格物致富。',
 			'app.splashSubtitle' => '智能财务助手',
 			'statistics.title' => '统计分析',
 			'statistics.analyze' => '统计分析',
 			'statistics.exportInProgress' => '导出功能开发中...',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.ranking' => '大额消费排行',
 			'statistics.noData' => '暂无数据',
 			'statistics.overview.balance' => '总结余',
@@ -6359,6 +6449,8 @@ extension on Translations {
 			'errorMapping.transaction.saveFailed' => '评论保存失败',
 			'errorMapping.transaction.deleteFailed' => '评论删除失败',
 			'errorMapping.transaction.notExists' => '交易记录不存在',
+			'errorMapping.transaction.invalidAccountId' => '账户ID无效',
+			'errorMapping.transaction.exchangeRateUnavailable' => '该币种汇率暂不可用',
 			'errorMapping.space.notFound' => '共享空间不存在或无权访问',
 			'errorMapping.space.inviteDenied' => '无权邀请成员',
 			'errorMapping.space.inviteSelf' => '不能邀请你自己',
@@ -6380,12 +6472,32 @@ extension on Translations {
 			'errorMapping.upload.tooLarge' => '文件过大',
 			'errorMapping.upload.unsupportedType' => '不支持的文件类型',
 			'errorMapping.upload.tooManyFiles' => '文件数量过多',
+			'errorMapping.upload.invalidFile' => '上传的文件无效',
+			'errorMapping.upload.invalidMimeType' => '文件MIME类型无效',
+			'errorMapping.upload.invalidImageContent' => '图片内容无效',
+			'errorMapping.upload.imageTooWide' => '图片过宽',
+			'errorMapping.upload.imageTooHigh' => '图片过高',
+			'errorMapping.upload.totalSizeTooLarge' => '文件总大小过大',
+			'errorMapping.upload.readError' => '读取文件失败',
+			'errorMapping.upload.filesystemError' => '文件系统错误',
+			'errorMapping.upload.verificationFailed' => '上传校验失败',
+			'errorMapping.upload.allFailed' => '所有文件上传失败',
+			'errorMapping.upload.invalidImageUrls' => '图片URL无效',
+			'errorMapping.upload.fileNotFound' => '文件不存在',
+			'errorMapping.upload.imageCompressionFailed' => '图片压缩失败',
+			'errorMapping.upload.accessError' => '文件访问错误',
+			'errorMapping.upload.deleteError' => '删除文件失败',
+			'errorMapping.upload.noFiles' => '未提供文件',
+			'errorMapping.upload.fileEmpty' => '文件为空',
+			'errorMapping.upload.invalidFilename' => '文件名无效',
 			'errorMapping.storage.configNotFound' => '存储配置不存在或无权访问',
 			'errorMapping.storage.configInUse' => '无法删除：存储配置仍被附件使用',
 			'errorMapping.storage.invalidProviderType' => '无效的存储提供商类型',
 			'errorMapping.ai.contextLimit' => '上下文长度超出限制',
 			'errorMapping.ai.tokenLimit' => 'Token配额不足',
 			'errorMapping.ai.emptyMessage' => '用户消息为空',
+			'errorMapping.ai.conversationIdInvalid' => '会话无效',
+			'errorMapping.ai.conversationIdNotOwner' => '您无权访问该会话',
 			'notification.title' => '消息通知',
 			'notification.markAllRead' => '全部已读',
 			'notification.empty' => '暂无通知消息',

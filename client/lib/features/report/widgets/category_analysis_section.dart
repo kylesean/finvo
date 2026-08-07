@@ -41,9 +41,11 @@ class _CategoryAnalysisSectionState
     extends ConsumerState<CategoryAnalysisSection> {
   CategoryViewMode _viewMode = CategoryViewMode.bar;
 
-  String _formatAmount(String amount) {
+  // Format an amount using the user's configured currency instead of the
+  // hard-coded CNY so the tooltip matches the app-wide currency setting.
+  String _formatAmount(String amount, String currencyCode) {
     final numberFormat = AmountFormatter.getNumberFormat(
-      'CNY',
+      currencyCode,
       decimalDigits: 0,
     );
     return numberFormat.format(AmountFormatter.parseDecimal(amount).toDouble());
@@ -166,7 +168,7 @@ class _CategoryAnalysisSectionState
                   final currencySymbol =
                       Currency.fromCode(currencyCode)?.symbol ?? currencyCode;
                   return BarTooltipItem(
-                    '${category.displayText}\n$currencySymbol${_formatAmount(item.amount)}',
+                    '${category.displayText}\n$currencySymbol${_formatAmount(item.amount, currencyCode)}',
                     theme.typography.body.xs.copyWith(
                       color: colors.primaryForeground,
                       fontWeight: AppFontConfig.headingBold,
@@ -292,7 +294,7 @@ class _CategoryAnalysisSectionState
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${Currency.fromCode(ref.read(financialSettingsProvider).primaryCurrency)?.symbol ?? ""}${_formatAmount(total.toStringAsFixed(0))}',
+                          '${Currency.fromCode(ref.read(financialSettingsProvider).primaryCurrency)?.symbol ?? ""}${_formatAmount(total.toStringAsFixed(0), ref.read(financialSettingsProvider).primaryCurrency)}',
                           style: AppTextStyles.listTitle(
                             theme,
                           ).copyWith(letterSpacing: -0.5),

@@ -9,21 +9,30 @@ part of 'speech_settings_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Speech settings Notifier
+///
+/// [keepAlive] so the locally-stored settings are kept in memory after the
+/// startup pre-warm instead of being re-read on every screen mount.
 
 @ProviderFor(SpeechSettingsNotifier)
 final speechSettingsProvider = SpeechSettingsNotifierProvider._();
 
 /// Speech settings Notifier
+///
+/// [keepAlive] so the locally-stored settings are kept in memory after the
+/// startup pre-warm instead of being re-read on every screen mount.
 final class SpeechSettingsNotifierProvider
     extends $NotifierProvider<SpeechSettingsNotifier, SpeechSettingsState> {
   /// Speech settings Notifier
+  ///
+  /// [keepAlive] so the locally-stored settings are kept in memory after the
+  /// startup pre-warm instead of being re-read on every screen mount.
   SpeechSettingsNotifierProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'speechSettingsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -45,9 +54,12 @@ final class SpeechSettingsNotifierProvider
 }
 
 String _$speechSettingsNotifierHash() =>
-    r'0415c1a4aede31c7bb4bf1dadff61aeeb02b27e7';
+    r'957052e4505156226e0bda9792e5e18dab285657';
 
 /// Speech settings Notifier
+///
+/// [keepAlive] so the locally-stored settings are kept in memory after the
+/// startup pre-warm instead of being re-read on every screen mount.
 
 abstract class _$SpeechSettingsNotifier extends $Notifier<SpeechSettingsState> {
   SpeechSettingsState build();

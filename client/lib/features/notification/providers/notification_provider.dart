@@ -10,6 +10,7 @@ import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/home/providers/comment_providers.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
 import 'package:finvo/features/notification/repositories/notification_repository.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 part 'notification_provider.freezed.dart';
 part 'notification_provider.g.dart';
@@ -50,8 +51,8 @@ class NotificationNotifier extends _$NotificationNotifier {
 
   @override
   NotificationState build() {
-    // Trigger initial load asynchronously
-    unawaited(Future<void>.microtask(() => unawaited(refresh())));
+    // Kept pure: the notification center page triggers [refresh] explicitly in
+    // initState instead of firing a network side-effect from build().
     return const NotificationState();
   }
 
@@ -71,7 +72,7 @@ class NotificationNotifier extends _$NotificationNotifier {
       );
     } catch (e) {
       _logger.severe('Failed to refresh notifications', e);
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
   }
 

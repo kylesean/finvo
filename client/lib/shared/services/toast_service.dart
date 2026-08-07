@@ -16,13 +16,20 @@ class ToastService {
     required Widget description,
     Widget? title,
     Duration? duration,
+    TopToastAction? action,
   }) {
     final context = _context;
     if (context == null) return;
 
-    final String message =
-        _extractText(description) ?? _extractText(title) ?? 'Success';
-    TopToast.info(context, message, overlay: _overlay);
+    TopToast.showWidget(
+      context,
+      description: description,
+      title: title,
+      type: ToastType.info,
+      duration: duration ?? const Duration(seconds: 3),
+      overlayState: _overlay,
+      action: action,
+    );
   }
 
   /// Show a success Toast
@@ -30,13 +37,20 @@ class ToastService {
     required Widget description,
     Widget? title,
     Duration? duration,
+    TopToastAction? action,
   }) {
     final context = _context;
     if (context == null) return;
 
-    final String message =
-        _extractText(description) ?? _extractText(title) ?? 'Success';
-    TopToast.success(context, message, overlay: _overlay);
+    TopToast.showWidget(
+      context,
+      description: description,
+      title: title,
+      type: ToastType.success,
+      duration: duration ?? const Duration(seconds: 3),
+      overlayState: _overlay,
+      action: action,
+    );
   }
 
   /// Show a destructive (error) Toast
@@ -44,13 +58,20 @@ class ToastService {
     required Widget description,
     Widget? title,
     Duration? duration,
+    TopToastAction? action,
   }) {
     final context = _context;
     if (context == null) return;
 
-    final String message =
-        _extractText(description) ?? _extractText(title) ?? 'Error';
-    TopToast.error(context, message, overlay: _overlay);
+    TopToast.showWidget(
+      context,
+      description: description,
+      title: title,
+      type: ToastType.error,
+      duration: duration ?? const Duration(seconds: 3),
+      overlayState: _overlay,
+      action: action,
+    );
   }
 
   /// Show a warning Toast
@@ -58,30 +79,19 @@ class ToastService {
     required Widget description,
     Widget? title,
     Duration? duration,
+    TopToastAction? action,
   }) {
     final context = _context;
     if (context == null) return;
 
-    final String message =
-        _extractText(description) ?? _extractText(title) ?? 'Warning';
-    TopToast.warning(context, message, overlay: _overlay);
-  }
-
-  static String? _extractText(Widget? widget) {
-    if (widget == null) return null;
-    if (widget is Text) return widget.data;
-    if (widget is RichText) {
-      return widget.text.toPlainText();
-    }
-    // Handle cases where Text might have a child or be wrapped
-    if (widget is Center) return _extractText(widget.child);
-    if (widget is Padding) return _extractText(widget.child);
-    if (widget is Column) {
-      return widget.children.map(_extractText).whereType<String>().join(' ');
-    }
-    if (widget is Row) {
-      return widget.children.map(_extractText).whereType<String>().join(' ');
-    }
-    return null;
+    TopToast.showWidget(
+      context,
+      description: description,
+      title: title,
+      type: ToastType.warning,
+      duration: duration ?? const Duration(seconds: 3),
+      overlayState: _overlay,
+      action: action,
+    );
   }
 }

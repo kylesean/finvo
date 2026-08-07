@@ -88,9 +88,15 @@ class NotificationWsService {
   NotificationCallback? onNotification;
 
   /// Connect to the notification WebSocket.
+  ///
+  /// [resetBudget] resets the reconnect attempt counter. External callers
+  /// (auth change, server edit) should pass the default `true` so a fresh user
+  /// action starts with a full reconnect budget; internal automatic reconnects
+  /// pass `false` so the budget accumulates toward [_maxReconnectAttempts].
   Future<void> connect({
     required String baseUrl,
     required SecureStorageService storageService,
+    bool resetBudget = true,
   }) async {
     if (_isDisposed) return;
 
@@ -98,6 +104,13 @@ class NotificationWsService {
     // awaiting a token read / handshake will see the new generation and abort
     // instead of stepping on the socket we are about to establish.
     final generation = ++_connectGeneration;
+
+    // A fresh external connect is a new connection session: give it a full
+    // reconnect budget instead of inheriting a possibly-exhausted counter from
+    // a previous session (H3 fix).
+    if (resetBudget) {
+      _reconnectAttempts = 0;
+    }
 
     // Reconnect path (or server switch) may arrive while a previous channel
     // is still alive; tear it down first to avoid leaking the old socket.
@@ -175,11 +188,20 @@ class NotificationWsService {
   void _listen() {
     _subscription = _channel?.stream.listen(
       (message) {
+        _lastServerMessage = DateTime.now();
+        // Parse first, dispatch second: a failure in the callback is NOT a
+        // parse failure. Keeping them in one try/catch would mislabel a
+        // callback exception as "Failed to parse WS message" and mask the
+        // real bug.
+        late final Map<String, dynamic> data;
         try {
-          _lastServerMessage = DateTime.now();
-          final data = jsonDecode(message as String) as Map<String, dynamic>;
-          final type = data['type'] as String?;
-
+          data = jsonDecode(message as String) as Map<String, dynamic>;
+        } catch (e) {
+          _logger.warning('Failed to parse WS message: $e');
+          return;
+        }
+        final type = data['type'] as String?;
+        try {
           if (type == 'notification') {
             final payload = data['payload'] as Map<String, dynamic>?;
             if (payload != null) {
@@ -189,8 +211,8 @@ class NotificationWsService {
             onNotification?.call(data);
           }
           // Ignore 'pong' responses
-        } catch (e) {
-          _logger.warning('Failed to parse WS message: $e');
+        } catch (e, st) {
+          _logger.warning('Notification callback failed', e, st);
         }
       },
       onError: (Object error) {
@@ -282,7 +304,13 @@ class NotificationWsService {
       'Reconnecting in ${delay.inSeconds}s (attempt $_reconnectAttempts)',
     );
     _reconnectTimer = Timer(delay, () {
-      unawaited(connect(baseUrl: baseUrl, storageService: storageService));
+      unawaited(
+        connect(
+          baseUrl: baseUrl,
+          storageService: storageService,
+          resetBudget: false,
+        ),
+      );
     });
   }
 

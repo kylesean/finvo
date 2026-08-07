@@ -5,19 +5,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:forui/forui.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/models/transaction_type.dart';
+
+export 'package:finvo/shared/models/transaction_type.dart';
 
 part 'transaction_model.freezed.dart';
 part 'transaction_model.g.dart';
 
 final _logger = Logger('TransactionModel');
-
-// Transaction type enum
-enum TransactionType {
-  expense, // Expense
-  income, // Income
-  transfer, // Transfer
-  other,
-}
 
 // Shared user information
 @freezed

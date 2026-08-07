@@ -5,7 +5,6 @@ import 'package:finvo/i18n/strings.g.dart';
 
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/finance/pages/financial_accounts_page.dart';
-import 'package:finvo/features/finance/pages/account_sources_page.dart';
 import 'package:finvo/features/finance/pages/account_type_picker_page.dart';
 import 'package:finvo/features/finance/pages/account_add_page.dart';
 import 'package:finvo/features/finance/pages/account_edit_page.dart';
@@ -35,7 +34,11 @@ StatefulShellBranch buildFinanceBranch() {
           GoRoute(
             path: 'accounts',
             name: AppRouteNames.financialAccounts,
-            builder: (context, state) => const AccountSourcesPage(),
+            // Reuse FinancialAccountsPage: the previous AccountSourcesPage was
+            // a second, duplicated implementation that hard-coded English
+            // strings. Converging on the maintained page keeps one source of
+            // truth for account management (H4 fix).
+            builder: (context, state) => const FinancialAccountsPage(),
             routes: [
               GoRoute(
                 path: 'type-picker',

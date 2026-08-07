@@ -47,7 +47,9 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier {
   Future<void> loadSpaces({bool refresh = false}) async {
     final service = ref.read(sharedSpaceServiceProvider);
     if (refresh) {
-      state = const SharedSpaceState(isLoading: true);
+      // Preserve the existing list while refreshing so a failed refresh does
+      // not wipe the previously loaded spaces (M2 fix).
+      state = state.copyWith(isLoading: true, error: null);
     } else if (state.isLoading || !state.hasMore) {
       return;
     } else {
@@ -281,9 +283,10 @@ class SpaceTransactionNotifier extends _$SpaceTransactionNotifier {
   Future<void> loadTransactions({bool refresh = false}) async {
     if (refresh) {
       // Invalidate any in-flight request so its response can't append stale
-      // pages onto the refreshed list.
+      // pages onto the refreshed list. Preserve the existing transactions so a
+      // failed refresh doesn't clear what was already shown (M2 fix).
       ++_loadGeneration;
-      state = const SpaceTransactionState(isLoading: true);
+      state = state.copyWith(isLoading: true, error: null);
     } else if (state.isLoading || !state.hasMore) {
       return;
     } else {

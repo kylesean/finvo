@@ -210,6 +210,12 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   Future<void> _startNewSpeechSession() async {
     _logger.info('Starting new speech recognition session');
 
+    // Reset any stale manual-stop flag from a previous session so a genuine
+    // error in this new session is not silently swallowed as a user-initiated
+    // stop (the flag may have been left set if the previous stop raced with a
+    // loading response).
+    _isManualStop = false;
+
     // Play haptic feedback immediately to give the user instant feedback.
     unawaited(HapticFeedback.lightImpact());
 

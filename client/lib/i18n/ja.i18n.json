@@ -1112,6 +1112,12 @@
     "includeInNetWorthLabel": "資産に含める",
     "includeInNetWorthDesc": "純資産の統計に使用",
     "nameHint": "例：給与振込口座",
+    "nameRequired": "口座名を入力してください",
+    "nameTooShort": "口座名は2文字以上で入力してください",
+    "amountRequired": "現在の残高を入力してください",
+    "invalidAmount": "有効な金額を入力してください",
+    "negativeBalance": "残高はマイナスにできません",
+    "amountTooLarge": "残高は 999,999,999.99 を超えられません",
     "amountHint": "0.00",
     "deleteAccount": "口座を削除",
     "deleteConfirm": "この口座を削除しますか？取り消せません。",
@@ -1460,7 +1466,9 @@
       "invalidParent": "Invalid parent comment ID",
       "saveFailed": "Failed to save comment",
       "deleteFailed": "Failed to delete comment",
-      "notExists": "Transaction does not exist"
+      "notExists": "Transaction does not exist",
+      "invalidAccountId": "アカウントIDが無効です",
+      "exchangeRateUnavailable": "この通貨の為替レートは利用できません"
     },
     "space": {
       "notFound": "Shared space not found or access denied",
@@ -1487,7 +1495,25 @@
       "noFile": "No file uploaded",
       "tooLarge": "File too large",
       "unsupportedType": "Unsupported file type",
-      "tooManyFiles": "Too many files"
+      "tooManyFiles": "Too many files",
+      "invalidFile": "アップロードされたファイルが無効です",
+      "invalidMimeType": "ファイルのMIMEタイプが無効です",
+      "invalidImageContent": "画像の内容が無効です",
+      "imageTooWide": "画像が幅広すぎます",
+      "imageTooHigh": "画像が高すぎます",
+      "totalSizeTooLarge": "ファイルの合計サイズが大きすぎます",
+      "readError": "ファイルの読み取りに失敗しました",
+      "filesystemError": "ファイルシステムエラー",
+      "verificationFailed": "アップロードの検証に失敗しました",
+      "allFailed": "すべてのファイルのアップロードに失敗しました",
+      "invalidImageUrls": "画像URLが無効です",
+      "fileNotFound": "ファイルが見つかりません",
+      "imageCompressionFailed": "画像の圧縮に失敗しました",
+      "accessError": "ファイルアクセスエラー",
+      "deleteError": "ファイルの削除に失敗しました",
+      "noFiles": "ファイルが指定されていません",
+      "fileEmpty": "ファイルが空です",
+      "invalidFilename": "ファイル名が無効です"
     },
     "storage": {
       "configNotFound": "ストレージ設定が見つからないかアクセス権限がありません",
@@ -1497,7 +1523,9 @@
     "ai": {
       "contextLimit": "Context limit exceeded",
       "tokenLimit": "Insufficient tokens",
-      "emptyMessage": "Empty user message"
+      "emptyMessage": "Empty user message",
+      "conversationIdInvalid": "会話が無効です",
+      "conversationIdNotOwner": "この会話へのアクセス権がありません"
     }
   },
   "notification": {

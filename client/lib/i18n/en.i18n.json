@@ -1118,6 +1118,12 @@
     "includeInNetWorthLabel": "Include in Net Worth",
     "includeInNetWorthDesc": "Count towards total net worth",
     "nameHint": "e.g. Salary Card",
+    "nameRequired": "Please enter account name",
+    "nameTooShort": "Account name must be at least 2 characters",
+    "amountRequired": "Please enter current balance",
+    "invalidAmount": "Please enter a valid amount",
+    "negativeBalance": "Balance cannot be negative",
+    "amountTooLarge": "Balance cannot exceed 999,999,999.99",
     "amountHint": "0.00",
     "deleteAccount": "Delete Account",
     "deleteConfirm": "Are you sure you want to delete this account? This cannot be undone.",
@@ -1466,7 +1472,9 @@
       "invalidParent": "Invalid parent comment ID",
       "saveFailed": "Failed to save comment",
       "deleteFailed": "Failed to delete comment",
-      "notExists": "Transaction does not exist"
+      "notExists": "Transaction does not exist",
+      "invalidAccountId": "Invalid account ID",
+      "exchangeRateUnavailable": "Exchange rate unavailable for this currency"
     },
     "space": {
       "notFound": "Shared space not found or access denied",
@@ -1493,7 +1501,25 @@
       "noFile": "No file uploaded",
       "tooLarge": "File too large",
       "unsupportedType": "Unsupported file type",
-      "tooManyFiles": "Too many files"
+      "tooManyFiles": "Too many files",
+      "invalidFile": "Invalid file uploaded",
+      "invalidMimeType": "Invalid file type (MIME)",
+      "invalidImageContent": "Invalid image content",
+      "imageTooWide": "Image is too wide",
+      "imageTooHigh": "Image is too tall",
+      "totalSizeTooLarge": "Total file size too large",
+      "readError": "Failed to read file",
+      "filesystemError": "Filesystem error",
+      "verificationFailed": "Upload verification failed",
+      "allFailed": "All files failed to upload",
+      "invalidImageUrls": "Invalid image URLs",
+      "fileNotFound": "File not found",
+      "imageCompressionFailed": "Image compression failed",
+      "accessError": "File access error",
+      "deleteError": "Failed to delete file",
+      "noFiles": "No files provided",
+      "fileEmpty": "File is empty",
+      "invalidFilename": "Invalid file name"
     },
     "storage": {
       "configNotFound": "Storage config not found or access denied",
@@ -1503,7 +1529,9 @@
     "ai": {
       "contextLimit": "Context limit exceeded",
       "tokenLimit": "Insufficient tokens",
-      "emptyMessage": "Empty user message"
+      "emptyMessage": "Empty user message",
+      "conversationIdInvalid": "Invalid conversation",
+      "conversationIdNotOwner": "You do not have access to this conversation"
     }
   },
   "notification": {

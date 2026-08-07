@@ -9,6 +9,7 @@ import 'package:finvo/core/network/interceptors/auth_interceptor.dart';
 import 'package:finvo/core/network/interceptors/logging_interceptor.dart';
 import 'package:finvo/core/network/interceptors/error_interceptor.dart';
 import 'package:finvo/core/network/interceptors/locale_interceptor.dart';
+import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 
@@ -55,33 +56,57 @@ Future<void> handleUnauthorized(Ref ref) async {
   await ref.read(authProvider.notifier).handleSessionExpired();
 }
 
-/// SSE Dio Provider
+/// Build a configured [Dio] instance with the shared interceptor pipeline.
 ///
-/// Used for SSE streaming connections (AI chat, script execution, etc.), disabling timeout limits.
-/// Streaming connections may last for a long time (e.g., waiting for AI to execute scripts), should not be subject to timeout limits.
-final sseDioProvider = Provider<Dio>((ref) {
+/// [forSse] selects the SSE profile (relaxed streaming timeouts, no
+/// Error/Business interceptors, `text/event-stream` accept header).
+///
+/// The provider watches [serverConfigServiceProvider] (not just
+/// [apiConstantsProvider], which never changes) so that saving a new server
+/// URL — which invalidates `serverConfigServiceProvider` — rebuilds the Dio
+/// instance. That rebuild triggers `ref.onDispose(dio.close)` and releases the
+/// stale idle connection pool.
+Dio _buildDio(Ref ref, {required bool forSse}) {
   final apiConstants = ref.watch(apiConstantsProvider);
+  ref.watch(serverConfigServiceProvider);
+
   final dio = Dio();
 
-  // SSE connection configuration: only set connectTimeout; the receive/send
-  // timeouts are relaxed (1h) because SSE streams may legitimately idle for a
-  // long time while waiting for the AI to execute long-running tasks.
-  dio.options.baseUrl = apiConstants.baseUrl;
-  dio.options.connectTimeout = ApiConstants.connectTimeout;
-  dio.options.receiveTimeout = const Duration(hours: 1);
-  dio.options.sendTimeout = const Duration(hours: 1);
+  // Timeouts: SSE relaxes receive/send to 1h because streams may legitimately
+  // idle while waiting for the AI to execute long-running tasks.
+  final (connectTimeout, receiveTimeout, sendTimeout) = forSse
+      ? (
+          ApiConstants.connectTimeout,
+          const Duration(hours: 1),
+          const Duration(hours: 1),
+        )
+      : (
+          ApiConstants.connectTimeout,
+          ApiConstants.receiveTimeout,
+          ApiConstants.sendTimeout,
+        );
+
+  // Use baseUrl or empty placeholder (will be set dynamically by
+  // ConfigurationCheckInterceptor on each request).
+  final baseUrl = apiConstants.baseUrl;
+  dio.options.baseUrl = baseUrl.isNotEmpty ? baseUrl : 'http://placeholder';
+  dio.options.connectTimeout = connectTimeout;
+  dio.options.receiveTimeout = receiveTimeout;
+  dio.options.sendTimeout = sendTimeout;
   dio.options.headers = {
     ApiConstants.contentTypeHeader: ApiConstants.applicationJson,
-    ApiConstants.acceptHeader: 'text/event-stream',
+    ApiConstants.acceptHeader: forSse
+        ? 'text/event-stream'
+        : ApiConstants.applicationJson,
   };
 
-  // SSE connection only needs basic interceptors
+  // --- Shared interceptor pipeline (in execution order) ---
   final storageService = ref.watch(secureStorageServiceProvider);
   dio.interceptors.add(
     ConfigurationCheckInterceptor(ref),
   ); // Check config first
-  dio.interceptors.add(loggingInterceptor);
-  dio.interceptors.add(LocaleInterceptor(ref));
+  dio.interceptors.add(loggingInterceptor); // Logging interceptor
+  dio.interceptors.add(LocaleInterceptor(ref)); // Locale interceptor
   dio.interceptors.add(
     AuthInterceptor(
       storageService,
@@ -96,58 +121,33 @@ final sseDioProvider = Provider<Dio>((ref) {
       },
       dio: dio,
     ),
-  );
-  // Note: SSE does not need ErrorInterceptor and BusinessInterceptor, because the streaming response handling is different
+  ); // Auth interceptor
+
+  if (!forSse) {
+    // SSE streams handle their own error/business parsing, so these two
+    // interceptors are only wired for regular JSON requests.
+    dio.interceptors.add(ErrorInterceptor()); // Error handling interceptor
+    dio.interceptors.add(BusinessInterceptor()); // Business logic interceptor
+  }
 
   // Release the idle HTTP connection pool when the provider rebuilds
   // (e.g. server URL change) or the container is disposed.
   ref.onDispose(dio.close);
+  return dio;
+}
 
+/// SSE Dio Provider
+///
+/// Used for SSE streaming connections (AI chat, script execution, etc.), disabling timeout limits.
+/// Streaming connections may last for a long time (e.g., waiting for AI to execute scripts), should not be subject to timeout limits.
+final sseDioProvider = Provider<Dio>((ref) {
+  final dio = _buildDio(ref, forSse: true);
   _logger.info('SSE Dio instance created (baseUrl will be set dynamically)');
   return dio;
 });
 
 final dioProvider = Provider<Dio>((ref) {
-  final apiConstants = ref.watch(apiConstantsProvider);
-  final dio = Dio();
-
-  // Basic configuration
-  // Use baseUrl or empty placeholder (will be set by ConfigurationCheckInterceptor)
-  final baseUrl = apiConstants.baseUrl;
-  dio.options.baseUrl = baseUrl.isNotEmpty ? baseUrl : 'http://placeholder';
-  dio.options.connectTimeout = ApiConstants.connectTimeout;
-  dio.options.receiveTimeout = ApiConstants.receiveTimeout;
-  dio.options.sendTimeout = ApiConstants.sendTimeout;
-  dio.options.headers = {
-    ApiConstants.contentTypeHeader: ApiConstants.applicationJson,
-    ApiConstants.acceptHeader: ApiConstants.applicationJson,
-  };
-  // --- Inject dependencies and add interceptors ---
-  // 1. Get SecureStorageService instance
-  final storageService = ref.watch(secureStorageServiceProvider);
-  // 2. Add interceptors in execution order
-  dio.interceptors.add(
-    ConfigurationCheckInterceptor(ref),
-  ); // Check config first
-  dio.interceptors.add(loggingInterceptor); // Logging interceptor
-  dio.interceptors.add(LocaleInterceptor(ref)); // Locale interceptor
-  dio.interceptors.add(
-    AuthInterceptor(
-      storageService,
-      onUnauthorized: () => handleUnauthorized(ref),
-      onTokenRefreshed: (accessToken, _) {
-        return ref
-            .read(authProvider.notifier)
-            .handleTokenRefreshed(accessToken);
-      },
-      dio: dio,
-    ),
-  ); // Auth interceptor
-  dio.interceptors.add(ErrorInterceptor()); // Error handling interceptor
-  dio.interceptors.add(BusinessInterceptor()); // Business logic interceptor
-  // Release the idle HTTP connection pool when the provider rebuilds
-  // (e.g. server URL change) or the container is disposed.
-  ref.onDispose(dio.close);
+  final dio = _buildDio(ref, forSse: false);
   _logger.info('Dio instance created (baseUrl will be set dynamically)');
   return dio;
 });

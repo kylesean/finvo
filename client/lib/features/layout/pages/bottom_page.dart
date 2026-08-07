@@ -5,6 +5,37 @@ import 'package:forui/forui.dart';
 import 'package:finvo/features/layout/widgets/nav_icon.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
+/// The five fixed bottom-navigation destinations, in render order.
+///
+/// Using an enum instead of raw int indices removes the magic-number tab
+/// indices (previously 0..4) scattered across the page and makes reordering or
+/// adding a destination type-safe: each item's index derives from
+/// [BottomTab.values], so the highlight and the navigation branch can never
+/// drift apart.
+enum BottomTab {
+  home,
+  budget,
+  chat,
+  statistics,
+  profile;
+
+  NavIconType get icon => switch (this) {
+    BottomTab.home => NavIconType.house,
+    BottomTab.budget => NavIconType.creditCard,
+    BottomTab.chat => NavIconType.botChat,
+    BottomTab.statistics => NavIconType.chartPie,
+    BottomTab.profile => NavIconType.user,
+  };
+
+  String label() => switch (this) {
+    BottomTab.home => t.navigation.home,
+    BottomTab.budget => t.navigation.budget,
+    BottomTab.chat => t.navigation.chat,
+    BottomTab.statistics => t.navigation.statistics,
+    BottomTab.profile => t.navigation.profile,
+  };
+}
+
 /// Bottom navigation page - using Forui design system
 ///
 /// Combines FScaffold + FBottomNavigationBar, following Forui best practices.
@@ -26,56 +57,17 @@ class BottomPage extends StatelessWidget {
         index: currentIndex,
         onChange: (index) => navigationShell.goBranch(index),
         children: [
-          FBottomNavigationBarItem(
-            icon: NavIcon(
-              type: NavIconType.house,
-              active: currentIndex == 0,
-              color: currentIndex == 0
-                  ? colors.primary
-                  : colors.mutedForeground,
+          for (final tab in BottomTab.values)
+            FBottomNavigationBarItem(
+              icon: NavIcon(
+                type: tab.icon,
+                active: currentIndex == tab.index,
+                color: currentIndex == tab.index
+                    ? colors.primary
+                    : colors.mutedForeground,
+              ),
+              label: Text(tab.label()),
             ),
-            label: Text(t.navigation.home),
-          ),
-          FBottomNavigationBarItem(
-            icon: NavIcon(
-              type: NavIconType.creditCard,
-              active: currentIndex == 1,
-              color: currentIndex == 1
-                  ? colors.primary
-                  : colors.mutedForeground,
-            ),
-            label: Text(t.navigation.budget),
-          ),
-          FBottomNavigationBarItem(
-            icon: NavIcon(
-              type: NavIconType.botChat,
-              active: currentIndex == 2,
-              color: currentIndex == 2
-                  ? colors.primary
-                  : colors.mutedForeground,
-            ),
-            label: Text(t.navigation.chat),
-          ),
-          FBottomNavigationBarItem(
-            icon: NavIcon(
-              type: NavIconType.chartPie,
-              active: currentIndex == 3,
-              color: currentIndex == 3
-                  ? colors.primary
-                  : colors.mutedForeground,
-            ),
-            label: Text(t.navigation.statistics),
-          ),
-          FBottomNavigationBarItem(
-            icon: NavIcon(
-              type: NavIconType.user,
-              active: currentIndex == 4,
-              color: currentIndex == 4
-                  ? colors.primary
-                  : colors.mutedForeground,
-            ),
-            label: Text(t.navigation.profile),
-          ),
         ],
       ),
       child: navigationShell,

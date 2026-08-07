@@ -81,8 +81,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutePaths.serverSetup;
       }
 
+      // Match on a path-segment boundary (exact match or prefix followed by
+      // '/') so that e.g. '/register' matches '/register' and
+      // '/register/step2' but not a hypothetical '/registrar'.
       final bool isPublicRoute = publicRoutePrefixes.any(
-        (route) => location.startsWith(route),
+        (route) => location == route || location.startsWith('$route/'),
       );
       if (isPublicRoute) {
         if (authStatus == AuthStatus.authenticated) {

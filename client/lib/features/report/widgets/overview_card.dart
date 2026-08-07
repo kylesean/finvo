@@ -4,7 +4,6 @@ import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
-import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
@@ -23,8 +22,6 @@ class OverviewCard extends ConsumerWidget {
     final colors = theme.colors;
     final amountTheme = ref.watch(currentAmountThemeProvider);
     final currencyCode = ref.watch(financialSettingsProvider).primaryCurrency;
-    final currencySymbol =
-        Currency.fromCode(currencyCode)?.symbol ?? currencyCode;
 
     return Container(
       width: double.infinity,
@@ -112,7 +109,7 @@ class OverviewCard extends ConsumerWidget {
                         overview.incomeChangePercent,
                         FLucideIcons.arrowUpRight,
                         amountTheme.incomeColor,
-                        currencySymbol,
+                        currencyCode,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -126,7 +123,7 @@ class OverviewCard extends ConsumerWidget {
                         overview.expenseChangePercent,
                         FLucideIcons.arrowDownRight,
                         amountTheme.expenseColor,
-                        currencySymbol,
+                        currencyCode,
                       ),
                     ),
                   ],
@@ -148,7 +145,7 @@ class OverviewCard extends ConsumerWidget {
     double change,
     IconData icon,
     Color color,
-    String currencySymbol,
+    String currencyCode,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,8 +175,9 @@ class OverviewCard extends ConsumerWidget {
                     ? TransactionType.income
                     : TransactionType.expense,
                 semantic: AmountSemantic.transaction,
-                currency:
-                    currencySymbol, // AmountText handles symbol via currency code
+                // AmountText resolves the symbol from the currency code, so pass
+                // the code (not a pre-resolved symbol) here.
+                currency: currencyCode,
                 showSign: false,
                 shrinkCurrency: true,
                 style: theme.typography.body.md.copyWith(

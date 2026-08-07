@@ -132,7 +132,9 @@ class InteractionRouter {
     // Typed decode: unknown event -> null, fall back to `Action: <name>` (preserving current behavior).
     final event = GenUiInteractionEvent.tryParse(name, context);
     if (event == null) {
-      return _fallback('Action: $name');
+      // Fall back to a readable label instead of rendering "Action: null"
+      // when the payload carries no name.
+      return _fallback('Action: ${name ?? 'unrecognized'}');
     }
 
     final result = GenUiEventRegistry.handle(event);

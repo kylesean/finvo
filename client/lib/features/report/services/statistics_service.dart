@@ -136,14 +136,18 @@ class StatisticsService {
 
   /// Get cash flow analysis for the period
   Future<CashFlowAnalysis> getCashFlow({
-    required String timeRange,
-    String? startDate,
-    String? endDate,
+    TimeRange timeRange = TimeRange.month,
+    DateTime? startDate,
+    DateTime? endDate,
     List<String>? accountTypes,
   }) async {
-    final queryParams = <String, dynamic>{'time_range': timeRange};
-    if (startDate != null) queryParams['start_date'] = startDate;
-    if (endDate != null) queryParams['end_date'] = endDate;
+    final queryParams = <String, String>{'time_range': timeRange.name};
+    if (startDate != null) {
+      queryParams['start_date'] = startDate.toIso8601String();
+    }
+    if (endDate != null) {
+      queryParams['end_date'] = endDate.toIso8601String();
+    }
     if (accountTypes != null && accountTypes.isNotEmpty) {
       queryParams['account_types'] = accountTypes.join(',');
     }
@@ -159,14 +163,18 @@ class StatisticsService {
 
   /// Get financial health score for the period
   Future<HealthScore> getHealthScore({
-    required String timeRange,
-    String? startDate,
-    String? endDate,
+    TimeRange timeRange = TimeRange.month,
+    DateTime? startDate,
+    DateTime? endDate,
     List<String>? accountTypes,
   }) async {
-    final queryParams = <String, dynamic>{'time_range': timeRange};
-    if (startDate != null) queryParams['start_date'] = startDate;
-    if (endDate != null) queryParams['end_date'] = endDate;
+    final queryParams = <String, String>{'time_range': timeRange.name};
+    if (startDate != null) {
+      queryParams['start_date'] = startDate.toIso8601String();
+    }
+    if (endDate != null) {
+      queryParams['end_date'] = endDate.toIso8601String();
+    }
     if (accountTypes != null && accountTypes.isNotEmpty) {
       queryParams['account_types'] = accountTypes.join(',');
     }

@@ -23,11 +23,7 @@ class ThemeNotifier extends Notifier<ThemeMode> {
   }
 
   void setTheme(AppThemeMode mode) {
-    state = switch (mode) {
-      AppThemeMode.system => ThemeMode.system,
-      AppThemeMode.light => ThemeMode.light,
-      AppThemeMode.dark => ThemeMode.dark,
-    };
+    state = _themeModeOf(mode);
     unawaited(_persist(mode));
   }
 
@@ -41,15 +37,22 @@ class ThemeNotifier extends Notifier<ThemeMode> {
     }
   }
 
+  /// Single source of truth for mapping [AppThemeMode] to Flutter's [ThemeMode].
+  /// Used by both [setTheme] and [_modeFromName] so the conversion is never
+  /// duplicated.
+  static ThemeMode _themeModeOf(AppThemeMode mode) {
+    return switch (mode) {
+      AppThemeMode.system => ThemeMode.system,
+      AppThemeMode.light => ThemeMode.light,
+      AppThemeMode.dark => ThemeMode.dark,
+    };
+  }
+
   static ThemeMode? _modeFromName(String? name) {
     if (name == null) return null;
     for (final mode in AppThemeMode.values) {
       if (mode.name == name) {
-        return switch (mode) {
-          AppThemeMode.system => ThemeMode.system,
-          AppThemeMode.light => ThemeMode.light,
-          AppThemeMode.dark => ThemeMode.dark,
-        };
+        return _themeModeOf(mode);
       }
     }
     return null;

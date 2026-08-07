@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:decimal/decimal.dart';
-import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/shared/models/transaction_type.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/models/currency.dart';
 
@@ -155,13 +155,23 @@ class AmountFormatter {
     // Determine if using Chinese format
     final effectiveLocale = locale ?? Intl.getCurrentLocale();
     final isChineseLocale = effectiveLocale.startsWith('zh');
+    // Traditional Chinese locales (zh_Hant/zh_TW/zh_HK) use the traditional
+    // glyphs 「萬/億」 instead of the simplified 「万/亿」.
+    final isTraditionalChinese =
+        effectiveLocale.contains('Hant') ||
+        effectiveLocale.contains('TW') ||
+        effectiveLocale.contains('HK') ||
+        effectiveLocale.contains('tw') ||
+        effectiveLocale.contains('hk');
 
     if (isChineseLocale) {
+      final wan = isTraditionalChinese ? '萬' : '万';
+      final yi = isTraditionalChinese ? '億' : '亿';
       // Chinese units: 10k, 100M
       if (amount >= 100000000) {
-        return '${(amount / 100000000).toStringAsFixed(1)}亿';
+        return '${(amount / 100000000).toStringAsFixed(1)}$yi';
       } else if (amount >= 10000) {
-        return '${(amount / 10000).toStringAsFixed(1)}万';
+        return '${(amount / 10000).toStringAsFixed(1)}$wan';
       } else {
         return amount.toStringAsFixed(2);
       }

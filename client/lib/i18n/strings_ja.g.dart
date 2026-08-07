@@ -872,6 +872,12 @@ class _Translations$account$ja extends Translations$account$zh {
 	@override String get includeInNetWorthLabel => '資産に含める';
 	@override String get includeInNetWorthDesc => '純資産の統計に使用';
 	@override String get nameHint => '例：給与振込口座';
+	@override String get nameRequired => '口座名を入力してください';
+	@override String get nameTooShort => '口座名は2文字以上で入力してください';
+	@override String get amountRequired => '現在の残高を入力してください';
+	@override String get invalidAmount => '有効な金額を入力してください';
+	@override String get negativeBalance => '残高はマイナスにできません';
+	@override String get amountTooLarge => '残高は 999,999,999.99 を超えられません';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '口座を削除';
 	@override String get deleteConfirm => 'この口座を削除しますか？取り消せません。';
@@ -1809,6 +1815,8 @@ class _Translations$errorMapping$transaction$ja extends Translations$errorMappin
 	@override String get saveFailed => 'Failed to save comment';
 	@override String get deleteFailed => 'Failed to delete comment';
 	@override String get notExists => 'Transaction does not exist';
+	@override String get invalidAccountId => 'アカウントIDが無効です';
+	@override String get exchangeRateUnavailable => 'この通貨の為替レートは利用できません';
 }
 
 // Path: errorMapping.space
@@ -1857,6 +1865,24 @@ class _Translations$errorMapping$upload$ja extends Translations$errorMapping$upl
 	@override String get tooLarge => 'File too large';
 	@override String get unsupportedType => 'Unsupported file type';
 	@override String get tooManyFiles => 'Too many files';
+	@override String get invalidFile => 'アップロードされたファイルが無効です';
+	@override String get invalidMimeType => 'ファイルのMIMEタイプが無効です';
+	@override String get invalidImageContent => '画像の内容が無効です';
+	@override String get imageTooWide => '画像が幅広すぎます';
+	@override String get imageTooHigh => '画像が高すぎます';
+	@override String get totalSizeTooLarge => 'ファイルの合計サイズが大きすぎます';
+	@override String get readError => 'ファイルの読み取りに失敗しました';
+	@override String get filesystemError => 'ファイルシステムエラー';
+	@override String get verificationFailed => 'アップロードの検証に失敗しました';
+	@override String get allFailed => 'すべてのファイルのアップロードに失敗しました';
+	@override String get invalidImageUrls => '画像URLが無効です';
+	@override String get fileNotFound => 'ファイルが見つかりません';
+	@override String get imageCompressionFailed => '画像の圧縮に失敗しました';
+	@override String get accessError => 'ファイルアクセスエラー';
+	@override String get deleteError => 'ファイルの削除に失敗しました';
+	@override String get noFiles => 'ファイルが指定されていません';
+	@override String get fileEmpty => 'ファイルが空です';
+	@override String get invalidFilename => 'ファイル名が無効です';
 }
 
 // Path: errorMapping.storage
@@ -1881,6 +1907,8 @@ class _Translations$errorMapping$ai$ja extends Translations$errorMapping$ai$zh {
 	@override String get contextLimit => 'Context limit exceeded';
 	@override String get tokenLimit => 'Insufficient tokens';
 	@override String get emptyMessage => 'Empty user message';
+	@override String get conversationIdInvalid => '会話が無効です';
+	@override String get conversationIdNotOwner => 'この会話へのアクセス権がありません';
 }
 
 // Path: notification.types
@@ -3458,6 +3486,12 @@ extension on TranslationsJa {
 			'account.includeInNetWorthLabel' => '資産に含める',
 			'account.includeInNetWorthDesc' => '純資産の統計に使用',
 			'account.nameHint' => '例：給与振込口座',
+			'account.nameRequired' => '口座名を入力してください',
+			'account.nameTooShort' => '口座名は2文字以上で入力してください',
+			'account.amountRequired' => '現在の残高を入力してください',
+			'account.invalidAmount' => '有効な金額を入力してください',
+			'account.negativeBalance' => '残高はマイナスにできません',
+			'account.amountTooLarge' => '残高は 999,999,999.99 を超えられません',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '口座を削除',
 			'account.deleteConfirm' => 'この口座を削除しますか？取り消せません。',
@@ -3528,14 +3562,14 @@ extension on TranslationsJa {
 			'app.splashTitle' => 'スマートに、豊かに。',
 			'app.splashSubtitle' => 'インテリジェント財務アシスタント',
 			'statistics.title' => '統計分析',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.analyze' => '分析',
 			'statistics.exportInProgress' => 'エクスポート機能は開発中です...',
 			'statistics.ranking' => '高額支出ランキング',
 			'statistics.noData' => 'データなし',
 			'statistics.overview.balance' => '残高',
 			'statistics.overview.income' => '総収入',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.overview.expense' => '総支出',
 			'statistics.trend.title' => '収支推移',
 			'statistics.trend.expense' => '支出',
@@ -3748,6 +3782,8 @@ extension on TranslationsJa {
 			'errorMapping.transaction.saveFailed' => 'Failed to save comment',
 			'errorMapping.transaction.deleteFailed' => 'Failed to delete comment',
 			'errorMapping.transaction.notExists' => 'Transaction does not exist',
+			'errorMapping.transaction.invalidAccountId' => 'アカウントIDが無効です',
+			'errorMapping.transaction.exchangeRateUnavailable' => 'この通貨の為替レートは利用できません',
 			'errorMapping.space.notFound' => 'Shared space not found or access denied',
 			'errorMapping.space.inviteDenied' => 'No permission to invite members',
 			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',
@@ -3769,12 +3805,32 @@ extension on TranslationsJa {
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
 			'errorMapping.upload.tooManyFiles' => 'Too many files',
+			'errorMapping.upload.invalidFile' => 'アップロードされたファイルが無効です',
+			'errorMapping.upload.invalidMimeType' => 'ファイルのMIMEタイプが無効です',
+			'errorMapping.upload.invalidImageContent' => '画像の内容が無効です',
+			'errorMapping.upload.imageTooWide' => '画像が幅広すぎます',
+			'errorMapping.upload.imageTooHigh' => '画像が高すぎます',
+			'errorMapping.upload.totalSizeTooLarge' => 'ファイルの合計サイズが大きすぎます',
+			'errorMapping.upload.readError' => 'ファイルの読み取りに失敗しました',
+			'errorMapping.upload.filesystemError' => 'ファイルシステムエラー',
+			'errorMapping.upload.verificationFailed' => 'アップロードの検証に失敗しました',
+			'errorMapping.upload.allFailed' => 'すべてのファイルのアップロードに失敗しました',
+			'errorMapping.upload.invalidImageUrls' => '画像URLが無効です',
+			'errorMapping.upload.fileNotFound' => 'ファイルが見つかりません',
+			'errorMapping.upload.imageCompressionFailed' => '画像の圧縮に失敗しました',
+			'errorMapping.upload.accessError' => 'ファイルアクセスエラー',
+			'errorMapping.upload.deleteError' => 'ファイルの削除に失敗しました',
+			'errorMapping.upload.noFiles' => 'ファイルが指定されていません',
+			'errorMapping.upload.fileEmpty' => 'ファイルが空です',
+			'errorMapping.upload.invalidFilename' => 'ファイル名が無効です',
 			'errorMapping.storage.configNotFound' => 'ストレージ設定が見つからないかアクセス権限がありません',
 			'errorMapping.storage.configInUse' => '削除できません：ストレージ設定は添付ファイルで使用中です',
 			'errorMapping.storage.invalidProviderType' => '無効なストレージプロバイダータイプ',
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
+			'errorMapping.ai.conversationIdInvalid' => '会話が無効です',
+			'errorMapping.ai.conversationIdNotOwner' => 'この会話へのアクセス権がありません',
 			'notification.title' => 'お知らせ',
 			'notification.markAllRead' => 'すべて既読',
 			'notification.empty' => 'お知らせはありません',

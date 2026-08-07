@@ -872,6 +872,12 @@ class _Translations$account$ko extends Translations$account$zh {
 	@override String get includeInNetWorthLabel => '자산 포함';
 	@override String get includeInNetWorthDesc => '순자산 통계에 반영';
 	@override String get nameHint => '예: 급여 통장';
+	@override String get nameRequired => '계좌 이름을 입력하세요';
+	@override String get nameTooShort => '계좌 이름은 최소 2자 이상이어야 합니다';
+	@override String get amountRequired => '현재 잔액을 입력하세요';
+	@override String get invalidAmount => '유효한 금액을 입력하세요';
+	@override String get negativeBalance => '잔액은 음수가 될 수 없습니다';
+	@override String get amountTooLarge => '잔액은 999,999,999.99를 초과할 수 없습니다';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '계좌 삭제';
 	@override String get deleteConfirm => '이 계좌를 삭제하시겠습니까? 복구할 수 없습니다.';
@@ -1810,6 +1816,8 @@ class _Translations$errorMapping$transaction$ko extends Translations$errorMappin
 	@override String get saveFailed => 'Failed to save comment';
 	@override String get deleteFailed => 'Failed to delete comment';
 	@override String get notExists => 'Transaction does not exist';
+	@override String get invalidAccountId => '계정 ID가 유효하지 않습니다';
+	@override String get exchangeRateUnavailable => '이 통화의 환율을 사용할 수 없습니다';
 }
 
 // Path: errorMapping.space
@@ -1858,6 +1866,24 @@ class _Translations$errorMapping$upload$ko extends Translations$errorMapping$upl
 	@override String get tooLarge => 'File too large';
 	@override String get unsupportedType => 'Unsupported file type';
 	@override String get tooManyFiles => 'Too many files';
+	@override String get invalidFile => '업로드된 파일이 유효하지 않습니다';
+	@override String get invalidMimeType => '파일 MIME 형식이 유효하지 않습니다';
+	@override String get invalidImageContent => '이미지 내용이 유효하지 않습니다';
+	@override String get imageTooWide => '이미지가 너무 넓습니다';
+	@override String get imageTooHigh => '이미지가 너무 높습니다';
+	@override String get totalSizeTooLarge => '파일 총 크기가 너무 큽니다';
+	@override String get readError => '파일을 읽지 못했습니다';
+	@override String get filesystemError => '파일 시스템 오류';
+	@override String get verificationFailed => '업로드 검증에 실패했습니다';
+	@override String get allFailed => '모든 파일 업로드에 실패했습니다';
+	@override String get invalidImageUrls => '이미지 URL이 유효하지 않습니다';
+	@override String get fileNotFound => '파일을 찾을 수 없습니다';
+	@override String get imageCompressionFailed => '이미지 압축에 실패했습니다';
+	@override String get accessError => '파일 액세스 오류';
+	@override String get deleteError => '파일 삭제에 실패했습니다';
+	@override String get noFiles => '파일이 제공되지 않았습니다';
+	@override String get fileEmpty => '파일이 비어 있습니다';
+	@override String get invalidFilename => '파일 이름이 유효하지 않습니다';
 }
 
 // Path: errorMapping.storage
@@ -1882,6 +1908,8 @@ class _Translations$errorMapping$ai$ko extends Translations$errorMapping$ai$zh {
 	@override String get contextLimit => 'Context limit exceeded';
 	@override String get tokenLimit => 'Insufficient tokens';
 	@override String get emptyMessage => 'Empty user message';
+	@override String get conversationIdInvalid => '대화가 유효하지 않습니다';
+	@override String get conversationIdNotOwner => '이 대화에 접근할 권한이 없습니다';
 }
 
 // Path: notification.types
@@ -3460,6 +3488,12 @@ extension on TranslationsKo {
 			'account.includeInNetWorthLabel' => '자산 포함',
 			'account.includeInNetWorthDesc' => '순자산 통계에 반영',
 			'account.nameHint' => '예: 급여 통장',
+			'account.nameRequired' => '계좌 이름을 입력하세요',
+			'account.nameTooShort' => '계좌 이름은 최소 2자 이상이어야 합니다',
+			'account.amountRequired' => '현재 잔액을 입력하세요',
+			'account.invalidAmount' => '유효한 금액을 입력하세요',
+			'account.negativeBalance' => '잔액은 음수가 될 수 없습니다',
+			'account.amountTooLarge' => '잔액은 999,999,999.99를 초과할 수 없습니다',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '계좌 삭제',
 			'account.deleteConfirm' => '이 계좌를 삭제하시겠습니까? 복구할 수 없습니다.',
@@ -3529,14 +3563,14 @@ extension on TranslationsKo {
 			'financial.updateNow' => '지금 업데이트',
 			'app.splashTitle' => '지혜로운 성장, 가치 있는 부.',
 			'app.splashSubtitle' => '스마트 금융 비서',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.title' => '통계 분석',
 			'statistics.analyze' => '통계 분석',
 			'statistics.exportInProgress' => '내보내기 기능 개발 중...',
 			'statistics.ranking' => '고액 소비 순위',
 			'statistics.noData' => '데이터 없음',
 			'statistics.overview.balance' => '총 잔액',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.overview.income' => '총 수입',
 			'statistics.overview.expense' => '총 지출',
 			'statistics.trend.title' => '수지 추세',
@@ -3750,6 +3784,8 @@ extension on TranslationsKo {
 			'errorMapping.transaction.saveFailed' => 'Failed to save comment',
 			'errorMapping.transaction.deleteFailed' => 'Failed to delete comment',
 			'errorMapping.transaction.notExists' => 'Transaction does not exist',
+			'errorMapping.transaction.invalidAccountId' => '계정 ID가 유효하지 않습니다',
+			'errorMapping.transaction.exchangeRateUnavailable' => '이 통화의 환율을 사용할 수 없습니다',
 			'errorMapping.space.notFound' => 'Shared space not found or access denied',
 			'errorMapping.space.inviteDenied' => 'No permission to invite members',
 			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',
@@ -3771,12 +3807,32 @@ extension on TranslationsKo {
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
 			'errorMapping.upload.tooManyFiles' => 'Too many files',
+			'errorMapping.upload.invalidFile' => '업로드된 파일이 유효하지 않습니다',
+			'errorMapping.upload.invalidMimeType' => '파일 MIME 형식이 유효하지 않습니다',
+			'errorMapping.upload.invalidImageContent' => '이미지 내용이 유효하지 않습니다',
+			'errorMapping.upload.imageTooWide' => '이미지가 너무 넓습니다',
+			'errorMapping.upload.imageTooHigh' => '이미지가 너무 높습니다',
+			'errorMapping.upload.totalSizeTooLarge' => '파일 총 크기가 너무 큽니다',
+			'errorMapping.upload.readError' => '파일을 읽지 못했습니다',
+			'errorMapping.upload.filesystemError' => '파일 시스템 오류',
+			'errorMapping.upload.verificationFailed' => '업로드 검증에 실패했습니다',
+			'errorMapping.upload.allFailed' => '모든 파일 업로드에 실패했습니다',
+			'errorMapping.upload.invalidImageUrls' => '이미지 URL이 유효하지 않습니다',
+			'errorMapping.upload.fileNotFound' => '파일을 찾을 수 없습니다',
+			'errorMapping.upload.imageCompressionFailed' => '이미지 압축에 실패했습니다',
+			'errorMapping.upload.accessError' => '파일 액세스 오류',
+			'errorMapping.upload.deleteError' => '파일 삭제에 실패했습니다',
+			'errorMapping.upload.noFiles' => '파일이 제공되지 않았습니다',
+			'errorMapping.upload.fileEmpty' => '파일이 비어 있습니다',
+			'errorMapping.upload.invalidFilename' => '파일 이름이 유효하지 않습니다',
 			'errorMapping.storage.configNotFound' => '저장소 설정이 없거나 접근 권한이 없습니다',
 			'errorMapping.storage.configInUse' => '삭제할 수 없습니다: 저장소 설정이 첨부파일에서 사용 중입니다',
 			'errorMapping.storage.invalidProviderType' => '잘못된 저장소 제공자 유형',
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
+			'errorMapping.ai.conversationIdInvalid' => '대화가 유효하지 않습니다',
+			'errorMapping.ai.conversationIdNotOwner' => '이 대화에 접근할 권한이 없습니다',
 			'notification.title' => '알림',
 			'notification.markAllRead' => '모두 읽음',
 			'notification.empty' => '알림이 없습니다',

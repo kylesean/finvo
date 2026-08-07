@@ -1,77 +1,24 @@
-import 'dart:async';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/features/home/services/home_service.dart';
 
-// Transaction detail state
-class TransactionDetailState {
-  final TransactionModel? transaction;
-  final bool isLoading;
-  final String? errorMessage;
+part 'transaction_detail_provider.g.dart';
 
-  const TransactionDetailState({
-    this.transaction,
-    this.isLoading = false,
-    this.errorMessage,
-  });
-
-  TransactionDetailState copyWith({
-    TransactionModel? transaction,
-    bool? isLoading,
-    String? errorMessage,
-    bool clearError = false,
-  }) {
-    return TransactionDetailState(
-      transaction: transaction ?? this.transaction,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-    );
-  }
-}
-
-// Transaction detail Notifier
-class TransactionDetailNotifier extends Notifier<TransactionDetailState> {
-  final String transactionId;
-
-  TransactionDetailNotifier(this.transactionId);
-
+/// Loads a single transaction's detail as an [String] keyed, auto-disposed,
+/// family [AsyncNotifier]. The loading / error / data lifecycle is fully
+/// managed by [AsyncValue], removing the hand-rolled isLoading/errorMessage
+/// state and the side-effect in `build()`.
+@riverpod
+class TransactionDetail extends _$TransactionDetail {
   @override
-  TransactionDetailState build() {
-    // Auto-load data
-    unawaited(
-      Future<void>.microtask(() => fetchTransactionDetail(transactionId)),
-    );
-    return const TransactionDetailState();
+  FutureOr<TransactionModel> build(String transactionId) {
+    final service = ref.watch(homeServiceProvider);
+    return service.getTransactionDetail(transactionId);
   }
 
-  // Fetch transaction detail
-  Future<void> fetchTransactionDetail(String id) async {
-    if (state.isLoading) return; // Prevent duplicate requests
-
-    state = state.copyWith(isLoading: true, clearError: true);
-
-    try {
-      final homeService = ref.read(homeServiceProvider);
-      final transaction = await homeService.getTransactionDetail(id);
-
-      if (ref.mounted) {
-        state = state.copyWith(transaction: transaction, isLoading: false);
-      }
-    } catch (e) {
-      if (ref.mounted) {
-        state = state.copyWith(isLoading: false, errorMessage: e.toString());
-      }
-    }
-  }
-
-  // Reload
-  Future<void> reload() async {
-    await fetchTransactionDetail(transactionId);
+  /// Re-fetch the transaction detail by invalidating the provider.
+  Future<void> reload() {
+    ref.invalidateSelf();
+    return future;
   }
 }
-
-// Provider for TransactionDetailNotifier
-final transactionDetailProvider = NotifierProvider.autoDispose
-    .family<TransactionDetailNotifier, TransactionDetailState, String>(
-      TransactionDetailNotifier.new,
-    );

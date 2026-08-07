@@ -4,13 +4,18 @@ import 'package:finvo/features/home/services/comment_service.dart';
 
 part 'comment_providers.g.dart';
 
+/// Ascending compare for comments by `createdAt`.
+int _compareByCreatedAt(CommentModel a, CommentModel b) {
+  return a.createdAt.compareTo(b.createdAt);
+}
+
 @riverpod
 class TransactionComments extends _$TransactionComments {
   @override
   FutureOr<List<CommentModel>> build(String transactionId) async {
     final service = ref.watch(commentServiceProvider);
     final comments = await service.getComments(transactionId);
-    comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    comments.sort(_compareByCreatedAt);
     return comments;
   }
 
@@ -33,12 +38,11 @@ class TransactionComments extends _$TransactionComments {
       if (current == null) {
         // List not loaded yet; reload to pick up the new comment.
         final comments = await service.getComments(transactionId);
-        comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        comments.sort(_compareByCreatedAt);
         state = AsyncData(comments);
       } else {
         // Optimistically append the server-created comment without a full reload.
-        final updated = [...current, created]
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        final updated = [...current, created]..sort(_compareByCreatedAt);
         state = AsyncData(updated);
       }
     } catch (e, st) {
@@ -67,7 +71,7 @@ class TransactionComments extends _$TransactionComments {
       // Reconcile with the server truth if the delete failed.
       state = await AsyncValue.guard(() async {
         final comments = await service.getComments(transactionId);
-        comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        comments.sort(_compareByCreatedAt);
         return comments;
       });
     }

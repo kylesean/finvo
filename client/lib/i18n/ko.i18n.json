@@ -1113,6 +1113,12 @@
     "includeInNetWorthLabel": "자산 포함",
     "includeInNetWorthDesc": "순자산 통계에 반영",
     "nameHint": "예: 급여 통장",
+    "nameRequired": "계좌 이름을 입력하세요",
+    "nameTooShort": "계좌 이름은 최소 2자 이상이어야 합니다",
+    "amountRequired": "현재 잔액을 입력하세요",
+    "invalidAmount": "유효한 금액을 입력하세요",
+    "negativeBalance": "잔액은 음수가 될 수 없습니다",
+    "amountTooLarge": "잔액은 999,999,999.99를 초과할 수 없습니다",
     "amountHint": "0.00",
     "deleteAccount": "계좌 삭제",
     "deleteConfirm": "이 계좌를 삭제하시겠습니까? 복구할 수 없습니다.",
@@ -1461,7 +1467,9 @@
       "invalidParent": "Invalid parent comment ID",
       "saveFailed": "Failed to save comment",
       "deleteFailed": "Failed to delete comment",
-      "notExists": "Transaction does not exist"
+      "notExists": "Transaction does not exist",
+      "invalidAccountId": "계정 ID가 유효하지 않습니다",
+      "exchangeRateUnavailable": "이 통화의 환율을 사용할 수 없습니다"
     },
     "space": {
       "notFound": "Shared space not found or access denied",
@@ -1488,7 +1496,25 @@
       "noFile": "No file uploaded",
       "tooLarge": "File too large",
       "unsupportedType": "Unsupported file type",
-      "tooManyFiles": "Too many files"
+      "tooManyFiles": "Too many files",
+      "invalidFile": "업로드된 파일이 유효하지 않습니다",
+      "invalidMimeType": "파일 MIME 형식이 유효하지 않습니다",
+      "invalidImageContent": "이미지 내용이 유효하지 않습니다",
+      "imageTooWide": "이미지가 너무 넓습니다",
+      "imageTooHigh": "이미지가 너무 높습니다",
+      "totalSizeTooLarge": "파일 총 크기가 너무 큽니다",
+      "readError": "파일을 읽지 못했습니다",
+      "filesystemError": "파일 시스템 오류",
+      "verificationFailed": "업로드 검증에 실패했습니다",
+      "allFailed": "모든 파일 업로드에 실패했습니다",
+      "invalidImageUrls": "이미지 URL이 유효하지 않습니다",
+      "fileNotFound": "파일을 찾을 수 없습니다",
+      "imageCompressionFailed": "이미지 압축에 실패했습니다",
+      "accessError": "파일 액세스 오류",
+      "deleteError": "파일 삭제에 실패했습니다",
+      "noFiles": "파일이 제공되지 않았습니다",
+      "fileEmpty": "파일이 비어 있습니다",
+      "invalidFilename": "파일 이름이 유효하지 않습니다"
     },
     "storage": {
       "configNotFound": "저장소 설정이 없거나 접근 권한이 없습니다",
@@ -1498,7 +1524,9 @@
     "ai": {
       "contextLimit": "Context limit exceeded",
       "tokenLimit": "Insufficient tokens",
-      "emptyMessage": "Empty user message"
+      "emptyMessage": "Empty user message",
+      "conversationIdInvalid": "대화가 유효하지 않습니다",
+      "conversationIdNotOwner": "이 대화에 접근할 권한이 없습니다"
     }
   },
   "notification": {

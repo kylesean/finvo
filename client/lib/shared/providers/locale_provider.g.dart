@@ -44,7 +44,7 @@ final class LocaleNotifierProvider
   }
 }
 
-String _$localeNotifierHash() => r'2d471f3a2948f4827462a663f8c44465c23b713c';
+String _$localeNotifierHash() => r'ca36efaa993660dc7d3cbcc589ef5f82584afc5f';
 
 /// Language state management - Use slang's AppLocale
 

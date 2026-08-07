@@ -50,10 +50,17 @@ class Auth extends _$Auth {
             token: token,
           );
         } else {
-          state = state.copyWith(
-            status: AuthStatus.authenticated,
-            token: token,
+          // Token exists but no cached user data — the persisted auth cache is
+          // inconsistent. Fail closed to unauthenticated instead of exposing an
+          // authenticated state with a null user, which would break every UI
+          // depending on currentUser (and leaves PII-vs-token out of sync). The
+          // user simply re-logs-in; a 401 mid-session is handled by the auth
+          // interceptor's session-expiry path.
+          _logger.warning(
+            'Token found but no cached user data; falling back to '
+            'unauthenticated',
           );
+          state = state.copyWith(status: AuthStatus.unauthenticated);
         }
       } else {
         state = state.copyWith(status: AuthStatus.unauthenticated);
@@ -121,6 +128,11 @@ class Auth extends _$Auth {
         token: result.token,
       );
     } catch (e) {
+      // Mirror login(): reset to unauthenticated on failure so the state never
+      // stays pinned to loading/authenticated after a failed register attempt.
+      if (state.status != AuthStatus.unauthenticated) {
+        state = state.copyWith(status: AuthStatus.unauthenticated);
+      }
       final appException = _appExceptionFrom(e);
       if (appException != null) {
         throw appException;
@@ -132,15 +144,14 @@ class Auth extends _$Auth {
   Future<void> logout() async {
     try {
       await _authService.logout();
-      await _storageService.deleteToken();
-      await _storageService.deleteRefreshToken();
-      state = const AuthState(status: AuthStatus.unauthenticated);
     } catch (e) {
-      await _storageService.deleteToken();
-      await _storageService.deleteRefreshToken();
-      state = const AuthState(status: AuthStatus.unauthenticated);
       _logger.warning('Error during logout, but local state cleared', e);
     }
+    // Whether the server call succeeded or not, always clear local credentials
+    // so the user is never left in a half-logged-in state.
+    await _storageService.deleteToken();
+    await _storageService.deleteRefreshToken();
+    state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
   /// Called by the auth interceptor after a successful token refresh. Writes

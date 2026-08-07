@@ -876,6 +876,12 @@ class _Translations$account$en extends Translations$account$zh {
 	@override String get includeInNetWorthLabel => 'Include in Net Worth';
 	@override String get includeInNetWorthDesc => 'Count towards total net worth';
 	@override String get nameHint => 'e.g. Salary Card';
+	@override String get nameRequired => 'Please enter account name';
+	@override String get nameTooShort => 'Account name must be at least 2 characters';
+	@override String get amountRequired => 'Please enter current balance';
+	@override String get invalidAmount => 'Please enter a valid amount';
+	@override String get negativeBalance => 'Balance cannot be negative';
+	@override String get amountTooLarge => 'Balance cannot exceed 999,999,999.99';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => 'Delete Account';
 	@override String get deleteConfirm => 'Are you sure you want to delete this account? This cannot be undone.';
@@ -1814,6 +1820,8 @@ class _Translations$errorMapping$transaction$en extends Translations$errorMappin
 	@override String get saveFailed => 'Failed to save comment';
 	@override String get deleteFailed => 'Failed to delete comment';
 	@override String get notExists => 'Transaction does not exist';
+	@override String get invalidAccountId => 'Invalid account ID';
+	@override String get exchangeRateUnavailable => 'Exchange rate unavailable for this currency';
 }
 
 // Path: errorMapping.space
@@ -1862,6 +1870,24 @@ class _Translations$errorMapping$upload$en extends Translations$errorMapping$upl
 	@override String get tooLarge => 'File too large';
 	@override String get unsupportedType => 'Unsupported file type';
 	@override String get tooManyFiles => 'Too many files';
+	@override String get invalidFile => 'Invalid file uploaded';
+	@override String get invalidMimeType => 'Invalid file type (MIME)';
+	@override String get invalidImageContent => 'Invalid image content';
+	@override String get imageTooWide => 'Image is too wide';
+	@override String get imageTooHigh => 'Image is too tall';
+	@override String get totalSizeTooLarge => 'Total file size too large';
+	@override String get readError => 'Failed to read file';
+	@override String get filesystemError => 'Filesystem error';
+	@override String get verificationFailed => 'Upload verification failed';
+	@override String get allFailed => 'All files failed to upload';
+	@override String get invalidImageUrls => 'Invalid image URLs';
+	@override String get fileNotFound => 'File not found';
+	@override String get imageCompressionFailed => 'Image compression failed';
+	@override String get accessError => 'File access error';
+	@override String get deleteError => 'Failed to delete file';
+	@override String get noFiles => 'No files provided';
+	@override String get fileEmpty => 'File is empty';
+	@override String get invalidFilename => 'Invalid file name';
 }
 
 // Path: errorMapping.storage
@@ -1886,6 +1912,8 @@ class _Translations$errorMapping$ai$en extends Translations$errorMapping$ai$zh {
 	@override String get contextLimit => 'Context limit exceeded';
 	@override String get tokenLimit => 'Insufficient tokens';
 	@override String get emptyMessage => 'Empty user message';
+	@override String get conversationIdInvalid => 'Invalid conversation';
+	@override String get conversationIdNotOwner => 'You do not have access to this conversation';
 }
 
 // Path: notification.types
@@ -3470,6 +3498,12 @@ extension on TranslationsEn {
 			'account.includeInNetWorthLabel' => 'Include in Net Worth',
 			'account.includeInNetWorthDesc' => 'Count towards total net worth',
 			'account.nameHint' => 'e.g. Salary Card',
+			'account.nameRequired' => 'Please enter account name',
+			'account.nameTooShort' => 'Account name must be at least 2 characters',
+			'account.amountRequired' => 'Please enter current balance',
+			'account.invalidAmount' => 'Please enter a valid amount',
+			'account.negativeBalance' => 'Balance cannot be negative',
+			'account.amountTooLarge' => 'Balance cannot exceed 999,999,999.99',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => 'Delete Account',
 			'account.deleteConfirm' => 'Are you sure you want to delete this account? This cannot be undone.',
@@ -3534,14 +3568,14 @@ extension on TranslationsEn {
 			'financial.missingExchangeRates' => ({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}',
 			'financial.cashPocketTitle' => 'My Cash Pockets',
 			'financial.sourcesCount' => ({required Object count}) => '${count} Sources',
+			_ => null,
+		} ?? switch (path) {
 			'financial.lastUpdatedAt' => ({required Object time}) => 'Last updated: ${time}',
 			'financial.neverUpdated' => 'Never updated',
 			'financial.updateNow' => 'Update Now',
 			'app.splashTitle' => 'Finvo: Intelligence that Grows.',
 			'app.splashSubtitle' => 'Smart Financial Assistant',
 			'statistics.title' => 'Analysis',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.analyze' => 'Analysis',
 			'statistics.exportInProgress' => 'Export feature coming soon...',
 			'statistics.ranking' => 'Top Spending',
@@ -3760,6 +3794,8 @@ extension on TranslationsEn {
 			'errorMapping.transaction.saveFailed' => 'Failed to save comment',
 			'errorMapping.transaction.deleteFailed' => 'Failed to delete comment',
 			'errorMapping.transaction.notExists' => 'Transaction does not exist',
+			'errorMapping.transaction.invalidAccountId' => 'Invalid account ID',
+			'errorMapping.transaction.exchangeRateUnavailable' => 'Exchange rate unavailable for this currency',
 			'errorMapping.space.notFound' => 'Shared space not found or access denied',
 			'errorMapping.space.inviteDenied' => 'No permission to invite members',
 			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',
@@ -3781,12 +3817,32 @@ extension on TranslationsEn {
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
 			'errorMapping.upload.tooManyFiles' => 'Too many files',
+			'errorMapping.upload.invalidFile' => 'Invalid file uploaded',
+			'errorMapping.upload.invalidMimeType' => 'Invalid file type (MIME)',
+			'errorMapping.upload.invalidImageContent' => 'Invalid image content',
+			'errorMapping.upload.imageTooWide' => 'Image is too wide',
+			'errorMapping.upload.imageTooHigh' => 'Image is too tall',
+			'errorMapping.upload.totalSizeTooLarge' => 'Total file size too large',
+			'errorMapping.upload.readError' => 'Failed to read file',
+			'errorMapping.upload.filesystemError' => 'Filesystem error',
+			'errorMapping.upload.verificationFailed' => 'Upload verification failed',
+			'errorMapping.upload.allFailed' => 'All files failed to upload',
+			'errorMapping.upload.invalidImageUrls' => 'Invalid image URLs',
+			'errorMapping.upload.fileNotFound' => 'File not found',
+			'errorMapping.upload.imageCompressionFailed' => 'Image compression failed',
+			'errorMapping.upload.accessError' => 'File access error',
+			'errorMapping.upload.deleteError' => 'Failed to delete file',
+			'errorMapping.upload.noFiles' => 'No files provided',
+			'errorMapping.upload.fileEmpty' => 'File is empty',
+			'errorMapping.upload.invalidFilename' => 'Invalid file name',
 			'errorMapping.storage.configNotFound' => 'Storage config not found or access denied',
 			'errorMapping.storage.configInUse' => 'Cannot delete: storage config is still in use by attachments',
 			'errorMapping.storage.invalidProviderType' => 'Invalid storage provider type',
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
+			'errorMapping.ai.conversationIdInvalid' => 'Invalid conversation',
+			'errorMapping.ai.conversationIdNotOwner' => 'You do not have access to this conversation',
 			'notification.title' => 'Notifications',
 			'notification.markAllRead' => 'Mark all read',
 			'notification.empty' => 'No notifications yet',

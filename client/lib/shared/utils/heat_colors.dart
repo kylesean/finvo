@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
+import 'package:finvo/shared/models/expense_heat_level.dart';
 
 /// Background alpha applied to the theme primary color per heat level, as a
 /// (light, dark) pair.

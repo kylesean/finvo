@@ -1111,6 +1111,12 @@
     "includeInNetWorthLabel": "計入資產",
     "includeInNetWorthDesc": "用於淨資產統計",
     "nameHint": "例如：工資卡",
+    "nameRequired": "請輸入帳戶名稱",
+    "nameTooShort": "帳戶名稱至少需要 2 個字元",
+    "amountRequired": "請輸入目前餘額",
+    "invalidAmount": "請輸入有效金額",
+    "negativeBalance": "餘額不能為負數",
+    "amountTooLarge": "餘額不能超過 999,999,999.99",
     "amountHint": "0.00",
     "deleteAccount": "刪除帳戶",
     "deleteConfirm": "確定要刪除該帳戶嗎？此操作無法撤銷。",
@@ -1459,7 +1465,9 @@
       "invalidParent": "Invalid parent comment ID",
       "saveFailed": "Failed to save comment",
       "deleteFailed": "Failed to delete comment",
-      "notExists": "Transaction does not exist"
+      "notExists": "Transaction does not exist",
+      "invalidAccountId": "帳戶ID無效",
+      "exchangeRateUnavailable": "該幣種匯率暫不可用"
     },
     "space": {
       "notFound": "Shared space not found or access denied",
@@ -1486,7 +1494,25 @@
       "noFile": "No file uploaded",
       "tooLarge": "File too large",
       "unsupportedType": "Unsupported file type",
-      "tooManyFiles": "Too many files"
+      "tooManyFiles": "Too many files",
+      "invalidFile": "上傳的檔案無效",
+      "invalidMimeType": "檔案MIME類型無效",
+      "invalidImageContent": "圖片內容無效",
+      "imageTooWide": "圖片過寬",
+      "imageTooHigh": "圖片過高",
+      "totalSizeTooLarge": "檔案總大小過大",
+      "readError": "讀取檔案失敗",
+      "filesystemError": "檔案系統錯誤",
+      "verificationFailed": "上傳驗證失敗",
+      "allFailed": "所有檔案上傳失敗",
+      "invalidImageUrls": "圖片URL無效",
+      "fileNotFound": "檔案不存在",
+      "imageCompressionFailed": "圖片壓縮失敗",
+      "accessError": "檔案存取錯誤",
+      "deleteError": "刪除檔案失敗",
+      "noFiles": "未提供檔案",
+      "fileEmpty": "檔案為空",
+      "invalidFilename": "檔案名稱無效"
     },
     "storage": {
       "configNotFound": "儲存設定不存在或無存取權限",
@@ -1496,7 +1522,9 @@
     "ai": {
       "contextLimit": "Context limit exceeded",
       "tokenLimit": "Insufficient tokens",
-      "emptyMessage": "Empty user message"
+      "emptyMessage": "Empty user message",
+      "conversationIdInvalid": "會話無效",
+      "conversationIdNotOwner": "您無權存取該會話"
     }
   },
   "notification": {

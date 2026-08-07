@@ -7,17 +7,67 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 /// Toast type
 enum ToastType { success, error, warning, info }
 
+/// Optional action button rendered inside a [TopToast].
+class TopToastAction {
+  final String label;
+  final VoidCallback onPressed;
+
+  const TopToastAction({required this.label, required this.onPressed});
+}
+
 /// Top Toast utility class
 class TopToast {
   static OverlayEntry? _currentEntry;
 
-  /// Display top Toast
+  /// Display a top toast with a plain [message] string.
   static void show(
     BuildContext context, {
     required String message,
     ToastType type = ToastType.info,
     Duration duration = const Duration(seconds: 3),
     OverlayState? overlayState,
+    TopToastAction? action,
+  }) {
+    _show(
+      context,
+      description: Text(message),
+      type: type,
+      duration: duration,
+      overlayState: overlayState,
+      action: action,
+    );
+  }
+
+  /// Display a top toast with arbitrary [description] widget content and an
+  /// optional [title] rendered above it.
+  static void showWidget(
+    BuildContext context, {
+    required Widget description,
+    Widget? title,
+    ToastType type = ToastType.info,
+    Duration duration = const Duration(seconds: 3),
+    OverlayState? overlayState,
+    TopToastAction? action,
+  }) {
+    _show(
+      context,
+      description: description,
+      title: title,
+      type: type,
+      duration: duration,
+      overlayState: overlayState,
+      action: action,
+    );
+  }
+
+  static void _show(
+    BuildContext context, {
+    required Widget description,
+    Widget? title,
+    ToastType type = ToastType.info,
+    Duration duration = const Duration(seconds: 3),
+    OverlayState? overlayState,
+    TopToastAction? action,
   }) {
     // Remove previous toast
     _currentEntry?.remove();
@@ -60,7 +110,8 @@ class TopToast {
     late final OverlayEntry entry;
     entry = OverlayEntry(
       builder: (context) => _TopToastWidget(
-        message: message,
+        description: description,
+        title: title,
         backgroundColor: backgroundColor,
         iconData: iconData,
         iconColor: iconColor,
@@ -72,6 +123,7 @@ class TopToast {
           }
         },
         duration: duration,
+        action: action,
       ),
     );
 
@@ -89,12 +141,14 @@ class TopToast {
     BuildContext context,
     String message, {
     OverlayState? overlay,
+    TopToastAction? action,
   }) {
     show(
       context,
       message: message,
       type: ToastType.success,
       overlayState: overlay,
+      action: action,
     );
   }
 
@@ -103,12 +157,14 @@ class TopToast {
     BuildContext context,
     String message, {
     OverlayState? overlay,
+    TopToastAction? action,
   }) {
     show(
       context,
       message: message,
       type: ToastType.error,
       overlayState: overlay,
+      action: action,
     );
   }
 
@@ -117,12 +173,14 @@ class TopToast {
     BuildContext context,
     String message, {
     OverlayState? overlay,
+    TopToastAction? action,
   }) {
     show(
       context,
       message: message,
       type: ToastType.warning,
       overlayState: overlay,
+      action: action,
     );
   }
 
@@ -131,33 +189,39 @@ class TopToast {
     BuildContext context,
     String message, {
     OverlayState? overlay,
+    TopToastAction? action,
   }) {
     show(
       context,
       message: message,
       type: ToastType.info,
       overlayState: overlay,
+      action: action,
     );
   }
 }
 
 class _TopToastWidget extends StatefulWidget {
-  final String message;
+  final Widget description;
+  final Widget? title;
   final Color backgroundColor;
   final IconData iconData;
   final Color iconColor;
   final FThemeData theme;
   final VoidCallback onDismiss;
   final Duration duration;
+  final TopToastAction? action;
 
   const _TopToastWidget({
-    required this.message,
+    required this.description,
+    this.title,
     required this.backgroundColor,
     required this.iconData,
     required this.iconColor,
     required this.theme,
     required this.onDismiss,
     required this.duration,
+    this.action,
   });
 
   @override
@@ -267,11 +331,41 @@ class _TopToastWidgetState extends State<_TopToastWidget>
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        widget.message,
-                        style: AppTextStyles.listTrailing(widget.theme),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.title != null)
+                            DefaultTextStyle(
+                              style: AppTextStyles.listTrailing(
+                                widget.theme,
+                              ).copyWith(fontWeight: FontWeight.w600),
+                              child: widget.title!,
+                            ),
+                          DefaultTextStyle(
+                            style: AppTextStyles.listTrailing(widget.theme),
+                            child: widget.description,
+                          ),
+                        ],
                       ),
                     ),
+                    if (widget.action != null)
+                      GestureDetector(
+                        onTap: () {
+                          unawaited(_dismiss());
+                          widget.action!.onPressed();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            widget.action!.label,
+                            style: TextStyle(
+                              color: widget.iconColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                     Icon(
                       FLucideIcons.x,
                       size: 16,

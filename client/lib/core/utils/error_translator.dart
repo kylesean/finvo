@@ -58,7 +58,7 @@ class ErrorTranslator {
       case ErrorCodes.invalidClientTimezone:
         return e.auth.invalidTimezone;
 
-      // Transaction (3000-3004)
+      // Transaction (3000-3006)
       case ErrorCodes.transactionCommentNull:
         return e.transaction.commentEmpty;
       case ErrorCodes.invalidParentCommentId:
@@ -69,6 +69,10 @@ class ErrorTranslator {
         return e.transaction.deleteFailed;
       case ErrorCodes.transactionNotExists:
         return e.transaction.notExists;
+      case ErrorCodes.invalidAccountId:
+        return e.transaction.invalidAccountId;
+      case ErrorCodes.exchangeRateUnavailable:
+        return e.transaction.exchangeRateUnavailable;
 
       // Shared Space (3100-3113)
       case ErrorCodes.sharedSpaceNotExistsOrNoAccess:
@@ -108,15 +112,51 @@ class ErrorTranslator {
       case ErrorCodes.recurrenceRuleNotFound:
         return e.recurring.ruleNotFound;
 
-      // File Upload (4001-4017)
+      // File Upload (4001-4022)
       case ErrorCodes.noFileUploaded:
         return e.upload.noFile;
+      case ErrorCodes.invalidFileUploaded:
+        return e.upload.invalidFile;
       case ErrorCodes.fileTooLarge:
         return e.upload.tooLarge;
       case ErrorCodes.invalidFileType:
         return e.upload.unsupportedType;
+      case ErrorCodes.invalidMimeType:
+        return e.upload.invalidMimeType;
+      case ErrorCodes.invalidImageContent:
+        return e.upload.invalidImageContent;
+      case ErrorCodes.imageTooWide:
+        return e.upload.imageTooWide;
+      case ErrorCodes.imageTooHigh:
+        return e.upload.imageTooHigh;
       case ErrorCodes.tooManyFiles:
         return e.upload.tooManyFiles;
+      case ErrorCodes.totalSizeTooLarge:
+        return e.upload.totalSizeTooLarge;
+      case ErrorCodes.fileReadError:
+        return e.upload.readError;
+      case ErrorCodes.filesystemError:
+        return e.upload.filesystemError;
+      case ErrorCodes.uploadVerificationFailed:
+        return e.upload.verificationFailed;
+      case ErrorCodes.uploadAllFailed:
+        return e.upload.allFailed;
+      case ErrorCodes.invalidImageUrls:
+        return e.upload.invalidImageUrls;
+      case ErrorCodes.fileNotFound:
+        return e.upload.fileNotFound;
+      case ErrorCodes.imageCompressionFailed:
+        return e.upload.imageCompressionFailed;
+      case ErrorCodes.fileAccessError:
+        return e.upload.accessError;
+      case ErrorCodes.fileDeleteError:
+        return e.upload.deleteError;
+      case ErrorCodes.noFiles:
+        return e.upload.noFiles;
+      case ErrorCodes.fileEmpty:
+        return e.upload.fileEmpty;
+      case ErrorCodes.invalidFilename:
+        return e.upload.invalidFilename;
 
       // Storage config (4500-4502)
       case ErrorCodes.invalidProviderType:
@@ -129,6 +169,10 @@ class ErrorTranslator {
       // AI/LLM (9000-9004)
       case ErrorCodes.aiContextLimitExceeded:
         return e.ai.contextLimit;
+      case ErrorCodes.conversationIdInvalid:
+        return e.ai.conversationIdInvalid;
+      case ErrorCodes.conversationIdNotOwner:
+        return e.ai.conversationIdNotOwner;
       case ErrorCodes.tokensLimited:
         return e.ai.tokenLimit;
       case ErrorCodes.noUserMessage:

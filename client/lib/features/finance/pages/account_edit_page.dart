@@ -42,9 +42,17 @@ class _FinancialAccountEditPageState
     extends ConsumerState<FinancialAccountEditPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _balanceController;
-  late Currency _selectedCurrency;
+  // Store the raw code so an unknown currency is preserved (and re-saved)
+  // instead of being silently coerced to CNY, which would destroy the
+  // account's original currency on edit.
+  late String _currencyCode;
   bool _hidden = false;
   bool _includeInAssets = true;
+
+  Currency? get _currency => Currency.fromCode(_currencyCode);
+  String get _currencySymbol => _currency?.symbol ?? _currencyCode;
+  String get _currencyLabel =>
+      '$_currencyCode - ${_currency?.localizedName ?? _currencyCode}';
 
   @override
   void initState() {
@@ -56,7 +64,7 @@ class _FinancialAccountEditPageState
         account.currentBalance ?? account.initialBalance,
       ),
     );
-    _selectedCurrency = Currency.fromCode(account.currencyCode) ?? Currency.cny;
+    _currencyCode = account.currencyCode;
     _hidden = account.status == AccountStatus.inactive;
     _includeInAssets = account.includeInNetWorth;
   }
@@ -191,7 +199,7 @@ class _FinancialAccountEditPageState
               child: FittedBox(
                 fit: BoxFit.contain,
                 child: Text(
-                  _selectedCurrency.symbol,
+                  _currencySymbol,
                   style: AppTextStyles.actionText(theme).copyWith(height: 1.0),
                 ),
               ),
@@ -226,8 +234,7 @@ class _FinancialAccountEditPageState
             colors: colors,
             icon: Icon(FLucideIcons.globe, size: 20, color: colors.primary),
             label: t.account.currencyLabel,
-            value:
-                '${_selectedCurrency.code} - ${_selectedCurrency.localizedName}',
+            value: _currencyLabel,
             showArrow: true,
             onTap: _openCurrencyPicker,
           ),
@@ -262,13 +269,10 @@ class _FinancialAccountEditPageState
   }
 
   Future<void> _openCurrencyPicker() async {
-    final result = await CurrencySelectionSheet.show(
-      context,
-      _selectedCurrency.code,
-    );
+    final result = await CurrencySelectionSheet.show(context, _currencyCode);
     if (!mounted || result == null) return;
     setState(() {
-      _selectedCurrency = Currency.fromCode(result) ?? Currency.cny;
+      _currencyCode = result;
     });
   }
 
@@ -339,7 +343,7 @@ class _FinancialAccountEditPageState
 
     final updatedAccount = widget.args.account.copyWith(
       name: name.isNotEmpty ? name : widget.args.account.name,
-      currencyCode: _selectedCurrency.code,
+      currencyCode: _currencyCode,
       currentBalance: balance,
       includeInNetWorth: _includeInAssets,
       status: _hidden ? AccountStatus.inactive : AccountStatus.active,

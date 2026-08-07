@@ -1116,6 +1116,12 @@
     "includeInNetWorthLabel": "计入资产",
     "includeInNetWorthDesc": "用于净资产统计",
     "nameHint": "例如：工资卡",
+    "nameRequired": "请输入账户名称",
+    "nameTooShort": "账户名称至少需要 2 个字符",
+    "amountRequired": "请输入当前余额",
+    "invalidAmount": "请输入有效金额",
+    "negativeBalance": "余额不能为负数",
+    "amountTooLarge": "余额不能超过 999,999,999.99",
     "amountHint": "0.00",
     "deleteAccount": "删除账户",
     "deleteConfirm": "确定要删除该账户吗？此操作无法撤销。",
@@ -1464,7 +1470,9 @@
       "invalidParent": "无效的父评论ID",
       "saveFailed": "评论保存失败",
       "deleteFailed": "评论删除失败",
-      "notExists": "交易记录不存在"
+      "notExists": "交易记录不存在",
+      "invalidAccountId": "账户ID无效",
+      "exchangeRateUnavailable": "该币种汇率暂不可用"
     },
     "space": {
       "notFound": "共享空间不存在或无权访问",
@@ -1491,7 +1499,25 @@
       "noFile": "未上传文件",
       "tooLarge": "文件过大",
       "unsupportedType": "不支持的文件类型",
-      "tooManyFiles": "文件数量过多"
+      "tooManyFiles": "文件数量过多",
+      "invalidFile": "上传的文件无效",
+      "invalidMimeType": "文件MIME类型无效",
+      "invalidImageContent": "图片内容无效",
+      "imageTooWide": "图片过宽",
+      "imageTooHigh": "图片过高",
+      "totalSizeTooLarge": "文件总大小过大",
+      "readError": "读取文件失败",
+      "filesystemError": "文件系统错误",
+      "verificationFailed": "上传校验失败",
+      "allFailed": "所有文件上传失败",
+      "invalidImageUrls": "图片URL无效",
+      "fileNotFound": "文件不存在",
+      "imageCompressionFailed": "图片压缩失败",
+      "accessError": "文件访问错误",
+      "deleteError": "删除文件失败",
+      "noFiles": "未提供文件",
+      "fileEmpty": "文件为空",
+      "invalidFilename": "文件名无效"
     },
     "storage": {
       "configNotFound": "存储配置不存在或无权访问",
@@ -1501,7 +1527,9 @@
     "ai": {
       "contextLimit": "上下文长度超出限制",
       "tokenLimit": "Token配额不足",
-      "emptyMessage": "用户消息为空"
+      "emptyMessage": "用户消息为空",
+      "conversationIdInvalid": "会话无效",
+      "conversationIdNotOwner": "您无权访问该会话"
     }
   },
   "notification": {

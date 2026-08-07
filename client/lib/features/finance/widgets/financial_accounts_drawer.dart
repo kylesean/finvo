@@ -9,6 +9,7 @@ import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
+import 'package:finvo/shared/utils/route_utils.dart';
 
 /// Left navigation drawer for the financial accounts page.
 class FinancialAccountsDrawer extends StatelessWidget {
@@ -71,18 +72,15 @@ class FinancialAccountsDrawer extends StatelessWidget {
                             Navigator.of(context).pop(); // Close drawer
                             // Delay navigation to wait for drawer close animation
                             unawaited(
-                              Future<void>.delayed(
-                                const Duration(milliseconds: 100),
-                                () {
-                                  if (context.mounted) {
-                                    unawaited(
-                                      context.pushNamed(
-                                        AppRouteNames.budgetOverview,
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
+                              waitForRouteSettle().then((_) {
+                                if (context.mounted) {
+                                  unawaited(
+                                    context.pushNamed(
+                                      AppRouteNames.budgetOverview,
+                                    ),
+                                  );
+                                }
+                              }),
                             );
                           },
                         ),
@@ -94,18 +92,15 @@ class FinancialAccountsDrawer extends StatelessWidget {
                             Navigator.of(context).pop(); // Close drawer
                             // Delay navigation to wait for drawer close animation
                             unawaited(
-                              Future<void>.delayed(
-                                const Duration(milliseconds: 100),
-                                () {
-                                  if (context.mounted) {
-                                    unawaited(
-                                      context.pushNamed(
-                                        AppRouteNames.recurringTransactions,
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
+                              waitForRouteSettle().then((_) {
+                                if (context.mounted) {
+                                  unawaited(
+                                    context.pushNamed(
+                                      AppRouteNames.recurringTransactions,
+                                    ),
+                                  );
+                                }
+                              }),
                             );
                           },
                         ),

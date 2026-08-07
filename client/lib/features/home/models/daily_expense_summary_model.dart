@@ -1,10 +1,11 @@
 // features/home/models/daily_expense_summary_model.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:finvo/shared/models/expense_heat_level.dart';
+
+export 'package:finvo/shared/models/expense_heat_level.dart';
 
 part 'daily_expense_summary_model.freezed.dart';
 part 'daily_expense_summary_model.g.dart';
-
-enum ExpenseHeatLevel { none, low, medium, high, veryHigh }
 
 // Helper function: Convert string to ExpenseHeatLevel enum
 ExpenseHeatLevel _heatLevelFromString(String? levelStr) {

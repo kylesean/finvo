@@ -190,7 +190,7 @@ void main() {
         },
       });
 
-      final result = await service.getCashFlow(timeRange: 'week');
+      final result = await service.getCashFlow(timeRange: TimeRange.week);
 
       expect(lastRequest.queryParameters['time_range'], 'week');
       expect(result.savingsRate, 62.5);
@@ -219,7 +219,7 @@ void main() {
         },
       });
 
-      final result = await service.getHealthScore(timeRange: 'month');
+      final result = await service.getHealthScore(timeRange: TimeRange.month);
 
       expect(lastRequest.path, '/statistics/health-score');
       expect(result.totalScore, 82);

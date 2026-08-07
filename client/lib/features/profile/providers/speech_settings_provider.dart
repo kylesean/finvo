@@ -14,16 +14,20 @@ final _logger = Logger('SpeechSettingsNotifier');
 const String _speechSettingsKey = 'speech_settings';
 
 /// Speech settings Notifier
-@riverpod
+///
+/// [keepAlive] so the locally-stored settings are kept in memory after the
+/// startup pre-warm instead of being re-read on every screen mount.
+@Riverpod(keepAlive: true)
 class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
   @override
   SpeechSettingsState build() {
-    unawaited(Future<void>.microtask(() => unawaited(_loadSettings())));
+    // Pure build: app startup triggers [loadSettings] explicitly (see
+    // main.dart) so this SharedPreferences read is not a build() side-effect.
     return const SpeechSettingsState();
   }
 
   /// Load settings from SharedPreferences
-  Future<void> _loadSettings() async {
+  Future<void> loadSettings() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {

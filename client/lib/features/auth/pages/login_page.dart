@@ -10,6 +10,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/shared/utils/route_utils.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -57,8 +58,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       // Show success message
       ToastService.success(description: Text(t.auth.loginSuccess));
 
-      // Delay briefly before navigation to ensure state updates complete
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      // Let the success toast settle before navigating away (the timing is
+      // centralised in route_utils so this isn't a magic number).
+      await waitForRouteSettle();
       if (!mounted) return;
 
       // Use pushReplacement instead of go to avoid returning to login page.

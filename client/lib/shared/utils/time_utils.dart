@@ -13,6 +13,13 @@ String relativeTime(DateTime timestamp) {
   final now = DateTime.now();
   final difference = now.difference(timestamp);
 
+  // Guard against future timestamps (clock skew or pre-scheduled content): a
+  // negative difference would otherwise surface as a nonsensical negative
+  // count. Clamp to "just now" instead of rendering e.g. "-3m ago".
+  if (difference.isNegative) {
+    return t.time.justNow;
+  }
+
   if (difference.inSeconds < 60) {
     return t.time.justNow;
   } else if (difference.inMinutes < 60) {

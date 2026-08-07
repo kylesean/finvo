@@ -9,22 +9,34 @@ part of 'financial_settings_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Financial settings state notifier
+///
+/// [keepAlive] so the primary currency is loaded once on login and reused
+/// across every currency-dependent screen (home/budget/report/shared widgets)
+/// without being torn down when those screens leave the tree.
 
 @ProviderFor(FinancialSettingsNotifier)
 final financialSettingsProvider = FinancialSettingsNotifierProvider._();
 
 /// Financial settings state notifier
+///
+/// [keepAlive] so the primary currency is loaded once on login and reused
+/// across every currency-dependent screen (home/budget/report/shared widgets)
+/// without being torn down when those screens leave the tree.
 final class FinancialSettingsNotifierProvider
     extends
         $NotifierProvider<FinancialSettingsNotifier, FinancialSettingsState> {
   /// Financial settings state notifier
+  ///
+  /// [keepAlive] so the primary currency is loaded once on login and reused
+  /// across every currency-dependent screen (home/budget/report/shared widgets)
+  /// without being torn down when those screens leave the tree.
   FinancialSettingsNotifierProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'financialSettingsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -46,9 +58,13 @@ final class FinancialSettingsNotifierProvider
 }
 
 String _$financialSettingsNotifierHash() =>
-    r'c0f79dbd55f07a6da2e218cbc7fc9e21cefa2463';
+    r'05d4d78c9f93867f17fb81247b938a0d33d0dc51';
 
 /// Financial settings state notifier
+///
+/// [keepAlive] so the primary currency is loaded once on login and reused
+/// across every currency-dependent screen (home/budget/report/shared widgets)
+/// without being torn down when those screens leave the tree.
 
 abstract class _$FinancialSettingsNotifier
     extends $Notifier<FinancialSettingsState> {

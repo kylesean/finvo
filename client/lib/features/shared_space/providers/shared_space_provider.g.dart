@@ -42,7 +42,7 @@ final class SharedSpaceNotifierProvider
 }
 
 String _$sharedSpaceNotifierHash() =>
-    r'cdd27defb33124a5e3c1245d40b10a659fc50503';
+    r'6639a5e2521438e6cf79c6347ff42e9f8605d39b';
 
 abstract class _$SharedSpaceNotifier extends $Notifier<SharedSpaceState> {
   SharedSpaceState build();
@@ -278,7 +278,7 @@ final class SpaceTransactionNotifierProvider
 }
 
 String _$spaceTransactionNotifierHash() =>
-    r'47b4e2e0f1dc2fc29e03512656c7f5945fe95290';
+    r'8b01c787db531320d102cc1ce237e163d9d174d4';
 
 /// Paginated transaction list for a shared space.
 ///

@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 
-import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/shared/models/transaction_type.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 
 /// Amount display semantic type

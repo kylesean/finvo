@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:decimal/decimal.dart';
-import 'package:logging/logging.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/profile/models/financial_account.dart';
@@ -9,7 +8,6 @@ import 'package:finvo/features/profile/models/user_info.dart';
 
 class ProfileService {
   final NetworkClient _networkClient;
-  final _logger = Logger('ProfileService');
 
   ProfileService(this._networkClient);
 
@@ -18,25 +16,8 @@ class ProfileService {
     return await _networkClient.request<UserInfo>(
       '/user',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          try {
-            final data = json['data'];
-            if (data == null) {
-              throw DataParsingException('data field is null');
-            }
-            if (data is Map<String, dynamic>) {
-              return UserInfo.fromJson(data);
-            }
-            throw DataParsingException('data field is not an object');
-          } catch (e) {
-            throw DataParsingException(
-              'Failed to parse user info: ${e.toString()}',
-            );
-          }
-        }
-        throw DataParsingException('API /user expects an object');
-      },
+      fromJsonT: (json) =>
+          _unwrapData(json, UserInfo.fromJson, endpoint: '/user'),
     );
   }
 
@@ -50,25 +31,8 @@ class ProfileService {
       '/user',
       method: HttpMethod.patch,
       data: data,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          try {
-            final respData = json['data'];
-            if (respData == null) {
-              throw DataParsingException('data field is null');
-            }
-            if (respData is Map<String, dynamic>) {
-              return UserInfo.fromJson(respData);
-            }
-            throw DataParsingException('data field is not an object');
-          } catch (e) {
-            throw DataParsingException(
-              'Failed to parse profile update response: ${e.toString()}',
-            );
-          }
-        }
-        throw DataParsingException('API /user PATCH expects an object');
-      },
+      fromJsonT: (json) =>
+          _unwrapData(json, UserInfo.fromJson, endpoint: '/user'),
     );
   }
 
@@ -76,33 +40,14 @@ class ProfileService {
     return await _networkClient.request<FinancialAccountResponse>(
       '/user/financial-accounts',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          try {
-            // Response format is {code, message, data}, need to extract data field
-            final data = json['data'];
-
-            if (data == null) {
-              return FinancialAccountResponse(totalBalance: Decimal.zero);
-            }
-
-            if (data is Map<String, dynamic>) {
-              return FinancialAccountResponse.fromJson(data);
-            }
-
-            throw DataParsingException(
-              'data field is not an object, but ${data.runtimeType}',
-            );
-          } catch (e) {
-            throw DataParsingException(
-              'Failed to parse financial accounts response: ${e.toString()}',
-            );
-          }
-        }
-        throw DataParsingException(
-          'API /user/financial-accounts expects an object, but received ${json.runtimeType}',
-        );
-      },
+      fromJsonT: (json) => _unwrapData(
+        json,
+        FinancialAccountResponse.fromJson,
+        endpoint: '/user/financial-accounts',
+        // A missing envelope is treated as an empty account set so the net
+        // worth view degrades gracefully instead of erroring on first run.
+        onNull: () => FinancialAccountResponse(totalBalance: Decimal.zero),
+      ),
     );
   }
 
@@ -116,34 +61,11 @@ class ProfileService {
       '/user/financial-accounts',
       method: HttpMethod.post,
       data: request.toJson(),
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          try {
-            // Response format is {code, message, data}, need to extract data field
-            final data = json['data'];
-
-            if (data == null) {
-              throw DataParsingException('data field is null');
-            }
-
-            if (data is Map<String, dynamic>) {
-              return FinancialAccountSummary.fromJson(data);
-            }
-
-            throw DataParsingException(
-              'data field is not an object, but ${data.runtimeType}',
-            );
-          } catch (e) {
-            _logger.severe('saveFinancialAccounts parsing error', e);
-            throw DataParsingException(
-              'Failed to parse financial accounts response: ${e.toString()}',
-            );
-          }
-        }
-        throw DataParsingException(
-          'API /user/financial-accounts expects an object, but received ${json.runtimeType}',
-        );
-      },
+      fromJsonT: (json) => _unwrapData(
+        json,
+        FinancialAccountSummary.fromJson,
+        endpoint: '/user/financial-accounts',
+      ),
     );
   }
 
@@ -152,28 +74,11 @@ class ProfileService {
     return await _networkClient.request<FinancialSettingsResponse>(
       '/financial-settings',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          try {
-            // Response format is {code, message, data}, need to extract data field
-            final data = json['data'];
-            if (data == null) {
-              throw DataParsingException('data field is null');
-            }
-            if (data is Map<String, dynamic>) {
-              return FinancialSettingsResponse.fromJson(data);
-            }
-            throw DataParsingException('data field is not an object');
-          } catch (e) {
-            throw DataParsingException(
-              'Failed to parse financial settings response: ${e.toString()}',
-            );
-          }
-        }
-        throw DataParsingException(
-          'API /financial-settings expects an object, but received ${json.runtimeType}',
-        );
-      },
+      fromJsonT: (json) => _unwrapData(
+        json,
+        FinancialSettingsResponse.fromJson,
+        endpoint: '/financial-settings',
+      ),
     );
   }
 
@@ -185,28 +90,11 @@ class ProfileService {
       '/financial-settings',
       method: HttpMethod.patch,
       data: request.toJson(),
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          try {
-            // Response format is {code, message, data}, need to extract data field
-            final data = json['data'];
-            if (data == null) {
-              throw DataParsingException('data field is null');
-            }
-            if (data is Map<String, dynamic>) {
-              return FinancialSettingsResponse.fromJson(data);
-            }
-            throw DataParsingException('data field is not an object');
-          } catch (e) {
-            throw DataParsingException(
-              'Failed to parse financial settings response: ${e.toString()}',
-            );
-          }
-        }
-        throw DataParsingException(
-          'API /financial-settings expects an object, but received ${json.runtimeType}',
-        );
-      },
+      fromJsonT: (json) => _unwrapData(
+        json,
+        FinancialSettingsResponse.fromJson,
+        endpoint: '/financial-settings',
+      ),
     );
   }
 
@@ -219,26 +107,11 @@ class ProfileService {
       '/user/financial-accounts/$accountId',
       method: HttpMethod.patch,
       data: account.toJson(),
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          // The callback receives the full response envelope; the account
-          // payload lives under `data`. Parsing the envelope directly would
-          // fail on the missing account fields.
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            try {
-              return FinancialAccount.fromJson(data);
-            } catch (e) {
-              throw DataParsingException(
-                'Failed to parse update account response: ${e.toString()}',
-              );
-            }
-          }
-        }
-        throw DataParsingException(
-          'API expects an object, but received ${json.runtimeType}',
-        );
-      },
+      fromJsonT: (json) => _unwrapData(
+        json,
+        FinancialAccount.fromJson,
+        endpoint: '/user/financial-accounts/$accountId',
+      ),
     );
   }
 
@@ -249,6 +122,44 @@ class ProfileService {
       method: HttpMethod.delete,
       fromJsonT: (_) {},
     );
+  }
+
+  /// Unwrap the standard `{code, message, data}` response envelope and decode
+  /// the payload under `data` with [fromJson]. Consolidates the near-identical
+  /// parsing blocks that otherwise repeat across every service method.
+  ///
+  /// - Non-object envelopes and non-object/`null` payloads raise
+  ///   [DataParsingException] with a consistent message (unless [onNull]
+  ///   supplies a fallback for a null payload).
+  /// - Decode failures are re-wrapped so the raw parser error never leaks.
+  T _unwrapData<T>(
+    dynamic json,
+    T Function(Map<String, dynamic> data) fromJson, {
+    required String endpoint,
+    T Function()? onNull,
+  }) {
+    if (json is! Map<String, dynamic>) {
+      throw DataParsingException(
+        'API $endpoint expects an object, but received ${json.runtimeType}',
+      );
+    }
+    final data = json['data'];
+    if (data == null) {
+      if (onNull != null) return onNull();
+      throw DataParsingException('data field is null');
+    }
+    if (data is! Map<String, dynamic>) {
+      throw DataParsingException(
+        'data field is not an object, but ${data.runtimeType}',
+      );
+    }
+    try {
+      return fromJson(data);
+    } catch (e) {
+      throw DataParsingException(
+        'Failed to parse $endpoint response: ${e.toString()}',
+      );
+    }
   }
 }
 

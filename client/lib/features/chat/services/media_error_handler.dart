@@ -8,6 +8,7 @@ import 'package:finvo/features/chat/models/media_upload_exception.dart';
 import 'package:finvo/features/chat/services/retry_policy.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/shared/widgets/top_toast.dart';
 
 /// Media upload error handling service
 /// Provides user-friendly error handling and guidance functionality
@@ -653,13 +654,18 @@ class MediaErrorHandler {
   ///
   /// [context] Build context
   /// [message] Error message
-  /// [action] Optional action button
+  /// [actionLabel] Optional action button label (rendered when non-null)
+  /// [onActionPressed] Action button callback (used when [actionLabel] supplied)
   static void showErrorSnackBar(
     BuildContext context,
     String message, {
-    SnackBarAction? action,
+    String? actionLabel,
+    VoidCallback? onActionPressed,
   }) {
-    ToastService.showDestructive(description: Text(message));
+    final action = actionLabel != null && onActionPressed != null
+        ? TopToastAction(label: actionLabel, onPressed: onActionPressed)
+        : null;
+    ToastService.showDestructive(description: Text(message), action: action);
   }
 
   /// Display retry error notification
@@ -675,11 +681,8 @@ class MediaErrorHandler {
     showErrorSnackBar(
       context,
       message,
-      action: SnackBarAction(
-        label: t.common.retry,
-        onPressed: onRetry,
-        textColor: Colors.white,
-      ),
+      actionLabel: t.common.retry,
+      onActionPressed: onRetry,
     );
   }
 

@@ -25,14 +25,16 @@ class ErrorCodes {
   static const int noPreferencesParams = 1011;
   static const int invalidClientTimezone = 1012;
 
-  // Transaction errors (3000-3018)
+  // Transaction errors (3000-3006)
   static const int transactionCommentNull = 3000;
   static const int invalidParentCommentId = 3001;
   static const int storeCommentFailed = 3002;
   static const int deleteCommentFailed = 3003;
   static const int transactionNotExists = 3004;
+  static const int invalidAccountId = 3005;
+  static const int exchangeRateUnavailable = 3006;
 
-  // Shared space errors (3100-3118)
+  // Shared space errors (3100-3114)
   static const int sharedSpaceNotExistsOrNoAccess = 3100;
   static const int noPermissionToInviteMembers = 3101;
   static const int cannotInviteYourself = 3102;
@@ -48,8 +50,6 @@ class ErrorCodes {
   static const int invalidInvitationCode = 3112;
   static const int invitationCodeExpiredOrLimited = 3113;
   static const int transactionAlreadyInSpace = 3114;
-  static const int invalidAccountId = 3005;
-  static const int exchangeRateUnavailable = 3006;
 
   // Recurring transaction errors (3200-3201)
   static const int invalidRecurrenceRule = 3200;

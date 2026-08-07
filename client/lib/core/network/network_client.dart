@@ -23,8 +23,12 @@ class NetworkClient {
   /// - [data]: Request body (for POST, PUT, PATCH)
   /// - [fromJsonT]: Callback to convert response data to generic type T
   /// - [options]: Optional Dio Options to override defaults or pass extra info
-  /// - [enableRetry]: Enable retry mechanism, default true
-  /// - [maxRetries]: Maximum retry attempts, default 3
+  /// - [enableRetry]: Enable retry mechanism. **Only idempotent (GET) requests
+  ///   are ever retried** — non-idempotent methods (POST/PUT/DELETE/PATCH)
+  ///   ignore this flag and never retry, because a timed-out write may already
+  ///   have succeeded server-side and retrying could create/duplicate a
+  ///   resource. Default true.
+  /// - [maxRetries]: Maximum retry attempts for idempotent requests, default 3.
   Future<T> request<T>(
     String path, {
     required HttpMethod method,
@@ -156,26 +160,26 @@ class NetworkClient {
       }
     }
 
-    // If all retries failed, handle final exception
-    if (lastException != null) {
-      // Run network diagnostics before final failure
-      await _handleFinalFailure(lastException, path);
+    // lastException is guaranteed non-null here: the loop either returns on
+    // success or records a DioException before breaking/rethrowing, so the
+    // former `if (lastException != null)` guard and its unreachable fallback
+    // throw were dead code and are removed.
+    final failure = lastException!;
+    // Run network diagnostics before final failure
+    await _handleFinalFailure(failure, path);
 
-      // ErrorInterceptor should have filled e.error with AppException subclass
-      if (lastException.error is AppException) {
-        throw lastException.error as AppException;
-      }
-      _logger.severe(
-        'All retries failed, final error: ${lastException.type}, ${lastException.message}',
-      );
-      throw NetworkException(
-        // Report the number of retries actually performed (0 for
-        // non-idempotent/disabled retry), not the configured max.
-        "Network request failed, retried $retriesPerformed times: ${lastException.message ?? 'Unknown network error'}",
-      );
+    // ErrorInterceptor should have filled e.error with AppException subclass
+    if (failure.error is AppException) {
+      throw failure.error as AppException;
     }
-
-    throw NetworkException('Request execution exception, unknown error');
+    _logger.severe(
+      'All retries failed, final error: ${failure.type}, ${failure.message}',
+    );
+    throw NetworkException(
+      // Report the number of retries actually performed (0 for
+      // non-idempotent/disabled retry), not the configured max.
+      "Network request failed, retried $retriesPerformed times: ${failure.message ?? 'Unknown network error'}",
+    );
   }
 
   /// Determine if request should be retried

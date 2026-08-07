@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
-class FinancialAccountInputSheet extends StatefulWidget {
+class FinancialAccountInputSheet extends ConsumerStatefulWidget {
   final AccountTypeDefinition definition;
   final FinancialAccount? initialAccount;
   final ValueChanged<FinancialAccount> onSubmitted;
@@ -22,12 +25,12 @@ class FinancialAccountInputSheet extends StatefulWidget {
   });
 
   @override
-  State<FinancialAccountInputSheet> createState() =>
+  ConsumerState<FinancialAccountInputSheet> createState() =>
       _FinancialAccountInputSheetState();
 }
 
 class _FinancialAccountInputSheetState
-    extends State<FinancialAccountInputSheet> {
+    extends ConsumerState<FinancialAccountInputSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _balanceController = TextEditingController();
@@ -64,6 +67,15 @@ class _FinancialAccountInputSheetState
     final colors = theme.colors;
     final definition = widget.definition;
     final showNameField = !_isPreset || definition.requiresCustomName;
+    // Resolve the user's primary currency symbol instead of hard-coding ¥ so
+    // the sheet respects the configured currency. For an unknown currency we
+    // fall back to the code itself (visibly truthful) rather than silently
+    // assuming CNY.
+    final primaryCurrency = ref
+        .watch(financialSettingsProvider)
+        .primaryCurrency;
+    final currencySymbol =
+        Currency.fromCode(primaryCurrency)?.symbol ?? primaryCurrency;
 
     return Material(
       color: Colors.transparent,
@@ -137,23 +149,22 @@ class _FinancialAccountInputSheetState
                     const SizedBox(height: 28),
                     if (showNameField) ...[
                       Text(
-                        'Account Name',
+                        t.account.nameLabel,
                         style: AppTextStyles.formFieldLabel(theme),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _nameController,
                         textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
-                          hintText:
-                              'e.g., Bank of China Debit Card, Petty Cash',
+                        decoration: InputDecoration(
+                          hintText: t.account.nameHint,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter account name';
+                            return t.account.nameRequired;
                           }
                           if (value.trim().length < 2) {
-                            return 'Account name must be at least 2 characters';
+                            return t.account.nameTooShort;
                           }
                           return null;
                         },
@@ -161,21 +172,21 @@ class _FinancialAccountInputSheetState
                       const SizedBox(height: 20),
                     ],
                     Text(
-                      'Current Balance',
+                      t.account.amountLabel,
                       style: AppTextStyles.formFieldLabel(theme),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _balanceController,
                       decoration: InputDecoration(
-                        hintText: '0.00',
+                        hintText: t.account.amountHint,
                         prefixIcon: Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
                           ),
                           child: Text(
-                            '¥',
+                            currencySymbol,
                             style: AppTextStyles.listSubtitle(theme),
                           ),
                         ),
@@ -190,17 +201,17 @@ class _FinancialAccountInputSheetState
                       ],
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please enter current balance';
+                          return t.account.amountRequired;
                         }
                         final amount = double.tryParse(value.trim());
                         if (amount == null) {
-                          return 'Please enter a valid amount';
+                          return t.account.invalidAmount;
                         }
                         if (amount < 0) {
-                          return 'Balance cannot be negative';
+                          return t.account.negativeBalance;
                         }
                         if (amount > 999999999.99) {
-                          return 'Balance cannot exceed 999,999,999.99';
+                          return t.account.amountTooLarge;
                         }
                         return null;
                       },

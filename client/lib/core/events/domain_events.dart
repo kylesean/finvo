@@ -126,7 +126,24 @@ class BufferingBroadcastController<T> implements StreamController<T> {
 
   @override
   Future<void> addStream(Stream<T> source, {bool? cancelOnError}) {
-    return _controller.addStream(source, cancelOnError: cancelOnError);
+    // Route the source's events through add/addError so they respect the
+    // buffer: events arriving while no listener is attached are buffered and
+    // replayed rather than dropped. Delegating straight to
+    // _controller.addStream would hand the source to the underlying broadcast
+    // controller, which silently discards events emitted with no listener,
+    // breaking the "never drop events" invariant this class guarantees.
+    late StreamSubscription<T> subscription;
+    subscription = source.listen(
+      add,
+      onError: (Object error, StackTrace stackTrace) {
+        addError(error, stackTrace);
+        if (cancelOnError ?? false) {
+          unawaited(subscription.cancel());
+        }
+      },
+      cancelOnError: cancelOnError ?? false,
+    );
+    return subscription.asFuture<void>();
   }
 
   @override

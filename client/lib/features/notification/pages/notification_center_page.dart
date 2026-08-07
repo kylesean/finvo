@@ -10,6 +10,7 @@ import 'package:finvo/shared/utils/time_utils.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 class NotificationCenterPage extends ConsumerStatefulWidget {
   const NotificationCenterPage({super.key});
@@ -27,6 +28,9 @@ class _NotificationCenterPageState
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Kick off the initial load explicitly; the provider build() is kept pure
+    // (no network side-effect) and this page is the single consumer.
+    unawaited(ref.read(notificationProvider.notifier).refresh());
   }
 
   @override
@@ -106,7 +110,7 @@ class _NotificationCenterPageState
             ),
             const SizedBox(height: 12),
             Text(
-              '${t.notification.loadFailed}: ${state.error}',
+              '${t.notification.loadFailed}: ${safeErrorMessage(state.error)}',
               style: AppTextStyles.listSubtitle(theme),
             ),
             const SizedBox(height: 16),

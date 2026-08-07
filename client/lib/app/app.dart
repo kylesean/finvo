@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +16,8 @@ import 'package:finvo/app/theme/app_theme_pair_provider.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/features/profile/providers/user_profile_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 class MyApp extends ConsumerWidget {
@@ -31,6 +35,20 @@ class MyApp extends ConsumerWidget {
     // Keep the cross-feature transaction event subscription alive so the
     // home feature refreshes when other features (e.g. chat) create data.
     ref.watch(transactionEventSubscriberProvider);
+
+    // Once the user authenticates, warm the login-scoped data providers. We
+    // react to the auth transition instead of firing network side-effects from
+    // provider build(): financial settings (used across home/budget/report) and
+    // the user profile are loaded once per login, keeping build() pure.
+    ref.listen(authProvider, (prev, next) {
+      if (prev?.status != AuthStatus.authenticated &&
+          next.status == AuthStatus.authenticated) {
+        unawaited(
+          ref.read(financialSettingsProvider.notifier).loadFinancialSettings(),
+        );
+        unawaited(ref.read(userProfileProvider.notifier).loadUser());
+      }
+    });
 
     return MaterialApp.router(
       title: 'Finvo',

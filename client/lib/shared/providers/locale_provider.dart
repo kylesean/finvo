@@ -19,7 +19,7 @@ class LocaleNotifier extends _$LocaleNotifier {
       return false; // Same language, no need to change
     }
 
-    final success = await LocaleService.saveLocale(newLocale);
+    final success = await ref.read(localeServiceProvider).saveLocale(newLocale);
     if (success) {
       state = newLocale;
       return true;

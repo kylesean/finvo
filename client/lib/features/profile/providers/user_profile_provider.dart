@@ -4,7 +4,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/features/profile/services/profile_service.dart';
 import 'package:finvo/features/profile/models/user_info.dart';
 import 'package:finvo/features/chat/services/file_upload_service.dart';
-import 'dart:async';
 
 part 'user_profile_provider.freezed.dart';
 part 'user_profile_provider.g.dart';
@@ -22,13 +21,16 @@ abstract class UserProfileState with _$UserProfileState {
 }
 
 /// User profile notifier
-@riverpod
+///
+/// [keepAlive] so the logged-in user is loaded once on login and reused across
+/// screens without being torn down when a consuming screen leaves the tree.
+@Riverpod(keepAlive: true)
 class UserProfile extends _$UserProfile {
   @override
   UserProfileState build() {
-    // Auto-load user info when provider is first accessed
-    unawaited(Future.microtask(loadUser));
-    return const UserProfileState(isLoading: true);
+    // Pure build: MyApp triggers [loadUser] explicitly on successful login
+    // instead of firing a network side-effect from build().
+    return const UserProfileState();
   }
 
   ProfileService get _service => ref.read(profileServiceProvider);

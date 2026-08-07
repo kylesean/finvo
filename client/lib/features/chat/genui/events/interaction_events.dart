@@ -160,12 +160,28 @@ final class SpaceSelectedEvent extends GenUiInteractionEvent {
   });
 
   factory SpaceSelectedEvent.fromContext(Map<String, dynamic> context) {
+    // AI-supplied context is untrusted: decode defensively instead of casting
+    // so a malformed value degrades to a sensible default instead of throwing
+    // through the request pipeline.
+    final rawIds = context['transaction_ids'];
     return SpaceSelectedEvent(
-      spaceId: (context['space_id'] as num?)?.toInt() ?? 0,
-      spaceName: context['space_name'] as String?,
-      transactionIds:
-          (context['transaction_ids'] as List<dynamic>?)?.cast<String>() ?? [],
-      surfaceId: context['surface_id'] as String?,
+      spaceId: switch (context['space_id']) {
+        final num n => n.toInt(),
+        final String s => int.tryParse(s) ?? 0,
+        _ => 0,
+      },
+      spaceName: context['space_name'] is String
+          ? context['space_name'] as String
+          : null,
+      transactionIds: rawIds is List
+          ? [
+              for (final id in rawIds)
+                if (id is String) id,
+            ]
+          : const [],
+      surfaceId: context['surface_id'] is String
+          ? context['surface_id'] as String
+          : null,
     );
   }
 

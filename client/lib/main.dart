@@ -14,6 +14,7 @@ import 'package:finvo/core/utils/logger_setup.dart';
 import 'package:finvo/shared/services/locale_service.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
+import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
 
 final _logger = Logger('Main');
 
@@ -65,12 +66,15 @@ Future<void> _bootstrap() async {
 
     // Initialize slang language service
     // Try to restore language settings from storage, otherwise use device language
+    // Note: await the startup locale so the first build frame and [syncIntlLocale]
+    // observe the final locale — using unawaited() here would race the async
+    // apply and briefly render/track the default locale.
     final savedLocale = prefs.getString('app_locale');
     if (savedLocale != null) {
-      unawaited(LocaleSettings.setLocaleRaw(savedLocale));
+      await LocaleSettings.setLocaleRaw(savedLocale);
       _logger.info('Language settings restored: $savedLocale');
     } else {
-      unawaited(LocaleSettings.useDeviceLocale());
+      await LocaleSettings.useDeviceLocale();
       _logger.info('Using device language');
     }
     // Keep Intl in sync so NumberFormat/DateFormat follow the app locale
@@ -137,12 +141,19 @@ Future<void> _bootstrap() async {
   // widget build cycle.
   SchedulerBinding.instance.addPostFrameCallback((_) {
     unawaited(container.read(authProvider.notifier).checkAuthStatus());
+    // Pre-warm app-local speech settings (a SharedPreferences read, not a
+    // network call) so the chat feature has them on first use. Triggered here
+    // explicitly to keep the speech settings provider build() free of
+    // side-effects.
+    unawaited(container.read(speechSettingsProvider.notifier).loadSettings());
   });
 }
 
 /// Minimal fallback UI shown when core initialization fails, so users are not
-/// left on a black screen. Deliberately avoids Riverpod/i18n dependencies
-/// (those may be exactly what failed to initialize).
+/// left on a black screen. Deliberately avoids Riverpod dependencies (those
+/// may be exactly what failed to initialize). The global `t` is safe to use
+/// here: slang falls back to the base locale when Intl initialization failed,
+/// so the retry label always resolves instead of throwing.
 class FatalInitErrorApp extends StatelessWidget {
   final Object error;
   final StackTrace stackTrace;

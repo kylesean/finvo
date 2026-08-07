@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
+import 'package:finvo/shared/utils/route_utils.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/home/widgets/feed/comment_section_widget.dart';
@@ -63,12 +64,12 @@ class TransactionDetailPage extends ConsumerWidget {
     final colors = theme.colors;
 
     // Show skeleton screen
-    if (detailState.isLoading && detailState.transaction == null) {
+    if (detailState.isLoading && detailState.value == null) {
       return const TransactionDetailSkeleton();
     }
 
     // Show error state
-    if (detailState.errorMessage != null && detailState.transaction == null) {
+    if (detailState.hasError && detailState.value == null) {
       return Scaffold(
         backgroundColor: colors.background,
         body: SafeArea(
@@ -89,7 +90,7 @@ class TransactionDetailPage extends ConsumerWidget {
                       Text(t.home.loadFailed, style: theme.typography.body.xl2),
                       const SizedBox(height: 8),
                       Text(
-                        detailState.errorMessage!,
+                        detailState.error.toString(),
                         style: AppTextStyles.listSubtitle(theme),
                         textAlign: TextAlign.center,
                       ),
@@ -118,7 +119,7 @@ class TransactionDetailPage extends ConsumerWidget {
       );
     }
 
-    final transaction = detailState.transaction;
+    final transaction = detailState.value;
     if (transaction == null) {
       return const TransactionDetailSkeleton();
     }
@@ -518,7 +519,7 @@ class TransactionDetailPage extends ConsumerWidget {
 
           // Delay showing dialog to wait for BottomSheet animation to complete
           unawaited(
-            Future<void>.delayed(const Duration(milliseconds: 100), () {
+            waitForRouteSettle().then((_) {
               if (!rootContext.mounted) return;
               unawaited(
                 showConfirmDialog(

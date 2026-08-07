@@ -1,13 +1,23 @@
 // shared/services/locale_service.dart
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/core/services/server_config_service.dart';
 
 /// Language management service
 /// Responsible for persistent storage and management of language settings, integrated with slang
 class LocaleService {
   static const String _localeKey = 'app_locale';
+
+  /// Concrete [SharedPreferences] instance supplied via DI (the provider is
+  /// overridden in main() with the already-initialized singleton), so reads and
+  /// writes go through the same instance the rest of the app uses instead of
+  /// calling [SharedPreferences.getInstance] each time.
+  final SharedPreferences _prefs;
+
+  LocaleService(this._prefs);
 
   /// Language display name mapping (use slang's t variable to get localized names)
   /// Language display name mapping
@@ -36,20 +46,18 @@ class LocaleService {
   }
 
   /// Get currently saved language settings
-  static Future<String?> getSavedLocale() async {
+  Future<String?> getSavedLocale() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_localeKey);
+      return _prefs.getString(_localeKey);
     } catch (e) {
       return null;
     }
   }
 
   /// Save language settings and apply
-  static Future<bool> saveLocale(AppLocale locale) async {
+  Future<bool> saveLocale(AppLocale locale) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final success = await prefs.setString(_localeKey, locale.languageTag);
+      final success = await _prefs.setString(_localeKey, locale.languageTag);
 
       if (success) {
         // Apply new language settings
@@ -80,3 +88,11 @@ class LocaleService {
     return AppLocale.values.any((l) => l.languageCode == localeCode);
   }
 }
+
+/// Provides the [LocaleService] wired to the shared [SharedPreferences] instance
+/// (overridden in main() with the pre-initialized singleton), so all locale
+/// persistence goes through the same DI-managed instance.
+final localeServiceProvider = Provider<LocaleService>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return LocaleService(prefs);
+});

@@ -1,28 +1,13 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:dio/dio.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/features/report/services/statistics_service.dart';
-import 'package:finvo/core/network/exceptions/app_exception.dart';
-import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 part 'statistics_provider.g.dart';
 
 final _logger = Logger('Statistics');
-
-/// Extracts a safe, user-displayable error message from [error], preferring a
-/// typed/localized [AppException] message and never leaking raw exception text
-/// (which may contain internal details) to the UI.
-String _safeError(Object error) {
-  if (error is DioException && error.error is AppException) {
-    return (error.error as AppException).message;
-  }
-  if (error is AppException) {
-    return error.message;
-  }
-  return t.common.error;
-}
 
 /// Statistics state
 class StatisticsState {
@@ -138,9 +123,9 @@ class Statistics extends _$Statistics {
       Future<CashFlowAnalysis?> loadCashFlow() async {
         try {
           return await service.getCashFlow(
-            timeRange: state.timeRange.name,
-            startDate: state.customStartDate?.toIso8601String(),
-            endDate: state.customEndDate?.toIso8601String(),
+            timeRange: state.timeRange,
+            startDate: state.customStartDate,
+            endDate: state.customEndDate,
             accountTypes: state.selectedAccountTypes.isNotEmpty
                 ? state.selectedAccountTypes
                 : null,
@@ -155,9 +140,9 @@ class Statistics extends _$Statistics {
       Future<HealthScore?> loadHealthScore() async {
         try {
           return await service.getHealthScore(
-            timeRange: state.timeRange.name,
-            startDate: state.customStartDate?.toIso8601String(),
-            endDate: state.customEndDate?.toIso8601String(),
+            timeRange: state.timeRange,
+            startDate: state.customStartDate,
+            endDate: state.customEndDate,
             accountTypes: state.selectedAccountTypes.isNotEmpty
                 ? state.selectedAccountTypes
                 : null,
@@ -238,7 +223,7 @@ class Statistics extends _$Statistics {
       // Only surface errors for the latest generation; older failures belong
       // to superseded requests.
       if (generation == _loadGeneration) {
-        state = state.copyWith(isLoading: false, error: _safeError(e));
+        state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
       }
     }
   }
@@ -288,7 +273,7 @@ class Statistics extends _$Statistics {
       state = state.copyWith(trendData: trendData);
     } catch (e) {
       if (generation == _loadGeneration) {
-        state = state.copyWith(error: _safeError(e));
+        state = state.copyWith(error: safeErrorMessage(e));
       }
     }
   }
@@ -317,7 +302,7 @@ class Statistics extends _$Statistics {
       state = state.copyWith(topTransactions: topTransactions);
     } catch (e) {
       if (generation == _loadGeneration) {
-        state = state.copyWith(error: _safeError(e));
+        state = state.copyWith(error: safeErrorMessage(e));
       }
     }
   }

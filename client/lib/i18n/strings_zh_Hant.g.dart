@@ -872,6 +872,12 @@ class _Translations$account$zh_Hant extends Translations$account$zh {
 	@override String get includeInNetWorthLabel => '計入資產';
 	@override String get includeInNetWorthDesc => '用於淨資產統計';
 	@override String get nameHint => '例如：工資卡';
+	@override String get nameRequired => '請輸入帳戶名稱';
+	@override String get nameTooShort => '帳戶名稱至少需要 2 個字元';
+	@override String get amountRequired => '請輸入目前餘額';
+	@override String get invalidAmount => '請輸入有效金額';
+	@override String get negativeBalance => '餘額不能為負數';
+	@override String get amountTooLarge => '餘額不能超過 999,999,999.99';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '刪除帳戶';
 	@override String get deleteConfirm => '確定要刪除該帳戶嗎？此操作無法撤銷。';
@@ -1809,6 +1815,8 @@ class _Translations$errorMapping$transaction$zh_Hant extends Translations$errorM
 	@override String get saveFailed => 'Failed to save comment';
 	@override String get deleteFailed => 'Failed to delete comment';
 	@override String get notExists => 'Transaction does not exist';
+	@override String get invalidAccountId => '帳戶ID無效';
+	@override String get exchangeRateUnavailable => '該幣種匯率暫不可用';
 }
 
 // Path: errorMapping.space
@@ -1857,6 +1865,24 @@ class _Translations$errorMapping$upload$zh_Hant extends Translations$errorMappin
 	@override String get tooLarge => 'File too large';
 	@override String get unsupportedType => 'Unsupported file type';
 	@override String get tooManyFiles => 'Too many files';
+	@override String get invalidFile => '上傳的檔案無效';
+	@override String get invalidMimeType => '檔案MIME類型無效';
+	@override String get invalidImageContent => '圖片內容無效';
+	@override String get imageTooWide => '圖片過寬';
+	@override String get imageTooHigh => '圖片過高';
+	@override String get totalSizeTooLarge => '檔案總大小過大';
+	@override String get readError => '讀取檔案失敗';
+	@override String get filesystemError => '檔案系統錯誤';
+	@override String get verificationFailed => '上傳驗證失敗';
+	@override String get allFailed => '所有檔案上傳失敗';
+	@override String get invalidImageUrls => '圖片URL無效';
+	@override String get fileNotFound => '檔案不存在';
+	@override String get imageCompressionFailed => '圖片壓縮失敗';
+	@override String get accessError => '檔案存取錯誤';
+	@override String get deleteError => '刪除檔案失敗';
+	@override String get noFiles => '未提供檔案';
+	@override String get fileEmpty => '檔案為空';
+	@override String get invalidFilename => '檔案名稱無效';
 }
 
 // Path: errorMapping.storage
@@ -1881,6 +1907,8 @@ class _Translations$errorMapping$ai$zh_Hant extends Translations$errorMapping$ai
 	@override String get contextLimit => 'Context limit exceeded';
 	@override String get tokenLimit => 'Insufficient tokens';
 	@override String get emptyMessage => 'Empty user message';
+	@override String get conversationIdInvalid => '會話無效';
+	@override String get conversationIdNotOwner => '您無權存取該會話';
 }
 
 // Path: notification.types
@@ -3456,6 +3484,12 @@ extension on TranslationsZhHant {
 			'account.includeInNetWorthLabel' => '計入資產',
 			'account.includeInNetWorthDesc' => '用於淨資產統計',
 			'account.nameHint' => '例如：工資卡',
+			'account.nameRequired' => '請輸入帳戶名稱',
+			'account.nameTooShort' => '帳戶名稱至少需要 2 個字元',
+			'account.amountRequired' => '請輸入目前餘額',
+			'account.invalidAmount' => '請輸入有效金額',
+			'account.negativeBalance' => '餘額不能為負數',
+			'account.amountTooLarge' => '餘額不能超過 999,999,999.99',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '刪除帳戶',
 			'account.deleteConfirm' => '確定要刪除該帳戶嗎？此操作無法撤銷。',
@@ -3527,14 +3561,14 @@ extension on TranslationsZhHant {
 			'app.splashSubtitle' => '智能財務助手',
 			'statistics.title' => '統計分析',
 			'statistics.analyze' => '統計分析',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.exportInProgress' => '導出功能開發中...',
 			'statistics.ranking' => '大額消費排行',
 			'statistics.noData' => '暫無數據',
 			'statistics.overview.balance' => '總結餘',
 			'statistics.overview.income' => '總收入',
 			'statistics.overview.expense' => '總支出',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.trend.title' => '收支趨勢',
 			'statistics.trend.expense' => '支出',
 			'statistics.trend.income' => '收入',
@@ -3746,6 +3780,8 @@ extension on TranslationsZhHant {
 			'errorMapping.transaction.saveFailed' => 'Failed to save comment',
 			'errorMapping.transaction.deleteFailed' => 'Failed to delete comment',
 			'errorMapping.transaction.notExists' => 'Transaction does not exist',
+			'errorMapping.transaction.invalidAccountId' => '帳戶ID無效',
+			'errorMapping.transaction.exchangeRateUnavailable' => '該幣種匯率暫不可用',
 			'errorMapping.space.notFound' => 'Shared space not found or access denied',
 			'errorMapping.space.inviteDenied' => 'No permission to invite members',
 			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',
@@ -3767,12 +3803,32 @@ extension on TranslationsZhHant {
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
 			'errorMapping.upload.tooManyFiles' => 'Too many files',
+			'errorMapping.upload.invalidFile' => '上傳的檔案無效',
+			'errorMapping.upload.invalidMimeType' => '檔案MIME類型無效',
+			'errorMapping.upload.invalidImageContent' => '圖片內容無效',
+			'errorMapping.upload.imageTooWide' => '圖片過寬',
+			'errorMapping.upload.imageTooHigh' => '圖片過高',
+			'errorMapping.upload.totalSizeTooLarge' => '檔案總大小過大',
+			'errorMapping.upload.readError' => '讀取檔案失敗',
+			'errorMapping.upload.filesystemError' => '檔案系統錯誤',
+			'errorMapping.upload.verificationFailed' => '上傳驗證失敗',
+			'errorMapping.upload.allFailed' => '所有檔案上傳失敗',
+			'errorMapping.upload.invalidImageUrls' => '圖片URL無效',
+			'errorMapping.upload.fileNotFound' => '檔案不存在',
+			'errorMapping.upload.imageCompressionFailed' => '圖片壓縮失敗',
+			'errorMapping.upload.accessError' => '檔案存取錯誤',
+			'errorMapping.upload.deleteError' => '刪除檔案失敗',
+			'errorMapping.upload.noFiles' => '未提供檔案',
+			'errorMapping.upload.fileEmpty' => '檔案為空',
+			'errorMapping.upload.invalidFilename' => '檔案名稱無效',
 			'errorMapping.storage.configNotFound' => '儲存設定不存在或無存取權限',
 			'errorMapping.storage.configInUse' => '無法刪除：儲存設定仍被附件使用中',
 			'errorMapping.storage.invalidProviderType' => '無效的儲存提供商類型',
 			'errorMapping.ai.contextLimit' => 'Context limit exceeded',
 			'errorMapping.ai.tokenLimit' => 'Insufficient tokens',
 			'errorMapping.ai.emptyMessage' => 'Empty user message',
+			'errorMapping.ai.conversationIdInvalid' => '會話無效',
+			'errorMapping.ai.conversationIdNotOwner' => '您無權存取該會話',
 			'notification.title' => '訊息通知',
 			'notification.markAllRead' => '全部已讀',
 			'notification.empty' => '暫無通知訊息',

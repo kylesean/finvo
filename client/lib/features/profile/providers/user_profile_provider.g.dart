@@ -9,21 +9,30 @@ part of 'user_profile_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// User profile notifier
+///
+/// [keepAlive] so the logged-in user is loaded once on login and reused across
+/// screens without being torn down when a consuming screen leaves the tree.
 
 @ProviderFor(UserProfile)
 final userProfileProvider = UserProfileProvider._();
 
 /// User profile notifier
+///
+/// [keepAlive] so the logged-in user is loaded once on login and reused across
+/// screens without being torn down when a consuming screen leaves the tree.
 final class UserProfileProvider
     extends $NotifierProvider<UserProfile, UserProfileState> {
   /// User profile notifier
+  ///
+  /// [keepAlive] so the logged-in user is loaded once on login and reused across
+  /// screens without being torn down when a consuming screen leaves the tree.
   UserProfileProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'userProfileProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -44,9 +53,12 @@ final class UserProfileProvider
   }
 }
 
-String _$userProfileHash() => r'e2425c516fe439434aebbcdb489d4aab12bfab8d';
+String _$userProfileHash() => r'c75a28765e5f302e23b5f2cd661bd0e357bbda4e';
 
 /// User profile notifier
+///
+/// [keepAlive] so the logged-in user is loaded once on login and reused across
+/// screens without being torn down when a consuming screen leaves the tree.
 
 abstract class _$UserProfile extends $Notifier<UserProfileState> {
   UserProfileState build();
