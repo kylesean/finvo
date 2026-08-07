@@ -37,7 +37,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
 
       final totalExpense = GenUiNumUtils.toDouble(data['total_expense']);
       final currency =
-          data['currency'] as String? ??
+          data['currency']?.toString() ??
           ref.watch(financialSettingsProvider).primaryCurrency;
       final currencySymbol = AmountFormatter.getCurrencySymbol(currency);
       final periodDays = GenUiNumUtils.toInt(data['period_days'], 90);
@@ -144,7 +144,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              data['title'] as String? ?? t.chat.genui.budgetAnalysis.title,
+              data['title']?.toString() ?? t.chat.genui.budgetAnalysis.title,
               style: theme.typography.body.md.copyWith(
                 color: colors.primary,
                 fontWeight: AppFontConfig.titleSemibold,
@@ -175,9 +175,10 @@ class BudgetAnalysisCard extends ConsumerWidget {
     Map<String, dynamic> trends,
     String currency,
   ) {
-    final mom = trends['month_over_month'] as Map<String, dynamic>?;
+    final momRaw = trends['month_over_month'];
+    final mom = momRaw is Map ? Map<String, dynamic>.from(momRaw) : null;
     final changePercent = GenUiNumUtils.toDouble(mom?['change_percent']);
-    final direction = mom?['direction'] as String? ?? 'flat';
+    final direction = mom?['direction']?.toString() ?? 'flat';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
@@ -393,9 +394,9 @@ class BudgetAnalysisCard extends ConsumerWidget {
                 ? Map<String, dynamic>.from(mapEntry.value as Map)
                 : <String, dynamic>{};
             final amount = GenUiNumUtils.toDouble(spender['amount']);
-            final categoryKey = spender['category'] as String? ?? 'OTHERS';
-            final description = spender['description'] as String? ?? '';
-            final date = spender['date'] as String? ?? '';
+            final categoryKey = spender['category']?.toString() ?? 'OTHERS';
+            final description = spender['description']?.toString() ?? '';
+            final date = spender['date']?.toString() ?? '';
             final category = TransactionCategory.fromKey(categoryKey);
             final chartColor = theme.chartColorAt(index);
 
@@ -522,8 +523,8 @@ class BudgetAnalysisCard extends ConsumerWidget {
     if (suggestion is String) return suggestion;
     if (suggestion is! Map) return suggestion.toString();
 
-    final type = suggestion['type'] as String?;
-    final categoryKey = suggestion['category_key'] as String?;
+    final type = suggestion['type']?.toString();
+    final categoryKey = suggestion['category_key']?.toString();
     final percentage = suggestion['percentage'];
     final count = suggestion['count'];
 

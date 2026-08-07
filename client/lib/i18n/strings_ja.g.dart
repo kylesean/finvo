@@ -1366,6 +1366,7 @@ class _Translations$chat$genui$ja extends Translations$chat$genui$zh {
 	@override late final _Translations$chat$genui$transferPath$ja transferPath = _Translations$chat$genui$transferPath$ja._(_root);
 	@override late final _Translations$chat$genui$transactionConfirmation$ja transactionConfirmation = _Translations$chat$genui$transactionConfirmation$ja._(_root);
 	@override late final _Translations$chat$genui$budgetAnalysis$ja budgetAnalysis = _Translations$chat$genui$budgetAnalysis$ja._(_root);
+	@override late final _Translations$chat$genui$error$ja error = _Translations$chat$genui$error$ja._(_root);
 }
 
 // Path: chat.welcome
@@ -2214,6 +2215,18 @@ class _Translations$chat$genui$budgetAnalysis$ja extends Translations$chat$genui
 	@override String get categoryDistribution => '分类占比';
 	@override String get topSpenders => '大额支出';
 	@override String amountWan({required Object amount}) => '${amount}万';
+}
+
+// Path: chat.genui.error
+class _Translations$chat$genui$error$ja extends Translations$chat$genui$error$zh {
+	_Translations$chat$genui$error$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'レンダリングに失敗しました';
+	@override String get fetchFailed => '読み込みに失敗しました。後でもう一度お試しください。';
+	@override String get dataIncomplete => 'データが不完全です';
 }
 
 // Path: chat.welcome.morning
@@ -3291,6 +3304,9 @@ extension on TranslationsJa {
 			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
 			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
 			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
+			'chat.genui.error.title' => 'レンダリングに失敗しました',
+			'chat.genui.error.fetchFailed' => '読み込みに失敗しました。後でもう一度お試しください。',
+			'chat.genui.error.dataIncomplete' => 'データが不完全です',
 			'chat.welcome.morning.subtitle' => 'Start your day by tracking',
 			'chat.welcome.morning.breakfast.title' => 'Breakfast',
 			'chat.welcome.morning.breakfast.prompt' => 'Record breakfast expense',
@@ -3508,11 +3524,11 @@ extension on TranslationsJa {
 			'statistics.filter.accountType' => '口座タイプ',
 			'statistics.filter.allAccounts' => 'すべての口座',
 			'statistics.filter.apply' => '適用',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.sort.amount' => '金額順',
 			'statistics.sort.date' => '日付順',
 			'statistics.exportList' => 'リストを書き出す',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.emptyState.title' => 'Unlock Financial Insights',
 			'statistics.emptyState.description' => 'Your financial report is currently a blank canvas.\nRecord your first transaction and let the data tell your story.',
 			'statistics.emptyState.action' => 'Record First Transaction',

@@ -5,6 +5,7 @@ import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/services/notification_ws_service.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/home/providers/comment_providers.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
 import 'package:finvo/features/notification/repositories/notification_repository.dart';
@@ -211,6 +212,17 @@ NotificationWsService notificationWs(Ref ref) {
   final wsService = NotificationWsService();
   final apiConstants = ref.read(apiConstantsProvider);
   final storageService = ref.read(secureStorageServiceProvider);
+
+  // Watch the auth token so the connection lifecycle tracks login state.
+  //
+  // `notificationWs` is keepAlive and typically first instantiated by MyApp
+  // at startup — before login, when no token exists. Without listening to the
+  // token here, the WS would silently skip connecting and never recover after
+  // a successful login (it was only invalidated on server switch). Watching
+  // `authTokenProvider` rebuilds this provider when the token flips to/from
+  // null, tearing down the old service (onDispose) and re-running `connect()`
+  // with the freshly stored token.
+  ref.watch(authTokenProvider);
 
   // Wire incoming notifications to the provider
   wsService.onNotification = (payload) {

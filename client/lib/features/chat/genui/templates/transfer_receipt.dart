@@ -25,19 +25,31 @@ class TransferReceipt extends StatelessWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // Extract data
-    final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
-    final currency = data['currency'] as String? ?? 'CNY';
-    final time = data['transaction_at'] as String? ?? '';
-    final tags =
-        (data['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
+    // Extract data (AI-provided payloads are untrusted; coerce types)
+    final amountRaw = data['amount'];
+    final amount = amountRaw is num
+        ? amountRaw.toDouble()
+        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final currency = data['currency']?.toString() ?? 'CNY';
+    final time = data['transaction_at']?.toString() ?? '';
+    final tagsRaw = data['tags'];
+    final tags = tagsRaw is List
+        ? tagsRaw.map((e) => e.toString()).toList()
+        : <String>[];
 
     // Transfer info
-    final transferInfo = data['transfer_info'] as Map<String, dynamic>?;
-    final sourceAccount =
-        transferInfo?['source_account'] as Map<String, dynamic>?;
-    final targetAccount =
-        transferInfo?['target_account'] as Map<String, dynamic>?;
+    final transferInfoRaw = data['transfer_info'];
+    final transferInfo = transferInfoRaw is Map
+        ? Map<String, dynamic>.from(transferInfoRaw)
+        : null;
+    final sourceAccountRaw = transferInfo?['source_account'];
+    final sourceAccount = sourceAccountRaw is Map
+        ? Map<String, dynamic>.from(sourceAccountRaw)
+        : null;
+    final targetAccountRaw = transferInfo?['target_account'];
+    final targetAccount = targetAccountRaw is Map
+        ? Map<String, dynamic>.from(targetAccountRaw)
+        : null;
 
     return Container(
       width: double.infinity,
@@ -227,10 +239,10 @@ class _TransferAnimationState extends State<_TransferAnimation>
     final theme = context.theme;
     final colors = widget.colors;
 
-    final sourceName = widget.sourceAccount?['name'] as String? ?? '';
-    final targetName = widget.targetAccount?['name'] as String? ?? '';
-    final sourceType = widget.sourceAccount?['type'] as String?;
-    final targetType = widget.targetAccount?['type'] as String?;
+    final sourceName = widget.sourceAccount?['name']?.toString() ?? '';
+    final targetName = widget.targetAccount?['name']?.toString() ?? '';
+    final sourceType = widget.sourceAccount?['type']?.toString();
+    final targetType = widget.targetAccount?['type']?.toString();
 
     return Container(
       width: double.infinity,

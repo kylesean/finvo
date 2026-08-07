@@ -38,19 +38,28 @@ class TransferWizardData {
   });
 
   factory TransferWizardData.fromJson(Map<String, dynamic> json) {
+    List<Map<String, dynamic>> coerceAccounts(dynamic raw) {
+      if (raw is! List) return [];
+      return raw
+          .whereType<Map<dynamic, dynamic>>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    }
+
+    final amountRaw = json['amount'];
+    final amount = amountRaw is num
+        ? amountRaw.toDouble()
+        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+
     return TransferWizardData(
-      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      currency: json['currency'] as String? ?? 'CNY',
-      sourceAccounts: (json['sourceAccounts'] as List<dynamic>? ?? [])
-          .map((e) => Map<String, dynamic>.from(e as Map<dynamic, dynamic>))
-          .toList(),
-      targetAccounts: (json['targetAccounts'] as List<dynamic>? ?? [])
-          .map((e) => Map<String, dynamic>.from(e as Map<dynamic, dynamic>))
-          .toList(),
-      preselectedSourceId: json['preselectedSourceId'] as String?,
-      preselectedTargetId: json['preselectedTargetId'] as String?,
-      memo: json['memo'] as String? ?? '',
-      surfaceId: json['_surfaceId'] as String? ?? 'unknown',
+      amount: amount,
+      currency: json['currency']?.toString() ?? 'CNY',
+      sourceAccounts: coerceAccounts(json['sourceAccounts']),
+      targetAccounts: coerceAccounts(json['targetAccounts']),
+      preselectedSourceId: json['preselectedSourceId']?.toString(),
+      preselectedTargetId: json['preselectedTargetId']?.toString(),
+      memo: json['memo']?.toString() ?? '',
+      surfaceId: json['_surfaceId']?.toString() ?? 'unknown',
       isHistorical: json['_isHistorical'] == true,
       isConfirmed: json['isConfirmed'] == true || json['_isHistorical'] == true,
     );
@@ -401,7 +410,7 @@ class _TransferWizardState extends State<TransferWizard> {
                 accounts: accounts,
                 selectedId: accountId,
               );
-              if (result != null) onSelect(result);
+              if (result != null && mounted) onSelect(result);
             },
       child: Row(
         children: [
@@ -451,7 +460,7 @@ class _TransferWizardState extends State<TransferWizard> {
                         Text(label, style: AppTextStyles.detailLabel(theme)),
                         const SizedBox(height: 2),
                         Text(
-                          account?['name'] as String? ??
+                          account?['name']?.toString() ??
                               t.chat.transferWizard.selectAccount,
                           style: theme.typography.body.sm.copyWith(
                             fontWeight: AppFontConfig.headingBold,
@@ -534,10 +543,10 @@ class _TransferWizardState extends State<TransferWizard> {
     final sourceAccount = _getAccount(_sourceId, _model.sourceAccounts);
     final targetAccount = _getAccount(_targetId, _model.targetAccounts);
     final sourceAccountName =
-        sourceAccount?['name'] as String? ??
+        sourceAccount?['name']?.toString() ??
         t.chat.transferWizard.sourceAccount;
     final targetAccountName =
-        targetAccount?['name'] as String? ??
+        targetAccount?['name']?.toString() ??
         t.chat.transferWizard.targetAccount;
 
     widget.dispatchEvent(

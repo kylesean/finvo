@@ -54,7 +54,7 @@ class _TransactionConfirmationState extends State<TransactionConfirmation> {
   bool _isConfirmed = false;
 
   bool get _isHistorical => widget.data['_isHistorical'] == true;
-  String get _surfaceId => widget.data['_surfaceId'] as String? ?? 'unknown';
+  String get _surfaceId => widget.data['_surfaceId']?.toString() ?? 'unknown';
 
   @override
   void initState() {
@@ -67,20 +67,21 @@ class _TransactionConfirmationState extends State<TransactionConfirmation> {
       return;
     }
 
-    _selectedAccountId = widget.data['preselected_account_id'] as String?;
+    _selectedAccountId = widget.data['preselected_account_id']?.toString();
   }
 
   @override
   Widget build(BuildContext context) {
-    final accounts =
-        (widget.data['available_accounts'] as List<dynamic>?) ?? [];
+    final accountsRaw = widget.data['available_accounts'];
+    final accounts = accountsRaw is List ? accountsRaw : const <dynamic>[];
 
     if (accounts.isEmpty) {
       return const SizedBox.shrink();
     }
 
     final accountMaps = accounts
-        .map((e) => Map<String, dynamic>.from(e as Map))
+        .whereType<Map<dynamic, dynamic>>()
+        .map((e) => Map<String, dynamic>.from(e))
         .toList();
 
     // Whether disabled: confirmed or historical mode
@@ -131,8 +132,8 @@ class _TransactionConfirmationState extends State<TransactionConfirmation> {
 
     String? accountName;
     if (_selectedAccountId != null) {
-      final accounts =
-          (widget.data['available_accounts'] as List<dynamic>?) ?? [];
+      final accountsRaw = widget.data['available_accounts'];
+      final accounts = accountsRaw is List ? accountsRaw : const <dynamic>[];
       accountName = _getAccountName(_selectedAccountId!, accounts);
     }
 
@@ -141,21 +142,22 @@ class _TransactionConfirmationState extends State<TransactionConfirmation> {
         accountId: _selectedAccountId,
         accountName: accountName,
         amount: widget.data['amount'],
-        description: widget.data['description'] as String?,
-        transactionType: widget.data['transaction_type'] as String?,
-        categoryKey: widget.data['category_key'] as String?,
-        currency: widget.data['currency'] as String?,
-        rawInput: widget.data['raw_input'] as String?,
-        tags: widget.data['tags'] as List<dynamic>?,
+        description: widget.data['description']?.toString(),
+        transactionType: widget.data['transaction_type']?.toString(),
+        categoryKey: widget.data['category_key']?.toString(),
+        currency: widget.data['currency']?.toString(),
+        rawInput: widget.data['raw_input']?.toString(),
+        tags: widget.data['tags'] is List ? widget.data['tags'] as List : null,
       ).toUserActionEvent(sourceComponentId: 'TransactionConfirmation'),
     );
   }
 
   String _getAccountName(String accountId, List<dynamic> accounts) {
     for (final acc in accounts) {
-      final accMap = acc as Map<String, dynamic>;
-      if (accMap['id'] == accountId) {
-        return accMap['name'] as String? ??
+      if (acc is! Map) continue;
+      final accMap = Map<String, dynamic>.from(acc);
+      if (accMap['id']?.toString() == accountId) {
+        return accMap['name']?.toString() ??
             t.chat.genui.transactionCard.noAccount;
       }
     }

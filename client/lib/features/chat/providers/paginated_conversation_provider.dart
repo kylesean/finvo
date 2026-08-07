@@ -29,6 +29,11 @@ abstract class PaginatedConversationState with _$PaginatedConversationState {
 /// Paginated conversation list state management
 @riverpod
 class PaginatedConversation extends _$PaginatedConversation {
+  /// Monotonic request generation. Incremented on every [loadFirstPage] so a
+  /// slower in-flight [loadNextPage] response is discarded when a refresh has
+  /// already replaced the list (prevents stale page-merge after refresh).
+  int _generation = 0;
+
   @override
   PaginatedConversationState build() {
     return const PaginatedConversationState();
@@ -37,6 +42,9 @@ class PaginatedConversation extends _$PaginatedConversation {
   /// Load first page data
   Future<void> loadFirstPage() async {
     if (state.isLoading) return;
+
+    // Bump the generation: any in-flight loadNextPage starts a new epoch.
+    final generation = ++_generation;
 
     state = state.copyWith(
       isLoading: true,
@@ -52,6 +60,10 @@ class PaginatedConversation extends _$PaginatedConversation {
         perPage: state.perPage,
       );
 
+      // Discard the response if the provider was disposed or a newer refresh
+      // has already superseded this request.
+      if (!ref.mounted || generation != _generation) return;
+
       state = state.copyWith(
         conversations: result.data,
         currentPage: result.meta.currentPage,
@@ -66,6 +78,7 @@ class PaginatedConversation extends _$PaginatedConversation {
       );
     } catch (e) {
       _logger.warning('PaginatedConversation: Error loading first page: $e');
+      if (!ref.mounted || generation != _generation) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -73,6 +86,9 @@ class PaginatedConversation extends _$PaginatedConversation {
   /// Load next page data
   Future<void> loadNextPage() async {
     if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
+
+    // Capture the current generation; discard the response if a refresh bumps it.
+    final generation = _generation;
 
     state = state.copyWith(isLoadingMore: true, error: null);
 
@@ -83,6 +99,8 @@ class PaginatedConversation extends _$PaginatedConversation {
         page: nextPage,
         perPage: state.perPage,
       );
+
+      if (!ref.mounted || generation != _generation) return;
 
       state = state.copyWith(
         conversations: [...state.conversations, ...result.data],
@@ -97,6 +115,7 @@ class PaginatedConversation extends _$PaginatedConversation {
       );
     } catch (e) {
       _logger.warning('PaginatedConversation: Error loading next page: $e');
+      if (!ref.mounted || generation != _generation) return;
       state = state.copyWith(isLoadingMore: false, error: e.toString());
     }
   }

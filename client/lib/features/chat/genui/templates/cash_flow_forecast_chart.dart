@@ -32,24 +32,32 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
 
   // Parse data points from the response
   List<_ForecastDataPoint> get _dataPoints {
-    final points = widget.data['data_points'] as List<dynamic>? ?? [];
+    final points = widget.data['data_points'];
+    if (points is! List) return const [];
     return points
-        .map((p) => _ForecastDataPoint.fromJson(p as Map<String, dynamic>))
+        .whereType<Map<dynamic, dynamic>>()
+        .map((p) => _ForecastDataPoint.fromJson(Map<String, dynamic>.from(p)))
         .toList();
   }
 
   List<_ForecastWarning> get _warnings {
-    final warnings = widget.data['warnings'] as List<dynamic>? ?? [];
+    final warnings = widget.data['warnings'];
+    if (warnings is! List) return const [];
     return warnings
-        .map((w) => _ForecastWarning.fromJson(w as Map<String, dynamic>))
+        .whereType<Map<dynamic, dynamic>>()
+        .map((w) => _ForecastWarning.fromJson(Map<String, dynamic>.from(w)))
         .toList();
   }
 
-  Map<String, dynamic>? get _summary =>
-      widget.data['summary'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get _summary {
+    final raw = widget.data['summary'];
+    return raw is Map ? Map<String, dynamic>.from(raw) : null;
+  }
 
-  Map<String, dynamic>? get _forecastPeriod =>
-      widget.data['forecast_period'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get _forecastPeriod {
+    final raw = widget.data['forecast_period'];
+    return raw is Map ? Map<String, dynamic>.from(raw) : null;
+  }
 
   double get _currentBalance {
     final balance = widget.data['current_balance'];
@@ -66,7 +74,17 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
     if (amount is String) {
       return numberFormat.format(double.tryParse(amount) ?? 0);
     }
-    return numberFormat.format((amount as num?)?.toDouble() ?? 0);
+    if (amount is num) {
+      return numberFormat.format(amount.toDouble());
+    }
+    return numberFormat.format(double.tryParse(amount?.toString() ?? '') ?? 0);
+  }
+
+  /// Safely coerce an event's amount (AI payloads may use strings).
+  double _eventAmount(Map<String, dynamic> event) {
+    final value = event['amount'];
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
   /// Localize event description
@@ -204,7 +222,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.data['title'] as String? ??
+                    widget.data['title']?.toString() ??
                         t.chat.genui.cashFlowForecast.title,
                     style: AppTextStyles.listTrailing(theme),
                   ),
@@ -569,9 +587,9 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
 
     for (final point in _dataPoints) {
       for (final event in point.events) {
-        if (event['type'] == 'RECURRING' &&
-            (event['amount'] as num).abs() > 500) {
-          final sourceId = event['source_id'] as String? ?? '';
+        final eventAmount = _eventAmount(event);
+        if (event['type'] == 'RECURRING' && eventAmount.abs() > 500) {
+          final sourceId = event['source_id']?.toString() ?? '';
 
           // Deduplicate: keep only the first occurrence per source_id
           if (sourceId.isEmpty || !seenSourceIds.contains(sourceId)) {
@@ -584,8 +602,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
 
     // Sort by absolute amount and take top 5
     keyEvents.sort(
-      (a, b) =>
-          (b['amount'] as num).abs().compareTo((a['amount'] as num).abs()),
+      (a, b) => _eventAmount(b).abs().compareTo(_eventAmount(a).abs()),
     );
     final topEvents = keyEvents.take(5).toList();
 
@@ -599,9 +616,11 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
     }
 
     return topEvents.map((event) {
-      final date = event['date'] as DateTime;
-      final amount = (event['amount'] as num).toDouble();
-      final rawDescription = event['description'] as String?;
+      final date = event['date'] is DateTime
+          ? event['date'] as DateTime
+          : DateTime.fromMillisecondsSinceEpoch(0);
+      final amount = _eventAmount(event);
+      final rawDescription = event['description']?.toString();
       final description = _localizeDescription(rawDescription);
       final isIncome = amount > 0;
 
@@ -674,16 +693,28 @@ class _ForecastDataPoint {
   });
 
   factory _ForecastDataPoint.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic value) =>
+        DateTime.tryParse(value?.toString() ?? '') ??
+        DateTime.fromMillisecondsSinceEpoch(0);
+    double asDouble(dynamic value) {
+      if (value is num) return value.toDouble();
+      return double.tryParse(value?.toString() ?? '') ?? 0;
+    }
+
+    final eventsRaw = json['events'];
+    final events = eventsRaw is List
+        ? eventsRaw
+              .whereType<Map<dynamic, dynamic>>()
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList()
+        : <Map<String, dynamic>>[];
+
     return _ForecastDataPoint(
-      date: DateTime.parse(json['date'] as String),
-      predictedBalance: (json['predicted_balance'] as num).toDouble(),
-      lowerBound: (json['lower_bound'] as num).toDouble(),
-      upperBound: (json['upper_bound'] as num).toDouble(),
-      events:
-          (json['events'] as List<dynamic>?)
-              ?.map((e) => Map<String, dynamic>.from(e as Map))
-              .toList() ??
-          [],
+      date: parseDate(json['date']),
+      predictedBalance: asDouble(json['predicted_balance']),
+      lowerBound: asDouble(json['lower_bound']),
+      upperBound: asDouble(json['upper_bound']),
+      events: events,
     );
   }
 }
@@ -700,10 +731,13 @@ class _ForecastWarning {
   });
 
   factory _ForecastWarning.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic value) =>
+        DateTime.tryParse(value?.toString() ?? '') ??
+        DateTime.fromMillisecondsSinceEpoch(0);
     return _ForecastWarning(
-      date: DateTime.parse(json['date'] as String),
-      type: json['type'] as String,
-      message: json['message'] as String,
+      date: parseDate(json['date']),
+      type: json['type']?.toString() ?? '',
+      message: json['message']?.toString() ?? '',
     );
   }
 }

@@ -39,11 +39,15 @@ class _TransactionListState extends ConsumerState<TransactionList> {
 
   void _initData() {
     final d = widget.data;
-    _items = List.from(d['items'] as List<dynamic>? ?? []);
-    _total = (d['total'] as num?)?.toInt() ?? 0;
-    _currentPage = (d['page'] as num?)?.toInt() ?? 1;
-    _hasMore = d['hasMore'] as bool? ?? false;
-    _searchMetadata = d['metadata'] as Map<String, dynamic>?;
+    final itemsRaw = d['items'];
+    _items = List.from(itemsRaw is List ? itemsRaw : const []);
+    _total = (d['total'] is num ? (d['total'] as num).toInt() : 0);
+    _currentPage = (d['page'] is num ? (d['page'] as num).toInt() : 1);
+    _hasMore = d['hasMore'] == true;
+    final metaRaw = d['metadata'];
+    _searchMetadata = metaRaw is Map
+        ? Map<String, dynamic>.from(metaRaw)
+        : null;
   }
 
   // Monitor and execute pagination
@@ -66,20 +70,23 @@ class _TransactionListState extends ConsumerState<TransactionList> {
 
       final result = await homeService.searchTransactions(
         page: _currentPage + 1,
-        size: (widget.data['per_page'] as num?)?.toInt() ?? 10,
-        keyword: _searchMetadata?['keyword'] as String?,
-        startDate: _searchMetadata?['start_date'] as String?,
-        endDate: _searchMetadata?['end_date'] as String?,
+        size: widget.data['per_page'] is num
+            ? (widget.data['per_page'] as num).toInt()
+            : 10,
+        keyword: _searchMetadata?['keyword']?.toString(),
+        startDate: _searchMetadata?['start_date']?.toString(),
+        endDate: _searchMetadata?['end_date']?.toString(),
         type: typesString,
       );
 
       if (mounted) {
         setState(() {
-          final newItems = result['items'] as List<dynamic>? ?? [];
-          _items.addAll(newItems);
-          _currentPage =
-              (result['page'] as num?)?.toInt() ?? (_currentPage + 1);
-          _hasMore = result['hasMore'] as bool? ?? false;
+          final newItems = result['items'];
+          _items.addAll(newItems is List ? newItems : const []);
+          _currentPage = result['page'] is num
+              ? (result['page'] as num).toInt()
+              : (_currentPage + 1);
+          _hasMore = result['hasMore'] == true;
           _isLoadingMore = false;
         });
       }
@@ -133,8 +140,16 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                 if (index == _items.length) {
                   return _buildLoadMoreIndicator(theme, colors);
                 }
-                final item = _items[index] as Map<String, dynamic>;
-                return _buildTransactionItem(context, theme, colors, item);
+                final item = _items[index];
+                if (item is! Map) {
+                  return const SizedBox.shrink();
+                }
+                return _buildTransactionItem(
+                  context,
+                  theme,
+                  colors,
+                  Map<String, dynamic>.from(item),
+                );
               },
             ),
           ),
@@ -220,14 +235,19 @@ class _TransactionListState extends ConsumerState<TransactionList> {
     FColors colors,
     Map<String, dynamic> item,
   ) {
-    final amount = (item['amount'] as num?)?.toDouble() ?? 0.0;
-    final currency = item['currency'] as String? ?? 'CNY';
-    final categoryKey = item['category'] as String?;
+    final amountRaw = item['amount'];
+    final amount = amountRaw is num
+        ? amountRaw.toDouble()
+        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final currency = item['currency']?.toString() ?? 'CNY';
+    final categoryKey = item['category']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
-    final tags =
-        (item['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
-    final type = (item['type'] as String? ?? 'EXPENSE').toUpperCase();
-    final time = item['transaction_time'] as String? ?? '';
+    final tagsRaw = item['tags'];
+    final tags = tagsRaw is List
+        ? tagsRaw.map((e) => e.toString()).toList()
+        : <String>[];
+    final type = (item['type']?.toString() ?? 'EXPENSE').toUpperCase();
+    final time = item['transaction_time']?.toString() ?? '';
 
     final isExpense = type == 'EXPENSE';
     final isIncome = type == 'INCOME';
@@ -235,7 +255,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
     final transactionType = isExpense
         ? TransactionType.expense
         : (isIncome ? TransactionType.income : TransactionType.transfer);
-    final transactionId = item['id'] as String?;
+    final transactionId = item['id']?.toString();
 
     return InkWell(
       onTap: transactionId != null
@@ -261,9 +281,11 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                         style: AppTextStyles.listTitle(theme),
                       ),
                       // Use unified AmountText component
-                      item['display'] != null
+                      item['display'] is Map
                           ? AmountText.fromDisplay(
-                              display: item['display'] as Map<String, dynamic>,
+                              display: Map<String, dynamic>.from(
+                                item['display'] as Map,
+                              ),
                               type: transactionType,
                               style: const TextStyle(
                                 fontSize: 16,
@@ -289,7 +311,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
                         child: Text(
                           tags.isNotEmpty
                               ? tags.join(' · ')
-                              : (item['description'] as String? ?? ''),
+                              : (item['description']?.toString() ?? ''),
                           style: AppTextStyles.listSubtitle(theme),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -409,8 +409,10 @@ class _TransactionGroupReceiptState
 
     double totalAmount = 0;
     for (final tx in transactions) {
-      final amountValue =
-          double.tryParse((tx as Map)['amount']?.toString() ?? '0') ?? 0;
+      // AI-provided payloads are untrusted: an element that is not a Map
+      // must not crash the whole card during build.
+      if (tx is! Map) continue;
+      final amountValue = double.tryParse(tx['amount']?.toString() ?? '0') ?? 0;
       totalAmount += amountValue.abs();
     }
 
@@ -571,11 +573,11 @@ class _TransactionGroupReceiptState
             controller: _pageController,
             onPageChanged: (index) => setState(() => _currentIndex = index),
             itemCount: transactions.length,
-            itemBuilder: (context, index) => _buildCarouselItem(
-              theme,
-              colors,
-              transactions[index] as Map<String, dynamic>,
-            ),
+            itemBuilder: (context, index) {
+              final tx = _toTxMap(transactions[index]);
+              if (tx == null) return const SizedBox.shrink();
+              return _buildCarouselItem(theme, colors, tx);
+            },
           ),
         ),
         if (transactions.length > 1)
@@ -608,7 +610,9 @@ class _TransactionGroupReceiptState
     FColors colors,
     Map<String, dynamic> tx,
   ) {
-    final category = TransactionCategory.fromKey(tx['category_key'] as String?);
+    final category = TransactionCategory.fromKey(
+      tx['category_key']?.toString(),
+    );
     final tags = (tx['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
 
     // Prefer original currency and amount (for exchange rate conversion scenarios)
@@ -616,14 +620,16 @@ class _TransactionGroupReceiptState
     final originalAmount = tx['originalAmount'] != null
         ? double.tryParse(tx['originalAmount'].toString())
         : null;
-    final originalCurrency = tx['originalCurrency'] as String?;
+    final originalCurrency = tx['originalCurrency']?.toString();
 
     final amount =
         originalAmount ??
         double.tryParse(tx['amount']?.toString() ?? '0') ??
         0.0;
     final isExpense = tx['type']?.toString().toUpperCase() != 'INCOME';
-    final currency = originalCurrency ?? tx['currency'] as String?;
+    // Parenthesize: `as` binds tighter than `??`, so the un-parenthesized
+    // form (`a ?? b as T`) would leave `a` untyped dynamic on the left.
+    final currency = originalCurrency ?? tx['currency']?.toString();
 
     final transactionId = tx['id']?.toString();
 
@@ -667,13 +673,21 @@ class _TransactionGroupReceiptState
         itemCount: transactions.length,
         separatorBuilder: (context, index) =>
             Divider(height: 1, color: colors.border.withValues(alpha: 0.1)),
-        itemBuilder: (context, index) => _buildListItem(
-          theme,
-          colors,
-          transactions[index] as Map<String, dynamic>,
-        ),
+        itemBuilder: (context, index) {
+          final tx = _toTxMap(transactions[index]);
+          if (tx == null) return const SizedBox.shrink();
+          return _buildListItem(theme, colors, tx);
+        },
       ),
     );
+  }
+
+  /// Safely coerce an AI-provided transaction entry into a map, skipping
+  /// malformed elements instead of throwing a TypeError during build.
+  Map<String, dynamic>? _toTxMap(dynamic item) {
+    if (item is Map<String, dynamic>) return item;
+    if (item is Map) return Map<String, dynamic>.from(item);
+    return null;
   }
 
   Widget _buildListItem(
@@ -681,7 +695,9 @@ class _TransactionGroupReceiptState
     FColors colors,
     Map<String, dynamic> tx,
   ) {
-    final category = TransactionCategory.fromKey(tx['category_key'] as String?);
+    final category = TransactionCategory.fromKey(
+      tx['category_key']?.toString(),
+    );
     final tags = (tx['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
 
     // Prefer original currency and amount (for exchange rate conversion scenarios)
@@ -689,14 +705,14 @@ class _TransactionGroupReceiptState
     final originalAmount = tx['originalAmount'] != null
         ? double.tryParse(tx['originalAmount'].toString())
         : null;
-    final originalCurrency = tx['originalCurrency'] as String?;
+    final originalCurrency = tx['originalCurrency']?.toString();
 
     final amount =
         originalAmount ??
         double.tryParse(tx['amount']?.toString() ?? '0') ??
         0.0;
     final isExpense = tx['type']?.toString().toUpperCase() != 'INCOME';
-    final currency = originalCurrency ?? tx['currency'] as String?;
+    final currency = originalCurrency ?? tx['currency']?.toString();
 
     final transactionId = tx['id']?.toString();
 
@@ -750,8 +766,8 @@ class _TransactionGroupReceiptState
 
     // Get transaction currency
     final txCurrency =
-        (tx['originalCurrency'] as String?) ??
-        (tx['currency'] as String?) ??
+        (tx['originalCurrency']?.toString()) ??
+        (tx['currency']?.toString()) ??
         'USD';
 
     // Get transaction amount
@@ -855,6 +871,7 @@ class _TransactionGroupReceiptState
     String transactionId,
     String accountId,
   ) async {
+    if (!mounted) return;
     setState(() => _updatingTransactions.add(transactionId));
 
     try {
@@ -866,6 +883,8 @@ class _TransactionGroupReceiptState
       );
 
       if (result['code'] == 0) {
+        // The page may have been popped while the PATCH was in flight.
+        if (!mounted) return;
         setState(() {
           _accountAssociations[transactionId] = accountId;
           _updatingTransactions.remove(transactionId);
@@ -876,7 +895,6 @@ class _TransactionGroupReceiptState
             .where((a) => a.id == accountId)
             .firstOrNull;
 
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -896,8 +914,8 @@ class _TransactionGroupReceiptState
         throw Exception(result['message'] ?? 'Update failed');
       }
     } catch (e) {
-      setState(() => _updatingTransactions.remove(transactionId));
       if (!mounted) return;
+      setState(() => _updatingTransactions.remove(transactionId));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -926,7 +944,8 @@ class _TransactionGroupReceiptState
         if (result['code'] == 0 && result['data'] != null) {
           final data = result['data'] as Map<String, dynamic>;
           _cachedSpaces = (data['spaces'] as List? ?? [])
-              .map((e) => Map<String, dynamic>.from(e as Map))
+              .whereType<Map<dynamic, dynamic>>()
+              .map((e) => Map<String, dynamic>.from(e))
               .toList();
         } else {
           _cachedSpaces = [];
@@ -970,6 +989,7 @@ class _TransactionGroupReceiptState
     String transactionId,
     dynamic spaceId,
   ) async {
+    if (!mounted) return;
     setState(() => _updatingSpaceTransactions.add(transactionId));
 
     try {
@@ -982,6 +1002,8 @@ class _TransactionGroupReceiptState
 
       if (result['code'] == 0) {
         final newSpaceId = spaceId.toString();
+        // The page may have been popped while the POST was in flight.
+        if (!mounted) return;
         setState(() {
           final list = _spaceAssociations[transactionId] ?? [];
           if (!list.contains(newSpaceId)) {
@@ -991,7 +1013,6 @@ class _TransactionGroupReceiptState
           _updatingSpaceTransactions.remove(transactionId);
         });
 
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -1007,8 +1028,8 @@ class _TransactionGroupReceiptState
         throw Exception(result['message'] ?? 'Association failed');
       }
     } catch (e) {
-      setState(() => _updatingSpaceTransactions.remove(transactionId));
       if (!mounted) return;
+      setState(() => _updatingSpaceTransactions.remove(transactionId));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

@@ -49,8 +49,8 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
       _selectedAccountName = linkedAccount['name']?.toString();
     } else {
       // Fallback for non-enriched or legacy data
-      _selectedAccountId = widget.data['account_id'] as String?;
-      _selectedAccountName = widget.data['account_name'] as String?;
+      _selectedAccountId = widget.data['account_id']?.toString();
+      _selectedAccountName = widget.data['account_name']?.toString();
     }
 
     final spaceId = widget.data['space_id']?.toString();
@@ -64,20 +64,24 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final theme = context.theme;
     final colors = theme.colors;
 
-    final amount = (widget.data['amount'] as num?)?.toDouble() ?? 0.0;
-    final currency = widget.data['currency'] as String? ?? 'CNY';
-    final categoryKey = widget.data['category_key'] as String?;
+    final amount = (widget.data['amount'] is num
+        ? (widget.data['amount'] as num).toDouble()
+        : double.tryParse(widget.data['amount']?.toString() ?? '0') ?? 0.0);
+    final currency = widget.data['currency']?.toString() ?? 'CNY';
+    final categoryKey = widget.data['category_key']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
     final category = categoryEnum.displayText;
 
-    final time = widget.data['time'] as String? ?? '';
+    final time = widget.data['time']?.toString() ?? '';
     final transactionType =
-        widget.data['type'] as String? ??
-        widget.data['transaction_type'] as String? ??
+        widget.data['type']?.toString() ??
+        widget.data['transaction_type']?.toString() ??
         'EXPENSE';
 
-    final tags =
-        (widget.data['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
+    final tagsRaw = widget.data['tags'];
+    final tags = tagsRaw is List
+        ? tagsRaw.map((e) => e.toString()).toList()
+        : <String>[];
 
     final hasAccount =
         _selectedAccountId != null && _selectedAccountId!.isNotEmpty;
@@ -412,18 +416,21 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
         String? accountName;
         for (final acc in accounts) {
           if (acc['id'] == accountId) {
-            accountName = acc['name'] as String?;
+            accountName = acc['name']?.toString();
             break;
           }
         }
 
+        // The card may have been disposed while the PATCH was in flight.
+        if (!mounted) {
+          return;
+        }
         setState(() {
           _selectedAccountId = accountId;
           _selectedAccountName = accountName;
           _isUpdating = false;
         });
 
-        if (!mounted) return;
         ToastService.success(
           description: Text(
             t.chat.genui.transactionCard.associatedTo(
@@ -439,8 +446,8 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
         throw Exception(result['message'] ?? t.financial.saveFailed);
       }
     } catch (e) {
-      setState(() => _isUpdating = false);
       if (!mounted) return;
+      setState(() => _isUpdating = false);
       ToastService.showDestructive(
         description: Text(
           t.chat.genui.transactionCard.updateFailed(error: e.toString()),
@@ -479,7 +486,8 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
         if (result['code'] == 0 && result['data'] != null) {
           final data = result['data'] as Map<String, dynamic>;
           _cachedSpaces = (data['spaces'] as List? ?? [])
-              .map((e) => Map<String, dynamic>.from(e as Map))
+              .whereType<Map<dynamic, dynamic>>()
+              .map((e) => Map<String, dynamic>.from(e))
               .toList();
         } else {
           _cachedSpaces = [];
@@ -536,7 +544,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                           ? colors.primary
                           : colors.mutedForeground,
                     ),
-                    title: Text((space['name'] as String?) ?? ''),
+                    title: Text(space['name']?.toString() ?? ''),
                     trailing: isSelected
                         ? Icon(FLucideIcons.check, color: colors.primary)
                         : null,
@@ -574,6 +582,8 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
         data: {'transaction_id': transactionId},
       );
 
+      // The card may have been disposed while the POST was in flight.
+      if (!mounted) return;
       setState(() {
         if (!_linkedSpaceIds.contains(spaceId)) {
           _linkedSpaceIds = [..._linkedSpaceIds, spaceId];
@@ -581,13 +591,12 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
         _isUpdatingSpace = false;
       });
 
-      if (!mounted) return;
       ToastService.success(
         description: Text(t.chat.genui.transactionCard.linkedToSpace),
       );
     } catch (e) {
-      setState(() => _isUpdatingSpace = false);
       if (!mounted) return;
+      setState(() => _isUpdatingSpace = false);
       ToastService.showDestructive(
         description: Text(
           t.chat.genui.transactionCard.updateFailed(error: e.toString()),

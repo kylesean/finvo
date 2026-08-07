@@ -8,11 +8,16 @@ import 'package:finvo/i18n/strings.g.dart';
 /// Previously duplicated (with inconsistent behavior — the detail page dropped
 /// the separators and swallowed the sign) in the overview and detail pages.
 String formatBudgetCompactAmount(Decimal amount) {
-  final value = double.tryParse(amount.toString()) ?? 0.0;
-  final absValue = value.abs();
+  // Compute the sign first: the previous implementation computed it after the
+  // 万-branch, so negative amounts >= 10000 rendered without their sign
+  // (e.g. -20000 displayed as "2.0万"). All arithmetic stays in Decimal to
+  // avoid double-precision loss on large values.
+  final sign = amount < Decimal.zero ? '-' : '';
+  final absValue = amount.abs();
 
-  if (absValue >= 10000) {
-    return '${(absValue / 10000).toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
+  if (absValue >= Decimal.fromInt(10000)) {
+    final value = absValue.toDouble() / 10000;
+    return '$sign${value.toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
   }
 
   final parts = absValue.toStringAsFixed(2).split('.');
@@ -29,7 +34,6 @@ String formatBudgetCompactAmount(Decimal amount) {
     count++;
   }
 
-  final sign = value < 0 ? '-' : '';
   if (decPart == '00') {
     return '$sign$formatted';
   }

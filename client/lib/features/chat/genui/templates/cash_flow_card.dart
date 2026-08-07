@@ -35,8 +35,16 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
   }
 
   String _formatPercent(dynamic value) {
-    final v = (value as num?)?.toDouble() ?? 0;
+    final v = _asDouble(value) ?? 0;
     return '${v >= 0 ? '+' : ''}${v.toStringAsFixed(1)}%';
+  }
+
+  /// AI-provided numbers may arrive as `num` or as numeric strings; coerce
+  /// both instead of crashing the build with a `TypeError` on bad payloads.
+  double? _asDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
   }
 
   @override
@@ -48,8 +56,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
         final amountTheme = ref.watch(currentAmountThemeProvider);
 
         final netCashFlow = widget.data['netCashFlow'];
-        final savingsRate =
-            (widget.data['savingsRate'] as num?)?.toDouble() ?? 0;
+        final savingsRate = _asDouble(widget.data['savingsRate']) ?? 0;
         final isPositive = savingsRate >= 0;
         final aiInsight = widget.data['aiInsight'] as String?;
 
@@ -172,9 +179,9 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               label: t.chat.genui.cashFlowCard.totalIncome,
                               value:
                                   '¥${_formatAmount(widget.data['totalIncome'])}',
-                              change:
-                                  (widget.data['incomeChangePercent'] as num?)
-                                      ?.toDouble(),
+                              change: _asDouble(
+                                widget.data['incomeChangePercent'],
+                              ),
                               valueColor: amountTheme.incomeColor,
                             ),
                           ),
@@ -186,9 +193,9 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               label: t.chat.genui.cashFlowCard.totalExpense,
                               value:
                                   '¥${_formatAmount(widget.data['totalExpense'])}',
-                              change:
-                                  (widget.data['expenseChangePercent'] as num?)
-                                      ?.toDouble(),
+                              change: _asDouble(
+                                widget.data['expenseChangePercent'],
+                              ),
                               inverseColor: true,
                               valueColor: amountTheme.expenseColor,
                             ),
@@ -205,7 +212,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               amountTheme,
                               label: t.chat.genui.cashFlowCard.essentialExpense,
                               value:
-                                  '${(widget.data['essentialExpenseRatio'] as num?)?.toStringAsFixed(0) ?? 0}%',
+                                  '${(_asDouble(widget.data['essentialExpenseRatio']) ?? 0).toStringAsFixed(0)}%',
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -219,7 +226,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                                   .cashFlowCard
                                   .discretionaryExpense,
                               value:
-                                  '${(widget.data['discretionaryExpenseRatio'] as num?)?.toStringAsFixed(0) ?? 0}%',
+                                  '${(_asDouble(widget.data['discretionaryExpenseRatio']) ?? 0).toStringAsFixed(0)}%',
                             ),
                           ),
                         ],

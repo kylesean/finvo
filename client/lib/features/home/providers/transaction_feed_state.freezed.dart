@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TransactionFeedState {
 
- List<TransactionModel> get transactions; bool get isLoading; bool get isLoadingMore; bool get hasReachedMax; int get currentPage; String? get errorMessage;
+ List<TransactionModel> get transactions; bool get isLoading; bool get isLoadingMore; bool get hasReachedMax; int get currentPage; String? get errorMessage; bool get hasLoadMoreError;
 /// Create a copy of TransactionFeedState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $TransactionFeedStateCopyWith<TransactionFeedState> get copyWith => _$Transactio
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionFeedState&&const DeepCollectionEquality().equals(other.transactions, transactions)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionFeedState&&const DeepCollectionEquality().equals(other.transactions, transactions)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.hasLoadMoreError, hasLoadMoreError) || other.hasLoadMoreError == hasLoadMoreError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(transactions),isLoading,isLoadingMore,hasReachedMax,currentPage,errorMessage);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(transactions),isLoading,isLoadingMore,hasReachedMax,currentPage,errorMessage,hasLoadMoreError);
 
 @override
 String toString() {
-  return 'TransactionFeedState(transactions: $transactions, isLoading: $isLoading, isLoadingMore: $isLoadingMore, hasReachedMax: $hasReachedMax, currentPage: $currentPage, errorMessage: $errorMessage)';
+  return 'TransactionFeedState(transactions: $transactions, isLoading: $isLoading, isLoadingMore: $isLoadingMore, hasReachedMax: $hasReachedMax, currentPage: $currentPage, errorMessage: $errorMessage, hasLoadMoreError: $hasLoadMoreError)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $TransactionFeedStateCopyWith<$Res>  {
   factory $TransactionFeedStateCopyWith(TransactionFeedState value, $Res Function(TransactionFeedState) _then) = _$TransactionFeedStateCopyWithImpl;
 @useResult
 $Res call({
- List<TransactionModel> transactions, bool isLoading, bool isLoadingMore, bool hasReachedMax, int currentPage, String? errorMessage
+ List<TransactionModel> transactions, bool isLoading, bool isLoadingMore, bool hasReachedMax, int currentPage, String? errorMessage, bool hasLoadMoreError
 });
 
 
@@ -62,7 +62,7 @@ class _$TransactionFeedStateCopyWithImpl<$Res>
 
 /// Create a copy of TransactionFeedState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? transactions = null,Object? isLoading = null,Object? isLoadingMore = null,Object? hasReachedMax = null,Object? currentPage = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? transactions = null,Object? isLoading = null,Object? isLoadingMore = null,Object? hasReachedMax = null,Object? currentPage = null,Object? errorMessage = freezed,Object? hasLoadMoreError = null,}) {
   return _then(_self.copyWith(
 transactions: null == transactions ? _self.transactions : transactions // ignore: cast_nullable_to_non_nullable
 as List<TransactionModel>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
@@ -70,7 +70,8 @@ as bool,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMo
 as bool,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
 as bool,currentPage: null == currentPage ? _self.currentPage : currentPage // ignore: cast_nullable_to_non_nullable
 as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,hasLoadMoreError: null == hasLoadMoreError ? _self.hasLoadMoreError : hasLoadMoreError // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TransactionModel> transactions,  bool isLoading,  bool isLoadingMore,  bool hasReachedMax,  int currentPage,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TransactionModel> transactions,  bool isLoading,  bool isLoadingMore,  bool hasReachedMax,  int currentPage,  String? errorMessage,  bool hasLoadMoreError)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransactionFeedState() when $default != null:
-return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.hasReachedMax,_that.currentPage,_that.errorMessage);case _:
+return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.hasReachedMax,_that.currentPage,_that.errorMessage,_that.hasLoadMoreError);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.has
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TransactionModel> transactions,  bool isLoading,  bool isLoadingMore,  bool hasReachedMax,  int currentPage,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TransactionModel> transactions,  bool isLoading,  bool isLoadingMore,  bool hasReachedMax,  int currentPage,  String? errorMessage,  bool hasLoadMoreError)  $default,) {final _that = this;
 switch (_that) {
 case _TransactionFeedState():
-return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.hasReachedMax,_that.currentPage,_that.errorMessage);case _:
+return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.hasReachedMax,_that.currentPage,_that.errorMessage,_that.hasLoadMoreError);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.has
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TransactionModel> transactions,  bool isLoading,  bool isLoadingMore,  bool hasReachedMax,  int currentPage,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TransactionModel> transactions,  bool isLoading,  bool isLoadingMore,  bool hasReachedMax,  int currentPage,  String? errorMessage,  bool hasLoadMoreError)?  $default,) {final _that = this;
 switch (_that) {
 case _TransactionFeedState() when $default != null:
-return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.hasReachedMax,_that.currentPage,_that.errorMessage);case _:
+return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.hasReachedMax,_that.currentPage,_that.errorMessage,_that.hasLoadMoreError);case _:
   return null;
 
 }
@@ -211,7 +212,7 @@ return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.has
 
 
 class _TransactionFeedState implements TransactionFeedState {
-  const _TransactionFeedState({final  List<TransactionModel> transactions = const [], this.isLoading = false, this.isLoadingMore = false, this.hasReachedMax = false, this.currentPage = 1, this.errorMessage}): _transactions = transactions;
+  const _TransactionFeedState({final  List<TransactionModel> transactions = const [], this.isLoading = false, this.isLoadingMore = false, this.hasReachedMax = false, this.currentPage = 1, this.errorMessage, this.hasLoadMoreError = false}): _transactions = transactions;
 
 
  final  List<TransactionModel> _transactions;
@@ -226,6 +227,7 @@ class _TransactionFeedState implements TransactionFeedState {
 @override@JsonKey() final  bool hasReachedMax;
 @override@JsonKey() final  int currentPage;
 @override final  String? errorMessage;
+@override@JsonKey() final  bool hasLoadMoreError;
 
 /// Create a copy of TransactionFeedState
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +239,16 @@ _$TransactionFeedStateCopyWith<_TransactionFeedState> get copyWith => __$Transac
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionFeedState&&const DeepCollectionEquality().equals(other._transactions, _transactions)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionFeedState&&const DeepCollectionEquality().equals(other._transactions, _transactions)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.hasLoadMoreError, hasLoadMoreError) || other.hasLoadMoreError == hasLoadMoreError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_transactions),isLoading,isLoadingMore,hasReachedMax,currentPage,errorMessage);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_transactions),isLoading,isLoadingMore,hasReachedMax,currentPage,errorMessage,hasLoadMoreError);
 
 @override
 String toString() {
-  return 'TransactionFeedState(transactions: $transactions, isLoading: $isLoading, isLoadingMore: $isLoadingMore, hasReachedMax: $hasReachedMax, currentPage: $currentPage, errorMessage: $errorMessage)';
+  return 'TransactionFeedState(transactions: $transactions, isLoading: $isLoading, isLoadingMore: $isLoadingMore, hasReachedMax: $hasReachedMax, currentPage: $currentPage, errorMessage: $errorMessage, hasLoadMoreError: $hasLoadMoreError)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$TransactionFeedStateCopyWith<$Res> implements $Transactio
   factory _$TransactionFeedStateCopyWith(_TransactionFeedState value, $Res Function(_TransactionFeedState) _then) = __$TransactionFeedStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<TransactionModel> transactions, bool isLoading, bool isLoadingMore, bool hasReachedMax, int currentPage, String? errorMessage
+ List<TransactionModel> transactions, bool isLoading, bool isLoadingMore, bool hasReachedMax, int currentPage, String? errorMessage, bool hasLoadMoreError
 });
 
 
@@ -274,7 +276,7 @@ class __$TransactionFeedStateCopyWithImpl<$Res>
 
 /// Create a copy of TransactionFeedState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? transactions = null,Object? isLoading = null,Object? isLoadingMore = null,Object? hasReachedMax = null,Object? currentPage = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? transactions = null,Object? isLoading = null,Object? isLoadingMore = null,Object? hasReachedMax = null,Object? currentPage = null,Object? errorMessage = freezed,Object? hasLoadMoreError = null,}) {
   return _then(_TransactionFeedState(
 transactions: null == transactions ? _self._transactions : transactions // ignore: cast_nullable_to_non_nullable
 as List<TransactionModel>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
@@ -282,7 +284,8 @@ as bool,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMo
 as bool,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
 as bool,currentPage: null == currentPage ? _self.currentPage : currentPage // ignore: cast_nullable_to_non_nullable
 as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,hasLoadMoreError: null == hasLoadMoreError ? _self.hasLoadMoreError : hasLoadMoreError // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

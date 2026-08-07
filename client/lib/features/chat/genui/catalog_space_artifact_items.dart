@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 import 'package:finvo/features/chat/genui/catalog_helpers.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/chat/genui/templates/templates.dart';
 
 /// Shared space & artifact link catalog items.
@@ -134,7 +135,7 @@ Widget _buildSpaceSelectorCardWidget(CatalogItemContext context) {
   } catch (e) {
     return buildErrorWidget(
       context.buildContext,
-      'Failed to load space selector: $e',
+      t.chat.genui.error.fetchFailed,
     );
   }
 }
@@ -152,7 +153,7 @@ Widget _buildSpaceAssociationReceiptWidget(CatalogItemContext context) {
   } catch (e) {
     return buildErrorWidget(
       context.buildContext,
-      'Failed to load association confirmation: $e',
+      t.chat.genui.error.fetchFailed,
     );
   }
 }
@@ -212,7 +213,7 @@ Widget _buildArtifactLinkWidget(CatalogItemContext context) {
   } catch (e) {
     return buildErrorWidget(
       context.buildContext,
-      'Failed to load artifact link: $e',
+      t.chat.genui.error.fetchFailed,
     );
   }
 }

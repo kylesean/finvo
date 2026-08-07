@@ -86,13 +86,13 @@ class BudgetStatusCard extends StatelessWidget {
     FColors colors,
     Map<String, dynamic> budget,
   ) {
-    final budgetId = budget['id'] as String?;
+    final budgetId = budget['id']?.toString();
 
     return BudgetItemCard(
       budgetId: budgetId,
-      name: budget['name'] as String? ?? t.chat.genui.budgetStatusCard.budget,
+      name: budget['name']?.toString() ?? t.chat.genui.budgetStatusCard.budget,
       percentage: GenUiNumUtils.toDouble(budget['percentage']),
-      status: budget['status'] as String? ?? 'ON_TRACK',
+      status: budget['status']?.toString() ?? 'ON_TRACK',
       spent: GenUiNumUtils.toDouble(budget['spent']),
       amount: GenUiNumUtils.toDouble(budget['amount']),
       remaining: GenUiNumUtils.toDouble(budget['remaining']),
@@ -174,7 +174,9 @@ class BudgetStatusCard extends StatelessWidget {
                   Divider(height: 1, color: colors.border),
                   const SizedBox(height: 12),
                   ...budgets.take(5).map((b) {
-                    final budget = b as Map<String, dynamic>;
+                    final budget = b is Map
+                        ? Map<String, dynamic>.from(b)
+                        : <String, dynamic>{};
                     return _buildCategoryBudgetItem(
                       context,
                       theme,
@@ -188,7 +190,9 @@ class BudgetStatusCard extends StatelessWidget {
                 if (alerts.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   ...alerts.take(2).map((a) {
-                    final alert = a as Map<String, dynamic>;
+                    final alert = a is Map
+                        ? Map<String, dynamic>.from(a)
+                        : <String, dynamic>{};
                     return _buildAlertItem(theme, colors, alert);
                   }),
                 ],
@@ -298,13 +302,13 @@ class BudgetStatusCard extends StatelessWidget {
     Map<String, dynamic> budget,
   ) {
     // Prefer category_key for category display name
-    final categoryKey = budget['category_key'] as String?;
+    final categoryKey = budget['category_key']?.toString();
     final name = categoryKey != null
         ? _getCategoryDisplayName(categoryKey)
-        : (budget['name'] as String? ?? '');
+        : (budget['name']?.toString() ?? '');
     final percentage = GenUiNumUtils.toDouble(budget['percentage']);
-    final status = budget['status'] as String? ?? 'ON_TRACK';
-    final budgetId = budget['id'] as String?;
+    final status = budget['status']?.toString() ?? 'ON_TRACK';
+    final budgetId = budget['id']?.toString();
 
     return BudgetItemCard(
       budgetId: budgetId,
@@ -372,8 +376,8 @@ class BudgetStatusCard extends StatelessWidget {
     Map<String, dynamic> alert,
   ) {
     final semantic = theme.semantic;
-    final alertType = alert['alert_type'] as String? ?? 'warning';
-    final message = alert['message'] as String? ?? '';
+    final alertType = alert['alert_type']?.toString() ?? 'warning';
+    final message = alert['message']?.toString() ?? '';
     final iconColor = alertType == 'exceeded'
         ? colors.destructive
         : semantic.warningAccent;
@@ -438,8 +442,8 @@ class BudgetStatusCard extends StatelessWidget {
   String _getOverallStatus(List<dynamic> alerts) {
     if (alerts.isEmpty) return 'ON_TRACK';
     for (final alert in alerts) {
-      final alertType =
-          (alert as Map<String, dynamic>)['alert_type'] as String?;
+      if (alert is! Map) continue;
+      final alertType = alert['alert_type']?.toString();
       if (alertType == 'exceeded') return 'EXCEEDED';
     }
     return 'WARNING';

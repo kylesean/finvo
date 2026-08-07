@@ -52,7 +52,22 @@ class NotificationWsService {
     _baseUrl = baseUrl;
     _storageService = storageService;
 
-    final token = await storageService.getToken();
+    String? token;
+    try {
+      token = await storageService.getToken();
+    } catch (e, stackTrace) {
+      // A platform-channel failure is transient, not a signal that no token
+      // exists. Schedule a reconnect so the connection is attempted again
+      // instead of silently skipping forever (the caller fires this
+      // unawaited, so an uncaught error would otherwise escape unnoticed).
+      _logger.warning('Token read failed, scheduling reconnect', e, stackTrace);
+      _scheduleReconnect();
+      return;
+    }
+    // Disposal can race with the awaited token read (e.g. logout during
+    // startup). Abort instead of resurrecting a socket on a disposed object.
+    if (_isDisposed) return;
+
     if (token == null || token.isEmpty) {
       _logger.warning('No auth token available, skipping WS connection');
       return;
@@ -78,6 +93,11 @@ class NotificationWsService {
           throw TimeoutException('WebSocket connection timed out after 15s');
         },
       );
+      // The socket may have been disposed while `ready` was pending.
+      if (_isDisposed) {
+        _cleanup();
+        return;
+      }
       _reconnectAttempts = 0;
       _lastServerMessage = DateTime.now();
       _logger.info('WebSocket connected');

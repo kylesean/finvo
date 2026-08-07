@@ -38,12 +38,15 @@ class BudgetReceipt extends StatelessWidget {
   /// Build success card
   Widget _buildSuccessCard(FThemeData theme, FColors colors) {
     final name =
-        data['name'] as String? ?? t.chat.genui.budgetReceipt.newBudget;
-    final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
-    final scope = data['scope'] as String? ?? 'TOTAL';
-    final categoryKey = data['category_key'] as String?;
-    final periodStart = data['period_start'] as String?;
-    final periodEnd = data['period_end'] as String?;
+        data['name']?.toString() ?? t.chat.genui.budgetReceipt.newBudget;
+    final amountRaw = data['amount'];
+    final amount = amountRaw is num
+        ? amountRaw.toDouble()
+        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final scope = data['scope']?.toString() ?? 'TOTAL';
+    final categoryKey = data['category_key']?.toString();
+    final periodStart = data['period_start']?.toString();
+    final periodEnd = data['period_end']?.toString();
     final rolloverEnabled = data['rollover_enabled'] == true;
 
     return Container(
@@ -240,7 +243,7 @@ class BudgetReceipt extends StatelessWidget {
   /// Build error card
   Widget _buildErrorCard(FThemeData theme, FColors colors) {
     final message =
-        data['message'] as String? ?? t.chat.genui.budgetReceipt.createFailed;
+        data['message']?.toString() ?? t.chat.genui.budgetReceipt.createFailed;
 
     return Container(
       width: double.infinity,

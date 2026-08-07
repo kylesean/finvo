@@ -12,8 +12,13 @@ class ExpenseTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.theme;
     final colors = theme.colors;
-    final headers = data['headers'] as List<dynamic>;
-    final rows = data['rows'] as List<dynamic>;
+    // AI-provided payloads are untrusted: guard every shape instead of
+    // letting a TypeError escape during build.
+    final headers = data['headers'];
+    final rows = data['rows'];
+    if (headers is! List || rows is! List) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8.0),
@@ -26,7 +31,10 @@ class ExpenseTable extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(data['title'] as String, style: AppTextStyles.listTitle(theme)),
+          Text(
+            data['title']?.toString() ?? '',
+            style: AppTextStyles.listTitle(theme),
+          ),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -35,19 +43,25 @@ class ExpenseTable extends StatelessWidget {
                   .map(
                     (h) => DataColumn(
                       label: Text(
-                        h as String,
+                        h.toString(),
                         style: AppTextStyles.listTrailing(theme),
                       ),
                     ),
                   )
                   .toList(),
               rows: rows.map((row) {
-                final cells = row as List<dynamic>;
+                if (row is! List) {
+                  return const DataRow(cells: [DataCell(SizedBox.shrink())]);
+                }
+                final cells = row;
                 return DataRow(
                   cells: cells
                       .map(
                         (cell) => DataCell(
-                          Text(cell as String, style: theme.typography.body.sm),
+                          Text(
+                            cell.toString(),
+                            style: theme.typography.body.sm,
+                          ),
                         ),
                       )
                       .toList(),

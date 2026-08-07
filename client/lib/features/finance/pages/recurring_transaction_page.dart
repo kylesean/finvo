@@ -18,6 +18,8 @@ import 'package:finvo/features/finance/widgets/date_picker_sheet.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/services/timezone_service.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
@@ -808,6 +810,7 @@ class _RecurringTransactionPageState
     );
 
     if (result != null) {
+      if (!mounted) return;
       setState(() {
         _recurrenceRule = result.rule;
         _recurrenceDescription = result.description;
@@ -827,6 +830,7 @@ class _RecurringTransactionPageState
       title: t.dateRange.startDate,
     );
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         _startDate = picked;
         // Update the date part of the recurrence rule
@@ -897,6 +901,7 @@ class _RecurringTransactionPageState
     );
 
     if (result != null) {
+      if (!mounted) return;
       setState(() {
         if (isSource) {
           _sourceAccountId = result.accountId;
@@ -918,6 +923,7 @@ class _RecurringTransactionPageState
     );
 
     if (result != null) {
+      if (!mounted) return;
       setState(() {
         _category = result.category;
       });
@@ -958,6 +964,16 @@ class _RecurringTransactionPageState
     try {
       bool success;
 
+      // Resolve the user's real currency/timezone instead of the model
+      // defaults (which were previously hardcoded to CNY/Asia-Shanghai and
+      // silently persisted for every recurring transaction).
+      // FinancialSettingsState.primaryCurrency defaults to 'CNY' while
+      // settings are still loading, so this is safe on first frame.
+      final currency = ref.read(financialSettingsProvider).primaryCurrency;
+      final timezone = await ref
+          .read(timezoneServiceProvider)
+          .getCurrentTimezone();
+
       if (widget.editId != null) {
         // Edit mode - call update. Fields the user cleared in the form must
         // be sent as explicit nulls (tracked via clearedFields), otherwise
@@ -982,6 +998,8 @@ class _RecurringTransactionPageState
           targetAccountId: _targetAccountId,
           amountType: _amountType,
           requiresConfirmation: _requiresConfirmation,
+          currency: currency,
+          timezone: timezone,
           categoryKey: _category.key,
           tags: _tags.isEmpty ? null : _tags,
           endDate: _endDate,
@@ -1005,6 +1023,8 @@ class _RecurringTransactionPageState
           targetAccountId: _targetAccountId,
           amountType: _amountType,
           requiresConfirmation: _requiresConfirmation,
+          currency: currency,
+          timezone: timezone,
           categoryKey: _category.key,
           tags: _tags.isEmpty ? null : _tags,
           endDate: _endDate,

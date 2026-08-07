@@ -30,19 +30,23 @@ class SpaceSelectorData {
   });
 
   factory SpaceSelectorData.fromJson(Map<String, dynamic> json) {
+    List<Map<String, dynamic>> coerceSegments(dynamic raw) {
+      if (raw is! List) return [];
+      return raw
+          .whereType<Map<dynamic, dynamic>>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    }
+
     return SpaceSelectorData(
-      matchedSpaces: (json['matched_spaces'] as List? ?? [])
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList(),
-      allSpaces: (json['all_spaces'] as List? ?? [])
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList(),
+      matchedSpaces: coerceSegments(json['matched_spaces']),
+      allSpaces: coerceSegments(json['all_spaces']),
       pendingTransactionIds: (json['pending_transaction_ids'] as List? ?? [])
           .map((e) => e.toString())
           .toList(),
-      surfaceId: json['_surfaceId'] as String? ?? 'unknown',
-      matchKeyword: json['match_keyword'] as String?,
-      message: json['message'] as String?,
+      surfaceId: json['_surfaceId']?.toString() ?? 'unknown',
+      matchKeyword: json['match_keyword']?.toString(),
+      message: json['message']?.toString(),
       isConfirmed: json['_isConfirmed'] == true,
     );
   }
@@ -270,11 +274,14 @@ class _SpaceSelectorCardState extends State<SpaceSelectorCard> {
     required FThemeData theme,
     required FColors colors,
   }) {
-    final spaceId = space['id'] as int?;
+    final spaceIdValue = space['id'];
+    final spaceId = spaceIdValue is int
+        ? spaceIdValue
+        : int.tryParse(spaceIdValue?.toString() ?? '');
     final name =
-        space['name'] as String? ?? t.chat.genui.spaceSelector.unnamedSpace;
-    final description = space['description'] as String?;
-    final role = space['role'] as String?;
+        space['name']?.toString() ?? t.chat.genui.spaceSelector.unnamedSpace;
+    final description = space['description']?.toString();
+    final role = space['role']?.toString();
 
     return GestureDetector(
       onTap: _isConfirmed

@@ -3010,6 +3010,7 @@ class Translations$chat$genui$zh {
 	late final Translations$chat$genui$budgetAnalysis$zh budgetAnalysis = Translations$chat$genui$budgetAnalysis$zh.internal(_root);
 	late final Translations$chat$genui$cashFlowCard$zh cashFlowCard = Translations$chat$genui$cashFlowCard$zh.internal(_root);
 	late final Translations$chat$genui$budgetSimulator$zh budgetSimulator = Translations$chat$genui$budgetSimulator$zh.internal(_root);
+	late final Translations$chat$genui$error$zh error = Translations$chat$genui$error$zh.internal(_root);
 }
 
 // Path: chat.welcome
@@ -4678,6 +4679,24 @@ class Translations$chat$genui$budgetSimulator$zh {
 	String get confirm => '採用此預算';
 }
 
+// Path: chat.genui.error
+class Translations$chat$genui$error$zh {
+	Translations$chat$genui$error$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '组件渲染失败'
+	String get title => '组件渲染失败';
+
+	/// zh: '加载失败，请稍后重试。'
+	String get fetchFailed => '加载失败，请稍后重试。';
+
+	/// zh: '数据不完整'
+	String get dataIncomplete => '数据不完整';
+}
+
 // Path: chat.welcome.morning
 class Translations$chat$welcome$morning$zh {
 	Translations$chat$welcome$morning$zh.internal(this._root);
@@ -5876,6 +5895,9 @@ extension on Translations {
 			'chat.genui.budgetSimulator.dailyAllowance' => '每日限額',
 			'chat.genui.budgetSimulator.cancel' => '放棄',
 			'chat.genui.budgetSimulator.confirm' => '採用此預算',
+			'chat.genui.error.title' => '组件渲染失败',
+			'chat.genui.error.fetchFailed' => '加载失败，请稍后重试。',
+			'chat.genui.error.dataIncomplete' => '数据不完整',
 			'chat.welcome.morning.subtitle' => '新的一天，从记录开始',
 			'chat.welcome.morning.breakfast.title' => '早餐记账',
 			'chat.welcome.morning.breakfast.prompt' => '记一笔早餐',
@@ -6089,11 +6111,11 @@ extension on Translations {
 			'statistics.analysis.incomeTitle' => '收入分析',
 			'statistics.analysis.total' => '总计',
 			'statistics.analysis.breakdown' => '支出分类明细',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.analysis.radarNeedMoreData' => '雷达图需要至少3个分类数据',
 			'statistics.filter.accountType' => '账户类型',
 			'statistics.filter.allAccounts' => '全部账户',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.filter.apply' => '确认应用',
 			'statistics.sort.amount' => '按金额排序',
 			'statistics.sort.date' => '按时间排序',

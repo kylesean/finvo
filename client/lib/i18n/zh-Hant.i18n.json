@@ -903,6 +903,11 @@
         "categoryDistribution": "分类占比",
         "topSpenders": "大额支出",
         "amountWan": "$amount万"
+      },
+      "error": {
+        "title": "元件渲染失敗",
+        "fetchFailed": "讀取失敗，請稍後再試。",
+        "dataIncomplete": "資料不完整"
       }
     },
     "welcome": {

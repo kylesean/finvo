@@ -1371,6 +1371,7 @@ class _Translations$chat$genui$en extends Translations$chat$genui$zh {
 	@override late final _Translations$chat$genui$transactionConfirmation$en transactionConfirmation = _Translations$chat$genui$transactionConfirmation$en._(_root);
 	@override late final _Translations$chat$genui$budgetAnalysis$en budgetAnalysis = _Translations$chat$genui$budgetAnalysis$en._(_root);
 	@override late final _Translations$chat$genui$budgetSimulator$en budgetSimulator = _Translations$chat$genui$budgetSimulator$en._(_root);
+	@override late final _Translations$chat$genui$error$en error = _Translations$chat$genui$error$en._(_root);
 }
 
 // Path: chat.welcome
@@ -2220,6 +2221,18 @@ class _Translations$chat$genui$budgetSimulator$en extends Translations$chat$genu
 	@override String get dailyAllowance => '每日限額';
 	@override String get cancel => '放棄';
 	@override String get confirm => '採用此預算';
+}
+
+// Path: chat.genui.error
+class _Translations$chat$genui$error$en extends Translations$chat$genui$error$zh {
+	_Translations$chat$genui$error$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Rendering failed';
+	@override String get fetchFailed => 'Failed to load, please retry later.';
+	@override String get dataIncomplete => 'Incomplete data';
 }
 
 // Path: chat.welcome.morning
@@ -3303,6 +3316,9 @@ extension on TranslationsEn {
 			'chat.genui.budgetSimulator.dailyAllowance' => '每日限額',
 			'chat.genui.budgetSimulator.cancel' => '放棄',
 			'chat.genui.budgetSimulator.confirm' => '採用此預算',
+			'chat.genui.error.title' => 'Rendering failed',
+			'chat.genui.error.fetchFailed' => 'Failed to load, please retry later.',
+			'chat.genui.error.dataIncomplete' => 'Incomplete data',
 			'chat.welcome.morning.subtitle' => 'Start your day by tracking',
 			'chat.welcome.morning.breakfast.title' => 'Breakfast',
 			'chat.welcome.morning.breakfast.prompt' => 'Record breakfast expense',
@@ -3514,11 +3530,11 @@ extension on TranslationsEn {
 			'statistics.analysis.title' => 'Expense Analysis',
 			'statistics.analysis.expenseTitle' => 'Expense Analysis',
 			'statistics.analysis.incomeTitle' => 'Income Analysis',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.analysis.total' => 'Total',
 			'statistics.analysis.breakdown' => 'Expense Breakdown',
 			'statistics.analysis.radarNeedMoreData' => 'Radar chart requires at least 3 categories',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.filter.accountType' => 'Account Type',
 			'statistics.filter.allAccounts' => 'All Accounts',
 			'statistics.filter.apply' => 'Apply',

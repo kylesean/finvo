@@ -5,6 +5,7 @@ import 'package:json_schema_builder/json_schema_builder.dart';
 import 'package:finvo/features/chat/services/genui_logger.dart';
 import 'package:finvo/features/chat/genui/catalog_helpers.dart';
 import 'package:finvo/features/chat/genui/templates/templates.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Transaction / transfer related catalog items.
 List<CatalogItem> buildTransactionItems() {
@@ -367,7 +368,7 @@ Widget _buildTransactionCardWidget(CatalogItemContext context) {
         );
         return buildErrorWidget(
           context.buildContext,
-          'Failed to load transaction record, please retry',
+          t.chat.genui.error.dataIncomplete,
         );
       }
 
@@ -399,7 +400,7 @@ Widget _buildTransferReceiptWidget(CatalogItemContext context) {
         );
         return buildErrorWidget(
           context.buildContext,
-          'Failed to load transfer record, please retry',
+          t.chat.genui.error.dataIncomplete,
         );
       }
 
@@ -420,7 +421,7 @@ Widget _buildExpenseTableWidget(CatalogItemContext context) {
       if (!validateRequiredFields(data, ['title', 'headers', 'rows'])) {
         return buildErrorWidget(
           context.buildContext,
-          'Missing required fields',
+          t.chat.genui.error.dataIncomplete,
         );
       }
 
@@ -441,7 +442,7 @@ Widget _buildChartCardWidget(CatalogItemContext context) {
       if (!validateRequiredFields(data, ['title', 'chartType', 'chartData'])) {
         return buildErrorWidget(
           context.buildContext,
-          'Missing required fields',
+          t.chat.genui.error.dataIncomplete,
         );
       }
 
@@ -462,7 +463,7 @@ Widget _buildSummaryCardWidget(CatalogItemContext context) {
       if (!validateRequiredFields(data, ['title', 'summary', 'items'])) {
         return buildErrorWidget(
           context.buildContext,
-          'Missing required fields',
+          t.chat.genui.error.dataIncomplete,
         );
       }
 
@@ -483,7 +484,7 @@ Widget _buildTransferWizardWidget(CatalogItemContext context) {
       if (!validateRequiredFields(data, ['sourceAccounts', 'targetAccounts'])) {
         return buildErrorWidget(
           context.buildContext,
-          'Failed to load transfer wizard, please retry',
+          t.chat.genui.error.fetchFailed,
         );
       }
       return TransferWizard(data: data, dispatchEvent: context.dispatchEvent);
@@ -501,7 +502,10 @@ Widget _buildTransactionGroupReceiptWidget(CatalogItemContext context) {
       final success = data['success'] as bool? ?? false;
       final transactions = data['transactions'] as List?;
       if (!success || transactions == null || transactions.isEmpty) {
-        return buildErrorWidget(context.buildContext, '批量交易数据不完整');
+        return buildErrorWidget(
+          context.buildContext,
+          t.chat.genui.error.dataIncomplete,
+        );
       }
       return TransactionGroupReceipt(
         data: data,

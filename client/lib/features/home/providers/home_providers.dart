@@ -193,6 +193,7 @@ class TransactionFeed extends _$TransactionFeed {
       currentPage: 1,
       transactions: isRefresh ? [] : state.transactions,
       hasReachedMax: false,
+      hasLoadMoreError: false,
       errorMessage: null,
     );
 
@@ -228,7 +229,7 @@ class TransactionFeed extends _$TransactionFeed {
       state = state.copyWith(
         isLoading: false,
         isLoadingMore: false,
-        hasReachedMax: true,
+        hasReachedMax: false,
         errorMessage: e.toString(),
       );
     }
@@ -264,13 +265,18 @@ class TransactionFeed extends _$TransactionFeed {
       if (!ref.mounted || generation != _generation) return;
 
       if (newTransactions.isEmpty) {
-        state = state.copyWith(hasReachedMax: true, isLoadingMore: false);
+        state = state.copyWith(
+          hasReachedMax: true,
+          isLoadingMore: false,
+          hasLoadMoreError: false,
+        );
       } else {
         state = state.copyWith(
           transactions: [...state.transactions, ...newTransactions],
           isLoadingMore: false,
           currentPage: nextPage,
           hasReachedMax: newTransactions.length < _pageSize,
+          hasLoadMoreError: false,
         );
       }
     } catch (e) {
@@ -278,9 +284,12 @@ class TransactionFeed extends _$TransactionFeed {
 
       if (!ref.mounted) return;
 
+      // Never mark hasReachedMax on an error: a transient network failure is
+      // not "end of data". Surface the failure via hasLoadMoreError so the
+      // feed footer can offer a retry instead of a dead "no more data" state.
       state = state.copyWith(
         isLoadingMore: false,
-        hasReachedMax: true,
+        hasLoadMoreError: true,
         errorMessage: e.toString(),
       );
     }

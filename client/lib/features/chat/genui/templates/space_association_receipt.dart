@@ -20,21 +20,29 @@ class SpaceAssociationReceiptData {
   });
 
   factory SpaceAssociationReceiptData.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> asMap(dynamic value) =>
+        value is Map ? Map<String, dynamic>.from(value) : <String, dynamic>{};
+
     return SpaceAssociationReceiptData(
-      space: (json['space'] as Map<String, dynamic>?) ?? {},
-      association: (json['association'] as Map<String, dynamic>?) ?? {},
-      surfaceId: json['_surfaceId'] as String? ?? 'unknown',
-      message: json['message'] as String?,
+      space: asMap(json['space']),
+      association: asMap(json['association']),
+      surfaceId: json['_surfaceId']?.toString() ?? 'unknown',
+      message: json['message']?.toString(),
     );
   }
 
-  String get spaceName => space['name'] as String? ?? 'Shared Space';
+  String get spaceName => space['name']?.toString() ?? 'Shared Space';
   // Backend returns space.id as UUID string
   String get spaceId => space['id']?.toString() ?? '';
-  int get totalCount => association['total_count'] as int? ?? 0;
-  int get successCount => association['success_count'] as int? ?? 0;
-  int get failedCount => association['failed_count'] as int? ?? 0;
+  int get totalCount => _asInt(association['total_count']);
+  int get successCount => _asInt(association['success_count']);
+  int get failedCount => _asInt(association['failed_count']);
   bool get isFullySuccessful => failedCount == 0 && successCount > 0;
+
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
 }
 
 /// SpaceAssociationReceipt - Confirmation component after space association

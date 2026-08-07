@@ -905,6 +905,11 @@
         "categoryDistribution": "分类占比",
         "topSpenders": "大额支出",
         "amountWan": "$amount万"
+      },
+      "error": {
+        "title": "렌더링 실패",
+        "fetchFailed": "불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        "dataIncomplete": "데이터가 불완전합니다"
       }
     },
     "welcome": {

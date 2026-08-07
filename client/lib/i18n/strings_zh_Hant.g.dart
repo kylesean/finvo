@@ -1366,6 +1366,7 @@ class _Translations$chat$genui$zh_Hant extends Translations$chat$genui$zh {
 	@override late final _Translations$chat$genui$transferPath$zh_Hant transferPath = _Translations$chat$genui$transferPath$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$transactionConfirmation$zh_Hant transactionConfirmation = _Translations$chat$genui$transactionConfirmation$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$budgetAnalysis$zh_Hant budgetAnalysis = _Translations$chat$genui$budgetAnalysis$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$error$zh_Hant error = _Translations$chat$genui$error$zh_Hant._(_root);
 }
 
 // Path: chat.welcome
@@ -2213,6 +2214,18 @@ class _Translations$chat$genui$budgetAnalysis$zh_Hant extends Translations$chat$
 	@override String get categoryDistribution => '分类占比';
 	@override String get topSpenders => '大额支出';
 	@override String amountWan({required Object amount}) => '${amount}万';
+}
+
+// Path: chat.genui.error
+class _Translations$chat$genui$error$zh_Hant extends Translations$chat$genui$error$zh {
+	_Translations$chat$genui$error$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '元件渲染失敗';
+	@override String get fetchFailed => '讀取失敗，請稍後再試。';
+	@override String get dataIncomplete => '資料不完整';
 }
 
 // Path: chat.welcome.morning
@@ -3289,6 +3302,9 @@ extension on TranslationsZhHant {
 			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
 			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
 			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
+			'chat.genui.error.title' => '元件渲染失敗',
+			'chat.genui.error.fetchFailed' => '讀取失敗，請稍後再試。',
+			'chat.genui.error.dataIncomplete' => '資料不完整',
 			'chat.welcome.morning.subtitle' => 'Start your day by tracking',
 			'chat.welcome.morning.breakfast.title' => 'Breakfast',
 			'chat.welcome.morning.breakfast.prompt' => 'Record breakfast expense',
@@ -3507,11 +3523,11 @@ extension on TranslationsZhHant {
 			'statistics.filter.allAccounts' => '全部帳戶',
 			'statistics.filter.apply' => '確認應用',
 			'statistics.sort.amount' => '按金額排序',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.sort.date' => '按時間排序',
 			'statistics.exportList' => '導出列表',
 			'statistics.noMoreData' => '沒有更多數據了',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.emptyState.title' => 'Unlock Financial Insights',
 			'statistics.emptyState.description' => 'Your financial report is currently a blank canvas.\nRecord your first transaction and let the data tell your story.',
 			'statistics.emptyState.action' => 'Record First Transaction',

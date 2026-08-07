@@ -83,24 +83,47 @@ class TransactionCard extends ConsumerWidget {
     );
   }
 
-  Future<bool> _performDelete(BuildContext context, WidgetRef ref) async {
-    final confirmed = await _showDeleteConfirmation(context);
-    if (!confirmed) return false;
+  /// Performs the optimistic delete. Called from [Dismissible.onDismissed]
+  /// AFTER the dismiss animation has completed, so the optimistic removal
+  /// inside [deleteTransaction] cannot race the Dismissible's own state (the
+  /// "dismissed Dismissible is still in the tree" problem that occurs when
+  /// deleting inside confirmDismiss).
+  Future<void> _performDelete(BuildContext context, WidgetRef ref) async {
+    // Capture the overlay before the async gap: when the optimistic removal
+    // succeeds this card is unmounted, so its context can no longer resolve
+    // the overlay after the API call returns.
+    final overlay = Overlay.maybeOf(context);
+    final overlayContext = overlay?.context;
 
     unawaited(AppHaptics.medium());
 
     final notifier = ref.read(transactionFeedProvider.notifier);
     final success = await notifier.deleteTransaction(transaction.id);
 
-    if (success && context.mounted) {
+    if (success) {
       unawaited(AppHaptics.success());
-      TopToast.success(context, t.transaction.deleted);
-    } else if (!success && context.mounted) {
+    } else {
       unawaited(AppHaptics.error());
-      TopToast.error(context, t.transaction.deleteFailed);
     }
 
-    return success;
+    if (overlay == null) {
+      if (context.mounted) {
+        TopToast.show(
+          context,
+          message: success ? t.transaction.deleted : t.transaction.deleteFailed,
+          type: success ? ToastType.success : ToastType.error,
+        );
+      }
+      return;
+    }
+
+    if (overlayContext == null || !overlayContext.mounted) return;
+    TopToast.show(
+      overlayContext,
+      message: success ? t.transaction.deleted : t.transaction.deleteFailed,
+      type: success ? ToastType.success : ToastType.error,
+      overlayState: overlay,
+    );
   }
 
   @override
@@ -115,10 +138,11 @@ class TransactionCard extends ConsumerWidget {
       dismissThresholds: const {DismissDirection.endToStart: 0.4},
       confirmDismiss: (direction) async {
         await AppHaptics.selection();
-        if (context.mounted) {
-          return await _performDelete(context, ref);
-        }
-        return false;
+        if (!context.mounted) return false;
+        return _showDeleteConfirmation(context);
+      },
+      onDismissed: (direction) {
+        unawaited(_performDelete(context, ref));
       },
       background: Container(
         color: colors.background,

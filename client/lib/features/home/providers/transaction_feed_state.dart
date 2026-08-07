@@ -14,5 +14,6 @@ abstract class TransactionFeedState with _$TransactionFeedState {
     @Default(false) bool hasReachedMax,
     @Default(1) int currentPage,
     String? errorMessage,
+    @Default(false) bool hasLoadMoreError,
   }) = _TransactionFeedState;
 }

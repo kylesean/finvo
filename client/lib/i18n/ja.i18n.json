@@ -904,6 +904,11 @@
         "categoryDistribution": "分类占比",
         "topSpenders": "大额支出",
         "amountWan": "$amount万"
+      },
+      "error": {
+        "title": "レンダリングに失敗しました",
+        "fetchFailed": "読み込みに失敗しました。後でもう一度お試しください。",
+        "dataIncomplete": "データが不完全です"
       }
     },
     "welcome": {

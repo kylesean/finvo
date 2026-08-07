@@ -175,7 +175,7 @@ Future<dynamic> showSpacePickerSheet(
           ...spaces.map((space) {
             final spaceId = space['id'];
             final isSelected = associatedIds.contains(spaceId?.toString());
-            final name = space['name'] as String? ?? 'unnamed';
+            final name = space['name']?.toString() ?? 'unnamed';
 
             return GestureDetector(
               onTap: () => Navigator.pop(context, spaceId),

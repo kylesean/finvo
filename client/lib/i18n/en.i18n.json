@@ -910,6 +910,11 @@
         "dailyAllowance": "每日限額",
         "cancel": "放棄",
         "confirm": "採用此預算"
+      },
+      "error": {
+        "title": "Rendering failed",
+        "fetchFailed": "Failed to load, please retry later.",
+        "dataIncomplete": "Incomplete data"
       }
     },
     "welcome": {

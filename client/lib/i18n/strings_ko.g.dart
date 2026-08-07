@@ -1367,6 +1367,7 @@ class _Translations$chat$genui$ko extends Translations$chat$genui$zh {
 	@override late final _Translations$chat$genui$transferPath$ko transferPath = _Translations$chat$genui$transferPath$ko._(_root);
 	@override late final _Translations$chat$genui$transactionConfirmation$ko transactionConfirmation = _Translations$chat$genui$transactionConfirmation$ko._(_root);
 	@override late final _Translations$chat$genui$budgetAnalysis$ko budgetAnalysis = _Translations$chat$genui$budgetAnalysis$ko._(_root);
+	@override late final _Translations$chat$genui$error$ko error = _Translations$chat$genui$error$ko._(_root);
 }
 
 // Path: chat.welcome
@@ -2215,6 +2216,18 @@ class _Translations$chat$genui$budgetAnalysis$ko extends Translations$chat$genui
 	@override String get categoryDistribution => '分类占比';
 	@override String get topSpenders => '大额支出';
 	@override String amountWan({required Object amount}) => '${amount}万';
+}
+
+// Path: chat.genui.error
+class _Translations$chat$genui$error$ko extends Translations$chat$genui$error$zh {
+	_Translations$chat$genui$error$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '렌더링 실패';
+	@override String get fetchFailed => '불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
+	@override String get dataIncomplete => '데이터가 불완전합니다';
 }
 
 // Path: chat.welcome.morning
@@ -3293,6 +3306,9 @@ extension on TranslationsKo {
 			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
 			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
 			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
+			'chat.genui.error.title' => '렌더링 실패',
+			'chat.genui.error.fetchFailed' => '불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
+			'chat.genui.error.dataIncomplete' => '데이터가 불완전합니다',
 			'chat.welcome.morning.subtitle' => 'Start your day by tracking',
 			'chat.welcome.morning.breakfast.title' => 'Breakfast',
 			'chat.welcome.morning.breakfast.prompt' => 'Record breakfast expense',
@@ -3509,11 +3525,11 @@ extension on TranslationsKo {
 			'statistics.analysis.radarNeedMoreData' => '레이더 차트는 3개 이상의 카테고리 데이터가 필요합니다',
 			'statistics.filter.accountType' => '계좌 유형',
 			'statistics.filter.allAccounts' => '모든 계좌',
+			_ => null,
+		} ?? switch (path) {
 			'statistics.filter.apply' => '적용',
 			'statistics.sort.amount' => '금액순',
 			'statistics.sort.date' => '날짜순',
-			_ => null,
-		} ?? switch (path) {
 			'statistics.exportList' => '목록 내보내기',
 			'statistics.emptyState.title' => 'Unlock Financial Insights',
 			'statistics.emptyState.description' => 'Your financial report is currently a blank canvas.\nRecord your first transaction and let the data tell your story.',

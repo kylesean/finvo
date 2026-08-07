@@ -12,7 +12,12 @@ class SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.theme;
     final colors = theme.colors;
-    final items = data['items'] as List<dynamic>;
+
+    // AI-provided payloads are untrusted: guard every shape instead of
+    // letting a TypeError escape during layout/build.
+    final itemsRaw = data['items'];
+    if (itemsRaw is! List) return const SizedBox.shrink();
+    final items = itemsRaw;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8.0),
@@ -25,10 +30,13 @@ class SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(data['title'] as String, style: AppTextStyles.listTitle(theme)),
+          Text(
+            data['title']?.toString() ?? '',
+            style: AppTextStyles.listTitle(theme),
+          ),
           const SizedBox(height: 12),
           Text(
-            data['summary'] as String,
+            data['summary']?.toString() ?? '',
             style: theme.typography.body.sm.copyWith(
               color: colors.mutedForeground,
               height: 1.5,
@@ -37,7 +45,8 @@ class SummaryCard extends StatelessWidget {
           if (items.isNotEmpty) ...[
             const SizedBox(height: 16),
             ...items.map((item) {
-              final i = item as Map<String, dynamic>;
+              final i = item is Map ? Map<String, dynamic>.from(item) : null;
+              if (i == null) return const SizedBox.shrink();
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
@@ -45,14 +54,14 @@ class SummaryCard extends StatelessWidget {
                     SizedBox(
                       width: 100,
                       child: Text(
-                        i['label'] as String,
+                        i['label']?.toString() ?? '',
                         style: AppTextStyles.listSubtitle(theme),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
-                        i['value'] as String,
+                        i['value']?.toString() ?? '',
                         style: AppTextStyles.listTrailing(theme),
                       ),
                     ),

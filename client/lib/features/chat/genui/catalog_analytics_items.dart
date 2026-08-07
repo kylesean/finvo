@@ -4,6 +4,7 @@ import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 import 'package:finvo/features/chat/genui/catalog_helpers.dart';
 import 'package:finvo/features/chat/genui/templates/templates.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Cash flow / health score / forecast analytics catalog items.
 List<CatalogItem> buildAnalyticsItems() {
@@ -227,7 +228,7 @@ Widget _buildCashFlowCardWidget(CatalogItemContext context) {
       if (!validateRequiredFields(data, ['netCashFlow', 'savingsRate'])) {
         return buildErrorWidget(
           context.buildContext,
-          'Incomplete cash flow data',
+          t.chat.genui.error.dataIncomplete,
         );
       }
       return CashFlowAnalysisCard(data: data);
@@ -245,7 +246,7 @@ Widget _buildHealthScoreCardWidget(CatalogItemContext context) {
       if (!validateRequiredFields(data, ['totalScore', 'grade'])) {
         return buildErrorWidget(
           context.buildContext,
-          'Incomplete financial health score data',
+          t.chat.genui.error.dataIncomplete,
         );
       }
       return HealthScoreAnalysisCard(data: data);
@@ -262,8 +263,10 @@ Widget _buildCashFlowForecastChartWidget(CatalogItemContext context) {
       final data = context.data as Map<String, dynamic>;
       final success = data['success'] as bool? ?? false;
       if (!success) {
-        final errorMsg = data['error'] as String? ?? 'Forecast failed';
-        return buildErrorWidget(context.buildContext, errorMsg);
+        return buildErrorWidget(
+          context.buildContext,
+          t.chat.genui.error.fetchFailed,
+        );
       }
       return CashFlowForecastChart(data: data);
     },
@@ -278,7 +281,7 @@ Widget _buildExpenseSummaryCardWidget(CatalogItemContext context) {
   } catch (e) {
     return buildErrorWidget(
       context.buildContext,
-      'Failed to load expense summary',
+      t.chat.genui.error.fetchFailed,
     );
   }
 }

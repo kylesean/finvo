@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/features/chat/services/genui_logger.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Shared building blocks used by the catalog item files.
 
@@ -44,38 +46,41 @@ Widget wrapBuilder({
       error: e,
       stackTrace: stackTrace,
     );
-    return buildErrorWidget(context.buildContext, 'Rendering failed: $e');
+    // Never surface the raw exception to the user; it goes to the log only.
+    return buildErrorWidget(
+      context.buildContext,
+      t.chat.genui.error.fetchFailed,
+    );
   }
 }
 
 /// Build error widget
+///
+/// Theme-aware error surface for GenUI components. Uses Forui colors so it
+/// follows light/dark mode instead of hardcoding Material red shades.
 Widget buildErrorWidget(BuildContext context, String message) {
+  final theme = context.theme;
+  final colors = theme.colors;
+
   return Container(
     margin: const EdgeInsets.only(bottom: 8.0),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     decoration: BoxDecoration(
-      color: Colors.red.shade50.withValues(alpha: 0.9),
+      color: colors.destructive.withValues(alpha: 0.06),
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.red.shade200),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.05),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
+      border: Border.all(color: colors.destructive.withValues(alpha: 0.35)),
     ),
     child: Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.red.shade100,
+            color: colors.destructive.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Icons.error_outline_rounded,
-            color: Colors.red.shade800,
+            FLucideIcons.triangleAlert,
+            color: colors.destructive,
             size: 20,
           ),
         ),
@@ -86,17 +91,18 @@ Widget buildErrorWidget(BuildContext context, String message) {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '组件渲染遇到问题',
-                style: TextStyle(
-                  color: Colors.red.shade900,
+                t.chat.genui.error.title,
+                style: theme.typography.body.sm.copyWith(
+                  color: colors.destructive,
                   fontWeight: AppFontConfig.headingBold,
-                  fontSize: 14,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 message,
-                style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                style: theme.typography.body.xs.copyWith(
+                  color: colors.destructive.withValues(alpha: 0.85),
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

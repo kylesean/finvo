@@ -908,6 +908,11 @@
         "dailyAllowance": "每日限額",
         "cancel": "放棄",
         "confirm": "採用此預算"
+      },
+      "error": {
+        "title": "组件渲染失败",
+        "fetchFailed": "加载失败，请稍后重试。",
+        "dataIncomplete": "数据不完整"
       }
     },
     "welcome": {

@@ -194,4 +194,4 @@ final class NotificationWsProvider
   }
 }
 
-String _$notificationWsHash() => r'2d974ede7782c9424baea6e85dc003c14918d263';
+String _$notificationWsHash() => r'6ed08336330654b9fd415efe088d13cde3f38f42';
