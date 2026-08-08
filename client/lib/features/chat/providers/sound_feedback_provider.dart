@@ -6,10 +6,9 @@ part 'sound_feedback_provider.g.dart';
 
 /// Riverpod-managed [SoundFeedbackService] provider.
 ///
-/// [keepAlive] so the audio players persist for the app's lifetime (they are
-/// pre-warmed at startup and reused across recording sessions). Initialization
-/// is fire-and-forget: a failure falls back to haptic feedback internally, so
-/// callers never need to guard against a failed init.
+/// [keepAlive] so the audio players persist after first access (initialized lazily
+/// when speech recognition or chat input is accessed, and reused across recording sessions).
+/// Initialization is fire-and-forget: a failure falls back to haptic feedback internally.
 @Riverpod(keepAlive: true)
 SoundFeedbackService soundFeedback(Ref ref) {
   final service = SoundFeedbackService();

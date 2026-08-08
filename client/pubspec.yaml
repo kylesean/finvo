@@ -18,7 +18,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   dio: ^5.10.0
-  flutter_riverpod: ^3.3.2
+  flutter_riverpod: ^3.4.2
   go_router: ^17.3.0
   riverpod_annotation: ^4.0.3
   record: ^6.1.1
@@ -81,6 +81,17 @@ dev_dependencies:
   async: ^2.13.1
   stream_channel: ^2.1.4
   fake_async: ^1.3.3
+
+dependency_overrides:
+  # riverpod_annotation 4.0.3 (used by riverpod_generator 4.0.4) pins
+  # riverpod to exactly 3.3.2, which had the "setState() called during build"
+  # ProviderScope bug (rrousselGit/riverpod#4781). flutter_riverpod ^3.4.2
+  # carries the upstream fix and 3.4.x is a drop-in with no public API break.
+  # Upgrading the codegen chain (annotation 4.0.6 / generator 4.0.8) instead
+  # requires analyzer ^13, which the stable freezed line does not support yet
+  # (freezed 4.0.0-dev only). Hence the runtime-only override; remove it and
+  # bump annotation+generator together once freezed 4.x is released.
+  riverpod: 3.4.2
 
 flutter:
   uses-material-design: true

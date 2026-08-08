@@ -19,19 +19,19 @@ void setupLogging() {
   // Configure log output format
   unawaited(_rootSubscription?.cancel());
   _rootSubscription = Logger.root.onRecord.listen((record) {
-    final message =
-        '${record.time}: [${record.level.name}] ${record.loggerName}: ${record.message}';
-
-    // Print stack trace if error exists
+    final log = StringBuffer(
+      '${record.time}: [${record.level.name}] ${record.loggerName}: ${record.message}',
+    );
+    // Include the error and its full stack trace when present; stack
+    // trimming/folding is the job of the console or the error-reporting
+    // SDK (e.g. Sentry), not of the logger itself.
     if (record.error != null) {
-      debugPrint('$message\nError: ${record.error}');
-    } else {
-      debugPrint(message);
+      log.write('\nError: ${record.error}');
     }
-
     if (record.stackTrace != null) {
-      debugPrint('StackTrace: ${record.stackTrace}');
+      log.write('\nStackTrace:\n${record.stackTrace}');
     }
+    debugPrint(log.toString());
   });
 
   _logger.info('Logging system initialized');

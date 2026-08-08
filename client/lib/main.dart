@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'dart:async';
 import 'package:finvo/app/app.dart';
@@ -13,7 +14,6 @@ import 'package:logging/logging.dart';
 import 'package:finvo/core/utils/logger_setup.dart';
 import 'package:finvo/shared/services/locale_service.dart';
 import 'package:finvo/core/services/server_config_service.dart';
-import 'package:finvo/features/chat/providers/sound_feedback_provider.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
@@ -52,11 +52,19 @@ Future<void> _bootstrap() async {
 
   // Catch Flutter framework errors (rendering, layout, assertions).
   // Without this override, unhandled framework errors render a red error
-  // screen in debug and are silently dropped in release. We log every one
-  // and still forward to presentError so debug-mode keeps its assertion UI.
+  // screen in debug and are silently dropped in release. We log the exception
+  // with its stack trace and only surface the red error screen in debug:
+  // in release builds the exception is captured by the log/error-reporting
+  // pipeline instead of disturbing the user with a debug-only UI.
   FlutterError.onError = (FlutterErrorDetails details) {
-    _logger.severe('Flutter framework error', details.exception, details.stack);
-    FlutterError.presentError(details);
+    _logger.severe(
+      'Flutter framework error: ${details.exception}',
+      details.exception,
+      details.stack,
+    );
+    if (kDebugMode) {
+      FlutterError.presentError(details);
+    }
   };
 
   final SharedPreferences prefs;
@@ -139,8 +147,6 @@ Future<void> _bootstrap() async {
     // explicitly to keep the speech settings provider build() free of
     // side-effects.
     unawaited(container.read(speechSettingsProvider.notifier).loadSettings());
-    // Pre-warm sound feedback service for speech recognition ASR
-    container.read(soundFeedbackProvider);
     // Warm notification WebSocket and transaction event subscriber for full app lifetime,
     // avoiding side-effects inside MyApp.build().
     container.read(notificationWsProvider);
