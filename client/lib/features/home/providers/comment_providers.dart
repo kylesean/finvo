@@ -28,8 +28,9 @@ class TransactionComments extends _$TransactionComments {
   Future<void> addComment(
     String text,
     String? parentId,
-    List<String>? mentionedUserIds,
-  ) async {
+    List<String>? mentionedUserIds, {
+    String? repliedToUserId,
+  }) async {
     final service = ref.read(commentServiceProvider);
     final generation = ++_generation;
 
@@ -39,6 +40,7 @@ class TransactionComments extends _$TransactionComments {
         commentText: text,
         parentCommentId: parentId,
         mentionedUserIds: mentionedUserIds,
+        repliedToUserId: repliedToUserId,
       );
 
       // A newer mutation (delete/add) landed while this request was in flight:
@@ -125,4 +127,16 @@ class ReplyingToUserName extends _$ReplyingToUserName {
   String? build() => null;
 
   void set(String? name) => state = name;
+}
+
+/// User id of the comment the user tapped to reply to. Captured AT TAP TIME so
+/// the reply target survives send-time races (e.g. the comment list reloading
+/// via WebSocket between tap and send, which would previously drop the target
+/// and silently post the reply as a top-level comment with no notification).
+@riverpod
+class ReplyingToUserId extends _$ReplyingToUserId {
+  @override
+  String? build() => null;
+
+  void set(String? id) => state = id;
 }

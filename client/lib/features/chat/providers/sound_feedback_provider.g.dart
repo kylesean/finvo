@@ -10,20 +10,18 @@ part of 'sound_feedback_provider.dart';
 // ignore_for_file: type=lint, type=warning
 /// Riverpod-managed [SoundFeedbackService] provider.
 ///
-/// [keepAlive] so the audio players persist for the app's lifetime (they are
-/// pre-warmed at startup and reused across recording sessions). Initialization
-/// is fire-and-forget: a failure falls back to haptic feedback internally, so
-/// callers never need to guard against a failed init.
+/// [keepAlive] so the audio players persist after first access (initialized lazily
+/// when speech recognition or chat input is accessed, and reused across recording sessions).
+/// Initialization is fire-and-forget: a failure falls back to haptic feedback internally.
 
 @ProviderFor(soundFeedback)
 final soundFeedbackProvider = SoundFeedbackProvider._();
 
 /// Riverpod-managed [SoundFeedbackService] provider.
 ///
-/// [keepAlive] so the audio players persist for the app's lifetime (they are
-/// pre-warmed at startup and reused across recording sessions). Initialization
-/// is fire-and-forget: a failure falls back to haptic feedback internally, so
-/// callers never need to guard against a failed init.
+/// [keepAlive] so the audio players persist after first access (initialized lazily
+/// when speech recognition or chat input is accessed, and reused across recording sessions).
+/// Initialization is fire-and-forget: a failure falls back to haptic feedback internally.
 
 final class SoundFeedbackProvider
     extends
@@ -35,10 +33,9 @@ final class SoundFeedbackProvider
     with $Provider<SoundFeedbackService> {
   /// Riverpod-managed [SoundFeedbackService] provider.
   ///
-  /// [keepAlive] so the audio players persist for the app's lifetime (they are
-  /// pre-warmed at startup and reused across recording sessions). Initialization
-  /// is fire-and-forget: a failure falls back to haptic feedback internally, so
-  /// callers never need to guard against a failed init.
+  /// [keepAlive] so the audio players persist after first access (initialized lazily
+  /// when speech recognition or chat input is accessed, and reused across recording sessions).
+  /// Initialization is fire-and-forget: a failure falls back to haptic feedback internally.
   SoundFeedbackProvider._()
     : super(
         from: null,

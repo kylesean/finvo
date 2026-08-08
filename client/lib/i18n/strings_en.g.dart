@@ -1950,6 +1950,10 @@ class _Translations$notification$semantic$en extends Translations$notification$s
 	@override String memberLeft({required Object name}) => '${name} left the space';
 	@override String get recurringPending => 'Recurring transaction pending';
 	@override String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}, awaiting your confirmation';
+	@override String commentReplied({required Object name}) => '${name} replied to your comment';
+	@override String commentOnTransaction({required Object name}) => '${name} commented on your transaction';
+	@override String commentMentioned({required Object name}) => '${name} mentioned you';
+	@override String commentInSpace({required Object name}) => '${name} commented in your space';
 }
 
 // Path: chat.tools.done
@@ -3875,6 +3879,10 @@ extension on TranslationsEn {
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name} left the space',
 			'notification.semantic.recurringPending' => 'Recurring transaction pending',
 			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}, awaiting your confirmation',
+			'notification.semantic.commentReplied' => ({required Object name}) => '${name} replied to your comment',
+			'notification.semantic.commentOnTransaction' => ({required Object name}) => '${name} commented on your transaction',
+			'notification.semantic.commentMentioned' => ({required Object name}) => '${name} mentioned you',
+			'notification.semantic.commentInSpace' => ({required Object name}) => '${name} commented in your space',
 			_ => null,
 		};
 	}

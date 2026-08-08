@@ -1945,6 +1945,10 @@ class _Translations$notification$semantic$ja extends Translations$notification$s
 	@override String memberLeft({required Object name}) => '${name} さんがスペースを退出しました';
 	@override String get recurringPending => '定期取引の確認待ち';
 	@override String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}、確認待ちです';
+	@override String commentReplied({required Object name}) => '${name} さんがあなたのコメントに返信しました';
+	@override String commentOnTransaction({required Object name}) => '${name} さんがあなたの取引にコメントしました';
+	@override String commentMentioned({required Object name}) => '${name} さんがあなたをメンションしました';
+	@override String commentInSpace({required Object name}) => '${name} さんがあなたのスペースにコメントしました';
 }
 
 // Path: chat.tools.done
@@ -3863,6 +3867,10 @@ extension on TranslationsJa {
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name} さんがスペースを退出しました',
 			'notification.semantic.recurringPending' => '定期取引の確認待ち',
 			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}、確認待ちです',
+			'notification.semantic.commentReplied' => ({required Object name}) => '${name} さんがあなたのコメントに返信しました',
+			'notification.semantic.commentOnTransaction' => ({required Object name}) => '${name} さんがあなたの取引にコメントしました',
+			'notification.semantic.commentMentioned' => ({required Object name}) => '${name} さんがあなたをメンションしました',
+			'notification.semantic.commentInSpace' => ({required Object name}) => '${name} さんがあなたのスペースにコメントしました',
 			_ => null,
 		};
 	}

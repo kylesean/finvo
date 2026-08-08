@@ -265,15 +265,18 @@ class TransactionCRUDService:
         associated_spaces = spaces_result.scalars().all()
         spaces_data = [TransactionSpaceItem(id=str(s.id), name=s.name) for s in associated_spaces]
 
-        # Batch-load all comment authors in one query to avoid N+1.
+        # Batch-load all comment authors and explicit reply targets in one query to avoid N+1.
         comments_data = []
         if transaction.comments:
             comment_user_uuids = {c.user_uuid for c in transaction.comments}
-            users_result = await self.db.execute(select(User).where(User.uuid.in_(comment_user_uuids)))
+            replied_target_uuids = {c.replied_to_user_uuid for c in transaction.comments if c.replied_to_user_uuid}
+            all_needed_uuids = comment_user_uuids | replied_target_uuids
+            users_result = await self.db.execute(select(User).where(User.uuid.in_(all_needed_uuids)))
             user_by_uuid = {u.uuid: u for u in users_result.scalars().all()}
 
             for comment in transaction.comments:
                 user = user_by_uuid.get(comment.user_uuid)
+                replied_user = user_by_uuid.get(comment.replied_to_user_uuid) if comment.replied_to_user_uuid else None
                 comments_data.append(
                     TransactionCommentItem(
                         id=str(comment.uuid),
@@ -283,6 +286,8 @@ class TransactionCRUDService:
                         user_avatar_url=user.avatar_url if user else None,
                         parent_comment_id=str(comment.parent_comment_id) if comment.parent_comment_id else None,
                         comment_text=comment.comment_text,
+                        replied_to_user_id=str(comment.replied_to_user_uuid) if comment.replied_to_user_uuid else None,
+                        replied_to_user_name=replied_user.username if replied_user else None,
                         mentioned_user_ids=comment.mentioned_user_ids or [],
                         created_at=comment.created_at.isoformat() if comment.created_at else None,
                         updated_at=comment.updated_at.isoformat() if comment.updated_at else None,
@@ -971,6 +976,7 @@ class TransactionCRUDService:
         parent_comment_id: UUID | None = None,
         mentioned_user_ids: list[str] | None = None,
         commenter_username: str = "Unknown",
+        replied_to_user_id: UUID | None = None,
     ) -> dict[str, Any]:
         """Add transaction comment."""
         return await self.comments.add_comment(
@@ -980,6 +986,7 @@ class TransactionCRUDService:
             parent_comment_id,
             mentioned_user_ids=mentioned_user_ids,
             commenter_username=commenter_username,
+            replied_to_user_id=replied_to_user_id,
         )
 
     async def delete_comment(self, comment_id: UUID, user_uuid: UUID) -> bool:

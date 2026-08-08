@@ -164,9 +164,7 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
         .firstOrNull;
     if (item == null) return;
 
-    final success = await _repository.deleteNotification(notificationId);
-    if (!success) return;
-
+    // Optimistically remove from state for responsive UI
     final result = NotificationListMutations.delete(
       items: state.notifications,
       unreadCount: state.unreadCount,
@@ -178,6 +176,20 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
       notifications: result.items,
       unreadCount: result.unreadCount,
     );
+
+    // Skip network deletion call for synthetic local-only IDs (rt_)
+    if (notificationId.startsWith('rt_')) return;
+
+    try {
+      final success = await _repository.deleteNotification(notificationId);
+      if (!success) {
+        _logger.warning(
+          'deleteNotification API failed for notification $notificationId',
+        );
+      }
+    } catch (e) {
+      _logger.warning('deleteNotification error for $notificationId', e);
+    }
   }
 
   /// Respond to a space invite (space-specific action)

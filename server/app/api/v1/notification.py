@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
@@ -58,9 +59,9 @@ async def get_unread_count(
     return success_response(data={"count": count})
 
 
-@router.patch("/{notification_id}/read", response_model=ResponseEnvelope[dict[str, Any]])
+@router.patch("/{notification_id:uuid}/read", response_model=ResponseEnvelope[dict[str, Any]])
 async def mark_as_read(
-    notification_id: int,
+    notification_id: UUID,
     current_user: CurrentUser,
     db: DbSession,
 ) -> JSONResponse:
@@ -79,9 +80,9 @@ async def mark_all_read(
     return success_response(data={"message": "All marked as read"})
 
 
-@router.delete("/{notification_id}", response_model=ResponseEnvelope[dict[str, Any]])
+@router.delete("/{notification_id:uuid}", response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_notification(
-    notification_id: int,
+    notification_id: UUID,
     current_user: CurrentUser,
     db: DbSession,
 ) -> JSONResponse:

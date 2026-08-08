@@ -1563,7 +1563,11 @@
       "newTransactionDetail": "${amount}，来自「${space}」",
       "memberLeft": "${name} 离开了空间",
       "recurringPending": "周期交易待确认",
-      "recurringPendingDetail": "${description} ${amount}，等待您确认记账"
+      "recurringPendingDetail": "${description} ${amount}，等待您确认记账",
+      "commentReplied": "${name} 回复了你的评论",
+      "commentOnTransaction": "${name} 评论了你的账单",
+      "commentMentioned": "${name} 提到了你",
+      "commentInSpace": "${name} 在共享账单中发表了评论"
     }
   }
 }

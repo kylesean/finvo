@@ -170,6 +170,11 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
 
     final directlyRepliedToCommentId = ref.read(replyingToCommentIdProvider);
     String? effectiveParentCommentId;
+    // The reply target is captured at tap time (replyingToUserIdProvider),
+    // never derived from the live comment list: a WebSocket-triggered reload
+    // between tap and send used to make the comment unresolvable, silently
+    // dropping the target so the replied-to user never got notified.
+    final repliedToUserId = ref.read(replyingToUserIdProvider);
 
     if (directlyRepliedToCommentId != null) {
       final allComments =
@@ -183,6 +188,11 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
       );
 
       if (repliedToComment != null) {
+        // The reply is attached to the thread's root comment (single-level
+        // reply structure), but the user it is directed at is the author of
+        // the comment the user actually tapped — which may differ from the
+        // root's author in multi-level threads. Persist that explicit target
+        // so the rendered "replied to X" stays correct after reloads.
         if (repliedToComment.parentCommentId == null) {
           effectiveParentCommentId = repliedToComment.id;
         } else {
@@ -213,11 +223,17 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
 
       await ref
           .read(transactionCommentsProvider(widget.transactionId).notifier)
-          .addComment(commentText, effectiveParentCommentId, mentionedUserIds);
+          .addComment(
+            commentText,
+            effectiveParentCommentId,
+            mentionedUserIds,
+            repliedToUserId: repliedToUserId,
+          );
 
       _commentController.clear();
       ref.read(replyingToCommentIdProvider.notifier).set(null);
       ref.read(replyingToUserNameProvider.notifier).set(null);
+      ref.read(replyingToUserIdProvider.notifier).set(null);
       _commentFocusNode.unfocus();
     } catch (e) {
       if (mounted) {
@@ -290,6 +306,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                             .read(replyingToCommentIdProvider.notifier)
                             .set(null);
                         ref.read(replyingToUserNameProvider.notifier).set(null);
+                        ref.read(replyingToUserIdProvider.notifier).set(null);
                         _commentController.clear();
                       },
                       child: Padding(
@@ -332,6 +349,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
                         !_commentFocusNode.hasFocus) {
                       ref.read(replyingToCommentIdProvider.notifier).set(null);
                       ref.read(replyingToUserNameProvider.notifier).set(null);
+                      ref.read(replyingToUserIdProvider.notifier).set(null);
                     }
                   },
                 ),

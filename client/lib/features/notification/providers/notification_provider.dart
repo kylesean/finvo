@@ -153,12 +153,7 @@ class NotificationNotifier extends _$NotificationNotifier {
     final itemToDelete = state.items.where((item) => item.id == id).firstOrNull;
     if (itemToDelete == null) return;
 
-    final repository = ref.read(notificationRepositoryProvider);
-    final success = await repository.deleteNotification(id);
-    if (!success) {
-      _logger.warning('deleteNotification failed for notification $id');
-      return;
-    }
+    // Optimistically remove from state for responsive UI
     final result = NotificationListMutations.delete(
       items: state.items,
       unreadCount: state.unreadCount,
@@ -171,6 +166,19 @@ class NotificationNotifier extends _$NotificationNotifier {
       total: (state.total - 1).clamp(0, 9999),
       unreadCount: result.unreadCount,
     );
+
+    // If ID is synthetic local-only ID (rt_), skip network deletion call
+    if (id.startsWith('rt_')) return;
+
+    try {
+      final repository = ref.read(notificationRepositoryProvider);
+      final success = await repository.deleteNotification(id);
+      if (!success) {
+        _logger.warning('deleteNotification API failed for notification $id');
+      }
+    } catch (e) {
+      _logger.warning('deleteNotification failed for notification $id', e);
+    }
   }
 
   int _realtimeNotificationSeq = 0;
@@ -189,8 +197,12 @@ class NotificationNotifier extends _$NotificationNotifier {
     Map<String, dynamic> payload,
     String type,
   ) {
+    final serverId =
+        payload['id']?.toString() ?? payload['data']?['id']?.toString();
     final item = NotificationItem(
-      id: 'rt_${DateTime.now().millisecondsSinceEpoch}_${_realtimeNotificationSeq++}',
+      id: (serverId != null && serverId.isNotEmpty)
+          ? serverId
+          : 'rt_${DateTime.now().millisecondsSinceEpoch}_${_realtimeNotificationSeq++}',
       userId: '',
       type: type,
       title: payload['title']?.toString() ?? '',

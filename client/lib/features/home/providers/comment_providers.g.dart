@@ -51,7 +51,7 @@ final class TransactionCommentsProvider
 }
 
 String _$transactionCommentsHash() =>
-    r'c426d62bd6220a9aff776db20c3f09a66fe32ab0';
+    r'adf7c793db42fddcb2ef3114697fc6d14632b800';
 
 final class TransactionCommentsFamily extends $Family
     with
@@ -190,6 +190,76 @@ String _$replyingToUserNameHash() =>
     r'9df9f97c537e6ece1ed2516dc416dec2c71b485a';
 
 abstract class _$ReplyingToUserName extends $Notifier<String?> {
+  String? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// User id of the comment the user tapped to reply to. Captured AT TAP TIME so
+/// the reply target survives send-time races (e.g. the comment list reloading
+/// via WebSocket between tap and send, which would previously drop the target
+/// and silently post the reply as a top-level comment with no notification).
+
+@ProviderFor(ReplyingToUserId)
+final replyingToUserIdProvider = ReplyingToUserIdProvider._();
+
+/// User id of the comment the user tapped to reply to. Captured AT TAP TIME so
+/// the reply target survives send-time races (e.g. the comment list reloading
+/// via WebSocket between tap and send, which would previously drop the target
+/// and silently post the reply as a top-level comment with no notification).
+final class ReplyingToUserIdProvider
+    extends $NotifierProvider<ReplyingToUserId, String?> {
+  /// User id of the comment the user tapped to reply to. Captured AT TAP TIME so
+  /// the reply target survives send-time races (e.g. the comment list reloading
+  /// via WebSocket between tap and send, which would previously drop the target
+  /// and silently post the reply as a top-level comment with no notification).
+  ReplyingToUserIdProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'replyingToUserIdProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$replyingToUserIdHash();
+
+  @$internal
+  @override
+  ReplyingToUserId create() => ReplyingToUserId();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$replyingToUserIdHash() => r'9968569984b90c83f202c220d2968932765f6b29';
+
+/// User id of the comment the user tapped to reply to. Captured AT TAP TIME so
+/// the reply target survives send-time races (e.g. the comment list reloading
+/// via WebSocket between tap and send, which would previously drop the target
+/// and silently post the reply as a top-level comment with no notification).
+
+abstract class _$ReplyingToUserId extends $Notifier<String?> {
   String? build();
   @$mustCallSuper
   @override

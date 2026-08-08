@@ -62,6 +62,22 @@ class TransactionCommentService:
 
         raise NotFoundError("Transaction")
 
+    async def _get_space_member_uuids(self, transaction_id: UUID) -> set[str]:
+        """UUIDs of every ACCEPTED member of the shared spaces a transaction is
+        linked to (excluding nobody; the commenter is filtered upstream).
+        """
+        from app.models.shared_space import SpaceMember, SpaceTransaction
+
+        result = await self.db.execute(
+            select(SpaceMember.user_uuid)
+            .join(SpaceTransaction, SpaceTransaction.space_id == SpaceMember.space_id)
+            .where(
+                SpaceTransaction.transaction_id == transaction_id,
+                SpaceMember.status == "ACCEPTED",
+            )
+        )
+        return {str(uuid) for (uuid,) in result.all()}
+
     async def get_comments_for_transaction(self, transaction_id: UUID, user_uuid: UUID) -> list[dict[str, Any]]:
         """Get transaction comments list
 
@@ -93,30 +109,22 @@ class TransactionCommentService:
         if not comments_data:
             return []
 
-        # Batch-load parent comments in one query to avoid N+1.
-        parent_ids = {c.parent_comment_id for c, _, _ in comments_data if c.parent_comment_id}
-        parent_by_id: dict[Any, tuple[Any, str | None]] = {}
-        if parent_ids:
-            parent_query = (
-                select(TransactionComment, User.username)
-                .join(User, TransactionComment.user_uuid == User.id)
-                .where(TransactionComment.id.in_(parent_ids))
-            )
-            parent_result = await self.db.execute(parent_query)
-            for pc, pn in parent_result.all():
-                parent_by_id[pc.id] = (pc, pn)
+        # Batch-load user info for the explicit reply targets (replied_to_user_uuid
+        # column). The reply target is always persisted at creation time, so no
+        # parent-author fallback is needed.
+        replied_to_ids = {c.replied_to_user_uuid for c, _, _ in comments_data if c.replied_to_user_uuid}
+        user_by_uuid: dict[Any, str | None] = {}
+        if replied_to_ids:
+            user_query = select(User.uuid, User.username).where(User.uuid.in_(replied_to_ids))
+            for uuid, uname in (await self.db.execute(user_query)).all():
+                user_by_uuid[uuid] = uname
 
         # Format comment data
         formatted_comments = []
         for comment, user_name, user_avatar_url in comments_data:
-            # If there is a parent comment, get the information of the user being replied to
-            replied_to_user_uuid = None
-            replied_to_user_name = None
-
-            if comment.parent_comment_id and comment.parent_comment_id in parent_by_id:
-                parent_comment, parent_user_name = parent_by_id[comment.parent_comment_id]
-                replied_to_user_uuid = str(parent_comment.user_uuid)
-                replied_to_user_name = parent_user_name
+            # Reply target comes straight from the persisted column.
+            replied_to_user_uuid = comment.replied_to_user_uuid
+            replied_to_user_name = user_by_uuid.get(replied_to_user_uuid)
 
             formatted_comments.append(
                 {
@@ -127,7 +135,7 @@ class TransactionCommentService:
                     "userAvatarUrl": user_avatar_url or default_avatar_url(comment.user_uuid),
                     "parentCommentId": str(comment.parent_comment_id) if comment.parent_comment_id else None,
                     "commentText": comment.comment_text,
-                    "repliedToUserId": replied_to_user_uuid,
+                    "repliedToUserId": str(replied_to_user_uuid) if replied_to_user_uuid else None,
                     "repliedToUserName": replied_to_user_name,
                     "createdAt": comment.created_at.isoformat(),
                     "updatedAt": comment.updated_at.isoformat() if comment.updated_at else None,
@@ -144,6 +152,7 @@ class TransactionCommentService:
         parent_comment_id: UUID | None = None,
         mentioned_user_ids: list[str] | None = None,
         commenter_username: str = "Unknown",
+        replied_to_user_id: UUID | None = None,
     ) -> dict[str, Any]:
         """Add transaction comment
 
@@ -154,6 +163,13 @@ class TransactionCommentService:
             parent_comment_id: Optional parent comment ID
             mentioned_user_ids: Optional list of mentioned user UUIDs
             commenter_username: Username of the commenter for notification
+            replied_to_user_id: Explicit user the reply is directed at. In the
+                flattened single-level reply layout the parent comment is the
+                thread's root, whose author may differ from the user the reply
+                targets; persisting the explicit target keeps the display
+                (and notification) accurate. When omitted, the parent
+                comment's author is the creation-time default so replies
+                always carry a notification target.
 
         Returns:
             New comment dictionary
@@ -168,7 +184,7 @@ class TransactionCommentService:
             raise BusinessError("Comment content cannot be empty", TransactionErrorCode.TRANSACTION_COMMENT_NULL)
 
         # Validate transaction exists and user has access
-        await self._can_access_transaction_comments(transaction_id, user_uuid)
+        transaction = await self._can_access_transaction_comments(transaction_id, user_uuid)
 
         # If there is a parent comment, validate the parent comment
         parent_comment: TransactionComment | None = None
@@ -190,11 +206,36 @@ class TransactionCommentService:
                 raise BusinessError("Cannot reply to a child comment", TransactionErrorCode.INVALID_PARENT_COMMENT_ID)
 
         # Create new comment
+        # Reply target resolution: the explicit user the client tapped wins;
+        # when the client omits it, the parent comment's author is the
+        # creation-time default so replies ALWAYS carry a notification target
+        # (never a legacy-data fallback — the value is applied on insert and
+        # stays in the column for all future reads).
+        resolved_reply_target: UUID | None = replied_to_user_id
+        if resolved_reply_target is None and parent_comment is not None:
+            resolved_reply_target = parent_comment.user_uuid
+        if resolved_reply_target == user_uuid and parent_comment is not None:
+            last_child_query = (
+                select(TransactionComment.user_uuid)
+                .where(
+                    and_(
+                        TransactionComment.parent_comment_id == parent_comment.id,
+                        TransactionComment.user_uuid != user_uuid,
+                    )
+                )
+                .order_by(TransactionComment.created_at.desc())
+                .limit(1)
+            )
+            last_child_res = await self.db.execute(last_child_query)
+            last_author = last_child_res.scalar_one_or_none()
+            resolved_reply_target = last_author
+
         new_comment = TransactionComment(
             transaction_id=transaction_id,
             user_uuid=user_uuid,
             comment_text=comment_text,
             parent_comment_id=parent_comment_id,
+            replied_to_user_uuid=resolved_reply_target,
         )
 
         # Flush (not commit): the comment and its notifications are ONE logical
@@ -212,12 +253,19 @@ class TransactionCommentService:
             is_reply=bool(parent_comment_id),
         )
 
-        # Collect users to notify: mentioned + parent comment author (on reply)
+        # Collect users to notify: the transaction owner, the reply target
+        # (explicit, or creation-time default = parent's author), every
+        # ACCEPTED member of a linked shared space (a comment in a group is
+        # group-visible), plus anyone mentioned in the text. The commenter
+        # never notifies themselves.
+        transaction_owner_uuid = str(transaction.user_uuid)
+        space_member_uuids = await self._get_space_member_uuids(transaction_id)
         users_to_notify: set[str] = set(mentioned_user_ids or [])
-        if parent_comment is not None:
-            users_to_notify.add(str(parent_comment.user_uuid))
+        if resolved_reply_target is not None:
+            users_to_notify.add(str(resolved_reply_target))
+        users_to_notify.add(transaction_owner_uuid)
+        users_to_notify.update(space_member_uuids)
 
-        # Don't notify the commenter themselves
         users_to_notify.discard(str(user_uuid))
 
         if users_to_notify:
@@ -227,7 +275,9 @@ class TransactionCommentService:
                 comment_id=new_comment.uuid,
                 commenter_username=commenter_username,
                 comment_text=comment_text,
-                parent_author_uuid=str(parent_comment.user_uuid) if parent_comment is not None else None,
+                reply_target_uuids=({str(resolved_reply_target)} if resolved_reply_target is not None else set()),
+                transaction_owner_uuid=transaction_owner_uuid,
+                space_member_uuids=space_member_uuids,
             )
 
         # Single commit point: comment + notifications are persisted together.
@@ -259,15 +309,17 @@ class TransactionCommentService:
 
         comment, user_name, user_avatar_url = comment_data
 
-        # If there is a parent comment, get the information of the user being replied to
-        replied_to_user_uuid = None
+        # Reply target resolution is the value persisted on insert above
+        # (explicit client target, or the creation-time default = parent
+        # author); the display and the notification always agree with it.
+        replied_to_user_uuid: str | None = None
         replied_to_user_name = None
 
-        if parent_comment is not None:
-            reply_context_query = select(User.username).where(User.uuid == parent_comment.user_uuid)
+        if resolved_reply_target is not None:
+            reply_context_query = select(User.username).where(User.uuid == resolved_reply_target)
             reply_context_result = await self.db.execute(reply_context_query)
             replied_to_user_name = reply_context_result.scalar_one_or_none()
-            replied_to_user_uuid = str(parent_comment.user_uuid)
+            replied_to_user_uuid = str(resolved_reply_target)
 
         return {
             "id": str(comment.id),
@@ -290,18 +342,38 @@ class TransactionCommentService:
         comment_id: UUID,
         commenter_username: str,
         comment_text: str,
-        parent_author_uuid: str | None = None,
+        reply_target_uuids: set[str] | None = None,
+        transaction_owner_uuid: str | None = None,
+        space_member_uuids: set[str] | None = None,
     ) -> None:
         """Create notifications for mentioned users and push via WebSocket.
 
         Notification rows are added to the caller's session and committed by the
         caller — never here — so a comment and its notifications share one
         atomic transaction. WebSocket pushes remain best-effort.
+
+        Args:
+            mentioned_user_ids: Users to notify (mentions + reply targets
+                + transaction owner + space members).
+            transaction_id: Transaction the comment belongs to.
+            comment_id: Comment that triggered the notification.
+            commenter_username: Display name of the comment author.
+            comment_text: Comment body (used for the notification preview).
+            reply_target_uuids: User IDs the comment is directly addressed to;
+                they get the "replied to your comment" title.
+            transaction_owner_uuid: Owner of the transaction; they get the
+                "commented on your transaction" title for direct comments.
+            space_member_uuids: Members of the linked shared spaces; they get
+                the "commented on a shared transaction" title.
         """
         from app.core.ws_manager import ws_manager
         from app.models.notification import Notification
 
         target_path = f"/home/transaction/{transaction_id}?commentId={comment_id}"
+
+        reply_targets: set[str] = set(reply_target_uuids or ())
+        space_members: set[str] = set(space_member_uuids or ())
+        created_notifications: dict[str, Notification] = {}
 
         for mentioned_id in mentioned_user_ids:
             try:
@@ -309,18 +381,26 @@ class TransactionCommentService:
             except ValueError:
                 continue
 
-            is_parent_author_reply = parent_author_uuid is not None and str(mentioned_uuid) == parent_author_uuid
-            title = (
-                f"{commenter_username} replied to your comment"
-                if is_parent_author_reply
-                else f"{commenter_username} mentioned you"
-            )
+            mentioned_id_str = str(mentioned_uuid)
+            if mentioned_id_str in reply_targets:
+                title = f"{commenter_username} 回复了你的评论"
+                comment_kind = "reply"
+            elif transaction_owner_uuid is not None and mentioned_id_str == transaction_owner_uuid:
+                title = f"{commenter_username} 评论了你的账单"
+                comment_kind = "owner"
+            elif mentioned_id_str in space_members:
+                title = f"{commenter_username} 在共享账单中发表了评论"
+                comment_kind = "space"
+            else:
+                title = f"{commenter_username} 提到了你"
+                comment_kind = "mention"
 
             notification_data = {
                 "transactionId": str(transaction_id),
                 "transaction_id": str(transaction_id),
                 "commentId": str(comment_id),
                 "comment_id": str(comment_id),
+                "commentKind": comment_kind,
                 "target_path": target_path,
                 "commenter": commenter_username,
             }
@@ -334,26 +414,46 @@ class TransactionCommentService:
                 data=notification_data,
             )
             self.db.add(notification)
+            created_notifications[mentioned_id_str] = notification
+
+        await self.db.flush()
 
         # Push via WebSocket (best effort, don't fail the comment)
         for mentioned_id in mentioned_user_ids:
             try:
-                is_parent_author_reply = parent_author_uuid is not None and mentioned_id == parent_author_uuid
-                title = (
-                    f"{commenter_username} replied to your comment"
-                    if is_parent_author_reply
-                    else f"{commenter_username} mentioned you"
-                )
+                try:
+                    mentioned_uuid = UUID(mentioned_id)
+                except ValueError:
+                    continue
+                mentioned_id_str = str(mentioned_uuid)
+
+                is_target_reply = mentioned_id_str in reply_targets
+                if is_target_reply:
+                    title = f"{commenter_username} 回复了你的评论"
+                    comment_kind = "reply"
+                elif transaction_owner_uuid is not None and mentioned_id_str == transaction_owner_uuid:
+                    title = f"{commenter_username} 评论了你的账单"
+                    comment_kind = "owner"
+                elif mentioned_id_str in space_members:
+                    title = f"{commenter_username} 在共享账单中发表了评论"
+                    comment_kind = "space"
+                else:
+                    title = f"{commenter_username} 提到了你"
+                    comment_kind = "mention"
+
+                notification_obj = created_notifications.get(mentioned_id_str)
 
                 await ws_manager.send_notification(
-                    mentioned_id,
+                    mentioned_id_str,
                     {
+                        "id": str(notification_obj.id) if notification_obj is not None else None,
                         "type": "bill_comment",
                         "title": title,
                         "message": comment_text[:100],
                         "data": {
                             "transactionId": str(transaction_id),
                             "commentId": str(comment_id),
+                            "commentKind": comment_kind,
                             "target_path": target_path,
                         },
                     },

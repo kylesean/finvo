@@ -67,7 +67,7 @@ class NotificationCard extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                notification.title,
+                                _buildSemanticTitle(),
                                 style: AppTextStyles.listTitle(theme).copyWith(
                                   color: notification.isRead
                                       ? colors.mutedForeground
@@ -207,5 +207,45 @@ class NotificationCard extends StatelessWidget {
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) return t.sharedSpace.notificationCard.unknownTime;
     return relativeTime(dateTime);
+  }
+
+  String _buildSemanticTitle() {
+    final data = notification.data;
+    final username =
+        (data?['joined_username'] ??
+                data?['added_by_username'] ??
+                data?['username'] ??
+                '')
+            .toString();
+    final commenter = (data?['commenter'] ?? '').toString();
+
+    return switch (notification.type) {
+      NotificationType.memberJoined =>
+        username.isNotEmpty
+            ? t.notification.semantic.memberJoined(name: username)
+            : notification.title,
+      NotificationType.newTransaction =>
+        username.isNotEmpty
+            ? t.notification.semantic.newTransaction(name: username)
+            : notification.title,
+      NotificationType.memberLeft =>
+        username.isNotEmpty
+            ? t.notification.semantic.memberLeft(name: username)
+            : notification.title,
+      NotificationType.billComment => _buildBillCommentTitle(commenter),
+      _ => notification.title,
+    };
+  }
+
+  String _buildBillCommentTitle(String commenter) {
+    if (commenter.isEmpty) return notification.title;
+    final kind = notification.data?['commentKind']?.toString();
+    return switch (kind) {
+      'reply' => t.notification.semantic.commentReplied(name: commenter),
+      'owner' => t.notification.semantic.commentOnTransaction(name: commenter),
+      'space' => t.notification.semantic.commentInSpace(name: commenter),
+      'mention' => t.notification.semantic.commentMentioned(name: commenter),
+      _ => notification.title,
+    };
   }
 }

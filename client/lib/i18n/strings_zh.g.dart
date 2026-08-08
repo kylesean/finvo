@@ -4159,6 +4159,18 @@ class Translations$notification$semantic$zh {
 
 	/// zh: '${description} ${amount}，等待您确认记账'
 	String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}，等待您确认记账';
+
+	/// zh: '${name} 回复了你的评论'
+	String commentReplied({required Object name}) => '${name} 回复了你的评论';
+
+	/// zh: '${name} 评论了你的账单'
+	String commentOnTransaction({required Object name}) => '${name} 评论了你的账单';
+
+	/// zh: '${name} 提到了你'
+	String commentMentioned({required Object name}) => '${name} 提到了你';
+
+	/// zh: '${name} 在你的空间中评论了'
+	String commentInSpace({required Object name}) => '${name} 在你的空间中评论了';
 }
 
 // Path: chat.tools.done
@@ -6538,6 +6550,10 @@ extension on Translations {
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name} 离开了空间',
 			'notification.semantic.recurringPending' => '周期交易待确认',
 			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}，等待您确认记账',
+			'notification.semantic.commentReplied' => ({required Object name}) => '${name} 回复了你的评论',
+			'notification.semantic.commentOnTransaction' => ({required Object name}) => '${name} 评论了你的账单',
+			'notification.semantic.commentMentioned' => ({required Object name}) => '${name} 提到了你',
+			'notification.semantic.commentInSpace' => ({required Object name}) => '${name} 在你的空间中评论了',
 			_ => null,
 		};
 	}

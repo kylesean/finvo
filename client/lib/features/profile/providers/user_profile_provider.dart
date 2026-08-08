@@ -41,8 +41,10 @@ class UserProfile extends _$UserProfile {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final user = await _service.getCurrentUser();
+      if (!ref.mounted) return;
       state = state.copyWith(user: user, isLoading: false);
     } catch (e) {
+      if (!ref.mounted) return;
       state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
   }
@@ -54,10 +56,12 @@ class UserProfile extends _$UserProfile {
     state = state.copyWith(isSaving: true, error: null);
     try {
       final updatedUser = await _service.updateProfile(username: newUsername);
+      if (!ref.mounted) return false;
       state = state.copyWith(user: updatedUser, isSaving: false);
       _syncUserWithAuth();
       return true;
     } catch (e) {
+      if (!ref.mounted) return false;
       state = state.copyWith(isSaving: false, error: safeErrorMessage(e));
       return false;
     }
@@ -80,11 +84,13 @@ class UserProfile extends _$UserProfile {
 
       // 3. Update profile with new avatar URL
       final updatedUser = await _service.updateProfile(avatarUrl: avatarUrl);
+      if (!ref.mounted) return false;
 
       state = state.copyWith(user: updatedUser, isUploadingAvatar: false);
       _syncUserWithAuth();
       return true;
     } catch (e) {
+      if (!ref.mounted) return false;
       state = state.copyWith(
         isUploadingAvatar: false,
         error: safeErrorMessage(e),
@@ -98,10 +104,12 @@ class UserProfile extends _$UserProfile {
     state = state.copyWith(isSaving: true, error: null);
     try {
       final updatedUser = await _service.updateProfile(avatarUrl: avatarUrl);
+      if (!ref.mounted) return false;
       state = state.copyWith(user: updatedUser, isSaving: false);
       _syncUserWithAuth();
       return true;
     } catch (e) {
+      if (!ref.mounted) return false;
       state = state.copyWith(isSaving: false, error: safeErrorMessage(e));
       return false;
     }

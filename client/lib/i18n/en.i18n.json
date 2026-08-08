@@ -1565,7 +1565,11 @@
       "newTransactionDetail": "${amount} in \"${space}\"",
       "memberLeft": "${name} left the space",
       "recurringPending": "Recurring transaction pending",
-      "recurringPendingDetail": "${description} ${amount}, awaiting your confirmation"
+      "recurringPendingDetail": "${description} ${amount}, awaiting your confirmation",
+      "commentReplied": "${name} replied to your comment",
+      "commentOnTransaction": "${name} commented on your transaction",
+      "commentMentioned": "${name} mentioned you",
+      "commentInSpace": "${name} commented in your space"
     }
   }
 }

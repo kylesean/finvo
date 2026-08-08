@@ -157,6 +157,8 @@ class _CommentSectionWidgetState extends ConsumerState<CommentSectionWidget> {
                       comment: reply,
                       transactionId: widget.transactionId,
                       isHighlighted: widget.targetCommentId == reply.id,
+                      parentAuthorId: parent.userId,
+                      parentAuthorName: parent.userName,
                     ),
                   ),
                 );

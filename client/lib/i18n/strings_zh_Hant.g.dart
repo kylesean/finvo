@@ -1945,6 +1945,10 @@ class _Translations$notification$semantic$zh_Hant extends Translations$notificat
 	@override String memberLeft({required Object name}) => '${name} 離開了空間';
 	@override String get recurringPending => '週期交易待確認';
 	@override String recurringPendingDetail({required Object description, required Object amount}) => '${description} ${amount}，等待您確認記帳';
+	@override String commentReplied({required Object name}) => '${name} 回覆了你的評論';
+	@override String commentOnTransaction({required Object name}) => '${name} 評論了你的帳單';
+	@override String commentMentioned({required Object name}) => '${name} 提到了你';
+	@override String commentInSpace({required Object name}) => '${name} 在你的空間中評論了';
 }
 
 // Path: chat.tools.done
@@ -3861,6 +3865,10 @@ extension on TranslationsZhHant {
 			'notification.semantic.memberLeft' => ({required Object name}) => '${name} 離開了空間',
 			'notification.semantic.recurringPending' => '週期交易待確認',
 			'notification.semantic.recurringPendingDetail' => ({required Object description, required Object amount}) => '${description} ${amount}，等待您確認記帳',
+			'notification.semantic.commentReplied' => ({required Object name}) => '${name} 回覆了你的評論',
+			'notification.semantic.commentOnTransaction' => ({required Object name}) => '${name} 評論了你的帳單',
+			'notification.semantic.commentMentioned' => ({required Object name}) => '${name} 提到了你',
+			'notification.semantic.commentInSpace' => ({required Object name}) => '${name} 在你的空間中評論了',
 			_ => null,
 		};
 	}

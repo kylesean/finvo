@@ -1558,7 +1558,11 @@
       "newTransactionDetail": "${amount}，來自「${space}」",
       "memberLeft": "${name} 離開了空間",
       "recurringPending": "週期交易待確認",
-      "recurringPendingDetail": "${description} ${amount}，等待您確認記帳"
+      "recurringPendingDetail": "${description} ${amount}，等待您確認記帳",
+      "commentReplied": "${name} 回覆了你的評論",
+      "commentOnTransaction": "${name} 評論了你的帳單",
+      "commentMentioned": "${name} 提到了你",
+      "commentInSpace": "${name} 在你的空間中評論了"
     }
   }
 }

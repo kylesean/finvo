@@ -45,7 +45,7 @@ final class ConversationSearchProvider
 }
 
 String _$conversationSearchHash() =>
-    r'0cdfd0ef343d0ce3b4f849dc1c7c7f5090e168b2';
+    r'0af9b948d304e45637f036f51cf57c570d308fb8';
 
 /// Conversation search state management
 

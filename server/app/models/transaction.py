@@ -185,6 +185,13 @@ class TransactionComment(Base):
     parent_comment_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("transaction_comments.id", ondelete="CASCADE"), nullable=True
     )
+    replied_to_user_uuid: Mapped[UUID | None] = col.uuid_fk(
+        "users",
+        ondelete="SET NULL",
+        index=True,
+        nullable=True,
+        column="id",
+    )
     comment_text: Mapped[str] = mapped_column(Text)
     mentioned_user_ids: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = col.timestamptz()

@@ -318,6 +318,7 @@ class CommentCreateRequest(BaseModel):
     comment_text: str = Field(min_length=1)
     parent_comment_id: UUID | None = None
     mentioned_user_ids: list[str] | None = None  # UUIDs of mentioned users
+    replied_to_user_id: UUID | None = None  # User actually being replied to
 
 
 # Response schemas
@@ -360,6 +361,8 @@ class TransactionCommentItem(BaseModel):
     user_avatar_url: str | None = Field(None, serialization_alias="userAvatarUrl")
     parent_comment_id: str | None = Field(None, serialization_alias="parentCommentId")
     comment_text: str = Field(..., serialization_alias="commentText")
+    replied_to_user_id: str | None = Field(None, serialization_alias="repliedToUserId")
+    replied_to_user_name: str | None = Field(None, serialization_alias="repliedToUserName")
     mentioned_user_ids: list[str] = Field(default_factory=list, serialization_alias="mentionedUserIds")
     created_at: str | None = Field(None, serialization_alias="createdAt")
     updated_at: str | None = Field(None, serialization_alias="updatedAt")

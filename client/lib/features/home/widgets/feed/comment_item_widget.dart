@@ -26,12 +26,16 @@ class CommentItemWidget extends ConsumerWidget {
   final CommentModel comment;
   final String transactionId;
   final bool isHighlighted;
+  final String? parentAuthorId;
+  final String? parentAuthorName;
 
   const CommentItemWidget({
     super.key,
     required this.comment,
     required this.transactionId,
     this.isHighlighted = false,
+    this.parentAuthorId,
+    this.parentAuthorName,
   });
 
   void _triggerReply(WidgetRef ref, String commentId, String userName) {
@@ -39,9 +43,11 @@ class CommentItemWidget extends ConsumerWidget {
     if (currentReplyingTo == commentId) {
       ref.read(replyingToCommentIdProvider.notifier).set(null);
       ref.read(replyingToUserNameProvider.notifier).set(null);
+      ref.read(replyingToUserIdProvider.notifier).set(null);
     } else {
       ref.read(replyingToCommentIdProvider.notifier).set(commentId);
       ref.read(replyingToUserNameProvider.notifier).set(userName);
+      ref.read(replyingToUserIdProvider.notifier).set(comment.userId);
     }
   }
 
@@ -128,55 +134,65 @@ class CommentItemWidget extends ConsumerWidget {
     final bool isSubComment = comment.parentCommentId != null;
     final String currentLoggedInUserId = ref.watch(currentUserIdProvider);
     final bool isSelf = comment.userId == currentLoggedInUserId;
-    final bool isRepliedToSelf =
-        comment.repliedToUserId == currentLoggedInUserId;
 
     // Build username display, including interactive reply target
+    // Names and the ">" separator stay muted so the comment content stands
+    // out; the reply target remains tappable.
+    final TextStyle mutedNameStyle = AppTextStyles.listTrailing(
+      theme,
+    ).copyWith(color: colorScheme.mutedForeground, fontWeight: FontWeight.w500);
+
     Widget buildUserNameDisplay() {
       final List<Widget> nameParts = [
-        Text(comment.userName, style: AppTextStyles.listTrailing(theme)),
+        Text(comment.userName, style: mutedNameStyle),
       ];
 
-      // Check if it's a child comment and has reply-to user info
-      if (isSubComment &&
+      // Social comment display rule:
+      // 1. Suppress self-reply (A > A).
+      // 2. Suppress direct replies to the root comment by sub-authors (A replying to root B -> A).
+      // 3. Show "> TargetName" when replying to sub-comment authors (B replying to sub-author A -> B > A).
+      final bool isSelfReply = comment.repliedToUserId != null
+          ? comment.repliedToUserId == comment.userId
+          : comment.repliedToUserName == comment.userName;
+
+      final bool isDirectToRoot =
+          comment.repliedToUserId != null && parentAuthorId != null
+          ? (comment.repliedToUserId == parentAuthorId &&
+                comment.userId != parentAuthorId)
+          : (parentAuthorName != null &&
+                comment.repliedToUserName == parentAuthorName &&
+                comment.userName != parentAuthorName);
+
+      final bool shouldShowReplyTarget =
+          isSubComment &&
           comment.repliedToUserName != null &&
-          comment.repliedToUserName!.isNotEmpty) {
+          comment.repliedToUserName!.isNotEmpty &&
+          !isSelfReply &&
+          !isDirectToRoot;
+
+      if (shouldShowReplyTarget) {
         nameParts.addAll([
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Icon(
               FLucideIcons.chevronRight,
               size: 12,
-              color: colorScheme.mutedForeground,
+              color: colorScheme.mutedForeground.withValues(alpha: 0.8),
             ),
           ),
           Flexible(
-            child: isRepliedToSelf
-                ? Text(
-                    comment.repliedToUserName!,
-                    style: AppTextStyles.listTrailing(theme).copyWith(
-                      color: colorScheme.mutedForeground,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  )
-                : GestureDetector(
-                    onTap: () {
-                      _triggerReply(
-                        ref,
-                        comment.id,
-                        comment.repliedToUserName!,
-                      );
-                    },
-                    child: Text(
-                      comment.repliedToUserName!,
-                      style: AppTextStyles.listTrailing(theme).copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+            child: GestureDetector(
+              onTap: () {
+                _triggerReply(ref, comment.id, comment.repliedToUserName!);
+              },
+              child: Text(
+                comment.repliedToUserName!,
+                style: mutedNameStyle.copyWith(
+                  color: colorScheme.mutedForeground.withValues(alpha: 0.8),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
         ]);
       }

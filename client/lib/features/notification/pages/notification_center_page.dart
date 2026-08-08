@@ -323,6 +323,7 @@ class _NotificationTile extends StatelessWidget {
         (data?['joined_username'] ?? data?['added_by_username'] ?? '')
             .toString();
     final spaceName = (data?['space_name'] ?? '').toString();
+    final commenter = (data?['commenter'] ?? '').toString();
 
     return switch (item.type) {
       'member_joined' =>
@@ -341,7 +342,23 @@ class _NotificationTile extends StatelessWidget {
         username.isNotEmpty
             ? t.notification.semantic.memberLeft(name: username)
             : item.title,
+      'bill_comment' => _buildBillCommentTitle(commenter),
       'recurring_pending' => t.notification.semantic.recurringPending,
+      _ => item.title,
+    };
+  }
+
+  /// Localized title for bill comments, driven by the server-sent
+  /// ``commentKind`` (reply / owner / mention) so each recipient sees the
+  /// text in their own language instead of the server's English fallback.
+  String _buildBillCommentTitle(String commenter) {
+    if (commenter.isEmpty) return item.title;
+    final kind = item.data?['commentKind']?.toString();
+    return switch (kind) {
+      'reply' => t.notification.semantic.commentReplied(name: commenter),
+      'owner' => t.notification.semantic.commentOnTransaction(name: commenter),
+      'space' => t.notification.semantic.commentInSpace(name: commenter),
+      'mention' => t.notification.semantic.commentMentioned(name: commenter),
       _ => item.title,
     };
   }

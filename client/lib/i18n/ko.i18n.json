@@ -1560,7 +1560,11 @@
       "newTransactionDetail": "${amount}, \"${space}\"에서",
       "memberLeft": "${name}님이 공간에서 나갔습니다",
       "recurringPending": "정기 거래 확인 대기",
-      "recurringPendingDetail": "${description} ${amount}, 확인을 기다리고 있습니다"
+      "recurringPendingDetail": "${description} ${amount}, 확인을 기다리고 있습니다",
+      "commentReplied": "${name}님이 내 댓글에 답글을 달았습니다",
+      "commentOnTransaction": "${name}님이 내 거래에 댓글을 남겼습니다",
+      "commentMentioned": "${name}님이 나를 언급했습니다",
+      "commentInSpace": "${name}님이 내 공간에 댓글을 남겼습니다"
     }
   }
 }

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$StatisticsOverview {
 
- String get totalBalance; String get totalIncome; String get totalExpense; double get incomeChangePercent; double get expenseChangePercent; double get netChangePercent; String get balanceNote; DateTime get periodStart; DateTime get periodEnd;
+ String get totalBalance; String get totalIncome; String get totalExpense;@JsonKey(fromJson: tryDouble) double get incomeChangePercent;@JsonKey(fromJson: tryDouble) double get expenseChangePercent;@JsonKey(fromJson: tryDouble) double get netChangePercent; String get balanceNote; DateTime get periodStart; DateTime get periodEnd;
 /// Create a copy of StatisticsOverview
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $StatisticsOverviewCopyWith<$Res>  {
   factory $StatisticsOverviewCopyWith(StatisticsOverview value, $Res Function(StatisticsOverview) _then) = _$StatisticsOverviewCopyWithImpl;
 @useResult
 $Res call({
- String totalBalance, String totalIncome, String totalExpense, double incomeChangePercent, double expenseChangePercent, double netChangePercent, String balanceNote, DateTime periodStart, DateTime periodEnd
+ String totalBalance, String totalIncome, String totalExpense,@JsonKey(fromJson: tryDouble) double incomeChangePercent,@JsonKey(fromJson: tryDouble) double expenseChangePercent,@JsonKey(fromJson: tryDouble) double netChangePercent, String balanceNote, DateTime periodStart, DateTime periodEnd
 });
 
 
@@ -161,7 +161,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String totalBalance,  String totalIncome,  String totalExpense,  double incomeChangePercent,  double expenseChangePercent,  double netChangePercent,  String balanceNote,  DateTime periodStart,  DateTime periodEnd)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String totalBalance,  String totalIncome,  String totalExpense, @JsonKey(fromJson: tryDouble)  double incomeChangePercent, @JsonKey(fromJson: tryDouble)  double expenseChangePercent, @JsonKey(fromJson: tryDouble)  double netChangePercent,  String balanceNote,  DateTime periodStart,  DateTime periodEnd)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StatisticsOverview() when $default != null:
 return $default(_that.totalBalance,_that.totalIncome,_that.totalExpense,_that.incomeChangePercent,_that.expenseChangePercent,_that.netChangePercent,_that.balanceNote,_that.periodStart,_that.periodEnd);case _:
@@ -182,7 +182,7 @@ return $default(_that.totalBalance,_that.totalIncome,_that.totalExpense,_that.in
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String totalBalance,  String totalIncome,  String totalExpense,  double incomeChangePercent,  double expenseChangePercent,  double netChangePercent,  String balanceNote,  DateTime periodStart,  DateTime periodEnd)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String totalBalance,  String totalIncome,  String totalExpense, @JsonKey(fromJson: tryDouble)  double incomeChangePercent, @JsonKey(fromJson: tryDouble)  double expenseChangePercent, @JsonKey(fromJson: tryDouble)  double netChangePercent,  String balanceNote,  DateTime periodStart,  DateTime periodEnd)  $default,) {final _that = this;
 switch (_that) {
 case _StatisticsOverview():
 return $default(_that.totalBalance,_that.totalIncome,_that.totalExpense,_that.incomeChangePercent,_that.expenseChangePercent,_that.netChangePercent,_that.balanceNote,_that.periodStart,_that.periodEnd);case _:
@@ -202,7 +202,7 @@ return $default(_that.totalBalance,_that.totalIncome,_that.totalExpense,_that.in
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String totalBalance,  String totalIncome,  String totalExpense,  double incomeChangePercent,  double expenseChangePercent,  double netChangePercent,  String balanceNote,  DateTime periodStart,  DateTime periodEnd)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String totalBalance,  String totalIncome,  String totalExpense, @JsonKey(fromJson: tryDouble)  double incomeChangePercent, @JsonKey(fromJson: tryDouble)  double expenseChangePercent, @JsonKey(fromJson: tryDouble)  double netChangePercent,  String balanceNote,  DateTime periodStart,  DateTime periodEnd)?  $default,) {final _that = this;
 switch (_that) {
 case _StatisticsOverview() when $default != null:
 return $default(_that.totalBalance,_that.totalIncome,_that.totalExpense,_that.incomeChangePercent,_that.expenseChangePercent,_that.netChangePercent,_that.balanceNote,_that.periodStart,_that.periodEnd);case _:
@@ -217,15 +217,15 @@ return $default(_that.totalBalance,_that.totalIncome,_that.totalExpense,_that.in
 @JsonSerializable()
 
 class _StatisticsOverview implements StatisticsOverview {
-  const _StatisticsOverview({required this.totalBalance, required this.totalIncome, required this.totalExpense, required this.incomeChangePercent, required this.expenseChangePercent, required this.netChangePercent, this.balanceNote = '', required this.periodStart, required this.periodEnd});
+  const _StatisticsOverview({required this.totalBalance, required this.totalIncome, required this.totalExpense, @JsonKey(fromJson: tryDouble) required this.incomeChangePercent, @JsonKey(fromJson: tryDouble) required this.expenseChangePercent, @JsonKey(fromJson: tryDouble) required this.netChangePercent, this.balanceNote = '', required this.periodStart, required this.periodEnd});
   factory _StatisticsOverview.fromJson(Map<String, dynamic> json) => _$StatisticsOverviewFromJson(json);
 
 @override final  String totalBalance;
 @override final  String totalIncome;
 @override final  String totalExpense;
-@override final  double incomeChangePercent;
-@override final  double expenseChangePercent;
-@override final  double netChangePercent;
+@override@JsonKey(fromJson: tryDouble) final  double incomeChangePercent;
+@override@JsonKey(fromJson: tryDouble) final  double expenseChangePercent;
+@override@JsonKey(fromJson: tryDouble) final  double netChangePercent;
 @override@JsonKey() final  String balanceNote;
 @override final  DateTime periodStart;
 @override final  DateTime periodEnd;
@@ -263,7 +263,7 @@ abstract mixin class _$StatisticsOverviewCopyWith<$Res> implements $StatisticsOv
   factory _$StatisticsOverviewCopyWith(_StatisticsOverview value, $Res Function(_StatisticsOverview) _then) = __$StatisticsOverviewCopyWithImpl;
 @override @useResult
 $Res call({
- String totalBalance, String totalIncome, String totalExpense, double incomeChangePercent, double expenseChangePercent, double netChangePercent, String balanceNote, DateTime periodStart, DateTime periodEnd
+ String totalBalance, String totalIncome, String totalExpense,@JsonKey(fromJson: tryDouble) double incomeChangePercent,@JsonKey(fromJson: tryDouble) double expenseChangePercent,@JsonKey(fromJson: tryDouble) double netChangePercent, String balanceNote, DateTime periodStart, DateTime periodEnd
 });
 
 

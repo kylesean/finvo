@@ -1559,7 +1559,11 @@
       "newTransactionDetail": "${amount}、「${space}」より",
       "memberLeft": "${name} さんがスペースを退出しました",
       "recurringPending": "定期取引の確認待ち",
-      "recurringPendingDetail": "${description} ${amount}、確認待ちです"
+      "recurringPendingDetail": "${description} ${amount}、確認待ちです",
+      "commentReplied": "${name} さんがあなたのコメントに返信しました",
+      "commentOnTransaction": "${name} さんがあなたの取引にコメントしました",
+      "commentMentioned": "${name} さんがあなたをメンションしました",
+      "commentInSpace": "${name} さんがあなたのスペースにコメントしました"
     }
   }
 }

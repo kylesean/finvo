@@ -46,6 +46,7 @@ class CommentService {
     required String commentText,
     String? parentCommentId,
     List<String>? mentionedUserIds,
+    String? repliedToUserId,
   }) async {
     final Map<String, dynamic> requestData = {'comment_text': commentText};
     if (parentCommentId != null) {
@@ -53,6 +54,9 @@ class CommentService {
     }
     if (mentionedUserIds != null && mentionedUserIds.isNotEmpty) {
       requestData['mentioned_user_ids'] = mentionedUserIds;
+    }
+    if (repliedToUserId != null) {
+      requestData['replied_to_user_id'] = repliedToUserId;
     }
 
     return await _networkClient.request<CommentModel>(

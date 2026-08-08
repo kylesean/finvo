@@ -30,6 +30,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/features/auth/providers/auth_provider.dart';
 
 class TransactionDetailPage extends ConsumerWidget {
   final String transactionId;
@@ -91,6 +92,16 @@ class TransactionDetailPage extends ConsumerWidget {
     WidgetRef ref,
     TransactionModel transaction,
   ) {
+    // Whether the current user recorded this transaction themselves. When the
+    // record comes from a shared space and belongs to another member, edit,
+    // delete, link (account/space) and AI-thread entrypoint rights do not
+    // apply and the corresponding UI is hidden.
+    final currentUser = ref.watch(currentUserProvider);
+    final isMine =
+        currentUser != null &&
+        transaction.sharedWith.isNotEmpty &&
+        transaction.sharedWith.first.userId == currentUser.id;
+
     // Page header
     final pageHeader = _buildPageHeader(context, theme, colors, transaction);
 
@@ -159,20 +170,21 @@ class TransactionDetailPage extends ConsumerWidget {
                                       ],
                                     ),
                                   ),
-                                  FButton.icon(
-                                    // More actions button
-                                    variant: .ghost,
-                                    onPress: () => _showTransactionActions(
-                                      context,
-                                      ref,
-                                      transaction,
+                                  if (isMine)
+                                    FButton.icon(
+                                      // More actions button
+                                      variant: .ghost,
+                                      onPress: () => _showTransactionActions(
+                                        context,
+                                        ref,
+                                        transaction,
+                                      ),
+                                      child: Icon(
+                                        FLucideIcons.ellipsis,
+                                        color: colors.mutedForeground,
+                                        size: 20,
+                                      ),
                                     ),
-                                    child: Icon(
-                                      FLucideIcons.ellipsis,
-                                      color: colors.mutedForeground,
-                                      size: 20,
-                                    ),
-                                  ),
                                 ],
                               ),
                               const SizedBox(height: 24),
@@ -222,19 +234,27 @@ class TransactionDetailPage extends ConsumerWidget {
                               if (transaction.status == 'PENDING')
                                 const SizedBox(height: 12),
 
-                              // Linked account and space actions
-                              TransactionLinkSection(transaction: transaction),
+                              // Linked account and space actions (only the
+                              // recorder may link/move their own record)
+                              if (isMine)
+                                TransactionLinkSection(
+                                  transaction: transaction,
+                                ),
 
                               const SizedBox(height: 16),
                               const FDivider(axis: Axis.horizontal),
                               const SizedBox(height: 12),
-                              // Detail row - original entry text (user's raw input)
+                              // Detail row - original entry text (user's raw input).
+                              // The AI-chat jump icon only applies when the current
+                              // user recorded the transaction themselves.
                               _buildDetailRow(
                                 context,
                                 icon: FLucideIcons.messageSquareText,
                                 label: t.transaction.rawInput,
                                 valueWidget: GestureDetector(
-                                  onTap: transaction.sourceThreadId != null
+                                  onTap:
+                                      isMine &&
+                                          transaction.sourceThreadId != null
                                       ? () {
                                           unawaited(
                                             HapticFeedback.lightImpact(),
@@ -263,8 +283,9 @@ class TransactionDetailPage extends ConsumerWidget {
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      if (transaction.sourceThreadId !=
-                                          null) ...[
+                                      if (isMine &&
+                                          transaction.sourceThreadId !=
+                                              null) ...[
                                         const SizedBox(width: 4),
                                         Icon(
                                           FLucideIcons.externalLink,

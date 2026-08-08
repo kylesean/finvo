@@ -362,6 +362,7 @@ async def add_transaction_comment(
         parent_comment_id=request.parent_comment_id,
         mentioned_user_ids=request.mentioned_user_ids,
         commenter_username=current_user.username or "Unknown",
+        replied_to_user_id=request.replied_to_user_id,
     )
     return success_response(
         data=comment,

@@ -83,7 +83,7 @@ class NotificationService:
         )
         return result.scalar() or 0
 
-    async def _get_owned(self, notification_id: int, user_uuid: UUID) -> Notification:
+    async def _get_owned(self, notification_id: UUID, user_uuid: UUID) -> Notification:
         """Fetch a notification only if it belongs to the given user."""
         result = await self.db.execute(
             select(Notification).where(and_(Notification.id == notification_id, Notification.user_uuid == user_uuid))
@@ -93,7 +93,7 @@ class NotificationService:
             raise NotFoundError("Notification")
         return notification
 
-    async def mark_as_read(self, notification_id: int, user_uuid: UUID) -> None:
+    async def mark_as_read(self, notification_id: UUID, user_uuid: UUID) -> None:
         """Mark a single owned notification as read."""
         notification = await self._get_owned(notification_id, user_uuid)
         notification.mark_as_read()
@@ -108,7 +108,7 @@ class NotificationService:
         )
         await self.db.commit()
 
-    async def delete(self, notification_id: int, user_uuid: UUID) -> None:
+    async def delete(self, notification_id: UUID, user_uuid: UUID) -> None:
         """Delete a single owned notification."""
         notification = await self._get_owned(notification_id, user_uuid)
         await self.db.delete(notification)
