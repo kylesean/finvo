@@ -61,9 +61,16 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
       ref.read(verificationProvider.notifier).reset();
 
       await waitForRouteSettle();
-      if (!mounted) return;
+      if (!mounted || !context.mounted) return;
 
-      context.pushReplacement(AppRoutePaths.home);
+      // Idempotent go() (not pushReplacement): once register() flips
+      // authProvider to authenticated, the router redirect has already queued
+      // the navigation to /home. pushReplacement against a stack that already
+      // contains it throws, which landed in the catch below and showed a
+      // spurious "unknown error" toast immediately after a successful
+      // registration. go() is a no-op for the current location, so it can
+      // never race the redirect.
+      context.go(AppRoutePaths.home);
     } on AppException catch (e) {
       if (!mounted) return;
       ToastService.showDestructive(

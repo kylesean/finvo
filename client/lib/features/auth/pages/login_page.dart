@@ -61,19 +61,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       // Let the success toast settle before navigating away (the timing is
       // centralised in route_utils so this isn't a magic number).
       await waitForRouteSettle();
-      if (!mounted) return;
+      if (!mounted || !context.mounted) return;
 
-      // Use pushReplacement instead of go to avoid returning to login page.
-      // If a 'from' param was stashed by the router redirect (e.g. from a
-      // finvo://join-space?code=xxx deep link), navigate there instead of /home.
-      if (mounted && context.mounted) {
-        final from = GoRouterState.of(context).uri.queryParameters['from'];
-        final destination =
-            (from != null && from.isNotEmpty && from.startsWith('/'))
-            ? from
-            : AppRoutePaths.home;
-        unawaited(GoRouter.of(context).pushReplacement(destination));
-      }
+      // Use an idempotent go() instead of pushReplacement: once authProvider
+      // flips to authenticated, the GoRouter redirect (appRedirect) has
+      // already queued the same navigation to /home (honouring the stashed
+      // 'from' deep-link). pushReplacement against a stack that already
+      // contains /home throws, and that exception fell into the catch below,
+      // surfacing a spurious "unknown error" toast right after login. go()
+      // is a no-op when the target is already the current location, so the
+      // explicit navigation below is a safe fallback that never races.
+      final from = GoRouterState.of(context).uri.queryParameters['from'];
+      final destination =
+          (from != null && from.isNotEmpty && from.startsWith('/'))
+          ? from
+          : AppRoutePaths.home;
+      GoRouter.of(context).go(destination);
     } on AppException catch (e) {
       if (!mounted) return;
       ToastService.showDestructive(

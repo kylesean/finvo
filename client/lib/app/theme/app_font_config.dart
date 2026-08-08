@@ -102,6 +102,10 @@ class AppFontConfig {
   /// Applies [primaryFontFamily] (Inter) for Latin characters, then delegates to
   /// `chinese_font_library` to inject the device-native CJK font (e.g. MiSans on
   /// Xiaomi) with correct multi-weight support, bypassing Skia's fallback selection.
+  ///
+  /// On web the plugin's system-font discovery is skipped: it probes filesystem
+  /// fonts via `dart:io` (unsupported on web) and the browser already resolves
+  /// Chinese text through the `fontFamilyFallback` list.
   static TextTheme createGlobalTextTheme(TextTheme baseTheme) {
     final theme = baseTheme.copyWith(
       displayLarge: _applyGlobalStyle(baseTheme.displayLarge),
@@ -120,6 +124,12 @@ class AppFontConfig {
       labelMedium: _applyGlobalStyle(baseTheme.labelMedium),
       labelSmall: _applyGlobalStyle(baseTheme.labelSmall),
     );
+    if (kIsWeb) {
+      // chinese_font_library's useSystemChineseFont() probes system font files
+      // through dart:io, which throws on web. The browser fonts are already in
+      // the fallback chain, so no device-native font injection is needed here.
+      return theme;
+    }
     // Inject device-native CJK font (MiSans/PingFang/etc.) with proper weight
     // mappings so Chinese text renders with the OEM-intended visual weight.
     // Uses the TextStyle extension (append semantics) to preserve our fallbacks.

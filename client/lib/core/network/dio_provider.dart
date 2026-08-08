@@ -9,7 +9,6 @@ import 'package:finvo/core/network/interceptors/auth_interceptor.dart';
 import 'package:finvo/core/network/interceptors/logging_interceptor.dart';
 import 'package:finvo/core/network/interceptors/error_interceptor.dart';
 import 'package:finvo/core/network/interceptors/locale_interceptor.dart';
-import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 
@@ -59,13 +58,15 @@ Future<void> handleUnauthorized(Ref ref) async {
 /// [forSse] selects the SSE profile (relaxed streaming timeouts, no
 /// Error/Business interceptors, `text/event-stream` accept header).
 ///
-/// The provider watches [serverConfigServiceProvider] (via
-/// [apiBaseUrlProvider]) so that saving a new server URL rebuilds the Dio
-/// instance. That rebuild triggers `ref.onDispose(dio.close)` and releases the
-/// stale idle connection pool.
+/// The instance is an application-lifetime singleton: it must never be
+/// rebuilt (and its previous instance closed) when the server URL changes.
+/// Replacing it mid-session strands every long-held reference (e.g.
+/// [authServiceProvider] caches its [NetworkClient] via `ref.read`) with a
+/// closed Dio, after which every request fails with "Dio can't establish a
+/// new connection after it was closed". The [ConfigurationCheckInterceptor]
+/// already injects the current base URL on each request, so a URL change
+/// requires no rebuild at all.
 Dio _buildDio(Ref ref, {required bool forSse}) {
-  ref.watch(serverConfigServiceProvider);
-
   final dio = Dio();
 
   // Timeouts: SSE relaxes receive/send to 1h because streams may legitimately
@@ -82,9 +83,8 @@ Dio _buildDio(Ref ref, {required bool forSse}) {
           ApiConstants.sendTimeout,
         );
 
-  // Use baseUrl or empty placeholder (will be set dynamically by
-  // ConfigurationCheckInterceptor on each request).
-  final baseUrl = ref.watch(apiBaseUrlProvider);
+  // Initial base URL; refreshed per-request by ConfigurationCheckInterceptor.
+  final baseUrl = ref.read(apiBaseUrlProvider);
   dio.options.baseUrl = baseUrl.isNotEmpty ? baseUrl : 'http://placeholder';
   dio.options.connectTimeout = connectTimeout;
   dio.options.receiveTimeout = receiveTimeout;
@@ -126,9 +126,6 @@ Dio _buildDio(Ref ref, {required bool forSse}) {
     dio.interceptors.add(BusinessInterceptor()); // Business logic interceptor
   }
 
-  // Release the idle HTTP connection pool when the provider rebuilds
-  // (e.g. server URL change) or the container is disposed.
-  ref.onDispose(dio.close);
   return dio;
 }
 
