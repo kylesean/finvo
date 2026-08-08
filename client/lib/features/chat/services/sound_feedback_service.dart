@@ -1,5 +1,7 @@
 // features/chat/services/sound_feedback_service.dart
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
@@ -27,10 +29,21 @@ class SoundFeedbackService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
+    // On Linux desktop (or platforms without native just_audio plugin registration),
+    // skip initializing AudioPlayer to avoid throwing uncaught MissingPluginException.
+    if (!kIsWeb && Platform.isLinux) {
+      _useHapticFallback = true;
+      _isInitialized = true;
+      _logger.info(
+        'Linux platform detected: using haptic/silent fallback for sound feedback',
+      );
+      return;
+    }
+
     // Supported audio formats list (by priority)
     const startSoundFiles = [
-      'assets/sounds/start_listening.mp3',
       'assets/sounds/start_listening.wav',
+      'assets/sounds/start_listening.mp3',
       'assets/sounds/start_listening.m4a',
     ];
     const stopSoundFiles = [
@@ -139,6 +152,7 @@ class SoundFeedbackService {
     try {
       await _startPlayer?.seek(Duration.zero);
       await _startPlayer?.play();
+      await _startPlayer?.stop();
       _logger.info('Start sound played successfully');
     } catch (e, stackTrace) {
       _logger.warning('Failed to play start sound', e, stackTrace);
@@ -159,7 +173,7 @@ class SoundFeedbackService {
     _logger.info('Playing stop sound (hapticFallback=$_useHapticFallback)');
 
     if (_useHapticFallback) {
-      // Use haptic feedback as fallback
+      // Use haptic fallback as fallback
       await HapticFeedback.lightImpact();
       return;
     }
@@ -167,6 +181,7 @@ class SoundFeedbackService {
     try {
       await _stopPlayer?.seek(Duration.zero);
       await _stopPlayer?.play();
+      await _stopPlayer?.stop();
       _logger.info('Stop sound played successfully');
     } catch (e, stackTrace) {
       _logger.warning('Failed to play stop sound', e, stackTrace);

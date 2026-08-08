@@ -100,7 +100,7 @@ class GenUiLogger {
     stats.recordInvocation(success, durationMs);
 
     _logger.log(
-      success ? Level.INFO : Level.WARNING,
+      success ? Level.FINE : Level.WARNING,
       'Builder invoked: $componentName - ${success ? 'SUCCESS' : 'FAILED'} in ${durationMs}ms',
     );
   }

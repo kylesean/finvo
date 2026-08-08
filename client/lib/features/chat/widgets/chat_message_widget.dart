@@ -58,6 +58,9 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   FThemeData? _cachedTheme;
   bool _reuseCache = false;
 
+  // Cache GenUI UIComponent subtrees to prevent rebuilds during text streaming.
+  final Map<String, _GenUiCacheEntry> _genUiCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -188,41 +191,70 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
         key: ValueKey('tool_${toolCall.id}'),
         toolCall: toolCall,
       ),
-      uiComponent: (component) {
-        if (component.mode == UIComponentMode.live) {
-          // Live Real-time Surface (Streaming with instant Shimmer Skeleton)
-          return RepaintBoundary(
-            child: Container(
-              key: ValueKey('live_${component.surfaceId}'),
-              margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
-              child: GenUiErrorBoundary(
-                componentName: 'LiveSurface_${component.surfaceId}',
-                data: component.data,
-                child: _buildLiveSurfaceWithSkeleton(
-                  context,
-                  theme,
-                  component.surfaceId,
-                ),
-              ),
-            ),
-          );
-        } else {
-          // Historical Static Surface
-          return Container(
-            key: ValueKey('historical_${component.surfaceId}'),
-            margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
-            child: GenUiErrorBoundary(
-              componentName: component.componentType,
-              data: component.data,
-              child: HistoricalComponentRenderer(
-                componentType: component.componentType,
-                data: component.data,
-              ),
-            ),
-          );
-        }
-      },
+      uiComponent: (component) =>
+          _buildGenUiComponentMemoized(context, theme, component),
     );
+  }
+
+  /// Build or return cached GenUI component subtree to avoid rebuilding
+  /// unchanged GenUI surfaces on every text streaming chunk.
+  Widget _buildGenUiComponentMemoized(
+    BuildContext context,
+    FThemeData theme,
+    UIComponentInfo component,
+  ) {
+    final cacheKey = '${component.mode.name}_${component.surfaceId}';
+    final existing = _genUiCache[cacheKey];
+
+    if (existing != null &&
+        existing.mode == component.mode &&
+        identical(existing.theme, theme) &&
+        mapEquals(existing.data, component.data)) {
+      return existing.widget;
+    }
+
+    final Widget builtWidget;
+    if (component.mode == UIComponentMode.live) {
+      // Live Real-time Surface (Streaming with instant Shimmer Skeleton)
+      builtWidget = RepaintBoundary(
+        child: Container(
+          key: ValueKey('live_${component.surfaceId}'),
+          margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
+          child: GenUiErrorBoundary(
+            componentName: 'LiveSurface_${component.surfaceId}',
+            data: component.data,
+            child: _buildLiveSurfaceWithSkeleton(
+              context,
+              theme,
+              component.surfaceId,
+            ),
+          ),
+        ),
+      );
+    } else {
+      // Historical Static Surface
+      builtWidget = Container(
+        key: ValueKey('historical_${component.surfaceId}'),
+        margin: const EdgeInsets.only(top: 4.0, bottom: 12.0),
+        child: GenUiErrorBoundary(
+          componentName: component.componentType,
+          data: component.data,
+          child: HistoricalComponentRenderer(
+            componentType: component.componentType,
+            data: component.data,
+          ),
+        ),
+      );
+    }
+
+    _genUiCache[cacheKey] = _GenUiCacheEntry(
+      mode: component.mode,
+      theme: theme,
+      data: component.data,
+      widget: builtWidget,
+    );
+
+    return builtWidget;
   }
 
   /// Process message content to handle UserActionEvent JSON
@@ -717,4 +749,19 @@ class _ThrottledMarkdownState extends State<_ThrottledMarkdown> {
       ),
     );
   }
+}
+
+/// Cache entry for memoizing GenUI component subtrees
+class _GenUiCacheEntry {
+  final UIComponentMode mode;
+  final FThemeData theme;
+  final Map<String, dynamic> data;
+  final Widget widget;
+
+  _GenUiCacheEntry({
+    required this.mode,
+    required this.theme,
+    required this.data,
+    required this.widget,
+  });
 }

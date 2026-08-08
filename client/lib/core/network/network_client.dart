@@ -184,22 +184,32 @@ class NetworkClient {
 
   /// Determine if request should be retried
   ///
-  /// Non-idempotent methods (POST/PUT/DELETE/PATCH) must NOT be retried:
-  /// a timed-out write may already have succeeded server-side, so retrying
-  /// could create/modify resources twice. Only GET (and other idempotent
-  /// requests) participate in retries.
+  /// Socket connection error ([DioExceptionType.connectionError]) occurs when the
+  /// underlying TCP socket is closed/reset by the server (e.g. Keep-Alive idle timeout
+  /// race condition). Because the request failed at the socket connection layer before an
+  /// HTTP exchange was established, it is safe to retry once with a fresh socket connection
+  /// for all HTTP methods (including POST/PUT/DELETE).
+  ///
+  /// Non-idempotent methods (POST/PUT/DELETE/PATCH) are otherwise not retried for
+  /// timeouts or bad responses: a timed-out write may already have succeeded server-side,
+  /// so retrying could create/modify resources twice.
   bool _shouldRetry(DioException e, {required bool isIdempotentMethod}) {
-    // Non-idempotent methods are never retried
+    // Stale TCP socket connection error (Keep-Alive closed connection) is always
+    // safe to retry on a fresh connection.
+    if (e.type == DioExceptionType.connectionError) {
+      return true;
+    }
+
+    // Non-idempotent methods are never retried for timeouts or bad responses
     if (!isIdempotentMethod) {
       return false;
     }
 
-    // Only retry for specific error types
+    // Only retry for specific error types on idempotent (GET) requests
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
-      case DioExceptionType.connectionError:
         return true;
       case DioExceptionType.badResponse:
         // Can retry for 5xx server errors

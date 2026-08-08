@@ -66,7 +66,7 @@ class BottomPage extends StatelessWidget {
                     ? colors.primary
                     : colors.mutedForeground,
               ),
-              label: Text(tab.label()),
+              semanticsLabel: tab.label(),
             ),
         ],
       ),

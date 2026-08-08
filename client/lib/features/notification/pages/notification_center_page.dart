@@ -28,9 +28,6 @@ class _NotificationCenterPageState
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    // Kick off the initial load explicitly; the provider build() is kept pure
-    // (no network side-effect) and this page is the single consumer.
-    unawaited(ref.read(notificationProvider.notifier).refresh());
   }
 
   @override

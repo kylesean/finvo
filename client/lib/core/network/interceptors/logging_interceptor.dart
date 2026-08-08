@@ -1,21 +1,35 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-/// Provides a configured LogInterceptor instance.
-/// Only enables logging in Debug mode.
+/// Provides a clean, concise HTTP LoggingInterceptor.
+///
+/// In Debug mode, it prints clean single-line summaries for requests, responses, and errors.
+/// In Release/Profile mode, it is completely silent.
 Interceptor get loggingInterceptor {
-  return LogInterceptor(
-    request: kDebugMode, // Print request summary
-    requestHeader: false, // Do not print request headers in debug output
-    requestBody: false, // Do not print request body
-    responseHeader: false, // Do not print response headers in debug output
-    responseBody: false, // Do not print response body
-    error: kDebugMode, // Print error information
-    logPrint: (object) {
-      // Custom log printing restricted to debug builds
+  return InterceptorsWrapper(
+    onRequest: (options, handler) {
       if (kDebugMode) {
-        debugPrint(object.toString());
+        debugPrint('[HTTP] 🚀 ${options.method} -> ${options.uri}');
       }
+      return handler.next(options);
+    },
+    onResponse: (response, handler) {
+      if (kDebugMode) {
+        final statusCode = response.statusCode ?? 0;
+        debugPrint(
+          '[HTTP] ✅ $statusCode <- ${response.requestOptions.method} ${response.requestOptions.uri}',
+        );
+      }
+      return handler.next(response);
+    },
+    onError: (DioException err, handler) {
+      if (kDebugMode) {
+        final statusCode = err.response?.statusCode ?? 'ERR';
+        debugPrint(
+          '[HTTP] ❌ $statusCode <- ${err.requestOptions.method} ${err.requestOptions.uri} (${err.message})',
+        );
+      }
+      return handler.next(err);
     },
   );
 }

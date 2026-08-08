@@ -135,8 +135,8 @@ class CashFlowForecastResult:
                             "type": e.event_type,
                             "description": e.description,
                             "amount": float(e.amount),
-                            "source_id": e.source_id,
-                            "category_key": e.category_key,
+                            "source_id": e.source_id or "",
+                            "category_key": e.category_key or "",
                             "confidence": e.confidence,
                         }
                         for e in dp.events

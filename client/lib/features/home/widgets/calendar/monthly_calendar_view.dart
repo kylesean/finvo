@@ -104,9 +104,12 @@ class MonthlyCalendarView extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  t.calendar.title,
-                  style: AppTextStyles.calendarTitle(theme),
+                Flexible(
+                  child: Text(
+                    t.calendar.title,
+                    style: AppTextStyles.calendarTitle(theme),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 Row(
                   children: [

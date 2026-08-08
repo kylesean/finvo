@@ -41,15 +41,15 @@ NotificationRepository notificationRepository(Ref ref) {
 }
 
 /// Notification State Notifier Provider
-@riverpod
+@Riverpod(keepAlive: true)
 class NotificationNotifier extends _$NotificationNotifier {
   static const _pageSize = 20;
 
   @override
   NotificationState build() {
-    // Kept pure: the notification center page triggers [refresh] explicitly in
-    // initState instead of firing a network side-effect from build().
-    return const NotificationState();
+    // Automatically trigger initial load on provider creation
+    unawaited(Future.microtask(() => refresh()));
+    return const NotificationState(isLoading: true);
   }
 
   /// Refresh notification list (resets to page 1)
@@ -57,7 +57,13 @@ class NotificationNotifier extends _$NotificationNotifier {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repository = ref.read(notificationRepositoryProvider);
-      final res = await repository.getNotifications(page: 1, limit: _pageSize);
+      final res = await repository
+          .getNotifications(page: 1, limit: _pageSize)
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () =>
+                throw TimeoutException('Notification request timed out'),
+          );
       state = state.copyWith(
         items: res.items,
         total: res.total,

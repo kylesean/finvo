@@ -29,6 +29,7 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 class TransactionDetailPage extends ConsumerWidget {
   final String transactionId;
@@ -64,14 +65,14 @@ class TransactionDetailPage extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // Show skeleton screen
-    if (detailState.isLoading && detailState.value == null) {
-      return const TransactionDetailSkeleton();
-    }
-
-    // Show error state
+    // Show error state first if an error occurred and there is no cached value
     if (detailState.hasError && detailState.value == null) {
       return _buildErrorState(context, theme, colors, ref, detailState);
+    }
+
+    // Show skeleton screen when initially loading
+    if (detailState.isLoading && detailState.value == null) {
+      return const TransactionDetailSkeleton();
     }
 
     final transaction = detailState.value;
@@ -379,7 +380,21 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  /// Full-screen error state with a retry button.
+  bool _isNotFoundError(Object? error) {
+    if (error is NotFoundException) return true;
+    if (error is UnexpectedHttpException && error.statusCode == 404) {
+      return true;
+    }
+    if (error is AppException &&
+        (error.message.contains('404') ||
+            error.message.contains('Not Found'))) {
+      return true;
+    }
+    final errStr = error?.toString() ?? '';
+    return errStr.contains('404') || errStr.contains('Not Found');
+  }
+
+  /// Full-screen error state with a retry button or deleted-resource empty state.
   Widget _buildErrorState(
     BuildContext context,
     FThemeData theme,
@@ -387,6 +402,8 @@ class TransactionDetailPage extends ConsumerWidget {
     WidgetRef ref,
     AsyncValue<TransactionModel> detailState,
   ) {
+    final isNotFound = _isNotFoundError(detailState.error);
+
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
@@ -395,38 +412,64 @@ class TransactionDetailPage extends ConsumerWidget {
             _buildPageHeader(context, theme, colors, null),
             Expanded(
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      FLucideIcons.ellipsis,
-                      size: 48,
-                      color: colors.destructive,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(t.home.loadFailed, style: theme.typography.body.xl2),
-                    const SizedBox(height: 8),
-                    Text(
-                      detailState.error.toString(),
-                      style: AppTextStyles.listSubtitle(theme),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    FButton(
-                      onPress: () {
-                        unawaited(
-                          ref
-                              .read(
-                                transactionDetailProvider(
-                                  transactionId,
-                                ).notifier,
-                              )
-                              .reload(),
-                        );
-                      },
-                      child: Text(t.common.retry),
-                    ),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isNotFound
+                            ? FLucideIcons.trash2
+                            : FLucideIcons.alertTriangle,
+                        size: 56,
+                        color: isNotFound
+                            ? colors.mutedForeground
+                            : colors.destructive,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        isNotFound ? '账目已被删除' : t.home.loadFailed,
+                        style: theme.typography.body.xl2,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        isNotFound
+                            ? '该账目记录已被发起人或管理员删除，无法查看明细。'
+                            : (detailState.error is AppException
+                                  ? (detailState.error as AppException).message
+                                  : detailState.error.toString()),
+                        style: AppTextStyles.listSubtitle(theme),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      if (isNotFound)
+                        FButton(
+                          onPress: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go(AppRoutePaths.home);
+                            }
+                          },
+                          child: const Text('返回上一页'),
+                        )
+                      else
+                        FButton(
+                          onPress: () {
+                            unawaited(
+                              ref
+                                  .read(
+                                    transactionDetailProvider(
+                                      transactionId,
+                                    ).notifier,
+                                  )
+                                  .reload(),
+                            );
+                          },
+                          child: Text(t.common.retry),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

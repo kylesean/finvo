@@ -24,20 +24,18 @@ class NotificationItem {
 
   factory NotificationItem.fromJson(Map<String, dynamic> json) {
     return NotificationItem(
-      id: json['id']?.toString() ?? '',
-      userId: json['userId']?.toString() ?? '',
-      type: json['type']?.toString() ?? 'system',
-      title: json['title']?.toString() ?? '',
-      message: json['message']?.toString() ?? json['content']?.toString() ?? '',
-      data: json['data'] is Map<String, dynamic>
-          ? json['data'] as Map<String, dynamic>
-          : null,
-      isRead: json['isRead'] as bool? ?? json['is_read'] as bool? ?? false,
+      id: json['id'] as String? ?? '',
+      userId: json['userId'] as String? ?? '',
+      type: json['type'] as String? ?? 'system',
+      title: json['title'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+      data: json['data'] as Map<String, dynamic>?,
+      isRead: json['isRead'] as bool? ?? false,
       createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
+          ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
       readAt: json['readAt'] != null
-          ? DateTime.tryParse(json['readAt'].toString())
+          ? DateTime.parse(json['readAt'] as String)
           : null,
     );
   }

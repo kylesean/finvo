@@ -92,6 +92,12 @@ class SystemSpeechService implements SpeechRecognitionService {
   }
 
   Future<bool> _isPlatformSpeechAvailable() async {
+    if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
+      _logger.info(
+        'System speech recognition is not supported on Linux/Windows desktop',
+      );
+      return false;
+    }
     if (!kIsWeb && Platform.isAndroid) {
       try {
         final bool? isAvailable = await _platformChannel.invokeMethod<bool>(

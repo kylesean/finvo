@@ -1,4 +1,4 @@
-// features/chat/services/media_picker_service.dart
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
@@ -12,6 +12,21 @@ class MediaPickerService {
   /// Take photo with camera
   static Future<XFile> takePhoto() async {
     try {
+      // Linux/Windows desktop platforms do not have native camera picker support in image_picker.
+      // Fallback gracefully to picking an image file via FilePicker instead of throwing an UnimplementedError.
+      if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.image,
+          allowMultiple: false,
+        );
+        if (result == null ||
+            result.files.isEmpty ||
+            result.files.first.path == null) {
+          throw MediaUploadException.noFilesSelected();
+        }
+        return XFile(result.files.first.path!);
+      }
+
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,
         imageQuality: 85,
