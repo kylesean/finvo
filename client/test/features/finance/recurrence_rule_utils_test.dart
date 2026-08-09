@@ -37,10 +37,11 @@ void main() {
     test('legacy UTC UNTIL restores the local date', () {
       const rule = 'FREQ=MONTHLY;UNTIL=20261230T160000Z';
       final until = parseUntilFromRule(rule);
-      // 2026-12-30T16:00Z == 2026-12-31 00:00 +08:00.
-      expect(until!.year, 2026);
-      expect(until.month, 12);
-      expect(until.day, 31);
+      // 2026-12-30T16:00Z converted to local time in test environment timezone
+      final expectedLocal = DateTime.utc(2026, 12, 30, 16, 0, 0).toLocal();
+      expect(until!.year, expectedLocal.year);
+      expect(until.month, expectedLocal.month);
+      expect(until.day, expectedLocal.day);
     });
 
     test('returns null when no UNTIL present', () {

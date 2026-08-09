@@ -7,6 +7,7 @@ import 'package:finvo/app/theme/app_theme_palette.dart';
 import 'package:finvo/app/theme/forui_theme_config.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/features/profile/pages/amount_settings_page.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ void main() {
     late SharedPreferences prefs;
 
     setUp(() async {
+      await LocaleSettings.setLocale(AppLocale.zh);
       SharedPreferences.setMockInitialValues({});
       prefs = await SharedPreferences.getInstance();
     });
@@ -48,7 +50,7 @@ void main() {
 
         // Verify options are rendered
         expect(find.text('国际标准'), findsOneWidget);
-        expect(find.text('中国大陆惯例'), findsOneWidget);
+        expect(find.text('中国市场'), findsOneWidget);
       },
     );
 
