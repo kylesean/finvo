@@ -20,6 +20,7 @@ import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
 import 'package:finvo/features/finance/widgets/financial_account_card.dart';
 import 'package:finvo/features/finance/widgets/financial_accounts_drawer.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 class FinancialAccountsPage extends ConsumerStatefulWidget {
   const FinancialAccountsPage({super.key});
@@ -461,7 +462,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                   TransactionType.income,
                   viewCurrency,
                   _hideAmounts,
-                  const Color(0xFF4CAF50),
+                  theme.semantic.successAccent,
                 ),
               ),
               const SizedBox(width: 12),

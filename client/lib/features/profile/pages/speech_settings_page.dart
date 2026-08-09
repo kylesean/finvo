@@ -194,12 +194,12 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
                                 ? null
                                 : () => _saveWebsocketConfig(),
                             child: state.isSaving
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: Colors.white,
+                                      color: colors.primaryForeground,
                                     ),
                                   )
                                 : Text(t.speech.saveConfig),

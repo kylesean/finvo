@@ -9,7 +9,7 @@ Interceptor get loggingInterceptor {
   return InterceptorsWrapper(
     onRequest: (options, handler) {
       if (kDebugMode) {
-        debugPrint('[HTTP] 🚀 ${options.method} -> ${options.uri}');
+        debugPrint('[HTTP] ${options.method} -> ${options.uri}');
       }
       return handler.next(options);
     },
@@ -17,7 +17,7 @@ Interceptor get loggingInterceptor {
       if (kDebugMode) {
         final statusCode = response.statusCode ?? 0;
         debugPrint(
-          '[HTTP] ✅ $statusCode <- ${response.requestOptions.method} ${response.requestOptions.uri}',
+          '[HTTP] $statusCode <- ${response.requestOptions.method} ${response.requestOptions.uri}',
         );
       }
       return handler.next(response);
@@ -26,7 +26,7 @@ Interceptor get loggingInterceptor {
       if (kDebugMode) {
         final statusCode = err.response?.statusCode ?? 'ERR';
         debugPrint(
-          '[HTTP] ❌ $statusCode <- ${err.requestOptions.method} ${err.requestOptions.uri} (${err.message})',
+          '[HTTP] $statusCode <- ${err.requestOptions.method} ${err.requestOptions.uri} (${err.message})',
         );
       }
       return handler.next(err);
