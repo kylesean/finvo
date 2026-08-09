@@ -46,6 +46,11 @@ class AmountSettingsPage extends ConsumerWidget {
           children: [
             const SizedBox(height: 16),
 
+            // Live Preview Card
+            _AmountThemePreviewCard(themeId: currentThemeId),
+
+            const SizedBox(height: 20),
+
             // Instruction text
             Padding(
               padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
@@ -114,40 +119,110 @@ class AmountSettingsPage extends ConsumerWidget {
             ),
 
             const SizedBox(height: 24),
-            // Notice text
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colors.muted.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.border),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    FLucideIcons.info,
-                    size: 16,
-                    color: colors.mutedForeground,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      t.settings.amountStyleNotice,
-                      style: theme.typography.body.xs.copyWith(
-                        color: colors.mutedForeground,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Live preview card widget for amount theme
+class _AmountThemePreviewCard extends StatelessWidget {
+  final String themeId;
+
+  const _AmountThemePreviewCard({required this.themeId});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    final colors = theme.colors;
+    final amountTheme = AmountTheme.fromName(themeId);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(FLucideIcons.eye, size: 16, color: colors.mutedForeground),
+              const SizedBox(width: 8),
+              Text(
+                '实时效果预览',
+                style: theme.typography.body.xs.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colors.mutedForeground,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _PreviewItem(
+                label: '收入示例',
+                amount: '+ ¥12,500.00',
+                color: amountTheme.incomeColor,
+              ),
+              _PreviewItem(
+                label: '支出示例',
+                amount: '- ¥45.00',
+                color: amountTheme.expenseColor,
+              ),
+              _PreviewItem(
+                label: '转账示例',
+                amount: '¥500.00',
+                color: amountTheme.transferColor,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PreviewItem extends StatelessWidget {
+  final String label;
+  final String amount;
+  final Color color;
+
+  const _PreviewItem({
+    required this.label,
+    required this.amount,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    final colors = theme.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.typography.body.xs.copyWith(
+            color: colors.mutedForeground,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          amount,
+          style: theme.typography.body.sm.copyWith(
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      ],
     );
   }
 }

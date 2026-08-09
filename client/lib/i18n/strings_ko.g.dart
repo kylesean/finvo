@@ -403,7 +403,7 @@ class _Translations$settings$ko extends Translations$settings$zh {
 	@override String get updateNow => '지금 업데이트';
 	@override String get updateLater => '나중에';
 	@override String get fetchUpdateFailed => '업데이트 확인 실패';
-	@override String currencyChangedRefreshHint({required Object currency}) => '${currency}로 변경되었습니다. 새 거래는 이 통화로 기록됩니다.';
+	@override String currencyChangedRefreshHint({required Object currency}) => '${currency}로 변경되었습니다. 기본 통화 및 새 거래의 기본 통화로 설정되었습니다.';
 	@override String get sharedSpace => '공유 공간';
 	@override String get speechRecognition => '음성 인식';
 	@override String get speechRecognitionSubtitle => '음성 입력 파라미터 구성';
@@ -415,7 +415,7 @@ class _Translations$settings$ko extends Translations$settings$zh {
 	@override String get speechTestSubtitle => 'WebSocket 음성 연결 테스트';
 	@override String get userTypeRegular => '일반 사용자';
 	@override String get selectAmountStyle => '금액 표시 스타일 선택';
-	@override String get currencyDescription => '선호하는 표시 통화를 선택하세요. 모든 금액이 이 통화로 표시됩니다.';
+	@override String get currencyDescription => '주요 통화를 선택하세요. 향후 거래는 기본적으로 이 통화를 사용하며 통계 및 요약도 이 통화로 표시됩니다. 과거 거래의 원래 금액은 영향받지 않습니다.';
 	@override String get amountStyleNotice => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.';
 	@override String get editUsername => 'Edit Username';
 	@override String get enterUsername => 'Enter username';
@@ -492,7 +492,7 @@ class _Translations$amountTheme$ko extends Translations$amountTheme$zh {
 	@override String get international => '국제 표준';
 	@override String get internationalDesc => '초록 상승/빨강 하락';
 	@override String get minimalist => '미니멀리스트';
-	@override String get minimalistDesc => '기호로만 구분';
+	@override String get minimalistDesc => '단색 표시, +/- 기호로만 구분';
 	@override String get colorBlind => '색약 지원';
 	@override String get colorBlindDesc => '파랑-주황 색상 구성';
 }
@@ -2856,7 +2856,7 @@ extension on TranslationsKo {
 			'amountTheme.international' => '국제 표준',
 			'amountTheme.internationalDesc' => '초록 상승/빨강 하락',
 			'amountTheme.minimalist' => '미니멀리스트',
-			'amountTheme.minimalistDesc' => '기호로만 구분',
+			'amountTheme.minimalistDesc' => '단색 표시, +/- 기호로만 구분',
 			'amountTheme.colorBlind' => '색약 지원',
 			'amountTheme.colorBlindDesc' => '파랑-주황 색상 구성',
 			'locale.chinese' => '简体中文',

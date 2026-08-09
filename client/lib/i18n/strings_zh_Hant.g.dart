@@ -403,7 +403,7 @@ class _Translations$settings$zh_Hant extends Translations$settings$zh {
 	@override String get updateNow => '立即更新';
 	@override String get updateLater => '暫不更新';
 	@override String get fetchUpdateFailed => '檢查更新失敗，請稍後重試';
-	@override String currencyChangedRefreshHint({required Object currency}) => '已切換為 ${currency}，新交易將以此貨幣記錄';
+	@override String currencyChangedRefreshHint({required Object currency}) => '已切換為 ${currency}，已設為主要貨幣與記帳預設幣種';
 	@override String get sharedSpace => '共享空間';
 	@override String get speechRecognition => '語音識別';
 	@override String get speechRecognitionSubtitle => '配置語音輸入參數';
@@ -415,7 +415,7 @@ class _Translations$settings$zh_Hant extends Translations$settings$zh {
 	@override String get speechTestSubtitle => '測試 WebSocket 語音連接';
 	@override String get userTypeRegular => '普通用戶';
 	@override String get selectAmountStyle => '選擇金額顯示樣式';
-	@override String get currencyDescription => '選擇您偏好的顯示幣種。所有金額都將以此幣種顯示。';
+	@override String get currencyDescription => '選擇您的主要貨幣。未來的記帳將預設使用此貨幣，統計和彙總將以此貨幣顯示。歷史交易的原始金額不受影響。';
 	@override String get amountStyleNotice => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.';
 	@override String get editUsername => 'Edit Username';
 	@override String get enterUsername => 'Enter username';
@@ -492,7 +492,7 @@ class _Translations$amountTheme$zh_Hant extends Translations$amountTheme$zh {
 	@override String get international => '國際標準';
 	@override String get internationalDesc => '綠漲紅跌';
 	@override String get minimalist => '極簡模式';
-	@override String get minimalistDesc => '僅通過符號區分';
+	@override String get minimalistDesc => '經典單色，僅靠 +/- 區分';
 	@override String get colorBlind => '色弱友好';
 	@override String get colorBlindDesc => '藍橙配色方案';
 }
@@ -2784,7 +2784,7 @@ extension on TranslationsZhHant {
 			'settings.updateNow' => '立即更新',
 			'settings.updateLater' => '暫不更新',
 			'settings.fetchUpdateFailed' => '檢查更新失敗，請稍後重試',
-			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '已切換為 ${currency}，新交易將以此貨幣記錄',
+			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '已切換為 ${currency}，已設為主要貨幣與記帳預設幣種',
 			'settings.sharedSpace' => '共享空間',
 			'settings.speechRecognition' => '語音識別',
 			'settings.speechRecognitionSubtitle' => '配置語音輸入參數',
@@ -2796,7 +2796,7 @@ extension on TranslationsZhHant {
 			'settings.speechTestSubtitle' => '測試 WebSocket 語音連接',
 			'settings.userTypeRegular' => '普通用戶',
 			'settings.selectAmountStyle' => '選擇金額顯示樣式',
-			'settings.currencyDescription' => '選擇您偏好的顯示幣種。所有金額都將以此幣種顯示。',
+			'settings.currencyDescription' => '選擇您的主要貨幣。未來的記帳將預設使用此貨幣，統計和彙總將以此貨幣顯示。歷史交易的原始金額不受影響。',
 			'settings.amountStyleNotice' => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.',
 			'settings.editUsername' => 'Edit Username',
 			'settings.enterUsername' => 'Enter username',
@@ -2854,7 +2854,7 @@ extension on TranslationsZhHant {
 			'amountTheme.international' => '國際標準',
 			'amountTheme.internationalDesc' => '綠漲紅跌',
 			'amountTheme.minimalist' => '極簡模式',
-			'amountTheme.minimalistDesc' => '僅通過符號區分',
+			'amountTheme.minimalistDesc' => '經典單色，僅靠 +/- 區分',
 			'amountTheme.colorBlind' => '色弱友好',
 			'amountTheme.colorBlindDesc' => '藍橙配色方案',
 			'locale.chinese' => '中文（簡體）',

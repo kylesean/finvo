@@ -852,8 +852,8 @@ class Translations$settings$zh {
 	/// zh: '检查更新失败，请稍后重试'
 	String get fetchUpdateFailed => '检查更新失败，请稍后重试';
 
-	/// zh: '已切换为 $currency，新交易将以此货币记录'
-	String currencyChangedRefreshHint({required Object currency}) => '已切换为 ${currency}，新交易将以此货币记录';
+	/// zh: '已切换为 $currency，已设为主要货币与记账默认币种'
+	String currencyChangedRefreshHint({required Object currency}) => '已切换为 ${currency}，已设为主要货币与记账默认币种';
 
 	/// zh: '共享空间'
 	String get sharedSpace => '共享空间';
@@ -1064,8 +1064,8 @@ class Translations$amountTheme$zh {
 	/// zh: '极简模式'
 	String get minimalist => '极简模式';
 
-	/// zh: '仅通过符号区分'
-	String get minimalistDesc => '仅通过符号区分';
+	/// zh: '经典单色，仅靠 +/- 区分'
+	String get minimalistDesc => '经典单色，仅靠 +/- 区分';
 
 	/// zh: '色弱友好'
 	String get colorBlind => '色弱友好';
@@ -5469,7 +5469,7 @@ extension on Translations {
 			'settings.updateNow' => '立即更新',
 			'settings.updateLater' => '暂不更新',
 			'settings.fetchUpdateFailed' => '检查更新失败，请稍后重试',
-			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '已切换为 ${currency}，新交易将以此货币记录',
+			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '已切换为 ${currency}，已设为主要货币与记账默认币种',
 			'settings.sharedSpace' => '共享空间',
 			'settings.speechRecognition' => '语音识别',
 			'settings.speechRecognitionSubtitle' => '配置语音输入参数',
@@ -5539,7 +5539,7 @@ extension on Translations {
 			'amountTheme.international' => '国际标准',
 			'amountTheme.internationalDesc' => '绿涨红跌',
 			'amountTheme.minimalist' => '极简模式',
-			'amountTheme.minimalistDesc' => '仅通过符号区分',
+			'amountTheme.minimalistDesc' => '经典单色，仅靠 +/- 区分',
 			'amountTheme.colorBlind' => '色弱友好',
 			'amountTheme.colorBlindDesc' => '蓝橙配色方案',
 			'locale.chinese' => '中文（简体）',

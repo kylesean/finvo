@@ -407,7 +407,7 @@ class _Translations$settings$en extends Translations$settings$zh {
 	@override String get updateNow => 'Update Now';
 	@override String get updateLater => 'Later';
 	@override String get fetchUpdateFailed => 'Failed to check for updates, please try again later';
-	@override String currencyChangedRefreshHint({required Object currency}) => 'Switched to ${currency}. New transactions will use this currency.';
+	@override String currencyChangedRefreshHint({required Object currency}) => 'Switched to ${currency} as your main currency and default for new transactions.';
 	@override String get sharedSpace => 'Shared Space';
 	@override String get speechRecognition => 'Speech Recognition';
 	@override String get speechRecognitionSubtitle => 'Configure voice input parameters';
@@ -420,7 +420,7 @@ class _Translations$settings$en extends Translations$settings$zh {
 	@override String get userTypeRegular => 'Regular User';
 	@override String get selectAmountStyle => 'Select Amount Display Style';
 	@override String get amountStyleNotice => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.';
-	@override String get currencyDescription => 'Choose your preferred display currency. All amounts will be displayed in this currency.';
+	@override String get currencyDescription => 'Choose your main currency. Future transactions will default to this currency, and statistics will be displayed in it. Original transaction amounts remain unchanged.';
 	@override String get editUsername => 'Edit Username';
 	@override String get enterUsername => 'Enter username';
 	@override String get usernameRequired => 'Username is required';
@@ -496,7 +496,7 @@ class _Translations$amountTheme$en extends Translations$amountTheme$zh {
 	@override String get international => 'International Standard';
 	@override String get internationalDesc => 'Green up, Red down';
 	@override String get minimalist => 'Minimalist';
-	@override String get minimalistDesc => 'Distinguish with symbols only';
+	@override String get minimalistDesc => 'Monochrome, distinguish with +/- only';
 	@override String get colorBlind => 'Color Blind Friendly';
 	@override String get colorBlindDesc => 'Blue-Orange color scheme';
 }
@@ -2795,7 +2795,7 @@ extension on TranslationsEn {
 			'settings.updateNow' => 'Update Now',
 			'settings.updateLater' => 'Later',
 			'settings.fetchUpdateFailed' => 'Failed to check for updates, please try again later',
-			'settings.currencyChangedRefreshHint' => ({required Object currency}) => 'Switched to ${currency}. New transactions will use this currency.',
+			'settings.currencyChangedRefreshHint' => ({required Object currency}) => 'Switched to ${currency} as your main currency and default for new transactions.',
 			'settings.sharedSpace' => 'Shared Space',
 			'settings.speechRecognition' => 'Speech Recognition',
 			'settings.speechRecognitionSubtitle' => 'Configure voice input parameters',
@@ -2808,7 +2808,7 @@ extension on TranslationsEn {
 			'settings.userTypeRegular' => 'Regular User',
 			'settings.selectAmountStyle' => 'Select Amount Display Style',
 			'settings.amountStyleNotice' => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.',
-			'settings.currencyDescription' => 'Choose your preferred display currency. All amounts will be displayed in this currency.',
+			'settings.currencyDescription' => 'Choose your main currency. Future transactions will default to this currency, and statistics will be displayed in it. Original transaction amounts remain unchanged.',
 			'settings.editUsername' => 'Edit Username',
 			'settings.enterUsername' => 'Enter username',
 			'settings.usernameRequired' => 'Username is required',
@@ -2865,7 +2865,7 @@ extension on TranslationsEn {
 			'amountTheme.international' => 'International Standard',
 			'amountTheme.internationalDesc' => 'Green up, Red down',
 			'amountTheme.minimalist' => 'Minimalist',
-			'amountTheme.minimalistDesc' => 'Distinguish with symbols only',
+			'amountTheme.minimalistDesc' => 'Monochrome, distinguish with +/- only',
 			'amountTheme.colorBlind' => 'Color Blind Friendly',
 			'amountTheme.colorBlindDesc' => 'Blue-Orange color scheme',
 			'locale.chinese' => 'Simplified Chinese',

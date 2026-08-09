@@ -35,40 +35,6 @@ class CurrencySettingsPage extends ConsumerWidget {
         ),
         title: Text(t.settings.currency, style: AppTextStyles.pageTitle(theme)),
         centerTitle: true,
-        actions: [
-          if (state.hasChanges)
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Center(
-                child: FButton(
-                  variant: .ghost,
-                  onPress: state.isLoading
-                      ? null
-                      : () async {
-                          final newCurrency = state.primaryCurrency;
-                          final currencyInfo = Currency.fromCode(newCurrency);
-                          final success = await notifier
-                              .saveFinancialSettings();
-                          if (success && context.mounted) {
-                            // Show switched currency name and symbol
-                            final currencyDisplay = currencyInfo != null
-                                ? '${currencyInfo.flag} ${currencyInfo.code}'
-                                : newCurrency;
-                            ToastService.success(
-                              description: Text(
-                                t.settings.currencyChangedRefreshHint(
-                                  currency: currencyDisplay,
-                                ),
-                              ),
-                            );
-                            context.pop();
-                          }
-                        },
-                  child: Text(t.common.save),
-                ),
-              ),
-            ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -118,9 +84,26 @@ class CurrencySettingsPage extends ConsumerWidget {
                           color: colors.primary,
                         )
                       : null,
-                  onPress: () {
-                    notifier.updatePrimaryCurrency(currency.code);
-                  },
+                  onPress: state.isLoading
+                      ? null
+                      : () async {
+                          if (isSelected) return;
+                          notifier.updatePrimaryCurrency(currency.code);
+                          final success = await notifier
+                              .saveFinancialSettings();
+                          if (success && context.mounted) {
+                            final currencyDisplay =
+                                '${currency.flag} ${currency.code}';
+                            ToastService.success(
+                              description: Text(
+                                t.settings.currencyChangedRefreshHint(
+                                  currency: currencyDisplay,
+                                ),
+                              ),
+                            );
+                            context.pop();
+                          }
+                        },
                 );
               }).toList(),
             ),

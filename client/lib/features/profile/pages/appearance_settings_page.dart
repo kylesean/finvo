@@ -25,14 +25,17 @@ class AppearanceSettingsPage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: colors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(FLucideIcons.chevronLeft, color: colors.foreground),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: FButton.icon(
+          variant: .ghost,
+          onPress: () => Navigator.of(context).pop(),
+          child: Icon(
+            FLucideIcons.chevronLeft,
+            color: colors.foreground,
+            size: 20,
+          ),
         ),
-        title: Text(
-          t.appearance.title,
-          style: AppTextStyles.pageTitleLarge(theme),
-        ),
+        title: Text(t.appearance.title, style: AppTextStyles.pageTitle(theme)),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

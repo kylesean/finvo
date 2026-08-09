@@ -403,7 +403,7 @@ class _Translations$settings$ja extends Translations$settings$zh {
 	@override String get updateNow => '今すぐアップデート';
 	@override String get updateLater => '後で';
 	@override String get fetchUpdateFailed => 'アップデートの確認に失敗しました';
-	@override String currencyChangedRefreshHint({required Object currency}) => '${currency} に切り替えました。新しい取引はこの通貨で記録されます';
+	@override String currencyChangedRefreshHint({required Object currency}) => '${currency} に切り替えました。主要通貨および既定の通貨として設定されました';
 	@override String get sharedSpace => '共有スペース';
 	@override String get speechRecognition => '音声認識';
 	@override String get speechRecognitionSubtitle => '音声入力パラメータを設定';
@@ -415,7 +415,7 @@ class _Translations$settings$ja extends Translations$settings$zh {
 	@override String get speechTestSubtitle => 'WebSocket音声接続をテスト';
 	@override String get userTypeRegular => '一般ユーザー';
 	@override String get selectAmountStyle => '金額表示スタイルを選択';
-	@override String get currencyDescription => '使用する通貨を選択してください。すべての金額がこの通貨で表示されます。';
+	@override String get currencyDescription => '主要通貨を選択してください。今後の取引はデフォルトでこの通貨になり、統計や集計もこの通貨で表示されます。過去の取引の元金額には影響しません。';
 	@override String get amountStyleNotice => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.';
 	@override String get editUsername => 'Edit Username';
 	@override String get enterUsername => 'Enter username';
@@ -492,7 +492,7 @@ class _Translations$amountTheme$ja extends Translations$amountTheme$zh {
 	@override String get international => '国際標準';
 	@override String get internationalDesc => '緑上昇/赤下落';
 	@override String get minimalist => 'ミニマリスト';
-	@override String get minimalistDesc => '記号のみで区別';
+	@override String get minimalistDesc => 'モノクロ表示、+/- 記号のみで区別';
 	@override String get colorBlind => '色覚サポート';
 	@override String get colorBlindDesc => '青・オレンジ配色';
 }
@@ -2785,7 +2785,7 @@ extension on TranslationsJa {
 			'settings.updateNow' => '今すぐアップデート',
 			'settings.updateLater' => '後で',
 			'settings.fetchUpdateFailed' => 'アップデートの確認に失敗しました',
-			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '${currency} に切り替えました。新しい取引はこの通貨で記録されます',
+			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '${currency} に切り替えました。主要通貨および既定の通貨として設定されました',
 			'settings.sharedSpace' => '共有スペース',
 			'settings.speechRecognition' => '音声認識',
 			'settings.speechRecognitionSubtitle' => '音声入力パラメータを設定',
@@ -2797,7 +2797,7 @@ extension on TranslationsJa {
 			'settings.speechTestSubtitle' => 'WebSocket音声接続をテスト',
 			'settings.userTypeRegular' => '一般ユーザー',
 			'settings.selectAmountStyle' => '金額表示スタイルを選択',
-			'settings.currencyDescription' => '使用する通貨を選択してください。すべての金額がこの通貨で表示されます。',
+			'settings.currencyDescription' => '主要通貨を選択してください。今後の取引はデフォルトでこの通貨になり、統計や集計もこの通貨で表示されます。過去の取引の元金額には影響しません。',
 			'settings.amountStyleNotice' => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.',
 			'settings.editUsername' => 'Edit Username',
 			'settings.enterUsername' => 'Enter username',
@@ -2855,7 +2855,7 @@ extension on TranslationsJa {
 			'amountTheme.international' => '国際標準',
 			'amountTheme.internationalDesc' => '緑上昇/赤下落',
 			'amountTheme.minimalist' => 'ミニマリスト',
-			'amountTheme.minimalistDesc' => '記号のみで区別',
+			'amountTheme.minimalistDesc' => 'モノクロ表示、+/- 記号のみで区別',
 			'amountTheme.colorBlind' => '色覚サポート',
 			'amountTheme.colorBlindDesc' => '青・オレンジ配色',
 			'locale.chinese' => '簡体字中国語',
