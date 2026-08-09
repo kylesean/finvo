@@ -11,6 +11,7 @@ import 'package:finvo/features/home/providers/comment_providers.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
 import 'package:finvo/features/notification/repositories/notification_repository.dart';
 import 'package:finvo/features/notification/utils/notification_list_mutations.dart';
+import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 
 part 'notification_provider.freezed.dart';
@@ -256,6 +257,20 @@ NotificationWsService notificationWs(Ref ref) {
         ref.invalidate(transactionCommentsProvider(transactionId));
       }
       if (type == 'comment_updated') return;
+    }
+
+    // A member left / was removed from a space: refresh the space detail (its
+    // member list) and the space list so open UIs drop the member immediately
+    // instead of showing a stale member (M-23).
+    if (type == 'member_left') {
+      final dataMap = payload['data'] is Map<String, dynamic>
+          ? payload['data'] as Map<String, dynamic>
+          : null;
+      final spaceId = (dataMap?['space_id'] ?? dataMap?['spaceId'])?.toString();
+      if (spaceId != null && spaceId.isNotEmpty) {
+        ref.invalidate(spaceDetailProvider(spaceId));
+        ref.invalidate(sharedSpaceProvider);
+      }
     }
 
     ref

@@ -441,6 +441,24 @@ class SharedSpaceService:
         await self.db.commit()
 
         logger.info("member_left_space", space_id=space_id, user=str(user_uuid))
+
+        # Emit domain event so remaining members are notified in realtime
+        from app.core.events import event_bus
+        from app.services.notification_handlers import MemberLeftEvent
+
+        space_name = (
+            await self.db.execute(select(SharedSpace.name).where(SharedSpace.id == space_id))
+        ).scalar_one_or_none()
+
+        event_bus.emit(
+            MemberLeftEvent(
+                space_id=space_id,
+                space_name=space_name or "",
+                left_user_uuid=user_uuid,
+                reason="left",
+            )
+        )
+
         return True
 
     async def remove_member(self, space_id: UUID, user_uuid: UUID, target_user_uuid: UUID) -> bool:
@@ -484,6 +502,25 @@ class SharedSpaceService:
         await self.db.commit()
 
         logger.info("member_removed", space_id=space_id, removed=str(target_user_uuid), by=str(user_uuid))
+
+        # Emit domain event so remaining members (and the removed user) are
+        # notified in realtime
+        from app.core.events import event_bus
+        from app.services.notification_handlers import MemberLeftEvent
+
+        space_name = (
+            await self.db.execute(select(SharedSpace.name).where(SharedSpace.id == space_id))
+        ).scalar_one_or_none()
+
+        event_bus.emit(
+            MemberLeftEvent(
+                space_id=space_id,
+                space_name=space_name or "",
+                left_user_uuid=target_user_uuid,
+                reason="removed",
+            )
+        )
+
         return True
 
     async def update_member_role(

@@ -47,10 +47,21 @@ class EventBus:
         self._handlers: dict[type[DomainEvent], list[EventHandler]] = {}
 
     def subscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
-        """Register a handler for a specific event type."""
-        if event_type not in self._handlers:
-            self._handlers[event_type] = []
-        self._handlers[event_type].append(handler)
+        """Register a handler for a specific event type.
+
+        Idempotent: registering the same handler twice (e.g. an app that runs
+        its startup hooks more than once in the same process) is ignored, so
+        an event is never dispatched to duplicate handler tasks.
+        """
+        handlers = self._handlers.setdefault(event_type, [])
+        if handler in handlers:
+            logger.debug(
+                "event_handler_already_registered",
+                event_type=event_type.__name__,
+                handler=handler.__name__,
+            )
+            return
+        handlers.append(handler)
         logger.debug("event_handler_registered", event_type=event_type.__name__, handler=handler.__name__)
 
     def emit(self, event: DomainEvent) -> None:

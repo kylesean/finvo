@@ -97,7 +97,8 @@ async def test_comment_reply_persists_explicit_target(client_with_auth, db_sessi
         .all()
     )
     assert len(reply_notifications) == 1
-    assert "replied to your comment" in reply_notifications[0].title
+    assert reply_notifications[0].data.get("commentKind") == "reply"
+    assert "integration_test_user" in reply_notifications[0].title
 
     # The explicit target survives a full reload of the thread.
     listed = client_with_auth.get(f"/api/v1/transactions/{tx_id}/comments")
@@ -167,7 +168,8 @@ async def test_first_direct_comment_notifies_transaction_owner(client_with_auth,
         .all()
     )
     assert len(rows) == 1
-    assert "commented on your transaction" in rows[0].title
+    assert rows[0].data.get("commentKind") == "owner"
+    assert "integration_test_user" in rows[0].title
 
 
 @pytest.mark.asyncio
@@ -311,4 +313,5 @@ async def test_reply_without_explicit_target_defaults_to_parent_author(client_wi
         .all()
     )
     assert len(rows) == 1
-    assert "replied to your comment" in rows[0].title
+    assert rows[0].data.get("commentKind") == "reply"
+    assert "integration_test_user" in rows[0].title

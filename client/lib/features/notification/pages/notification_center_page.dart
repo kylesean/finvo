@@ -320,7 +320,10 @@ class _NotificationTile extends StatelessWidget {
   String _buildSemanticTitle() {
     final data = item.data;
     final username =
-        (data?['joined_username'] ?? data?['added_by_username'] ?? '')
+        (data?['member_username'] ??
+                data?['joined_username'] ??
+                data?['added_by_username'] ??
+                '')
             .toString();
     final spaceName = (data?['space_name'] ?? '').toString();
     final commenter = (data?['commenter'] ?? '').toString();
@@ -331,7 +334,9 @@ class _NotificationTile extends StatelessWidget {
             ? t.notification.semantic.memberJoined(name: username)
             : item.title,
       'space_activity' =>
-        spaceName.isNotEmpty
+        data?['action'] == 'removed_from_space'
+            ? item.title
+            : spaceName.isNotEmpty
             ? t.notification.semantic.welcome(space: spaceName)
             : item.title,
       'transaction' =>
