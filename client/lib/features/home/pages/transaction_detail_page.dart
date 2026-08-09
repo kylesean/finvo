@@ -376,6 +376,9 @@ class TransactionDetailPage extends ConsumerWidget {
                     child: CommentSectionWidget(
                       transactionId: transaction.id,
                       targetCommentId: targetCommentId,
+                      recorderUserId: transaction.sharedWith.isNotEmpty
+                          ? transaction.sharedWith.first.userId
+                          : null,
                     ),
                   ),
                   const SliverToBoxAdapter(

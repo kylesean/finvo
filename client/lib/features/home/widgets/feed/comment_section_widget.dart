@@ -12,11 +12,13 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 class CommentSectionWidget extends ConsumerStatefulWidget {
   final String transactionId;
   final String? targetCommentId;
+  final String? recorderUserId;
 
   const CommentSectionWidget({
     super.key,
     required this.transactionId,
     this.targetCommentId,
+    this.recorderUserId,
   });
 
   @override
@@ -135,6 +137,7 @@ class _CommentSectionWidgetState extends ConsumerState<CommentSectionWidget> {
                     comment: parent,
                     transactionId: widget.transactionId,
                     isHighlighted: widget.targetCommentId == parent.id,
+                    recorderUserId: widget.recorderUserId,
                   ),
                 ),
               );
@@ -159,6 +162,7 @@ class _CommentSectionWidgetState extends ConsumerState<CommentSectionWidget> {
                       isHighlighted: widget.targetCommentId == reply.id,
                       parentAuthorId: parent.userId,
                       parentAuthorName: parent.userName,
+                      recorderUserId: widget.recorderUserId,
                     ),
                   ),
                 );

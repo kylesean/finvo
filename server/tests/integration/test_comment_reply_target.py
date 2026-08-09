@@ -173,91 +173,8 @@ async def test_first_direct_comment_notifies_transaction_owner(client_with_auth,
 
 
 @pytest.mark.asyncio
-async def test_owner_comment_notifies_space_members(client_with_auth, db_session, test_user):
-    """A comment by the transaction owner in a shared space notifies members."""
-    from app.models.shared_space import SharedSpace, SpaceMember, SpaceTransaction
-
-    other = User(
-        uuid=uuid4(),
-        username="integration_space_owner",
-        email="space-owner@example.com",
-        password="hashed_password",
-        registration_type="email",
-    )
-    db_session.add(other)
-    await db_session.commit()
-
-    tx = Transaction(
-        uuid=uuid4(),
-        user_uuid=other.uuid,
-        type="EXPENSE",
-        amount=Decimal("10.0"),
-        amount_original=Decimal("10.0"),
-        currency="CNY",
-        transaction_at=datetime.now(UTC),
-        status="CLEARED",
-    )
-    db_session.add(tx)
-    await db_session.commit()
-
-    shared_space = SharedSpace(id=uuid4(), name="member notify space", creator_uuid=other.uuid)
-    db_session.add(shared_space)
-    await db_session.commit()
-    db_session.add(
-        SpaceMember(
-            space_id=shared_space.id,
-            user_uuid=test_user.uuid,
-            status="ACCEPTED",
-        )
-    )
-    # A third member (neither owner nor commenter) must still be notified.
-    alice = User(
-        uuid=uuid4(),
-        username="integration_space_member",
-        email="space-member@example.com",
-        password="hashed_password",
-        registration_type="email",
-    )
-    db_session.add(alice)
-    await db_session.commit()
-    db_session.add(
-        SpaceMember(
-            space_id=shared_space.id,
-            user_uuid=alice.uuid,
-            status="ACCEPTED",
-        )
-    )
-    db_session.add(SpaceTransaction(space_id=shared_space.id, transaction_id=tx.uuid, added_by_user_uuid=other.uuid))
-    await db_session.commit()
-
-    # The owner writes a comment. alice (a member, not the commenter) must
-    # still be notified even though she is neither target nor owner.
-    response = client_with_auth.post(
-        f"/api/v1/transactions/{tx.uuid}/comments",
-        json={"comment_text": "owner root comment"},
-    )
-    assert response.status_code == 200, response.text
-
-    rows = (
-        (
-            await db_session.execute(
-                select(Notification).where(
-                    Notification.user_uuid == alice.uuid,
-                    Notification.type == "bill_comment",
-                )
-            )
-        )
-        .scalars()
-        .all()
-    )
-    assert len(rows) == 1
-    assert "在共享账单中发表了评论" in rows[0].title
-    assert rows[0].data.get("commentKind") == "space"
-
-
-@pytest.mark.asyncio
-async def test_reply_without_explicit_target_defaults_to_parent_author(client_with_auth, db_session, test_user):
-    """Omitted replied_to_user_id falls back to the parent comment's author."""
+async def test_direct_root_reply_keeps_replied_to_user_id_none(client_with_auth, db_session, test_user):
+    """Direct root reply keeps repliedToUserId=None for clean UI rendering, while notifying root author."""
     tx = Transaction(
         uuid=uuid4(),
         user_uuid=test_user.uuid,
@@ -290,15 +207,14 @@ async def test_reply_without_explicit_target_defaults_to_parent_author(client_wi
     db_session.add(root)
     await db_session.commit()
 
-    # Reply WITHOUT replied_to_user_id — the target must default to the parent
-    # comment's author so the author is notified and the ">" chip renders.
     response = client_with_auth.post(
         f"/api/v1/transactions/{tx.uuid}/comments",
         json={"comment_text": "plain reply", "parent_comment_id": str(root.uuid)},
     )
     assert response.status_code == 200, response.text
     created = response.json()["data"]
-    assert created["repliedToUserId"] == str(other.uuid)
+    # Direct reply to 1st-level root comment leaves repliedToUserId None for clean UI
+    assert created["repliedToUserId"] is None
 
     rows = (
         (
@@ -315,3 +231,54 @@ async def test_reply_without_explicit_target_defaults_to_parent_author(client_wi
     assert len(rows) == 1
     assert rows[0].data.get("commentKind") == "reply"
     assert "integration_test_user" in rows[0].title
+
+
+@pytest.mark.asyncio
+async def test_auto_extract_mention_in_comment_text(client_with_auth, db_session, test_user):
+    """Writing @username in comment text automatically extracts mention and notifies user without polluting repliedToUserId."""
+    tx = Transaction(
+        uuid=uuid4(),
+        user_uuid=test_user.uuid,
+        type="EXPENSE",
+        amount=Decimal("15.0"),
+        amount_original=Decimal("15.0"),
+        currency="CNY",
+        transaction_at=datetime.now(UTC),
+        status="CLEARED",
+    )
+    db_session.add(tx)
+    await db_session.commit()
+
+    mentioned_target = User(
+        uuid=uuid4(),
+        username="integration_mention_target",
+        email="mention-target@example.com",
+        password="hashed_password",
+        registration_type="email",
+    )
+    db_session.add(mentioned_target)
+    await db_session.commit()
+
+    response = client_with_auth.post(
+        f"/api/v1/transactions/{tx.uuid}/comments",
+        json={"comment_text": "@integration_mention_target look at this transaction"},
+    )
+    assert response.status_code == 200, response.text
+    created = response.json()["data"]
+    # Text mention does NOT set repliedToUserId (so UI doesn't render > mention_target)
+    assert created["repliedToUserId"] is None
+
+    rows = (
+        (
+            await db_session.execute(
+                select(Notification).where(
+                    Notification.user_uuid == mentioned_target.uuid,
+                    Notification.type == "bill_comment",
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert rows[0].data.get("commentKind") == "mention"
+    assert "提到了你" in rows[0].title

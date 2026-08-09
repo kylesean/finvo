@@ -200,7 +200,11 @@ class AppFontConfig {
     for (final path in _miSansPaths) {
       debugPrint('[AppFontConfig] preloadMiSans: trying $path');
       try {
-        final bytes = await File(path).readAsBytes();
+        final file = File(path);
+        if (!file.existsSync()) {
+          continue;
+        }
+        final bytes = await file.readAsBytes();
         debugPrint(
           '[AppFontConfig] preloadMiSans: read ${bytes.length} bytes from $path',
         );

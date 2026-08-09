@@ -137,12 +137,20 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
     final text = _commentController.text;
     final cursorPos = _commentController.selection.baseOffset;
 
-    // Replace from @ position to cursor with @username
-    final before = text.substring(0, _mentionStartIndex);
-    final after = text.substring(cursorPos);
-    final newText = '$before@${member.username} $after';
-    final newCursor =
-        before.length + member.username.length + 2; // @name + space
+    // Replace from @ position to cursor with " @username " (padding with spaces)
+    final rawBefore = text.substring(0, _mentionStartIndex);
+    final rawAfter = text.substring(cursorPos);
+
+    final before = (rawBefore.isNotEmpty && !rawBefore.endsWith(' '))
+        ? '$rawBefore '
+        : rawBefore;
+    final after = (rawAfter.isNotEmpty && !rawAfter.startsWith(' '))
+        ? ' $rawAfter'
+        : (rawAfter.isEmpty ? ' ' : rawAfter);
+
+    final insertedTag = '@${member.username}';
+    final newText = '$before$insertedTag$after';
+    final newCursor = before.length + insertedTag.length + 1;
 
     _commentController.value = TextEditingValue(
       text: newText,
@@ -174,7 +182,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
     // never derived from the live comment list: a WebSocket-triggered reload
     // between tap and send used to make the comment unresolvable, silently
     // dropping the target so the replied-to user never got notified.
-    final repliedToUserId = ref.read(replyingToUserIdProvider);
+    String? repliedToUserId = ref.read(replyingToUserIdProvider);
 
     if (directlyRepliedToCommentId != null) {
       final allComments =
@@ -194,9 +202,15 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
         // root's author in multi-level threads. Persist that explicit target
         // so the rendered "replied to X" stays correct after reloads.
         if (repliedToComment.parentCommentId == null) {
+          // Tapping the 1st-level root comment header:
+          // Reply attaches to this root comment; no explicit "▶ Target" label needed on the sub-comment.
           effectiveParentCommentId = repliedToComment.id;
+          repliedToUserId = null;
         } else {
+          // Tapping a 2nd-level sub-comment item inside the thread:
+          // Reply attaches to the root comment, but explicitly targets the sub-comment author.
           effectiveParentCommentId = repliedToComment.parentCommentId;
+          repliedToUserId ??= repliedToComment.userId;
         }
       } else {
         effectiveParentCommentId = null;
@@ -207,19 +221,31 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
 
     try {
       // Parse @mentions from text to extract mentioned user IDs
-      List<String>? mentionedUserIds;
+      final Set<String> mentionedSet = {};
       final effectiveSpaceId = _getEffectiveSpaceId(isRead: true);
       if (effectiveSpaceId != null) {
         final membersAsync = ref.read(spaceMembersProvider(effectiveSpaceId));
         final members = membersAsync.asData?.value ?? [];
-        final mentioned = members
-            .where((m) => commentText.contains('@${m.username}'))
-            .map((m) => m.userId)
-            .toList();
-        if (mentioned.isNotEmpty) {
-          mentionedUserIds = mentioned;
+        for (final m in members) {
+          if (commentText.contains('@${m.username}')) {
+            mentionedSet.add(m.userId);
+          }
         }
       }
+      final allComments =
+          ref
+              .read(transactionCommentsProvider(widget.transactionId))
+              .asData
+              ?.value ??
+          [];
+      for (final c in allComments) {
+        if (commentText.contains('@${c.userName}')) {
+          mentionedSet.add(c.userId);
+        }
+      }
+      final List<String>? mentionedUserIds = mentionedSet.isNotEmpty
+          ? mentionedSet.toList()
+          : null;
 
       await ref
           .read(transactionCommentsProvider(widget.transactionId).notifier)

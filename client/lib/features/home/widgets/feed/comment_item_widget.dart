@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,7 @@ class CommentItemWidget extends ConsumerWidget {
   final bool isHighlighted;
   final String? parentAuthorId;
   final String? parentAuthorName;
+  final String? recorderUserId;
 
   const CommentItemWidget({
     super.key,
@@ -36,6 +38,7 @@ class CommentItemWidget extends ConsumerWidget {
     this.isHighlighted = false,
     this.parentAuthorId,
     this.parentAuthorName,
+    this.recorderUserId,
   });
 
   void _triggerReply(WidgetRef ref, String commentId, String userName) {
@@ -147,28 +150,47 @@ class CommentItemWidget extends ConsumerWidget {
         Text(comment.userName, style: mutedNameStyle),
       ];
 
-      // Social comment display rule:
-      // 1. Suppress self-reply (A > A).
-      // 2. Suppress direct replies to the root comment by sub-authors (A replying to root B -> A).
-      // 3. Show "> TargetName" when replying to sub-comment authors (B replying to sub-author A -> B > A).
+      // Add "记录人" / "Author" badge tag for transaction owner/recorder
+      final bool isRecorder =
+          recorderUserId != null && comment.userId == recorderUserId;
+      if (isRecorder) {
+        nameParts.addAll([
+          const SizedBox(width: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: colorScheme.primary.withValues(alpha: 0.25),
+                width: 0.5,
+              ),
+            ),
+            child: Text(
+              t.comment.recordedBy,
+              style: theme.typography.body.xs.copyWith(
+                color: colorScheme.primary,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ]);
+      }
+
+      // Social media comment display rules (Xiaohongshu / Bilibili standard):
+      // 1. Never show self-reply (A ▶ A).
+      // 2. Tapping 1st-level root comment has no repliedToUserName -> renders cleanly without ▶.
+      // 3. Tapping a 2nd-level sub-comment item persists repliedToUserName -> ALWAYS renders "▶ TargetName".
       final bool isSelfReply = comment.repliedToUserId != null
           ? comment.repliedToUserId == comment.userId
           : comment.repliedToUserName == comment.userName;
-
-      final bool isDirectToRoot =
-          comment.repliedToUserId != null && parentAuthorId != null
-          ? (comment.repliedToUserId == parentAuthorId &&
-                comment.userId != parentAuthorId)
-          : (parentAuthorName != null &&
-                comment.repliedToUserName == parentAuthorName &&
-                comment.userName != parentAuthorName);
 
       final bool shouldShowReplyTarget =
           isSubComment &&
           comment.repliedToUserName != null &&
           comment.repliedToUserName!.isNotEmpty &&
-          !isSelfReply &&
-          !isDirectToRoot;
+          !isSelfReply;
 
       if (shouldShowReplyTarget) {
         nameParts.addAll([
@@ -278,12 +300,11 @@ class CommentItemWidget extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(
+                  _buildFormattedCommentText(
+                    context,
                     comment.commentText,
-                    style: theme.typography.body.sm.copyWith(
-                      color: colorScheme.foreground,
-                      height: 1.3,
-                    ),
+                    theme,
+                    colorScheme,
                   ),
                 ],
               ),
@@ -292,5 +313,69 @@ class CommentItemWidget extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildFormattedCommentText(
+    BuildContext context,
+    String text,
+    FThemeData theme,
+    FColors colorScheme,
+  ) {
+    final baseStyle = theme.typography.body.sm.copyWith(
+      color: colorScheme.foreground,
+      height: 1.3,
+    );
+    final mentionStyle = baseStyle.copyWith(
+      color: colorScheme.primary,
+      fontWeight: FontWeight.w600,
+    );
+
+    final regex = RegExp(r'(@[^\s@]+)');
+    final matches = regex.allMatches(text);
+
+    if (matches.isEmpty) {
+      return Text(text, style: baseStyle);
+    }
+
+    final List<InlineSpan> spans = [];
+    int lastMatchEnd = 0;
+
+    for (final match in matches) {
+      if (match.start > lastMatchEnd) {
+        final precedingText = text.substring(lastMatchEnd, match.start);
+        spans.add(TextSpan(text: precedingText));
+        if (precedingText.isNotEmpty && !precedingText.endsWith(' ')) {
+          spans.add(const TextSpan(text: ' '));
+        }
+      }
+      final mentionTag = match.group(0)!;
+      final username = mentionTag.startsWith('@')
+          ? mentionTag.substring(1)
+          : mentionTag;
+
+      spans.add(
+        TextSpan(
+          text: mentionTag,
+          style: mentionStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              unawaited(HapticFeedback.lightImpact());
+              TopToast.info(context, '用户 @$username');
+            },
+        ),
+      );
+      lastMatchEnd = match.end;
+
+      if (lastMatchEnd < text.length &&
+          !text.substring(lastMatchEnd).startsWith(' ')) {
+        spans.add(const TextSpan(text: ' '));
+      }
+    }
+
+    if (lastMatchEnd < text.length) {
+      spans.add(TextSpan(text: text.substring(lastMatchEnd)));
+    }
+
+    return Text.rich(TextSpan(style: baseStyle, children: spans));
   }
 }

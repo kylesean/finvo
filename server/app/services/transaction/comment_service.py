@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 from uuid import UUID
 
@@ -205,30 +206,9 @@ class TransactionCommentService:
             if parent_comment.parent_comment_id is not None:
                 raise BusinessError("Cannot reply to a child comment", TransactionErrorCode.INVALID_PARENT_COMMENT_ID)
 
-        # Create new comment
-        # Reply target resolution: the explicit user the client tapped wins;
-        # when the client omits it, the parent comment's author is the
-        # creation-time default so replies ALWAYS carry a notification target
-        # (never a legacy-data fallback — the value is applied on insert and
-        # stays in the column for all future reads).
+        # Reply target resolution: ONLY explicit target passed by client (tapped user).
+        # Text @mentions belong strictly to explicit_mentions (triggers "mentioned you", not "replied to you").
         resolved_reply_target: UUID | None = replied_to_user_id
-        if resolved_reply_target is None and parent_comment is not None:
-            resolved_reply_target = parent_comment.user_uuid
-        if resolved_reply_target == user_uuid and parent_comment is not None:
-            last_child_query = (
-                select(TransactionComment.user_uuid)
-                .where(
-                    and_(
-                        TransactionComment.parent_comment_id == parent_comment.id,
-                        TransactionComment.user_uuid != user_uuid,
-                    )
-                )
-                .order_by(TransactionComment.created_at.desc())
-                .limit(1)
-            )
-            last_child_res = await self.db.execute(last_child_query)
-            last_author = last_child_res.scalar_one_or_none()
-            resolved_reply_target = last_author
 
         new_comment = TransactionComment(
             transaction_id=transaction_id,
@@ -253,18 +233,27 @@ class TransactionCommentService:
             is_reply=bool(parent_comment_id),
         )
 
-        # Collect users to notify: the transaction owner, the reply target
-        # (explicit, or creation-time default = parent's author), every
-        # ACCEPTED member of a linked shared space (a comment in a group is
-        # group-visible), plus anyone mentioned in the text. The commenter
-        # never notifies themselves.
+        # Notification target: explicit reply target OR root comment author
+        notification_reply_target = resolved_reply_target or (parent_comment.user_uuid if parent_comment else None)
+
+        # Collect users to notify: explicit mentions passed by client OR parsed
+        # from comment_text (e.g. @username), reply target, transaction owner,
+        # and space members. The commenter never notifies themselves.
         transaction_owner_uuid = str(transaction.user_uuid)
         space_member_uuids = await self._get_space_member_uuids(transaction_id)
-        users_to_notify: set[str] = set(mentioned_user_ids or [])
-        if resolved_reply_target is not None:
-            users_to_notify.add(str(resolved_reply_target))
+
+        explicit_mention_uuids: set[str] = set(mentioned_user_ids or [])
+        raw_mentions = set(re.findall(r"@([^\s@]+)", comment_text))
+        if raw_mentions:
+            user_query = select(User.uuid, User.username).where(User.username.in_(raw_mentions))
+            matched_users = (await self.db.execute(user_query)).all()
+            for m_uuid, _ in matched_users:
+                explicit_mention_uuids.add(str(m_uuid))
+
+        users_to_notify: set[str] = set(explicit_mention_uuids)
+        if notification_reply_target is not None:
+            users_to_notify.add(str(notification_reply_target))
         users_to_notify.add(transaction_owner_uuid)
-        users_to_notify.update(space_member_uuids)
 
         users_to_notify.discard(str(user_uuid))
 
@@ -275,9 +264,13 @@ class TransactionCommentService:
                 comment_id=new_comment.uuid,
                 commenter_username=commenter_username,
                 comment_text=comment_text,
-                reply_target_uuids=({str(resolved_reply_target)} if resolved_reply_target is not None else set()),
+                reply_target_uuids=(
+                    {str(notification_reply_target)} if notification_reply_target is not None else set()
+                ),
+                explicit_mention_uuids=explicit_mention_uuids,
                 transaction_owner_uuid=transaction_owner_uuid,
                 space_member_uuids=space_member_uuids,
+                is_sub_comment=bool(parent_comment_id),
             )
 
         # Single commit point: comment + notifications are persisted together.
@@ -343,28 +336,16 @@ class TransactionCommentService:
         commenter_username: str,
         comment_text: str,
         reply_target_uuids: set[str] | None = None,
+        explicit_mention_uuids: set[str] | None = None,
         transaction_owner_uuid: str | None = None,
         space_member_uuids: set[str] | None = None,
+        is_sub_comment: bool = False,
     ) -> None:
         """Create notifications for mentioned users and push via WebSocket.
 
         Notification rows are added to the caller's session and committed by the
         caller — never here — so a comment and its notifications share one
         atomic transaction. WebSocket pushes remain best-effort.
-
-        Args:
-            mentioned_user_ids: Users to notify (mentions + reply targets
-                + transaction owner + space members).
-            transaction_id: Transaction the comment belongs to.
-            comment_id: Comment that triggered the notification.
-            commenter_username: Display name of the comment author.
-            comment_text: Comment body (used for the notification preview).
-            reply_target_uuids: User IDs the comment is directly addressed to;
-                they get the "replied to your comment" title.
-            transaction_owner_uuid: Owner of the transaction; they get the
-                "commented on your transaction" title for direct comments.
-            space_member_uuids: Members of the linked shared spaces; they get
-                the "commented on a shared transaction" title.
         """
         from app.core.ws_manager import ws_manager
         from app.models.notification import Notification
@@ -372,6 +353,7 @@ class TransactionCommentService:
         target_path = f"/home/transaction/{transaction_id}?commentId={comment_id}"
 
         reply_targets: set[str] = set(reply_target_uuids or ())
+        explicit_mentions: set[str] = set(explicit_mention_uuids or ())
         space_members: set[str] = set(space_member_uuids or ())
         created_notifications: dict[str, Notification] = {}
 
@@ -385,9 +367,16 @@ class TransactionCommentService:
             if mentioned_id_str in reply_targets:
                 title = f"{commenter_username} 回复了你的评论"
                 comment_kind = "reply"
+            elif mentioned_id_str in explicit_mentions:
+                title = f"{commenter_username} 提到了你"
+                comment_kind = "mention"
             elif transaction_owner_uuid is not None and mentioned_id_str == transaction_owner_uuid:
-                title = f"{commenter_username} 评论了你的账单"
-                comment_kind = "owner"
+                if is_sub_comment:
+                    title = f"{commenter_username} 在你的账单下参与了讨论"
+                    comment_kind = "owner_discussion"
+                else:
+                    title = f"{commenter_username} 评论了你的账单"
+                    comment_kind = "owner"
             elif mentioned_id_str in space_members:
                 title = f"{commenter_username} 在共享账单中发表了评论"
                 comment_kind = "space"
@@ -427,13 +416,19 @@ class TransactionCommentService:
                     continue
                 mentioned_id_str = str(mentioned_uuid)
 
-                is_target_reply = mentioned_id_str in reply_targets
-                if is_target_reply:
+                if mentioned_id_str in reply_targets:
                     title = f"{commenter_username} 回复了你的评论"
                     comment_kind = "reply"
+                elif mentioned_id_str in explicit_mentions:
+                    title = f"{commenter_username} 提到了你"
+                    comment_kind = "mention"
                 elif transaction_owner_uuid is not None and mentioned_id_str == transaction_owner_uuid:
-                    title = f"{commenter_username} 评论了你的账单"
-                    comment_kind = "owner"
+                    if is_sub_comment:
+                        title = f"{commenter_username} 在你的账单下参与了讨论"
+                        comment_kind = "owner_discussion"
+                    else:
+                        title = f"{commenter_username} 评论了你的账单"
+                        comment_kind = "owner"
                 elif mentioned_id_str in space_members:
                     title = f"{commenter_username} 在共享账单中发表了评论"
                     comment_kind = "space"
