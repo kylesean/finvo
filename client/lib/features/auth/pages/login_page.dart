@@ -71,12 +71,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       // surfacing a spurious "unknown error" toast right after login. go()
       // is a no-op when the target is already the current location, so the
       // explicit navigation below is a safe fallback that never races.
-      final from = GoRouterState.of(context).uri.queryParameters['from'];
-      final destination =
-          (from != null && from.isNotEmpty && from.startsWith('/'))
-          ? from
-          : AppRoutePaths.home;
-      GoRouter.of(context).go(destination);
+      try {
+        final from = GoRouterState.of(context).uri.queryParameters['from'];
+        final destination =
+            (from != null && from.isNotEmpty && from.startsWith('/'))
+            ? from
+            : AppRoutePaths.home;
+        GoRouter.of(context).go(destination);
+      } catch (_) {
+        // Ignored: GoRouter's appRedirect has already navigated to destination
+      }
     } on AppException catch (e) {
       if (!mounted) return;
       ToastService.showDestructive(

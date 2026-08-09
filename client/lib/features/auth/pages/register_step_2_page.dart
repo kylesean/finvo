@@ -70,7 +70,11 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
       // spurious "unknown error" toast immediately after a successful
       // registration. go() is a no-op for the current location, so it can
       // never race the redirect.
-      context.go(AppRoutePaths.home);
+      try {
+        context.go(AppRoutePaths.home);
+      } catch (_) {
+        // Ignored: GoRouter's appRedirect has already navigated to /home
+      }
     } on AppException catch (e) {
       if (!mounted) return;
       ToastService.showDestructive(
