@@ -381,6 +381,13 @@ class _Translations$settings$en extends Translations$settings$zh {
 
 	// Translations
 	@override String get title => 'Settings';
+	@override String get editProfile => 'Edit Profile';
+	@override String get saveProfile => 'Save Profile';
+	@override String get profileHelpHint => 'Your profile helps others identify you in shared spaces.';
+	@override String get enterUsernameHint => 'Enter your username';
+	@override String get groupPreferences => 'Preferences';
+	@override String get groupServices => 'Workspace & Services';
+	@override String get groupSystem => 'System & Appearance';
 	@override String get language => 'Language';
 	@override String get languageSettings => 'Language Settings';
 	@override String get selectLanguage => 'Select Language';
@@ -2769,6 +2776,13 @@ extension on TranslationsEn {
 			'category.generalTransfer' => 'Transfer',
 			'category.debtRepayment' => 'Debt Repayment',
 			'settings.title' => 'Settings',
+			'settings.editProfile' => 'Edit Profile',
+			'settings.saveProfile' => 'Save Profile',
+			'settings.profileHelpHint' => 'Your profile helps others identify you in shared spaces.',
+			'settings.enterUsernameHint' => 'Enter your username',
+			'settings.groupPreferences' => 'Preferences',
+			'settings.groupServices' => 'Workspace & Services',
+			'settings.groupSystem' => 'System & Appearance',
 			'settings.language' => 'Language',
 			'settings.languageSettings' => 'Language Settings',
 			'settings.selectLanguage' => 'Select Language',

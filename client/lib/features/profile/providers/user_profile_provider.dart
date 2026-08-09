@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/painting.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -19,6 +20,11 @@ abstract class UserProfileState with _$UserProfileState {
     @Default(false) bool isSaving,
     @Default(false) bool isUploadingAvatar,
     String? error,
+
+    /// Cache-busting value bumped each time the avatar is re-uploaded, so the
+    /// profile page's [UserAvatar] fetches a fresh image instead of serving
+    /// the stale one from Flutter's image cache.
+    String? avatarCacheBuster,
   }) = _UserProfileState;
 }
 
@@ -79,14 +85,33 @@ class UserProfile extends _$UserProfile {
         throw Exception('Image upload failed');
       }
 
-      // 2. Get uploaded image URL
-      final avatarUrl = uploadResult.uploads.first.uri;
+      // 2. Format avatarUrl for backend attachment resolution (/files/view/{attachmentId})
+      final upload = uploadResult.uploads.first;
+      final String avatarUrl;
+      if (upload.attachmentId.isNotEmpty) {
+        avatarUrl = '/files/view/${upload.attachmentId}';
+      } else if (upload.uri.isNotEmpty) {
+        avatarUrl = upload.uri;
+      } else if (upload.id.isNotEmpty) {
+        avatarUrl = '/files/view/${upload.id}';
+      } else {
+        avatarUrl = upload.objectKey;
+      }
 
       // 3. Update profile with new avatar URL
       final updatedUser = await _service.updateProfile(avatarUrl: avatarUrl);
       if (!ref.mounted) return false;
 
-      state = state.copyWith(user: updatedUser, isUploadingAvatar: false);
+      // 4. Clear Flutter network image cache & set cacheBuster timestamp for immediate UI refresh
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+      final cacheBuster = DateTime.now().millisecondsSinceEpoch.toString();
+
+      state = state.copyWith(
+        user: updatedUser,
+        isUploadingAvatar: false,
+        avatarCacheBuster: cacheBuster,
+      );
       _syncUserWithAuth();
       return true;
     } catch (e) {
@@ -105,7 +130,11 @@ class UserProfile extends _$UserProfile {
     try {
       final updatedUser = await _service.updateProfile(avatarUrl: avatarUrl);
       if (!ref.mounted) return false;
-      state = state.copyWith(user: updatedUser, isSaving: false);
+      state = state.copyWith(
+        user: updatedUser,
+        isSaving: false,
+        avatarCacheBuster: DateTime.now().millisecondsSinceEpoch.toString(),
+      );
       _syncUserWithAuth();
       return true;
     } catch (e) {

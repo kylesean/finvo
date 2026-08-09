@@ -774,6 +774,27 @@ class Translations$settings$zh {
 	/// zh: '设置'
 	String get title => '设置';
 
+	/// zh: '修改个人资料'
+	String get editProfile => '修改个人资料';
+
+	/// zh: '保存个人资料'
+	String get saveProfile => '保存个人资料';
+
+	/// zh: '你的个人资料可帮助他人识别你的身份。'
+	String get profileHelpHint => '你的个人资料可帮助他人识别你的身份。';
+
+	/// zh: '请输入用户名'
+	String get enterUsernameHint => '请输入用户名';
+
+	/// zh: '偏好与记账'
+	String get groupPreferences => '偏好与记账';
+
+	/// zh: '协作与服务'
+	String get groupServices => '协作与服务';
+
+	/// zh: '系统与外观'
+	String get groupSystem => '系统与外观';
+
 	/// zh: '语言'
 	String get language => '语言';
 
@@ -5443,6 +5464,13 @@ extension on Translations {
 			'category.generalTransfer' => '转账',
 			'category.debtRepayment' => '债务还款',
 			'settings.title' => '设置',
+			'settings.editProfile' => '修改个人资料',
+			'settings.saveProfile' => '保存个人资料',
+			'settings.profileHelpHint' => '你的个人资料可帮助他人识别你的身份。',
+			'settings.enterUsernameHint' => '请输入用户名',
+			'settings.groupPreferences' => '偏好与记账',
+			'settings.groupServices' => '协作与服务',
+			'settings.groupSystem' => '系统与外观',
 			'settings.language' => '语言',
 			'settings.languageSettings' => '语言设置',
 			'settings.selectLanguage' => '选择语言',

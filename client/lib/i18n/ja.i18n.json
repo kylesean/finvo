@@ -245,6 +245,13 @@
   },
   "settings": {
     "title": "設定",
+    "editProfile": "プロフィールを編集",
+    "saveProfile": "プロフィールを保存",
+    "profileHelpHint": "プロフィールは共有スペースであなたを識別するのに役立ちます。",
+    "enterUsernameHint": "ユーザー名を入力してください",
+    "groupPreferences": "環境設定と記録",
+    "groupServices": "共有とサービス",
+    "groupSystem": "システムと外観",
     "language": "言語",
     "languageSettings": "言語設定",
     "selectLanguage": "言語を選択",

@@ -344,6 +344,8 @@ def setup_logging() -> None:
         u_logger.propagate = True
 
     # Suppress verbose logs from third-party libraries
+    logging.getLogger("PIL").setLevel(logging.WARNING)
+    logging.getLogger("multipart").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("duckduckgo_search").setLevel(logging.WARNING)
@@ -354,6 +356,7 @@ def setup_logging() -> None:
     logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
     logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
     logging.getLogger("tzlocal").setLevel(logging.WARNING)
+    logging.getLogger("PIL").setLevel(logging.WARNING)
 
     # Configure structlog to always emit via ProcessorFormatter. Rendering is
     # deferred to the console/file formatters so each output is encoded exactly

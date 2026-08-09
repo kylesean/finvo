@@ -21,7 +21,7 @@ from uuid import UUID
 import aiofiles
 import aiofiles.os
 from fastapi import UploadFile
-from PIL import Image
+from PIL import Image, ImageOps
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
@@ -572,6 +572,7 @@ class UploadService:
         """
         try:
             image: Image.Image = Image.open(io.BytesIO(content))
+            image = ImageOps.exif_transpose(image)
             original_width, original_height = image.size
 
             if original_width > self.IMAGE_MAX_WIDTH or original_height > self.IMAGE_MAX_HEIGHT:

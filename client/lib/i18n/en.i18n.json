@@ -249,6 +249,13 @@
   },
   "settings": {
     "title": "Settings",
+    "editProfile": "Edit Profile",
+    "saveProfile": "Save Profile",
+    "profileHelpHint": "Your profile helps others identify you in shared spaces.",
+    "enterUsernameHint": "Enter your username",
+    "groupPreferences": "Preferences",
+    "groupServices": "Workspace & Services",
+    "groupSystem": "System & Appearance",
     "language": "Language",
     "languageSettings": "Language Settings",
     "selectLanguage": "Select Language",

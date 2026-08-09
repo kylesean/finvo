@@ -377,6 +377,13 @@ class _Translations$settings$ja extends Translations$settings$zh {
 
 	// Translations
 	@override String get title => '設定';
+	@override String get editProfile => 'プロフィールを編集';
+	@override String get saveProfile => 'プロフィールを保存';
+	@override String get profileHelpHint => 'プロフィールは共有スペースであなたを識別するのに役立ちます。';
+	@override String get enterUsernameHint => 'ユーザー名を入力してください';
+	@override String get groupPreferences => '環境設定と記録';
+	@override String get groupServices => '共有とサービス';
+	@override String get groupSystem => 'システムと外観';
 	@override String get language => '言語';
 	@override String get languageSettings => '言語設定';
 	@override String get selectLanguage => '言語を選択';
@@ -2759,6 +2766,13 @@ extension on TranslationsJa {
 			'category.generalTransfer' => '振替',
 			'category.debtRepayment' => '債務返済',
 			'settings.title' => '設定',
+			'settings.editProfile' => 'プロフィールを編集',
+			'settings.saveProfile' => 'プロフィールを保存',
+			'settings.profileHelpHint' => 'プロフィールは共有スペースであなたを識別するのに役立ちます。',
+			'settings.enterUsernameHint' => 'ユーザー名を入力してください',
+			'settings.groupPreferences' => '環境設定と記録',
+			'settings.groupServices' => '共有とサービス',
+			'settings.groupSystem' => 'システムと外観',
 			'settings.language' => '言語',
 			'settings.languageSettings' => '言語設定',
 			'settings.selectLanguage' => '言語を選択',

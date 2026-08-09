@@ -245,6 +245,13 @@
   },
   "settings": {
     "title": "設置",
+    "editProfile": "修改個人資料",
+    "saveProfile": "保存個人資料",
+    "profileHelpHint": "你的個人資料可幫助他人識別你的身份。",
+    "enterUsernameHint": "請輸入用戶名",
+    "groupPreferences": "偏好與記帳",
+    "groupServices": "協作與服務",
+    "groupSystem": "系統與外觀",
     "language": "語言",
     "languageSettings": "語言設置",
     "selectLanguage": "選擇語言",

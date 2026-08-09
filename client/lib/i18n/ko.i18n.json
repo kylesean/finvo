@@ -245,6 +245,13 @@
   },
   "settings": {
     "title": "설정",
+    "editProfile": "프로필 수정",
+    "saveProfile": "프로필 저장",
+    "profileHelpHint": "프로필 정보는 공유 공간에서 본인을 확인하는 데 도움이 됩니다.",
+    "enterUsernameHint": "사용자 이름을 입력하세요",
+    "groupPreferences": "기본 설정 및 기록",
+    "groupServices": "공유 및 서비스",
+    "groupSystem": "시스템 및 화면",
     "language": "언어",
     "languageSettings": "언어 설정",
     "selectLanguage": "언어 선택",

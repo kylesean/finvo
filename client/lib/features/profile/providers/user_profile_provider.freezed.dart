@@ -14,7 +14,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfileState {
 
- UserInfo? get user; bool get isLoading; bool get isSaving; bool get isUploadingAvatar; String? get error;
+ UserInfo? get user; bool get isLoading; bool get isSaving; bool get isUploadingAvatar; String? get error;/// Cache-busting value bumped each time the avatar is re-uploaded, so the
+/// profile page's [UserAvatar] fetches a fresh image instead of serving
+/// the stale one from Flutter's image cache.
+ String? get avatarCacheBuster;
 /// Create a copy of UserProfileState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +28,16 @@ $UserProfileStateCopyWith<UserProfileState> get copyWith => _$UserProfileStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileState&&(identical(other.user, user) || other.user == user)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isUploadingAvatar, isUploadingAvatar) || other.isUploadingAvatar == isUploadingAvatar)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileState&&(identical(other.user, user) || other.user == user)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isUploadingAvatar, isUploadingAvatar) || other.isUploadingAvatar == isUploadingAvatar)&&(identical(other.error, error) || other.error == error)&&(identical(other.avatarCacheBuster, avatarCacheBuster) || other.avatarCacheBuster == avatarCacheBuster));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,user,isLoading,isSaving,isUploadingAvatar,error);
+int get hashCode => Object.hash(runtimeType,user,isLoading,isSaving,isUploadingAvatar,error,avatarCacheBuster);
 
 @override
 String toString() {
-  return 'UserProfileState(user: $user, isLoading: $isLoading, isSaving: $isSaving, isUploadingAvatar: $isUploadingAvatar, error: $error)';
+  return 'UserProfileState(user: $user, isLoading: $isLoading, isSaving: $isSaving, isUploadingAvatar: $isUploadingAvatar, error: $error, avatarCacheBuster: $avatarCacheBuster)';
 }
 
 
@@ -45,7 +48,7 @@ abstract mixin class $UserProfileStateCopyWith<$Res>  {
   factory $UserProfileStateCopyWith(UserProfileState value, $Res Function(UserProfileState) _then) = _$UserProfileStateCopyWithImpl;
 @useResult
 $Res call({
- UserInfo? user, bool isLoading, bool isSaving, bool isUploadingAvatar, String? error
+ UserInfo? user, bool isLoading, bool isSaving, bool isUploadingAvatar, String? error, String? avatarCacheBuster
 });
 
 
@@ -62,13 +65,14 @@ class _$UserProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? user = freezed,Object? isLoading = null,Object? isSaving = null,Object? isUploadingAvatar = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? user = freezed,Object? isLoading = null,Object? isSaving = null,Object? isUploadingAvatar = null,Object? error = freezed,Object? avatarCacheBuster = freezed,}) {
   return _then(_self.copyWith(
 user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as UserInfo?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
 as bool,isUploadingAvatar: null == isUploadingAvatar ? _self.isUploadingAvatar : isUploadingAvatar // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,avatarCacheBuster: freezed == avatarCacheBuster ? _self.avatarCacheBuster : avatarCacheBuster // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -154,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( UserInfo? user,  bool isLoading,  bool isSaving,  bool isUploadingAvatar,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( UserInfo? user,  bool isLoading,  bool isSaving,  bool isUploadingAvatar,  String? error,  String? avatarCacheBuster)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfileState() when $default != null:
-return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvatar,_that.error);case _:
+return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvatar,_that.error,_that.avatarCacheBuster);case _:
   return orElse();
 
 }
@@ -175,10 +179,10 @@ return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvata
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( UserInfo? user,  bool isLoading,  bool isSaving,  bool isUploadingAvatar,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( UserInfo? user,  bool isLoading,  bool isSaving,  bool isUploadingAvatar,  String? error,  String? avatarCacheBuster)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileState():
-return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvatar,_that.error);case _:
+return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvatar,_that.error,_that.avatarCacheBuster);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +199,10 @@ return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvata
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( UserInfo? user,  bool isLoading,  bool isSaving,  bool isUploadingAvatar,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( UserInfo? user,  bool isLoading,  bool isSaving,  bool isUploadingAvatar,  String? error,  String? avatarCacheBuster)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileState() when $default != null:
-return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvatar,_that.error);case _:
+return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvatar,_that.error,_that.avatarCacheBuster);case _:
   return null;
 
 }
@@ -210,7 +214,7 @@ return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvata
 
 
 class _UserProfileState implements UserProfileState {
-  const _UserProfileState({this.user, this.isLoading = false, this.isSaving = false, this.isUploadingAvatar = false, this.error});
+  const _UserProfileState({this.user, this.isLoading = false, this.isSaving = false, this.isUploadingAvatar = false, this.error, this.avatarCacheBuster});
 
 
 @override final  UserInfo? user;
@@ -218,6 +222,10 @@ class _UserProfileState implements UserProfileState {
 @override@JsonKey() final  bool isSaving;
 @override@JsonKey() final  bool isUploadingAvatar;
 @override final  String? error;
+/// Cache-busting value bumped each time the avatar is re-uploaded, so the
+/// profile page's [UserAvatar] fetches a fresh image instead of serving
+/// the stale one from Flutter's image cache.
+@override final  String? avatarCacheBuster;
 
 /// Create a copy of UserProfileState
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +237,16 @@ _$UserProfileStateCopyWith<_UserProfileState> get copyWith => __$UserProfileStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileState&&(identical(other.user, user) || other.user == user)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isUploadingAvatar, isUploadingAvatar) || other.isUploadingAvatar == isUploadingAvatar)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileState&&(identical(other.user, user) || other.user == user)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isUploadingAvatar, isUploadingAvatar) || other.isUploadingAvatar == isUploadingAvatar)&&(identical(other.error, error) || other.error == error)&&(identical(other.avatarCacheBuster, avatarCacheBuster) || other.avatarCacheBuster == avatarCacheBuster));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,user,isLoading,isSaving,isUploadingAvatar,error);
+int get hashCode => Object.hash(runtimeType,user,isLoading,isSaving,isUploadingAvatar,error,avatarCacheBuster);
 
 @override
 String toString() {
-  return 'UserProfileState(user: $user, isLoading: $isLoading, isSaving: $isSaving, isUploadingAvatar: $isUploadingAvatar, error: $error)';
+  return 'UserProfileState(user: $user, isLoading: $isLoading, isSaving: $isSaving, isUploadingAvatar: $isUploadingAvatar, error: $error, avatarCacheBuster: $avatarCacheBuster)';
 }
 
 
@@ -249,7 +257,7 @@ abstract mixin class _$UserProfileStateCopyWith<$Res> implements $UserProfileSta
   factory _$UserProfileStateCopyWith(_UserProfileState value, $Res Function(_UserProfileState) _then) = __$UserProfileStateCopyWithImpl;
 @override @useResult
 $Res call({
- UserInfo? user, bool isLoading, bool isSaving, bool isUploadingAvatar, String? error
+ UserInfo? user, bool isLoading, bool isSaving, bool isUploadingAvatar, String? error, String? avatarCacheBuster
 });
 
 
@@ -266,13 +274,14 @@ class __$UserProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? user = freezed,Object? isLoading = null,Object? isSaving = null,Object? isUploadingAvatar = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? user = freezed,Object? isLoading = null,Object? isSaving = null,Object? isUploadingAvatar = null,Object? error = freezed,Object? avatarCacheBuster = freezed,}) {
   return _then(_UserProfileState(
 user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as UserInfo?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
 as bool,isUploadingAvatar: null == isUploadingAvatar ? _self.isUploadingAvatar : isUploadingAvatar // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,avatarCacheBuster: freezed == avatarCacheBuster ? _self.avatarCacheBuster : avatarCacheBuster // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

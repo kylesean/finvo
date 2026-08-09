@@ -20,6 +20,9 @@ class UserAvatar extends ConsumerWidget {
   /// The user's UUID, used both for the avatar URL and as the identicon seed.
   final String userId;
 
+  /// Optional direct avatar URL (e.g. user.avatarUrl)
+  final String? avatarUrl;
+
   /// The circle's diameter in logical pixels.
   final double size;
 
@@ -36,6 +39,7 @@ class UserAvatar extends ConsumerWidget {
 
   const UserAvatar({
     required this.userId,
+    this.avatarUrl,
     this.size = 40,
     this.backgroundColor,
     this.border,
@@ -61,22 +65,47 @@ class UserAvatar extends ConsumerWidget {
     final baseUrl = ref.read(apiBaseUrlProvider);
     final isUuid = _uuidPattern.hasMatch(userId);
 
+    String? targetUrl;
+    if (avatarUrl != null &&
+        avatarUrl!.trim().isNotEmpty &&
+        (avatarUrl!.startsWith('http://') ||
+            avatarUrl!.startsWith('https://')) &&
+        !avatarUrl!.contains('/files/view/')) {
+      // External third-party URL loads directly
+      targetUrl = avatarUrl!.trim();
+    } else if (baseUrl.isNotEmpty && isUuid) {
+      // Finvo internal uploaded avatars are served through the public /avatars/{userId} endpoint
+      targetUrl = '$baseUrl/avatars/$userId';
+    }
+
     final Widget content;
-    if (baseUrl.isEmpty || !isUuid) {
-      // Server not configured yet or non-UUID seed (e.g. bot avatar) — show the local identicon.
+    if (targetUrl == null || targetUrl.isEmpty) {
       content = fallback;
     } else {
-      var url = '$baseUrl/avatars/$userId';
+      var requestUrl = targetUrl;
       if (version != null && version!.isNotEmpty) {
-        url += '?v=${Uri.encodeQueryComponent(version!)}';
+        final sep = requestUrl.contains('?') ? '&' : '?';
+        requestUrl += '${sep}v=${Uri.encodeQueryComponent(version!)}';
       }
+      debugPrint(
+        '[UserAvatar] userId=$userId url=$requestUrl version=${version ?? '-'}',
+      );
       content = Image(
-        image: NetworkImage(url),
+        key: ValueKey(requestUrl),
+        image: NetworkImage(requestUrl),
         fit: BoxFit.cover,
         width: size,
         height: size,
-        loadingBuilder: (context, child, progress) => fallback,
-        errorBuilder: (context, error, stackTrace) => fallback,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return fallback;
+        },
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint(
+            '[UserAvatar] IMAGE FAILED userId=$userId url=$requestUrl error=$error',
+          );
+          return fallback;
+        },
       );
     }
 

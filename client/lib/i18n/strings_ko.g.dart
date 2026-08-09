@@ -377,6 +377,13 @@ class _Translations$settings$ko extends Translations$settings$zh {
 
 	// Translations
 	@override String get title => '설정';
+	@override String get editProfile => '프로필 수정';
+	@override String get saveProfile => '프로필 저장';
+	@override String get profileHelpHint => '프로필 정보는 공유 공간에서 본인을 확인하는 데 도움이 됩니다.';
+	@override String get enterUsernameHint => '사용자 이름을 입력하세요';
+	@override String get groupPreferences => '기본 설정 및 기록';
+	@override String get groupServices => '공유 및 서비스';
+	@override String get groupSystem => '시스템 및 화면';
 	@override String get language => '언어';
 	@override String get languageSettings => '언어 설정';
 	@override String get selectLanguage => '언어 선택';
@@ -2760,6 +2767,13 @@ extension on TranslationsKo {
 			'category.generalTransfer' => '이체',
 			'category.debtRepayment' => '부채 상환',
 			'settings.title' => '설정',
+			'settings.editProfile' => '프로필 수정',
+			'settings.saveProfile' => '프로필 저장',
+			'settings.profileHelpHint' => '프로필 정보는 공유 공간에서 본인을 확인하는 데 도움이 됩니다.',
+			'settings.enterUsernameHint' => '사용자 이름을 입력하세요',
+			'settings.groupPreferences' => '기본 설정 및 기록',
+			'settings.groupServices' => '공유 및 서비스',
+			'settings.groupSystem' => '시스템 및 화면',
 			'settings.language' => '언어',
 			'settings.languageSettings' => '언어 설정',
 			'settings.selectLanguage' => '언어 선택',

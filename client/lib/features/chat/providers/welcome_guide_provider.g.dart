@@ -58,4 +58,4 @@ final class WelcomeGuideProvider
   }
 }
 
-String _$welcomeGuideHash() => r'35753e42a5688c8d9994dbfe578701a3fc880d9d';
+String _$welcomeGuideHash() => r'69a662cbd4363ad9dad223fa6e9c24360b5f0bff';

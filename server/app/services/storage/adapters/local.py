@@ -191,8 +191,7 @@ class LocalAdapter(StorageAdapter):
         # Create JWT token with file access claims
         token_data = {
             "object_key": object_key,
-            "storage_config_id": self.config.id,
-            "exp": datetime.now(UTC) + timedelta(seconds=expire_seconds),
+            "storage_config_id": str(self.config.id),
         }
 
         if filename:

@@ -321,6 +321,7 @@ class _ChatConversationDrawerState
                   userId: user?.id ?? 'Finvo',
                   size: 32,
                   backgroundColor: theme.colors.secondary,
+                  version: user?.updatedAt,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

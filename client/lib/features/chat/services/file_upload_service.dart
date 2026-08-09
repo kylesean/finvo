@@ -225,13 +225,24 @@ class UploadedFile {
   });
 
   factory UploadedFile.fromJson(Map<String, dynamic> json) {
+    final rawUri =
+        json['uri'] as String? ??
+        json['url'] as String? ??
+        json['path'] as String? ??
+        '';
+    final rawKey =
+        json['fileKey'] as String? ??
+        json['key'] as String? ??
+        json['objectKey'] as String? ??
+        rawUri;
+
     return UploadedFile(
       id: json['id']?.toString() ?? '',
       attachmentId: json['attachmentId']?.toString() ?? '',
       originalName:
           json['originalName'] as String? ?? json['filename'] as String? ?? '',
-      fileKey: json['fileKey'] as String? ?? '',
-      uri: json['uri'] as String? ?? '',
+      fileKey: rawKey,
+      uri: rawUri,
       size: (json['size'] as num?)?.toDouble() ?? 0,
       mimeType: json['mimeType'] as String? ?? 'application/octet-stream',
       hash: json['hash'] as String?,

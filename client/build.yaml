@@ -3,22 +3,3 @@ targets:
     builders:
       slang_build_runner:
         enabled: false
-      freezed:freezed:
-        generate_for:
-          - lib/**/models/*.dart
-          - lib/**/models/**/*.dart
-          - lib/**/providers/*.dart
-          - lib/**/providers/**/*.dart
-          - lib/shared/models/*.dart
-      json_serializable:json_serializable:
-        generate_for:
-          - lib/**/models/*.dart
-          - lib/**/models/**/*.dart
-          - lib/**/providers/*.dart
-          - lib/**/providers/**/*.dart
-          - lib/shared/models/*.dart
-      riverpod_generator:riverpod_generator:
-        generate_for:
-          - lib/**/providers/*.dart
-          - lib/**/providers/**/*.dart
-          - lib/app/theme/*.dart

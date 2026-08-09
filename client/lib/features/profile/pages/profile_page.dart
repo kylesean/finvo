@@ -13,7 +13,6 @@ import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
-import 'package:finvo/features/profile/models/user_info.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
@@ -21,7 +20,6 @@ import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/features/version/providers/version_provider.dart';
 import 'package:finvo/features/version/services/app_version_service.dart';
-import 'package:finvo/shared/theme/form_text_styles.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -31,7 +29,6 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  bool _isEditingUsername = false;
   final _usernameController = TextEditingController();
   final _usernameFocusNode = FocusNode();
 
@@ -60,179 +57,143 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return FScaffold(
       resizeToAvoidBottomInset: false,
       header: const FHeader(title: SizedBox.shrink()),
-      child: GestureDetector(
-        onTap: () {
-          if (_isEditingUsername) {
-            _cancelEditUsername();
-          }
-        },
-        behavior: HitTestBehavior.translucent,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            top: 8.0,
-            bottom: 16.0 + MediaQuery.viewInsetsOf(context).bottom,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 16),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          top: 8.0,
+          bottom: 16.0 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 16),
 
-              // User avatar section - centered
-              _buildUserAvatarSection(context, theme, colors, userState),
+            // User avatar section - centered
+            _buildUserAvatarSection(context, theme, colors, userState),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-              // Group 1: Shared Spaces
-              FTileGroup(
-                children: [
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.users),
-                    title: Text(t.settings.sharedSpace),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () =>
-                        context.pushNamed(AppRouteNames.sharedSpaceList),
+            // Group 1: Preferences & Finance
+            FTileGroup(
+              label: Text(t.settings.groupPreferences),
+              children: [
+                FTile(
+                  prefix: _buildSettingIcon(context, FLucideIcons.globe),
+                  title: Text(t.settings.language),
+                  suffix: _buildTrailingValue(
+                    context,
+                    LocaleService.getLocaleDisplayName(currentLocale),
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Group 2: Settings Options
-              FTileGroup(
-                children: [
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.globe),
-                    title: Text(t.settings.language),
-                    subtitle: Text(
-                      LocaleService.getLocaleDisplayName(currentLocale),
-                    ),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () =>
-                        context.goNamed(AppRouteNames.languageSettings),
+                  onPress: () =>
+                      context.goNamed(AppRouteNames.languageSettings),
+                ),
+                FTile(
+                  prefix: _buildSettingIcon(context, FLucideIcons.dollarSign),
+                  title: Text(t.settings.currency),
+                  suffix: _buildTrailingValue(
+                    context,
+                    _getCurrencyDisplayName(ref),
                   ),
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.mic),
-                    title: Text(t.settings.speechRecognition),
-                    subtitle: Text(t.settings.speechRecognitionSubtitle),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () =>
-                        context.goNamed(AppRouteNames.speechSettings),
+                  onPress: () =>
+                      context.goNamed(AppRouteNames.currencySettings),
+                ),
+                FTile(
+                  prefix: _buildSettingIcon(context, FLucideIcons.palette),
+                  title: Text(t.settings.amountDisplayStyle),
+                  suffix: _buildTrailingValue(
+                    context,
+                    _getAmountThemeDisplayName(ref),
                   ),
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.palette),
-                    title: Text(t.settings.amountDisplayStyle),
-                    subtitle: Text(_getAmountThemeDisplayName(ref)),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () =>
-                        context.goNamed(AppRouteNames.amountStyleSettings),
+                  onPress: () =>
+                      context.goNamed(AppRouteNames.amountStyleSettings),
+                ),
+                FTile(
+                  prefix: _buildSettingIcon(context, FLucideIcons.mic),
+                  title: Text(t.settings.speechRecognition),
+                  suffix: Icon(
+                    FLucideIcons.chevronRight,
+                    size: 16,
+                    color: colors.mutedForeground,
                   ),
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.dollarSign),
-                    title: Text(t.settings.currency),
-                    subtitle: Text(_getCurrencyDisplayName(ref)),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () =>
-                        context.goNamed(AppRouteNames.currencySettings),
+                  onPress: () => context.goNamed(AppRouteNames.speechSettings),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Group 2: Shared Spaces & Services
+            FTileGroup(
+              label: Text(t.settings.groupServices),
+              children: [
+                FTile(
+                  prefix: _buildSettingIcon(context, FLucideIcons.users),
+                  title: Text(t.settings.sharedSpace),
+                  suffix: Icon(
+                    FLucideIcons.chevronRight,
+                    size: 16,
+                    color: colors.mutedForeground,
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Group 3: Appearance Settings
-              FTileGroup(
-                children: [
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.sun),
-                    title: Text(t.settings.appearance),
-                    subtitle: Text(t.settings.appearanceSubtitle),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () =>
-                        context.goNamed(AppRouteNames.appearanceSettings),
+                  onPress: () =>
+                      context.pushNamed(AppRouteNames.sharedSpaceList),
+                ),
+                FTile(
+                  prefix: _buildSettingIcon(context, FLucideIcons.server),
+                  title: Text(t.server.serverSettings),
+                  suffix: _buildTrailingValue(context, _getServerHostName(ref)),
+                  onPress: () => context.pushNamed(
+                    AppRouteNames.serverSetup,
+                    queryParameters: {'reconfigure': 'true'},
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-              // Server Settings Section
-              FTileGroup(
-                children: [
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.server),
-                    title: Text(t.server.serverSettings),
-                    subtitle: _buildServerSubtitle(ref),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () => context.pushNamed(
-                      AppRouteNames.serverSetup,
-                      queryParameters: {'reconfigure': 'true'},
-                    ),
+            // Group 3: System & Appearance
+            FTileGroup(
+              label: Text(t.settings.groupSystem),
+              children: [
+                FTile(
+                  prefix: _buildSettingIcon(context, FLucideIcons.sun),
+                  title: Text(t.settings.appearance),
+                  suffix: Icon(
+                    FLucideIcons.chevronRight,
+                    size: 16,
+                    color: colors.mutedForeground,
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-              FTileGroup(
-                children: [
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.info),
-                    title: Text(t.settings.aboutApp),
-                    subtitle: Text(t.settings.aboutAppSubtitle),
-                    suffix: Icon(
-                      FLucideIcons.chevronRight,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    onPress: () => _checkAppUpdate(context),
+                  onPress: () =>
+                      context.goNamed(AppRouteNames.appearanceSettings),
+                ),
+                FTile(
+                  prefix: _buildSettingIcon(context, FLucideIcons.info),
+                  title: Text(t.settings.aboutApp),
+                  suffix: Icon(
+                    FLucideIcons.chevronRight,
+                    size: 16,
+                    color: colors.mutedForeground,
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              FTileGroup(
-                children: [
-                  FTile(
-                    prefix: _buildSettingIcon(context, FLucideIcons.logOut),
-                    title: Text(t.auth.logout),
-                    onPress: () => _handleLogout(context),
+                  onPress: () => _checkAppUpdate(context),
+                ),
+                FTile(
+                  prefix: Icon(
+                    FLucideIcons.logOut,
+                    size: 20,
+                    color: colors.destructive,
                   ),
-                ],
-              ),
+                  title: Text(
+                    t.auth.logout,
+                    style: TextStyle(color: colors.destructive),
+                  ),
+                  onPress: () => _handleLogout(context),
+                ),
+              ],
+            ),
 
-              const SizedBox(height: 32),
-            ],
-          ),
+            const SizedBox(height: 32),
+          ],
         ),
       ),
     );
@@ -251,210 +212,140 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Avatar (with edit button)
+        // Profile Header Section (Avatar + Username) -> Tap opens Edit Profile Modal
         GestureDetector(
-          onTap: isUploadingAvatar ? null : _pickAndUploadAvatar,
-          child: Stack(
-            alignment: Alignment.center,
+          onTap: () => _openEditProfileSheet(context),
+          behavior: HitTestBehavior.opaque,
+          child: Column(
             children: [
-              // Avatar
-              isUploadingAvatar
-                  ? Container(
-                      width: 88,
-                      height: 88,
-                      decoration: BoxDecoration(
-                        color: colors.muted,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.border, width: 2),
-                      ),
-                      child: ClipOval(
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: colors.primary,
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Avatar
+                  isUploadingAvatar
+                      ? Container(
+                          width: 88,
+                          height: 88,
+                          decoration: BoxDecoration(
+                            color: colors.muted,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: colors.border, width: 2),
                           ),
+                          child: ClipOval(
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: colors.primary,
+                              ),
+                            ),
+                          ),
+                        )
+                      : UserAvatar(
+                          userId: user?.id ?? 'Finvo',
+                          avatarUrl: user?.avatarUrl,
+                          size: 88,
+                          border: Border.all(color: colors.border, width: 2),
+                          version:
+                              userState.avatarCacheBuster ?? user?.updatedAt,
                         ),
+                  // Edit pencil badge icon
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: colors.background,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colors.border, width: 1.5),
+                      ),
+                      child: Icon(
+                        FLucideIcons.pencil,
+                        size: 14,
+                        color: colors.foreground,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Username display with subtle pencil
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (userState.isLoading)
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colors.mutedForeground,
                       ),
                     )
-                  : UserAvatar(
-                      userId: user?.id ?? 'Finvo',
-                      size: 88,
-                      border: Border.all(color: colors.border, width: 2),
-                      version: user?.updatedAt,
+                  else
+                    Text(
+                      user?.username ??
+                          ref.watch(currentUserProvider)?.username ??
+                          t.user.username,
+                      style: theme.typography.body.lg.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-              // Edit icon
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: colors.primary,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: colors.background, width: 2),
-                  ),
-                  child: Icon(
-                    FLucideIcons.camera,
-                    size: 14,
-                    color: colors.primaryForeground,
-                  ),
-                ),
+                ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
-        // Username (inline editing)
-        _buildUsernameSection(user, userState, theme, colors),
       ],
     );
   }
 
-  /// Builds the username section (supports inline editing)
-  Widget _buildUsernameSection(
-    UserInfo? user,
-    UserProfileState userState,
-    FThemeData theme,
-    FColors colors,
-  ) {
-    final isSaving = userState.isSaving;
-
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      transitionBuilder: (child, animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.95, end: 1.0).animate(animation),
-            child: child,
-          ),
-        );
-      },
-      child: _isEditingUsername
-          ? _buildEditingMode(theme, colors, isSaving)
-          : _buildDisplayMode(user, userState, theme, colors),
-    );
-  }
-
-  /// edit mode
-  Widget _buildEditingMode(FThemeData theme, FColors colors, bool isSaving) {
-    return SizedBox(
-      key: const ValueKey('editing'),
-      width: 250,
-      child: FTextField(
-        control: .managed(controller: _usernameController),
-        focusNode: _usernameFocusNode,
-        autofocus: true,
-        hint: t.user.username,
-        suffixBuilder: (context, style, child) => Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: FButton.icon(
-            variant: .ghost,
-            onPress: isSaving ? null : _submitUsername,
-            child: isSaving
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colors.primary,
-                    ),
-                  )
-                : Icon(FLucideIcons.check, size: 20, color: colors.primary),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// display mode
-  Widget _buildDisplayMode(
-    UserInfo? user,
-    UserProfileState userState,
-    FThemeData theme,
-    FColors colors,
-  ) {
-    return GestureDetector(
-      key: const ValueKey('display'),
-      onTap: () => _startEditUsername(user?.username ?? ''),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (userState.isLoading)
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: colors.mutedForeground,
-              ),
-            )
-          else
-            Text(
-              user?.username ??
-                  ref.watch(currentUserProvider)?.username ??
-                  t.user.username,
-              style: AppTextStyles.listTitle(theme),
-            ),
-          const SizedBox(width: 6),
-          Icon(FLucideIcons.squarePen, size: 16, color: colors.mutedForeground),
-        ],
-      ),
-    );
-  }
-
-  /// start edit username
-  void _startEditUsername(String currentUsername) {
+  /// Opens the ChatGPT style Edit Profile Bottom Sheet
+  void _openEditProfileSheet(BuildContext context) {
+    final userState = ref.read(userProfileProvider);
+    final currentUsername =
+        userState.user?.username ??
+        ref.read(currentUserProvider)?.username ??
+        '';
     _usernameController.text = currentUsername;
-    // set selection
-    _usernameController.selection = TextSelection(
-      baseOffset: 0,
-      extentOffset: currentUsername.length,
+
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (bottomSheetContext) {
+          return _EditProfileBottomSheet(
+            controller: _usernameController,
+            onSave: (newUsername) async {
+              if (newUsername.isEmpty) {
+                ToastService.showDestructive(
+                  description: Text(t.settings.usernameRequired),
+                );
+                return false;
+              }
+              final success = await ref
+                  .read(userProfileProvider.notifier)
+                  .updateUsername(newUsername);
+              if (success) {
+                ToastService.success(
+                  description: Text(t.settings.usernameUpdated),
+                );
+                return true;
+              } else {
+                final error = ref.read(userProfileProvider).error;
+                ToastService.showDestructive(
+                  description: Text(error ?? t.common.error),
+                );
+                return false;
+              }
+            },
+            onPickAvatar: _pickAndUploadAvatar,
+          );
+        },
+      ),
     );
-    setState(() {
-      _isEditingUsername = true;
-    });
-  }
-
-  /// Cancel editing
-  void _cancelEditUsername() {
-    _usernameFocusNode.unfocus();
-    setState(() {
-      _isEditingUsername = false;
-    });
-  }
-
-  /// submit username
-  Future<void> _submitUsername() async {
-    final newUsername = _usernameController.text.trim();
-    if (newUsername.isEmpty) {
-      ToastService.showDestructive(
-        description: Text(t.settings.usernameRequired),
-      );
-      return;
-    }
-
-    final success = await ref
-        .read(userProfileProvider.notifier)
-        .updateUsername(newUsername);
-
-    if (mounted) {
-      setState(() {
-        _isEditingUsername = false;
-      });
-
-      if (success) {
-        ToastService.success(description: Text(t.settings.usernameUpdated));
-      } else {
-        final error = ref.read(userProfileProvider).error;
-        ToastService.showDestructive(
-          description: Text(error ?? t.common.error),
-        );
-      }
-    }
   }
 
   /// Pick and upload avatar
@@ -490,6 +381,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return ThemedIcon(icon: icon);
   }
 
+  /// Builds right-aligned value with chevron icon
+  Widget _buildTrailingValue(BuildContext context, String text) {
+    final colors = context.theme.colors;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 140),
+          child: Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+            style: context.theme.typography.body.sm.copyWith(
+              color: colors.mutedForeground,
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Icon(
+          FLucideIcons.chevronRight,
+          size: 16,
+          color: colors.mutedForeground,
+        ),
+      ],
+    );
+  }
+
   /// Gets amount theme display name
   String _getAmountThemeDisplayName(WidgetRef ref) {
     final themeId = ref.watch(amountThemeProvider).themeId;
@@ -509,7 +426,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   String _getCurrencyDisplayName(WidgetRef ref) {
     final currencyCode = ref.watch(financialSettingsProvider).primaryCurrency;
     final currency = Currency.fromCode(currencyCode);
-    return currency?.displayName ?? currencyCode;
+    return currency != null
+        ? '${currency.flag} ${currency.code}'
+        : currencyCode;
   }
 
   /// Handles logout
@@ -532,16 +451,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  /// Build server subtitle showing current server URL
-  Widget _buildServerSubtitle(WidgetRef ref) {
+  /// Build server hostname
+  String _getServerHostName(WidgetRef ref) {
     final serverUrl = ref.watch(serverUrlProvider);
     if (serverUrl != null && serverUrl.isNotEmpty) {
-      // Show shortened URL
       final uri = Uri.tryParse(serverUrl);
-      final displayUrl = uri?.host ?? serverUrl;
-      return Text('${t.server.currentServer}: $displayUrl');
+      return uri?.host ?? serverUrl;
     }
-    return Text(t.server.currentServer);
+    return '';
   }
 
   /// Check app updates and display Forui update dialog
@@ -625,13 +542,247 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 if (!updateInfo.forceUpdate) ...[
                   const SizedBox(height: 8),
                   FButton(
-                    variant: .outline,
+                    variant: FButtonVariant.outline,
                     onPress: () => Navigator.of(dialogContext).pop(),
-                    child: Text(t.settings.updateLater),
+                    child: Text(t.common.cancel),
                   ),
                 ],
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ChatGPT style Edit Profile Bottom Sheet
+class _EditProfileBottomSheet extends ConsumerStatefulWidget {
+  final TextEditingController controller;
+  final Future<bool> Function(String) onSave;
+  final VoidCallback onPickAvatar;
+
+  const _EditProfileBottomSheet({
+    required this.controller,
+    required this.onSave,
+    required this.onPickAvatar,
+  });
+
+  @override
+  ConsumerState<_EditProfileBottomSheet> createState() =>
+      __EditProfileBottomSheetState();
+}
+
+class __EditProfileBottomSheetState
+    extends ConsumerState<_EditProfileBottomSheet> {
+  bool _isSaving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    final colors = theme.colors;
+    final userState = ref.watch(userProfileProvider);
+    final user = userState.user;
+
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 16,
+            bottom: 24 + bottomInset,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Top drag handle bar
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(top: 4, bottom: 16),
+                decoration: BoxDecoration(
+                  color: colors.mutedForeground.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              // Large Avatar with camera icon & uploading progress overlay
+              GestureDetector(
+                onTap: userState.isUploadingAvatar ? null : widget.onPickAvatar,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    UserAvatar(
+                      userId: user?.id ?? 'Finvo',
+                      avatarUrl: user?.avatarUrl,
+                      size: 104,
+                      border: Border.all(
+                        color: colors.border.withValues(alpha: 0.6),
+                        width: 1.5,
+                      ),
+                      version: userState.avatarCacheBuster ?? user?.updatedAt,
+                    ),
+                    if (userState.isUploadingAvatar)
+                      Container(
+                        width: 104,
+                        height: 104,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.45),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    Positioned(
+                      bottom: 2,
+                      right: 2,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: colors.background,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colors.border, width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          userState.isUploadingAvatar
+                              ? FLucideIcons.loader2
+                              : FLucideIcons.camera,
+                          size: 16,
+                          color: colors.foreground,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // Username Label & FTextField
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4.0, bottom: 6.0),
+                  child: Text(
+                    t.user.username,
+                    style: theme.typography.body.xs.copyWith(
+                      color: colors.mutedForeground,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+              FTextField(
+                control: FTextFieldControl.managed(
+                  controller: widget.controller,
+                ),
+                hint: t.settings.enterUsernameHint,
+              ),
+              const SizedBox(height: 16),
+
+              // Help hint
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  t.settings.profileHelpHint,
+                  textAlign: TextAlign.center,
+                  style: theme.typography.body.xs.copyWith(
+                    color: colors.mutedForeground,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // High contrast Pill Save profile button (Compact ChatGPT style)
+              SizedBox(
+                height: 46,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.primaryForeground,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 36),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(23),
+                    ),
+                  ),
+                  onPressed: _isSaving
+                      ? null
+                      : () async {
+                          final navigator = Navigator.of(context);
+                          setState(() {
+                            _isSaving = true;
+                          });
+                          final success = await widget.onSave(
+                            widget.controller.text.trim(),
+                          );
+                          if (mounted) {
+                            setState(() {
+                              _isSaving = false;
+                            });
+                            if (success) {
+                              navigator.pop();
+                            }
+                          }
+                        },
+                  child: _isSaving
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colors.primaryForeground,
+                          ),
+                        )
+                      : Text(
+                          t.settings.saveProfile,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Clean text Cancel button
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  t.common.cancel,
+                  style: TextStyle(
+                    color: colors.foreground,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

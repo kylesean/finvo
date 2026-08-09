@@ -377,6 +377,13 @@ class _Translations$settings$zh_Hant extends Translations$settings$zh {
 
 	// Translations
 	@override String get title => '設置';
+	@override String get editProfile => '修改個人資料';
+	@override String get saveProfile => '保存個人資料';
+	@override String get profileHelpHint => '你的個人資料可幫助他人識別你的身份。';
+	@override String get enterUsernameHint => '請輸入用戶名';
+	@override String get groupPreferences => '偏好與記帳';
+	@override String get groupServices => '協作與服務';
+	@override String get groupSystem => '系統與外觀';
 	@override String get language => '語言';
 	@override String get languageSettings => '語言設置';
 	@override String get selectLanguage => '選擇語言';
@@ -2758,6 +2765,13 @@ extension on TranslationsZhHant {
 			'category.generalTransfer' => '轉帳',
 			'category.debtRepayment' => '債務還款',
 			'settings.title' => '設置',
+			'settings.editProfile' => '修改個人資料',
+			'settings.saveProfile' => '保存個人資料',
+			'settings.profileHelpHint' => '你的個人資料可幫助他人識別你的身份。',
+			'settings.enterUsernameHint' => '請輸入用戶名',
+			'settings.groupPreferences' => '偏好與記帳',
+			'settings.groupServices' => '協作與服務',
+			'settings.groupSystem' => '系統與外觀',
 			'settings.language' => '語言',
 			'settings.languageSettings' => '語言設置',
 			'settings.selectLanguage' => '選擇語言',
