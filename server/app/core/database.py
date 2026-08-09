@@ -164,6 +164,8 @@ class DatabaseManager:
     async def create_tables(self) -> None:
         """Create all database tables defined in SQLModel metadata."""
         async with self.engine.begin() as conn:
+            await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "vector";'))
+            await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'))
             await conn.run_sync(SQLModel.metadata.create_all)
         logger.info("database_tables_created")
 
