@@ -12,6 +12,7 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import 'package:finvo/features/budget/models/budget_models.dart';
 import 'package:finvo/features/budget/providers/budget_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -42,6 +43,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(localeProvider);
     final theme = context.theme;
     final colors = theme.colors;
     final state = ref.watch(budgetSummaryProvider);

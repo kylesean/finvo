@@ -885,7 +885,7 @@
         "linkedToSpace": "Linked to shared space"
       },
       "cashFlowCard": {
-        "title": "Cash Flow Analysis",
+        "title": "Cash Flow & Health Report",
         "savingsRate": "Savings $rate%",
         "totalIncome": "Total Income",
         "totalExpense": "Total Expense",

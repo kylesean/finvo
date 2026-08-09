@@ -1,4 +1,3 @@
-// features/home/pages/home_page.dart
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/features/shared_space/widgets/notification_icon.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
@@ -35,6 +35,7 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider);
     final theme = context.theme;
 
     // Add scroll listener to trigger load more
@@ -186,6 +187,7 @@ class _FixedTabBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider);
     final theme = context.theme;
     final currentSelectedType = ref.watch(currentTransactionFeedTypeProvider);
 
@@ -314,6 +316,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(localeProvider);
     final theme = context.theme;
     final colors = theme.colors;
     final now = DateTime.now();

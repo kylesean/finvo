@@ -5,6 +5,7 @@ import 'package:forui/forui.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/features/report/providers/statistics_provider.dart';
 import 'package:finvo/features/report/widgets/statistics_widgets.dart';
@@ -113,6 +114,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(localeProvider);
     final theme = context.theme;
     final colors = theme.colors;
     final state = ref.watch(statisticsProvider);

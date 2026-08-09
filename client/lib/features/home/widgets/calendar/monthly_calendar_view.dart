@@ -1,13 +1,13 @@
-// features/home/widgets/calendar/monthly_calendar_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart'; // Import shimmer package
+import 'package:shimmer/shimmer.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:finvo/features/home/widgets/calendar/daily_cell_widget.dart';
 import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
-import 'package:forui/forui.dart'; // Import forui
+import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/utils/heat_colors.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -70,6 +70,7 @@ class MonthlyCalendarView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider);
     final theme = context.theme;
     final colors = theme.colors;
 

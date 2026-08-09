@@ -896,7 +896,7 @@
         "amountWan": "$amount万"
       },
       "cashFlowCard": {
-        "title": "现金流分析",
+        "title": "现金流与健康报告",
         "savingsRate": "储蓄 $rate%",
         "totalIncome": "总收入",
         "totalExpense": "总支出",

@@ -105,8 +105,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.data['title'] as String? ??
-                                    t.chat.genui.cashFlowCard.title,
+                                t.chat.genui.cashFlowCard.title,
                                 style: AppTextStyles.listTitle(theme),
                               ),
                               const SizedBox(height: 2),

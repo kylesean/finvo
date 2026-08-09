@@ -799,7 +799,7 @@
         "linkedToSpace": "Linked to shared space"
       },
       "cashFlowCard": {
-        "title": "現金流分析",
+        "title": "現金流與健康報告",
         "savingsRate": "儲蓄 $rate%",
         "totalIncome": "總收入",
         "totalExpense": "總支出",
@@ -920,95 +920,95 @@
     },
     "welcome": {
       "morning": {
-        "subtitle": "Start your day by tracking",
+        "subtitle": "新的一天，從記錄開始",
         "breakfast": {
-          "title": "Breakfast",
-          "prompt": "Record breakfast expense",
-          "description": "Log today's first expense"
+          "title": "早餐記帳",
+          "prompt": "記一筆早餐",
+          "description": "快速記錄今天的第一筆消費"
         },
         "yesterdayReview": {
-          "title": "Yesterday Review",
-          "prompt": "Analyze yesterday's spending",
-          "description": "Check how much you spent yesterday"
+          "title": "昨日回顧",
+          "prompt": "分析昨天的消費",
+          "description": "看看昨天花了多少錢"
         },
         "todayBudget": {
-          "title": "Today's Budget",
-          "prompt": "How much budget left for today",
-          "description": "Plan your spending for today"
+          "title": "今日預算",
+          "prompt": "今天還剩多少預算",
+          "description": "規劃一天的消費額度"
         }
       },
       "midday": {
-        "greeting": "Good Afternoon",
-        "subtitle": "Quick record during lunch",
+        "greeting": "午安",
+        "subtitle": "午間時光，順手記一筆",
         "lunch": {
-          "title": "Lunch",
-          "prompt": "Record lunch expense",
-          "description": "Log your lunch spending"
+          "title": "午餐記帳",
+          "prompt": "記一筆午餐",
+          "description": "記錄午餐開銷"
         },
         "weeklyExpense": {
-          "title": "Weekly Spending",
-          "prompt": "Analyze this week's spending",
-          "description": "See your weekly expenses"
+          "title": "本週消費",
+          "prompt": "分析本週消費",
+          "description": "了解本週花費情況"
         },
         "checkBalance": {
-          "title": "Check Balance",
-          "prompt": "Check my account balance",
-          "description": "View your account balances"
+          "title": "查看餘額",
+          "prompt": "查看帳戶餘額",
+          "description": "看看各帳戶還剩多少"
         }
       },
       "afternoon": {
-        "subtitle": "Tea time, let's review finances",
+        "subtitle": "下午茶時間，理理財",
         "quickRecord": {
-          "title": "Quick Record",
-          "prompt": "Help me record an expense",
-          "description": "Quickly log a transaction"
+          "title": "隨手記帳",
+          "prompt": "幫我記一筆",
+          "description": "快速記錄一筆消費"
         },
         "analyzeSpending": {
-          "title": "Analyze Spending",
-          "prompt": "Analyze this month's spending",
-          "description": "View spending trends and breakdown"
+          "title": "分析消費",
+          "prompt": "分析本月消費",
+          "description": "查看消費趨勢和構成"
         },
         "budgetProgress": {
-          "title": "Budget Progress",
-          "prompt": "Check budget status",
-          "description": "See how your budget is doing"
+          "title": "財務健康",
+          "prompt": "評估我的財務健康",
+          "description": "收支平衡評分與建議"
         }
       },
       "evening": {
-        "subtitle": "End of day, time to balance the books",
+        "subtitle": "辛苦一天，來理理帳",
         "dinner": {
-          "title": "Dinner",
-          "prompt": "Record dinner expense",
-          "description": "Log tonight's dinner spending"
+          "title": "晚餐記帳",
+          "prompt": "記一筆晚餐",
+          "description": "記錄今天的晚餐消費"
         },
         "todaySummary": {
-          "title": "Today's Summary",
-          "prompt": "Summarize today's spending",
-          "description": "See what you spent today"
+          "title": "今日總結",
+          "prompt": "總結今天的消費",
+          "description": "看看今天花了多少"
         },
         "tomorrowPlan": {
-          "title": "Tomorrow's Plan",
-          "prompt": "What fixed expenses tomorrow",
-          "description": "Plan ahead for tomorrow"
+          "title": "明日計劃",
+          "prompt": "明天有什麼固定支出",
+          "description": "提前規劃明天的消費"
         }
       },
       "night": {
-        "greeting": "Late Night",
-        "subtitle": "Quiet time for financial planning",
+        "greeting": "夜深了",
+        "subtitle": "靜心理財，規劃未來",
         "makeupRecord": {
-          "title": "Catch Up",
-          "prompt": "Help me log any missed expenses",
-          "description": "Record expenses you forgot today"
+          "title": "補記今日",
+          "prompt": "幫我補記今天的消費",
+          "description": "把今天忘記的帳補上"
         },
         "monthlyReview": {
-          "title": "Monthly Review",
-          "prompt": "Analyze this month's spending",
-          "description": "Review your monthly expenses"
+          "title": "本月分析",
+          "prompt": "詳細分析本月支出",
+          "description": "回顧這個月的錢花哪了"
         },
         "financialThinking": {
-          "title": "Financial Tips",
-          "prompt": "Give me some financial advice",
-          "description": "Get AI-powered financial insights"
+          "title": "未來預測",
+          "prompt": "預測未來 30 天餘額",
+          "description": "看清未來的財務趨勢"
         }
       }
     },

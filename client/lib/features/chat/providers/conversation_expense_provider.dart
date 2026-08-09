@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:finvo/features/chat/models/chat_message.dart';
 import 'package:finvo/features/chat/models/tool_call_info.dart';
 import 'package:finvo/features/chat/providers/chat_history_provider.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 part 'conversation_expense_provider.g.dart';
@@ -204,6 +205,7 @@ double _parseAmount(dynamic value) {
 ///
 @riverpod
 String conversationExpenseTitle(Ref ref) {
+  ref.watch(localeProvider);
   final expense = ref.watch(conversationTotalExpenseProvider);
 
   if (expense <= 0) {

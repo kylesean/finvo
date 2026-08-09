@@ -208,6 +208,13 @@ class Auth extends _$Auth {
     }
   }
 
+  Future<void> updateUsername(String newUsername) async {
+    await _authService.updateStoredUsername(newUsername);
+    if (state.user != null) {
+      state = state.copyWith(user: state.user!.copyWith(username: newUsername));
+    }
+  }
+
   Future<void> checkAuthStatus() async {
     await _initializeAuthState();
   }

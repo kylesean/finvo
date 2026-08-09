@@ -87,6 +87,12 @@ class AuthService {
     );
   }
 
+  /// Update stored username in shared preferences
+  Future<void> updateStoredUsername(String newUsername) async {
+    await _prefs.setString(_userNameKey, newUsername);
+    _logger.info('Updated stored username in shared preferences: $newUsername');
+  }
+
   // Method to retrieve stored authentication data
   Future<Map<String, dynamic>?> getStoredAuthData() async {
     String? token;

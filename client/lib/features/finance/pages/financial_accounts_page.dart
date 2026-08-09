@@ -13,6 +13,7 @@ import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/finance/providers/financial_summary_provider.dart';
 import 'package:finvo/features/finance/providers/account_view_currency_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
@@ -34,6 +35,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(localeProvider);
     final theme = context.theme;
     final colorScheme = theme.colors;
     final state = ref.watch(financialAccountProvider);

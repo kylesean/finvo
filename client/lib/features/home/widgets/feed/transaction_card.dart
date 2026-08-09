@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
@@ -100,8 +101,9 @@ class TransactionCard extends ConsumerWidget {
 
     unawaited(AppHaptics.medium());
 
-    final notifier = ref.read(transactionFeedProvider.notifier);
-    final success = await notifier.deleteTransaction(transaction.id);
+    final success = await ref
+        .read(transactionFeedProvider.notifier)
+        .deleteTransaction(transaction.id);
 
     if (success) {
       unawaited(AppHaptics.success());
@@ -131,6 +133,7 @@ class TransactionCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider);
     final theme = context.theme;
     final colors = theme.colors;
     final amountTheme = ref.watch(currentAmountThemeProvider);

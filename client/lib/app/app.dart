@@ -16,6 +16,7 @@ import 'package:finvo/app/theme/app_theme_pair_provider.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 class MyApp extends ConsumerWidget {
@@ -25,6 +26,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appThemeMode = ref.watch(themeProvider);
     final themes = ref.watch(appThemePairProvider);
+    final currentLocale = ref.watch(localeProvider);
 
     // Once the user authenticates, warm the login-scoped data providers. We
     // react to the auth transition instead of firing network side-effects from
@@ -45,7 +47,7 @@ class MyApp extends ConsumerWidget {
       theme: themes.materialLight,
       darkTheme: themes.materialDark,
       themeMode: appThemeMode,
-      locale: TranslationProvider.of(context).flutterLocale,
+      locale: currentLocale.flutterLocale,
       localizationsDelegates: [
         ...FLocalizations.localizationsDelegates,
         GlobalMaterialLocalizations.delegate,

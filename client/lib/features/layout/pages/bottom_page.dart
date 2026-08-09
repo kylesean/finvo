@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 
 import 'package:finvo/features/layout/widgets/nav_icon.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 /// The five fixed bottom-navigation destinations, in render order.
@@ -41,13 +43,14 @@ enum BottomTab {
 /// Combines FScaffold + FBottomNavigationBar, following Forui best practices.
 /// Icons use [NavIcon] (inline SVG via flutter_svg) to achieve the
 /// outline → filled state switch that Lucide font icons cannot provide.
-class BottomPage extends StatelessWidget {
+class BottomPage extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const BottomPage({super.key, required this.navigationShell});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider);
     final colors = context.theme.colors;
     final currentIndex = navigationShell.currentIndex;
 

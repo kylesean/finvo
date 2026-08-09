@@ -58,7 +58,7 @@ class UserProfile extends _$UserProfile {
       final updatedUser = await _service.updateProfile(username: newUsername);
       if (!ref.mounted) return false;
       state = state.copyWith(user: updatedUser, isSaving: false);
-      _syncUserWithAuth();
+      await ref.read(authProvider.notifier).updateUsername(newUsername);
       return true;
     } catch (e) {
       if (!ref.mounted) return false;

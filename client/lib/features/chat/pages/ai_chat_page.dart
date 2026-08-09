@@ -44,39 +44,29 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
     // When the Widget is first inserted into the tree, load initial data based on the passed conversationId.
     // Use addPostFrameCallback to safely interact with Provider after the first frame renders.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _logger.info(
-        'AIChatPage(initState): Initializing with conversationId: ${widget.conversationId}',
-      );
-      _loadDataForCurrentRoute();
+      _initConversationData();
     });
   }
 
   @override
-  void didUpdateWidget(covariant AIChatPage oldWidget) {
+  void didUpdateWidget(AIChatPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _logger.fine(
-      'AIChatPage didUpdateWidget called. oldConversationId: ${oldWidget.conversationId}, newConversationId: ${widget.conversationId}',
-    );
-    // Called when GoRouter changes route causing this Widget's parameters to change.
-    // We compare old and new conversationId.
-    // When route change causes Widget update (e.g. navigating from /ai/123 to /ai/456)
-    // reload data
-    if (widget.conversationId != oldWidget.conversationId) {
-      _logger.info(
-        'AIChatPage(didUpdateWidget): conversationId changed from ${oldWidget.conversationId} to ${widget.conversationId}. Reloading data.',
+    // When route parameter conversationId changes, re-initialize data
+    if (oldWidget.conversationId != widget.conversationId) {
+      _logger.fine(
+        'AIChatPage didUpdateWidget: conversationId changed from ${oldWidget.conversationId} to ${widget.conversationId}',
       );
-      _loadDataForCurrentRoute();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initConversationData();
+      });
     }
   }
 
-  void _loadDataForCurrentRoute() {
-    _logger.fine(
-      '_loadDataForCurrentRoute called. Current widget.conversationId: ${widget.conversationId}',
-    );
+  /// Initialize conversation data
+  void _initConversationData() {
     final notifier = ref.read(chatHistoryProvider.notifier);
-    // If the route provides a conversationId, load it.
-    // Add a check to avoid redundant loading when ID is the same.
-    if (widget.conversationId != null) {
+
+    if (widget.conversationId != null && widget.conversationId!.isNotEmpty) {
       // If ID exists, load the corresponding conversation
       unawaited(notifier.loadConversation(widget.conversationId!));
     } else {

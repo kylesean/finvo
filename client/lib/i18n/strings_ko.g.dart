@@ -2283,7 +2283,7 @@ class _Translations$chat$welcome$morning$ko extends Translations$chat$welcome$mo
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'Start your day by tracking';
+	@override String get subtitle => '기록과 함께 시작하는 새로운 하루';
 	@override late final _Translations$chat$welcome$morning$breakfast$ko breakfast = _Translations$chat$welcome$morning$breakfast$ko._(_root);
 	@override late final _Translations$chat$welcome$morning$yesterdayReview$ko yesterdayReview = _Translations$chat$welcome$morning$yesterdayReview$ko._(_root);
 	@override late final _Translations$chat$welcome$morning$todayBudget$ko todayBudget = _Translations$chat$welcome$morning$todayBudget$ko._(_root);
@@ -2296,8 +2296,8 @@ class _Translations$chat$welcome$midday$ko extends Translations$chat$welcome$mid
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get greeting => 'Good Afternoon';
-	@override String get subtitle => 'Quick record during lunch';
+	@override String get greeting => '좋은 오후입니다';
+	@override String get subtitle => '점심시간, 간편하게 기록하세요';
 	@override late final _Translations$chat$welcome$midday$lunch$ko lunch = _Translations$chat$welcome$midday$lunch$ko._(_root);
 	@override late final _Translations$chat$welcome$midday$weeklyExpense$ko weeklyExpense = _Translations$chat$welcome$midday$weeklyExpense$ko._(_root);
 	@override late final _Translations$chat$welcome$midday$checkBalance$ko checkBalance = _Translations$chat$welcome$midday$checkBalance$ko._(_root);
@@ -2310,7 +2310,7 @@ class _Translations$chat$welcome$afternoon$ko extends Translations$chat$welcome$
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'Tea time, let\'s review finances';
+	@override String get subtitle => '티타임, 자산을 정리해보세요';
 	@override late final _Translations$chat$welcome$afternoon$quickRecord$ko quickRecord = _Translations$chat$welcome$afternoon$quickRecord$ko._(_root);
 	@override late final _Translations$chat$welcome$afternoon$analyzeSpending$ko analyzeSpending = _Translations$chat$welcome$afternoon$analyzeSpending$ko._(_root);
 	@override late final _Translations$chat$welcome$afternoon$budgetProgress$ko budgetProgress = _Translations$chat$welcome$afternoon$budgetProgress$ko._(_root);
@@ -2323,7 +2323,7 @@ class _Translations$chat$welcome$evening$ko extends Translations$chat$welcome$ev
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'End of day, time to balance the books';
+	@override String get subtitle => '오늘 하루도 수고하셨습니다, 지출을 정리해보세요';
 	@override late final _Translations$chat$welcome$evening$dinner$ko dinner = _Translations$chat$welcome$evening$dinner$ko._(_root);
 	@override late final _Translations$chat$welcome$evening$todaySummary$ko todaySummary = _Translations$chat$welcome$evening$todaySummary$ko._(_root);
 	@override late final _Translations$chat$welcome$evening$tomorrowPlan$ko tomorrowPlan = _Translations$chat$welcome$evening$tomorrowPlan$ko._(_root);
@@ -2336,8 +2336,8 @@ class _Translations$chat$welcome$night$ko extends Translations$chat$welcome$nigh
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get greeting => 'Late Night';
-	@override String get subtitle => 'Quiet time for financial planning';
+	@override String get greeting => '늦은 밤입니다';
+	@override String get subtitle => '차분한 마음으로 미래를 계획하세요';
 	@override late final _Translations$chat$welcome$night$makeupRecord$ko makeupRecord = _Translations$chat$welcome$night$makeupRecord$ko._(_root);
 	@override late final _Translations$chat$welcome$night$monthlyReview$ko monthlyReview = _Translations$chat$welcome$night$monthlyReview$ko._(_root);
 	@override late final _Translations$chat$welcome$night$financialThinking$ko financialThinking = _Translations$chat$welcome$night$financialThinking$ko._(_root);
@@ -2364,9 +2364,9 @@ class _Translations$chat$welcome$morning$breakfast$ko extends Translations$chat$
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Breakfast';
-	@override String get prompt => 'Record breakfast expense';
-	@override String get description => 'Log today\'s first expense';
+	@override String get title => '아침 식사 기록';
+	@override String get prompt => '아침 식사 지출 기록하기';
+	@override String get description => '오늘의 첫 번째 지출을 기록하세요';
 }
 
 // Path: chat.welcome.morning.yesterdayReview
@@ -2376,9 +2376,9 @@ class _Translations$chat$welcome$morning$yesterdayReview$ko extends Translations
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Yesterday Review';
-	@override String get prompt => 'Analyze yesterday\'s spending';
-	@override String get description => 'Check how much you spent yesterday';
+	@override String get title => '어제 지출 돌아보기';
+	@override String get prompt => '어제 지출 분석하기';
+	@override String get description => '어제 얼마를 썼는지 확인하세요';
 }
 
 // Path: chat.welcome.morning.todayBudget
@@ -2388,9 +2388,9 @@ class _Translations$chat$welcome$morning$todayBudget$ko extends Translations$cha
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Today\'s Budget';
-	@override String get prompt => 'How much budget left for today';
-	@override String get description => 'Plan your spending for today';
+	@override String get title => '오늘의 예산';
+	@override String get prompt => '오늘 남은 예산 확인하기';
+	@override String get description => '오늘의 지출 한도를 계획하세요';
 }
 
 // Path: chat.welcome.midday.lunch
@@ -2400,9 +2400,9 @@ class _Translations$chat$welcome$midday$lunch$ko extends Translations$chat$welco
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Lunch';
-	@override String get prompt => 'Record lunch expense';
-	@override String get description => 'Log your lunch spending';
+	@override String get title => '점심 식사 기록';
+	@override String get prompt => '점심 식사 지출 기록하기';
+	@override String get description => '점심 지출을 기록하세요';
 }
 
 // Path: chat.welcome.midday.weeklyExpense
@@ -2412,9 +2412,9 @@ class _Translations$chat$welcome$midday$weeklyExpense$ko extends Translations$ch
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Weekly Spending';
-	@override String get prompt => 'Analyze this week\'s spending';
-	@override String get description => 'See your weekly expenses';
+	@override String get title => '이번 주 지출';
+	@override String get prompt => '이번 주 지출 분석하기';
+	@override String get description => '이번 주 지출 내역을 확인하세요';
 }
 
 // Path: chat.welcome.midday.checkBalance
@@ -2424,9 +2424,9 @@ class _Translations$chat$welcome$midday$checkBalance$ko extends Translations$cha
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Check Balance';
-	@override String get prompt => 'Check my account balance';
-	@override String get description => 'View your account balances';
+	@override String get title => '잔액 확인';
+	@override String get prompt => '계좌 잔액 확인하기';
+	@override String get description => '각 계좌의 남은 잔액을 확인하세요';
 }
 
 // Path: chat.welcome.afternoon.quickRecord
@@ -2436,9 +2436,9 @@ class _Translations$chat$welcome$afternoon$quickRecord$ko extends Translations$c
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Quick Record';
-	@override String get prompt => 'Help me record an expense';
-	@override String get description => 'Quickly log a transaction';
+	@override String get title => '빠른 지출 기록';
+	@override String get prompt => '지출 기록 도와줘';
+	@override String get description => '빠르게 지출을 기록하세요';
 }
 
 // Path: chat.welcome.afternoon.analyzeSpending
@@ -2448,9 +2448,9 @@ class _Translations$chat$welcome$afternoon$analyzeSpending$ko extends Translatio
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Analyze Spending';
-	@override String get prompt => 'Analyze this month\'s spending';
-	@override String get description => 'View spending trends and breakdown';
+	@override String get title => '지출 분석';
+	@override String get prompt => '이번 달 지출 분석하기';
+	@override String get description => '지출 트렌드와 구성을 확인하세요';
 }
 
 // Path: chat.welcome.afternoon.budgetProgress
@@ -2460,9 +2460,9 @@ class _Translations$chat$welcome$afternoon$budgetProgress$ko extends Translation
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Budget Progress';
-	@override String get prompt => 'Check budget status';
-	@override String get description => 'See how your budget is doing';
+	@override String get title => '재정 건강 상태';
+	@override String get prompt => '내 재정 건강 평가하기';
+	@override String get description => '수지 균형 점수와 조언을 받아보세요';
 }
 
 // Path: chat.welcome.evening.dinner
@@ -2472,9 +2472,9 @@ class _Translations$chat$welcome$evening$dinner$ko extends Translations$chat$wel
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Dinner';
-	@override String get prompt => 'Record dinner expense';
-	@override String get description => 'Log tonight\'s dinner spending';
+	@override String get title => '저녁 식사 기록';
+	@override String get prompt => '저녁 식사 지출 기록하기';
+	@override String get description => '오늘 저녁 지출을 기록하세요';
 }
 
 // Path: chat.welcome.evening.todaySummary
@@ -2484,9 +2484,9 @@ class _Translations$chat$welcome$evening$todaySummary$ko extends Translations$ch
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Today\'s Summary';
-	@override String get prompt => 'Summarize today\'s spending';
-	@override String get description => 'See what you spent today';
+	@override String get title => '오늘의 지출 요약';
+	@override String get prompt => '오늘 지출 요약하기';
+	@override String get description => '오늘 얼마를 썼는지 확인하세요';
 }
 
 // Path: chat.welcome.evening.tomorrowPlan
@@ -2496,9 +2496,9 @@ class _Translations$chat$welcome$evening$tomorrowPlan$ko extends Translations$ch
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Tomorrow\'s Plan';
-	@override String get prompt => 'What fixed expenses tomorrow';
-	@override String get description => 'Plan ahead for tomorrow';
+	@override String get title => '내일 지출 계획';
+	@override String get prompt => '내일 예정된 고정 지출 확인하기';
+	@override String get description => '내일의 지출을 미리 계획하세요';
 }
 
 // Path: chat.welcome.night.makeupRecord
@@ -2508,9 +2508,9 @@ class _Translations$chat$welcome$night$makeupRecord$ko extends Translations$chat
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Catch Up';
-	@override String get prompt => 'Help me log any missed expenses';
-	@override String get description => 'Record expenses you forgot today';
+	@override String get title => '오늘 지출 누락 보완';
+	@override String get prompt => '오늘 누락된 지출 기록하기';
+	@override String get description => '오늘 잊고 지나간 지출을 기록하세요';
 }
 
 // Path: chat.welcome.night.monthlyReview
@@ -2520,9 +2520,9 @@ class _Translations$chat$welcome$night$monthlyReview$ko extends Translations$cha
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Monthly Review';
-	@override String get prompt => 'Analyze this month\'s spending';
-	@override String get description => 'Review your monthly expenses';
+	@override String get title => '이번 달 분석';
+	@override String get prompt => '이번 달 지출 상세 분석하기';
+	@override String get description => '이번 달 지출을 돌아보세요';
 }
 
 // Path: chat.welcome.night.financialThinking
@@ -2532,9 +2532,9 @@ class _Translations$chat$welcome$night$financialThinking$ko extends Translations
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Financial Tips';
-	@override String get prompt => 'Give me some financial advice';
-	@override String get description => 'Get AI-powered financial insights';
+	@override String get title => '미래 예측';
+	@override String get prompt => '향후 30일 잔액 예측하기';
+	@override String get description => '미래의 재정 트렌드를 확인하세요';
 }
 
 /// The flat map containing all translations for locale <ko>.

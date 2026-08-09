@@ -1,6 +1,7 @@
 // features/chat/providers/welcome_guide_provider.dart
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 import 'package:forui/forui.dart';
@@ -221,6 +222,7 @@ List<ContextualSuggestion> _getSuggestionsForSlot(TimeSlot slot) {
 /// Welcome Guide Provider - returns greetings and contextual suggestions based on current time
 @riverpod
 WelcomeGuideState welcomeGuide(Ref ref) {
+  ref.watch(localeProvider);
   final hour = DateTime.now().hour;
   final slot = _getTimeSlot(hour);
 

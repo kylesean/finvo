@@ -801,7 +801,7 @@
         "linkedToSpace": "Linked to shared space"
       },
       "cashFlowCard": {
-        "title": "현금 흐름 분석",
+        "title": "현금 흐름 및 재정 건강 리포트",
         "savingsRate": "저축률 $rate%",
         "totalIncome": "총수입",
         "totalExpense": "총지출",
@@ -922,95 +922,95 @@
     },
     "welcome": {
       "morning": {
-        "subtitle": "Start your day by tracking",
+        "subtitle": "기록과 함께 시작하는 새로운 하루",
         "breakfast": {
-          "title": "Breakfast",
-          "prompt": "Record breakfast expense",
-          "description": "Log today's first expense"
+          "title": "아침 식사 기록",
+          "prompt": "아침 식사 지출 기록하기",
+          "description": "오늘의 첫 번째 지출을 기록하세요"
         },
         "yesterdayReview": {
-          "title": "Yesterday Review",
-          "prompt": "Analyze yesterday's spending",
-          "description": "Check how much you spent yesterday"
+          "title": "어제 지출 돌아보기",
+          "prompt": "어제 지출 분석하기",
+          "description": "어제 얼마를 썼는지 확인하세요"
         },
         "todayBudget": {
-          "title": "Today's Budget",
-          "prompt": "How much budget left for today",
-          "description": "Plan your spending for today"
+          "title": "오늘의 예산",
+          "prompt": "오늘 남은 예산 확인하기",
+          "description": "오늘의 지출 한도를 계획하세요"
         }
       },
       "midday": {
-        "greeting": "Good Afternoon",
-        "subtitle": "Quick record during lunch",
+        "greeting": "좋은 오후입니다",
+        "subtitle": "점심시간, 간편하게 기록하세요",
         "lunch": {
-          "title": "Lunch",
-          "prompt": "Record lunch expense",
-          "description": "Log your lunch spending"
+          "title": "점심 식사 기록",
+          "prompt": "점심 식사 지출 기록하기",
+          "description": "점심 지출을 기록하세요"
         },
         "weeklyExpense": {
-          "title": "Weekly Spending",
-          "prompt": "Analyze this week's spending",
-          "description": "See your weekly expenses"
+          "title": "이번 주 지출",
+          "prompt": "이번 주 지출 분석하기",
+          "description": "이번 주 지출 내역을 확인하세요"
         },
         "checkBalance": {
-          "title": "Check Balance",
-          "prompt": "Check my account balance",
-          "description": "View your account balances"
+          "title": "잔액 확인",
+          "prompt": "계좌 잔액 확인하기",
+          "description": "각 계좌의 남은 잔액을 확인하세요"
         }
       },
       "afternoon": {
-        "subtitle": "Tea time, let's review finances",
+        "subtitle": "티타임, 자산을 정리해보세요",
         "quickRecord": {
-          "title": "Quick Record",
-          "prompt": "Help me record an expense",
-          "description": "Quickly log a transaction"
+          "title": "빠른 지출 기록",
+          "prompt": "지출 기록 도와줘",
+          "description": "빠르게 지출을 기록하세요"
         },
         "analyzeSpending": {
-          "title": "Analyze Spending",
-          "prompt": "Analyze this month's spending",
-          "description": "View spending trends and breakdown"
+          "title": "지출 분석",
+          "prompt": "이번 달 지출 분석하기",
+          "description": "지출 트렌드와 구성을 확인하세요"
         },
         "budgetProgress": {
-          "title": "Budget Progress",
-          "prompt": "Check budget status",
-          "description": "See how your budget is doing"
+          "title": "재정 건강 상태",
+          "prompt": "내 재정 건강 평가하기",
+          "description": "수지 균형 점수와 조언을 받아보세요"
         }
       },
       "evening": {
-        "subtitle": "End of day, time to balance the books",
+        "subtitle": "오늘 하루도 수고하셨습니다, 지출을 정리해보세요",
         "dinner": {
-          "title": "Dinner",
-          "prompt": "Record dinner expense",
-          "description": "Log tonight's dinner spending"
+          "title": "저녁 식사 기록",
+          "prompt": "저녁 식사 지출 기록하기",
+          "description": "오늘 저녁 지출을 기록하세요"
         },
         "todaySummary": {
-          "title": "Today's Summary",
-          "prompt": "Summarize today's spending",
-          "description": "See what you spent today"
+          "title": "오늘의 지출 요약",
+          "prompt": "오늘 지출 요약하기",
+          "description": "오늘 얼마를 썼는지 확인하세요"
         },
         "tomorrowPlan": {
-          "title": "Tomorrow's Plan",
-          "prompt": "What fixed expenses tomorrow",
-          "description": "Plan ahead for tomorrow"
+          "title": "내일 지출 계획",
+          "prompt": "내일 예정된 고정 지출 확인하기",
+          "description": "내일의 지출을 미리 계획하세요"
         }
       },
       "night": {
-        "greeting": "Late Night",
-        "subtitle": "Quiet time for financial planning",
+        "greeting": "늦은 밤입니다",
+        "subtitle": "차분한 마음으로 미래를 계획하세요",
         "makeupRecord": {
-          "title": "Catch Up",
-          "prompt": "Help me log any missed expenses",
-          "description": "Record expenses you forgot today"
+          "title": "오늘 지출 누락 보완",
+          "prompt": "오늘 누락된 지출 기록하기",
+          "description": "오늘 잊고 지나간 지출을 기록하세요"
         },
         "monthlyReview": {
-          "title": "Monthly Review",
-          "prompt": "Analyze this month's spending",
-          "description": "Review your monthly expenses"
+          "title": "이번 달 분석",
+          "prompt": "이번 달 지출 상세 분석하기",
+          "description": "이번 달 지출을 돌아보세요"
         },
         "financialThinking": {
-          "title": "Financial Tips",
-          "prompt": "Give me some financial advice",
-          "description": "Get AI-powered financial insights"
+          "title": "미래 예측",
+          "prompt": "향후 30일 잔액 예측하기",
+          "description": "미래의 재정 트렌드를 확인하세요"
         }
       }
     },

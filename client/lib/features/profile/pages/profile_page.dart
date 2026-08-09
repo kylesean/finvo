@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/providers/locale_provider.dart';
+import 'package:finvo/shared/services/locale_service.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
@@ -35,6 +36,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   final _usernameFocusNode = FocusNode();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(ref.read(userProfileProvider.notifier).loadUser());
+    });
+  }
+
+  @override
   void dispose() {
     _usernameController.dispose();
     _usernameFocusNode.dispose();
@@ -46,6 +55,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final theme = context.theme;
     final colors = theme.colors;
     final userState = ref.watch(userProfileProvider);
+    final currentLocale = ref.watch(localeProvider);
 
     return FScaffold(
       resizeToAvoidBottomInset: false,
@@ -100,9 +110,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     prefix: _buildSettingIcon(context, FLucideIcons.globe),
                     title: Text(t.settings.language),
                     subtitle: Text(
-                      ref
-                          .watch(localeProvider.notifier)
-                          .currentLocaleDisplayName,
+                      LocaleService.getLocaleDisplayName(currentLocale),
                     ),
                     suffix: Icon(
                       FLucideIcons.chevronRight,
@@ -386,7 +394,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             )
           else
             Text(
-              user?.username ?? t.user.username,
+              user?.username ??
+                  ref.watch(currentUserProvider)?.username ??
+                  t.user.username,
               style: AppTextStyles.listTitle(theme),
             ),
           const SizedBox(width: 6),

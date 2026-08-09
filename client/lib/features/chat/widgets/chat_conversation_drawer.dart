@@ -16,6 +16,7 @@ import 'package:finvo/features/chat/widgets/chat_conversation_drawer_search_fiel
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/chat/widgets/conversation_item_skeleton.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
@@ -159,6 +160,7 @@ class _ChatConversationDrawerState
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(localeProvider);
     final theme = context.theme;
     final paginatedState = ref.watch(paginatedConversationProvider);
     final currentConversationId = ref.watch(

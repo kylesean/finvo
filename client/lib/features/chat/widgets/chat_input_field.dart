@@ -10,6 +10,7 @@ import 'package:finvo/features/chat/models/message_attachments.dart';
 import 'package:finvo/features/chat/widgets/media_upload_button.dart';
 import 'package:finvo/features/chat/widgets/media_preview_widget.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'dart:async';
@@ -283,6 +284,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(localeProvider);
     final chatInputState = ref.watch(provider);
     final chatInputNotifier = ref.read(provider.notifier);
 

@@ -800,7 +800,7 @@
         "linkedToSpace": "Linked to shared space"
       },
       "cashFlowCard": {
-        "title": "キャッシュフロー分析",
+        "title": "キャッシュフロー＆健康レポート",
         "savingsRate": "貯蓄率 $rate%",
         "totalIncome": "総収入",
         "totalExpense": "総支出",
@@ -921,95 +921,95 @@
     },
     "welcome": {
       "morning": {
-        "subtitle": "Start your day by tracking",
+        "subtitle": "新しい一日を、記録から始めましょう",
         "breakfast": {
-          "title": "Breakfast",
-          "prompt": "Record breakfast expense",
-          "description": "Log today's first expense"
+          "title": "朝食記録",
+          "prompt": "朝食の支出を記録",
+          "description": "今日最初の支出をすばやく記録"
         },
         "yesterdayReview": {
-          "title": "Yesterday Review",
-          "prompt": "Analyze yesterday's spending",
-          "description": "Check how much you spent yesterday"
+          "title": "昨日の振り返り",
+          "prompt": "昨日の支出を分析",
+          "description": "昨日いくら使ったか確認"
         },
         "todayBudget": {
-          "title": "Today's Budget",
-          "prompt": "How much budget left for today",
-          "description": "Plan your spending for today"
+          "title": "今日の予算",
+          "prompt": "今日の残予算を確認",
+          "description": "一日の支出限度を計画"
         }
       },
       "midday": {
-        "greeting": "Good Afternoon",
-        "subtitle": "Quick record during lunch",
+        "greeting": "こんにちは",
+        "subtitle": "ランチタイムにサクッと記録",
         "lunch": {
-          "title": "Lunch",
-          "prompt": "Record lunch expense",
-          "description": "Log your lunch spending"
+          "title": "ランチ記録",
+          "prompt": "ランチ代を記録",
+          "description": "昼食の支出を記録"
         },
         "weeklyExpense": {
-          "title": "Weekly Spending",
-          "prompt": "Analyze this week's spending",
-          "description": "See your weekly expenses"
+          "title": "今週の支出",
+          "prompt": "今週の支出を分析",
+          "description": "今週使った金額を確認"
         },
         "checkBalance": {
-          "title": "Check Balance",
-          "prompt": "Check my account balance",
-          "description": "View your account balances"
+          "title": "残高確認",
+          "prompt": "口座残高を確認",
+          "description": "各口座の残高を確認"
         }
       },
       "afternoon": {
-        "subtitle": "Tea time, let's review finances",
+        "subtitle": "ティータイムに家計を整理",
         "quickRecord": {
-          "title": "Quick Record",
-          "prompt": "Help me record an expense",
-          "description": "Quickly log a transaction"
+          "title": "クイック記録",
+          "prompt": "支出の記録を手伝って",
+          "description": "支出をすばやく記録"
         },
         "analyzeSpending": {
-          "title": "Analyze Spending",
-          "prompt": "Analyze this month's spending",
-          "description": "View spending trends and breakdown"
+          "title": "支出分析",
+          "prompt": "今月の支出を分析",
+          "description": "支出の傾向と内訳を確認"
         },
         "budgetProgress": {
-          "title": "Budget Progress",
-          "prompt": "Check budget status",
-          "description": "See how your budget is doing"
+          "title": "家計の健康度",
+          "prompt": "財務状況を診断して",
+          "description": "収支バランスとアドバイス"
         }
       },
       "evening": {
-        "subtitle": "End of day, time to balance the books",
+        "subtitle": "今日もお疲れ様でした、家計の点検をしましょう",
         "dinner": {
-          "title": "Dinner",
-          "prompt": "Record dinner expense",
-          "description": "Log tonight's dinner spending"
+          "title": "夕食記録",
+          "prompt": "夕食代を記録",
+          "description": "今夜の夕食代を記録"
         },
         "todaySummary": {
-          "title": "Today's Summary",
-          "prompt": "Summarize today's spending",
-          "description": "See what you spent today"
+          "title": "今日のまとめ",
+          "prompt": "今日の支出をまとめて",
+          "description": "今日いくら使ったか確認"
         },
         "tomorrowPlan": {
-          "title": "Tomorrow's Plan",
-          "prompt": "What fixed expenses tomorrow",
-          "description": "Plan ahead for tomorrow"
+          "title": "明日の予定",
+          "prompt": "明日の固定出費を確認",
+          "description": "明日の支出を事前に計画"
         }
       },
       "night": {
-        "greeting": "Late Night",
-        "subtitle": "Quiet time for financial planning",
+        "greeting": "夜深まりました",
+        "subtitle": "静かに見つめ直す、これからの資産",
         "makeupRecord": {
-          "title": "Catch Up",
-          "prompt": "Help me log any missed expenses",
-          "description": "Record expenses you forgot today"
+          "title": "今日の記入漏れ",
+          "prompt": "今日の記入漏れを記録",
+          "description": "つけ忘れた支出を補完"
         },
         "monthlyReview": {
-          "title": "Monthly Review",
-          "prompt": "Analyze this month's spending",
-          "description": "Review your monthly expenses"
+          "title": "今月の振り返り",
+          "prompt": "今月の支出を詳しく分析",
+          "description": "今月何にお金を使ったか確認"
         },
         "financialThinking": {
-          "title": "Financial Tips",
-          "prompt": "Give me some financial advice",
-          "description": "Get AI-powered financial insights"
+          "title": "将来の予測",
+          "prompt": "今後30日間の残高を予測",
+          "description": "将来の財務トレンドを予測"
         }
       }
     },
