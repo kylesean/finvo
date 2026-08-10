@@ -86,76 +86,80 @@ class CategoryStyle {
 }
 
 /// Gets name, icon and color for transaction category
-CategoryStyle getCategoryStyle(String? categoryKey) {
+///
+/// Colors are derived from the theme's primary color at varying opacities
+/// (mirroring [getAccountTypeStyle]) so category icons automatically adapt
+/// to the active palette and dark mode.
+CategoryStyle getCategoryStyle(String? categoryKey, FColors colors) {
   switch (categoryKey?.toLowerCase()) {
     case 'dining':
     case '1':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Dining',
-        icon: Icons.restaurant,
-        color: Color(0xFFF97316), // Orange
+        icon: FLucideIcons.utensils,
+        color: colors.primary,
       );
     case 'transport':
     case '2':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Transport',
-        icon: Icons.directions_car,
-        color: Color(0xFF3B82F6), // Blue
+        icon: FLucideIcons.car,
+        color: colors.primary.withValues(alpha: 0.9),
       );
     case 'shopping':
     case '3':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Shopping',
-        icon: Icons.shopping_bag,
-        color: Color(0xFFEC4899), // Pink
+        icon: FLucideIcons.shoppingBag,
+        color: colors.primary.withValues(alpha: 0.8),
       );
     case 'life':
     case '4':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Life Services',
-        icon: Icons.home,
-        color: Color(0xFF10B981), // Green
+        icon: FLucideIcons.home,
+        color: colors.primary.withValues(alpha: 0.7),
       );
     case 'medical':
     case '5':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Medical',
-        icon: Icons.medical_services,
-        color: Color(0xFFEF4444), // Red
+        icon: FLucideIcons.heartPulse,
+        color: colors.primary.withValues(alpha: 0.6),
       );
     case 'education':
     case '6':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Education',
-        icon: Icons.school,
-        color: Color(0xFF8B5CF6), // Purple
+        icon: FLucideIcons.graduationCap,
+        color: colors.primary.withValues(alpha: 0.5),
       );
     case 'entertainment':
     case '7':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Entertainment',
-        icon: Icons.sports_esports,
-        color: Color(0xFFF59E0B), // Amber
+        icon: FLucideIcons.gamepad2,
+        color: colors.primary.withValues(alpha: 0.45),
       );
     case 'salary':
     case 'income':
     case '8':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Salary',
-        icon: Icons.attach_money,
-        color: Color(0xFF22C55E), // Green
+        icon: FLucideIcons.banknote,
+        color: colors.primary,
       );
     case 'transfer':
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Transfer',
-        icon: Icons.swap_horiz,
-        color: Color(0xFF6366F1), // Indigo
+        icon: FLucideIcons.arrowRightLeft,
+        color: colors.primary.withValues(alpha: 0.7),
       );
     default:
-      return const CategoryStyle(
+      return CategoryStyle(
         name: 'Others',
-        icon: Icons.receipt_long,
-        color: Color(0xFFF97316), // Default orange
+        icon: FLucideIcons.receiptText,
+        color: colors.primary.withValues(alpha: 0.4),
       );
   }
 }

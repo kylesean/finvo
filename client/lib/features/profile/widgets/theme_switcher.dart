@@ -28,7 +28,7 @@ class ThemeSwitcher extends ConsumerWidget {
             Row(
               children: [
                 Icon(
-                  Icons.palette_outlined,
+                  FLucideIcons.palette,
                   size: 20,
                   color: colorScheme.foreground,
                 ),
@@ -136,11 +136,11 @@ class ThemeSwitcher extends ConsumerWidget {
   IconData _getCurrentThemeIcon(ThemeMode currentTheme) {
     switch (currentTheme) {
       case ThemeMode.light:
-        return Icons.light_mode;
+        return FLucideIcons.sun;
       case ThemeMode.dark:
-        return Icons.dark_mode;
+        return FLucideIcons.moon;
       case ThemeMode.system:
-        return Icons.brightness_auto;
+        return FLucideIcons.monitor;
     }
   }
 

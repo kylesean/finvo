@@ -129,7 +129,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
-                          Icons.account_balance_wallet,
+                          FLucideIcons.wallet,
                           color: Colors.white,
                           size: 20,
                         ),
@@ -145,7 +145,7 @@ class _CashPocketCardState extends ConsumerState<CashPocketCard>
                     ],
                   ),
                   Icon(
-                    Icons.arrow_forward_ios,
+                    FLucideIcons.chevronRight,
                     color: Colors.white.withValues(alpha: 0.7),
                     size: 16,
                   ),

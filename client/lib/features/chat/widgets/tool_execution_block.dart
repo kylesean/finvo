@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/features/chat/models/tool_call_info.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -313,7 +314,11 @@ class _ToolExecutionBlockState extends State<ToolExecutionBlock>
           },
         );
       case ToolExecutionStatus.success:
-        return const Icon(FLucideIcons.check, size: 14, color: Colors.green);
+        return Icon(
+          FLucideIcons.check,
+          size: 14,
+          color: theme.semantic.successAccent,
+        );
       case ToolExecutionStatus.error:
         return Icon(
           FLucideIcons.triangleAlert,

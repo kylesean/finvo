@@ -66,7 +66,7 @@ class TransactionItem extends ConsumerWidget {
     }
 
     // Use theme helpers for category style
-    final categoryStyle = helpers.getCategoryStyle(category);
+    final categoryStyle = helpers.getCategoryStyle(category, colors);
     final amountNum = amount is num
         ? amount
         : num.tryParse(amount?.toString() ?? '0') ?? 0;
@@ -77,8 +77,13 @@ class TransactionItem extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
-            // Category icon
-            IconBadge(icon: categoryStyle.icon, size: 40),
+            // Category icon - primary-tinted background like account type icons
+            IconBadge(
+              icon: categoryStyle.icon,
+              size: 40,
+              backgroundColor: categoryStyle.color.withValues(alpha: 0.1),
+              iconColor: categoryStyle.color,
+            ),
             const SizedBox(width: 12),
 
             // Description and time

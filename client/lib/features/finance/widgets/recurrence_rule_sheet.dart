@@ -343,7 +343,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
               ),
               child: Center(
                 child: Icon(
-                  Icons.remove,
+                  FLucideIcons.minus,
                   size: 16,
                   color: _interval > 1
                       ? colors.foreground
@@ -374,7 +374,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                 border: Border.all(color: colors.border),
               ),
               child: Center(
-                child: Icon(Icons.add, size: 16, color: colors.foreground),
+                child: Icon(
+                  FLucideIcons.plus,
+                  size: 16,
+                  color: colors.foreground,
+                ),
               ),
             ),
           ),

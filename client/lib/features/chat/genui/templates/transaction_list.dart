@@ -331,7 +331,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
             // Add right arrow to indicate tappable
             const SizedBox(width: 8),
             Icon(
-              Icons.chevron_right,
+              FLucideIcons.chevronRight,
               color: colors.mutedForeground.withValues(alpha: 0.5),
               size: 20,
             ),

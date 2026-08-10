@@ -115,7 +115,7 @@ class _FallbackWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  Icons.error_outline,
+                  FLucideIcons.circleAlert,
                   color: colors.destructive,
                   size: 20,
                 ),

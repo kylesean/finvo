@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 /// Upload progress status
@@ -225,11 +226,17 @@ class UploadProgressWidget extends StatelessWidget {
       case UploadStatus.success:
         return Row(
           children: [
-            const Icon(FLucideIcons.check, size: 16, color: Colors.green),
+            Icon(
+              FLucideIcons.check,
+              size: 16,
+              color: theme.semantic.successAccent,
+            ),
             const SizedBox(width: 4),
             Text(
               'Upload successful',
-              style: theme.typography.body.xs.copyWith(color: Colors.green),
+              style: theme.typography.body.xs.copyWith(
+                color: theme.semantic.successAccent,
+              ),
             ),
           ],
         );

@@ -43,6 +43,10 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
   }
 
   void _onScroll() {
+    final state = ref.read(sharedSpaceNotificationProvider);
+    if (state.notifications.isEmpty || state.isLoading || !state.hasMore) {
+      return;
+    }
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       unawaited(

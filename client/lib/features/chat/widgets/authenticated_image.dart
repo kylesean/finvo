@@ -114,7 +114,7 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
       }
       return Center(
         child: Icon(
-          Icons.error_outline,
+          FLucideIcons.imageOff,
           color: context.theme.colors.destructive,
         ),
       );

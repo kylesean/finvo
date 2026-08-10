@@ -132,7 +132,7 @@ class _RecurringTransactionListPageState
         backgroundColor: colors.primary,
         foregroundColor: colors.primaryForeground,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add, size: 28),
+        child: const Icon(FLucideIcons.plus, size: 28),
       ),
     );
   }

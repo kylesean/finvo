@@ -107,7 +107,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
         child: Row(
           children: [
             Icon(
-              Icons.warning_amber_rounded,
+              FLucideIcons.triangleAlert,
               color: context.theme.colors.mutedForeground,
             ),
             const SizedBox(width: 8),
@@ -143,7 +143,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.insights, color: colors.primary, size: 22),
+          Icon(FLucideIcons.chartLine, color: colors.primary, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

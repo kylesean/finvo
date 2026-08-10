@@ -144,6 +144,9 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
               _buildScopeSelector(theme, colors),
               const SizedBox(height: 24),
 
+              _buildNameSection(theme, colors),
+              const SizedBox(height: 24),
+
               _buildAmountSection(theme, colors),
               const SizedBox(height: 24),
 
@@ -239,6 +242,36 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildNameSection(FThemeData theme, FColors colors) {
+    final defaultHint = _scope == BudgetScope.category
+        ? _category.displayText
+        : t.budget.totalBudget;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(t.budget.info, style: AppTextStyles.sectionHeader(theme)),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colors.border),
+          ),
+          child: TextField(
+            controller: _nameController,
+            style: AppTextStyles.formValue(theme),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: defaultHint,
+              hintStyle: AppTextStyles.formFieldLabel(theme),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

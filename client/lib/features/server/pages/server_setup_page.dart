@@ -8,6 +8,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:async';
 
 import 'package:finvo/features/server/providers/server_config_provider.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -173,7 +174,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
 
                   // Icon
                   Icon(
-                    Icons.dns_outlined,
+                    FLucideIcons.server,
                     size: 64,
                     color: theme.colors.primary,
                   ),
@@ -224,7 +225,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.qr_code_scanner, size: 20),
+                      const Icon(FLucideIcons.qrCode, size: 20),
                       const SizedBox(width: 8),
                       Text(t.server.scanQr),
                     ],
@@ -235,15 +236,15 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
                 // Connection Status
                 if (_isConnecting)
                   _ConnectionStatusCard(
-                    icon: Icons.sync,
+                    icon: FLucideIcons.refreshCw,
                     iconColor: theme.colors.primary,
                     title: t.server.connecting,
                     isLoading: true,
                   )
                 else if (_healthResult?.isHealthy == true)
                   _ConnectionStatusCard(
-                    icon: Icons.check_circle,
-                    iconColor: Colors.green,
+                    icon: FLucideIcons.checkCircle,
+                    iconColor: theme.semantic.successAccent,
                     title: t.server.connected,
                     subtitle: _healthResult?.version != null
                         ? 'v${_healthResult!.version}'
@@ -251,7 +252,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
                   )
                 else if (_connectionError != null)
                   _ConnectionStatusCard(
-                    icon: Icons.error_outline,
+                    icon: FLucideIcons.circleAlert,
                     iconColor: theme.colors.destructive,
                     title: t.server.connectionFailed,
                     subtitle: _connectionError,
@@ -432,12 +433,12 @@ class _QrScannerViewState extends State<_QrScannerView> {
                 children: [
                   IconButton(
                     onPressed: widget.onCancel,
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(FLucideIcons.x, color: Colors.white),
                   ),
                   const Spacer(),
                   IconButton(
                     onPressed: () => unawaited(_controller.toggleTorch()),
-                    icon: const Icon(Icons.flash_on, color: Colors.white),
+                    icon: const Icon(FLucideIcons.zap, color: Colors.white),
                   ),
                 ],
               ),

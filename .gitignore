@@ -54,3 +54,4 @@ evals/reports/
 
 # 6. CodeGraph
 .codegraph/
+.reasonix/

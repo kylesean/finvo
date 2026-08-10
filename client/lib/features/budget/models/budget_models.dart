@@ -184,13 +184,6 @@ class Budget {
   });
 
   factory Budget.fromJson(Map<String, dynamic> json) {
-    DateTime parseDate(String? dateStr) {
-      if (dateStr == null || dateStr.isEmpty) {
-        return DateTime.fromMillisecondsSinceEpoch(0);
-      }
-      return DateTime.parse(dateStr);
-    }
-
     return Budget(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -203,8 +196,8 @@ class Budget {
       status: BudgetStatus.fromString(json['status'] as String),
       rolloverEnabled: json['rollover_enabled'] as bool? ?? true,
       rolloverBalance: _parseDecimal(json['rollover_balance']),
-      createdAt: parseDate(json['created_at'] as String?),
-      updatedAt: parseDate(json['updated_at'] as String?),
+      createdAt: _parseDate(json['created_at']),
+      updatedAt: _parseDate(json['updated_at']),
     );
   }
 

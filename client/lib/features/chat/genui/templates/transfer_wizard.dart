@@ -167,7 +167,7 @@ class _TransferWizardState extends State<TransferWizard> {
         border: Border.all(color: colors.border.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colors.foreground.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),

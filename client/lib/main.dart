@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:forui/forui.dart';
 import 'dart:async';
 import 'package:finvo/app/app.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
@@ -183,7 +184,7 @@ class FatalInitErrorApp extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    Icons.error_outline,
+                    FLucideIcons.circleAlert,
                     color: Colors.white,
                     size: 48,
                   ),
@@ -210,7 +211,7 @@ class FatalInitErrorApp extends StatelessWidget {
                       // runZonedGuarded on every retry.)
                       unawaited(_bootstrap());
                     },
-                    icon: const Icon(Icons.refresh),
+                    icon: const Icon(FLucideIcons.refreshCw),
                     label: Text(t.common.retry),
                   ),
                 ],

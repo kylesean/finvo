@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 /// A widget that renders text with a smooth typing typewriter animation
 /// when text arrives or updates incrementally via A2UI stream.
@@ -139,7 +140,8 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
       child: Text(
         '▌',
         style: (widget.style ?? const TextStyle()).copyWith(
-          color: (widget.style?.color ?? Colors.blue).withValues(alpha: 0.8),
+          color: (widget.style?.color ?? context.theme.colors.primary)
+              .withValues(alpha: 0.8),
           fontSize: widget.style?.fontSize,
           fontWeight: FontWeight.bold,
         ),

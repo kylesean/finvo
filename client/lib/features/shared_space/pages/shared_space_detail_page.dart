@@ -58,6 +58,10 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
   }
 
   void _onScroll() {
+    final txState = ref.read(spaceTransactionProvider(widget.spaceId));
+    if (txState.transactions.isEmpty || txState.isLoading || !txState.hasMore) {
+      return;
+    }
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       unawaited(

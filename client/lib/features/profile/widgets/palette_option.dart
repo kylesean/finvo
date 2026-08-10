@@ -73,7 +73,11 @@ class PaletteOption extends StatelessWidget {
                   ),
                 ),
                 if (isSelected)
-                  Icon(Icons.check_circle, size: 16, color: colors.primary),
+                  Icon(
+                    FLucideIcons.checkCircle,
+                    size: 16,
+                    color: colors.primary,
+                  ),
               ],
             ),
             const SizedBox(height: 10),

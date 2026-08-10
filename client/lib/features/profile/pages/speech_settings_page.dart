@@ -30,6 +30,16 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
     _hostController = TextEditingController();
     _portController = TextEditingController();
     _pathController = TextEditingController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _initControllers();
+    });
+
+    ref.listenManual(speechSettingsProvider, (previous, next) {
+      if (previous?.settings != next.settings && next.settings != null) {
+        _initControllers();
+      }
+    });
   }
 
   @override
@@ -58,11 +68,6 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
     final theme = context.theme;
     final colors = theme.colors;
     final state = ref.watch(speechSettingsProvider);
-
-    // Initialize controllers (only after settings are loaded)
-    if (state.settings != null && _hostController.text.isEmpty) {
-      _initControllers();
-    }
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -316,6 +321,7 @@ class _SpeechSettingsPageState extends ConsumerState<SpeechSettingsPage> {
     if (ok) {
       ToastService.success(description: Text(t.speech.configSaved));
     } else {
+      _initControllers();
       ToastService.showDestructive(
         description: Text(t.speech.configSaveFailed),
       );

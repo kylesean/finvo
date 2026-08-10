@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -100,7 +101,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.error_outline,
+                  FLucideIcons.circleAlert,
                   size: 48,
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -119,7 +120,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 const SizedBox(height: 24),
                 FilledButton.icon(
                   onPressed: () => context.go(AppRoutePaths.home),
-                  icon: const Icon(Icons.home),
+                  icon: const Icon(FLucideIcons.home),
                   label: Text(t.common.retry),
                 ),
               ],

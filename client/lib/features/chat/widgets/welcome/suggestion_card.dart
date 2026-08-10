@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/widgets/themed_icon.dart';
 
 /// Suggestion card component
 /// Compact design, sends prompt to AI on tap
@@ -29,29 +30,20 @@ class SuggestionCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: theme.style.borderRadius.lg,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: theme.colors.muted.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: theme.style.borderRadius.lg,
             border: Border.all(
               color: theme.colors.border.withValues(alpha: 0.6),
             ),
           ),
           child: Row(
             children: [
-              // Icon container
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.colors.background,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 20, color: theme.colors.foreground),
-              ),
+              // Icon container - unified ThemedIcon styling
+              ThemedIcon(icon: icon),
               const SizedBox(width: 12),
               // Text content
               Expanded(

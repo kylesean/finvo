@@ -73,7 +73,7 @@ class MediaPreviewWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: isImage
                   ? Hero(tag: 'image_$index', child: _buildImage(file))
-                  : _buildFileIcon(),
+                  : _buildFileIcon(context),
             ),
           ),
         ),
@@ -112,7 +112,7 @@ class MediaPreviewWidget extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.close,
+                FLucideIcons.x,
                 color: context.theme.colors.destructiveForeground,
                 size: 12,
               ),
@@ -146,14 +146,14 @@ class MediaPreviewWidget extends StatelessWidget {
           }
 
           if (snapshot.hasError || !snapshot.hasData) {
-            return _buildFileIcon();
+            return _buildFileIcon(context);
           }
 
           return Image.memory(
             snapshot.data as Uint8List,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              return _buildFileIcon();
+              return _buildFileIcon(context);
             },
           );
         },
@@ -164,16 +164,21 @@ class MediaPreviewWidget extends StatelessWidget {
         File(file.path),
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return _buildFileIcon();
+          return _buildFileIcon(context);
         },
       );
     }
   }
 
-  Widget _buildFileIcon() {
+  Widget _buildFileIcon(BuildContext context) {
+    final theme = context.theme;
     return Container(
-      color: Colors.grey.shade100,
-      child: const Icon(Icons.insert_drive_file, size: 32, color: Colors.grey),
+      color: theme.colors.muted.withValues(alpha: 0.3),
+      child: Icon(
+        FLucideIcons.fileText,
+        size: 32,
+        color: theme.colors.mutedForeground,
+      ),
     );
   }
 

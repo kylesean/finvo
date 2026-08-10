@@ -19,7 +19,19 @@ class IconBadge extends StatelessWidget {
   /// Size of the badge (width and height). Defaults to 44.
   final double size;
 
-  const IconBadge({super.key, required this.icon, this.size = 44});
+  /// Optional custom background color (overrides the ThemedIcon default).
+  final Color? backgroundColor;
+
+  /// Optional custom icon color (overrides the ThemedIcon default).
+  final Color? iconColor;
+
+  const IconBadge({
+    super.key,
+    required this.icon,
+    this.size = 44,
+    this.backgroundColor,
+    this.iconColor,
+  });
 
   /// Creates an IconBadge from account type data
   factory IconBadge.fromAccountType({
@@ -57,6 +69,11 @@ class IconBadge extends StatelessWidget {
       _ => ThemedIconSize.large,
     };
 
-    return ThemedIcon(icon: icon, size: themedSize);
+    return ThemedIcon(
+      icon: icon,
+      size: themedSize,
+      backgroundColor: backgroundColor,
+      iconColor: iconColor,
+    );
   }
 }

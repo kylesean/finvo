@@ -86,7 +86,7 @@ class Auth extends _$Auth {
       user: user,
       token: token,
     );
-    _logger.info('Login successful, state updated - user: ${user.email}');
+    _logger.info('Login successful, state updated - userId: ${user.id}');
   }
 
   /// If [error] is a [DioException] wrapping an [AppException], return that

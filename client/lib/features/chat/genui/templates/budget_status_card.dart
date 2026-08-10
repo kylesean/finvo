@@ -58,7 +58,7 @@ class BudgetStatusCard extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              Icons.warning_amber_rounded,
+              FLucideIcons.triangleAlert,
               color: context.theme.colors.mutedForeground,
             ),
             const SizedBox(width: 8),

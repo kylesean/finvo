@@ -68,6 +68,10 @@ class _SharedSpaceListPageState extends ConsumerState<SharedSpaceListPage>
   }
 
   void _onScroll() {
+    final state = ref.read(sharedSpaceProvider);
+    if (state.spaces.isEmpty || state.isLoading || !state.hasMore) {
+      return;
+    }
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       unawaited(ref.read(sharedSpaceProvider.notifier).loadSpaces());

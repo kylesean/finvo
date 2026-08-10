@@ -70,7 +70,7 @@ class HistoricalComponentRenderer extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.warning_amber_rounded, color: colors.mutedForeground),
+          Icon(FLucideIcons.triangleAlert, color: colors.mutedForeground),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

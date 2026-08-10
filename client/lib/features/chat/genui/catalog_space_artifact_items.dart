@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 import 'package:finvo/features/chat/genui/catalog_helpers.dart';
@@ -181,7 +182,7 @@ Widget _buildArtifactLinkWidget(CatalogItemContext context) {
       ),
       child: Row(
         children: [
-          const Icon(Icons.insert_drive_file_outlined, size: 24.0),
+          const Icon(FLucideIcons.fileText, size: 24.0),
           const SizedBox(width: 12.0),
           Expanded(
             child: Column(

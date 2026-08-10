@@ -219,7 +219,7 @@ Future<dynamic> showSpacePickerSheet(
                     ),
                     if (isSelected)
                       Icon(
-                        Icons.check,
+                        FLucideIcons.check,
                         color: context.theme.semantic.sharedSpaceAccent,
                         size: 18,
                       ),

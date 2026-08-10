@@ -37,6 +37,10 @@ class _NotificationCenterPageState
   }
 
   void _onScroll() {
+    final state = ref.read(notificationProvider);
+    if (state.items.isEmpty || state.isLoadingMore || state.hasReachedMax) {
+      return;
+    }
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       unawaited(ref.read(notificationProvider.notifier).loadMore());

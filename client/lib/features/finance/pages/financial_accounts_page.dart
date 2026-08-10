@@ -109,7 +109,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.primaryForeground,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add, size: 28),
+        child: const Icon(FLucideIcons.plus, size: 28),
       ),
     );
   }
@@ -141,7 +141,11 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline, size: 48, color: colors.destructive),
+              Icon(
+                FLucideIcons.circleAlert,
+                size: 48,
+                color: colors.destructive,
+              ),
               const SizedBox(height: 16),
               Text(
                 state.error!,
@@ -294,7 +298,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.account_balance_wallet_outlined,
+                FLucideIcons.wallet,
                 size: 64,
                 color: colors.mutedForeground.withValues(alpha: 0.5),
               ),

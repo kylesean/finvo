@@ -307,22 +307,22 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     final theme = context.theme;
 
     if (isStreamingResponse) {
-      currentIcon = Icons.square_rounded;
+      currentIcon = FLucideIcons.square;
       buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
       currentAction = () => chatHistoryNotifier.cancelPendingOperation();
     } else if (chatInputState.isListening) {
-      currentIcon = Icons.square_rounded;
+      currentIcon = FLucideIcons.square;
       buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
     } else if (chatInputState.text.trim().isNotEmpty) {
-      currentIcon = Icons.arrow_upward;
+      currentIcon = FLucideIcons.arrowUp;
       buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
     } else {
       currentIcon = chatInputState.isSpeechAvailable
-          ? Icons.mic_none_outlined
-          : Icons.mic_off_outlined;
+          ? FLucideIcons.mic
+          : FLucideIcons.micOff;
       buttonBackgroundColor = theme.colors.muted;
       iconColor = chatInputState.isSpeechAvailable
           ? theme.colors.foreground
@@ -380,6 +380,11 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                           chatInputState.isListening,
                           isStreamingResponse: isStreamingResponse,
                         ),
+                        hintStyle: theme.typography.body.md.copyWith(
+                          color: theme.colors.mutedForeground.withValues(
+                            alpha: 0.8,
+                          ),
+                        ),
                         border: InputBorder.none,
                         filled: false,
                         contentPadding: const EdgeInsets.symmetric(
@@ -396,7 +401,9 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                       },
                       minLines: 1,
                       maxLines: 5,
-                      style: const TextStyle(fontSize: 16),
+                      style: theme.typography.body.md.copyWith(
+                        color: theme.colors.foreground,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
