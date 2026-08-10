@@ -357,15 +357,15 @@ async def search_transactions(
             items.append(
                 {
                     "id": item.id,
-                    # LLM-facing amount: clean decimal string (no float precision loss).
+                    # Clean decimal string for monetary amounts
                     "amount": money_str(val),
                     "currency": item.currency,
                     "description": item.description or "",
                     "type": item.type,
-                    "transaction_time": item.transaction_at,
+                    "transactionAt": item.transaction_at,
                     "location": item.location,
                     "tags": item.tags or [],
-                    "category": item.category_key,
+                    "categoryKey": item.category_key,
                     "display": item.display.model_dump() if item.display else None,
                 }
             )
@@ -381,12 +381,16 @@ async def search_transactions(
             sorted_cats = sorted(category_stats.items(), key=lambda x: x[1], reverse=True)
             for cat_key, amt in sorted_cats:
                 distribution.append(
-                    {"category": cat_key, "amount": float(amt), "percentage": float(amt / total_expense)}
+                    {
+                        "categoryKey": cat_key,
+                        "amount": money_str(amt),
+                        "percentage": float(amt / total_expense),
+                    }
                 )
 
         top_items = sorted(
             [it for it in items if it["type"] == "EXPENSE"],
-            key=lambda x: float(cast(Any, x.get("amount")) or 0),
+            key=lambda x: Decimal(str(x.get("amount") or "0")),
             reverse=True,
         )[:3]
 
@@ -404,25 +408,25 @@ async def search_transactions(
         response_data: dict[str, Any] = {
             "success": True,
             "summary": {
-                "total_expense": float(total_expense),
+                "totalExpense": money_str(total_expense),
                 "currency": display_currency,  # Use user's primaryCurrency
                 "distribution": distribution,
-                "top_items": top_items,
+                "topItems": top_items,
                 "count": result.total,
             },
             "items": llm_items,
             "total": result.total,
             "page": result.page,
-            "per_page": result.per_page,
+            "perPage": result.per_page,
             "hasMore": result.has_more,
             "truncated": len(items) > MAX_LLM_ITEMS,
             "metadata": {
                 "keyword": keyword,
-                "start_date": start_date,
-                "end_date": end_date,
-                "transaction_types": transaction_types,
-                "min_amount": min_amount,
-                "max_amount": max_amount,
+                "startDate": start_date,
+                "endDate": end_date,
+                "transactionTypes": transaction_types,
+                "minAmount": min_amount,
+                "maxAmount": max_amount,
             },
         }
 

@@ -51,8 +51,8 @@ void main() {
       final data = {
         'amount': 258.00,
         'currency': 'CNY',
-        'category_key': 'SHOPPING_RETAIL',
-        'time': '2023-10-27T19:00:00Z',
+        'categoryKey': 'SHOPPING_RETAIL',
+        'transactionAt': '2023-10-27T19:00:00Z',
         'tags': ['life', 'shopping'],
         'status': 'COMPLETED',
       };

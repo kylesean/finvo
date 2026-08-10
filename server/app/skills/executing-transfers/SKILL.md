@@ -50,3 +50,4 @@ uv run python app/skills/executing-transfers/scripts/prepare_transfer.py --amoun
 3. Only transfer between ASSET-type accounts
 4. Always require user confirmation before executing
 5. Execute scripts directly without `cd`, `&&`, or pipe operators
+6. For new transfer requests, extract amount and account hints strictly from the user's LATEST prompt in the current turn. Do NOT carry over parameters from previously completed transfers.

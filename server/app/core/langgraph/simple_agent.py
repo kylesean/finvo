@@ -563,25 +563,49 @@ class SimpleLangChainAgent:
                     "toolName": tool_name,
                 }
 
-        # Process direct_execute_result (bypassing LLM execution results)
-        direct_execute_result = state.values.get("direct_execute_result")
-        if direct_execute_result and direct_execute_result.get("success"):
-            tool_name = direct_execute_result.get("tool_name", "")
-            tool_result = direct_execute_result.get("data", {})
+        # Process direct_execute results (bypassing LLM execution results).
+        # The direct_execute_result channel is last-write-wins, so executing two
+        # transfers in one session overwrites the earlier receipt. The checkpoint
+        # history preserves every write, so collect all of them (deduped by
+        # surface_id) to render every execution result, not just the last one.
+        direct_execute_results: list[dict[str, Any]] = []
+        seen_de_surfaces: set[str] = set()
+        try:
+            async for snap in agent.aget_state_history(config):
+                de = snap.values.get("direct_execute_result")
+                if de and isinstance(de, dict) and de.get("success"):
+                    surf = de.get("surface_id")
+                    if surf and surf not in seen_de_surfaces:
+                        seen_de_surfaces.add(surf)
+                        direct_execute_results.append(de)
+        except Exception as e:  # pragma: no cover - defensive
+            logger.warning("direct_execute_history_collect_failed", error=str(e))
+        # Fall back to the latest value when history iteration is unavailable/failed
+        if not direct_execute_results:
+            latest_de = state.values.get("direct_execute_result")
+            if latest_de and latest_de.get("success"):
+                direct_execute_results.append(latest_de)
 
-            if isinstance(tool_result, dict):
-                component_type = ComponentDetector.detect_with_overrides(tool_result, tool_name)
-
-                if component_type and ComponentDetector.is_successful_result(tool_result):
-                    de_id = "direct_execute_result"
-                    tool_call_ui_map[de_id] = {
-                        "surfaceId": f"history_de_{session_id}",
-                        "componentType": component_type,
-                        "data": tool_result,
-                        "mode": "historical",
-                        "toolCallId": de_id,
-                        "toolName": tool_name,
-                    }
+        for de_result in direct_execute_results:
+            tool_name = de_result.get("tool_name", "")
+            tool_result = de_result.get("data", {})
+            if not isinstance(tool_result, dict):
+                continue
+            component_type = ComponentDetector.detect_with_overrides(tool_result, tool_name)
+            if not component_type or not ComponentDetector.is_successful_result(tool_result):
+                continue
+            # Key by the live surface id the wizard sent to direct_execute, so the
+            # result can be linked back to the wizard that triggered it. surfaceId
+            # must stay unique per execution (the client memoizes UI by surfaceId).
+            de_surface_id = de_result.get("surface_id") or f"history_de_{session_id}_{uuid.uuid4().hex[:8]}"
+            tool_call_ui_map[de_surface_id] = {
+                "surfaceId": f"history_de_{de_surface_id}",
+                "componentType": component_type,
+                "data": tool_result,
+                "mode": "historical",
+                "toolCallId": de_surface_id,
+                "toolName": tool_name,
+            }
 
         # Enrichment Layer: Real-time data backfill
         if user_uuid:
@@ -605,34 +629,38 @@ class SimpleLangChainAgent:
                             component_type=component_type,
                         )
 
-        # Link TransferWizard to execution result for historical state completeness
-        confirmed_params = None
-        if direct_execute_result and direct_execute_result.get("success"):
-            de_data = direct_execute_result.get("data", {})
-            if de_data.get("componentType") == "TransferReceipt" or de_data.get("transfer_info"):
-                transfer_info = de_data.get("transfer_info") or {}
-                source_acc = transfer_info.get("source_account") or {}
-                target_acc = transfer_info.get("target_account") or {}
-
-                confirmed_params = {
-                    "amount": float(de_data.get("amount") or 0.0),
-                    "source_id": str(source_acc.get("id") or de_data.get("source_account_id") or ""),
-                    "target_id": str(target_acc.get("id") or de_data.get("target_account_id") or ""),
-                }
-
-        if confirmed_params:
-            for ui_comp in tool_call_ui_map.values():
-                if ui_comp.get("componentType") == "TransferWizard":
-                    wizard_data = ui_comp.get("data", {})
-                    if confirmed_params["source_id"]:
-                        wizard_data["preselectedSourceId"] = confirmed_params["source_id"]
-                    if confirmed_params["target_id"]:
-                        wizard_data["preselectedTargetId"] = confirmed_params["target_id"]
-                    if float(str(confirmed_params.get("amount") or 0.0)) > 0:
-                        wizard_data["amount"] = confirmed_params["amount"]
-
-                    wizard_data["isConfirmed"] = True
-                    logger.debug("history_wizard_data_auto_filled", surface_id=ui_comp.get("surfaceId"))
+        # Link each TransferWizard to the execution result that confirmed it, so the
+        # historical wizard shows the confirmed source/target accounts and amount.
+        # The direct_execute node persists the wizard's live surface id
+        # (surface_{session_id}_{execute_tool_call_id}); the wizard's entry key is
+        # that same execute tool_call_id, so reconstructing the live surface id
+        # links each wizard to its own execution result (per transfer round).
+        for tc_id, ui_comp in tool_call_ui_map.items():
+            if ui_comp.get("componentType") != "TransferWizard":
+                continue
+            wizard_live_surface = f"surface_{session_id}_{tc_id}"
+            matched_de = [d for d in direct_execute_results if d.get("surface_id") == wizard_live_surface]
+            wizard_de_result: dict[str, Any] | None = matched_de[0] if matched_de else None
+            if not wizard_de_result:
+                continue
+            de_data = wizard_de_result.get("data", {})
+            transfer_info = de_data.get("transfer_info") or {}
+            source_acc = transfer_info.get("source_account") or {}
+            target_acc = transfer_info.get("target_account") or {}
+            wizard_data = ui_comp.get("data", {})
+            if source_acc.get("id"):
+                wizard_data["preselectedSourceId"] = str(source_acc["id"])
+            if target_acc.get("id"):
+                wizard_data["preselectedTargetId"] = str(target_acc["id"])
+            amount = de_data.get("amount")
+            if amount is not None:
+                wizard_data["amount"] = float(amount)
+            wizard_data["isConfirmed"] = True
+            logger.debug(
+                "history_wizard_linked_to_execution",
+                tool_call_id=tc_id,
+                surface_id=wizard_live_surface,
+            )
 
         logger.debug("tool_call_ui_map_built", count=len(tool_call_ui_map))
 
@@ -736,20 +764,59 @@ class SimpleLangChainAgent:
 
         result = raw_result
 
-        # Append direct_execute_result UI component to last AI message
-        de_ui_component = tool_call_ui_map.get("direct_execute_result")
-        if de_ui_component:
-            for i in range(len(result) - 1, -1, -1):
-                if isinstance(result[i], dict) and result[i].get("role") == "assistant":
-                    assistant_msg_ui_components: Any = result[i]["uiComponents"]
-                    if isinstance(assistant_msg_ui_components, list):
-                        assistant_msg_ui_components.append(de_ui_component)
-                    logger.info(
-                        "direct_execute_ui_appended_to_message",
-                        message_id=result[i].get("id"),
-                        component_type=de_ui_component.get("componentType"),
-                    )
-                    break
+        # Attach each direct_execute result UI component to the silent assistant
+        # message that follows the user's confirmation (direct_execute runs as a
+        # separate turn right after the confirmation and adds an empty AI message).
+        # This renders chronologically: wizard -> user confirms -> success receipt.
+        # Fallback: the last assistant message.
+        de_prefix = f"surface_{session_id}_"
+        for de_result in direct_execute_results:
+            de_surface_id = de_result.get("surface_id") or ""
+            de_ui_component = tool_call_ui_map.get(de_surface_id)
+            if not de_ui_component:
+                continue
+
+            target_index = -1
+            wizard_tc_id = None
+            if de_surface_id.startswith(de_prefix):
+                wizard_tc_id = de_surface_id[len(de_prefix) :]
+            if wizard_tc_id:
+                # Locate the wizard's AI message (the one carrying the execute tool call).
+                wizard_idx = -1
+                for i, msg in enumerate(result):
+                    tool_calls = msg.get("toolCalls", []) if isinstance(msg, dict) else []
+                    if any(str(tc.get("id", "")) == wizard_tc_id for tc in tool_calls):
+                        wizard_idx = i
+                        break
+                if wizard_idx != -1:
+                    # The direct_execute result message is the first assistant message
+                    # after the wizard that is silent (empty content, no tool calls).
+                    for j in range(wizard_idx + 1, len(result)):
+                        msg = result[j]
+                        if not isinstance(msg, dict) or msg.get("role") != "assistant":
+                            continue
+                        content = msg.get("content") or ""
+                        tool_calls = msg.get("toolCalls") or []
+                        if content == "" and not tool_calls:
+                            target_index = j
+                            break
+
+            if target_index == -1:
+                for i in range(len(result) - 1, -1, -1):
+                    if isinstance(result[i], dict) and result[i].get("role") == "assistant":
+                        target_index = i
+                        break
+            if target_index == -1:
+                continue
+
+            assistant_msg_ui_components: Any = result[target_index]["uiComponents"]
+            if isinstance(assistant_msg_ui_components, list):
+                assistant_msg_ui_components.append(de_ui_component)
+            logger.info(
+                "direct_execute_ui_appended_to_message",
+                message_id=result[target_index].get("id"),
+                component_type=de_ui_component.get("componentType"),
+            )
 
         logger.info(
             "detailed_history_retrieved",

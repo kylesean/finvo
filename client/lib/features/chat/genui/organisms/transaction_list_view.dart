@@ -12,6 +12,7 @@ import 'package:finvo/core/constants/category_constants.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/features/chat/genui/utils/genui_error_boundary.dart';
 
 /// Transaction list view component
 ///
@@ -141,19 +142,22 @@ class _TransactionListViewState extends ConsumerState<TransactionListView> {
                   return _buildLoadMoreIndicator(theme, colors);
                 }
                 final item = _items[index] as Map<String, dynamic>;
-                return _TransactionListItem(
-                  data: item,
-                  onTap: () {
-                    final id = item['id'] as String?;
-                    if (id != null) {
-                      unawaited(
-                        context.pushNamed(
-                          AppRouteNames.transactionDetail,
-                          pathParameters: {'transactionId': id},
-                        ),
-                      );
-                    }
-                  },
+                return GenUiErrorBoundary(
+                  componentName: 'TransactionListItem',
+                  child: _TransactionListItem(
+                    data: item,
+                    onTap: () {
+                      final id = item['id'] as String?;
+                      if (id != null) {
+                        unawaited(
+                          context.pushNamed(
+                            AppRouteNames.transactionDetail,
+                            pathParameters: {'transactionId': id},
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 );
               },
             ),
@@ -250,17 +254,14 @@ class _TransactionListItem extends StatelessWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    final amount = AmountFormatter.parseDecimal(
-      (data['amount'] as num?)?.toString(),
-    );
-    final currency = data['currency'] as String? ?? 'CNY';
-    final categoryKey = data['category'] as String?;
+    final amount = AmountFormatter.parseDecimal(data['amount']?.toString());
+    final currency = data['currency']?.toString() ?? 'CNY';
+    final categoryKey = data['categoryKey']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
     final tags =
-        (data['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
-        [];
-    final type = (data['type'] as String? ?? 'EXPENSE').toUpperCase();
-    final time = data['transaction_time'] as String? ?? '';
+        (data['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
+    final type = (data['type']?.toString() ?? 'EXPENSE').toUpperCase();
+    final time = data['transactionAt']?.toString() ?? '';
 
     final isExpense = type == 'EXPENSE';
     final isIncome = type == 'INCOME';
@@ -268,6 +269,10 @@ class _TransactionListItem extends StatelessWidget {
     final transactionType = isExpense
         ? TransactionType.expense
         : (isIncome ? TransactionType.income : TransactionType.transfer);
+
+    final rawDisplay = data['display'] is Map
+        ? Map<String, dynamic>.from(data['display'] as Map)
+        : null;
 
     return InkWell(
       onTap: onTap,
@@ -291,9 +296,9 @@ class _TransactionListItem extends StatelessWidget {
                         style: AppTextStyles.listTitle(theme),
                       ),
                       // Prefer backend display, otherwise fallback to client-side calculation
-                      data['display'] != null
+                      rawDisplay != null
                           ? AmountText.fromDisplay(
-                              display: data['display'] as Map<String, dynamic>,
+                              display: rawDisplay,
                               type: transactionType,
                               style: const TextStyle(
                                 fontSize: 16,

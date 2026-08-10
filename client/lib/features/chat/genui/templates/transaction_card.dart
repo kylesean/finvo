@@ -69,23 +69,18 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final colors = theme.colors;
 
     final amount = AmountFormatter.parseDecimal(
-      (widget.data['amount'] as num?)?.toString(),
+      widget.data['amount']?.toString(),
     );
     final currency = widget.data['currency']?.toString() ?? 'CNY';
-    final categoryKey = widget.data['category_key']?.toString();
+    final categoryKey = widget.data['categoryKey']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
     final category = categoryEnum.displayText;
 
-    final time = widget.data['time']?.toString() ?? '';
-    final transactionType =
-        widget.data['type']?.toString() ??
-        widget.data['transaction_type']?.toString() ??
-        'EXPENSE';
+    final time = widget.data['transactionAt']?.toString() ?? '';
+    final transactionType = widget.data['type']?.toString() ?? 'EXPENSE';
 
-    final tagsRaw = widget.data['tags'];
-    final tags = tagsRaw is List
-        ? tagsRaw.map((e) => e.toString()).toList()
-        : <String>[];
+    final tags =
+        (widget.data['tags'] as List?)?.map((e) => e.toString()).toList() ?? [];
 
     final hasAccount =
         _selectedAccountId != null && _selectedAccountId!.isNotEmpty;

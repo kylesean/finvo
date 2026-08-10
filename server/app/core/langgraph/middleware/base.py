@@ -376,6 +376,20 @@ class MiddlewareAgent:
         """
         return await self.agent.aupdate_state(config, values, as_node)
 
+    def aget_state_history(self, config: dict[str, Any]) -> Any:
+        """Get full checkpoint history (delegates to underlying agent).
+
+        This is a plain method (not ``async def``) that returns the underlying
+        async generator, so callers can iterate it with ``async for`` unchanged.
+
+        Args:
+            config: Configuration dict with thread_id
+
+        Returns:
+            Async iterator of state snapshots
+        """
+        return self.agent.aget_state_history(config)
+
 
 def inject_system_message(
     messages: list[BaseMessage],

@@ -98,21 +98,19 @@ class TransactionLedgerService:
     async def apply_account_balance_effect(
         self,
         transaction: Transaction,
-        *,
         account_id: UUID | None,
+        *,
         user_uuid: UUID,
         user_base_currency: str,
         sign: int,
+        direction: int = -1,
         for_update: bool = False,
     ) -> None:
-        """Apply (sign=+1) or reverse (sign=-1) a transaction's balance effect on one account.
+        """Apply (sign=1) or rollback (sign=-1) a balance delta on a single account.
 
-        EXPENSE and TRANSFER debit their linked account; INCOME credits it. The
-        effect is converted to the account's own currency from the transaction
-        snapshot (see :meth:`convert_snapshot_amount`). Accounts that no longer
-        exist (or are no longer owned) are skipped so stale links never crash
-        the ledger. Row locks serialize concurrent adjustments on the same
-        account — always keep ``for_update=True`` when mutating balances.
+        ``direction`` controls whether the transaction increases (+1, e.g. INCOME,
+        target account in TRANSFER) or decreases (-1, e.g. EXPENSE, source account
+        in TRANSFER) the balance.
         """
         if account_id is None:
             return
@@ -128,8 +126,6 @@ class TransactionLedgerService:
             target_currency=acc_currency,
             user_base_currency=user_base_currency,
         )
-        # Expense/Transfer debit the linked account, Income credits it.
-        direction = 1 if transaction.type == "INCOME" else -1
         account.current_balance = (account.current_balance or Decimal("0")) + sign * direction * effect
         account.updated_at = utc_now()
 
@@ -171,6 +167,7 @@ class TransactionLedgerService:
                 user_uuid=user_uuid,
                 user_base_currency=user_base_currency,
                 sign=sign,
+                direction=-1,
                 for_update=for_update,
             )
         elif tx_type == "INCOME":
@@ -180,23 +177,28 @@ class TransactionLedgerService:
                 user_uuid=user_uuid,
                 user_base_currency=user_base_currency,
                 sign=sign,
+                direction=1,
                 for_update=for_update,
             )
         elif tx_type == "TRANSFER":
+            # Source account is debited (-1)
             await self.apply_account_balance_effect(
                 transaction,
                 account_id=source_account_id,
                 user_uuid=user_uuid,
                 user_base_currency=user_base_currency,
                 sign=sign,
+                direction=-1,
                 for_update=for_update,
             )
+            # Target account is credited (+1)
             await self.apply_account_balance_effect(
                 transaction,
                 account_id=target_account_id,
                 user_uuid=user_uuid,
                 user_base_currency=user_base_currency,
                 sign=sign,
+                direction=1,
                 for_update=for_update,
             )
 

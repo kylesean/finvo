@@ -26,19 +26,18 @@ class ExpenseSummaryCard extends ConsumerWidget {
       final theme = context.theme;
       final colors = theme.colors;
 
-      final summaryRaw = data['summary'];
-      final summary = summaryRaw is Map
-          ? Map<String, dynamic>.from(summaryRaw)
-          : <String, dynamic>{};
+      final summary = data['summary'] is Map
+          ? Map<String, dynamic>.from(data['summary'] as Map)
+          : data;
       final totalExpense = AmountFormatter.parseDecimal(
-        summary['total_expense']?.toString(),
+        summary['totalExpense']?.toString(),
       );
-      final distributionRaw = summary['distribution'];
-      final distribution = distributionRaw is List
-          ? distributionRaw
-          : <dynamic>[];
-      final topItemsRaw = summary['top_items'];
-      final topItems = topItemsRaw is List ? topItemsRaw : <dynamic>[];
+      final distribution = summary['distribution'] is List
+          ? (summary['distribution'] as List)
+          : const <dynamic>[];
+      final topItems = summary['topItems'] is List
+          ? (summary['topItems'] as List)
+          : const <dynamic>[];
       final totalCount = GenUiNumUtils.toInt(summary['count']);
 
       return Container(
@@ -147,9 +146,10 @@ class ExpenseSummaryCard extends ConsumerWidget {
             child: Row(
               children: distribution.asMap().entries.map((mapEntry) {
                 final index = mapEntry.key;
-                final item = mapEntry.value;
-                final percentage =
-                    (item['percentage'] as num?)?.toDouble() ?? 0.0;
+                final item = mapEntry.value is Map
+                    ? Map<String, dynamic>.from(mapEntry.value as Map)
+                    : <String, dynamic>{};
+                final percentage = GenUiNumUtils.toDouble(item['percentage']);
 
                 return Flexible(
                   flex: (percentage * 1000).toInt(),
@@ -167,10 +167,11 @@ class ExpenseSummaryCard extends ConsumerWidget {
               mapEntry,
             ) {
               final index = mapEntry.key;
-              final item = mapEntry.value;
-              final categoryKey = item['category'] as String?;
-              final percentage =
-                  (item['percentage'] as num?)?.toDouble() ?? 0.0;
+              final item = mapEntry.value is Map
+                  ? Map<String, dynamic>.from(mapEntry.value as Map)
+                  : <String, dynamic>{};
+              final categoryKey = item['categoryKey']?.toString();
+              final percentage = GenUiNumUtils.toDouble(item['percentage']);
               final category = TransactionCategory.fromKey(categoryKey);
               final chartColor = theme.chartColorAt(index);
 
@@ -221,13 +222,18 @@ class ExpenseSummaryCard extends ConsumerWidget {
           const SizedBox(height: 8),
           ...topItems.asMap().entries.map((mapEntry) {
             final index = mapEntry.key;
-            final item = mapEntry.value;
-            final categoryKey = item['category'] as String?;
+            final item = mapEntry.value is Map
+                ? Map<String, dynamic>.from(mapEntry.value as Map)
+                : <String, dynamic>{};
+            final categoryKey = item['categoryKey']?.toString();
             final category = TransactionCategory.fromKey(categoryKey);
             final amount = AmountFormatter.parseDecimal(
               item['amount']?.toString(),
             );
-            final tags = (item['tags'] as List?)?.join(' · ') ?? '';
+            final tagsList =
+                (item['tags'] as List?)?.map((e) => e.toString()).toList() ??
+                [];
+            final tags = tagsList.join(' · ');
             final chartColor = theme.chartColorAt(index);
 
             return Padding(

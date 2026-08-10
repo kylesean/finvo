@@ -487,7 +487,21 @@ Widget _buildTransferWizardWidget(CatalogItemContext context) {
           t.chat.genui.error.fetchFailed,
         );
       }
-      return TransferWizard(data: data, dispatchEvent: context.dispatchEvent);
+
+      // Inject the real surface ID (mirrors catalog_space_artifact_items.dart).
+      // The backend strips '_'-prefixed keys from the wire payload, so without
+      // this every live TransferWizard falls back to surfaceId 'unknown'.
+      // TransferWizard uses surfaceId as its confirmed-state cache key, so a
+      // shared 'unknown' key makes the first confirmed transfer poison every
+      // later wizard in the same conversation (rendered as already-confirmed
+      // with the previous transfer's data), blocking repeated transfers.
+      final widgetData = Map<String, dynamic>.from(data);
+      widgetData['_surfaceId'] = context.surfaceId;
+
+      return TransferWizard(
+        data: widgetData,
+        dispatchEvent: context.dispatchEvent,
+      );
     },
   );
 }
