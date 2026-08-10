@@ -160,7 +160,10 @@
     "noRawInput": "No message",
     "attachments": "$count attachments",
     "viewInConversation": "View more in conversation",
-    "statusPending": "Pending"
+    "statusPending": "Pending",
+    "notFoundTitle": "Transaction deleted",
+    "notFoundBody": "This transaction was deleted by its creator or an admin and can no longer be viewed.",
+    "backToPrevious": "Back"
   },
   "home": {
     "totalExpense": "Total Expense",
@@ -198,7 +201,8 @@
     "noActions": "No actions available",
     "note": "Note",
     "noNote": "No notes yet",
-    "loadFailed": "Failed to load notes"
+    "loadFailed": "Failed to load notes",
+    "userToast": "User @$username"
   },
   "calendar": {
     "title": "Expense Calendar",
@@ -301,7 +305,7 @@
     "usernameRequired": "Username is required",
     "usernameUpdated": "Username updated",
     "avatarUpdated": "Avatar updated",
-    "appearanceUpdated": "外观设置已更新"
+    "appearanceUpdated": "Appearance settings updated"
   },
   "appearance": {
     "title": "Appearance Settings",
@@ -702,12 +706,12 @@
         "query_space_summary": "Space summary ready",
         "prepare_transfer": "Transfer ready",
         "unknown": "Processing complete",
-        "analyze_finance": "財務分析完成",
-        "forecast_finance": "財務預測完成",
-        "analyze_budget": "預算分析完成",
-        "audit_analysis": "審計分析完成",
-        "budget_ops": "預算處理完成",
-        "create_shared_transaction": "共享帳單創建完成",
+        "analyze_finance": "Financial analysis complete",
+        "forecast_finance": "Financial forecast complete",
+        "analyze_budget": "Budget analysis complete",
+        "audit_analysis": "Audit analysis complete",
+        "budget_ops": "Budget processing complete",
+        "create_shared_transaction": "Shared bill creation complete",
         "prepareBudgetSimulation": "Budget simulation prepared",
         "simulateBudget": "Budget simulation completed"
       },
@@ -715,12 +719,12 @@
         "unknown": "Action failed"
       },
       "cancelled": "Cancelled",
-      "analyze_finance": "正在分析財務狀況...",
-      "forecast_finance": "正在預測財務趨勢...",
-      "analyze_budget": "正在分析預算...",
-      "audit_analysis": "正在審計分析...",
-      "budget_ops": "正在處理預算...",
-      "create_shared_transaction": "正在創建共享帳單...",
+      "analyze_finance": "Analyzing financial status...",
+      "forecast_finance": "Forecasting financial trends...",
+      "analyze_budget": "Analyzing budget...",
+      "audit_analysis": "Performing audit analysis...",
+      "budget_ops": "Processing budget...",
+      "create_shared_transaction": "Creating shared bill...",
       "prepareBudgetSimulation": "Preparing budget simulation",
       "simulateBudget": "Simulating budget"
     },
@@ -752,7 +756,7 @@
       "confirmTransfer": "Confirm Transfer",
       "confirmed": "Confirmed",
       "transferSuccess": "Transfer Successful",
-      "selectReceiveAccount": "选择收款账户"
+      "selectReceiveAccount": "Select receiving account"
     },
     "genui": {
       "expenseSummary": {
@@ -901,30 +905,30 @@
         "aiInsight": "AI Insight"
       },
       "transactionConfirmation": {
-        "multipleAccounts": "检测到多个关联账户",
-        "confirmed": "已确认"
+        "multipleAccounts": "Multiple linked accounts detected",
+        "confirmed": "Confirmed"
       },
       "budgetAnalysis": {
-        "title": "预算分析报告",
-        "periodDays": "过去 $days 天",
-        "totalExpense": "总支出",
-        "momChange": "环比 $change%",
-        "categoryDistribution": "分类占比",
-        "topSpenders": "大额支出",
-        "amountWan": "$amount万"
+        "title": "Budget Analysis Report",
+        "periodDays": "Last $days days",
+        "totalExpense": "Total Expense",
+        "momChange": "MoM $change%",
+        "categoryDistribution": "Category Distribution",
+        "topSpenders": "Top Spenders",
+        "amountWan": "${amount}0K"
       },
       "budgetSimulator": {
-        "title": "預算壓力模擬器",
-        "targetAmount": "目標預算金額",
-        "overspendProbability": "預計超支機率",
-        "riskLow": "風險極低",
-        "riskMedium": "風險適中",
-        "riskHigh": "超支高危",
-        "evaluating": "正在評估歷史消費習慣...",
-        "historyAverage": "歷史月均",
-        "dailyAllowance": "每日限額",
-        "cancel": "放棄",
-        "confirm": "採用此預算"
+        "title": "Budget Stress Simulator",
+        "targetAmount": "Target Budget Amount",
+        "overspendProbability": "Predicted Overspend Probability",
+        "riskLow": "Very Low Risk",
+        "riskMedium": "Moderate Risk",
+        "riskHigh": "High Risk of Overspending",
+        "evaluating": "Evaluating historical spending habits...",
+        "historyAverage": "Historical Monthly Average",
+        "dailyAllowance": "Daily Allowance",
+        "cancel": "Discard",
+        "confirm": "Adopt This Budget"
       },
       "error": {
         "title": "Rendering failed",

@@ -132,28 +132,34 @@ class MessageRepository {
     }
 
     final messages = getCurrentMessages();
-    final updatedMessages = messages.map((msg) {
-      if (msg.id == id) {
-        final updatedFullContent = _updateFullContentWithDelta(
-          msg.fullContent,
-          msg.content,
-          effectiveContent,
-        );
+    // Locate once and replace a single element instead of mapping the whole
+    // list: streaming updates fire on every chunk, so an O(n) map over all
+    // messages (with a closure per element) is hot-path waste that scales
+    // with conversation length.
+    final index = messages.indexWhere((m) => m.id == id);
+    if (index == -1) return;
 
-        return msg.copyWith(
-          content: effectiveContent,
-          fullContent: updatedFullContent,
-          isTyping: isTyping ?? msg.isTyping,
-          streamingStatus: streamingStatus ?? msg.streamingStatus,
-          timestamp: timestamp ?? msg.timestamp,
-          mediaFiles: msg.mediaFiles,
-          surfaceIds: msg.surfaceIds,
-          feedbackStatus: msg.feedbackStatus,
-          conversationId: msg.conversationId,
-        );
-      }
-      return msg;
-    }).toList();
+    final msg = messages[index];
+    final updatedFullContent = _updateFullContentWithDelta(
+      msg.fullContent,
+      msg.content,
+      effectiveContent,
+    );
+
+    final updatedMessage = msg.copyWith(
+      content: effectiveContent,
+      fullContent: updatedFullContent,
+      isTyping: isTyping ?? msg.isTyping,
+      streamingStatus: streamingStatus ?? msg.streamingStatus,
+      timestamp: timestamp ?? msg.timestamp,
+      mediaFiles: msg.mediaFiles,
+      surfaceIds: msg.surfaceIds,
+      feedbackStatus: msg.feedbackStatus,
+      conversationId: msg.conversationId,
+    );
+
+    final updatedMessages = [...messages];
+    updatedMessages[index] = updatedMessage;
 
     onMessagesChanged(updatedMessages);
   }
@@ -213,12 +219,11 @@ class MessageRepository {
     }
 
     final messages = getCurrentMessages();
-    final updatedMessages = messages.map((msg) {
-      if (msg.id == oldId) {
-        return msg.copyWith(id: newId);
-      }
-      return msg;
-    }).toList();
+    final index = messages.indexWhere((msg) => msg.id == oldId);
+    if (index == -1) return;
+
+    final updatedMessages = [...messages];
+    updatedMessages[index] = messages[index].copyWith(id: newId);
 
     onMessagesChanged(updatedMessages);
     _logger.info(

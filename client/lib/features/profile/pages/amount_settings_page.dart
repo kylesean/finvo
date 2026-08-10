@@ -154,7 +154,7 @@ class _AmountThemePreviewCard extends StatelessWidget {
               Icon(FLucideIcons.eye, size: 16, color: colors.mutedForeground),
               const SizedBox(width: 8),
               Text(
-                '实时效果预览',
+                t.forecast.recurringTransaction.preview,
                 style: theme.typography.body.xs.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colors.mutedForeground,
@@ -167,17 +167,17 @@ class _AmountThemePreviewCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _PreviewItem(
-                label: '收入示例',
+                label: t.transaction.income,
                 amount: '+ ¥12,500.00',
                 color: amountTheme.incomeColor,
               ),
               _PreviewItem(
-                label: '支出示例',
+                label: t.transaction.expense,
                 amount: '- ¥45.00',
                 color: amountTheme.expenseColor,
               ),
               _PreviewItem(
-                label: '转账示例',
+                label: t.transaction.transfer,
                 amount: '¥500.00',
                 color: amountTheme.transferColor,
               ),

@@ -263,6 +263,9 @@ class _Translations$transaction$ja extends Translations$transaction$zh {
 	@override String get linkFailed => 'Link failed';
 	@override String get rawInput => 'Message';
 	@override String get noRawInput => 'No message';
+	@override String get notFoundTitle => '取引が削除されました';
+	@override String get notFoundBody => 'この取引は作成者または管理者によって削除されたため、詳細を表示できません。';
+	@override String get backToPrevious => '戻る';
 }
 
 // Path: home
@@ -314,6 +317,7 @@ class _Translations$comment$ja extends Translations$comment$zh {
 	@override String get note => '備考';
 	@override String get noNote => '備考なし';
 	@override String get loadFailed => '備考の読み込みに失敗しました';
+	@override String userToast({required Object username}) => 'ユーザー @${username}';
 }
 
 // Path: calendar
@@ -2099,7 +2103,7 @@ class _Translations$chat$genui$cashFlowCard$ja extends Translations$chat$genui$c
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'キャッシュフロー分析';
+	@override String get title => 'キャッシュフロー＆健康レポート';
 	@override String savingsRate({required Object rate}) => '貯蓄率 ${rate}%';
 	@override String get totalIncome => '総収入';
 	@override String get totalExpense => '総支出';
@@ -2289,7 +2293,7 @@ class _Translations$chat$welcome$morning$ja extends Translations$chat$welcome$mo
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'Start your day by tracking';
+	@override String get subtitle => '新しい一日を、記録から始めましょう';
 	@override late final _Translations$chat$welcome$morning$breakfast$ja breakfast = _Translations$chat$welcome$morning$breakfast$ja._(_root);
 	@override late final _Translations$chat$welcome$morning$yesterdayReview$ja yesterdayReview = _Translations$chat$welcome$morning$yesterdayReview$ja._(_root);
 	@override late final _Translations$chat$welcome$morning$todayBudget$ja todayBudget = _Translations$chat$welcome$morning$todayBudget$ja._(_root);
@@ -2302,8 +2306,8 @@ class _Translations$chat$welcome$midday$ja extends Translations$chat$welcome$mid
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get greeting => 'Good Afternoon';
-	@override String get subtitle => 'Quick record during lunch';
+	@override String get greeting => 'こんにちは';
+	@override String get subtitle => 'ランチタイムにサクッと記録';
 	@override late final _Translations$chat$welcome$midday$lunch$ja lunch = _Translations$chat$welcome$midday$lunch$ja._(_root);
 	@override late final _Translations$chat$welcome$midday$weeklyExpense$ja weeklyExpense = _Translations$chat$welcome$midday$weeklyExpense$ja._(_root);
 	@override late final _Translations$chat$welcome$midday$checkBalance$ja checkBalance = _Translations$chat$welcome$midday$checkBalance$ja._(_root);
@@ -2316,7 +2320,7 @@ class _Translations$chat$welcome$afternoon$ja extends Translations$chat$welcome$
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'Tea time, let\'s review finances';
+	@override String get subtitle => 'ティータイムに家計を整理';
 	@override late final _Translations$chat$welcome$afternoon$quickRecord$ja quickRecord = _Translations$chat$welcome$afternoon$quickRecord$ja._(_root);
 	@override late final _Translations$chat$welcome$afternoon$analyzeSpending$ja analyzeSpending = _Translations$chat$welcome$afternoon$analyzeSpending$ja._(_root);
 	@override late final _Translations$chat$welcome$afternoon$budgetProgress$ja budgetProgress = _Translations$chat$welcome$afternoon$budgetProgress$ja._(_root);
@@ -2329,7 +2333,7 @@ class _Translations$chat$welcome$evening$ja extends Translations$chat$welcome$ev
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'End of day, time to balance the books';
+	@override String get subtitle => '今日もお疲れ様でした、家計の点検をしましょう';
 	@override late final _Translations$chat$welcome$evening$dinner$ja dinner = _Translations$chat$welcome$evening$dinner$ja._(_root);
 	@override late final _Translations$chat$welcome$evening$todaySummary$ja todaySummary = _Translations$chat$welcome$evening$todaySummary$ja._(_root);
 	@override late final _Translations$chat$welcome$evening$tomorrowPlan$ja tomorrowPlan = _Translations$chat$welcome$evening$tomorrowPlan$ja._(_root);
@@ -2342,8 +2346,8 @@ class _Translations$chat$welcome$night$ja extends Translations$chat$welcome$nigh
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get greeting => 'Late Night';
-	@override String get subtitle => 'Quiet time for financial planning';
+	@override String get greeting => '夜深まりました';
+	@override String get subtitle => '静かに見つめ直す、これからの資産';
 	@override late final _Translations$chat$welcome$night$makeupRecord$ja makeupRecord = _Translations$chat$welcome$night$makeupRecord$ja._(_root);
 	@override late final _Translations$chat$welcome$night$monthlyReview$ja monthlyReview = _Translations$chat$welcome$night$monthlyReview$ja._(_root);
 	@override late final _Translations$chat$welcome$night$financialThinking$ja financialThinking = _Translations$chat$welcome$night$financialThinking$ja._(_root);
@@ -2370,9 +2374,9 @@ class _Translations$chat$welcome$morning$breakfast$ja extends Translations$chat$
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Breakfast';
-	@override String get prompt => 'Record breakfast expense';
-	@override String get description => 'Log today\'s first expense';
+	@override String get title => '朝食記録';
+	@override String get prompt => '朝食の支出を記録';
+	@override String get description => '今日最初の支出をすばやく記録';
 }
 
 // Path: chat.welcome.morning.yesterdayReview
@@ -2382,9 +2386,9 @@ class _Translations$chat$welcome$morning$yesterdayReview$ja extends Translations
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Yesterday Review';
-	@override String get prompt => 'Analyze yesterday\'s spending';
-	@override String get description => 'Check how much you spent yesterday';
+	@override String get title => '昨日の振り返り';
+	@override String get prompt => '昨日の支出を分析';
+	@override String get description => '昨日いくら使ったか確認';
 }
 
 // Path: chat.welcome.morning.todayBudget
@@ -2394,9 +2398,9 @@ class _Translations$chat$welcome$morning$todayBudget$ja extends Translations$cha
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Today\'s Budget';
-	@override String get prompt => 'How much budget left for today';
-	@override String get description => 'Plan your spending for today';
+	@override String get title => '今日の予算';
+	@override String get prompt => '今日の残予算を確認';
+	@override String get description => '一日の支出限度を計画';
 }
 
 // Path: chat.welcome.midday.lunch
@@ -2406,9 +2410,9 @@ class _Translations$chat$welcome$midday$lunch$ja extends Translations$chat$welco
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Lunch';
-	@override String get prompt => 'Record lunch expense';
-	@override String get description => 'Log your lunch spending';
+	@override String get title => 'ランチ記録';
+	@override String get prompt => 'ランチ代を記録';
+	@override String get description => '昼食の支出を記録';
 }
 
 // Path: chat.welcome.midday.weeklyExpense
@@ -2418,9 +2422,9 @@ class _Translations$chat$welcome$midday$weeklyExpense$ja extends Translations$ch
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Weekly Spending';
-	@override String get prompt => 'Analyze this week\'s spending';
-	@override String get description => 'See your weekly expenses';
+	@override String get title => '今週の支出';
+	@override String get prompt => '今週の支出を分析';
+	@override String get description => '今週使った金額を確認';
 }
 
 // Path: chat.welcome.midday.checkBalance
@@ -2430,9 +2434,9 @@ class _Translations$chat$welcome$midday$checkBalance$ja extends Translations$cha
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Check Balance';
-	@override String get prompt => 'Check my account balance';
-	@override String get description => 'View your account balances';
+	@override String get title => '残高確認';
+	@override String get prompt => '口座残高を確認';
+	@override String get description => '各口座の残高を確認';
 }
 
 // Path: chat.welcome.afternoon.quickRecord
@@ -2442,9 +2446,9 @@ class _Translations$chat$welcome$afternoon$quickRecord$ja extends Translations$c
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Quick Record';
-	@override String get prompt => 'Help me record an expense';
-	@override String get description => 'Quickly log a transaction';
+	@override String get title => 'クイック記録';
+	@override String get prompt => '支出の記録を手伝って';
+	@override String get description => '支出をすばやく記録';
 }
 
 // Path: chat.welcome.afternoon.analyzeSpending
@@ -2454,9 +2458,9 @@ class _Translations$chat$welcome$afternoon$analyzeSpending$ja extends Translatio
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Analyze Spending';
-	@override String get prompt => 'Analyze this month\'s spending';
-	@override String get description => 'View spending trends and breakdown';
+	@override String get title => '支出分析';
+	@override String get prompt => '今月の支出を分析';
+	@override String get description => '支出の傾向と内訳を確認';
 }
 
 // Path: chat.welcome.afternoon.budgetProgress
@@ -2466,9 +2470,9 @@ class _Translations$chat$welcome$afternoon$budgetProgress$ja extends Translation
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Budget Progress';
-	@override String get prompt => 'Check budget status';
-	@override String get description => 'See how your budget is doing';
+	@override String get title => '家計の健康度';
+	@override String get prompt => '財務状況を診断して';
+	@override String get description => '収支バランスとアドバイス';
 }
 
 // Path: chat.welcome.evening.dinner
@@ -2478,9 +2482,9 @@ class _Translations$chat$welcome$evening$dinner$ja extends Translations$chat$wel
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Dinner';
-	@override String get prompt => 'Record dinner expense';
-	@override String get description => 'Log tonight\'s dinner spending';
+	@override String get title => '夕食記録';
+	@override String get prompt => '夕食代を記録';
+	@override String get description => '今夜の夕食代を記録';
 }
 
 // Path: chat.welcome.evening.todaySummary
@@ -2490,9 +2494,9 @@ class _Translations$chat$welcome$evening$todaySummary$ja extends Translations$ch
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Today\'s Summary';
-	@override String get prompt => 'Summarize today\'s spending';
-	@override String get description => 'See what you spent today';
+	@override String get title => '今日のまとめ';
+	@override String get prompt => '今日の支出をまとめて';
+	@override String get description => '今日いくら使ったか確認';
 }
 
 // Path: chat.welcome.evening.tomorrowPlan
@@ -2502,9 +2506,9 @@ class _Translations$chat$welcome$evening$tomorrowPlan$ja extends Translations$ch
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Tomorrow\'s Plan';
-	@override String get prompt => 'What fixed expenses tomorrow';
-	@override String get description => 'Plan ahead for tomorrow';
+	@override String get title => '明日の予定';
+	@override String get prompt => '明日の固定出費を確認';
+	@override String get description => '明日の支出を事前に計画';
 }
 
 // Path: chat.welcome.night.makeupRecord
@@ -2514,9 +2518,9 @@ class _Translations$chat$welcome$night$makeupRecord$ja extends Translations$chat
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Catch Up';
-	@override String get prompt => 'Help me log any missed expenses';
-	@override String get description => 'Record expenses you forgot today';
+	@override String get title => '今日の記入漏れ';
+	@override String get prompt => '今日の記入漏れを記録';
+	@override String get description => 'つけ忘れた支出を補完';
 }
 
 // Path: chat.welcome.night.monthlyReview
@@ -2526,9 +2530,9 @@ class _Translations$chat$welcome$night$monthlyReview$ja extends Translations$cha
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Monthly Review';
-	@override String get prompt => 'Analyze this month\'s spending';
-	@override String get description => 'Review your monthly expenses';
+	@override String get title => '今月の振り返り';
+	@override String get prompt => '今月の支出を詳しく分析';
+	@override String get description => '今月何にお金を使ったか確認';
 }
 
 // Path: chat.welcome.night.financialThinking
@@ -2538,9 +2542,9 @@ class _Translations$chat$welcome$night$financialThinking$ja extends Translations
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Financial Tips';
-	@override String get prompt => 'Give me some financial advice';
-	@override String get description => 'Get AI-powered financial insights';
+	@override String get title => '将来の予測';
+	@override String get prompt => '今後30日間の残高を予測';
+	@override String get description => '将来の財務トレンドを予測';
 }
 
 /// The flat map containing all translations for locale <ja>.
@@ -2691,6 +2695,9 @@ extension on TranslationsJa {
 			'transaction.linkFailed' => 'Link failed',
 			'transaction.rawInput' => 'Message',
 			'transaction.noRawInput' => 'No message',
+			'transaction.notFoundTitle' => '取引が削除されました',
+			'transaction.notFoundBody' => 'この取引は作成者または管理者によって削除されたため、詳細を表示できません。',
+			'transaction.backToPrevious' => '戻る',
 			'home.totalExpense' => '総支出額',
 			'home.todayExpense' => '今日の支出',
 			'home.monthExpense' => '今月の支出',
@@ -2724,6 +2731,7 @@ extension on TranslationsJa {
 			'comment.note' => '備考',
 			'comment.noNote' => '備考なし',
 			'comment.loadFailed' => '備考の読み込みに失敗しました',
+			'comment.userToast' => ({required Object username}) => 'ユーザー @${username}',
 			'calendar.title' => '家計カレンダー',
 			'calendar.weekdays.mon' => '月',
 			'calendar.weekdays.tue' => '火',
@@ -3059,6 +3067,8 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.noPending' => '確認待ち取引なし',
 			'forecast.recurringTransaction.confirmSuccess' => '取引を確認しました',
 			'forecast.recurringTransaction.skipSuccess' => '取引をスキップしました',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.interval' => '繰り返し間隔',
 			'forecast.recurringTransaction.selectDays' => '曜日を選択',
 			'forecast.recurringTransaction.alwaysLastDay' => '毎月末日に実行',
@@ -3070,8 +3080,6 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.daily' => '毎日',
 			'forecast.recurringTransaction.weekly' => '毎週',
 			'forecast.recurringTransaction.monthly' => '毎月',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.yearly' => '毎年',
 			'forecast.recurringTransaction.custom' => 'カスタム',
 			'forecast.recurringTransaction.cycle' => 'サイクル',
@@ -3280,7 +3288,7 @@ extension on TranslationsJa {
 			'chat.genui.transactionCard.noSpace' => 'No shared spaces available',
 			'chat.genui.transactionCard.selectSpace' => 'Select Shared Space',
 			'chat.genui.transactionCard.linkedToSpace' => 'Linked to shared space',
-			'chat.genui.cashFlowCard.title' => 'キャッシュフロー分析',
+			'chat.genui.cashFlowCard.title' => 'キャッシュフロー＆健康レポート',
 			'chat.genui.cashFlowCard.savingsRate' => ({required Object rate}) => '貯蓄率 ${rate}%',
 			'chat.genui.cashFlowCard.totalIncome' => '総収入',
 			'chat.genui.cashFlowCard.totalExpense' => '総支出',
@@ -3375,58 +3383,58 @@ extension on TranslationsJa {
 			'chat.genui.error.title' => 'レンダリングに失敗しました',
 			'chat.genui.error.fetchFailed' => '読み込みに失敗しました。後でもう一度お試しください。',
 			'chat.genui.error.dataIncomplete' => 'データが不完全です',
-			'chat.welcome.morning.subtitle' => 'Start your day by tracking',
-			'chat.welcome.morning.breakfast.title' => 'Breakfast',
-			'chat.welcome.morning.breakfast.prompt' => 'Record breakfast expense',
-			'chat.welcome.morning.breakfast.description' => 'Log today\'s first expense',
-			'chat.welcome.morning.yesterdayReview.title' => 'Yesterday Review',
-			'chat.welcome.morning.yesterdayReview.prompt' => 'Analyze yesterday\'s spending',
-			'chat.welcome.morning.yesterdayReview.description' => 'Check how much you spent yesterday',
-			'chat.welcome.morning.todayBudget.title' => 'Today\'s Budget',
-			'chat.welcome.morning.todayBudget.prompt' => 'How much budget left for today',
-			'chat.welcome.morning.todayBudget.description' => 'Plan your spending for today',
-			'chat.welcome.midday.greeting' => 'Good Afternoon',
-			'chat.welcome.midday.subtitle' => 'Quick record during lunch',
-			'chat.welcome.midday.lunch.title' => 'Lunch',
-			'chat.welcome.midday.lunch.prompt' => 'Record lunch expense',
-			'chat.welcome.midday.lunch.description' => 'Log your lunch spending',
-			'chat.welcome.midday.weeklyExpense.title' => 'Weekly Spending',
-			'chat.welcome.midday.weeklyExpense.prompt' => 'Analyze this week\'s spending',
-			'chat.welcome.midday.weeklyExpense.description' => 'See your weekly expenses',
-			'chat.welcome.midday.checkBalance.title' => 'Check Balance',
-			'chat.welcome.midday.checkBalance.prompt' => 'Check my account balance',
-			'chat.welcome.midday.checkBalance.description' => 'View your account balances',
-			'chat.welcome.afternoon.subtitle' => 'Tea time, let\'s review finances',
-			'chat.welcome.afternoon.quickRecord.title' => 'Quick Record',
-			'chat.welcome.afternoon.quickRecord.prompt' => 'Help me record an expense',
-			'chat.welcome.afternoon.quickRecord.description' => 'Quickly log a transaction',
-			'chat.welcome.afternoon.analyzeSpending.title' => 'Analyze Spending',
-			'chat.welcome.afternoon.analyzeSpending.prompt' => 'Analyze this month\'s spending',
-			'chat.welcome.afternoon.analyzeSpending.description' => 'View spending trends and breakdown',
-			'chat.welcome.afternoon.budgetProgress.title' => 'Budget Progress',
-			'chat.welcome.afternoon.budgetProgress.prompt' => 'Check budget status',
-			'chat.welcome.afternoon.budgetProgress.description' => 'See how your budget is doing',
-			'chat.welcome.evening.subtitle' => 'End of day, time to balance the books',
-			'chat.welcome.evening.dinner.title' => 'Dinner',
-			'chat.welcome.evening.dinner.prompt' => 'Record dinner expense',
-			'chat.welcome.evening.dinner.description' => 'Log tonight\'s dinner spending',
-			'chat.welcome.evening.todaySummary.title' => 'Today\'s Summary',
-			'chat.welcome.evening.todaySummary.prompt' => 'Summarize today\'s spending',
-			'chat.welcome.evening.todaySummary.description' => 'See what you spent today',
-			'chat.welcome.evening.tomorrowPlan.title' => 'Tomorrow\'s Plan',
-			'chat.welcome.evening.tomorrowPlan.prompt' => 'What fixed expenses tomorrow',
-			'chat.welcome.evening.tomorrowPlan.description' => 'Plan ahead for tomorrow',
-			'chat.welcome.night.greeting' => 'Late Night',
-			'chat.welcome.night.subtitle' => 'Quiet time for financial planning',
-			'chat.welcome.night.makeupRecord.title' => 'Catch Up',
-			'chat.welcome.night.makeupRecord.prompt' => 'Help me log any missed expenses',
-			'chat.welcome.night.makeupRecord.description' => 'Record expenses you forgot today',
-			'chat.welcome.night.monthlyReview.title' => 'Monthly Review',
-			'chat.welcome.night.monthlyReview.prompt' => 'Analyze this month\'s spending',
-			'chat.welcome.night.monthlyReview.description' => 'Review your monthly expenses',
-			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
-			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
-			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'chat.welcome.morning.subtitle' => '新しい一日を、記録から始めましょう',
+			'chat.welcome.morning.breakfast.title' => '朝食記録',
+			'chat.welcome.morning.breakfast.prompt' => '朝食の支出を記録',
+			'chat.welcome.morning.breakfast.description' => '今日最初の支出をすばやく記録',
+			'chat.welcome.morning.yesterdayReview.title' => '昨日の振り返り',
+			'chat.welcome.morning.yesterdayReview.prompt' => '昨日の支出を分析',
+			'chat.welcome.morning.yesterdayReview.description' => '昨日いくら使ったか確認',
+			'chat.welcome.morning.todayBudget.title' => '今日の予算',
+			'chat.welcome.morning.todayBudget.prompt' => '今日の残予算を確認',
+			'chat.welcome.morning.todayBudget.description' => '一日の支出限度を計画',
+			'chat.welcome.midday.greeting' => 'こんにちは',
+			'chat.welcome.midday.subtitle' => 'ランチタイムにサクッと記録',
+			'chat.welcome.midday.lunch.title' => 'ランチ記録',
+			'chat.welcome.midday.lunch.prompt' => 'ランチ代を記録',
+			'chat.welcome.midday.lunch.description' => '昼食の支出を記録',
+			'chat.welcome.midday.weeklyExpense.title' => '今週の支出',
+			'chat.welcome.midday.weeklyExpense.prompt' => '今週の支出を分析',
+			'chat.welcome.midday.weeklyExpense.description' => '今週使った金額を確認',
+			'chat.welcome.midday.checkBalance.title' => '残高確認',
+			'chat.welcome.midday.checkBalance.prompt' => '口座残高を確認',
+			'chat.welcome.midday.checkBalance.description' => '各口座の残高を確認',
+			'chat.welcome.afternoon.subtitle' => 'ティータイムに家計を整理',
+			'chat.welcome.afternoon.quickRecord.title' => 'クイック記録',
+			'chat.welcome.afternoon.quickRecord.prompt' => '支出の記録を手伝って',
+			'chat.welcome.afternoon.quickRecord.description' => '支出をすばやく記録',
+			'chat.welcome.afternoon.analyzeSpending.title' => '支出分析',
+			'chat.welcome.afternoon.analyzeSpending.prompt' => '今月の支出を分析',
+			'chat.welcome.afternoon.analyzeSpending.description' => '支出の傾向と内訳を確認',
+			'chat.welcome.afternoon.budgetProgress.title' => '家計の健康度',
+			'chat.welcome.afternoon.budgetProgress.prompt' => '財務状況を診断して',
+			'chat.welcome.afternoon.budgetProgress.description' => '収支バランスとアドバイス',
+			'chat.welcome.evening.subtitle' => '今日もお疲れ様でした、家計の点検をしましょう',
+			'chat.welcome.evening.dinner.title' => '夕食記録',
+			'chat.welcome.evening.dinner.prompt' => '夕食代を記録',
+			'chat.welcome.evening.dinner.description' => '今夜の夕食代を記録',
+			'chat.welcome.evening.todaySummary.title' => '今日のまとめ',
+			'chat.welcome.evening.todaySummary.prompt' => '今日の支出をまとめて',
+			'chat.welcome.evening.todaySummary.description' => '今日いくら使ったか確認',
+			'chat.welcome.evening.tomorrowPlan.title' => '明日の予定',
+			'chat.welcome.evening.tomorrowPlan.prompt' => '明日の固定出費を確認',
+			'chat.welcome.evening.tomorrowPlan.description' => '明日の支出を事前に計画',
+			'chat.welcome.night.greeting' => '夜深まりました',
+			'chat.welcome.night.subtitle' => '静かに見つめ直す、これからの資産',
+			'chat.welcome.night.makeupRecord.title' => '今日の記入漏れ',
+			'chat.welcome.night.makeupRecord.prompt' => '今日の記入漏れを記録',
+			'chat.welcome.night.makeupRecord.description' => 'つけ忘れた支出を補完',
+			'chat.welcome.night.monthlyReview.title' => '今月の振り返り',
+			'chat.welcome.night.monthlyReview.prompt' => '今月の支出を詳しく分析',
+			'chat.welcome.night.monthlyReview.description' => '今月何にお金を使ったか確認',
+			'chat.welcome.night.financialThinking.title' => '将来の予測',
+			'chat.welcome.night.financialThinking.prompt' => '今後30日間の残高を予測',
+			'chat.welcome.night.financialThinking.description' => '将来の財務トレンドを予測',
 			'chat.shareComingSoon' => '共有機能は近日公開予定です...',
 			'chat.invalidAttachmentLink' => '無効な添付ファイルリンク',
 			'chat.unableToOpenAttachmentLink' => '添付ファイルリンクを開けません',
@@ -3573,6 +3581,8 @@ extension on TranslationsJa {
 			'financial.safetyThresholdSettings' => 'セーフティライン設定',
 			'financial.setSafetyThreshold' => 'セーフティラインの閾値を設定',
 			'financial.safetyThresholdSaved' => 'セーフティラインを保存しました',
+			_ => null,
+		} ?? switch (path) {
 			'financial.dailyBurnRateSettings' => '支出見積もり',
 			'financial.setDailyBurnRate' => '1日の支出見積もりを設定',
 			'financial.dailyBurnRateSaved' => '支出見積もりを保存しました',
@@ -3584,8 +3594,6 @@ extension on TranslationsJa {
 			'financial.sourcesCount' => ({required Object count}) => '${count} 口座',
 			'financial.lastUpdatedAt' => ({required Object time}) => '最終更新：${time}',
 			'financial.neverUpdated' => '未更新',
-			_ => null,
-		} ?? switch (path) {
 			'financial.updateNow' => '今すぐ更新',
 			'app.splashTitle' => 'スマートに、豊かに。',
 			'app.splashSubtitle' => 'インテリジェント財務アシスタント',

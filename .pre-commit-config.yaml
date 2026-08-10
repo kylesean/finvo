@@ -66,6 +66,12 @@ repos:
         types: [dart]
         files: ^client/
         pass_filenames: false
+      - id: i18n-cjk-check
+        name: i18n Untranslated CJK Check
+        entry: python3 client/tool/check_i18n_cjk.py
+        language: system
+        pass_filenames: false
+        files: ^client/lib/i18n/
 
   # ============================================================================
   # General File Checks

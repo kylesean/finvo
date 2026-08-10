@@ -91,7 +91,7 @@ class ThemeSwitcher extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Current Theme: ${_getCurrentThemeName(currentTheme)}',
+                    '${t.appearance.title}: ${_getCurrentThemeName(currentTheme)}',
                     style: theme.typography.body.sm.copyWith(
                       color: colorScheme.mutedForeground,
                     ),

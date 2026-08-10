@@ -84,7 +84,13 @@ class BudgetAnalysisCard extends ConsumerWidget {
 
             // 3. Category distribution
             if (byCategory.isNotEmpty)
-              _buildCategorySection(theme, colors, byCategory, currencySymbol),
+              _buildCategorySection(
+                context,
+                theme,
+                colors,
+                byCategory,
+                currencySymbol,
+              ),
 
             // 4. Top spenders
             if (topSpenders.isNotEmpty)
@@ -270,6 +276,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
 
   /// Category distribution section
   Widget _buildCategorySection(
+    BuildContext context,
     FThemeData theme,
     FColors colors,
     Map<String, dynamic> byCategory,
@@ -353,7 +360,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '$currencySymbol${_formatAmount(total)}',
+                    '$currencySymbol${_formatAmount(context, total)}',
                     style: AppTextStyles.listSubtitle(theme),
                   ),
                   const SizedBox(width: 8),
@@ -560,12 +567,18 @@ class BudgetAnalysisCard extends ConsumerWidget {
     }
   }
 
-  String _formatAmount(Decimal amount) {
-    if (amount >= Decimal.fromInt(10000)) {
-      return t.chat.genui.budgetAnalysis.amountWan(
-        amount: (amount / Decimal.fromInt(10000)).toDouble().toStringAsFixed(1),
-      );
+  String _formatAmount(BuildContext context, Decimal amount) {
+    if (amount < Decimal.fromInt(10000)) {
+      return amount.toStringAsFixed(0);
     }
-    return amount.toStringAsFixed(0);
+    // English locales use the western "35K" convention. The 万/만 unit does
+    // not exist in English, so keep the localized key (which renders
+    // "$amount0K") out of the English path to avoid a misleading "3.50K".
+    if (TranslationProvider.of(context).locale == AppLocale.en) {
+      return '${(amount / Decimal.fromInt(1000)).toDouble().toStringAsFixed(0)}K';
+    }
+    return t.chat.genui.budgetAnalysis.amountWan(
+      amount: (amount / Decimal.fromInt(10000)).toDouble().toStringAsFixed(1),
+    );
   }
 }

@@ -263,6 +263,9 @@ class _Translations$transaction$ko extends Translations$transaction$zh {
 	@override String get linkFailed => 'Link failed';
 	@override String get rawInput => 'Message';
 	@override String get noRawInput => 'No message';
+	@override String get notFoundTitle => '거래가 삭제되었습니다';
+	@override String get notFoundBody => '이 거래는 작성자 또는 관리자에 의해 삭제되어 상세 내역을 볼 수 없습니다.';
+	@override String get backToPrevious => '뒤로 가기';
 }
 
 // Path: home
@@ -314,6 +317,7 @@ class _Translations$comment$ko extends Translations$comment$zh {
 	@override String get note => '메모';
 	@override String get noNote => '메모 없음';
 	@override String get loadFailed => '메모 불러오기 실패';
+	@override String userToast({required Object username}) => '사용자 @${username}';
 }
 
 // Path: calendar
@@ -429,7 +433,7 @@ class _Translations$settings$ko extends Translations$settings$zh {
 	@override String get usernameRequired => 'Username is required';
 	@override String get usernameUpdated => 'Username updated';
 	@override String get avatarUpdated => 'Avatar updated';
-	@override String get appearanceUpdated => '外观设置已更新';
+	@override String get appearanceUpdated => '외관 설정이 업데이트되었습니다';
 }
 
 // Path: appearance
@@ -1373,7 +1377,7 @@ class _Translations$chat$transferWizard$ko extends Translations$chat$transferWiz
 	@override String get confirmTransfer => '이체 확인';
 	@override String get confirmed => '확인됨';
 	@override String get transferSuccess => '이체 성공';
-	@override String get selectReceiveAccount => '选择收款账户';
+	@override String get selectReceiveAccount => '받을 계좌 선택';
 }
 
 // Path: chat.genui
@@ -2100,7 +2104,7 @@ class _Translations$chat$genui$cashFlowCard$ko extends Translations$chat$genui$c
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '현금 흐름 분석';
+	@override String get title => '현금 흐름 및 재정 건강 리포트';
 	@override String savingsRate({required Object rate}) => '저축률 ${rate}%';
 	@override String get totalIncome => '총수입';
 	@override String get totalExpense => '총지출';
@@ -2251,8 +2255,8 @@ class _Translations$chat$genui$transactionConfirmation$ko extends Translations$c
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get multipleAccounts => '检测到多个关联账户';
-	@override String get confirmed => '已确认';
+	@override String get multipleAccounts => '연결된 계좌가 여러 개 감지되었습니다';
+	@override String get confirmed => '확인됨';
 }
 
 // Path: chat.genui.budgetAnalysis
@@ -2262,13 +2266,13 @@ class _Translations$chat$genui$budgetAnalysis$ko extends Translations$chat$genui
 	final TranslationsKo _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '预算分析报告';
-	@override String periodDays({required Object days}) => '过去 ${days} 天';
-	@override String get totalExpense => '总支出';
-	@override String momChange({required Object change}) => '环比 ${change}%';
-	@override String get categoryDistribution => '分类占比';
-	@override String get topSpenders => '大额支出';
-	@override String amountWan({required Object amount}) => '${amount}万';
+	@override String get title => '예산 분석 보고서';
+	@override String periodDays({required Object days}) => '지난 ${days}일';
+	@override String get totalExpense => '총 지출';
+	@override String momChange({required Object change}) => '전월 대비 ${change}%';
+	@override String get categoryDistribution => '카테고리 비중';
+	@override String get topSpenders => '대형 지출';
+	@override String amountWan({required Object amount}) => '${amount}만';
 }
 
 // Path: chat.genui.error
@@ -2692,6 +2696,9 @@ extension on TranslationsKo {
 			'transaction.linkFailed' => 'Link failed',
 			'transaction.rawInput' => 'Message',
 			'transaction.noRawInput' => 'No message',
+			'transaction.notFoundTitle' => '거래가 삭제되었습니다',
+			'transaction.notFoundBody' => '이 거래는 작성자 또는 관리자에 의해 삭제되어 상세 내역을 볼 수 없습니다.',
+			'transaction.backToPrevious' => '뒤로 가기',
 			'home.totalExpense' => '총 소비 금액',
 			'home.todayExpense' => '오늘 지출',
 			'home.monthExpense' => '이번 달 지출',
@@ -2725,6 +2732,7 @@ extension on TranslationsKo {
 			'comment.note' => '메모',
 			'comment.noNote' => '메모 없음',
 			'comment.loadFailed' => '메모 불러오기 실패',
+			'comment.userToast' => ({required Object username}) => '사용자 @${username}',
 			'calendar.title' => '소비 달력',
 			'calendar.weekdays.mon' => '월',
 			'calendar.weekdays.tue' => '화',
@@ -2800,7 +2808,7 @@ extension on TranslationsKo {
 			'settings.updateNow' => '지금 업데이트',
 			'settings.updateLater' => '나중에',
 			'settings.fetchUpdateFailed' => '업데이트 확인 실패',
-			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '${currency}로 변경되었습니다. 새 거래는 이 통화로 기록됩니다.',
+			'settings.currencyChangedRefreshHint' => ({required Object currency}) => '${currency}로 변경되었습니다. 기본 통화 및 새 거래의 기본 통화로 설정되었습니다.',
 			'settings.sharedSpace' => '공유 공간',
 			'settings.speechRecognition' => '음성 인식',
 			'settings.speechRecognitionSubtitle' => '음성 입력 파라미터 구성',
@@ -2812,14 +2820,14 @@ extension on TranslationsKo {
 			'settings.speechTestSubtitle' => 'WebSocket 음성 연결 테스트',
 			'settings.userTypeRegular' => '일반 사용자',
 			'settings.selectAmountStyle' => '금액 표시 스타일 선택',
-			'settings.currencyDescription' => '선호하는 표시 통화를 선택하세요. 모든 금액이 이 통화로 표시됩니다.',
+			'settings.currencyDescription' => '주요 통화를 선택하세요. 향후 거래는 기본적으로 이 통화를 사용하며 통계 및 요약도 이 통화로 표시됩니다. 과거 거래의 원래 금액은 영향받지 않습니다.',
 			'settings.amountStyleNotice' => 'Note: Amount styles are primarily applied to \'Transactions\' and \'Trends\'. To maintain visual clarity, \'Account Balances\' and \'Asset Summaries\' will remain in neutral colors.',
 			'settings.editUsername' => 'Edit Username',
 			'settings.enterUsername' => 'Enter username',
 			'settings.usernameRequired' => 'Username is required',
 			'settings.usernameUpdated' => 'Username updated',
 			'settings.avatarUpdated' => 'Avatar updated',
-			'settings.appearanceUpdated' => '外观设置已更新',
+			'settings.appearanceUpdated' => '외관 설정이 업데이트되었습니다',
 			'appearance.title' => '화면 설정',
 			'appearance.themeMode' => '테마 모드',
 			'appearance.light' => '라이트',
@@ -3060,6 +3068,8 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.noPending' => '대기 거래 없음',
 			'forecast.recurringTransaction.confirmSuccess' => '거래 확인됨',
 			'forecast.recurringTransaction.skipSuccess' => '거래 건너뜀',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.interval' => '반복 간격',
 			'forecast.recurringTransaction.selectDays' => '요일 선택',
 			'forecast.recurringTransaction.alwaysLastDay' => '매월 마지막 날에 실행',
@@ -3071,8 +3081,6 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.daily' => '매일',
 			'forecast.recurringTransaction.weekly' => '매주',
 			'forecast.recurringTransaction.monthly' => '매월',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.yearly' => '매년',
 			'forecast.recurringTransaction.custom' => '사용자 지정',
 			'forecast.recurringTransaction.cycle' => '주기',
@@ -3233,7 +3241,7 @@ extension on TranslationsKo {
 			'chat.transferWizard.confirmTransfer' => '이체 확인',
 			'chat.transferWizard.confirmed' => '확인됨',
 			'chat.transferWizard.transferSuccess' => '이체 성공',
-			'chat.transferWizard.selectReceiveAccount' => '选择收款账户',
+			'chat.transferWizard.selectReceiveAccount' => '받을 계좌 선택',
 			'chat.genui.expenseSummary.totalExpense' => '총 지출',
 			'chat.genui.expenseSummary.mainExpenses' => '주요 지출',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '전체 ${count}건 보기',
@@ -3282,7 +3290,7 @@ extension on TranslationsKo {
 			'chat.genui.transactionCard.noSpace' => 'No shared spaces available',
 			'chat.genui.transactionCard.selectSpace' => 'Select Shared Space',
 			'chat.genui.transactionCard.linkedToSpace' => 'Linked to shared space',
-			'chat.genui.cashFlowCard.title' => '현금 흐름 분석',
+			'chat.genui.cashFlowCard.title' => '현금 흐름 및 재정 건강 리포트',
 			'chat.genui.cashFlowCard.savingsRate' => ({required Object rate}) => '저축률 ${rate}%',
 			'chat.genui.cashFlowCard.totalIncome' => '총수입',
 			'chat.genui.cashFlowCard.totalExpense' => '총지출',
@@ -3365,70 +3373,70 @@ extension on TranslationsKo {
 			'chat.genui.transferPath.unknownAccount' => 'Unknown Account',
 			'chat.genui.transferPath.confirmed' => 'Confirmed',
 			'chat.genui.transferPath.executeAction' => '선택에 따라 이체 실행',
-			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
-			'chat.genui.transactionConfirmation.confirmed' => '已确认',
-			'chat.genui.budgetAnalysis.title' => '预算分析报告',
-			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => '过去 ${days} 天',
-			'chat.genui.budgetAnalysis.totalExpense' => '总支出',
-			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => '环比 ${change}%',
-			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
-			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
-			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
+			'chat.genui.transactionConfirmation.multipleAccounts' => '연결된 계좌가 여러 개 감지되었습니다',
+			'chat.genui.transactionConfirmation.confirmed' => '확인됨',
+			'chat.genui.budgetAnalysis.title' => '예산 분석 보고서',
+			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => '지난 ${days}일',
+			'chat.genui.budgetAnalysis.totalExpense' => '총 지출',
+			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => '전월 대비 ${change}%',
+			'chat.genui.budgetAnalysis.categoryDistribution' => '카테고리 비중',
+			'chat.genui.budgetAnalysis.topSpenders' => '대형 지출',
+			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}만',
 			'chat.genui.error.title' => '렌더링 실패',
 			'chat.genui.error.fetchFailed' => '불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
 			'chat.genui.error.dataIncomplete' => '데이터가 불완전합니다',
-			'chat.welcome.morning.subtitle' => 'Start your day by tracking',
-			'chat.welcome.morning.breakfast.title' => 'Breakfast',
-			'chat.welcome.morning.breakfast.prompt' => 'Record breakfast expense',
-			'chat.welcome.morning.breakfast.description' => 'Log today\'s first expense',
-			'chat.welcome.morning.yesterdayReview.title' => 'Yesterday Review',
-			'chat.welcome.morning.yesterdayReview.prompt' => 'Analyze yesterday\'s spending',
-			'chat.welcome.morning.yesterdayReview.description' => 'Check how much you spent yesterday',
-			'chat.welcome.morning.todayBudget.title' => 'Today\'s Budget',
-			'chat.welcome.morning.todayBudget.prompt' => 'How much budget left for today',
-			'chat.welcome.morning.todayBudget.description' => 'Plan your spending for today',
-			'chat.welcome.midday.greeting' => 'Good Afternoon',
-			'chat.welcome.midday.subtitle' => 'Quick record during lunch',
-			'chat.welcome.midday.lunch.title' => 'Lunch',
-			'chat.welcome.midday.lunch.prompt' => 'Record lunch expense',
-			'chat.welcome.midday.lunch.description' => 'Log your lunch spending',
-			'chat.welcome.midday.weeklyExpense.title' => 'Weekly Spending',
-			'chat.welcome.midday.weeklyExpense.prompt' => 'Analyze this week\'s spending',
-			'chat.welcome.midday.weeklyExpense.description' => 'See your weekly expenses',
-			'chat.welcome.midday.checkBalance.title' => 'Check Balance',
-			'chat.welcome.midday.checkBalance.prompt' => 'Check my account balance',
-			'chat.welcome.midday.checkBalance.description' => 'View your account balances',
-			'chat.welcome.afternoon.subtitle' => 'Tea time, let\'s review finances',
-			'chat.welcome.afternoon.quickRecord.title' => 'Quick Record',
-			'chat.welcome.afternoon.quickRecord.prompt' => 'Help me record an expense',
-			'chat.welcome.afternoon.quickRecord.description' => 'Quickly log a transaction',
-			'chat.welcome.afternoon.analyzeSpending.title' => 'Analyze Spending',
-			'chat.welcome.afternoon.analyzeSpending.prompt' => 'Analyze this month\'s spending',
-			'chat.welcome.afternoon.analyzeSpending.description' => 'View spending trends and breakdown',
-			'chat.welcome.afternoon.budgetProgress.title' => 'Budget Progress',
-			'chat.welcome.afternoon.budgetProgress.prompt' => 'Check budget status',
-			'chat.welcome.afternoon.budgetProgress.description' => 'See how your budget is doing',
-			'chat.welcome.evening.subtitle' => 'End of day, time to balance the books',
-			'chat.welcome.evening.dinner.title' => 'Dinner',
-			'chat.welcome.evening.dinner.prompt' => 'Record dinner expense',
-			'chat.welcome.evening.dinner.description' => 'Log tonight\'s dinner spending',
-			'chat.welcome.evening.todaySummary.title' => 'Today\'s Summary',
-			'chat.welcome.evening.todaySummary.prompt' => 'Summarize today\'s spending',
-			'chat.welcome.evening.todaySummary.description' => 'See what you spent today',
-			'chat.welcome.evening.tomorrowPlan.title' => 'Tomorrow\'s Plan',
-			'chat.welcome.evening.tomorrowPlan.prompt' => 'What fixed expenses tomorrow',
-			'chat.welcome.evening.tomorrowPlan.description' => 'Plan ahead for tomorrow',
-			'chat.welcome.night.greeting' => 'Late Night',
-			'chat.welcome.night.subtitle' => 'Quiet time for financial planning',
-			'chat.welcome.night.makeupRecord.title' => 'Catch Up',
-			'chat.welcome.night.makeupRecord.prompt' => 'Help me log any missed expenses',
-			'chat.welcome.night.makeupRecord.description' => 'Record expenses you forgot today',
-			'chat.welcome.night.monthlyReview.title' => 'Monthly Review',
-			'chat.welcome.night.monthlyReview.prompt' => 'Analyze this month\'s spending',
-			'chat.welcome.night.monthlyReview.description' => 'Review your monthly expenses',
-			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
-			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
-			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'chat.welcome.morning.subtitle' => '기록과 함께 시작하는 새로운 하루',
+			'chat.welcome.morning.breakfast.title' => '아침 식사 기록',
+			'chat.welcome.morning.breakfast.prompt' => '아침 식사 지출 기록하기',
+			'chat.welcome.morning.breakfast.description' => '오늘의 첫 번째 지출을 기록하세요',
+			'chat.welcome.morning.yesterdayReview.title' => '어제 지출 돌아보기',
+			'chat.welcome.morning.yesterdayReview.prompt' => '어제 지출 분석하기',
+			'chat.welcome.morning.yesterdayReview.description' => '어제 얼마를 썼는지 확인하세요',
+			'chat.welcome.morning.todayBudget.title' => '오늘의 예산',
+			'chat.welcome.morning.todayBudget.prompt' => '오늘 남은 예산 확인하기',
+			'chat.welcome.morning.todayBudget.description' => '오늘의 지출 한도를 계획하세요',
+			'chat.welcome.midday.greeting' => '좋은 오후입니다',
+			'chat.welcome.midday.subtitle' => '점심시간, 간편하게 기록하세요',
+			'chat.welcome.midday.lunch.title' => '점심 식사 기록',
+			'chat.welcome.midday.lunch.prompt' => '점심 식사 지출 기록하기',
+			'chat.welcome.midday.lunch.description' => '점심 지출을 기록하세요',
+			'chat.welcome.midday.weeklyExpense.title' => '이번 주 지출',
+			'chat.welcome.midday.weeklyExpense.prompt' => '이번 주 지출 분석하기',
+			'chat.welcome.midday.weeklyExpense.description' => '이번 주 지출 내역을 확인하세요',
+			'chat.welcome.midday.checkBalance.title' => '잔액 확인',
+			'chat.welcome.midday.checkBalance.prompt' => '계좌 잔액 확인하기',
+			'chat.welcome.midday.checkBalance.description' => '각 계좌의 남은 잔액을 확인하세요',
+			'chat.welcome.afternoon.subtitle' => '티타임, 자산을 정리해보세요',
+			'chat.welcome.afternoon.quickRecord.title' => '빠른 지출 기록',
+			'chat.welcome.afternoon.quickRecord.prompt' => '지출 기록 도와줘',
+			'chat.welcome.afternoon.quickRecord.description' => '빠르게 지출을 기록하세요',
+			'chat.welcome.afternoon.analyzeSpending.title' => '지출 분석',
+			'chat.welcome.afternoon.analyzeSpending.prompt' => '이번 달 지출 분석하기',
+			'chat.welcome.afternoon.analyzeSpending.description' => '지출 트렌드와 구성을 확인하세요',
+			'chat.welcome.afternoon.budgetProgress.title' => '재정 건강 상태',
+			'chat.welcome.afternoon.budgetProgress.prompt' => '내 재정 건강 평가하기',
+			'chat.welcome.afternoon.budgetProgress.description' => '수지 균형 점수와 조언을 받아보세요',
+			'chat.welcome.evening.subtitle' => '오늘 하루도 수고하셨습니다, 지출을 정리해보세요',
+			'chat.welcome.evening.dinner.title' => '저녁 식사 기록',
+			'chat.welcome.evening.dinner.prompt' => '저녁 식사 지출 기록하기',
+			'chat.welcome.evening.dinner.description' => '오늘 저녁 지출을 기록하세요',
+			'chat.welcome.evening.todaySummary.title' => '오늘의 지출 요약',
+			'chat.welcome.evening.todaySummary.prompt' => '오늘 지출 요약하기',
+			'chat.welcome.evening.todaySummary.description' => '오늘 얼마를 썼는지 확인하세요',
+			'chat.welcome.evening.tomorrowPlan.title' => '내일 지출 계획',
+			'chat.welcome.evening.tomorrowPlan.prompt' => '내일 예정된 고정 지출 확인하기',
+			'chat.welcome.evening.tomorrowPlan.description' => '내일의 지출을 미리 계획하세요',
+			'chat.welcome.night.greeting' => '늦은 밤입니다',
+			'chat.welcome.night.subtitle' => '차분한 마음으로 미래를 계획하세요',
+			'chat.welcome.night.makeupRecord.title' => '오늘 지출 누락 보완',
+			'chat.welcome.night.makeupRecord.prompt' => '오늘 누락된 지출 기록하기',
+			'chat.welcome.night.makeupRecord.description' => '오늘 잊고 지나간 지출을 기록하세요',
+			'chat.welcome.night.monthlyReview.title' => '이번 달 분석',
+			'chat.welcome.night.monthlyReview.prompt' => '이번 달 지출 상세 분석하기',
+			'chat.welcome.night.monthlyReview.description' => '이번 달 지출을 돌아보세요',
+			'chat.welcome.night.financialThinking.title' => '미래 예측',
+			'chat.welcome.night.financialThinking.prompt' => '향후 30일 잔액 예측하기',
+			'chat.welcome.night.financialThinking.description' => '미래의 재정 트렌드를 확인하세요',
 			'chat.shareComingSoon' => '공유 기능은 곧 출시될 예정입니다...',
 			'chat.invalidAttachmentLink' => '잘못된 첨부 파일 링크',
 			'chat.unableToOpenAttachmentLink' => '첨부 파일 링크를 열 수 없습니다',
@@ -3574,6 +3582,8 @@ extension on TranslationsKo {
 			'financial.manageFinancialSettings' => '금융 설정 관리',
 			'financial.safetyThresholdSettings' => '재무 안전선 설정',
 			'financial.setSafetyThreshold' => '재무 안전 기준선 설정',
+			_ => null,
+		} ?? switch (path) {
 			'financial.safetyThresholdSaved' => '재무 안전선 저장됨',
 			'financial.dailyBurnRateSettings' => '일일 소비 추정',
 			'financial.setDailyBurnRate' => '일일 예상 소비 금액 설정',
@@ -3585,8 +3595,6 @@ extension on TranslationsKo {
 			'financial.cashPocketTitle' => '내 현금 계좌',
 			'financial.sourcesCount' => ({required Object count}) => '${count} 계좌',
 			'financial.lastUpdatedAt' => ({required Object time}) => '마지막 업데이트: ${time}',
-			_ => null,
-		} ?? switch (path) {
 			'financial.neverUpdated' => '업데이트되지 않음',
 			'financial.updateNow' => '지금 업데이트',
 			'app.splashTitle' => '지혜로운 성장, 가치 있는 부.',

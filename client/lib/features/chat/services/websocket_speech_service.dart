@@ -270,7 +270,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       final recordingStarted = await _audioRecorder.startRecording();
       if (!recordingStarted) {
         _logger.severe('Failed to start recording');
-        _errorController.add('Failed to start recording');
+        _errorController.add('speech_start_failed');
         return;
       }
 
@@ -293,7 +293,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
               return;
             }
             _logger.severe('Audio stream error: $error');
-            _errorController.add('Recording error: $error');
+            _errorController.add('speech_recording_error');
           },
           onDone: () {
             _logger.info('Audio stream ended');
@@ -309,7 +309,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _logger.info('Speech recognition started');
     } catch (e) {
       _logger.severe('Failed to start listening: $e');
-      _errorController.add('Failed to start listening: $e');
+      _errorController.add('speech_start_failed');
       _isListening = false;
       _statusController.add('error');
 
@@ -355,7 +355,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       unawaited(_soundFeedback.playStopSound());
     } catch (e) {
       _logger.severe('Failed to stop listening: $e');
-      _errorController.add('Failed to stop listening: $e');
+      _errorController.add('speech_stop_failed');
       _isListening = false;
       _statusController.add('error');
     }

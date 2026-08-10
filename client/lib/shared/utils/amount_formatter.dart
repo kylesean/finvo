@@ -5,6 +5,7 @@ import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/models/transaction_type.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Unified amount formatting service
 ///
@@ -187,6 +188,36 @@ class AmountFormatter {
         return amount.toStringAsFixed(2);
       }
     }
+  }
+
+  /// Format a budget [Decimal] amount using localized units (萬/万) and thousands separators.
+  static String formatBudgetCompact(Decimal amount) {
+    final sign = amount < Decimal.zero ? '-' : '';
+    final absValue = amount.abs();
+
+    if (absValue >= Decimal.fromInt(10000)) {
+      final wanValue = (absValue / Decimal.fromInt(10000)).toDecimal();
+      return '$sign${wanValue.toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
+    }
+
+    final parts = absValue.toStringAsFixed(2).split('.');
+    final intPart = parts[0];
+    final decPart = parts[1];
+
+    var formatted = '';
+    var count = 0;
+    for (int i = intPart.length - 1; i >= 0; i--) {
+      if (count > 0 && count % 3 == 0) {
+        formatted = ',$formatted';
+      }
+      formatted = intPart[i] + formatted;
+      count++;
+    }
+
+    if (decPart == '00') {
+      return '$sign$formatted';
+    }
+    return '$sign$formatted.$decPart';
   }
 
   /// Get amount color

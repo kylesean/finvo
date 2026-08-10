@@ -144,7 +144,9 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
         _showSnackBarError(t.speech.noSpeechRecognized);
         break;
       case SpeechErrorType.unknown:
-        _showSnackBarError(rawMessage.isEmpty ? t.common.error : rawMessage);
+        // Never surface raw exception text or enum names: collapse to the
+        // generic error label (details are in the service logs).
+        _showSnackBarError(t.common.error);
         break;
     }
   }

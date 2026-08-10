@@ -8,6 +8,7 @@ import 'package:forui/forui.dart';
 import 'package:finvo/features/auth/providers/verification_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/features/auth/utils/auth_validators.dart';
 
 class RegisterStep1Page extends ConsumerStatefulWidget {
   const RegisterStep1Page({super.key});
@@ -93,21 +94,7 @@ class _RegisterStep1PageState extends ConsumerState<RegisterStep1Page> {
                           label: Text(t.auth.email.label),
                           hint: t.auth.email.placeholder,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            final trimmedValue = value?.trim() ?? '';
-                            if (trimmedValue.isEmpty) {
-                              return t.auth.email.required;
-                            }
-                            final phoneRegex = RegExp(r'^1[3-9]\d{9}$');
-                            final emailRegex = RegExp(
-                              r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                            );
-                            if (!phoneRegex.hasMatch(trimmedValue) &&
-                                !emailRegex.hasMatch(trimmedValue)) {
-                              return t.auth.email.invalid;
-                            }
-                            return null;
-                          },
+                          validator: AuthValidators.validateContact,
                         ),
                         const SizedBox(height: 20),
                         FTextFormField(

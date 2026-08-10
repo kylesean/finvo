@@ -94,8 +94,12 @@ class _AccountTileSelectorState extends State<AccountTileSelector> {
 
     // Account options
     for (final account in widget.accounts) {
-      final id = account['id'] as String;
-      final name = account['name'] as String;
+      // Untrusted AI-generated data: skip entries without a usable id
+      // instead of throwing a TypeError during build.
+      final rawId = account['id'];
+      if (rawId is! String || rawId.isEmpty) continue;
+      final id = rawId;
+      final name = account['name']?.toString() ?? '';
       final type = account['type'] as String?;
 
       tiles.add(

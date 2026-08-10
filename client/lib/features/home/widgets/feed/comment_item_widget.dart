@@ -360,7 +360,7 @@ class CommentItemWidget extends ConsumerWidget {
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               unawaited(HapticFeedback.lightImpact());
-              TopToast.info(context, '用户 @$username');
+              TopToast.info(context, t.comment.userToast(username: username));
             },
         ),
       );

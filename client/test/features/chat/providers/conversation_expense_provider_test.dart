@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/features/chat/models/chat_message.dart';
 import 'package:finvo/features/chat/models/tool_call_info.dart';
 import 'package:finvo/features/chat/providers/conversation_expense_provider.dart';
@@ -29,7 +30,7 @@ void main() {
         ],
       );
 
-      expect(scanMessageExpense(msg), 50.0);
+      expect(scanMessageExpense(msg), Decimal.parse('50'));
     });
 
     test('does not count failed create_transaction tool call', () {
@@ -44,7 +45,7 @@ void main() {
         ],
       );
 
-      expect(scanMessageExpense(msg), 0.0);
+      expect(scanMessageExpense(msg), Decimal.zero);
     });
 
     test('ignores income tool calls', () {
@@ -59,7 +60,7 @@ void main() {
         ],
       );
 
-      expect(scanMessageExpense(msg), 0.0);
+      expect(scanMessageExpense(msg), Decimal.zero);
     });
 
     test('counts record_transactions expense items in batch', () {
@@ -80,7 +81,7 @@ void main() {
         ],
       );
 
-      expect(scanMessageExpense(msg), 50.0);
+      expect(scanMessageExpense(msg), Decimal.parse('50'));
     });
 
     test(
@@ -106,7 +107,7 @@ void main() {
           ],
         );
 
-        expect(scanMessageExpense(msg), 50.0);
+        expect(scanMessageExpense(msg), Decimal.parse('50'));
       },
     );
 
@@ -124,7 +125,7 @@ void main() {
           ],
         );
 
-        expect(scanMessageExpense(msg), 50.0);
+        expect(scanMessageExpense(msg), Decimal.parse('50'));
       },
     );
 
@@ -140,11 +141,11 @@ void main() {
         ],
       );
 
-      expect(scanMessageExpense(msg), 33.0);
+      expect(scanMessageExpense(msg), Decimal.parse('33'));
     });
 
     test('empty message yields zero', () {
-      expect(scanMessageExpense(message()), 0.0);
+      expect(scanMessageExpense(message()), Decimal.zero);
     });
   });
 }

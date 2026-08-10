@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:logging/logging.dart';
 import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,8 @@ import 'package:finvo/shared/widgets/user_avatar.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+
+final _logger = Logger('ChatConversationDrawer');
 
 class ChatConversationDrawer extends ConsumerStatefulWidget {
   const ChatConversationDrawer({super.key});
@@ -532,7 +535,14 @@ class _ChatConversationDrawerState
     try {
       await service.deleteConversation(id);
       success = true;
-    } catch (e) {
+    } catch (e, st) {
+      // Previously swallowed silently — deletion failures were impossible
+      // to diagnose in production.
+      _logger.warning(
+        'ChatConversationDrawer: Failed to delete conversation $id',
+        e,
+        st,
+      );
       success = false;
     }
 

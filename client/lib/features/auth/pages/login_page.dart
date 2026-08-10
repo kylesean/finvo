@@ -10,6 +10,7 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/features/auth/utils/auth_validators.dart';
 import 'package:finvo/shared/utils/route_utils.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -128,17 +129,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           label: Text(t.auth.email.label),
                           hint: t.auth.email.placeholder,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return t.auth.email.required;
-                            }
-                            if (!RegExp(
-                              r'^[^@]+@[^@]+\.[^@]+',
-                            ).hasMatch(value)) {
-                              return t.auth.email.invalid;
-                            }
-                            return null;
-                          },
+                          validator: AuthValidators.validateContact,
                         ),
                         const SizedBox(height: 20),
                         FTextFormField.password(

@@ -32,6 +32,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
   BudgetWithUsage? _budgetWithUsage;
   bool _isLoading = true;
   bool _isDeleting = false;
+  bool _isTogglingPause = false;
   String? _error;
 
   /// Get currency symbol from global settings
@@ -535,6 +536,9 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
   }
 
   Future<void> _handlePauseToggle() async {
+    if (_isTogglingPause) return;
+    setState(() => _isTogglingPause = true);
+
     final newStatus = _budgetWithUsage!.budget.status == BudgetStatus.paused
         ? BudgetStatus.active
         : BudgetStatus.paused;
@@ -558,6 +562,10 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
     } catch (e) {
       if (mounted) {
         TopToast.error(context, '${t.budget.operationFailed}: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isTogglingPause = false);
       }
     }
   }

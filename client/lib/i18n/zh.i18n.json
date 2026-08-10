@@ -161,7 +161,10 @@
     "noRawInput": "无消息",
     "attachments": "$count 个附件",
     "viewInConversation": "在对话中查看更多",
-    "statusPending": "待确认"
+    "statusPending": "待确认",
+    "notFoundTitle": "账目已被删除",
+    "notFoundBody": "该账目记录已被发起人或管理员删除，无法查看明细。",
+    "backToPrevious": "返回上一页"
   },
   "home": {
     "totalExpense": "总消费金额",
@@ -199,7 +202,8 @@
     "noActions": "没有可用的操作",
     "note": "备注",
     "noNote": "暂无备注",
-    "loadFailed": "加载备注失败"
+    "loadFailed": "加载备注失败",
+    "userToast": "用户 @$username"
   },
   "calendar": {
     "title": "消费日历",

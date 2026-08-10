@@ -14,6 +14,7 @@ import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
@@ -21,6 +22,7 @@ import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/error_display.dart';
 
 class TransactionCard extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
@@ -452,7 +454,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
       setState(() => _isUpdating = false);
       ToastService.showDestructive(
         description: Text(
-          t.chat.genui.transactionCard.updateFailed(error: e.toString()),
+          t.chat.genui.transactionCard.updateFailed(
+            error: friendlyErrorMessage(e),
+          ),
         ),
       );
     }
@@ -601,7 +605,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
       setState(() => _isUpdatingSpace = false);
       ToastService.showDestructive(
         description: Text(
-          t.chat.genui.transactionCard.updateFailed(error: e.toString()),
+          t.chat.genui.transactionCard.updateFailed(
+            error: friendlyErrorMessage(e),
+          ),
         ),
       );
     }
@@ -612,11 +618,8 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
       final now = DateTime.now();
       return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     }
-    try {
-      final dateTime = DateTime.parse(isoTime);
-      return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return '';
-    }
+    final dateTime = tryParseDateTime(isoTime);
+    if (dateTime == null) return '';
+    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

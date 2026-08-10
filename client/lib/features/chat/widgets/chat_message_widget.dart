@@ -223,7 +223,9 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
           child: GenUiErrorBoundary(
             componentName: 'LiveSurface_${component.surfaceId}',
             data: component.data,
-            child: _buildLiveSurfaceWithSkeleton(
+            // Builder form: the live surface is constructed inside the
+            // boundary's build, so construction errors degrade gracefully.
+            builder: (context) => _buildLiveSurfaceWithSkeleton(
               context,
               theme,
               component.surfaceId,

@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 import 'package:finvo/features/shared_space/services/shared_space_service.dart';
+import 'package:finvo/shared/providers/paginated_list_mixin.dart';
 
 part 'shared_space_provider.g.dart';
 
@@ -38,48 +39,67 @@ class SharedSpaceState {
 }
 
 @riverpod
-class SharedSpaceNotifier extends _$SharedSpaceNotifier {
+class SharedSpaceNotifier extends _$SharedSpaceNotifier
+    with PaginatedListMixin<SharedSpace, SharedSpaceState> {
   @override
   SharedSpaceState build() {
     return const SharedSpaceState();
   }
 
-  Future<void> loadSpaces({bool refresh = false}) async {
-    final service = ref.read(sharedSpaceServiceProvider);
-    if (refresh) {
-      // Preserve the existing list while refreshing so a failed refresh does
-      // not wipe the previously loaded spaces (M2 fix).
-      state = state.copyWith(isLoading: true, error: null);
-    } else if (state.isLoading || !state.hasMore) {
-      return;
-    } else {
-      state = state.copyWith(isLoading: true, error: null);
-    }
+  Future<void> loadSpaces({bool refresh = false}) => loadPage(refresh: refresh);
 
-    try {
-      final page = refresh ? 1 : state.currentPage;
-      final response = await service.getSharedSpaces(page: page);
+  // ============================================================
+  // PaginatedListMixin accessors
+  // ============================================================
 
-      final newSpaces = refresh
-          ? response.spaces
-          : [...state.spaces, ...response.spaces];
-      final hasMore = newSpaces.length < response.total;
+  @override
+  bool get pageMounted => ref.mounted;
 
-      state = state.copyWith(
-        spaces: newSpaces,
-        isLoading: false,
-        error: null,
-        currentPage: page + 1,
-        hasMore: hasMore,
-      );
-    } catch (e) {
-      String errorMessage = 'Failed to load shared spaces';
-      if (e is AppException) {
-        errorMessage = e.message;
-      }
-      state = state.copyWith(isLoading: false, error: errorMessage);
-    }
+  @override
+  SharedSpaceState get pageState => state;
+
+  @override
+  set pageState(SharedSpaceState value) => state = value;
+
+  @override
+  List<SharedSpace> get pageItems => state.spaces;
+
+  @override
+  bool get pageIsLoading => state.isLoading;
+
+  @override
+  bool get pageHasMore => state.hasMore;
+
+  @override
+  int get pageCurrentPage => state.currentPage;
+
+  @override
+  Future<PageResult<SharedSpace>> fetchPage(int page) async {
+    final response = await ref
+        .read(sharedSpaceServiceProvider)
+        .getSharedSpaces(page: page);
+    return PageResult(items: response.spaces, total: response.total);
   }
+
+  @override
+  SharedSpaceState updatePageState({
+    required List<SharedSpace> items,
+    required int currentPage,
+    required bool isLoading,
+    required bool hasMore,
+    String? error,
+    PageResult<SharedSpace>? result,
+  }) => state.copyWith(
+    spaces: items,
+    currentPage: currentPage,
+    isLoading: isLoading,
+    hasMore: hasMore,
+    error: error,
+  );
+
+  @override
+  String pageErrorMessage(Object error) =>
+      error is AppException ? error.message : 'Failed to load shared spaces';
 
   Future<SharedSpace?> createSpace({
     required String name,
@@ -259,86 +279,99 @@ class SpaceTransactionState {
 /// Mirrors [SharedSpaceNotifier]'s pagination contract (currentPage/hasMore)
 /// so the detail page can drive infinite-scroll through its scroll controller.
 @riverpod
-class SpaceTransactionNotifier extends _$SpaceTransactionNotifier {
+class SpaceTransactionNotifier extends _$SpaceTransactionNotifier
+    with PaginatedListMixin<SpaceTransaction, SpaceTransactionState> {
   static const _pageSize = 20;
+
+  late String _spaceId;
 
   @override
   SpaceTransactionState build(String spaceId) {
+    _spaceId = spaceId;
     return const SpaceTransactionState();
   }
 
-  /// Generation token guarding against stale pagination responses.
-  /// Incremented on every refresh; a response whose captured generation no
-  /// longer matches is discarded, so a refresh racing an in-flight loadMore
-  /// can't append an old page onto the freshly reset page-1 list.
-  int _loadGeneration = 0;
-
   SharedSpaceService get _service => ref.read(sharedSpaceServiceProvider);
 
-  /// Load transactions with pagination.
+  /// Load transactions with pagination (delegated to [PaginatedListMixin]).
   ///
   /// [refresh] resets to page 1 (replaces the accumulated list); otherwise the
   /// next page is appended. Overlapping ids from a refresh racing an in-flight
   /// load are collapsed so the list can't contain duplicates.
-  Future<void> loadTransactions({bool refresh = false}) async {
-    if (refresh) {
-      // Invalidate any in-flight request so its response can't append stale
-      // pages onto the refreshed list. Preserve the existing transactions so a
-      // failed refresh doesn't clear what was already shown (M2 fix).
-      ++_loadGeneration;
-      state = state.copyWith(isLoading: true, error: null);
-    } else if (state.isLoading || !state.hasMore) {
-      return;
-    } else {
-      state = state.copyWith(isLoading: true, error: null);
-    }
-
-    final generation = _loadGeneration;
-    try {
-      final page = refresh ? 1 : state.currentPage;
-      final res = await _service.getSpaceTransactions(
-        spaceId,
-        page: page,
-        limit: _pageSize,
-      );
-      // Discard a stale response that raced a more recent refresh.
-      if (generation != _loadGeneration) return;
-
-      final newTransactions = refresh
-          ? res.transactions
-          : _appendUnique(state.transactions, res.transactions);
-      final hasMore = newTransactions.length < res.total;
-
-      state = state.copyWith(
-        transactions: newTransactions,
-        isLoading: false,
-        error: null,
-        currentPage: page + 1,
-        hasMore: hasMore,
-        total: res.total,
-      );
-    } catch (e) {
-      if (generation != _loadGeneration) return;
-      String errorMessage = 'Failed to load space transactions';
-      if (e is AppException) {
-        errorMessage = e.message;
-      }
-      state = state.copyWith(isLoading: false, error: errorMessage);
-    }
-  }
+  Future<void> loadTransactions({bool refresh = false}) =>
+      loadPage(refresh: refresh);
 
   /// Load the next page (no-op when already loading or exhausted).
-  Future<void> loadMore() => loadTransactions();
+  Future<void> loadMore() => loadPage();
 
   void clearError() {
     state = state.copyWith(error: null);
   }
 
-  /// Append [incoming] to [existing], skipping ids already present.
-  List<SpaceTransaction> _appendUnique(
+  // ============================================================
+  // PaginatedListMixin accessors
+  // ============================================================
+
+  @override
+  bool get pageMounted => ref.mounted;
+
+  @override
+  SpaceTransactionState get pageState => state;
+
+  @override
+  set pageState(SpaceTransactionState value) => state = value;
+
+  @override
+  List<SpaceTransaction> get pageItems => state.transactions;
+
+  @override
+  bool get pageIsLoading => state.isLoading;
+
+  @override
+  bool get pageHasMore => state.hasMore;
+
+  @override
+  int get pageCurrentPage => state.currentPage;
+
+  @override
+  Future<PageResult<SpaceTransaction>> fetchPage(int page) async {
+    final res = await _service.getSpaceTransactions(
+      _spaceId,
+      page: page,
+      limit: _pageSize,
+    );
+    return PageResult(items: res.transactions, total: res.total);
+  }
+
+  @override
+  SpaceTransactionState updatePageState({
+    required List<SpaceTransaction> items,
+    required int currentPage,
+    required bool isLoading,
+    required bool hasMore,
+    String? error,
+    PageResult<SpaceTransaction>? result,
+  }) => state.copyWith(
+    transactions: items,
+    currentPage: currentPage,
+    isLoading: isLoading,
+    hasMore: hasMore,
+    error: error,
+    total: result?.total ?? state.total,
+  );
+
+  @override
+  String pageErrorMessage(Object error) => error is AppException
+      ? error.message
+      : 'Failed to load space transactions';
+
+  @override
+  List<SpaceTransaction> mergePageItems(
     List<SpaceTransaction> existing,
     List<SpaceTransaction> incoming,
   ) {
+    // Overlapping ids from a refresh racing an in-flight load are collapsed
+    // so the list can't contain duplicates.
     final existingIds = existing.map((t) => t.id).toSet();
     return [...existing, ...incoming.where((t) => !existingIds.contains(t.id))];
   }

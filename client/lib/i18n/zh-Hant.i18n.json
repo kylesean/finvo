@@ -157,7 +157,10 @@
     "linkSuccess": "Link successful",
     "linkFailed": "Link failed",
     "rawInput": "Message",
-    "noRawInput": "No message"
+    "noRawInput": "No message",
+    "notFoundTitle": "帳目已被刪除",
+    "notFoundBody": "該帳目記錄已被發起人或管理員刪除，無法查看明細。",
+    "backToPrevious": "返回上一頁"
   },
   "home": {
     "totalExpense": "總消費金額",
@@ -194,7 +197,8 @@
     "noActions": "沒有可用的操作",
     "note": "備註",
     "noNote": "暫無備註",
-    "loadFailed": "載入備註失敗"
+    "loadFailed": "載入備註失敗",
+    "userToast": "用戶 @$username"
   },
   "calendar": {
     "title": "消費日曆",

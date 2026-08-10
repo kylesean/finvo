@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'dart:typed_data';
-import 'package:dio/dio.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:async';
+import 'package:dio/dio.dart';
 
-import 'package:finvo/core/storage/secure_storage_service.dart';
-import 'package:finvo/core/constants/api_constants.dart';
-
-part 'authenticated_image.g.dart';
+import 'package:finvo/core/network/dio_provider.dart';
 
 /// Authenticated image loading component
 /// Automatically attaches JWT token when requesting images
@@ -61,23 +57,15 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
     });
 
     try {
-      final storageService = ref.read(secureStorageServiceProvider);
-      final token = await storageService.getToken();
-
-      if (token == null || token.isEmpty) {
-        throw Exception('Authentication token not found');
-      }
-
-      final dio = Dio();
-      final url =
-          '${ref.read(apiBaseUrlProvider)}/files/view/${widget.attachmentId}';
-
+      // Use the shared Dio pipeline (auth interceptor attaches the JWT,
+      // timeouts/cancellation and error normalization come for free).
+      // Previously this created a bare Dio() per load, bypassing the
+      // interceptor chain: no timeout, no cancel, and 401 responses were
+      // never re-signed.
+      final dio = ref.read(dioProvider);
       final response = await dio.get<List<int>>(
-        url,
-        options: Options(
-          headers: {'Authorization': 'Bearer $token'},
-          responseType: ResponseType.bytes,
-        ),
+        '/files/view/${widget.attachmentId}',
+        options: Options(responseType: ResponseType.bytes),
       );
 
       if (!mounted) return;
@@ -124,35 +112,21 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
       return const SizedBox.shrink();
     }
 
-    return Image.memory(_imageBytes!, fit: widget.fit, gaplessPlayback: true);
+    // Downscale the decoded bitmap to the actual display size: full-size
+    // decoding of large photos wastes memory and hurts scroll performance.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final cacheWidth = maxWidth.isFinite && maxWidth > 0
+            ? (maxWidth * MediaQuery.devicePixelRatioOf(context)).round()
+            : null;
+        return Image.memory(
+          _imageBytes!,
+          fit: widget.fit,
+          gaplessPlayback: true,
+          cacheWidth: cacheWidth,
+        );
+      },
+    );
   }
-}
-
-/// Authenticated network image provider
-/// Used to cache loaded image data
-@riverpod
-Future<Uint8List> authenticatedImage(Ref ref, String attachmentId) async {
-  final storageService = ref.watch(secureStorageServiceProvider);
-  final token = await storageService.getToken();
-
-  if (token == null || token.isEmpty) {
-    throw Exception('Authentication token not found');
-  }
-
-  final dio = Dio();
-  final url = '${ref.watch(apiBaseUrlProvider)}/files/view/$attachmentId';
-
-  final response = await dio.get<List<int>>(
-    url,
-    options: Options(
-      headers: {'Authorization': 'Bearer $token'},
-      responseType: ResponseType.bytes,
-    ),
-  );
-
-  if (response.data == null) {
-    throw Exception('Image data is empty');
-  }
-
-  return Uint8List.fromList(response.data!);
 }

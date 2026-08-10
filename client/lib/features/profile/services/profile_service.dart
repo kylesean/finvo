@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/core/network/network_client.dart';
-import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/profile/models/financial_settings.dart';
 import 'package:finvo/features/profile/models/user_info.dart';
@@ -17,7 +16,7 @@ class ProfileService {
       '/user',
       method: HttpMethod.get,
       fromJsonT: (json) =>
-          _unwrapData(json, UserInfo.fromJson, endpoint: '/user'),
+          _networkClient.unwrapData(json, UserInfo.fromJson, endpoint: '/user'),
     );
   }
 
@@ -32,7 +31,7 @@ class ProfileService {
       method: HttpMethod.patch,
       data: data,
       fromJsonT: (json) =>
-          _unwrapData(json, UserInfo.fromJson, endpoint: '/user'),
+          _networkClient.unwrapData(json, UserInfo.fromJson, endpoint: '/user'),
     );
   }
 
@@ -40,7 +39,7 @@ class ProfileService {
     return await _networkClient.request<FinancialAccountResponse>(
       '/user/financial-accounts',
       method: HttpMethod.get,
-      fromJsonT: (json) => _unwrapData(
+      fromJsonT: (json) => _networkClient.unwrapData(
         json,
         FinancialAccountResponse.fromJson,
         endpoint: '/user/financial-accounts',
@@ -61,7 +60,7 @@ class ProfileService {
       '/user/financial-accounts',
       method: HttpMethod.post,
       data: request.toJson(),
-      fromJsonT: (json) => _unwrapData(
+      fromJsonT: (json) => _networkClient.unwrapData(
         json,
         FinancialAccountSummary.fromJson,
         endpoint: '/user/financial-accounts',
@@ -74,7 +73,7 @@ class ProfileService {
     return await _networkClient.request<FinancialSettingsResponse>(
       '/financial-settings',
       method: HttpMethod.get,
-      fromJsonT: (json) => _unwrapData(
+      fromJsonT: (json) => _networkClient.unwrapData(
         json,
         FinancialSettingsResponse.fromJson,
         endpoint: '/financial-settings',
@@ -90,7 +89,7 @@ class ProfileService {
       '/financial-settings',
       method: HttpMethod.patch,
       data: request.toJson(),
-      fromJsonT: (json) => _unwrapData(
+      fromJsonT: (json) => _networkClient.unwrapData(
         json,
         FinancialSettingsResponse.fromJson,
         endpoint: '/financial-settings',
@@ -107,7 +106,7 @@ class ProfileService {
       '/user/financial-accounts/$accountId',
       method: HttpMethod.patch,
       data: account.toJson(),
-      fromJsonT: (json) => _unwrapData(
+      fromJsonT: (json) => _networkClient.unwrapData(
         json,
         FinancialAccount.fromJson,
         endpoint: '/user/financial-accounts/$accountId',
@@ -122,44 +121,6 @@ class ProfileService {
       method: HttpMethod.delete,
       fromJsonT: (_) {},
     );
-  }
-
-  /// Unwrap the standard `{code, message, data}` response envelope and decode
-  /// the payload under `data` with [fromJson]. Consolidates the near-identical
-  /// parsing blocks that otherwise repeat across every service method.
-  ///
-  /// - Non-object envelopes and non-object/`null` payloads raise
-  ///   [DataParsingException] with a consistent message (unless [onNull]
-  ///   supplies a fallback for a null payload).
-  /// - Decode failures are re-wrapped so the raw parser error never leaks.
-  T _unwrapData<T>(
-    dynamic json,
-    T Function(Map<String, dynamic> data) fromJson, {
-    required String endpoint,
-    T Function()? onNull,
-  }) {
-    if (json is! Map<String, dynamic>) {
-      throw DataParsingException(
-        'API $endpoint expects an object, but received ${json.runtimeType}',
-      );
-    }
-    final data = json['data'];
-    if (data == null) {
-      if (onNull != null) return onNull();
-      throw DataParsingException('data field is null');
-    }
-    if (data is! Map<String, dynamic>) {
-      throw DataParsingException(
-        'data field is not an object, but ${data.runtimeType}',
-      );
-    }
-    try {
-      return fromJson(data);
-    } catch (e) {
-      throw DataParsingException(
-        'Failed to parse $endpoint response: ${e.toString()}',
-      );
-    }
   }
 }
 

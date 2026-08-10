@@ -231,7 +231,7 @@ class SystemSpeechService implements SpeechRecognitionService {
           errStr.contains('bindService')) {
         _errorController.add('system_speech_restricted');
       } else {
-        _errorController.add('Failed to start listening: $e');
+        _errorController.add('speech_start_failed');
       }
     }
   }
@@ -252,7 +252,7 @@ class SystemSpeechService implements SpeechRecognitionService {
       _logger.severe('Failed to stop listening: $e');
       _isListening = false;
       _statusController.add('error');
-      _errorController.add('Failed to stop listening: $e');
+      _errorController.add('speech_stop_failed');
     }
   }
 

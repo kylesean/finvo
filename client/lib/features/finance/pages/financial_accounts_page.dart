@@ -291,6 +291,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   /// build empty state
   Widget _buildEmptyState(FThemeData theme, FColors colors) {
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         const SizedBox(height: 100),
         Center(

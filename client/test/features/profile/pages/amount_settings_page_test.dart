@@ -43,10 +43,13 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify title & preview card header are present
-        expect(find.text('实时效果预览'), findsOneWidget);
-        expect(find.text('收入示例'), findsOneWidget);
-        expect(find.text('支出示例'), findsOneWidget);
-        expect(find.text('转账示例'), findsOneWidget);
+        expect(
+          find.text(t.forecast.recurringTransaction.preview),
+          findsOneWidget,
+        );
+        expect(find.text(t.transaction.income), findsOneWidget);
+        expect(find.text(t.transaction.expense), findsOneWidget);
+        expect(find.text(t.transaction.transfer), findsOneWidget);
 
         // Verify options are rendered
         expect(find.text('国际标准'), findsOneWidget);

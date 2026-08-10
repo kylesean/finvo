@@ -266,6 +266,9 @@ class _Translations$transaction$en extends Translations$transaction$zh {
 	@override String attachments({required Object count}) => '${count} attachments';
 	@override String get viewInConversation => 'View more in conversation';
 	@override String get statusPending => 'Pending';
+	@override String get notFoundTitle => 'Transaction deleted';
+	@override String get notFoundBody => 'This transaction was deleted by its creator or an admin and can no longer be viewed.';
+	@override String get backToPrevious => 'Back';
 }
 
 // Path: home
@@ -318,6 +321,7 @@ class _Translations$comment$en extends Translations$comment$zh {
 	@override String get note => 'Note';
 	@override String get noNote => 'No notes yet';
 	@override String get loadFailed => 'Failed to load notes';
+	@override String userToast({required Object username}) => 'User @${username}';
 }
 
 // Path: calendar
@@ -433,7 +437,7 @@ class _Translations$settings$en extends Translations$settings$zh {
 	@override String get usernameRequired => 'Username is required';
 	@override String get usernameUpdated => 'Username updated';
 	@override String get avatarUpdated => 'Avatar updated';
-	@override String get appearanceUpdated => '外观设置已更新';
+	@override String get appearanceUpdated => 'Appearance settings updated';
 }
 
 // Path: appearance
@@ -1350,12 +1354,12 @@ class _Translations$chat$tools$en extends Translations$chat$tools$zh {
 	@override late final _Translations$chat$tools$done$en done = _Translations$chat$tools$done$en._(_root);
 	@override late final _Translations$chat$tools$failed$en failed = _Translations$chat$tools$failed$en._(_root);
 	@override String get cancelled => 'Cancelled';
-	@override String get analyzeFinance => '正在分析財務狀況...';
-	@override String get forecastFinance => '正在預測財務趨勢...';
-	@override String get analyzeBudget => '正在分析預算...';
-	@override String get auditAnalysis => '正在審計分析...';
-	@override String get budgetOps => '正在處理預算...';
-	@override String get createSharedTransaction => '正在創建共享帳單...';
+	@override String get analyzeFinance => 'Analyzing financial status...';
+	@override String get forecastFinance => 'Forecasting financial trends...';
+	@override String get analyzeBudget => 'Analyzing budget...';
+	@override String get auditAnalysis => 'Performing audit analysis...';
+	@override String get budgetOps => 'Processing budget...';
+	@override String get createSharedTransaction => 'Creating shared bill...';
 	@override String get prepareBudgetSimulation => 'Preparing budget simulation';
 	@override String get simulateBudget => 'Simulating budget';
 }
@@ -1377,7 +1381,7 @@ class _Translations$chat$transferWizard$en extends Translations$chat$transferWiz
 	@override String get confirmTransfer => 'Confirm Transfer';
 	@override String get confirmed => 'Confirmed';
 	@override String get transferSuccess => 'Transfer Successful';
-	@override String get selectReceiveAccount => '选择收款账户';
+	@override String get selectReceiveAccount => 'Select receiving account';
 }
 
 // Path: chat.genui
@@ -1993,12 +1997,12 @@ class _Translations$chat$tools$done$en extends Translations$chat$tools$done$zh {
 	@override String get querySpaceSummary => 'Space summary ready';
 	@override String get prepareTransfer => 'Transfer ready';
 	@override String get unknown => 'Processing complete';
-	@override String get analyzeFinance => '財務分析完成';
-	@override String get forecastFinance => '財務預測完成';
-	@override String get analyzeBudget => '預算分析完成';
-	@override String get auditAnalysis => '審計分析完成';
-	@override String get budgetOps => '預算處理完成';
-	@override String get createSharedTransaction => '共享帳單創建完成';
+	@override String get analyzeFinance => 'Financial analysis complete';
+	@override String get forecastFinance => 'Financial forecast complete';
+	@override String get analyzeBudget => 'Budget analysis complete';
+	@override String get auditAnalysis => 'Audit analysis complete';
+	@override String get budgetOps => 'Budget processing complete';
+	@override String get createSharedTransaction => 'Shared bill creation complete';
 	@override String get prepareBudgetSimulation => 'Budget simulation prepared';
 	@override String get simulateBudget => 'Budget simulation completed';
 }
@@ -2220,7 +2224,7 @@ class _Translations$chat$genui$cashFlowCard$en extends Translations$chat$genui$c
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Cash Flow Analysis';
+	@override String get title => 'Cash Flow & Health Report';
 	@override String savingsRate({required Object rate}) => 'Savings ${rate}%';
 	@override String get totalIncome => 'Total Income';
 	@override String get totalExpense => 'Total Expense';
@@ -2236,8 +2240,8 @@ class _Translations$chat$genui$transactionConfirmation$en extends Translations$c
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get multipleAccounts => '检测到多个关联账户';
-	@override String get confirmed => '已确认';
+	@override String get multipleAccounts => 'Multiple linked accounts detected';
+	@override String get confirmed => 'Confirmed';
 }
 
 // Path: chat.genui.budgetAnalysis
@@ -2247,13 +2251,13 @@ class _Translations$chat$genui$budgetAnalysis$en extends Translations$chat$genui
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '预算分析报告';
-	@override String periodDays({required Object days}) => '过去 ${days} 天';
-	@override String get totalExpense => '总支出';
-	@override String momChange({required Object change}) => '环比 ${change}%';
-	@override String get categoryDistribution => '分类占比';
-	@override String get topSpenders => '大额支出';
-	@override String amountWan({required Object amount}) => '${amount}万';
+	@override String get title => 'Budget Analysis Report';
+	@override String periodDays({required Object days}) => 'Last ${days} days';
+	@override String get totalExpense => 'Total Expense';
+	@override String momChange({required Object change}) => 'MoM ${change}%';
+	@override String get categoryDistribution => 'Category Distribution';
+	@override String get topSpenders => 'Top Spenders';
+	@override String amountWan({required Object amount}) => '${amount}0K';
 }
 
 // Path: chat.genui.budgetSimulator
@@ -2263,17 +2267,17 @@ class _Translations$chat$genui$budgetSimulator$en extends Translations$chat$genu
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '預算壓力模擬器';
-	@override String get targetAmount => '目標預算金額';
-	@override String get overspendProbability => '預計超支機率';
-	@override String get riskLow => '風險極低';
-	@override String get riskMedium => '風險適中';
-	@override String get riskHigh => '超支高危';
-	@override String get evaluating => '正在評估歷史消費習慣...';
-	@override String get historyAverage => '歷史月均';
-	@override String get dailyAllowance => '每日限額';
-	@override String get cancel => '放棄';
-	@override String get confirm => '採用此預算';
+	@override String get title => 'Budget Stress Simulator';
+	@override String get targetAmount => 'Target Budget Amount';
+	@override String get overspendProbability => 'Predicted Overspend Probability';
+	@override String get riskLow => 'Very Low Risk';
+	@override String get riskMedium => 'Moderate Risk';
+	@override String get riskHigh => 'High Risk of Overspending';
+	@override String get evaluating => 'Evaluating historical spending habits...';
+	@override String get historyAverage => 'Historical Monthly Average';
+	@override String get dailyAllowance => 'Daily Allowance';
+	@override String get cancel => 'Discard';
+	@override String get confirm => 'Adopt This Budget';
 }
 
 // Path: chat.genui.error
@@ -2700,6 +2704,9 @@ extension on TranslationsEn {
 			'transaction.attachments' => ({required Object count}) => '${count} attachments',
 			'transaction.viewInConversation' => 'View more in conversation',
 			'transaction.statusPending' => 'Pending',
+			'transaction.notFoundTitle' => 'Transaction deleted',
+			'transaction.notFoundBody' => 'This transaction was deleted by its creator or an admin and can no longer be viewed.',
+			'transaction.backToPrevious' => 'Back',
 			'home.totalExpense' => 'Total Expense',
 			'home.todayExpense' => 'Today\'s',
 			'home.monthExpense' => 'This Month\'s',
@@ -2734,6 +2741,7 @@ extension on TranslationsEn {
 			'comment.note' => 'Note',
 			'comment.noNote' => 'No notes yet',
 			'comment.loadFailed' => 'Failed to load notes',
+			'comment.userToast' => ({required Object username}) => 'User @${username}',
 			'calendar.title' => 'Expense Calendar',
 			'calendar.weekdays.mon' => 'M',
 			'calendar.weekdays.tue' => 'T',
@@ -2828,7 +2836,7 @@ extension on TranslationsEn {
 			'settings.usernameRequired' => 'Username is required',
 			'settings.usernameUpdated' => 'Username updated',
 			'settings.avatarUpdated' => 'Avatar updated',
-			'settings.appearanceUpdated' => '外观设置已更新',
+			'settings.appearanceUpdated' => 'Appearance settings updated',
 			'appearance.title' => 'Appearance Settings',
 			'appearance.themeMode' => 'Theme Mode',
 			'appearance.light' => 'Light',
@@ -3065,6 +3073,8 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.pendingTitle' => 'Pending Transactions',
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} pending',
 			'forecast.recurringTransaction.confirm' => 'Confirm',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.skip' => 'Skip',
 			'forecast.recurringTransaction.noPending' => 'No pending transactions',
 			'forecast.recurringTransaction.confirmSuccess' => 'Transaction confirmed',
@@ -3076,8 +3086,6 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => 'Will execute on the ${day}${suffix} of each month (clamped for short months)',
 			'forecast.recurringTransaction.setEndDate' => 'Set End Date',
 			'forecast.recurringTransaction.selectEndDate' => 'Select End Date',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.preview' => 'Preview',
 			'forecast.recurringTransaction.daily' => 'Daily',
 			'forecast.recurringTransaction.weekly' => 'Weekly',
@@ -3197,22 +3205,22 @@ extension on TranslationsEn {
 			'chat.tools.done.querySpaceSummary' => 'Space summary ready',
 			'chat.tools.done.prepareTransfer' => 'Transfer ready',
 			'chat.tools.done.unknown' => 'Processing complete',
-			'chat.tools.done.analyzeFinance' => '財務分析完成',
-			'chat.tools.done.forecastFinance' => '財務預測完成',
-			'chat.tools.done.analyzeBudget' => '預算分析完成',
-			'chat.tools.done.auditAnalysis' => '審計分析完成',
-			'chat.tools.done.budgetOps' => '預算處理完成',
-			'chat.tools.done.createSharedTransaction' => '共享帳單創建完成',
+			'chat.tools.done.analyzeFinance' => 'Financial analysis complete',
+			'chat.tools.done.forecastFinance' => 'Financial forecast complete',
+			'chat.tools.done.analyzeBudget' => 'Budget analysis complete',
+			'chat.tools.done.auditAnalysis' => 'Audit analysis complete',
+			'chat.tools.done.budgetOps' => 'Budget processing complete',
+			'chat.tools.done.createSharedTransaction' => 'Shared bill creation complete',
 			'chat.tools.done.prepareBudgetSimulation' => 'Budget simulation prepared',
 			'chat.tools.done.simulateBudget' => 'Budget simulation completed',
 			'chat.tools.failed.unknown' => 'Action failed',
 			'chat.tools.cancelled' => 'Cancelled',
-			'chat.tools.analyzeFinance' => '正在分析財務狀況...',
-			'chat.tools.forecastFinance' => '正在預測財務趨勢...',
-			'chat.tools.analyzeBudget' => '正在分析預算...',
-			'chat.tools.auditAnalysis' => '正在審計分析...',
-			'chat.tools.budgetOps' => '正在處理預算...',
-			'chat.tools.createSharedTransaction' => '正在創建共享帳單...',
+			'chat.tools.analyzeFinance' => 'Analyzing financial status...',
+			'chat.tools.forecastFinance' => 'Forecasting financial trends...',
+			'chat.tools.analyzeBudget' => 'Analyzing budget...',
+			'chat.tools.auditAnalysis' => 'Performing audit analysis...',
+			'chat.tools.budgetOps' => 'Processing budget...',
+			'chat.tools.createSharedTransaction' => 'Creating shared bill...',
 			'chat.tools.prepareBudgetSimulation' => 'Preparing budget simulation',
 			'chat.tools.simulateBudget' => 'Simulating budget',
 			'chat.speechNotRecognized' => 'Speech not recognized, please try again',
@@ -3242,7 +3250,7 @@ extension on TranslationsEn {
 			'chat.transferWizard.confirmTransfer' => 'Confirm Transfer',
 			'chat.transferWizard.confirmed' => 'Confirmed',
 			'chat.transferWizard.transferSuccess' => 'Transfer Successful',
-			'chat.transferWizard.selectReceiveAccount' => '选择收款账户',
+			'chat.transferWizard.selectReceiveAccount' => 'Select receiving account',
 			'chat.genui.expenseSummary.totalExpense' => 'Total Expense',
 			'chat.genui.expenseSummary.mainExpenses' => 'Main Expenses',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => 'View all ${count} transactions',
@@ -3357,33 +3365,33 @@ extension on TranslationsEn {
 			'chat.genui.transactionCard.noSpace' => 'No shared spaces available',
 			'chat.genui.transactionCard.selectSpace' => 'Select Shared Space',
 			'chat.genui.transactionCard.linkedToSpace' => 'Linked to shared space',
-			'chat.genui.cashFlowCard.title' => 'Cash Flow Analysis',
+			'chat.genui.cashFlowCard.title' => 'Cash Flow & Health Report',
 			'chat.genui.cashFlowCard.savingsRate' => ({required Object rate}) => 'Savings ${rate}%',
 			'chat.genui.cashFlowCard.totalIncome' => 'Total Income',
 			'chat.genui.cashFlowCard.totalExpense' => 'Total Expense',
 			'chat.genui.cashFlowCard.essentialExpense' => 'Essential',
 			'chat.genui.cashFlowCard.discretionaryExpense' => 'Discretionary',
 			'chat.genui.cashFlowCard.aiInsight' => 'AI Insight',
-			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
-			'chat.genui.transactionConfirmation.confirmed' => '已确认',
-			'chat.genui.budgetAnalysis.title' => '预算分析报告',
-			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => '过去 ${days} 天',
-			'chat.genui.budgetAnalysis.totalExpense' => '总支出',
-			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => '环比 ${change}%',
-			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
-			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
-			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
-			'chat.genui.budgetSimulator.title' => '預算壓力模擬器',
-			'chat.genui.budgetSimulator.targetAmount' => '目標預算金額',
-			'chat.genui.budgetSimulator.overspendProbability' => '預計超支機率',
-			'chat.genui.budgetSimulator.riskLow' => '風險極低',
-			'chat.genui.budgetSimulator.riskMedium' => '風險適中',
-			'chat.genui.budgetSimulator.riskHigh' => '超支高危',
-			'chat.genui.budgetSimulator.evaluating' => '正在評估歷史消費習慣...',
-			'chat.genui.budgetSimulator.historyAverage' => '歷史月均',
-			'chat.genui.budgetSimulator.dailyAllowance' => '每日限額',
-			'chat.genui.budgetSimulator.cancel' => '放棄',
-			'chat.genui.budgetSimulator.confirm' => '採用此預算',
+			'chat.genui.transactionConfirmation.multipleAccounts' => 'Multiple linked accounts detected',
+			'chat.genui.transactionConfirmation.confirmed' => 'Confirmed',
+			'chat.genui.budgetAnalysis.title' => 'Budget Analysis Report',
+			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => 'Last ${days} days',
+			'chat.genui.budgetAnalysis.totalExpense' => 'Total Expense',
+			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => 'MoM ${change}%',
+			'chat.genui.budgetAnalysis.categoryDistribution' => 'Category Distribution',
+			'chat.genui.budgetAnalysis.topSpenders' => 'Top Spenders',
+			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}0K',
+			'chat.genui.budgetSimulator.title' => 'Budget Stress Simulator',
+			'chat.genui.budgetSimulator.targetAmount' => 'Target Budget Amount',
+			'chat.genui.budgetSimulator.overspendProbability' => 'Predicted Overspend Probability',
+			'chat.genui.budgetSimulator.riskLow' => 'Very Low Risk',
+			'chat.genui.budgetSimulator.riskMedium' => 'Moderate Risk',
+			'chat.genui.budgetSimulator.riskHigh' => 'High Risk of Overspending',
+			'chat.genui.budgetSimulator.evaluating' => 'Evaluating historical spending habits...',
+			'chat.genui.budgetSimulator.historyAverage' => 'Historical Monthly Average',
+			'chat.genui.budgetSimulator.dailyAllowance' => 'Daily Allowance',
+			'chat.genui.budgetSimulator.cancel' => 'Discard',
+			'chat.genui.budgetSimulator.confirm' => 'Adopt This Budget',
 			'chat.genui.error.title' => 'Rendering failed',
 			'chat.genui.error.fetchFailed' => 'Failed to load, please retry later.',
 			'chat.genui.error.dataIncomplete' => 'Incomplete data',
@@ -3579,6 +3587,8 @@ extension on TranslationsEn {
 			'financial.budgetManagement' => 'Budget Management',
 			'financial.recurringTransactions' => 'Recurring Transactions',
 			'financial.safetyThreshold' => 'Safety Threshold',
+			_ => null,
+		} ?? switch (path) {
 			'financial.dailyBurnRate' => 'Daily Burn Rate',
 			'financial.financialAssistant' => 'Financial Assistant',
 			'financial.manageFinancialSettings' => 'Manage your financial settings',
@@ -3590,8 +3600,6 @@ extension on TranslationsEn {
 			'financial.dailyBurnRateSaved' => 'Daily burn rate saved',
 			'financial.dayUnit' => 'day',
 			'financial.saveFailed' => 'Save failed',
-			_ => null,
-		} ?? switch (path) {
 			'financial.deleteFailed' => 'Delete failed, please try again later',
 			'financial.missingExchangeRates' => ({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}',
 			'financial.cashPocketTitle' => 'My Cash Pockets',

@@ -30,6 +30,7 @@ class VersionNotifier extends _$VersionNotifier {
     state = state.copyWith(isChecking: true, error: null);
     try {
       final result = await _service.checkUpdate();
+      if (!ref.mounted) return result;
       if (result != null) {
         state = state.copyWith(isChecking: false, updateInfo: result);
       } else {
@@ -40,10 +41,9 @@ class VersionNotifier extends _$VersionNotifier {
       }
       return result;
     } catch (e) {
-      // Reset the in-flight flag even on failure so the caller is never stuck
-      // in a perpetual checking state, then surface a safe, user-displayable
-      // error instead of leaking the raw exception text.
-      state = state.copyWith(isChecking: false, error: safeErrorMessage(e));
+      if (ref.mounted) {
+        state = state.copyWith(isChecking: false, error: safeErrorMessage(e));
+      }
       rethrow;
     }
   }

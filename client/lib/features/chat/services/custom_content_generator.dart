@@ -11,6 +11,7 @@ import 'package:finvo/features/chat/constants/genui_markers.dart';
 import 'package:finvo/features/chat/models/sse_event_models.dart';
 import 'package:finvo/features/chat/services/interaction_router.dart';
 import 'package:finvo/features/chat/services/sse_event_parsing.dart';
+import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 
 export '../models/sse_event_models.dart'
     show ToolCallStartEvent, ToolCallEndEvent;
@@ -596,7 +597,11 @@ class CustomContentGenerator implements genui.Transport {
 
         if (componentType == A2uiComponentTypes.transactionSuccess ||
             componentType == A2uiComponentTypes.transactionSuccessLegacy) {
-          final amount = (props['amount'] as num?)?.toDouble() ?? 0.0;
+          // Untrusted AI payload: AI frequently emits amounts as strings
+          // ("12.5"), which a bare `as num?` cast would reject — the
+          // resulting TypeError used to be swallowed by the outer catch and
+          // silently dropped the transaction event (home feed never updated).
+          final amount = GenUiNumUtils.toDouble(props['amount']);
           final type = props['transaction_type'] as String? ?? 'expense';
           final currency = props['currency'] as String? ?? 'CNY';
 
@@ -607,12 +612,12 @@ class CustomContentGenerator implements genui.Transport {
           onTransactionCreated?.call(amount, type, currency);
         } else if (componentType ==
             A2uiComponentTypes.transactionGroupReceipt) {
-          final summary = props['summary'] as Map<String, dynamic>?;
-          if (summary != null) {
-            final expenseTotal =
-                (summary['expense_total'] as num?)?.toDouble() ?? 0.0;
-            final incomeTotal =
-                (summary['income_total'] as num?)?.toDouble() ?? 0.0;
+          final summary = props['summary'];
+          if (summary is Map<String, dynamic>) {
+            final expenseTotal = GenUiNumUtils.toDouble(
+              summary['expense_total'],
+            );
+            final incomeTotal = GenUiNumUtils.toDouble(summary['income_total']);
 
             // Derive currency instead of hardcoding: prefer an explicit
             // summary currency, otherwise fall back to the first entry's

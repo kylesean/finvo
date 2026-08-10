@@ -85,7 +85,7 @@ class ExpenseSummaryCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
-          'Expense summary format error: $e',
+          t.chat.genui.error.title,
           style: TextStyle(
             color: context.theme.colors.mutedForeground,
             fontSize: 13,

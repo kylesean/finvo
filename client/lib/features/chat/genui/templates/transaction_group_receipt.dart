@@ -23,6 +23,7 @@ import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/error_display.dart';
 
 /// Batch transaction receipt component
 ///
@@ -941,7 +942,9 @@ class _TransactionGroupReceiptState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            t.chat.genui.transactionCard.updateFailed(error: e.toString()),
+            t.chat.genui.transactionCard.updateFailed(
+              error: friendlyErrorMessage(e),
+            ),
             style: const TextStyle(color: Colors.white),
           ),
           backgroundColor: context.theme.colors.destructive,

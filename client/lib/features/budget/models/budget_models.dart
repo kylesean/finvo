@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 /// Parses a JSON value into a [Decimal], tolerating null/empty/missing values
@@ -25,43 +26,9 @@ DateTime _parseDate(dynamic value) {
 /// Shared compact budget amount formatting: localized 万-suffix + thousands
 /// separators + trailing `.00` omission + negative sign.
 ///
-/// Previously duplicated (with inconsistent behavior — the detail page dropped
-/// the separators and swallowed the sign) in the overview and detail pages.
-String formatBudgetCompactAmount(Decimal amount) {
-  // Compute the sign first: the previous implementation computed it after the
-  // 万-branch, so negative amounts >= 10000 rendered without their sign
-  // (e.g. -20000 displayed as "2.0万"). All arithmetic stays in Decimal to
-  // avoid double-precision loss on large values.
-  final sign = amount < Decimal.zero ? '-' : '';
-  final absValue = amount.abs();
-
-  if (absValue >= Decimal.fromInt(10000)) {
-    // Divide in Decimal to avoid double-precision loss on large values.
-    final wanValue = (absValue / Decimal.fromInt(10000)).toDecimal();
-    // toStringAsFixed on Decimal is exact (no binary floating point), so the
-    // single-decimal rendering is stable for large amounts.
-    return '$sign${wanValue.toStringAsFixed(1)}${t.budget.tenThousandSuffix}';
-  }
-
-  final parts = absValue.toStringAsFixed(2).split('.');
-  final intPart = parts[0];
-  final decPart = parts[1];
-
-  var formatted = '';
-  var count = 0;
-  for (int i = intPart.length - 1; i >= 0; i--) {
-    if (count > 0 && count % 3 == 0) {
-      formatted = ',$formatted';
-    }
-    formatted = intPart[i] + formatted;
-    count++;
-  }
-
-  if (decPart == '00') {
-    return '$sign$formatted';
-  }
-  return '$sign$formatted.$decPart';
-}
+/// Delegated to [AmountFormatter.formatBudgetCompact] for presentation layer decoupling.
+String formatBudgetCompactAmount(Decimal amount) =>
+    AmountFormatter.formatBudgetCompact(amount);
 
 enum BudgetScope {
   total('TOTAL'),

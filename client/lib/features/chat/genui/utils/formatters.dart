@@ -5,6 +5,7 @@
 library;
 
 import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
 
 /// Formats a numeric amount with currency symbol
@@ -66,14 +67,11 @@ String getCurrencySymbol(String currency) {
   }
 }
 
-/// Formats ISO time string to HH:mm format
+/// Formats ISO time string to HH:mm format (local time).
 String formatTimeOnly(String isoTime) {
-  try {
-    final dateTime = DateTime.parse(isoTime);
-    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  } catch (e) {
-    return isoTime;
-  }
+  final dateTime = tryParseDateTime(isoTime);
+  if (dateTime == null) return isoTime;
+  return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
 }
 
 /// Formats ISO time string to a localized relative time (e.g. "3 minutes ago").
@@ -82,17 +80,16 @@ String formatTimeOnly(String isoTime) {
 /// strings instead of a duplicated, hardcoded-English implementation. Unparseable
 /// input is returned unchanged.
 String formatRelativeTime(String isoTime) {
-  final dateTime = DateTime.tryParse(isoTime);
+  // Parsed defensively and converted to local time so relative labels match
+  // the user's timezone.
+  final dateTime = tryParseDateTime(isoTime);
   if (dateTime == null) return isoTime;
   return relativeTime(dateTime);
 }
 
 /// Formats date to YYYY-MM-DD format
 String formatDate(String isoTime) {
-  try {
-    final dateTime = DateTime.parse(isoTime);
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
-  } catch (e) {
-    return isoTime;
-  }
+  final dateTime = tryParseDateTime(isoTime);
+  if (dateTime == null) return isoTime;
+  return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
 }

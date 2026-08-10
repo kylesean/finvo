@@ -205,6 +205,8 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       isListening: false,
       showError: true,
       speechErrorType: errorType,
+      // The enum name is not user-facing copy; keep it only as a diagnostic
+      // hint (the UI maps each type to localized text).
       errorMessage: errorType.name,
       hintType: HintType.normal,
     );

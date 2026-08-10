@@ -1,3 +1,5 @@
+import 'package:finvo/shared/utils/date_time_utils.dart';
+
 /// NotificationItem model for in-app notifications
 class NotificationItem {
   final String id;
@@ -31,12 +33,10 @@ class NotificationItem {
       message: json['message'] as String? ?? '',
       data: json['data'] as Map<String, dynamic>?,
       isRead: json['isRead'] as bool? ?? false,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      readAt: json['readAt'] != null
-          ? DateTime.parse(json['readAt'] as String)
-          : null,
+      // Defensive parse + local-time conversion: a single malformed timestamp
+      // must not break the whole notification list.
+      createdAt: tryParseDateTime(json['createdAt']) ?? DateTime.now(),
+      readAt: tryParseDateTime(json['readAt']),
     );
   }
 

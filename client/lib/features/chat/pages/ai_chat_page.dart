@@ -331,18 +331,33 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                       final message = messages[messages.length - 1 - index];
 
                       // Select appropriate message bubble based on sender and type
+                      // Keys are REQUIRED for reverse:true lists: appending a
+                      // message shifts every existing index, and without keys
+                      // Flutter reuses elements by index — every visible
+                      // ChatMessageWidget then gets a different message and
+                      // its memo cache is invalidated on every streamed chunk.
                       switch (message.sender) {
                         case app.MessageSender.user:
-                          return UserMessageBubble(message: message);
+                          return UserMessageBubble(
+                            key: message.id.isEmpty
+                                ? ObjectKey(message)
+                                : ValueKey('user_${message.id}'),
+                            message: message,
+                          );
 
                         case app.MessageSender.ai:
                         case app.MessageSender.assistant:
                         default:
                           // AI message with GenUI support
-                          return _buildAiMessageWithGenUi(
-                            context,
-                            message,
-                            chatHistoryNotifier,
+                          return KeyedSubtree(
+                            key: message.id.isEmpty
+                                ? ObjectKey(message)
+                                : ValueKey('ai_${message.id}'),
+                            child: _buildAiMessageWithGenUi(
+                              context,
+                              message,
+                              chatHistoryNotifier,
+                            ),
                           );
                       }
                     },

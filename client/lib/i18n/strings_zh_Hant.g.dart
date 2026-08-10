@@ -263,6 +263,9 @@ class _Translations$transaction$zh_Hant extends Translations$transaction$zh {
 	@override String get linkFailed => 'Link failed';
 	@override String get rawInput => 'Message';
 	@override String get noRawInput => 'No message';
+	@override String get notFoundTitle => '帳目已被刪除';
+	@override String get notFoundBody => '該帳目記錄已被發起人或管理員刪除，無法查看明細。';
+	@override String get backToPrevious => '返回上一頁';
 }
 
 // Path: home
@@ -314,6 +317,7 @@ class _Translations$comment$zh_Hant extends Translations$comment$zh {
 	@override String get note => '備註';
 	@override String get noNote => '暫無備註';
 	@override String get loadFailed => '載入備註失敗';
+	@override String userToast({required Object username}) => '用戶 @${username}';
 }
 
 // Path: calendar
@@ -2098,7 +2102,7 @@ class _Translations$chat$genui$cashFlowCard$zh_Hant extends Translations$chat$ge
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '現金流分析';
+	@override String get title => '現金流與健康報告';
 	@override String savingsRate({required Object rate}) => '儲蓄 ${rate}%';
 	@override String get totalIncome => '總收入';
 	@override String get totalExpense => '總支出';
@@ -2288,7 +2292,7 @@ class _Translations$chat$welcome$morning$zh_Hant extends Translations$chat$welco
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'Start your day by tracking';
+	@override String get subtitle => '新的一天，從記錄開始';
 	@override late final _Translations$chat$welcome$morning$breakfast$zh_Hant breakfast = _Translations$chat$welcome$morning$breakfast$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$morning$yesterdayReview$zh_Hant yesterdayReview = _Translations$chat$welcome$morning$yesterdayReview$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$morning$todayBudget$zh_Hant todayBudget = _Translations$chat$welcome$morning$todayBudget$zh_Hant._(_root);
@@ -2301,8 +2305,8 @@ class _Translations$chat$welcome$midday$zh_Hant extends Translations$chat$welcom
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get greeting => 'Good Afternoon';
-	@override String get subtitle => 'Quick record during lunch';
+	@override String get greeting => '午安';
+	@override String get subtitle => '午間時光，順手記一筆';
 	@override late final _Translations$chat$welcome$midday$lunch$zh_Hant lunch = _Translations$chat$welcome$midday$lunch$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$midday$weeklyExpense$zh_Hant weeklyExpense = _Translations$chat$welcome$midday$weeklyExpense$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$midday$checkBalance$zh_Hant checkBalance = _Translations$chat$welcome$midday$checkBalance$zh_Hant._(_root);
@@ -2315,7 +2319,7 @@ class _Translations$chat$welcome$afternoon$zh_Hant extends Translations$chat$wel
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'Tea time, let\'s review finances';
+	@override String get subtitle => '下午茶時間，理理財';
 	@override late final _Translations$chat$welcome$afternoon$quickRecord$zh_Hant quickRecord = _Translations$chat$welcome$afternoon$quickRecord$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$afternoon$analyzeSpending$zh_Hant analyzeSpending = _Translations$chat$welcome$afternoon$analyzeSpending$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$afternoon$budgetProgress$zh_Hant budgetProgress = _Translations$chat$welcome$afternoon$budgetProgress$zh_Hant._(_root);
@@ -2328,7 +2332,7 @@ class _Translations$chat$welcome$evening$zh_Hant extends Translations$chat$welco
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'End of day, time to balance the books';
+	@override String get subtitle => '辛苦一天，來理理帳';
 	@override late final _Translations$chat$welcome$evening$dinner$zh_Hant dinner = _Translations$chat$welcome$evening$dinner$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$evening$todaySummary$zh_Hant todaySummary = _Translations$chat$welcome$evening$todaySummary$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$evening$tomorrowPlan$zh_Hant tomorrowPlan = _Translations$chat$welcome$evening$tomorrowPlan$zh_Hant._(_root);
@@ -2341,8 +2345,8 @@ class _Translations$chat$welcome$night$zh_Hant extends Translations$chat$welcome
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get greeting => 'Late Night';
-	@override String get subtitle => 'Quiet time for financial planning';
+	@override String get greeting => '夜深了';
+	@override String get subtitle => '靜心理財，規劃未來';
 	@override late final _Translations$chat$welcome$night$makeupRecord$zh_Hant makeupRecord = _Translations$chat$welcome$night$makeupRecord$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$night$monthlyReview$zh_Hant monthlyReview = _Translations$chat$welcome$night$monthlyReview$zh_Hant._(_root);
 	@override late final _Translations$chat$welcome$night$financialThinking$zh_Hant financialThinking = _Translations$chat$welcome$night$financialThinking$zh_Hant._(_root);
@@ -2369,9 +2373,9 @@ class _Translations$chat$welcome$morning$breakfast$zh_Hant extends Translations$
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Breakfast';
-	@override String get prompt => 'Record breakfast expense';
-	@override String get description => 'Log today\'s first expense';
+	@override String get title => '早餐記帳';
+	@override String get prompt => '記一筆早餐';
+	@override String get description => '快速記錄今天的第一筆消費';
 }
 
 // Path: chat.welcome.morning.yesterdayReview
@@ -2381,9 +2385,9 @@ class _Translations$chat$welcome$morning$yesterdayReview$zh_Hant extends Transla
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Yesterday Review';
-	@override String get prompt => 'Analyze yesterday\'s spending';
-	@override String get description => 'Check how much you spent yesterday';
+	@override String get title => '昨日回顧';
+	@override String get prompt => '分析昨天的消費';
+	@override String get description => '看看昨天花了多少錢';
 }
 
 // Path: chat.welcome.morning.todayBudget
@@ -2393,9 +2397,9 @@ class _Translations$chat$welcome$morning$todayBudget$zh_Hant extends Translation
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Today\'s Budget';
-	@override String get prompt => 'How much budget left for today';
-	@override String get description => 'Plan your spending for today';
+	@override String get title => '今日預算';
+	@override String get prompt => '今天還剩多少預算';
+	@override String get description => '規劃一天的消費額度';
 }
 
 // Path: chat.welcome.midday.lunch
@@ -2405,9 +2409,9 @@ class _Translations$chat$welcome$midday$lunch$zh_Hant extends Translations$chat$
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Lunch';
-	@override String get prompt => 'Record lunch expense';
-	@override String get description => 'Log your lunch spending';
+	@override String get title => '午餐記帳';
+	@override String get prompt => '記一筆午餐';
+	@override String get description => '記錄午餐開銷';
 }
 
 // Path: chat.welcome.midday.weeklyExpense
@@ -2417,9 +2421,9 @@ class _Translations$chat$welcome$midday$weeklyExpense$zh_Hant extends Translatio
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Weekly Spending';
-	@override String get prompt => 'Analyze this week\'s spending';
-	@override String get description => 'See your weekly expenses';
+	@override String get title => '本週消費';
+	@override String get prompt => '分析本週消費';
+	@override String get description => '了解本週花費情況';
 }
 
 // Path: chat.welcome.midday.checkBalance
@@ -2429,9 +2433,9 @@ class _Translations$chat$welcome$midday$checkBalance$zh_Hant extends Translation
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Check Balance';
-	@override String get prompt => 'Check my account balance';
-	@override String get description => 'View your account balances';
+	@override String get title => '查看餘額';
+	@override String get prompt => '查看帳戶餘額';
+	@override String get description => '看看各帳戶還剩多少';
 }
 
 // Path: chat.welcome.afternoon.quickRecord
@@ -2441,9 +2445,9 @@ class _Translations$chat$welcome$afternoon$quickRecord$zh_Hant extends Translati
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Quick Record';
-	@override String get prompt => 'Help me record an expense';
-	@override String get description => 'Quickly log a transaction';
+	@override String get title => '隨手記帳';
+	@override String get prompt => '幫我記一筆';
+	@override String get description => '快速記錄一筆消費';
 }
 
 // Path: chat.welcome.afternoon.analyzeSpending
@@ -2453,9 +2457,9 @@ class _Translations$chat$welcome$afternoon$analyzeSpending$zh_Hant extends Trans
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Analyze Spending';
-	@override String get prompt => 'Analyze this month\'s spending';
-	@override String get description => 'View spending trends and breakdown';
+	@override String get title => '分析消費';
+	@override String get prompt => '分析本月消費';
+	@override String get description => '查看消費趨勢和構成';
 }
 
 // Path: chat.welcome.afternoon.budgetProgress
@@ -2465,9 +2469,9 @@ class _Translations$chat$welcome$afternoon$budgetProgress$zh_Hant extends Transl
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Budget Progress';
-	@override String get prompt => 'Check budget status';
-	@override String get description => 'See how your budget is doing';
+	@override String get title => '財務健康';
+	@override String get prompt => '評估我的財務健康';
+	@override String get description => '收支平衡評分與建議';
 }
 
 // Path: chat.welcome.evening.dinner
@@ -2477,9 +2481,9 @@ class _Translations$chat$welcome$evening$dinner$zh_Hant extends Translations$cha
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Dinner';
-	@override String get prompt => 'Record dinner expense';
-	@override String get description => 'Log tonight\'s dinner spending';
+	@override String get title => '晚餐記帳';
+	@override String get prompt => '記一筆晚餐';
+	@override String get description => '記錄今天的晚餐消費';
 }
 
 // Path: chat.welcome.evening.todaySummary
@@ -2489,9 +2493,9 @@ class _Translations$chat$welcome$evening$todaySummary$zh_Hant extends Translatio
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Today\'s Summary';
-	@override String get prompt => 'Summarize today\'s spending';
-	@override String get description => 'See what you spent today';
+	@override String get title => '今日總結';
+	@override String get prompt => '總結今天的消費';
+	@override String get description => '看看今天花了多少';
 }
 
 // Path: chat.welcome.evening.tomorrowPlan
@@ -2501,9 +2505,9 @@ class _Translations$chat$welcome$evening$tomorrowPlan$zh_Hant extends Translatio
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Tomorrow\'s Plan';
-	@override String get prompt => 'What fixed expenses tomorrow';
-	@override String get description => 'Plan ahead for tomorrow';
+	@override String get title => '明日計劃';
+	@override String get prompt => '明天有什麼固定支出';
+	@override String get description => '提前規劃明天的消費';
 }
 
 // Path: chat.welcome.night.makeupRecord
@@ -2513,9 +2517,9 @@ class _Translations$chat$welcome$night$makeupRecord$zh_Hant extends Translations
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Catch Up';
-	@override String get prompt => 'Help me log any missed expenses';
-	@override String get description => 'Record expenses you forgot today';
+	@override String get title => '補記今日';
+	@override String get prompt => '幫我補記今天的消費';
+	@override String get description => '把今天忘記的帳補上';
 }
 
 // Path: chat.welcome.night.monthlyReview
@@ -2525,9 +2529,9 @@ class _Translations$chat$welcome$night$monthlyReview$zh_Hant extends Translation
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Monthly Review';
-	@override String get prompt => 'Analyze this month\'s spending';
-	@override String get description => 'Review your monthly expenses';
+	@override String get title => '本月分析';
+	@override String get prompt => '詳細分析本月支出';
+	@override String get description => '回顧這個月的錢花哪了';
 }
 
 // Path: chat.welcome.night.financialThinking
@@ -2537,9 +2541,9 @@ class _Translations$chat$welcome$night$financialThinking$zh_Hant extends Transla
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Financial Tips';
-	@override String get prompt => 'Give me some financial advice';
-	@override String get description => 'Get AI-powered financial insights';
+	@override String get title => '未來預測';
+	@override String get prompt => '預測未來 30 天餘額';
+	@override String get description => '看清未來的財務趨勢';
 }
 
 /// The flat map containing all translations for locale <zh-Hant>.
@@ -2690,6 +2694,9 @@ extension on TranslationsZhHant {
 			'transaction.linkFailed' => 'Link failed',
 			'transaction.rawInput' => 'Message',
 			'transaction.noRawInput' => 'No message',
+			'transaction.notFoundTitle' => '帳目已被刪除',
+			'transaction.notFoundBody' => '該帳目記錄已被發起人或管理員刪除，無法查看明細。',
+			'transaction.backToPrevious' => '返回上一頁',
 			'home.totalExpense' => '總消費金額',
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
@@ -2723,6 +2730,7 @@ extension on TranslationsZhHant {
 			'comment.note' => '備註',
 			'comment.noNote' => '暫無備註',
 			'comment.loadFailed' => '載入備註失敗',
+			'comment.userToast' => ({required Object username}) => '用戶 @${username}',
 			'calendar.title' => '消費日曆',
 			'calendar.weekdays.mon' => '一',
 			'calendar.weekdays.tue' => '二',
@@ -3058,6 +3066,8 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.noPending' => '無待確認交易',
 			'forecast.recurringTransaction.confirmSuccess' => '已確認記帳',
 			'forecast.recurringTransaction.skipSuccess' => '已跳過',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.interval' => '重複間隔',
 			'forecast.recurringTransaction.selectDays' => '選擇星期',
 			'forecast.recurringTransaction.alwaysLastDay' => '固定在每月最後一天',
@@ -3069,8 +3079,6 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.daily' => '每天',
 			'forecast.recurringTransaction.weekly' => '每週',
 			'forecast.recurringTransaction.monthly' => '每月',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.yearly' => '每年',
 			'forecast.recurringTransaction.custom' => '自訂',
 			'forecast.recurringTransaction.cycle' => '週期',
@@ -3278,7 +3286,7 @@ extension on TranslationsZhHant {
 			'chat.genui.transactionCard.noSpace' => 'No shared spaces available',
 			'chat.genui.transactionCard.selectSpace' => 'Select Shared Space',
 			'chat.genui.transactionCard.linkedToSpace' => 'Linked to shared space',
-			'chat.genui.cashFlowCard.title' => '現金流分析',
+			'chat.genui.cashFlowCard.title' => '現金流與健康報告',
 			'chat.genui.cashFlowCard.savingsRate' => ({required Object rate}) => '儲蓄 ${rate}%',
 			'chat.genui.cashFlowCard.totalIncome' => '總收入',
 			'chat.genui.cashFlowCard.totalExpense' => '總支出',
@@ -3373,58 +3381,58 @@ extension on TranslationsZhHant {
 			'chat.genui.error.title' => '元件渲染失敗',
 			'chat.genui.error.fetchFailed' => '讀取失敗，請稍後再試。',
 			'chat.genui.error.dataIncomplete' => '資料不完整',
-			'chat.welcome.morning.subtitle' => 'Start your day by tracking',
-			'chat.welcome.morning.breakfast.title' => 'Breakfast',
-			'chat.welcome.morning.breakfast.prompt' => 'Record breakfast expense',
-			'chat.welcome.morning.breakfast.description' => 'Log today\'s first expense',
-			'chat.welcome.morning.yesterdayReview.title' => 'Yesterday Review',
-			'chat.welcome.morning.yesterdayReview.prompt' => 'Analyze yesterday\'s spending',
-			'chat.welcome.morning.yesterdayReview.description' => 'Check how much you spent yesterday',
-			'chat.welcome.morning.todayBudget.title' => 'Today\'s Budget',
-			'chat.welcome.morning.todayBudget.prompt' => 'How much budget left for today',
-			'chat.welcome.morning.todayBudget.description' => 'Plan your spending for today',
-			'chat.welcome.midday.greeting' => 'Good Afternoon',
-			'chat.welcome.midday.subtitle' => 'Quick record during lunch',
-			'chat.welcome.midday.lunch.title' => 'Lunch',
-			'chat.welcome.midday.lunch.prompt' => 'Record lunch expense',
-			'chat.welcome.midday.lunch.description' => 'Log your lunch spending',
-			'chat.welcome.midday.weeklyExpense.title' => 'Weekly Spending',
-			'chat.welcome.midday.weeklyExpense.prompt' => 'Analyze this week\'s spending',
-			'chat.welcome.midday.weeklyExpense.description' => 'See your weekly expenses',
-			'chat.welcome.midday.checkBalance.title' => 'Check Balance',
-			'chat.welcome.midday.checkBalance.prompt' => 'Check my account balance',
-			'chat.welcome.midday.checkBalance.description' => 'View your account balances',
-			'chat.welcome.afternoon.subtitle' => 'Tea time, let\'s review finances',
-			'chat.welcome.afternoon.quickRecord.title' => 'Quick Record',
-			'chat.welcome.afternoon.quickRecord.prompt' => 'Help me record an expense',
-			'chat.welcome.afternoon.quickRecord.description' => 'Quickly log a transaction',
-			'chat.welcome.afternoon.analyzeSpending.title' => 'Analyze Spending',
-			'chat.welcome.afternoon.analyzeSpending.prompt' => 'Analyze this month\'s spending',
-			'chat.welcome.afternoon.analyzeSpending.description' => 'View spending trends and breakdown',
-			'chat.welcome.afternoon.budgetProgress.title' => 'Budget Progress',
-			'chat.welcome.afternoon.budgetProgress.prompt' => 'Check budget status',
-			'chat.welcome.afternoon.budgetProgress.description' => 'See how your budget is doing',
-			'chat.welcome.evening.subtitle' => 'End of day, time to balance the books',
-			'chat.welcome.evening.dinner.title' => 'Dinner',
-			'chat.welcome.evening.dinner.prompt' => 'Record dinner expense',
-			'chat.welcome.evening.dinner.description' => 'Log tonight\'s dinner spending',
-			'chat.welcome.evening.todaySummary.title' => 'Today\'s Summary',
-			'chat.welcome.evening.todaySummary.prompt' => 'Summarize today\'s spending',
-			'chat.welcome.evening.todaySummary.description' => 'See what you spent today',
-			'chat.welcome.evening.tomorrowPlan.title' => 'Tomorrow\'s Plan',
-			'chat.welcome.evening.tomorrowPlan.prompt' => 'What fixed expenses tomorrow',
-			'chat.welcome.evening.tomorrowPlan.description' => 'Plan ahead for tomorrow',
-			'chat.welcome.night.greeting' => 'Late Night',
-			'chat.welcome.night.subtitle' => 'Quiet time for financial planning',
-			'chat.welcome.night.makeupRecord.title' => 'Catch Up',
-			'chat.welcome.night.makeupRecord.prompt' => 'Help me log any missed expenses',
-			'chat.welcome.night.makeupRecord.description' => 'Record expenses you forgot today',
-			'chat.welcome.night.monthlyReview.title' => 'Monthly Review',
-			'chat.welcome.night.monthlyReview.prompt' => 'Analyze this month\'s spending',
-			'chat.welcome.night.monthlyReview.description' => 'Review your monthly expenses',
-			'chat.welcome.night.financialThinking.title' => 'Financial Tips',
-			'chat.welcome.night.financialThinking.prompt' => 'Give me some financial advice',
-			'chat.welcome.night.financialThinking.description' => 'Get AI-powered financial insights',
+			'chat.welcome.morning.subtitle' => '新的一天，從記錄開始',
+			'chat.welcome.morning.breakfast.title' => '早餐記帳',
+			'chat.welcome.morning.breakfast.prompt' => '記一筆早餐',
+			'chat.welcome.morning.breakfast.description' => '快速記錄今天的第一筆消費',
+			'chat.welcome.morning.yesterdayReview.title' => '昨日回顧',
+			'chat.welcome.morning.yesterdayReview.prompt' => '分析昨天的消費',
+			'chat.welcome.morning.yesterdayReview.description' => '看看昨天花了多少錢',
+			'chat.welcome.morning.todayBudget.title' => '今日預算',
+			'chat.welcome.morning.todayBudget.prompt' => '今天還剩多少預算',
+			'chat.welcome.morning.todayBudget.description' => '規劃一天的消費額度',
+			'chat.welcome.midday.greeting' => '午安',
+			'chat.welcome.midday.subtitle' => '午間時光，順手記一筆',
+			'chat.welcome.midday.lunch.title' => '午餐記帳',
+			'chat.welcome.midday.lunch.prompt' => '記一筆午餐',
+			'chat.welcome.midday.lunch.description' => '記錄午餐開銷',
+			'chat.welcome.midday.weeklyExpense.title' => '本週消費',
+			'chat.welcome.midday.weeklyExpense.prompt' => '分析本週消費',
+			'chat.welcome.midday.weeklyExpense.description' => '了解本週花費情況',
+			'chat.welcome.midday.checkBalance.title' => '查看餘額',
+			'chat.welcome.midday.checkBalance.prompt' => '查看帳戶餘額',
+			'chat.welcome.midday.checkBalance.description' => '看看各帳戶還剩多少',
+			'chat.welcome.afternoon.subtitle' => '下午茶時間，理理財',
+			'chat.welcome.afternoon.quickRecord.title' => '隨手記帳',
+			'chat.welcome.afternoon.quickRecord.prompt' => '幫我記一筆',
+			'chat.welcome.afternoon.quickRecord.description' => '快速記錄一筆消費',
+			'chat.welcome.afternoon.analyzeSpending.title' => '分析消費',
+			'chat.welcome.afternoon.analyzeSpending.prompt' => '分析本月消費',
+			'chat.welcome.afternoon.analyzeSpending.description' => '查看消費趨勢和構成',
+			'chat.welcome.afternoon.budgetProgress.title' => '財務健康',
+			'chat.welcome.afternoon.budgetProgress.prompt' => '評估我的財務健康',
+			'chat.welcome.afternoon.budgetProgress.description' => '收支平衡評分與建議',
+			'chat.welcome.evening.subtitle' => '辛苦一天，來理理帳',
+			'chat.welcome.evening.dinner.title' => '晚餐記帳',
+			'chat.welcome.evening.dinner.prompt' => '記一筆晚餐',
+			'chat.welcome.evening.dinner.description' => '記錄今天的晚餐消費',
+			'chat.welcome.evening.todaySummary.title' => '今日總結',
+			'chat.welcome.evening.todaySummary.prompt' => '總結今天的消費',
+			'chat.welcome.evening.todaySummary.description' => '看看今天花了多少',
+			'chat.welcome.evening.tomorrowPlan.title' => '明日計劃',
+			'chat.welcome.evening.tomorrowPlan.prompt' => '明天有什麼固定支出',
+			'chat.welcome.evening.tomorrowPlan.description' => '提前規劃明天的消費',
+			'chat.welcome.night.greeting' => '夜深了',
+			'chat.welcome.night.subtitle' => '靜心理財，規劃未來',
+			'chat.welcome.night.makeupRecord.title' => '補記今日',
+			'chat.welcome.night.makeupRecord.prompt' => '幫我補記今天的消費',
+			'chat.welcome.night.makeupRecord.description' => '把今天忘記的帳補上',
+			'chat.welcome.night.monthlyReview.title' => '本月分析',
+			'chat.welcome.night.monthlyReview.prompt' => '詳細分析本月支出',
+			'chat.welcome.night.monthlyReview.description' => '回顧這個月的錢花哪了',
+			'chat.welcome.night.financialThinking.title' => '未來預測',
+			'chat.welcome.night.financialThinking.prompt' => '預測未來 30 天餘額',
+			'chat.welcome.night.financialThinking.description' => '看清未來的財務趨勢',
 			'chat.shareComingSoon' => '分享功能即將上線...',
 			'chat.invalidAttachmentLink' => '無效的附件連結',
 			'chat.unableToOpenAttachmentLink' => '無法開啟附件連結',
@@ -3572,6 +3580,8 @@ extension on TranslationsZhHant {
 			'financial.setSafetyThreshold' => '設置您的財務安全閾值',
 			'financial.safetyThresholdSaved' => '財務安全線已保存',
 			'financial.dailyBurnRateSettings' => '日常消費預估',
+			_ => null,
+		} ?? switch (path) {
 			'financial.setDailyBurnRate' => '設置您的日常消費預估金額',
 			'financial.dailyBurnRateSaved' => '日常消費預估已保存',
 			'financial.dayUnit' => '天',
@@ -3583,8 +3593,6 @@ extension on TranslationsZhHant {
 			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',
 			'financial.neverUpdated' => '從未更新',
 			'financial.updateNow' => '立即更新',
-			_ => null,
-		} ?? switch (path) {
 			'app.splashTitle' => '智見增長，格物致富。',
 			'app.splashSubtitle' => '智能財務助手',
 			'statistics.title' => '統計分析',

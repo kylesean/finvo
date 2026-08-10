@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/features/chat/models/chat_message.dart';
 import 'package:finvo/features/chat/models/tool_call_info.dart';
 import 'package:finvo/features/chat/providers/chat_history_provider.dart';
@@ -53,13 +54,13 @@ double conversationTotalExpense(Ref ref) {
     chatHistoryProvider.select((state) => state.messages),
   );
 
-  double totalExpense = 0.0;
+  Decimal totalExpense = Decimal.zero;
 
   for (final message in messages) {
     totalExpense += scanMessageExpense(message);
   }
 
-  return totalExpense;
+  return totalExpense.toDouble();
 }
 
 /// Scan a single message for expense amounts.
@@ -67,8 +68,11 @@ double conversationTotalExpense(Ref ref) {
 /// Extracts expenses from UI components and tool calls, deduplicating by
 /// toolCallId so the same transaction rendered as both a component and a
 /// tool call is counted once. Only successful tool calls are counted.
-double scanMessageExpense(ChatMessage message) {
-  double total = 0.0;
+///
+/// Accumulates in [Decimal] to avoid floating-point drift across many
+/// transactions; callers convert to double only for display.
+Decimal scanMessageExpense(ChatMessage message) {
+  Decimal total = Decimal.zero;
   final countedToolCallIds = <String>{};
 
   // Tool calls are the canonical source of executed transactions.
@@ -79,7 +83,7 @@ double scanMessageExpense(ChatMessage message) {
     }
 
     final expense = _expenseFromToolCall(messageToolCall);
-    if (expense > 0) {
+    if (expense > Decimal.zero) {
       total += expense;
       countedToolCallIds.add(messageToolCall.id);
     }
@@ -93,7 +97,7 @@ double scanMessageExpense(ChatMessage message) {
     }
 
     final expense = _expenseFromUiComponent(component);
-    if (expense > 0) {
+    if (expense > Decimal.zero) {
       total += expense;
     }
   }
@@ -102,17 +106,17 @@ double scanMessageExpense(ChatMessage message) {
 }
 
 /// Extract expense amount from a single UI component, or 0 if not expense.
-double _expenseFromUiComponent(UIComponentInfo component) {
+Decimal _expenseFromUiComponent(UIComponentInfo component) {
   if (component.toolName == 'create_transaction') {
     final data = component.userSelection ?? component.data;
-    if (data.isEmpty) return 0.0;
+    if (data.isEmpty) return Decimal.zero;
 
     final type =
         data['transaction_type'] as String? ??
         data['type'] as String? ??
         'expense';
 
-    if (type.toLowerCase() != 'expense') return 0.0;
+    if (type.toLowerCase() != 'expense') return Decimal.zero;
 
     return _parseAmount(data['amount']);
   }
@@ -120,39 +124,41 @@ double _expenseFromUiComponent(UIComponentInfo component) {
   if (component.toolName == 'record_transactions' ||
       component.toolName == 'record_shared_transactions') {
     final data = component.userSelection ?? component.data;
-    if (data.isEmpty) return 0.0;
+    if (data.isEmpty) return Decimal.zero;
 
-    final summary = data['summary'] as Map<String, dynamic>?;
-    if (summary != null) {
+    // AI-generated data is untrusted: guard the cast instead of assuming the
+    // shape promised by the tool contract.
+    final summary = data['summary'];
+    if (summary is Map<String, dynamic>) {
       final expenseTotal = _parseAmount(summary['expense_total']);
-      if (expenseTotal > 0) {
+      if (expenseTotal > Decimal.zero) {
         return expenseTotal;
       }
     }
-    return 0.0;
+    return Decimal.zero;
   }
 
   if (component.toolName == 'create_space_transaction') {
     final data = component.userSelection ?? component.data;
-    if (data.isEmpty) return 0.0;
+    if (data.isEmpty) return Decimal.zero;
 
     final type = data['type'] as String? ?? 'expense';
-    if (type.toLowerCase() != 'expense') return 0.0;
+    if (type.toLowerCase() != 'expense') return Decimal.zero;
 
     return _parseAmount(data['amount']);
   }
 
-  return 0.0;
+  return Decimal.zero;
 }
 
 /// Extract expense amount from a single tool call, or 0 if not expense.
-double _expenseFromToolCall(ToolCallInfo messageToolCall) {
+Decimal _expenseFromToolCall(ToolCallInfo messageToolCall) {
   if (messageToolCall.name == 'create_transaction') {
     final args = messageToolCall.args;
-    if (args.isEmpty) return 0.0;
+    if (args.isEmpty) return Decimal.zero;
 
     final type = args['transaction_type'] as String? ?? 'expense';
-    if (type.toLowerCase() != 'expense') return 0.0;
+    if (type.toLowerCase() != 'expense') return Decimal.zero;
 
     return _parseAmount(args['amount']);
   }
@@ -160,19 +166,21 @@ double _expenseFromToolCall(ToolCallInfo messageToolCall) {
   if (messageToolCall.name == 'record_transactions' ||
       messageToolCall.name == 'record_shared_transactions') {
     final args = messageToolCall.args;
-    if (args.isEmpty) return 0.0;
+    if (args.isEmpty) return Decimal.zero;
 
-    final transactions = args['transactions'] as List<dynamic>?;
-    if (transactions == null) return 0.0;
+    // Untrusted AI payload: skip malformed entries instead of throwing.
+    final transactions = args['transactions'];
+    if (transactions is! List) return Decimal.zero;
 
-    double total = 0.0;
+    Decimal total = Decimal.zero;
     for (final tx in transactions) {
-      final txMap = tx as Map<String, dynamic>;
-      final type = txMap['type'] as String? ?? 'expense';
+      if (tx is! Map<String, dynamic>) continue;
+
+      final type = tx['type'] as String? ?? 'expense';
       if (type.toLowerCase() != 'expense') continue;
 
-      final amount = _parseAmount(txMap['amount']);
-      if (amount > 0) {
+      final amount = _parseAmount(tx['amount']);
+      if (amount > Decimal.zero) {
         total += amount;
       }
     }
@@ -181,24 +189,24 @@ double _expenseFromToolCall(ToolCallInfo messageToolCall) {
 
   if (messageToolCall.name == 'create_space_transaction') {
     final args = messageToolCall.args;
-    if (args.isEmpty) return 0.0;
+    if (args.isEmpty) return Decimal.zero;
 
     final type = args['transaction_type'] as String? ?? 'expense';
-    if (type.toLowerCase() != 'expense') return 0.0;
+    if (type.toLowerCase() != 'expense') return Decimal.zero;
 
     return _parseAmount(args['amount']);
   }
 
-  return 0.0;
+  return Decimal.zero;
 }
 
-/// Parse amount, supporting multiple types
-double _parseAmount(dynamic value) {
-  if (value == null) return 0.0;
-  if (value is double) return value;
-  if (value is int) return value.toDouble();
-  if (value is String) return double.tryParse(value) ?? 0.0;
-  return 0.0;
+/// Parse amount, supporting multiple types. Returns [Decimal] so callers can
+/// accumulate without floating-point drift.
+Decimal _parseAmount(dynamic value) {
+  if (value == null) return Decimal.zero;
+  if (value is num) return Decimal.parse(value.toString());
+  if (value is String) return Decimal.tryParse(value) ?? Decimal.zero;
+  return Decimal.zero;
 }
 
 /// Formatted current conversation expense title Provider

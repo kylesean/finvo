@@ -5,7 +5,7 @@ import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/notification/repositories/notification_repository.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
-import 'package:finvo/features/notification/utils/notification_list_mutations.dart';
+import 'package:finvo/features/notification/utils/notification_crud_mixin.dart';
 import 'package:finvo/features/shared_space/models/shared_space_models.dart';
 
 part 'shared_space_notification_provider.g.dart';
@@ -54,8 +54,60 @@ class SharedSpaceNotificationState {
 /// Delegates generic notification CRUD to the central NotificationRepository.
 /// Only adds space-specific logic (respondToSpaceInvite).
 @riverpod
-class SharedSpaceNotification extends _$SharedSpaceNotification {
+class SharedSpaceNotification extends _$SharedSpaceNotification
+    with
+        NotificationCrudMixin<NotificationModel, SharedSpaceNotificationState> {
   static const _pageSize = 20;
+
+  // ============================================================
+  // NotificationCrudMixin accessors
+  // ============================================================
+
+  @override
+  SharedSpaceNotificationState get notificationState => state;
+
+  @override
+  set notificationState(SharedSpaceNotificationState value) => state = value;
+
+  @override
+  List<NotificationModel> get notificationItems => state.notifications;
+
+  @override
+  int get notificationUnreadCount => state.unreadCount;
+
+  @override
+  int? get notificationTotal => null;
+
+  @override
+  SharedSpaceNotificationState updateNotificationState(
+    List<NotificationModel> items, {
+    int? unreadCount,
+    int? total,
+  }) => state.copyWith(notifications: items, unreadCount: unreadCount);
+
+  @override
+  String notificationIdOf(NotificationModel item) => item.id;
+
+  @override
+  bool notificationIsReadOf(NotificationModel item) => item.isRead;
+
+  @override
+  NotificationModel notificationMarkRead(
+    NotificationModel item, {
+    required DateTime readAt,
+  }) => item.isRead ? item : item.copyWith(isRead: true, readAt: readAt);
+
+  @override
+  Future<bool> markNotificationReadRemote(String id) async =>
+      _repository.markAsRead(id);
+
+  @override
+  Future<bool> markAllNotificationsReadRemote() async =>
+      _repository.markAllAsRead();
+
+  @override
+  Future<bool> deleteNotificationRemote(String id) async =>
+      _repository.deleteNotification(id);
 
   @override
   SharedSpaceNotificationState build() {
@@ -118,77 +170,6 @@ class SharedSpaceNotification extends _$SharedSpaceNotification {
         isLoading: false,
         error: e is AppException ? e.message : 'Failed to load notifications',
       );
-    }
-  }
-
-  /// Mark notification as read
-  Future<void> markAsRead(String notificationId) async {
-    final success = await _repository.markAsRead(notificationId);
-    if (!success) return;
-
-    final result = NotificationListMutations.markAsRead(
-      items: state.notifications,
-      unreadCount: state.unreadCount,
-      id: notificationId,
-      idOf: (n) => n.id,
-      isReadOf: (n) => n.isRead,
-      withReadAt: (n) =>
-          n.isRead ? n : n.copyWith(isRead: true, readAt: DateTime.now()),
-    );
-    state = state.copyWith(
-      notifications: result.items,
-      unreadCount: result.unreadCount,
-    );
-  }
-
-  /// Mark all as read
-  Future<void> markAllAsRead() async {
-    final success = await _repository.markAllAsRead();
-    if (!success) return;
-
-    final result = NotificationListMutations.markAllAsRead(
-      items: state.notifications,
-      withRead: (n) =>
-          n.isRead ? n : n.copyWith(isRead: true, readAt: DateTime.now()),
-    );
-    state = state.copyWith(
-      notifications: result.items,
-      unreadCount: result.unreadCount,
-    );
-  }
-
-  /// Delete notification
-  Future<void> deleteNotification(String notificationId) async {
-    final item = state.notifications
-        .where((n) => n.id == notificationId)
-        .firstOrNull;
-    if (item == null) return;
-
-    // Optimistically remove from state for responsive UI
-    final result = NotificationListMutations.delete(
-      items: state.notifications,
-      unreadCount: state.unreadCount,
-      id: notificationId,
-      idOf: (n) => n.id,
-      isReadOf: (n) => n.isRead,
-    );
-    state = state.copyWith(
-      notifications: result.items,
-      unreadCount: result.unreadCount,
-    );
-
-    // Skip network deletion call for synthetic local-only IDs (rt_)
-    if (notificationId.startsWith('rt_')) return;
-
-    try {
-      final success = await _repository.deleteNotification(notificationId);
-      if (!success) {
-        _logger.warning(
-          'deleteNotification API failed for notification $notificationId',
-        );
-      }
-    } catch (e) {
-      _logger.warning('deleteNotification error for $notificationId', e);
     }
   }
 

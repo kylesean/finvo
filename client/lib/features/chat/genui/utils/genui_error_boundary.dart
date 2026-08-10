@@ -17,7 +17,16 @@ final _logger = Logger('GenUiErrorBoundary');
 /// )
 /// ```
 class GenUiErrorBoundary extends StatefulWidget {
-  final Widget child;
+  /// Either [child] or [builder] must be provided.
+  ///
+  /// Prefer [builder] when the subtree is expensive to construct: the builder
+  /// is invoked inside this boundary's [State.build], so exceptions raised
+  /// while constructing the subtree are caught here and degrade gracefully.
+  /// A plain [child] widget is already constructed by the caller, so errors
+  /// thrown later by the child's own `build` cannot be caught here — those are
+  /// handled by the global [ErrorWidget.builder] fallback instead.
+  final Widget? child;
+  final Widget Function(BuildContext context)? builder;
   final String componentName;
   final Map<String, dynamic>? data;
 
@@ -26,11 +35,15 @@ class GenUiErrorBoundary extends StatefulWidget {
 
   const GenUiErrorBoundary({
     super.key,
-    required this.child,
+    this.child,
+    this.builder,
     required this.componentName,
     this.data,
     this.onError,
-  });
+  }) : assert(
+         child != null || builder != null,
+         'Either child or builder must be provided',
+       );
 
   @override
   State<GenUiErrorBoundary> createState() => _GenUiErrorBoundaryState();
@@ -48,24 +61,28 @@ class _GenUiErrorBoundaryState extends State<GenUiErrorBoundary> {
       );
     }
 
-    // Use ErrorWidget.builder to catch rendering errors
-    return Builder(
-      builder: (context) {
-        try {
-          return widget.child;
-        } catch (e, stack) {
-          _handleError(e, stack);
-          return _FallbackWidget(
-            componentName: widget.componentName,
-            error: e.toString(),
-          );
-        }
-      },
-    );
+    // Construct the guarded subtree inside this build so any exception raised
+    // during construction (e.g. parsing untrusted AI data in a builder) is
+    // caught here and degrades to the fallback UI. Errors thrown later by a
+    // child widget's own build are outside this frame and are surfaced by the
+    // global ErrorWidget.builder set up in main.dart.
+    try {
+      final builder = widget.builder;
+      if (builder != null) {
+        return builder(context);
+      }
+      return widget.child!;
+    } catch (e, stack) {
+      _handleError(e, stack);
+      return _FallbackWidget(
+        componentName: widget.componentName,
+        error: e.toString(),
+      );
+    }
   }
 
   void _handleError(Object error, StackTrace? stackTrace) {
-    _logger.info(
+    _logger.warning(
       'GenUiErrorBoundary: Error in ${widget.componentName}',
       error,
       stackTrace,

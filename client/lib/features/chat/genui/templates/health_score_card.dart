@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
@@ -80,7 +81,8 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
     final colors = theme.colors;
 
     final grade = widget.data['grade'] as String? ?? 'C';
-    final totalScore = (widget.data['totalScore'] as num?)?.toInt() ?? 0;
+    // Untrusted AI data: score may arrive as a string, keep the cast safe.
+    final totalScore = GenUiNumUtils.toInt(widget.data['totalScore']);
     final dimensions = widget.data['dimensions'] as List? ?? [];
     final suggestions = widget.data['suggestions'] as List? ?? [];
     final semantic = theme.semantic;
@@ -176,7 +178,11 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
                 const SizedBox(height: 16),
                 // Dimensions
                 ...dimensions.map((dim) {
-                  final dimMap = dim as Map<String, dynamic>;
+                  // Untrusted AI data: skip malformed dimension entries.
+                  if (dim is! Map<String, dynamic>) {
+                    return const SizedBox.shrink();
+                  }
+                  final dimMap = dim;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _buildDimensionBar(context, dimMap),
@@ -229,7 +235,7 @@ class _HealthScoreAnalysisCardState extends State<HealthScoreAnalysisCard> {
     final colors = theme.colors;
 
     final name = dimension['name'] as String? ?? '';
-    final score = (dimension['score'] as num?)?.toInt() ?? 0;
+    final score = GenUiNumUtils.toInt(dimension['score']);
     final description = dimension['description'] as String? ?? '';
     final status = dimension['status'] as String? ?? 'fair';
     final semantic = theme.semantic;

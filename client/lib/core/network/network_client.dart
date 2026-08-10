@@ -16,6 +16,45 @@ class NetworkClient {
 
   Dio get dio => _dio;
 
+  /// Unwrap the common `{ "data": ... }` response envelope used by the backend.
+  ///
+  /// Shared by every service's `fromJsonT` to avoid near-identical unwrap
+  /// boilerplate (previously duplicated in profile/budget/home/comment/
+  /// shared_space/notification services):
+  /// - Non-object envelopes and non-object/`null` payloads raise
+  ///   [DataParsingException] with a consistent message (unless [onNull]
+  ///   supplies a fallback for a null payload).
+  /// - Decode failures are re-wrapped so the raw parser error never leaks.
+  T unwrapData<T>(
+    Object? json,
+    T Function(Map<String, dynamic> data) fromJson, {
+    required String endpoint,
+    T Function()? onNull,
+  }) {
+    if (json is! Map<String, dynamic>) {
+      throw DataParsingException(
+        'API $endpoint expects an object, but received ${json.runtimeType}',
+      );
+    }
+    final data = json['data'];
+    if (data == null) {
+      if (onNull != null) return onNull();
+      throw DataParsingException('data field is null');
+    }
+    if (data is! Map<String, dynamic>) {
+      throw DataParsingException(
+        'data field is not an object, but ${data.runtimeType}',
+      );
+    }
+    try {
+      return fromJson(data);
+    } catch (e) {
+      throw DataParsingException(
+        'Failed to parse $endpoint response: ${e.toString()}',
+      );
+    }
+  }
+
   /// Generic network request method
   /// - [path]: API relative path
   /// - [method]: HTTP method (GET, POST, etc.)

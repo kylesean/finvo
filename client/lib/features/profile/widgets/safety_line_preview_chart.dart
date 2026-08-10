@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'dart:math' as math;
+import 'package:finvo/shared/utils/amount_formatter.dart';
 
 /// Safety line preview chart component
 class SafetyLinePreviewChart extends StatefulWidget {
@@ -158,9 +159,9 @@ class SafetyLineChartPainter extends CustomPainter {
     paint.color = Colors.red;
     paint.strokeWidth = 2;
 
-    // Calculate safety line Y position
+    // Calculate safety line Y position dynamically
     final chartHeight = size.height - 60;
-    const maxValue = 8000.0; // Chart max value
+    final maxValue = math.max(8000.0, safetyLineValue * 1.25);
     final safetyLineY =
         20 + chartHeight - (safetyLineValue / maxValue * chartHeight);
 
@@ -173,7 +174,8 @@ class SafetyLineChartPainter extends CustomPainter {
     );
 
     // Draw safety line label background
-    final labelText = 'Safety Line ¥${safetyLineValue.toInt()}';
+    final symbol = AmountFormatter.getCurrencySymbol('CNY');
+    final labelText = 'Safety Line $symbol${safetyLineValue.toInt()}';
     final textPainter = TextPainter(
       text: TextSpan(
         text: labelText,

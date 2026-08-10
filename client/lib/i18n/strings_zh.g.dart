@@ -519,6 +519,15 @@ class Translations$transaction$zh {
 
 	/// zh: '待确认'
 	String get statusPending => '待确认';
+
+	/// zh: '账目已被删除'
+	String get notFoundTitle => '账目已被删除';
+
+	/// zh: '该账目记录已被发起人或管理员删除，无法查看明细。'
+	String get notFoundBody => '该账目记录已被发起人或管理员删除，无法查看明细。';
+
+	/// zh: '返回上一页'
+	String get backToPrevious => '返回上一页';
 }
 
 // Path: home
@@ -639,6 +648,9 @@ class Translations$comment$zh {
 
 	/// zh: '加载备注失败'
 	String get loadFailed => '加载备注失败';
+
+	/// zh: '用户 @$username'
+	String userToast({required Object username}) => '用户 @${username}';
 }
 
 // Path: calendar
@@ -4190,8 +4202,8 @@ class Translations$notification$semantic$zh {
 	/// zh: '${name} 提到了你'
 	String commentMentioned({required Object name}) => '${name} 提到了你';
 
-	/// zh: '${name} 在你的空间中评论了'
-	String commentInSpace({required Object name}) => '${name} 在你的空间中评论了';
+	/// zh: '${name} 在共享账单中发表了评论'
+	String commentInSpace({required Object name}) => '${name} 在共享账单中发表了评论';
 }
 
 // Path: chat.tools.done
@@ -4774,8 +4786,8 @@ class Translations$chat$genui$cashFlowCard$zh {
 
 	// Translations
 
-	/// zh: '现金流分析'
-	String get title => '现金流分析';
+	/// zh: '现金流与健康报告'
+	String get title => '现金流与健康报告';
 
 	/// zh: '储蓄 $rate%'
 	String savingsRate({required Object rate}) => '储蓄 ${rate}%';
@@ -5388,6 +5400,9 @@ extension on Translations {
 			'transaction.attachments' => ({required Object count}) => '${count} 个附件',
 			'transaction.viewInConversation' => '在对话中查看更多',
 			'transaction.statusPending' => '待确认',
+			'transaction.notFoundTitle' => '账目已被删除',
+			'transaction.notFoundBody' => '该账目记录已被发起人或管理员删除，无法查看明细。',
+			'transaction.backToPrevious' => '返回上一页',
 			'home.totalExpense' => '总消费金额',
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
@@ -5422,6 +5437,7 @@ extension on Translations {
 			'comment.note' => '备注',
 			'comment.noNote' => '暂无备注',
 			'comment.loadFailed' => '加载备注失败',
+			'comment.userToast' => ({required Object username}) => '用户 @${username}',
 			'calendar.title' => '消费日历',
 			'calendar.weekdays.mon' => '一',
 			'calendar.weekdays.tue' => '二',
@@ -5752,6 +5768,8 @@ extension on Translations {
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期时生成待确认交易，需手动确认后记账',
 			'forecast.recurringTransaction.pendingTitle' => '待确认交易',
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 笔待确认',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirm' => '确认',
 			'forecast.recurringTransaction.skip' => '跳过',
 			'forecast.recurringTransaction.noPending' => '无待确认交易',
@@ -5763,8 +5781,6 @@ extension on Translations {
 			'forecast.recurringTransaction.lastDayExecution' => '将在每月最后一天执行',
 			'forecast.recurringTransaction.dayExecution' => ({required Object day, required Object suffix}) => '将在每月 ${day} 号${suffix}执行（短月份自动对齐月末）',
 			'forecast.recurringTransaction.setEndDate' => '设置结束日期',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.selectEndDate' => '选择结束日期',
 			'forecast.recurringTransaction.preview' => '规则预览',
 			'forecast.recurringTransaction.daily' => '每天',
@@ -6051,7 +6067,7 @@ extension on Translations {
 			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
 			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
 			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
-			'chat.genui.cashFlowCard.title' => '现金流分析',
+			'chat.genui.cashFlowCard.title' => '现金流与健康报告',
 			'chat.genui.cashFlowCard.savingsRate' => ({required Object rate}) => '储蓄 ${rate}%',
 			'chat.genui.cashFlowCard.totalIncome' => '总收入',
 			'chat.genui.cashFlowCard.totalExpense' => '总支出',
@@ -6266,6 +6282,8 @@ extension on Translations {
 			'financial.safetyThreshold' => '安全阈值',
 			'financial.dailyBurnRate' => '每日消费',
 			'financial.financialAssistant' => '财务助手',
+			_ => null,
+		} ?? switch (path) {
 			'financial.manageFinancialSettings' => '管理您的财务设置',
 			'financial.safetyThresholdSettings' => '财务安全线设置',
 			'financial.setSafetyThreshold' => '设置您的财务安全阈值',
@@ -6277,8 +6295,6 @@ extension on Translations {
 			'financial.saveFailed' => '保存失败',
 			'financial.deleteFailed' => '删除失败，请稍后重试',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '部分币种缺少汇率，相关账户未计入总额：${currencies}',
-			_ => null,
-		} ?? switch (path) {
 			'financial.cashPocketTitle' => '我的现金账户',
 			'financial.sourcesCount' => ({required Object count}) => '${count} 个账户',
 			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',
@@ -6581,7 +6597,7 @@ extension on Translations {
 			'notification.semantic.commentReplied' => ({required Object name}) => '${name} 回复了你的评论',
 			'notification.semantic.commentOnTransaction' => ({required Object name}) => '${name} 评论了你的账单',
 			'notification.semantic.commentMentioned' => ({required Object name}) => '${name} 提到了你',
-			'notification.semantic.commentInSpace' => ({required Object name}) => '${name} 在你的空间中评论了',
+			'notification.semantic.commentInSpace' => ({required Object name}) => '${name} 在共享账单中发表了评论',
 			_ => null,
 		};
 	}

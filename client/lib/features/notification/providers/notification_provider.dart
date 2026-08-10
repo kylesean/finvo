@@ -10,7 +10,7 @@ import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/home/providers/comment_providers.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
 import 'package:finvo/features/notification/repositories/notification_repository.dart';
-import 'package:finvo/features/notification/utils/notification_list_mutations.dart';
+import 'package:finvo/features/notification/utils/notification_crud_mixin.dart';
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 
@@ -43,7 +43,8 @@ NotificationRepository notificationRepository(Ref ref) {
 
 /// Notification State Notifier Provider
 @Riverpod(keepAlive: true)
-class NotificationNotifier extends _$NotificationNotifier {
+class NotificationNotifier extends _$NotificationNotifier
+    with NotificationCrudMixin<NotificationItem, NotificationState> {
   static const _pageSize = 20;
 
   @override
@@ -54,7 +55,14 @@ class NotificationNotifier extends _$NotificationNotifier {
   }
 
   /// Refresh notification list (resets to page 1)
+  /// Monotonic epoch guarding refresh vs loadMore races: a loadMore response
+  /// that returns after a refresh must not append its stale page onto the
+  /// freshly reset list.
+  int _loadGeneration = 0;
+
   Future<void> refresh() async {
+    // Invalidate any in-flight loadMore so its response is discarded.
+    final generation = ++_loadGeneration;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repository = ref.read(notificationRepositoryProvider);
@@ -65,6 +73,7 @@ class NotificationNotifier extends _$NotificationNotifier {
             onTimeout: () =>
                 throw TimeoutException('Notification request timed out'),
           );
+      if (generation != _loadGeneration) return;
       state = state.copyWith(
         items: res.items,
         total: res.total,
@@ -74,6 +83,7 @@ class NotificationNotifier extends _$NotificationNotifier {
         hasReachedMax: res.items.length < _pageSize,
       );
     } catch (e) {
+      if (generation != _loadGeneration) return;
       _logger.severe('Failed to refresh notifications', e);
       state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
@@ -83,6 +93,7 @@ class NotificationNotifier extends _$NotificationNotifier {
   Future<void> loadMore() async {
     if (state.isLoadingMore || state.hasReachedMax || state.isLoading) return;
 
+    final generation = _loadGeneration;
     state = state.copyWith(isLoadingMore: true);
     try {
       final repository = ref.read(notificationRepositoryProvider);
@@ -92,6 +103,14 @@ class NotificationNotifier extends _$NotificationNotifier {
         limit: _pageSize,
       );
 
+      // A refresh started while this request was in flight supersedes it.
+      // Reset the loading flag first: the superseding refresh() does not
+      // touch isLoadingMore, so without this the infinite scroll would stay
+      // disabled forever.
+      if (generation != _loadGeneration) {
+        state = state.copyWith(isLoadingMore: false);
+        return;
+      }
       state = state.copyWith(
         items: [...state.items, ...res.items],
         total: res.total,
@@ -101,86 +120,73 @@ class NotificationNotifier extends _$NotificationNotifier {
         hasReachedMax: res.items.length < _pageSize,
       );
     } catch (e) {
+      if (generation != _loadGeneration) {
+        state = state.copyWith(isLoadingMore: false);
+        return;
+      }
       _logger.warning('Failed to load more notifications', e);
       state = state.copyWith(isLoadingMore: false);
     }
   }
 
-  /// Mark notification as read
-  Future<void> markAsRead(String id) async {
-    final repository = ref.read(notificationRepositoryProvider);
-    final success = await repository.markAsRead(id);
-    if (!success) {
-      // Failure is deliberately silent at the UI level (the item just stays
-      // unread), but log it so repeat failures are diagnosable.
-      _logger.warning('markAsRead failed for notification $id');
-      return;
-    }
-    final result = NotificationListMutations.markAsRead(
-      items: state.items,
-      unreadCount: state.unreadCount,
-      id: id,
-      idOf: (item) => item.id,
-      isReadOf: (item) => item.isRead,
-      withReadAt: (item) => item.copyWith(isRead: true, readAt: DateTime.now()),
-    );
-    state = state.copyWith(
-      items: result.items,
-      unreadCount: result.unreadCount,
-    );
-  }
+  // ============================================================
+  // NotificationCrudMixin accessors
+  // ============================================================
 
-  /// Mark all notifications as read
-  Future<void> markAllAsRead() async {
-    final repository = ref.read(notificationRepositoryProvider);
-    final success = await repository.markAllAsRead();
-    if (!success) {
-      _logger.warning('markAllAsRead failed');
-      return;
-    }
-    final result = NotificationListMutations.markAllAsRead(
-      items: state.items,
-      withRead: (item) => item.copyWith(isRead: true),
-    );
-    state = state.copyWith(
-      items: result.items,
-      unreadCount: result.unreadCount,
-    );
-  }
+  @override
+  NotificationState get notificationState => state;
 
-  /// Delete a notification
-  Future<void> deleteNotification(String id) async {
-    // Safe lookup - return early if item not found
-    final itemToDelete = state.items.where((item) => item.id == id).firstOrNull;
-    if (itemToDelete == null) return;
+  @override
+  set notificationState(NotificationState value) => state = value;
 
-    // Optimistically remove from state for responsive UI
-    final result = NotificationListMutations.delete(
-      items: state.items,
-      unreadCount: state.unreadCount,
-      id: id,
-      idOf: (item) => item.id,
-      isReadOf: (item) => item.isRead,
-    );
-    state = state.copyWith(
-      items: result.items,
-      total: (state.total - 1).clamp(0, 9999),
-      unreadCount: result.unreadCount,
-    );
+  @override
+  List<NotificationItem> get notificationItems => state.items;
 
-    // If ID is synthetic local-only ID (rt_), skip network deletion call
-    if (id.startsWith('rt_')) return;
+  @override
+  int get notificationUnreadCount => state.unreadCount;
 
-    try {
-      final repository = ref.read(notificationRepositoryProvider);
-      final success = await repository.deleteNotification(id);
-      if (!success) {
-        _logger.warning('deleteNotification API failed for notification $id');
-      }
-    } catch (e) {
-      _logger.warning('deleteNotification failed for notification $id', e);
-    }
-  }
+  @override
+  int? get notificationTotal => state.total;
+
+  @override
+  NotificationState updateNotificationState(
+    List<NotificationItem> items, {
+    int? unreadCount,
+    int? total,
+  }) => state.copyWith(
+    items: items,
+    unreadCount: unreadCount ?? state.unreadCount,
+    total: total ?? state.total,
+  );
+
+  @override
+  String notificationIdOf(NotificationItem item) => item.id;
+
+  @override
+  bool notificationIsReadOf(NotificationItem item) => item.isRead;
+
+  @override
+  NotificationItem notificationMarkRead(
+    NotificationItem item, {
+    required DateTime readAt,
+  }) => item.copyWith(isRead: true, readAt: readAt);
+
+  @override
+  NotificationItem notificationMarkAllRead(NotificationItem item) =>
+      // Preserve the original bulk-mark behavior: `readAt` is not stamped.
+      item.copyWith(isRead: true);
+
+  @override
+  Future<bool> markNotificationReadRemote(String id) async =>
+      ref.read(notificationRepositoryProvider).markAsRead(id);
+
+  @override
+  Future<bool> markAllNotificationsReadRemote() async =>
+      ref.read(notificationRepositoryProvider).markAllAsRead();
+
+  @override
+  Future<bool> deleteNotificationRemote(String id) async =>
+      ref.read(notificationRepositoryProvider).deleteNotification(id);
 
   int _realtimeNotificationSeq = 0;
 

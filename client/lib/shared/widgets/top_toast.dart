@@ -123,7 +123,11 @@ class TopToast {
         onDismiss: () {
           try {
             entry.remove();
-          } catch (_) {}
+          } catch (e) {
+            debugPrint(
+              'TopToast: Overlay entry already removed or unmounted: $e',
+            );
+          }
           if (identical(_currentEntry, entry)) {
             _currentEntry = null;
           }

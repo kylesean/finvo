@@ -13,6 +13,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/core/utils/logger_setup.dart';
+import 'package:finvo/core/network/dio_provider.dart';
 import 'package:finvo/shared/services/locale_service.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
@@ -68,6 +69,22 @@ Future<void> _bootstrap() async {
     }
   };
 
+  // Global fallback for widget build errors (rendering phase). When any
+  // widget subtree throws during build/layout, Flutter replaces that subtree
+  // with this fallback instead of the default grey ErrorWidget — so a single
+  // bad GenUI surface can never blank out the whole conversation page.
+  // [GenUiErrorBoundary] handles construction-time errors with graceful
+  // degradation; this catches everything that escapes it (e.g. a widget's
+  // build method throwing).
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    _logger.severe(
+      'Widget build error: ${details.exception}',
+      details.exception,
+      details.stack,
+    );
+    return const _ErrorFallbackView();
+  };
+
   final SharedPreferences prefs;
 
   try {
@@ -119,8 +136,16 @@ Future<void> _bootstrap() async {
   // Create ProviderContainer
   // Optimization: No longer synchronously warming up authProvider, allowing SecureStorage operations
   // to happen asynchronously after the Splash Screen renders to avoid blocking the main thread
-  final container = ProviderContainer(
-    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+  late final ProviderContainer container;
+  container = ProviderContainer(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      // Wire the auth callbacks into the shared Dio pipeline at the
+      // composition root, keeping core/network free of feature imports.
+      dioAuthCallbacksProvider.overrideWithValue(
+        _AppDioAuthCallbacks(() => container),
+      ),
+    ],
   );
 
   _logger.info(
@@ -221,5 +246,67 @@ class FatalInitErrorApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Minimal fallback rendered by [ErrorWidget.builder] when a widget subtree
+/// throws during build/layout. Deliberately uses only core Material widgets
+/// so it cannot fail itself (no theme/GenUI dependencies).
+class _ErrorFallbackView extends StatelessWidget {
+  const _ErrorFallbackView();
+
+  @override
+  Widget build(BuildContext context) {
+    // Directionality is required by Text and may be missing if the failing
+    // subtree sits above MaterialApp — provide it explicitly so the fallback
+    // cannot fail itself.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Container(
+        color: const Color(0x1A000000),
+        padding: const EdgeInsets.all(16),
+        child: const Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, color: Color(0xFFB3261E), size: 20),
+              SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'Component failed to load',
+                  style: TextStyle(fontSize: 13, color: Color(0xFF8B8B8B)),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Composition-root implementation of [DioAuthCallbacks] that forwards to the
+/// auth provider. Lives here (not in core/network) so the Dio pipeline stays
+/// feature-independent; the container reference is resolved lazily to break
+/// the construction cycle with [ProviderContainer].
+class _AppDioAuthCallbacks implements DioAuthCallbacks {
+  _AppDioAuthCallbacks(this._containerRef);
+
+  final ProviderContainer Function() _containerRef;
+
+  @override
+  Future<void> onUnauthorized() async {
+    await _containerRef().read(authProvider.notifier).handleSessionExpired();
+  }
+
+  @override
+  Future<void> onTokenRefreshed(String accessToken, String refreshToken) async {
+    // Keep the in-memory AuthState in sync after a silent token refresh so
+    // derived providers (authToken → notificationWs) rebuild their long-lived
+    // connections with the new token instead of the stale one.
+    await _containerRef()
+        .read(authProvider.notifier)
+        .handleTokenRefreshed(accessToken);
   }
 }

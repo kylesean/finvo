@@ -92,7 +92,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Account Type',
+                    t.statistics.filter.accountType,
                     style: AppTextStyles.listSubtitle(theme),
                   ),
                   const SizedBox(height: 6),
@@ -114,7 +114,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
             Expanded(
               child: Center(
                 child: Text(
-                  'Account details feature is under construction',
+                  t.common.noData,
                   style: AppTextStyles.listSubtitle(theme),
                 ),
               ),

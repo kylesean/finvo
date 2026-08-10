@@ -135,13 +135,10 @@ class FinancialAccountCard extends ConsumerWidget {
                             if (converted == null) {
                               return const SizedBox.shrink();
                             }
-                            final symbol = AmountFormatter.getCurrencySymbol(
-                              viewCurrency,
-                            );
                             return Padding(
                               padding: const EdgeInsets.only(top: 2),
                               child: Text(
-                                '≈ $symbol${converted.toDouble().toStringAsFixed(2)} $viewCurrency',
+                                '≈ ${AmountFormatter.formatCommon(converted.toDouble(), currencyCode: viewCurrency)}',
                                 style: theme.typography.body.xs.copyWith(
                                   color: colors.mutedForeground.withValues(
                                     alpha: 0.7,

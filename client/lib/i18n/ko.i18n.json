@@ -157,7 +157,10 @@
     "linkSuccess": "Link successful",
     "linkFailed": "Link failed",
     "rawInput": "Message",
-    "noRawInput": "No message"
+    "noRawInput": "No message",
+    "notFoundTitle": "거래가 삭제되었습니다",
+    "notFoundBody": "이 거래는 작성자 또는 관리자에 의해 삭제되어 상세 내역을 볼 수 없습니다.",
+    "backToPrevious": "뒤로 가기"
   },
   "home": {
     "totalExpense": "총 소비 금액",
@@ -194,7 +197,8 @@
     "noActions": "사용 가능한 작업이 없습니다",
     "note": "메모",
     "noNote": "메모 없음",
-    "loadFailed": "메모 불러오기 실패"
+    "loadFailed": "메모 불러오기 실패",
+    "userToast": "사용자 @$username"
   },
   "calendar": {
     "title": "소비 달력",
@@ -297,7 +301,7 @@
     "usernameRequired": "Username is required",
     "usernameUpdated": "Username updated",
     "avatarUpdated": "Avatar updated",
-    "appearanceUpdated": "外观设置已更新"
+    "appearanceUpdated": "외관 설정이 업데이트되었습니다"
   },
   "appearance": {
     "title": "화면 설정",
@@ -748,7 +752,7 @@
       "confirmTransfer": "이체 확인",
       "confirmed": "확인됨",
       "transferSuccess": "이체 성공",
-      "selectReceiveAccount": "选择收款账户"
+      "selectReceiveAccount": "받을 계좌 선택"
     },
     "genui": {
       "expenseSummary": {
@@ -909,17 +913,17 @@
         "executeAction": "선택에 따라 이체 실행"
       },
       "transactionConfirmation": {
-        "multipleAccounts": "检测到多个关联账户",
-        "confirmed": "已确认"
+        "multipleAccounts": "연결된 계좌가 여러 개 감지되었습니다",
+        "confirmed": "확인됨"
       },
       "budgetAnalysis": {
-        "title": "预算分析报告",
-        "periodDays": "过去 $days 天",
-        "totalExpense": "总支出",
-        "momChange": "环比 $change%",
-        "categoryDistribution": "分类占比",
-        "topSpenders": "大额支出",
-        "amountWan": "$amount万"
+        "title": "예산 분석 보고서",
+        "periodDays": "지난 $days일",
+        "totalExpense": "총 지출",
+        "momChange": "전월 대비 $change%",
+        "categoryDistribution": "카테고리 비중",
+        "topSpenders": "대형 지출",
+        "amountWan": "$amount만"
       },
       "error": {
         "title": "렌더링 실패",

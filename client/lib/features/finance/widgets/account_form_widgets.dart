@@ -1,8 +1,10 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/features/finance/models/account_type_definition.dart';
 
 /// Shared building blocks for the add/edit financial account form pages.
 ///
@@ -154,8 +156,146 @@ Widget buildAccountSaveButton(
   );
 }
 
-/// Format a balance as a 2-decimal string for the balance field.
+/// Format a balance as a 2-decimal string for the balance field (directly from Decimal).
 String formatAccountAmount(Decimal balance) {
-  final value = double.tryParse(balance.toString()) ?? 0.0;
-  return value.toStringAsFixed(2);
+  return balance.toStringAsFixed(2);
+}
+
+/// Shared account form card container combining all input rows.
+Widget buildAccountFormCard({
+  required FThemeData theme,
+  required FColors colors,
+  required AccountTypeDefinition definition,
+  required TextEditingController nameController,
+  required String nameHint,
+  required TextEditingController balanceController,
+  required String currencySymbol,
+  required String currencyLabel,
+  required VoidCallback onOpenCurrencyPicker,
+  required bool hidden,
+  required ValueChanged<bool> onHiddenChanged,
+  required bool includeInNetWorth,
+  required ValueChanged<bool> onIncludeInNetWorthChanged,
+}) {
+  return Container(
+    decoration: BoxDecoration(
+      color: colors.background,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: colors.border.withValues(alpha: 0.5), width: 1),
+    ),
+    child: Column(
+      children: [
+        // Account name
+        buildAccountInputRow(
+          theme: theme,
+          colors: colors,
+          icon: SizedBox(
+            width: 20,
+            height: 20,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: definition.iconBuilder(colors.primary),
+            ),
+          ),
+          label: t.account.nameLabel,
+          child: TextField(
+            controller: nameController,
+            style: AppTextStyles.formValue(theme),
+            decoration: InputDecoration(
+              hintText: nameHint,
+              hintStyle: theme.typography.body.md.copyWith(
+                color: colors.mutedForeground,
+              ),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+            ),
+            maxLength: 16,
+            buildCounter:
+                (
+                  _, {
+                  required currentLength,
+                  required isFocused,
+                  required maxLength,
+                }) => null,
+          ),
+        ),
+
+        buildAccountFormDivider(colors),
+
+        // Initial balance
+        buildAccountInputRow(
+          theme: theme,
+          colors: colors,
+          icon: SizedBox(
+            width: 20,
+            height: 20,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Text(
+                currencySymbol,
+                style: AppTextStyles.actionText(theme).copyWith(height: 1.0),
+              ),
+            ),
+          ),
+          label: t.account.amountLabel,
+          child: TextField(
+            controller: balanceController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+            ],
+            style: AppTextStyles.formValueNumeric(theme),
+            decoration: InputDecoration(
+              hintText: '0.00',
+              hintStyle: theme.typography.body.md.copyWith(
+                color: colors.mutedForeground,
+              ),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+        ),
+
+        buildAccountFormDivider(colors),
+
+        // Currency selection
+        buildAccountTapRow(
+          theme: theme,
+          colors: colors,
+          icon: Icon(FLucideIcons.globe, size: 20, color: colors.primary),
+          label: t.account.currencyLabel,
+          value: currencyLabel,
+          showArrow: true,
+          onTap: onOpenCurrencyPicker,
+        ),
+
+        buildAccountFormDivider(colors),
+
+        // Hidden toggle
+        buildAccountSwitchRow(
+          theme: theme,
+          colors: colors,
+          title: t.account.hiddenLabel,
+          subtitle: t.account.hiddenDesc,
+          value: hidden,
+          onChanged: onHiddenChanged,
+        ),
+
+        buildAccountFormDivider(colors),
+
+        // Include in net worth toggle
+        buildAccountSwitchRow(
+          theme: theme,
+          colors: colors,
+          title: t.account.includeInNetWorthLabel,
+          subtitle: t.account.includeInNetWorthDesc,
+          value: includeInNetWorth,
+          onChanged: onIncludeInNetWorthChanged,
+          isLast: true,
+        ),
+      ],
+    ),
+  );
 }

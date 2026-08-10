@@ -157,7 +157,10 @@
     "linkSuccess": "Link successful",
     "linkFailed": "Link failed",
     "rawInput": "Message",
-    "noRawInput": "No message"
+    "noRawInput": "No message",
+    "notFoundTitle": "取引が削除されました",
+    "notFoundBody": "この取引は作成者または管理者によって削除されたため、詳細を表示できません。",
+    "backToPrevious": "戻る"
   },
   "home": {
     "totalExpense": "総支出額",
@@ -194,7 +197,8 @@
     "noActions": "利用可能なアクションはありません",
     "note": "備考",
     "noNote": "備考なし",
-    "loadFailed": "備考の読み込みに失敗しました"
+    "loadFailed": "備考の読み込みに失敗しました",
+    "userToast": "ユーザー @$username"
   },
   "calendar": {
     "title": "家計カレンダー",

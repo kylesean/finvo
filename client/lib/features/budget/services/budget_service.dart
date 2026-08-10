@@ -17,20 +17,11 @@ class BudgetService {
       '/budgets/summary',
       method: HttpMethod.get,
       queryParameters: {'include_paused': includePaused},
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            return BudgetSummary.fromJson(data);
-          }
-          throw DataParsingException(
-            'API /budgets/summary: invalid "data" field format',
-          );
-        }
-        throw DataParsingException(
-          'API /budgets/summary: expected an object response',
-        );
-      },
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        BudgetSummary.fromJson,
+        endpoint: '/budgets/summary',
+      ),
     );
   }
 
@@ -58,15 +49,11 @@ class BudgetService {
     return await _networkClient.request<Budget>(
       '/budgets/$id',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            return Budget.fromJson(data);
-          }
-        }
-        throw DataParsingException('Invalid format for /budgets/$id response');
-      },
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        Budget.fromJson,
+        endpoint: '/budgets/$id',
+      ),
     );
   }
 
@@ -75,17 +62,11 @@ class BudgetService {
     return await _networkClient.request<BudgetWithUsage>(
       '/budgets/$id',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            return BudgetWithUsage.fromBudgetResponse(data);
-          }
-        }
-        throw DataParsingException(
-          'Invalid format for /budgets/$id detail response',
-        );
-      },
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        BudgetWithUsage.fromBudgetResponse,
+        endpoint: '/budgets/$id detail',
+      ),
     );
   }
 
@@ -104,15 +85,11 @@ class BudgetService {
       '/budgets',
       method: HttpMethod.post,
       data: request.toJson(),
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            return Budget.fromJson(data);
-          }
-        }
-        throw DataParsingException('Invalid format for POST /budgets response');
-      },
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        Budget.fromJson,
+        endpoint: 'POST /budgets',
+      ),
     );
   }
 
@@ -122,17 +99,11 @@ class BudgetService {
       '/budgets/$id',
       method: HttpMethod.put,
       data: request.toJson(),
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            return Budget.fromJson(data);
-          }
-        }
-        throw DataParsingException(
-          'Invalid format for PUT /budgets/$id response',
-        );
-      },
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        Budget.fromJson,
+        endpoint: 'PUT /budgets/$id',
+      ),
     );
   }
 
@@ -141,17 +112,11 @@ class BudgetService {
     return await _networkClient.request<BudgetSettings>(
       '/budgets/settings/me',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            return BudgetSettings.fromJson(data);
-          }
-        }
-        throw DataParsingException(
-          'Invalid format for /budgets/settings/me response',
-        );
-      },
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        BudgetSettings.fromJson,
+        endpoint: '/budgets/settings/me',
+      ),
     );
   }
 
@@ -163,17 +128,11 @@ class BudgetService {
       '/budgets/settings/me',
       method: HttpMethod.put,
       data: request.toJson(),
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is Map<String, dynamic>) {
-            return BudgetSettings.fromJson(data);
-          }
-        }
-        throw DataParsingException(
-          'Invalid format for PUT /budgets/settings/me response',
-        );
-      },
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        BudgetSettings.fromJson,
+        endpoint: 'PUT /budgets/settings/me',
+      ),
     );
   }
 }

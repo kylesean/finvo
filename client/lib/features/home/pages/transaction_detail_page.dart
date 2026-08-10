@@ -451,13 +451,15 @@ class TransactionDetailPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        isNotFound ? '账目已被删除' : t.home.loadFailed,
+                        isNotFound
+                            ? t.transaction.notFoundTitle
+                            : t.home.loadFailed,
                         style: theme.typography.body.xl2,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         isNotFound
-                            ? '该账目记录已被发起人或管理员删除，无法查看明细。'
+                            ? t.transaction.notFoundBody
                             : (detailState.error is AppException
                                   ? (detailState.error as AppException).message
                                   : detailState.error.toString()),
@@ -474,7 +476,7 @@ class TransactionDetailPage extends ConsumerWidget {
                               context.go(AppRoutePaths.home);
                             }
                           },
-                          child: const Text('返回上一页'),
+                          child: Text(t.transaction.backToPrevious),
                         )
                       else
                         FButton(

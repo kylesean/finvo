@@ -10,6 +10,7 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 import 'package:finvo/features/chat/genui/atoms/atoms.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 
 /// Transfer success receipt card widget - concise three-section design
 ///
@@ -187,12 +188,9 @@ class TransferReceipt extends StatelessWidget {
       final now = DateTime.now();
       return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     }
-    try {
-      final dateTime = DateTime.parse(isoTime);
-      return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return '';
-    }
+    final dateTime = tryParseDateTime(isoTime);
+    if (dateTime == null) return '';
+    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }
 

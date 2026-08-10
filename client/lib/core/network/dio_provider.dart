@@ -2,7 +2,6 @@ import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
 import 'package:finvo/core/network/interceptors/business_interceptor.dart';
-import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/network/interceptors/auth_interceptor.dart';
@@ -14,6 +13,23 @@ import 'package:finvo/core/network/exceptions/app_exception.dart';
 
 /// Riverpod Provider for Dio instance
 final _logger = Logger('DioProvider');
+
+/// Auth-related callbacks wired into the Dio interceptor pipeline.
+///
+/// Implemented at the composition root (main.dart) so that core/network stays
+/// independent of feature modules: without an override, the Dio pipeline runs
+/// without session-expiry handling (callbacks are null and the interceptor
+/// skips them).
+abstract interface class DioAuthCallbacks {
+  /// Called when a 401 cannot be recovered by a token refresh.
+  Future<void> onUnauthorized();
+
+  /// Called after a silent token refresh to keep derived state in sync.
+  Future<void> onTokenRefreshed(String accessToken, String refreshToken);
+}
+
+/// Composition-root override point for [DioAuthCallbacks].
+final dioAuthCallbacksProvider = Provider<DioAuthCallbacks?>((ref) => null);
 
 /// Interceptor that checks if server is configured before making requests
 class ConfigurationCheckInterceptor extends Interceptor {
@@ -49,9 +65,9 @@ class ConfigurationCheckInterceptor extends Interceptor {
 
 /// Sign out locally when a 401 is received (token invalid/expired).
 /// The router redirects to the login page after auth state clears.
-Future<void> handleUnauthorized(Ref ref) async {
-  await ref.read(authProvider.notifier).handleSessionExpired();
-}
+///
+/// Removed in favor of [dioAuthCallbacksProvider]: the implementation now
+/// lives at the composition root so core/network does not import features.
 
 /// Build a configured [Dio] instance with the shared interceptor pipeline.
 ///
@@ -98,6 +114,7 @@ Dio _buildDio(Ref ref, {required bool forSse}) {
 
   // --- Shared interceptor pipeline (in execution order) ---
   final storageService = ref.watch(secureStorageServiceProvider);
+  final authCallbacks = ref.watch(dioAuthCallbacksProvider);
   dio.interceptors.add(
     ConfigurationCheckInterceptor(ref),
   ); // Check config first
@@ -106,15 +123,13 @@ Dio _buildDio(Ref ref, {required bool forSse}) {
   dio.interceptors.add(
     AuthInterceptor(
       storageService,
-      onUnauthorized: () => handleUnauthorized(ref),
-      onTokenRefreshed: (accessToken, _) {
-        // Keep the in-memory AuthState in sync after a silent token refresh so
-        // derived providers (authToken → notificationWs) rebuild their long-
-        // lived connections with the new token instead of the stale one.
-        return ref
-            .read(authProvider.notifier)
-            .handleTokenRefreshed(accessToken);
-      },
+      onUnauthorized: authCallbacks == null
+          ? null
+          : () => authCallbacks.onUnauthorized(),
+      onTokenRefreshed: authCallbacks == null
+          ? null
+          : (accessToken, refreshToken) =>
+                authCallbacks.onTokenRefreshed(accessToken, refreshToken),
       dio: dio,
     ),
   ); // Auth interceptor

@@ -49,6 +49,10 @@ enum SpeechErrorType {
     }
 
     final lower = rawError.toLowerCase();
+    // Internal service tokens (speech_start_failed / speech_stop_failed /
+    // speech_recording_error) intentionally classify as `unknown`: they are
+    // internal failures whose details belong in logs, and the UI collapses
+    // `unknown` to a generic localized label instead of leaking raw text.
     if (lower.contains('permission') || lower.contains('denied')) {
       return SpeechErrorType.permissionDenied;
     }

@@ -180,6 +180,30 @@ void main() {
     });
   });
 
+  group('AmountFormatter.formatBudgetCompact', () {
+    test('formats amounts >= 10000 with wan suffix and sign', () {
+      expect(
+        AmountFormatter.formatBudgetCompact(Decimal.parse('20000')),
+        contains('2.0'),
+      );
+      expect(
+        AmountFormatter.formatBudgetCompact(Decimal.parse('-20000')),
+        startsWith('-'),
+      );
+    });
+
+    test('formats amounts < 10000 with thousand separators', () {
+      expect(
+        AmountFormatter.formatBudgetCompact(Decimal.parse('1500')),
+        equals('1,500'),
+      );
+      expect(
+        AmountFormatter.formatBudgetCompact(Decimal.parse('1500.50')),
+        equals('1,500.50'),
+      );
+    });
+  });
+
   group('AmountFormatter.getAmountColor', () {
     test('expense returns theme expense color', () {
       final color = AmountFormatter.getAmountColor(

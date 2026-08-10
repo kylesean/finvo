@@ -64,7 +64,7 @@ class BudgetStatusCard extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Budget status format error: $e',
+                t.chat.genui.error.title,
                 style: TextStyle(
                   color: context.theme.colors.mutedForeground,
                   fontSize: 13,

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:finvo/features/chat/services/media_picker_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/features/chat/models/media_upload_exception.dart';
 
 /// Media upload bottom sheet interface
 /// Simplified three-option UI layout: camera, photos, files
@@ -151,7 +152,7 @@ class _MediaSelectionSheet extends StatelessWidget {
       if (!context.mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: Text('${t.common.error}: $e'),
+          content: Text(e is MediaUploadException ? e.message : t.common.error),
           backgroundColor: errorColor,
         ),
       );
@@ -173,7 +174,7 @@ class _MediaSelectionSheet extends StatelessWidget {
       if (!context.mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: Text('${t.common.error}: $e'),
+          content: Text(e is MediaUploadException ? e.message : t.common.error),
           backgroundColor: errorColor,
         ),
       );
@@ -195,7 +196,7 @@ class _MediaSelectionSheet extends StatelessWidget {
       if (!context.mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: Text('${t.common.error}: $e'),
+          content: Text(e is MediaUploadException ? e.message : t.common.error),
           backgroundColor: errorColor,
         ),
       );
