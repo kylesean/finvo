@@ -320,7 +320,7 @@ class StatisticsService:
                     current = current.replace(month=current.month + 1)
             else:
                 date_key = current.strftime("%Y-%m-%d")
-                label_str = current.strftime("%m/%d")
+                label_str = date_key
                 amount = date_amount_map.get(date_key, Decimal("0"))
                 data_points.append(
                     TrendDataPoint(
