@@ -18,6 +18,7 @@ import 'package:finvo/features/chat/models/chat_message.dart' as app;
 import 'package:finvo/features/chat/models/message_attachments.dart';
 import 'package:finvo/features/chat/widgets/enhanced_user_message_bubble.dart';
 import 'package:finvo/features/chat/widgets/chat_conversation_drawer.dart';
+import 'package:finvo/features/chat/widgets/chat_action_button.dart';
 import 'package:finvo/features/chat/widgets/welcome/welcome_guide_widget.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -144,34 +145,12 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // Build individual action icon button - no background
-    Widget buildIconButton({
-      required IconData icon,
-      required VoidCallback? onTap,
-      Color? color,
-      bool isFirst = false,
-    }) {
-      return GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: isFirst ? 0 : 20, // Increased spacing
-            right: 0,
-            top: 4,
-            bottom: 4,
-          ),
-          child: Icon(icon, color: color ?? colors.mutedForeground, size: 16),
-        ),
-      );
-    }
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         // Copy button - first, no left padding
-        buildIconButton(
+        ChatActionButton(
           icon: FLucideIcons.copy,
           isFirst: true,
           onTap: () async {
@@ -207,7 +186,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
           },
         ),
         // Like button
-        buildIconButton(
+        ChatActionButton(
           icon: FLucideIcons.thumbsUp,
           onTap: () =>
               notifier.updateAIFeedback(message.id, app.AIFeedbackStatus.liked),
@@ -216,7 +195,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
               : colors.mutedForeground,
         ),
         // Dislike button
-        buildIconButton(
+        ChatActionButton(
           icon: FLucideIcons.thumbsDown,
           onTap: () => notifier.updateAIFeedback(
             message.id,
@@ -227,7 +206,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
               : colors.mutedForeground,
         ),
         // Share button
-        buildIconButton(
+        ChatActionButton(
           icon: FLucideIcons.share2,
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
