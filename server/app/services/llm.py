@@ -129,45 +129,6 @@ class LLMRegistry:
                 "temperature": settings.DEFAULT_LLM_TEMPERATURE,
             },
         },
-        {
-            "name": "qwen3.6-genesis-35b",
-            "provider": "ollama",
-            "capabilities": {"vision": False},
-            "llm_kwargs": {
-                "model": "qwen3.6-genesis-35b",
-                "api_key": SecretStr(settings.OLLAMA_API_KEY or "ollama"),
-                "base_url": settings.OLLAMA_BASE_URL,
-                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                "max_completion_tokens": 512,
-                "temperature": 0.1,
-                "reasoning_effort": "low",
-                "extra_body": {
-                    "options": {
-                        "num_predict": 512,
-                        "num_ctx": 4096,
-                    }
-                },
-            },
-        },
-        {
-            "name": "translategemma:4b-it",
-            "provider": "ollama",
-            "capabilities": {"vision": False},
-            "llm_kwargs": {
-                "model": "translategemma:4b-it",
-                "api_key": SecretStr(settings.OLLAMA_API_KEY or "ollama"),
-                "base_url": settings.OLLAMA_BASE_URL,
-                "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
-                "max_completion_tokens": 512,
-                "temperature": 0.1,
-                "extra_body": {
-                    "options": {
-                        "num_predict": 512,
-                        "num_ctx": 4096,
-                    }
-                },
-            },
-        },
     ]
 
     @classmethod

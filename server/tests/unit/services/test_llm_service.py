@@ -9,12 +9,11 @@ from app.services.llm import LLMRegistry
 class TestLLMRegistryOllama:
     """Test cases for LLMRegistry Ollama integration."""
 
-    def test_registered_ollama_models(self):
-        """Test retrieving registered Ollama models."""
-        llm = LLMRegistry.get("qwen3.6-genesis-35b")
+    def test_dynamic_ollama_model_creation(self):
+        """Test dynamically-created Ollama models use the configured OLLAMA base URL."""
+        llm = LLMRegistry.get("ollama:local-model-test")
         assert (
-            getattr(llm, "model_name", None) == "qwen3.6-genesis-35b"
-            or getattr(llm, "model", None) == "qwen3.6-genesis-35b"
+            getattr(llm, "model_name", None) == "local-model-test" or getattr(llm, "model", None) == "local-model-test"
         )
         assert (
             getattr(llm, "openai_api_base", None) == settings.OLLAMA_BASE_URL
@@ -42,13 +41,14 @@ class TestLLMRegistryOllama:
         assert is_ollama is True
         assert clean_name == "qwen2.5:7b"
 
-        is_ollama, clean_name = LLMRegistry._is_ollama_model("ollama/deepseek-r1")
+        is_ollama, clean_name = LLMRegistry._is_ollama_model("ollama/qwen2.5:7b")
         assert is_ollama is True
-        assert clean_name == "deepseek-r1"
+        assert clean_name == "qwen2.5:7b"
 
-        is_ollama, clean_name = LLMRegistry._is_ollama_model("qwen3.6-genesis-35b")
-        assert is_ollama is True
-        assert clean_name == "qwen3.6-genesis-35b"
+        # Bare names (no ollama prefix, not in registry) are not ollama models
+        is_ollama, clean_name = LLMRegistry._is_ollama_model("some-cloud-model")
+        assert is_ollama is False
+        assert clean_name == "some-cloud-model"
 
         is_ollama, clean_name = LLMRegistry._is_ollama_model("gpt-5.6-sol")
         assert is_ollama is False
