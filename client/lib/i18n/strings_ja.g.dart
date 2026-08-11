@@ -1377,6 +1377,9 @@ class _Translations$chat$transferWizard$ja extends Translations$chat$transferWiz
 	@override String get confirmed => '確認済み';
 	@override String get transferSuccess => '振替が完了しました';
 	@override String get selectReceiveAccount => '选择收款账户';
+	@override String get noAssetAccounts => '資産口座がありません';
+	@override String get goToFinanceToAddAccounts => '財務ページで口座を追加してください';
+	@override String get needTwoAssetAccounts => '振替には資産口座が2つ以上必要です';
 }
 
 // Path: chat.genui
@@ -3240,6 +3243,9 @@ extension on TranslationsJa {
 			'chat.transferWizard.confirmed' => '確認済み',
 			'chat.transferWizard.transferSuccess' => '振替が完了しました',
 			'chat.transferWizard.selectReceiveAccount' => '选择收款账户',
+			'chat.transferWizard.noAssetAccounts' => '資産口座がありません',
+			'chat.transferWizard.goToFinanceToAddAccounts' => '財務ページで口座を追加してください',
+			'chat.transferWizard.needTwoAssetAccounts' => '振替には資産口座が2つ以上必要です',
 			'chat.genui.expenseSummary.totalExpense' => '総支出',
 			'chat.genui.expenseSummary.mainExpenses' => '主な支出',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '全 ${count} 件を表示',
@@ -3578,11 +3584,11 @@ extension on TranslationsJa {
 			'financial.dailyBurnRate' => '1日の支出',
 			'financial.financialAssistant' => '財務アシスタント',
 			'financial.manageFinancialSettings' => '財務設定を管理',
+			_ => null,
+		} ?? switch (path) {
 			'financial.safetyThresholdSettings' => 'セーフティライン設定',
 			'financial.setSafetyThreshold' => 'セーフティラインの閾値を設定',
 			'financial.safetyThresholdSaved' => 'セーフティラインを保存しました',
-			_ => null,
-		} ?? switch (path) {
 			'financial.dailyBurnRateSettings' => '支出見積もり',
 			'financial.setDailyBurnRate' => '1日の支出見積もりを設定',
 			'financial.dailyBurnRateSaved' => '支出見積もりを保存しました',

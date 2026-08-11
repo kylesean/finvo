@@ -752,7 +752,10 @@
       "confirmTransfer": "이체 확인",
       "confirmed": "확인됨",
       "transferSuccess": "이체 성공",
-      "selectReceiveAccount": "받을 계좌 선택"
+      "selectReceiveAccount": "받을 계좌 선택",
+      "noAssetAccounts": "자산 계좌가 없습니다",
+      "goToFinanceToAddAccounts": "재무 페이지에서 계좌를 추가하세요",
+      "needTwoAssetAccounts": "이체에는 자산 계좌가 2개 이상 필요합니다"
     },
     "genui": {
       "expenseSummary": {

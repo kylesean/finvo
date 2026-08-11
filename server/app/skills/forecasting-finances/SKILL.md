@@ -5,52 +5,44 @@ description: >
   USE WHEN: balance forecast, affordability check, "can I afford X", future projection.
   NOT FOR: past spending analysis (→ reviewing-finances), budget creation (→ guide to app UI), budget status query (→ query_budget_status tool).
 
-allowed-tools: "execute search_transactions read_file"
+allowed-tools: "forecast_balance search_transactions"
 ---
 
 # Forecasting Finances
 
 Predict future financial situation and evaluate purchase affordability.
 
-## Scripts
+## Tools
 
-### forecast_balance.py
+### forecast_balance
 
-```bash
-uv run python app/skills/forecasting-finances/scripts/forecast_balance.py --days 30
-```
+Call the typed `forecast_balance` tool (structured arguments — never via shell) to predict the future balance.
 
 **Parameters**:
-- `--days`: Forecast period (default: 30)
-- `--simulate-purchase`: Enable purchase simulation
-- `--amount`: Purchase amount for simulation
-- `--description`: Purchase description
+- `days`: Forecast period (default: 30)
+- `simulate_purchase`: Enable purchase simulation
+- `amount`: Purchase amount for simulation
+- `description`: Purchase description
 
-**Output**: `forecast` (daily balance series), `warnings` (low balance alerts), `recurring_events`
-
-**GenUI Component**: `CashFlowForecastChart`
+**Result**: `forecast` (daily balance series), `warnings` (low balance alerts), `recurring_events` feeding the CashFlowForecastChart.
 
 ## Workflows
 
 ### Balance Forecast
-1. Run `forecast_balance.py --days N`
-2. Present CashFlowForecastChart
+1. Call `forecast_balance` with the forecast period
+2. Present the CashFlowForecastChart
 3. Highlight warning periods and key upcoming events
 
 ### Purchase Simulation
-```bash
-uv run python app/skills/forecasting-finances/scripts/forecast_balance.py --simulate-purchase --amount 5000 --description "iPhone"
-```
-1. Run with simulation parameters
-2. Show before/after comparison
+1. Call `forecast_balance` with `simulate_purchase`, `amount` and `description`
+2. Show the before/after comparison
 3. State clearly: AFFORDABLE or NOT RECOMMENDED
 
 ## Rules
 
 1. Focus on FUTURE only — no past analysis
-2. Always give clear yes/no on affordability
+2. Always give a clear yes/no on affordability
 3. Highlight low balance warnings prominently
-4. Do NOT create budgets — guide user to app budget module
-5. Execute scripts directly without `cd`, `&&`, or pipe operators
-6. If the script output contains `"data_quality": "insufficient"`, inform the user that forecasting requires some financial data (accounts or transactions) and suggest they add some first.
-7. Run each script at most once per user request. If it fails, explain the error to the user — do not retry the same command.
+4. Do NOT create budgets — guide the user to the app budget module
+5. If the result contains `"data_quality": "insufficient"`, inform the user that forecasting requires some financial data (accounts or transactions) and suggest they add some first
+6. Call the tool at most once per user request

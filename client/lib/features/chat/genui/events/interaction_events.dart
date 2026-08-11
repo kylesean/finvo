@@ -99,6 +99,13 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
   final Decimal amount;
   final String currency;
   final String? memo;
+
+  /// LLM-generated tags extracted from the user's message (e.g. ["转账"]).
+  final List<String> tags;
+
+  /// The user's original message that triggered this transfer (e.g. "转账"),
+  /// persisted as the transaction's raw input.
+  final String? rawInput;
   @override
   final String? surfaceId;
 
@@ -110,10 +117,13 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
     required this.amount,
     this.currency = 'CNY',
     this.memo,
+    this.tags = const [],
+    this.rawInput,
     this.surfaceId,
   });
 
   factory TransferPathConfirmedEvent.fromContext(Map<String, dynamic> context) {
+    final rawTags = context['tags'];
     return TransferPathConfirmedEvent(
       sourceAccountId: context['source_account_id'] as String? ?? '',
       targetAccountId: context['target_account_id'] as String? ?? '',
@@ -124,6 +134,10 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
       amount: _amountToDecimal(context['amount']),
       currency: context['currency'] as String? ?? 'CNY',
       memo: context['memo'] as String?,
+      tags: rawTags is List
+          ? rawTags.map((e) => e.toString()).where((t) => t.isNotEmpty).toList()
+          : const [],
+      rawInput: context['raw_input'] as String?,
       surfaceId: context['surface_id'] as String?,
     );
   }
@@ -142,6 +156,8 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
     'amount': amount.toString(),
     'currency': currency,
     'memo': memo,
+    'tags': tags,
+    'raw_input': rawInput,
   };
 }
 

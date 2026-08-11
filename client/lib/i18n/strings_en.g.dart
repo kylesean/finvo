@@ -1382,6 +1382,9 @@ class _Translations$chat$transferWizard$en extends Translations$chat$transferWiz
 	@override String get confirmed => 'Confirmed';
 	@override String get transferSuccess => 'Transfer Successful';
 	@override String get selectReceiveAccount => 'Select receiving account';
+	@override String get noAssetAccounts => 'No asset accounts yet';
+	@override String get goToFinanceToAddAccounts => 'Go to Finance to add accounts';
+	@override String get needTwoAssetAccounts => 'Transfers require at least two asset accounts';
 }
 
 // Path: chat.genui
@@ -3251,6 +3254,9 @@ extension on TranslationsEn {
 			'chat.transferWizard.confirmed' => 'Confirmed',
 			'chat.transferWizard.transferSuccess' => 'Transfer Successful',
 			'chat.transferWizard.selectReceiveAccount' => 'Select receiving account',
+			'chat.transferWizard.noAssetAccounts' => 'No asset accounts yet',
+			'chat.transferWizard.goToFinanceToAddAccounts' => 'Go to Finance to add accounts',
+			'chat.transferWizard.needTwoAssetAccounts' => 'Transfers require at least two asset accounts',
 			'chat.genui.expenseSummary.totalExpense' => 'Total Expense',
 			'chat.genui.expenseSummary.mainExpenses' => 'Main Expenses',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => 'View all ${count} transactions',
@@ -3584,11 +3590,11 @@ extension on TranslationsEn {
 			'financial.cancel' => 'Cancel',
 			'financial.confirm' => 'Confirm',
 			'financial.settings' => 'Financial Settings',
+			_ => null,
+		} ?? switch (path) {
 			'financial.budgetManagement' => 'Budget Management',
 			'financial.recurringTransactions' => 'Recurring Transactions',
 			'financial.safetyThreshold' => 'Safety Threshold',
-			_ => null,
-		} ?? switch (path) {
 			'financial.dailyBurnRate' => 'Daily Burn Rate',
 			'financial.financialAssistant' => 'Financial Assistant',
 			'financial.manageFinancialSettings' => 'Manage your financial settings',

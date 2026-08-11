@@ -280,6 +280,13 @@ CatalogItem _buildTransferWizard() {
         ),
         'preselectedSourceId': StringSchema(description: '预选的转出账户ID'),
         'preselectedTargetId': StringSchema(description: '预选的转入账户ID'),
+        'tags': ListSchema(
+          description: 'LLM 从用户消息中提取的交易标签',
+          items: StringSchema(),
+        ),
+        'guidance': StringSchema(
+          description: '空状态引导码：NO_ACCOUNTS（无资产账户）/ SINGLE_ACCOUNT（仅一个资产账户）',
+        ),
       },
       required: ['sourceAccounts', 'targetAccounts'],
     ),

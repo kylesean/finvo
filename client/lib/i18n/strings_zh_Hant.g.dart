@@ -1377,6 +1377,9 @@ class _Translations$chat$transferWizard$zh_Hant extends Translations$chat$transf
 	@override String get confirmed => '已確認';
 	@override String get transferSuccess => '轉帳成功';
 	@override String get selectReceiveAccount => '选择收款账户';
+	@override String get noAssetAccounts => '暫無資產帳戶';
+	@override String get goToFinanceToAddAccounts => '請前往財務頁面新增帳戶';
+	@override String get needTwoAssetAccounts => '轉帳需要至少兩個資產帳戶';
 }
 
 // Path: chat.genui
@@ -3239,6 +3242,9 @@ extension on TranslationsZhHant {
 			'chat.transferWizard.confirmed' => '已確認',
 			'chat.transferWizard.transferSuccess' => '轉帳成功',
 			'chat.transferWizard.selectReceiveAccount' => '选择收款账户',
+			'chat.transferWizard.noAssetAccounts' => '暫無資產帳戶',
+			'chat.transferWizard.goToFinanceToAddAccounts' => '請前往財務頁面新增帳戶',
+			'chat.transferWizard.needTwoAssetAccounts' => '轉帳需要至少兩個資產帳戶',
 			'chat.genui.expenseSummary.totalExpense' => '總支出',
 			'chat.genui.expenseSummary.mainExpenses' => '主要支出',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '查看全部 ${count} 筆消費',
@@ -3577,11 +3583,11 @@ extension on TranslationsZhHant {
 			'financial.financialAssistant' => '財務助手',
 			'financial.manageFinancialSettings' => '管理您的財務設置',
 			'financial.safetyThresholdSettings' => '財務安全線設置',
+			_ => null,
+		} ?? switch (path) {
 			'financial.setSafetyThreshold' => '設置您的財務安全閾值',
 			'financial.safetyThresholdSaved' => '財務安全線已保存',
 			'financial.dailyBurnRateSettings' => '日常消費預估',
-			_ => null,
-		} ?? switch (path) {
 			'financial.setDailyBurnRate' => '設置您的日常消費預估金額',
 			'financial.dailyBurnRateSaved' => '日常消費預估已保存',
 			'financial.dayUnit' => '天',

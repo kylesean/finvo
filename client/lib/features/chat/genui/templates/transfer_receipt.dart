@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
 import 'package:finvo/features/chat/genui/atoms/atoms.dart';
@@ -51,38 +54,58 @@ class TransferReceipt extends StatelessWidget {
         ? Map<String, dynamic>.from(targetAccountRaw)
         : null;
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8.0),
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colors.border.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+    final transactionId = data['transaction_id']?.toString();
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _navigateToDetail(context, transactionId),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 8.0),
+        decoration: BoxDecoration(
+          color: colors.background,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: colors.border.withValues(alpha: 0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Section 1: Top status bar
+            _buildStatusHeader(theme, colors, time),
+
+            // Section 2: Middle content - amount + tags
+            _buildMainContent(theme, colors, currency, amount, tags),
+
+            // Section 3: Bottom account animation (with account names)
+            _TransferAnimation(
+              colors: colors,
+              sourceAccount: sourceAccount,
+              targetAccount: targetAccount,
+            ),
+          ],
+        ),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Section 1: Top status bar
-          _buildStatusHeader(theme, colors, time),
+    );
+  }
 
-          // Section 2: Middle content - amount + tags
-          _buildMainContent(theme, colors, currency, amount, tags),
-
-          // Section 3: Bottom account animation (with account names)
-          _TransferAnimation(
-            colors: colors,
-            sourceAccount: sourceAccount,
-            targetAccount: targetAccount,
-          ),
-        ],
+  /// Navigate to the transaction detail page (mirrors TransactionCard).
+  void _navigateToDetail(BuildContext context, String? transactionId) {
+    if (transactionId == null || transactionId.isEmpty) {
+      return;
+    }
+    unawaited(HapticFeedback.lightImpact());
+    unawaited(
+      context.pushNamed(
+        AppRouteNames.transactionDetail,
+        pathParameters: {'transactionId': transactionId},
       ),
     );
   }

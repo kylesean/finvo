@@ -108,18 +108,29 @@ SHELL_INJECTION_PATTERN: re.Pattern[str] = re.compile(
 # metacharacters). This prevents quote-closing + command substitution attacks
 # like: echo ''$(whoami)'' | uv run python ...  (would otherwise pass a
 # naive `.*` match and execute $(whoami)).
+# An argument to a skill script: either a bare token free of shell
+# metacharacters, or a single/double-quoted literal. Quoted arguments are
+# accepted because LLMs naturally quote string args (e.g. `--target_hint
+# "信用卡"`); the content rules still forbid `$`, backtick, backslash and
+# chaining/redirection metacharacters, so no command substitution or
+# quote-closing injection is possible inside the quotes.
+_SAFE_BARE_ARG: str = r"[^\s;&|<>`\"'\$\\]+"
+_SAFE_DQ_ARG: str = r'"[^"`\$\\;&|<>]*"'  # double-quoted literal
+_SAFE_SQ_ARG: str = r"'[^'`\$\\;&|<>]*'"  # single-quoted literal
+_COMMAND_ARG: str = rf"(?:{_SAFE_BARE_ARG}|{_SAFE_DQ_ARG}|{_SAFE_SQ_ARG})"
+
 ALLOWED_PIPE_PATTERN: re.Pattern[str] = re.compile(
     r"^echo\s+'[^'\\$`;&|<>]*'\s*\|\s*uv\s+run\s+python\s+"
     r"app/skills/[\w-]+/scripts/[\w-]+\.py"
-    r"(?:\s+[^\s;&|<>`\"'\$\\]+)*$"
+    rf"(?:\s+{_COMMAND_ARG})*$"
 )
 
 # Core allowlist pattern: uv run python app/skills/<name>/scripts/<script>.py [args...]
 # Anchored with fullmatch semantics: no trailing garbage, and every argument
-# must be free of shell metacharacters (quotes, $, backslash, redirection, chaining).
+# must be a bare token or a quoted literal free of injection metacharacters.
 ALLOWED_COMMAND_PATTERN: re.Pattern[str] = re.compile(
     r"^uv\s+run\s+python\s+app/skills/[\w-]+/scripts/[\w-]+\.py"
-    r"(?:\s+[^\s;&|<>`\"'\$\\]+)*$"
+    rf"(?:\s+{_COMMAND_ARG})*$"
 )
 
 

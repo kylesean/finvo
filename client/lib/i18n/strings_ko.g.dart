@@ -1378,6 +1378,9 @@ class _Translations$chat$transferWizard$ko extends Translations$chat$transferWiz
 	@override String get confirmed => '확인됨';
 	@override String get transferSuccess => '이체 성공';
 	@override String get selectReceiveAccount => '받을 계좌 선택';
+	@override String get noAssetAccounts => '자산 계좌가 없습니다';
+	@override String get goToFinanceToAddAccounts => '재무 페이지에서 계좌를 추가하세요';
+	@override String get needTwoAssetAccounts => '이체에는 자산 계좌가 2개 이상 필요합니다';
 }
 
 // Path: chat.genui
@@ -3242,6 +3245,9 @@ extension on TranslationsKo {
 			'chat.transferWizard.confirmed' => '확인됨',
 			'chat.transferWizard.transferSuccess' => '이체 성공',
 			'chat.transferWizard.selectReceiveAccount' => '받을 계좌 선택',
+			'chat.transferWizard.noAssetAccounts' => '자산 계좌가 없습니다',
+			'chat.transferWizard.goToFinanceToAddAccounts' => '재무 페이지에서 계좌를 추가하세요',
+			'chat.transferWizard.needTwoAssetAccounts' => '이체에는 자산 계좌가 2개 이상 필요합니다',
 			'chat.genui.expenseSummary.totalExpense' => '총 지출',
 			'chat.genui.expenseSummary.mainExpenses' => '주요 지출',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '전체 ${count}건 보기',
@@ -3579,11 +3585,11 @@ extension on TranslationsKo {
 			'financial.safetyThreshold' => '안전선',
 			'financial.dailyBurnRate' => '일일 소비',
 			'financial.financialAssistant' => '금융 비서',
+			_ => null,
+		} ?? switch (path) {
 			'financial.manageFinancialSettings' => '금융 설정 관리',
 			'financial.safetyThresholdSettings' => '재무 안전선 설정',
 			'financial.setSafetyThreshold' => '재무 안전 기준선 설정',
-			_ => null,
-		} ?? switch (path) {
 			'financial.safetyThresholdSaved' => '재무 안전선 저장됨',
 			'financial.dailyBurnRateSettings' => '일일 소비 추정',
 			'financial.setDailyBurnRate' => '일일 예상 소비 금액 설정',

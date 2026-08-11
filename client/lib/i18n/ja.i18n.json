@@ -751,7 +751,10 @@
       "confirmTransfer": "振替を確認",
       "confirmed": "確認済み",
       "transferSuccess": "振替が完了しました",
-      "selectReceiveAccount": "选择收款账户"
+      "selectReceiveAccount": "选择收款账户",
+      "noAssetAccounts": "資産口座がありません",
+      "goToFinanceToAddAccounts": "財務ページで口座を追加してください",
+      "needTwoAssetAccounts": "振替には資産口座が2つ以上必要です"
     },
     "genui": {
       "expenseSummary": {

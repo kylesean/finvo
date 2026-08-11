@@ -56,6 +56,7 @@ class TransactionService:
         subject: str = "SELF",
         intent: str = "SURVIVAL",
         tags: list[str] | None = None,
+        source_thread_id: UUID | None = None,
     ) -> dict[str, Any]:
         """Create a single transaction record."""
         return await self._crud.create_transaction(
@@ -71,6 +72,7 @@ class TransactionService:
             subject=subject,
             intent=intent,
             tags=tags,
+            source_thread_id=source_thread_id,
         )
 
     async def get_transaction_detail(self, transaction_id: UUID, user_uuid: UUID) -> dict[str, Any] | None:

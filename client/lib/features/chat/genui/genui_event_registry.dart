@@ -76,6 +76,8 @@ class GenUiEventRegistry {
         targetAccountName: event.targetAccountName,
         amount: event.amount,
         currency: event.currency,
+        rawInput: event.rawInput,
+        tags: event.tags,
       ),
       payloadExtensions: {
         'role': 'user',

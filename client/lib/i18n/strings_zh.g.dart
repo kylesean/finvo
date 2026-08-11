@@ -3089,6 +3089,15 @@ class Translations$chat$transferWizard$zh {
 
 	/// zh: '转账成功'
 	String get transferSuccess => '转账成功';
+
+	/// zh: '暂无资产账户'
+	String get noAssetAccounts => '暂无资产账户';
+
+	/// zh: '请前往财务页面添加账户'
+	String get goToFinanceToAddAccounts => '请前往财务页面添加账户';
+
+	/// zh: '转账需要至少两个资产账户'
+	String get needTwoAssetAccounts => '转账需要至少两个资产账户';
 }
 
 // Path: chat.genui
@@ -5946,6 +5955,9 @@ extension on Translations {
 			'chat.transferWizard.confirmTransfer' => '确认转账',
 			'chat.transferWizard.confirmed' => '已确认',
 			'chat.transferWizard.transferSuccess' => '转账成功',
+			'chat.transferWizard.noAssetAccounts' => '暂无资产账户',
+			'chat.transferWizard.goToFinanceToAddAccounts' => '请前往财务页面添加账户',
+			'chat.transferWizard.needTwoAssetAccounts' => '转账需要至少两个资产账户',
 			'chat.genui.expenseSummary.totalExpense' => '总支出',
 			'chat.genui.expenseSummary.mainExpenses' => '主要支出',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '查看全部 ${count} 笔消费',
@@ -6279,11 +6291,11 @@ extension on Translations {
 			'financial.settings' => '财务设置',
 			'financial.budgetManagement' => '预算管理',
 			'financial.recurringTransactions' => '周期交易',
+			_ => null,
+		} ?? switch (path) {
 			'financial.safetyThreshold' => '安全阈值',
 			'financial.dailyBurnRate' => '每日消费',
 			'financial.financialAssistant' => '财务助手',
-			_ => null,
-		} ?? switch (path) {
 			'financial.manageFinancialSettings' => '管理您的财务设置',
 			'financial.safetyThresholdSettings' => '财务安全线设置',
 			'financial.setSafetyThreshold' => '设置您的财务安全阈值',

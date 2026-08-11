@@ -751,7 +751,10 @@
       "confirmTransfer": "確認轉帳",
       "confirmed": "已確認",
       "transferSuccess": "轉帳成功",
-      "selectReceiveAccount": "选择收款账户"
+      "selectReceiveAccount": "选择收款账户",
+      "noAssetAccounts": "暫無資產帳戶",
+      "goToFinanceToAddAccounts": "請前往財務頁面新增帳戶",
+      "needTwoAssetAccounts": "轉帳需要至少兩個資產帳戶"
     },
     "genui": {
       "expenseSummary": {

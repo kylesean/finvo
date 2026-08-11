@@ -97,6 +97,7 @@ class TransactionCRUDService:
         subject: str = "SELF",
         intent: str = "SURVIVAL",
         tags: list[str] | None = None,
+        source_thread_id: UUID | None = None,
     ) -> dict[str, Any]:
         """Create a single transaction record
 
@@ -159,6 +160,7 @@ class TransactionCRUDService:
             status="CLEARED",
             source_account_id=source_account_id,
             target_account_id=target_account_id,
+            source_thread_id=source_thread_id,
         )
 
         self.db.add(transaction)

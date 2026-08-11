@@ -192,3 +192,33 @@ class TestCommandValidatorSecurity:
             "uv run python app/skills/managing-shared-ledgers/scripts/query_space_summary.py"
         )
         assert result.allowed, result.reason
+
+    def test_quoted_skill_args_allowed(self, tmp_path: Path) -> None:
+        """LLM-style quoted string arguments (e.g. --target_hint "信用卡") must pass.
+
+        LLMs naturally quote string args (the SKILL.md examples do too); before
+        this was allowed those commands were rejected by the allowlist and
+        surfaced as a generic "operation failed" tool block.
+        """
+        script = tmp_path / "app" / "skills" / "executing-transfers" / "scripts" / "prepare_transfer.py"
+        script.parent.mkdir(parents=True)
+        script.write_text("", encoding="utf-8")
+
+        validator = CommandValidator(tmp_path)
+        legit_cmds = [
+            "uv run python app/skills/executing-transfers/scripts/prepare_transfer.py "
+            '--amount 300 --target_hint "信用卡账户"',
+            "uv run python app/skills/executing-transfers/scripts/prepare_transfer.py "
+            "--tags '转账,日常' --amount \"300\"",
+            'uv run python app/skills/executing-transfers/scripts/prepare_transfer.py --target_hint "工资 卡"',
+        ]
+        for cmd in legit_cmds:
+            assert validator.validate(cmd).allowed, f"legit command rejected: {cmd}"
+
+        attack_cmds = [
+            'uv run python app/skills/executing-transfers/scripts/prepare_transfer.py --target_hint "x$(whoami)"',
+            "uv run python app/skills/executing-transfers/scripts/prepare_transfer.py --target_hint x`id`",
+            'uv run python app/skills/executing-transfers/scripts/prepare_transfer.py --target_hint "a&b"',
+        ]
+        for cmd in attack_cmds:
+            assert not validator.validate(cmd).allowed, f"attack slipped through: {cmd}"

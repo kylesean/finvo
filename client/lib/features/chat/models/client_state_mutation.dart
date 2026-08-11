@@ -32,6 +32,8 @@ abstract class ClientStateMutation with _$ClientStateMutation {
     required String targetAccountName,
     required Decimal amount,
     String currency = 'CNY',
+    String? rawInput,
+    List<String> tags = const [],
   }) {
     return ClientStateMutation(
       uiMode: 'direct_execute',
@@ -45,6 +47,8 @@ abstract class ClientStateMutation with _$ClientStateMutation {
         // 8 decimal places to match backend Decimal(20,8) precision contract
         'amount': amount.toStringAsFixed(8),
         'currency': currency,
+        if (rawInput != null && rawInput.isNotEmpty) 'raw_input': rawInput,
+        if (tags.isNotEmpty) 'tags': tags,
       },
     );
   }

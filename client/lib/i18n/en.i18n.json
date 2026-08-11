@@ -756,7 +756,10 @@
       "confirmTransfer": "Confirm Transfer",
       "confirmed": "Confirmed",
       "transferSuccess": "Transfer Successful",
-      "selectReceiveAccount": "Select receiving account"
+      "selectReceiveAccount": "Select receiving account",
+      "noAssetAccounts": "No asset accounts yet",
+      "goToFinanceToAddAccounts": "Go to Finance to add accounts",
+      "needTwoAssetAccounts": "Transfers require at least two asset accounts"
     },
     "genui": {
       "expenseSummary": {

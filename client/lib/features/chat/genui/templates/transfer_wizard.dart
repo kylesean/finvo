@@ -1,13 +1,19 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
+import 'package:go_router/go_router.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/features/chat/genui/organisms/organisms.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/chat/services/genui_cache_service.dart';
 import 'package:finvo/features/chat/genui/events/interaction_events.dart';
+import 'package:finvo/features/chat/constants/genui_markers.dart';
+import 'package:finvo/features/chat/models/chat_message.dart' as app;
+import 'package:finvo/features/chat/providers/chat_history_provider.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:decimal/decimal.dart';
@@ -21,6 +27,16 @@ class TransferWizardData {
   final String? preselectedSourceId;
   final String? preselectedTargetId;
   final String memo;
+
+  /// LLM-generated tags extracted from the user's message (e.g. ["转账"]),
+  /// persisted on the created transaction.
+  final List<String> tags;
+
+  /// Guidance code for the empty state when transfers are not possible:
+  /// "NO_ACCOUNTS" (no asset accounts) | "SINGLE_ACCOUNT" (only one asset
+  /// account) | null (wizard fully usable). Never a failure — the UI renders a
+  /// friendly guidance card instead of an error.
+  final String? guidance;
   final String surfaceId;
   final bool isHistorical;
   final bool isConfirmed;
@@ -33,6 +49,8 @@ class TransferWizardData {
     this.preselectedSourceId,
     this.preselectedTargetId,
     this.memo = '',
+    this.tags = const [],
+    this.guidance,
     required this.surfaceId,
     this.isHistorical = false,
     this.isConfirmed = false,
@@ -48,6 +66,10 @@ class TransferWizardData {
     }
 
     final amount = AmountFormatter.parseDecimal(json['amount']?.toString());
+    final rawTags = json['tags'];
+    final tags = rawTags is List
+        ? rawTags.map((e) => e.toString()).where((t) => t.isNotEmpty).toList()
+        : <String>[];
 
     return TransferWizardData(
       amount: amount,
@@ -57,6 +79,8 @@ class TransferWizardData {
       preselectedSourceId: json['preselectedSourceId']?.toString(),
       preselectedTargetId: json['preselectedTargetId']?.toString(),
       memo: json['memo']?.toString() ?? '',
+      tags: tags,
+      guidance: json['guidance']?.toString(),
       surfaceId: json['_surfaceId']?.toString() ?? 'unknown',
       isHistorical: json['_isHistorical'] == true,
       isConfirmed: json['isConfirmed'] == true || json['_isHistorical'] == true,
@@ -64,7 +88,7 @@ class TransferWizardData {
   }
 }
 
-class TransferWizard extends StatefulWidget {
+class TransferWizard extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
   final void Function(UiEvent) dispatchEvent;
 
@@ -75,7 +99,7 @@ class TransferWizard extends StatefulWidget {
   });
 
   @override
-  State<TransferWizard> createState() => _TransferWizardState();
+  ConsumerState<TransferWizard> createState() => _TransferWizardState();
 }
 
 /// State cache upon user confirmation
@@ -91,7 +115,7 @@ class _ConfirmedState {
   });
 }
 
-class _TransferWizardState extends State<TransferWizard> {
+class _TransferWizardState extends ConsumerState<TransferWizard> {
   static const String _cacheCategory = 'transfer_wizard';
 
   late TransferWizardData _model;
@@ -159,6 +183,15 @@ class _TransferWizardState extends State<TransferWizard> {
     final theme = context.theme;
     final colors = theme.colors;
 
+    // Insufficient accounts: render a friendly guidance card instead of an
+    // unusable wizard. The backend never fails the transfer on this — it is a
+    // state that needs the user to add asset accounts first.
+    if (_model.guidance != null ||
+        _model.sourceAccounts.isEmpty ||
+        _model.targetAccounts.isEmpty) {
+      return _buildGuidanceState(theme, colors);
+    }
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -196,6 +229,87 @@ class _TransferWizardState extends State<TransferWizard> {
 
               // Action Button
               _buildConfirmButton(theme, colors),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Friendly guidance card for when a transfer can't be started yet (no asset
+  /// accounts, or fewer than two). Shown instead of the unusable wizard so the
+  /// user gets actionable guidance rather than a failed-operation tool block.
+  Widget _buildGuidanceState(FThemeData theme, FColors colors) {
+    final isSingle = _model.guidance == 'SINGLE_ACCOUNT';
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colors.background.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colors.border.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: colors.foreground.withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              _buildHeader(theme, colors),
+              const SizedBox(height: 24),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: colors.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        FLucideIcons.wallet,
+                        color: colors.primary,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      isSingle
+                          ? t.chat.transferWizard.needTwoAssetAccounts
+                          : t.chat.transferWizard.noAssetAccounts,
+                      style: theme.typography.body.md.copyWith(
+                        fontWeight: AppFontConfig.headingBold,
+                        color: colors.foreground,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FButton(
+                      onPress: () => context.goNamed(AppRouteNames.finance),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(FLucideIcons.walletCards, size: 16),
+                          const SizedBox(width: 8),
+                          Text(t.chat.transferWizard.goToFinanceToAddAccounts),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -561,7 +675,29 @@ class _TransferWizardState extends State<TransferWizard> {
         amount: finalAmount,
         currency: _model.currency,
         memo: _model.memo,
+        tags: _model.tags,
+        // Preserve the user's original input that triggered this transfer
+        // (e.g. "转账") so the created transaction keeps its real raw input.
+        rawInput: _resolveUserRawInput(),
       ).toUserActionEvent(sourceComponentId: 'TransferWizard'),
     );
+  }
+
+  /// The user's latest plain-text message in the conversation is the original
+  /// input that triggered this transfer (e.g. "转账"). Genui-internal marker
+  /// messages (the auto-generated confirm text) are excluded.
+  String? _resolveUserRawInput() {
+    try {
+      final messages = ref.read(chatHistoryProvider).messages;
+      for (final msg in messages.reversed) {
+        if (msg.sender != app.MessageSender.user) continue;
+        final text = msg.content.trim();
+        if (text.isEmpty || text.startsWith(genuiInternalMarker)) continue;
+        return text;
+      }
+    } catch (_) {
+      // Provider unavailable (e.g. isolated render) — treat as no raw input.
+    }
+    return null;
   }
 }

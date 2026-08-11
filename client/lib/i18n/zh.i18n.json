@@ -756,7 +756,10 @@
       "selectReceiveAccount": "选择收款账户",
       "confirmTransfer": "确认转账",
       "confirmed": "已确认",
-      "transferSuccess": "转账成功"
+      "transferSuccess": "转账成功",
+      "noAssetAccounts": "暂无资产账户",
+      "goToFinanceToAddAccounts": "请前往财务页面添加账户",
+      "needTwoAssetAccounts": "转账需要至少两个资产账户"
     },
     "genui": {
       "expenseSummary": {
