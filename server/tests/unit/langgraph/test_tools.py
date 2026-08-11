@@ -104,7 +104,11 @@ class TestToolMetadata:
             if tool.args_schema is None:
                 continue
             fields = tool.args_schema.model_fields
-            assert fields, f"tool {tool.name!r} args schema has no fields"
+            # Tools may legitimately expose no user-facing parameters when they
+            # only consume injected runtime args (e.g. list_spaces), so only
+            # validate annotations for parameters that actually exist.
+            if not fields:
+                continue
             for name, field in fields.items():
                 assert field.annotation is not None, f"tool {tool.name!r} parameter {name!r} has no type annotation"
 
