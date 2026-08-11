@@ -820,6 +820,11 @@
         "plentiful": "预算充裕",
         "normal": "正常"
       },
+      "emptyStateAlert": {
+        "noBudgetsYet": "暂无预算",
+        "noTransactionsYet": "暂无交易",
+        "noAccountsYet": "暂无账户"
+      },
       "cashFlowForecast": {
         "title": "现金流预测",
         "recurringTransaction": "周期性交易",
@@ -1214,7 +1219,9 @@
   },
   "app": {
     "splashTitle": "智见增长，格物致富。",
-    "splashSubtitle": "智能财务助手"
+    "splashSubtitle": "智能财务助手",
+    "fatalInitTitle": "Finvo 启动失败",
+    "fatalInitMessage": "初始化错误：$error"
   },
   "statistics": {
     "title": "统计分析",

@@ -967,6 +967,8 @@ class _Translations$app$en extends Translations$app$zh {
 	// Translations
 	@override String get splashTitle => 'Finvo: Intelligence that Grows.';
 	@override String get splashSubtitle => 'Smart Financial Assistant';
+	@override String get fatalInitTitle => 'Finvo failed to start';
+	@override String fatalInitMessage({required Object error}) => 'Initialization error: ${error}';
 }
 
 // Path: statistics
@@ -1399,6 +1401,7 @@ class _Translations$chat$genui$en extends Translations$chat$genui$zh {
 	@override late final _Translations$chat$genui$transactionGroupReceipt$en transactionGroupReceipt = _Translations$chat$genui$transactionGroupReceipt$en._(_root);
 	@override late final _Translations$chat$genui$budgetReceipt$en budgetReceipt = _Translations$chat$genui$budgetReceipt$en._(_root);
 	@override late final _Translations$chat$genui$budgetStatusCard$en budgetStatusCard = _Translations$chat$genui$budgetStatusCard$en._(_root);
+	@override late final _Translations$chat$genui$emptyStateAlert$en emptyStateAlert = _Translations$chat$genui$emptyStateAlert$en._(_root);
 	@override late final _Translations$chat$genui$cashFlowForecast$en cashFlowForecast = _Translations$chat$genui$cashFlowForecast$en._(_root);
 	@override late final _Translations$chat$genui$healthScore$en healthScore = _Translations$chat$genui$healthScore$en._(_root);
 	@override late final _Translations$chat$genui$spaceSelector$en spaceSelector = _Translations$chat$genui$spaceSelector$en._(_root);
@@ -2112,6 +2115,18 @@ class _Translations$chat$genui$budgetStatusCard$en extends Translations$chat$gen
 	@override String get warning => 'Warning';
 	@override String get plentiful => 'Healthy';
 	@override String get normal => 'Normal';
+}
+
+// Path: chat.genui.emptyStateAlert
+class _Translations$chat$genui$emptyStateAlert$en extends Translations$chat$genui$emptyStateAlert$zh {
+	_Translations$chat$genui$emptyStateAlert$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get noBudgetsYet => 'No budgets yet';
+	@override String get noTransactionsYet => 'No transactions yet';
+	@override String get noAccountsYet => 'No accounts yet';
 }
 
 // Path: chat.genui.cashFlowForecast
@@ -3306,6 +3321,9 @@ extension on TranslationsEn {
 			'chat.genui.budgetStatusCard.warning' => 'Warning',
 			'chat.genui.budgetStatusCard.plentiful' => 'Healthy',
 			'chat.genui.budgetStatusCard.normal' => 'Normal',
+			'chat.genui.emptyStateAlert.noBudgetsYet' => 'No budgets yet',
+			'chat.genui.emptyStateAlert.noTransactionsYet' => 'No transactions yet',
+			'chat.genui.emptyStateAlert.noAccountsYet' => 'No accounts yet',
 			'chat.genui.cashFlowForecast.title' => 'Cash Flow Forecast',
 			'chat.genui.cashFlowForecast.recurringTransaction' => 'Recurring Transaction',
 			'chat.genui.cashFlowForecast.recurringIncome' => 'Recurring Income',
@@ -3587,11 +3605,11 @@ extension on TranslationsEn {
 			'financial.assetAccounts' => 'Asset Accounts',
 			'financial.liabilityAccounts' => 'Liability Accounts',
 			'financial.selectCurrency' => 'Select Currency',
+			_ => null,
+		} ?? switch (path) {
 			'financial.cancel' => 'Cancel',
 			'financial.confirm' => 'Confirm',
 			'financial.settings' => 'Financial Settings',
-			_ => null,
-		} ?? switch (path) {
 			'financial.budgetManagement' => 'Budget Management',
 			'financial.recurringTransactions' => 'Recurring Transactions',
 			'financial.safetyThreshold' => 'Safety Threshold',
@@ -3615,6 +3633,8 @@ extension on TranslationsEn {
 			'financial.updateNow' => 'Update Now',
 			'app.splashTitle' => 'Finvo: Intelligence that Grows.',
 			'app.splashSubtitle' => 'Smart Financial Assistant',
+			'app.fatalInitTitle' => 'Finvo failed to start',
+			'app.fatalInitMessage' => ({required Object error}) => 'Initialization error: ${error}',
 			'statistics.title' => 'Analysis',
 			'statistics.analyze' => 'Analysis',
 			'statistics.exportInProgress' => 'Export feature coming soon...',

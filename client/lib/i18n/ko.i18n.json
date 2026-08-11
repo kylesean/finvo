@@ -855,6 +855,11 @@
         "plentiful": "Healthy",
         "normal": "Normal"
       },
+      "emptyStateAlert": {
+        "noBudgetsYet": "예산이 없습니다",
+        "noTransactionsYet": "거래 내역이 없습니다",
+        "noAccountsYet": "계좌가 없습니다"
+      },
       "cashFlowForecast": {
         "title": "Cash Flow Forecast",
         "recurringTransaction": "Recurring Transaction",
@@ -1211,7 +1216,9 @@
   },
   "app": {
     "splashTitle": "지혜로운 성장, 가치 있는 부.",
-    "splashSubtitle": "스마트 금융 비서"
+    "splashSubtitle": "스마트 금융 비서",
+    "fatalInitTitle": "Finvo 시작 실패",
+    "fatalInitMessage": "초기화 오류: $error"
   },
   "statistics": {
     "title": "통계 분석",

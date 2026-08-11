@@ -963,6 +963,8 @@ class _Translations$app$ja extends Translations$app$zh {
 	// Translations
 	@override String get splashTitle => 'スマートに、豊かに。';
 	@override String get splashSubtitle => 'インテリジェント財務アシスタント';
+	@override String get fatalInitTitle => 'Finvo の起動に失敗しました';
+	@override String fatalInitMessage({required Object error}) => '初期化エラー：${error}';
 }
 
 // Path: statistics
@@ -1397,6 +1399,7 @@ class _Translations$chat$genui$ja extends Translations$chat$genui$zh {
 	@override late final _Translations$chat$genui$budgetSimulator$ja budgetSimulator = _Translations$chat$genui$budgetSimulator$ja._(_root);
 	@override late final _Translations$chat$genui$budgetReceipt$ja budgetReceipt = _Translations$chat$genui$budgetReceipt$ja._(_root);
 	@override late final _Translations$chat$genui$budgetStatusCard$ja budgetStatusCard = _Translations$chat$genui$budgetStatusCard$ja._(_root);
+	@override late final _Translations$chat$genui$emptyStateAlert$ja emptyStateAlert = _Translations$chat$genui$emptyStateAlert$ja._(_root);
 	@override late final _Translations$chat$genui$cashFlowForecast$ja cashFlowForecast = _Translations$chat$genui$cashFlowForecast$ja._(_root);
 	@override late final _Translations$chat$genui$healthScore$ja healthScore = _Translations$chat$genui$healthScore$ja._(_root);
 	@override late final _Translations$chat$genui$spaceSelector$ja spaceSelector = _Translations$chat$genui$spaceSelector$ja._(_root);
@@ -2166,6 +2169,18 @@ class _Translations$chat$genui$budgetStatusCard$ja extends Translations$chat$gen
 	@override String get warning => 'Warning';
 	@override String get plentiful => 'Healthy';
 	@override String get normal => 'Normal';
+}
+
+// Path: chat.genui.emptyStateAlert
+class _Translations$chat$genui$emptyStateAlert$ja extends Translations$chat$genui$emptyStateAlert$zh {
+	_Translations$chat$genui$emptyStateAlert$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get noBudgetsYet => '予算がありません';
+	@override String get noTransactionsYet => '取引がありません';
+	@override String get noAccountsYet => '口座がありません';
 }
 
 // Path: chat.genui.cashFlowForecast
@@ -3327,6 +3342,9 @@ extension on TranslationsJa {
 			'chat.genui.budgetStatusCard.warning' => 'Warning',
 			'chat.genui.budgetStatusCard.plentiful' => 'Healthy',
 			'chat.genui.budgetStatusCard.normal' => 'Normal',
+			'chat.genui.emptyStateAlert.noBudgetsYet' => '予算がありません',
+			'chat.genui.emptyStateAlert.noTransactionsYet' => '取引がありません',
+			'chat.genui.emptyStateAlert.noAccountsYet' => '口座がありません',
 			'chat.genui.cashFlowForecast.title' => 'Cash Flow Forecast',
 			'chat.genui.cashFlowForecast.recurringTransaction' => 'Recurring Transaction',
 			'chat.genui.cashFlowForecast.recurringIncome' => 'Recurring Income',
@@ -3581,11 +3599,11 @@ extension on TranslationsJa {
 			'financial.budgetManagement' => '予算管理',
 			'financial.recurringTransactions' => '繰り返し取引',
 			'financial.safetyThreshold' => 'セーフティライン',
+			_ => null,
+		} ?? switch (path) {
 			'financial.dailyBurnRate' => '1日の支出',
 			'financial.financialAssistant' => '財務アシスタント',
 			'financial.manageFinancialSettings' => '財務設定を管理',
-			_ => null,
-		} ?? switch (path) {
 			'financial.safetyThresholdSettings' => 'セーフティライン設定',
 			'financial.setSafetyThreshold' => 'セーフティラインの閾値を設定',
 			'financial.safetyThresholdSaved' => 'セーフティラインを保存しました',
@@ -3603,6 +3621,8 @@ extension on TranslationsJa {
 			'financial.updateNow' => '今すぐ更新',
 			'app.splashTitle' => 'スマートに、豊かに。',
 			'app.splashSubtitle' => 'インテリジェント財務アシスタント',
+			'app.fatalInitTitle' => 'Finvo の起動に失敗しました',
+			'app.fatalInitMessage' => ({required Object error}) => '初期化エラー：${error}',
 			'statistics.title' => '統計分析',
 			'statistics.analyze' => '分析',
 			'statistics.exportInProgress' => 'エクスポート機能は開発中です...',

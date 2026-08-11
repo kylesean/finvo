@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Empty state alert atom
 ///
@@ -35,39 +36,39 @@ class EmptyStateAlert extends StatelessWidget {
   });
 
   factory EmptyStateAlert.budget({
-    String title = 'No budgets yet',
+    String? title,
     String? actionText,
     VoidCallback? onAction,
   }) {
     return EmptyStateAlert(
       icon: FLucideIcons.chartPie,
-      title: title,
+      title: title ?? t.chat.genui.emptyStateAlert.noBudgetsYet,
       actionText: actionText,
       onAction: onAction,
     );
   }
 
   factory EmptyStateAlert.transaction({
-    String title = 'No transactions yet',
+    String? title,
     String? actionText,
     VoidCallback? onAction,
   }) {
     return EmptyStateAlert(
       icon: FLucideIcons.receiptText,
-      title: title,
+      title: title ?? t.chat.genui.emptyStateAlert.noTransactionsYet,
       actionText: actionText,
       onAction: onAction,
     );
   }
 
   factory EmptyStateAlert.account({
-    String title = 'No accounts yet',
+    String? title,
     String? actionText,
     VoidCallback? onAction,
   }) {
     return EmptyStateAlert(
       icon: FLucideIcons.wallet,
-      title: title,
+      title: title ?? t.chat.genui.emptyStateAlert.noAccountsYet,
       actionText: actionText,
       onAction: onAction,
     );

@@ -853,6 +853,11 @@
         "plentiful": "Healthy",
         "normal": "Normal"
       },
+      "emptyStateAlert": {
+        "noBudgetsYet": "暫無預算",
+        "noTransactionsYet": "暫無交易",
+        "noAccountsYet": "暫無帳戶"
+      },
       "cashFlowForecast": {
         "title": "Cash Flow Forecast",
         "recurringTransaction": "Recurring Transaction",
@@ -1209,7 +1214,9 @@
   },
   "app": {
     "splashTitle": "智見增長，格物致富。",
-    "splashSubtitle": "智能財務助手"
+    "splashSubtitle": "智能財務助手",
+    "fatalInitTitle": "Finvo 啟動失敗",
+    "fatalInitMessage": "初始化錯誤：$error"
   },
   "statistics": {
     "title": "統計分析",

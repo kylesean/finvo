@@ -214,9 +214,9 @@ class FatalInitErrorApp extends StatelessWidget {
                     size: 48,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Finvo failed to start',
-                    style: TextStyle(
+                  Text(
+                    t.app.fatalInitTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -224,7 +224,7 @@ class FatalInitErrorApp extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Initialization error: $error',
+                    t.app.fatalInitMessage(error: '$error'),
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.white70),
                   ),
@@ -265,16 +265,23 @@ class _ErrorFallbackView extends StatelessWidget {
       child: Container(
         color: const Color(0x1A000000),
         padding: const EdgeInsets.all(16),
-        child: const Center(
+        child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline, color: Color(0xFFB3261E), size: 20),
-              SizedBox(width: 8),
+              const Icon(
+                Icons.error_outline,
+                color: Color(0xFFB3261E),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  'Component failed to load',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF8B8B8B)),
+                  t.error.genui.loadingFailed,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF8B8B8B),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

@@ -821,6 +821,11 @@
         "plentiful": "Healthy",
         "normal": "Normal"
       },
+      "emptyStateAlert": {
+        "noBudgetsYet": "No budgets yet",
+        "noTransactionsYet": "No transactions yet",
+        "noAccountsYet": "No accounts yet"
+      },
       "cashFlowForecast": {
         "title": "Cash Flow Forecast",
         "recurringTransaction": "Recurring Transaction",
@@ -1216,7 +1221,9 @@
   },
   "app": {
     "splashTitle": "Finvo: Intelligence that Grows.",
-    "splashSubtitle": "Smart Financial Assistant"
+    "splashSubtitle": "Smart Financial Assistant",
+    "fatalInitTitle": "Finvo failed to start",
+    "fatalInitMessage": "Initialization error: $error"
   },
   "statistics": {
     "title": "Analysis",

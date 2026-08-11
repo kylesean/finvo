@@ -963,6 +963,8 @@ class _Translations$app$ko extends Translations$app$zh {
 	// Translations
 	@override String get splashTitle => '지혜로운 성장, 가치 있는 부.';
 	@override String get splashSubtitle => '스마트 금융 비서';
+	@override String get fatalInitTitle => 'Finvo 시작 실패';
+	@override String fatalInitMessage({required Object error}) => '초기화 오류: ${error}';
 }
 
 // Path: statistics
@@ -1398,6 +1400,7 @@ class _Translations$chat$genui$ko extends Translations$chat$genui$zh {
 	@override late final _Translations$chat$genui$budgetSimulator$ko budgetSimulator = _Translations$chat$genui$budgetSimulator$ko._(_root);
 	@override late final _Translations$chat$genui$budgetReceipt$ko budgetReceipt = _Translations$chat$genui$budgetReceipt$ko._(_root);
 	@override late final _Translations$chat$genui$budgetStatusCard$ko budgetStatusCard = _Translations$chat$genui$budgetStatusCard$ko._(_root);
+	@override late final _Translations$chat$genui$emptyStateAlert$ko emptyStateAlert = _Translations$chat$genui$emptyStateAlert$ko._(_root);
 	@override late final _Translations$chat$genui$cashFlowForecast$ko cashFlowForecast = _Translations$chat$genui$cashFlowForecast$ko._(_root);
 	@override late final _Translations$chat$genui$healthScore$ko healthScore = _Translations$chat$genui$healthScore$ko._(_root);
 	@override late final _Translations$chat$genui$spaceSelector$ko spaceSelector = _Translations$chat$genui$spaceSelector$ko._(_root);
@@ -2167,6 +2170,18 @@ class _Translations$chat$genui$budgetStatusCard$ko extends Translations$chat$gen
 	@override String get warning => 'Warning';
 	@override String get plentiful => 'Healthy';
 	@override String get normal => 'Normal';
+}
+
+// Path: chat.genui.emptyStateAlert
+class _Translations$chat$genui$emptyStateAlert$ko extends Translations$chat$genui$emptyStateAlert$zh {
+	_Translations$chat$genui$emptyStateAlert$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get noBudgetsYet => '예산이 없습니다';
+	@override String get noTransactionsYet => '거래 내역이 없습니다';
+	@override String get noAccountsYet => '계좌가 없습니다';
 }
 
 // Path: chat.genui.cashFlowForecast
@@ -3329,6 +3344,9 @@ extension on TranslationsKo {
 			'chat.genui.budgetStatusCard.warning' => 'Warning',
 			'chat.genui.budgetStatusCard.plentiful' => 'Healthy',
 			'chat.genui.budgetStatusCard.normal' => 'Normal',
+			'chat.genui.emptyStateAlert.noBudgetsYet' => '예산이 없습니다',
+			'chat.genui.emptyStateAlert.noTransactionsYet' => '거래 내역이 없습니다',
+			'chat.genui.emptyStateAlert.noAccountsYet' => '계좌가 없습니다',
 			'chat.genui.cashFlowForecast.title' => 'Cash Flow Forecast',
 			'chat.genui.cashFlowForecast.recurringTransaction' => 'Recurring Transaction',
 			'chat.genui.cashFlowForecast.recurringIncome' => 'Recurring Income',
@@ -3582,11 +3600,11 @@ extension on TranslationsKo {
 			'financial.settings' => '금융 설정',
 			'financial.budgetManagement' => '예산 관리',
 			'financial.recurringTransactions' => '정기 거래',
+			_ => null,
+		} ?? switch (path) {
 			'financial.safetyThreshold' => '안전선',
 			'financial.dailyBurnRate' => '일일 소비',
 			'financial.financialAssistant' => '금융 비서',
-			_ => null,
-		} ?? switch (path) {
 			'financial.manageFinancialSettings' => '금융 설정 관리',
 			'financial.safetyThresholdSettings' => '재무 안전선 설정',
 			'financial.setSafetyThreshold' => '재무 안전 기준선 설정',
@@ -3605,6 +3623,8 @@ extension on TranslationsKo {
 			'financial.updateNow' => '지금 업데이트',
 			'app.splashTitle' => '지혜로운 성장, 가치 있는 부.',
 			'app.splashSubtitle' => '스마트 금융 비서',
+			'app.fatalInitTitle' => 'Finvo 시작 실패',
+			'app.fatalInitMessage' => ({required Object error}) => '초기화 오류: ${error}',
 			'statistics.title' => '통계 분석',
 			'statistics.analyze' => '통계 분석',
 			'statistics.exportInProgress' => '내보내기 기능 개발 중...',

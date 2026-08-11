@@ -2197,6 +2197,12 @@ class Translations$app$zh {
 
 	/// zh: '智能财务助手'
 	String get splashSubtitle => '智能财务助手';
+
+	/// zh: 'Finvo 启动失败'
+	String get fatalInitTitle => 'Finvo 启动失败';
+
+	/// zh: '初始化错误：$error'
+	String fatalInitMessage({required Object error}) => '初始化错误：${error}';
 }
 
 // Path: statistics
@@ -3112,6 +3118,7 @@ class Translations$chat$genui$zh {
 	late final Translations$chat$genui$transactionGroupReceipt$zh transactionGroupReceipt = Translations$chat$genui$transactionGroupReceipt$zh.internal(_root);
 	late final Translations$chat$genui$budgetReceipt$zh budgetReceipt = Translations$chat$genui$budgetReceipt$zh.internal(_root);
 	late final Translations$chat$genui$budgetStatusCard$zh budgetStatusCard = Translations$chat$genui$budgetStatusCard$zh.internal(_root);
+	late final Translations$chat$genui$emptyStateAlert$zh emptyStateAlert = Translations$chat$genui$emptyStateAlert$zh.internal(_root);
 	late final Translations$chat$genui$cashFlowForecast$zh cashFlowForecast = Translations$chat$genui$cashFlowForecast$zh.internal(_root);
 	late final Translations$chat$genui$healthScore$zh healthScore = Translations$chat$genui$healthScore$zh.internal(_root);
 	late final Translations$chat$genui$spaceSelector$zh spaceSelector = Translations$chat$genui$spaceSelector$zh.internal(_root);
@@ -4516,6 +4523,24 @@ class Translations$chat$genui$budgetStatusCard$zh {
 
 	/// zh: '正常'
 	String get normal => '正常';
+}
+
+// Path: chat.genui.emptyStateAlert
+class Translations$chat$genui$emptyStateAlert$zh {
+	Translations$chat$genui$emptyStateAlert$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '暂无预算'
+	String get noBudgetsYet => '暂无预算';
+
+	/// zh: '暂无交易'
+	String get noTransactionsYet => '暂无交易';
+
+	/// zh: '暂无账户'
+	String get noAccountsYet => '暂无账户';
 }
 
 // Path: chat.genui.cashFlowForecast
@@ -6006,6 +6031,9 @@ extension on Translations {
 			'chat.genui.budgetStatusCard.warning' => '预算紧张',
 			'chat.genui.budgetStatusCard.plentiful' => '预算充裕',
 			'chat.genui.budgetStatusCard.normal' => '正常',
+			'chat.genui.emptyStateAlert.noBudgetsYet' => '暂无预算',
+			'chat.genui.emptyStateAlert.noTransactionsYet' => '暂无交易',
+			'chat.genui.emptyStateAlert.noAccountsYet' => '暂无账户',
 			'chat.genui.cashFlowForecast.title' => '现金流预测',
 			'chat.genui.cashFlowForecast.recurringTransaction' => '周期性交易',
 			'chat.genui.cashFlowForecast.recurringIncome' => '周期性收入',
@@ -6288,11 +6316,11 @@ extension on Translations {
 			'financial.selectCurrency' => '选择货币',
 			'financial.cancel' => '取消',
 			'financial.confirm' => '确定',
+			_ => null,
+		} ?? switch (path) {
 			'financial.settings' => '财务设置',
 			'financial.budgetManagement' => '预算管理',
 			'financial.recurringTransactions' => '周期交易',
-			_ => null,
-		} ?? switch (path) {
 			'financial.safetyThreshold' => '安全阈值',
 			'financial.dailyBurnRate' => '每日消费',
 			'financial.financialAssistant' => '财务助手',
@@ -6314,6 +6342,8 @@ extension on Translations {
 			'financial.updateNow' => '立即更新',
 			'app.splashTitle' => '智见增长，格物致富。',
 			'app.splashSubtitle' => '智能财务助手',
+			'app.fatalInitTitle' => 'Finvo 启动失败',
+			'app.fatalInitMessage' => ({required Object error}) => '初始化错误：${error}',
 			'statistics.title' => '统计分析',
 			'statistics.analyze' => '统计分析',
 			'statistics.exportInProgress' => '导出功能开发中...',

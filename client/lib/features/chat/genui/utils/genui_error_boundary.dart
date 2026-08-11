@@ -2,6 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 final _logger = Logger('GenUiErrorBoundary');
 
@@ -143,7 +144,7 @@ class _FallbackWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Component failed to load',
+                      t.error.genui.loadingFailed,
                       style: AppTextStyles.destructiveText(theme),
                     ),
                     Text(

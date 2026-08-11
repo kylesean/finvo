@@ -22,6 +22,22 @@ import 'package:finvo/features/finance/widgets/financial_accounts_drawer.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
+sealed class _AccountListItem {}
+
+final class _AccountSectionHeaderItem extends _AccountListItem {
+  _AccountSectionHeaderItem(this.title);
+
+  final String title;
+}
+
+final class _AccountCardItem extends _AccountListItem {
+  _AccountCardItem(this.account);
+
+  final FinancialAccount account;
+}
+
+final class _AccountListBottomSpacer extends _AccountListItem {}
+
 class FinancialAccountsPage extends ConsumerStatefulWidget {
   const FinancialAccountsPage({super.key});
 
@@ -205,54 +221,63 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                 },
                 child: accounts.isEmpty
                     ? _buildEmptyState(theme, colors)
-                    : ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        children: [
-                          if (assetAccounts.isNotEmpty) ...[
-                            _buildSectionHeader(
-                              theme,
-                              colors,
-                              t.financial.assetAccounts,
-                            ),
-                            ...assetAccounts.map(
-                              (account) => FinancialAccountCard(
-                                account: account,
-                                hideAmounts: _hideAmounts,
-                                onEdit: (account, definition) =>
-                                    pushAccountEditPage(
-                                      context,
-                                      account,
-                                      definition,
-                                    ),
-                              ),
-                            ),
-                          ],
-                          if (liabilityAccounts.isNotEmpty) ...[
-                            _buildSectionHeader(
-                              theme,
-                              colors,
-                              t.financial.liabilityAccounts,
-                            ),
-                            ...liabilityAccounts.map(
-                              (account) => FinancialAccountCard(
-                                account: account,
-                                hideAmounts: _hideAmounts,
-                                onEdit: (account, definition) =>
-                                    pushAccountEditPage(
-                                      context,
-                                      account,
-                                      definition,
-                                    ),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 80), // Space for FAB
-                        ],
+                    : _buildAccountListView(
+                        theme,
+                        colors,
+                        assetAccounts,
+                        liabilityAccounts,
                       ),
               ),
             ),
           ],
         );
+      },
+    );
+  }
+
+  List<_AccountListItem> _buildAccountListItems(
+    List<FinancialAccount> assetAccounts,
+    List<FinancialAccount> liabilityAccounts,
+  ) {
+    final items = <_AccountListItem>[];
+    if (assetAccounts.isNotEmpty) {
+      items.add(_AccountSectionHeaderItem(t.financial.assetAccounts));
+      items.addAll(assetAccounts.map(_AccountCardItem.new));
+    }
+    if (liabilityAccounts.isNotEmpty) {
+      items.add(_AccountSectionHeaderItem(t.financial.liabilityAccounts));
+      items.addAll(liabilityAccounts.map(_AccountCardItem.new));
+    }
+    items.add(_AccountListBottomSpacer());
+    return items;
+  }
+
+  Widget _buildAccountListView(
+    FThemeData theme,
+    FColors colors,
+    List<FinancialAccount> assetAccounts,
+    List<FinancialAccount> liabilityAccounts,
+  ) {
+    final items = _buildAccountListItems(assetAccounts, liabilityAccounts);
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return switch (items[index]) {
+          _AccountSectionHeaderItem(:final title) => _buildSectionHeader(
+            theme,
+            colors,
+            title,
+          ),
+          _AccountCardItem(:final account) => FinancialAccountCard(
+            account: account,
+            hideAmounts: _hideAmounts,
+            onEdit: (account, definition) =>
+                pushAccountEditPage(context, account, definition),
+          ),
+          _AccountListBottomSpacer() => const SizedBox(height: 80),
+        };
       },
     );
   }

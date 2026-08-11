@@ -854,6 +854,11 @@
         "plentiful": "Healthy",
         "normal": "Normal"
       },
+      "emptyStateAlert": {
+        "noBudgetsYet": "予算がありません",
+        "noTransactionsYet": "取引がありません",
+        "noAccountsYet": "口座がありません"
+      },
       "cashFlowForecast": {
         "title": "Cash Flow Forecast",
         "recurringTransaction": "Recurring Transaction",
@@ -1210,7 +1215,9 @@
   },
   "app": {
     "splashTitle": "スマートに、豊かに。",
-    "splashSubtitle": "インテリジェント財務アシスタント"
+    "splashSubtitle": "インテリジェント財務アシスタント",
+    "fatalInitTitle": "Finvo の起動に失敗しました",
+    "fatalInitMessage": "初期化エラー：$error"
   },
   "statistics": {
     "title": "統計分析",

@@ -963,6 +963,8 @@ class _Translations$app$zh_Hant extends Translations$app$zh {
 	// Translations
 	@override String get splashTitle => '智見增長，格物致富。';
 	@override String get splashSubtitle => '智能財務助手';
+	@override String get fatalInitTitle => 'Finvo 啟動失敗';
+	@override String fatalInitMessage({required Object error}) => '初始化錯誤：${error}';
 }
 
 // Path: statistics
@@ -1397,6 +1399,7 @@ class _Translations$chat$genui$zh_Hant extends Translations$chat$genui$zh {
 	@override late final _Translations$chat$genui$budgetSimulator$zh_Hant budgetSimulator = _Translations$chat$genui$budgetSimulator$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$budgetReceipt$zh_Hant budgetReceipt = _Translations$chat$genui$budgetReceipt$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$budgetStatusCard$zh_Hant budgetStatusCard = _Translations$chat$genui$budgetStatusCard$zh_Hant._(_root);
+	@override late final _Translations$chat$genui$emptyStateAlert$zh_Hant emptyStateAlert = _Translations$chat$genui$emptyStateAlert$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$cashFlowForecast$zh_Hant cashFlowForecast = _Translations$chat$genui$cashFlowForecast$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$healthScore$zh_Hant healthScore = _Translations$chat$genui$healthScore$zh_Hant._(_root);
 	@override late final _Translations$chat$genui$spaceSelector$zh_Hant spaceSelector = _Translations$chat$genui$spaceSelector$zh_Hant._(_root);
@@ -2165,6 +2168,18 @@ class _Translations$chat$genui$budgetStatusCard$zh_Hant extends Translations$cha
 	@override String get warning => 'Warning';
 	@override String get plentiful => 'Healthy';
 	@override String get normal => 'Normal';
+}
+
+// Path: chat.genui.emptyStateAlert
+class _Translations$chat$genui$emptyStateAlert$zh_Hant extends Translations$chat$genui$emptyStateAlert$zh {
+	_Translations$chat$genui$emptyStateAlert$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get noBudgetsYet => '暫無預算';
+	@override String get noTransactionsYet => '暫無交易';
+	@override String get noAccountsYet => '暫無帳戶';
 }
 
 // Path: chat.genui.cashFlowForecast
@@ -3325,6 +3340,9 @@ extension on TranslationsZhHant {
 			'chat.genui.budgetStatusCard.warning' => 'Warning',
 			'chat.genui.budgetStatusCard.plentiful' => 'Healthy',
 			'chat.genui.budgetStatusCard.normal' => 'Normal',
+			'chat.genui.emptyStateAlert.noBudgetsYet' => '暫無預算',
+			'chat.genui.emptyStateAlert.noTransactionsYet' => '暫無交易',
+			'chat.genui.emptyStateAlert.noAccountsYet' => '暫無帳戶',
 			'chat.genui.cashFlowForecast.title' => 'Cash Flow Forecast',
 			'chat.genui.cashFlowForecast.recurringTransaction' => 'Recurring Transaction',
 			'chat.genui.cashFlowForecast.recurringIncome' => 'Recurring Income',
@@ -3580,11 +3598,11 @@ extension on TranslationsZhHant {
 			'financial.recurringTransactions' => '週期交易',
 			'financial.safetyThreshold' => '安全閾值',
 			'financial.dailyBurnRate' => '每日消費',
+			_ => null,
+		} ?? switch (path) {
 			'financial.financialAssistant' => '財務助手',
 			'financial.manageFinancialSettings' => '管理您的財務設置',
 			'financial.safetyThresholdSettings' => '財務安全線設置',
-			_ => null,
-		} ?? switch (path) {
 			'financial.setSafetyThreshold' => '設置您的財務安全閾值',
 			'financial.safetyThresholdSaved' => '財務安全線已保存',
 			'financial.dailyBurnRateSettings' => '日常消費預估',
@@ -3601,6 +3619,8 @@ extension on TranslationsZhHant {
 			'financial.updateNow' => '立即更新',
 			'app.splashTitle' => '智見增長，格物致富。',
 			'app.splashSubtitle' => '智能財務助手',
+			'app.fatalInitTitle' => 'Finvo 啟動失敗',
+			'app.fatalInitMessage' => ({required Object error}) => '初始化錯誤：${error}',
 			'statistics.title' => '統計分析',
 			'statistics.analyze' => '統計分析',
 			'statistics.exportInProgress' => '導出功能開發中...',

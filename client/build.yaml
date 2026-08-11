@@ -1,5 +1,12 @@
 targets:
   $default:
     builders:
+      # slang_build_runner is intentionally disabled so `build_runner` stays
+      # focused on Freezed / Riverpod / json_serializable. After editing any
+      # `lib/i18n/*.i18n.json` file, regenerate translations manually:
+      #
+      #   dart run slang
+      #
+      # Commit both the JSON sources and the generated `lib/i18n/strings*.dart`.
       slang_build_runner:
         enabled: false
