@@ -149,6 +149,16 @@ def upgrade() -> None:
             sa.ForeignKey("transaction_comments.id", ondelete="CASCADE"),
             nullable=True,
         ),
+        sa.Column(
+            "replied_to_user_uuid",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey(
+                "users.id",
+                ondelete="SET NULL",
+                name="fk_transaction_comments_replied_to_user_uuid_users",
+            ),
+            nullable=True,
+        ),
         sa.Column("comment_text", sa.Text, nullable=False),
         sa.Column("mentioned_user_ids", postgresql.JSONB, nullable=True),
         sa.Column(
@@ -167,6 +177,9 @@ def upgrade() -> None:
 
     op.create_index("ix_transaction_comments_transaction_id", "transaction_comments", ["transaction_id"])
     op.create_index("ix_transaction_comments_user_uuid", "transaction_comments", ["user_uuid"])
+    op.create_index(
+        "ix_transaction_comments_replied_to_user_uuid", "transaction_comments", ["replied_to_user_uuid"]
+    )
 
     # =========================================================================
     # transaction_shares - Shared transactions (matches TransactionShare model)
@@ -306,6 +319,7 @@ def downgrade() -> None:
     op.drop_index("ix_transaction_shares_transaction_id")
     op.drop_table("transaction_shares")
 
+    op.drop_index("ix_transaction_comments_replied_to_user_uuid")
     op.drop_index("ix_transaction_comments_user_uuid")
     op.drop_index("ix_transaction_comments_transaction_id")
     op.drop_table("transaction_comments")
