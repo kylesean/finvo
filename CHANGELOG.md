@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0-alpha] - 2026-08-11
 
 ### Added
-- **Cloud deployment support**: external `REDIS_URL` caching, automatic PostgreSQL extension provisioning, and a HuggingFace Space entry point.
+- **Cloud deployment support**: external `REDIS_URL` caching and automatic PostgreSQL extension provisioning (`vector`, `uuid-ossp`).
 - **Server-driven forecast localization**: forecast output now follows the session language (language stickiness).
 - **Local Ollama support**: `ollama:` / `ollama/` model prefix with low-latency inference options for fully-offline deployments.
 - **JWT refresh tokens** with rotation for longer-lived authenticated sessions.
