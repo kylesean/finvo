@@ -8,6 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note**: During alpha development, this changelog is updated only at version releases.
 > For detailed changes between releases, see the [Git commit history](https://github.com/kylesean/Finvo/commits/main).
 
+## [0.3.0-alpha] - 2026-08-11
+
+### Added
+- **Cloud deployment support**: external `REDIS_URL` caching, automatic PostgreSQL extension provisioning, and a HuggingFace Space entry point.
+- **Server-driven forecast localization**: forecast output now follows the session language (language stickiness).
+- **Local Ollama support**: `ollama:` / `ollama/` model prefix with low-latency inference options for fully-offline deployments.
+- **JWT refresh tokens** with rotation for longer-lived authenticated sessions.
+- **Avatar cache busting** and improved profile image URL resolution.
+- **Currency & amount settings**: live previews and immediate-save UX.
+- **Real-time shared-space sync**: member leave/removal propagated to all members with notifications.
+- **Text-based @mentions** in comments with granular notification types.
+- **Cross-platform WebSocket** connection component with per-platform auth handling.
+- **Typed tools**: skill scripts migrated to typed tools and hardened transfer flow.
+- Client test coverage for navigation, server-config, and version providers.
+
+### Changed
+- Standardized transaction field naming to camelCase and improved balance reconciliation reliability.
+- Migrated transaction amounts from `float` to `Decimal`/string across API, ledger, and storage.
+- Refactored god services into focused services plus repositories with explicit response schemas.
+- Unified backend error handling on a single `AppException`/`BusinessError` hierarchy with an error-code registry.
+- Made `LLMRegistry` thread-safe and `LLMService` tool binding immutable.
+- Split the LLM history token budget from the output cap and added a tokenizer fallback.
+- Migrated UI icons to Lucide and decomposed the cash flow forecast chart.
+- Upgraded Riverpod to 3.4.2 (fixes setState-during-build) and added tolerant JSON parsing.
+- Internationalized remaining hardcoded UI strings across all 5 languages.
+- CI/CD: unified client pipelines, Alembic schema-drift validation, and server tests against real PostgreSQL via testcontainers.
+
+### Fixed
+- Web login crash, Dio lifecycle issues, and spurious unknown-error toasts.
+- Statistics money fields now serialized as strings to prevent decimal precision loss.
+- Feed load-more errors no longer wipe the rendered list; pagination guards and delete-race fixes.
+- Resolved 11 critical/high/medium issues found in a deep code audit.
+- Ledger atomicity, snapshot-based balance re-link, and `jti` revocation.
+- Security hardening: `write_file` sandbox (RCE), weak-JWT detection, CORS and SVG XSS, constant-time verification-code comparison, CSPRNG-based codes, and removal of verification-code logging.
+- Long-term memory retrieval and credential routing.
+- Capped recurring-transaction recursion and offloaded large file reads.
+- LLM call retries and fallback across the model ring.
+
 ## [0.2.2-alpha] - 2026-07-29
 
 ### Added
