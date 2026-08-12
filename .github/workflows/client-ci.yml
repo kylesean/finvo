@@ -48,6 +48,20 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      # Generated code (.g.dart / .freezed.dart / slang) is committed to the
+      # repo. Regenerating it in CI and failing on any diff catches drift
+      # (a source edit that forgot to run build_runner), which analyze/test
+      # alone cannot detect because the stale generated files still compile.
+      - name: Verify generated code is up to date
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          dart run slang
+          if [ -n "$(git status --porcelain lib/)" ]; then
+            echo "Generated files are out of date. Run: dart run build_runner build --delete-conflicting-outputs && dart run slang"
+            git diff --stat lib/
+            exit 1
+          fi
+
       - name: Check formatting
         run: dart format --set-exit-if-changed lib/
 
@@ -56,6 +70,18 @@ jobs:
 
       - name: Run tests
         run: flutter test --coverage
+
+      # Coverage gate: fail the build if line coverage drops below the
+      # threshold. Currently 15%→30% target; raise it as page/widget tests
+      # are added. awk reports the percentage without needing lcov installed.
+      - name: Enforce coverage threshold
+        run: |
+          COVERAGE=$(awk -F: '/^LF:/{lf+=$2}/^LH:/{lh+=$2}END{printf "%.1f", lh*100/lf}' coverage/lcov.info)
+          echo "Line coverage: ${COVERAGE}% (threshold: 30%)"
+          if [ "$(echo "${COVERAGE} < 30" | bc)" = "1" ]; then
+            echo "::error::Line coverage ${COVERAGE}% is below the 30% threshold"
+            exit 1
+          fi
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
