@@ -7,10 +7,10 @@ import 'dart:async' as _i3;
 
 import 'package:dio/dio.dart' as _i2;
 import 'package:finvo/core/network/interceptors/business_interceptor.dart'
-    as _i5;
+    as _i6;
 import 'package:finvo/core/network/network_client.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i6;
+import 'package:mockito/src/dummies.dart' as _i5;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -54,12 +54,36 @@ class MockNetworkClient extends _i1.Mock implements _i4.NetworkClient {
           as _i2.Dio);
 
   @override
+  T unwrapData<T>(
+    Object? json,
+    T Function(Map<String, dynamic>)? fromJson, {
+    required String? endpoint,
+    T Function()? onNull,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #unwrapData,
+              [json, fromJson],
+              {#endpoint: endpoint, #onNull: onNull},
+            ),
+            returnValue: _i5.dummyValue<T>(
+              this,
+              Invocation.method(
+                #unwrapData,
+                [json, fromJson],
+                {#endpoint: endpoint, #onNull: onNull},
+              ),
+            ),
+          )
+          as T);
+
+  @override
   _i3.Future<T> request<T>(
     String? path, {
     required _i4.HttpMethod? method,
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? data,
-    _i5.FromJsonT<T>? fromJsonT,
+    _i6.FromJsonT<T>? fromJsonT,
     _i2.Options? options,
     _i2.CancelToken? cancelToken,
     bool? enableRetry = true,
@@ -81,8 +105,8 @@ class MockNetworkClient extends _i1.Mock implements _i4.NetworkClient {
               },
             ),
             returnValue:
-                _i6.ifNotNull(
-                  _i6.dummyValueOrNull<T>(
+                _i5.ifNotNull(
+                  _i5.dummyValueOrNull<T>(
                     this,
                     Invocation.method(
                       #request,

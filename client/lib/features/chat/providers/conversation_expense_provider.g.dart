@@ -138,7 +138,7 @@ final class ConversationTotalExpenseProvider
 }
 
 String _$conversationTotalExpenseHash() =>
-    r'857112985dce3985ce69b341cd32cbd17d53a33f';
+    r'c2d15972bbc7d6d0f189dbbffba94807407447c1';
 
 /// Formatted current conversation expense title Provider
 ///
