@@ -10,8 +10,8 @@ import 'package:logging/logging.dart';
 import 'package:finvo/features/profile/models/financial_account.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
 import 'package:finvo/features/chat/genui/organisms/account_picker_card.dart';
+import 'package:finvo/features/chat/genui/templates/transaction_group_receipt_parts.dart';
 import 'package:finvo/features/chat/genui/templates/transaction_group_receipt_sheets.dart';
-
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/core/network/network_client.dart';
@@ -19,7 +19,6 @@ import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:decimal/decimal.dart';
-import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
@@ -191,118 +190,15 @@ class _TransactionGroupReceiptState
     double iconSize = 44,
     String? currency,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Left: Category Icon - Using ThemedIcon for consistency
-        iconSize >= 44
-            ? ThemedIcon.large(icon: category.icon)
-            : ThemedIcon(icon: category.icon),
-        const SizedBox(width: 12),
-
-        // Middle: Category Name & Tags
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Category Name
-              Text(
-                category.displayText,
-                style: AppTextStyles.listTitle(theme).copyWith(height: 1.2),
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-
-              // Tags or Type Description
-              tags.isNotEmpty
-                  ? _atomTagsRow(theme, colors, tags)
-                  : Text(
-                      isExpense ? t.transaction.expense : t.transaction.income,
-                      style: theme.typography.body.sm.copyWith(
-                        color: colors.mutedForeground,
-                        height: 1.2,
-                      ),
-                    ),
-            ],
-          ),
-        ),
-
-        const SizedBox(width: 8),
-
-        // Right: Amount
-        _moleculeAmount(
-          theme,
-          amount,
-          isExpense,
-          currency: currency,
-          style: AppTextStyles.pageTitleLarge(
-            theme,
-          ).copyWith(letterSpacing: -0.5, height: 1.2),
-        ),
-      ],
-    );
-  }
-
-  /// Atom: Tags row
-  ///
-  /// Mirrors the home feed: show at most [maxVisible] tags and collapse the
-  /// rest into a `+N` counter. Each visible tag is [Flexible] so a long label
-  /// (e.g. a merchant name) ellipsizes instead of overflowing the row when the
-  /// amount column on the right leaves little room.
-  Widget _atomTagsRow(FThemeData theme, FColors colors, List<String> tags) {
-    const maxVisible = 2;
-    final visibleTags = tags.take(maxVisible).toList();
-    final extraCount = tags.length - maxVisible;
-
-    return Row(
-      children: [
-        for (final tag in visibleTags)
-          Flexible(
-            fit: FlexFit.loose,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: colors.muted.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(
-                    color: colors.border.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Text(
-                  tag,
-                  style: AppTextStyles.detailLabel(theme),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ),
-        if (extraCount > 0)
-          Text('+$extraCount', style: AppTextStyles.detailLabel(theme)),
-      ],
-    );
-  }
-
-  /// Molecule 2: Amount
-  Widget _moleculeAmount(
-    FThemeData theme,
-    Decimal amount,
-    bool isExpense, {
-    TextStyle? style,
-    String? currency,
-  }) {
-    return AmountText(
-      amount: amount,
-      type: isExpense ? TransactionType.expense : TransactionType.income,
+    return buildGroupTransactionInfo(
+      theme,
+      colors,
+      category,
+      tags,
+      amount,
+      isExpense,
+      iconSize: iconSize,
       currency: currency,
-      style:
-          style ??
-          theme.typography.body.sm.copyWith(
-            fontWeight: FontWeight.w700,
-          ), // Elevated default weight and size
     );
   }
 
@@ -371,36 +267,13 @@ class _TransactionGroupReceiptState
     required Color activeColor,
     required bool isActive,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      decoration: BoxDecoration(
-        color: isActive
-            ? activeColor.withValues(alpha: 0.08)
-            : colors.muted.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 12,
-            color: isActive ? activeColor : colors.mutedForeground,
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              style: theme.typography.body.xs.copyWith(
-                color: isActive ? activeColor : colors.mutedForeground,
-                fontWeight: isActive ? FontWeight.w600 : null,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
+    return buildGroupActionPill(
+      theme,
+      colors,
+      icon: icon,
+      label: label,
+      activeColor: activeColor,
+      isActive: isActive,
     );
   }
 
