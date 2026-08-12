@@ -22,6 +22,14 @@ class BusinessInterceptor extends Interceptor {
       return handler.next(response);
     }
 
+    // Skip validation for binary responses (e.g. authenticated image/file
+    // downloads via ResponseType.bytes): the payload is List<int>, not a JSON
+    // envelope, and would otherwise be rejected as a malformed business
+    // response, breaking every binary endpoint that shares this Dio pipeline.
+    if (response.requestOptions.responseType == ResponseType.bytes) {
+      return handler.next(response);
+    }
+
     // Response must be a JSON object
     if (response.data is! Map<String, dynamic>) {
       return handler.reject(

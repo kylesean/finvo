@@ -59,6 +59,10 @@ class SharedSpaceNotification extends _$SharedSpaceNotification
         NotificationCrudMixin<NotificationModel, SharedSpaceNotificationState> {
   static const _pageSize = 20;
 
+  /// Monotonic pagination generation: a refresh supersedes any in-flight
+  /// load-more, whose late response is discarded instead of being appended.
+  int _generation = 0;
+
   // ============================================================
   // NotificationCrudMixin accessors
   // ============================================================
@@ -118,7 +122,13 @@ class SharedSpaceNotification extends _$SharedSpaceNotification
       ref.read(notificationRepositoryProvider);
 
   /// Load notifications with pagination
+  ///
+  /// [refresh] bumps the generation so an in-flight load-more response is
+  /// discarded: appending an old page onto a refreshed list would duplicate
+  /// items and corrupt pagination state.
   Future<void> loadNotifications({bool refresh = false}) async {
+    final generation = refresh ? ++_generation : _generation;
+
     if (refresh) {
       state = const SharedSpaceNotificationState(isLoading: true);
     } else if (state.isLoading || !state.hasMore) {
@@ -133,6 +143,8 @@ class SharedSpaceNotification extends _$SharedSpaceNotification
         page: page,
         limit: _pageSize,
       );
+
+      if (!ref.mounted || generation != _generation) return;
 
       // Map central NotificationItem -> shared_space NotificationModel
       final mapped = res.items
@@ -165,6 +177,7 @@ class SharedSpaceNotification extends _$SharedSpaceNotification
         hasMore: hasMore,
       );
     } catch (e) {
+      if (!ref.mounted || generation != _generation) return;
       _logger.severe('Failed to load notifications', e);
       state = state.copyWith(
         isLoading: false,

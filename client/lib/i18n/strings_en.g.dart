@@ -211,6 +211,7 @@ class _Translations$auth$en extends Translations$auth$zh {
 	@override late final _Translations$auth$email$en email = _Translations$auth$email$en._(_root);
 	@override late final _Translations$auth$password$en password = _Translations$auth$password$en._(_root);
 	@override late final _Translations$auth$verificationCode$en verificationCode = _Translations$auth$verificationCode$en._(_root);
+	@override String get logoutFailedTitle => 'Logout Failed';
 }
 
 // Path: transaction
@@ -1557,6 +1558,7 @@ class _Translations$server$error$en extends Translations$server$error$zh {
 	@override String get connectionRefused => 'Could not connect to server';
 	@override String get sslError => 'SSL certificate error';
 	@override String get serverError => 'Server error';
+	@override String get plainHttpWarning => 'Plain HTTP: your login token and data would travel unencrypted. Only use this for trusted local networks.';
 }
 
 // Path: sharedSpace.dashboard
@@ -2676,6 +2678,7 @@ extension on TranslationsEn {
 			'auth.verificationCode.sendFailed' => 'Failed to send',
 			'auth.verificationCode.placeholder' => 'Optional for now, enter anything',
 			'auth.verificationCode.required' => 'Verification code is required',
+			'auth.logoutFailedTitle' => 'Logout Failed',
 			'transaction.expense' => 'Expense',
 			'transaction.income' => 'Income',
 			'transaction.transfer' => 'Transfer',
@@ -3090,9 +3093,9 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => 'Generates a pending transaction on due date, requires manual confirmation',
 			'forecast.recurringTransaction.pendingTitle' => 'Pending Transactions',
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} pending',
-			'forecast.recurringTransaction.confirm' => 'Confirm',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.confirm' => 'Confirm',
 			'forecast.recurringTransaction.skip' => 'Skip',
 			'forecast.recurringTransaction.noPending' => 'No pending transactions',
 			'forecast.recurringTransaction.confirmSuccess' => 'Transaction confirmed',
@@ -3604,9 +3607,9 @@ extension on TranslationsEn {
 			'financial.addFirstAccount' => 'Tap the button below to add your first account',
 			'financial.assetAccounts' => 'Asset Accounts',
 			'financial.liabilityAccounts' => 'Liability Accounts',
-			'financial.selectCurrency' => 'Select Currency',
 			_ => null,
 		} ?? switch (path) {
+			'financial.selectCurrency' => 'Select Currency',
 			'financial.cancel' => 'Cancel',
 			'financial.confirm' => 'Confirm',
 			'financial.settings' => 'Financial Settings',
@@ -3704,6 +3707,7 @@ extension on TranslationsEn {
 			'server.error.connectionRefused' => 'Could not connect to server',
 			'server.error.sslError' => 'SSL certificate error',
 			'server.error.serverError' => 'Server error',
+			'server.error.plainHttpWarning' => 'Plain HTTP: your login token and data would travel unencrypted. Only use this for trusted local networks.',
 			'sharedSpace.dashboard.sectionTitle' => 'Financial Overview',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => 'Cumulative Total Expense',
 			'sharedSpace.dashboard.participatingMembers' => 'Participating Members',

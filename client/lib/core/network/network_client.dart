@@ -233,19 +233,20 @@ class NetworkClient {
   /// timeouts or bad responses: a timed-out write may already have succeeded server-side,
   /// so retrying could create/modify resources twice.
   bool _shouldRetry(DioException e, {required bool isIdempotentMethod}) {
-    // Stale TCP socket connection error (Keep-Alive closed connection) is always
-    // safe to retry on a fresh connection.
-    if (e.type == DioExceptionType.connectionError) {
-      return true;
-    }
-
-    // Non-idempotent methods are never retried for timeouts or bad responses
+    // Non-idempotent methods (POST/PUT/DELETE/PATCH) are never retried, not
+    // even for connection errors: a failed write may already have been
+    // executed server-side (the response was lost, not the request), so
+    // retrying could create/modify resources twice (e.g. duplicate financial
+    // transactions). Retrying requires an idempotency-key contract.
     if (!isIdempotentMethod) {
       return false;
     }
 
     // Only retry for specific error types on idempotent (GET) requests
     switch (e.type) {
+      // Stale TCP socket connection error (Keep-Alive closed connection) is
+      // safe to retry on a fresh connection.
+      case DioExceptionType.connectionError:
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
@@ -268,8 +269,12 @@ class NetworkClient {
 
   /// Handle final failure, log error details
   void _handleFinalFailure(DioException e, String path) {
-    _logger.info('Final failure for path: $path');
-    _logger.info('Error type: ${e.type}, Message: ${e.message}');
+    // Severity: a request that exhausted its retry budget is a real failure
+    // the caller (and any error-reporting pipeline) should be able to see.
+    _logger.warning(
+      'Final failure for path: $path (type=${e.type}, '
+      'message=${e.message})',
+    );
   }
 
   Future<Map<String, dynamic>> requestMap(

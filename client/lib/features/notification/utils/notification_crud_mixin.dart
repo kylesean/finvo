@@ -98,12 +98,20 @@ mixin NotificationCrudMixin<TItem, TState> {
 
   /// Delete a notification (optimistic), skipping the network call for
   /// synthetic local-only IDs (`rt_` prefix).
+  ///
+  /// If the remote deletion fails, the optimistic removal is rolled back:
+  /// the item is re-inserted at its previous position and the badge/total
+  /// counters are restored, so the UI never silently shows a deletion that
+  /// did not happen server-side.
   Future<void> deleteNotification(String id) async {
     // Safe lookup - return early if item not found
     final itemToDelete = notificationItems
         .where((item) => notificationIdOf(item) == id)
         .firstOrNull;
     if (itemToDelete == null) return;
+
+    final previousIndex = notificationItems.indexOf(itemToDelete);
+    final total = notificationTotal;
 
     // Optimistically remove from state for responsive UI
     final result = NotificationListMutations.delete(
@@ -113,7 +121,6 @@ mixin NotificationCrudMixin<TItem, TState> {
       idOf: notificationIdOf,
       isReadOf: notificationIsReadOf,
     );
-    final total = notificationTotal;
     notificationState = updateNotificationState(
       result.items,
       unreadCount: result.unreadCount,
@@ -127,9 +134,29 @@ mixin NotificationCrudMixin<TItem, TState> {
       final success = await deleteNotificationRemote(id);
       if (!success) {
         _logger.warning('deleteNotification API failed for notification $id');
+        await _rollbackDelete(itemToDelete, previousIndex, total);
       }
     } catch (e) {
       _logger.warning('deleteNotification failed for notification $id', e);
+      await _rollbackDelete(itemToDelete, previousIndex, total);
     }
+  }
+
+  /// Re-insert [item] at [index] after a failed remote deletion, restoring
+  /// the badge counter (only if the item was unread) and the total.
+  Future<void> _rollbackDelete(TItem item, int index, int? total) async {
+    final items = [...notificationItems];
+    final insertAt = index.clamp(0, items.length);
+    items.insert(insertAt, item);
+    notificationState = updateNotificationState(
+      items,
+      unreadCount:
+          notificationUnreadCount + (notificationIsReadOf(item) ? 0 : 1),
+      total: total == null ? null : total + 1,
+    );
+    _logger.warning(
+      'deleteNotification rolled back for notification '
+      '${notificationIdOf(item)} (re-inserted at $insertAt)',
+    );
   }
 }

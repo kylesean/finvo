@@ -80,20 +80,81 @@ class GenUiLifecycleManager {
        _callbacks = callbacks;
 
   // Callbacks getters for internal use
+  //
+  // Every forwarding callback guards on [_isDisposed]: dispose() (which is
+  // invoked unawaited during a keepAlive provider rebuild) is asynchronous
+  // inside, so the old GenUI service may still deliver late events while the
+  // teardown is in flight. Without these guards those late events would be
+  // applied through the *old* repository/state closures onto the *new* chat
+  // session — message cross-talk, duplicate completions, or surface leaks.
   String Function() get _getCurrentStreamingMessageId =>
       _callbacks.getCurrentStreamingMessageId;
   void Function(double amount, String type, String currency)
-  get _onTransactionCreated => _callbacks.onTransactionCreated;
-  void Function(String sessionId, String? messageId) get _onSessionInit =>
-      _callbacks.onSessionInit;
-  void Function(String text) get _onTextResponse => _callbacks.onTextResponse;
-  void Function() get _onStreamComplete => _callbacks.onStreamComplete;
-  void Function() get _markFirstChunkReceived =>
-      _callbacks.markFirstChunkReceived;
-  void Function(String title) get _onTitleUpdate => _callbacks.onTitleUpdate;
-  void Function(ToolCallInfo)? get _onToolCallStart =>
-      _callbacks.onToolCallStart;
-  void Function(ToolCallInfo)? get _onToolCallEnd => _callbacks.onToolCallEnd;
+  get _onTransactionCreated {
+    final cb = _callbacks.onTransactionCreated;
+    return (amount, type, currency) {
+      if (_isDisposed) return;
+      cb(amount, type, currency);
+    };
+  }
+
+  void Function(String sessionId, String? messageId) get _onSessionInit {
+    final cb = _callbacks.onSessionInit;
+    return (sessionId, messageId) {
+      if (_isDisposed) return;
+      cb(sessionId, messageId);
+    };
+  }
+
+  void Function(String text) get _onTextResponse {
+    final cb = _callbacks.onTextResponse;
+    return (text) {
+      if (_isDisposed) return;
+      cb(text);
+    };
+  }
+
+  void Function() get _onStreamComplete {
+    final cb = _callbacks.onStreamComplete;
+    return () {
+      if (_isDisposed) return;
+      cb();
+    };
+  }
+
+  void Function() get _markFirstChunkReceived {
+    final cb = _callbacks.markFirstChunkReceived;
+    return () {
+      if (_isDisposed) return;
+      cb();
+    };
+  }
+
+  void Function(String title) get _onTitleUpdate {
+    final cb = _callbacks.onTitleUpdate;
+    return (title) {
+      if (_isDisposed) return;
+      cb(title);
+    };
+  }
+
+  void Function(ToolCallInfo)? get _onToolCallStart {
+    final cb = _callbacks.onToolCallStart;
+    if (cb == null) return null;
+    return (toolCall) {
+      if (_isDisposed) return;
+      cb(toolCall);
+    };
+  }
+
+  void Function(ToolCallInfo)? get _onToolCallEnd {
+    final cb = _callbacks.onToolCallEnd;
+    if (cb == null) return null;
+    return (toolCall) {
+      if (_isDisposed) return;
+      cb(toolCall);
+    };
+  }
 
   bool get isInitialized => _genUiService?.isInitialized ?? false;
   GenUiService? get service => _genUiService;
@@ -105,14 +166,21 @@ class GenUiLifecycleManager {
   int get activeSurfaceCount => _surfaceRegistry.length;
 
   /// Initialize GenUI service
-  Future<void> initialize({Dio? dio, required String sseBaseUrl}) async {
+  ///
+  /// [sseBaseUrlResolver] is resolved per request (not at init time) so a
+  /// server switch mid-session takes effect without rebuilding the keepAlive
+  /// chat service.
+  Future<void> initialize({
+    Dio? dio,
+    required String Function() sseBaseUrlResolver,
+  }) async {
     try {
       _genUiService = GenUiService();
       await _genUiService!.initialize(
         config: GenUiConfig(
           catalog: AppCatalog.build(),
           storageService: _secureStorageService,
-          sseBaseUrl: sseBaseUrl,
+          sseBaseUrlResolver: sseBaseUrlResolver,
           dio: dio,
         ),
         callbacks: GenUiCallbacks(
@@ -237,6 +305,7 @@ class GenUiLifecycleManager {
 
   /// Update surface status
   void updateSurfaceStatus(String surfaceId, SurfaceStatus status) {
+    if (_isDisposed) return;
     final existing = _surfaceRegistry[surfaceId];
     if (existing != null) {
       _surfaceRegistry[surfaceId] = existing.copyWith(
@@ -256,6 +325,7 @@ class GenUiLifecycleManager {
 
   /// Handle DeleteSurface event
   void handleDeleteSurface(String surfaceId) {
+    if (_isDisposed) return;
     final existing = _surfaceRegistry[surfaceId];
     if (existing != null) {
       updateSurfaceStatus(surfaceId, SurfaceStatus.removed);
@@ -284,6 +354,7 @@ class GenUiLifecycleManager {
   // ============================================================
 
   void _handleSurfaceAdded(String surfaceId) {
+    if (_isDisposed) return;
     _logger.info('GenUiLifecycleManager: Surface added - $surfaceId');
 
     if (surfaceId.startsWith('history_')) {
@@ -297,6 +368,7 @@ class GenUiLifecycleManager {
   }
 
   void _handleSurfaceIdAdded(String surfaceId) {
+    if (_isDisposed) return;
     _logger.info('GenUiLifecycleManager: Surface ID added - $surfaceId');
 
     final messageId = _findTargetMessageIdForSurface(surfaceId);
@@ -336,11 +408,13 @@ class GenUiLifecycleManager {
   }
 
   void _handleSurfaceRemoved(String surfaceId) {
+    if (_isDisposed) return;
     _logger.info('GenUiLifecycleManager: Surface removed - $surfaceId');
     handleDeleteSurface(surfaceId);
   }
 
   void _handleGenUiError(String error) {
+    if (_isDisposed) return;
     // Log and update message state
     _logger.warning('GenUiLifecycleManager: GenUI error: $error');
 
@@ -396,6 +470,7 @@ class GenUiLifecycleManager {
     Map<String, dynamic> componentData,
     String uuidV4,
   ) {
+    if (_isDisposed) return;
     if (_genUiService == null || !_genUiService!.isInitialized) {
       _logger.info('GenUiLifecycleManager: Service not initialized');
       return;

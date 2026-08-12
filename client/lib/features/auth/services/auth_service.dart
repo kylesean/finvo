@@ -69,13 +69,12 @@ class AuthService {
 
   // Helper to delete authentication data
   Future<void> _deleteAuthData() async {
-    // Clear sensitive data through the single secure-storage entry point
-    try {
-      await _storageService.deleteToken();
-      await _storageService.deleteRefreshToken();
-    } catch (e, stackTrace) {
-      _logger.warning('SecureStorage delete failed', e, stackTrace);
-    }
+    // Fail-closed credential deletion: if Keychain/Keystore refuses the
+    // delete, propagate the failure instead of reporting a clean logout while
+    // the credentials remain stored. SharedPreferences cleanup only runs once
+    // the secure deletion succeeded.
+    await _storageService.deleteToken();
+    await _storageService.deleteRefreshToken();
 
     // Clear non-sensitive data from shared preferences
     await _prefs.remove(_userIdKey);

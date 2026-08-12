@@ -7,6 +7,7 @@ import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/auth/providers/verification_provider.dart';
 import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/shared/utils/route_utils.dart';
@@ -85,7 +86,7 @@ class _RegisterStep2PageState extends ConsumerState<RegisterStep2Page> {
       if (!mounted) return;
       ToastService.showDestructive(
         title: Text(t.error.unknownError),
-        description: Text(e.toString()),
+        description: Text(safeErrorMessage(e)),
       );
     } finally {
       if (mounted) {

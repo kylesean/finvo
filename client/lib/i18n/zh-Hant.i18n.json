@@ -112,7 +112,8 @@
     },
     "logoutSuccess": "Logged out successfully",
     "confirmLogoutTitle": "Confirm Logout",
-    "confirmLogoutContent": "Are you sure you want to log out?"
+    "confirmLogoutContent": "Are you sure you want to log out?",
+    "logoutFailedTitle": "登出失敗"
   },
   "transaction": {
     "expense": "支出",
@@ -1457,7 +1458,8 @@
       "connectionTimeout": "Connection timed out",
       "connectionRefused": "Could not connect to server",
       "sslError": "SSL certificate error",
-      "serverError": "Server error"
+      "serverError": "Server error",
+      "plainHttpWarning": "明文 HTTP:登入令牌與資料將以未加密方式傳輸。僅可在可信的區域網路環境使用。"
     }
   },
   "errorMapping": {

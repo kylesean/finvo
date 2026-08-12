@@ -112,7 +112,8 @@
       "sendFailed": "发送失败",
       "placeholder": "暂不校验，随意输入",
       "required": "验证码不能为空"
-    }
+    },
+    "logoutFailedTitle": "登出失败"
   },
   "transaction": {
     "expense": "支出",
@@ -1311,7 +1312,8 @@
       "connectionTimeout": "连接超时",
       "connectionRefused": "无法连接到服务器",
       "sslError": "SSL 证书错误",
-      "serverError": "服务器错误"
+      "serverError": "服务器错误",
+      "plainHttpWarning": "明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。"
     }
   },
   "sharedSpace": {

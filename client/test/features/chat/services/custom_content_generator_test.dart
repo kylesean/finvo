@@ -94,7 +94,7 @@ void main() {
     generator = CustomContentGenerator(
       _FakeSecureStorageService(),
       dio: dio,
-      sseBaseUrl: 'http://localhost:8080',
+      sseBaseUrlResolver: () => 'http://localhost:8080',
     );
     userMessageSent.clear();
     streamCompleteCount = 0;
@@ -205,5 +205,28 @@ void main() {
 
     expect(adapter.requests, hasLength(2));
     expect(streamCompleteCount, 2);
+  });
+
+  test('SSE base URL is resolved per request (server switch takes effect '
+      'without service rebuild)', () async {
+    setAdapter(doneSseBody);
+
+    var baseUrl = 'http://old-server:8080';
+    generator = CustomContentGenerator(
+      _FakeSecureStorageService(),
+      dio: Dio(BaseOptions())..httpClientAdapter = adapter,
+      sseBaseUrlResolver: () => baseUrl,
+    );
+
+    await generator.sendRequest(genui.ChatMessage.user('第一条'));
+    expect(adapter.requests.single.url, startsWith('http://old-server:8080'));
+
+    // Simulate a server switch: the resolver now returns the new address and
+    // the very next request must stream from it, without any re-initialization.
+    baseUrl = 'http://new-server:9090';
+    adapter.requests.clear();
+    await generator.sendRequest(genui.ChatMessage.user('第二条'));
+
+    expect(adapter.requests.single.url, startsWith('http://new-server:9090'));
   });
 }

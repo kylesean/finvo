@@ -12,7 +12,7 @@ import 'package:finvo/features/chat/models/tool_call_info.dart';
 import 'package:finvo/features/chat/services/ai_service.dart';
 import 'package:finvo/features/chat/services/genui_service.dart';
 
-import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/features/chat/services/conversation_service.dart';
 import 'package:finvo/features/chat/services/file_attachment_service.dart';
@@ -207,7 +207,10 @@ class ChatHistory extends _$ChatHistory {
     final dio = ref.read(sseDioProvider);
     await _genUiLifecycleManager.initialize(
       dio: dio,
-      sseBaseUrl: ref.read(sseBaseUrlProvider),
+      // Resolve the SSE base URL at request time so a server switch takes
+      // effect immediately instead of streaming to the old server for the
+      // whole keepAlive service lifetime.
+      sseBaseUrlResolver: () => ref.read(sseBaseUrlProvider),
     );
 
     // Pass GenUI service reference to extracted controllers
@@ -433,7 +436,7 @@ class ChatHistory extends _$ChatHistory {
         );
         state = state.copyWith(
           isLoadingHistory: false,
-          historyError: e is AppException ? e.message : t.common.error,
+          historyError: safeErrorMessage(e),
           currentConversationTitle: t.common.loadFailed,
         );
       }
@@ -501,9 +504,7 @@ class ChatHistory extends _$ChatHistory {
   }
 
   void _handleStreamError(Object error) {
-    final errorMessageText = error is AppException
-        ? error.message
-        : 'An unknown error occurred: ${error.toString()}';
+    final errorMessageText = safeErrorMessage(error);
     final displayError = t.chat.aiCommunicationError(error: errorMessageText);
 
     final currentText = state.messages

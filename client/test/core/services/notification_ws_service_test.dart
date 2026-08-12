@@ -333,6 +333,9 @@ void main() {
     test('reconnect budget follows exponential backoff and then gives up', () {
       final attempts = <String>[];
       final service = NotificationWsService()
+        // Deterministic timing: disable jitter so the elapse() schedule below
+        // matches the exact 1s/2s/4s/8s/16s backoff sequence.
+        ..enableReconnectJitter = false
         ..connectChannelFactory = (url, {required token}) {
           attempts.add(url);
           return _FakeWebSocketChannel()..failReady = true;

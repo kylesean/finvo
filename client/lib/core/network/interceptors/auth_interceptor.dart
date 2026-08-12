@@ -106,7 +106,24 @@ class AuthInterceptor extends Interceptor {
           'Received 401 Unauthorized error for ${err.requestOptions.path}',
         );
 
-        final String? refreshToken = await storageService.getRefreshToken();
+        final String? refreshToken;
+        try {
+          refreshToken = await storageService.getRefreshToken();
+        } catch (e, stackTrace) {
+          // Secure storage is unavailable: the refresh token cannot be read,
+          // so a silent refresh is impossible. Fail closed (sign out locally)
+          // and propagate the ORIGINAL DioException through the normalization
+          // chain instead of letting this storage error replace it (which
+          // would bypass error normalization and skip the sign-out flow).
+          _logger.warning(
+            'Failed to read refresh token from secure storage, signing out',
+            e,
+            stackTrace,
+          );
+          await _signOutLocally();
+          super.onError(err, handler);
+          return;
+        }
         if (refreshToken != null && refreshToken.isNotEmpty) {
           // _singleFlightRefresh holds the lock across the whole
           // refresh + persist + notify span, so a 401 arriving during the
@@ -252,7 +269,22 @@ class AuthInterceptor extends Interceptor {
     }
     final future = _refreshAndPersist(refreshToken, baseUrl);
     _refreshing = future;
-    unawaited(future.whenComplete(() => _refreshing = null));
+    // Clear the shared future when the pipeline settles, on success AND on
+    // failure. Handle the error explicitly: an unhandled completion here would
+    // surface as an uncaught async error in the zone handler. The derived
+    // future can only error if the onError handler itself throws (it does
+    // not), so discarding it is safe.
+    unawaited(
+      future.then<void>(
+        (_) {
+          if (identical(_refreshing, future)) _refreshing = null;
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          if (identical(_refreshing, future)) _refreshing = null;
+          _logger.warning('Token refresh pipeline failed', error, stackTrace);
+        },
+      ),
+    );
     return future;
   }
 

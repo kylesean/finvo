@@ -147,15 +147,13 @@ class Auth extends _$Auth {
   }
 
   Future<void> logout() async {
-    try {
-      await _authService.logout();
-    } catch (e) {
-      _logger.warning('Error during logout, but local state cleared', e);
-    }
-    // logout() clears the secure-storage tokens and shared-preference user PII
-    // internally (via _deleteAuthData). Whether the call succeeded or not, the
-    // local credentials are already removed, so the user is never left in a
-    // half-logged-in state.
+    // Fail-closed logout: if the credentials cannot be removed from
+    // Keychain/Keystore, the exception propagates to the caller and the
+    // in-memory session is NOT cleared — the user stays signed in and the UI
+    // surfaces the failure. Clearing state while the token remains stored
+    // would report a logout that did not happen (the residual credential
+    // could be reused or restore the session on the next cold start).
+    await _authService.logout();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 

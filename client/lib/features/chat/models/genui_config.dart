@@ -12,14 +12,20 @@ typedef OnErrorCallback = void Function(String message, dynamic error);
 class GenUiConfig {
   final genui.Catalog catalog;
   final SecureStorageService storageService;
-  final String sseBaseUrl;
+
+  /// Resolves the SSE base URL at request time (not capture time). A plain
+  /// string would freeze the server address for the lifetime of the keepAlive
+  /// chat service, so after a server switch the chat would keep streaming
+  /// from the old server. Deferred resolution always reads the current
+  /// [sseBaseUrlProvider] value.
+  final String Function() sseBaseUrlResolver;
   final Dio? dio;
   final dynamic configuration;
 
   const GenUiConfig({
     required this.catalog,
     required this.storageService,
-    required this.sseBaseUrl,
+    required this.sseBaseUrlResolver,
     this.dio,
     this.configuration,
   });

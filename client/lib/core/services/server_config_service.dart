@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 part 'server_config_service.g.dart';
 
 final _logger = Logger('ServerConfigService');
@@ -46,7 +47,17 @@ class ServerConfigService {
   }
 
   /// Save server URL to persistent storage
+  ///
+  /// Re-validates at the service boundary (defense in depth: the UI validator
+  /// is not the only gate) and throws [InvalidServerUrlException] on invalid
+  /// input instead of persisting a malformed/dangerous URL.
   Future<void> saveServerUrl(String url) async {
+    final validationError = validateUrl(url);
+    if (validationError != null) {
+      _logger.warning('Rejected invalid server URL: ${_redactUrl(url)}');
+      throw InvalidServerUrlException(validationError);
+    }
+
     // Normalize URL
     String normalizedUrl = url.trim();
 
@@ -65,7 +76,16 @@ class ServerConfigService {
     }
 
     await _prefs.setString(_serverUrlKey, normalizedUrl);
-    _logger.info('Server URL saved: $normalizedUrl');
+    _logger.info('Server URL saved: ${_redactUrl(normalizedUrl)}');
+  }
+
+  /// Redact a URL for logging: only scheme, host and port are emitted — never
+  /// userinfo, query parameters or paths (potential secrets / PII).
+  static String _redactUrl(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.host.isEmpty) return '<invalid-url>';
+    final port = uri.hasPort ? ':${uri.port}' : '';
+    return '${uri.scheme}://${uri.host}$port';
   }
 
   /// Clear saved server URL
@@ -99,6 +119,15 @@ class ServerConfigService {
       // /api/v1/api/v1 on the wire, so reject any path component.
       if (uri.path.isNotEmpty && uri.path != '/') {
         return 'URL must be a host without a path (e.g. https://example.com)';
+      }
+      // Credentials embedded in the URL would be sent as part of the request
+      // and leak into logs; query/fragment strings are never part of a base
+      // server address and could hide a subtle re-targeting.
+      if (uri.userInfo.isNotEmpty) {
+        return 'URL must not contain credentials (user:password@)';
+      }
+      if (uri.query.isNotEmpty || uri.fragment.isNotEmpty) {
+        return 'URL must not contain a query string or fragment';
       }
     } catch (e) {
       return 'Invalid URL format';
@@ -162,7 +191,7 @@ class ServerConfigService {
     }
 
     final healthUrl = '$normalizedUrl/api/v1/health';
-    _logger.info('Checking health at: $healthUrl');
+    _logger.info('Checking health at: ${_redactUrl(healthUrl)}');
 
     // Health checks run from the server-setup flow, i.e. BEFORE the server is
     // configured, so the app's unified Dio (whose ConfigurationCheckInterceptor

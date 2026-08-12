@@ -52,6 +52,10 @@ class NotificationWsService {
   /// race to reinstate a half-open socket.
   int _connectGeneration = 0;
 
+  /// Shared RNG for reconnect-backoff jitter (deterministic seeding is not
+  /// needed; the service is not created in tests unless jitter is asserted).
+  final _random = Random();
+
   /// Broadcast stream of connection state transitions, and the current value.
   final _statusController =
       StreamController<NotificationWsConnectionStatus>.broadcast();
@@ -97,6 +101,11 @@ class NotificationWsService {
   @visibleForTesting
   WebSocketChannel Function(String wsUrl, {required String token})?
   connectChannelFactory;
+
+  /// Test seam: disables reconnect-delay jitter so tests can elapse exact
+  /// exponential-backoff durations. Production never sets this.
+  @visibleForTesting
+  bool enableReconnectJitter = true;
 
   NotificationCallback? onNotification;
 
@@ -166,7 +175,11 @@ class NotificationWsService {
       // Token is sent via Authorization header (IO) or query param (web).
       // connectChannelFactory lets tests inject a fake channel; production
       // always falls through to the platform connectWs.
-      _channel = (connectChannelFactory ?? connectWs)(wsBase, token: token);
+      final channel = (connectChannelFactory ?? connectWs)(
+        wsBase,
+        token: token,
+      );
+      _channel = channel;
       // Guard against a half-open TCP connection where the server accepts
       // the socket but never completes the WebSocket upgrade. Without a
       // timeout, `ready` would hang forever, blocking connect() and
@@ -189,7 +202,7 @@ class NotificationWsService {
       _setStatus(NotificationWsConnectionStatus.connected);
 
       _startHeartbeat();
-      _listen();
+      _listen(channel, generation);
     } catch (e, stackTrace) {
       _logger.warning('WebSocket connection failed', e, stackTrace);
       // Clean up the failed channel (closes its sink to release underlying
@@ -200,9 +213,15 @@ class NotificationWsService {
     }
   }
 
-  void _listen() {
-    _subscription = _channel?.stream.listen(
+  void _listen(WebSocketChannel channel, int generation) {
+    _subscription = channel.stream.listen(
       (message) {
+        // A stale channel's late event must not be attributed to the current
+        // connection (e.g. the message timer or an in-flight message arriving
+        // after a newer connect() replaced this channel).
+        if (generation != _connectGeneration || !identical(channel, _channel)) {
+          return;
+        }
         _sinceLastServerMessage.reset();
         // Parse first, dispatch second: a failure in the callback is NOT a
         // parse failure. Keeping them in one try/catch would mislabel a
@@ -231,12 +250,21 @@ class NotificationWsService {
         }
       },
       onError: (Object error) {
+        // Only the current connection may tear down state: an old channel's
+        // terminal event must not _cleanup() (and cancel the heartbeat/
+        // reconnect timer of) the channel that has replaced it.
+        if (generation != _connectGeneration || !identical(channel, _channel)) {
+          return;
+        }
         _logger.warning('WebSocket error: $error');
         _cleanup();
         _setStatus(NotificationWsConnectionStatus.reconnecting);
         _scheduleReconnect();
       },
       onDone: () {
+        if (generation != _connectGeneration || !identical(channel, _channel)) {
+          return;
+        }
         _logger.info('WebSocket closed');
         _cleanup();
         // A dropped connection after initial connect must also be reconnected.
@@ -305,13 +333,22 @@ class NotificationWsService {
 
     _reconnectTimer?.cancel();
 
-    // Exponential backoff: 1s, 2s, 4s, 8s, ... max 30s
-    final delay = Duration(
+    // Exponential backoff: 1s, 2s, 4s, 8s, ... max 30s, with a small random
+    // jitter (±25%) so many clients reconnecting at once (e.g. after a server
+    // restart) do not synchronize into a thundering herd on the same cadence.
+    final baseDelay = Duration(
       seconds: min(
         pow(2, _reconnectAttempts).toInt(),
         _maxReconnectDelay.inSeconds,
       ),
     );
+    final jitterMs = (baseDelay.inMilliseconds * 0.25).round();
+    final delay = enableReconnectJitter
+        ? baseDelay +
+              Duration(
+                milliseconds: _random.nextInt(jitterMs * 2 + 1) - jitterMs,
+              )
+        : baseDelay;
     _reconnectAttempts++;
 
     _logger.info(

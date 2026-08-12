@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
@@ -87,9 +88,13 @@ class UserAvatar extends ConsumerWidget {
         final sep = requestUrl.contains('?') ? '&' : '?';
         requestUrl += '${sep}v=${Uri.encodeQueryComponent(version!)}';
       }
-      debugPrint(
-        '[UserAvatar] userId=$userId url=$requestUrl version=${version ?? '-'}',
-      );
+      // Debug-only diagnostics: the URL and userId are PII and must never be
+      // emitted in production logs.
+      if (kDebugMode) {
+        debugPrint(
+          '[UserAvatar] userId=$userId url=$requestUrl version=${version ?? '-'}',
+        );
+      }
       content = Image(
         key: ValueKey(requestUrl),
         image: NetworkImage(requestUrl),
@@ -101,9 +106,11 @@ class UserAvatar extends ConsumerWidget {
           return fallback;
         },
         errorBuilder: (context, error, stackTrace) {
-          debugPrint(
-            '[UserAvatar] IMAGE FAILED userId=$userId url=$requestUrl error=$error',
-          );
+          if (kDebugMode) {
+            debugPrint(
+              '[UserAvatar] IMAGE FAILED userId=$userId url=$requestUrl error=$error',
+            );
+          }
           return fallback;
         },
       );

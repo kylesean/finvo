@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/profile/models/user_info.dart';
 import 'package:finvo/features/profile/services/profile_service.dart';
@@ -77,6 +78,11 @@ class UserProfile extends _$UserProfile {
   Future<bool> uploadAndUpdateAvatar(XFile imageFile) async {
     state = state.copyWith(isUploadingAvatar: true, error: null);
 
+    // Capture the pre-update identity so the *old* cached images can be
+    // evicted precisely after the swap.
+    final userId = state.user?.id;
+    final oldCacheBuster = state.avatarCacheBuster;
+
     try {
       // 1. Upload image to server
       final uploadResult = await _uploadService.uploadFiles([imageFile]);
@@ -102,9 +108,21 @@ class UserProfile extends _$UserProfile {
       final updatedUser = await _service.updateProfile(avatarUrl: avatarUrl);
       if (!ref.mounted) return false;
 
-      // 4. Clear Flutter network image cache & set cacheBuster timestamp for immediate UI refresh
-      PaintingBinding.instance.imageCache.clear();
-      PaintingBinding.instance.imageCache.clearLiveImages();
+      // 4. Evict only this user's previously cached avatar image(s) instead
+      // of clearing Flutter's entire global image cache (which would force
+      // every image app-wide to re-decode, causing jank after every avatar
+      // upload). The new avatar loads under a fresh ?v= cache-buster; the
+      // stale entries are the versionless URL (used by widgets that pass no
+      // version) and the previous versioned URL.
+      if (userId != null) {
+        final baseUrl = ref.read(apiBaseUrlProvider);
+        final avatarBase = '$baseUrl/avatars/$userId';
+        final cache = PaintingBinding.instance.imageCache;
+        cache.evict(NetworkImage(avatarBase));
+        if (oldCacheBuster != null && oldCacheBuster.isNotEmpty) {
+          cache.evict(NetworkImage('$avatarBase?v=$oldCacheBuster'));
+        }
+      }
       final cacheBuster = DateTime.now().millisecondsSinceEpoch.toString();
 
       state = state.copyWith(

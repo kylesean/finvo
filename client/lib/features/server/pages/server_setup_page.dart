@@ -13,6 +13,7 @@ import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/widgets/top_toast.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/app/router/app_routes.dart';
 
@@ -48,10 +49,17 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
     if (currentUrl != null) {
       _urlController.text = currentUrl;
     }
+    // Live-update the cleartext-HTTP warning as the user types.
+    _urlController.addListener(_onUrlChanged);
+  }
+
+  void _onUrlChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _urlController.removeListener(_onUrlChanged);
     _urlController.dispose();
     super.dispose();
   }
@@ -87,13 +95,31 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
     }
 
     final notifier = ref.read(serverConfigProvider.notifier);
-    await notifier.saveServerUrl(_urlController.text);
+    try {
+      await notifier.saveServerUrl(_urlController.text);
+    } catch (e) {
+      // Service-boundary validation can still reject the URL even though the
+      // form validator passed (defense in depth); surface it instead of
+      // navigating with an unpersisted configuration.
+      if (!mounted) return;
+      TopToast.error(context, safeErrorMessage(e));
+      return;
+    }
 
     if (!mounted) return;
 
     if (widget.isReconfiguring) {
-      // Clear login session and force redirect to login
-      await ref.read(authProvider.notifier).logout();
+      // Clear login session and force redirect to login. Fail-closed: if the
+      // credentials cannot be removed from secure storage, abort the
+      // redirect and surface the error instead of leaving the old session's
+      // credentials behind on a different server.
+      try {
+        await ref.read(authProvider.notifier).logout();
+      } catch (e) {
+        if (!mounted) return;
+        TopToast.error(context, safeErrorMessage(e));
+        return;
+      }
       if (!mounted) return;
 
       TopToast.success(context, t.server.serverUrlSavedRedirectLogin);
@@ -117,7 +143,7 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
   }
 
   void _onQrCodeDetected(String url) {
-    _logger.info('QR code detected: $url');
+    _logger.info('QR code detected: ${_redactServerUrl(url)}');
     setState(() {
       _urlController.text = url;
       _isScanning = false;
@@ -126,6 +152,25 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
     });
     // Auto-test connection after QR scan
     unawaited(_testConnection());
+  }
+
+  /// Whether the entered URL uses cleartext http:// (acceptable for LAN
+  /// self-hosted deployments, but shown with a prominent security warning).
+  bool get _usesPlainHttp {
+    var value = _urlController.text.trim();
+    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+      value = 'https://$value';
+    }
+    final uri = Uri.tryParse(value);
+    return uri != null && uri.scheme == 'http';
+  }
+
+  /// Redact a server URL for logs: scheme + host + port only.
+  static String _redactServerUrl(String url) {
+    final uri = Uri.tryParse(url.contains('://') ? url : 'http://$url');
+    if (uri == null || uri.host.isEmpty) return '<invalid-url>';
+    final port = uri.hasPort ? ':${uri.port}' : '';
+    return '${uri.scheme}://${uri.host}$port';
   }
 
   @override
@@ -216,6 +261,39 @@ class _ServerSetupPageState extends ConsumerState<ServerSetupPage> {
                     return configService.validateUrl(value);
                   },
                 ),
+                if (_usesPlainHttp) ...[
+                  const SizedBox(height: 8),
+                  // Security warning for cleartext connections: the Bearer
+                  // token would transit unencrypted. Allowed for self-hosted
+                  // LAN deployments, but never silently.
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.semantic.warningAccent.withValues(
+                        alpha: 0.12,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          FLucideIcons.shieldAlert,
+                          size: 18,
+                          color: theme.semantic.warningAccent,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            t.server.error.plainHttpWarning,
+                            style: theme.typography.body.sm.copyWith(
+                              color: theme.colors.foreground,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
 
                 // QR Scan Button

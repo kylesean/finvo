@@ -78,12 +78,12 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
         includePaused: filter.includePaused,
       );
       // Discard a stale response if the user switched filters while this
-      // request was in flight.
-      if (generation != _loadGeneration) return;
+      // request was in flight, or if the provider was disposed meanwhile.
+      if (!ref.mounted || generation != _loadGeneration) return;
       state = state.copyWith(summary: summary, isLoading: false);
     } catch (e) {
       // Preserve the typed exception (AppException) instead of flattening it.
-      if (generation != _loadGeneration) return;
+      if (!ref.mounted || generation != _loadGeneration) return;
       state = state.copyWith(isLoading: false, error: e);
     }
   }

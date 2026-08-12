@@ -101,7 +101,17 @@ class PaginatedConversation extends _$PaginatedConversation {
         perPage: state.perPage,
       );
 
-      if (!ref.mounted || generation != _generation) return;
+      // Discard a stale response that raced a more recent refresh. Reset
+      // isLoadingMore first: loadFirstPage never touches it, so without this
+      // reset the flag would stay true forever and permanently block
+      // subsequent loadNextPage calls.
+      if (generation != _generation) {
+        if (ref.mounted) {
+          state = state.copyWith(isLoadingMore: false);
+        }
+        return;
+      }
+      if (!ref.mounted) return;
 
       state = state.copyWith(
         conversations: [...state.conversations, ...result.data],

@@ -112,7 +112,8 @@
     },
     "logoutSuccess": "Logged out successfully",
     "confirmLogoutTitle": "Confirm Logout",
-    "confirmLogoutContent": "Are you sure you want to log out?"
+    "confirmLogoutContent": "Are you sure you want to log out?",
+    "logoutFailedTitle": "로그아웃 실패"
   },
   "transaction": {
     "expense": "지출",
@@ -1459,7 +1460,8 @@
       "connectionTimeout": "Connection timed out",
       "connectionRefused": "Could not connect to server",
       "sslError": "SSL certificate error",
-      "serverError": "Server error"
+      "serverError": "Server error",
+      "plainHttpWarning": "일반 HTTP: 로그인 토큰과 데이터가 암호화되지 않고 전송됩니다. 신뢰할 수 있는 로컬 네트워크에서만 사용하세요."
     }
   },
   "errorMapping": {

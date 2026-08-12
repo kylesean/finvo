@@ -369,6 +369,9 @@ class Translations$auth$zh {
 	late final Translations$auth$email$zh email = Translations$auth$email$zh.internal(_root);
 	late final Translations$auth$password$zh password = Translations$auth$password$zh.internal(_root);
 	late final Translations$auth$verificationCode$zh verificationCode = Translations$auth$verificationCode$zh.internal(_root);
+
+	/// zh: '登出失败'
+	String get logoutFailedTitle => '登出失败';
 }
 
 // Path: transaction
@@ -3374,6 +3377,9 @@ class Translations$server$error$zh {
 
 	/// zh: '服务器错误'
 	String get serverError => '服务器错误';
+
+	/// zh: '明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。'
+	String get plainHttpWarning => '明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。';
 }
 
 // Path: sharedSpace.dashboard
@@ -5387,6 +5393,7 @@ extension on Translations {
 			'auth.verificationCode.sendFailed' => '发送失败',
 			'auth.verificationCode.placeholder' => '暂不校验，随意输入',
 			'auth.verificationCode.required' => '验证码不能为空',
+			'auth.logoutFailedTitle' => '登出失败',
 			'transaction.expense' => '支出',
 			'transaction.income' => '收入',
 			'transaction.transfer' => '转账',
@@ -5801,9 +5808,9 @@ extension on Translations {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前需确认',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期时生成待确认交易，需手动确认后记账',
 			'forecast.recurringTransaction.pendingTitle' => '待确认交易',
-			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 笔待确认',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 笔待确认',
 			'forecast.recurringTransaction.confirm' => '确认',
 			'forecast.recurringTransaction.skip' => '跳过',
 			'forecast.recurringTransaction.noPending' => '无待确认交易',
@@ -6315,9 +6322,9 @@ extension on Translations {
 			'financial.liabilityAccounts' => '负债账户',
 			'financial.selectCurrency' => '选择货币',
 			'financial.cancel' => '取消',
-			'financial.confirm' => '确定',
 			_ => null,
 		} ?? switch (path) {
+			'financial.confirm' => '确定',
 			'financial.settings' => '财务设置',
 			'financial.budgetManagement' => '预算管理',
 			'financial.recurringTransactions' => '周期交易',
@@ -6413,6 +6420,7 @@ extension on Translations {
 			'server.error.connectionRefused' => '无法连接到服务器',
 			'server.error.sslError' => 'SSL 证书错误',
 			'server.error.serverError' => '服务器错误',
+			'server.error.plainHttpWarning' => '明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。',
 			'sharedSpace.dashboard.sectionTitle' => '财务概览',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => '累计总支出',
 			'sharedSpace.dashboard.participatingMembers' => '参与成员',

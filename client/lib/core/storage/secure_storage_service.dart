@@ -92,6 +92,13 @@ class SecureStorageService {
     });
   }
 
+  /// Delete the access token from secure storage.
+  ///
+  /// Fail-closed: if the token cannot be removed from Keychain/Keystore, the
+  /// failure is surfaced as [SecureStorageUnavailableException] instead of
+  /// being swallowed — a silent delete failure would leave valid credentials
+  /// behind after logout/server-switch while the app reports a clean logout
+  /// (residual credentials can be reused or restored on the next cold start).
   Future<void> deleteToken() {
     return _synchronized(() async {
       try {
@@ -105,10 +112,16 @@ class SecureStorageService {
         // memory cache, so `getToken()` would keep returning the stale cached
         // value — contradicting the fail-closed policy used on writes.
         // Invalidate the cache (next read re-reads the real value from storage)
-        // and surface the failure as a warning instead of swallowing it.
+        // and surface the failure instead of swallowing it.
         _cachedToken = null;
         _tokenCacheInitialized = false;
-        _logger.warning('SecureStorageService: Failed to delete token: $e');
+        _logger.severe(
+          'SecureStorageService: Failed to delete token from '
+          'Keychain/Keystore: $e',
+        );
+        throw SecureStorageUnavailableException(
+          'Failed to delete the access token securely on this device.',
+        );
       }
     });
   }
@@ -157,7 +170,7 @@ class SecureStorageService {
     });
   }
 
-  /// Delete the refresh token (best-effort during logout).
+  /// Delete the refresh token (fail-closed, like the access token).
   Future<void> deleteRefreshToken() {
     return _synchronized(() async {
       try {
@@ -167,11 +180,17 @@ class SecureStorageService {
         _logger.info('SecureStorageService: Refresh token deleted');
       } catch (e) {
         // Mirror deleteToken: invalidate the cache so a later read does not
-        // serve a stale value from memory, and log the failure visibly.
+        // serve a stale value from memory, and surface the failure instead of
+        // swallowing it — the caller decides how to proceed knowing the
+        // credential may still be stored.
         _cachedRefreshToken = null;
         _refreshTokenCacheInitialized = false;
-        _logger.warning(
-          'SecureStorageService: Failed to delete refresh token: $e',
+        _logger.severe(
+          'SecureStorageService: Failed to delete refresh token from '
+          'Keychain/Keystore: $e',
+        );
+        throw SecureStorageUnavailableException(
+          'Failed to delete the refresh token securely on this device.',
         );
       }
     });

@@ -112,7 +112,8 @@
       "sendFailed": "Failed to send",
       "placeholder": "Optional for now, enter anything",
       "required": "Verification code is required"
-    }
+    },
+    "logoutFailedTitle": "Logout Failed"
   },
   "transaction": {
     "expense": "Expense",
@@ -1313,7 +1314,8 @@
       "connectionTimeout": "Connection timed out",
       "connectionRefused": "Could not connect to server",
       "sslError": "SSL certificate error",
-      "serverError": "Server error"
+      "serverError": "Server error",
+      "plainHttpWarning": "Plain HTTP: your login token and data would travel unencrypted. Only use this for trusted local networks."
     }
   },
   "sharedSpace": {

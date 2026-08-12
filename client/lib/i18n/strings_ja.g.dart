@@ -211,6 +211,7 @@ class _Translations$auth$ja extends Translations$auth$zh {
 	@override String get logoutSuccess => 'Logged out successfully';
 	@override String get confirmLogoutTitle => 'Confirm Logout';
 	@override String get confirmLogoutContent => 'Are you sure you want to log out?';
+	@override String get logoutFailedTitle => 'ログアウト失敗';
 }
 
 // Path: transaction
@@ -1784,6 +1785,7 @@ class _Translations$server$error$ja extends Translations$server$error$zh {
 	@override String get connectionRefused => 'Could not connect to server';
 	@override String get sslError => 'SSL certificate error';
 	@override String get serverError => 'Server error';
+	@override String get plainHttpWarning => '平文 HTTP:ログイントークンとデータが暗号化されず送信されます。信頼できるローカルネットワークでのみ使用してください。';
 }
 
 // Path: errorMapping.generic
@@ -2670,6 +2672,7 @@ extension on TranslationsJa {
 			'auth.logoutSuccess' => 'Logged out successfully',
 			'auth.confirmLogoutTitle' => 'Confirm Logout',
 			'auth.confirmLogoutContent' => 'Are you sure you want to log out?',
+			'auth.logoutFailedTitle' => 'ログアウト失敗',
 			'transaction.expense' => '支出',
 			'transaction.income' => '収入',
 			'transaction.transfer' => '振替',
@@ -3084,9 +3087,9 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.skip' => 'スキップ',
 			'forecast.recurringTransaction.noPending' => '確認待ち取引なし',
 			'forecast.recurringTransaction.confirmSuccess' => '取引を確認しました',
-			'forecast.recurringTransaction.skipSuccess' => '取引をスキップしました',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.skipSuccess' => '取引をスキップしました',
 			'forecast.recurringTransaction.interval' => '繰り返し間隔',
 			'forecast.recurringTransaction.selectDays' => '曜日を選択',
 			'forecast.recurringTransaction.alwaysLastDay' => '毎月末日に実行',
@@ -3598,9 +3601,9 @@ extension on TranslationsJa {
 			'financial.settings' => '財務設定',
 			'financial.budgetManagement' => '予算管理',
 			'financial.recurringTransactions' => '繰り返し取引',
-			'financial.safetyThreshold' => 'セーフティライン',
 			_ => null,
 		} ?? switch (path) {
+			'financial.safetyThreshold' => 'セーフティライン',
 			'financial.dailyBurnRate' => '1日の支出',
 			'financial.financialAssistant' => '財務アシスタント',
 			'financial.manageFinancialSettings' => '財務設定を管理',
@@ -3817,6 +3820,7 @@ extension on TranslationsJa {
 			'server.error.connectionRefused' => 'Could not connect to server',
 			'server.error.sslError' => 'SSL certificate error',
 			'server.error.serverError' => 'Server error',
+			'server.error.plainHttpWarning' => '平文 HTTP:ログイントークンとデータが暗号化されず送信されます。信頼できるローカルネットワークでのみ使用してください。',
 			'errorMapping.generic.badRequest' => 'Bad Request',
 			'errorMapping.generic.authFailed' => 'Authentication failed, please login again',
 			'errorMapping.generic.permissionDenied' => 'Permission denied',

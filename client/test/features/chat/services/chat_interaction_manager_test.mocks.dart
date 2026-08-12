@@ -304,11 +304,14 @@ class MockGenUiLifecycleManager extends _i1.Mock
           as int);
 
   @override
-  _i14.Future<void> initialize({_i15.Dio? dio, required String? sseBaseUrl}) =>
+  _i14.Future<void> initialize({
+    _i15.Dio? dio,
+    required String Function()? sseBaseUrlResolver,
+  }) =>
       (super.noSuchMethod(
             Invocation.method(#initialize, [], {
               #dio: dio,
-              #sseBaseUrl: sseBaseUrl,
+              #sseBaseUrlResolver: sseBaseUrlResolver,
             }),
             returnValue: _i14.Future<void>.value(),
             returnValueForMissingStub: _i14.Future<void>.value(),

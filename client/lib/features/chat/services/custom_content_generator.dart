@@ -13,6 +13,10 @@ import 'package:finvo/features/chat/services/interaction_router.dart';
 import 'package:finvo/features/chat/services/sse_event_parsing.dart';
 import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 
+// ignore_for_file: prefer_initializing_formals - public ctor params assigned
+// to private fields (named parameters cannot be private, so initializing
+// formals are impossible); same convention as genui_lifecycle_manager.dart.
+
 export '../models/sse_event_models.dart'
     show ToolCallStartEvent, ToolCallEndEvent;
 
@@ -106,8 +110,10 @@ class CustomContentGenerator implements genui.Transport {
   /// a superseded request can never be applied to the newer one.
   int _requestGeneration = 0;
 
-  // URL configuration
-  final String _sseBaseUrl;
+  // URL configuration: resolved per request so a server switch takes effect
+  // immediately (a fixed string would keep the chat streaming from the old
+  // server for the whole keepAlive service lifetime).
+  final String Function() _sseBaseUrlResolver;
 
   /// Whether [_dio] was created by this instance (vs. injected by the
   /// provider layer). Only owned instances are closed on dispose; closing an
@@ -117,8 +123,9 @@ class CustomContentGenerator implements genui.Transport {
   CustomContentGenerator(
     this._storageService, {
     this._dio,
-    required this._sseBaseUrl,
-  }) : _ownsDio = _dio == null;
+    required String Function() sseBaseUrlResolver,
+  }) : _sseBaseUrlResolver = sseBaseUrlResolver,
+       _ownsDio = _dio == null;
 
   /// Get current session ID
   String? get currentSessionId => _currentSessionId;
@@ -283,7 +290,9 @@ class CustomContentGenerator implements genui.Transport {
       }
 
       // 2. Build request
-      final uri = Uri.parse('$_sseBaseUrl${ApiConstants.aiChatSseEndpoint}');
+      final uri = Uri.parse(
+        '${_sseBaseUrlResolver()}${ApiConstants.aiChatSseEndpoint}',
+      );
 
       _dio ??= Dio(
         BaseOptions(

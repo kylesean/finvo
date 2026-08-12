@@ -162,8 +162,9 @@ class Statistics extends _$Statistics {
         loadHealthScore(),
       ).wait;
 
-      // Discard stale responses from superseded filter/sort/range changes.
-      if (generation != _loadGeneration) {
+      // Discard stale responses from superseded filter/sort/range changes,
+      // or if the provider was disposed while fetching.
+      if (!ref.mounted || generation != _loadGeneration) {
         _logger.fine(
           'Statistics: discarding stale response (generation $generation)',
         );
@@ -182,7 +183,7 @@ class Statistics extends _$Statistics {
     } catch (e) {
       // Only surface errors for the latest generation; older failures belong
       // to superseded requests.
-      if (generation == _loadGeneration) {
+      if (!ref.mounted || generation == _loadGeneration) {
         state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
       }
     }

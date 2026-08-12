@@ -45,7 +45,7 @@ class GenUiService {
       _contentGenerator = CustomContentGenerator(
         config.storageService,
         dio: config.dio,
-        sseBaseUrl: config.sseBaseUrl,
+        sseBaseUrlResolver: config.sseBaseUrlResolver,
       );
 
       // Wire up callbacks

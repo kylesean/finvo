@@ -33,6 +33,12 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
   bool _isLoading = true;
   Object? _error;
 
+  /// Monotonic request id. Each [_loadImage] bumps it; a response whose id no
+  /// longer matches (a newer request has superseded it, e.g. after
+  /// didUpdateWidget) is discarded so a slow response can never overwrite the
+  /// image of a newer attachment.
+  int _imageRequestId = 0;
+
   @override
   void initState() {
     super.initState();
@@ -50,6 +56,9 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
   Future<void> _loadImage() async {
     if (!mounted) return;
 
+    final requestId = ++_imageRequestId;
+    final attachmentId = widget.attachmentId;
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -64,11 +73,13 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
       // never re-signed.
       final dio = ref.read(dioProvider);
       final response = await dio.get<List<int>>(
-        '/files/view/${widget.attachmentId}',
+        '/files/view/$attachmentId',
         options: Options(responseType: ResponseType.bytes),
       );
 
-      if (!mounted) return;
+      // Discard a stale response: the widget may have been updated to a
+      // different attachment (or disposed) while the request was in flight.
+      if (!mounted || requestId != _imageRequestId) return;
 
       if (response.data != null) {
         setState(() {
@@ -79,7 +90,7 @@ class _AuthenticatedImageState extends ConsumerState<AuthenticatedImage> {
         throw Exception('Image data is empty');
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || requestId != _imageRequestId) return;
       setState(() {
         _error = e;
         _isLoading = false;

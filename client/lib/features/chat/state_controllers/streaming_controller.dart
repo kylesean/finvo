@@ -165,6 +165,7 @@ class StreamingController {
 
   /// Reset state for a new streaming session
   void resetForNewMessage(String messageId) {
+    if (_isDisposed) return;
     _currentMessageId = messageId;
     streamState.startStreaming(messageId);
 
@@ -176,6 +177,7 @@ class StreamingController {
   /// If first chunk is not received within the delay, triggers callback
   /// to show "AI is thinking..." indicator
   void startInitialDelayTimer() {
+    if (_isDisposed) return;
     _initialResponseDelayTimer?.cancel();
     _initialResponseDelayTimer = Timer(
       Duration(milliseconds: config.initialDelayMs),
@@ -194,7 +196,7 @@ class StreamingController {
   ///
   /// Returns true if this was the first chunk
   bool handleTextChunk(String text) {
-    if (text.isEmpty) return false;
+    if (_isDisposed || text.isEmpty) return false;
 
     _initialResponseDelayTimer?.cancel();
 
@@ -209,6 +211,7 @@ class StreamingController {
 
   /// Mark first chunk as received (for UI components)
   void markFirstChunkReceived() {
+    if (_isDisposed) return;
     if (!streamState.isFirstChunkReceived) {
       streamState.markFirstChunkReceived();
     }
@@ -216,11 +219,13 @@ class StreamingController {
 
   /// Manually mark message as completed
   void markMessageCompleted() {
+    if (_isDisposed) return;
     streamState.markCompleted();
   }
 
   /// Mark stream as ended (without triggering callbacks)
   void markStreamEnded({bool isError = false}) {
+    if (_isDisposed) return;
     _initialResponseDelayTimer?.cancel();
     if (isError) {
       streamState.markError();
@@ -231,6 +236,7 @@ class StreamingController {
 
   /// Handle stream error
   void handleStreamError(Object error) {
+    if (_isDisposed) return;
     _initialResponseDelayTimer?.cancel();
     streamState.markError();
 

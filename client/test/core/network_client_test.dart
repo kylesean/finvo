@@ -36,6 +36,35 @@ void main() {
       expect(calls, greaterThan(1), reason: 'GET should be retried');
     });
 
+    test('GET connectionError (stale socket) IS retried', () async {
+      var calls = 0;
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            calls++;
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                type: DioExceptionType.connectionError,
+                message:
+                    "Dio can't establish a new connection after it was closed",
+              ),
+            );
+          },
+        ),
+      );
+
+      await expectLater(
+        client.request<void>('/ping', method: HttpMethod.get, maxRetries: 2),
+        throwsA(isA<NetworkException>()),
+      );
+      expect(
+        calls,
+        greaterThan(1),
+        reason: 'GET connectionError (stale socket) should be retried',
+      );
+    });
+
     test('POST timeout is NOT retried (non-idempotent)', () async {
       var calls = 0;
       dio.interceptors.add(
@@ -64,7 +93,7 @@ void main() {
       expect(calls, 1, reason: 'POST must not be retried on timeout');
     });
 
-    test('POST connectionError (stale socket) IS retried', () async {
+    test('POST connectionError is NOT retried (non-idempotent)', () async {
       var calls = 0;
       dio.interceptors.add(
         InterceptorsWrapper(
@@ -93,8 +122,11 @@ void main() {
       );
       expect(
         calls,
-        greaterThan(1),
-        reason: 'POST connectionError should be retried on stale socket',
+        1,
+        reason:
+            'POST must not be retried on connectionError: the write may '
+            'already have been executed server-side, and retrying could '
+            'create/modify resources twice',
       );
     });
 

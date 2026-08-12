@@ -81,6 +81,13 @@ class ServerNotConfiguredException extends AppException {
     : super(message, 'Server Not Configured: ');
 }
 
+/// Invalid server URL exception: thrown when the entered server URL fails
+/// service-boundary validation (dangerous components, malformed authority).
+class InvalidServerUrlException extends AppException {
+  InvalidServerUrlException([String? message])
+    : super(message, 'Invalid Server URL: ');
+}
+
 /// Secure storage unavailable exception: thrown when Keychain/Keystore is
 /// unavailable and the app refuses to fall back to plaintext storage.
 class SecureStorageUnavailableException extends AppException {

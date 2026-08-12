@@ -211,6 +211,7 @@ class _Translations$auth$ko extends Translations$auth$zh {
 	@override String get logoutSuccess => 'Logged out successfully';
 	@override String get confirmLogoutTitle => 'Confirm Logout';
 	@override String get confirmLogoutContent => 'Are you sure you want to log out?';
+	@override String get logoutFailedTitle => '로그아웃 실패';
 }
 
 // Path: transaction
@@ -1785,6 +1786,7 @@ class _Translations$server$error$ko extends Translations$server$error$zh {
 	@override String get connectionRefused => 'Could not connect to server';
 	@override String get sslError => 'SSL certificate error';
 	@override String get serverError => 'Server error';
+	@override String get plainHttpWarning => '일반 HTTP: 로그인 토큰과 데이터가 암호화되지 않고 전송됩니다. 신뢰할 수 있는 로컬 네트워크에서만 사용하세요.';
 }
 
 // Path: errorMapping.generic
@@ -2671,6 +2673,7 @@ extension on TranslationsKo {
 			'auth.logoutSuccess' => 'Logged out successfully',
 			'auth.confirmLogoutTitle' => 'Confirm Logout',
 			'auth.confirmLogoutContent' => 'Are you sure you want to log out?',
+			'auth.logoutFailedTitle' => '로그아웃 실패',
 			'transaction.expense' => '지출',
 			'transaction.income' => '수입',
 			'transaction.transfer' => '이체',
@@ -3085,9 +3088,9 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.skip' => '건너뛰기',
 			'forecast.recurringTransaction.noPending' => '대기 거래 없음',
 			'forecast.recurringTransaction.confirmSuccess' => '거래 확인됨',
-			'forecast.recurringTransaction.skipSuccess' => '거래 건너뜀',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.skipSuccess' => '거래 건너뜀',
 			'forecast.recurringTransaction.interval' => '반복 간격',
 			'forecast.recurringTransaction.selectDays' => '요일 선택',
 			'forecast.recurringTransaction.alwaysLastDay' => '매월 마지막 날에 실행',
@@ -3599,9 +3602,9 @@ extension on TranslationsKo {
 			'financial.confirm' => '확인',
 			'financial.settings' => '금융 설정',
 			'financial.budgetManagement' => '예산 관리',
-			'financial.recurringTransactions' => '정기 거래',
 			_ => null,
 		} ?? switch (path) {
+			'financial.recurringTransactions' => '정기 거래',
 			'financial.safetyThreshold' => '안전선',
 			'financial.dailyBurnRate' => '일일 소비',
 			'financial.financialAssistant' => '금융 비서',
@@ -3819,6 +3822,7 @@ extension on TranslationsKo {
 			'server.error.connectionRefused' => 'Could not connect to server',
 			'server.error.sslError' => 'SSL certificate error',
 			'server.error.serverError' => 'Server error',
+			'server.error.plainHttpWarning' => '일반 HTTP: 로그인 토큰과 데이터가 암호화되지 않고 전송됩니다. 신뢰할 수 있는 로컬 네트워크에서만 사용하세요.',
 			'errorMapping.generic.badRequest' => 'Bad Request',
 			'errorMapping.generic.authFailed' => 'Authentication failed, please login again',
 			'errorMapping.generic.permissionDenied' => 'Permission denied',

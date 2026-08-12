@@ -58,6 +58,10 @@ abstract class FinancialAccountState with _$FinancialAccountState {
 // Account state notifier
 @riverpod
 class FinancialAccountNotifier extends _$FinancialAccountNotifier {
+  /// Monotonic generation: a stale in-flight response is discarded when a
+  /// newer load has superseded it (and writes after dispose are skipped).
+  int _loadGeneration = 0;
+
   @override
   FinancialAccountState build() {
     // Automatically trigger initial data fetch when provider is first built
@@ -67,6 +71,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
   /// Load account data
   Future<void> loadFinancialAccounts() async {
+    final generation = ++_loadGeneration;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -89,6 +94,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
         }
       }
 
+      if (!ref.mounted || generation != _loadGeneration) return;
       state = state.copyWith(
         accounts: response.accounts,
         totalBalance: response.totalBalance,
@@ -102,6 +108,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
         errorMessage = e.message;
       }
 
+      if (!ref.mounted || generation != _loadGeneration) return;
       state = state.copyWith(isLoading: false, error: errorMessage);
     }
   }
@@ -115,6 +122,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
       final summary = await profileService.saveFinancialAccounts(accounts);
 
       // After successful save, use local source list + server returned balance/time
+      if (!ref.mounted) return false;
       state = state.copyWith(
         accounts: accounts,
         totalBalance: summary.totalBalance,
@@ -130,6 +138,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
         errorMessage = e.message;
       }
 
+      if (!ref.mounted) return false;
       state = state.copyWith(isLoading: false, error: errorMessage);
 
       return false;
@@ -165,6 +174,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
       );
 
       // Update local list
+      if (!ref.mounted) return false;
       final updatedAccounts = state.accounts.map((a) {
         return a.id == accountId ? updatedAccount : a;
       }).toList();
@@ -197,6 +207,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
       await profileService.deleteFinancialAccount(accountId);
 
       // Remove from local list
+      if (!ref.mounted) return false;
       final updatedAccounts = state.accounts
           .where((a) => a.id != accountId)
           .toList();
@@ -215,6 +226,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
         errorMessage = e.message;
       }
 
+      if (!ref.mounted) return false;
       state = state.copyWith(isLoading: false, error: errorMessage);
       return false;
     }

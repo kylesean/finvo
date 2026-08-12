@@ -47,6 +47,15 @@ void main() {
       expect(res.data, 'not json');
     });
 
+    test('bytes responses pass through untouched', () async {
+      final d = makeDio('binary-payload', contentType: 'image/png');
+      final res = await d.get<List<int>>(
+        '/files/view/1',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      expect(res.data, isA<List<int>>());
+    });
+
     test('non-JSON response is rejected as DataParsingException', () async {
       final d = makeDio('hello', contentType: 'text/plain');
       await expectLater(

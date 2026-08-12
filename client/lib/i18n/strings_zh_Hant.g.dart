@@ -211,6 +211,7 @@ class _Translations$auth$zh_Hant extends Translations$auth$zh {
 	@override String get logoutSuccess => 'Logged out successfully';
 	@override String get confirmLogoutTitle => 'Confirm Logout';
 	@override String get confirmLogoutContent => 'Are you sure you want to log out?';
+	@override String get logoutFailedTitle => '登出失敗';
 }
 
 // Path: transaction
@@ -1784,6 +1785,7 @@ class _Translations$server$error$zh_Hant extends Translations$server$error$zh {
 	@override String get connectionRefused => 'Could not connect to server';
 	@override String get sslError => 'SSL certificate error';
 	@override String get serverError => 'Server error';
+	@override String get plainHttpWarning => '明文 HTTP:登入令牌與資料將以未加密方式傳輸。僅可在可信的區域網路環境使用。';
 }
 
 // Path: errorMapping.generic
@@ -2669,6 +2671,7 @@ extension on TranslationsZhHant {
 			'auth.logoutSuccess' => 'Logged out successfully',
 			'auth.confirmLogoutTitle' => 'Confirm Logout',
 			'auth.confirmLogoutContent' => 'Are you sure you want to log out?',
+			'auth.logoutFailedTitle' => '登出失敗',
 			'transaction.expense' => '支出',
 			'transaction.income' => '收入',
 			'transaction.transfer' => '轉帳',
@@ -3083,9 +3086,9 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.skip' => '跳過',
 			'forecast.recurringTransaction.noPending' => '無待確認交易',
 			'forecast.recurringTransaction.confirmSuccess' => '已確認記帳',
-			'forecast.recurringTransaction.skipSuccess' => '已跳過',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.skipSuccess' => '已跳過',
 			'forecast.recurringTransaction.interval' => '重複間隔',
 			'forecast.recurringTransaction.selectDays' => '選擇星期',
 			'forecast.recurringTransaction.alwaysLastDay' => '固定在每月最後一天',
@@ -3597,9 +3600,9 @@ extension on TranslationsZhHant {
 			'financial.budgetManagement' => '預算管理',
 			'financial.recurringTransactions' => '週期交易',
 			'financial.safetyThreshold' => '安全閾值',
-			'financial.dailyBurnRate' => '每日消費',
 			_ => null,
 		} ?? switch (path) {
+			'financial.dailyBurnRate' => '每日消費',
 			'financial.financialAssistant' => '財務助手',
 			'financial.manageFinancialSettings' => '管理您的財務設置',
 			'financial.safetyThresholdSettings' => '財務安全線設置',
@@ -3815,6 +3818,7 @@ extension on TranslationsZhHant {
 			'server.error.connectionRefused' => 'Could not connect to server',
 			'server.error.sslError' => 'SSL certificate error',
 			'server.error.serverError' => 'Server error',
+			'server.error.plainHttpWarning' => '明文 HTTP:登入令牌與資料將以未加密方式傳輸。僅可在可信的區域網路環境使用。',
 			'errorMapping.generic.badRequest' => 'Bad Request',
 			'errorMapping.generic.authFailed' => 'Authentication failed, please login again',
 			'errorMapping.generic.permissionDenied' => 'Permission denied',

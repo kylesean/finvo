@@ -268,11 +268,20 @@ void main() {
       expect(await service.getToken(), isNull);
     });
 
-    test('deleteToken failure does not block logout', () async {
-      final service = SecureStorageService(_ThrowingSecureStorage());
-      // Should not throw: deletion is best-effort during logout
-      await service.deleteToken();
-    });
+    test(
+      'deleteToken failure is fail-closed: throws instead of swallowing',
+      () async {
+        final service = SecureStorageService(_ThrowingSecureStorage());
+        // Fail-closed contract: a delete that cannot remove the credential must
+        // surface as SecureStorageUnavailableException so logout/session-expiry
+        // callers can react (block the logout) instead of reporting success
+        // while the token remains in Keychain/Keystore.
+        await expectLater(
+          service.deleteToken(),
+          throwsA(isA<SecureStorageUnavailableException>()),
+        );
+      },
+    );
   });
 }
 

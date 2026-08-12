@@ -112,7 +112,8 @@
     },
     "logoutSuccess": "Logged out successfully",
     "confirmLogoutTitle": "Confirm Logout",
-    "confirmLogoutContent": "Are you sure you want to log out?"
+    "confirmLogoutContent": "Are you sure you want to log out?",
+    "logoutFailedTitle": "ログアウト失敗"
   },
   "transaction": {
     "expense": "支出",
@@ -1458,7 +1459,8 @@
       "connectionTimeout": "Connection timed out",
       "connectionRefused": "Could not connect to server",
       "sslError": "SSL certificate error",
-      "serverError": "Server error"
+      "serverError": "Server error",
+      "plainHttpWarning": "平文 HTTP:ログイントークンとデータが暗号化されず送信されます。信頼できるローカルネットワークでのみ使用してください。"
     }
   },
   "errorMapping": {

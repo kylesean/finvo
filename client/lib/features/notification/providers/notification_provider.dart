@@ -191,7 +191,36 @@ class NotificationNotifier extends _$NotificationNotifier
   int _realtimeNotificationSeq = 0;
 
   /// Add a real-time notification received via WebSocket.
+  ///
+  /// Deduplicates by ID: the same notification can arrive both via the
+  /// WebSocket push and via the next list refresh — adding it twice would
+  /// duplicate the row and double-count total/unread. Existing entries are
+  /// replaced in place (so an unread WS entry is upgraded to the read state
+  /// once a refresh reports it read).
   void addRealtimeNotification(NotificationItem item) {
+    final existingIndex = state.items.indexWhere((i) => i.id == item.id);
+    if (existingIndex != -1) {
+      final items = [...state.items];
+      items[existingIndex] = item;
+      state = state.copyWith(items: items);
+      return;
+    }
+
+    // A synthetic rt_ entry (WS payload without a server id) may later be
+    // superseded by the server's real notification, which carries the real
+    // id in data['id']. Replace it without double-counting.
+    if (!item.id.startsWith('rt_')) {
+      final staleRtIndex = state.items.indexWhere(
+        (i) => i.id.startsWith('rt_') && i.data?['id']?.toString() == item.id,
+      );
+      if (staleRtIndex != -1) {
+        final items = [...state.items];
+        items[staleRtIndex] = item;
+        state = state.copyWith(items: items);
+        return;
+      }
+    }
+
     state = state.copyWith(
       items: [item, ...state.items],
       total: state.total + 1,
