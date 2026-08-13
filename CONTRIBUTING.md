@@ -43,6 +43,40 @@ By participating in this project, you are expected to uphold our [Code of Conduc
 2. Run `make setup-all` from the root or navigate to `client` and run `flutter pub get`.
 3. Run `make client-run` or `flutter run`.
 
+#### Building the client
+
+| Goal | Command | Notes |
+|---|---|---|
+| Run on a device/emulator | `make client-run` | Hot reload for development |
+| Build an APK for personal use | `make client-build` | Debug-signed; **no keystore needed** |
+| Run tests | `make client-test` | |
+| Lint | `make client-analyze` | |
+| Build a **release** APK | `make client-release` | **Maintainers only** — requires the release keystore (see below) |
+
+**Why debug vs release matters:** release APKs are signed with the project's
+release keystore, which is the app's *permanent identity*. It is intentionally
+NOT committed to the repository (a leaked keystore would let anyone
+impersonate official releases, and switching keys later forces every existing
+user to uninstall/reinstall, losing data). Gradle therefore **fails the
+release build on purpose** when the keystore environment variables are absent.
+
+If you are a maintainer publishing release artifacts, export the credentials
+before building (or let CI inject them from GitHub Secrets):
+
+```bash
+export ANDROID_KEYSTORE_PATH=/path/to/finvo-release.jks
+export ANDROID_KEYSTORE_PASSWORD='...'
+export ANDROID_KEY_ALIAS=finvo-release
+export ANDROID_KEY_PASSWORD='...'
+make client-release
+```
+
+**Losing the keystore is unrecoverable** (existing users could never update).
+Keep a backup in at least two offline locations. Store the keystore
+base64-encoded in the `ANDROID_KEYSTORE_BASE64` GitHub secret for CI builds
+(see `.github/workflows/client-release.yml`); enable Play App Signing when
+onboarding Google Play so a lost upload key stays recoverable.
+
 ## Coding Standards
 
 ### Backend

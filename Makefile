@@ -4,7 +4,7 @@
 
 .PHONY: help install setup start dev test lint format clean \
         docker-up docker-down docker-logs docker-build \
-        client-run client-build
+        client-run client-build client-release client-test client-analyze
 
 # Default target
 help:
@@ -35,8 +35,9 @@ help:
 	@echo "  make docker-logs - View Docker logs"
 	@echo ""
 	@echo "Client (Flutter):"
-	@echo "  make client-run   - Run Flutter client"
-	@echo "  make client-build - Build Flutter release"
+	@echo "  make client-run     - Run Flutter client"
+	@echo "  make client-release - Build release APK (requires keystore env vars)"
+	@echo "  make client-build   - Build debug APK (no signing key needed)"
 	@echo ""
 	@echo "For more commands: cd server && ./manage.sh"
 
@@ -140,7 +141,21 @@ docker-build:
 client-run:
 	cd client && flutter run
 
+# Debug APK: what contributors and casual users build. Requires NO signing
+# key, so building from source is friction-free.
 client-build:
+	cd client && flutter build apk --debug
+
+# Release APK: requires the release keystore credentials. The keystore is the
+# app's permanent identity — it is intentionally NOT in the repository.
+# Provide the credentials via environment variables (GitHub Actions secrets
+# in CI, or a local export for a maintainer build):
+#   export ANDROID_KEYSTORE_PATH=/path/to/finvo-release.jks
+#   export ANDROID_KEYSTORE_PASSWORD=...
+#   export ANDROID_KEY_ALIAS=finvo-release
+#   export ANDROID_KEY_PASSWORD=...
+# Without them Gradle fails the build on purpose (no debug-key fallback).
+client-release:
 	cd client && flutter build apk --release
 
 client-test:
