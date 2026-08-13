@@ -52,8 +52,44 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      # Reconstruct the release keystore on the runner. The keystore itself
+      # must NEVER be committed to the repo (it is the app's permanent
+      # identity; a leaked keystore lets anyone impersonate releases).
+      # Preferred: store the keystore base64-encoded in the
+      # ANDROID_KEYSTORE_BASE64 secret; the file is then decoded into a temp
+      # path and exported as ANDROID_KEYSTORE_PATH for Gradle.
+      # Alternative (advanced): keep the file in private storage and point
+      # ANDROID_KEYSTORE_PATH directly at it.
+      - name: Reconstruct release keystore
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/finvo-release.jks"
+            chmod 600 "$RUNNER_TEMP/finvo-release.jks"
+            echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/finvo-release.jks" >> "$GITHUB_ENV"
+          fi
+
       - name: Build Universal Release APK
         run: flutter build apk --release
+        env:
+          # Prefer the base64-decoded path set by the reconstruct step; fall
+          # back to a directly-configured ANDROID_KEYSTORE_PATH secret.
+          ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH || secrets.ANDROID_KEYSTORE_PATH }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Verify APK signature
+        shell: bash
+        run: |
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          # apksigner is bundled with the Android SDK present on the runner.
+          if [ -x "$ANDROID_HOME/build-tools/"*/apksigner ]; then
+            APKSIGNER=$(ls "$ANDROID_HOME/build-tools/"*/apksigner | head -1)
+            "$APKSIGNER" verify --print-certs "$APK_PATH"
+          else
+            echo "::warning::apksigner not found, skipping signature verification"
+          fi
 
       - name: Prepare Android Release Artifact
         run: |
