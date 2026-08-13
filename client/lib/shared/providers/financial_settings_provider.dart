@@ -41,17 +41,29 @@ FinancialSettingsResponse _parseSettingsResponse(Object? json, String context) {
 class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
   FinancialSettingsResponse? _originalSettings;
 
+  /// Monotonic epoch guarding loadFinancialSettings against cross-account
+  /// in-flight writes (AUTH-P1): this provider is keepAlive, so a slow
+  /// response for account A can settle AFTER A logged out and B logged in —
+  /// without a generation check it would write A's currency/thresholds into
+  /// the shared state B is now reading. Mirrors financial_account_provider.
+  int _loadGeneration = 0;
+
   @override
   FinancialSettingsState build() {
     // Pure build: this provider is kept free of network side-effects. The
     // app triggers [loadFinancialSettings] explicitly when the user
     // authenticates (see app.dart), so the primary currency is warmed before
     // any currency-dependent screen reads it.
+    // Reset session-scoped state on rebuild (keepAlive re-creation).
+    _originalSettings = null;
     return const FinancialSettingsState();
   }
 
   /// Load financial settings
   Future<void> loadFinancialSettings() async {
+    // Bump the generation: any in-flight request from a previous session is
+    // now stale and will be discarded when it settles.
+    final generation = ++_loadGeneration;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -62,6 +74,7 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
         fromJsonT: (json) =>
             _parseSettingsResponse(json, 'API /financial-settings'),
       );
+      if (!ref.mounted || generation != _loadGeneration) return;
       _originalSettings = response;
 
       _logger.info('Loaded primaryCurrency: ${response.primaryCurrency}');
@@ -78,6 +91,7 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
         error: null,
       );
     } catch (e) {
+      if (!ref.mounted || generation != _loadGeneration) return;
       String errorMessage = 'Failed to load financial settings';
       if (e is AppException) {
         errorMessage = e.message;

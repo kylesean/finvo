@@ -61,10 +61,11 @@ class Auth extends _$Auth {
             'unauthenticated',
           );
           // The persisted auth cache is inconsistent (token without user
-          // data). Wipe the orphaned token so a subsequent cold start does not
-          // hit this fallback branch again and repeatedly log the warning.
-          await _storageService.deleteToken();
-          await _storageService.deleteRefreshToken();
+          // data). Wipe the orphaned token AND the leftover PII keys so a
+          // subsequent cold start does not hit this fallback branch again
+          // (AUTH-A5: previously only the token was deleted, leaving the
+          // username/email/phone in SharedPreferences).
+          await _authService.clearLocalAuthData();
           state = state.copyWith(status: AuthStatus.unauthenticated);
         }
       } else {

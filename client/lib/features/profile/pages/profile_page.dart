@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -20,6 +21,7 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   final _usernameController = TextEditingController();
+  final _logger = Logger('ProfilePage');
 
   @override
   void initState() {
@@ -223,12 +225,24 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// Pick and upload avatar
   Future<void> _pickAndUploadAvatar() async {
     final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 512,
-      maxHeight: 512,
-      imageQuality: 85,
-    );
+    // Guard the platform call: permission denial / an unavailable gallery
+    // throws a PlatformException. Without this the exception escapes as an
+    // uncaught async error (zone log only) and the user gets no feedback.
+    final XFile? image;
+    try {
+      image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 85,
+      );
+    } catch (e, stackTrace) {
+      _logger.warning('Failed to open image picker', e, stackTrace);
+      if (mounted) {
+        ToastService.showDestructive(description: Text(t.error.unknownError));
+      }
+      return;
+    }
 
     if (image == null) return;
 

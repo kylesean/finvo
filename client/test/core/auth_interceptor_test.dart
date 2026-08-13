@@ -238,6 +238,113 @@ void main() {
       );
       expect(unauthorizedCalls, ['triggered']);
     });
+
+    test(
+      'concurrent 401s across TWO Dio instances share ONE refresh (H-1)',
+      () async {
+        // H-1 regression: the REST and SSE DIOs each install their own
+        // AuthInterceptor, but they MUST share a single TokenRefreshCoordinator.
+        // Per-instance locks would fire two concurrent /auth/refresh calls
+        // against the same refresh token, racing the server-side rotation;
+        // the loser gets rejected and the failure is misattributed to an
+        // expired session (wrongful sign-out).
+        final refreshAdapter = _CountingRefreshAdapter();
+        refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
+        refreshDio.httpClientAdapter = refreshAdapter;
+        fakeStorage.refreshToken = 'seed-refresh-token';
+
+        final coordinator = TokenRefreshCoordinator(
+          storageService: storageService,
+          onUnauthorized: () async => unauthorizedCalls.add('triggered'),
+          refreshDio: refreshDio,
+        );
+
+        Dio makeSharedDio(HttpClientAdapter adapter) {
+          final d = Dio();
+          d.interceptors.add(
+            AuthInterceptor(
+              storageService,
+              refreshCoordinator: coordinator,
+              dio: d,
+            ),
+          );
+          d.httpClientAdapter = adapter;
+          return d;
+        }
+
+        // Two independent Dio pipelines (mirroring dioProvider + sseDioProvider),
+        // each firing a 401 at the same time. Each adapter 401s the original
+        // request but succeeds on the replayed one (fresh token).
+        final restDio = makeSharedDio(_OneShot401Adapter());
+        final sseDio = makeSharedDio(_OneShot401Adapter());
+
+        final results = await Future.wait([
+          restDio
+              .get<dynamic>('https://example.com/api')
+              .then((r) => 'ok')
+              .catchError((e) => 'err'),
+          sseDio
+              .get<dynamic>('https://example.com/api')
+              .then((r) => 'ok')
+              .catchError((e) => 'err'),
+        ]);
+
+        // Both requests were replayed after the (single) refresh.
+        expect(results, ['ok', 'ok']);
+        // The refresh endpoint was hit exactly once across both pipelines.
+        expect(refreshAdapter.refreshCalls, 1);
+        // A successful shared refresh must NOT sign out.
+        expect(unauthorizedCalls, isEmpty);
+      },
+    );
+
+    test(
+      'concurrent 401s across two DIOs sign out exactly ONCE on rejection (M-3)',
+      () async {
+        // M-3: when the refresh is rejected, every concurrent waiter must not
+        // run the full local sign-out — the coordinator latch makes the first
+        // waiter perform it and the rest propagate silently.
+        refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
+        refreshDio.httpClientAdapter = _RejectingRefreshAdapter();
+        fakeStorage.refreshToken = 'seed-refresh-token';
+
+        final coordinator = TokenRefreshCoordinator(
+          storageService: storageService,
+          onUnauthorized: () async => unauthorizedCalls.add('triggered'),
+          refreshDio: refreshDio,
+        );
+
+        Dio makeSharedDio(HttpClientAdapter adapter) {
+          final d = Dio();
+          d.interceptors.add(
+            AuthInterceptor(
+              storageService,
+              refreshCoordinator: coordinator,
+              dio: d,
+            ),
+          );
+          d.httpClientAdapter = adapter;
+          return d;
+        }
+
+        final restDio = makeSharedDio(_MockAdapter(401));
+        final sseDio = makeSharedDio(_MockAdapter(401));
+
+        await Future.wait([
+          restDio
+              .get<dynamic>('https://example.com/api')
+              .then((r) => 'ok')
+              .catchError((e) => 'err'),
+          sseDio
+              .get<dynamic>('https://example.com/api')
+              .then((r) => 'ok')
+              .catchError((e) => 'err'),
+        ]);
+
+        // Exactly one sign-out despite two concurrent rejections.
+        expect(unauthorizedCalls, ['triggered']);
+      },
+    );
   });
 
   group('SecureStorageService fail-closed', () {
@@ -366,6 +473,57 @@ class _RefreshAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+/// Like [_RefreshAdapter] but counts how many times the refresh endpoint
+/// was hit, so tests can assert single-flight behavior across pipelines.
+class _CountingRefreshAdapter implements HttpClientAdapter {
+  int refreshCalls = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    refreshCalls++;
+    return ResponseBody.fromString(
+      '{"code":0,"data":{"token":"new-access-token",'
+      '"refresh_token":"new-refresh-token"}}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Refresh adapter that rejects the refresh token (server-side rotation
+/// failure), so the waiters fall into the sign-out path.
+class _RejectingRefreshAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    throw DioException(
+      requestOptions: options,
+      response: Response<dynamic>(
+        requestOptions: options,
+        statusCode: 401,
+        statusMessage: 'unauthorized',
+        data: '{"code":1}',
+      ),
+      type: DioExceptionType.badResponse,
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
 /// Returns a 401 DioException for the given options.
 DioException _mockResponse(int statusCode) {
   return DioException(
@@ -427,6 +585,44 @@ class _SequencedAdapter implements HttpClientAdapter {
         data: e.response?.data,
       ),
       type: e.type,
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Fails the FIRST request with a 401 (so the interceptor enters the
+/// refresh-and-replay flow) and succeeds afterwards (the replayed request
+/// carries the fresh token).
+class _OneShot401Adapter implements HttpClientAdapter {
+  bool _failedOnce = false;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (!_failedOnce) {
+      _failedOnce = true;
+      throw DioException(
+        requestOptions: options,
+        response: Response<dynamic>(
+          requestOptions: options,
+          statusCode: 401,
+          statusMessage: 'error',
+          data: '{"code":1}',
+        ),
+        type: DioExceptionType.badResponse,
+      );
+    }
+    return ResponseBody.fromString(
+      '{"code":0,"data":{}}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
     );
   }
 

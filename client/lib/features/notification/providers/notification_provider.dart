@@ -54,6 +54,14 @@ class NotificationNotifier extends _$NotificationNotifier
     return const NotificationState(isLoading: true);
   }
 
+  /// Reset to the pristine state on logout / session expiry so the next
+  /// account never sees the previous one's notifications or unread badge.
+  /// The keepAlive provider would otherwise hold the stale list forever.
+  void resetState() {
+    _loadGeneration++;
+    state = const NotificationState();
+  }
+
   /// Refresh notification list (resets to page 1)
   /// Monotonic epoch guarding refresh vs loadMore races: a loadMore response
   /// that returns after a refresh must not append its stale page onto the
@@ -201,8 +209,19 @@ class NotificationNotifier extends _$NotificationNotifier
     final existingIndex = state.items.indexWhere((i) => i.id == item.id);
     if (existingIndex != -1) {
       final items = [...state.items];
+      final wasRead = items[existingIndex].isRead;
       items[existingIndex] = item;
-      state = state.copyWith(items: items);
+      // NTF-5: keep the badge in sync — a late unread push replacing a READ
+      // entry is a newly-unread notification and must bump the count; the
+      // old code replaced the row but left unreadCount stale.
+      if (wasRead && !item.isRead) {
+        state = state.copyWith(
+          items: items,
+          unreadCount: state.unreadCount + 1,
+        );
+      } else {
+        state = state.copyWith(items: items);
+      }
       return;
     }
 
@@ -267,16 +286,22 @@ NotificationWsService notificationWs(Ref ref) {
   final wsService = NotificationWsService();
   final storageService = ref.read(secureStorageServiceProvider);
 
-  // Watch the auth token so the connection lifecycle tracks login state.
+  // Watch the auth STATUS so the connection lifecycle tracks login state.
   //
   // `notificationWs` is keepAlive and typically first instantiated by MyApp
   // at startup — before login, when no token exists. Without listening to the
-  // token here, the WS would silently skip connecting and never recover after
-  // a successful login (it was only invalidated on server switch). Watching
-  // `authTokenProvider` rebuilds this provider when the token flips to/from
-  // null, tearing down the old service (onDispose) and re-running `connect()`
-  // with the freshly stored token.
-  ref.watch(authTokenProvider);
+  // auth status here, the WS would silently skip connecting and never recover
+  // after a successful login (it was only invalidated on server switch).
+  // Watching `authStatusProvider` rebuilds this provider when the session
+  // flips to/from authenticated, tearing down the old service (onDispose) and
+  // re-running `connect()` with the freshly stored token.
+  //
+  // NOTE: we deliberately watch STATUS and not the token value (NTF-3): the
+  // auth interceptor rotates the access token on every 401 refresh, and a
+  // token watch would rebuild (tear down + reconnect) a perfectly healthy WS
+  // connection each time — losing notifications in the reconnect window. The
+  // WS authenticates once at handshake; a rotated token needs no reconnect.
+  ref.watch(authStatusProvider);
 
   // Wire incoming notifications to the provider
   wsService.onNotification = (payload) {

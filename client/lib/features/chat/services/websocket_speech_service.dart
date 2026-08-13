@@ -48,6 +48,10 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   static const _maxReconnectAttempts = 3;
   static const _maxReconnectDelaySeconds = 8;
 
+  /// In-flight [initialize] future; deduplicates concurrent connect attempts
+  /// (reconnect timer vs. ensureReady racing each other).
+  Future<bool>? _connecting;
+
   // Public streams
   @override
   Stream<String> get onResult => _resultController.stream;
@@ -130,6 +134,27 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       return true;
     }
 
+    // Deduplicate concurrent initialize() calls: the reconnect timer and
+    // ensureReady() can fire together (e.g. a user action landing right as a
+    // backoff retry fires). Both would otherwise run their own _cleanup() and
+    // overwrite _channel/_channelSubscription, racing each other and possibly
+    // stranding a half-open socket or attaching the subscription to the wrong
+    // connection.
+    final inFlight = _connecting;
+    if (inFlight != null) {
+      _logger.info('WebSocket connect already in progress, awaiting it');
+      return inFlight;
+    }
+    final future = _initializeInternal();
+    _connecting = future;
+    try {
+      return await future;
+    } finally {
+      if (identical(_connecting, future)) _connecting = null;
+    }
+  }
+
+  Future<bool> _initializeInternal() async {
     // Clean up previous connection
     await _cleanup();
 
@@ -379,7 +404,10 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   /// Handle received messages
   void _onMessage(dynamic message) {
     try {
-      _logger.info('Received message: $message');
+      // Every incremental recognition result arrives here — at info level this
+      // is a log storm (one entry per partial result). Fine keeps it
+      // diagnosable without flooding production logs.
+      _logger.fine('Received message: $message');
 
       // If message is plain text, use directly as recognition result
       if (message is String) {
@@ -468,11 +496,21 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       return;
     }
 
+    // Asymmetry fix: _onDisconnected tears down the recording session and
+    // audio subscription; _onError must do the same, or the recorder keeps
+    // running (its callback keeps dropping data via sendAudioData) and the
+    // audio stream stays subscribed after the socket died.
+    final wasListening = _isListening;
+    if (wasListening) {
+      unawaited(_audioRecorder.stopRecording());
+      unawaited(_audioSubscription?.cancel());
+      _audioSubscription = null;
+      _isListening = false;
+    }
+
     _errorController.add('speech_connection_failed');
     _statusController.add('error');
     _isConnected = false;
-    final wasListening = _isListening;
-    _isListening = false;
 
     // A drop outside an active session is transparently repaired in the
     // background; mid-session drops already surfaced an error to the user.

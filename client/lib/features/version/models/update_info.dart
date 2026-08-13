@@ -54,13 +54,17 @@ class UpdateInfo {
     required Map<String, dynamic> data,
     required String? targetDownloadUrl,
     required bool hasUpdate,
+    bool? forceUpdateOverride,
   }) {
     return UpdateInfo(
       currentVersion: currentVersion,
       latestVersion: data['latestVersion'] as String? ?? currentVersion,
       minSupportedVersion: data['minSupportedVersion'] as String? ?? '0.0.0',
       hasUpdate: hasUpdate,
-      forceUpdate: data['forceUpdate'] as bool? ?? false,
+      // AUTH-V1: the service may force the update (e.g. when the local
+      // version is below minSupportedVersion) without the server flagging it.
+      forceUpdate:
+          forceUpdateOverride ?? (data['forceUpdate'] as bool? ?? false),
       releaseDate: data['releaseDate'] as String? ?? '',
       changelog: data['changelog'] as String? ?? '',
       downloadUrls: DownloadUrls.fromJson(

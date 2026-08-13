@@ -89,7 +89,9 @@ class AuthService {
   /// Update stored username in shared preferences
   Future<void> updateStoredUsername(String newUsername) async {
     await _prefs.setString(_userNameKey, newUsername);
-    _logger.info('Updated stored username in shared preferences: $newUsername');
+    // AUTH-4: do not log the username — it is PII and the log may be
+    // shipped to crash/error reporting pipelines.
+    _logger.info('Updated stored username in shared preferences.');
   }
 
   // Method to retrieve stored authentication data
@@ -182,7 +184,11 @@ class AuthService {
       method: HttpMethod.post,
       data: {'account': account, 'type': _accountType(account)},
     );
-    _logger.info('Verification code sent to $account (API call successful)');
+    // AUTH-4: the account is a phone number or email — PII. Log only the
+    // account type so logs remain useful without leaking identity.
+    _logger.info(
+      'Verification code sent (${_accountType(account)} API call successful)',
+    );
   }
 
   // User registration

@@ -5,6 +5,10 @@ import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/features/profile/providers/user_profile_provider.dart';
+import 'package:finvo/shared/providers/exchange_rate_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 
 part 'server_config_provider.freezed.dart';
 
@@ -65,6 +69,17 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     ref.invalidate(apiBaseUrlProvider);
     ref.invalidate(serverUrlProvider);
 
+    // CORE-M7: a server switch is effectively a new account context (local
+    // auth data was cleared above) — invalidate every provider holding data
+    // fetched from the OLD server, not just the URL providers. Without this,
+    // the previous server's PII/currency settings keep rendering until the
+    // first 401 from the new server.
+    ref.invalidate(financialSettingsProvider);
+    ref.invalidate(userProfileProvider);
+    ref.invalidate(financialAccountProvider);
+    ref.invalidate(exchangeRateProvider);
+    ref.invalidate(notificationProvider);
+
     // Rebuild the notification WebSocket: it captures the baseUrl once at
     // build time, so without this invalidation it would keep connecting to
     // (and reconnect-looping towards) the old server after a server switch.
@@ -83,6 +98,12 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     ref.invalidate(isServerConfiguredProvider);
     ref.invalidate(apiBaseUrlProvider);
     ref.invalidate(serverUrlProvider);
+    // Same account-scoped invalidation as saveServerUrl (CORE-M7).
+    ref.invalidate(financialSettingsProvider);
+    ref.invalidate(userProfileProvider);
+    ref.invalidate(financialAccountProvider);
+    ref.invalidate(exchangeRateProvider);
+    ref.invalidate(notificationProvider);
     ref.invalidate(notificationWsProvider);
   }
 

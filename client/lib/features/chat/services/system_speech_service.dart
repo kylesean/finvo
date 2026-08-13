@@ -194,6 +194,40 @@ class SystemSpeechService implements SpeechRecognitionService {
       return;
     }
 
+    // Crash guard for OEM-restricted recognizers: some devices (OnePlus,
+    // Qualcomm SVA, etc.) resolve a default RecognitionService that refuses
+    // third-party binding (signature-level permission). speech_to_text calls
+    // SpeechRecognizer.startListening from its native thread WITHOUT a
+    // try/catch, so the resulting SecurityException crashes the whole app —
+    // unreachable from Dart. Probe bindability first; when the service
+    // refuses, surface a stable error instead of calling the plugin at all.
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        final bool? canBind = await _platformChannel.invokeMethod<bool>(
+          'canBindDefaultSpeechService',
+        );
+        if (canBind != true) {
+          _logger.warning(
+            'Default system speech service cannot be bound; '
+            'aborting start to avoid native crash',
+          );
+          _isListening = false;
+          _statusController.add('error');
+          _lastError = 'system_speech_restricted';
+          _errorController.add(_lastError!);
+          return;
+        }
+      } catch (e) {
+        // Channel failure: fail closed (never risk the native crash path).
+        _logger.warning('Bind probe failed, aborting start: $e');
+        _isListening = false;
+        _statusController.add('error');
+        _lastError = 'system_speech_restricted';
+        _errorController.add(_lastError!);
+        return;
+      }
+    }
+
     try {
       _logger.info(
         'Starting system speech recognition (locale: $_formattedLocaleId)...',

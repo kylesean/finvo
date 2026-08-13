@@ -286,60 +286,71 @@ class ProfileSettingsSections extends ConsumerWidget {
     unawaited(
       showFDialog<void>(
         context: context,
-        builder: (dialogContext, style, animation) => FDialog(
-          animation: animation,
-          builder: (context, dialogStyle) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  '${t.settings.newVersionTitle} v${updateInfo.latestVersion}',
-                  style: dialogStyle.titleTextStyle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.settings.currentVersion(version: updateInfo.currentVersion),
-                  style: dialogStyle.bodyTextStyle.copyWith(fontSize: 12),
-                ),
-                if (updateInfo.changelog.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: context.theme.colors.muted.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      updateInfo.changelog,
-                      style: dialogStyle.bodyTextStyle,
-                    ),
+        // AUTH-V2: a forced update must not be dismissible — tapping the
+        // barrier or pressing back would close the dialog and leave the user
+        // running a version the server no longer supports.
+        barrierDismissible: !updateInfo.forceUpdate,
+        builder: (dialogContext, style, animation) => PopScope(
+          canPop: !updateInfo.forceUpdate,
+          child: FDialog(
+            animation: animation,
+            builder: (context, dialogStyle) => Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    '${t.settings.newVersionTitle} v${updateInfo.latestVersion}',
+                    style: dialogStyle.titleTextStyle,
                   ),
-                ],
-                const SizedBox(height: 24),
-                FButton(
-                  variant: .primary,
-                  onPress: () async {
-                    Navigator.of(dialogContext).pop();
-                    if (updateInfo.targetDownloadUrl != null &&
-                        updateInfo.targetDownloadUrl!.isNotEmpty) {
-                      await ref
-                          .read(appVersionServiceProvider)
-                          .openUpdateUrl(updateInfo.targetDownloadUrl!);
-                    }
-                  },
-                  child: Text(t.settings.updateNow),
-                ),
-                if (!updateInfo.forceUpdate) ...[
                   const SizedBox(height: 8),
-                  FButton(
-                    variant: FButtonVariant.outline,
-                    onPress: () => Navigator.of(dialogContext).pop(),
-                    child: Text(t.common.cancel),
+                  Text(
+                    t.settings.currentVersion(
+                      version: updateInfo.currentVersion,
+                    ),
+                    style: dialogStyle.bodyTextStyle.copyWith(fontSize: 12),
                   ),
+                  if (updateInfo.changelog.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: context.theme.colors.muted.withValues(
+                          alpha: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        updateInfo.changelog,
+                        style: dialogStyle.bodyTextStyle,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  FButton(
+                    variant: .primary,
+                    onPress: () async {
+                      Navigator.of(dialogContext).pop();
+                      if (updateInfo.targetDownloadUrl != null &&
+                          updateInfo.targetDownloadUrl!.isNotEmpty) {
+                        await ref
+                            .read(appVersionServiceProvider)
+                            .openUpdateUrl(updateInfo.targetDownloadUrl!);
+                      }
+                    },
+                    child: Text(t.settings.updateNow),
+                  ),
+                  if (!updateInfo.forceUpdate) ...[
+                    const SizedBox(height: 8),
+                    FButton(
+                      variant: FButtonVariant.outline,
+                      onPress: () => Navigator.of(dialogContext).pop(),
+                      child: Text(t.common.cancel),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

@@ -26,10 +26,45 @@ abstract interface class DioAuthCallbacks {
 
   /// Called after a silent token refresh to keep derived state in sync.
   Future<void> onTokenRefreshed(String accessToken, String refreshToken);
+
+  /// Whether the local session is still considered active.
+  ///
+  /// Consulted by [TokenRefreshCoordinator] before persisting rotated tokens:
+  /// an in-flight refresh that settles after a logout must not resurrect
+  /// credentials in secure storage (H-3).
+  bool get isSessionActive;
 }
 
 /// Composition-root override point for [DioAuthCallbacks].
 final dioAuthCallbacksProvider = Provider<DioAuthCallbacks?>((ref) => null);
+
+/// Shared single-flight token-refresh coordinator.
+///
+/// One instance per app: both the REST [dioProvider] and the SSE
+/// [sseDioProvider] install their own [AuthInterceptor], but they must share
+/// the refresh lock — a 401 storm spanning both pipelines (a long-lived SSE
+/// stream plus parallel REST calls) would otherwise fire two concurrent
+/// `/auth/refresh` calls against the same refresh token, racing the server-
+/// side rotation and cascading into an unnecessary sign-out (H-1).
+final tokenRefreshCoordinatorProvider = Provider<TokenRefreshCoordinator>((
+  ref,
+) {
+  final storageService = ref.read(secureStorageServiceProvider);
+  final authCallbacks = ref.read(dioAuthCallbacksProvider);
+  return TokenRefreshCoordinator(
+    storageService: storageService,
+    onUnauthorized: authCallbacks == null
+        ? null
+        : () => authCallbacks.onUnauthorized(),
+    onTokenRefreshed: authCallbacks == null
+        ? null
+        : (accessToken, refreshToken) =>
+              authCallbacks.onTokenRefreshed(accessToken, refreshToken),
+    isSessionValid: authCallbacks == null
+        ? null
+        : () => authCallbacks.isSessionActive,
+  );
+});
 
 /// Interceptor that checks if server is configured before making requests
 class ConfigurationCheckInterceptor extends Interceptor {
@@ -113,8 +148,8 @@ Dio _buildDio(Ref ref, {required bool forSse}) {
   };
 
   // --- Shared interceptor pipeline (in execution order) ---
-  final storageService = ref.watch(secureStorageServiceProvider);
-  final authCallbacks = ref.watch(dioAuthCallbacksProvider);
+  final storageService = ref.read(secureStorageServiceProvider);
+  final refreshCoordinator = ref.read(tokenRefreshCoordinatorProvider);
   dio.interceptors.add(
     ConfigurationCheckInterceptor(ref),
   ); // Check config first
@@ -123,13 +158,9 @@ Dio _buildDio(Ref ref, {required bool forSse}) {
   dio.interceptors.add(
     AuthInterceptor(
       storageService,
-      onUnauthorized: authCallbacks == null
-          ? null
-          : () => authCallbacks.onUnauthorized(),
-      onTokenRefreshed: authCallbacks == null
-          ? null
-          : (accessToken, refreshToken) =>
-                authCallbacks.onTokenRefreshed(accessToken, refreshToken),
+      // Every Dio instance shares the same single-flight refresh lock so a
+      // 401 storm spanning the REST and SSE pipelines is serialized (H-1).
+      refreshCoordinator: refreshCoordinator,
       dio: dio,
     ),
   ); // Auth interceptor

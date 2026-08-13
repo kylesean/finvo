@@ -14,7 +14,10 @@ import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/app/theme/theme_notifier.dart';
 import 'package:finvo/app/theme/app_theme_pair_provider.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/features/profile/providers/financial_account_provider.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
+import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -39,6 +42,20 @@ class MyApp extends ConsumerWidget {
           ref.read(financialSettingsProvider.notifier).loadFinancialSettings(),
         );
         unawaited(ref.read(userProfileProvider.notifier).loadUser());
+      } else if (prev?.status == AuthStatus.authenticated &&
+          next.status != AuthStatus.authenticated) {
+        // Logout / session expiry: tear down the login-scoped state so the
+        // next account never renders the previous one's data (PII in profile
+        // and financial settings, stale notification list and unread badge,
+        // and a WebSocket that would keep pushing the old account's
+        // notifications). KeepAlive providers would otherwise hold this state
+        // forever.
+        ref.invalidate(notificationWsProvider);
+        ref.read(notificationProvider.notifier).resetState();
+        ref.invalidate(userProfileProvider);
+        ref.invalidate(financialSettingsProvider);
+        ref.invalidate(financialAccountProvider);
+        ref.invalidate(exchangeRateProvider);
       }
     });
 

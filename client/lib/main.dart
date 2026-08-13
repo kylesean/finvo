@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/core/utils/logger_setup.dart';
 import 'package:finvo/core/network/dio_provider.dart';
+import 'package:finvo/core/services/notification_ws_service.dart';
 import 'package:finvo/shared/services/locale_service.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
@@ -175,10 +176,29 @@ Future<void> _bootstrap() async {
     unawaited(container.read(speechSettingsProvider.notifier).loadSettings());
     // Warm notification WebSocket and transaction event subscriber for full app lifetime,
     // avoiding side-effects inside MyApp.build().
-    container.read(notificationWsProvider);
+    // NOTE: an active `listen` (not just `read`) keeps the keepAlive provider
+    // subscribed so the `ref.watch(authTokenProvider)` inside notificationWs
+    // actually propagates: token flips (login/logout/refresh) tear down and
+    // rebuild the long-lived WS connection instead of silently never firing
+    // because nothing is listening. The subscription is intentionally never
+    // cancelled — it lives for the app's whole lifetime.
+    _notificationWsSubscription = container.listen<NotificationWsService>(
+      notificationWsProvider,
+      (_, _) {},
+    );
     container.read(transactionEventSubscriberProvider);
+    // Observe app lifecycle so the notification WS can be restarted when the
+    // app returns to the foreground after its reconnect budget was exhausted.
+    WidgetsBinding.instance.addObserver(_AppLifecycleObserver(() => container));
   });
 }
+
+/// Holds the active [notificationWsProvider] subscription for the app's whole
+/// lifetime (see the note in [_bootstrap]). Only ever written, never read:
+/// its purpose is to keep the subscription (and thus the WS rebuild-on-token-
+/// flip behavior) alive, so the analyzer's unused_element warning is ignored.
+// ignore: unused_element
+ProviderSubscription<NotificationWsService>? _notificationWsSubscription;
 
 /// Minimal fallback UI shown when core initialization fails, so users are not
 /// left on a black screen. Deliberately avoids Riverpod dependencies (those
@@ -303,6 +323,10 @@ class _AppDioAuthCallbacks implements DioAuthCallbacks {
   final ProviderContainer Function() _containerRef;
 
   @override
+  bool get isSessionActive =>
+      _containerRef().read(authProvider).status == AuthStatus.authenticated;
+
+  @override
   Future<void> onUnauthorized() async {
     await _containerRef().read(authProvider.notifier).handleSessionExpired();
   }
@@ -315,5 +339,26 @@ class _AppDioAuthCallbacks implements DioAuthCallbacks {
     await _containerRef()
         .read(authProvider.notifier)
         .handleTokenRefreshed(accessToken);
+  }
+}
+
+/// App-lifecycle observer that restores background services when the app
+/// returns to the foreground.
+///
+/// The notification WebSocket stops itself permanently once its reconnect
+/// budget (5 attempts) is exhausted — a design choice that prevents an
+/// unreachable server from waking the device forever. Coming back to the
+/// foreground is the natural retry point (the network may have returned in
+/// the meantime), so [onAppResumed] restarts the connection there.
+class _AppLifecycleObserver with WidgetsBindingObserver {
+  _AppLifecycleObserver(this._containerRef);
+
+  final ProviderContainer Function() _containerRef;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _containerRef().read(notificationWsProvider).onAppResumed();
+    }
   }
 }

@@ -160,7 +160,9 @@ void main() {
         storageService: storage,
       );
 
-      expect(service.status, NotificationWsConnectionStatus.connecting);
+      // The state machine must not park at `connecting`: report that no
+      // connection exists so UI/diagnostics read the truth.
+      expect(service.status, NotificationWsConnectionStatus.disconnected);
       service.dispose();
     });
 
@@ -247,9 +249,10 @@ void main() {
 
     test('silent server is detected as half-open and reconnected', () async {
       // Shrink the heartbeat so the 3x-interval detection happens in test time.
+      // 20ms interval -> half-open window is 60ms.
       final channel = _FakeWebSocketChannel();
       final service = NotificationWsService()
-        ..heartbeatInterval = const Duration(milliseconds: 100)
+        ..heartbeatInterval = const Duration(milliseconds: 20)
         ..connectChannelFactory = (url, {required token}) => channel;
 
       await service.connect(
@@ -257,15 +260,18 @@ void main() {
         storageService: storageWithToken('jwt-token'),
       );
 
-      // Nothing answers yet; the check for pong is expected to kick in only
-      // after 3+ intervals have passed untouched. Assert while the 3rd tick
-      // (300ms) is still in the future so the window check cannot have fired.
-      await Future<void>.delayed(const Duration(milliseconds: 230));
+      // M-20: generous margins for CI timer drift. Heartbeat ticks are
+      // scheduled at 20/40ms; by 50ms at least one ping must have been sent.
+      // The half-open window (60ms of silence) cannot have been hit yet: the
+      // earliest tick that could close the socket fires at 60ms elapsed —
+      // strictly after this assertion. (fakeAsync cannot be used here: the
+      // detection reads a real Stopwatch, which fake_async does not fake.)
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(channel.fakeSink.sent, isNotEmpty);
       expect(jsonDecode(channel.fakeSink.sent.first)['type'], 'ping');
       expect(channel.fakeSink.closeCalled, isFalse);
 
-      // Still silent: after the 3x window the socket is dropped and a
+      // Still silent: well past the 60ms window the socket is dropped and a
       // reconnect scheduled. The sink close is the observable signal.
       await Future<void>.delayed(const Duration(milliseconds: 500));
       expect(channel.fakeSink.closeCalled, isTrue);

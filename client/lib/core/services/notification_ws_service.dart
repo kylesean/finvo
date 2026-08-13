@@ -161,6 +161,10 @@ class NotificationWsService {
 
     if (token == null || token.isEmpty) {
       _logger.warning('No auth token available, skipping WS connection');
+      // Do not leave the state machine parked at `connecting`: report that no
+      // connection exists so UI/diagnostics read the truth. A later connect()
+      // (after login / token flip) restarts normally.
+      _setStatus(NotificationWsConnectionStatus.disconnected);
       return;
     }
 
@@ -204,6 +208,13 @@ class NotificationWsService {
       _startHeartbeat();
       _listen(channel, generation);
     } catch (e, stackTrace) {
+      // A newer connect() may have replaced this one while the handshake was
+      // pending (e.g. a server switch mid-connect), or the service may have
+      // been disposed. In both cases the state belongs to the newer session:
+      // running _cleanup() here would close the NEW connection's channel, and
+      // scheduling a reconnect would fight the in-flight connect. Only the
+      // current generation may tear down and retry.
+      if (_isDisposed || generation != _connectGeneration) return;
       _logger.warning('WebSocket connection failed', e, stackTrace);
       // Clean up the failed channel (closes its sink to release underlying
       // resources) before scheduling a reconnect.
@@ -363,6 +374,32 @@ class NotificationWsService {
         ),
       );
     });
+  }
+
+  /// Restart the connection when the app returns to the foreground.
+  ///
+  /// The reconnect budget is bounded ([_maxReconnectAttempts]) so a
+  /// permanently unreachable server never keeps waking the device; once
+  /// exhausted the service parks at `failed` with no automatic retry. Coming
+  /// back to the foreground is the natural recovery point (the network may
+  /// have returned meanwhile), so this method re-arms the budget and retries
+  /// instead of silently staying dead until login or a server edit.
+  void onAppResumed() {
+    if (_isDisposed) return;
+    if (_status != NotificationWsConnectionStatus.failed &&
+        _status != NotificationWsConnectionStatus.disconnected) {
+      return;
+    }
+    final baseUrl = _baseUrl;
+    final storageService = _storageService;
+    if (baseUrl == null || storageService == null) {
+      _logger.warning(
+        'onAppResumed: no connect config available, skipping reconnect',
+      );
+      return;
+    }
+    _logger.info('App resumed, re-arming notification WS reconnect budget');
+    unawaited(connect(baseUrl: baseUrl, storageService: storageService));
   }
 
   /// Disconnect and dispose resources.

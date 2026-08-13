@@ -35,6 +35,17 @@ class AppVersionService {
                 data['latestVersion'] as String? ?? currentVersion;
             final hasUpdate = _isVersionHigher(latestVersion, currentVersion);
 
+            // AUTH-V1: the server may raise the minimum supported version
+            // WITHOUT bumping latestVersion — a hard gate that must force an
+            // update regardless of hasUpdate. Previously minSupportedVersion
+            // was parsed into the model but never compared anywhere, so the
+            // gate was a dead field.
+            final minSupported =
+                data['minSupportedVersion'] as String? ?? '0.0.0';
+            final minNotMet = _isVersionHigher(minSupported, currentVersion);
+            final forceUpdate =
+                (data['forceUpdate'] as bool? ?? false) || minNotMet;
+
             String? targetUrl;
             final downloadUrls =
                 data['downloadUrls'] as Map<String, dynamic>? ?? {};
@@ -51,7 +62,8 @@ class AppVersionService {
               currentVersion: currentVersion,
               data: data,
               targetDownloadUrl: targetUrl,
-              hasUpdate: hasUpdate,
+              hasUpdate: hasUpdate || minNotMet,
+              forceUpdateOverride: forceUpdate,
             );
           }
           throw Exception('Invalid version response format');
