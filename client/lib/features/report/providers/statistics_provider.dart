@@ -146,6 +146,9 @@ class Statistics extends _$Statistics {
           accountTypes: state.selectedAccountTypes.isNotEmpty
               ? state.selectedAccountTypes
               : null,
+          // RPT-1: the category breakdown must follow the selected
+          // income/expense chart type (server defaults to expense).
+          transactionType: state.chartType.name,
         ),
         service.getTopTransactions(
           timeRange: state.timeRange,
@@ -155,6 +158,8 @@ class Statistics extends _$Statistics {
           accountTypes: state.selectedAccountTypes.isNotEmpty
               ? state.selectedAccountTypes
               : null,
+          // RPT-1: same as above for the top-transactions ranking.
+          transactionType: state.chartType.name,
           page: 1,
           pageSize: 15,
         ),
@@ -216,17 +221,52 @@ class Statistics extends _$Statistics {
     state = state.copyWith(chartType: chartType);
     try {
       final service = ref.read(statisticsServiceProvider);
-      final trendData = await service.getTrendData(
-        timeRange: state.timeRange,
-        chartType: chartType,
-        startDate: state.customStartDate,
-        endDate: state.customEndDate,
-        accountTypes: state.selectedAccountTypes.isNotEmpty
-            ? state.selectedAccountTypes
-            : null,
-      );
+      // RPT-1: reload EVERY chart-type-dependent dataset — not just the
+      // trend. The category breakdown and top-transactions ranking are also
+      // filtered by income/expense (transaction_type) and would otherwise
+      // keep showing the previous tab's data under the new tab's title.
+      final (
+        TrendDataResponse trendData,
+        CategoryBreakdownResponse categoryBreakdown,
+        TopTransactionsResponse topTransactions,
+      ) = await (
+        service.getTrendData(
+          timeRange: state.timeRange,
+          chartType: chartType,
+          startDate: state.customStartDate,
+          endDate: state.customEndDate,
+          accountTypes: state.selectedAccountTypes.isNotEmpty
+              ? state.selectedAccountTypes
+              : null,
+        ),
+        service.getCategoryBreakdown(
+          timeRange: state.timeRange,
+          startDate: state.customStartDate,
+          endDate: state.customEndDate,
+          accountTypes: state.selectedAccountTypes.isNotEmpty
+              ? state.selectedAccountTypes
+              : null,
+          transactionType: chartType.name,
+        ),
+        service.getTopTransactions(
+          timeRange: state.timeRange,
+          sortBy: state.sortType,
+          startDate: state.customStartDate,
+          endDate: state.customEndDate,
+          accountTypes: state.selectedAccountTypes.isNotEmpty
+              ? state.selectedAccountTypes
+              : null,
+          transactionType: chartType.name,
+          page: 1,
+          pageSize: 15,
+        ),
+      ).wait;
       if (generation != _loadGeneration) return;
-      state = state.copyWith(trendData: trendData);
+      state = state.copyWith(
+        trendData: trendData,
+        categoryBreakdown: categoryBreakdown,
+        topTransactions: topTransactions,
+      );
     } catch (e) {
       if (generation == _loadGeneration) {
         state = state.copyWith(error: safeErrorMessage(e));
@@ -315,8 +355,15 @@ class Statistics extends _$Statistics {
         isLoadingMoreTopTransactions: false,
       );
     } catch (e) {
+      // F1: reset the flag UNCONDITIONALLY. The success path already handles
+      // the stale-generation case, but when the request FAILS after a filter/
+      // sort switch bumped the generation, neither branch would reset it —
+      // leaving isLoadingMoreTopTransactions true forever: the footer spins
+      // forever AND the entry guard above blocks all future load-more calls
+      // (pagination is permanently dead until a full reload).
+      if (!ref.mounted) return;
+      state = state.copyWith(isLoadingMoreTopTransactions: false);
       if (generation == _loadGeneration) {
-        state = state.copyWith(isLoadingMoreTopTransactions: false);
         // Keep the already-loaded data visible; log the failure for diagnostics.
         _logger.warning('Failed to load more top transactions: $e');
       }

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FinancialSummary {
 
- Decimal get totalNetWorth; Decimal get totalAssets; Decimal get totalLiabilities; String get currencyCode; bool get isLoading; Set<String> get missingRateCurrencies;
+ Decimal get totalNetWorth; Decimal get totalAssets; Decimal get totalLiabilities; String get currencyCode; bool get isLoading; bool get ratesFailed; Set<String> get missingRateCurrencies;
 /// Create a copy of FinancialSummary
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $FinancialSummaryCopyWith<FinancialSummary> get copyWith => _$FinancialSummaryCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FinancialSummary&&(identical(other.totalNetWorth, totalNetWorth) || other.totalNetWorth == totalNetWorth)&&(identical(other.totalAssets, totalAssets) || other.totalAssets == totalAssets)&&(identical(other.totalLiabilities, totalLiabilities) || other.totalLiabilities == totalLiabilities)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.missingRateCurrencies, missingRateCurrencies));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FinancialSummary&&(identical(other.totalNetWorth, totalNetWorth) || other.totalNetWorth == totalNetWorth)&&(identical(other.totalAssets, totalAssets) || other.totalAssets == totalAssets)&&(identical(other.totalLiabilities, totalLiabilities) || other.totalLiabilities == totalLiabilities)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.ratesFailed, ratesFailed) || other.ratesFailed == ratesFailed)&&const DeepCollectionEquality().equals(other.missingRateCurrencies, missingRateCurrencies));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,totalNetWorth,totalAssets,totalLiabilities,currencyCode,isLoading,const DeepCollectionEquality().hash(missingRateCurrencies));
+int get hashCode => Object.hash(runtimeType,totalNetWorth,totalAssets,totalLiabilities,currencyCode,isLoading,ratesFailed,const DeepCollectionEquality().hash(missingRateCurrencies));
 
 @override
 String toString() {
-  return 'FinancialSummary(totalNetWorth: $totalNetWorth, totalAssets: $totalAssets, totalLiabilities: $totalLiabilities, currencyCode: $currencyCode, isLoading: $isLoading, missingRateCurrencies: $missingRateCurrencies)';
+  return 'FinancialSummary(totalNetWorth: $totalNetWorth, totalAssets: $totalAssets, totalLiabilities: $totalLiabilities, currencyCode: $currencyCode, isLoading: $isLoading, ratesFailed: $ratesFailed, missingRateCurrencies: $missingRateCurrencies)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $FinancialSummaryCopyWith<$Res>  {
   factory $FinancialSummaryCopyWith(FinancialSummary value, $Res Function(FinancialSummary) _then) = _$FinancialSummaryCopyWithImpl;
 @useResult
 $Res call({
- Decimal totalNetWorth, Decimal totalAssets, Decimal totalLiabilities, String currencyCode, bool isLoading, Set<String> missingRateCurrencies
+ Decimal totalNetWorth, Decimal totalAssets, Decimal totalLiabilities, String currencyCode, bool isLoading, bool ratesFailed, Set<String> missingRateCurrencies
 });
 
 
@@ -62,13 +62,14 @@ class _$FinancialSummaryCopyWithImpl<$Res>
 
 /// Create a copy of FinancialSummary
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? totalNetWorth = null,Object? totalAssets = null,Object? totalLiabilities = null,Object? currencyCode = null,Object? isLoading = null,Object? missingRateCurrencies = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? totalNetWorth = null,Object? totalAssets = null,Object? totalLiabilities = null,Object? currencyCode = null,Object? isLoading = null,Object? ratesFailed = null,Object? missingRateCurrencies = null,}) {
   return _then(_self.copyWith(
 totalNetWorth: null == totalNetWorth ? _self.totalNetWorth : totalNetWorth // ignore: cast_nullable_to_non_nullable
 as Decimal,totalAssets: null == totalAssets ? _self.totalAssets : totalAssets // ignore: cast_nullable_to_non_nullable
 as Decimal,totalLiabilities: null == totalLiabilities ? _self.totalLiabilities : totalLiabilities // ignore: cast_nullable_to_non_nullable
 as Decimal,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,ratesFailed: null == ratesFailed ? _self.ratesFailed : ratesFailed // ignore: cast_nullable_to_non_nullable
 as bool,missingRateCurrencies: null == missingRateCurrencies ? _self.missingRateCurrencies : missingRateCurrencies // ignore: cast_nullable_to_non_nullable
 as Set<String>,
   ));
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Decimal totalNetWorth,  Decimal totalAssets,  Decimal totalLiabilities,  String currencyCode,  bool isLoading,  Set<String> missingRateCurrencies)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Decimal totalNetWorth,  Decimal totalAssets,  Decimal totalLiabilities,  String currencyCode,  bool isLoading,  bool ratesFailed,  Set<String> missingRateCurrencies)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FinancialSummary() when $default != null:
-return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_that.currencyCode,_that.isLoading,_that.missingRateCurrencies);case _:
+return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_that.currencyCode,_that.isLoading,_that.ratesFailed,_that.missingRateCurrencies);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Decimal totalNetWorth,  Decimal totalAssets,  Decimal totalLiabilities,  String currencyCode,  bool isLoading,  Set<String> missingRateCurrencies)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Decimal totalNetWorth,  Decimal totalAssets,  Decimal totalLiabilities,  String currencyCode,  bool isLoading,  bool ratesFailed,  Set<String> missingRateCurrencies)  $default,) {final _that = this;
 switch (_that) {
 case _FinancialSummary():
-return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_that.currencyCode,_that.isLoading,_that.missingRateCurrencies);case _:
+return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_that.currencyCode,_that.isLoading,_that.ratesFailed,_that.missingRateCurrencies);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Decimal totalNetWorth,  Decimal totalAssets,  Decimal totalLiabilities,  String currencyCode,  bool isLoading,  Set<String> missingRateCurrencies)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Decimal totalNetWorth,  Decimal totalAssets,  Decimal totalLiabilities,  String currencyCode,  bool isLoading,  bool ratesFailed,  Set<String> missingRateCurrencies)?  $default,) {final _that = this;
 switch (_that) {
 case _FinancialSummary() when $default != null:
-return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_that.currencyCode,_that.isLoading,_that.missingRateCurrencies);case _:
+return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_that.currencyCode,_that.isLoading,_that.ratesFailed,_that.missingRateCurrencies);case _:
   return null;
 
 }
@@ -211,7 +212,7 @@ return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_th
 
 
 class _FinancialSummary implements FinancialSummary {
-  const _FinancialSummary({required this.totalNetWorth, required this.totalAssets, required this.totalLiabilities, required this.currencyCode, this.isLoading = false, final  Set<String> missingRateCurrencies = const <String>{}}): _missingRateCurrencies = missingRateCurrencies;
+  const _FinancialSummary({required this.totalNetWorth, required this.totalAssets, required this.totalLiabilities, required this.currencyCode, this.isLoading = false, this.ratesFailed = false, final  Set<String> missingRateCurrencies = const <String>{}}): _missingRateCurrencies = missingRateCurrencies;
 
 
 @override final  Decimal totalNetWorth;
@@ -219,6 +220,7 @@ class _FinancialSummary implements FinancialSummary {
 @override final  Decimal totalLiabilities;
 @override final  String currencyCode;
 @override@JsonKey() final  bool isLoading;
+@override@JsonKey() final  bool ratesFailed;
  final  Set<String> _missingRateCurrencies;
 @override@JsonKey() Set<String> get missingRateCurrencies {
   if (_missingRateCurrencies is EqualUnmodifiableSetView) return _missingRateCurrencies;
@@ -237,16 +239,16 @@ _$FinancialSummaryCopyWith<_FinancialSummary> get copyWith => __$FinancialSummar
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FinancialSummary&&(identical(other.totalNetWorth, totalNetWorth) || other.totalNetWorth == totalNetWorth)&&(identical(other.totalAssets, totalAssets) || other.totalAssets == totalAssets)&&(identical(other.totalLiabilities, totalLiabilities) || other.totalLiabilities == totalLiabilities)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._missingRateCurrencies, _missingRateCurrencies));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FinancialSummary&&(identical(other.totalNetWorth, totalNetWorth) || other.totalNetWorth == totalNetWorth)&&(identical(other.totalAssets, totalAssets) || other.totalAssets == totalAssets)&&(identical(other.totalLiabilities, totalLiabilities) || other.totalLiabilities == totalLiabilities)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.ratesFailed, ratesFailed) || other.ratesFailed == ratesFailed)&&const DeepCollectionEquality().equals(other._missingRateCurrencies, _missingRateCurrencies));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,totalNetWorth,totalAssets,totalLiabilities,currencyCode,isLoading,const DeepCollectionEquality().hash(_missingRateCurrencies));
+int get hashCode => Object.hash(runtimeType,totalNetWorth,totalAssets,totalLiabilities,currencyCode,isLoading,ratesFailed,const DeepCollectionEquality().hash(_missingRateCurrencies));
 
 @override
 String toString() {
-  return 'FinancialSummary(totalNetWorth: $totalNetWorth, totalAssets: $totalAssets, totalLiabilities: $totalLiabilities, currencyCode: $currencyCode, isLoading: $isLoading, missingRateCurrencies: $missingRateCurrencies)';
+  return 'FinancialSummary(totalNetWorth: $totalNetWorth, totalAssets: $totalAssets, totalLiabilities: $totalLiabilities, currencyCode: $currencyCode, isLoading: $isLoading, ratesFailed: $ratesFailed, missingRateCurrencies: $missingRateCurrencies)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$FinancialSummaryCopyWith<$Res> implements $FinancialSumma
   factory _$FinancialSummaryCopyWith(_FinancialSummary value, $Res Function(_FinancialSummary) _then) = __$FinancialSummaryCopyWithImpl;
 @override @useResult
 $Res call({
- Decimal totalNetWorth, Decimal totalAssets, Decimal totalLiabilities, String currencyCode, bool isLoading, Set<String> missingRateCurrencies
+ Decimal totalNetWorth, Decimal totalAssets, Decimal totalLiabilities, String currencyCode, bool isLoading, bool ratesFailed, Set<String> missingRateCurrencies
 });
 
 
@@ -274,13 +276,14 @@ class __$FinancialSummaryCopyWithImpl<$Res>
 
 /// Create a copy of FinancialSummary
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? totalNetWorth = null,Object? totalAssets = null,Object? totalLiabilities = null,Object? currencyCode = null,Object? isLoading = null,Object? missingRateCurrencies = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? totalNetWorth = null,Object? totalAssets = null,Object? totalLiabilities = null,Object? currencyCode = null,Object? isLoading = null,Object? ratesFailed = null,Object? missingRateCurrencies = null,}) {
   return _then(_FinancialSummary(
 totalNetWorth: null == totalNetWorth ? _self.totalNetWorth : totalNetWorth // ignore: cast_nullable_to_non_nullable
 as Decimal,totalAssets: null == totalAssets ? _self.totalAssets : totalAssets // ignore: cast_nullable_to_non_nullable
 as Decimal,totalLiabilities: null == totalLiabilities ? _self.totalLiabilities : totalLiabilities // ignore: cast_nullable_to_non_nullable
 as Decimal,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,ratesFailed: null == ratesFailed ? _self.ratesFailed : ratesFailed // ignore: cast_nullable_to_non_nullable
 as bool,missingRateCurrencies: null == missingRateCurrencies ? _self._missingRateCurrencies : missingRateCurrencies // ignore: cast_nullable_to_non_nullable
 as Set<String>,
   ));

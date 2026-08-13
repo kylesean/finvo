@@ -149,8 +149,11 @@ void main() {
       );
 
       expect(lastQueryParams!['time_range'], 'custom');
-      expect(lastQueryParams!['start_date'], start.toIso8601String());
-      expect(lastQueryParams!['end_date'], end.toIso8601String());
+      // F3: dates are sent as plain `yyyy-MM-dd` (the server's "calendar day"
+      // contract, same as the feed) — NOT ISO-8601 with a UTC offset, which
+      // drifted boundary days for non-UTC users.
+      expect(lastQueryParams!['start_date'], '2026-01-01');
+      expect(lastQueryParams!['end_date'], '2026-01-31');
       expect(lastQueryParams!['account_types'], 'cash,bank');
     });
 

@@ -49,9 +49,17 @@ class NetworkClient {
     try {
       return fromJson(data);
     } catch (e) {
-      throw DataParsingException(
-        'Failed to parse $endpoint response: ${e.toString()}',
+      // F2: keep the parser's detail for the log, but never surface the raw
+      // exception text to the user: it can embed response bodies with other
+      // users' PII, and this message flows straight into toasts via
+      // safeErrorMessage.
+      _logger.severe(
+        'Failed to parse $endpoint response',
+        e,
+        // Error.throwWithStackTrace preserves the original stack
+        StackTrace.current,
       );
+      throw DataParsingException('Failed to parse $endpoint response');
     }
   }
 
@@ -225,13 +233,13 @@ class NetworkClient {
   ///
   /// Socket connection error ([DioExceptionType.connectionError]) occurs when the
   /// underlying TCP socket is closed/reset by the server (e.g. Keep-Alive idle timeout
-  /// race condition). Because the request failed at the socket connection layer before an
-  /// HTTP exchange was established, it is safe to retry once with a fresh socket connection
-  /// for all HTTP methods (including POST/PUT/DELETE).
-  ///
-  /// Non-idempotent methods (POST/PUT/DELETE/PATCH) are otherwise not retried for
-  /// timeouts or bad responses: a timed-out write may already have succeeded server-side,
-  /// so retrying could create/modify resources twice.
+  /// race condition). It would be safe to retry once with a fresh socket connection
+  /// for idempotent methods — BUT the project currently applies retries to
+  /// idempotent (GET) requests only: non-idempotent methods (POST/PUT/DELETE/PATCH)
+  /// are never retried, even for connection errors, because a failed write may
+  /// already have succeeded server-side (the response was lost, not the request);
+  /// retrying could create/modify resources twice (e.g. duplicate financial
+  /// transactions) without an idempotency-key contract.
   bool _shouldRetry(DioException e, {required bool isIdempotentMethod}) {
     // Non-idempotent methods (POST/PUT/DELETE/PATCH) are never retried, not
     // even for connection errors: a failed write may already have been

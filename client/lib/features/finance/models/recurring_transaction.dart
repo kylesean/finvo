@@ -10,6 +10,16 @@ Decimal _parseDecimal(dynamic value) {
   return Decimal.tryParse(text) ?? Decimal.zero;
 }
 
+/// Tolerant date parse, mirroring [_parseDecimal]: a single malformed or
+/// missing timestamp must degrade to null (the model's field is nullable for
+/// every optional date) instead of throwing and killing the whole list parse.
+DateTime? _parseDate(dynamic value) {
+  if (value == null) return null;
+  final text = value.toString().trim();
+  if (text.isEmpty) return null;
+  return DateTime.tryParse(text);
+}
+
 /// Recurring transaction type
 enum RecurringTransactionType {
   expense('EXPENSE', 'Expense'),
@@ -110,22 +120,16 @@ class RecurringTransaction {
       tags: (json['tags'] as List<dynamic>?)?.cast<String>(),
       recurrenceRule: json['recurrence_rule'] as String,
       timezone: json['timezone'] as String,
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: json['end_date'] != null
-          ? DateTime.parse(json['end_date'] as String)
-          : null,
+      startDate: _parseDate(json['start_date']) ?? DateTime.now(),
+      endDate: _parseDate(json['end_date']),
       exceptionDates: (json['exception_dates'] as List<dynamic>?)
           ?.cast<String>(),
-      lastGeneratedAt: json['last_generated_at'] != null
-          ? DateTime.parse(json['last_generated_at'] as String)
-          : null,
-      nextExecutionAt: json['next_execution_at'] != null
-          ? DateTime.parse(json['next_execution_at'] as String)
-          : null,
+      lastGeneratedAt: _parseDate(json['last_generated_at']),
+      nextExecutionAt: _parseDate(json['next_execution_at']),
       description: json['description'] as String?,
       isActive: json['is_active'] as bool,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: _parseDate(json['created_at']) ?? DateTime.now(),
+      updatedAt: _parseDate(json['updated_at']) ?? DateTime.now(),
     );
   }
 

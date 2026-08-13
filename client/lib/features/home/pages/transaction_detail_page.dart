@@ -96,10 +96,15 @@ class TransactionDetailPage extends ConsumerWidget {
     // delete, link (account/space) and AI-thread entrypoint rights do not
     // apply and the corresponding UI is hidden.
     final currentUser = ref.watch(currentUserProvider);
+    // HOME-6/M-13: `sharedWith` carries the RECORDER's identity (the backend
+    // overloads it with the transaction's userUuid/userId). When the backend
+    // omits that field (e.g. older endpoints), assume the current user is the
+    // owner instead of hiding every edit/delete entry point for their own
+    // transactions.
     final isMine =
         currentUser != null &&
-        transaction.sharedWith.isNotEmpty &&
-        transaction.sharedWith.first.userId == currentUser.id;
+        (transaction.sharedWith.isEmpty ||
+            transaction.sharedWith.first.userId == currentUser.id);
 
     // Page header
     final pageHeader = _buildPageHeader(context, theme, colors, transaction);

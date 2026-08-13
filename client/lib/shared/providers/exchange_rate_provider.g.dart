@@ -33,7 +33,7 @@ final class ExchangeRateProvider
   ExchangeRate create() => ExchangeRate();
 }
 
-String _$exchangeRateHash() => r'0d48ade8887e62340000a58dfd3060a5e570f71b';
+String _$exchangeRateHash() => r'6303b6735d94983e8e6c8edcf2fe90bc935e2a6c';
 
 abstract class _$ExchangeRate extends $AsyncNotifier<ExchangeRateResponse> {
   FutureOr<ExchangeRateResponse> build();

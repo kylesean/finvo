@@ -44,7 +44,7 @@ final class StatisticsProvider
   }
 }
 
-String _$statisticsHash() => r'b7cb81e7102c6897040bace728529338195c5678';
+String _$statisticsHash() => r'5488479f4aa370f3b04ef7a9fcb694041977a077';
 
 /// Statistics state notifier
 

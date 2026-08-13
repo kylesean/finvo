@@ -321,7 +321,17 @@ IconData lucideIconFromString(String raw) {
 // investigable via logs.
 Decimal _parseAmount(dynamic value) {
   if (value == null) return Decimal.zero;
-  if (value is num) return Decimal.parse(value.toString());
+  if (value is num) {
+    // The string path below goes through tryParse, so keep the num path just
+    // as tolerant: Dart's JSON decoder produces doubles, and
+    // `1.0E+7`.toString() is "1.0E+7", which Decimal.parse rejects with a
+    // FormatException. One scientific-notation amount in a feed payload would
+    // otherwise crash the whole list parse.
+    final decimal = Decimal.tryParse(value.toString());
+    if (decimal != null) return decimal;
+    _logger.warning('Unparseable numeric amount "$value" coerced to 0');
+    return Decimal.zero;
+  }
   if (value is String) {
     final normalized = _normalizeAmountString(value);
     if (normalized.isEmpty) return Decimal.zero;

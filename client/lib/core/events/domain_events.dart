@@ -153,7 +153,7 @@ class BufferingBroadcastController<T> implements StreamController<T> {
   Future<void> get done => _controller.done;
 
   @override
-  StreamSink<T> get sink => _controller.sink;
+  StreamSink<T> get sink => _BufferingStreamSink<T>(this);
 
   @override
   void Function()? get onListen => _controller.onListen;
@@ -186,6 +186,35 @@ class BufferingBroadcastController<T> implements StreamController<T> {
   set onCancel(void Function()? onCancelHandler) {
     _controller.onCancel = onCancelHandler;
   }
+}
+
+/// [StreamSink] view that routes every event through [add]/[addError] so the
+/// "never drop events while no listener is attached" invariant ALSO holds for
+/// producers that publish via `controller.sink.add(...)`. Previously the sink
+/// delegated straight to the underlying broadcast controller, silently
+/// dropping events emitted with no listener — a contract hole for a class
+/// whose whole reason to exist is buffering those events.
+class _BufferingStreamSink<T> implements StreamSink<T> {
+  _BufferingStreamSink(this._controller);
+
+  final BufferingBroadcastController<T> _controller;
+
+  @override
+  void add(T event) => _controller.add(event);
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) =>
+      _controller.addError(error, stackTrace);
+
+  @override
+  Future<void> addStream(Stream<T> source, {bool? cancelOnError}) =>
+      _controller.addStream(source, cancelOnError: cancelOnError);
+
+  @override
+  Future<void> close() => _controller.close();
+
+  @override
+  Future<void> get done => _controller.done;
 }
 
 /// Buffering broadcast bus for [TransactionCreatedEvent].

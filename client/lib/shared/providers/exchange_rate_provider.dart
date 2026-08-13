@@ -42,15 +42,19 @@ class ExchangeRate extends _$ExchangeRate {
     if (from == baseCurrency) {
       fromRate = Decimal.one;
     } else {
+      // Parse tolerantly: the backend may deliver a rate in a form whose
+      // toString() is not a valid Decimal literal (e.g. scientific notation
+      // or an unexpected type). A single bad rate must degrade to "no rate"
+      // (null -> caller shows the missing-rate state) instead of throwing.
       final r = rates[from];
-      fromRate = r != null ? Decimal.parse(r.toString()) : null;
+      fromRate = r != null ? Decimal.tryParse(r.toString()) : null;
     }
 
     if (to == baseCurrency) {
       toRate = Decimal.one;
     } else {
       final r = rates[to];
-      toRate = r != null ? Decimal.parse(r.toString()) : null;
+      toRate = r != null ? Decimal.tryParse(r.toString()) : null;
     }
 
     if (fromRate == null || toRate == null) return null;

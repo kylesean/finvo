@@ -16,6 +16,12 @@ abstract class FinancialSummary with _$FinancialSummary {
     required Decimal totalLiabilities,
     required String currencyCode,
     @Default(false) bool isLoading,
+    // True when the exchange-rate fetch itself FAILED (vs. individual
+    // currencies merely missing a rate). The UI must distinguish these:
+    // showing "rates missing for your currencies" while the whole fetch
+    // failed would silently zero the net worth and mislead the user into
+    // thinking the data is merely incomplete.
+    @Default(false) bool ratesFailed,
     // Currency codes of accounts excluded from the totals because no exchange
     // rate was available for them. Empty when every account converted cleanly.
     // UI layers can surface a hint instead of silently treating them as zero.
@@ -44,6 +50,19 @@ class FinancialSummaryNotifier extends _$FinancialSummaryNotifier {
     if (ratesAsync.isLoading) {
       return FinancialSummary.empty.copyWith(
         isLoading: true,
+        currencyCode: targetCurrency,
+      );
+    }
+
+    // M-10: the rate fetch failed. Do NOT fall through to the conversion loop:
+    // every convert() would return null and every currency would land in
+    // missingRateCurrencies, silently zeroing the net worth under the guise
+    // of "no rates available". Surface the failure instead so the UI can
+    // offer a retry.
+    if (ratesAsync.hasError) {
+      return FinancialSummary.empty.copyWith(
+        isLoading: false,
+        ratesFailed: true,
         currencyCode: targetCurrency,
       );
     }

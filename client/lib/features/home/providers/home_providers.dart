@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
@@ -15,6 +16,7 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 import 'package:finvo/features/profile/models/financial_settings.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 
 part 'home_providers.g.dart';
@@ -194,7 +196,12 @@ class TransactionFeed extends _$TransactionFeed {
 
     state = state.copyWith(
       isLoading: true,
-      isLoadingMore: true,
+      // F10: a plain refresh (clearList: false) must NOT set isLoadingMore:
+      // that flag drives the feed-footer spinner and blocks fetchMore, so a
+      // pull-to-refresh flashed a skeleton footer and temporarily disabled
+      // pagination. Concurrency is already handled by the generation guard
+      // below (a fetchMore in flight during refresh is discarded).
+      isLoadingMore: clearList ? true : state.isLoadingMore,
       currentPage: 1,
       // Only a semantic filter change (feed type / date) clears the list.
       // Plain refreshes keep the visible transactions so pull-to-refresh does
@@ -240,6 +247,21 @@ class TransactionFeed extends _$TransactionFeed {
         hasReachedMax: false,
         errorMessage: safeErrorMessage(e),
       );
+
+      // F11: when the refresh fails but transactions are still on screen, the
+      // errorMessage is intentionally not rendered (the view only shows it on
+      // an empty list) — without this the user would believe the refresh
+      // succeeded. Surface the failure explicitly instead. Guarded because
+      // provider unit tests run without a widget binding (no navigatorKey).
+      if (!clearList && state.transactions.isNotEmpty) {
+        try {
+          ToastService.showDestructive(
+            description: Text('${t.common.loadFailed}: ${safeErrorMessage(e)}'),
+          );
+        } catch (toastError) {
+          _logger.fine('Toast unavailable in this environment: $toastError');
+        }
+      }
     }
   }
 

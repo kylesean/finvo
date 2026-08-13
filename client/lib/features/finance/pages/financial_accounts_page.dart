@@ -51,6 +51,19 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   bool _hideAmounts = false;
 
   @override
+  void initState() {
+    super.initState();
+    // AUTH-P3: the provider build() is now side-effect free; load the account
+    // list explicitly after the first frame (matching the project-wide
+    // "explicit startup triggers, pure build" convention).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(
+        ref.read(financialAccountProvider.notifier).loadFinancialAccounts(),
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     ref.watch(localeProvider);
     final theme = context.theme;

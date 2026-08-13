@@ -64,8 +64,10 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
   @override
   FinancialAccountState build() {
-    // Automatically trigger initial data fetch when provider is first built
-    unawaited(Future.microtask(() => loadFinancialAccounts()));
+    // AUTH-P3: no network side-effect in build — the caller (app.dart login
+    // listener, account page init) triggers loadFinancialAccounts explicitly.
+    // Previously a build() microtask fired a network request on EVERY read
+    // of this provider, and keepAlive rebuilds duplicated it.
     return const FinancialAccountState(isLoading: true);
   }
 
@@ -188,6 +190,10 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
       return true;
     } catch (e) {
+      // AUTH-P2: the success branch checks ref.mounted; the failure branch
+      // must too, or a write-back after the autoDispose provider was
+      // disposed triggers a Riverpod assertion.
+      if (!ref.mounted) return false;
       String errorMessage = 'Failed to update account';
       if (e is AppException) {
         errorMessage = e.message;

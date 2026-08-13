@@ -359,6 +359,7 @@ class _FakeStatisticsService implements StatisticsService {
     DateTime? startDate,
     DateTime? endDate,
     List<String>? accountTypes,
+    String? transactionType,
     int limit = 10,
   }) async {
     lastAccountTypes = accountTypes;
@@ -373,6 +374,7 @@ class _FakeStatisticsService implements StatisticsService {
     DateTime? startDate,
     DateTime? endDate,
     List<String>? accountTypes,
+    String? transactionType,
     int page = 1,
     int pageSize = 10,
   }) async {

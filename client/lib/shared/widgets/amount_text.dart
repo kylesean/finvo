@@ -332,6 +332,16 @@ class _AmountTextFromDisplay extends ConsumerWidget {
     this.compact = false,
   });
 
+  /// Coerce an untrusted display-map value to String (CORE-H1): values from
+  /// backend/GenUI payloads may be numbers, booleans, or nulls — casting
+  /// (`as String?`) would TypeError in build and crash the whole list.
+  static String? _coerceString(Object? value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is num || value is bool) return value.toString();
+    return null;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foruiTheme = context.theme;
@@ -343,19 +353,23 @@ class _AmountTextFromDisplay extends ConsumerWidget {
         .watch(financialSettingsProvider)
         .primaryCurrency;
     final defaultSymbol = AmountFormatter.getCurrencySymbol(primaryCurrency);
-
     String text;
     if (compact) {
-      final sign = display['sign'] as String? ?? '';
+      // CORE-H1: the display map comes from backend/GenUI data — never trust
+      // the field types. Coerce instead of casting (a numeric 'sign' or a
+      // malformed 'value' would otherwise TypeError inside build and take
+      // down the whole list render).
+      final sign = _coerceString(display['sign']) ?? '';
       final currencySymbol =
-          display['currencySymbol'] as String? ?? defaultSymbol;
-      final value = double.tryParse(display['value'] as String? ?? '0') ?? 0;
+          _coerceString(display['currencySymbol']) ?? defaultSymbol;
+      final value =
+          double.tryParse(_coerceString(display['value']) ?? '0') ?? 0;
       final compactValue = AmountFormatter.formatCompact(value);
       text = sign.isEmpty
           ? '$currencySymbol$compactValue'
           : '$sign $currencySymbol$compactValue';
     } else {
-      text = display['fullString'] as String? ?? '';
+      text = _coerceString(display['fullString']) ?? '';
     }
 
     var effectiveStyle = (style ?? foruiTheme.typography.body.md).copyWith(

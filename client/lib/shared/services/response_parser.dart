@@ -43,7 +43,11 @@ abstract final class ResponseParser {
       try {
         return fromJson(json);
       } catch (e) {
-        throw DataParsingException('Failed to parse item response: $json');
+        // F2: never embed the raw response body in the message — it may
+        // contain other users' PII and is surfaced verbatim to the UI via
+        // safeErrorMessage/toast. Keep the exception detail for the log; the
+        // message stays generic.
+        throw DataParsingException('Failed to parse item response');
       }
     }
     throw DataParsingException('Expected JSON Object, got ${json.runtimeType}');

@@ -702,19 +702,27 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         // to the DateTime constructor: Dart normalizes negative days into the
         // PREVIOUS month (DateTime(2026, 8, -1) == 2026-07-30), which would
         // shift the first execution date into the wrong month.
+        //
+        // FIN-H1: search from TODAY's month, not _startDate's month. Editing
+        // a rule created months ago must produce a first-execution date in
+        // the future — previously only +1 month was tried, so a stale rule
+        // was silently saved with a start date still in the past (the rule
+        // would read as "already expired" and never fire).
         DateTime targetDate = _dateForMonthDay(
-          _startDate.year,
-          _startDate.month,
+          today.year,
+          today.month,
           _monthDay,
         );
-
-        // If target date has passed, move to next month
         if (targetDate.isBefore(today)) {
-          targetDate = _dateForMonthDay(
-            _startDate.year,
-            _startDate.month + 1,
-            _monthDay,
-          );
+          // Bounded advance: at most 24 months out (a defensive cap; a valid
+          // month day is always reached within 1).
+          for (var i = 1; i <= 24 && targetDate.isBefore(today); i++) {
+            targetDate = _dateForMonthDay(
+              today.year,
+              today.month + i,
+              _monthDay,
+            );
+          }
         }
         return targetDate;
 
