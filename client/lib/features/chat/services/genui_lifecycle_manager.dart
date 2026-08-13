@@ -423,6 +423,26 @@ class GenUiLifecycleManager {
 
     final currentId = _getCurrentStreamingMessageId();
     if (currentId.isNotEmpty) {
+      // M-7: a late error (e.g. an A2UI payload parsed after the `done` event)
+      // must not rewrite a message already in a terminal state — appending an
+      // error footnote and flipping a completed message back to `error` would
+      // misrepresent a finished turn as failed.
+      final messages = _messageRepository.getCurrentMessages();
+      StreamingStatus? currentStatus;
+      for (final m in messages) {
+        if (m.id == currentId) {
+          currentStatus = m.streamingStatus;
+          break;
+        }
+      }
+      if (currentStatus == StreamingStatus.completed ||
+          currentStatus == StreamingStatus.error) {
+        _logger.info(
+          'GenUiLifecycleManager: ignoring late GenUI error for terminal '
+          'message $currentId',
+        );
+        return;
+      }
       _messageRepository.updateAiMessageState(
         id: currentId,
         // Append the error note instead of replacing the already-streamed

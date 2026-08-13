@@ -45,6 +45,14 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   String _textBeforeSpeechSession = '';
   bool _isManualStop = false;
 
+  /// Synchronous re-entrancy guard for [_submitMessage]. Must be set BEFORE
+  /// any await: in voice mode the speech stop can take hundreds of
+  /// milliseconds, and `state.isLoadingResponse` is only set after that
+  /// await — a rapid double-tap would otherwise pass the guard twice and run
+  /// two concurrent send pipelines (the second cancels the first's stream
+  /// and both duplicate messages into the list).
+  bool _isSubmitting = false;
+
   /// Set when the provider is disposed. Long-running async flows
   /// (_startNewSpeechSession, _submitMessage, _uploadFilesInBackground)
   /// must not touch `state` after disposal: the notifier is recreated on the
@@ -297,68 +305,74 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   }
 
   Future<void> _submitMessage() async {
-    if (state.isLoadingResponse) return;
-
-    final textToSend = state.text.trim();
-    final hasMediaFiles = state.hasMediaFiles;
-
-    if (textToSend.isEmpty && !hasMediaFiles) return;
-
-    if (state.isListening) {
-      await _speechSession.stopListening(manual: false);
-      state = state.copyWith(isListening: false, hintType: HintType.normal);
-    }
-
-    final currentTextAfterStop = state.text.trim();
-    final currentMediaFiles = List<XFile>.from(state.selectedFiles);
-
-    if (currentTextAfterStop.isEmpty && currentMediaFiles.isEmpty) return;
-
-    final pendingAttachments = <PendingMessageAttachment>[];
-    if (currentMediaFiles.isNotEmpty) {
-      for (final file in currentMediaFiles) {
-        final uploadInfo = _uploadedInfos[file.path];
-        if (uploadInfo == null) {
-          state = state.copyWith(
-            showError: true,
-            errorMessage: t.chat.uploadStillInProgress,
-            hintType: HintType.normal,
-          );
-          return;
-        }
-        pendingAttachments.add(
-          PendingMessageAttachment(file: file, uploadInfo: uploadInfo),
-        );
-      }
-    }
-
-    state = state.copyWith(
-      isLoadingResponse: true,
-      hintType: HintType.aiProcessing,
-    );
+    if (_isSubmitting || state.isLoadingResponse) return;
+    // Set synchronously, before any await (see the field doc).
+    _isSubmitting = true;
 
     try {
-      await _onSendMessage(
-        currentTextAfterStop,
-        attachments: pendingAttachments.isEmpty ? null : pendingAttachments,
-      );
-      if (_disposed) return;
+      final textToSend = state.text.trim();
+      final hasMediaFiles = state.hasMediaFiles;
 
-      for (final attachment in pendingAttachments) {
-        _uploadedInfos.remove(attachment.file.path);
+      if (textToSend.isEmpty && !hasMediaFiles) return;
+
+      if (state.isListening) {
+        await _speechSession.stopListening(manual: false);
+        state = state.copyWith(isListening: false, hintType: HintType.normal);
       }
 
-      _textBeforeSpeechSession = '';
-      state = state.copyWith(text: '', selectedFiles: []);
-    } catch (e, s) {
-      if (_disposed) return;
-      _logger.severe('Message send failed: $e\n$s');
+      final currentTextAfterStop = state.text.trim();
+      final currentMediaFiles = List<XFile>.from(state.selectedFiles);
+
+      if (currentTextAfterStop.isEmpty && currentMediaFiles.isEmpty) return;
+
+      final pendingAttachments = <PendingMessageAttachment>[];
+      if (currentMediaFiles.isNotEmpty) {
+        for (final file in currentMediaFiles) {
+          final uploadInfo = _uploadedInfos[file.path];
+          if (uploadInfo == null) {
+            state = state.copyWith(
+              showError: true,
+              errorMessage: t.chat.uploadStillInProgress,
+              hintType: HintType.normal,
+            );
+            return;
+          }
+          pendingAttachments.add(
+            PendingMessageAttachment(file: file, uploadInfo: uploadInfo),
+          );
+        }
+      }
+
       state = state.copyWith(
-        isLoadingResponse: false,
-        showError: true,
-        errorMessage: t.chat.sendFailed,
-        hintType: HintType.normal,
+        isLoadingResponse: true,
+        hintType: HintType.aiProcessing,
       );
+
+      try {
+        await _onSendMessage(
+          currentTextAfterStop,
+          attachments: pendingAttachments.isEmpty ? null : pendingAttachments,
+        );
+        if (_disposed) return;
+
+        for (final attachment in pendingAttachments) {
+          _uploadedInfos.remove(attachment.file.path);
+        }
+
+        _textBeforeSpeechSession = '';
+        state = state.copyWith(text: '', selectedFiles: []);
+      } catch (e, s) {
+        if (_disposed) return;
+        _logger.severe('Message send failed: $e\n$s');
+        state = state.copyWith(
+          isLoadingResponse: false,
+          showError: true,
+          errorMessage: t.chat.sendFailed,
+          hintType: HintType.normal,
+        );
+      }
+    } finally {
+      _isSubmitting = false;
     }
   }
 
@@ -476,27 +490,20 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       );
     }
 
-    final usedIndices = <int>{};
-    for (final upload in result.uploads) {
-      int fileIndex = -1;
-      for (var i = 0; i < originalFiles.length; i++) {
-        if (usedIndices.contains(i)) continue;
-        if (originalFiles[i].name == upload.originalName) {
-          fileIndex = i;
-          break;
-        }
-      }
-      if (fileIndex == -1) {
-        for (var i = 0; i < originalFiles.length; i++) {
-          if (usedIndices.contains(i)) continue;
-          fileIndex = i;
-          break;
-        }
-      }
-      if (fileIndex == -1) break;
-
-      usedIndices.add(fileIndex);
-      final file = originalFiles[fileIndex];
+    // CHAT-8: the server returns uploads in the SAME ORDER the files were
+    // sent (the service uploads sequentially), so align by index. Matching by
+    // `originalName` misattributes results when two selected files share a
+    // name — the wrong attachmentId/uri would be attached to the wrong file.
+    // Failed files are excluded from the zip by the filter above.
+    final uploadableFiles = originalFiles
+        .where((file) => !failedPaths.contains(file.path))
+        .toList();
+    final uploadCount = result.uploads.length < uploadableFiles.length
+        ? result.uploads.length
+        : uploadableFiles.length;
+    for (var i = 0; i < uploadCount; i++) {
+      final file = uploadableFiles[i];
+      final upload = result.uploads[i];
       _uploadedInfos[file.path] = UploadedAttachmentInfo(
         id: upload.id,
         attachmentId: upload.attachmentId,

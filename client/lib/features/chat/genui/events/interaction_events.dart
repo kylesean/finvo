@@ -37,6 +37,19 @@ Decimal _amountToDecimal(Object? raw) {
   return Decimal.tryParse(raw.toString()) ?? Decimal.zero;
 }
 
+/// Decode an untrusted AI/backend-supplied context value as a String (CHAT-H2).
+///
+/// The context map is produced by the LLM and must never be trusted: a bare
+/// `as String?` cast would TypeError on a numeric/boolean value and blow
+/// through the request pipeline. `is`-check + `toString()` fallback keeps the
+/// same defensive posture as [SpaceSelectedEvent.fromContext].
+String? _asString(Object? value) => switch (value) {
+  final String s => s,
+  final num n => n.toString(),
+  final bool b => b.toString(),
+  _ => null,
+};
+
 /// GenUI interaction event base class.
 ///
 /// Sealed to support exhaustive switch; each subclass corresponds to a wire event name ([eventName]).
@@ -125,20 +138,20 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
   factory TransferPathConfirmedEvent.fromContext(Map<String, dynamic> context) {
     final rawTags = context['tags'];
     return TransferPathConfirmedEvent(
-      sourceAccountId: context['source_account_id'] as String? ?? '',
-      targetAccountId: context['target_account_id'] as String? ?? '',
+      sourceAccountId: _asString(context['source_account_id']) ?? '',
+      targetAccountId: _asString(context['target_account_id']) ?? '',
       sourceAccountName:
-          context['source_account_name'] as String? ?? 'Source Account',
+          _asString(context['source_account_name']) ?? 'Source Account',
       targetAccountName:
-          context['target_account_name'] as String? ?? 'Target Account',
+          _asString(context['target_account_name']) ?? 'Target Account',
       amount: _amountToDecimal(context['amount']),
-      currency: context['currency'] as String? ?? 'CNY',
-      memo: context['memo'] as String?,
+      currency: _asString(context['currency']) ?? 'CNY',
+      memo: _asString(context['memo']),
       tags: rawTags is List
           ? rawTags.map((e) => e.toString()).where((t) => t.isNotEmpty).toList()
           : const [],
-      rawInput: context['raw_input'] as String?,
-      surfaceId: context['surface_id'] as String?,
+      rawInput: _asString(context['raw_input']),
+      surfaceId: _asString(context['surface_id']),
     );
   }
 
@@ -237,10 +250,10 @@ final class AccountSelectedEvent extends GenUiInteractionEvent {
 
   factory AccountSelectedEvent.fromContext(Map<String, dynamic> context) {
     return AccountSelectedEvent(
-      accountId: context['account_id'] as String?,
-      accountName: context['account_name'] as String?,
-      accountType: context['account_type'] as String?,
-      surfaceId: context['surface_id'] as String?,
+      accountId: _asString(context['account_id']),
+      accountName: _asString(context['account_name']),
+      accountType: _asString(context['account_type']),
+      surfaceId: _asString(context['surface_id']),
     );
   }
 
@@ -290,16 +303,16 @@ final class TransactionConfirmedWithAccountEvent extends GenUiInteractionEvent {
     Map<String, dynamic> context,
   ) {
     return TransactionConfirmedWithAccountEvent(
-      accountId: context['account_id'] as String?,
-      accountName: context['account_name'] as String?,
+      accountId: _asString(context['account_id']),
+      accountName: _asString(context['account_name']),
       amount: context['amount'],
-      description: context['description'] as String?,
-      transactionType: context['transaction_type'] as String?,
-      categoryKey: context['category_key'] as String?,
-      currency: context['currency'] as String?,
-      rawInput: context['raw_input'] as String?,
-      tags: context['tags'] as List<dynamic>?,
-      surfaceId: context['surface_id'] as String?,
+      description: _asString(context['description']),
+      transactionType: _asString(context['transaction_type']),
+      categoryKey: _asString(context['category_key']),
+      currency: _asString(context['currency']),
+      rawInput: _asString(context['raw_input']),
+      tags: context['tags'] is List ? context['tags'] as List<dynamic> : null,
+      surfaceId: _asString(context['surface_id']),
     );
   }
 

@@ -104,6 +104,14 @@ class CustomContentGenerator implements genui.Transport {
   // Cancellation flag - set to true when user clicks stop button
   bool _isCancelled = false;
 
+  /// Idle watchdog: if the SSE stream delivers no line for this long, the
+  /// connection is treated as dead and cancelled (see the request loop).
+  static const _idleWatchdogTimeout = Duration(seconds: 60);
+
+  /// Set by the idle watchdog when it cancels the in-flight request, so the
+  /// catch block can report the true cause instead of a generic cancel error.
+  bool _idleTimedOut = false;
+
   /// Monotonic counter distinguishing successive requests. Every SSE event
   /// dispatch and terminal callback (onError/onStreamComplete) is guarded by
   /// the generation captured when the request started, so buffered lines from
@@ -353,7 +361,34 @@ class CustomContentGenerator implements genui.Transport {
       // event and the event is dispatched on the blank-line boundary (a
       // multi-line data field is joined with '\n'). Trailing events without
       // a final blank line are flushed after the stream ends.
+      //
+      // Idle watchdog (CHAT-2): the 1h receiveTimeout only fires on TCP-level
+      // failures. A silently dead stream (network switch, server hang) delivers
+      // no events AND no timeout, leaving the chat UI locked in the streaming
+      // state forever. If no SSE line arrives for [_idleWatchdogTimeout],
+      // cancel the request so the error path below terminates the turn.
+      _idleTimedOut = false;
       final accumulator = SseEventAccumulator();
+      Timer watchdog = Timer(_idleWatchdogTimeout, () {
+        _idleTimedOut = true;
+        _logger.warning(
+          'CustomContentGenerator: SSE stream idle for '
+          '${_idleWatchdogTimeout.inSeconds}s, cancelling as dead',
+        );
+        _cancelToken?.cancel('SSE idle watchdog');
+      });
+      void restartWatchdog() {
+        watchdog.cancel();
+        watchdog = Timer(_idleWatchdogTimeout, () {
+          _idleTimedOut = true;
+          _logger.warning(
+            'CustomContentGenerator: SSE stream idle for '
+            '${_idleWatchdogTimeout.inSeconds}s, cancelling as dead',
+          );
+          _cancelToken?.cancel('SSE idle watchdog');
+        });
+      }
+
       await for (final line
           in response.data!.stream
               .cast<List<int>>()
@@ -368,11 +403,13 @@ class CustomContentGenerator implements genui.Transport {
           break;
         }
 
+        restartWatchdog();
         final event = accumulator.addLine(line);
         if (event != null) {
           await _dispatchSseEventData(event);
         }
       }
+      watchdog.cancel();
 
       // Flush a trailing event that was not terminated by a blank line.
       if (!_isCancelled && requestGeneration == _requestGeneration) {
@@ -401,7 +438,13 @@ class CustomContentGenerator implements genui.Transport {
       // Map non-2xx responses (now raised as DioException since the
       // validateStatus bypass was removed) back to a readable error message.
       final String errorMessage;
-      if (e is DioException && e.response != null) {
+      if (_idleTimedOut) {
+        // The watchdog cancelled the request: report the real cause instead
+        // of a confusing "request cancelled".
+        errorMessage =
+            'Stream idle timeout: no data received for '
+            '${_idleWatchdogTimeout.inSeconds}s';
+      } else if (e is DioException && e.response != null) {
         errorMessage = 'HTTP error: ${e.response!.statusCode}';
       } else {
         errorMessage = e.toString();

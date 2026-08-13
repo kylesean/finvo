@@ -55,6 +55,12 @@ class ChatInteractionManager {
       'ChatInteractionManager: Cancelling previous stream and timers...',
     );
     await _streamingController.cancelStreamAndTimers();
+    // H-3/CHAT-7: if a stop was requested right before this send, the
+    // checkpoint-cleanup HTTP request may still be in flight against the same
+    // session. Sending the new turn immediately would let the late cleanup
+    // delete the new turn's server-side checkpoint. Wait for it to settle
+    // (bounded by the controller's cancel timeout).
+    await _streamingController.waitForPendingCancel();
 
     // 2. Generate IDs
     final messageId = _uuid.v4();
@@ -136,6 +142,8 @@ class ChatInteractionManager {
 
     // Similar flow to addUserMessageAndGetResponse but simpler
     await _streamingController.cancelStreamAndTimers();
+    // Wait for an in-flight checkpoint cleanup (see addUserMessageAndGetResponse).
+    await _streamingController.waitForPendingCancel();
 
     final messageId = _uuid.v4();
     final aiMessageId = _uuid.v4();

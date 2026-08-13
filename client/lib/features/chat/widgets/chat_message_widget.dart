@@ -350,15 +350,38 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
 
         Widget imageWidget;
         if (url.startsWith('data:')) {
-          // Base64 data URI - decode and render directly
-          final base64Data = url.split(',').last;
-          imageWidget = Image.memory(
-            base64Decode(base64Data),
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return _buildImageError(theme, attachment.filename);
-            },
-          );
+          // Base64 data URI - decode and render directly. Guard the decode:
+          // a malformed payload (no comma, illegal base64) throws inside
+          // build — a single bad attachment must degrade to the error tile
+          // instead of crashing the whole message list.
+          Uint8List? decodedBytes;
+          final commaIndex = url.indexOf(',');
+          if (commaIndex != -1) {
+            try {
+              decodedBytes = base64Decode(url.substring(commaIndex + 1));
+            } catch (e) {
+              _logger.warning(
+                'Attachment ${attachment.id} has malformed data URI, '
+                'skipping: $e',
+              );
+            }
+          } else {
+            _logger.warning(
+              'Attachment ${attachment.id} has data URI without comma, '
+              'skipping',
+            );
+          }
+          if (decodedBytes == null) {
+            imageWidget = _buildImageError(theme, attachment.filename);
+          } else {
+            imageWidget = Image.memory(
+              decodedBytes,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return _buildImageError(theme, attachment.filename);
+              },
+            );
+          }
         } else {
           // Network URL - use AuthenticatedImage component (with auth header)
           // Extract attachment ID from URL (e.g., /api/v1/files/view/{id})

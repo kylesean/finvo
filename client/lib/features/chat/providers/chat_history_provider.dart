@@ -383,6 +383,11 @@ class ChatHistory extends _$ChatHistory {
       return;
     }
     await _streamingController.cancelStreamAndTimers();
+    // H-4: clear the GenUI surface registry (and its message→surface index)
+    // when switching sessions. The lifecycle manager is keepAlive for the
+    // whole app lifetime, so without this every session switch leaks surface
+    // entries — unbounded growth plus stale getSurfaceInfo() results.
+    _genUiLifecycleManager.clearSession();
     _messageRepository.clearAllContentBuffers();
 
     state = state.copyWith(
@@ -463,6 +468,9 @@ class ChatHistory extends _$ChatHistory {
 
   Future<void> createNewConversation() async {
     await _streamingController.cancelStreamAndTimers();
+    // H-4: same as loadConversation — reset the keepAlive surface registry so
+    // the new conversation starts with a clean surface state.
+    _genUiLifecycleManager.clearSession();
     _messageRepository.clearAllContentBuffers();
     if (_genUiService != null && _genUiService!.isInitialized) {
       _genUiService!.conversation.clearSession();
@@ -540,12 +548,24 @@ class ChatHistory extends _$ChatHistory {
       }
       return;
     }
-    _streamingController.markMessageCompleted();
 
+    // CHAT-1: the SSE layer pairs onError with onStreamComplete, and the GenUI
+    // error path already marked the message streamingStatus=error (with the
+    // error text appended) before the completion callback fired. Never
+    // overwrite a terminal error state with `completed` — the user must see
+    // the error state, not a "completed" message with an error footnote.
     final messageIndex = state.messages.indexWhere(
       (m) => m.id == _currentStreamingAiMessageId,
     );
-    if (messageIndex == -1) return;
+    if (messageIndex != -1 &&
+        state.messages[messageIndex].streamingStatus == StreamingStatus.error) {
+      // Drive the stream phase to error so a second completion callback (the
+      // SSE layer's trailing onStreamComplete) also short-circuits above.
+      _streamingController.markStreamEnded(isError: true);
+      state = state.copyWith(isStreamingResponse: false);
+      return;
+    }
+    _streamingController.markMessageCompleted();
 
     // Clean up any tool calls still in pending/running state.
     // This handles the case where the server emitted tool_call_start but
