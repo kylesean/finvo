@@ -11,6 +11,8 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:decimal/decimal.dart';
+import 'package:finvo/features/chat/genui/catalog_helpers.dart';
+import 'package:finvo/features/chat/services/genui_logger.dart';
 
 import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
 
@@ -75,22 +77,14 @@ class ExpenseSummaryCard extends ConsumerWidget {
           ],
         ),
       );
-    } catch (e) {
-      return Container(
-        padding: const EdgeInsets.all(12),
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: context.theme.colors.muted.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          t.chat.genui.error.title,
-          style: TextStyle(
-            color: context.theme.colors.mutedForeground,
-            fontSize: 13,
-          ),
-        ),
+    } catch (e, stackTrace) {
+      final t = Translations.of(context);
+      GenUiLogger.logError(
+        message: 'ExpenseSummaryCard rendering failed',
+        error: e,
+        stackTrace: stackTrace,
       );
+      return buildErrorWidget(context, t.chat.genui.error.fetchFailed);
     }
   }
 

@@ -13,6 +13,8 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:decimal/decimal.dart';
+import 'package:finvo/features/chat/genui/catalog_helpers.dart';
+import 'package:finvo/features/chat/services/genui_logger.dart';
 
 /// Budget status card template
 ///
@@ -47,33 +49,13 @@ class BudgetStatusCard extends StatelessWidget {
       } else {
         return _buildBudgetSummaryCard(context, theme, colors);
       }
-    } catch (e) {
-      return Container(
-        padding: const EdgeInsets.all(12),
-        margin: const EdgeInsets.only(bottom: 8.0),
-        decoration: BoxDecoration(
-          color: context.theme.colors.muted.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              FLucideIcons.triangleAlert,
-              color: context.theme.colors.mutedForeground,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                t.chat.genui.error.title,
-                style: TextStyle(
-                  color: context.theme.colors.mutedForeground,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
+    } catch (e, stackTrace) {
+      GenUiLogger.logError(
+        message: 'BudgetStatusCard rendering failed',
+        error: e,
+        stackTrace: stackTrace,
       );
+      return buildErrorWidget(context, t.chat.genui.error.fetchFailed);
     }
   }
 

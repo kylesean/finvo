@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:finvo/features/finance/pages/account_edit_page.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
-import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/shared/models/financial_account.dart';
 
 /// Shared navigation helper for opening the account edit page.
 ///

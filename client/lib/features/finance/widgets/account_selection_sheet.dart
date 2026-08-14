@@ -7,7 +7,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'dart:async';
 
-import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/shared/models/financial_account.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/shared/widgets/app_card.dart';

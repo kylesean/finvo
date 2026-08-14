@@ -5,7 +5,7 @@ import 'package:forui/forui.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/features/finance/providers/account_view_currency_provider.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
-import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/shared/models/financial_account.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';

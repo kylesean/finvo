@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/shared/models/financial_account.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
 import 'package:finvo/features/chat/genui/organisms/account_select_sheet.dart';
 import 'package:finvo/features/chat/genui/atoms/atoms.dart';

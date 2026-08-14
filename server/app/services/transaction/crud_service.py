@@ -187,11 +187,23 @@ class TransactionCRUDService:
         if tx_type != "transfer":
             linked_acc = source_acc or target_acc
             if linked_acc:
-                linked_account = LinkedAccountInfo(id=str(linked_acc.uuid), name=linked_acc.name, type=linked_acc.type)
+                linked_account = LinkedAccountInfo(
+                    id=str(linked_acc.uuid),
+                    name=linked_acc.name,
+                    type=linked_acc.type or "OTHER",
+                )
         elif source_acc and target_acc:
             transfer_info = TransferInfo(
-                source_account=LinkedAccountInfo(id=str(source_acc.uuid), name=source_acc.name, type=source_acc.type),
-                target_account=LinkedAccountInfo(id=str(target_acc.uuid), name=target_acc.name, type=target_acc.type),
+                source_account=LinkedAccountInfo(
+                    id=str(source_acc.uuid),
+                    name=source_acc.name,
+                    type=source_acc.type or "OTHER",
+                ),
+                target_account=LinkedAccountInfo(
+                    id=str(target_acc.uuid),
+                    name=target_acc.name,
+                    type=target_acc.type or "OTHER",
+                ),
             )
 
         return TransactionCreateResult(
@@ -203,7 +215,7 @@ class TransactionCRUDService:
             category_key=transaction.category_key,
             subject=transaction.subject,
             intent=transaction.intent,
-            tags=transaction.tags,
+            tags=transaction.tags or [],
             transaction_at=transaction.transaction_at.isoformat(),
             status="success",
             raw_input=transaction.raw_input,
@@ -313,8 +325,8 @@ class TransactionCRUDService:
                 TransactionAttachmentItem(
                     id=str(a.id),
                     filename=a.filename,
-                    mime_type=a.mime_type,
-                    size=a.size,
+                    mime_type=a.mime_type or "application/octet-stream",
+                    size=a.size or 0,
                     url=f"/files/view/{a.id}",
                     is_image=a.is_image,
                     created_at=a.created_at.isoformat() if a.created_at else None,

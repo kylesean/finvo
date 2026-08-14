@@ -60,3 +60,33 @@ String tryString(Object? v, [String defaultValue = '']) => switch (v) {
   final String s => s,
   _ => v.toString(),
 };
+
+// =========================================================================
+// Reusable @JsonKey JsonSerializable converter helpers for Decimal fields
+// =========================================================================
+
+/// Parse non-null Decimal from dynamic value.
+Decimal decimalFromJson(dynamic value) {
+  if (value is String) return Decimal.tryParse(value) ?? Decimal.zero;
+  if (value is num) return Decimal.tryParse(value.toString()) ?? Decimal.zero;
+  if (value is Decimal) return value;
+  return Decimal.zero;
+}
+
+/// Parse Decimal from nullable dynamic value, defaulting to Decimal.zero if null.
+Decimal decimalFromJsonNullable(dynamic value) {
+  if (value == null) return Decimal.zero;
+  return decimalFromJson(value);
+}
+
+/// Parse Decimal from nullable dynamic value, preserving null.
+Decimal? decimalOrNullFromJson(dynamic value) {
+  if (value == null) return null;
+  return decimalFromJson(value);
+}
+
+/// Serialize Decimal to String.
+String decimalToJson(Decimal value) => value.toString();
+
+/// Serialize nullable Decimal to String (or '0' if null).
+String decimalToJsonOrZero(Decimal? value) => value?.toString() ?? '0';

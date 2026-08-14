@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finvo/features/finance/providers/financial_summary_provider.dart';
-import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/shared/models/financial_account.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
 import 'package:finvo/shared/models/exchange_rate.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';

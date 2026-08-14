@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ExchangeRateResponse {
 
-@JsonKey(name: 'base_code') String get baseCode;@JsonKey(name: 'last_update_utc') String? get lastUpdateUtc;@JsonKey(name: 'conversion_rates') Map<String, double> get conversionRates;
+@JsonKey(name: 'base_code') String get baseCode;@JsonKey(name: 'last_update_utc') String? get lastUpdateUtc;@JsonKey(name: 'conversion_rates', fromJson: _ratesFromJson, toJson: _ratesToJson) Map<String, double> get conversionRates;
 /// Create a copy of ExchangeRateResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $ExchangeRateResponseCopyWith<$Res>  {
   factory $ExchangeRateResponseCopyWith(ExchangeRateResponse value, $Res Function(ExchangeRateResponse) _then) = _$ExchangeRateResponseCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'base_code') String baseCode,@JsonKey(name: 'last_update_utc') String? lastUpdateUtc,@JsonKey(name: 'conversion_rates') Map<String, double> conversionRates
+@JsonKey(name: 'base_code') String baseCode,@JsonKey(name: 'last_update_utc') String? lastUpdateUtc,@JsonKey(name: 'conversion_rates', fromJson: _ratesFromJson, toJson: _ratesToJson) Map<String, double> conversionRates
 });
 
 
@@ -155,7 +155,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'base_code')  String baseCode, @JsonKey(name: 'last_update_utc')  String? lastUpdateUtc, @JsonKey(name: 'conversion_rates')  Map<String, double> conversionRates)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'base_code')  String baseCode, @JsonKey(name: 'last_update_utc')  String? lastUpdateUtc, @JsonKey(name: 'conversion_rates', fromJson: _ratesFromJson, toJson: _ratesToJson)  Map<String, double> conversionRates)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ExchangeRateResponse() when $default != null:
 return $default(_that.baseCode,_that.lastUpdateUtc,_that.conversionRates);case _:
@@ -176,7 +176,7 @@ return $default(_that.baseCode,_that.lastUpdateUtc,_that.conversionRates);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'base_code')  String baseCode, @JsonKey(name: 'last_update_utc')  String? lastUpdateUtc, @JsonKey(name: 'conversion_rates')  Map<String, double> conversionRates)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'base_code')  String baseCode, @JsonKey(name: 'last_update_utc')  String? lastUpdateUtc, @JsonKey(name: 'conversion_rates', fromJson: _ratesFromJson, toJson: _ratesToJson)  Map<String, double> conversionRates)  $default,) {final _that = this;
 switch (_that) {
 case _ExchangeRateResponse():
 return $default(_that.baseCode,_that.lastUpdateUtc,_that.conversionRates);case _:
@@ -196,7 +196,7 @@ return $default(_that.baseCode,_that.lastUpdateUtc,_that.conversionRates);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'base_code')  String baseCode, @JsonKey(name: 'last_update_utc')  String? lastUpdateUtc, @JsonKey(name: 'conversion_rates')  Map<String, double> conversionRates)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'base_code')  String baseCode, @JsonKey(name: 'last_update_utc')  String? lastUpdateUtc, @JsonKey(name: 'conversion_rates', fromJson: _ratesFromJson, toJson: _ratesToJson)  Map<String, double> conversionRates)?  $default,) {final _that = this;
 switch (_that) {
 case _ExchangeRateResponse() when $default != null:
 return $default(_that.baseCode,_that.lastUpdateUtc,_that.conversionRates);case _:
@@ -211,13 +211,13 @@ return $default(_that.baseCode,_that.lastUpdateUtc,_that.conversionRates);case _
 @JsonSerializable()
 
 class _ExchangeRateResponse implements ExchangeRateResponse {
-  const _ExchangeRateResponse({@JsonKey(name: 'base_code') required this.baseCode, @JsonKey(name: 'last_update_utc') this.lastUpdateUtc, @JsonKey(name: 'conversion_rates') required final  Map<String, double> conversionRates}): _conversionRates = conversionRates;
+  const _ExchangeRateResponse({@JsonKey(name: 'base_code') required this.baseCode, @JsonKey(name: 'last_update_utc') this.lastUpdateUtc, @JsonKey(name: 'conversion_rates', fromJson: _ratesFromJson, toJson: _ratesToJson) required final  Map<String, double> conversionRates}): _conversionRates = conversionRates;
   factory _ExchangeRateResponse.fromJson(Map<String, dynamic> json) => _$ExchangeRateResponseFromJson(json);
 
 @override@JsonKey(name: 'base_code') final  String baseCode;
 @override@JsonKey(name: 'last_update_utc') final  String? lastUpdateUtc;
  final  Map<String, double> _conversionRates;
-@override@JsonKey(name: 'conversion_rates') Map<String, double> get conversionRates {
+@override@JsonKey(name: 'conversion_rates', fromJson: _ratesFromJson, toJson: _ratesToJson) Map<String, double> get conversionRates {
   if (_conversionRates is EqualUnmodifiableMapView) return _conversionRates;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_conversionRates);
@@ -257,7 +257,7 @@ abstract mixin class _$ExchangeRateResponseCopyWith<$Res> implements $ExchangeRa
   factory _$ExchangeRateResponseCopyWith(_ExchangeRateResponse value, $Res Function(_ExchangeRateResponse) _then) = __$ExchangeRateResponseCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'base_code') String baseCode,@JsonKey(name: 'last_update_utc') String? lastUpdateUtc,@JsonKey(name: 'conversion_rates') Map<String, double> conversionRates
+@JsonKey(name: 'base_code') String baseCode,@JsonKey(name: 'last_update_utc') String? lastUpdateUtc,@JsonKey(name: 'conversion_rates', fromJson: _ratesFromJson, toJson: _ratesToJson) Map<String, double> conversionRates
 });
 
 

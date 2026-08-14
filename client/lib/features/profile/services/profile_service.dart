@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/core/network/network_client.dart';
-import 'package:finvo/features/profile/models/financial_account.dart';
+import 'package:finvo/shared/models/financial_account.dart';
 import 'package:finvo/features/profile/models/financial_settings.dart';
 import 'package:finvo/features/profile/models/user_info.dart';
 

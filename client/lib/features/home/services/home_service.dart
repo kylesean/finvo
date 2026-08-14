@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
@@ -12,20 +13,26 @@ class HomeService {
   HomeService(this._networkClient);
 
   // Get daily expense summary for a specific month (for calendar heat map)
-  Future<CalendarMonthData> getCalendarMonthDetails(int year, int month) async {
+  Future<CalendarMonthData> getCalendarMonthDetails(
+    int year,
+    int month, {
+    CancelToken? cancelToken,
+  }) async {
     return await _networkClient.request<CalendarMonthData>(
       '/home/calendar-month-details',
       method: HttpMethod.get,
       queryParameters: {'year': year, 'month': month},
+      cancelToken: cancelToken,
       fromJsonT: (json) => _parseItemResponse(json, CalendarMonthData.fromJson),
     );
   }
 
   // Get total expense amount
-  Future<TotalExpenseData> getTotalExpense() async {
+  Future<TotalExpenseData> getTotalExpense({CancelToken? cancelToken}) async {
     return await _networkClient.request<TotalExpenseData>(
       '/home/total-expense',
       method: HttpMethod.get,
+      cancelToken: cancelToken,
       fromJsonT: (json) => _parseItemResponse(json, TotalExpenseData.fromJson),
     );
   }
@@ -37,6 +44,7 @@ class HomeService {
     int size = 20,
     String? type, // EXPENSE, INCOME, TRANSFER
     String? date, // (YYYY-MM-DD)
+    CancelToken? cancelToken,
   }) async {
     // Build query parameters
     final Map<String, dynamic> queryParameters = {'page': page, 'size': size};
@@ -51,16 +59,21 @@ class HomeService {
       '/transactions',
       method: HttpMethod.get,
       queryParameters: queryParameters,
+      cancelToken: cancelToken,
       fromJsonT: (json) =>
           _parseListResponse(json, TransactionModel.fromApiJson),
     );
   }
 
   // Get transaction details
-  Future<TransactionModel> getTransactionDetail(String transactionId) async {
+  Future<TransactionModel> getTransactionDetail(
+    String transactionId, {
+    CancelToken? cancelToken,
+  }) async {
     return await _networkClient.request<TransactionModel>(
       '/transactions/$transactionId',
       method: HttpMethod.get,
+      cancelToken: cancelToken,
       fromJsonT: (json) =>
           _parseItemResponse(json, TransactionModel.fromApiJson),
     );
@@ -89,17 +102,20 @@ class HomeService {
   }
 
   /// List shared spaces a transaction can be linked to
-  Future<List<Map<String, dynamic>>> listSharedSpaces() async {
+  Future<List<Map<String, dynamic>>> listSharedSpaces({
+    CancelToken? cancelToken,
+  }) async {
     return _networkClient.request<List<Map<String, dynamic>>>(
       '/shared-spaces',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        final data = json is Map<String, dynamic> ? json['data'] : null;
-        final spaces = data is Map<String, dynamic>
-            ? (data['spaces'] as List? ?? const <dynamic>[])
-            : const <dynamic>[];
-        return spaces.map((s) => s as Map<String, dynamic>).toList();
-      },
+      cancelToken: cancelToken,
+      fromJsonT: (json) => _networkClient.unwrapData(json, (data) {
+        final spaces = data['spaces'];
+        if (spaces is List) {
+          return spaces.whereType<Map<String, dynamic>>().toList();
+        }
+        return const <Map<String, dynamic>>[];
+      }, endpoint: '/shared-spaces'),
     );
   }
 
@@ -126,6 +142,7 @@ class HomeService {
     String? type,
     String? categoryKeys,
     String? tags,
+    CancelToken? cancelToken,
   }) async {
     final Map<String, dynamic> queryParameters = {'page': page, 'size': size};
     if (keyword != null) queryParameters['keyword'] = keyword;
@@ -139,12 +156,12 @@ class HomeService {
       '/transactions/search',
       method: HttpMethod.get,
       queryParameters: queryParameters,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic> && json.containsKey('data')) {
-          return json['data'] as Map<String, dynamic>;
-        }
-        return {};
-      },
+      cancelToken: cancelToken,
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        (data) => data,
+        endpoint: '/transactions/search',
+      ),
     );
   }
 

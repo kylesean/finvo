@@ -31,8 +31,8 @@ _FinancialAccount _$FinancialAccountFromJson(Map<String, dynamic> json) =>
       nature: $enumDecode(_$FinancialNatureEnumMap, json['nature']),
       type: $enumDecodeNullable(_$FinancialAccountTypeEnumMap, json['type']),
       currencyCode: json['currencyCode'] as String? ?? 'CNY',
-      initialBalance: _decimalFromJson(json['initialBalance']),
-      currentBalance: _decimalOrNullFromJson(json['currentBalance']),
+      initialBalance: decimalFromJson(json['initialBalance']),
+      currentBalance: decimalOrNullFromJson(json['currentBalance']),
       includeInNetWorth: json['includeInNetWorth'] as bool? ?? true,
       includeInCashFlow: json['includeInCashFlow'] as bool? ?? false,
       display: json['display'] == null
@@ -52,8 +52,8 @@ Map<String, dynamic> _$FinancialAccountToJson(_FinancialAccount instance) =>
       'nature': _$FinancialNatureEnumMap[instance.nature]!,
       'type': _$FinancialAccountTypeEnumMap[instance.type],
       'currencyCode': instance.currencyCode,
-      'initialBalance': _decimalToJson(instance.initialBalance),
-      'currentBalance': _decimalToJsonOrZero(instance.currentBalance),
+      'initialBalance': decimalToJson(instance.initialBalance),
+      'currentBalance': decimalToJsonOrZero(instance.currentBalance),
       'includeInNetWorth': instance.includeInNetWorth,
       'includeInCashFlow': instance.includeInCashFlow,
       'display': instance.display,
@@ -87,14 +87,14 @@ const _$AccountStatusEnumMap = {
 _FinancialAccountSummary _$FinancialAccountSummaryFromJson(
   Map<String, dynamic> json,
 ) => _FinancialAccountSummary(
-  totalBalance: _decimalFromJson(json['totalBalance']),
+  totalBalance: decimalFromJson(json['totalBalance']),
   lastUpdatedAt: DateTime.parse(json['lastUpdatedAt'] as String),
 );
 
 Map<String, dynamic> _$FinancialAccountSummaryToJson(
   _FinancialAccountSummary instance,
 ) => <String, dynamic>{
-  'totalBalance': _decimalToJson(instance.totalBalance),
+  'totalBalance': decimalToJson(instance.totalBalance),
   'lastUpdatedAt': instance.lastUpdatedAt.toIso8601String(),
 };
 
@@ -106,7 +106,7 @@ _FinancialAccountResponse _$FinancialAccountResponseFromJson(
           ?.map((e) => FinancialAccount.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
-  totalBalance: _decimalFromJsonNullable(json['totalBalance']),
+  totalBalance: decimalFromJsonNullable(json['totalBalance']),
   lastUpdatedAt: json['lastUpdatedAt'] as String? ?? '',
 );
 
@@ -114,7 +114,7 @@ Map<String, dynamic> _$FinancialAccountResponseToJson(
   _FinancialAccountResponse instance,
 ) => <String, dynamic>{
   'accounts': instance.accounts,
-  'totalBalance': _decimalToJson(instance.totalBalance),
+  'totalBalance': decimalToJson(instance.totalBalance),
   'lastUpdatedAt': instance.lastUpdatedAt,
 };
 

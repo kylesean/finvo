@@ -30,6 +30,7 @@ class _FakeHomeService extends HomeService {
     int size = 20,
     String? type,
     String? date,
+    CancelToken? cancelToken,
   }) async {
     if (gate != null) await gate!.future;
     if (failNext) {
