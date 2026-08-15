@@ -53,6 +53,11 @@ def _exec_rowcount(result: Any) -> int:
     return int(getattr(result, "rowcount", 0) or 0)
 
 
+def _account_payload_balance(account: FinancialAccount) -> Decimal:
+    """Balance to expose in account payloads (fall back to initial when None)."""
+    return account.current_balance if account.current_balance is not None else (account.initial_balance or Decimal("0"))
+
+
 def _format_decimal(value: Decimal, precision: int = 8) -> str:
     """Format a Decimal to a fixed-point string, avoiding scientific notation.
 
@@ -377,6 +382,7 @@ class UserService:
             "type": financial_account.type,
             "currencyCode": financial_account.currency_code,
             "initialBalance": _format_decimal(financial_account.initial_balance),
+            "currentBalance": _format_decimal(_account_payload_balance(financial_account)),
             "includeInNetWorth": financial_account.include_in_net_worth,
             "status": financial_account.status,
             "createdAt": _format_iso_datetime(financial_account.created_at),
@@ -460,6 +466,7 @@ class UserService:
             "type": account.type,
             "currencyCode": account.currency_code,
             "initialBalance": _format_decimal(account.initial_balance),
+            "currentBalance": _format_decimal(_account_payload_balance(account)),
             "includeInNetWorth": account.include_in_net_worth,
             "status": account.status,
             "createdAt": _format_iso_datetime(type_cast(datetime | None, account.created_at)),

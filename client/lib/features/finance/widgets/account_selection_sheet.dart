@@ -161,11 +161,16 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
     FColors colors,
     List<FinancialAccount> accounts,
   ) {
-    // Default: only asset accounts (recurring transactions only need asset
-    // accounts). Lifecycle flows (merge/close targets) inject their own filter.
+    // Default: only asset accounts that are still ACTIVE — a CLOSED account
+    // must not be selectable for new transactions / recurring rules (its
+    // history is preserved, but it no longer accepts new activity). Lifecycle
+    // flows (merge/close targets) inject their own filter.
     final accountsToShow = accounts
         .where(
-          widget.filter ?? (account) => account.nature == FinancialNature.asset,
+          widget.filter ??
+              (account) =>
+                  account.nature == FinancialNature.asset &&
+                  account.status == AccountStatus.active,
         )
         .toList();
 
