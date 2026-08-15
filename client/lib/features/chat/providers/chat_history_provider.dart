@@ -29,6 +29,7 @@ import 'package:finvo/features/chat/services/historical_message_processor.dart';
 import 'package:finvo/features/chat/services/attachment_manager.dart';
 import 'package:finvo/features/chat/services/genui_lifecycle_manager.dart';
 import 'package:finvo/features/chat/services/chat_interaction_manager.dart';
+import 'package:finvo/features/chat/services/conversation_session_manager.dart';
 import 'package:finvo/core/network/dio_provider.dart' show sseDioProvider;
 import 'package:finvo/core/constants/api_constants.dart';
 
@@ -53,9 +54,9 @@ class ChatHistory extends _$ChatHistory {
   // Message repository - manages message CRUD operations
   late MessageRepository _messageRepository;
 
-  // Historical message processor
-  final HistoricalMessageProcessor _historicalProcessor =
-      HistoricalMessageProcessor();
+  // Conversation session loading orchestration (fetch + switch-race guard
+  // + resume probe); state application stays in this provider.
+  late ConversationSessionManager _conversationSessionManager;
 
   // Attachment manager
   late AttachmentManager _attachmentManager;
@@ -117,6 +118,13 @@ class ChatHistory extends _$ChatHistory {
         state = state.copyWith(messages: messages);
       },
       getCurrentMessages: () => state.messages,
+    );
+
+    // Initialize ConversationSessionManager (resolver-style service access so
+    // a server switch is picked up on the next load)
+    _conversationSessionManager = ConversationSessionManager(
+      conversationService: () => ref.read(conversationServiceProvider),
+      historicalProcessor: HistoricalMessageProcessor(),
     );
 
     // Initialize AttachmentManager
@@ -430,68 +438,32 @@ class ChatHistory extends _$ChatHistory {
     ref
         .read(conversationExpenseProvider.notifier)
         .switchConversation(conversationId);
-    try {
-      final conversationService = ref.read(conversationServiceProvider);
-      final conversationDetail = await conversationService
-          .getConversationDetail(conversationId);
-
-      // Guard against the switch-race: if the user switched to another
-      // conversation while this request was in flight, a stale response must
-      // not overwrite the newer conversation's messages/title.
-      if (conversationId != state.currentConversationId) {
-        _logger.info(
-          'ChatHistory: discarding stale conversation detail for $conversationId '
-          '(current is ${state.currentConversationId})',
+    // Fetch + process + apply through the session manager, which owns the
+    // network call and the switch-race guard; state application stays here.
+    await _conversationSessionManager.loadConversationDetail(
+      conversationId,
+      isCurrent: () => conversationId == state.currentConversationId,
+      onLoaded: (result) {
+        state = state.copyWith(
+          messages: result.messages,
+          currentConversationTitle: result.title,
+          isLoadingHistory: false,
         );
-        return;
-      }
-
-      final processedMessages = _processHistoricalMessages(
-        conversationDetail.messages,
-      );
-
-      state = state.copyWith(
-        messages: processedMessages,
-        currentConversationTitle: conversationDetail.title,
-        isLoadingHistory: false,
-      );
-
-      if (_genUiService != null && _genUiService!.isInitialized) {
-        _genUiService!.conversation.setSessionId(conversationId);
-      }
-
-      await _checkAndResumeIfNeeded(conversationId);
-    } catch (e) {
-      // Only surface errors for the conversation that is still current.
-      if (conversationId == state.currentConversationId) {
-        _logger.warning(
-          'ChatHistory: Failed to load conversation $conversationId: $e',
-        );
+        if (_genUiService != null && _genUiService!.isInitialized) {
+          _genUiService!.conversation.setSessionId(conversationId);
+        }
+      },
+      onError: (e) {
+        // Only surface errors for the conversation that is still current.
         state = state.copyWith(
           isLoadingHistory: false,
           historyError: safeErrorMessage(e),
           currentConversationTitle: t.common.loadFailed,
         );
-      }
-    }
-  }
+      },
+    );
 
-  Future<void> _checkAndResumeIfNeeded(String conversationId) async {
-    try {
-      final conversationService = ref.read(conversationServiceProvider);
-      final resumeStatus = await conversationService.getResumeStatus(
-        conversationId,
-      );
-      if (resumeStatus.canResume) {
-        _logger.info(
-          'ChatHistory: Detected resumable state for $conversationId, nextNodes: ${resumeStatus.nextNodes}',
-        );
-      }
-    } catch (e) {
-      _logger.info(
-        'ChatHistory: Resume status check failed (non-critical): $e',
-      );
-    }
+    await _conversationSessionManager.checkAndResumeIfNeeded(conversationId);
   }
 
   Future<void> createNewConversation() async {
@@ -672,10 +644,6 @@ class ChatHistory extends _$ChatHistory {
 
   void updateAIFeedback(String messageId, AIFeedbackStatus newFeedbackStatus) {
     _messageRepository.updateFeedbackStatus(messageId, newFeedbackStatus);
-  }
-
-  List<ChatMessage> _processHistoricalMessages(List<ChatMessage> rawMessages) {
-    return _historicalProcessor.processHistoricalMessages(rawMessages);
   }
 
   genui.SurfaceHost? get genUiHost {
