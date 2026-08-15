@@ -23,6 +23,7 @@ import 'package:finvo/core/events/domain_events.dart';
 
 import 'package:finvo/features/chat/state_controllers/stream_state_controller.dart';
 import 'package:finvo/features/chat/state_controllers/streaming_controller.dart';
+import 'package:finvo/features/chat/state_controllers/stream_completion_policy.dart';
 import 'package:finvo/features/chat/repositories/message_repository.dart';
 import 'package:finvo/features/chat/services/historical_message_processor.dart';
 import 'package:finvo/features/chat/services/attachment_manager.dart';
@@ -119,21 +120,37 @@ class ChatHistory extends _$ChatHistory {
     _genUiLifecycleManager = GenUiLifecycleManager(
       secureStorageService: ref.read(secureStorageServiceProvider),
       messageRepository: _messageRepository,
-      callbacks: GenUiLifecycleCallbacks(
-        getCurrentStreamingMessageId: () => _currentStreamingAiMessageId,
-        onTransactionCreated: _handleTransactionCreated,
-        onSessionInit: _handleSessionInit,
-        onTextResponse: _handleTextResponse,
-        onStreamComplete: _onGenUiStreamComplete,
-        markFirstChunkReceived: _markFirstChunkReceived,
-        onTitleUpdate: _handleTitleUpdate,
-        onToolCallStart: _handleToolCallStart,
-        onToolCallEnd: _handleToolCallEnd,
-      ),
+      callbacks: _buildGenUiLifecycleCallbacks(),
     );
 
     // Initialize StreamingController
-    _streamingController = StreamingController(
+    _streamingController = _createStreamingController();
+
+    // Initialize ChatInteractionManager
+    _chatInteractionManager = _createChatInteractionManager();
+  }
+
+  /// Build the GenUI lifecycle callbacks that wire model events (session init,
+  /// text deltas, tool calls, transaction creation, title updates) back into
+  /// this provider.
+  GenUiLifecycleCallbacks _buildGenUiLifecycleCallbacks() {
+    return GenUiLifecycleCallbacks(
+      getCurrentStreamingMessageId: () => _currentStreamingAiMessageId,
+      onTransactionCreated: _handleTransactionCreated,
+      onSessionInit: _handleSessionInit,
+      onTextResponse: _handleTextResponse,
+      onStreamComplete: _onGenUiStreamComplete,
+      markFirstChunkReceived: _markFirstChunkReceived,
+      onTitleUpdate: _handleTitleUpdate,
+      onToolCallStart: _handleToolCallStart,
+      onToolCallEnd: _handleToolCallEnd,
+    );
+  }
+
+  /// Build the streaming controller that manages the SSE lifecycle, wiring
+  /// per-message state updates back into the provider's message list.
+  StreamingController _createStreamingController() {
+    return StreamingController(
       streamState: _streamState,
       onUpdateMessageState:
           ({
@@ -188,9 +205,11 @@ class ChatHistory extends _$ChatHistory {
         }
       },
     );
+  }
 
-    // Initialize ChatInteractionManager
-    _chatInteractionManager = ChatInteractionManager(
+  /// Build the interaction manager that orchestrates the send pipeline.
+  ChatInteractionManager _createChatInteractionManager() {
+    return ChatInteractionManager(
       messageRepository: _messageRepository,
       genUiLifecycleManager: _genUiLifecycleManager,
       streamingController: _streamingController,
@@ -535,61 +554,65 @@ class ChatHistory extends _$ChatHistory {
   }
 
   void _handleStreamComplete(String? finalTextOverride) {
-    // Guard against double-completion. Both the GenUI onStreamComplete and the
-    // SSE layer's onStreamComplete can reach here, and in some interleavings
-    // BOTH fire for the same message. The first pass already clears the
-    // incremental content buffer (see MessageRepository), so a second pass would
-    // read an empty buffer and inadvertently blank the message content. Keeping
-    // the terminal bookkeeping on a single guarded path also avoids redundant
-    // message-list rebuilds and tool-call sweeps.
-    if (_streamingController.isMessageCompleted) {
-      if (state.isStreamingResponse) {
-        state = state.copyWith(isStreamingResponse: false);
-      }
-      return;
-    }
-
-    // CHAT-1: the SSE layer pairs onError with onStreamComplete, and the GenUI
-    // error path already marked the message streamingStatus=error (with the
-    // error text appended) before the completion callback fired. Never
-    // overwrite a terminal error state with `completed` — the user must see
-    // the error state, not a "completed" message with an error footnote.
+    // Guard against double-completion (see [resolveStreamCompletionAction]):
+    // both the GenUI onStreamComplete and the SSE layer's onStreamComplete can
+    // reach here, and in some interleavings BOTH fire for the same message. The
+    // first pass already clears the incremental content buffer (see
+    // MessageRepository), so a second pass would read an empty buffer and
+    // inadvertently blank the message content. Keeping the terminal bookkeeping
+    // on a single guarded path also avoids redundant message-list rebuilds and
+    // tool-call sweeps. CHAT-1: a terminal error state must never be
+    // overwritten with `completed` — the user must see the error state, not a
+    // "completed" message with an error footnote.
     final messageIndex = state.messages.indexWhere(
       (m) => m.id == _currentStreamingAiMessageId,
     );
-    if (messageIndex != -1 &&
-        state.messages[messageIndex].streamingStatus == StreamingStatus.error) {
-      // Drive the stream phase to error so a second completion callback (the
-      // SSE layer's trailing onStreamComplete) also short-circuits above.
-      _streamingController.markStreamEnded(isError: true);
-      state = state.copyWith(isStreamingResponse: false);
-      return;
+    final messageInErrorState =
+        messageIndex != -1 &&
+        state.messages[messageIndex].streamingStatus == StreamingStatus.error;
+
+    switch (resolveStreamCompletionAction(
+      isMessageCompleted: _streamingController.isMessageCompleted,
+      isMessageInErrorState: messageInErrorState,
+    )) {
+      case StreamCompletionAction.skipAlreadyCompleted:
+        if (state.isStreamingResponse) {
+          state = state.copyWith(isStreamingResponse: false);
+        }
+      case StreamCompletionAction.preserveError:
+        // Drive the stream phase to error so a trailing completion callback
+        // also short-circuits via the guard above.
+        _streamingController.markStreamEnded(isError: true);
+        state = state.copyWith(isStreamingResponse: false);
+      case StreamCompletionAction.finalize:
+        _streamingController.markMessageCompleted();
+
+        // Clean up any tool calls still in pending/running state. Handles the
+        // case where the server emitted tool_call_start but never sent the
+        // corresponding tool_call_end (e.g. internal skill file reads that
+        // bypass the standard tools node). Mark as success since the stream
+        // completed normally.
+        _messageRepository.completePendingToolCalls(
+          _currentStreamingAiMessageId,
+        );
+
+        if (finalTextOverride != null) {
+          _updateAiMessageState(
+            id: _currentStreamingAiMessageId,
+            content: finalTextOverride,
+            isTyping: false,
+            streamingStatus: StreamingStatus.completed,
+          );
+        } else {
+          _updateAiMessageState(
+            id: _currentStreamingAiMessageId,
+            isTyping: false,
+            streamingStatus: StreamingStatus.completed,
+          );
+        }
+
+        state = state.copyWith(isStreamingResponse: false);
     }
-    _streamingController.markMessageCompleted();
-
-    // Clean up any tool calls still in pending/running state.
-    // This handles the case where the server emitted tool_call_start but
-    // never sent the corresponding tool_call_end (e.g. internal skill file
-    // reads that bypass the standard tools node).
-    // Mark as success since the stream completed normally.
-    _messageRepository.completePendingToolCalls(_currentStreamingAiMessageId);
-
-    if (finalTextOverride != null) {
-      _updateAiMessageState(
-        id: _currentStreamingAiMessageId,
-        content: finalTextOverride,
-        isTyping: false,
-        streamingStatus: StreamingStatus.completed,
-      );
-    } else {
-      _updateAiMessageState(
-        id: _currentStreamingAiMessageId,
-        isTyping: false,
-        streamingStatus: StreamingStatus.completed,
-      );
-    }
-
-    state = state.copyWith(isStreamingResponse: false);
   }
 
   void cancelPendingOperation() {
