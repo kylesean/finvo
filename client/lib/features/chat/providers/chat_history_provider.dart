@@ -169,58 +169,65 @@ class ChatHistory extends _$ChatHistory {
   StreamingController _createStreamingController() {
     return StreamingController(
       streamState: _streamState,
-      onUpdateMessageState:
-          ({
-            required String id,
-            String? content,
-            bool? isTyping,
-            StreamingStatus? streamingStatus,
-          }) {
-            _updateAiMessageState(
-              id: id,
-              content: content,
-              isTyping: isTyping,
-              streamingStatus: streamingStatus,
-            );
-          },
-      getCurrentMessageContent: (messageId) {
-        final message = state.messages.firstWhere(
-          (m) => m.id == messageId,
-          orElse: () => ChatMessage.empty(),
-        );
-        return message.content;
-      },
-      onInitialDelayExceeded: () {
-        _updateAiMessageState(id: _currentStreamingAiMessageId, isTyping: true);
-      },
-      onStreamComplete: (finalTextOverride) {
-        _handleStreamComplete(finalTextOverride);
-      },
-      onStreamError: (error) {
-        _handleStreamError(error);
-      },
-      onStreamCancelled: (hasContent) {
-        // Cancel all pending/running tool calls to stop loading animations
-        _messageRepository.cancelPendingToolCalls(_currentStreamingAiMessageId);
+      callbacks: StreamingCallbacks(
+        onUpdateMessageState:
+            ({
+              required String id,
+              String? content,
+              bool? isTyping,
+              StreamingStatus? streamingStatus,
+            }) {
+              _updateAiMessageState(
+                id: id,
+                content: content,
+                isTyping: isTyping,
+                streamingStatus: streamingStatus,
+              );
+            },
+        getCurrentMessageContent: (messageId) {
+          final message = state.messages.firstWhere(
+            (m) => m.id == messageId,
+            orElse: () => ChatMessage.empty(),
+          );
+          return message.content;
+        },
+        onInitialDelayExceeded: () {
+          _updateAiMessageState(
+            id: _currentStreamingAiMessageId,
+            isTyping: true,
+          );
+        },
+        onStreamComplete: (finalTextOverride) {
+          _handleStreamComplete(finalTextOverride);
+        },
+        onStreamError: (error) {
+          _handleStreamError(error);
+        },
+        onStreamCancelled: (hasContent) {
+          // Cancel all pending/running tool calls to stop loading animations
+          _messageRepository.cancelPendingToolCalls(
+            _currentStreamingAiMessageId,
+          );
 
-        if (!hasContent) {
-          _updateAiMessageState(
-            id: _currentStreamingAiMessageId,
-            content: t.chat.stoppedResponse,
-            isTyping: false,
-            streamingStatus: StreamingStatus.completed,
-          );
-        } else {
-          _updateAiMessageState(
-            id: _currentStreamingAiMessageId,
-            isTyping: false,
-            streamingStatus: StreamingStatus.completed,
-          );
-        }
-        if (state.isStreamingResponse) {
-          state = state.copyWith(isStreamingResponse: false);
-        }
-      },
+          if (!hasContent) {
+            _updateAiMessageState(
+              id: _currentStreamingAiMessageId,
+              content: t.chat.stoppedResponse,
+              isTyping: false,
+              streamingStatus: StreamingStatus.completed,
+            );
+          } else {
+            _updateAiMessageState(
+              id: _currentStreamingAiMessageId,
+              isTyping: false,
+              streamingStatus: StreamingStatus.completed,
+            );
+          }
+          if (state.isStreamingResponse) {
+            state = state.copyWith(isStreamingResponse: false);
+          }
+        },
+      ),
     );
   }
 

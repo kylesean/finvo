@@ -33,24 +33,26 @@ void main() {
         initialDelayMs: 100,
       ), // Short delay for testing
       streamState: streamState,
-      onUpdateMessageState:
-          ({
-            required String id,
-            String? content,
-            bool? isTyping,
-            StreamingStatus? streamingStatus,
-          }) {},
-      getCurrentMessageContent: (id) => 'Current Content',
-      onInitialDelayExceeded: () {
-        lastDelayExceededReceived = 'Exceeded';
-      },
-      onStreamComplete: (finalText) {
-        lastStreamCompleteFinalText = finalText;
-      },
-      onStreamError: (error) {
-        lastStreamError = error;
-      },
-      onStreamCancelled: (hasContent) {},
+      callbacks: StreamingCallbacks(
+        onUpdateMessageState:
+            ({
+              required String id,
+              String? content,
+              bool? isTyping,
+              StreamingStatus? streamingStatus,
+            }) {},
+        getCurrentMessageContent: (id) => 'Current Content',
+        onInitialDelayExceeded: () {
+          lastDelayExceededReceived = 'Exceeded';
+        },
+        onStreamComplete: (finalText) {
+          lastStreamCompleteFinalText = finalText;
+        },
+        onStreamError: (error) {
+          lastStreamError = error;
+        },
+        onStreamCancelled: (hasContent) {},
+      ),
     );
 
     controller.setGenUiService(mockGenUiService);

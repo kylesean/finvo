@@ -35,6 +35,39 @@ typedef UpdateMessageStateCallback =
     });
 typedef GetCurrentMessageContentCallback = String Function(String messageId);
 
+/// Groups every streaming-event callback into one cohesive object (L5), so the
+/// controller's constructor takes a single [callbacks] argument instead of six
+/// positional-by-name callbacks. Internal call sites access the same fields,
+/// so behavior is unchanged.
+class StreamingCallbacks {
+  const StreamingCallbacks({
+    required this.onUpdateMessageState,
+    required this.getCurrentMessageContent,
+    required this.onInitialDelayExceeded,
+    required this.onStreamComplete,
+    required this.onStreamError,
+    required this.onStreamCancelled,
+  });
+
+  /// Called when streaming should update message state
+  final UpdateMessageStateCallback onUpdateMessageState;
+
+  /// Called to get current message content
+  final GetCurrentMessageContentCallback getCurrentMessageContent;
+
+  /// Called when initial delay is exceeded (show "thinking...")
+  final OnInitialDelayExceededCallback onInitialDelayExceeded;
+
+  /// Called when stream completes successfully
+  final OnStreamCompleteCallback onStreamComplete;
+
+  /// Called when stream encounters error
+  final OnStreamErrorCallback onStreamError;
+
+  /// Called when user cancels stream
+  final OnStreamCancelledCallback onStreamCancelled;
+}
+
 /// Streaming Controller Configuration
 class StreamingConfig {
   /// Initial delay before showing "AI is thinking..." (ms)
@@ -104,13 +137,13 @@ class StreamingController {
   StreamingController({
     this.config = StreamingConfig.defaultConfig,
     required this.streamState,
-    required this.onUpdateMessageState,
-    required this.getCurrentMessageContent,
-    required this.onInitialDelayExceeded,
-    required this.onStreamComplete,
-    required this.onStreamError,
-    required this.onStreamCancelled,
-  });
+    required StreamingCallbacks callbacks,
+  }) : onUpdateMessageState = callbacks.onUpdateMessageState,
+       getCurrentMessageContent = callbacks.getCurrentMessageContent,
+       onInitialDelayExceeded = callbacks.onInitialDelayExceeded,
+       onStreamComplete = callbacks.onStreamComplete,
+       onStreamError = callbacks.onStreamError,
+       onStreamCancelled = callbacks.onStreamCancelled;
 
   // ============================================================
   // Public Getters
