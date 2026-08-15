@@ -237,4 +237,57 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
       return false;
     }
   }
+
+  /// Merge [sourceId] into [targetId] (correction for wrong/duplicate
+  /// accounts), then reload the authoritative list from the server.
+  Future<bool> mergeFinancialAccounts(String sourceId, String targetId) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final profileService = ref.read(profileServiceProvider);
+      await profileService.mergeFinancialAccounts(sourceId, targetId);
+
+      await loadFinancialAccounts();
+      return true;
+    } catch (e) {
+      if (!ref.mounted) return false;
+      String errorMessage = 'Failed to merge accounts';
+      if (e is AppException) {
+        errorMessage = e.message;
+      }
+
+      state = state.copyWith(isLoading: false, error: errorMessage);
+      return false;
+    }
+  }
+
+  /// Close (archive) an account, then reload the authoritative list.
+  Future<bool> closeFinancialAccount(
+    String accountId,
+    String disposal, {
+    String? targetAccountId,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final profileService = ref.read(profileServiceProvider);
+      await profileService.closeFinancialAccount(
+        accountId,
+        disposal: disposal,
+        targetAccountId: targetAccountId,
+      );
+
+      await loadFinancialAccounts();
+      return true;
+    } catch (e) {
+      if (!ref.mounted) return false;
+      String errorMessage = 'Failed to close account';
+      if (e is AppException) {
+        errorMessage = e.message;
+      }
+
+      state = state.copyWith(isLoading: false, error: errorMessage);
+      return false;
+    }
+  }
 }

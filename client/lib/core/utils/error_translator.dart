@@ -91,6 +91,32 @@ class ErrorTranslator {
       ErrorCodes.recurrenceRuleNotFound: () =>
           t.errorMapping.recurring.ruleNotFound,
 
+      // Financial Account Lifecycle (3300-3311)
+      ErrorCodes.accountNotFound: () => t.errorMapping.account.notFound,
+      ErrorCodes.accountAlreadyClosed: () =>
+          t.errorMapping.account.alreadyClosed,
+      ErrorCodes.accountDeleteReferenced: () =>
+          t.errorMapping.account.deleteReferenced,
+      ErrorCodes.accountDeleteBalanceNotZero: () =>
+          t.errorMapping.account.deleteBalanceNotZero,
+      ErrorCodes.accountCloseRecurringActive: () =>
+          t.errorMapping.account.closeRecurringActive,
+      ErrorCodes.accountCloseTargetRequired: () =>
+          t.errorMapping.account.closeTargetRequired,
+      ErrorCodes.accountCloseTargetClosed: () =>
+          t.errorMapping.account.closeTargetClosed,
+      ErrorCodes.accountCloseTargetCurrencyMismatch: () =>
+          t.errorMapping.account.closeTargetCurrencyMismatch,
+      ErrorCodes.accountMergeSelf: () => t.errorMapping.account.mergeSelf,
+      ErrorCodes.accountMergeCurrencyMismatch: () =>
+          t.errorMapping.account.mergeCurrencyMismatch,
+      ErrorCodes.accountMergeNatureMismatch: () =>
+          t.errorMapping.account.mergeNatureMismatch,
+      ErrorCodes.accountMergeClosedTarget: () =>
+          t.errorMapping.account.mergeClosedTarget,
+      ErrorCodes.accountDeleteClosedHasHistory: () =>
+          t.errorMapping.account.deleteClosedHasHistory,
+
       // File Upload (4001-4022)
       ErrorCodes.noFileUploaded: () => t.errorMapping.upload.noFile,
       ErrorCodes.invalidFileUploaded: () => t.errorMapping.upload.invalidFile,

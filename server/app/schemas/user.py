@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -28,6 +29,7 @@ class FinancialAccountItem(BaseModel):
         status: Account status (default: 'ACTIVE')
     """
 
+    id: UUID | None = Field(default=None, description="Account ID (present when updating an existing account, absent when creating a new one)")
     name: str = Field(..., description="Account name", max_length=100)
     nature: Literal["ASSET", "LIABILITY"] = Field(..., description="Account nature")
     type: (
@@ -174,6 +176,7 @@ class SaveFinancialAccountsResponse(BaseModel):
 class CreateFinancialAccountRequest(BaseModel):
     """Request schema for creating a single financial account."""
 
+    id: UUID | None = Field(default=None, description="Account ID (present when updating an existing account, absent when creating a new one)")
     name: str = Field(..., description="Account name", max_length=100)
     nature: Literal["ASSET", "LIABILITY"] = Field(..., description="Account nature")
     type: (
@@ -210,7 +213,7 @@ class UpdateFinancialAccountRequest(BaseModel):
     currencyCode: str | None = Field(None, max_length=3)
     includeInNetWorth: bool | None = None
     includeInCashFlow: bool | None = None
-    status: Literal["ACTIVE", "INACTIVE", "CLOSED"] | None = None
+    status: Literal["ACTIVE", "INACTIVE"] | None = None  # CLOSED is managed via POST .../close
 
     @field_validator("initialBalance", "currentBalance")
     @classmethod
@@ -223,6 +226,75 @@ class UpdateFinancialAccountRequest(BaseModel):
             return f"{decimal_val:.8f}"
         except Exception as e:
             raise ValueError(f"Invalid balance format: {e}")
+
+
+# =============================================================================
+# Financial Account Lifecycle Schemas (merge / close)
+# =============================================================================
+
+
+class MergeFinancialAccountsRequest(BaseModel):
+    """Request schema for merging one account into another.
+
+    Semantics: the source account's transactions / recurring rules are
+    re-pointed to the target account, the source is deleted, and the target's
+    balance is recomputed from the ledger. This is the "I created the wrong /
+    duplicate account" correction path — no money actually moves, so no
+    TRANSFER transaction is generated.
+    """
+
+    target_account_id: UUID = Field(..., description="Target account to merge the source into")
+
+
+class CloseFinancialAccountRequest(BaseModel):
+    """Request schema for closing (archiving) an account.
+
+    Semantics: archive keeps all historical transactions linked to the account
+    and freezes its balance snapshot; the account no longer appears in new
+    transaction account pickers or net worth.
+
+    ``disposal`` decides how a non-zero balance is handled before closing:
+    - ``keep``     — freeze the balance as-is (user accepts the snapshot)
+    - ``transfer`` — generate a TRANSFER to ``target_account_id`` (real money moved)
+    - ``writeoff`` — generate an EXPENSE/INCOME write-off entry
+    """
+
+    disposal: Literal["keep", "transfer", "writeoff"] = Field(
+        default="keep", description="How to dispose of the remaining balance before closing"
+    )
+    target_account_id: UUID | None = Field(
+        default=None, description="Required when disposal is 'transfer'"
+    )
+
+    @model_validator(mode="after")
+    def validate_disposal(self) -> CloseFinancialAccountRequest:
+        """Require a target account when transferring the balance out."""
+        if self.disposal == "transfer" and self.target_account_id is None:
+            raise ValueError("target_account_id is required when disposal is 'transfer'")
+        if self.disposal == "keep" or self.disposal == "writeoff":
+            self.target_account_id = None
+        return self
+
+
+class MergeFinancialAccountsResponse(BaseModel):
+    """Response schema for a successful account merge."""
+
+    source_id: str = Field(..., description="Deleted source account ID")
+    target_id: str = Field(..., description="Surviving target account ID")
+    moved_transactions: int = Field(..., description="Transactions re-pointed to the target")
+    moved_recurring: int = Field(..., description="Recurring rules re-pointed to the target")
+    target_currency: str = Field(..., description="Currency of the merged account")
+    target_balance: str = Field(..., description="Recomputed balance of the merged account")
+
+
+class CloseFinancialAccountResponse(BaseModel):
+    """Response schema for a successful account close."""
+
+    account_id: str = Field(..., description="Closed account ID")
+    status: str = Field(..., description="New account status (CLOSED)")
+    disposal: str = Field(..., description="Effective disposal applied (keep/transfer/writeoff)")
+    transaction_id: str | None = Field(None, description="Generated disposal transaction, if any")
+    final_balance: str = Field(..., description="Balance snapshot after closing")
 
 
 # =============================================================================

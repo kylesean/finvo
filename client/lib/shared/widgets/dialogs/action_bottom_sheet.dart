@@ -8,11 +8,15 @@ class ActionBottomSheet extends StatelessWidget {
   final List<ActionItem> actions;
   final List<ActionItem>?
   destructiveActions; // Handle destructive actions separately
+  final String? title; // Optional sheet title shown above the actions
+  final String? description; // Optional explanation shown under the title
 
   const ActionBottomSheet({
     super.key,
     required this.actions,
     this.destructiveActions,
+    this.title,
+    this.description,
   });
 
   @override
@@ -45,7 +49,9 @@ class ActionBottomSheet extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            Navigator.pop(sheetContext);
+            // pop with the item's result so callers can await the sheet's
+            // value; a null result behaves exactly like the previous pop.
+            Navigator.pop(sheetContext, item.result);
             item.onTap();
           },
           child: Container(
@@ -56,13 +62,27 @@ class ActionBottomSheet extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    item.title,
-                    style: AppTextStyles.listTitle(theme).copyWith(
-                      color: isDestructive
-                          ? destructiveItemColor
-                          : (item.color ?? itemTextColor),
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        style: AppTextStyles.listTitle(theme).copyWith(
+                          color: isDestructive
+                              ? destructiveItemColor
+                              : (item.color ?? itemTextColor),
+                        ),
+                      ),
+                      if (item.subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          item.subtitle!,
+                          style: theme.typography.body.xs.copyWith(
+                            color: colors.mutedForeground,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 Icon(
@@ -129,6 +149,31 @@ class ActionBottomSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
+
+            // Optional title + description
+            if (title != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                child: Text(
+                  title!,
+                  textAlign: TextAlign.center,
+                  style: theme.typography.body.md.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            if (description != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(
+                  description!,
+                  textAlign: TextAlign.center,
+                  style: theme.typography.body.sm.copyWith(
+                    color: colors.mutedForeground,
+                  ),
+                ),
+              ),
 
             // Main action items area
             if (actions.isNotEmpty) ...[

@@ -896,7 +896,31 @@ class _Translations$account$ko extends Translations$account$zh {
 	@override String get amountTooLarge => '잔액은 999,999,999.99를 초과할 수 없습니다';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '계좌 삭제';
-	@override String get deleteConfirm => '이 계좌를 삭제하시겠습니까? 복구할 수 없습니다.';
+	@override String get deleteConfirm => '거래도 잔액도 없는 계좌만 삭제할 수 있습니다. 복구할 수 없습니다.';
+	@override String get closeAccount => '계좌 정지(내역 유지)';
+	@override String closeBalanceDisposal({required Object balance}) => '이 계좌에는 잔액 ${balance}이(가) 있습니다. 정지 전에 어떻게 처리할까요?';
+	@override String get closeMessage => '이 계좌는 정지(보관)됩니다. 모든 내역이 유지되며 새 거래와 순자산에는 표시되지 않습니다.';
+	@override String get closeTitle => '계좌 정지';
+	@override String get closedSuccess => '계좌가 정지되었습니다';
+	@override String get deleteSuccess => '계좌가 삭제되었습니다';
+	@override String get disposalKeep => '동결 스냅샷으로 유지';
+	@override String get disposalTransfer => '다른 계좌로 이체';
+	@override String get disposalWriteoff => '지출로 정리';
+	@override String mergeMessage({required Object name}) => '"${name}"의 모든 거래가 대상 계좌로 이동한 후 이 계좌가 삭제됩니다. 새 내역은 생성되지 않습니다.';
+	@override String get mergeNoTarget => '같은 통화의 다른 병합 가능한 활성 계좌가 없습니다.';
+	@override String get mergeTargetTitle => '대상 계좌 선택';
+	@override String get mergeTitle => '계좌 병합';
+	@override String get mergeToOther => '다른 계좌로 병합';
+	@override String get mergedSuccess => '계좌가 병합되었습니다';
+	@override String get transferTargetTitle => '이체 대상 계좌 선택';
+	@override String get closedBadge => '정지됨';
+	@override String get reopenAccount => '계좌 재활성화';
+	@override String get reopenConfirm => '이 계좌는 재활성화(ACTIVE)되어 순자산과 새 거래에 다시 포함됩니다.';
+	@override String get reopenSuccess => '계좌가 재활성화되었습니다';
+	@override String get closeDisposalTitle => '정지 전 잔액 처리';
+	@override String get disposalKeepDesc => '잔액을 현재 그대로 고정하고 보관합니다. 새 내역은 생성되지 않습니다.';
+	@override String get disposalTransferDesc => '실제 이체 내역을 만들어 잔액을 다른 계좌로 이동한 후 정지합니다.';
+	@override String get disposalWriteoffDesc => '지출(또는 수입) 내역을 만들어 잔액을 정리한 후 정지합니다.';
 	@override String get save => '수정사항 저장';
 	@override String get assetsCategory => '자산';
 	@override String get liabilitiesCategory => '부채/신용';
@@ -1088,6 +1112,7 @@ class _Translations$errorMapping$ko extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$transaction$ko transaction = _Translations$errorMapping$transaction$ko._(_root);
 	@override late final _Translations$errorMapping$space$ko space = _Translations$errorMapping$space$ko._(_root);
 	@override late final _Translations$errorMapping$recurring$ko recurring = _Translations$errorMapping$recurring$ko._(_root);
+	@override late final _Translations$errorMapping$account$ko account = _Translations$errorMapping$account$ko._(_root);
 	@override late final _Translations$errorMapping$upload$ko upload = _Translations$errorMapping$upload$ko._(_root);
 	@override late final _Translations$errorMapping$storage$ko storage = _Translations$errorMapping$storage$ko._(_root);
 	@override late final _Translations$errorMapping$ai$ko ai = _Translations$errorMapping$ai$ko._(_root);
@@ -1876,6 +1901,28 @@ class _Translations$errorMapping$recurring$ko extends Translations$errorMapping$
 	// Translations
 	@override String get invalidRule => 'Invalid recurrence rule';
 	@override String get ruleNotFound => 'Recurrence rule not found';
+}
+
+// Path: errorMapping.account
+class _Translations$errorMapping$account$ko extends Translations$errorMapping$account$zh {
+	_Translations$errorMapping$account$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get notFound => '계좌를 찾을 수 없습니다';
+	@override String get alreadyClosed => '이미 정지된 계좌입니다';
+	@override String get deleteReferenced => '이 계좌에는 거래나 정기 규칙이 남아 있습니다. 다른 계좌로 병합하거나 정지하세요.';
+	@override String get deleteBalanceNotZero => '이 계좌에는 아직 잔액이 있습니다. 다른 계좌로 병합하거나 정지 시 잔액을 처리하세요.';
+	@override String get closeRecurringActive => '이 계좌에는 정기 규칙이 남아 있습니다. 정지 전에 규칙을 비활성화하거나 다른 계좌로 병합하세요.';
+	@override String get closeTargetRequired => '잔액 이체에는 대상 계좌가 필요합니다.';
+	@override String get closeTargetClosed => '대상 계좌가 정지되어 있습니다. 다른 계좌를 선택하세요.';
+	@override String get closeTargetCurrencyMismatch => '이체 대상 계좌는 같은 통화여야 합니다.';
+	@override String get mergeSelf => '계좌를 그 자체로 병합할 수 없습니다.';
+	@override String get mergeCurrencyMismatch => '통화가 다른 계좌는 병합할 수 없습니다.';
+	@override String get mergeNatureMismatch => '자산과 부채는 서로 병합할 수 없습니다.';
+	@override String get mergeClosedTarget => '정지된 계좌에는 병합할 수 없습니다. 재활성화하거나 다른 대상을 선택하세요.';
+	@override String get deleteClosedHasHistory => '이 계좌는 정지되어 전체 내역이 유지됩니다. 완전히 제거하려면 먼저 다른 계좌로 병합하세요.';
 }
 
 // Path: errorMapping.upload
@@ -3557,7 +3604,31 @@ extension on TranslationsKo {
 			'account.amountTooLarge' => '잔액은 999,999,999.99를 초과할 수 없습니다',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '계좌 삭제',
-			'account.deleteConfirm' => '이 계좌를 삭제하시겠습니까? 복구할 수 없습니다.',
+			'account.deleteConfirm' => '거래도 잔액도 없는 계좌만 삭제할 수 있습니다. 복구할 수 없습니다.',
+			'account.closeAccount' => '계좌 정지(내역 유지)',
+			'account.closeBalanceDisposal' => ({required Object balance}) => '이 계좌에는 잔액 ${balance}이(가) 있습니다. 정지 전에 어떻게 처리할까요?',
+			'account.closeMessage' => '이 계좌는 정지(보관)됩니다. 모든 내역이 유지되며 새 거래와 순자산에는 표시되지 않습니다.',
+			'account.closeTitle' => '계좌 정지',
+			'account.closedSuccess' => '계좌가 정지되었습니다',
+			'account.deleteSuccess' => '계좌가 삭제되었습니다',
+			'account.disposalKeep' => '동결 스냅샷으로 유지',
+			'account.disposalTransfer' => '다른 계좌로 이체',
+			'account.disposalWriteoff' => '지출로 정리',
+			'account.mergeMessage' => ({required Object name}) => '"${name}"의 모든 거래가 대상 계좌로 이동한 후 이 계좌가 삭제됩니다. 새 내역은 생성되지 않습니다.',
+			'account.mergeNoTarget' => '같은 통화의 다른 병합 가능한 활성 계좌가 없습니다.',
+			'account.mergeTargetTitle' => '대상 계좌 선택',
+			'account.mergeTitle' => '계좌 병합',
+			'account.mergeToOther' => '다른 계좌로 병합',
+			'account.mergedSuccess' => '계좌가 병합되었습니다',
+			'account.transferTargetTitle' => '이체 대상 계좌 선택',
+			'account.closedBadge' => '정지됨',
+			'account.reopenAccount' => '계좌 재활성화',
+			'account.reopenConfirm' => '이 계좌는 재활성화(ACTIVE)되어 순자산과 새 거래에 다시 포함됩니다.',
+			'account.reopenSuccess' => '계좌가 재활성화되었습니다',
+			'account.closeDisposalTitle' => '정지 전 잔액 처리',
+			'account.disposalKeepDesc' => '잔액을 현재 그대로 고정하고 보관합니다. 새 내역은 생성되지 않습니다.',
+			'account.disposalTransferDesc' => '실제 이체 내역을 만들어 잔액을 다른 계좌로 이동한 후 정지합니다.',
+			'account.disposalWriteoffDesc' => '지출(또는 수입) 내역을 만들어 잔액을 정리한 후 정지합니다.',
 			'account.save' => '수정사항 저장',
 			'account.assetsCategory' => '자산',
 			'account.liabilitiesCategory' => '부채/신용',
@@ -3578,6 +3649,8 @@ extension on TranslationsKo {
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
 			'account.types.investmentTitle' => 'Investment',
 			'account.types.investmentSubtitle' => 'Stocks, funds, bonds, etc.',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.receivableTitle' => 'Receivable',
 			'account.types.receivableSubtitle' => 'Loans to others, pending',
 			'account.types.receivableHelper' => 'Owed to me',
@@ -3602,8 +3675,6 @@ extension on TranslationsKo {
 			'financial.confirm' => '확인',
 			'financial.settings' => '금융 설정',
 			'financial.budgetManagement' => '예산 관리',
-			_ => null,
-		} ?? switch (path) {
 			'financial.recurringTransactions' => '정기 거래',
 			'financial.safetyThreshold' => '안전선',
 			'financial.dailyBurnRate' => '일일 소비',
@@ -3867,6 +3938,19 @@ extension on TranslationsKo {
 			'errorMapping.space.transactionAlreadyInSpace' => '거래가 이미 이 공간에 있습니다',
 			'errorMapping.recurring.invalidRule' => 'Invalid recurrence rule',
 			'errorMapping.recurring.ruleNotFound' => 'Recurrence rule not found',
+			'errorMapping.account.notFound' => '계좌를 찾을 수 없습니다',
+			'errorMapping.account.alreadyClosed' => '이미 정지된 계좌입니다',
+			'errorMapping.account.deleteReferenced' => '이 계좌에는 거래나 정기 규칙이 남아 있습니다. 다른 계좌로 병합하거나 정지하세요.',
+			'errorMapping.account.deleteBalanceNotZero' => '이 계좌에는 아직 잔액이 있습니다. 다른 계좌로 병합하거나 정지 시 잔액을 처리하세요.',
+			'errorMapping.account.closeRecurringActive' => '이 계좌에는 정기 규칙이 남아 있습니다. 정지 전에 규칙을 비활성화하거나 다른 계좌로 병합하세요.',
+			'errorMapping.account.closeTargetRequired' => '잔액 이체에는 대상 계좌가 필요합니다.',
+			'errorMapping.account.closeTargetClosed' => '대상 계좌가 정지되어 있습니다. 다른 계좌를 선택하세요.',
+			'errorMapping.account.closeTargetCurrencyMismatch' => '이체 대상 계좌는 같은 통화여야 합니다.',
+			'errorMapping.account.mergeSelf' => '계좌를 그 자체로 병합할 수 없습니다.',
+			'errorMapping.account.mergeCurrencyMismatch' => '통화가 다른 계좌는 병합할 수 없습니다.',
+			'errorMapping.account.mergeNatureMismatch' => '자산과 부채는 서로 병합할 수 없습니다.',
+			'errorMapping.account.mergeClosedTarget' => '정지된 계좌에는 병합할 수 없습니다. 재활성화하거나 다른 대상을 선택하세요.',
+			'errorMapping.account.deleteClosedHasHistory' => '이 계좌는 정지되어 전체 내역이 유지됩니다. 완전히 제거하려면 먼저 다른 계좌로 병합하세요.',
 			'errorMapping.upload.noFile' => 'No file uploaded',
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',

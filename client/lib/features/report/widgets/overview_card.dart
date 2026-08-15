@@ -169,20 +169,23 @@ class OverviewCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: AmountText(
-                amount: AmountFormatter.parseDecimal(amount),
-                type: type,
-                semantic: AmountSemantic.transaction,
-                // AmountText resolves the symbol from the currency code, so pass
-                // the code (not a pre-resolved symbol) here.
-                currency: currencyCode,
-                showSign: false,
-                shrinkCurrency: true,
-                style: theme.typography.body.md.copyWith(
-                  color: Colors.white, // Ensure always white on large card
-                  fontWeight: AppFontConfig.amountBold,
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: AmountText(
+                  amount: AmountFormatter.parseDecimal(amount),
+                  type: type,
+                  semantic: AmountSemantic.transaction,
+                  // AmountText resolves the symbol from the currency code, so pass
+                  // the code (not a pre-resolved symbol) here.
+                  currency: currencyCode,
+                  showSign: false,
+                  shrinkCurrency: true,
+                  style: theme.typography.body.md.copyWith(
+                    color: Colors.white, // Ensure always white on large card
+                    fontWeight: AppFontConfig.amountBold,
+                  ),
                 ),
               ),
             ),

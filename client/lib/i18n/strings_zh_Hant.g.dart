@@ -896,7 +896,31 @@ class _Translations$account$zh_Hant extends Translations$account$zh {
 	@override String get amountTooLarge => '餘額不能超過 999,999,999.99';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '刪除帳戶';
-	@override String get deleteConfirm => '確定要刪除該帳戶嗎？此操作無法撤銷。';
+	@override String get deleteConfirm => '僅無交易且無餘額的帳戶可刪除。此操作無法復原。';
+	@override String get closeAccount => '停用帳戶（保留歷史）';
+	@override String closeBalanceDisposal({required Object balance}) => '該帳戶停用前仍有餘額 ${balance}，如何處理？';
+	@override String get closeMessage => '該帳戶將被停用歸檔：全部歷史記帳保留，不再出現在新交易與淨值中。';
+	@override String get closeTitle => '停用帳戶';
+	@override String get closedSuccess => '帳戶已停用';
+	@override String get deleteSuccess => '帳戶已刪除';
+	@override String get disposalKeep => '保留為凍結快照';
+	@override String get disposalTransfer => '轉出到另一帳戶';
+	@override String get disposalWriteoff => '記為支出核銷';
+	@override String mergeMessage({required Object name}) => '「${name}」的全部交易將轉移到目標帳戶，然後刪除該帳戶；不會新增流水。';
+	@override String get mergeNoTarget => '沒有其他同幣種且狀態為啟用的帳戶可合併。';
+	@override String get mergeTargetTitle => '選擇目標帳戶';
+	@override String get mergeTitle => '合併帳戶';
+	@override String get mergeToOther => '合併到其他帳戶';
+	@override String get mergedSuccess => '帳戶合併成功';
+	@override String get transferTargetTitle => '選擇轉入帳戶';
+	@override String get closedBadge => '已停用';
+	@override String get reopenAccount => '重新啟用帳戶';
+	@override String get reopenConfirm => '該帳戶將被重新啟用（ACTIVE），重新計入淨值並可用於新交易。';
+	@override String get reopenSuccess => '帳戶已重新啟用';
+	@override String get closeDisposalTitle => '處理停用前餘額';
+	@override String get disposalKeepDesc => '直接歸檔，餘額保持當前數值不再變動；不產生任何流水。';
+	@override String get disposalTransferDesc => '產生一筆真實的轉帳流水，把餘額轉入指定帳戶後再停用。';
+	@override String get disposalWriteoffDesc => '產生一筆支出（或收入）流水核銷餘額，視為已消耗/免除後再停用。';
 	@override String get save => '保存修改';
 	@override String get assetsCategory => '資產類';
 	@override String get liabilitiesCategory => '負債/信用類';
@@ -1088,6 +1112,7 @@ class _Translations$errorMapping$zh_Hant extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$transaction$zh_Hant transaction = _Translations$errorMapping$transaction$zh_Hant._(_root);
 	@override late final _Translations$errorMapping$space$zh_Hant space = _Translations$errorMapping$space$zh_Hant._(_root);
 	@override late final _Translations$errorMapping$recurring$zh_Hant recurring = _Translations$errorMapping$recurring$zh_Hant._(_root);
+	@override late final _Translations$errorMapping$account$zh_Hant account = _Translations$errorMapping$account$zh_Hant._(_root);
 	@override late final _Translations$errorMapping$upload$zh_Hant upload = _Translations$errorMapping$upload$zh_Hant._(_root);
 	@override late final _Translations$errorMapping$storage$zh_Hant storage = _Translations$errorMapping$storage$zh_Hant._(_root);
 	@override late final _Translations$errorMapping$ai$zh_Hant ai = _Translations$errorMapping$ai$zh_Hant._(_root);
@@ -1875,6 +1900,28 @@ class _Translations$errorMapping$recurring$zh_Hant extends Translations$errorMap
 	// Translations
 	@override String get invalidRule => 'Invalid recurrence rule';
 	@override String get ruleNotFound => 'Recurrence rule not found';
+}
+
+// Path: errorMapping.account
+class _Translations$errorMapping$account$zh_Hant extends Translations$errorMapping$account$zh {
+	_Translations$errorMapping$account$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get notFound => '帳戶不存在';
+	@override String get alreadyClosed => '該帳戶已停用';
+	@override String get deleteReferenced => '該帳戶仍有交易或週期規則引用。請先合併到其他帳戶，或改為停用。';
+	@override String get deleteBalanceNotZero => '該帳戶仍有餘額。請先合併到其他帳戶，或在停用時處置餘額。';
+	@override String get closeRecurringActive => '該帳戶仍有週期規則。請先停用規則或將其合併到其他帳戶，再停用帳戶。';
+	@override String get closeTargetRequired => '轉出餘額需要指定目標帳戶。';
+	@override String get closeTargetClosed => '目標帳戶已停用，請選擇其他帳戶。';
+	@override String get closeTargetCurrencyMismatch => '轉入帳戶必須使用相同幣種。';
+	@override String get mergeSelf => '不能將帳戶合併到自身。';
+	@override String get mergeCurrencyMismatch => '幣種不同的帳戶無法合併。';
+	@override String get mergeNatureMismatch => '資產與負債無法互相合併。';
+	@override String get mergeClosedTarget => '不能合併到已停用的帳戶，請先重新啟用或選擇其他目標。';
+	@override String get deleteClosedHasHistory => '該帳戶已停用並保留全部歷史記錄；如需徹底移除，請先將其合併到其他帳戶。';
 }
 
 // Path: errorMapping.upload
@@ -3553,7 +3600,31 @@ extension on TranslationsZhHant {
 			'account.amountTooLarge' => '餘額不能超過 999,999,999.99',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '刪除帳戶',
-			'account.deleteConfirm' => '確定要刪除該帳戶嗎？此操作無法撤銷。',
+			'account.deleteConfirm' => '僅無交易且無餘額的帳戶可刪除。此操作無法復原。',
+			'account.closeAccount' => '停用帳戶（保留歷史）',
+			'account.closeBalanceDisposal' => ({required Object balance}) => '該帳戶停用前仍有餘額 ${balance}，如何處理？',
+			'account.closeMessage' => '該帳戶將被停用歸檔：全部歷史記帳保留，不再出現在新交易與淨值中。',
+			'account.closeTitle' => '停用帳戶',
+			'account.closedSuccess' => '帳戶已停用',
+			'account.deleteSuccess' => '帳戶已刪除',
+			'account.disposalKeep' => '保留為凍結快照',
+			'account.disposalTransfer' => '轉出到另一帳戶',
+			'account.disposalWriteoff' => '記為支出核銷',
+			'account.mergeMessage' => ({required Object name}) => '「${name}」的全部交易將轉移到目標帳戶，然後刪除該帳戶；不會新增流水。',
+			'account.mergeNoTarget' => '沒有其他同幣種且狀態為啟用的帳戶可合併。',
+			'account.mergeTargetTitle' => '選擇目標帳戶',
+			'account.mergeTitle' => '合併帳戶',
+			'account.mergeToOther' => '合併到其他帳戶',
+			'account.mergedSuccess' => '帳戶合併成功',
+			'account.transferTargetTitle' => '選擇轉入帳戶',
+			'account.closedBadge' => '已停用',
+			'account.reopenAccount' => '重新啟用帳戶',
+			'account.reopenConfirm' => '該帳戶將被重新啟用（ACTIVE），重新計入淨值並可用於新交易。',
+			'account.reopenSuccess' => '帳戶已重新啟用',
+			'account.closeDisposalTitle' => '處理停用前餘額',
+			'account.disposalKeepDesc' => '直接歸檔，餘額保持當前數值不再變動；不產生任何流水。',
+			'account.disposalTransferDesc' => '產生一筆真實的轉帳流水，把餘額轉入指定帳戶後再停用。',
+			'account.disposalWriteoffDesc' => '產生一筆支出（或收入）流水核銷餘額，視為已消耗/免除後再停用。',
 			'account.save' => '保存修改',
 			'account.assetsCategory' => '資產類',
 			'account.liabilitiesCategory' => '負債/信用類',
@@ -3576,6 +3647,8 @@ extension on TranslationsZhHant {
 			'account.types.investmentSubtitle' => 'Stocks, funds, bonds, etc.',
 			'account.types.receivableTitle' => 'Receivable',
 			'account.types.receivableSubtitle' => 'Loans to others, pending',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.receivableHelper' => 'Owed to me',
 			'account.types.creditCardTitle' => 'Credit Card',
 			'account.types.creditCardSubtitle' => 'Credit card balances',
@@ -3600,8 +3673,6 @@ extension on TranslationsZhHant {
 			'financial.budgetManagement' => '預算管理',
 			'financial.recurringTransactions' => '週期交易',
 			'financial.safetyThreshold' => '安全閾值',
-			_ => null,
-		} ?? switch (path) {
 			'financial.dailyBurnRate' => '每日消費',
 			'financial.financialAssistant' => '財務助手',
 			'financial.manageFinancialSettings' => '管理您的財務設置',
@@ -3863,6 +3934,19 @@ extension on TranslationsZhHant {
 			'errorMapping.space.transactionAlreadyInSpace' => '交易已在此共享空間中',
 			'errorMapping.recurring.invalidRule' => 'Invalid recurrence rule',
 			'errorMapping.recurring.ruleNotFound' => 'Recurrence rule not found',
+			'errorMapping.account.notFound' => '帳戶不存在',
+			'errorMapping.account.alreadyClosed' => '該帳戶已停用',
+			'errorMapping.account.deleteReferenced' => '該帳戶仍有交易或週期規則引用。請先合併到其他帳戶，或改為停用。',
+			'errorMapping.account.deleteBalanceNotZero' => '該帳戶仍有餘額。請先合併到其他帳戶，或在停用時處置餘額。',
+			'errorMapping.account.closeRecurringActive' => '該帳戶仍有週期規則。請先停用規則或將其合併到其他帳戶，再停用帳戶。',
+			'errorMapping.account.closeTargetRequired' => '轉出餘額需要指定目標帳戶。',
+			'errorMapping.account.closeTargetClosed' => '目標帳戶已停用，請選擇其他帳戶。',
+			'errorMapping.account.closeTargetCurrencyMismatch' => '轉入帳戶必須使用相同幣種。',
+			'errorMapping.account.mergeSelf' => '不能將帳戶合併到自身。',
+			'errorMapping.account.mergeCurrencyMismatch' => '幣種不同的帳戶無法合併。',
+			'errorMapping.account.mergeNatureMismatch' => '資產與負債無法互相合併。',
+			'errorMapping.account.mergeClosedTarget' => '不能合併到已停用的帳戶，請先重新啟用或選擇其他目標。',
+			'errorMapping.account.deleteClosedHasHistory' => '該帳戶已停用並保留全部歷史記錄；如需徹底移除，請先將其合併到其他帳戶。',
 			'errorMapping.upload.noFile' => 'No file uploaded',
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',

@@ -1,5 +1,7 @@
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/models/action_item_model.dart';
 import 'package:finvo/shared/widgets/confirm_dialog.dart';
+import 'package:finvo/shared/widgets/dialogs/action_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import 'dart:async';
 import 'package:finvo/shared/models/financial_account.dart';
 import 'package:finvo/features/profile/providers/financial_account_provider.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
+import 'package:finvo/features/finance/widgets/account_selection_sheet.dart';
 import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/finance/widgets/account_form_widgets.dart';
@@ -103,9 +106,9 @@ class _FinancialAccountEditPageState
         actions: [
           FButton.icon(
             variant: .ghost,
-            onPress: _handleDelete,
+            onPress: _showManageActions,
             child: Icon(
-              FLucideIcons.trash2,
+              FLucideIcons.moreHorizontal,
               size: 20,
               color: colors.mutedForeground,
             ),
@@ -165,54 +168,322 @@ class _FinancialAccountEditPageState
     });
   }
 
-  void _handleDelete() {
-    unawaited(
-      showConfirmDialog(
-        context: context,
+  /// Account lifecycle menu — intent decides the operation:
+  /// merge (wrong/duplicate account), close (real-life account termination),
+  /// or delete (only empty accounts; the server enforces this).
+  void _showManageActions() {
+    final account = widget.args.account;
+    final isClosed = account.status == AccountStatus.closed;
+    final primaryActions = <ActionItem>[
+      // A closed (archived) account can be explicitly reopened — reopening is
+      // the user's decision, never a side effect of editing its fields.
+      if (isClosed)
+        ActionItem(
+          title: t.account.reopenAccount,
+          icon: FLucideIcons.rotateCcw,
+          onTap: _handleReopen,
+        ),
+      ActionItem(
+        title: t.account.mergeToOther,
+        icon: FLucideIcons.gitMerge,
+        onTap: _handleMerge,
+      ),
+      if (!isClosed)
+        ActionItem(
+          title: t.account.closeAccount,
+          icon: FLucideIcons.archive,
+          onTap: _handleClose,
+        ),
+    ];
+    final destructiveActions = <ActionItem>[
+      ActionItem(
         title: t.account.deleteAccount,
-        message: t.account.deleteConfirm,
-        cancelLabel: t.common.cancel,
-        confirmLabel: t.common.delete,
-        onConfirm: () async {
-          unawaited(_performDelete());
+        icon: FLucideIcons.trash2,
+        isDestructive: true,
+        onTap: _handleDelete,
+      ),
+    ];
+
+    final rootContext = GoRouter.of(
+      context,
+    ).routerDelegate.navigatorKey.currentContext;
+    if (rootContext == null) return;
+
+    unawaited(
+      showModalBottomSheet<void>(
+        context: rootContext,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (sheetContext) {
+          return ActionBottomSheet(
+            actions: primaryActions,
+            destructiveActions: destructiveActions,
+          );
         },
       ),
     );
   }
 
-  Future<void> _performDelete() async {
-    final currentAccounts = ref.read(financialAccountProvider).accounts;
-    final accountToDelete = widget.args.account;
+  /// Explicitly reopen a closed (archived) account. The status change goes
+  /// through the PATCH endpoint (setting CLOSED is rejected there, but going
+  /// back to ACTIVE is a legitimate, deliberate user action).
+  Future<void> _handleReopen() async {
+    final account = widget.args.account;
+    final accountId = account.id;
+    if (accountId == null) return;
 
-    // Use ID or name+type combination to match accounts
-    final updatedList = currentAccounts.where((a) {
-      if (accountToDelete.id != null && a.id != null) {
-        return a.id != accountToDelete.id;
-      }
-      // If ID is null, use name and type combination matching
-      return !(a.name == accountToDelete.name &&
-          a.type == accountToDelete.type &&
-          a.currencyCode == accountToDelete.currencyCode);
-    }).toList();
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: t.account.reopenAccount,
+      message: t.account.reopenConfirm,
+      cancelLabel: t.common.cancel,
+      confirmLabel: t.account.reopenAccount,
+    );
+    if (!confirmed || !mounted) return;
 
+    final reopened = account.copyWith(status: AccountStatus.active);
     final success = await ref
         .read(financialAccountProvider.notifier)
-        .saveFinancialAccounts(updatedList);
+        .updateFinancialAccount(accountId, reopened);
 
     if (!mounted) return;
-
-    // Never pop on failure: the account is still there and silently closing
-    // the page would make the user believe the delete succeeded.
     if (!success) {
-      TopToast.error(context, t.financial.deleteFailed);
+      final err = ref.read(financialAccountProvider).error;
+      TopToast.error(context, err ?? t.financial.saveFailed);
       return;
     }
 
-    await ref.read(financialAccountProvider.notifier).loadFinancialAccounts();
+    TopToast.success(context, t.account.reopenSuccess);
+    context.pop();
+  }
 
-    if (mounted) {
-      context.pop();
+  /// Merge this account into another one (correction path for wrong/duplicate
+  /// accounts). The server re-points transactions/rules, recomputes the target
+  /// balance and deletes the source; no new record is created.
+  Future<void> _handleMerge() async {
+    final account = widget.args.account;
+    final accountId = account.id;
+    if (accountId == null) return;
+
+    final targetId = await _pickAccountTarget(
+      title: t.account.mergeTargetTitle,
+      sameNature: true,
+    );
+    if (targetId == null || !mounted) return;
+
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: t.account.mergeTitle,
+      message: t.account.mergeMessage(name: account.name),
+      cancelLabel: t.common.cancel,
+      confirmLabel: t.account.mergeTitle,
+    );
+    if (!confirmed || !mounted) return;
+
+    final success = await ref
+        .read(financialAccountProvider.notifier)
+        .mergeFinancialAccounts(accountId, targetId);
+
+    if (!mounted) return;
+    if (!success) {
+      final err = ref.read(financialAccountProvider).error;
+      TopToast.error(context, err ?? t.financial.saveFailed);
+      return;
     }
+
+    TopToast.success(context, t.account.mergedSuccess);
+    context.pop();
+  }
+
+  /// Close (archive) this account, keeping its full transaction history. A
+  /// non-zero balance must be disposed of first (keep snapshot / transfer /
+  /// write off).
+  Future<void> _handleClose() async {
+    final account = widget.args.account;
+    final accountId = account.id;
+    if (accountId == null) return;
+
+    var disposal = 'keep';
+    String? targetAccountId;
+
+    final balance = account.currentBalance ?? account.initialBalance;
+    if (balance != Decimal.zero) {
+      final choice = await _pickCloseDisposal(balance);
+      if (choice == null || !mounted) return;
+      disposal = choice;
+
+      if (disposal == 'transfer') {
+        final targetId = await _pickAccountTarget(
+          title: t.account.transferTargetTitle,
+          sameNature: false,
+        );
+        if (targetId == null || !mounted) return;
+        targetAccountId = targetId;
+      }
+    }
+
+    if (!mounted) return;
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: t.account.closeTitle,
+      message: t.account.closeMessage,
+      cancelLabel: t.common.cancel,
+      confirmLabel: t.account.closeAccount,
+    );
+    if (!confirmed || !mounted) return;
+
+    final success = await ref
+        .read(financialAccountProvider.notifier)
+        .closeFinancialAccount(
+          accountId,
+          disposal,
+          targetAccountId: targetAccountId,
+        );
+
+    if (!mounted) return;
+    if (!success) {
+      final err = ref.read(financialAccountProvider).error;
+      TopToast.error(context, err ?? t.financial.saveFailed);
+      return;
+    }
+
+    TopToast.success(context, t.account.closedSuccess);
+    context.pop();
+  }
+
+  /// Physical delete — only valid for accounts without transactions and
+  /// without a balance. The server rejects everything else with guidance.
+  Future<void> _handleDelete() async {
+    final account = widget.args.account;
+    final accountId = account.id;
+    if (accountId == null) return;
+
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: t.account.deleteAccount,
+      message: t.account.deleteConfirm,
+      cancelLabel: t.common.cancel,
+      confirmLabel: t.common.delete,
+    );
+    if (!confirmed || !mounted) return;
+
+    final success = await ref
+        .read(financialAccountProvider.notifier)
+        .deleteFinancialAccount(accountId);
+
+    if (!mounted) return;
+    if (!success) {
+      final err = ref.read(financialAccountProvider).error;
+      TopToast.error(context, err ?? t.financial.deleteFailed);
+      return;
+    }
+
+    TopToast.success(context, t.account.deleteSuccess);
+    context.pop();
+  }
+
+  /// Bottom-sheet picker for choosing another account as merge/transfer target.
+  ///
+  /// Candidates are limited to active accounts with the same currency (the
+  /// server enforces same-nature for merges and same-currency for transfers,
+  /// so we pre-filter the obvious mismatches for a better UX).
+  Future<String?> _pickAccountTarget({
+    required String title,
+    required bool sameNature,
+  }) async {
+    final current = widget.args.account;
+    final currentId = current.id;
+
+    // Reuse the system AccountSelectionSheet (same modal design as every other
+    // account picker in the app) and just narrow the list to what the backend
+    // will accept: same currency + active + (for merges) same nature.
+    final rootContext = GoRouter.of(
+      context,
+    ).routerDelegate.navigatorKey.currentContext;
+    if (rootContext == null) return null;
+
+    final result = await AccountSelectionSheet.show(
+      rootContext,
+      title: title,
+      filter: (account) {
+        if (account.id == null || account.id == currentId) return false;
+        if (account.status != AccountStatus.active) return false;
+        if (account.currencyCode != current.currencyCode) return false;
+        if (sameNature && account.nature != current.nature) return false;
+        return true;
+      },
+      emptyMessage: t.account.mergeNoTarget,
+    );
+    return result?.accountId;
+  }
+
+  /// Bottom-sheet to choose how to dispose of a non-zero balance on close.
+  Future<String?> _pickCloseDisposal(Decimal balance) async {
+    final rootContext = GoRouter.of(
+      context,
+    ).routerDelegate.navigatorKey.currentContext;
+    if (rootContext == null) return null;
+
+    // Uses the same ActionBottomSheet as every other account-management modal,
+    // with each option carrying a short explanation of what it actually does.
+    // ActionBottomSheet pops itself with the selected item's `result`, so we
+    // must NOT pop again here (a manual second pop would eject the page too).
+    final options = <(String, ActionItem)>[
+      (
+        'keep',
+        ActionItem(
+          title: t.account.disposalKeep,
+          subtitle: t.account.disposalKeepDesc,
+          icon: FLucideIcons.archive,
+          result: 'keep',
+          onTap: () {},
+        ),
+      ),
+      (
+        'transfer',
+        ActionItem(
+          title: t.account.disposalTransfer,
+          subtitle: t.account.disposalTransferDesc,
+          icon: FLucideIcons.wallet,
+          result: 'transfer',
+          onTap: () {},
+        ),
+      ),
+      (
+        'writeoff',
+        ActionItem(
+          title: t.account.disposalWriteoff,
+          subtitle: t.account.disposalWriteoffDesc,
+          icon: FLucideIcons.receipt,
+          result: 'writeoff',
+          onTap: () {},
+        ),
+      ),
+    ];
+
+    return showModalBottomSheet<String>(
+      context: rootContext,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return ActionBottomSheet(
+          title: t.account.closeDisposalTitle,
+          description: t.account.closeBalanceDisposal(
+            balance: formatAccountAmount(balance),
+          ),
+          actions: [
+            for (final (value, item) in options)
+              ActionItem(
+                title: item.title,
+                subtitle: item.subtitle,
+                icon: item.icon,
+                result: value,
+                onTap: () {},
+              ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _handleSave() async {
@@ -235,7 +506,12 @@ class _FinancialAccountEditPageState
       currencyCode: _currencyCode,
       currentBalance: balance,
       includeInNetWorth: _includeInAssets,
-      status: _hidden ? AccountStatus.inactive : AccountStatus.active,
+      // A closed (archived) account stays closed through ordinary edits;
+      // reopening is an explicit account-management decision, not a side
+      // effect of editing its name or balance.
+      status: widget.args.account.status == AccountStatus.closed
+          ? AccountStatus.closed
+          : (_hidden ? AccountStatus.inactive : AccountStatus.active),
     );
 
     final currentAccounts = ref.read(financialAccountProvider).accounts;

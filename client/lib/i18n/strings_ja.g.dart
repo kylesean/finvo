@@ -896,7 +896,31 @@ class _Translations$account$ja extends Translations$account$zh {
 	@override String get amountTooLarge => '残高は 999,999,999.99 を超えられません';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '口座を削除';
-	@override String get deleteConfirm => 'この口座を削除しますか？取り消せません。';
+	@override String get deleteConfirm => '取引も残高もない口座のみ削除できます。取り消せません。';
+	@override String get closeAccount => '口座を停止（履歴を保持）';
+	@override String closeBalanceDisposal({required Object balance}) => 'この口座には残高 ${balance} があります。停止前にどうしますか？';
+	@override String get closeMessage => 'この口座は停止（アーカイブ）されます。履歴はすべて保持され、新しい取引や純資産には表示されなくなります。';
+	@override String get closeTitle => '口座を停止';
+	@override String get closedSuccess => '口座を停止しました';
+	@override String get deleteSuccess => '口座を削除しました';
+	@override String get disposalKeep => 'スナップショットとして保持';
+	@override String get disposalTransfer => '別の口座へ振替';
+	@override String get disposalWriteoff => '支出として消込';
+	@override String mergeMessage({required Object name}) => '「${name}」のすべての取引は対象口座に移動し、この口座は削除されます。新しい明細は作成されません。';
+	@override String get mergeNoTarget => '同じ通貨の他に統合できる有効な口座がありません。';
+	@override String get mergeTargetTitle => '対象口座を選択';
+	@override String get mergeTitle => '口座を統合';
+	@override String get mergeToOther => '別の口座に統合';
+	@override String get mergedSuccess => '口座を統合しました';
+	@override String get transferTargetTitle => '振替先口座を選択';
+	@override String get closedBadge => '停止中';
+	@override String get reopenAccount => '口座を再有効化';
+	@override String get reopenConfirm => 'この口座は再有効化（ACTIVE）され、純資産と新しい取引に再度含まれます。';
+	@override String get reopenSuccess => '口座を再有効化しました';
+	@override String get closeDisposalTitle => '停止前の残高の処理';
+	@override String get disposalKeepDesc => '残高を現在のまま固定してアーカイブします。新しい明細は作成されません。';
+	@override String get disposalTransferDesc => '実際の振替明細を作成し、残高を別の口座へ移動してから停止します。';
+	@override String get disposalWriteoffDesc => '支出（または収入）明細を作成して残高を消し込み、それから停止します。';
 	@override String get save => '変更を保存';
 	@override String get assetsCategory => '資産';
 	@override String get liabilitiesCategory => '負債/クレジット';
@@ -1088,6 +1112,7 @@ class _Translations$errorMapping$ja extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$transaction$ja transaction = _Translations$errorMapping$transaction$ja._(_root);
 	@override late final _Translations$errorMapping$space$ja space = _Translations$errorMapping$space$ja._(_root);
 	@override late final _Translations$errorMapping$recurring$ja recurring = _Translations$errorMapping$recurring$ja._(_root);
+	@override late final _Translations$errorMapping$account$ja account = _Translations$errorMapping$account$ja._(_root);
 	@override late final _Translations$errorMapping$upload$ja upload = _Translations$errorMapping$upload$ja._(_root);
 	@override late final _Translations$errorMapping$storage$ja storage = _Translations$errorMapping$storage$ja._(_root);
 	@override late final _Translations$errorMapping$ai$ja ai = _Translations$errorMapping$ai$ja._(_root);
@@ -1875,6 +1900,28 @@ class _Translations$errorMapping$recurring$ja extends Translations$errorMapping$
 	// Translations
 	@override String get invalidRule => 'Invalid recurrence rule';
 	@override String get ruleNotFound => 'Recurrence rule not found';
+}
+
+// Path: errorMapping.account
+class _Translations$errorMapping$account$ja extends Translations$errorMapping$account$zh {
+	_Translations$errorMapping$account$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get notFound => '口座が見つかりません';
+	@override String get alreadyClosed => 'この口座はすでに停止されています';
+	@override String get deleteReferenced => 'この口座には取引または定期ルールが残っています。別の口座に統合するか、停止してください。';
+	@override String get deleteBalanceNotZero => 'この口座にはまだ残高があります。別の口座に統合するか、停止時に残高を処理してください。';
+	@override String get closeRecurringActive => 'この口座には定期ルールが残っています。停止する前にルールを無効化するか別の口座に統合してください。';
+	@override String get closeTargetRequired => '残高の振替には対象口座が必要です。';
+	@override String get closeTargetClosed => '対象口座は停止されています。別の口座を選択してください。';
+	@override String get closeTargetCurrencyMismatch => '振替先口座は同じ通貨である必要があります。';
+	@override String get mergeSelf => '口座をそれ自体に統合することはできません。';
+	@override String get mergeCurrencyMismatch => '通貨が異なる口座は統合できません。';
+	@override String get mergeNatureMismatch => '資産と負債は統合できません。';
+	@override String get mergeClosedTarget => '停止中の口座には統合できません。再有効化するか別の対象を選択してください。';
+	@override String get deleteClosedHasHistory => 'この口座は停止されており履歴が保持されています。完全に削除するには、まず別の口座に統合してください。';
 }
 
 // Path: errorMapping.upload
@@ -3555,7 +3602,31 @@ extension on TranslationsJa {
 			'account.amountTooLarge' => '残高は 999,999,999.99 を超えられません',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '口座を削除',
-			'account.deleteConfirm' => 'この口座を削除しますか？取り消せません。',
+			'account.deleteConfirm' => '取引も残高もない口座のみ削除できます。取り消せません。',
+			'account.closeAccount' => '口座を停止（履歴を保持）',
+			'account.closeBalanceDisposal' => ({required Object balance}) => 'この口座には残高 ${balance} があります。停止前にどうしますか？',
+			'account.closeMessage' => 'この口座は停止（アーカイブ）されます。履歴はすべて保持され、新しい取引や純資産には表示されなくなります。',
+			'account.closeTitle' => '口座を停止',
+			'account.closedSuccess' => '口座を停止しました',
+			'account.deleteSuccess' => '口座を削除しました',
+			'account.disposalKeep' => 'スナップショットとして保持',
+			'account.disposalTransfer' => '別の口座へ振替',
+			'account.disposalWriteoff' => '支出として消込',
+			'account.mergeMessage' => ({required Object name}) => '「${name}」のすべての取引は対象口座に移動し、この口座は削除されます。新しい明細は作成されません。',
+			'account.mergeNoTarget' => '同じ通貨の他に統合できる有効な口座がありません。',
+			'account.mergeTargetTitle' => '対象口座を選択',
+			'account.mergeTitle' => '口座を統合',
+			'account.mergeToOther' => '別の口座に統合',
+			'account.mergedSuccess' => '口座を統合しました',
+			'account.transferTargetTitle' => '振替先口座を選択',
+			'account.closedBadge' => '停止中',
+			'account.reopenAccount' => '口座を再有効化',
+			'account.reopenConfirm' => 'この口座は再有効化（ACTIVE）され、純資産と新しい取引に再度含まれます。',
+			'account.reopenSuccess' => '口座を再有効化しました',
+			'account.closeDisposalTitle' => '停止前の残高の処理',
+			'account.disposalKeepDesc' => '残高を現在のまま固定してアーカイブします。新しい明細は作成されません。',
+			'account.disposalTransferDesc' => '実際の振替明細を作成し、残高を別の口座へ移動してから停止します。',
+			'account.disposalWriteoffDesc' => '支出（または収入）明細を作成して残高を消し込み、それから停止します。',
 			'account.save' => '変更を保存',
 			'account.assetsCategory' => '資産',
 			'account.liabilitiesCategory' => '負債/クレジット',
@@ -3577,6 +3648,8 @@ extension on TranslationsJa {
 			'account.types.investmentTitle' => 'Investment',
 			'account.types.investmentSubtitle' => 'Stocks, funds, bonds, etc.',
 			'account.types.receivableTitle' => 'Receivable',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.receivableSubtitle' => 'Loans to others, pending',
 			'account.types.receivableHelper' => 'Owed to me',
 			'account.types.creditCardTitle' => 'Credit Card',
@@ -3601,8 +3674,6 @@ extension on TranslationsJa {
 			'financial.settings' => '財務設定',
 			'financial.budgetManagement' => '予算管理',
 			'financial.recurringTransactions' => '繰り返し取引',
-			_ => null,
-		} ?? switch (path) {
 			'financial.safetyThreshold' => 'セーフティライン',
 			'financial.dailyBurnRate' => '1日の支出',
 			'financial.financialAssistant' => '財務アシスタント',
@@ -3865,6 +3936,19 @@ extension on TranslationsJa {
 			'errorMapping.space.transactionAlreadyInSpace' => '取引は既にこのスペースにあります',
 			'errorMapping.recurring.invalidRule' => 'Invalid recurrence rule',
 			'errorMapping.recurring.ruleNotFound' => 'Recurrence rule not found',
+			'errorMapping.account.notFound' => '口座が見つかりません',
+			'errorMapping.account.alreadyClosed' => 'この口座はすでに停止されています',
+			'errorMapping.account.deleteReferenced' => 'この口座には取引または定期ルールが残っています。別の口座に統合するか、停止してください。',
+			'errorMapping.account.deleteBalanceNotZero' => 'この口座にはまだ残高があります。別の口座に統合するか、停止時に残高を処理してください。',
+			'errorMapping.account.closeRecurringActive' => 'この口座には定期ルールが残っています。停止する前にルールを無効化するか別の口座に統合してください。',
+			'errorMapping.account.closeTargetRequired' => '残高の振替には対象口座が必要です。',
+			'errorMapping.account.closeTargetClosed' => '対象口座は停止されています。別の口座を選択してください。',
+			'errorMapping.account.closeTargetCurrencyMismatch' => '振替先口座は同じ通貨である必要があります。',
+			'errorMapping.account.mergeSelf' => '口座をそれ自体に統合することはできません。',
+			'errorMapping.account.mergeCurrencyMismatch' => '通貨が異なる口座は統合できません。',
+			'errorMapping.account.mergeNatureMismatch' => '資産と負債は統合できません。',
+			'errorMapping.account.mergeClosedTarget' => '停止中の口座には統合できません。再有効化するか別の対象を選択してください。',
+			'errorMapping.account.deleteClosedHasHistory' => 'この口座は停止されており履歴が保持されています。完全に削除するには、まず別の口座に統合してください。',
 			'errorMapping.upload.noFile' => 'No file uploaded',
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',

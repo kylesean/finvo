@@ -42,6 +42,9 @@ class FinancialAccountCard extends ConsumerWidget {
 
     // Use nature field to determine if liability
     final isLiabilityAccount = account.nature == FinancialNature.liability;
+    // Closed (archived) accounts are shown dimmed with a badge; their history
+    // stays visible, but they are clearly not part of the active set.
+    final isClosed = account.status == AccountStatus.closed;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8), // Reduced bottom padding
@@ -54,111 +57,143 @@ class FinancialAccountCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(10),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              child: Row(
-                children: [
-                  // Icon - Using ThemedIcon for consistency
-                  ThemedIcon(
-                    icon: _getAccountTypeIcon(
-                      definition?.id,
-                      isLiabilityAccount,
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  // Name and type
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          account.name,
-                          style: AppTextStyles.listTitle(theme),
-                        ),
-                        Text(
-                          definition != null
-                              ? _getTypeDisplayName(definition)
-                              : (isLiabilityAccount
-                                    ? t.financial.liabilityAccounts
-                                    : t.financial.assetAccounts),
-                          style: theme.typography.body.sm.copyWith(
-                            // Revert to sm
-                            color: colors.mutedForeground,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Amount
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      hideAmounts
-                          ? const Text('****')
-                          : AmountText(
-                              amount:
-                                  account.currentBalance ??
-                                  account.initialBalance,
-                              type: isLiabilityAccount
-                                  ? TransactionType.expense
-                                  : TransactionType.income,
-                              semantic: AmountSemantic.status,
-                              currency: account.currencyCode,
-                              style: AppTextStyles.listTitle(theme),
-                            ),
-                      Text(
-                        account.currencyCode,
-                        style: AppTextStyles.listSubtitle(theme),
+              child: Opacity(
+                opacity: isClosed ? 0.55 : 1,
+                child: Row(
+                  children: [
+                    // Icon - Using ThemedIcon for consistency
+                    ThemedIcon(
+                      icon: _getAccountTypeIcon(
+                        definition?.id,
+                        isLiabilityAccount,
                       ),
-                      if (!hideAmounts) ...[
-                        Builder(
-                          builder: (context) {
-                            final viewCurrency = ref.watch(
-                              effectiveViewCurrencyProvider,
-                            );
-                            if (viewCurrency.toUpperCase() ==
-                                account.currencyCode.toUpperCase()) {
-                              return const SizedBox.shrink();
-                            }
-                            final rawBalance =
-                                account.currentBalance ??
-                                account.initialBalance;
-                            final ratesNotifier = ref.watch(
-                              exchangeRateProvider.notifier,
-                            );
-                            final converted = ratesNotifier.convert(
-                              rawBalance,
-                              account.currencyCode,
-                              viewCurrency,
-                            );
-                            if (converted == null) {
-                              return const SizedBox.shrink();
-                            }
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                '≈ ${AmountFormatter.formatCommon(converted.toDouble(), currencyCode: viewCurrency)}',
-                                style: theme.typography.body.xs.copyWith(
-                                  color: colors.mutedForeground.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                  fontSize: 11,
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    // Name and type
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  account.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.listTitle(theme),
                                 ),
                               ),
-                            );
-                          },
+                              if (isClosed) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.mutedForeground.withValues(
+                                      alpha: 0.18,
+                                    ),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    t.account.closedBadge,
+                                    style: theme.typography.body.xs.copyWith(
+                                      color: colors.mutedForeground,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            definition != null
+                                ? _getTypeDisplayName(definition)
+                                : (isLiabilityAccount
+                                      ? t.financial.liabilityAccounts
+                                      : t.financial.assetAccounts),
+                            style: theme.typography.body.sm.copyWith(
+                              // Revert to sm
+                              color: colors.mutedForeground,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Amount
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        hideAmounts
+                            ? const Text('****')
+                            : AmountText(
+                                amount:
+                                    account.currentBalance ??
+                                    account.initialBalance,
+                                type: isLiabilityAccount
+                                    ? TransactionType.expense
+                                    : TransactionType.income,
+                                semantic: AmountSemantic.status,
+                                currency: account.currencyCode,
+                                style: AppTextStyles.listTitle(theme),
+                              ),
+                        Text(
+                          account.currencyCode,
+                          style: AppTextStyles.listSubtitle(theme),
                         ),
+                        if (!hideAmounts) ...[
+                          Builder(
+                            builder: (context) {
+                              final viewCurrency = ref.watch(
+                                effectiveViewCurrencyProvider,
+                              );
+                              if (viewCurrency.toUpperCase() ==
+                                  account.currencyCode.toUpperCase()) {
+                                return const SizedBox.shrink();
+                              }
+                              final rawBalance =
+                                  account.currentBalance ??
+                                  account.initialBalance;
+                              final ratesNotifier = ref.watch(
+                                exchangeRateProvider.notifier,
+                              );
+                              final converted = ratesNotifier.convert(
+                                rawBalance,
+                                account.currencyCode,
+                                viewCurrency,
+                              );
+                              if (converted == null) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  '≈ ${AmountFormatter.formatCommon(converted.toDouble(), currencyCode: viewCurrency)}',
+                                  style: theme.typography.body.xs.copyWith(
+                                    color: colors.mutedForeground.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  // const SizedBox(width: 8),
-                  // Icon(
-                  //   FLucideIcons.chevronRight,
-                  //   size: 16,
-                  //   color: colors.mutedForeground.withValues(alpha: 0.5),
-                  // ),
-                ],
+                    ),
+                    // const SizedBox(width: 8),
+                    // Icon(
+                    //   FLucideIcons.chevronRight,
+                    //   size: 16,
+                    //   color: colors.mutedForeground.withValues(alpha: 0.5),
+                    // ),
+                  ],
+                ),
               ),
             ),
           ),

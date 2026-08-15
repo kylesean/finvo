@@ -3,7 +3,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Request
 from fastapi.responses import JSONResponse
 
 from app.core.aliases import CurrentUser
@@ -12,11 +12,15 @@ from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_user_service
 from app.schemas.user import (
+    CloseFinancialAccountRequest,
+    CloseFinancialAccountResponse,
     CreateFinancialAccountRequest,
     FinancialAccountResponse,
     FinancialAccountsResponse,
     FinancialSafetyLineRequest,
     FinancialSafetyLineResponse,
+    MergeFinancialAccountsRequest,
+    MergeFinancialAccountsResponse,
     OnboardingStatusResponse,
     SaveFinancialAccountsRequest,
     SaveFinancialAccountsResponse,
@@ -102,7 +106,10 @@ async def save_financial_accounts(
         Unified response with total balance and update timestamp
     """
     # Convert Pydantic models to dicts
-    accounts_data = [account.model_dump() for account in request.accounts]
+    # exclude_unset: a missing currentBalance (e.g. a new account opened with
+    # only an initial balance) must NOT default to "0" and wipe the balance.
+    # The Flutter client always sends both explicitly, so its flow is unaffected.
+    accounts_data = [account.model_dump(exclude_unset=True) for account in request.accounts]
 
     result = await service.save_financial_accounts(current_user.uuid, accounts_data)
 
@@ -170,7 +177,7 @@ async def create_financial_account(
     Returns:
         Unified response with created account
     """
-    result = await service.create_financial_account(current_user.uuid, request.model_dump())
+    result = await service.create_financial_account(current_user.uuid, request.model_dump(exclude_unset=True))
 
     return success_response(
         data=FinancialAccountResponse(
@@ -253,6 +260,79 @@ async def delete_financial_account(
         raise NotFoundError("Financial account")
 
     return success_response(message="Financial account deleted successfully")
+
+
+@router.post("/financial-accounts/{account_id}/merge", response_model=ResponseEnvelope[MergeFinancialAccountsResponse])
+async def merge_financial_accounts(
+    account_id: Annotated[UUID, Path(description="Account ID to merge away (source)")],
+    request: MergeFinancialAccountsRequest,
+    current_user: CurrentUser,
+    service: Annotated[UserService, Depends(get_user_service)],
+) -> JSONResponse:
+    """Merge one account into another (correction for wrong/duplicate accounts).
+
+    The source account's transactions and recurring rules are re-pointed to the
+    target account, the target's balance is recomputed from the ledger, and the
+    source account is deleted. No TRANSFER is generated — no money actually moves.
+
+    Args:
+        account_id: Source account (will be deleted)
+        request: Merge request containing the target account ID
+        current_user: The authenticated user
+        service: Injected user service
+
+    Returns:
+        Unified response with merge summary
+    """
+    result = await service.merge_financial_accounts(
+        user_uuid=current_user.uuid,
+        source_id=account_id,
+        target_id=request.target_account_id,
+    )
+
+    return success_response(
+        data=MergeFinancialAccountsResponse(**result),
+        message="Accounts merged successfully",
+    )
+
+
+@router.post("/financial-accounts/{account_id}/close", response_model=ResponseEnvelope[CloseFinancialAccountResponse])
+async def close_financial_account(
+    account_id: Annotated[UUID, Path(description="Account ID to close (archive)")],
+    request: CloseFinancialAccountRequest,
+    http_request: Request,
+    current_user: CurrentUser,
+    service: Annotated[UserService, Depends(get_user_service)],
+) -> JSONResponse:
+    """Close (archive) an account while keeping its full transaction history.
+
+    The account is marked ``CLOSED``: it no longer appears in new-transaction
+    pickers or net worth, but historical reports stay intact. A non-zero
+    balance can be transferred out, written off, or frozen as a snapshot.
+
+    Args:
+        account_id: Account to close
+        request: Close request with the balance disposal strategy
+        http_request: Raw HTTP request (its Accept-Language drives the locale
+            of any system-generated transaction message)
+        current_user: The authenticated user
+        service: Injected user service
+
+    Returns:
+        Unified response with close summary
+    """
+    result = await service.close_financial_account(
+        user_uuid=current_user.uuid,
+        account_id=account_id,
+        disposal=request.disposal,
+        target_account_id=request.target_account_id,
+        locale=http_request.headers.get("accept-language"),
+    )
+
+    return success_response(
+        data=CloseFinancialAccountResponse(**result),
+        message="Financial account closed successfully",
+    )
 
 
 @router.patch("/financial-settings", response_model=ResponseEnvelope[FinancialSafetyLineResponse])

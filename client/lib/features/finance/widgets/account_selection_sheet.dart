@@ -29,10 +29,21 @@ class AccountSelectionSheet extends ConsumerStatefulWidget {
   final String title;
   final String? selectedAccountId;
 
+  /// Optional filter for the account list. Defaults to asset-only accounts
+  /// (legacy behaviour for recurring-transaction selection); lifecycle flows
+  /// (merge target, close transfer target) pass their own predicate.
+  final bool Function(FinancialAccount account)? filter;
+
+  /// Optional empty-state message. Only used when [filter] is provided; the
+  /// legacy asset-only flow keeps its original two-line empty hint.
+  final String? emptyMessage;
+
   const AccountSelectionSheet({
     super.key,
     required this.title,
     this.selectedAccountId,
+    this.filter,
+    this.emptyMessage,
   });
 
   /// Show sheet
@@ -40,6 +51,8 @@ class AccountSelectionSheet extends ConsumerStatefulWidget {
     BuildContext context, {
     required String title,
     String? selectedAccountId,
+    bool Function(FinancialAccount account)? filter,
+    String? emptyMessage,
   }) {
     return showModalBottomSheet<AccountSelectionResult>(
       context: context,
@@ -48,6 +61,8 @@ class AccountSelectionSheet extends ConsumerStatefulWidget {
       builder: (context) => AccountSelectionSheet(
         title: title,
         selectedAccountId: selectedAccountId,
+        filter: filter,
+        emptyMessage: emptyMessage,
       ),
     );
   }
@@ -146,12 +161,39 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
     FColors colors,
     List<FinancialAccount> accounts,
   ) {
-    // Only get asset accounts (recurring transactions only need asset accounts)
-    final assetAccounts = accounts
-        .where((a) => a.nature == FinancialNature.asset)
+    // Default: only asset accounts (recurring transactions only need asset
+    // accounts). Lifecycle flows (merge/close targets) inject their own filter.
+    final accountsToShow = accounts
+        .where(
+          widget.filter ?? (account) => account.nature == FinancialNature.asset,
+        )
         .toList();
 
-    if (assetAccounts.isEmpty) {
+    if (accountsToShow.isEmpty) {
+      // Custom-filtered empty state shows a single message; the legacy
+      // asset-only flow keeps its original two-line hint.
+      if (widget.emptyMessage != null) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ThemedIcon.large(
+                  icon: FLucideIcons.wallet,
+                  backgroundColor: colors.secondary,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  widget.emptyMessage!,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.listSubtitle(theme),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -185,7 +227,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
           colors,
           t.forecast.recurringTransaction.selectAccount,
         ),
-        ...assetAccounts.map(
+        ...accountsToShow.map(
           (account) => _buildAccountCard(theme, colors, account),
         ),
         const SizedBox(height: 24), // Bottom spacing

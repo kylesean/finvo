@@ -114,11 +114,43 @@ class ProfileService {
     );
   }
 
-  /// Delete a single account
+  /// Delete a single account (guarded server-side: only empty accounts).
   Future<void> deleteFinancialAccount(String accountId) async {
     await _networkClient.request<void>(
       '/user/financial-accounts/$accountId',
       method: HttpMethod.delete,
+      fromJsonT: (_) {},
+    );
+  }
+
+  /// Merge one account into another (correction for wrong/duplicate accounts).
+  ///
+  /// The source's transactions and recurring rules are re-pointed to the
+  /// target, the target balance is recomputed from the ledger and the source
+  /// is deleted. No new transaction record is created.
+  Future<void> mergeFinancialAccounts(String sourceId, String targetId) async {
+    await _networkClient.request<void>(
+      '/user/financial-accounts/$sourceId/merge',
+      method: HttpMethod.post,
+      data: {'target_account_id': targetId},
+      fromJsonT: (_) {},
+    );
+  }
+
+  /// Close (archive) an account while keeping its full transaction history.
+  ///
+  /// [disposal] decides how a non-zero balance is handled: 'keep' (freeze the
+  /// snapshot), 'transfer' (generate a TRANSFER to [targetAccountId]) or
+  /// 'writeoff' (generate an EXPENSE/INCOME write-off entry).
+  Future<void> closeFinancialAccount(
+    String accountId, {
+    required String disposal,
+    String? targetAccountId,
+  }) async {
+    await _networkClient.request<void>(
+      '/user/financial-accounts/$accountId/close',
+      method: HttpMethod.post,
+      data: {'disposal': disposal, 'target_account_id': ?targetAccountId},
       fromJsonT: (_) {},
     );
   }

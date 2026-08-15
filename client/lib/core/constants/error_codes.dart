@@ -55,6 +55,21 @@ class ErrorCodes {
   static const int invalidRecurrenceRule = 3200;
   static const int recurrenceRuleNotFound = 3201;
 
+  // Financial account lifecycle errors (3300-3311)
+  static const int accountNotFound = 3300;
+  static const int accountAlreadyClosed = 3301;
+  static const int accountDeleteReferenced = 3302;
+  static const int accountDeleteBalanceNotZero = 3303;
+  static const int accountCloseRecurringActive = 3304;
+  static const int accountCloseTargetRequired = 3305;
+  static const int accountCloseTargetClosed = 3306;
+  static const int accountCloseTargetCurrencyMismatch = 3307;
+  static const int accountMergeSelf = 3308;
+  static const int accountMergeCurrencyMismatch = 3309;
+  static const int accountMergeNatureMismatch = 3310;
+  static const int accountMergeClosedTarget = 3311;
+  static const int accountDeleteClosedHasHistory = 3312;
+
   // File upload errors (4001-4022)
   static const int noFileUploaded = 4001;
   static const int invalidFileUploaded = 4002;

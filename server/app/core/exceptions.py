@@ -134,6 +134,28 @@ class SpaceErrorCode(_ErrorCode):
     TRANSACTION_ALREADY_IN_SPACE = ("TRANSACTION_ALREADY_IN_SPACE", 3114)
 
 
+class AccountErrorCode(_ErrorCode):
+    """Financial account lifecycle error codes (3300-33xx).
+
+    Using a dedicated code per failure lets clients localize the message and
+    (if needed) branch on the exact reason instead of a generic 409/422.
+    """
+
+    ACCOUNT_NOT_FOUND = ("ACCOUNT_NOT_FOUND", 3300)
+    ACCOUNT_ALREADY_CLOSED = ("ACCOUNT_ALREADY_CLOSED", 3301)
+    ACCOUNT_DELETE_REFERENCED = ("ACCOUNT_DELETE_REFERENCED", 3302)
+    ACCOUNT_DELETE_BALANCE_NOT_ZERO = ("ACCOUNT_DELETE_BALANCE_NOT_ZERO", 3303)
+    ACCOUNT_CLOSE_RECURRING_ACTIVE = ("ACCOUNT_CLOSE_RECURRING_ACTIVE", 3304)
+    ACCOUNT_CLOSE_TARGET_REQUIRED = ("ACCOUNT_CLOSE_TARGET_REQUIRED", 3305)
+    ACCOUNT_CLOSE_TARGET_CLOSED = ("ACCOUNT_CLOSE_TARGET_CLOSED", 3306)
+    ACCOUNT_CLOSE_TARGET_CURRENCY_MISMATCH = ("ACCOUNT_CLOSE_TARGET_CURRENCY_MISMATCH", 3307)
+    ACCOUNT_MERGE_SELF = ("ACCOUNT_MERGE_SELF", 3308)
+    ACCOUNT_MERGE_CURRENCY_MISMATCH = ("ACCOUNT_MERGE_CURRENCY_MISMATCH", 3309)
+    ACCOUNT_MERGE_NATURE_MISMATCH = ("ACCOUNT_MERGE_NATURE_MISMATCH", 3310)
+    ACCOUNT_MERGE_CLOSED_TARGET = ("ACCOUNT_MERGE_CLOSED_TARGET", 3311)
+    ACCOUNT_DELETE_CLOSED_HAS_HISTORY = ("ACCOUNT_DELETE_CLOSED_HAS_HISTORY", 3312)
+
+
 class AIErrorCode(_ErrorCode):
     """AI/LLM service error codes."""
 
@@ -160,6 +182,7 @@ _ALL_ERROR_CODE_ENUMS = (
     FileErrorCode,
     TransactionErrorCode,
     SpaceErrorCode,
+    AccountErrorCode,
     AIErrorCode,
     StorageErrorCode,
 )
@@ -183,6 +206,7 @@ ErrorCodeType = (
     | FileErrorCode
     | TransactionErrorCode
     | SpaceErrorCode
+    | AccountErrorCode
     | AIErrorCode
     | StorageErrorCode
 )

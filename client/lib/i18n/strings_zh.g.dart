@@ -2034,8 +2034,80 @@ class Translations$account$zh {
 	/// zh: '删除账户'
 	String get deleteAccount => '删除账户';
 
-	/// zh: '确定要删除该账户吗？此操作无法撤销。'
-	String get deleteConfirm => '确定要删除该账户吗？此操作无法撤销。';
+	/// zh: '仅无交易且无余额的账户可删除。此操作无法撤销。'
+	String get deleteConfirm => '仅无交易且无余额的账户可删除。此操作无法撤销。';
+
+	/// zh: '停用账户（保留历史）'
+	String get closeAccount => '停用账户（保留历史）';
+
+	/// zh: '该账户停用前仍有余额 $balance，如何处理？'
+	String closeBalanceDisposal({required Object balance}) => '该账户停用前仍有余额 ${balance}，如何处理？';
+
+	/// zh: '该账户将被停用归档：全部历史记账保留，不再出现在新交易与净值中。'
+	String get closeMessage => '该账户将被停用归档：全部历史记账保留，不再出现在新交易与净值中。';
+
+	/// zh: '停用账户'
+	String get closeTitle => '停用账户';
+
+	/// zh: '账户已停用'
+	String get closedSuccess => '账户已停用';
+
+	/// zh: '账户已删除'
+	String get deleteSuccess => '账户已删除';
+
+	/// zh: '保留为冻结快照'
+	String get disposalKeep => '保留为冻结快照';
+
+	/// zh: '转出到另一账户'
+	String get disposalTransfer => '转出到另一账户';
+
+	/// zh: '记为支出核销'
+	String get disposalWriteoff => '记为支出核销';
+
+	/// zh: '「$name」的全部交易将转移到目标账户，然后删除该账户；不会新增流水。'
+	String mergeMessage({required Object name}) => '「${name}」的全部交易将转移到目标账户，然后删除该账户；不会新增流水。';
+
+	/// zh: '没有其他同币种且状态为启用的账户可合并。'
+	String get mergeNoTarget => '没有其他同币种且状态为启用的账户可合并。';
+
+	/// zh: '选择目标账户'
+	String get mergeTargetTitle => '选择目标账户';
+
+	/// zh: '合并账户'
+	String get mergeTitle => '合并账户';
+
+	/// zh: '合并到其他账户'
+	String get mergeToOther => '合并到其他账户';
+
+	/// zh: '账户合并成功'
+	String get mergedSuccess => '账户合并成功';
+
+	/// zh: '选择转入账户'
+	String get transferTargetTitle => '选择转入账户';
+
+	/// zh: '已停用'
+	String get closedBadge => '已停用';
+
+	/// zh: '重新启用账户'
+	String get reopenAccount => '重新启用账户';
+
+	/// zh: '该账户将被重新启用（ACTIVE），重新计入净值并可用于新交易。'
+	String get reopenConfirm => '该账户将被重新启用（ACTIVE），重新计入净值并可用于新交易。';
+
+	/// zh: '账户已重新启用'
+	String get reopenSuccess => '账户已重新启用';
+
+	/// zh: '处理停用前余额'
+	String get closeDisposalTitle => '处理停用前余额';
+
+	/// zh: '直接归档，余额保持当前数值不再变动；不生成任何流水。'
+	String get disposalKeepDesc => '直接归档，余额保持当前数值不再变动；不生成任何流水。';
+
+	/// zh: '生成一笔真实的转账流水，把余额转入指定账户后再停用。'
+	String get disposalTransferDesc => '生成一笔真实的转账流水，把余额转入指定账户后再停用。';
+
+	/// zh: '生成一笔支出（或收入）流水核销余额，视为已消耗/免除后再停用。'
+	String get disposalWriteoffDesc => '生成一笔支出（或收入）流水核销余额，视为已消耗/免除后再停用。';
 
 	/// zh: '保存修改'
 	String get save => '保存修改';
@@ -2420,6 +2492,7 @@ class Translations$errorMapping$zh {
 	late final Translations$errorMapping$transaction$zh transaction = Translations$errorMapping$transaction$zh.internal(_root);
 	late final Translations$errorMapping$space$zh space = Translations$errorMapping$space$zh.internal(_root);
 	late final Translations$errorMapping$recurring$zh recurring = Translations$errorMapping$recurring$zh.internal(_root);
+	late final Translations$errorMapping$account$zh account = Translations$errorMapping$account$zh.internal(_root);
 	late final Translations$errorMapping$upload$zh upload = Translations$errorMapping$upload$zh.internal(_root);
 	late final Translations$errorMapping$storage$zh storage = Translations$errorMapping$storage$zh.internal(_root);
 	late final Translations$errorMapping$ai$zh ai = Translations$errorMapping$ai$zh.internal(_root);
@@ -4037,6 +4110,54 @@ class Translations$errorMapping$recurring$zh {
 
 	/// zh: '未找到重复规则'
 	String get ruleNotFound => '未找到重复规则';
+}
+
+// Path: errorMapping.account
+class Translations$errorMapping$account$zh {
+	Translations$errorMapping$account$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '账户不存在'
+	String get notFound => '账户不存在';
+
+	/// zh: '该账户已停用'
+	String get alreadyClosed => '该账户已停用';
+
+	/// zh: '该账户仍有交易或周期规则引用。请先合并到其他账户，或改为停用。'
+	String get deleteReferenced => '该账户仍有交易或周期规则引用。请先合并到其他账户，或改为停用。';
+
+	/// zh: '该账户仍有余额。请先合并到其他账户，或在停用时处置余额。'
+	String get deleteBalanceNotZero => '该账户仍有余额。请先合并到其他账户，或在停用时处置余额。';
+
+	/// zh: '该账户仍有周期规则。请先停用规则或将其合并到其他账户，再停用账户。'
+	String get closeRecurringActive => '该账户仍有周期规则。请先停用规则或将其合并到其他账户，再停用账户。';
+
+	/// zh: '转出余额需要指定目标账户。'
+	String get closeTargetRequired => '转出余额需要指定目标账户。';
+
+	/// zh: '目标账户已停用，请选择其他账户。'
+	String get closeTargetClosed => '目标账户已停用，请选择其他账户。';
+
+	/// zh: '转入账户必须使用相同币种。'
+	String get closeTargetCurrencyMismatch => '转入账户必须使用相同币种。';
+
+	/// zh: '不能将账户合并到自身。'
+	String get mergeSelf => '不能将账户合并到自身。';
+
+	/// zh: '币种不同的账户无法合并。'
+	String get mergeCurrencyMismatch => '币种不同的账户无法合并。';
+
+	/// zh: '资产与负债无法互相合并。'
+	String get mergeNatureMismatch => '资产与负债无法互相合并。';
+
+	/// zh: '不能合并到已停用的账户，请先重新启用或选择其他目标。'
+	String get mergeClosedTarget => '不能合并到已停用的账户，请先重新启用或选择其他目标。';
+
+	/// zh: '该账户已停用并保留全部历史记录；如需彻底移除，请先将其合并到其他账户。'
+	String get deleteClosedHasHistory => '该账户已停用并保留全部历史记录；如需彻底移除，请先将其合并到其他账户。';
 }
 
 // Path: errorMapping.upload
@@ -6280,7 +6401,31 @@ extension on Translations {
 			'account.amountTooLarge' => '余额不能超过 999,999,999.99',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '删除账户',
-			'account.deleteConfirm' => '确定要删除该账户吗？此操作无法撤销。',
+			'account.deleteConfirm' => '仅无交易且无余额的账户可删除。此操作无法撤销。',
+			'account.closeAccount' => '停用账户（保留历史）',
+			'account.closeBalanceDisposal' => ({required Object balance}) => '该账户停用前仍有余额 ${balance}，如何处理？',
+			'account.closeMessage' => '该账户将被停用归档：全部历史记账保留，不再出现在新交易与净值中。',
+			'account.closeTitle' => '停用账户',
+			'account.closedSuccess' => '账户已停用',
+			'account.deleteSuccess' => '账户已删除',
+			'account.disposalKeep' => '保留为冻结快照',
+			'account.disposalTransfer' => '转出到另一账户',
+			'account.disposalWriteoff' => '记为支出核销',
+			'account.mergeMessage' => ({required Object name}) => '「${name}」的全部交易将转移到目标账户，然后删除该账户；不会新增流水。',
+			'account.mergeNoTarget' => '没有其他同币种且状态为启用的账户可合并。',
+			'account.mergeTargetTitle' => '选择目标账户',
+			'account.mergeTitle' => '合并账户',
+			'account.mergeToOther' => '合并到其他账户',
+			'account.mergedSuccess' => '账户合并成功',
+			'account.transferTargetTitle' => '选择转入账户',
+			'account.closedBadge' => '已停用',
+			'account.reopenAccount' => '重新启用账户',
+			'account.reopenConfirm' => '该账户将被重新启用（ACTIVE），重新计入净值并可用于新交易。',
+			'account.reopenSuccess' => '账户已重新启用',
+			'account.closeDisposalTitle' => '处理停用前余额',
+			'account.disposalKeepDesc' => '直接归档，余额保持当前数值不再变动；不生成任何流水。',
+			'account.disposalTransferDesc' => '生成一笔真实的转账流水，把余额转入指定账户后再停用。',
+			'account.disposalWriteoffDesc' => '生成一笔支出（或收入）流水核销余额，视为已消耗/免除后再停用。',
 			'account.save' => '保存修改',
 			'account.assetsCategory' => '资产类',
 			'account.liabilitiesCategory' => '负债/信用类',
@@ -6298,6 +6443,8 @@ extension on Translations {
 			'account.types.depositTitle' => '银行存款',
 			'account.types.depositSubtitle' => '储蓄卡、活期/定期存款',
 			'account.types.eMoneyTitle' => '电子钱包',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.eMoneySubtitle' => '第三方支付平台余额',
 			'account.types.investmentTitle' => '投资账户',
 			'account.types.investmentSubtitle' => '股票、基金、债券等',
@@ -6322,8 +6469,6 @@ extension on Translations {
 			'financial.liabilityAccounts' => '负债账户',
 			'financial.selectCurrency' => '选择货币',
 			'financial.cancel' => '取消',
-			_ => null,
-		} ?? switch (path) {
 			'financial.confirm' => '确定',
 			'financial.settings' => '财务设置',
 			'financial.budgetManagement' => '预算管理',
@@ -6590,6 +6735,19 @@ extension on Translations {
 			'errorMapping.space.transactionAlreadyInSpace' => '交易已在此共享空间中',
 			'errorMapping.recurring.invalidRule' => '无效的重复规则',
 			'errorMapping.recurring.ruleNotFound' => '未找到重复规则',
+			'errorMapping.account.notFound' => '账户不存在',
+			'errorMapping.account.alreadyClosed' => '该账户已停用',
+			'errorMapping.account.deleteReferenced' => '该账户仍有交易或周期规则引用。请先合并到其他账户，或改为停用。',
+			'errorMapping.account.deleteBalanceNotZero' => '该账户仍有余额。请先合并到其他账户，或在停用时处置余额。',
+			'errorMapping.account.closeRecurringActive' => '该账户仍有周期规则。请先停用规则或将其合并到其他账户，再停用账户。',
+			'errorMapping.account.closeTargetRequired' => '转出余额需要指定目标账户。',
+			'errorMapping.account.closeTargetClosed' => '目标账户已停用，请选择其他账户。',
+			'errorMapping.account.closeTargetCurrencyMismatch' => '转入账户必须使用相同币种。',
+			'errorMapping.account.mergeSelf' => '不能将账户合并到自身。',
+			'errorMapping.account.mergeCurrencyMismatch' => '币种不同的账户无法合并。',
+			'errorMapping.account.mergeNatureMismatch' => '资产与负债无法互相合并。',
+			'errorMapping.account.mergeClosedTarget' => '不能合并到已停用的账户，请先重新启用或选择其他目标。',
+			'errorMapping.account.deleteClosedHasHistory' => '该账户已停用并保留全部历史记录；如需彻底移除，请先将其合并到其他账户。',
 			'errorMapping.upload.noFile' => '未上传文件',
 			'errorMapping.upload.tooLarge' => '文件过大',
 			'errorMapping.upload.unsupportedType' => '不支持的文件类型',

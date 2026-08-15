@@ -900,7 +900,31 @@ class _Translations$account$en extends Translations$account$zh {
 	@override String get amountTooLarge => 'Balance cannot exceed 999,999,999.99';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => 'Delete Account';
-	@override String get deleteConfirm => 'Are you sure you want to delete this account? This cannot be undone.';
+	@override String get closeAccount => 'Close Account';
+	@override String closeBalanceDisposal({required Object balance}) => 'This account still has a balance of ${balance}. What should happen to it before closing?';
+	@override String get closeMessage => 'This account will be archived (CLOSED). Its history stays intact and it no longer appears in new transactions or net worth.';
+	@override String get closeTitle => 'Close Account';
+	@override String get closedSuccess => 'Account closed';
+	@override String get deleteConfirm => 'Only accounts without transactions or a remaining balance can be deleted. This cannot be undone.';
+	@override String get deleteSuccess => 'Account deleted';
+	@override String get disposalKeep => 'Keep as frozen snapshot';
+	@override String get disposalTransfer => 'Transfer to another account';
+	@override String get disposalWriteoff => 'Write off as expense';
+	@override String mergeMessage({required Object name}) => 'All transactions of "${name}" will be moved to the target account, then this account will be deleted. No new record is created.';
+	@override String get mergeNoTarget => 'No other active account with the same currency is available to merge into.';
+	@override String get mergeTargetTitle => 'Choose target account';
+	@override String get mergeTitle => 'Merge Account';
+	@override String get mergeToOther => 'Merge into another account';
+	@override String get mergedSuccess => 'Accounts merged';
+	@override String get transferTargetTitle => 'Choose transfer target account';
+	@override String get closedBadge => 'Closed';
+	@override String get reopenAccount => 'Reopen Account';
+	@override String get reopenConfirm => 'This account will be reopened (ACTIVE): it will count toward net worth and be available for new transactions again.';
+	@override String get reopenSuccess => 'Account reopened';
+	@override String get closeDisposalTitle => 'Handle remaining balance';
+	@override String get disposalKeepDesc => 'Freeze the balance as-is and archive the account. No new record is created.';
+	@override String get disposalTransferDesc => 'Creates a real transfer record moving the balance to another account, then closes.';
+	@override String get disposalWriteoffDesc => 'Creates an expense (or income) record that writes the balance off, then closes.';
 	@override String get save => 'Save Changes';
 	@override String get assetsCategory => 'Assets';
 	@override String get liabilitiesCategory => 'Liabilities/Credit';
@@ -1092,6 +1116,7 @@ class _Translations$errorMapping$en extends Translations$errorMapping$zh {
 	@override late final _Translations$errorMapping$transaction$en transaction = _Translations$errorMapping$transaction$en._(_root);
 	@override late final _Translations$errorMapping$space$en space = _Translations$errorMapping$space$en._(_root);
 	@override late final _Translations$errorMapping$recurring$en recurring = _Translations$errorMapping$recurring$en._(_root);
+	@override late final _Translations$errorMapping$account$en account = _Translations$errorMapping$account$en._(_root);
 	@override late final _Translations$errorMapping$upload$en upload = _Translations$errorMapping$upload$en._(_root);
 	@override late final _Translations$errorMapping$storage$en storage = _Translations$errorMapping$storage$en._(_root);
 	@override late final _Translations$errorMapping$ai$en ai = _Translations$errorMapping$ai$en._(_root);
@@ -1880,6 +1905,28 @@ class _Translations$errorMapping$recurring$en extends Translations$errorMapping$
 	// Translations
 	@override String get invalidRule => 'Invalid recurrence rule';
 	@override String get ruleNotFound => 'Recurrence rule not found';
+}
+
+// Path: errorMapping.account
+class _Translations$errorMapping$account$en extends Translations$errorMapping$account$zh {
+	_Translations$errorMapping$account$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get notFound => 'Account not found';
+	@override String get alreadyClosed => 'This account is already closed';
+	@override String get deleteReferenced => 'This account still has transactions or recurring rules. Merge it into another account, or close it instead.';
+	@override String get deleteBalanceNotZero => 'This account still has a balance. Merge it elsewhere, or dispose of the balance when closing.';
+	@override String get closeRecurringActive => 'This account still has recurring rules. Disable them or merge them into another account before closing.';
+	@override String get closeTargetRequired => 'A target account is required to transfer the balance out.';
+	@override String get closeTargetClosed => 'The target account is closed; pick another one.';
+	@override String get closeTargetCurrencyMismatch => 'The transfer target must use the same currency.';
+	@override String get mergeSelf => 'Cannot merge an account into itself.';
+	@override String get mergeCurrencyMismatch => 'Cannot merge accounts with different currencies.';
+	@override String get mergeNatureMismatch => 'Cannot merge an asset into a liability (or vice versa).';
+	@override String get mergeClosedTarget => 'Cannot merge into a closed account; reopen it or pick another target.';
+	@override String get deleteClosedHasHistory => 'This closed account keeps its full history. To remove it entirely, merge it into another account first.';
 }
 
 // Path: errorMapping.upload
@@ -3567,7 +3614,31 @@ extension on TranslationsEn {
 			'account.amountTooLarge' => 'Balance cannot exceed 999,999,999.99',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => 'Delete Account',
-			'account.deleteConfirm' => 'Are you sure you want to delete this account? This cannot be undone.',
+			'account.closeAccount' => 'Close Account',
+			'account.closeBalanceDisposal' => ({required Object balance}) => 'This account still has a balance of ${balance}. What should happen to it before closing?',
+			'account.closeMessage' => 'This account will be archived (CLOSED). Its history stays intact and it no longer appears in new transactions or net worth.',
+			'account.closeTitle' => 'Close Account',
+			'account.closedSuccess' => 'Account closed',
+			'account.deleteConfirm' => 'Only accounts without transactions or a remaining balance can be deleted. This cannot be undone.',
+			'account.deleteSuccess' => 'Account deleted',
+			'account.disposalKeep' => 'Keep as frozen snapshot',
+			'account.disposalTransfer' => 'Transfer to another account',
+			'account.disposalWriteoff' => 'Write off as expense',
+			'account.mergeMessage' => ({required Object name}) => 'All transactions of "${name}" will be moved to the target account, then this account will be deleted. No new record is created.',
+			'account.mergeNoTarget' => 'No other active account with the same currency is available to merge into.',
+			'account.mergeTargetTitle' => 'Choose target account',
+			'account.mergeTitle' => 'Merge Account',
+			'account.mergeToOther' => 'Merge into another account',
+			'account.mergedSuccess' => 'Accounts merged',
+			'account.transferTargetTitle' => 'Choose transfer target account',
+			'account.closedBadge' => 'Closed',
+			'account.reopenAccount' => 'Reopen Account',
+			'account.reopenConfirm' => 'This account will be reopened (ACTIVE): it will count toward net worth and be available for new transactions again.',
+			'account.reopenSuccess' => 'Account reopened',
+			'account.closeDisposalTitle' => 'Handle remaining balance',
+			'account.disposalKeepDesc' => 'Freeze the balance as-is and archive the account. No new record is created.',
+			'account.disposalTransferDesc' => 'Creates a real transfer record moving the balance to another account, then closes.',
+			'account.disposalWriteoffDesc' => 'Creates an expense (or income) record that writes the balance off, then closes.',
 			'account.save' => 'Save Changes',
 			'account.assetsCategory' => 'Assets',
 			'account.liabilitiesCategory' => 'Liabilities/Credit',
@@ -3583,6 +3654,8 @@ extension on TranslationsEn {
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
 			'account.types.depositTitle' => 'Bank Deposit',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
@@ -3607,8 +3680,6 @@ extension on TranslationsEn {
 			'financial.addFirstAccount' => 'Tap the button below to add your first account',
 			'financial.assetAccounts' => 'Asset Accounts',
 			'financial.liabilityAccounts' => 'Liability Accounts',
-			_ => null,
-		} ?? switch (path) {
 			'financial.selectCurrency' => 'Select Currency',
 			'financial.cancel' => 'Cancel',
 			'financial.confirm' => 'Confirm',
@@ -3877,6 +3948,19 @@ extension on TranslationsEn {
 			'errorMapping.space.transactionAlreadyInSpace' => 'Transaction already in this space',
 			'errorMapping.recurring.invalidRule' => 'Invalid recurrence rule',
 			'errorMapping.recurring.ruleNotFound' => 'Recurrence rule not found',
+			'errorMapping.account.notFound' => 'Account not found',
+			'errorMapping.account.alreadyClosed' => 'This account is already closed',
+			'errorMapping.account.deleteReferenced' => 'This account still has transactions or recurring rules. Merge it into another account, or close it instead.',
+			'errorMapping.account.deleteBalanceNotZero' => 'This account still has a balance. Merge it elsewhere, or dispose of the balance when closing.',
+			'errorMapping.account.closeRecurringActive' => 'This account still has recurring rules. Disable them or merge them into another account before closing.',
+			'errorMapping.account.closeTargetRequired' => 'A target account is required to transfer the balance out.',
+			'errorMapping.account.closeTargetClosed' => 'The target account is closed; pick another one.',
+			'errorMapping.account.closeTargetCurrencyMismatch' => 'The transfer target must use the same currency.',
+			'errorMapping.account.mergeSelf' => 'Cannot merge an account into itself.',
+			'errorMapping.account.mergeCurrencyMismatch' => 'Cannot merge accounts with different currencies.',
+			'errorMapping.account.mergeNatureMismatch' => 'Cannot merge an asset into a liability (or vice versa).',
+			'errorMapping.account.mergeClosedTarget' => 'Cannot merge into a closed account; reopen it or pick another target.',
+			'errorMapping.account.deleteClosedHasHistory' => 'This closed account keeps its full history. To remove it entirely, merge it into another account first.',
 			'errorMapping.upload.noFile' => 'No file uploaded',
 			'errorMapping.upload.tooLarge' => 'File too large',
 			'errorMapping.upload.unsupportedType' => 'Unsupported file type',
