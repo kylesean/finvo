@@ -404,6 +404,12 @@ class ChatHistory extends _$ChatHistory {
     if (text.isEmpty) return;
     if (_currentStreamingAiMessageId.isEmpty) return;
 
+    // CHAT-01: drop deltas that arrive after the stream reached a terminal
+    // state. The repository releases the incremental buffer on completion, so
+    // a late delta would rebuild an empty buffer via putIfAbsent and truncate
+    // (content) or duplicate (fullContent) the already-preserved body.
+    if (_streamingController.isMessageCompleted) return;
+
     _updateAiMessageState(
       id: _currentStreamingAiMessageId,
       contentDelta: text,
@@ -447,7 +453,7 @@ class ChatHistory extends _$ChatHistory {
         .switchConversation(conversationId);
     // Fetch + process + apply through the session manager, which owns the
     // network call and the switch-race guard; state application stays here.
-    await _conversationSessionManager.loadConversationDetail(
+    final loaded = await _conversationSessionManager.loadConversationDetail(
       conversationId,
       isCurrent: () => conversationId == state.currentConversationId,
       onLoaded: (result) {
@@ -470,7 +476,12 @@ class ChatHistory extends _$ChatHistory {
       },
     );
 
-    await _conversationSessionManager.checkAndResumeIfNeeded(conversationId);
+    // L-1: probing resume state for a conversation that failed to load (or
+    // was switched away) is a pointless network call — skip it unless the
+    // detail actually loaded and is still current.
+    if (loaded) {
+      await _conversationSessionManager.checkAndResumeIfNeeded(conversationId);
+    }
   }
 
   Future<void> createNewConversation() async {

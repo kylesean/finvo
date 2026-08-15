@@ -112,6 +112,11 @@ class CustomContentGenerator implements genui.Transport {
   /// catch block can report the true cause instead of a generic cancel error.
   bool _idleTimedOut = false;
 
+  /// Set when the stream reaches logical completion (the `done` event or a
+  /// terminal error path). The consumption loop breaks on it so events
+  /// arriving after the turn has ended are never dispatched (S-1/CHAT-01).
+  bool _streamEnded = false;
+
   /// Monotonic counter distinguishing successive requests. Every SSE event
   /// dispatch and terminal callback (onError/onStreamComplete) is guarded by
   /// the generation captured when the request started, so buffered lines from
@@ -368,18 +373,21 @@ class CustomContentGenerator implements genui.Transport {
       // state forever. If no SSE line arrives for [_idleWatchdogTimeout],
       // cancel the request so the error path below terminates the turn.
       _idleTimedOut = false;
+      _streamEnded = false;
       final accumulator = SseEventAccumulator();
-      Timer watchdog = Timer(_idleWatchdogTimeout, () {
-        _idleTimedOut = true;
-        _logger.warning(
-          'CustomContentGenerator: SSE stream idle for '
-          '${_idleWatchdogTimeout.inSeconds}s, cancelling as dead',
-        );
-        _cancelToken?.cancel('SSE idle watchdog');
-      });
-      void restartWatchdog() {
-        watchdog.cancel();
+      // S-1: the watchdog must remain cancellable on EVERY exit path (incl.
+      // exceptions) and its callback must be generation-guarded. A stale
+      // watchdog firing after this request finished would otherwise cancel
+      // the *next* request's CancelToken (an instance field reused per
+      // request) and mislabel its errors as "idle timeout".
+      Timer? watchdog;
+      void armWatchdog() {
+        final gen = requestGeneration;
+        watchdog?.cancel();
         watchdog = Timer(_idleWatchdogTimeout, () {
+          if (gen != _requestGeneration) {
+            return; // stale: leave the newer stream alone
+          }
           _idleTimedOut = true;
           _logger.warning(
             'CustomContentGenerator: SSE stream idle for '
@@ -389,40 +397,50 @@ class CustomContentGenerator implements genui.Transport {
         });
       }
 
-      await for (final line
-          in response.data!.stream
-              .cast<List<int>>()
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())) {
-        // Stale request: either the user cancelled or a newer request has
-        // already taken over. Discard remaining lines either way.
-        if (_isCancelled || requestGeneration != _requestGeneration) {
-          _logger.info(
-            'CustomContentGenerator: Stream processing cancelled by user',
-          );
-          break;
+      armWatchdog();
+      try {
+        await for (final line
+            in response.data!.stream
+                .cast<List<int>>()
+                .transform(utf8.decoder)
+                .transform(const LineSplitter())) {
+          // Stale request: either the user cancelled, a newer request has
+          // already taken over, or the server signalled completion (`done`).
+          // Discard remaining lines either way.
+          if (_isCancelled ||
+              requestGeneration != _requestGeneration ||
+              _streamEnded) {
+            if (!_streamEnded) {
+              _logger.info(
+                'CustomContentGenerator: Stream processing cancelled by user',
+              );
+            }
+            break;
+          }
+
+          armWatchdog();
+          final event = accumulator.addLine(line);
+          if (event != null) {
+            await _dispatchSseEventData(event);
+          }
         }
 
-        restartWatchdog();
-        final event = accumulator.addLine(line);
-        if (event != null) {
-          await _dispatchSseEventData(event);
+        // Flush a trailing event that was not terminated by a blank line.
+        if (!_isCancelled && requestGeneration == _requestGeneration) {
+          final trailing = accumulator.flush();
+          if (trailing != null) {
+            await _dispatchSseEventData(trailing);
+          }
         }
-      }
-      watchdog.cancel();
 
-      // Flush a trailing event that was not terminated by a blank line.
-      if (!_isCancelled && requestGeneration == _requestGeneration) {
-        final trailing = accumulator.flush();
-        if (trailing != null) {
-          await _dispatchSseEventData(trailing);
+        // Stream processing ended normally
+        if (!_isCancelled && requestGeneration == _requestGeneration) {
+          _logger.info('CustomContentGenerator: Stream succeeded');
+          onStreamComplete?.call();
         }
-      }
-
-      // Stream processing ended normally
-      if (!_isCancelled && requestGeneration == _requestGeneration) {
-        _logger.info('CustomContentGenerator: Stream succeeded');
-        onStreamComplete?.call();
+      } finally {
+        watchdog?.cancel();
+        watchdog = null;
       }
     } catch (e, stackTrace) {
       if (_isCancelled || requestGeneration != _requestGeneration) {
@@ -545,6 +563,7 @@ class CustomContentGenerator implements genui.Transport {
         // on stream closure is fragile if the connection is ever kept alive
         // after the event; completing here is idempotent (the lifecycle layer
         // tolerates repeated onStreamComplete calls).
+        _streamEnded = true;
         onStreamComplete?.call();
         break;
 
@@ -599,6 +618,7 @@ class CustomContentGenerator implements genui.Transport {
       onError?.call(e.toString());
       // A malformed A2UI message is a terminal failure for this stream turn;
       // notify completion so isStreamingResponse is not left stuck.
+      _streamEnded = true;
       onStreamComplete?.call();
     }
   }

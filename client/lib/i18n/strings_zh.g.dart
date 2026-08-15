@@ -2034,9 +2034,6 @@ class Translations$account$zh {
 	/// zh: '删除账户'
 	String get deleteAccount => '删除账户';
 
-	/// zh: '仅无交易且无余额的账户可删除。此操作无法撤销。'
-	String get deleteConfirm => '仅无交易且无余额的账户可删除。此操作无法撤销。';
-
 	/// zh: '停用账户（保留历史）'
 	String get closeAccount => '停用账户（保留历史）';
 
@@ -2051,6 +2048,9 @@ class Translations$account$zh {
 
 	/// zh: '账户已停用'
 	String get closedSuccess => '账户已停用';
+
+	/// zh: '仅无交易且无余额的账户可删除。此操作无法撤销。'
+	String get deleteConfirm => '仅无交易且无余额的账户可删除。此操作无法撤销。';
 
 	/// zh: '账户已删除'
 	String get deleteSuccess => '账户已删除';
@@ -2242,6 +2242,9 @@ class Translations$financial$zh {
 
 	/// zh: '部分币种缺少汇率，相关账户未计入总额：$currencies'
 	String missingExchangeRates({required Object currencies}) => '部分币种缺少汇率，相关账户未计入总额：${currencies}';
+
+	/// zh: '汇率获取失败，净资产总额暂不可用。请检查网络后重试。'
+	String get ratesFetchFailed => '汇率获取失败，净资产总额暂不可用。请检查网络后重试。';
 
 	/// zh: '我的现金账户'
 	String get cashPocketTitle => '我的现金账户';
@@ -3180,6 +3183,9 @@ class Translations$chat$transferWizard$zh {
 
 	/// zh: '转账需要至少两个资产账户'
 	String get needTwoAssetAccounts => '转账需要至少两个资产账户';
+
+	/// zh: '按规则自动生成交易'
+	String get autoGenerateByRule => '按规则自动生成交易';
 }
 
 // Path: chat.genui
@@ -4587,6 +4593,9 @@ class Translations$chat$genui$transactionGroupReceipt$zh {
 
 	/// zh: '$count 空间'
 	String spaceCount({required Object count}) => '${count} 空间';
+
+	/// zh: '按规则自动生成交易'
+	String get autoGenerateByRule => '按规则自动生成交易';
 }
 
 // Path: chat.genui.budgetReceipt
@@ -4892,6 +4901,9 @@ class Translations$chat$genui$transactionCard$zh {
 
 	/// zh: '已关联到共享空间'
 	String get linkedToSpace => '已关联到共享空间';
+
+	/// zh: '按规则自动生成交易'
+	String get autoGenerateByRule => '按规则自动生成交易';
 }
 
 // Path: chat.genui.transactionConfirmation
@@ -6111,6 +6123,7 @@ extension on Translations {
 			'chat.transferWizard.noAssetAccounts' => '暂无资产账户',
 			'chat.transferWizard.goToFinanceToAddAccounts' => '请前往财务页面添加账户',
 			'chat.transferWizard.needTwoAssetAccounts' => '转账需要至少两个资产账户',
+			'chat.transferWizard.autoGenerateByRule' => '按规则自动生成交易',
 			'chat.genui.expenseSummary.totalExpense' => '总支出',
 			'chat.genui.expenseSummary.mainExpenses' => '主要支出',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '查看全部 ${count} 笔消费',
@@ -6144,6 +6157,7 @@ extension on Translations {
 			'chat.genui.transactionGroupReceipt.currencyMismatchNote' => '提示：账户余额将按当时汇率进行换算扣减',
 			'chat.genui.transactionGroupReceipt.confirmAssociate' => '确认关联',
 			'chat.genui.transactionGroupReceipt.spaceCount' => ({required Object count}) => '${count} 空间',
+			'chat.genui.transactionGroupReceipt.autoGenerateByRule' => '按规则自动生成交易',
 			'chat.genui.budgetReceipt.newBudget' => '新预算',
 			'chat.genui.budgetReceipt.budgetCreated' => '预算已创建',
 			'chat.genui.budgetReceipt.rolloverBudget' => '滚动预算',
@@ -6226,6 +6240,7 @@ extension on Translations {
 			'chat.genui.transactionCard.noSpace' => '暂无可用共享空间',
 			'chat.genui.transactionCard.selectSpace' => '选择共享空间',
 			'chat.genui.transactionCard.linkedToSpace' => '已关联到共享空间',
+			'chat.genui.transactionCard.autoGenerateByRule' => '按规则自动生成交易',
 			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
 			'chat.genui.transactionConfirmation.confirmed' => '已确认',
 			'chat.genui.budgetAnalysis.title' => '预算分析报告',
@@ -6401,12 +6416,12 @@ extension on Translations {
 			'account.amountTooLarge' => '余额不能超过 999,999,999.99',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '删除账户',
-			'account.deleteConfirm' => '仅无交易且无余额的账户可删除。此操作无法撤销。',
 			'account.closeAccount' => '停用账户（保留历史）',
 			'account.closeBalanceDisposal' => ({required Object balance}) => '该账户停用前仍有余额 ${balance}，如何处理？',
 			'account.closeMessage' => '该账户将被停用归档：全部历史记账保留，不再出现在新交易与净值中。',
 			'account.closeTitle' => '停用账户',
 			'account.closedSuccess' => '账户已停用',
+			'account.deleteConfirm' => '仅无交易且无余额的账户可删除。此操作无法撤销。',
 			'account.deleteSuccess' => '账户已删除',
 			'account.disposalKeep' => '保留为冻结快照',
 			'account.disposalTransfer' => '转出到另一账户',
@@ -6440,11 +6455,11 @@ extension on Translations {
 			'account.other' => '其他账户',
 			'account.types.cashTitle' => '现金',
 			'account.types.cashSubtitle' => '纸币、硬币等实体货币',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.depositTitle' => '银行存款',
 			'account.types.depositSubtitle' => '储蓄卡、活期/定期存款',
 			'account.types.eMoneyTitle' => '电子钱包',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.eMoneySubtitle' => '第三方支付平台余额',
 			'account.types.investmentTitle' => '投资账户',
 			'account.types.investmentSubtitle' => '股票、基金、债券等',
@@ -6487,6 +6502,7 @@ extension on Translations {
 			'financial.saveFailed' => '保存失败',
 			'financial.deleteFailed' => '删除失败，请稍后重试',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '部分币种缺少汇率，相关账户未计入总额：${currencies}',
+			'financial.ratesFetchFailed' => '汇率获取失败，净资产总额暂不可用。请检查网络后重试。',
 			'financial.cashPocketTitle' => '我的现金账户',
 			'financial.sourcesCount' => ({required Object count}) => '${count} 个账户',
 			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',

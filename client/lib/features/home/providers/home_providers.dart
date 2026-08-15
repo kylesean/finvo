@@ -312,7 +312,10 @@ class TransactionFeed extends _$TransactionFeed {
     } catch (e) {
       _logger.severe('Error fetching more transactions', e);
 
-      if (!ref.mounted) return;
+      // BRH-07: a refresh that ran while this fetchMore was in flight has
+      // already bumped the generation — a stale failure must not stamp error
+      // flags onto the new list's state.
+      if (!ref.mounted || generation != _generation) return;
 
       // Never mark hasReachedMax on an error: a transient network failure is
       // not "end of data". Surface the failure via hasLoadMoreError so the

@@ -30,6 +30,10 @@ class CommentInputBar extends ConsumerStatefulWidget {
 class _CommentInputBarState extends ConsumerState<CommentInputBar> {
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
+  // BRH-01: keep the listenManual subscription and close it in dispose so a
+  // late provider update can never touch a disposed controller/focus node
+  // after the widget is unmounted (use-after-dispose crash path).
+  ProviderSubscription<String?>? _replySubscription;
   bool _isSubmitting = false;
 
   // @ mention state
@@ -51,31 +55,34 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
       }
     });
 
-    ref.listenManual<String?>(replyingToCommentIdProvider, (previous, next) {
-      if (next != null && (previous == null || previous != next)) {
-        if (!_commentFocusNode.hasFocus) {
-          _commentFocusNode.requestFocus();
-        }
-        final currentReplyingToName = ref.read(replyingToUserNameProvider);
-        final allComments =
-            ref
-                .read(transactionCommentsProvider(widget.transactionId))
-                .asData
-                ?.value ??
-            [];
-        final repliedToComment = allComments.firstWhereOrNull(
-          (c) => c.id == next,
-        );
-
-        if (currentReplyingToName != null && repliedToComment != null) {
-          final newText = '@$currentReplyingToName ';
-          _commentController.value = TextEditingValue(
-            text: newText,
-            selection: TextSelection.collapsed(offset: newText.length),
+    _replySubscription = ref.listenManual<String?>(
+      replyingToCommentIdProvider,
+      (previous, next) {
+        if (next != null && (previous == null || previous != next)) {
+          if (!_commentFocusNode.hasFocus) {
+            _commentFocusNode.requestFocus();
+          }
+          final currentReplyingToName = ref.read(replyingToUserNameProvider);
+          final allComments =
+              ref
+                  .read(transactionCommentsProvider(widget.transactionId))
+                  .asData
+                  ?.value ??
+              [];
+          final repliedToComment = allComments.firstWhereOrNull(
+            (c) => c.id == next,
           );
+
+          if (currentReplyingToName != null && repliedToComment != null) {
+            final newText = '@$currentReplyingToName ';
+            _commentController.value = TextEditingValue(
+              text: newText,
+              selection: TextSelection.collapsed(offset: newText.length),
+            );
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   String? _getEffectiveSpaceId({bool isRead = false}) {
@@ -280,6 +287,7 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
 
   @override
   void dispose() {
+    _replySubscription?.close();
     _commentController.removeListener(_onTextChanged);
     _commentController.dispose();
     _commentFocusNode.dispose();

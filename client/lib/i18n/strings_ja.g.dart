@@ -267,6 +267,9 @@ class _Translations$transaction$ja extends Translations$transaction$zh {
 	@override String get notFoundTitle => '取引が削除されました';
 	@override String get notFoundBody => 'この取引は作成者または管理者によって削除されたため、詳細を表示できません。';
 	@override String get backToPrevious => '戻る';
+	@override String attachments({required Object count}) => '${count} 件の添付ファイル';
+	@override String get statusPending => '保留中';
+	@override String get viewInConversation => '会話で詳細を見る';
 }
 
 // Path: home
@@ -319,6 +322,7 @@ class _Translations$comment$ja extends Translations$comment$zh {
 	@override String get noNote => '備考なし';
 	@override String get loadFailed => '備考の読み込みに失敗しました';
 	@override String userToast({required Object username}) => 'ユーザー @${username}';
+	@override String get addNoteWithMention => 'コメントまたは @メンション…';
 }
 
 // Path: calendar
@@ -896,12 +900,12 @@ class _Translations$account$ja extends Translations$account$zh {
 	@override String get amountTooLarge => '残高は 999,999,999.99 を超えられません';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '口座を削除';
-	@override String get deleteConfirm => '取引も残高もない口座のみ削除できます。取り消せません。';
 	@override String get closeAccount => '口座を停止（履歴を保持）';
 	@override String closeBalanceDisposal({required Object balance}) => 'この口座には残高 ${balance} があります。停止前にどうしますか？';
 	@override String get closeMessage => 'この口座は停止（アーカイブ）されます。履歴はすべて保持され、新しい取引や純資産には表示されなくなります。';
 	@override String get closeTitle => '口座を停止';
 	@override String get closedSuccess => '口座を停止しました';
+	@override String get deleteConfirm => '取引も残高もない口座のみ削除できます。取り消せません。';
 	@override String get deleteSuccess => '口座を削除しました';
 	@override String get disposalKeep => 'スナップショットとして保持';
 	@override String get disposalTransfer => '別の口座へ振替';
@@ -972,6 +976,7 @@ class _Translations$financial$ja extends Translations$financial$zh {
 	@override String get saveFailed => '保存に失敗しました';
 	@override String get deleteFailed => '削除に失敗しました。しばらくしてから再試行してください';
 	@override String missingExchangeRates({required Object currencies}) => '一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：${currencies}';
+	@override String get ratesFetchFailed => '為替レートの取得に失敗しました。純資産の合計は利用できません。ネットワークを確認して再試行してください。';
 	@override String get cashPocketTitle => 'マイ現金口座';
 	@override String sourcesCount({required Object count}) => '${count} 口座';
 	@override String lastUpdatedAt({required Object time}) => '最終更新：${time}';
@@ -1408,6 +1413,7 @@ class _Translations$chat$transferWizard$ja extends Translations$chat$transferWiz
 	@override String get noAssetAccounts => '資産口座がありません';
 	@override String get goToFinanceToAddAccounts => '財務ページで口座を追加してください';
 	@override String get needTwoAssetAccounts => '振替には資産口座が2つ以上必要です';
+	@override String get autoGenerateByRule => 'ルールに基づいて取引を自動生成';
 }
 
 // Path: chat.genui
@@ -2125,6 +2131,7 @@ class _Translations$chat$genui$transactionGroupReceipt$ja extends Translations$c
 	@override String get confirmAssociate => '確認';
 	@override String get total => 'Total';
 	@override String spaceCount({required Object count}) => '${count} spaces';
+	@override String get autoGenerateByRule => 'ルールに基づいて取引を自動生成';
 }
 
 // Path: chat.genui.transactionCard
@@ -2766,6 +2773,9 @@ extension on TranslationsJa {
 			'transaction.notFoundTitle' => '取引が削除されました',
 			'transaction.notFoundBody' => 'この取引は作成者または管理者によって削除されたため、詳細を表示できません。',
 			'transaction.backToPrevious' => '戻る',
+			'transaction.attachments' => ({required Object count}) => '${count} 件の添付ファイル',
+			'transaction.statusPending' => '保留中',
+			'transaction.viewInConversation' => '会話で詳細を見る',
 			'home.totalExpense' => '総支出額',
 			'home.todayExpense' => '今日の支出',
 			'home.monthExpense' => '今月の支出',
@@ -2800,6 +2810,7 @@ extension on TranslationsJa {
 			'comment.noNote' => '備考なし',
 			'comment.loadFailed' => '備考の読み込みに失敗しました',
 			'comment.userToast' => ({required Object username}) => 'ユーザー @${username}',
+			'comment.addNoteWithMention' => 'コメントまたは @メンション…',
 			'calendar.title' => '家計カレンダー',
 			'calendar.weekdays.mon' => '月',
 			'calendar.weekdays.tue' => '火',
@@ -3130,12 +3141,12 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '期限日に確認待ち取引を生成、手動確認後に記帳',
 			'forecast.recurringTransaction.pendingTitle' => '確認待ち取引',
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 件確認待ち',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirm' => '確認',
 			'forecast.recurringTransaction.skip' => 'スキップ',
 			'forecast.recurringTransaction.noPending' => '確認待ち取引なし',
 			'forecast.recurringTransaction.confirmSuccess' => '取引を確認しました',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.skipSuccess' => '取引をスキップしました',
 			'forecast.recurringTransaction.interval' => '繰り返し間隔',
 			'forecast.recurringTransaction.selectDays' => '曜日を選択',
@@ -3311,6 +3322,7 @@ extension on TranslationsJa {
 			'chat.transferWizard.noAssetAccounts' => '資産口座がありません',
 			'chat.transferWizard.goToFinanceToAddAccounts' => '財務ページで口座を追加してください',
 			'chat.transferWizard.needTwoAssetAccounts' => '振替には資産口座が2つ以上必要です',
+			'chat.transferWizard.autoGenerateByRule' => 'ルールに基づいて取引を自動生成',
 			'chat.genui.expenseSummary.totalExpense' => '総支出',
 			'chat.genui.expenseSummary.mainExpenses' => '主な支出',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '全 ${count} 件を表示',
@@ -3344,6 +3356,7 @@ extension on TranslationsJa {
 			'chat.genui.transactionGroupReceipt.confirmAssociate' => '確認',
 			'chat.genui.transactionGroupReceipt.total' => 'Total',
 			'chat.genui.transactionGroupReceipt.spaceCount' => ({required Object count}) => '${count} spaces',
+			'chat.genui.transactionGroupReceipt.autoGenerateByRule' => 'ルールに基づいて取引を自動生成',
 			'chat.genui.transactionCard.title' => '取引成功',
 			'chat.genui.transactionCard.associatedAccount' => '関連口座',
 			'chat.genui.transactionCard.notCounted' => '資産に含めない',
@@ -3602,12 +3615,12 @@ extension on TranslationsJa {
 			'account.amountTooLarge' => '残高は 999,999,999.99 を超えられません',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '口座を削除',
-			'account.deleteConfirm' => '取引も残高もない口座のみ削除できます。取り消せません。',
 			'account.closeAccount' => '口座を停止（履歴を保持）',
 			'account.closeBalanceDisposal' => ({required Object balance}) => 'この口座には残高 ${balance} があります。停止前にどうしますか？',
 			'account.closeMessage' => 'この口座は停止（アーカイブ）されます。履歴はすべて保持され、新しい取引や純資産には表示されなくなります。',
 			'account.closeTitle' => '口座を停止',
 			'account.closedSuccess' => '口座を停止しました',
+			'account.deleteConfirm' => '取引も残高もない口座のみ削除できます。取り消せません。',
 			'account.deleteSuccess' => '口座を削除しました',
 			'account.disposalKeep' => 'スナップショットとして保持',
 			'account.disposalTransfer' => '別の口座へ振替',
@@ -3642,14 +3655,14 @@ extension on TranslationsJa {
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
 			'account.types.depositTitle' => 'Bank Deposit',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
 			'account.types.investmentTitle' => 'Investment',
 			'account.types.investmentSubtitle' => 'Stocks, funds, bonds, etc.',
 			'account.types.receivableTitle' => 'Receivable',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.receivableSubtitle' => 'Loans to others, pending',
 			'account.types.receivableHelper' => 'Owed to me',
 			'account.types.creditCardTitle' => 'Credit Card',
@@ -3688,6 +3701,7 @@ extension on TranslationsJa {
 			'financial.saveFailed' => '保存に失敗しました',
 			'financial.deleteFailed' => '削除に失敗しました。しばらくしてから再試行してください',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：${currencies}',
+			'financial.ratesFetchFailed' => '為替レートの取得に失敗しました。純資産の合計は利用できません。ネットワークを確認して再試行してください。',
 			'financial.cashPocketTitle' => 'マイ現金口座',
 			'financial.sourcesCount' => ({required Object count}) => '${count} 口座',
 			'financial.lastUpdatedAt' => ({required Object time}) => '最終更新：${time}',

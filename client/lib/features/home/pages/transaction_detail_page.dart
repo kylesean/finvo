@@ -409,13 +409,17 @@ class TransactionDetailPage extends ConsumerWidget {
     if (error is UnexpectedHttpException && error.statusCode == 404) {
       return true;
     }
+    // BRH-13: only typed errors decide the "not found" state. Raw "404"
+    // substring matching is dropped — a numeric amount such as "404.50" in a
+    // generic message is not an HTTP status. Meaningful resource-missing text
+    // from business errors is still honoured.
     if (error is AppException &&
-        (error.message.contains('404') ||
-            error.message.contains('Not Found'))) {
+        (error.message.contains('Not Found') ||
+            error.message.contains('不存在') ||
+            error.message.contains('未找到'))) {
       return true;
     }
-    final errStr = error?.toString() ?? '';
-    return errStr.contains('404') || errStr.contains('Not Found');
+    return false;
   }
 
   /// Full-screen error state with a retry button or deleted-resource empty state.

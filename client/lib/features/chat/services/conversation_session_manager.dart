@@ -54,7 +54,11 @@ class ConversationSessionManager {
   /// conversation while this request was in flight, the stale response is
   /// dropped. [onError] is only invoked when this request is still current,
   /// so a superseded failure never marks the newer session as failed.
-  Future<void> loadConversationDetail(
+  /// Returns `true` when the detail was loaded AND is still current;
+  /// `false` when the load failed or the session was switched meanwhile.
+  /// Callers use this to skip follow-up probes (e.g. resume-status) after a
+  /// failed or superseded load (L-1).
+  Future<bool> loadConversationDetail(
     String conversationId, {
     required bool Function() isCurrent,
     required void Function(ConversationSessionLoadResult result) onLoaded,
@@ -71,7 +75,7 @@ class ConversationSessionManager {
           'ConversationSessionManager: discarding stale conversation detail '
           'for $conversationId (session switched)',
         );
-        return;
+        return false;
       }
 
       onLoaded(
@@ -82,14 +86,16 @@ class ConversationSessionManager {
           title: conversationDetail.title,
         ),
       );
+      return true;
     } catch (e) {
       // Only surface errors for the conversation that is still current.
-      if (!isCurrent()) return;
+      if (!isCurrent()) return false;
       _logger.warning(
         'ConversationSessionManager: Failed to load conversation '
         '$conversationId: $e',
       );
       onError(e);
+      return false;
     }
   }
 

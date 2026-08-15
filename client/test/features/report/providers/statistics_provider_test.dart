@@ -66,8 +66,6 @@ void main() {
       service.trendData = _trend();
       service.categoryBreakdown = _category();
       service.topTransactions = _topTransactions();
-      service.cashFlow = _cashFlow();
-      service.healthScore = _healthScore();
 
       final notifier = container.read(statisticsProvider.notifier);
       await notifier.loadStatistics();
@@ -79,8 +77,12 @@ void main() {
       expect(state.trendData, isNotNull);
       expect(state.categoryBreakdown, isNotNull);
       expect(state.topTransactions, isNotNull);
-      expect(state.cashFlow, isNotNull);
-      expect(state.healthScore, isNotNull);
+      // BRH-04: cash-flow/health-score are no longer fetched (dead data) —
+      // state fields stay null until a real report surface consumes them.
+      expect(state.cashFlow, isNull);
+      expect(state.healthScore, isNull);
+      expect(service.cashFlowCalls, 0);
+      expect(service.healthScoreCalls, 0);
     });
 
     test('core data failure sets error and stops loading', () async {
@@ -96,7 +98,7 @@ void main() {
     });
 
     test(
-      'supplementary (cash-flow/health) failure degrades to null without error',
+      'BRH-04: load never calls the supplementary cash-flow/health endpoints',
       () async {
         service.overview = _overview();
         service.trendData = _trend();
@@ -108,8 +110,8 @@ void main() {
         await notifier.loadStatistics();
 
         final state = container.read(statisticsProvider);
-        expect(state.cashFlow, isNull);
-        expect(state.healthScore, isNull);
+        expect(service.cashFlowCalls, 0);
+        expect(service.healthScoreCalls, 0);
         expect(state.error, isNull);
         expect(state.overview, isNotNull);
       },
@@ -326,6 +328,11 @@ class _FakeStatisticsService implements StatisticsService {
   bool failSupplementary = false;
   List<String>? lastAccountTypes;
 
+  // BRH-04: the provider must never call the supplementary endpoints during a
+  // plain load — count their invocations so the regression is testable.
+  int cashFlowCalls = 0;
+  int healthScoreCalls = 0;
+
   _FakeStatisticsService();
 
   @override
@@ -413,6 +420,7 @@ class _FakeStatisticsService implements StatisticsService {
     DateTime? endDate,
     List<String>? accountTypes,
   }) async {
+    cashFlowCalls++;
     lastAccountTypes = accountTypes;
     if (failSupplementary) throw Exception('supplementary failed');
     return cashFlow ?? _cashFlow();
@@ -425,6 +433,7 @@ class _FakeStatisticsService implements StatisticsService {
     DateTime? endDate,
     List<String>? accountTypes,
   }) async {
+    healthScoreCalls++;
     lastAccountTypes = accountTypes;
     if (failSupplementary) throw Exception('supplementary failed');
     return healthScore ?? _healthScore();

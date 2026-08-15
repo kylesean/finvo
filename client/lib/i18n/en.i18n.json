@@ -1238,6 +1238,7 @@
     "saveFailed": "Save failed",
     "deleteFailed": "Delete failed, please try again later",
     "missingExchangeRates": "Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: $currencies",
+    "ratesFetchFailed": "Exchange rate fetch failed. Net worth totals are unavailable. Please check your connection and retry.",
     "cashPocketTitle": "My Cash Pockets",
     "sourcesCount": "$count Sources",
     "lastUpdatedAt": "Last updated: $time",

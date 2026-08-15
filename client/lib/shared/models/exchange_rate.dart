@@ -18,13 +18,17 @@ Map<String, double> _ratesFromJson(Object? json) {
   json.forEach((key, value) {
     final name = key?.toString();
     if (name == null || name.isEmpty) return;
+    // SHR-01: normalize keys to uppercase on ingress — the converters query
+    // with upcased codes, so a lowercase key from the server would silently
+    // be treated as a missing rate and drop that currency from totals.
+    final normalizedName = name.toUpperCase();
     if (value is num) {
-      rates[name] = value.toDouble();
+      rates[normalizedName] = value.toDouble();
       return;
     }
     final parsed = double.tryParse(value?.toString().trim() ?? '');
     if (parsed != null) {
-      rates[name] = parsed;
+      rates[normalizedName] = parsed;
     } else {
       _logger.warning('exchange_rate: dropping invalid rate for "$name"');
     }

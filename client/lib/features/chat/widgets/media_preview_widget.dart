@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:finvo/features/chat/widgets/image_preview_page.dart';
+import 'package:finvo/features/chat/providers/chat_input_state.dart';
 
 /// Simplified media file list preview component
 /// Displays selected files directly using XFile
@@ -37,7 +38,7 @@ class MediaPreviewWidget extends StatelessWidget {
         itemCount: selectedFiles.length,
         itemBuilder: (context, index) {
           final file = selectedFiles[index];
-          final isUploading = uploadingFiles[file.path] ?? false;
+          final isUploading = uploadingFiles[fileUploadKey(file)] ?? false;
           return Container(
             margin: const EdgeInsets.only(right: 8.0),
             child: _buildFileItem(context, file, index, isUploading),

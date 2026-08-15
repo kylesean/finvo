@@ -26,6 +26,29 @@ abstract class ChatInputState with _$ChatInputState {
 }
 
 // New enum for more precise control of input box hint text
+/// Stable per-file upload key shared by the input notifier and the media
+/// preview widget.
+///
+/// On native platforms [XFile.path] is a unique filesystem path and makes a
+/// perfect map key. On web, `XFile.fromData` (the picker's byte fallback)
+/// leaves `path` empty for EVERY file, so path alone would collapse all
+/// selected files into one bucket (CHAT-02). For pathless files, fall back to
+/// an identity-derived key that stays stable for the file's whole lifetime.
+///
+/// The tiny registration map is deliberately global: both the provider and
+/// the preview widget must resolve the *same* key for the *same* XFile
+/// instance, and the instance themselves are kept alive by `selectedFiles`.
+String fileUploadKey(XFile file) {
+  if (file.path.isNotEmpty) return file.path;
+  return _pathlessUploadKeys.putIfAbsent(
+    identityHashCode(file),
+    () => 'web-file#${_pathlessUploadSeq++}',
+  );
+}
+
+final Map<int, String> _pathlessUploadKeys = {};
+int _pathlessUploadSeq = 0;
+
 enum HintType {
   normal, // "Input message..."
   listening, // "Listening..."

@@ -760,7 +760,8 @@
       "transferSuccess": "转账成功",
       "noAssetAccounts": "暂无资产账户",
       "goToFinanceToAddAccounts": "请前往财务页面添加账户",
-      "needTwoAssetAccounts": "转账需要至少两个资产账户"
+      "needTwoAssetAccounts": "转账需要至少两个资产账户",
+      "autoGenerateByRule": "按规则自动生成交易"
     },
     "genui": {
       "expenseSummary": {
@@ -800,7 +801,8 @@
         "targetAccount": "目标账户",
         "currencyMismatchNote": "提示：账户余额将按当时汇率进行换算扣减",
         "confirmAssociate": "确认关联",
-        "spaceCount": "$count 空间"
+        "spaceCount": "$count 空间",
+        "autoGenerateByRule": "按规则自动生成交易"
       },
       "budgetReceipt": {
         "newBudget": "新预算",
@@ -900,7 +902,8 @@
         "sharedSpace": "共享空间",
         "noSpace": "暂无可用共享空间",
         "selectSpace": "选择共享空间",
-        "linkedToSpace": "已关联到共享空间"
+        "linkedToSpace": "已关联到共享空间",
+        "autoGenerateByRule": "按规则自动生成交易"
       },
       "transactionConfirmation": {
         "multipleAccounts": "检测到多个关联账户",
@@ -1236,6 +1239,7 @@
     "saveFailed": "保存失败",
     "deleteFailed": "删除失败，请稍后重试",
     "missingExchangeRates": "部分币种缺少汇率，相关账户未计入总额：$currencies",
+    "ratesFetchFailed": "汇率获取失败，净资产总额暂不可用。请检查网络后重试。",
     "cashPocketTitle": "我的现金账户",
     "sourcesCount": "$count 个账户",
     "lastUpdatedAt": "上次更新：$time",
@@ -1561,7 +1565,6 @@
       "mergeClosedTarget": "不能合并到已停用的账户，请先重新启用或选择其他目标。",
       "deleteClosedHasHistory": "该账户已停用并保留全部历史记录；如需彻底移除，请先将其合并到其他账户。"
     },
-
     "upload": {
       "noFile": "未上传文件",
       "tooLarge": "文件过大",

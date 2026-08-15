@@ -113,53 +113,6 @@ final class ServerConfigServiceProvider
 String _$serverConfigServiceHash() =>
     r'09dcbbf25565e519f911fed195ac05b4417f9ec6';
 
-/// Provider for checking if server is configured
-
-@ProviderFor(isServerConfigured)
-final isServerConfiguredProvider = IsServerConfiguredProvider._();
-
-/// Provider for checking if server is configured
-
-final class IsServerConfiguredProvider
-    extends $FunctionalProvider<bool, bool, bool>
-    with $Provider<bool> {
-  /// Provider for checking if server is configured
-  IsServerConfiguredProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'isServerConfiguredProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$isServerConfiguredHash();
-
-  @$internal
-  @override
-  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  bool create(Ref ref) {
-    return isServerConfigured(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
-    );
-  }
-}
-
-String _$isServerConfiguredHash() =>
-    r'47e70a0bdbfe8e5bcb47358030d29eeb813940af';
-
 /// Provider for current server URL
 
 @ProviderFor(serverUrl)

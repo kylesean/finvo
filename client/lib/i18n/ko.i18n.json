@@ -161,7 +161,10 @@
     "noRawInput": "No message",
     "notFoundTitle": "거래가 삭제되었습니다",
     "notFoundBody": "이 거래는 작성자 또는 관리자에 의해 삭제되어 상세 내역을 볼 수 없습니다.",
-    "backToPrevious": "뒤로 가기"
+    "backToPrevious": "뒤로 가기",
+    "attachments": "첨부 파일 $count개",
+    "statusPending": "보류 중",
+    "viewInConversation": "대화에서 자세히 보기"
   },
   "home": {
     "totalExpense": "총 소비 금액",
@@ -199,7 +202,8 @@
     "note": "메모",
     "noNote": "메모 없음",
     "loadFailed": "메모 불러오기 실패",
-    "userToast": "사용자 @$username"
+    "userToast": "사용자 @$username",
+    "addNoteWithMention": "댓글 또는 @멘션…"
   },
   "calendar": {
     "title": "소비 달력",
@@ -749,7 +753,7 @@
       "sourceAccount": "출금 계좌",
       "targetAccount": "입금 계좌",
       "selectAccount": "계좌 선택",
-      "autoGenerateByRule": "활성화하면 규칙에 따라 거래가 자동 생성됩니다",
+      "autoGenerateByRule": "규칙에 따라 거래 자동 생성",
       "confirmTransfer": "이체 확인",
       "confirmed": "확인됨",
       "transferSuccess": "이체 성공",
@@ -796,7 +800,8 @@
         "currencyMismatchNote": "참고: 현재 환율로 환산하여 잔액에서 차감합니다",
         "confirmAssociate": "확인",
         "total": "Total",
-        "spaceCount": "$count spaces"
+        "spaceCount": "$count spaces",
+        "autoGenerateByRule": "규칙에 따라 거래 자동 생성"
       },
       "transactionCard": {
         "title": "거래 성공",
@@ -1233,6 +1238,7 @@
     "saveFailed": "저장 실패",
     "deleteFailed": "삭제에 실패했습니다. 잠시 후 다시 시도해 주세요",
     "missingExchangeRates": "일부 통화의 환율을 가져올 수 없어 해당 계정은 합계에 포함되지 않았습니다: $currencies",
+    "ratesFetchFailed": "환율 정보를 가져오지 못했습니다. 순자산 합계를 사용할 수 없습니다. 네트워크를 확인하고 다시 시도하세요.",
     "cashPocketTitle": "내 현금 계좌",
     "sourcesCount": "$count 계좌",
     "lastUpdatedAt": "마지막 업데이트: $time",
@@ -1558,7 +1564,6 @@
       "mergeClosedTarget": "정지된 계좌에는 병합할 수 없습니다. 재활성화하거나 다른 대상을 선택하세요.",
       "deleteClosedHasHistory": "이 계좌는 정지되어 전체 내역이 유지됩니다. 완전히 제거하려면 먼저 다른 계좌로 병합하세요."
     },
-
     "upload": {
       "noFile": "No file uploaded",
       "tooLarge": "File too large",

@@ -17,7 +17,7 @@ import 'package:finvo/features/home/pages/transaction_detail_page.dart';
 import 'package:finvo/features/report/pages/report_page.dart';
 import 'package:finvo/features/notification/pages/notification_center_page.dart';
 import 'package:finvo/features/server/pages/server_setup_page.dart';
-import 'package:finvo/core/services/server_config_service.dart';
+import 'package:finvo/core/constants/api_constants.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -84,7 +84,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   // background refreshUser) would otherwise rebuild the entire GoRouter and
   // reset the navigation stack back to '/home'.
   final authStatus = ref.watch(authStatusProvider);
-  final isServerConfigured = ref.watch(isServerConfiguredProvider);
+  // CORE-09: single "configured" source of truth — the network layer and the
+  // router must agree (env base URL OR dynamic config), or an env-configured
+  // build would be trapped on the server-setup page.
+  final isServerConfigured = ref.watch(apiConfiguredProvider);
 
   return GoRouter(
     navigatorKey: navigatorKey,

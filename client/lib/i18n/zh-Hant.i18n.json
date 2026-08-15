@@ -161,7 +161,10 @@
     "noRawInput": "No message",
     "notFoundTitle": "帳目已被刪除",
     "notFoundBody": "該帳目記錄已被發起人或管理員刪除，無法查看明細。",
-    "backToPrevious": "返回上一頁"
+    "backToPrevious": "返回上一頁",
+    "attachments": "共 $count 個附件",
+    "statusPending": "待處理",
+    "viewInConversation": "在會話中查看更多"
   },
   "home": {
     "totalExpense": "總消費金額",
@@ -199,7 +202,8 @@
     "note": "備註",
     "noNote": "暫無備註",
     "loadFailed": "載入備註失敗",
-    "userToast": "用戶 @$username"
+    "userToast": "用戶 @$username",
+    "addNoteWithMention": "評論或 @提及成員…"
   },
   "calendar": {
     "title": "消費日曆",
@@ -755,7 +759,8 @@
       "selectReceiveAccount": "选择收款账户",
       "noAssetAccounts": "暫無資產帳戶",
       "goToFinanceToAddAccounts": "請前往財務頁面新增帳戶",
-      "needTwoAssetAccounts": "轉帳需要至少兩個資產帳戶"
+      "needTwoAssetAccounts": "轉帳需要至少兩個資產帳戶",
+      "autoGenerateByRule": "依規則自動產生交易"
     },
     "genui": {
       "expenseSummary": {
@@ -795,7 +800,8 @@
         "currencyMismatchNote": "提示：帳戶餘額將按當時匯率進行換算扣減",
         "confirmAssociate": "確認關聯",
         "total": "Total",
-        "spaceCount": "$count spaces"
+        "spaceCount": "$count spaces",
+        "autoGenerateByRule": "依規則自動產生交易"
       },
       "transactionCard": {
         "title": "交易成功",
@@ -811,7 +817,8 @@
         "sharedSpace": "Shared Space",
         "noSpace": "No shared spaces available",
         "selectSpace": "Select Shared Space",
-        "linkedToSpace": "Linked to shared space"
+        "linkedToSpace": "Linked to shared space",
+        "autoGenerateByRule": "依規則自動產生交易"
       },
       "cashFlowCard": {
         "title": "現金流與健康報告",
@@ -1231,6 +1238,7 @@
     "saveFailed": "保存失敗",
     "deleteFailed": "刪除失敗，請稍後再試",
     "missingExchangeRates": "部分幣種缺少匯率，相關帳戶未計入總額：$currencies",
+    "ratesFetchFailed": "匯率獲取失敗，淨資產總額暫不可用。請檢查網路後重試。",
     "cashPocketTitle": "我的現金帳戶",
     "sourcesCount": "$count 個帳戶",
     "lastUpdatedAt": "上次更新：$time",
@@ -1556,7 +1564,6 @@
       "mergeClosedTarget": "不能合併到已停用的帳戶，請先重新啟用或選擇其他目標。",
       "deleteClosedHasHistory": "該帳戶已停用並保留全部歷史記錄；如需徹底移除，請先將其合併到其他帳戶。"
     },
-
     "upload": {
       "noFile": "No file uploaded",
       "tooLarge": "File too large",

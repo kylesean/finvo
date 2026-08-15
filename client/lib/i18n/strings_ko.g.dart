@@ -267,6 +267,9 @@ class _Translations$transaction$ko extends Translations$transaction$zh {
 	@override String get notFoundTitle => '거래가 삭제되었습니다';
 	@override String get notFoundBody => '이 거래는 작성자 또는 관리자에 의해 삭제되어 상세 내역을 볼 수 없습니다.';
 	@override String get backToPrevious => '뒤로 가기';
+	@override String attachments({required Object count}) => '첨부 파일 ${count}개';
+	@override String get statusPending => '보류 중';
+	@override String get viewInConversation => '대화에서 자세히 보기';
 }
 
 // Path: home
@@ -319,6 +322,7 @@ class _Translations$comment$ko extends Translations$comment$zh {
 	@override String get noNote => '메모 없음';
 	@override String get loadFailed => '메모 불러오기 실패';
 	@override String userToast({required Object username}) => '사용자 @${username}';
+	@override String get addNoteWithMention => '댓글 또는 @멘션…';
 }
 
 // Path: calendar
@@ -896,12 +900,12 @@ class _Translations$account$ko extends Translations$account$zh {
 	@override String get amountTooLarge => '잔액은 999,999,999.99를 초과할 수 없습니다';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '계좌 삭제';
-	@override String get deleteConfirm => '거래도 잔액도 없는 계좌만 삭제할 수 있습니다. 복구할 수 없습니다.';
 	@override String get closeAccount => '계좌 정지(내역 유지)';
 	@override String closeBalanceDisposal({required Object balance}) => '이 계좌에는 잔액 ${balance}이(가) 있습니다. 정지 전에 어떻게 처리할까요?';
 	@override String get closeMessage => '이 계좌는 정지(보관)됩니다. 모든 내역이 유지되며 새 거래와 순자산에는 표시되지 않습니다.';
 	@override String get closeTitle => '계좌 정지';
 	@override String get closedSuccess => '계좌가 정지되었습니다';
+	@override String get deleteConfirm => '거래도 잔액도 없는 계좌만 삭제할 수 있습니다. 복구할 수 없습니다.';
 	@override String get deleteSuccess => '계좌가 삭제되었습니다';
 	@override String get disposalKeep => '동결 스냅샷으로 유지';
 	@override String get disposalTransfer => '다른 계좌로 이체';
@@ -972,6 +976,7 @@ class _Translations$financial$ko extends Translations$financial$zh {
 	@override String get saveFailed => '저장 실패';
 	@override String get deleteFailed => '삭제에 실패했습니다. 잠시 후 다시 시도해 주세요';
 	@override String missingExchangeRates({required Object currencies}) => '일부 통화의 환율을 가져올 수 없어 해당 계정은 합계에 포함되지 않았습니다: ${currencies}';
+	@override String get ratesFetchFailed => '환율 정보를 가져오지 못했습니다. 순자산 합계를 사용할 수 없습니다. 네트워크를 확인하고 다시 시도하세요.';
 	@override String get cashPocketTitle => '내 현금 계좌';
 	@override String sourcesCount({required Object count}) => '${count} 계좌';
 	@override String lastUpdatedAt({required Object time}) => '마지막 업데이트: ${time}';
@@ -1401,7 +1406,7 @@ class _Translations$chat$transferWizard$ko extends Translations$chat$transferWiz
 	@override String get sourceAccount => '출금 계좌';
 	@override String get targetAccount => '입금 계좌';
 	@override String get selectAccount => '계좌 선택';
-	@override String get autoGenerateByRule => '활성화하면 규칙에 따라 거래가 자동 생성됩니다';
+	@override String get autoGenerateByRule => '규칙에 따라 거래 자동 생성';
 	@override String get confirmTransfer => '이체 확인';
 	@override String get confirmed => '확인됨';
 	@override String get transferSuccess => '이체 성공';
@@ -2126,6 +2131,7 @@ class _Translations$chat$genui$transactionGroupReceipt$ko extends Translations$c
 	@override String get confirmAssociate => '확인';
 	@override String get total => 'Total';
 	@override String spaceCount({required Object count}) => '${count} spaces';
+	@override String get autoGenerateByRule => '규칙에 따라 거래 자동 생성';
 }
 
 // Path: chat.genui.transactionCard
@@ -2767,6 +2773,9 @@ extension on TranslationsKo {
 			'transaction.notFoundTitle' => '거래가 삭제되었습니다',
 			'transaction.notFoundBody' => '이 거래는 작성자 또는 관리자에 의해 삭제되어 상세 내역을 볼 수 없습니다.',
 			'transaction.backToPrevious' => '뒤로 가기',
+			'transaction.attachments' => ({required Object count}) => '첨부 파일 ${count}개',
+			'transaction.statusPending' => '보류 중',
+			'transaction.viewInConversation' => '대화에서 자세히 보기',
 			'home.totalExpense' => '총 소비 금액',
 			'home.todayExpense' => '오늘 지출',
 			'home.monthExpense' => '이번 달 지출',
@@ -2801,6 +2810,7 @@ extension on TranslationsKo {
 			'comment.noNote' => '메모 없음',
 			'comment.loadFailed' => '메모 불러오기 실패',
 			'comment.userToast' => ({required Object username}) => '사용자 @${username}',
+			'comment.addNoteWithMention' => '댓글 또는 @멘션…',
 			'calendar.title' => '소비 달력',
 			'calendar.weekdays.mon' => '월',
 			'calendar.weekdays.tue' => '화',
@@ -3131,12 +3141,12 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '만기일에 대기 거래 생성, 수동 확인 후 기록',
 			'forecast.recurringTransaction.pendingTitle' => '대기 거래',
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 건 대기',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirm' => '확인',
 			'forecast.recurringTransaction.skip' => '건너뛰기',
 			'forecast.recurringTransaction.noPending' => '대기 거래 없음',
 			'forecast.recurringTransaction.confirmSuccess' => '거래 확인됨',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.skipSuccess' => '거래 건너뜀',
 			'forecast.recurringTransaction.interval' => '반복 간격',
 			'forecast.recurringTransaction.selectDays' => '요일 선택',
@@ -3305,7 +3315,7 @@ extension on TranslationsKo {
 			'chat.transferWizard.sourceAccount' => '출금 계좌',
 			'chat.transferWizard.targetAccount' => '입금 계좌',
 			'chat.transferWizard.selectAccount' => '계좌 선택',
-			'chat.transferWizard.autoGenerateByRule' => '활성화하면 규칙에 따라 거래가 자동 생성됩니다',
+			'chat.transferWizard.autoGenerateByRule' => '규칙에 따라 거래 자동 생성',
 			'chat.transferWizard.confirmTransfer' => '이체 확인',
 			'chat.transferWizard.confirmed' => '확인됨',
 			'chat.transferWizard.transferSuccess' => '이체 성공',
@@ -3346,6 +3356,7 @@ extension on TranslationsKo {
 			'chat.genui.transactionGroupReceipt.confirmAssociate' => '확인',
 			'chat.genui.transactionGroupReceipt.total' => 'Total',
 			'chat.genui.transactionGroupReceipt.spaceCount' => ({required Object count}) => '${count} spaces',
+			'chat.genui.transactionGroupReceipt.autoGenerateByRule' => '규칙에 따라 거래 자동 생성',
 			'chat.genui.transactionCard.title' => '거래 성공',
 			'chat.genui.transactionCard.associatedAccount' => '연결된 계좌',
 			'chat.genui.transactionCard.notCounted' => '자산 제외',
@@ -3604,12 +3615,12 @@ extension on TranslationsKo {
 			'account.amountTooLarge' => '잔액은 999,999,999.99를 초과할 수 없습니다',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '계좌 삭제',
-			'account.deleteConfirm' => '거래도 잔액도 없는 계좌만 삭제할 수 있습니다. 복구할 수 없습니다.',
 			'account.closeAccount' => '계좌 정지(내역 유지)',
 			'account.closeBalanceDisposal' => ({required Object balance}) => '이 계좌에는 잔액 ${balance}이(가) 있습니다. 정지 전에 어떻게 처리할까요?',
 			'account.closeMessage' => '이 계좌는 정지(보관)됩니다. 모든 내역이 유지되며 새 거래와 순자산에는 표시되지 않습니다.',
 			'account.closeTitle' => '계좌 정지',
 			'account.closedSuccess' => '계좌가 정지되었습니다',
+			'account.deleteConfirm' => '거래도 잔액도 없는 계좌만 삭제할 수 있습니다. 복구할 수 없습니다.',
 			'account.deleteSuccess' => '계좌가 삭제되었습니다',
 			'account.disposalKeep' => '동결 스냅샷으로 유지',
 			'account.disposalTransfer' => '다른 계좌로 이체',
@@ -3644,13 +3655,13 @@ extension on TranslationsKo {
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
 			'account.types.depositTitle' => 'Bank Deposit',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
 			'account.types.investmentTitle' => 'Investment',
 			'account.types.investmentSubtitle' => 'Stocks, funds, bonds, etc.',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.receivableTitle' => 'Receivable',
 			'account.types.receivableSubtitle' => 'Loans to others, pending',
 			'account.types.receivableHelper' => 'Owed to me',
@@ -3690,6 +3701,7 @@ extension on TranslationsKo {
 			'financial.saveFailed' => '저장 실패',
 			'financial.deleteFailed' => '삭제에 실패했습니다. 잠시 후 다시 시도해 주세요',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '일부 통화의 환율을 가져올 수 없어 해당 계정은 합계에 포함되지 않았습니다: ${currencies}',
+			'financial.ratesFetchFailed' => '환율 정보를 가져오지 못했습니다. 순자산 합계를 사용할 수 없습니다. 네트워크를 확인하고 다시 시도하세요.',
 			'financial.cashPocketTitle' => '내 현금 계좌',
 			'financial.sourcesCount' => ({required Object count}) => '${count} 계좌',
 			'financial.lastUpdatedAt' => ({required Object time}) => '마지막 업데이트: ${time}',

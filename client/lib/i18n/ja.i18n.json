@@ -161,7 +161,10 @@
     "noRawInput": "No message",
     "notFoundTitle": "取引が削除されました",
     "notFoundBody": "この取引は作成者または管理者によって削除されたため、詳細を表示できません。",
-    "backToPrevious": "戻る"
+    "backToPrevious": "戻る",
+    "attachments": "$count 件の添付ファイル",
+    "statusPending": "保留中",
+    "viewInConversation": "会話で詳細を見る"
   },
   "home": {
     "totalExpense": "総支出額",
@@ -199,7 +202,8 @@
     "note": "備考",
     "noNote": "備考なし",
     "loadFailed": "備考の読み込みに失敗しました",
-    "userToast": "ユーザー @$username"
+    "userToast": "ユーザー @$username",
+    "addNoteWithMention": "コメントまたは @メンション…"
   },
   "calendar": {
     "title": "家計カレンダー",
@@ -755,7 +759,8 @@
       "selectReceiveAccount": "选择收款账户",
       "noAssetAccounts": "資産口座がありません",
       "goToFinanceToAddAccounts": "財務ページで口座を追加してください",
-      "needTwoAssetAccounts": "振替には資産口座が2つ以上必要です"
+      "needTwoAssetAccounts": "振替には資産口座が2つ以上必要です",
+      "autoGenerateByRule": "ルールに基づいて取引を自動生成"
     },
     "genui": {
       "expenseSummary": {
@@ -795,7 +800,8 @@
         "currencyMismatchNote": "注意：為替レートで換算して残高から差し引きます",
         "confirmAssociate": "確認",
         "total": "Total",
-        "spaceCount": "$count spaces"
+        "spaceCount": "$count spaces",
+        "autoGenerateByRule": "ルールに基づいて取引を自動生成"
       },
       "transactionCard": {
         "title": "取引成功",
@@ -1232,6 +1238,7 @@
     "saveFailed": "保存に失敗しました",
     "deleteFailed": "削除に失敗しました。しばらくしてから再試行してください",
     "missingExchangeRates": "一部の通貨の為替レートが取得できないため、該当口座は合計に含まれていません：$currencies",
+    "ratesFetchFailed": "為替レートの取得に失敗しました。純資産の合計は利用できません。ネットワークを確認して再試行してください。",
     "cashPocketTitle": "マイ現金口座",
     "sourcesCount": "$count 口座",
     "lastUpdatedAt": "最終更新：$time",
@@ -1557,7 +1564,6 @@
       "mergeClosedTarget": "停止中の口座には統合できません。再有効化するか別の対象を選択してください。",
       "deleteClosedHasHistory": "この口座は停止されており履歴が保持されています。完全に削除するには、まず別の口座に統合してください。"
     },
-
     "upload": {
       "noFile": "No file uploaded",
       "tooLarge": "File too large",

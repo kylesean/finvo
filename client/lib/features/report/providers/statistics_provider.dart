@@ -5,6 +5,9 @@ import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/features/report/services/statistics_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:finvo/shared/services/toast_service.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'statistics_provider.freezed.dart';
 part 'statistics_provider.g.dart';
@@ -72,55 +75,16 @@ class Statistics extends _$Statistics {
 
     try {
       final service = ref.read(statisticsServiceProvider);
-      // Fetch all data in parallel. Overview/trend/category/top-transactions are
-      // core and fail together; cash-flow and health-score are supplementary and
-      // degrade gracefully to null on error so the report still renders.
-      //
-      // Local helpers isolate each supplementary fetch so a failure degrades to
-      // null without aborting the parallel batch (replacing the former
-      // `.catchError((_) => null)` chain, which could swallow non-business
-      // errors and was hard to read).
-      Future<CashFlowAnalysis?> loadCashFlow() async {
-        try {
-          return await service.getCashFlow(
-            timeRange: state.timeRange,
-            startDate: state.customStartDate,
-            endDate: state.customEndDate,
-            accountTypes: state.selectedAccountTypes.isNotEmpty
-                ? state.selectedAccountTypes
-                : null,
-          );
-        } catch (e) {
-          // Supplementary data: degrade to null but keep the failure visible.
-          _logger.warning('Cash-flow fetch failed, degrading to null', e);
-          return null;
-        }
-      }
-
-      Future<HealthScore?> loadHealthScore() async {
-        try {
-          return await service.getHealthScore(
-            timeRange: state.timeRange,
-            startDate: state.customStartDate,
-            endDate: state.customEndDate,
-            accountTypes: state.selectedAccountTypes.isNotEmpty
-                ? state.selectedAccountTypes
-                : null,
-          );
-        } catch (e) {
-          // Supplementary data: degrade to null but keep the failure visible.
-          _logger.warning('Health-score fetch failed, degrading to null', e);
-          return null;
-        }
-      }
-
+      // BRH-04: the cash-flow and health-score endpoints were fetched on every
+      // report load but NO UI ever renders them (dead data) — two wasted
+      // network round-trips per visit. They are removed from the load path;
+      // the service methods and state fields stay for when a real report
+      // surfaces them.
       final (
         StatisticsOverview overview,
         TrendDataResponse trendData,
         CategoryBreakdownResponse categoryBreakdown,
         TopTransactionsResponse topTransactions,
-        CashFlowAnalysis? cashFlow,
-        HealthScore? healthScore,
       ) = await (
         service.getOverview(
           timeRange: state.timeRange,
@@ -163,8 +127,6 @@ class Statistics extends _$Statistics {
           page: 1,
           pageSize: 15,
         ),
-        loadCashFlow(),
-        loadHealthScore(),
       ).wait;
 
       // Discard stale responses from superseded filter/sort/range changes,
@@ -182,8 +144,6 @@ class Statistics extends _$Statistics {
         trendData: trendData,
         categoryBreakdown: categoryBreakdown,
         topTransactions: topTransactions,
-        cashFlow: cashFlow,
-        healthScore: healthScore,
       );
     } catch (e) {
       // Only surface errors for the latest generation; older failures belong
@@ -268,8 +228,14 @@ class Statistics extends _$Statistics {
         topTransactions: topTransactions,
       );
     } catch (e) {
+      _logger.warning('Report chart-type reload failed', e);
+      // BRH-02: a sub-task failure must not flip the whole report page into
+      // the error state — keep showing the already loaded data and surface
+      // the failure as a transient toast instead.
       if (generation == _loadGeneration) {
-        state = state.copyWith(error: safeErrorMessage(e));
+        ToastService.showDestructive(
+          description: Text('${t.common.loadFailed}: ${safeErrorMessage(e)}'),
+        );
       }
     }
   }
@@ -297,8 +263,13 @@ class Statistics extends _$Statistics {
       if (generation != _loadGeneration) return;
       state = state.copyWith(topTransactions: topTransactions);
     } catch (e) {
+      _logger.warning('Report top-transactions reload failed', e);
+      // BRH-02: same degradation as setChartType — never flip the page into
+      // the full error state for a sub-task failure.
       if (generation == _loadGeneration) {
-        state = state.copyWith(error: safeErrorMessage(e));
+        ToastService.showDestructive(
+          description: Text('${t.common.loadFailed}: ${safeErrorMessage(e)}'),
+        );
       }
     }
   }

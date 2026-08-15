@@ -328,7 +328,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       final pendingAttachments = <PendingMessageAttachment>[];
       if (currentMediaFiles.isNotEmpty) {
         for (final file in currentMediaFiles) {
-          final uploadInfo = _uploadedInfos[file.path];
+          final uploadInfo = _uploadedInfos[fileUploadKey(file)];
           if (uploadInfo == null) {
             state = state.copyWith(
               showError: true,
@@ -356,7 +356,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         if (_disposed) return;
 
         for (final attachment in pendingAttachments) {
-          _uploadedInfos.remove(attachment.file.path);
+          _uploadedInfos.remove(fileUploadKey(attachment.file));
         }
 
         _textBeforeSpeechSession = '';
@@ -422,7 +422,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     final updatedFiles = [...state.selectedFiles, ...files];
     final uploadingMap = Map<String, bool>.from(state.uploadingFiles);
     for (final file in files) {
-      uploadingMap[file.path] = true;
+      uploadingMap[fileUploadKey(file)] = true;
     }
 
     state = state.copyWith(
@@ -440,8 +440,8 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     final fileToRemove = state.selectedFiles[index];
     final updatedFiles = List<XFile>.from(state.selectedFiles)..removeAt(index);
     final uploadingMap = Map<String, bool>.from(state.uploadingFiles);
-    uploadingMap.remove(fileToRemove.path);
-    _uploadedInfos.remove(fileToRemove.path);
+    uploadingMap.remove(fileUploadKey(fileToRemove));
+    _uploadedInfos.remove(fileUploadKey(fileToRemove));
 
     state = state.copyWith(
       selectedFiles: updatedFiles,
@@ -465,7 +465,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
     for (final file in originalFiles) {
       if (failedFileNames.contains(file.name)) {
-        failedPaths.add(file.path);
+        failedPaths.add(fileUploadKey(file));
         failedNames.add(file.name);
       }
     }
@@ -474,7 +474,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
     if (failedPaths.isNotEmpty) {
       final updatedFiles = state.selectedFiles
-          .where((file) => !failedPaths.contains(file.path))
+          .where((file) => !failedPaths.contains(fileUploadKey(file)))
           .toList();
       for (final path in failedPaths) {
         _uploadedInfos.remove(path);
@@ -504,7 +504,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     for (var i = 0; i < uploadCount; i++) {
       final file = uploadableFiles[i];
       final upload = result.uploads[i];
-      _uploadedInfos[file.path] = UploadedAttachmentInfo(
+      _uploadedInfos[fileUploadKey(file)] = UploadedAttachmentInfo(
         id: upload.id,
         attachmentId: upload.attachmentId,
         originalName: upload.originalName,
@@ -514,7 +514,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
         size: upload.size,
         hash: upload.hash,
       );
-      uploadingMap[file.path] = false;
+      uploadingMap[fileUploadKey(file)] = false;
     }
 
     state = state.copyWith(uploadingFiles: uploadingMap);
@@ -534,7 +534,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       _logger.severe('Background upload exception: $e\n$stackTrace');
       final uploadingMap = Map<String, bool>.from(state.uploadingFiles);
       for (final file in files) {
-        uploadingMap.remove(file.path);
+        uploadingMap.remove(fileUploadKey(file));
       }
       state = state.copyWith(
         uploadingFiles: uploadingMap,

@@ -65,18 +65,26 @@ class AmountFormatter {
   }) {
     final effectiveLocale = locale ?? Intl.getCurrentLocale();
     final cacheKey = '$effectiveLocale:$currency:$decimalDigits';
-    return _formatCache.putIfAbsent(cacheKey, () {
-      // Evict the oldest entry when the cache exceeds its bound.
-      if (_formatCache.length >= _maxCacheSize) {
-        final oldestKey = _formatCache.keys.first;
-        _formatCache.remove(oldestKey);
-      }
-      return NumberFormat.currency(
-        locale: effectiveLocale,
-        symbol: '',
-        decimalDigits: decimalDigits,
-      );
-    });
+
+    // SHR-05: LinkedHashMap re-insertion implements LRU — a hit is moved to
+    // the tail so the bound evicts the least-recently-used key, and eviction
+    // happens only on miss (never on hit).
+    final cached = _formatCache.remove(cacheKey);
+    if (cached != null) {
+      _formatCache[cacheKey] = cached;
+      return cached;
+    }
+    if (_formatCache.length >= _maxCacheSize) {
+      final oldestKey = _formatCache.keys.first;
+      _formatCache.remove(oldestKey);
+    }
+    final format = NumberFormat.currency(
+      locale: effectiveLocale,
+      symbol: '',
+      decimalDigits: decimalDigits,
+    );
+    _formatCache[cacheKey] = format;
+    return format;
   }
 
   /// Format transaction amount
@@ -275,7 +283,9 @@ class AmountFormatter {
       return currencyEnum.symbol;
     }
 
-    // Fallback for other currencies
+    // Fallback for currencies outside the enum (SHR-09: CAD/AUD/INR/RUB/
+    // HKD/TWD are already covered by `Currency` above and are NOT reachable
+    // here — only the non-enum codes below are).
     switch (currency.toUpperCase()) {
       case 'RMB':
         return '¥';
@@ -283,20 +293,8 @@ class AmountFormatter {
         return '\$';
       case 'KRW':
         return '₩';
-      case 'RUB':
-        return '₽';
-      case 'INR':
-        return '₹';
       case 'TRY':
         return '₺';
-      case 'HKD':
-        return 'HK\$';
-      case 'TWD':
-        return 'NT\$';
-      case 'CAD':
-        return 'C\$';
-      case 'AUD':
-        return 'A\$';
       default:
         return currency;
     }

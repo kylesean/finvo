@@ -312,12 +312,6 @@ ServerConfigService serverConfigService(Ref ref) {
   return ServerConfigService(prefs);
 }
 
-/// Provider for checking if server is configured
-@Riverpod(keepAlive: true)
-bool isServerConfigured(Ref ref) {
-  return ref.watch(serverConfigServiceProvider).isConfigured;
-}
-
 /// Provider for current server URL
 @Riverpod(keepAlive: true)
 String? serverUrl(Ref ref) {

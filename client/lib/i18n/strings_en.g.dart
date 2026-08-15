@@ -976,6 +976,7 @@ class _Translations$financial$en extends Translations$financial$zh {
 	@override String get saveFailed => 'Save failed';
 	@override String get deleteFailed => 'Delete failed, please try again later';
 	@override String missingExchangeRates({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}';
+	@override String get ratesFetchFailed => 'Exchange rate fetch failed. Net worth totals are unavailable. Please check your connection and retry.';
 	@override String get cashPocketTitle => 'My Cash Pockets';
 	@override String sourcesCount({required Object count}) => '${count} Sources';
 	@override String lastUpdatedAt({required Object time}) => 'Last updated: ${time}';
@@ -3700,6 +3701,7 @@ extension on TranslationsEn {
 			'financial.saveFailed' => 'Save failed',
 			'financial.deleteFailed' => 'Delete failed, please try again later',
 			'financial.missingExchangeRates' => ({required Object currencies}) => 'Exchange rates are unavailable for some currencies, so the related accounts are excluded from totals: ${currencies}',
+			'financial.ratesFetchFailed' => 'Exchange rate fetch failed. Net worth totals are unavailable. Please check your connection and retry.',
 			'financial.cashPocketTitle' => 'My Cash Pockets',
 			'financial.sourcesCount' => ({required Object count}) => '${count} Sources',
 			'financial.lastUpdatedAt' => ({required Object time}) => 'Last updated: ${time}',

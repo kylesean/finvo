@@ -19,6 +19,7 @@ import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/features/finance/widgets/currency_selection_sheet.dart';
 import 'package:finvo/features/finance/widgets/financial_account_card.dart';
 import 'package:finvo/features/finance/widgets/financial_accounts_drawer.dart';
+import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 
@@ -127,6 +128,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                 totalLiabilities,
                 viewCurrency,
                 summary.missingRateCurrencies,
+                summary.ratesFailed,
               ),
             ),
           ],
@@ -156,6 +158,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     Decimal totalLiabilities,
     String viewCurrency,
     Set<String> missingRateCurrencies,
+    bool ratesFailed,
   ) {
     // loading state
     if (state.isLoading && accounts.isEmpty) {
@@ -217,12 +220,19 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                 totalAssets,
                 totalLiabilities,
                 viewCurrency,
+                ratesFailed: ratesFailed,
               ),
 
             // Warn when some accounts were excluded from the totals because
             // their currency has no usable exchange rate.
             if (missingRateCurrencies.isNotEmpty)
               _buildMissingRateHint(theme, colors, missingRateCurrencies),
+
+            // FIN-01: the whole exchange-rate fetch failed, so the net worth
+            // totals were never computed (ratesFailed deliberately leaves
+            // missingRateCurrencies empty). Surface an explicit error + retry
+            // instead of silently showing a zero net worth.
+            if (ratesFailed) _buildRatesFailedBanner(theme, colors),
 
             // Account list
             Expanded(
@@ -326,6 +336,46 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     );
   }
 
+  /// Whole-fetch failure banner (FIN-01): unlike [_buildMissingRateHint],
+  /// no totals were computed at all, so offer a direct retry that re-fetches
+  /// the exchange-rate data (invalidating the provider rebuilds the summary).
+  Widget _buildRatesFailedBanner(FThemeData theme, FColors colors) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colors.destructive.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(FLucideIcons.circleAlert, size: 14, color: colors.destructive),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              t.financial.ratesFetchFailed,
+              style: theme.typography.body.xs.copyWith(
+                color: colors.destructive,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => ref.invalidate(exchangeRateProvider),
+            child: Text(
+              t.common.retry,
+              style: theme.typography.body.xs.copyWith(
+                color: colors.destructive,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// build empty state
   Widget _buildEmptyState(FThemeData theme, FColors colors) {
     return ListView(
@@ -368,8 +418,9 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     Decimal netWorth,
     Decimal assets,
     Decimal liabilities,
-    String viewCurrency,
-  ) {
+    String viewCurrency, {
+    bool ratesFailed = false,
+  }) {
     final currency = Currency.fromCode(viewCurrency) ?? Currency.cny;
     final currencySymbol = currency.symbol;
 
@@ -466,9 +517,9 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             child: FittedBox(
               alignment: Alignment.centerLeft,
               fit: BoxFit.scaleDown,
-              child: _hideAmounts
+              child: _hideAmounts || ratesFailed
                   ? Text(
-                      '$currencySymbol ****',
+                      '$currencySymbol ${ratesFailed ? '--' : '****'}',
                       style: const TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w700,

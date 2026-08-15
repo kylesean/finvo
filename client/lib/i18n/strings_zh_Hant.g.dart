@@ -267,6 +267,9 @@ class _Translations$transaction$zh_Hant extends Translations$transaction$zh {
 	@override String get notFoundTitle => '帳目已被刪除';
 	@override String get notFoundBody => '該帳目記錄已被發起人或管理員刪除，無法查看明細。';
 	@override String get backToPrevious => '返回上一頁';
+	@override String attachments({required Object count}) => '共 ${count} 個附件';
+	@override String get statusPending => '待處理';
+	@override String get viewInConversation => '在會話中查看更多';
 }
 
 // Path: home
@@ -319,6 +322,7 @@ class _Translations$comment$zh_Hant extends Translations$comment$zh {
 	@override String get noNote => '暫無備註';
 	@override String get loadFailed => '載入備註失敗';
 	@override String userToast({required Object username}) => '用戶 @${username}';
+	@override String get addNoteWithMention => '評論或 @提及成員…';
 }
 
 // Path: calendar
@@ -896,12 +900,12 @@ class _Translations$account$zh_Hant extends Translations$account$zh {
 	@override String get amountTooLarge => '餘額不能超過 999,999,999.99';
 	@override String get amountHint => '0.00';
 	@override String get deleteAccount => '刪除帳戶';
-	@override String get deleteConfirm => '僅無交易且無餘額的帳戶可刪除。此操作無法復原。';
 	@override String get closeAccount => '停用帳戶（保留歷史）';
 	@override String closeBalanceDisposal({required Object balance}) => '該帳戶停用前仍有餘額 ${balance}，如何處理？';
 	@override String get closeMessage => '該帳戶將被停用歸檔：全部歷史記帳保留，不再出現在新交易與淨值中。';
 	@override String get closeTitle => '停用帳戶';
 	@override String get closedSuccess => '帳戶已停用';
+	@override String get deleteConfirm => '僅無交易且無餘額的帳戶可刪除。此操作無法復原。';
 	@override String get deleteSuccess => '帳戶已刪除';
 	@override String get disposalKeep => '保留為凍結快照';
 	@override String get disposalTransfer => '轉出到另一帳戶';
@@ -972,6 +976,7 @@ class _Translations$financial$zh_Hant extends Translations$financial$zh {
 	@override String get saveFailed => '保存失敗';
 	@override String get deleteFailed => '刪除失敗，請稍後再試';
 	@override String missingExchangeRates({required Object currencies}) => '部分幣種缺少匯率，相關帳戶未計入總額：${currencies}';
+	@override String get ratesFetchFailed => '匯率獲取失敗，淨資產總額暫不可用。請檢查網路後重試。';
 	@override String get cashPocketTitle => '我的現金帳戶';
 	@override String sourcesCount({required Object count}) => '${count} 個帳戶';
 	@override String lastUpdatedAt({required Object time}) => '上次更新：${time}';
@@ -1408,6 +1413,7 @@ class _Translations$chat$transferWizard$zh_Hant extends Translations$chat$transf
 	@override String get noAssetAccounts => '暫無資產帳戶';
 	@override String get goToFinanceToAddAccounts => '請前往財務頁面新增帳戶';
 	@override String get needTwoAssetAccounts => '轉帳需要至少兩個資產帳戶';
+	@override String get autoGenerateByRule => '依規則自動產生交易';
 }
 
 // Path: chat.genui
@@ -2125,6 +2131,7 @@ class _Translations$chat$genui$transactionGroupReceipt$zh_Hant extends Translati
 	@override String get confirmAssociate => '確認關聯';
 	@override String get total => 'Total';
 	@override String spaceCount({required Object count}) => '${count} spaces';
+	@override String get autoGenerateByRule => '依規則自動產生交易';
 }
 
 // Path: chat.genui.transactionCard
@@ -2148,6 +2155,7 @@ class _Translations$chat$genui$transactionCard$zh_Hant extends Translations$chat
 	@override String get noSpace => 'No shared spaces available';
 	@override String get selectSpace => 'Select Shared Space';
 	@override String get linkedToSpace => 'Linked to shared space';
+	@override String get autoGenerateByRule => '依規則自動產生交易';
 }
 
 // Path: chat.genui.cashFlowCard
@@ -2765,6 +2773,9 @@ extension on TranslationsZhHant {
 			'transaction.notFoundTitle' => '帳目已被刪除',
 			'transaction.notFoundBody' => '該帳目記錄已被發起人或管理員刪除，無法查看明細。',
 			'transaction.backToPrevious' => '返回上一頁',
+			'transaction.attachments' => ({required Object count}) => '共 ${count} 個附件',
+			'transaction.statusPending' => '待處理',
+			'transaction.viewInConversation' => '在會話中查看更多',
 			'home.totalExpense' => '總消費金額',
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
@@ -2799,6 +2810,7 @@ extension on TranslationsZhHant {
 			'comment.noNote' => '暫無備註',
 			'comment.loadFailed' => '載入備註失敗',
 			'comment.userToast' => ({required Object username}) => '用戶 @${username}',
+			'comment.addNoteWithMention' => '評論或 @提及成員…',
 			'calendar.title' => '消費日曆',
 			'calendar.weekdays.mon' => '一',
 			'calendar.weekdays.tue' => '二',
@@ -3129,12 +3141,12 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期時生成待確認交易，需手動確認後記帳',
 			'forecast.recurringTransaction.pendingTitle' => '待確認交易',
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 筆待確認',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirm' => '確認',
 			'forecast.recurringTransaction.skip' => '跳過',
 			'forecast.recurringTransaction.noPending' => '無待確認交易',
 			'forecast.recurringTransaction.confirmSuccess' => '已確認記帳',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.skipSuccess' => '已跳過',
 			'forecast.recurringTransaction.interval' => '重複間隔',
 			'forecast.recurringTransaction.selectDays' => '選擇星期',
@@ -3310,6 +3322,7 @@ extension on TranslationsZhHant {
 			'chat.transferWizard.noAssetAccounts' => '暫無資產帳戶',
 			'chat.transferWizard.goToFinanceToAddAccounts' => '請前往財務頁面新增帳戶',
 			'chat.transferWizard.needTwoAssetAccounts' => '轉帳需要至少兩個資產帳戶',
+			'chat.transferWizard.autoGenerateByRule' => '依規則自動產生交易',
 			'chat.genui.expenseSummary.totalExpense' => '總支出',
 			'chat.genui.expenseSummary.mainExpenses' => '主要支出',
 			'chat.genui.expenseSummary.viewAll' => ({required Object count}) => '查看全部 ${count} 筆消費',
@@ -3343,6 +3356,7 @@ extension on TranslationsZhHant {
 			'chat.genui.transactionGroupReceipt.confirmAssociate' => '確認關聯',
 			'chat.genui.transactionGroupReceipt.total' => 'Total',
 			'chat.genui.transactionGroupReceipt.spaceCount' => ({required Object count}) => '${count} spaces',
+			'chat.genui.transactionGroupReceipt.autoGenerateByRule' => '依規則自動產生交易',
 			'chat.genui.transactionCard.title' => '交易成功',
 			'chat.genui.transactionCard.associatedAccount' => '已關聯帳戶',
 			'chat.genui.transactionCard.notCounted' => '不計入資產',
@@ -3357,6 +3371,7 @@ extension on TranslationsZhHant {
 			'chat.genui.transactionCard.noSpace' => 'No shared spaces available',
 			'chat.genui.transactionCard.selectSpace' => 'Select Shared Space',
 			'chat.genui.transactionCard.linkedToSpace' => 'Linked to shared space',
+			'chat.genui.transactionCard.autoGenerateByRule' => '依規則自動產生交易',
 			'chat.genui.cashFlowCard.title' => '現金流與健康報告',
 			'chat.genui.cashFlowCard.savingsRate' => ({required Object rate}) => '儲蓄 ${rate}%',
 			'chat.genui.cashFlowCard.totalIncome' => '總收入',
@@ -3600,12 +3615,12 @@ extension on TranslationsZhHant {
 			'account.amountTooLarge' => '餘額不能超過 999,999,999.99',
 			'account.amountHint' => '0.00',
 			'account.deleteAccount' => '刪除帳戶',
-			'account.deleteConfirm' => '僅無交易且無餘額的帳戶可刪除。此操作無法復原。',
 			'account.closeAccount' => '停用帳戶（保留歷史）',
 			'account.closeBalanceDisposal' => ({required Object balance}) => '該帳戶停用前仍有餘額 ${balance}，如何處理？',
 			'account.closeMessage' => '該帳戶將被停用歸檔：全部歷史記帳保留，不再出現在新交易與淨值中。',
 			'account.closeTitle' => '停用帳戶',
 			'account.closedSuccess' => '帳戶已停用',
+			'account.deleteConfirm' => '僅無交易且無餘額的帳戶可刪除。此操作無法復原。',
 			'account.deleteSuccess' => '帳戶已刪除',
 			'account.disposalKeep' => '保留為凍結快照',
 			'account.disposalTransfer' => '轉出到另一帳戶',
@@ -3640,6 +3655,8 @@ extension on TranslationsZhHant {
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
 			'account.types.depositTitle' => 'Bank Deposit',
+			_ => null,
+		} ?? switch (path) {
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
@@ -3647,8 +3664,6 @@ extension on TranslationsZhHant {
 			'account.types.investmentSubtitle' => 'Stocks, funds, bonds, etc.',
 			'account.types.receivableTitle' => 'Receivable',
 			'account.types.receivableSubtitle' => 'Loans to others, pending',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.receivableHelper' => 'Owed to me',
 			'account.types.creditCardTitle' => 'Credit Card',
 			'account.types.creditCardSubtitle' => 'Credit card balances',
@@ -3686,6 +3701,7 @@ extension on TranslationsZhHant {
 			'financial.saveFailed' => '保存失敗',
 			'financial.deleteFailed' => '刪除失敗，請稍後再試',
 			'financial.missingExchangeRates' => ({required Object currencies}) => '部分幣種缺少匯率，相關帳戶未計入總額：${currencies}',
+			'financial.ratesFetchFailed' => '匯率獲取失敗，淨資產總額暫不可用。請檢查網路後重試。',
 			'financial.cashPocketTitle' => '我的現金帳戶',
 			'financial.sourcesCount' => ({required Object count}) => '${count} 個帳戶',
 			'financial.lastUpdatedAt' => ({required Object time}) => '上次更新：${time}',

@@ -65,7 +65,7 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
 
     // Invalidate all providers that depend on server URL
     ref.invalidate(serverConfigServiceProvider);
-    ref.invalidate(isServerConfiguredProvider);
+    ref.invalidate(apiConfiguredProvider);
     ref.invalidate(apiBaseUrlProvider);
     ref.invalidate(serverUrlProvider);
 
@@ -95,7 +95,7 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
 
     // Invalidate all providers that depend on server URL
     ref.invalidate(serverConfigServiceProvider);
-    ref.invalidate(isServerConfiguredProvider);
+    ref.invalidate(apiConfiguredProvider);
     ref.invalidate(apiBaseUrlProvider);
     ref.invalidate(serverUrlProvider);
     // Same account-scoped invalidation as saveServerUrl (CORE-M7).
