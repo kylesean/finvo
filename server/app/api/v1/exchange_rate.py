@@ -98,7 +98,7 @@ async def get_single_rate(
     currency = currency.upper()
     logger.info("get_single_rate_requested", currency=currency)
 
-    rate = await exchange_rate_service.get_rate(currency)
+    base_code, rate = await exchange_rate_service.get_rate_with_base(currency)
 
     if rate is None:
         return error_response(
@@ -110,7 +110,9 @@ async def get_single_rate(
 
     return success_response(
         data={
-            "base": "USD",
+            # S-G: report the ACTUAL base of the cached payload, not a
+            # hardcoded "USD" (the API URL may be configured with any base).
+            "base": base_code or "USD",
             "target": currency,
             "rate": rate,
         }

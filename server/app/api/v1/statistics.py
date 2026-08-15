@@ -84,6 +84,7 @@ async def get_category_breakdown(
         start_date=params.start_date,
         end_date=params.end_date,
         account_types=params.account_types_list,
+        tz_offset_minutes=params.tz_offset,
         transaction_type=transaction_type,
         limit=limit,
     )
@@ -110,6 +111,7 @@ async def get_top_transactions(
         start_date=params.start_date,
         end_date=params.end_date,
         account_types=params.account_types_list,
+        tz_offset_minutes=params.tz_offset,
         transaction_type=transaction_type,
         sort_by=sort_by,
         page=page,
@@ -132,6 +134,7 @@ async def get_cash_flow_analysis(
         start_date=params.start_date,
         end_date=params.end_date,
         account_types=params.account_types_list,
+        tz_offset_minutes=params.tz_offset,
     )
 
     return ResponseEnvelope(code=0, message="Cash flow analysis retrieved successfully", data=result)
@@ -150,6 +153,7 @@ async def get_health_score(
         start_date=params.start_date,
         end_date=params.end_date,
         account_types=params.account_types_list,
+        tz_offset_minutes=params.tz_offset,
     )
 
     return ResponseEnvelope(code=0, message="Health score retrieved successfully", data=result)

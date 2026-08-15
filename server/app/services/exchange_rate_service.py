@@ -196,6 +196,17 @@ class ExchangeRateService:
         Returns:
             float | None: Exchange rate from USD to target currency, or None if not available
         """
+        _, rate = await self.get_rate_with_base(target_currency)
+        return rate
+
+    async def get_rate_with_base(self, target_currency: str) -> tuple[str | None, float | None]:
+        """Get the actual ``base_code`` and the target's rate from one data source.
+
+        S-G: the API labels rates with their base; hardcoding a base (e.g.
+        "USD") mislabels the response when EXCHANGE_RATE_API_URL is configured
+        with a different base. Both values come from the same cached payload so
+        they can never disagree.
+        """
         data = await self.get_cached_rates()
 
         if data is None:
@@ -205,8 +216,9 @@ class ExchangeRateService:
             data = await self.get_cached_rates()
 
         if data is None:
-            return None
+            return None, None
 
+        base_code = data.get("base_code")
         rates = data.get("conversion_rates", {})
         rate = rates.get(target_currency.upper())
 
@@ -216,7 +228,7 @@ class ExchangeRateService:
                 target_currency=target_currency,
             )
 
-        return cast(float | None, rate)
+        return cast(str | None, base_code), cast(float | None, rate)
 
     async def convert(
         self,

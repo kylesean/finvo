@@ -342,6 +342,18 @@ def create_direct_execute_node() -> Callable[[AgentState, RunnableConfig], Any]:
 
             logger.info("direct_execute_success", tool_name=tool_name)
 
+            # S-I: propagate the tool's OWN success flag honestly. Some tools
+            # (e.g. execute_transfer) catch their failures and return
+            # {"success": False, "message": ...} instead of raising — wrapping
+            # that as success=True would make the event generator emit nothing
+            # (silent failure) because its component emission is gated on
+            # `success`. Carry the error text for the client-facing error event.
+            inner_success = True
+            error_message: str | None = None
+            if isinstance(result, dict) and result.get("success") is False:
+                inner_success = False
+                error_message = result.get("message") or "Action failed"
+
             return {
                 "messages": [AIMessage(content="")],  # Silent — let the UI component show the result
                 "ui_mode": "idle",
@@ -349,9 +361,10 @@ def create_direct_execute_node() -> Callable[[AgentState, RunnableConfig], Any]:
                 "tool_params": None,
                 "direct_execute_result": {
                     "tool_name": tool_name,
-                    "success": True,
+                    "success": inner_success,
                     "data": result if isinstance(result, dict) else {"result": result},
                     "surface_id": tool_params.get("surface_id"),
+                    "error": error_message,
                 },
             }
         except Exception as e:

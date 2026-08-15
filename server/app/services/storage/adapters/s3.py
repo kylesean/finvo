@@ -221,8 +221,17 @@ class S3Adapter(StorageAdapter):
         Raises:
             StorageNotFoundError: If object doesn't exist
         """
+        # S-F: resolve the client OUTSIDE the try so a client-creation failure
+        # can never hit the `except client.exceptions.NoSuchKey` branch with
+        # `client` unbound (a NameError masking the real error).
         try:
-            async with await self._get_client() as client:
+            client = await self._get_client()
+        except Exception as e:
+            logger.error("s3_stream_client_failed", bucket=self.bucket, key=object_key, error=str(e))
+            raise StorageError(f"Failed to initialize S3 client for stream: {e}")
+
+        try:
+            async with client:
                 response = await client.get_object(
                     Bucket=self.bucket,
                     Key=object_key,

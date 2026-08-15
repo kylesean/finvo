@@ -34,24 +34,27 @@ from app.core.config import settings
 from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.models.base import utc_now
 from app.models.financial_account import FinancialAccount
+from app.models.financial_settings import FinancialSettings
 from app.models.transaction import Transaction
 from app.services.exchange_rate_service import exchange_rate_service
-from app.utils.currency_utils import BASE_CURRENCY
+from app.utils.currency_inference import FALLBACK_CURRENCY
+
+FALLBACK_BASE_CURRENCY = FALLBACK_CURRENCY
 
 
-async def effect_amount(tx: Transaction, account_currency: str) -> Decimal:
+async def effect_amount(tx: Transaction, account_currency: str, user_base_currency: str) -> Decimal:
     """Snapshot-based conversion mirroring ``_convert_amount_effect``.
 
     - account currency == tx currency -> ``amount_original`` (exact)
-    - account currency == base       -> ``amount`` (snapshot, stable)
+    - account currency == user base   -> ``amount`` (snapshot, stable)
     - any other currency             -> live conversion; raises if unavailable
       so the ledger is never silently mislabeled.
     """
-    tx_currency = (tx.currency or BASE_CURRENCY).upper()
+    tx_currency = (tx.currency or user_base_currency).upper()
     target = account_currency.upper()
     if target == tx_currency:
         return abs(tx.amount_original)
-    if target == BASE_CURRENCY:
+    if target == user_base_currency.upper():
         return abs(tx.amount)
 
     try:
@@ -68,30 +71,30 @@ async def effect_amount(tx: Transaction, account_currency: str) -> Decimal:
     # Universal snapshot fallback using tx.exchange_rate or tx.amount / tx.amount_original
     if tx.exchange_rate and tx.exchange_rate > 0:
         rate = Decimal(str(tx.exchange_rate))
-        if tx_currency == BASE_CURRENCY:
+        if tx_currency == user_base_currency.upper():
             return abs(tx.amount_original) / rate
-        if target == BASE_CURRENCY:
+        if target == user_base_currency.upper():
             return abs(tx.amount_original) * rate
 
     if tx.amount_original and tx.amount and tx.amount_original != Decimal("0"):
         implicit_rate = abs(tx.amount) / abs(tx.amount_original)
         if implicit_rate > Decimal("0"):
-            if tx_currency == BASE_CURRENCY:
+            if tx_currency == user_base_currency.upper():
                 return abs(tx.amount_original) / implicit_rate
-            if target == BASE_CURRENCY:
+            if target == user_base_currency.upper():
                 return abs(tx.amount_original) * implicit_rate
 
     raise ValueError(f"no exchange rate available to convert {tx_currency} -> {target} (tx {tx.id})")
 
 
-async def ledger_effect(tx: Transaction, account: FinancialAccount) -> Decimal:
+async def ledger_effect(tx: Transaction, account: FinancialAccount, user_base_currency: str) -> Decimal:
     """Signed balance effect of ``tx`` on ``account`` (0 if not linked)."""
     tx_type = (tx.type or "").upper()
     if tx.source_account_id != account.id and tx.target_account_id != account.id:
         return Decimal("0")
 
     acc_currency = (account.currency_code or PROJECT_DEFAULT_CURRENCY).upper()
-    amount = await effect_amount(tx, acc_currency)
+    amount = await effect_amount(tx, acc_currency, user_base_currency)
 
     if tx_type == "EXPENSE":
         return -amount if tx.source_account_id == account.id else Decimal("0")
@@ -137,15 +140,26 @@ async def reconcile(session: AsyncSession, apply: bool) -> tuple[int, int, Decim
             if acc_id is not None:
                 by_account.setdefault(acc_id, []).append(tx)
 
+    # Resolve each account owner's actual base currency (the ledger convention)
+    # instead of assuming a global constant.
+    base_by_user: dict[UUID, str] = {}
+    settings_rows = (
+        await session.execute(select(FinancialSettings.user_uuid, FinancialSettings.primary_currency))
+    ).all()
+    for user_uuid, primary in settings_rows:
+        if primary:
+            base_by_user[user_uuid] = primary.upper()
+
     total_diff = Decimal("0")
     skipped = 0
     corrected = 0
     for account in accounts:
+        user_base = base_by_user.get(account.user_uuid, FALLBACK_BASE_CURRENCY)
         expected = Decimal(account.initial_balance or 0)
         effects_ok = True
         for tx in by_account.get(account.id, []):
             try:
-                expected += await ledger_effect(tx, account)
+                expected += await ledger_effect(tx, account, user_base)
             except Exception as e:  # noqa: BLE001 - script-level guard
                 print(f"  [skip] account={account.id} tx={tx.id} effect unknown: {e}")
                 skipped += 1

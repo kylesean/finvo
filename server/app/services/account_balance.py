@@ -35,25 +35,29 @@ from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.models.financial_account import FinancialAccount
 from app.models.transaction import RecurringTransaction, Transaction
 from app.services.exchange_rate_service import exchange_rate_service
-from app.utils.currency_utils import BASE_CURRENCY
+from app.utils.currency_utils import get_user_base_currency
 
 
-async def tx_effect_amount(tx: Transaction, account_currency: str) -> Decimal:
+async def tx_effect_amount(tx: Transaction, account_currency: str, user_base_currency: str) -> Decimal:
     """Convert a transaction's absolute amount into the account currency.
 
     Snapshot-based conversion mirroring ``scripts/reconcile_balances.py``:
 
     - account currency == tx currency -> ``amount_original`` (exact)
-    - account currency == base       -> ``amount`` (snapshot, stable)
+    - account currency == user base   -> ``amount`` (snapshot, stable)
     - any other currency             -> live conversion; falls back to the
       snapshot rate when conversion is unavailable and raises only if no
       usable rate exists at all, so the ledger is never silently mislabeled.
+
+    ``user_base_currency`` is the user's *actual* primary currency (resolved
+    from their financial settings) — hardcoding a global constant here would
+    mislabel balances for any user whose base differs from it (S-B).
     """
-    tx_currency = (tx.currency or BASE_CURRENCY).upper()
+    tx_currency = (tx.currency or user_base_currency).upper()
     target = account_currency.upper()
     if target == tx_currency:
         return abs(Decimal(str(tx.amount_original)))
-    if target == BASE_CURRENCY:
+    if target == user_base_currency.upper():
         return abs(Decimal(str(tx.amount)))
 
     try:
@@ -72,30 +76,30 @@ async def tx_effect_amount(tx: Transaction, account_currency: str) -> Decimal:
 
     if tx.exchange_rate and Decimal(str(tx.exchange_rate)) > 0:
         rate = Decimal(str(tx.exchange_rate))
-        if tx_currency == BASE_CURRENCY:
+        if tx_currency == user_base_currency.upper():
             return tx_amount / rate
-        if target == BASE_CURRENCY:
+        if target == user_base_currency.upper():
             return tx_amount * rate
 
     if base_amount and tx_amount and base_amount != 0:
         implicit_rate = base_amount / tx_amount
         if implicit_rate > 0:
-            if tx_currency == BASE_CURRENCY:
+            if tx_currency == user_base_currency.upper():
                 return tx_amount / implicit_rate
-            if target == BASE_CURRENCY:
+            if target == user_base_currency.upper():
                 return tx_amount * implicit_rate
 
     raise ValueError(f"no exchange rate available to convert {tx_currency} -> {target} (tx {tx.id})")
 
 
-async def tx_ledger_effect(tx: Transaction, account: FinancialAccount) -> Decimal:
+async def tx_ledger_effect(tx: Transaction, account: FinancialAccount, user_base_currency: str) -> Decimal:
     """Signed balance effect of a single transaction on an account (0 if not linked)."""
     tx_type = (tx.type or "").upper()
     if tx.source_account_id != account.id and tx.target_account_id != account.id:
         return Decimal("0")
 
     acc_currency = (account.currency_code or PROJECT_DEFAULT_CURRENCY).upper()
-    amount = await tx_effect_amount(tx, acc_currency)
+    amount = await tx_effect_amount(tx, acc_currency, user_base_currency)
 
     if tx_type == "EXPENSE":
         return -amount if tx.source_account_id == account.id else Decimal("0")
@@ -139,9 +143,13 @@ async def compute_expected_balance(
     target_txs = result.scalars().all()
 
     expected = Decimal(account.initial_balance or 0)
+    # S-B: resolve the account owner's ACTUAL base currency once and reuse it
+    # for every effect conversion — the ledger convention compares against the
+    # user's primary currency, not a global constant.
+    user_base_currency = await get_user_base_currency(db, account.user_uuid)
     for tx in [*source_txs, *target_txs]:
         try:
-            expected += await tx_ledger_effect(tx, account)
+            expected += await tx_ledger_effect(tx, account, user_base_currency)
         except ValueError:
             return Decimal(account.current_balance or 0), False
     return expected, True
@@ -167,15 +175,16 @@ async def count_account_references(db: AsyncSession, account_id: UUID) -> dict[s
     reference means a physical delete would silently corrupt history.
     """
     result = await db.execute(
-        select(func.count()).select_from(Transaction).where(
-            (Transaction.source_account_id == account_id)
-            | (Transaction.target_account_id == account_id)
-        )
+        select(func.count())
+        .select_from(Transaction)
+        .where((Transaction.source_account_id == account_id) | (Transaction.target_account_id == account_id))
     )
     tx_count = int(result.scalar() or 0)
 
     result = await db.execute(
-        select(func.count()).select_from(RecurringTransaction).where(
+        select(func.count())
+        .select_from(RecurringTransaction)
+        .where(
             (RecurringTransaction.source_account_id == account_id)
             | (RecurringTransaction.target_account_id == account_id)
         )

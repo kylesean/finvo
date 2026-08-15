@@ -24,7 +24,7 @@ from app.models.budget import (
     BudgetPeriodType,
     BudgetSettings,
 )
-from app.models.transaction import Transaction
+from app.models.transaction import SYSTEM_TRANSACTION_SOURCE, Transaction
 
 # Default threshold values used when no BudgetSettings row exists yet.
 # These match the DB column defaults and avoid a write on the read path.
@@ -112,6 +112,12 @@ class BudgetPeriodService:
 
                 rollover_in = Decimal("0")
                 if budget.rollover_enabled and prev_period:
+                    # S-D: refresh the previous period's spent amount from the
+                    # ledger before computing the rollover surplus. The
+                    # persisted value can be stale — transactions booked after
+                    # the user's last budget-page visit — which would inflate
+                    # the surplus and carry it into the new period's target.
+                    await self.update_period_spent_amount(budget, prev_period, auto_commit=False)
                     unused = prev_period.adjusted_target - prev_period.spent_amount
                     surplus = max(unused, Decimal("0"))
                     rollover_in = surplus
@@ -284,6 +290,10 @@ class BudgetPeriodService:
             Transaction.user_uuid == user_uuid,
             Transaction.type == "EXPENSE",
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries (close disposal) are balance bookkeeping,
+            # not user spending — exclude them so a writeoff never drains the
+            # budget's remaining amount.
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
             Transaction.transaction_at >= start_dt,
             Transaction.transaction_at < end_dt,
         )

@@ -251,7 +251,22 @@ class EventGenerator:
             # Process direct_execute node
             if node_name == "direct_execute":
                 result_data = node_output.get("direct_execute_result")
-                if result_data and result_data.get("success"):
+                if result_data:
+                    # S-I: a failed tool result must reach the client. The node
+                    # marks the wrapper success=False (with the error text) when
+                    # the tool itself returned {"success": False}; without this,
+                    # text is suppressed AND component emission is skipped —
+                    # a completely silent failure (e.g. a rejected transfer).
+                    if not result_data.get("success"):
+                        error_message = result_data.get("error") or "Action failed"
+                        logger.warning(
+                            "direct_execute_failure_feedback",
+                            tool_name=result_data.get("tool_name", ""),
+                            error=error_message,
+                        )
+                        yield GenUIEvent(type="error", content=str(error_message))
+                        continue
+
                     # Honor the surface_id the direct_execute node persisted (from
                     # the client's tool_params); without it, every turn would mint a
                     # brand-new random surface and in-place component updates break.

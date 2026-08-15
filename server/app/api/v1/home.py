@@ -43,6 +43,7 @@ async def get_calendar_month_details(
     service: StatsService,
     year: int = Query(..., ge=2000, le=2100, description="Year"),
     month: int = Query(..., ge=1, le=12, description="Month"),
+    tz_offset: int = Query(default=0, ge=-840, le=840, description="Client timezone offset in minutes"),
 ) -> JSONResponse:
     """Get calendar month details for the specified month.
 
@@ -51,11 +52,12 @@ async def get_calendar_month_details(
         service: Injected StatisticsService instance
         year: Year
         month: Month
+        tz_offset: Client timezone offset in minutes (S-E: local-day grouping)
 
     Returns:
         Unified response format, containing daily expense summary and heat level
     """
-    data = await service.get_calendar_month_details(current_user.uuid, year, month)
+    data = await service.get_calendar_month_details(current_user.uuid, year, month, tz_offset_minutes=tz_offset)
     return success_response(
         data=data,
         message="Calendar month details retrieved successfully",

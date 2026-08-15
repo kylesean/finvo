@@ -16,7 +16,7 @@ from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError, TransactionErrorCode
 from app.models.attachment import Attachment
 from app.models.base import utc_now
-from app.models.financial_account import FinancialAccount
+from app.models.financial_account import AccountStatus, FinancialAccount
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.repositories.notification_repository import NotificationRepository
@@ -40,6 +40,11 @@ from app.utils.currency_utils import (
 )
 
 logger = structlog.get_logger(__name__)
+
+# Transactions minted by account-lifecycle operations (close disposal entries)
+# are the ledger's audit trail: they must never be edited, re-associated or
+# deleted by the user. Everything else in the transaction domain stays mutable.
+SYSTEM_TX_READONLY_MESSAGE = "System-generated transactions are read-only"
 
 
 class TransactionCRUDService:
@@ -416,6 +421,9 @@ class TransactionCRUDService:
         if transaction.user_uuid != user_uuid:
             raise BusinessError("Permission denied to modify this transaction", CommonErrorCode.PERMISSION_DENIED)
 
+        # Lifecycle audit entries are immutable
+        self._ensure_mutable(transaction)
+
         # Track what changed for DataModelUpdate paths
         changed_fields: list[str] = []
 
@@ -542,6 +550,9 @@ class TransactionCRUDService:
         if transaction.user_uuid != user_uuid:
             raise BusinessError("Permission denied to delete this transaction", CommonErrorCode.PERMISSION_DENIED)
 
+        # Lifecycle audit entries are immutable
+        self._ensure_mutable(transaction)
+
         # PENDING rows carry no booked balance effect (see confirm/skip docs),
         # so deleting one must not reverse an effect that was never applied.
         if transaction.status != "PENDING":
@@ -584,6 +595,21 @@ class TransactionCRUDService:
         if transaction is None:
             raise NotFoundError("Transaction")
         return transaction
+
+    @staticmethod
+    def _ensure_mutable(transaction: Transaction) -> None:
+        """Reject mutations on system-generated (lifecycle) transactions.
+
+        Close-disposal entries (``source == SYSTEM``) are the audit trail of
+        account lifecycle operations: editing, re-associating or deleting one
+        would silently undo a balance disposal (e.g. resurrecting a CLOSED
+        account's zeroed balance), so they are read-only.
+        """
+        if transaction.source == "SYSTEM":
+            raise BusinessError(
+                SYSTEM_TX_READONLY_MESSAGE,
+                TransactionErrorCode.TRANSACTION_SYSTEM_READONLY,
+            )
 
     async def confirm_pending_transaction(
         self,
@@ -784,6 +810,22 @@ class TransactionCRUDService:
                 )
                 self.db.add(tx)
                 created_transactions.append(tx)
+
+                # S-A: keep the batch path consistent with the single-transaction
+                # path — the ledger balance effect must be applied for items that
+                # carry the shared source account, otherwise account balances
+                # silently drift from the transaction ledger. The ledger converts
+                # via the transaction's own snapshot and skips accounts that no
+                # longer exist, mirroring create_transaction() exactly.
+                if source_account_uuid:
+                    await self.ledger.apply_transaction_balance_effect(
+                        tx,
+                        user_uuid,
+                        sign=1,
+                        source_account_id=source_account_uuid,
+                        target_account_id=None,
+                        for_update=True,
+                    )
             except BusinessError as e:
                 logger.warning("batch_create_item_rejected", index=index, error=e.message)
                 failed.append({"index": str(index), "error": e.message})
@@ -888,6 +930,10 @@ class TransactionCRUDService:
         if transaction.user_uuid != user_uuid:
             raise BusinessError("Permission denied to modify this transaction", CommonErrorCode.PERMISSION_DENIED)
 
+        # Lifecycle audit entries are immutable (re-associating one would
+        # roll the disposed balance back onto a CLOSED account).
+        self._ensure_mutable(transaction)
+
         is_income = transaction.type == "INCOME"
 
         # Expense → source_account_id; Income → target_account_id (Transfer uses
@@ -901,6 +947,20 @@ class TransactionCRUDService:
 
         if old_account_id == new_account_id:
             return await self.get_transaction_detail(transaction_id, user_uuid)
+
+        # A new association must point at an owned, ACTIVE account. A CLOSED
+        # account has been disposed of (balance frozen/zeroed); accepting one
+        # here would let a re-association resurrect its disposed balance, so
+        # the client filter is enforced server-side too.
+        if new_account_id:
+            account = await self.get_financial_account(new_account_id, user_uuid)
+            if not account:
+                raise BusinessError("Invalid financial account", TransactionErrorCode.INVALID_ACCOUNT_ID)
+            if account.status != AccountStatus.ACTIVE.value:
+                raise BusinessError(
+                    "Cannot link a transaction to a closed account",
+                    TransactionErrorCode.TRANSACTION_ACCOUNT_LINK_CLOSED,
+                )
 
         # PENDING rows carry no booked balance effect, so re-association must
         # not adjust any balance (the association itself is still updated).

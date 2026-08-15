@@ -16,6 +16,7 @@ from collections.abc import AsyncGenerator
 from typing import Any
 from uuid import UUID
 
+from langchain_core.messages import AIMessage
 from langgraph.errors import GraphRecursionError
 
 from app.core.exceptions import to_client_error
@@ -70,6 +71,10 @@ class StreamProcessor:
         self._render_policy = render_policy or DefaultRenderPolicy()
         self._text_filter_policy = text_filter_policy or DefaultTextFilterPolicy()
         self._event_generator = EventGenerator()
+        # S-H: the server generates the AI message id when the model node emits
+        # its first chunk; it is streamed to the client once per turn so the
+        # client can rename its optimistic placeholder to the authoritative id.
+        self._message_id_emitted = False
 
     def get_last_response(self) -> str:
         """Get the AI response text from the last stream processing.
@@ -290,6 +295,20 @@ class StreamProcessor:
         """Process messages stream mode."""
         msg_chunk, metadata = chunk
         node_name = metadata.get("langgraph_node", "")
+
+        # S-H: emit the authoritative AI message id BEFORE its first text delta
+        # so the client can rename its optimistic placeholder first (a rename
+        # after content has landed would leave the content on the old id).
+        if not self._message_id_emitted and isinstance(msg_chunk, AIMessage):
+            msg_id = getattr(msg_chunk, "id", None)
+            if msg_id:
+                self._message_id_emitted = True
+                logger.info(
+                    "stream_message_id",
+                    message_id=msg_id,
+                    node_name=node_name,
+                )
+                yield GenUIEvent(type="message_id", content=msg_id)
 
         # Apply text filter policy
         should_suppress_text = self._text_filter_policy.should_suppress(node_name, metadata)

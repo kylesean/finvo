@@ -8,7 +8,7 @@ from sqlalchemy import and_, case, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.financial_account import FinancialAccount
-from app.models.transaction import Transaction
+from app.models.transaction import SYSTEM_TRANSACTION_SOURCE, Transaction
 from app.schemas.statistics import (
     CashFlowResponse,
     CategoryBreakdownItem,
@@ -137,6 +137,9 @@ class StatisticsService:
             # Only include settled transactions so overview/cash-flow match
             # trends/categories/top-transactions conventions.
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries (close disposal) are balance bookkeeping,
+            # not real income/expense — excluded from all user analytics.
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
         ]
 
         # Apply account type filter if specified
@@ -192,6 +195,9 @@ class StatisticsService:
             Transaction.transaction_at >= prev_start,
             Transaction.transaction_at <= prev_end,
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries (close disposal) are balance bookkeeping,
+            # not real income/expense — excluded from all user analytics.
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
         ]
         if account_filter is not None:
             prev_conditions.append(Transaction.source_account_id.in_(account_filter))
@@ -251,21 +257,31 @@ class StatisticsService:
 
         tx_type = transaction_type.upper()
 
+        # S-E: group by the CLIENT-LOCAL day/month, not raw UTC. The bucket
+        # labels below are generated from the local (tz-shifted) period range;
+        # truncating the raw UTC timestamp would put a transaction booked at
+        # local 00:30 into the previous day's bucket (and then into the wrong
+        # label or none at all).
+        shifted_ts: Any = (
+            Transaction.transaction_at + timedelta(minutes=tz_offset_minutes)
+            if tz_offset_minutes
+            else Transaction.transaction_at
+        )
+
         # Determine grouping granularity based on time range
-        if time_range == "week":
-            date_trunc = func.date_trunc("day", Transaction.transaction_at)
-        elif time_range == "month":
-            date_trunc = func.date_trunc("day", Transaction.transaction_at)
-        elif time_range == "year":
-            date_trunc = func.date_trunc("month", Transaction.transaction_at)
+        if time_range == "year":
+            date_trunc = func.date_trunc("month", shifted_ts)
         else:
-            date_trunc = func.date_trunc("day", Transaction.transaction_at)
+            date_trunc = func.date_trunc("day", shifted_ts)
 
         # Build base conditions
         base_conditions: list[Any] = [
             Transaction.user_uuid == user_uuid,
             Transaction.type == tx_type,
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries (close disposal) are balance bookkeeping,
+            # not real income/expense — excluded from all user analytics.
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
             Transaction.transaction_at >= period_start,
             Transaction.transaction_at <= period_end,
         ]
@@ -359,6 +375,9 @@ class StatisticsService:
             Transaction.user_uuid == user_uuid,
             Transaction.type == tx_type,
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries (close disposal) are balance bookkeeping,
+            # not real income/expense — excluded from all user analytics.
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
             Transaction.transaction_at >= period_start,
             Transaction.transaction_at <= period_end,
         ]
@@ -429,6 +448,9 @@ class StatisticsService:
             Transaction.user_uuid == user_uuid,
             Transaction.type == tx_type,
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries (close disposal) are balance bookkeeping,
+            # not real income/expense — excluded from all user analytics.
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
             Transaction.transaction_at >= period_start,
             Transaction.transaction_at <= period_end,
         ]
@@ -509,6 +531,9 @@ class StatisticsService:
             # Only include settled transactions so overview/cash-flow match
             # trends/categories/top-transactions conventions.
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries (close disposal) are balance bookkeeping,
+            # not real income/expense — excluded from all user analytics.
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
         ]
 
         # Apply account type filter if specified
@@ -540,6 +565,9 @@ class StatisticsService:
             Transaction.transaction_at >= prev_start,
             Transaction.transaction_at <= prev_end,
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries (close disposal) are balance bookkeeping,
+            # not real income/expense — excluded from all user analytics.
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
         ]
         if account_filter is not None:
             prev_conditions.append(Transaction.source_account_id.in_(account_filter))
@@ -814,6 +842,9 @@ class StatisticsService:
                     Transaction.user_uuid == user_uuid,
                     Transaction.type == "EXPENSE",
                     Transaction.status == "CLEARED",
+                    # Lifecycle audit entries (close disposal) are balance bookkeeping,
+                    # not real income/expense — excluded from all user analytics.
+                    Transaction.source != SYSTEM_TRANSACTION_SOURCE,
                 )
             )
         )
@@ -840,18 +871,39 @@ class StatisticsService:
             },
         }
 
-    async def get_calendar_month_details(self, user_uuid: UUID, year: int, month: int) -> dict[str, Any]:
+    async def get_calendar_month_details(
+        self,
+        user_uuid: UUID,
+        year: int,
+        month: int,
+        tz_offset_minutes: int | None = None,
+    ) -> dict[str, Any]:
         """Get calendar month daily summary and heat levels for the specified month."""
         display_currency = await get_user_display_currency(self.db, user_uuid)
         currency_symbol = get_currency_symbol(display_currency)
-
         _, days_in_month = monthrange(year, month)
-        start_date = datetime(year, month, 1, tzinfo=UTC)
-        end_date = datetime(year + 1, 1, 1, tzinfo=UTC) if month == 12 else datetime(year, month + 1, 1, tzinfo=UTC)
+
+        # S-E: the client displays LOCAL calendar days, so both the range and
+        # the grouping must be shifted by the client's tz offset — a raw-UTC
+        # month range would drop local-midnight transactions at month edges and
+        # attribute local-00:30 bookings to the previous day.
+        if tz_offset_minutes:
+            local_start = datetime(year, month, 1, tzinfo=UTC) - timedelta(minutes=tz_offset_minutes)
+            if month == 12:
+                local_end = datetime(year + 1, 1, 1, tzinfo=UTC) - timedelta(minutes=tz_offset_minutes)
+            else:
+                local_end = datetime(year, month + 1, 1, tzinfo=UTC) - timedelta(minutes=tz_offset_minutes)
+            shifted_ts: Any = Transaction.transaction_at + timedelta(minutes=tz_offset_minutes)
+        else:
+            local_start = datetime(year, month, 1, tzinfo=UTC)
+            local_end = (
+                datetime(year + 1, 1, 1, tzinfo=UTC) if month == 12 else datetime(year, month + 1, 1, tzinfo=UTC)
+            )
+            shifted_ts = Transaction.transaction_at
 
         result = await self.db.execute(
             select(
-                func.date(Transaction.transaction_at).label("date"),
+                func.date(shifted_ts).label("date"),
                 func.coalesce(func.sum(Transaction.amount), Decimal("0.0")).label("total"),
             )
             .where(
@@ -859,11 +911,14 @@ class StatisticsService:
                     Transaction.user_uuid == user_uuid,
                     Transaction.type == "EXPENSE",
                     Transaction.status == "CLEARED",
-                    Transaction.transaction_at >= start_date,
-                    Transaction.transaction_at < end_date,
+                    # Lifecycle audit entries (close disposal) are balance bookkeeping,
+                    # not real income/expense — excluded from all user analytics.
+                    Transaction.source != SYSTEM_TRANSACTION_SOURCE,
+                    Transaction.transaction_at >= local_start,
+                    Transaction.transaction_at < local_end,
                 )
             )
-            .group_by(func.date(Transaction.transaction_at))
+            .group_by(func.date(shifted_ts))
         )
         daily_totals = {
             row.date: row.total if isinstance(row.total, Decimal) else Decimal(str(row.total or "0.0"))

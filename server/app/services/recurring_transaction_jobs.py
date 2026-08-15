@@ -15,7 +15,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session_context
 from app.core.logging import logger
-from app.models.base import utc_now
 from app.models.transaction import RecurringTransaction, Transaction
 from app.services.transaction.recurring_service import RecurringTransactionService
 
@@ -61,16 +60,25 @@ async def process_due_transactions() -> None:
 
             for recurring_tx in due_transactions:
                 try:
-                    # Idempotency: skip if already generated for this exact execution point
-                    if await _already_generated(db, recurring_tx):
-                        skipped_count += 1
-                        # Still advance the schedule
-                        await _update_next_execution(db, recurring_tx)
-                        continue
+                    # S-C: per-item savepoint. The ledger balance effect raises
+                    # when a cross-currency rate is unavailable (never silently
+                    # mislabels) — without a savepoint that failure would still
+                    # commit the transaction insert at the end of the loop,
+                    # orphaning a transaction that has no balance effect and is
+                    # then blocked forever by the _already_generated dedup.
+                    # Rolling back to the savepoint keeps the item atomic: the
+                    # transaction is not created and the next run retries it.
+                    async with db.begin_nested():
+                        # Idempotency: skip if already generated for this exact execution point
+                        if await _already_generated(db, recurring_tx):
+                            skipped_count += 1
+                            # Still advance the schedule
+                            await _update_next_execution(db, recurring_tx)
+                            continue
 
-                    await _create_transaction_from_recurring(db, recurring_tx, user_base_cache=user_base_cache)
-                    await _update_next_execution(db, recurring_tx)
-                    processed_count += 1
+                        await _create_transaction_from_recurring(db, recurring_tx, user_base_cache=user_base_cache)
+                        await _update_next_execution(db, recurring_tx)
+                        processed_count += 1
                 except Exception as e:
                     error_count += 1
                     logger.error(
@@ -124,57 +132,54 @@ async def _already_generated(
     return count > 0
 
 
-async def _update_account_balances_for_recurring(
+async def _apply_recurring_balance_effect(
     db: AsyncSession,
     recurring_tx: RecurringTransaction,
-    amount_original: Decimal,
-    amount_base: Decimal,
-    currency: str,
+    transaction: Transaction,
 ) -> None:
-    """Update linked financial account balances when recurring transaction is automatically confirmed."""
-    from app.models.financial_account import FinancialAccount
-    from app.services.exchange_rate_service import exchange_rate_service
+    """Apply the ledger balance effect for an auto-confirmed recurring transaction.
 
-    exchange_rate_svc = exchange_rate_service
+    S-C: replaces the previous manual balance adjustment. The ledger service is
+    the single source of truth — it converts via the transaction's snapshot
+    with the user's REAL base currency (never silently books ``amount_base`` as
+    the account currency) and takes a row lock (``for_update``) so a concurrent
+    balance edit cannot lose an update.
+    """
+    from app.services.transaction.ledger_service import TransactionLedgerService
 
-    async def _adjust_account_balance(account_id: UUID, is_deduction: bool) -> None:
-        account = await db.get(FinancialAccount, account_id)
-        if not account:
-            return
+    ledger = TransactionLedgerService(db)
+    tx_type = transaction.type.upper() if transaction.type else "EXPENSE"
 
-        account_currency = (account.currency_code or "CNY").upper()
-        if currency == account_currency:
-            delta = abs(Decimal(str(amount_original)))
-        else:
-            try:
-                converted = await exchange_rate_svc.convert(
-                    amount=abs(Decimal(str(amount_original))),
-                    from_currency=currency,
-                    to_currency=account_currency,
-                )
-                delta = Decimal(str(converted)) if converted is not None else abs(Decimal(str(amount_base)))
-            except Exception:
-                delta = abs(Decimal(str(amount_base)))
-
-        if is_deduction:
-            account.current_balance -= delta
-        else:
-            account.current_balance += delta
-        account.updated_at = utc_now()
-
-    tx_type = recurring_tx.type.upper() if recurring_tx.type else "EXPENSE"
-
-    if tx_type == "EXPENSE" and recurring_tx.source_account_id:
-        await _adjust_account_balance(recurring_tx.source_account_id, is_deduction=True)
+    if tx_type == "EXPENSE":
+        await ledger.apply_transaction_balance_effect(
+            transaction,
+            recurring_tx.user_uuid,
+            sign=1,
+            source_account_id=transaction.source_account_id,
+            target_account_id=None,
+            for_update=True,
+        )
     elif tx_type == "INCOME":
-        target_id = recurring_tx.target_account_id or recurring_tx.source_account_id
-        if target_id:
-            await _adjust_account_balance(target_id, is_deduction=False)
+        # Preserve the legacy fallback: an income rule with no target account
+        # credits the source account.
+        target_id = transaction.target_account_id or transaction.source_account_id
+        await ledger.apply_transaction_balance_effect(
+            transaction,
+            recurring_tx.user_uuid,
+            sign=1,
+            source_account_id=None,
+            target_account_id=target_id,
+            for_update=True,
+        )
     elif tx_type == "TRANSFER":
-        if recurring_tx.source_account_id:
-            await _adjust_account_balance(recurring_tx.source_account_id, is_deduction=True)
-        if recurring_tx.target_account_id:
-            await _adjust_account_balance(recurring_tx.target_account_id, is_deduction=False)
+        await ledger.apply_transaction_balance_effect(
+            transaction,
+            recurring_tx.user_uuid,
+            sign=1,
+            source_account_id=transaction.source_account_id,
+            target_account_id=transaction.target_account_id,
+            for_update=True,
+        )
 
 
 async def _create_transaction_from_recurring(
@@ -233,13 +238,7 @@ async def _create_transaction_from_recurring(
 
     # Immediately adjust linked account balances if transaction is automatically confirmed
     if status == "CONFIRMED":
-        await _update_account_balances_for_recurring(
-            db=db,
-            recurring_tx=recurring_tx,
-            amount_original=amount_original,
-            amount_base=amount,
-            currency=currency,
-        )
+        await _apply_recurring_balance_effect(db, recurring_tx, transaction)
 
     recurring_tx.last_generated_at = utc_now()
 
