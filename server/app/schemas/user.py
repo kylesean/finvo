@@ -29,7 +29,10 @@ class FinancialAccountItem(BaseModel):
         status: Account status (default: 'ACTIVE')
     """
 
-    id: UUID | None = Field(default=None, description="Account ID (present when updating an existing account, absent when creating a new one)")
+    id: UUID | None = Field(
+        default=None,
+        description="Account ID (present when updating an existing account, absent when creating a new one)",
+    )
     name: str = Field(..., description="Account name", max_length=100)
     nature: Literal["ASSET", "LIABILITY"] = Field(..., description="Account nature")
     type: (
@@ -176,7 +179,10 @@ class SaveFinancialAccountsResponse(BaseModel):
 class CreateFinancialAccountRequest(BaseModel):
     """Request schema for creating a single financial account."""
 
-    id: UUID | None = Field(default=None, description="Account ID (present when updating an existing account, absent when creating a new one)")
+    id: UUID | None = Field(
+        default=None,
+        description="Account ID (present when updating an existing account, absent when creating a new one)",
+    )
     name: str = Field(..., description="Account name", max_length=100)
     nature: Literal["ASSET", "LIABILITY"] = Field(..., description="Account nature")
     type: (
@@ -262,9 +268,7 @@ class CloseFinancialAccountRequest(BaseModel):
     disposal: Literal["keep", "transfer", "writeoff"] = Field(
         default="keep", description="How to dispose of the remaining balance before closing"
     )
-    target_account_id: UUID | None = Field(
-        default=None, description="Required when disposal is 'transfer'"
-    )
+    target_account_id: UUID | None = Field(default=None, description="Required when disposal is 'transfer'")
 
     @model_validator(mode="after")
     def validate_disposal(self) -> CloseFinancialAccountRequest:

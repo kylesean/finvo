@@ -32,7 +32,7 @@ from app.models.budget import (
     BudgetStatus,
     BudgetType,
 )
-from app.models.transaction import Transaction
+from app.models.transaction import SYSTEM_TRANSACTION_SOURCE, Transaction
 from app.schemas.budget import (
     BudgetAlert,
     BudgetCreateRequest,
@@ -629,6 +629,8 @@ class BudgetService:
             Transaction.user_uuid == user_uuid,
             Transaction.type == "EXPENSE",
             Transaction.status == "CLEARED",
+            # Lifecycle audit entries are balance bookkeeping, not user spending
+            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
             Transaction.transaction_at >= start_dt,
             Transaction.transaction_at < end_dt,
         )
@@ -709,6 +711,8 @@ class BudgetService:
                 Transaction.user_uuid == user_uuid,
                 Transaction.type == "EXPENSE",
                 Transaction.status == "CLEARED",
+                # Lifecycle audit entries are balance bookkeeping, not user spending
+                Transaction.source != SYSTEM_TRANSACTION_SOURCE,
                 Transaction.transaction_at >= start_dt,
                 Transaction.transaction_at < end_dt,
             )

@@ -10,7 +10,7 @@ from sqlalchemy import and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.financial_account import FinancialAccount
-from app.models.transaction import RecurringTransaction, Transaction
+from app.models.transaction import SYSTEM_TRANSACTION_SOURCE, RecurringTransaction, Transaction
 
 if TYPE_CHECKING:
     from app.services.transaction.recurring_service import RecurringTransactionService
@@ -101,6 +101,10 @@ class CashFlowService:
                 and_(
                     Transaction.user_uuid == user_uuid,
                     Transaction.type == "EXPENSE",
+                    # Lifecycle audit entries (close disposal) are one-off
+                    # balance bookkeeping — excluded so they don't inflate the
+                    # average daily consumption used for forecasting.
+                    Transaction.source != SYSTEM_TRANSACTION_SOURCE,
                     Transaction.transaction_at >= thirty_days_ago,
                 )
             )

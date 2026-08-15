@@ -140,6 +140,93 @@ async def test_calculate_spent_amount(db_session):
 
 
 @pytest.mark.asyncio
+async def test_calculate_spent_amount_excludes_system_transactions(db_session):
+    """Regression: close-disposal entries (source=SYSTEM) must not count as spending.
+
+    A writeoff booked at account close is balance bookkeeping (the money is
+    gone from the account, not spent by the user); including it in the budget's
+    spent amount would turn the remaining amount negative.
+    """
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid, username="system_tx", email="system@example.com", password="hash", registration_type="email"
+    )
+    db_session.add(user)
+    await db_session.commit()
+
+    today = datetime.now(UTC)
+    normal = Transaction(
+        uuid=uuid4(),
+        user_uuid=user_uuid,
+        type="EXPENSE",
+        amount=Decimal("50.0"),
+        amount_original=Decimal("50.0"),
+        currency="CNY",
+        transaction_at=today,
+        category_key="FOOD",
+        status="CLEARED",
+    )
+    system = Transaction(
+        uuid=uuid4(),
+        user_uuid=user_uuid,
+        type="EXPENSE",
+        amount=Decimal("586000.0"),
+        amount_original=Decimal("586000.0"),
+        currency="CNY",
+        transaction_at=today,
+        category_key="OTHERS",
+        status="CLEARED",
+        source="SYSTEM",
+    )
+    db_session.add_all([normal, system])
+    await db_session.commit()
+
+    service = BudgetService(db_session)
+    start_date = today.date()
+    end_date = today.date()
+
+    spent = await service.calculate_spent_amount(user_uuid, start_date, end_date, category_key=None)
+    assert spent == Decimal("50.0"), "SYSTEM disposal entries must not count as budget spending"
+
+
+@pytest.mark.asyncio
+async def test_budget_suggestion_excludes_system_transactions(db_session):
+    """Regression: budget suggestions must not be skewed by lifecycle writeoffs."""
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid,
+        username="suggestion_tx",
+        email="suggest@example.com",
+        password="hash",
+        registration_type="email",
+    )
+    db_session.add(user)
+    await db_session.commit()
+
+    today = datetime.now(UTC)
+    system = Transaction(
+        uuid=uuid4(),
+        user_uuid=user_uuid,
+        type="EXPENSE",
+        amount=Decimal("586000.0"),
+        amount_original=Decimal("586000.0"),
+        currency="CNY",
+        transaction_at=today,
+        category_key="OTHERS",
+        status="CLEARED",
+        source="SYSTEM",
+    )
+    db_session.add(system)
+    await db_session.commit()
+
+    service = BudgetService(db_session)
+    suggestion = await service.suggest_budget(user_uuid, months=1, category_key=None)
+    assert Decimal(suggestion.suggested_amount) == Decimal("0"), (
+        "a lone SYSTEM writeoff must not fabricate a budget suggestion"
+    )
+
+
+@pytest.mark.asyncio
 async def test_update_period_status(db_session):
     # 1. Setup User and Budget
     user_uuid = uuid4()

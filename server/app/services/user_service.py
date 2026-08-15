@@ -16,7 +16,7 @@ from app.core.logging import logger
 from app.models.base import utc_now
 from app.models.financial_account import FinancialAccount
 from app.models.financial_settings import BurnRateMode, FinancialSettings
-from app.models.transaction import RecurringTransaction, Transaction
+from app.models.transaction import SYSTEM_TRANSACTION_SOURCE, RecurringTransaction, Transaction
 from app.models.user import User
 from app.models.user_settings import UserSettings
 from app.services.account_balance import count_account_references, recompute_account_balance
@@ -74,7 +74,9 @@ def _normalize_account_status(value: Any) -> str:
 
 def _account_payload_balance(account: FinancialAccount) -> Decimal:
     """Balance to expose in account payloads (fall back to initial when None)."""
-    return account.current_balance if account.current_balance is not None else (account.initial_balance or Decimal("0"))
+    return (
+        account.current_balance if account.current_balance is not None else (account.initial_balance or Decimal("0"))
+    )
 
 
 def _format_decimal(value: Decimal, precision: int = 8) -> str:
@@ -439,9 +441,7 @@ class UserService:
         # CLOSED is a terminal lifecycle state managed by the dedicated close
         # endpoint (it also implies balance disposal decisions). Refuse to flip
         # it through the generic update path so the semantics stay unambiguous.
-        if "status" in account_data and _normalize_account_status(
-            account_data["status"]
-        ) == "CLOSED":
+        if "status" in account_data and _normalize_account_status(account_data["status"]) == "CLOSED":
             raise ValidationError(
                 "Use the close-account operation to close an account",
                 field_errors={"status": "POST /financial-accounts/{id}/close"},
@@ -561,7 +561,9 @@ class UserService:
                 },
             )
 
-        balance = Decimal(account.current_balance if account.current_balance is not None else account.initial_balance or 0)
+        balance = Decimal(
+            account.current_balance if account.current_balance is not None else account.initial_balance or 0
+        )
         if balance != 0:
             raise BusinessError(
                 f"This account still has a balance of {balance:g} and cannot be deleted directly. "
@@ -769,7 +771,9 @@ class UserService:
                 },
             )
 
-        balance = Decimal(account.current_balance if account.current_balance is not None else account.initial_balance or 0)
+        balance = Decimal(
+            account.current_balance if account.current_balance is not None else account.initial_balance or 0
+        )
         effective_disposal = disposal
         transaction_id: str | None = None
 
@@ -819,12 +823,8 @@ class UserService:
                     user_uuid=user_uuid,
                     amount=abs(balance),
                     transaction_type="transfer",
-                    source_account_id=(
-                        account_id if balance > 0 else target_account_id
-                    ),
-                    target_account_id=(
-                        target_account_id if balance > 0 else account_id
-                    ),
+                    source_account_id=(account_id if balance > 0 else target_account_id),
+                    target_account_id=(target_account_id if balance > 0 else account_id),
                     category_key="OTHERS",
                     raw_input=_close_system_message(locale, "transfer"),
                 )
@@ -835,7 +835,7 @@ class UserService:
                 await self.db.execute(
                     update(Transaction)
                     .where(Transaction.uuid == created["transaction_id"])
-                    .values(source="SYSTEM")
+                    .values(source=SYSTEM_TRANSACTION_SOURCE)
                 )
             elif disposal == "writeoff":
                 # Ledger invariant: EXPENSE deducts the SOURCE account, INCOME
@@ -872,7 +872,7 @@ class UserService:
                 await self.db.execute(
                     update(Transaction)
                     .where(Transaction.uuid == created["transaction_id"])
-                    .values(source="SYSTEM")
+                    .values(source=SYSTEM_TRANSACTION_SOURCE)
                 )
             else:
                 raise ValidationError(f"Unknown disposal strategy: {disposal}")

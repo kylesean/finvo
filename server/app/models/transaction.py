@@ -21,6 +21,15 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
+# Source marker for transactions minted by account-lifecycle operations (close
+# disposal entries). Such rows are the ledger's audit trail: they must never be
+# edited or deleted (see TransactionCRUDService._ensure_mutable), and
+# user-facing income/expense analytics (budget spending, statistics, forecasts)
+# exclude them so a one-off disposal never pollutes real spending/income
+# metrics — the disposal is reflected in account balances only.
+SYSTEM_TRANSACTION_SOURCE = "SYSTEM"
+
+
 class Transaction(Base):
     """Transaction model for storing financial transactions.
 

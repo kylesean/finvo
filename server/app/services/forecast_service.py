@@ -24,7 +24,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import logger
 from app.models.financial_account import FinancialAccount
-from app.models.transaction import RecurringTransaction, Transaction
+from app.models.transaction import (
+    SYSTEM_TRANSACTION_SOURCE,
+    RecurringTransaction,
+    Transaction,
+)
 
 # Human-readable forecast labels localized per app language.
 # Keyed by ``language`` (zh, zh-Hant, ja, ko, en) with an English fallback.
@@ -441,6 +445,10 @@ class ForecastService:
                         Transaction.user_uuid == user_uuid,
                         Transaction.type == "EXPENSE",
                         Transaction.status == "CLEARED",
+                        # Lifecycle audit entries (close disposal) are one-off
+                        # balance bookkeeping — excluded so they don't skew the
+                        # estimated daily burn rate.
+                        Transaction.source != SYSTEM_TRANSACTION_SOURCE,
                         Transaction.transaction_at >= lookback_start,
                     ),
                 )

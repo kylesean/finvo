@@ -17,7 +17,7 @@ from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError, T
 from app.models.attachment import Attachment
 from app.models.base import utc_now
 from app.models.financial_account import AccountStatus, FinancialAccount
-from app.models.transaction import Transaction
+from app.models.transaction import SYSTEM_TRANSACTION_SOURCE, Transaction
 from app.models.user import User
 from app.repositories.notification_repository import NotificationRepository
 from app.schemas.transaction import (
@@ -605,7 +605,7 @@ class TransactionCRUDService:
         would silently undo a balance disposal (e.g. resurrecting a CLOSED
         account's zeroed balance), so they are read-only.
         """
-        if transaction.source == "SYSTEM":
+        if transaction.source == SYSTEM_TRANSACTION_SOURCE:
             raise BusinessError(
                 SYSTEM_TX_READONLY_MESSAGE,
                 TransactionErrorCode.TRANSACTION_SYSTEM_READONLY,
