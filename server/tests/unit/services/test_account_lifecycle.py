@@ -13,9 +13,9 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 
-from app.core.exceptions import BusinessError, NotFoundError, ValidationError
+from app.core.exceptions import AccountErrorCode, BusinessError, NotFoundError, ValidationError
 from app.models.financial_account import FinancialAccount
 from app.models.transaction import Transaction
 from app.models.user import User
@@ -35,8 +35,17 @@ async def _mk_user(db) -> UUID:
     return user.uuid
 
 
-async def _mk_account(db, user_uuid: str, *, name="Acc", nature="ASSET", currency="CNY",
-                      initial: str = "0", current: str = "0", status="ACTIVE") -> dict:
+async def _mk_account(
+    db,
+    user_uuid: str,
+    *,
+    name="Acc",
+    nature="ASSET",
+    currency="CNY",
+    initial: str = "0",
+    current: str = "0",
+    status="ACTIVE",
+) -> dict:
     service = UserService(db)
     data = {
         "name": name,
@@ -66,9 +75,19 @@ async def test_save_upserts_existing_account_preserving_identity_and_balances(db
     service = UserService(db_session)
     await service.save_financial_accounts(
         user_uuid,
-        [{"id": created["id"], "name": "A renamed", "nature": "ASSET", "type": "CASH",
-          "initialBalance": "100", "currentBalance": "150", "currencyCode": "CNY",
-          "includeInNetWorth": True, "status": "ACTIVE"}],
+        [
+            {
+                "id": created["id"],
+                "name": "A renamed",
+                "nature": "ASSET",
+                "type": "CASH",
+                "initialBalance": "100",
+                "currentBalance": "150",
+                "currencyCode": "CNY",
+                "includeInNetWorth": True,
+                "status": "ACTIVE",
+            }
+        ],
     )
 
     rows = (await db_session.execute(select(FinancialAccount))).scalars().all()
@@ -86,9 +105,18 @@ async def test_save_creates_new_account_when_no_id(db_session):
     service = UserService(db_session)
     await service.save_financial_accounts(
         user_uuid,
-        [{"name": "Cash", "nature": "ASSET", "type": "CASH",
-          "initialBalance": "0", "currentBalance": "0", "currencyCode": "CNY",
-          "includeInNetWorth": True, "status": "ACTIVE"}],
+        [
+            {
+                "name": "Cash",
+                "nature": "ASSET",
+                "type": "CASH",
+                "initialBalance": "0",
+                "currentBalance": "0",
+                "currencyCode": "CNY",
+                "includeInNetWorth": True,
+                "status": "ACTIVE",
+            }
+        ],
     )
     rows = (await db_session.execute(select(FinancialAccount))).scalars().all()
     assert len(rows) == 1
@@ -101,12 +129,10 @@ async def test_update_initial_balance_shifts_current_balance(db_session):
     created = await _mk_account(db_session, user_uuid, name="A", initial="100", current="150")
 
     service = UserService(db_session)
-    await service.update_financial_account(
-        user_uuid, created["uuid"], {"initialBalance": "200"}
-    )
-    row = (await db_session.execute(
-        select(FinancialAccount).where(FinancialAccount.uuid == created["uuid"])
-    )).scalar_one()
+    await service.update_financial_account(user_uuid, created["uuid"], {"initialBalance": "200"})
+    row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == created["uuid"]))
+    ).scalar_one()
     assert row.initial_balance == Decimal("200")
     assert row.current_balance == Decimal("250"), "delta of +100 must carry into current"
 
@@ -118,9 +144,9 @@ async def test_update_current_balance_is_authoritative(db_session):
 
     service = UserService(db_session)
     await service.update_financial_account(user_uuid, created["uuid"], {"currentBalance": "999"})
-    row = (await db_session.execute(
-        select(FinancialAccount).where(FinancialAccount.uuid == created["uuid"])
-    )).scalar_one()
+    row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == created["uuid"]))
+    ).scalar_one()
     assert row.current_balance == Decimal("999")
     assert row.initial_balance == Decimal("100")
 
@@ -230,7 +256,9 @@ async def test_merge_rejects_cross_currency_and_closed_target(db_session):
     user_uuid = await _mk_user(db_session)
     a = await _mk_account(db_session, user_uuid, name="A", currency="CNY", initial="100", current="100")
     b_usd = await _mk_account(db_session, user_uuid, name="B", currency="USD", initial="10", current="10")
-    b_closed = await _mk_account(db_session, user_uuid, name="C", currency="CNY", initial="0", current="0", status="CLOSED")
+    b_closed = await _mk_account(
+        db_session, user_uuid, name="C", currency="CNY", initial="0", current="0", status="CLOSED"
+    )
 
     service = UserService(db_session)
     with pytest.raises(BusinessError):
@@ -273,9 +301,7 @@ async def test_close_keep_freezes_snapshot_keeps_history(db_session):
     assert result["status"] == "CLOSED"
     assert result["disposal"] == "keep"
 
-    row = (await db_session.execute(
-        select(FinancialAccount).where(FinancialAccount.uuid == a["uuid"])
-    )).scalar_one()
+    row = (await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == a["uuid"]))).scalar_one()
     assert row.status == "CLOSED"
     assert row.current_balance == Decimal("88"), "snapshot frozen"
     tx_count = (await db_session.execute(select(func.count()).select_from(Transaction))).scalar()
@@ -292,9 +318,7 @@ async def test_close_writeoff_generates_expense_and_zeroes_balance(db_session):
     assert result["status"] == "CLOSED"
     assert result["disposal"] == "writeoff"
 
-    row = (await db_session.execute(
-        select(FinancialAccount).where(FinancialAccount.uuid == a["uuid"])
-    )).scalar_one()
+    row = (await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == a["uuid"]))).scalar_one()
     assert row.current_balance == Decimal("0"), "write-off must zero the balance via the ledger"
 
     tx_row = (await db_session.execute(select(Transaction))).scalar_one()
@@ -315,12 +339,12 @@ async def test_close_transfer_moves_balance_to_target(db_session):
     assert result["status"] == "CLOSED"
     assert result["disposal"] == "transfer"
 
-    src_row = (await db_session.execute(
-        select(FinancialAccount).where(FinancialAccount.uuid == src["uuid"])
-    )).scalar_one()
-    dst_row = (await db_session.execute(
-        select(FinancialAccount).where(FinancialAccount.uuid == dst["uuid"])
-    )).scalar_one()
+    src_row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == src["uuid"]))
+    ).scalar_one()
+    dst_row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == dst["uuid"]))
+    ).scalar_one()
     assert src_row.status == "CLOSED"
     assert src_row.current_balance == Decimal("0")
     assert dst_row.current_balance == Decimal("150")
@@ -338,10 +362,17 @@ async def test_close_transfer_requires_target_and_rejects_closed(db_session):
     closed = await _mk_account(db_session, user_uuid, name="C", initial="0", current="0", status="CLOSED")
 
     service = UserService(db_session)
-    with pytest.raises(ValidationError):
+    # The close endpoint raises typed BusinessError with dedicated codes
+    # (3305 target required / 3306 target closed), not a generic
+    # ValidationError — the client branches on these codes for localized copy.
+    with pytest.raises(BusinessError) as excinfo:
         await service.close_financial_account(user_uuid, a["uuid"], disposal="transfer", target_account_id=None)
-    with pytest.raises(ValidationError):
-        await service.close_financial_account(user_uuid, a["uuid"], disposal="transfer", target_account_id=closed["uuid"])
+    assert excinfo.value.error_code == AccountErrorCode.ACCOUNT_CLOSE_TARGET_REQUIRED
+    with pytest.raises(BusinessError) as excinfo:
+        await service.close_financial_account(
+            user_uuid, a["uuid"], disposal="transfer", target_account_id=closed["uuid"]
+        )
+    assert excinfo.value.error_code == AccountErrorCode.ACCOUNT_CLOSE_TARGET_CLOSED
 
 
 @pytest.mark.asyncio
@@ -350,8 +381,9 @@ async def test_close_already_closed_rejected(db_session):
     a = await _mk_account(db_session, user_uuid, name="A", initial="0", current="0", status="CLOSED")
 
     service = UserService(db_session)
-    with pytest.raises(ValidationError):
+    with pytest.raises(BusinessError) as excinfo:
         await service.close_financial_account(user_uuid, a["uuid"], disposal="keep")
+    assert excinfo.value.error_code == AccountErrorCode.ACCOUNT_ALREADY_CLOSED
 
 
 @pytest.mark.asyncio
@@ -392,9 +424,7 @@ async def test_close_blocked_by_recurring_rule(db_session):
     assert excinfo.value.details["recurring"] == 1
 
     # Nothing may have changed
-    row = (await db_session.execute(
-        select(FinancialAccount).where(FinancialAccount.uuid == a["uuid"])
-    )).scalar_one()
+    row = (await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == a["uuid"]))).scalar_one()
     assert row.status == "ACTIVE"
 
 
@@ -427,17 +457,21 @@ async def test_merge_repoints_recurring_rules(db_session):
     assert result["moved_recurring"] == 1
 
     rule_row = (await db_session.execute(select(RecurringTransaction))).scalar_one()
-    assert str(rule_row.source_account_id) == b["uuid"]
+    assert str(rule_row.source_account_id) == str(b["uuid"])
 
 
 @pytest.mark.asyncio
 async def test_close_liability_writeoff_zeroes_balance_via_income(db_session):
     """Liability balances are stored negative (owed money). Writing them off
     must credit the closing account through an INCOME entry so the balance
-    returns to zero instead of growing more negative."""
+    returns to zero instead of growing more negative.
+
+    The negative balance is ledger-backed (set via the account's initial
+    balance) so the post-disposal ledger recompute — the close endpoint's
+    source of truth for final_balance — derives exactly zero.
+    """
     user_uuid = await _mk_user(db_session)
-    acc = await _mk_account(db_session, user_uuid, name="Card", nature="LIABILITY",
-                            initial="0", current="-3000")
+    acc = await _mk_account(db_session, user_uuid, name="Card", nature="LIABILITY", initial="-3000", current="-3000")
 
     service = UserService(db_session)
     result = await service.close_financial_account(user_uuid, acc["uuid"], disposal="writeoff")
@@ -445,41 +479,54 @@ async def test_close_liability_writeoff_zeroes_balance_via_income(db_session):
     assert result["status"] == "CLOSED"
     assert Decimal(result["final_balance"]) == 0
 
-    tx = (await db_session.execute(
-        select(Transaction).where(Transaction.source_account_id == acc["uuid"])
-        .union(select(Transaction).where(Transaction.target_account_id == acc["uuid"]))
-    )).scalars().first()
+    tx = (
+        (
+            await db_session.execute(
+                select(Transaction).where(
+                    or_(
+                        Transaction.source_account_id == acc["uuid"],
+                        Transaction.target_account_id == acc["uuid"],
+                    )
+                )
+            )
+        )
+        .scalars()
+        .first()
+    )
     assert tx is not None
     assert tx.type == "INCOME"
-    assert str(tx.target_account_id) == acc["uuid"], "income must credit the closing account as target"
+    assert str(tx.target_account_id) == str(acc["uuid"]), "income must credit the closing account as target"
 
-    row = (await db_session.execute(
-        select(FinancialAccount).where(FinancialAccount.uuid == acc["uuid"])
-    )).scalar_one()
+    row = (await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == acc["uuid"]))).scalar_one()
     assert row.current_balance == 0
 
 
 @pytest.mark.asyncio
 async def test_close_liability_transfer_moves_debt_to_target(db_session):
     """Closing a liability with a negative balance transfers the DEBT to the
-    chosen account (closing account becomes the transfer target), zeroing it."""
+    chosen account (closing account becomes the transfer target), zeroing it.
+
+    The negative balance is ledger-backed (initial balance) so the recompute
+    after the disposal derives exactly zero.
+    """
     user_uuid = await _mk_user(db_session)
-    acc = await _mk_account(db_session, user_uuid, name="Card", nature="LIABILITY",
-                            initial="0", current="-3000")
-    target = await _mk_account(db_session, user_uuid, name="Other", nature="LIABILITY",
-                               initial="0", current="0")
+    acc = await _mk_account(db_session, user_uuid, name="Card", nature="LIABILITY", initial="-3000", current="-3000")
+    target = await _mk_account(db_session, user_uuid, name="Other", nature="LIABILITY", initial="0", current="0")
 
     service = UserService(db_session)
     result = await service.close_financial_account(
-        user_uuid, acc["uuid"], disposal="transfer", target_account_id=target["uuid"],
+        user_uuid,
+        acc["uuid"],
+        disposal="transfer",
+        target_account_id=target["uuid"],
     )
 
     assert Decimal(result["final_balance"]) == 0
     tx = (await db_session.execute(select(Transaction))).scalars().first()
     assert tx.type == "TRANSFER"
-    assert str(tx.source_account_id) == target["uuid"], "debt moves FROM the chosen target"
-    assert str(tx.target_account_id) == acc["uuid"], "closing account RECEIVES the debt (returns to zero)"
+    assert str(tx.source_account_id) == str(target["uuid"]), "debt moves FROM the chosen target"
+    assert str(tx.target_account_id) == str(acc["uuid"]), "closing account RECEIVES the debt (returns to zero)"
 
     rows = {str(r.uuid): r for r in (await db_session.execute(select(FinancialAccount))).scalars()}
-    assert rows[acc["uuid"]].current_balance == 0
-    assert rows[target["uuid"]].current_balance == Decimal("-3000"), "debt now sits on the target"
+    assert rows[acc["id"]].current_balance == 0
+    assert rows[target["id"]].current_balance == Decimal("-3000"), "debt now sits on the target"

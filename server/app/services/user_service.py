@@ -229,12 +229,16 @@ class UserService:
 
         result = await self.db.execute(select(FinancialAccount).where(FinancialAccount.user_uuid == user_uuid))
         existing = result.scalars().all()
-        existing_by_id: dict[Any, FinancialAccount] = {acc.id: acc for acc in existing}
+        # Key by STRING: the client round-trips `id` as a string, while
+        # acc.id is a UUID — keying by UUID made every in-place update miss
+        # and silently created a duplicate account instead of preserving
+        # identity (the upsert contract).
+        existing_by_id: dict[str, FinancialAccount] = {str(acc.id): acc for acc in existing}
 
         for account_data in accounts:
             account_id = account_data.get("id")
-            if account_id is not None and account_id in existing_by_id:
-                acc = existing_by_id[account_id]
+            if account_id is not None and str(account_id) in existing_by_id:
+                acc = existing_by_id[str(account_id)]
                 self._apply_financial_account_fields(acc, account_data)
                 acc.updated_at = now
             else:
