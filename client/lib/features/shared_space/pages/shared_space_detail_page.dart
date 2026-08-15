@@ -15,6 +15,7 @@ import 'package:finvo/shared/models/action_item_model.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/shared_space/widgets/detail/shared_space_detail_sections.dart';
 import 'package:finvo/shared/utils/route_utils.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 import 'dart:async';
 
 class SharedSpaceDetailPage extends ConsumerStatefulWidget {
@@ -92,7 +93,7 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
       body: spaceAsync.when(
         loading: () => const SpaceDetailLoadingState(),
         error: (error, stack) => SpaceDetailErrorState(
-          error: error.toString(),
+          error: safeErrorMessage(error),
           onRetry: () {
             ref.invalidate(spaceDetailProvider(widget.spaceId));
             ref.invalidate(spaceSettlementProvider(widget.spaceId));

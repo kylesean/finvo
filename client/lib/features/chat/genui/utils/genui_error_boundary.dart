@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 final _logger = Logger('GenUiErrorBoundary');
 
@@ -58,7 +59,9 @@ class _GenUiErrorBoundaryState extends State<GenUiErrorBoundary> {
     if (_error != null) {
       return _FallbackWidget(
         componentName: widget.componentName,
-        error: _error.toString(),
+        // Safe, localized detail — unknown exceptions degrade to the
+        // component-level loading-failed label instead of leaking raw text.
+        error: safeErrorMessage(_error, fallback: t.common.error),
       );
     }
 
@@ -77,7 +80,7 @@ class _GenUiErrorBoundaryState extends State<GenUiErrorBoundary> {
       _handleError(e, stack);
       return _FallbackWidget(
         componentName: widget.componentName,
-        error: e.toString(),
+        error: safeErrorMessage(e, fallback: t.common.error),
       );
     }
   }

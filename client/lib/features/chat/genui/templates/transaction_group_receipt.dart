@@ -926,7 +926,10 @@ class _TransactionGroupReceiptState
         SnackBar(
           content: Text(
             t.chat.genui.transactionGroupReceipt.spaceAssociateFailed(
-              error: e.toString(),
+              // Never surface the raw exception text: unknown errors degrade
+              // to the localized generic message (raw exceptions may embed
+              // internal URLs/paths).
+              error: safeErrorMessage(e),
             ),
             style: const TextStyle(color: Colors.white),
           ),

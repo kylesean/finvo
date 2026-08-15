@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/features/chat/genui/utils/genui_error_boundary.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
 void main() {
@@ -96,6 +97,45 @@ void main() {
         expect(find.text(t.error.genui.loadingFailed), findsNothing);
       },
     );
+
+    testWidgets(
+      'never leaks raw exception text into the fallback detail (M2)',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            GenUiErrorBoundary(
+              componentName: 'LeakyComponent',
+              builder: (_) => throw StateError('internal url: https://secret'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // The raw exception string (and the internal URL in it) must not be
+        // rendered; the localized generic label is shown instead.
+        expect(find.text(t.error.genui.loadingFailed), findsOneWidget);
+        expect(find.textContaining('secret'), findsNothing);
+        expect(find.textContaining('Bad state'), findsNothing);
+      },
+    );
+
+    testWidgets('shows the safe message for a known AppException (M2)', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          GenUiErrorBoundary(
+            componentName: 'KnownErrorComponent',
+            builder: (_) => throw BusinessException('预算超限'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // AppException messages are trusted/safe: they surface verbatim.
+      expect(find.text(t.error.genui.loadingFailed), findsOneWidget);
+      expect(find.text('预算超限'), findsOneWidget);
+    });
 
     testWidgets('renders content produced by a successful builder', (
       WidgetTester tester,
