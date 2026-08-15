@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/features/version/models/update_info.dart';
 import 'package:finvo/features/version/services/app_version_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'version_provider.freezed.dart';
 part 'version_provider.g.dart';
@@ -34,9 +35,12 @@ class VersionNotifier extends _$VersionNotifier {
       if (result != null) {
         state = state.copyWith(isChecking: false, updateInfo: result);
       } else {
+        // Null result == the service hit an error (it logs the detail and
+        // returns null). Surface the localized failure message; the UI layer
+        // additionally shows its own fetch-failed toast via the null return.
         state = state.copyWith(
           isChecking: false,
-          error: 'Failed to fetch update information',
+          error: t.settings.fetchUpdateFailed,
         );
       }
       return result;

@@ -45,7 +45,14 @@ class AmountFormatter {
   /// `Decimal` is exact. Convert to [double] only at the display boundary
   /// (e.g. [AmountText]) via [Decimal.toDouble].
   static Decimal parseDecimal(String? amount) =>
-      Decimal.tryParse(amount ?? '') ?? Decimal.zero;
+      Decimal.tryParse(amount?.trim() ?? '') ?? Decimal.zero;
+
+  /// JSON-value variant of [parseDecimal]: accepts a raw JSON value
+  /// (String/num/bool/null) and normalizes it to a string first, so callers
+  /// parsing untrusted backend payloads never need to hand-roll the
+  /// value→Decimal conversion (and never crash on missing/malformed fields).
+  static Decimal parseDecimalFromJson(Object? value) =>
+      parseDecimal(value?.toString());
 
   /// Get currency formatter.
   ///

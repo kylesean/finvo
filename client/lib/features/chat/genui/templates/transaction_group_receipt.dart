@@ -22,7 +22,7 @@ import 'package:decimal/decimal.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import 'package:finvo/shared/utils/error_display.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 /// Batch transaction receipt component
 ///
@@ -816,7 +816,7 @@ class _TransactionGroupReceiptState
         SnackBar(
           content: Text(
             t.chat.genui.transactionCard.updateFailed(
-              error: friendlyErrorMessage(e),
+              error: safeErrorMessage(e),
             ),
             style: const TextStyle(color: Colors.white),
           ),

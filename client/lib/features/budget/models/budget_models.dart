@@ -3,16 +3,6 @@ import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
-/// Parses a JSON value into a [Decimal], tolerating null/empty/missing values
-/// (treated as zero) and non-numeric strings (fall back to zero) so a single
-/// malformed field can't crash an entire model parse.
-Decimal _parseDecimal(dynamic value) {
-  if (value == null) return Decimal.zero;
-  final text = value.toString().trim();
-  if (text.isEmpty) return Decimal.zero;
-  return Decimal.tryParse(text) ?? Decimal.zero;
-}
-
 /// Parses a date value into a [DateTime], tolerating null/empty/missing values
 /// (falling back to the epoch) so a single malformed date can't crash parsing.
 DateTime _parseDate(dynamic value) {
@@ -156,17 +146,45 @@ class Budget {
       name: json['name'] as String,
       scope: BudgetScope.fromString(json['scope'] as String),
       categoryKey: json['category_key'] as String?,
-      amount: _parseDecimal(json['amount']),
+      amount: AmountFormatter.parseDecimalFromJson(json['amount']),
       currencyCode: json['currency_code'] as String? ?? 'CNY',
       periodType: BudgetPeriodType.fromString(json['period_type'] as String),
       periodAnchorDay: json['period_anchor_day'] as int? ?? 1,
       status: BudgetStatus.fromString(json['status'] as String),
       rolloverEnabled: json['rollover_enabled'] as bool? ?? true,
-      rolloverBalance: _parseDecimal(json['rollover_balance']),
+      rolloverBalance: AmountFormatter.parseDecimalFromJson(
+        json['rollover_balance'],
+      ),
       createdAt: _parseDate(json['created_at']),
       updatedAt: _parseDate(json['updated_at']),
     );
   }
+
+  /// Tolerantly parse a [Budget] from an untrusted JSON value.
+  ///
+  /// Guards against missing/malformed payloads (null or non-map values) by
+  /// degrading to [Budget.empty] instead of throwing a `TypeError`, matching
+  /// the codebase's defensive-decoding convention for backend-supplied data.
+  factory Budget.fromUnknown(Object? value) {
+    if (value is Map<String, dynamic>) return Budget.fromJson(value);
+    return Budget.empty();
+  }
+
+  /// Zero-valued placeholder budget, used when the backend omits or mangles
+  /// the budget object inside a summary payload.
+  factory Budget.empty() => Budget(
+    id: '',
+    name: '',
+    scope: BudgetScope.total,
+    amount: Decimal.zero,
+    currencyCode: 'CNY',
+    periodType: BudgetPeriodType.monthly,
+    status: BudgetStatus.active,
+    rolloverEnabled: false,
+    rolloverBalance: Decimal.zero,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+    updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
+  );
 
   Map<String, dynamic> toJson() {
     return {
@@ -231,8 +249,10 @@ class BudgetPeriodDetail {
       budgetId: json['budget_id'] as String,
       periodStart: _parseDate(json['period_start']),
       periodEnd: _parseDate(json['period_end']),
-      spentAmount: _parseDecimal(json['spent_amount']),
-      adjustedTarget: _parseDecimal(json['adjusted_target']),
+      spentAmount: AmountFormatter.parseDecimalFromJson(json['spent_amount']),
+      adjustedTarget: AmountFormatter.parseDecimalFromJson(
+        json['adjusted_target'],
+      ),
       status: BudgetPeriodStatus.fromString(json['status'] as String),
       usagePercentage: (json['usage_percentage'] as num?)?.toDouble() ?? 0.0,
     );
@@ -262,14 +282,16 @@ class BudgetWithUsage {
 
   factory BudgetWithUsage.fromJson(Map<String, dynamic> json) {
     return BudgetWithUsage(
-      budget: Budget.fromJson(json['budget'] as Map<String, dynamic>),
-      currentPeriod: json['current_period'] != null
+      budget: Budget.fromUnknown(json['budget']),
+      currentPeriod: json['current_period'] is Map<String, dynamic>
           ? BudgetPeriodDetail.fromJson(
               json['current_period'] as Map<String, dynamic>,
             )
           : null,
-      spentAmount: _parseDecimal(json['spent_amount']),
-      remainingAmount: _parseDecimal(json['remaining_amount']),
+      spentAmount: AmountFormatter.parseDecimalFromJson(json['spent_amount']),
+      remainingAmount: AmountFormatter.parseDecimalFromJson(
+        json['remaining_amount'],
+      ),
       usagePercentage: (json['usage_percentage'] as num?)?.toDouble() ?? 0.0,
       periodStatus: BudgetPeriodStatus.fromString(
         json['period_status'] as String? ?? 'ON_TRACK',
@@ -283,8 +305,10 @@ class BudgetWithUsage {
       budget: Budget.fromJson(json), // BudgetResponse parsed directly as Budget
       currentPeriod:
           null, // BudgetResponse does not contain a separate period object
-      spentAmount: _parseDecimal(json['spent_amount']),
-      remainingAmount: _parseDecimal(json['remaining_amount']),
+      spentAmount: AmountFormatter.parseDecimalFromJson(json['spent_amount']),
+      remainingAmount: AmountFormatter.parseDecimalFromJson(
+        json['remaining_amount'],
+      ),
       usagePercentage: (json['usage_percentage'] as num?)?.toDouble() ?? 0.0,
       periodStatus: BudgetPeriodStatus.fromString(
         json['period_status'] as String? ?? 'ON_TRACK',
@@ -318,25 +342,30 @@ class BudgetSummary {
     // - overall_spent, overall_remaining, overall_percentage
 
     BudgetWithUsage? totalBudgetDetail;
-    if (json['total_budget'] != null) {
+    if (json['total_budget'] is Map<String, dynamic>) {
       totalBudgetDetail = BudgetWithUsage.fromBudgetResponse(
         json['total_budget'] as Map<String, dynamic>,
       );
     }
 
-    // parse category budgets
+    // parse category budgets; skip malformed entries instead of crashing the
+    // whole summary on a single non-map item.
     final categoryBudgets = <BudgetWithUsage>[];
-    if (json['category_budgets'] != null) {
-      for (final item in (json['category_budgets'] as List<dynamic>)) {
-        categoryBudgets.add(
-          BudgetWithUsage.fromBudgetResponse(item as Map<String, dynamic>),
-        );
+    if (json['category_budgets'] is List<dynamic>) {
+      for (final item in json['category_budgets'] as List<dynamic>) {
+        if (item is Map<String, dynamic>) {
+          categoryBudgets.add(BudgetWithUsage.fromBudgetResponse(item));
+        }
       }
     }
 
     // calculate total amount
-    final overallSpent = _parseDecimal(json['overall_spent']);
-    final overallRemaining = _parseDecimal(json['overall_remaining']);
+    final overallSpent = AmountFormatter.parseDecimalFromJson(
+      json['overall_spent'],
+    );
+    final overallRemaining = AmountFormatter.parseDecimalFromJson(
+      json['overall_remaining'],
+    );
     final totalAmount = overallSpent + overallRemaining;
 
     return BudgetSummary(

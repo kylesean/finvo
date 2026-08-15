@@ -152,7 +152,7 @@ class StreamingController {
   void updateCurrentMessageId(String messageId) {
     if (messageId.isEmpty) return;
     if (_currentMessageId == messageId) return;
-    _logger.info(
+    _logger.fine(
       'StreamingController: Updating message ID $_currentMessageId -> $messageId',
     );
     _currentMessageId = messageId;
@@ -169,7 +169,7 @@ class StreamingController {
     _currentMessageId = messageId;
     streamState.startStreaming(messageId);
 
-    _logger.info('StreamingController: Reset for message $messageId');
+    _logger.fine('StreamingController: Reset for message $messageId');
   }
 
   /// Start initial response delay timer

@@ -9,6 +9,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/widgets/user_avatar.dart';
 import 'dart:async';
 import 'package:finvo/shared/utils/time_utils.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 import 'package:finvo/features/home/models/comment_model.dart';
 import 'package:finvo/features/home/providers/comment_providers.dart';
@@ -74,7 +75,10 @@ class CommentItemWidget extends ConsumerWidget {
           TopToast.success(context, t.comment.commentDeleted);
         } catch (e) {
           if (!context.mounted) return;
-          TopToast.error(context, '${t.comment.deleteFailed}: ${e.toString()}');
+          TopToast.error(
+            context,
+            safeErrorMessage(e, fallback: t.comment.deleteFailed),
+          );
         }
       },
     );

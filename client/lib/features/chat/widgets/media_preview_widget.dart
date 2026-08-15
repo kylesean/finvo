@@ -134,7 +134,7 @@ class MediaPreviewWidget extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
-              color: Colors.grey.shade100,
+              color: context.theme.colors.background,
               child: const Center(
                 child: SizedBox(
                   width: 24,

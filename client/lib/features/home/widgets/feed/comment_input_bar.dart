@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/widgets/top_toast.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'dart:async';
@@ -263,7 +264,10 @@ class _CommentInputBarState extends ConsumerState<CommentInputBar> {
       _commentFocusNode.unfocus();
     } catch (e) {
       if (mounted) {
-        TopToast.error(context, '${t.comment.commentFailed}: ${e.toString()}');
+        TopToast.error(
+          context,
+          safeErrorMessage(e, fallback: t.comment.commentFailed),
+        );
       }
     } finally {
       if (mounted) {

@@ -22,7 +22,7 @@ import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import 'package:finvo/shared/utils/error_display.dart';
+import 'package:finvo/shared/utils/error_message.dart';
 
 class TransactionCard extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
@@ -449,9 +449,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
       setState(() => _isUpdating = false);
       ToastService.showDestructive(
         description: Text(
-          t.chat.genui.transactionCard.updateFailed(
-            error: friendlyErrorMessage(e),
-          ),
+          t.chat.genui.transactionCard.updateFailed(error: safeErrorMessage(e)),
         ),
       );
     }
@@ -600,9 +598,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
       setState(() => _isUpdatingSpace = false);
       ToastService.showDestructive(
         description: Text(
-          t.chat.genui.transactionCard.updateFailed(
-            error: friendlyErrorMessage(e),
-          ),
+          t.chat.genui.transactionCard.updateFailed(error: safeErrorMessage(e)),
         ),
       );
     }

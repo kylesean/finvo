@@ -26,7 +26,6 @@ import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/features/home/widgets/transaction_link_section.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
@@ -58,9 +57,6 @@ class TransactionDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Ensure real-time WebSocket connection is active for live comment sync
-    ref.watch(notificationWsProvider);
-
     final detailState = ref.watch(transactionDetailProvider(transactionId));
     final theme = context.theme;
     final colors = theme.colors;
