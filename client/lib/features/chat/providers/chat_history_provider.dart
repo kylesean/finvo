@@ -94,10 +94,19 @@ class ChatHistory extends _$ChatHistory {
   }
 
   /// Synchronously initiate teardown of current disposable controllers.
+  ///
+  /// Order matters (dispose-order hazard): the lifecycle manager must be
+  /// marked disposed FIRST so its `_isDisposed` guards drop any synchronous
+  /// stream callbacks that the streaming controller's teardown `cancel()`
+  /// fires (`CustomContentGenerator.cancel` → `onStreamComplete`). Disposing
+  /// the streaming controller first lets that callback reach
+  /// `_onGenUiStreamComplete` while the guard is still open — mutating
+  /// provider state inside the Riverpod dispose lifecycle (debug assertion in
+  /// tests, stale-state cross-talk in release rebuilds).
   void _disposeControllersSync() {
     if (!_controllersInitialized) return;
-    unawaited(_streamingController.dispose());
     unawaited(_genUiLifecycleManager.dispose());
+    unawaited(_streamingController.dispose());
   }
 
   /// Create all extracted controllers that outlive a single build.
