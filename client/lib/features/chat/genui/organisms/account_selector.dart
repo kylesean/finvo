@@ -202,8 +202,18 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
 
   List<Map<String, dynamic>> get _accounts {
     final dataAccounts = widget.data['accounts'] as List<dynamic>? ?? [];
-    return widget.accounts ??
+    final raw =
+        widget.accounts ??
         dataAccounts.map((e) => e as Map<String, dynamic>).toList();
+
+    // Defense-in-depth: a CLOSED account must never be offered for selection
+    // (it no longer accepts new activity). The data-driven payloads may carry
+    // a `status` field; when absent the account is kept as-is.
+    return raw.where((a) {
+      final status = a['status'];
+      return status == null ||
+          !status.toString().toUpperCase().contains('CLOSED');
+    }).toList();
   }
 
   List<Map<String, dynamic>> get _filteredAccounts {

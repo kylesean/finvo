@@ -53,6 +53,25 @@ def _exec_rowcount(result: Any) -> int:
     return int(getattr(result, "rowcount", 0) or 0)
 
 
+_ACCOUNT_STATUSES = {"ACTIVE", "INACTIVE", "CLOSED"}
+
+
+def _normalize_account_status(value: Any) -> str:
+    """Validate + normalize an account status to its canonical uppercase form.
+
+    The DB column is constrained to (ACTIVE, INACTIVE, CLOSED); validating here
+    keeps bad values out of the ORM/DB layer entirely (which would otherwise end
+    in a raw 500 from the CHECK constraint on commit).
+    """
+    status = str(value or "ACTIVE").upper()
+    if status not in _ACCOUNT_STATUSES:
+        raise ValidationError(
+            f"Invalid account status: {value!r}",
+            field_errors={"status": "must be one of ACTIVE, INACTIVE, CLOSED"},
+        )
+    return status
+
+
 def _account_payload_balance(account: FinancialAccount) -> Decimal:
     """Balance to expose in account payloads (fall back to initial when None)."""
     return account.current_balance if account.current_balance is not None else (account.initial_balance or Decimal("0"))
@@ -232,7 +251,7 @@ class UserService:
                         current_balance=current,
                         include_in_net_worth=account_data.get("includeInNetWorth", True),
                         include_in_cash_flow=account_data.get("includeInCashFlow", False),
-                        status=account_data.get("status", "ACTIVE"),
+                        status=_normalize_account_status(account_data.get("status", "ACTIVE")),
                         created_at=now,
                         updated_at=now,
                     )
@@ -360,7 +379,7 @@ class UserService:
             initial_balance=balance,
             current_balance=current,
             include_in_net_worth=account_data.get("includeInNetWorth", True),
-            status=account_data.get("status", "ACTIVE"),
+            status=_normalize_account_status(account_data.get("status", "ACTIVE")),
             created_at=now,
             updated_at=now,
         )
@@ -416,7 +435,9 @@ class UserService:
         # CLOSED is a terminal lifecycle state managed by the dedicated close
         # endpoint (it also implies balance disposal decisions). Refuse to flip
         # it through the generic update path so the semantics stay unambiguous.
-        if account_data.get("status") == "CLOSED":
+        if "status" in account_data and _normalize_account_status(
+            account_data["status"]
+        ) == "CLOSED":
             raise ValidationError(
                 "Use the close-account operation to close an account",
                 field_errors={"status": "POST /financial-accounts/{id}/close"},
@@ -450,7 +471,7 @@ class UserService:
         if "includeInNetWorth" in account_data:
             account.include_in_net_worth = account_data["includeInNetWorth"]
         if "status" in account_data:
-            account.status = account_data["status"]
+            account.status = _normalize_account_status(account_data["status"])
 
         account.updated_at = utc_now()
 
@@ -906,7 +927,7 @@ class UserService:
         if "includeInCashFlow" in data:
             account.include_in_cash_flow = data["includeInCashFlow"]
         if "status" in data:
-            account.status = data["status"]
+            account.status = _normalize_account_status(data["status"])
 
         if "initialBalance" in data:
             old_initial = Decimal(str(account.initial_balance or "0"))
