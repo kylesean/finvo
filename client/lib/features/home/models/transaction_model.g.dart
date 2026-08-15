@@ -147,6 +147,7 @@ _TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
           const [],
       rawInput: json['rawInput'] as String?,
       status: json['status'] as String? ?? 'CLEARED',
+      source: json['source'] as String? ?? 'MANUAL',
       financialAccount: json['financialAccount'] == null
           ? null
           : FinancialAccountInfo.fromJson(
@@ -211,6 +212,7 @@ Map<String, dynamic> _$TransactionModelToJson(_TransactionModel instance) =>
       'tags': instance.tags,
       'rawInput': instance.rawInput,
       'status': instance.status,
+      'source': instance.source,
       'financialAccount': instance.financialAccount,
       'display': instance.display,
       'createdAt': instance.createdAt?.toIso8601String(),

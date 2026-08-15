@@ -164,7 +164,8 @@
     "backToPrevious": "뒤로 가기",
     "attachments": "첨부 파일 $count개",
     "statusPending": "보류 중",
-    "viewInConversation": "대화에서 자세히 보기"
+    "viewInConversation": "대화에서 자세히 보기",
+    "systemGenerated": "시스템 생성"
   },
   "home": {
     "totalExpense": "총 소비 금액",
@@ -1526,7 +1527,9 @@
       "deleteFailed": "Failed to delete comment",
       "notExists": "Transaction does not exist",
       "invalidAccountId": "계정 ID가 유효하지 않습니다",
-      "exchangeRateUnavailable": "이 통화의 환율을 사용할 수 없습니다"
+      "exchangeRateUnavailable": "이 통화의 환율을 사용할 수 없습니다",
+      "systemReadonly": "시스템 생성 거래는 수정할 수 없습니다",
+      "accountLinkClosed": "정지된 계좌에는 연결할 수 없습니다"
     },
     "space": {
       "notFound": "Shared space not found or access denied",

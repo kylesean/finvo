@@ -531,6 +531,9 @@ class Translations$transaction$zh {
 
 	/// zh: '返回上一页'
 	String get backToPrevious => '返回上一页';
+
+	/// zh: '系统生成'
+	String get systemGenerated => '系统生成';
 }
 
 // Path: home
@@ -4047,6 +4050,12 @@ class Translations$errorMapping$transaction$zh {
 
 	/// zh: '该币种汇率暂不可用'
 	String get exchangeRateUnavailable => '该币种汇率暂不可用';
+
+	/// zh: '系统生成的交易记录不可修改'
+	String get systemReadonly => '系统生成的交易记录不可修改';
+
+	/// zh: '不能关联到已停用的账户'
+	String get accountLinkClosed => '不能关联到已停用的账户';
 }
 
 // Path: errorMapping.space
@@ -5577,6 +5586,7 @@ extension on Translations {
 			'transaction.notFoundTitle' => '账目已被删除',
 			'transaction.notFoundBody' => '该账目记录已被发起人或管理员删除，无法查看明细。',
 			'transaction.backToPrevious' => '返回上一页',
+			'transaction.systemGenerated' => '系统生成',
 			'home.totalExpense' => '总消费金额',
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
@@ -5940,9 +5950,9 @@ extension on Translations {
 			'forecast.recurringTransaction.dynamicAmountDescription' => '系统将在账单日发送提醒，需要您手动确认具体金额后才会记账。',
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前需确认',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期时生成待确认交易，需手动确认后记账',
-			'forecast.recurringTransaction.pendingTitle' => '待确认交易',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.pendingTitle' => '待确认交易',
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 笔待确认',
 			'forecast.recurringTransaction.confirm' => '确认',
 			'forecast.recurringTransaction.skip' => '跳过',
@@ -6454,9 +6464,9 @@ extension on Translations {
 			'account.payable' => '应付款项',
 			'account.other' => '其他账户',
 			'account.types.cashTitle' => '现金',
-			'account.types.cashSubtitle' => '纸币、硬币等实体货币',
 			_ => null,
 		} ?? switch (path) {
+			'account.types.cashSubtitle' => '纸币、硬币等实体货币',
 			'account.types.depositTitle' => '银行存款',
 			'account.types.depositSubtitle' => '储蓄卡、活期/定期存款',
 			'account.types.eMoneyTitle' => '电子钱包',
@@ -6734,6 +6744,8 @@ extension on Translations {
 			'errorMapping.transaction.notExists' => '交易记录不存在',
 			'errorMapping.transaction.invalidAccountId' => '账户ID无效',
 			'errorMapping.transaction.exchangeRateUnavailable' => '该币种汇率暂不可用',
+			'errorMapping.transaction.systemReadonly' => '系统生成的交易记录不可修改',
+			'errorMapping.transaction.accountLinkClosed' => '不能关联到已停用的账户',
 			'errorMapping.space.notFound' => '共享空间不存在或无权访问',
 			'errorMapping.space.inviteDenied' => '无权邀请成员',
 			'errorMapping.space.inviteSelf' => '不能邀请你自己',

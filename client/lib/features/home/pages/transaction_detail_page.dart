@@ -55,6 +55,13 @@ class TransactionDetailPage extends ConsumerWidget {
     return transaction.category;
   }
 
+  /// Whether this transaction is a system-generated lifecycle audit entry
+  /// (e.g. an account-close disposal). Such entries are read-only: editing or
+  /// deleting one would silently undo the lifecycle balance disposal.
+  bool _isSystemTransaction(TransactionModel transaction) {
+    return transaction.source == 'SYSTEM';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailState = ref.watch(transactionDetailProvider(transactionId));
@@ -170,7 +177,8 @@ class TransactionDetailPage extends ConsumerWidget {
                                       ],
                                     ),
                                   ),
-                                  if (isMine)
+                                  if (isMine &&
+                                      !_isSystemTransaction(transaction))
                                     FButton.icon(
                                       // More actions button
                                       variant: .ghost,

@@ -270,6 +270,7 @@ class _Translations$transaction$ja extends Translations$transaction$zh {
 	@override String attachments({required Object count}) => '${count} 件の添付ファイル';
 	@override String get statusPending => '保留中';
 	@override String get viewInConversation => '会話で詳細を見る';
+	@override String get systemGenerated => 'システム生成';
 }
 
 // Path: home
@@ -1871,6 +1872,8 @@ class _Translations$errorMapping$transaction$ja extends Translations$errorMappin
 	@override String get notExists => 'Transaction does not exist';
 	@override String get invalidAccountId => 'アカウントIDが無効です';
 	@override String get exchangeRateUnavailable => 'この通貨の為替レートは利用できません';
+	@override String get systemReadonly => 'システム生成の取引は変更できません';
+	@override String get accountLinkClosed => '停止中の口座には関連付けできません';
 }
 
 // Path: errorMapping.space
@@ -2776,6 +2779,7 @@ extension on TranslationsJa {
 			'transaction.attachments' => ({required Object count}) => '${count} 件の添付ファイル',
 			'transaction.statusPending' => '保留中',
 			'transaction.viewInConversation' => '会話で詳細を見る',
+			'transaction.systemGenerated' => 'システム生成',
 			'home.totalExpense' => '総支出額',
 			'home.todayExpense' => '今日の支出',
 			'home.monthExpense' => '今月の支出',
@@ -3140,9 +3144,9 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前に確認',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '期限日に確認待ち取引を生成、手動確認後に記帳',
 			'forecast.recurringTransaction.pendingTitle' => '確認待ち取引',
-			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 件確認待ち',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 件確認待ち',
 			'forecast.recurringTransaction.confirm' => '確認',
 			'forecast.recurringTransaction.skip' => 'スキップ',
 			'forecast.recurringTransaction.noPending' => '確認待ち取引なし',
@@ -3654,9 +3658,9 @@ extension on TranslationsJa {
 			'account.other' => 'その他',
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
-			'account.types.depositTitle' => 'Bank Deposit',
 			_ => null,
 		} ?? switch (path) {
+			'account.types.depositTitle' => 'Bank Deposit',
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
@@ -3933,6 +3937,8 @@ extension on TranslationsJa {
 			'errorMapping.transaction.notExists' => 'Transaction does not exist',
 			'errorMapping.transaction.invalidAccountId' => 'アカウントIDが無効です',
 			'errorMapping.transaction.exchangeRateUnavailable' => 'この通貨の為替レートは利用できません',
+			'errorMapping.transaction.systemReadonly' => 'システム生成の取引は変更できません',
+			'errorMapping.transaction.accountLinkClosed' => '停止中の口座には関連付けできません',
 			'errorMapping.space.notFound' => 'Shared space not found or access denied',
 			'errorMapping.space.inviteDenied' => 'No permission to invite members',
 			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',

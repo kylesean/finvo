@@ -165,7 +165,8 @@
     "statusPending": "待确认",
     "notFoundTitle": "账目已被删除",
     "notFoundBody": "该账目记录已被发起人或管理员删除，无法查看明细。",
-    "backToPrevious": "返回上一页"
+    "backToPrevious": "返回上一页",
+    "systemGenerated": "系统生成"
   },
   "home": {
     "totalExpense": "总消费金额",
@@ -1527,7 +1528,9 @@
       "deleteFailed": "评论删除失败",
       "notExists": "交易记录不存在",
       "invalidAccountId": "账户ID无效",
-      "exchangeRateUnavailable": "该币种汇率暂不可用"
+      "exchangeRateUnavailable": "该币种汇率暂不可用",
+      "systemReadonly": "系统生成的交易记录不可修改",
+      "accountLinkClosed": "不能关联到已停用的账户"
     },
     "space": {
       "notFound": "共享空间不存在或无权访问",

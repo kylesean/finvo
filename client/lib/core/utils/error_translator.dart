@@ -44,7 +44,7 @@ class ErrorTranslator {
       ErrorCodes.invalidClientTimezone: () =>
           t.errorMapping.auth.invalidTimezone,
 
-      // Transaction (3000-3006)
+      // Transaction (3000-3008)
       ErrorCodes.transactionCommentNull: () =>
           t.errorMapping.transaction.commentEmpty,
       ErrorCodes.invalidParentCommentId: () =>
@@ -59,6 +59,10 @@ class ErrorTranslator {
           t.errorMapping.transaction.invalidAccountId,
       ErrorCodes.exchangeRateUnavailable: () =>
           t.errorMapping.transaction.exchangeRateUnavailable,
+      ErrorCodes.transactionSystemReadonly: () =>
+          t.errorMapping.transaction.systemReadonly,
+      ErrorCodes.transactionAccountLinkClosed: () =>
+          t.errorMapping.transaction.accountLinkClosed,
 
       // Shared Space (3100-3113)
       ErrorCodes.sharedSpaceNotExistsOrNoAccess: () =>

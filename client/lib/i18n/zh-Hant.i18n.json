@@ -164,7 +164,8 @@
     "backToPrevious": "返回上一頁",
     "attachments": "共 $count 個附件",
     "statusPending": "待處理",
-    "viewInConversation": "在會話中查看更多"
+    "viewInConversation": "在會話中查看更多",
+    "systemGenerated": "系統產生"
   },
   "home": {
     "totalExpense": "總消費金額",
@@ -1526,7 +1527,9 @@
       "deleteFailed": "Failed to delete comment",
       "notExists": "Transaction does not exist",
       "invalidAccountId": "帳戶ID無效",
-      "exchangeRateUnavailable": "該幣種匯率暫不可用"
+      "exchangeRateUnavailable": "該幣種匯率暫不可用",
+      "systemReadonly": "系統產生的交易記錄不可修改",
+      "accountLinkClosed": "無法關聯到已停用的帳戶"
     },
     "space": {
       "notFound": "Shared space not found or access denied",

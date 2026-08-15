@@ -270,6 +270,7 @@ class _Translations$transaction$ko extends Translations$transaction$zh {
 	@override String attachments({required Object count}) => '첨부 파일 ${count}개';
 	@override String get statusPending => '보류 중';
 	@override String get viewInConversation => '대화에서 자세히 보기';
+	@override String get systemGenerated => '시스템 생성';
 }
 
 // Path: home
@@ -1871,6 +1872,8 @@ class _Translations$errorMapping$transaction$ko extends Translations$errorMappin
 	@override String get notExists => 'Transaction does not exist';
 	@override String get invalidAccountId => '계정 ID가 유효하지 않습니다';
 	@override String get exchangeRateUnavailable => '이 통화의 환율을 사용할 수 없습니다';
+	@override String get systemReadonly => '시스템 생성 거래는 수정할 수 없습니다';
+	@override String get accountLinkClosed => '정지된 계좌에는 연결할 수 없습니다';
 }
 
 // Path: errorMapping.space
@@ -2776,6 +2779,7 @@ extension on TranslationsKo {
 			'transaction.attachments' => ({required Object count}) => '첨부 파일 ${count}개',
 			'transaction.statusPending' => '보류 중',
 			'transaction.viewInConversation' => '대화에서 자세히 보기',
+			'transaction.systemGenerated' => '시스템 생성',
 			'home.totalExpense' => '총 소비 금액',
 			'home.todayExpense' => '오늘 지출',
 			'home.monthExpense' => '이번 달 지출',
@@ -3140,9 +3144,9 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '생성 전 확인',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '만기일에 대기 거래 생성, 수동 확인 후 기록',
 			'forecast.recurringTransaction.pendingTitle' => '대기 거래',
-			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 건 대기',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 건 대기',
 			'forecast.recurringTransaction.confirm' => '확인',
 			'forecast.recurringTransaction.skip' => '건너뛰기',
 			'forecast.recurringTransaction.noPending' => '대기 거래 없음',
@@ -3654,9 +3658,9 @@ extension on TranslationsKo {
 			'account.other' => '기타 계좌',
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
-			'account.types.depositTitle' => 'Bank Deposit',
 			_ => null,
 		} ?? switch (path) {
+			'account.types.depositTitle' => 'Bank Deposit',
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
@@ -3933,6 +3937,8 @@ extension on TranslationsKo {
 			'errorMapping.transaction.notExists' => 'Transaction does not exist',
 			'errorMapping.transaction.invalidAccountId' => '계정 ID가 유효하지 않습니다',
 			'errorMapping.transaction.exchangeRateUnavailable' => '이 통화의 환율을 사용할 수 없습니다',
+			'errorMapping.transaction.systemReadonly' => '시스템 생성 거래는 수정할 수 없습니다',
+			'errorMapping.transaction.accountLinkClosed' => '정지된 계좌에는 연결할 수 없습니다',
 			'errorMapping.space.notFound' => 'Shared space not found or access denied',
 			'errorMapping.space.inviteDenied' => 'No permission to invite members',
 			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',

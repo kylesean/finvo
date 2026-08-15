@@ -30,11 +30,23 @@ class TransactionLinkSection extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // Linked account info
-    final isExpense = transaction.type == TransactionType.expense;
-    final accountId = isExpense
-        ? transaction.sourceAccountId
-        : transaction.targetAccountId;
+    // System-generated transactions (account close disposal entries) are the
+    // ledger's audit trail: account/space linking would silently undo the
+    // balance disposal, so no linking UI is offered for them.
+    if (transaction.source == 'SYSTEM') {
+      return _buildReadOnlyBadge(theme, colors);
+    }
+
+    // The account a transaction "is linked to" mirrors the server: INCOME
+    // links the receiving (target) account, everything else (EXPENSE,
+    // TRANSFER, ...) links the paying/from (source) account. TRANSFER must
+    // NOT show the target here — the server updates the source side for
+    // transfers, and showing the other end would mislead the user about
+    // which account is being re-associated.
+    final isIncome = transaction.type == TransactionType.income;
+    final accountId = isIncome
+        ? transaction.targetAccountId
+        : transaction.sourceAccountId;
     final accountState = ref.watch(financialAccountProvider);
     final linkedAccount = accountId != null
         ? accountState.accounts.where((a) => a.id == accountId).firstOrNull
@@ -75,6 +87,42 @@ class TransactionLinkSection extends ConsumerWidget {
             isActive: hasSpaces,
             activeColor: theme.semantic.sharedSpaceAccent,
             onTap: () => _showSpacePicker(context, ref, transaction),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Read-only badge shown for system-generated (lifecycle audit) entries.
+  Widget _buildReadOnlyBadge(FThemeData theme, FColors colors) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            decoration: BoxDecoration(
+              color: colors.muted.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  FLucideIcons.shieldCheck,
+                  size: 14,
+                  color: colors.mutedForeground,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    t.transaction.systemGenerated,
+                    style: AppTextStyles.sectionHeader(theme),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -171,11 +219,12 @@ class TransactionLinkSection extends ConsumerWidget {
       return;
     }
 
-    // Get current account ID
-    final isExpense = transaction.type == TransactionType.expense;
-    final currentAccountId = isExpense
-        ? transaction.sourceAccountId
-        : transaction.targetAccountId;
+    // Get the currently linked account ID (mirrors the server-side side
+    // convention: INCOME -> target, everything else -> source).
+    final isIncome = transaction.type == TransactionType.income;
+    final currentAccountId = isIncome
+        ? transaction.targetAccountId
+        : transaction.sourceAccountId;
 
     if (!context.mounted) return;
 

@@ -146,6 +146,9 @@ abstract class TransactionModel with _$TransactionModel {
     @Default([]) List<String> tags,
     String? rawInput,
     @Default('CLEARED') String status, // CLEARED, PENDING, CONFIRMED
+    @Default('MANUAL')
+    String
+    source, // MANUAL, AI, IMPORT, SYSTEM (SYSTEM = lifecycle audit entry, read-only)
     FinancialAccountInfo? financialAccount,
     AmountDisplay? display,
     DateTime? createdAt,
@@ -271,6 +274,7 @@ abstract class TransactionModel with _$TransactionModel {
       iconUrl: '', // Keep default empty string
       rawInput: rawInput,
       status: json['status'] as String? ?? 'CLEARED',
+      source: json['source'] as String? ?? 'MANUAL',
       financialAccount: null, // Keep default null
       createdAt: createdAt,
       updatedAt: null, // Keep default null

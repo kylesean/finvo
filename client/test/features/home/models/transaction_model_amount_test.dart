@@ -75,4 +75,15 @@ void main() {
       }, '0');
     });
   });
+
+  group('TransactionModel.fromApiJson source parsing', () {
+    test('defaults to MANUAL when source is absent', () {
+      expect(_parse({}).source, 'MANUAL');
+    });
+
+    test('parses the server source marker', () {
+      expect(_parse({'source': 'AI'}).source, 'AI');
+      expect(_parse({'source': 'SYSTEM'}).source, 'SYSTEM');
+    });
+  });
 }

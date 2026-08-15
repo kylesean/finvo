@@ -270,6 +270,7 @@ class _Translations$transaction$zh_Hant extends Translations$transaction$zh {
 	@override String attachments({required Object count}) => '共 ${count} 個附件';
 	@override String get statusPending => '待處理';
 	@override String get viewInConversation => '在會話中查看更多';
+	@override String get systemGenerated => '系統產生';
 }
 
 // Path: home
@@ -1871,6 +1872,8 @@ class _Translations$errorMapping$transaction$zh_Hant extends Translations$errorM
 	@override String get notExists => 'Transaction does not exist';
 	@override String get invalidAccountId => '帳戶ID無效';
 	@override String get exchangeRateUnavailable => '該幣種匯率暫不可用';
+	@override String get systemReadonly => '系統產生的交易記錄不可修改';
+	@override String get accountLinkClosed => '無法關聯到已停用的帳戶';
 }
 
 // Path: errorMapping.space
@@ -2776,6 +2779,7 @@ extension on TranslationsZhHant {
 			'transaction.attachments' => ({required Object count}) => '共 ${count} 個附件',
 			'transaction.statusPending' => '待處理',
 			'transaction.viewInConversation' => '在會話中查看更多',
+			'transaction.systemGenerated' => '系統產生',
 			'home.totalExpense' => '總消費金額',
 			'home.todayExpense' => '今日支出',
 			'home.monthExpense' => '本月支出',
@@ -3140,9 +3144,9 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前需確認',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期時生成待確認交易，需手動確認後記帳',
 			'forecast.recurringTransaction.pendingTitle' => '待確認交易',
-			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 筆待確認',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 筆待確認',
 			'forecast.recurringTransaction.confirm' => '確認',
 			'forecast.recurringTransaction.skip' => '跳過',
 			'forecast.recurringTransaction.noPending' => '無待確認交易',
@@ -3654,9 +3658,9 @@ extension on TranslationsZhHant {
 			'account.other' => '其他帳戶',
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
-			'account.types.depositTitle' => 'Bank Deposit',
 			_ => null,
 		} ?? switch (path) {
+			'account.types.depositTitle' => 'Bank Deposit',
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
@@ -3933,6 +3937,8 @@ extension on TranslationsZhHant {
 			'errorMapping.transaction.notExists' => 'Transaction does not exist',
 			'errorMapping.transaction.invalidAccountId' => '帳戶ID無效',
 			'errorMapping.transaction.exchangeRateUnavailable' => '該幣種匯率暫不可用',
+			'errorMapping.transaction.systemReadonly' => '系統產生的交易記錄不可修改',
+			'errorMapping.transaction.accountLinkClosed' => '無法關聯到已停用的帳戶',
 			'errorMapping.space.notFound' => 'Shared space not found or access denied',
 			'errorMapping.space.inviteDenied' => 'No permission to invite members',
 			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',

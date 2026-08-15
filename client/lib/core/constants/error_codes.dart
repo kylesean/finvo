@@ -25,7 +25,7 @@ class ErrorCodes {
   static const int noPreferencesParams = 1011;
   static const int invalidClientTimezone = 1012;
 
-  // Transaction errors (3000-3006)
+  // Transaction errors (3000-3008)
   static const int transactionCommentNull = 3000;
   static const int invalidParentCommentId = 3001;
   static const int storeCommentFailed = 3002;
@@ -33,6 +33,8 @@ class ErrorCodes {
   static const int transactionNotExists = 3004;
   static const int invalidAccountId = 3005;
   static const int exchangeRateUnavailable = 3006;
+  static const int transactionSystemReadonly = 3007;
+  static const int transactionAccountLinkClosed = 3008;
 
   // Shared space errors (3100-3114)
   static const int sharedSpaceNotExistsOrNoAccess = 3100;

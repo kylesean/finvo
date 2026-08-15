@@ -137,11 +137,17 @@ class TransactionCard extends ConsumerWidget {
     final colors = theme.colors;
     final amountTheme = ref.watch(currentAmountThemeProvider);
 
+    // System-generated lifecycle audit entries (account-close disposal) are
+    // read-only: the server rejects their deletion, so no swipe-to-delete is
+    // offered for them.
+    final isSystem = transaction.source == 'SYSTEM';
+
     return Dismissible(
       key: Key('transaction_${transaction.id}'),
-      direction: DismissDirection.endToStart,
+      direction: isSystem ? DismissDirection.none : DismissDirection.endToStart,
       dismissThresholds: const {DismissDirection.endToStart: 0.4},
       confirmDismiss: (direction) async {
+        if (isSystem) return false;
         await AppHaptics.selection();
         if (!context.mounted) return false;
         return _showDeleteConfirmation(context);

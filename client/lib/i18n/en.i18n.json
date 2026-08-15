@@ -164,7 +164,8 @@
     "statusPending": "Pending",
     "notFoundTitle": "Transaction deleted",
     "notFoundBody": "This transaction was deleted by its creator or an admin and can no longer be viewed.",
-    "backToPrevious": "Back"
+    "backToPrevious": "Back",
+    "systemGenerated": "System generated"
   },
   "home": {
     "totalExpense": "Total Expense",
@@ -1526,7 +1527,9 @@
       "deleteFailed": "Failed to delete comment",
       "notExists": "Transaction does not exist",
       "invalidAccountId": "Invalid account ID",
-      "exchangeRateUnavailable": "Exchange rate unavailable for this currency"
+      "exchangeRateUnavailable": "Exchange rate unavailable for this currency",
+      "systemReadonly": "System-generated transactions cannot be modified",
+      "accountLinkClosed": "Cannot link to a closed account"
     },
     "space": {
       "notFound": "Shared space not found or access denied",

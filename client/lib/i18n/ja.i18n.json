@@ -164,7 +164,8 @@
     "backToPrevious": "戻る",
     "attachments": "$count 件の添付ファイル",
     "statusPending": "保留中",
-    "viewInConversation": "会話で詳細を見る"
+    "viewInConversation": "会話で詳細を見る",
+    "systemGenerated": "システム生成"
   },
   "home": {
     "totalExpense": "総支出額",
@@ -1526,7 +1527,9 @@
       "deleteFailed": "Failed to delete comment",
       "notExists": "Transaction does not exist",
       "invalidAccountId": "アカウントIDが無効です",
-      "exchangeRateUnavailable": "この通貨の為替レートは利用できません"
+      "exchangeRateUnavailable": "この通貨の為替レートは利用できません",
+      "systemReadonly": "システム生成の取引は変更できません",
+      "accountLinkClosed": "停止中の口座には関連付けできません"
     },
     "space": {
       "notFound": "Shared space not found or access denied",

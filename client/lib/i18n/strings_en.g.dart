@@ -270,6 +270,7 @@ class _Translations$transaction$en extends Translations$transaction$zh {
 	@override String get notFoundTitle => 'Transaction deleted';
 	@override String get notFoundBody => 'This transaction was deleted by its creator or an admin and can no longer be viewed.';
 	@override String get backToPrevious => 'Back';
+	@override String get systemGenerated => 'System generated';
 }
 
 // Path: home
@@ -1871,6 +1872,8 @@ class _Translations$errorMapping$transaction$en extends Translations$errorMappin
 	@override String get notExists => 'Transaction does not exist';
 	@override String get invalidAccountId => 'Invalid account ID';
 	@override String get exchangeRateUnavailable => 'Exchange rate unavailable for this currency';
+	@override String get systemReadonly => 'System-generated transactions cannot be modified';
+	@override String get accountLinkClosed => 'Cannot link to a closed account';
 }
 
 // Path: errorMapping.space
@@ -2776,6 +2779,7 @@ extension on TranslationsEn {
 			'transaction.notFoundTitle' => 'Transaction deleted',
 			'transaction.notFoundBody' => 'This transaction was deleted by its creator or an admin and can no longer be viewed.',
 			'transaction.backToPrevious' => 'Back',
+			'transaction.systemGenerated' => 'System generated',
 			'home.totalExpense' => 'Total Expense',
 			'home.todayExpense' => 'Today\'s',
 			'home.monthExpense' => 'This Month\'s',
@@ -3140,9 +3144,9 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => 'Confirm Before Generation',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => 'Generates a pending transaction on due date, requires manual confirmation',
 			'forecast.recurringTransaction.pendingTitle' => 'Pending Transactions',
-			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} pending',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} pending',
 			'forecast.recurringTransaction.confirm' => 'Confirm',
 			'forecast.recurringTransaction.skip' => 'Skip',
 			'forecast.recurringTransaction.noPending' => 'No pending transactions',
@@ -3654,9 +3658,9 @@ extension on TranslationsEn {
 			'account.other' => 'Other',
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
-			'account.types.depositTitle' => 'Bank Deposit',
 			_ => null,
 		} ?? switch (path) {
+			'account.types.depositTitle' => 'Bank Deposit',
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',
 			'account.types.eMoneySubtitle' => 'Digital payment balances',
@@ -3933,6 +3937,8 @@ extension on TranslationsEn {
 			'errorMapping.transaction.notExists' => 'Transaction does not exist',
 			'errorMapping.transaction.invalidAccountId' => 'Invalid account ID',
 			'errorMapping.transaction.exchangeRateUnavailable' => 'Exchange rate unavailable for this currency',
+			'errorMapping.transaction.systemReadonly' => 'System-generated transactions cannot be modified',
+			'errorMapping.transaction.accountLinkClosed' => 'Cannot link to a closed account',
 			'errorMapping.space.notFound' => 'Shared space not found or access denied',
 			'errorMapping.space.inviteDenied' => 'No permission to invite members',
 			'errorMapping.space.inviteSelf' => 'Cannot invite yourself',
