@@ -1,4 +1,3 @@
-// features/chat/widgets/media_upload_bottom_sheet.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';

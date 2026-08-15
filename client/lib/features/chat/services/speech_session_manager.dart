@@ -1,4 +1,3 @@
-// features/chat/services/speech_session_manager.dart
 import 'dart:async';
 
 import 'package:logging/logging.dart';

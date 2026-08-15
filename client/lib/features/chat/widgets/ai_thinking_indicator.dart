@@ -1,4 +1,3 @@
-// features/chat/widgets/ai_thinking_indicator.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';

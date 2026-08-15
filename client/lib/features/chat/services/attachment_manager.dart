@@ -1,5 +1,3 @@
-// features/chat/services/attachment_manager.dart
-//
 // Attachment Manager
 // Extracted from ChatHistory to manage file attachments
 //

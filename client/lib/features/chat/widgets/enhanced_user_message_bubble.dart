@@ -1,4 +1,3 @@
-// features/chat/widgets/enhanced_user_message_bubble.dart
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:async';

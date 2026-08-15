@@ -1,4 +1,3 @@
-// features/chat/models/photo_selection_model.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 

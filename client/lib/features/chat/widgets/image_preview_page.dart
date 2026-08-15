@@ -1,4 +1,3 @@
-// features/chat/widgets/image_preview_page.dart
 import 'dart:io' show File;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;

@@ -1,4 +1,3 @@
-// features/chat/models/message_chunk.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'message_chunk.freezed.dart';

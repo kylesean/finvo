@@ -1,4 +1,3 @@
-// features/chat/models/tool_call_info.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'tool_call_info.freezed.dart';

@@ -1,4 +1,3 @@
-// features/chat/services/speech_recognition_service.dart
 import 'dart:async';
 
 /// Speech recognition service type

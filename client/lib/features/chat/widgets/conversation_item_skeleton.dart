@@ -1,4 +1,3 @@
-// features/chat/widgets/conversation_item_skeleton.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 

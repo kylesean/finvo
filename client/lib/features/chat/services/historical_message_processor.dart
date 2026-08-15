@@ -1,5 +1,3 @@
-// features/chat/services/historical_message_processor.dart
-//
 // Historical Message Processor
 // Extracted from ChatHistory to process historical messages
 //

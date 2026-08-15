@@ -1,5 +1,3 @@
-// lib/shared/providers/financial_settings_provider.dart
-//
 // Moved out of `features/profile/providers/financial_settings_provider.dart`
 // so that shared widgets (amount text/input) can read the current currency
 // without importing a feature module. It talks directly to the `core` network

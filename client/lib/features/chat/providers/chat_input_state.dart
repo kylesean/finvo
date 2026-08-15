@@ -1,4 +1,3 @@
-// features/chat/providers/chat_input_state.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:finvo/features/chat/models/speech_error_type.dart';

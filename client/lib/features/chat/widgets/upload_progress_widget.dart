@@ -1,4 +1,3 @@
-// features/chat/widgets/upload_progress_widget.dart
 import 'dart:io' show File;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;

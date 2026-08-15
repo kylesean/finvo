@@ -1,5 +1,3 @@
-// features/chat/repositories/message_repository.dart
-//
 // Message Repository
 // Extracted from ChatHistory to manage message CRUD operations
 //

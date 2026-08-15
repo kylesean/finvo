@@ -1,4 +1,3 @@
-// lib/shared/theme/amount_theme.dart
 import 'package:flutter/material.dart';
 
 /// Amount display theme configuration

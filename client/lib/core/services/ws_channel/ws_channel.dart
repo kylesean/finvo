@@ -1,5 +1,3 @@
-// core/services/ws_channel/ws_channel.dart
-//
 // Cross-platform WebSocket connector. On IO platforms (iOS/Android/desktop)
 // the auth token is sent via an `Authorization` header instead of the URL to
 // avoid leaking it into server/proxy logs. On web (where custom headers are

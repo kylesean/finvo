@@ -1,4 +1,3 @@
-// features/chat/utils/permission_diagnostics.dart
 import 'package:logging/logging.dart';
 import 'package:record/record.dart';
 import 'dart:io';

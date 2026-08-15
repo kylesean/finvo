@@ -1,4 +1,3 @@
-// features/auth/models/auth_response_model.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/features/auth/models/user.dart';
 

@@ -1,5 +1,3 @@
-// features/chat/models/speech_error_type.dart
-
 /// Strongly-typed classification of speech recognition errors.
 ///
 /// Replaces magic strings across SpeechRecognitionService implementations,

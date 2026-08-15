@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:finvo/shared/widgets/confirm_dialog.dart';
-// features/home/widgets/feed/transaction_card.dart
 import 'package:flutter/material.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/core/utils/app_haptics.dart';

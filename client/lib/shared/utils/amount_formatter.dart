@@ -1,4 +1,3 @@
-// lib/shared/utils/amount_formatter.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:decimal/decimal.dart';

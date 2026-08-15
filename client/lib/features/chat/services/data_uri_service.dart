@@ -1,4 +1,3 @@
-// features/chat/services/data_uri_service.dart
 import 'dart:convert';
 import 'dart:typed_data';
 

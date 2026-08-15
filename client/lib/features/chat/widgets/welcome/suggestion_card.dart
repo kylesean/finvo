@@ -1,4 +1,3 @@
-// features/chat/widgets/welcome/suggestion_card.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';

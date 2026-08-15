@@ -1,5 +1,3 @@
-// features/shared_space/widgets/detail/shared_space_detail_sections.dart
-//
 // M-28: presentational widgets extracted from `SharedSpaceDetailPage` so the
 // page State keeps only state + interaction + navigation logic.
 import 'package:flutter/material.dart';

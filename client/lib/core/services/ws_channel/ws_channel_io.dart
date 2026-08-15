@@ -1,5 +1,3 @@
-// core/services/ws_channel/ws_channel_io.dart
-//
 // IO implementation: sends the auth token via an `Authorization` header so it
 // does not appear in the URL (avoids leaking into server/proxy logs).
 import 'package:web_socket_channel/io.dart';

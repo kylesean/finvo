@@ -1,5 +1,3 @@
-// core/services/ws_channel/web_socket_uri.dart
-//
 // Platform-neutral helper for attaching the auth token to a WebSocket URL.
 // Kept free of any web/io imports so it can be unit tested on the VM without
 // pulling in `dart:html` (web_socket_channel/html.dart) transitive deps.

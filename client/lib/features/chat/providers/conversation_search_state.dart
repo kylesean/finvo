@@ -1,4 +1,3 @@
-// features/chat/providers/conversation_search_state.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'conversation_search_state.freezed.dart';

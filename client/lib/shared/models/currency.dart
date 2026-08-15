@@ -1,4 +1,3 @@
-// shared/models/currency.dart
 import 'package:finvo/i18n/strings.g.dart';
 
 /// Supported currencies for the application

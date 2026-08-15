@@ -1,4 +1,3 @@
-// features/home/widgets/feed/mention_picker_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';

@@ -1,4 +1,3 @@
-// features/home/models/total_expense_model.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'total_expense_model.freezed.dart';

@@ -1,5 +1,3 @@
-// features/chat/state_controllers/stream_state_controller.dart
-//
 // Stream State Controller
 // Extracted from ChatHistory to manage SSE streaming state
 //

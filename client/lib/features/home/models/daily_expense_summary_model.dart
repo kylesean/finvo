@@ -1,4 +1,3 @@
-// features/home/models/daily_expense_summary_model.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/shared/models/expense_heat_level.dart';
 

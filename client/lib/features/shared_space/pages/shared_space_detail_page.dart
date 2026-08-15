@@ -1,4 +1,3 @@
-// features/shared_space/pages/shared_space_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:finvo/shared/widgets/confirm_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

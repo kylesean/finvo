@@ -1,4 +1,3 @@
-// features/chat/widgets/authenticated_image.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';

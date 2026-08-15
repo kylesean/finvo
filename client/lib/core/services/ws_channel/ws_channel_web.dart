@@ -1,5 +1,3 @@
-// core/services/ws_channel/ws_channel_web.dart
-//
 // Web implementation: the browser WebSocket API does not allow custom headers,
 // so the auth token is sent as a query parameter instead.
 import 'package:finvo/core/services/ws_channel/web_socket_uri.dart';

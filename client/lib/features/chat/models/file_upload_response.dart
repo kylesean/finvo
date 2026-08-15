@@ -1,4 +1,3 @@
-// features/chat/models/file_upload_response.dart
 import 'package:json_annotation/json_annotation.dart';
 
 part 'file_upload_response.g.dart';

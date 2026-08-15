@@ -1,4 +1,3 @@
-// features/chat/models/genui_config.dart
 import 'package:dio/dio.dart';
 import 'package:genui/genui.dart' as genui;
 import 'package:finvo/core/storage/secure_storage_service.dart';

@@ -1,5 +1,3 @@
-// features/chat/state_controllers/stream_completion_policy.dart
-//
 // Pure decision logic for stream-completion callbacks.
 //
 // Extracted from ChatHistory._handleStreamComplete so the subtle

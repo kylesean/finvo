@@ -1,5 +1,3 @@
-// lib/shared/models/financial_settings.dart
-//
 // Moved out of `features/profile/models/financial_settings.dart` so that shared
 // widgets can depend on the current currency setting without importing a
 // feature module. Features re-export this file for source compatibility.

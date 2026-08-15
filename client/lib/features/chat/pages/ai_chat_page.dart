@@ -1,4 +1,3 @@
-// features/chat/pages/ai_chat_page.dart
 import 'package:logging/logging.dart';
 import 'dart:async';
 

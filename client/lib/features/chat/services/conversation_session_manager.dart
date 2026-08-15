@@ -1,5 +1,3 @@
-// features/chat/services/conversation_session_manager.dart
-//
 // Conversation-session loading orchestration, extracted from ChatHistory so
 // the provider reads as a thin facade over managers (same pattern as
 // ChatInteractionManager). Owns the network fetch, the switch-race guard and

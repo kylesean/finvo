@@ -1,4 +1,3 @@
-// shared/providers/locale_provider.dart
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/locale_service.dart';

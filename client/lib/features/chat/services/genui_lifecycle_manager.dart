@@ -1,5 +1,3 @@
-// features/chat/services/genui_lifecycle_manager.dart
-
 import 'dart:async';
 import 'package:logging/logging.dart';
 
