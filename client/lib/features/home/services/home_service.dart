@@ -21,7 +21,13 @@ class HomeService {
     return await _networkClient.request<CalendarMonthData>(
       '/home/calendar-month-details',
       method: HttpMethod.get,
-      queryParameters: {'year': year, 'month': month},
+      queryParameters: {
+        'year': year,
+        'month': month,
+        // S-E: local-day grouping (the server slices the month and groups
+        // daily totals by the client's local offset).
+        'tz_offset': DateTime.now().timeZoneOffset.inMinutes.toString(),
+      },
       cancelToken: cancelToken,
       fromJsonT: (json) => _parseItemResponse(json, CalendarMonthData.fromJson),
     );

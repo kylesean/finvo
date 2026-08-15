@@ -495,8 +495,13 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     // `originalName` misattributes results when two selected files share a
     // name — the wrong attachmentId/uri would be attached to the wrong file.
     // Failed files are excluded from the zip by the filter above.
+    // C-A: the exclusion MUST use the same identity as failedPaths
+    // (fileUploadKey). Comparing against file.path breaks on web where
+    // XFile.fromData files have an empty path — every failed file would
+    // survive the filter and shift the index alignment, attaching the
+    // successful file's uploadInfo to the failed file.
     final uploadableFiles = originalFiles
-        .where((file) => !failedPaths.contains(file.path))
+        .where((file) => !failedPaths.contains(fileUploadKey(file)))
         .toList();
     final uploadCount = result.uploads.length < uploadableFiles.length
         ? result.uploads.length

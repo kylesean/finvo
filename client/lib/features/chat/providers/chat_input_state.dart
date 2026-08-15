@@ -35,18 +35,19 @@ abstract class ChatInputState with _$ChatInputState {
 /// selected files into one bucket (CHAT-02). For pathless files, fall back to
 /// an identity-derived key that stays stable for the file's whole lifetime.
 ///
-/// The tiny registration map is deliberately global: both the provider and
+/// The tiny registration store is deliberately global: both the provider and
 /// the preview widget must resolve the *same* key for the *same* XFile
 /// instance, and the instance themselves are kept alive by `selectedFiles`.
+/// An [Expando] (not a plain Map keyed by identityHashCode) keeps this leak-
+/// free: entries are garbage-collected with their XFile, so the store never
+/// grows across a long session, and two live files can never collide on the
+/// same hash.
 String fileUploadKey(XFile file) {
   if (file.path.isNotEmpty) return file.path;
-  return _pathlessUploadKeys.putIfAbsent(
-    identityHashCode(file),
-    () => 'web-file#${_pathlessUploadSeq++}',
-  );
+  return _pathlessUploadKeys[file] ??= 'web-file#${_pathlessUploadSeq++}';
 }
 
-final Map<int, String> _pathlessUploadKeys = {};
+final Expando<String> _pathlessUploadKeys = Expando<String>();
 int _pathlessUploadSeq = 0;
 
 enum HintType {

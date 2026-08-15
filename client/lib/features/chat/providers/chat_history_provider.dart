@@ -161,6 +161,7 @@ class ChatHistory extends _$ChatHistory {
       onTitleUpdate: _handleTitleUpdate,
       onToolCallStart: _handleToolCallStart,
       onToolCallEnd: _handleToolCallEnd,
+      onMessageId: _handleServerMessageId,
     );
   }
 
@@ -293,13 +294,30 @@ class ChatHistory extends _$ChatHistory {
     }
 
     if (messageId != null && _currentStreamingAiMessageId.isNotEmpty) {
-      _updateMessageIdLocally(_currentStreamingAiMessageId, messageId);
-      // Keep streaming controller in sync so subsequent text/tool-call events
-      // (which carry the server-assigned ID) still find the message.
-      // Previously the controller kept the temporary optimistic UUID, causing
-      // first-chunk content to be silently dropped on new conversations.
-      _streamingController.updateCurrentMessageId(messageId);
+      _applyServerMessageId(messageId);
     }
+  }
+
+  /// Adopt the server-assigned AI message id, replacing the optimistic
+  /// temporary UUID.
+  ///
+  /// Used by both the `session_init` metadata (S-H legacy path) and the
+  /// streamed `message_id` event (authoritative path, arrives before the
+  /// message's first text delta).
+  void _applyServerMessageId(String serverId) {
+    if (serverId.isEmpty || _currentStreamingAiMessageId.isEmpty) return;
+    if (_currentStreamingAiMessageId == serverId) return;
+    _updateMessageIdLocally(_currentStreamingAiMessageId, serverId);
+    // Keep streaming controller in sync so subsequent text/tool-call events
+    // (which carry the server-assigned ID) still find the message.
+    // Previously the controller kept the temporary optimistic UUID, causing
+    // first-chunk content to be silently dropped on new conversations.
+    _streamingController.updateCurrentMessageId(serverId);
+  }
+
+  /// Handle the streamed `message_id` event (S-H).
+  void _handleServerMessageId(String serverId) {
+    _applyServerMessageId(serverId);
   }
 
   /// Handle stream completion (GenUI onStreamComplete callback).

@@ -29,6 +29,7 @@ class GenUiLifecycleCallbacks {
   final void Function(String title) onTitleUpdate;
   final void Function(ToolCallInfo)? onToolCallStart;
   final void Function(ToolCallInfo)? onToolCallEnd;
+  final void Function(String messageId)? onMessageId;
 
   const GenUiLifecycleCallbacks({
     required this.getCurrentStreamingMessageId,
@@ -40,6 +41,7 @@ class GenUiLifecycleCallbacks {
     required this.onTitleUpdate,
     this.onToolCallStart,
     this.onToolCallEnd,
+    this.onMessageId,
   });
 }
 
@@ -101,6 +103,17 @@ class GenUiLifecycleManager {
     return (sessionId, messageId) {
       if (_isDisposed) return;
       cb(sessionId, messageId);
+    };
+  }
+
+  /// S-H: the server streams the authoritative AI message id via a
+  /// `message_id` SSE event once the model node emits its first chunk; the
+  /// provider renames its optimistic placeholder to that id.
+  void Function(String messageId) get _onMessageId {
+    final cb = _callbacks.onMessageId;
+    return (messageId) {
+      if (_isDisposed) return;
+      cb?.call(messageId);
     };
   }
 
@@ -201,6 +214,12 @@ class GenUiLifecycleManager {
       // Wire up tool call event callbacks
       final CustomContentGenerator contentGenerator =
           _genUiService!.conversation.contentGenerator;
+
+      // S-H: authoritative message-id streaming (see _onMessageId).
+      contentGenerator.onMessageIdUpdate = (_, serverId) {
+        _onMessageId(serverId);
+      };
+
       contentGenerator.onToolCallStart = (event) {
         _logger.info('GenUiLifecycleManager: Tool call start - ${event.name}');
         final toolCallInfo = ToolCallInfo(

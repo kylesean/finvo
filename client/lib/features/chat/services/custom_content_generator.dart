@@ -567,6 +567,31 @@ class CustomContentGenerator implements genui.Transport {
         onStreamComplete?.call();
         break;
 
+      case 'message_id':
+        // S-H: the server streams the authoritative AI message id before the
+        // message's first text delta. The provider renames its optimistic
+        // placeholder (the transport does not know the local id; the provider
+        // reads it from the streaming controller).
+        final msgId = data['content'] as String?;
+        if (msgId != null && msgId.isNotEmpty) {
+          _logger.info('CustomContentGenerator: Server message id: $msgId');
+          onMessageIdUpdate?.call('', msgId);
+        }
+        break;
+
+      case 'error':
+        // S-I: mid-stream failures (e.g. a rejected transfer) arrive as
+        // `error` events with a user-safe message. Route them through onError
+        // so the turn surfaces the failure instead of silently ending.
+        final errorContent = data['content'] as String?;
+        if (errorContent != null && errorContent.isNotEmpty) {
+          _logger.warning(
+            'CustomContentGenerator: Stream error event: $errorContent',
+          );
+          onError?.call(errorContent);
+        }
+        break;
+
       default:
         _logger.info('CustomContentGenerator: Unknown event type: $eventType');
     }

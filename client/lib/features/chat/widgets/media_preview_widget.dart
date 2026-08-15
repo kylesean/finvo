@@ -195,9 +195,15 @@ class MediaPreviewWidget extends StatelessWidget {
 
     if (images.isEmpty) return;
 
-    // Find the index of the clicked image in the image list.
+    // Find the index of the clicked image in the image list. Identity is
+    // compared via fileUploadKey: on web, XFile.fromData files all have an
+    // empty path, so a `.path` comparison would always match the FIRST image
+    // — the wrong image opens in the preview and the wrong one gets deleted.
     final currentFile = selectedFiles[initialIndex];
-    final imageIndex = images.indexWhere((img) => img.path == currentFile.path);
+    final currentKey = fileUploadKey(currentFile);
+    final imageIndex = images.indexWhere(
+      (img) => fileUploadKey(img) == currentKey,
+    );
 
     unawaited(
       Navigator.of(context).push<void>(
@@ -209,7 +215,7 @@ class MediaPreviewWidget extends StatelessWidget {
               // Find the index of the image to delete in the original list.
               final imageToDelete = images[imageIndex];
               final originalIndex = selectedFiles.indexWhere(
-                (file) => file.path == imageToDelete.path,
+                (file) => fileUploadKey(file) == fileUploadKey(imageToDelete),
               );
               if (originalIndex >= 0) {
                 onRemove(originalIndex);

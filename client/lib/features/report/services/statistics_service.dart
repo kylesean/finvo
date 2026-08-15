@@ -33,7 +33,14 @@ class StatisticsService {
     DateTime? endDate,
     List<String>? accountTypes,
   }) {
-    final queryParams = <String, String>{'time_range': timeRange.name};
+    final queryParams = <String, String>{
+      'time_range': timeRange.name,
+      // S-E: tell the server the client's local offset so trends/categories/
+      // top-transactions/cash-flow/health-score group by LOCAL calendar days
+      // (a UTC+8 transaction at local 00:30 must land on today's bucket, not
+      // yesterday's).
+      'tz_offset': DateTime.now().timeZoneOffset.inMinutes.toString(),
+    };
     if (startDate != null) {
       queryParams['start_date'] = _formatDateParam(startDate);
     }
