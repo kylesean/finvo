@@ -10,13 +10,8 @@ import 'package:finvo/features/chat/widgets/media_upload_bottom_sheet.dart';
 /// Tapping shows a bottom sheet with multiple function options
 class MediaUploadButton extends ConsumerWidget {
   final bool enabled;
-  final ChatInputNotifierProvider chatInputProvider;
 
-  const MediaUploadButton({
-    super.key,
-    this.enabled = true,
-    required this.chatInputProvider,
-  });
+  const MediaUploadButton({super.key, this.enabled = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

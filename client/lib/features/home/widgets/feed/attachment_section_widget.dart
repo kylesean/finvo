@@ -118,6 +118,9 @@ class AttachmentSectionWidget extends ConsumerWidget {
             fullUrl,
             headers: headers,
             fit: BoxFit.cover,
+            // M26: 72px thumbnail — decode at display resolution instead of
+            // holding full-size originals in the image cache.
+            cacheWidth: (72 * MediaQuery.devicePixelRatioOf(context)).round(),
             frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
               if (wasSynchronouslyLoaded || frame != null) {
                 return AnimatedOpacity(

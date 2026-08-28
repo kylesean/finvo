@@ -97,7 +97,13 @@ class UserAvatar extends ConsumerWidget {
       }
       content = Image(
         key: ValueKey(requestUrl),
-        image: NetworkImage(requestUrl),
+        // M26: decode at display resolution (physical px), not the full
+        // original — avatars render at 40-88px and the image cache would
+        // otherwise hold full-size bitmaps per cache-busted URL.
+        image: ResizeImage(
+          NetworkImage(requestUrl),
+          width: (size * MediaQuery.devicePixelRatioOf(context)).round(),
+        ),
         fit: BoxFit.cover,
         width: size,
         height: size,

@@ -60,16 +60,17 @@ class ChatInputNotifier extends _$ChatInputNotifier {
   /// corrupt the fresh one.
   bool _disposed = false;
 
-  /// The current send-message callback. Stored as a mutable field (instead of
-  /// relying only on the build parameter) so a reused widget State can swap in
-  /// a fresher callback via [updateOnSendMessage] without resetting the whole
-  /// provider and losing the draft/isiVoice state.
+  /// The current send-message callback, bound by the ChatInputField via
+  /// [updateOnSendMessage] (initState + didUpdateWidget).
   late OnSendMessageCallback _onSendMessage;
 
   @override
-  ChatInputState build(OnSendMessageCallback onSendMessage) {
-    _onSendMessage = onSendMessage;
-
+  ChatInputState build() {
+    // M5: parameterless build — the send callback is bound by the
+    // ChatInputField via [updateOnSendMessage]. The previous closure-keyed
+    // family made provider identity follow closure identity: a rebuilt
+    // widget State silently created a fresh notifier, losing the draft text
+    // and in-flight upload bookkeeping.
     // Service initialization
     _fileUploadService = ref.watch(fileUploadServiceProvider);
 

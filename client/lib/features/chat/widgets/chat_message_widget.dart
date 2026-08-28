@@ -204,6 +204,16 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     UIComponentInfo component,
   ) {
     final cacheKey = '${component.mode.name}_${component.surfaceId}';
+    // M15: the cache used to grow unbounded for the lifetime of the list
+    // item — a long conversation with many surfaces kept every subtree
+    // alive. Prune entries that are no longer part of the current message.
+    _genUiCache.removeWhere((key, entry) {
+      if (key == cacheKey) return false;
+      final stillPresent = widget.message.uiComponents.any(
+        (c) => '${c.mode.name}_${c.surfaceId}' == key,
+      );
+      return !stillPresent;
+    });
     final existing = _genUiCache[cacheKey];
 
     if (existing != null &&

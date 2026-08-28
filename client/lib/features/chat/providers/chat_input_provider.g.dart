@@ -10,30 +10,23 @@ part of 'chat_input_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ChatInputNotifier)
-final chatInputProvider = ChatInputNotifierFamily._();
+final chatInputProvider = ChatInputNotifierProvider._();
 
 final class ChatInputNotifierProvider
     extends $NotifierProvider<ChatInputNotifier, ChatInputState> {
-  ChatInputNotifierProvider._({
-    required ChatInputNotifierFamily super.from,
-    required OnSendMessageCallback super.argument,
-  }) : super(
-         retry: null,
-         name: r'chatInputProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  ChatInputNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatInputProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$chatInputNotifierHash();
-
-  @override
-  String toString() {
-    return r'chatInputProvider'
-        ''
-        '($argument)';
-  }
 
   @$internal
   @override
@@ -46,50 +39,12 @@ final class ChatInputNotifierProvider
       providerOverride: $SyncValueProvider<ChatInputState>(value),
     );
   }
-
-  @override
-  bool operator ==(Object other) {
-    return other is ChatInputNotifierProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
-String _$chatInputNotifierHash() => r'7920bdbe09ac1ab40c3261998ab25c8baf6f8d2a';
-
-final class ChatInputNotifierFamily extends $Family
-    with
-        $ClassFamilyOverride<
-          ChatInputNotifier,
-          ChatInputState,
-          ChatInputState,
-          ChatInputState,
-          OnSendMessageCallback
-        > {
-  ChatInputNotifierFamily._()
-    : super(
-        retry: null,
-        name: r'chatInputProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  ChatInputNotifierProvider call(OnSendMessageCallback onSendMessage) =>
-      ChatInputNotifierProvider._(argument: onSendMessage, from: this);
-
-  @override
-  String toString() => r'chatInputProvider';
-}
+String _$chatInputNotifierHash() => r'fb1c2d8cd3d06e401d63c828f41ade52f9170540';
 
 abstract class _$ChatInputNotifier extends $Notifier<ChatInputState> {
-  late final _$args = ref.$arg as OnSendMessageCallback;
-  OnSendMessageCallback get onSendMessage => _$args;
-
-  ChatInputState build(OnSendMessageCallback onSendMessage);
+  ChatInputState build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
@@ -102,6 +57,6 @@ abstract class _$ChatInputNotifier extends $Notifier<ChatInputState> {
               Object?,
               Object?
             >;
-    return element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, build);
   }
 }

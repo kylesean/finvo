@@ -31,7 +31,6 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     with SingleTickerProviderStateMixin {
   late final TextEditingController _textController;
   final FocusNode _focusNode = FocusNode();
-  late final provider = chatInputProvider(widget.onSendMessage);
 
   // Breathing animation controller
   late AnimationController _breathingController;
@@ -52,6 +51,13 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     );
     _textController = TextEditingController();
 
+    // M5: bind the send callback now that the provider is parameterless
+    // (didUpdateWidget keeps refreshing it when the parent rebuilds with a
+    // new closure).
+    ref
+        .read(chatInputProvider.notifier)
+        .updateOnSendMessage(widget.onSendMessage);
+
     // Start/stop the breathing animation whenever the waiting state changes.
     // The animation is driven purely by listeners (never from build) so build
     // stays side-effect free.
@@ -61,11 +67,11 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     ) {
       _syncBreathingAnimation();
       if (previous == true && current == false && mounted) {
-        ref.read(provider.notifier).resetLoadingState();
+        ref.read(chatInputProvider.notifier).resetLoadingState();
       }
     });
     ref.listenManual(
-      provider.select((s) => s.isListening),
+      chatInputProvider.select((s) => s.isListening),
       (_, _) => _syncBreathingAnimation(),
     );
     _syncBreathingAnimation();
@@ -76,12 +82,12 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
       chatHistoryProvider.select((s) => s.currentConversationId),
       (previous, current) {
         if (previous != current) {
-          ref.read(provider.notifier).resetForConversationSwitch();
+          ref.read(chatInputProvider.notifier).resetForConversationSwitch();
         }
       },
     );
 
-    ref.listenManual(provider.select((s) => s.text), (
+    ref.listenManual(chatInputProvider.select((s) => s.text), (
       previousText,
       currentText,
     ) {
@@ -106,7 +112,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
       }
     }, fireImmediately: true);
 
-    ref.listenManual(provider, (
+    ref.listenManual(chatInputProvider, (
       ChatInputState? previousState,
       ChatInputState currentState,
     ) {
@@ -123,7 +129,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            ref.read(provider.notifier).clearError();
+            ref.read(chatInputProvider.notifier).clearError();
           }
         });
       }
@@ -220,7 +226,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
         duration: const Duration(seconds: 3),
         action: SnackBarAction(
           label: t.common.ok,
-          onPressed: () => ref.read(provider.notifier).clearError(),
+          onPressed: () => ref.read(chatInputProvider.notifier).clearError(),
         ),
       ),
     );
@@ -230,7 +236,9 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
   void didUpdateWidget(ChatInputField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.onSendMessage, widget.onSendMessage)) {
-      ref.read(provider.notifier).updateOnSendMessage(widget.onSendMessage);
+      ref
+          .read(chatInputProvider.notifier)
+          .updateOnSendMessage(widget.onSendMessage);
     }
   }
 
@@ -247,7 +255,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     if (!mounted) return;
     final isWaitingState =
         ref.read(chatHistoryProvider).isStreamingResponse ||
-        ref.read(provider).isListening;
+        ref.read(chatInputProvider).isListening;
     if (isWaitingState) {
       if (!_breathingController.isAnimating) {
         unawaited(_breathingController.repeat(reverse: true));
@@ -291,15 +299,23 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     // (media preview, animated containers, icon button) per character even
     // though the TextField itself is controller-driven. Watch only the
     // slices this build actually consumes.
-    final hasText = ref.watch(provider.select((s) => s.text.trim().isNotEmpty));
-    final isListening = ref.watch(provider.select((s) => s.isListening));
-    final isSpeechAvailable = ref.watch(
-      provider.select((s) => s.isSpeechAvailable),
+    final hasText = ref.watch(
+      chatInputProvider.select((s) => s.text.trim().isNotEmpty),
     );
-    final hintType = ref.watch(provider.select((s) => s.hintType));
-    final selectedFiles = ref.watch(provider.select((s) => s.selectedFiles));
-    final uploadingFiles = ref.watch(provider.select((s) => s.uploadingFiles));
-    final chatInputNotifier = ref.read(provider.notifier);
+    final isListening = ref.watch(
+      chatInputProvider.select((s) => s.isListening),
+    );
+    final isSpeechAvailable = ref.watch(
+      chatInputProvider.select((s) => s.isSpeechAvailable),
+    );
+    final hintType = ref.watch(chatInputProvider.select((s) => s.hintType));
+    final selectedFiles = ref.watch(
+      chatInputProvider.select((s) => s.selectedFiles),
+    );
+    final uploadingFiles = ref.watch(
+      chatInputProvider.select((s) => s.uploadingFiles),
+    );
+    final chatInputNotifier = ref.read(chatInputProvider.notifier);
 
     final isStreamingResponse = ref.watch(
       chatHistoryProvider.select((state) => state.isStreamingResponse),
@@ -373,10 +389,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  MediaUploadButton(
-                    enabled: canUseAddButton,
-                    chatInputProvider: provider,
-                  ),
+                  MediaUploadButton(enabled: canUseAddButton),
                   const SizedBox(width: 4),
                   Expanded(
                     child: TextField(
