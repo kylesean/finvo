@@ -51,7 +51,7 @@ class FinancialAccountDetailPage extends ConsumerWidget {
           ),
         ),
         title: Text(
-          args.definition.title,
+          args.definition.localizedTitle,
           style: AppTextStyles.pageTitle(theme),
         ),
       ),
@@ -97,13 +97,13 @@ class FinancialAccountDetailPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    args.definition.title,
+                    args.definition.localizedTitle,
                     style: AppTextStyles.listTitle(theme),
                   ),
                   if (args.definition.subtitle.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
-                      args.definition.subtitle,
+                      args.definition.localizedSubtitle,
                       style: AppTextStyles.detailLabel(theme),
                     ),
                   ],

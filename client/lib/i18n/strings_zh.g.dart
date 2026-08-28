@@ -1749,6 +1749,15 @@ class Translations$chat$zh {
 
 	/// zh: '文件上传失败，请稍后再试'
 	String get fileUploadFailed => '文件上传失败，请稍后再试';
+
+	/// zh: '已确认转账路径：从 $source 到 $target，金额 $currency $amount。请执行该转账操作。'
+	String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '已确认转账路径：从 ${source} 到 ${target}，金额 ${currency} ${amount}。请执行该转账操作。';
+
+	/// zh: '附件加载失败，点击重试'
+	String get attachmentLoadFailedTapRetry => '附件加载失败，点击重试';
+
+	/// zh: '$count 个文件'
+	String mediaFilesCount({required Object count}) => '${count} 个文件';
 }
 
 // Path: image
@@ -2173,6 +2182,7 @@ class Translations$account$zh {
 	String get other => '其他账户';
 
 	late final Translations$account$types$zh types = Translations$account$types$zh.internal(_root);
+	late final Translations$account$natures$zh natures = Translations$account$natures$zh.internal(_root);
 }
 
 // Path: financial
@@ -3344,6 +3354,57 @@ class Translations$account$types$zh {
 	String get payableHelper => '我欠他人';
 }
 
+// Path: account.natures
+class Translations$account$natures$zh {
+	Translations$account$natures$zh.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh: '流动资产'
+	String get liquidAssetsTitle => '流动资产';
+
+	/// zh: '日常随时可用、流动性最高的资金。'
+	String get liquidAssetsDescription => '日常随时可用、流动性最高的资金。';
+
+	/// zh: '信用账户'
+	String get creditAccountsTitle => '信用账户';
+
+	/// zh: '金融机构授予的循环信用额度。'
+	String get creditAccountsDescription => '金融机构授予的循环信用额度。';
+
+	/// zh: '投资资产'
+	String get investmentAssetsTitle => '投资资产';
+
+	/// zh: '以增值为目标、价值随市场波动的资产。'
+	String get investmentAssetsDescription => '以增值为目标、价值随市场波动的资产。';
+
+	/// zh: '长期负债'
+	String get longTermLiabilitiesTitle => '长期负债';
+
+	/// zh: '结构性的长期贷款或融资债务。'
+	String get longTermLiabilitiesDescription => '结构性的长期贷款或融资债务。';
+
+	/// zh: '应收款项'
+	String get receivablesTitle => '应收款项';
+
+	/// zh: '他人欠你的短期款项。'
+	String get receivablesDescription => '他人欠你的短期款项。';
+
+	/// zh: '应付款项'
+	String get payablesTitle => '应付款项';
+
+	/// zh: '你欠他人的短期款项。'
+	String get payablesDescription => '你欠他人的短期款项。';
+
+	/// zh: '其他资产'
+	String get otherAssetsTitle => '其他资产';
+
+	/// zh: '特定用途或流动性较低的其他资产。'
+	String get otherAssetsDescription => '特定用途或流动性较低的其他资产。';
+}
+
 // Path: statistics.overview
 class Translations$statistics$overview$zh {
 	Translations$statistics$overview$zh.internal(this._root);
@@ -3486,6 +3547,12 @@ class Translations$server$error$zh {
 
 	/// zh: '明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。'
 	String get plainHttpWarning => '明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。';
+
+	/// zh: '服务器响应异常：$code'
+	String statusResponse({required Object code}) => '服务器响应异常：${code}';
+
+	/// zh: '连接失败'
+	String get connectionFailed => '连接失败';
 }
 
 // Path: sharedSpace.dashboard
@@ -6373,6 +6440,9 @@ extension on Translations {
 			'chat.sendFailed' => '发送消息失败，请稍后再试',
 			'chat.attachmentUploadFailed' => ({required Object files}) => '附件上传失败：${files}',
 			'chat.fileUploadFailed' => '文件上传失败，请稍后再试',
+			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '已确认转账路径：从 ${source} 到 ${target}，金额 ${currency} ${amount}。请执行该转账操作。',
+			'chat.attachmentLoadFailedTapRetry' => '附件加载失败，点击重试',
+			'chat.mediaFilesCount' => ({required Object count}) => '${count} 个文件',
 			'image.deleteTitle' => '删除图片',
 			'image.deleteConfirm' => '确定要删除这张图片吗？此操作无法撤销。',
 			'footprint.searchIn' => '搜索',
@@ -6485,11 +6555,11 @@ extension on Translations {
 			'account.disposalWriteoffDesc' => '生成一笔支出（或收入）流水核销余额，视为已消耗/免除后再停用。',
 			'account.save' => '保存修改',
 			'account.assetsCategory' => '资产类',
+			_ => null,
+		} ?? switch (path) {
 			'account.liabilitiesCategory' => '负债/信用类',
 			'account.cash' => '现金钱包',
 			'account.deposit' => '银行存款',
-			_ => null,
-		} ?? switch (path) {
 			'account.creditCard' => '信用卡',
 			'account.investment' => '投资理财',
 			'account.eWallet' => '电子钱包',
@@ -6515,6 +6585,20 @@ extension on Translations {
 			'account.types.payableTitle' => '应付款项',
 			'account.types.payableSubtitle' => '借入款项、待付账款',
 			'account.types.payableHelper' => '我欠他人',
+			'account.natures.liquidAssetsTitle' => '流动资产',
+			'account.natures.liquidAssetsDescription' => '日常随时可用、流动性最高的资金。',
+			'account.natures.creditAccountsTitle' => '信用账户',
+			'account.natures.creditAccountsDescription' => '金融机构授予的循环信用额度。',
+			'account.natures.investmentAssetsTitle' => '投资资产',
+			'account.natures.investmentAssetsDescription' => '以增值为目标、价值随市场波动的资产。',
+			'account.natures.longTermLiabilitiesTitle' => '长期负债',
+			'account.natures.longTermLiabilitiesDescription' => '结构性的长期贷款或融资债务。',
+			'account.natures.receivablesTitle' => '应收款项',
+			'account.natures.receivablesDescription' => '他人欠你的短期款项。',
+			'account.natures.payablesTitle' => '应付款项',
+			'account.natures.payablesDescription' => '你欠他人的短期款项。',
+			'account.natures.otherAssetsTitle' => '其他资产',
+			'account.natures.otherAssetsDescription' => '特定用途或流动性较低的其他资产。',
 			'financial.title' => '财务',
 			'financial.management' => '财务管理',
 			'financial.netWorth' => '总净值',
@@ -6624,6 +6708,8 @@ extension on Translations {
 			'server.error.sslError' => 'SSL 证书错误',
 			'server.error.serverError' => '服务器错误',
 			'server.error.plainHttpWarning' => '明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。',
+			'server.error.statusResponse' => ({required Object code}) => '服务器响应异常：${code}',
+			'server.error.connectionFailed' => '连接失败',
 			'sharedSpace.dashboard.sectionTitle' => '财务概览',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => '累计总支出',
 			'sharedSpace.dashboard.participatingMembers' => '参与成员',

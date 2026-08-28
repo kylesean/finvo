@@ -757,6 +757,9 @@ class _Translations$chat$ko extends Translations$chat$zh {
 	@override String get sendFailed => '메시지 전송에 실패했습니다. 잠시 후 다시 시도해 주세요';
 	@override String attachmentUploadFailed({required Object files}) => '첨부 파일 업로드에 실패했습니다: ${files}';
 	@override String get fileUploadFailed => '파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요';
+	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '이체 경로 확인됨: ${source}에서 ${target}으로, 금액 ${currency} ${amount}. 이 이체를 실행해 주세요.';
+	@override String get attachmentLoadFailedTapRetry => '첨부파일 로드 실패, 탭하여 재시도';
+	@override String mediaFilesCount({required Object count}) => '파일 ${count}개';
 }
 
 // Path: image
@@ -947,6 +950,7 @@ class _Translations$account$ko extends Translations$account$zh {
 	@override String get payable => '갚을 돈';
 	@override String get other => '기타 계좌';
 	@override late final _Translations$account$types$ko types = _Translations$account$types$ko._(_root);
+	@override late final _Translations$account$natures$ko natures = _Translations$account$natures$ko._(_root);
 }
 
 // Path: financial
@@ -1506,6 +1510,29 @@ class _Translations$account$types$ko extends Translations$account$types$zh {
 	@override String get payableHelper => 'I owe';
 }
 
+// Path: account.natures
+class _Translations$account$natures$ko extends Translations$account$natures$zh {
+	_Translations$account$natures$ko._(TranslationsKo root) : this._root = root, super.internal(root);
+
+	final TranslationsKo _root; // ignore: unused_field
+
+	// Translations
+	@override String get liquidAssetsTitle => '유동 자산';
+	@override String get liquidAssetsDescription => '언제든 사용 가능한 유동성이 가장 높은 자금입니다.';
+	@override String get creditAccountsTitle => '신용 계좌';
+	@override String get creditAccountsDescription => '금융기관이 제공하는 리볼빙 신용 한도입니다.';
+	@override String get investmentAssetsTitle => '투자 자산';
+	@override String get investmentAssetsDescription => '시장에 따라 가치가 변동하는 증식 목적 자산입니다.';
+	@override String get longTermLiabilitiesTitle => '장기 부채';
+	@override String get longTermLiabilitiesDescription => '계획적인 장기 대출 또는 금융 부채입니다.';
+	@override String get receivablesTitle => '미수금';
+	@override String get receivablesDescription => '타인이 갚아야 할 단기 금액입니다.';
+	@override String get payablesTitle => '미지급금';
+	@override String get payablesDescription => '타인에게 갚아야 할 단기 금액입니다.';
+	@override String get otherAssetsTitle => '기타 자산';
+	@override String get otherAssetsDescription => '특정 용도 또는 유동성이 낮은 기타 자산입니다.';
+}
+
 // Path: statistics.overview
 class _Translations$statistics$overview$ko extends Translations$statistics$overview$zh {
 	_Translations$statistics$overview$ko._(TranslationsKo root) : this._root = root, super.internal(root);
@@ -1826,6 +1853,8 @@ class _Translations$server$error$ko extends Translations$server$error$zh {
 	@override String get sslError => 'SSL certificate error';
 	@override String get serverError => 'Server error';
 	@override String get plainHttpWarning => '일반 HTTP: 로그인 토큰과 데이터가 암호화되지 않고 전송됩니다. 신뢰할 수 있는 로컬 네트워크에서만 사용하세요.';
+	@override String statusResponse({required Object code}) => '서버가 상태 ${code} 를 반환했습니다';
+	@override String get connectionFailed => '연결 실패';
 }
 
 // Path: errorMapping.generic
@@ -3550,6 +3579,9 @@ extension on TranslationsKo {
 			'chat.sendFailed' => '메시지 전송에 실패했습니다. 잠시 후 다시 시도해 주세요',
 			'chat.attachmentUploadFailed' => ({required Object files}) => '첨부 파일 업로드에 실패했습니다: ${files}',
 			'chat.fileUploadFailed' => '파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요',
+			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '이체 경로 확인됨: ${source}에서 ${target}으로, 금액 ${currency} ${amount}. 이 이체를 실행해 주세요.',
+			'chat.attachmentLoadFailedTapRetry' => '첨부파일 로드 실패, 탭하여 재시도',
+			'chat.mediaFilesCount' => ({required Object count}) => '파일 ${count}개',
 			'image.deleteTitle' => '이미지 삭제',
 			'image.deleteConfirm' => '이 이미지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
 			'footprint.searchIn' => '검색',
@@ -3663,11 +3695,11 @@ extension on TranslationsKo {
 			'account.save' => '수정사항 저장',
 			'account.assetsCategory' => '자산',
 			'account.liabilitiesCategory' => '부채/신용',
+			_ => null,
+		} ?? switch (path) {
 			'account.cash' => '현금/지갑',
 			'account.deposit' => '예금',
 			'account.creditCard' => '신용카드',
-			_ => null,
-		} ?? switch (path) {
 			'account.investment' => '투자',
 			'account.eWallet' => '전자지갑',
 			'account.loan' => '대출',
@@ -3692,6 +3724,20 @@ extension on TranslationsKo {
 			'account.types.payableTitle' => 'Payable',
 			'account.types.payableSubtitle' => 'Amounts owed to others',
 			'account.types.payableHelper' => 'I owe',
+			'account.natures.liquidAssetsTitle' => '유동 자산',
+			'account.natures.liquidAssetsDescription' => '언제든 사용 가능한 유동성이 가장 높은 자금입니다.',
+			'account.natures.creditAccountsTitle' => '신용 계좌',
+			'account.natures.creditAccountsDescription' => '금융기관이 제공하는 리볼빙 신용 한도입니다.',
+			'account.natures.investmentAssetsTitle' => '투자 자산',
+			'account.natures.investmentAssetsDescription' => '시장에 따라 가치가 변동하는 증식 목적 자산입니다.',
+			'account.natures.longTermLiabilitiesTitle' => '장기 부채',
+			'account.natures.longTermLiabilitiesDescription' => '계획적인 장기 대출 또는 금융 부채입니다.',
+			'account.natures.receivablesTitle' => '미수금',
+			'account.natures.receivablesDescription' => '타인이 갚아야 할 단기 금액입니다.',
+			'account.natures.payablesTitle' => '미지급금',
+			'account.natures.payablesDescription' => '타인에게 갚아야 할 단기 금액입니다.',
+			'account.natures.otherAssetsTitle' => '기타 자산',
+			'account.natures.otherAssetsDescription' => '특정 용도 또는 유동성이 낮은 기타 자산입니다.',
 			'financial.title' => '금융',
 			'financial.management' => '금융 관리',
 			'financial.netWorth' => '총 순자산',
@@ -3926,6 +3972,8 @@ extension on TranslationsKo {
 			'server.error.sslError' => 'SSL certificate error',
 			'server.error.serverError' => 'Server error',
 			'server.error.plainHttpWarning' => '일반 HTTP: 로그인 토큰과 데이터가 암호화되지 않고 전송됩니다. 신뢰할 수 있는 로컬 네트워크에서만 사용하세요.',
+			'server.error.statusResponse' => ({required Object code}) => '서버가 상태 ${code} 를 반환했습니다',
+			'server.error.connectionFailed' => '연결 실패',
 			'errorMapping.generic.badRequest' => 'Bad Request',
 			'errorMapping.generic.authFailed' => 'Authentication failed, please login again',
 			'errorMapping.generic.permissionDenied' => 'Permission denied',

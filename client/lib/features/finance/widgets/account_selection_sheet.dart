@@ -389,7 +389,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
       case 'payable':
         return rt.accountTypePayable;
       default:
-        return definition.title;
+        return definition.localizedTitle;
     }
   }
 }

@@ -203,7 +203,7 @@ class _FinancialAccountAddPageState
       case 'payable':
         return t.account.payable;
       default:
-        return definition.title;
+        return definition.localizedTitle;
     }
   }
 

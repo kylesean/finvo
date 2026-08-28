@@ -389,7 +389,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     ChatMessageAttachment attachment,
   ) {
     final message =
-        attachment.errorMessage ?? 'Failed to load attachment, tap to retry';
+        attachment.errorMessage ?? t.chat.attachmentLoadFailedTapRetry;
     return InkWell(
       onTap: () => _retryAttachment(attachment),
       child: Container(
@@ -457,7 +457,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              '${widget.message.mediaFiles.length} files total',
+              t.chat.mediaFilesCount(count: widget.message.mediaFiles.length),
               style: AppTextStyles.detailLabel(theme).copyWith(fontSize: 11),
             ),
           ),

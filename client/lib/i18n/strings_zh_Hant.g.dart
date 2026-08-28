@@ -757,6 +757,9 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override String get sendFailed => '傳送訊息失敗，請稍後再試';
 	@override String attachmentUploadFailed({required Object files}) => '附件上傳失敗：${files}';
 	@override String get fileUploadFailed => '檔案上傳失敗，請稍後再試';
+	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '已確認轉帳路徑：從 ${source} 到 ${target}，金額 ${currency} ${amount}。請執行該轉帳操作。';
+	@override String get attachmentLoadFailedTapRetry => '附件載入失敗，點擊重試';
+	@override String mediaFilesCount({required Object count}) => '${count} 個檔案';
 }
 
 // Path: image
@@ -947,6 +950,7 @@ class _Translations$account$zh_Hant extends Translations$account$zh {
 	@override String get payable => '應付款項';
 	@override String get other => '其他帳戶';
 	@override late final _Translations$account$types$zh_Hant types = _Translations$account$types$zh_Hant._(_root);
+	@override late final _Translations$account$natures$zh_Hant natures = _Translations$account$natures$zh_Hant._(_root);
 }
 
 // Path: financial
@@ -1506,6 +1510,29 @@ class _Translations$account$types$zh_Hant extends Translations$account$types$zh 
 	@override String get payableHelper => 'I owe';
 }
 
+// Path: account.natures
+class _Translations$account$natures$zh_Hant extends Translations$account$natures$zh {
+	_Translations$account$natures$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
+
+	final TranslationsZhHant _root; // ignore: unused_field
+
+	// Translations
+	@override String get liquidAssetsTitle => '流動資產';
+	@override String get liquidAssetsDescription => '日常隨時可用、流動性最高的資金。';
+	@override String get creditAccountsTitle => '信用帳戶';
+	@override String get creditAccountsDescription => '金融機構授予的循環信用額度。';
+	@override String get investmentAssetsTitle => '投資資產';
+	@override String get investmentAssetsDescription => '以增值為目標、價值隨市場波動的資產。';
+	@override String get longTermLiabilitiesTitle => '長期負債';
+	@override String get longTermLiabilitiesDescription => '結構性的長期貸款或融資債務。';
+	@override String get receivablesTitle => '應收款項';
+	@override String get receivablesDescription => '他人欠你的短期款項。';
+	@override String get payablesTitle => '應付款項';
+	@override String get payablesDescription => '你欠他人的短期款項。';
+	@override String get otherAssetsTitle => '其他資產';
+	@override String get otherAssetsDescription => '特定用途或流動性較低的其他資產。';
+}
+
 // Path: statistics.overview
 class _Translations$statistics$overview$zh_Hant extends Translations$statistics$overview$zh {
 	_Translations$statistics$overview$zh_Hant._(TranslationsZhHant root) : this._root = root, super.internal(root);
@@ -1826,6 +1853,8 @@ class _Translations$server$error$zh_Hant extends Translations$server$error$zh {
 	@override String get sslError => 'SSL certificate error';
 	@override String get serverError => 'Server error';
 	@override String get plainHttpWarning => '明文 HTTP:登入令牌與資料將以未加密方式傳輸。僅可在可信的區域網路環境使用。';
+	@override String statusResponse({required Object code}) => '伺服器回應異常：${code}';
+	@override String get connectionFailed => '連線失敗';
 }
 
 // Path: errorMapping.generic
@@ -3550,6 +3579,9 @@ extension on TranslationsZhHant {
 			'chat.sendFailed' => '傳送訊息失敗，請稍後再試',
 			'chat.attachmentUploadFailed' => ({required Object files}) => '附件上傳失敗：${files}',
 			'chat.fileUploadFailed' => '檔案上傳失敗，請稍後再試',
+			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '已確認轉帳路徑：從 ${source} 到 ${target}，金額 ${currency} ${amount}。請執行該轉帳操作。',
+			'chat.attachmentLoadFailedTapRetry' => '附件載入失敗，點擊重試',
+			'chat.mediaFilesCount' => ({required Object count}) => '${count} 個檔案',
 			'image.deleteTitle' => '刪除圖片',
 			'image.deleteConfirm' => '確定要刪除這張圖片嗎？此操作無法撤銷。',
 			'footprint.searchIn' => '搜尋',
@@ -3663,11 +3695,11 @@ extension on TranslationsZhHant {
 			'account.save' => '保存修改',
 			'account.assetsCategory' => '資產類',
 			'account.liabilitiesCategory' => '負債/信用類',
+			_ => null,
+		} ?? switch (path) {
 			'account.cash' => '現金錢包',
 			'account.deposit' => '銀行存款',
 			'account.creditCard' => '信用卡',
-			_ => null,
-		} ?? switch (path) {
 			'account.investment' => '投資理財',
 			'account.eWallet' => '電子錢包',
 			'account.loan' => '貸款帳戶',
@@ -3692,6 +3724,20 @@ extension on TranslationsZhHant {
 			'account.types.payableTitle' => 'Payable',
 			'account.types.payableSubtitle' => 'Amounts owed to others',
 			'account.types.payableHelper' => 'I owe',
+			'account.natures.liquidAssetsTitle' => '流動資產',
+			'account.natures.liquidAssetsDescription' => '日常隨時可用、流動性最高的資金。',
+			'account.natures.creditAccountsTitle' => '信用帳戶',
+			'account.natures.creditAccountsDescription' => '金融機構授予的循環信用額度。',
+			'account.natures.investmentAssetsTitle' => '投資資產',
+			'account.natures.investmentAssetsDescription' => '以增值為目標、價值隨市場波動的資產。',
+			'account.natures.longTermLiabilitiesTitle' => '長期負債',
+			'account.natures.longTermLiabilitiesDescription' => '結構性的長期貸款或融資債務。',
+			'account.natures.receivablesTitle' => '應收款項',
+			'account.natures.receivablesDescription' => '他人欠你的短期款項。',
+			'account.natures.payablesTitle' => '應付款項',
+			'account.natures.payablesDescription' => '你欠他人的短期款項。',
+			'account.natures.otherAssetsTitle' => '其他資產',
+			'account.natures.otherAssetsDescription' => '特定用途或流動性較低的其他資產。',
 			'financial.title' => '財務',
 			'financial.management' => '財務管理',
 			'financial.netWorth' => '總淨值',
@@ -3926,6 +3972,8 @@ extension on TranslationsZhHant {
 			'server.error.sslError' => 'SSL certificate error',
 			'server.error.serverError' => 'Server error',
 			'server.error.plainHttpWarning' => '明文 HTTP:登入令牌與資料將以未加密方式傳輸。僅可在可信的區域網路環境使用。',
+			'server.error.statusResponse' => ({required Object code}) => '伺服器回應異常：${code}',
+			'server.error.connectionFailed' => '連線失敗',
 			'errorMapping.generic.badRequest' => 'Bad Request',
 			'errorMapping.generic.authFailed' => 'Authentication failed, please login again',
 			'errorMapping.generic.permissionDenied' => 'Permission denied',

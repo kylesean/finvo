@@ -269,7 +269,9 @@ class _FinancialAccountInputSheetState
       // Use account name: custom name priority, otherwise use definition title
       final accountName = (shouldPersistName && trimmedName.isNotEmpty)
           ? trimmedName
-          : definition.title.split(' ').first; // Take part of the title
+          : definition.localizedTitle
+                .split(' ')
+                .first; // Take part of the title
 
       final financialAccount = FinancialAccount(
         name: accountName,
@@ -348,28 +350,8 @@ class _FinancialAccountInputSheetState
   }
 
   /// Gets localized subtitle
-  String _getLocalizedSubtitle(AccountTypeDefinition definition) {
-    switch (definition.id) {
-      case 'cash':
-        return t.account.types.cashSubtitle;
-      case 'deposit':
-        return t.account.types.depositSubtitle;
-      case 'e_money':
-        return t.account.types.eMoneySubtitle;
-      case 'investment':
-        return t.account.types.investmentSubtitle;
-      case 'receivable':
-        return t.account.types.receivableSubtitle;
-      case 'credit_card':
-        return t.account.types.creditCardSubtitle;
-      case 'loan':
-        return t.account.types.loanSubtitle;
-      case 'payable':
-        return t.account.types.payableSubtitle;
-      default:
-        return definition.subtitle;
-    }
-  }
+  String _getLocalizedSubtitle(AccountTypeDefinition definition) =>
+      definition.localizedSubtitle;
 
   /// Checks if there is helper text
   bool _hasHelper(AccountTypeDefinition definition) {
@@ -377,14 +359,6 @@ class _FinancialAccountInputSheetState
   }
 
   /// Gets localized helper text
-  String _getLocalizedHelper(AccountTypeDefinition definition) {
-    switch (definition.id) {
-      case 'receivable':
-        return t.account.types.receivableHelper;
-      case 'payable':
-        return t.account.types.payableHelper;
-      default:
-        return '';
-    }
-  }
+  String _getLocalizedHelper(AccountTypeDefinition definition) =>
+      definition.localizedHelper ?? '';
 }

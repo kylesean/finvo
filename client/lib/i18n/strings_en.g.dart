@@ -757,6 +757,9 @@ class _Translations$chat$en extends Translations$chat$zh {
 	@override String get sendFailed => 'Failed to send message, please try again later';
 	@override String attachmentUploadFailed({required Object files}) => 'Attachment upload failed: ${files}';
 	@override String get fileUploadFailed => 'File upload failed, please try again later';
+	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => 'Confirmed transfer path: from ${source} to ${target}, amount ${currency} ${amount}. Please execute this transfer operation.';
+	@override String get attachmentLoadFailedTapRetry => 'Failed to load attachment, tap to retry';
+	@override String mediaFilesCount({required Object count}) => '${count} files';
 }
 
 // Path: image
@@ -947,6 +950,7 @@ class _Translations$account$en extends Translations$account$zh {
 	@override String get payable => 'Payable';
 	@override String get other => 'Other';
 	@override late final _Translations$account$types$en types = _Translations$account$types$en._(_root);
+	@override late final _Translations$account$natures$en natures = _Translations$account$natures$en._(_root);
 }
 
 // Path: financial
@@ -1506,6 +1510,29 @@ class _Translations$account$types$en extends Translations$account$types$zh {
 	@override String get payableHelper => 'I owe';
 }
 
+// Path: account.natures
+class _Translations$account$natures$en extends Translations$account$natures$zh {
+	_Translations$account$natures$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get liquidAssetsTitle => 'Liquid Assets';
+	@override String get liquidAssetsDescription => 'Everyday accessible funds with the highest liquidity.';
+	@override String get creditAccountsTitle => 'Credit Accounts';
+	@override String get creditAccountsDescription => 'Revolving credit lines granted by financial institutions.';
+	@override String get investmentAssetsTitle => 'Investment Assets';
+	@override String get investmentAssetsDescription => 'Assets aimed at appreciation, with values fluctuating by market.';
+	@override String get longTermLiabilitiesTitle => 'Long-term Liabilities';
+	@override String get longTermLiabilitiesDescription => 'Structured long-term loans or financing debts.';
+	@override String get receivablesTitle => 'Receivables';
+	@override String get receivablesDescription => 'Short-term amounts owed to you.';
+	@override String get payablesTitle => 'Payables';
+	@override String get payablesDescription => 'Short-term amounts you owe to others.';
+	@override String get otherAssetsTitle => 'Other Assets';
+	@override String get otherAssetsDescription => 'Other special-purpose or less liquid assets.';
+}
+
 // Path: statistics.overview
 class _Translations$statistics$overview$en extends Translations$statistics$overview$zh {
 	_Translations$statistics$overview$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -1594,6 +1621,8 @@ class _Translations$server$error$en extends Translations$server$error$zh {
 	@override String get sslError => 'SSL certificate error';
 	@override String get serverError => 'Server error';
 	@override String get plainHttpWarning => 'Plain HTTP: your login token and data would travel unencrypted. Only use this for trusted local networks.';
+	@override String statusResponse({required Object code}) => 'Server returned status ${code}';
+	@override String get connectionFailed => 'Connection failed';
 }
 
 // Path: sharedSpace.dashboard
@@ -3550,6 +3579,9 @@ extension on TranslationsEn {
 			'chat.sendFailed' => 'Failed to send message, please try again later',
 			'chat.attachmentUploadFailed' => ({required Object files}) => 'Attachment upload failed: ${files}',
 			'chat.fileUploadFailed' => 'File upload failed, please try again later',
+			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => 'Confirmed transfer path: from ${source} to ${target}, amount ${currency} ${amount}. Please execute this transfer operation.',
+			'chat.attachmentLoadFailedTapRetry' => 'Failed to load attachment, tap to retry',
+			'chat.mediaFilesCount' => ({required Object count}) => '${count} files',
 			'image.deleteTitle' => 'Delete Image',
 			'image.deleteConfirm' => 'Are you sure you want to delete this image? This action cannot be undone.',
 			'footprint.searchIn' => 'Search',
@@ -3663,11 +3695,11 @@ extension on TranslationsEn {
 			'account.save' => 'Save Changes',
 			'account.assetsCategory' => 'Assets',
 			'account.liabilitiesCategory' => 'Liabilities/Credit',
+			_ => null,
+		} ?? switch (path) {
 			'account.cash' => 'Cash Wallet',
 			'account.deposit' => 'Bank Deposit',
 			'account.creditCard' => 'Credit Card',
-			_ => null,
-		} ?? switch (path) {
 			'account.investment' => 'Investment',
 			'account.eWallet' => 'E-Wallet',
 			'account.loan' => 'Loan',
@@ -3692,6 +3724,20 @@ extension on TranslationsEn {
 			'account.types.payableTitle' => 'Payable',
 			'account.types.payableSubtitle' => 'Amounts owed to others',
 			'account.types.payableHelper' => 'I owe',
+			'account.natures.liquidAssetsTitle' => 'Liquid Assets',
+			'account.natures.liquidAssetsDescription' => 'Everyday accessible funds with the highest liquidity.',
+			'account.natures.creditAccountsTitle' => 'Credit Accounts',
+			'account.natures.creditAccountsDescription' => 'Revolving credit lines granted by financial institutions.',
+			'account.natures.investmentAssetsTitle' => 'Investment Assets',
+			'account.natures.investmentAssetsDescription' => 'Assets aimed at appreciation, with values fluctuating by market.',
+			'account.natures.longTermLiabilitiesTitle' => 'Long-term Liabilities',
+			'account.natures.longTermLiabilitiesDescription' => 'Structured long-term loans or financing debts.',
+			'account.natures.receivablesTitle' => 'Receivables',
+			'account.natures.receivablesDescription' => 'Short-term amounts owed to you.',
+			'account.natures.payablesTitle' => 'Payables',
+			'account.natures.payablesDescription' => 'Short-term amounts you owe to others.',
+			'account.natures.otherAssetsTitle' => 'Other Assets',
+			'account.natures.otherAssetsDescription' => 'Other special-purpose or less liquid assets.',
 			'financial.title' => 'Financial',
 			'financial.management' => 'Financial Management',
 			'financial.netWorth' => 'Total Net Worth',
@@ -3801,6 +3847,8 @@ extension on TranslationsEn {
 			'server.error.sslError' => 'SSL certificate error',
 			'server.error.serverError' => 'Server error',
 			'server.error.plainHttpWarning' => 'Plain HTTP: your login token and data would travel unencrypted. Only use this for trusted local networks.',
+			'server.error.statusResponse' => ({required Object code}) => 'Server returned status ${code}',
+			'server.error.connectionFailed' => 'Connection failed',
 			'sharedSpace.dashboard.sectionTitle' => 'Financial Overview',
 			'sharedSpace.dashboard.cumulativeTotalExpense' => 'Cumulative Total Expense',
 			'sharedSpace.dashboard.participatingMembers' => 'Participating Members',

@@ -188,38 +188,8 @@ class _AccountTypeCard extends StatelessWidget {
     );
   }
 
-  /// Get localized title and description
+  /// M14: localized strings now live on the definition itself.
   (String title, String subtitle) _getLocalizedText(
     AccountTypeDefinition definition,
-  ) {
-    switch (definition.id) {
-      case 'cash':
-        return (t.account.types.cashTitle, t.account.types.cashSubtitle);
-      case 'deposit':
-        return (t.account.types.depositTitle, t.account.types.depositSubtitle);
-      case 'e_money':
-        return (t.account.types.eMoneyTitle, t.account.types.eMoneySubtitle);
-      case 'investment':
-        return (
-          t.account.types.investmentTitle,
-          t.account.types.investmentSubtitle,
-        );
-      case 'receivable':
-        return (
-          t.account.types.receivableTitle,
-          t.account.types.receivableSubtitle,
-        );
-      case 'credit_card':
-        return (
-          t.account.types.creditCardTitle,
-          t.account.types.creditCardSubtitle,
-        );
-      case 'loan':
-        return (t.account.types.loanTitle, t.account.types.loanSubtitle);
-      case 'payable':
-        return (t.account.types.payableTitle, t.account.types.payableSubtitle);
-      default:
-        return (definition.title, definition.subtitle);
-    }
-  }
+  ) => (definition.localizedTitle, definition.localizedSubtitle);
 }

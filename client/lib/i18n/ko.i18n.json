@@ -1055,7 +1055,10 @@
     "uploadStillInProgress": "첨부 파일이 아직 업로드 중입니다. 잠시 후 다시 시도해 주세요",
     "sendFailed": "메시지 전송에 실패했습니다. 잠시 후 다시 시도해 주세요",
     "attachmentUploadFailed": "첨부 파일 업로드에 실패했습니다: $files",
-    "fileUploadFailed": "파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요"
+    "fileUploadFailed": "파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요",
+    "transferPathConfirmedLegacy": "이체 경로 확인됨: $source에서 $target으로, 금액 $currency $amount. 이 이체를 실행해 주세요.",
+    "attachmentLoadFailedTapRetry": "첨부파일 로드 실패, 탭하여 재시도",
+    "mediaFilesCount": "파일 $count개"
   },
   "image": {
     "deleteTitle": "이미지 삭제",
@@ -1215,6 +1218,22 @@
       "payableTitle": "Payable",
       "payableSubtitle": "Amounts owed to others",
       "payableHelper": "I owe"
+    },
+    "natures": {
+      "liquidAssetsTitle": "유동 자산",
+      "liquidAssetsDescription": "언제든 사용 가능한 유동성이 가장 높은 자금입니다.",
+      "creditAccountsTitle": "신용 계좌",
+      "creditAccountsDescription": "금융기관이 제공하는 리볼빙 신용 한도입니다.",
+      "investmentAssetsTitle": "투자 자산",
+      "investmentAssetsDescription": "시장에 따라 가치가 변동하는 증식 목적 자산입니다.",
+      "longTermLiabilitiesTitle": "장기 부채",
+      "longTermLiabilitiesDescription": "계획적인 장기 대출 또는 금융 부채입니다.",
+      "receivablesTitle": "미수금",
+      "receivablesDescription": "타인이 갚아야 할 단기 금액입니다.",
+      "payablesTitle": "미지급금",
+      "payablesDescription": "타인에게 갚아야 할 단기 금액입니다.",
+      "otherAssetsTitle": "기타 자산",
+      "otherAssetsDescription": "특정 용도 또는 유동성이 낮은 기타 자산입니다."
     }
   },
   "financial": {
@@ -1500,7 +1519,9 @@
       "connectionRefused": "Could not connect to server",
       "sslError": "SSL certificate error",
       "serverError": "Server error",
-      "plainHttpWarning": "일반 HTTP: 로그인 토큰과 데이터가 암호화되지 않고 전송됩니다. 신뢰할 수 있는 로컬 네트워크에서만 사용하세요."
+      "plainHttpWarning": "일반 HTTP: 로그인 토큰과 데이터가 암호화되지 않고 전송됩니다. 신뢰할 수 있는 로컬 네트워크에서만 사용하세요.",
+      "statusResponse": "서버가 상태 $code 를 반환했습니다",
+      "connectionFailed": "연결 실패"
     }
   },
   "errorMapping": {

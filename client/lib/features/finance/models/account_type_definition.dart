@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/models/financial_account.dart';
 
 /// UI-layer account nature classification (for grouped display)
@@ -15,23 +16,23 @@ enum AccountNature {
 }
 
 extension AccountNatureX on AccountNature {
-  /// Display name header matching the PRD wording.
+  /// Display name header (M14: resolved from the slang registry).
   String get displayName {
     switch (this) {
       case AccountNature.liquidAssets:
-        return 'Liquid Assets';
+        return t.account.natures.liquidAssetsTitle;
       case AccountNature.creditAccounts:
-        return 'Credit Accounts';
+        return t.account.natures.creditAccountsTitle;
       case AccountNature.investmentAssets:
-        return 'Investment Assets';
+        return t.account.natures.investmentAssetsTitle;
       case AccountNature.longTermLiabilities:
-        return 'Long-term Liabilities';
+        return t.account.natures.longTermLiabilitiesTitle;
       case AccountNature.receivables:
-        return 'Receivables';
+        return t.account.natures.receivablesTitle;
       case AccountNature.payables:
-        return 'Payables';
+        return t.account.natures.payablesTitle;
       case AccountNature.otherAssets:
-        return 'Other Assets';
+        return t.account.natures.otherAssetsTitle;
     }
   }
 
@@ -39,21 +40,58 @@ extension AccountNatureX on AccountNature {
   String get description {
     switch (this) {
       case AccountNature.liquidAssets:
-        return 'Everyday accessible funds with the highest liquidity.';
+        return t.account.natures.liquidAssetsDescription;
       case AccountNature.creditAccounts:
-        return 'Revolving credit lines granted by financial institutions.';
+        return t.account.natures.creditAccountsDescription;
       case AccountNature.investmentAssets:
-        return 'Assets aimed at appreciation, with values fluctuating by market.';
+        return t.account.natures.investmentAssetsDescription;
       case AccountNature.longTermLiabilities:
-        return 'Structured long-term loans or financing debts.';
+        return t.account.natures.longTermLiabilitiesDescription;
       case AccountNature.receivables:
-        return 'Short-term amounts owed to you.';
+        return t.account.natures.receivablesDescription;
       case AccountNature.payables:
-        return 'Short-term amounts you owe to others.';
+        return t.account.natures.payablesDescription;
       case AccountNature.otherAssets:
-        return 'Other special-purpose or less liquid assets.';
+        return t.account.natures.otherAssetsDescription;
     }
   }
+}
+
+/// M14: localized display strings for the hardcoded English defaults.
+///
+/// The raw [AccountTypeDefinition.title]/[subtitle]/[helper] fields remain
+/// as the (English) search/keyword corpus used by [AccountTypeDefinition.matches];
+/// rendering code should read the localized getters instead.
+extension AccountTypeDefinitionI18n on AccountTypeDefinition {
+  String get localizedTitle => switch (id) {
+    'cash' => t.account.types.cashTitle,
+    'deposit' => t.account.types.depositTitle,
+    'e_money' => t.account.types.eMoneyTitle,
+    'investment' => t.account.types.investmentTitle,
+    'receivable' => t.account.types.receivableTitle,
+    'credit_card' => t.account.types.creditCardTitle,
+    'loan' => t.account.types.loanTitle,
+    'payable' => t.account.types.payableTitle,
+    _ => title,
+  };
+
+  String get localizedSubtitle => switch (id) {
+    'cash' => t.account.types.cashSubtitle,
+    'deposit' => t.account.types.depositSubtitle,
+    'e_money' => t.account.types.eMoneySubtitle,
+    'investment' => t.account.types.investmentSubtitle,
+    'receivable' => t.account.types.receivableSubtitle,
+    'credit_card' => t.account.types.creditCardSubtitle,
+    'loan' => t.account.types.loanSubtitle,
+    'payable' => t.account.types.payableSubtitle,
+    _ => subtitle,
+  };
+
+  String? get localizedHelper => switch (id) {
+    'receivable' => t.account.types.receivableHelper,
+    'payable' => t.account.types.payableHelper,
+    _ => helper,
+  };
 }
 
 typedef AccountTypeIconBuilder = Widget Function(Color color);

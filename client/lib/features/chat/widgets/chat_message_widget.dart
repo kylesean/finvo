@@ -284,7 +284,16 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
                 ? '$targetName ($targetId)'
                 : targetName as String;
 
-            return 'Confirmed transfer path: from $sourceDisplay to $targetDisplay, amount $currency $amount. Please execute this transfer operation.';
+            // M14: localize the legacy-convention display copy (the
+            // {"userAction":...} text convention is deprecated — see
+            // InteractionRouter — this shim only exists to render
+            // already-persisted history messages readably).
+            return t.chat.transferPathConfirmedLegacy(
+              source: sourceDisplay.toString(),
+              target: targetDisplay.toString(),
+              currency: currency.toString(),
+              amount: amount.toString(),
+            );
           }
         }
       } catch (e) {

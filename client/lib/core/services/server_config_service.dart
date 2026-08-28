@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:finvo/core/constants/api_constants.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 part 'server_config_service.g.dart';
 
@@ -242,25 +243,28 @@ class ServerConfigService {
         );
         return ServerHealthResult(
           isHealthy: false,
-          errorMessage: 'Server returned status ${response.statusCode}',
+          errorMessage: t.server.error.statusResponse(
+            code: response.statusCode.toString(),
+          ),
         );
       }
     } on DioException catch (e) {
+      // M14: user-facing health-check messages route through i18n.
       String errorMessage;
       switch (e.type) {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
-          errorMessage = 'Connection timed out';
+          errorMessage = t.server.error.connectionTimeout;
           break;
         case DioExceptionType.connectionError:
-          errorMessage = 'Could not connect to server';
+          errorMessage = t.server.error.connectionRefused;
           break;
         case DioExceptionType.badCertificate:
-          errorMessage = 'SSL certificate error';
+          errorMessage = t.server.error.sslError;
           break;
         default:
-          errorMessage = e.message ?? 'Connection failed';
+          errorMessage = e.message ?? t.server.error.connectionFailed;
       }
       _logger.warning('Health check error: $errorMessage');
       return ServerHealthResult(isHealthy: false, errorMessage: errorMessage);

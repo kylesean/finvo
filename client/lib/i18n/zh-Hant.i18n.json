@@ -1055,7 +1055,10 @@
     "uploadStillInProgress": "附件仍在傳輸中，請稍後再試",
     "sendFailed": "傳送訊息失敗，請稍後再試",
     "attachmentUploadFailed": "附件上傳失敗：$files",
-    "fileUploadFailed": "檔案上傳失敗，請稍後再試"
+    "fileUploadFailed": "檔案上傳失敗，請稍後再試",
+    "transferPathConfirmedLegacy": "已確認轉帳路徑：從 $source 到 $target，金額 $currency $amount。請執行該轉帳操作。",
+    "attachmentLoadFailedTapRetry": "附件載入失敗，點擊重試",
+    "mediaFilesCount": "$count 個檔案"
   },
   "image": {
     "deleteTitle": "刪除圖片",
@@ -1215,6 +1218,22 @@
       "payableTitle": "Payable",
       "payableSubtitle": "Amounts owed to others",
       "payableHelper": "I owe"
+    },
+    "natures": {
+      "liquidAssetsTitle": "流動資產",
+      "liquidAssetsDescription": "日常隨時可用、流動性最高的資金。",
+      "creditAccountsTitle": "信用帳戶",
+      "creditAccountsDescription": "金融機構授予的循環信用額度。",
+      "investmentAssetsTitle": "投資資產",
+      "investmentAssetsDescription": "以增值為目標、價值隨市場波動的資產。",
+      "longTermLiabilitiesTitle": "長期負債",
+      "longTermLiabilitiesDescription": "結構性的長期貸款或融資債務。",
+      "receivablesTitle": "應收款項",
+      "receivablesDescription": "他人欠你的短期款項。",
+      "payablesTitle": "應付款項",
+      "payablesDescription": "你欠他人的短期款項。",
+      "otherAssetsTitle": "其他資產",
+      "otherAssetsDescription": "特定用途或流動性較低的其他資產。"
     }
   },
   "financial": {
@@ -1500,7 +1519,9 @@
       "connectionRefused": "Could not connect to server",
       "sslError": "SSL certificate error",
       "serverError": "Server error",
-      "plainHttpWarning": "明文 HTTP:登入令牌與資料將以未加密方式傳輸。僅可在可信的區域網路環境使用。"
+      "plainHttpWarning": "明文 HTTP:登入令牌與資料將以未加密方式傳輸。僅可在可信的區域網路環境使用。",
+      "statusResponse": "伺服器回應異常：$code",
+      "connectionFailed": "連線失敗"
     }
   },
   "errorMapping": {

@@ -1055,7 +1055,10 @@
     "uploadStillInProgress": "Attachment still uploading, please try again later",
     "sendFailed": "Failed to send message, please try again later",
     "attachmentUploadFailed": "Attachment upload failed: $files",
-    "fileUploadFailed": "File upload failed, please try again later"
+    "fileUploadFailed": "File upload failed, please try again later",
+    "transferPathConfirmedLegacy": "Confirmed transfer path: from $source to $target, amount $currency $amount. Please execute this transfer operation.",
+    "attachmentLoadFailedTapRetry": "Failed to load attachment, tap to retry",
+    "mediaFilesCount": "$count files"
   },
   "image": {
     "deleteTitle": "Delete Image",
@@ -1215,6 +1218,22 @@
       "payableTitle": "Payable",
       "payableSubtitle": "Amounts owed to others",
       "payableHelper": "I owe"
+    },
+    "natures": {
+      "liquidAssetsTitle": "Liquid Assets",
+      "liquidAssetsDescription": "Everyday accessible funds with the highest liquidity.",
+      "creditAccountsTitle": "Credit Accounts",
+      "creditAccountsDescription": "Revolving credit lines granted by financial institutions.",
+      "investmentAssetsTitle": "Investment Assets",
+      "investmentAssetsDescription": "Assets aimed at appreciation, with values fluctuating by market.",
+      "longTermLiabilitiesTitle": "Long-term Liabilities",
+      "longTermLiabilitiesDescription": "Structured long-term loans or financing debts.",
+      "receivablesTitle": "Receivables",
+      "receivablesDescription": "Short-term amounts owed to you.",
+      "payablesTitle": "Payables",
+      "payablesDescription": "Short-term amounts you owe to others.",
+      "otherAssetsTitle": "Other Assets",
+      "otherAssetsDescription": "Other special-purpose or less liquid assets."
     }
   },
   "financial": {
@@ -1349,7 +1368,9 @@
       "connectionRefused": "Could not connect to server",
       "sslError": "SSL certificate error",
       "serverError": "Server error",
-      "plainHttpWarning": "Plain HTTP: your login token and data would travel unencrypted. Only use this for trusted local networks."
+      "plainHttpWarning": "Plain HTTP: your login token and data would travel unencrypted. Only use this for trusted local networks.",
+      "statusResponse": "Server returned status $code",
+      "connectionFailed": "Connection failed"
     }
   },
   "sharedSpace": {

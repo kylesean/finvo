@@ -1056,7 +1056,10 @@
     "uploadStillInProgress": "附件仍在上传中，请稍后再试",
     "sendFailed": "发送消息失败，请稍后再试",
     "attachmentUploadFailed": "附件上传失败：$files",
-    "fileUploadFailed": "文件上传失败，请稍后再试"
+    "fileUploadFailed": "文件上传失败，请稍后再试",
+    "transferPathConfirmedLegacy": "已确认转账路径：从 $source 到 $target，金额 $currency $amount。请执行该转账操作。",
+    "attachmentLoadFailedTapRetry": "附件加载失败，点击重试",
+    "mediaFilesCount": "$count 个文件"
   },
   "image": {
     "deleteTitle": "删除图片",
@@ -1216,6 +1219,22 @@
       "payableTitle": "应付款项",
       "payableSubtitle": "借入款项、待付账款",
       "payableHelper": "我欠他人"
+    },
+    "natures": {
+      "liquidAssetsTitle": "流动资产",
+      "liquidAssetsDescription": "日常随时可用、流动性最高的资金。",
+      "creditAccountsTitle": "信用账户",
+      "creditAccountsDescription": "金融机构授予的循环信用额度。",
+      "investmentAssetsTitle": "投资资产",
+      "investmentAssetsDescription": "以增值为目标、价值随市场波动的资产。",
+      "longTermLiabilitiesTitle": "长期负债",
+      "longTermLiabilitiesDescription": "结构性的长期贷款或融资债务。",
+      "receivablesTitle": "应收款项",
+      "receivablesDescription": "他人欠你的短期款项。",
+      "payablesTitle": "应付款项",
+      "payablesDescription": "你欠他人的短期款项。",
+      "otherAssetsTitle": "其他资产",
+      "otherAssetsDescription": "特定用途或流动性较低的其他资产。"
     }
   },
   "financial": {
@@ -1350,7 +1369,9 @@
       "connectionRefused": "无法连接到服务器",
       "sslError": "SSL 证书错误",
       "serverError": "服务器错误",
-      "plainHttpWarning": "明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。"
+      "plainHttpWarning": "明文 HTTP:登录令牌与数据将不加密传输。仅可在可信的局域网环境使用。",
+      "statusResponse": "服务器响应异常：$code",
+      "connectionFailed": "连接失败"
     }
   },
   "sharedSpace": {

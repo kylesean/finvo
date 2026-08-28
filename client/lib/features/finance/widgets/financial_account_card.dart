@@ -222,7 +222,7 @@ String _getTypeDisplayName(AccountTypeDefinition definition) {
     case 'payable':
       return t.account.payable;
     default:
-      return definition.title;
+      return definition.localizedTitle;
   }
 }
 
