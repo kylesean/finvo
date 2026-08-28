@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/features/version/models/update_info.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 
 final appVersionServiceProvider = Provider<AppVersionService>((ref) {
   return AppVersionService(ref.watch(networkClientProvider));
@@ -28,45 +29,49 @@ class AppVersionService {
         '/version/check',
         method: HttpMethod.get,
         fromJsonT: (json) {
-          if (json is Map<String, dynamic>) {
-            final data = (json['data'] as Map<String, dynamic>?) ?? json;
+          // M22: envelope extraction routes through the shared ResponseParser;
+          // a missing `data` field falls back to the root (legacy shape).
+          // A non-object envelope throws DataParsingException from the parser.
+          final data = ResponseParser.parseData<Map<String, dynamic>>(
+            json,
+            // parseData only reaches whenNull when the root IS a Map.
+            whenNull: () => json as Map<String, dynamic>,
+          );
 
-            final latestVersion =
-                data['latestVersion'] as String? ?? currentVersion;
-            final hasUpdate = _isVersionHigher(latestVersion, currentVersion);
+          final latestVersion =
+              data['latestVersion'] as String? ?? currentVersion;
+          final hasUpdate = _isVersionHigher(latestVersion, currentVersion);
 
-            // AUTH-V1: the server may raise the minimum supported version
-            // WITHOUT bumping latestVersion — a hard gate that must force an
-            // update regardless of hasUpdate. Previously minSupportedVersion
-            // was parsed into the model but never compared anywhere, so the
-            // gate was a dead field.
-            final minSupported =
-                data['minSupportedVersion'] as String? ?? '0.0.0';
-            final minNotMet = _isVersionHigher(minSupported, currentVersion);
-            final forceUpdate =
-                (data['forceUpdate'] as bool? ?? false) || minNotMet;
+          // AUTH-V1: the server may raise the minimum supported version
+          // WITHOUT bumping latestVersion — a hard gate that must force an
+          // update regardless of hasUpdate. Previously minSupportedVersion
+          // was parsed into the model but never compared anywhere, so the
+          // gate was a dead field.
+          final minSupported =
+              data['minSupportedVersion'] as String? ?? '0.0.0';
+          final minNotMet = _isVersionHigher(minSupported, currentVersion);
+          final forceUpdate =
+              (data['forceUpdate'] as bool? ?? false) || minNotMet;
 
-            String? targetUrl;
-            final downloadUrls =
-                data['downloadUrls'] as Map<String, dynamic>? ?? {};
+          String? targetUrl;
+          final downloadUrls =
+              data['downloadUrls'] as Map<String, dynamic>? ?? {};
 
-            if (kIsWeb) {
-              targetUrl = downloadUrls['webUrl'] as String?;
-            } else if (Platform.isAndroid) {
-              targetUrl = downloadUrls['androidApk'] as String?;
-            } else if (Platform.isIOS) {
-              targetUrl = downloadUrls['iosTestFlight'] as String?;
-            }
-
-            return UpdateInfo.fromServerResponse(
-              currentVersion: currentVersion,
-              data: data,
-              targetDownloadUrl: targetUrl,
-              hasUpdate: hasUpdate || minNotMet,
-              forceUpdateOverride: forceUpdate,
-            );
+          if (kIsWeb) {
+            targetUrl = downloadUrls['webUrl'] as String?;
+          } else if (Platform.isAndroid) {
+            targetUrl = downloadUrls['androidApk'] as String?;
+          } else if (Platform.isIOS) {
+            targetUrl = downloadUrls['iosTestFlight'] as String?;
           }
-          throw Exception('Invalid version response format');
+
+          return UpdateInfo.fromServerResponse(
+            currentVersion: currentVersion,
+            data: data,
+            targetDownloadUrl: targetUrl,
+            hasUpdate: hasUpdate || minNotMet,
+            forceUpdateOverride: forceUpdate,
+          );
         },
       );
     } catch (e, stack) {

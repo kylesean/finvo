@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/shared/utils/mime_type_mapper.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 
 /// Upload progress listener
 typedef ProgressCallback = void Function(int bytes, int total);
@@ -68,11 +69,18 @@ class FileUploadService {
 
       _logger.info('Upload status code: ${response.statusCode}');
 
-      // BusinessInterceptor has already processed API response format, response.data is the data part
+      // BusinessInterceptor has already processed API response format; the
+      // upload response is the standard {code, message, data} envelope.
+      // M22: envelope extraction routes through the shared ResponseParser
+      // (and no longer interpolates the raw parse error into the message —
+      // F2: it can embed response fragments).
       if (response.data is Map<String, dynamic>) {
+        final dataField = ResponseParser.parseData<Map<String, dynamic>>(
+          response.data,
+          whenNull: () =>
+              throw DataParsingException('File upload data field is null'),
+        );
         try {
-          final jsonData = response.data as Map<String, dynamic>;
-          final dataField = jsonData['data'] as Map<String, dynamic>;
           final result = FileUploadResult.fromJson(dataField);
           _logger.info(
             'Upload result parsed successfully: successful=${result.summary.successfulCount}, failed=${result.summary.failedCount}',
@@ -91,7 +99,9 @@ class FileUploadService {
           return result;
         } catch (e, stackTrace) {
           _logger.severe('Failed to parse upload result', e, stackTrace);
-          throw DataParsingException('Failed to parse file upload result: $e');
+          // F2: keep the detail in the log; never interpolate the raw parse
+          // error into the user-visible message.
+          throw DataParsingException('Failed to parse file upload result');
         }
       }
       throw DataParsingException(

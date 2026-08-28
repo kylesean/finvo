@@ -56,17 +56,24 @@ abstract final class ResponseParser {
   /// Parses a list response supporting:
   /// - `{ data: { items: [...] } }` (standard pagination shape)
   /// - `{ data: [...] }` (plain list shape)
+  /// - `[...]` at the root (legacy shape tolerated for endpoints that never
+  ///   adopted the envelope)
   /// - `{ data: null }` (empty result)
   ///
   /// Throws [DataParsingException] on a structurally-invalid response (e.g.
   /// `data` is neither a List nor an items-bearing Map, or the root is not an
-  /// Object), so contract drift surfaces as an error instead of silently
+  /// Object/List), so contract drift surfaces as an error instead of silently
   /// rendering an "empty" list. Only `data: null` is tolerated as an empty
   /// result.
   static List<T> parseList<T>(
     dynamic json,
     T Function(Map<String, dynamic>) fromJson,
   ) {
+    // Legacy root-level list shape (M22: previously hand-rolled inline in
+    // comment_service and others).
+    if (json is List) {
+      return _mapItems(json, fromJson);
+    }
     if (json is Map<String, dynamic>) {
       final dataField = json['data'];
       if (dataField == null) return [];

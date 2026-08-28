@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/core/network/network_client.dart';
-import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/budget/models/budget_models.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 
 class BudgetService {
   final NetworkClient _networkClient;
@@ -30,17 +30,10 @@ class BudgetService {
     return await _networkClient.request<List<Budget>>(
       '/budgets',
       method: HttpMethod.get,
-      fromJsonT: (json) {
-        if (json is Map<String, dynamic>) {
-          final data = json['data'];
-          if (data is List) {
-            return data
-                .map((e) => Budget.fromJson(e as Map<String, dynamic>))
-                .toList();
-          }
-        }
-        throw DataParsingException('Invalid format for /budgets response');
-      },
+      // M22: the inline envelope+list unwrap previously bypassed the shared
+      // parser; parseList covers `{data: [...]}` (and tolerates `data: null`
+      // as an empty result per its documented contract).
+      fromJsonT: (json) => ResponseParser.parseList(json, Budget.fromJson),
     );
   }
 

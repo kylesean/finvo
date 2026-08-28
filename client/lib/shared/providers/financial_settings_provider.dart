@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/shared/models/financial_settings.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 import 'package:finvo/shared/providers/generation_guard.dart';
 
 part 'financial_settings_provider.g.dart';
@@ -15,20 +16,15 @@ part 'financial_settings_provider.g.dart';
 final _logger = Logger('FinancialSettingsNotifier');
 
 /// Parse the `{code, message, data}` envelope and return the settings payload.
+///
+/// M22: previously a private re-implementation of the envelope unwrap; now a
+/// thin wrapper over the shared [ResponseParser].
 FinancialSettingsResponse _parseSettingsResponse(Object? json, String context) {
-  if (json is Map<String, dynamic>) {
-    final data = json['data'];
-    if (data == null) {
-      throw DataParsingException('$context: data field is null');
-    }
-    if (data is Map<String, dynamic>) {
-      return FinancialSettingsResponse.fromJson(data);
-    }
-    throw DataParsingException('$context: data field is not an object');
-  }
-  throw DataParsingException(
-    '$context expects an object, but received ${json.runtimeType}',
+  final data = ResponseParser.parseData<Map<String, dynamic>>(
+    json,
+    whenNull: () => throw DataParsingException('$context: data field is null'),
   );
+  return FinancialSettingsResponse.fromJson(data);
 }
 
 /// Financial settings state notifier

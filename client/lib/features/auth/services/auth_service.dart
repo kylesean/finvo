@@ -13,6 +13,7 @@ import 'package:finvo/core/utils/map_require.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/shared/services/timezone_service.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 
 class AuthService {
   final NetworkClient _networkClient;
@@ -162,8 +163,13 @@ class AuthService {
       },
       fromJsonT: (json) => json as Map<String, dynamic>,
     );
-    // Extract data from response['data']
-    final data = response.require<Map<String, dynamic>>('data');
+    // M22: extract the envelope's data field through the shared parser
+    // (strict: missing data throws a typed DataParsingException); leaf
+    // fields keep using MapRequire for typed required-field extraction.
+    final data = ResponseParser.parseData<Map<String, dynamic>>(
+      response,
+      whenNull: () => throw DataParsingException('data field is null'),
+    );
     final userJson = data.require<Map<String, dynamic>>('user');
     final token = data.require<String>('token');
     final refreshToken = data.require<String>('refresh_token');
@@ -216,8 +222,13 @@ class AuthService {
       },
       fromJsonT: (json) => json as Map<String, dynamic>,
     );
-    // Extract data from response['data']
-    final data = response.require<Map<String, dynamic>>('data');
+    // M22: extract the envelope's data field through the shared parser
+    // (strict: missing data throws a typed DataParsingException); leaf
+    // fields keep using MapRequire for typed required-field extraction.
+    final data = ResponseParser.parseData<Map<String, dynamic>>(
+      response,
+      whenNull: () => throw DataParsingException('data field is null'),
+    );
     final userJson = data.require<Map<String, dynamic>>('user');
     final token = data.require<String>('token');
     final refreshToken = data.require<String>('refresh_token');

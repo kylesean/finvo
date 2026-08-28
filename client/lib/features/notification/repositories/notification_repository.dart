@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
+import 'package:finvo/shared/services/response_parser.dart';
 
 class NotificationRepository {
   final NetworkClient _networkClient;
@@ -27,7 +28,12 @@ class NotificationRepository {
       );
 
       // API response structure: {code, message, data: {notifications, total, unreadCount}}
-      final data = response['data'] as Map<String, dynamic>? ?? response;
+      // M22: envelope extraction routes through the shared ResponseParser;
+      // a missing `data` field falls back to the root object (legacy shape).
+      final data = ResponseParser.parseData<Map<String, dynamic>>(
+        response,
+        whenNull: () => response,
+      );
       final notificationsJson = (data['notifications'] as List<dynamic>?) ?? [];
       final items = notificationsJson
           .map(
