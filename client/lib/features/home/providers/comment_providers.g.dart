@@ -8,6 +8,96 @@ part of 'comment_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Derived provider: threaded view of [transactionCommentsProvider].
+
+@ProviderFor(threadedComments)
+final threadedCommentsProvider = ThreadedCommentsFamily._();
+
+/// Derived provider: threaded view of [transactionCommentsProvider].
+
+final class ThreadedCommentsProvider
+    extends
+        $FunctionalProvider<
+          ThreadedComments,
+          ThreadedComments,
+          ThreadedComments
+        >
+    with $Provider<ThreadedComments> {
+  /// Derived provider: threaded view of [transactionCommentsProvider].
+  ThreadedCommentsProvider._({
+    required ThreadedCommentsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'threadedCommentsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$threadedCommentsHash();
+
+  @override
+  String toString() {
+    return r'threadedCommentsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<ThreadedComments> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ThreadedComments create(Ref ref) {
+    final argument = this.argument as String;
+    return threadedComments(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ThreadedComments value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ThreadedComments>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ThreadedCommentsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$threadedCommentsHash() => r'9f192a46eb44b28582c5712fddb09b0f7573763a';
+
+/// Derived provider: threaded view of [transactionCommentsProvider].
+
+final class ThreadedCommentsFamily extends $Family
+    with $FunctionalFamilyOverride<ThreadedComments, String> {
+  ThreadedCommentsFamily._()
+    : super(
+        retry: null,
+        name: r'threadedCommentsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Derived provider: threaded view of [transactionCommentsProvider].
+
+  ThreadedCommentsProvider call(String transactionId) =>
+      ThreadedCommentsProvider._(argument: transactionId, from: this);
+
+  @override
+  String toString() => r'threadedCommentsProvider';
+}
 
 @ProviderFor(TransactionComments)
 final transactionCommentsProvider = TransactionCommentsFamily._();

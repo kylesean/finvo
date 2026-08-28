@@ -17,6 +17,14 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 class MonthlyCalendarView extends ConsumerWidget {
   const MonthlyCalendarView({super.key});
 
+  /// M20: index summaries by date once (O(n)) for O(1) cell lookups.
+  Map<DateTime, DailyExpenseSummaryModel> _summaryByDate(
+    CalendarMonthData data,
+  ) => {
+    for (final s in data.dailySummaries)
+      DateTime(s.date.year, s.date.month, s.date.day): s,
+  };
+
   // Skeleton cell (adapted to Shadcn UI style)
   Widget _buildShimmerCell(BuildContext context) {
     final theme = context.theme;
@@ -221,6 +229,10 @@ class MonthlyCalendarView extends ConsumerWidget {
                   1; // Assume Monday (1) corresponds to index 0, Sunday (7) to index 6
               final List<Widget> dayWidgets = [];
 
+              // M20: index summaries by date once (O(n)) instead of running
+              // a firstWhere scan per cell (O(n^2) over the month grid).
+              final summaryByDate = _summaryByDate(calendarData);
+
               // Fill end of previous month
               for (int i = 0; i < daysToPadAtStart; i++) {
                 final padDay = firstDayOfMonth.subtract(
@@ -239,14 +251,13 @@ class MonthlyCalendarView extends ConsumerWidget {
                   calendarData.month,
                   i + 1,
                 );
-                final summary = calendarData.dailySummaries.firstWhere(
-                  (s) => DateUtils.isSameDay(s.date, day),
-                  orElse: () => DailyExpenseSummaryModel(
-                    date: day,
-                    totalExpense: Decimal.zero,
-                    heatLevel: ExpenseHeatLevel.none,
-                  ),
-                );
+                final summary =
+                    summaryByDate[DateTime(day.year, day.month, day.day)] ??
+                    DailyExpenseSummaryModel(
+                      date: day,
+                      totalExpense: Decimal.zero,
+                      heatLevel: ExpenseHeatLevel.none,
+                    );
                 // Important: DailyCellWidget needs internal refactoring
                 dayWidgets.add(
                   DailyCellWidget(
@@ -326,6 +337,8 @@ class MonthlyCalendarView extends ConsumerWidget {
                   child: calendarDataAsyncValue.when(
                     data: (calendarData) {
                       final locale = LocaleSettings.currentLocale;
+                      // M20: O(1) lookup for the selected-day summary.
+                      final summaryByDate = _summaryByDate(calendarData);
 
                       // Use user preferred currency, instead of inferring from language
                       final currencyCode = ref
@@ -352,15 +365,17 @@ class MonthlyCalendarView extends ConsumerWidget {
                       // Get selected date (default today)
                       final targetDate = selectedDateState ?? now;
 
-                      // Find expense for selected date
-                      final selectedSummary = calendarData.dailySummaries
-                          .firstWhere(
-                            (s) => DateUtils.isSameDay(s.date, targetDate),
-                            orElse: () => DailyExpenseSummaryModel(
-                              date: targetDate,
-                              totalExpense: Decimal.zero,
-                              heatLevel: ExpenseHeatLevel.none,
-                            ),
+                      // Find expense for selected date (M20: O(1) lookup)
+                      final selectedSummary =
+                          summaryByDate[DateTime(
+                            targetDate.year,
+                            targetDate.month,
+                            targetDate.day,
+                          )] ??
+                          DailyExpenseSummaryModel(
+                            date: targetDate,
+                            totalExpense: Decimal.zero,
+                            heatLevel: ExpenseHeatLevel.none,
                           );
 
                       // Format date display

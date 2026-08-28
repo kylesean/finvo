@@ -104,28 +104,18 @@ class _CommentSectionWidgetState extends ConsumerState<CommentSectionWidget> {
 
             _scrollToTargetIfNeeded(allComments);
 
-            // 1. Split comments into parent comments and replies
-            final parentComments = <CommentModel>[];
-            final Map<String, List<CommentModel>> repliesMap = {};
-
-            for (final comment in allComments) {
-              if (comment.parentCommentId == null) {
-                parentComments.add(comment);
-              } else {
-                repliesMap
-                    .putIfAbsent(comment.parentCommentId!, () => [])
-                    .add(comment);
-              }
-            }
-
-            parentComments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-            repliesMap.forEach((key, value) {
-              value.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-            });
+            // M20: grouping/sorting lives in the derived
+            // threadedCommentsProvider — rebuilding for expansion/highlight
+            // no longer re-sorts the whole list.
+            final threaded = ref.watch(
+              threadedCommentsProvider(widget.transactionId),
+            );
+            final parentComments = threaded.parents;
+            final repliesMap = threaded.replies;
 
             // 2. Build list of widgets
             final List<Widget> commentWidgets = [];
-            for (final parent in parentComments) {
+            for (final (parentIndex, parent) in parentComments.indexed) {
               commentWidgets.add(
                 Padding(
                   key: _getOrCreateKey(parent.id),
@@ -232,7 +222,7 @@ class _CommentSectionWidgetState extends ConsumerState<CommentSectionWidget> {
               }
 
               if (replies.isNotEmpty ||
-                  parentComments.indexOf(parent) < parentComments.length - 1) {
+                  parentIndex < parentComments.length - 1) {
                 commentWidgets.add(
                   const Padding(
                     padding: EdgeInsets.symmetric(

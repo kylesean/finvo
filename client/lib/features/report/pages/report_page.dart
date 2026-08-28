@@ -264,21 +264,24 @@ class _ReportPageState extends ConsumerState<ReportPage> {
       onRefresh: () async {
         await ref.read(statisticsProvider.notifier).loadStatistics();
       },
-      child: SingleChildScrollView(
+      // M19: a CustomScrollView + SliverList keeps the transaction list
+      // lazy. The previous shrinkWrap ListView built and laid out every
+      // card on each build — the builder laziness was defeated exactly when
+      // the (paginated, growing) list is largest.
+      child: CustomScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
+        slivers: [
+          _box(const SizedBox(height: 8)),
 
-            // Date range display (custom mode only)
-            if (state.timeRange == TimeRange.custom &&
-                state.dateRangeDisplayText != null) ...[
-              FadeInDown(
+          // Date range display (custom mode only)
+          if (state.timeRange == TimeRange.custom &&
+              state.dateRangeDisplayText != null) ...[
+            SliverToBoxAdapter(
+              child: FadeInDown(
                 duration: const Duration(milliseconds: 400),
                 child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,
@@ -304,11 +307,13 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-            ],
+            ),
+            _box(const SizedBox(height: 16)),
+          ],
 
-            if (hasNoData) ...[
-              FadeInUp(
+          if (hasNoData) ...[
+            SliverToBoxAdapter(
+              child: FadeInUp(
                 duration: const Duration(milliseconds: 600),
                 child: PremiumEmptyState(
                   onAddTransaction: () {
@@ -316,20 +321,24 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                   },
                 ),
               ),
-            ] else ...[
-              // Overview card
-              if (state.overview != null) ...[
-                FadeInUp(
+            ),
+          ] else ...[
+            // Overview card
+            if (state.overview != null) ...[
+              SliverToBoxAdapter(
+                child: FadeInUp(
                   duration: const Duration(milliseconds: 500),
                   delay: const Duration(milliseconds: 200),
                   child: OverviewCard(overview: state.overview!),
                 ),
-                const SizedBox(height: 24),
-              ],
+              ),
+              _box(const SizedBox(height: 24)),
+            ],
 
-              // Trend chart
-              if (state.trendData != null) ...[
-                FadeInUp(
+            // Trend chart
+            if (state.trendData != null) ...[
+              SliverToBoxAdapter(
+                child: FadeInUp(
                   duration: const Duration(milliseconds: 500),
                   delay: const Duration(milliseconds: 300),
                   child: TrendChart(
@@ -344,13 +353,15 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 24),
-              ],
+              ),
+              _box(const SizedBox(height: 24)),
+            ],
 
-              // Category Analysis (unified multi-view section)
-              if (state.categoryBreakdown != null &&
-                  state.categoryBreakdown!.items.isNotEmpty) ...[
-                FadeInUp(
+            // Category Analysis (unified multi-view section)
+            if (state.categoryBreakdown != null &&
+                state.categoryBreakdown!.items.isNotEmpty) ...[
+              SliverToBoxAdapter(
+                child: FadeInUp(
                   duration: const Duration(milliseconds: 500),
                   delay: const Duration(milliseconds: 400),
                   child: CategoryAnalysisSection(
@@ -358,30 +369,36 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                     chartType: state.chartType,
                   ),
                 ),
-                const SizedBox(height: 24),
-              ],
-
-              // Top transactions
-              if (state.topTransactions != null &&
-                  state.topTransactions!.items.isNotEmpty) ...[
-                FadeInUp(
-                  duration: const Duration(milliseconds: 500),
-                  delay: const Duration(milliseconds: 600),
-                  child: _buildTopTransactionsSection(context, theme, state),
-                ),
-                const SizedBox(height: 24),
-              ],
+              ),
+              _box(const SizedBox(height: 24)),
             ],
 
-            // Bottom padding
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 32),
+            // Top transactions: header + lazy SliverList
+            if (state.topTransactions != null &&
+                state.topTransactions!.items.isNotEmpty) ...[
+              ..._buildTopTransactionsSlivers(context, theme, state),
+            ],
           ],
-        ),
+
+          // Bottom padding
+          _box(SizedBox(height: MediaQuery.of(context).padding.bottom + 32)),
+        ],
       ),
     );
   }
 
-  Widget _buildTopTransactionsSection(
+  /// M19: box wrapper preserving the page's horizontal padding for
+  /// non-scrolling slivers.
+  SliverToBoxAdapter _box(Widget child) => SliverToBoxAdapter(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: child,
+    ),
+  );
+
+  /// M19: top-transactions section restructured into slivers so the card
+  /// list stays lazy inside the page-level CustomScrollView.
+  List<Widget> _buildTopTransactionsSlivers(
     BuildContext context,
     FThemeData theme,
     StatisticsState state,
@@ -389,84 +406,85 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     final colors = theme.colors;
     final transactions = state.topTransactions?.items ?? [];
     final hasMore = state.topTransactions?.hasMore ?? false;
+    final showLoadingRow = hasMore || state.isLoadingMoreTopTransactions;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return [
+      SliverToBoxAdapter(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(t.statistics.ranking, style: AppTextStyles.listTitle(theme)),
             Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                AppFilterChip(
-                  icon: FLucideIcons.arrowDownWideNarrow,
-                  isSelected: state.sortType == SortType.amount,
-                  onTap: () => ref
-                      .read(statisticsProvider.notifier)
-                      .setSortType(SortType.amount),
+                Text(
+                  t.statistics.ranking,
+                  style: AppTextStyles.listTitle(theme),
                 ),
-                const SizedBox(width: 4),
-                AppFilterChip(
-                  icon: FLucideIcons.calendarRange,
-                  isSelected: state.sortType == SortType.date,
-                  onTap: () => ref
-                      .read(statisticsProvider.notifier)
-                      .setSortType(SortType.date),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppFilterChip(
+                      icon: FLucideIcons.arrowDownWideNarrow,
+                      isSelected: state.sortType == SortType.amount,
+                      onTap: () => ref
+                          .read(statisticsProvider.notifier)
+                          .setSortType(SortType.amount),
+                    ),
+                    const SizedBox(width: 4),
+                    AppFilterChip(
+                      icon: FLucideIcons.calendarRange,
+                      isSelected: state.sortType == SortType.date,
+                      onTap: () => ref
+                          .read(statisticsProvider.notifier)
+                          .setSortType(SortType.date),
+                    ),
+                  ],
                 ),
               ],
             ),
+            const SizedBox(height: 12),
           ],
         ),
-        const SizedBox(height: 12),
-        // Transaction list using ListView.builder for performance and simple pagination
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount:
-              transactions.length +
-              (hasMore || state.isLoadingMoreTopTransactions ? 1 : 0),
-          separatorBuilder: (context, index) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            if (index < transactions.length) {
-              return TopTransactionCard(
-                transaction: transactions[index],
-                onTap: () {
-                  unawaited(
-                    context.pushNamed(
-                      AppRouteNames.transactionDetail,
-                      pathParameters: {'transactionId': transactions[index].id},
-                    ),
-                  );
-                },
-              );
-            } else {
-              if (state.isLoadingMoreTopTransactions) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: colors.primary,
-                      ),
-                    ),
+      ),
+      SliverList.separated(
+        itemBuilder: (context, index) {
+          if (index < transactions.length) {
+            return TopTransactionCard(
+              transaction: transactions[index],
+              onTap: () {
+                unawaited(
+                  context.pushNamed(
+                    AppRouteNames.transactionDetail,
+                    pathParameters: {'transactionId': transactions[index].id},
                   ),
                 );
-              } else if (hasMore) {
-                return const SizedBox(height: 40);
-              } else {
-                return const SizedBox();
-              }
-            }
-          },
-        ),
-        if (!hasMore && transactions.isNotEmpty)
-          Padding(
+              },
+            );
+          }
+          // Trailing row: load-more spinner (hasMore) or end spacing.
+          if (state.isLoadingMoreTopTransactions) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colors.primary,
+                  ),
+                ),
+              ),
+            );
+          }
+          return const SizedBox(height: 40);
+        },
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
+        itemCount: transactions.length + (showLoadingRow ? 1 : 0),
+      ),
+      if (!hasMore && transactions.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
               child: Text(
@@ -475,7 +493,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
               ),
             ),
           ),
-      ],
-    );
+        ),
+    ];
   }
 }

@@ -10,6 +10,44 @@ int _compareByCreatedAt(CommentModel a, CommentModel b) {
   return a.createdAt.compareTo(b.createdAt);
 }
 
+/// M20: grouping/sorting result for a comment thread, computed once per
+/// source-list change in a derived provider instead of on every widget
+/// rebuild (expansion/highlight/keyboard dismissal used to re-sort the
+/// whole list per rebuild).
+class ThreadedComments {
+  /// Parent comments sorted ascending by [CommentModel.createdAt].
+  final List<CommentModel> parents;
+
+  /// Replies keyed by parentCommentId, each sorted ascending.
+  final Map<String, List<CommentModel>> replies;
+
+  const ThreadedComments({required this.parents, required this.replies});
+
+  factory ThreadedComments.from(List<CommentModel> comments) {
+    final parents = <CommentModel>[];
+    final replies = <String, List<CommentModel>>{};
+    for (final comment in comments) {
+      if (comment.parentCommentId == null) {
+        parents.add(comment);
+      } else {
+        replies.putIfAbsent(comment.parentCommentId!, () => []).add(comment);
+      }
+    }
+    parents.sort(_compareByCreatedAt);
+    replies.forEach((_, list) => list.sort(_compareByCreatedAt));
+    return ThreadedComments(parents: parents, replies: replies);
+  }
+}
+
+/// Derived provider: threaded view of [transactionCommentsProvider].
+@riverpod
+ThreadedComments threadedComments(Ref ref, String transactionId) {
+  final comments =
+      ref.watch(transactionCommentsProvider(transactionId)).value ??
+      const <CommentModel>[];
+  return ThreadedComments.from(comments);
+}
+
 @riverpod
 class TransactionComments extends _$TransactionComments {
   /// Monotonic mutation generation. Each optimistic mutation bumps it; a slower
