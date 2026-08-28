@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:decimal/decimal.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/utils/heat_colors.dart';
 import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
@@ -104,8 +105,8 @@ class DailyCellWidget extends StatelessWidget {
         );
       } else {
         // If neither selected nor today, background and text color based on consumption heat
-        if (summary != null && summary!.totalExpense >= 0) {
-          // totalExpense >= 0 includes zero consumption case
+        if (summary != null && summary!.totalExpense >= Decimal.zero) {
+          // non-negative (incl. zero consumption) renders heat colors
           final heatColors = _getHeatColors(context, summary!.heatLevel);
           cellBackgroundColor = heatColors.backgroundColor;
           cellTextColor = heatColors.textColor;

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DailyExpenseSummaryModel {
 
-@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime get date; double get totalExpense;@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel get heatLevel;
+@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime get date;@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal get totalExpense;@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel get heatLevel;
 /// Create a copy of DailyExpenseSummaryModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $DailyExpenseSummaryModelCopyWith<$Res>  {
   factory $DailyExpenseSummaryModelCopyWith(DailyExpenseSummaryModel value, $Res Function(DailyExpenseSummaryModel) _then) = _$DailyExpenseSummaryModelCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime date, double totalExpense,@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel heatLevel
+@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime date,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal totalExpense,@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel heatLevel
 });
 
 
@@ -69,7 +69,7 @@ class _$DailyExpenseSummaryModelCopyWithImpl<$Res>
   return _then(_self.copyWith(
 date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,totalExpense: null == totalExpense ? _self.totalExpense : totalExpense // ignore: cast_nullable_to_non_nullable
-as double,heatLevel: null == heatLevel ? _self.heatLevel : heatLevel // ignore: cast_nullable_to_non_nullable
+as Decimal,heatLevel: null == heatLevel ? _self.heatLevel : heatLevel // ignore: cast_nullable_to_non_nullable
 as ExpenseHeatLevel,
   ));
 }
@@ -155,7 +155,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date,  double totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DailyExpenseSummaryModel() when $default != null:
 return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
@@ -176,7 +176,7 @@ return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date,  double totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)  $default,) {final _that = this;
 switch (_that) {
 case _DailyExpenseSummaryModel():
 return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
@@ -196,7 +196,7 @@ return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date,  double totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)?  $default,) {final _that = this;
 switch (_that) {
 case _DailyExpenseSummaryModel() when $default != null:
 return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
@@ -211,11 +211,11 @@ return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
 
 @JsonSerializable(explicitToJson: true)
 class _DailyExpenseSummaryModel extends DailyExpenseSummaryModel {
-  const _DailyExpenseSummaryModel({@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) required this.date, required this.totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) required this.heatLevel}): super._();
+  const _DailyExpenseSummaryModel({@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) required this.date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) required this.heatLevel}): super._();
   factory _DailyExpenseSummaryModel.fromJson(Map<String, dynamic> json) => _$DailyExpenseSummaryModelFromJson(json);
 
 @override@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) final  DateTime date;
-@override final  double totalExpense;
+@override@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) final  Decimal totalExpense;
 @override@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) final  ExpenseHeatLevel heatLevel;
 
 /// Create a copy of DailyExpenseSummaryModel
@@ -251,7 +251,7 @@ abstract mixin class _$DailyExpenseSummaryModelCopyWith<$Res> implements $DailyE
   factory _$DailyExpenseSummaryModelCopyWith(_DailyExpenseSummaryModel value, $Res Function(_DailyExpenseSummaryModel) _then) = __$DailyExpenseSummaryModelCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime date, double totalExpense,@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel heatLevel
+@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime date,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal totalExpense,@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel heatLevel
 });
 
 
@@ -272,7 +272,7 @@ class __$DailyExpenseSummaryModelCopyWithImpl<$Res>
   return _then(_DailyExpenseSummaryModel(
 date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,totalExpense: null == totalExpense ? _self.totalExpense : totalExpense // ignore: cast_nullable_to_non_nullable
-as double,heatLevel: null == heatLevel ? _self.heatLevel : heatLevel // ignore: cast_nullable_to_non_nullable
+as Decimal,heatLevel: null == heatLevel ? _self.heatLevel : heatLevel // ignore: cast_nullable_to_non_nullable
 as ExpenseHeatLevel,
   ));
 }
@@ -284,7 +284,7 @@ as ExpenseHeatLevel,
 /// @nodoc
 mixin _$CalendarMonthData {
 
- int get year; int get month; double get totalExpenseForMonth; List<DailyExpenseSummaryModel> get dailySummaries; List<String>? get trendColors;
+ int get year; int get month;@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal get totalExpenseForMonth; List<DailyExpenseSummaryModel> get dailySummaries; List<String>? get trendColors;
 /// Create a copy of CalendarMonthData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -317,7 +317,7 @@ abstract mixin class $CalendarMonthDataCopyWith<$Res>  {
   factory $CalendarMonthDataCopyWith(CalendarMonthData value, $Res Function(CalendarMonthData) _then) = _$CalendarMonthDataCopyWithImpl;
 @useResult
 $Res call({
- int year, int month, double totalExpenseForMonth, List<DailyExpenseSummaryModel> dailySummaries, List<String>? trendColors
+ int year, int month,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal totalExpenseForMonth, List<DailyExpenseSummaryModel> dailySummaries, List<String>? trendColors
 });
 
 
@@ -339,7 +339,7 @@ class _$CalendarMonthDataCopyWithImpl<$Res>
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,month: null == month ? _self.month : month // ignore: cast_nullable_to_non_nullable
 as int,totalExpenseForMonth: null == totalExpenseForMonth ? _self.totalExpenseForMonth : totalExpenseForMonth // ignore: cast_nullable_to_non_nullable
-as double,dailySummaries: null == dailySummaries ? _self.dailySummaries : dailySummaries // ignore: cast_nullable_to_non_nullable
+as Decimal,dailySummaries: null == dailySummaries ? _self.dailySummaries : dailySummaries // ignore: cast_nullable_to_non_nullable
 as List<DailyExpenseSummaryModel>,trendColors: freezed == trendColors ? _self.trendColors : trendColors // ignore: cast_nullable_to_non_nullable
 as List<String>?,
   ));
@@ -426,7 +426,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  int month,  double totalExpenseForMonth,  List<DailyExpenseSummaryModel> dailySummaries,  List<String>? trendColors)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  int month, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpenseForMonth,  List<DailyExpenseSummaryModel> dailySummaries,  List<String>? trendColors)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CalendarMonthData() when $default != null:
 return $default(_that.year,_that.month,_that.totalExpenseForMonth,_that.dailySummaries,_that.trendColors);case _:
@@ -447,7 +447,7 @@ return $default(_that.year,_that.month,_that.totalExpenseForMonth,_that.dailySum
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  int month,  double totalExpenseForMonth,  List<DailyExpenseSummaryModel> dailySummaries,  List<String>? trendColors)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  int month, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpenseForMonth,  List<DailyExpenseSummaryModel> dailySummaries,  List<String>? trendColors)  $default,) {final _that = this;
 switch (_that) {
 case _CalendarMonthData():
 return $default(_that.year,_that.month,_that.totalExpenseForMonth,_that.dailySummaries,_that.trendColors);case _:
@@ -467,7 +467,7 @@ return $default(_that.year,_that.month,_that.totalExpenseForMonth,_that.dailySum
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  int month,  double totalExpenseForMonth,  List<DailyExpenseSummaryModel> dailySummaries,  List<String>? trendColors)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  int month, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpenseForMonth,  List<DailyExpenseSummaryModel> dailySummaries,  List<String>? trendColors)?  $default,) {final _that = this;
 switch (_that) {
 case _CalendarMonthData() when $default != null:
 return $default(_that.year,_that.month,_that.totalExpenseForMonth,_that.dailySummaries,_that.trendColors);case _:
@@ -482,12 +482,12 @@ return $default(_that.year,_that.month,_that.totalExpenseForMonth,_that.dailySum
 @JsonSerializable()
 
 class _CalendarMonthData implements CalendarMonthData {
-  const _CalendarMonthData({required this.year, required this.month, required this.totalExpenseForMonth, required final  List<DailyExpenseSummaryModel> dailySummaries, final  List<String>? trendColors}): _dailySummaries = dailySummaries,_trendColors = trendColors;
+  const _CalendarMonthData({required this.year, required this.month, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.totalExpenseForMonth, required final  List<DailyExpenseSummaryModel> dailySummaries, final  List<String>? trendColors}): _dailySummaries = dailySummaries,_trendColors = trendColors;
   factory _CalendarMonthData.fromJson(Map<String, dynamic> json) => _$CalendarMonthDataFromJson(json);
 
 @override final  int year;
 @override final  int month;
-@override final  double totalExpenseForMonth;
+@override@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) final  Decimal totalExpenseForMonth;
  final  List<DailyExpenseSummaryModel> _dailySummaries;
 @override List<DailyExpenseSummaryModel> get dailySummaries {
   if (_dailySummaries is EqualUnmodifiableListView) return _dailySummaries;
@@ -538,7 +538,7 @@ abstract mixin class _$CalendarMonthDataCopyWith<$Res> implements $CalendarMonth
   factory _$CalendarMonthDataCopyWith(_CalendarMonthData value, $Res Function(_CalendarMonthData) _then) = __$CalendarMonthDataCopyWithImpl;
 @override @useResult
 $Res call({
- int year, int month, double totalExpenseForMonth, List<DailyExpenseSummaryModel> dailySummaries, List<String>? trendColors
+ int year, int month,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal totalExpenseForMonth, List<DailyExpenseSummaryModel> dailySummaries, List<String>? trendColors
 });
 
 
@@ -560,7 +560,7 @@ class __$CalendarMonthDataCopyWithImpl<$Res>
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,month: null == month ? _self.month : month // ignore: cast_nullable_to_non_nullable
 as int,totalExpenseForMonth: null == totalExpenseForMonth ? _self.totalExpenseForMonth : totalExpenseForMonth // ignore: cast_nullable_to_non_nullable
-as double,dailySummaries: null == dailySummaries ? _self._dailySummaries : dailySummaries // ignore: cast_nullable_to_non_nullable
+as Decimal,dailySummaries: null == dailySummaries ? _self._dailySummaries : dailySummaries // ignore: cast_nullable_to_non_nullable
 as List<DailyExpenseSummaryModel>,trendColors: freezed == trendColors ? _self._trendColors : trendColors // ignore: cast_nullable_to_non_nullable
 as List<String>?,
   ));

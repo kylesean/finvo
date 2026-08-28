@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:finvo/features/home/widgets/calendar/daily_cell_widget.dart';
 import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
@@ -232,7 +233,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                   (s) => DateUtils.isSameDay(s.date, day),
                   orElse: () => DailyExpenseSummaryModel(
                     date: day,
-                    totalExpense: 0,
+                    totalExpense: Decimal.zero,
                     heatLevel: ExpenseHeatLevel.none,
                   ),
                 );
@@ -347,7 +348,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                             (s) => DateUtils.isSameDay(s.date, targetDate),
                             orElse: () => DailyExpenseSummaryModel(
                               date: targetDate,
-                              totalExpense: 0,
+                              totalExpense: Decimal.zero,
                               heatLevel: ExpenseHeatLevel.none,
                             ),
                           );
@@ -372,7 +373,8 @@ class MonthlyCalendarView extends ConsumerWidget {
                       }();
 
                       return Text(
-                        '$dateLabel: ${currencyFormat.format(selectedSummary.totalExpense)}',
+                        // H6: double conversion only at the display boundary.
+                        '$dateLabel: ${currencyFormat.format(selectedSummary.totalExpense.toDouble())}',
                         style: AppTextStyles.calendarFooter(theme),
                         overflow: TextOverflow.ellipsis,
                       );

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:decimal/decimal.dart';
 import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:flutter/material.dart';
@@ -139,12 +140,15 @@ class SpaceDashboardCard extends ConsumerWidget {
   Widget _buildDistributionBar(BuildContext context) {
     final colors = context.theme.colors;
     final members = space.members ?? [];
-    final total = members.fold<double>(
-      0,
-      (sum, m) => sum + (double.tryParse(m.contributionAmount) ?? 0),
+    // H6: aggregate contributions in Decimal — folding double.tryParse
+    // results accumulates floating-point error.
+    final total = members.fold(
+      Decimal.zero,
+      (sum, m) =>
+          sum + (Decimal.tryParse(m.contributionAmount) ?? Decimal.zero),
     );
 
-    if (total <= 0 || members.isEmpty) {
+    if (total <= Decimal.zero || members.isEmpty) {
       return Container(
         height: 8,
         decoration: BoxDecoration(
@@ -157,8 +161,11 @@ class SpaceDashboardCard extends ConsumerWidget {
     // Build proportional segments based on real contribution data
     final segments = <Widget>[];
     for (int i = 0; i < members.length; i++) {
-      final amount = double.tryParse(members[i].contributionAmount) ?? 0;
-      final ratio = (amount / total * 100).round();
+      final amount =
+          Decimal.tryParse(members[i].contributionAmount) ?? Decimal.zero;
+      // Ratio is a display proportion (flex weight), not money — double at
+      // this boundary is fine.
+      final ratio = ((amount / total).toDouble() * 100).round();
       if (ratio <= 0) continue;
       // Use decreasing opacity to distinguish members
       final opacity = 1.0 - (i * 0.25).clamp(0.0, 0.7);
@@ -244,9 +251,10 @@ class SpaceDashboardCard extends ConsumerWidget {
   }
 
   String _calculateAverage(String currency) {
-    final total = double.tryParse(space.totalExpense) ?? 0.0;
+    // H6: average computed in Decimal, converted to string for the formatter.
+    final total = Decimal.tryParse(space.totalExpense) ?? Decimal.zero;
     final memberCount = space.members?.length ?? 1;
-    final avg = memberCount > 0 ? total / memberCount : total;
+    final avg = memberCount > 0 ? total / Decimal.fromInt(memberCount) : total;
     return AmountFormatter.formatWithCurrency(
       avg.toString(),
       currencyCode: currency,

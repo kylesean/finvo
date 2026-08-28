@@ -10,7 +10,7 @@ _DailyExpenseSummaryModel _$DailyExpenseSummaryModelFromJson(
   Map<String, dynamic> json,
 ) => _DailyExpenseSummaryModel(
   date: DateTime.parse(json['date'] as String),
-  totalExpense: (json['totalExpense'] as num).toDouble(),
+  totalExpense: decimalFromJson(json['totalExpense']),
   heatLevel: _heatLevelFromString(json['heatLevel'] as String?),
 );
 
@@ -18,7 +18,7 @@ Map<String, dynamic> _$DailyExpenseSummaryModelToJson(
   _DailyExpenseSummaryModel instance,
 ) => <String, dynamic>{
   'date': _dateTimeToIso8601String(instance.date),
-  'totalExpense': instance.totalExpense,
+  'totalExpense': decimalToJson(instance.totalExpense),
   'heatLevel': _heatLevelToString(instance.heatLevel),
 };
 
@@ -26,7 +26,7 @@ _CalendarMonthData _$CalendarMonthDataFromJson(Map<String, dynamic> json) =>
     _CalendarMonthData(
       year: (json['year'] as num).toInt(),
       month: (json['month'] as num).toInt(),
-      totalExpenseForMonth: (json['totalExpenseForMonth'] as num).toDouble(),
+      totalExpenseForMonth: decimalFromJson(json['totalExpenseForMonth']),
       dailySummaries: (json['dailySummaries'] as List<dynamic>)
           .map(
             (e) => DailyExpenseSummaryModel.fromJson(e as Map<String, dynamic>),
@@ -41,7 +41,7 @@ Map<String, dynamic> _$CalendarMonthDataToJson(_CalendarMonthData instance) =>
     <String, dynamic>{
       'year': instance.year,
       'month': instance.month,
-      'totalExpenseForMonth': instance.totalExpenseForMonth,
+      'totalExpenseForMonth': decimalToJson(instance.totalExpenseForMonth),
       'dailySummaries': instance.dailySummaries,
       'trendColors': instance.trendColors,
     };
