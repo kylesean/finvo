@@ -28,55 +28,62 @@ class AppFilterChip extends StatelessWidget {
     const double height = 40;
     const double borderRadius = 10;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      constraints: const BoxConstraints(minHeight: height, maxHeight: height),
-      decoration: BoxDecoration(
-        color: isSelected ? colors.primary : Colors.transparent,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: isSelected ? colors.primary : colors.border,
-          width: 1,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            unawaited(HapticFeedback.lightImpact());
-            onTap();
-          },
+    // H7/M27: keep the 40dp minimum but drop the hard cap so large system
+    // text scales don't clip the label; and expose the selected state to
+    // screen readers instead of conveying it by color alone.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        constraints: const BoxConstraints(minHeight: height),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(borderRadius),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(
-                    icon,
-                    size: 18,
-                    color: isSelected
-                        ? colors.primaryForeground
-                        : colors.mutedForeground,
-                  ),
-                  if (label != null) const SizedBox(width: 8),
-                ],
-                if (label != null)
-                  Flexible(
-                    child: Text(
-                      label!,
-                      style: AppTextStyles.listTrailing(theme).copyWith(
-                        color: isSelected
-                            ? colors.primaryForeground
-                            : colors.mutedForeground,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+          border: Border.all(
+            color: isSelected ? colors.primary : colors.border,
+            width: 1,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              unawaited(HapticFeedback.lightImpact());
+              onTap();
+            },
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    Icon(
+                      icon,
+                      size: 18,
+                      color: isSelected
+                          ? colors.primaryForeground
+                          : colors.mutedForeground,
                     ),
-                  ),
-              ],
+                    if (label != null) const SizedBox(width: 8),
+                  ],
+                  if (label != null)
+                    Flexible(
+                      child: Text(
+                        label!,
+                        style: AppTextStyles.listTrailing(theme).copyWith(
+                          color: isSelected
+                              ? colors.primaryForeground
+                              : colors.mutedForeground,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

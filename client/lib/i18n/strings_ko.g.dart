@@ -113,6 +113,14 @@ class _Translations$common$ko extends Translations$common$zh {
 	@override String get cancelled => '취소됨';
 	@override String get saving => '저장 중...';
 	@override String get saveFailed => '저장 실패';
+	@override String get semHideAmounts => '금액 숨기기';
+	@override String get semShowAmounts => '금액 표시';
+	@override String get semPreviousMonth => '이전 달';
+	@override String get semNextMonth => '다음 달';
+	@override String get semDeleteAllNotifications => '모든 알림 삭제';
+	@override String get semEditAvatar => '아바타 편집';
+	@override String semDayExpense({required Object date, required Object amount}) => '${date} 지출 ${amount}';
+	@override String get semMarkAllRead => '모두 읽음으로 표시';
 }
 
 // Path: genui
@@ -2660,6 +2668,14 @@ extension on TranslationsKo {
 			'common.cancelled' => '취소됨',
 			'common.saving' => '저장 중...',
 			'common.saveFailed' => '저장 실패',
+			'common.semHideAmounts' => '금액 숨기기',
+			'common.semShowAmounts' => '금액 표시',
+			'common.semPreviousMonth' => '이전 달',
+			'common.semNextMonth' => '다음 달',
+			'common.semDeleteAllNotifications' => '모든 알림 삭제',
+			'common.semEditAvatar' => '아바타 편집',
+			'common.semDayExpense' => ({required Object date, required Object amount}) => '${date} 지출 ${amount}',
+			'common.semMarkAllRead' => '모두 읽음으로 표시',
 			'genui.errorBusy' => '죄송합니다. 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요',
 			'genui.errorTimeout' => '요청이 시간 초과되었습니다. 네트워크를 확인하고 다시 시도해 주세요',
 			'genui.errorNetwork' => '네트워크 연결에 문제가 있습니다. 확인 후 다시 시도해 주세요',
@@ -3136,6 +3152,8 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.allPeriod' => '모든 주기',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}주기 (${count})',
 			'forecast.recurringTransaction.confirmDelete' => '삭제 확인',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirmActivate' => '활성화 확인',
 			'forecast.recurringTransaction.confirmPause' => '정지 확인',
 			'forecast.recurringTransaction.dynamicAmount' => '동적 평균',
@@ -3144,8 +3162,6 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '생성 전 확인',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '만기일에 대기 거래 생성, 수동 확인 후 기록',
 			'forecast.recurringTransaction.pendingTitle' => '대기 거래',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 건 대기',
 			'forecast.recurringTransaction.confirm' => '확인',
 			'forecast.recurringTransaction.skip' => '건너뛰기',
@@ -3650,6 +3666,8 @@ extension on TranslationsKo {
 			'account.cash' => '현금/지갑',
 			'account.deposit' => '예금',
 			'account.creditCard' => '신용카드',
+			_ => null,
+		} ?? switch (path) {
 			'account.investment' => '투자',
 			'account.eWallet' => '전자지갑',
 			'account.loan' => '대출',
@@ -3658,8 +3676,6 @@ extension on TranslationsKo {
 			'account.other' => '기타 계좌',
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.depositTitle' => 'Bank Deposit',
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',

@@ -27,7 +27,15 @@
     "reset": "リセット",
     "cancelled": "キャンセル済み",
     "saving": "保存中...",
-    "saveFailed": "保存に失敗しました"
+    "saveFailed": "保存に失敗しました",
+    "semHideAmounts": "金額を隠す",
+    "semShowAmounts": "金額を表示",
+    "semPreviousMonth": "前の月",
+    "semNextMonth": "次の月",
+    "semDeleteAllNotifications": "通知をすべて削除",
+    "semEditAvatar": "アイコンを編集",
+    "semDayExpense": "$date、支出$amount",
+    "semMarkAllRead": "すべて既読にする"
   },
   "genui": {
     "errorBusy": "申し訳ございません。サービスが一時的に混雑しています。後ほどお試しください",

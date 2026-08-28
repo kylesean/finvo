@@ -27,7 +27,15 @@
     "reset": "초기화",
     "cancelled": "취소됨",
     "saving": "저장 중...",
-    "saveFailed": "저장 실패"
+    "saveFailed": "저장 실패",
+    "semHideAmounts": "금액 숨기기",
+    "semShowAmounts": "금액 표시",
+    "semPreviousMonth": "이전 달",
+    "semNextMonth": "다음 달",
+    "semDeleteAllNotifications": "모든 알림 삭제",
+    "semEditAvatar": "아바타 편집",
+    "semDayExpense": "$date 지출 $amount",
+    "semMarkAllRead": "모두 읽음으로 표시"
   },
   "genui": {
     "errorBusy": "죄송합니다. 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요",

@@ -113,6 +113,14 @@ class _Translations$common$zh_Hant extends Translations$common$zh {
 	@override String get cancelled => '已取消';
 	@override String get saving => '保存中...';
 	@override String get saveFailed => '保存失敗';
+	@override String get semHideAmounts => '隱藏金額';
+	@override String get semShowAmounts => '顯示金額';
+	@override String get semPreviousMonth => '上個月';
+	@override String get semNextMonth => '下個月';
+	@override String get semDeleteAllNotifications => '刪除全部通知';
+	@override String get semEditAvatar => '編輯頭像';
+	@override String semDayExpense({required Object date, required Object amount}) => '${date}支出${amount}';
+	@override String get semMarkAllRead => '全部標為已讀';
 }
 
 // Path: genui
@@ -2660,6 +2668,14 @@ extension on TranslationsZhHant {
 			'common.cancelled' => '已取消',
 			'common.saving' => '保存中...',
 			'common.saveFailed' => '保存失敗',
+			'common.semHideAmounts' => '隱藏金額',
+			'common.semShowAmounts' => '顯示金額',
+			'common.semPreviousMonth' => '上個月',
+			'common.semNextMonth' => '下個月',
+			'common.semDeleteAllNotifications' => '刪除全部通知',
+			'common.semEditAvatar' => '編輯頭像',
+			'common.semDayExpense' => ({required Object date, required Object amount}) => '${date}支出${amount}',
+			'common.semMarkAllRead' => '全部標為已讀',
 			'genui.errorBusy' => '抱歉，服務暫時繁忙，請稍後重試',
 			'genui.errorTimeout' => '請求逾時，請檢查網路後重試',
 			'genui.errorNetwork' => '網路連線異常，請檢查後重試',
@@ -3136,6 +3152,8 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.allPeriod' => '全部週期',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}週期 (${count})',
 			'forecast.recurringTransaction.confirmDelete' => '確認刪除',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirmActivate' => '確認啟用',
 			'forecast.recurringTransaction.confirmPause' => '確認暫停',
 			'forecast.recurringTransaction.dynamicAmount' => '動態均值',
@@ -3144,8 +3162,6 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前需確認',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期時生成待確認交易，需手動確認後記帳',
 			'forecast.recurringTransaction.pendingTitle' => '待確認交易',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 筆待確認',
 			'forecast.recurringTransaction.confirm' => '確認',
 			'forecast.recurringTransaction.skip' => '跳過',
@@ -3650,6 +3666,8 @@ extension on TranslationsZhHant {
 			'account.cash' => '現金錢包',
 			'account.deposit' => '銀行存款',
 			'account.creditCard' => '信用卡',
+			_ => null,
+		} ?? switch (path) {
 			'account.investment' => '投資理財',
 			'account.eWallet' => '電子錢包',
 			'account.loan' => '貸款帳戶',
@@ -3658,8 +3676,6 @@ extension on TranslationsZhHant {
 			'account.other' => '其他帳戶',
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.depositTitle' => 'Bank Deposit',
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',

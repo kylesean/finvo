@@ -115,19 +115,25 @@ class MonthlyCalendarView extends ConsumerWidget {
                 ),
                 Row(
                   children: [
-                    FButton.icon(
-                      variant: .ghost,
-                      onPress: () {
-                        ref
-                            .read(currentDisplayMonthProvider.notifier)
-                            .update(
-                              (state) => DateTime(state.year, state.month - 1),
-                            );
-                      },
-                      child: Icon(
-                        FLucideIcons.chevronLeft,
-                        color: colors.primary,
-                        size: 18,
+                    Semantics(
+                      // H7: icon-only month navigation needs explicit labels.
+                      label: t.common.semPreviousMonth,
+                      button: true,
+                      child: FButton.icon(
+                        variant: .ghost,
+                        onPress: () {
+                          ref
+                              .read(currentDisplayMonthProvider.notifier)
+                              .update(
+                                (state) =>
+                                    DateTime(state.year, state.month - 1),
+                              );
+                        },
+                        child: Icon(
+                          FLucideIcons.chevronLeft,
+                          color: colors.primary,
+                          size: 18,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -146,24 +152,28 @@ class MonthlyCalendarView extends ConsumerWidget {
                       ).format(displayMonth);
                     }(), style: AppTextStyles.listTrailing(theme)),
                     const SizedBox(width: 4),
-                    FButton.icon(
-                      variant: .ghost,
-                      onPress: canNavigateToNextMonth
-                          ? () {
-                              ref
-                                  .read(currentDisplayMonthProvider.notifier)
-                                  .update(
-                                    (state) =>
-                                        DateTime(state.year, state.month + 1),
-                                  );
-                            }
-                          : null,
-                      child: Icon(
-                        FLucideIcons.chevronRight,
-                        color: canNavigateToNextMonth
-                            ? colors.primary
-                            : colors.mutedForeground,
-                        size: 18,
+                    Semantics(
+                      label: t.common.semNextMonth,
+                      button: true,
+                      child: FButton.icon(
+                        variant: .ghost,
+                        onPress: canNavigateToNextMonth
+                            ? () {
+                                ref
+                                    .read(currentDisplayMonthProvider.notifier)
+                                    .update(
+                                      (state) =>
+                                          DateTime(state.year, state.month + 1),
+                                    );
+                              }
+                            : null,
+                        child: Icon(
+                          FLucideIcons.chevronRight,
+                          color: canNavigateToNextMonth
+                              ? colors.primary
+                              : colors.mutedForeground,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ],

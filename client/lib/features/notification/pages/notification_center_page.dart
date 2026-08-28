@@ -75,10 +75,15 @@ class _NotificationCenterPageState
         ),
         actions: [
           if (state.unreadCount > 0)
-            FButton.icon(
-              variant: .ghost,
-              onPress: () => notifier.markAllAsRead(),
-              child: const Icon(FLucideIcons.checkCheck, size: 20),
+            Semantics(
+              // H7: icon-only action needs an explicit label.
+              label: t.common.semMarkAllRead,
+              button: true,
+              child: FButton.icon(
+                variant: .ghost,
+                onPress: () => notifier.markAllAsRead(),
+                child: const Icon(FLucideIcons.checkCheck, size: 20),
+              ),
             ),
           const SizedBox(width: 8),
         ],

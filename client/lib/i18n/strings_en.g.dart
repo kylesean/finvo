@@ -113,6 +113,14 @@ class _Translations$common$en extends Translations$common$zh {
 	@override String get cancelled => 'Cancelled';
 	@override String get saving => 'Saving...';
 	@override String get saveFailed => 'Save failed';
+	@override String get semHideAmounts => 'Hide amounts';
+	@override String get semShowAmounts => 'Show amounts';
+	@override String get semPreviousMonth => 'Previous month';
+	@override String get semNextMonth => 'Next month';
+	@override String get semDeleteAllNotifications => 'Delete all notifications';
+	@override String get semEditAvatar => 'Edit avatar';
+	@override String semDayExpense({required Object date, required Object amount}) => '${date}, expense ${amount}';
+	@override String get semMarkAllRead => 'Mark all as read';
 }
 
 // Path: genui
@@ -2660,6 +2668,14 @@ extension on TranslationsEn {
 			'common.cancelled' => 'Cancelled',
 			'common.saving' => 'Saving...',
 			'common.saveFailed' => 'Save failed',
+			'common.semHideAmounts' => 'Hide amounts',
+			'common.semShowAmounts' => 'Show amounts',
+			'common.semPreviousMonth' => 'Previous month',
+			'common.semNextMonth' => 'Next month',
+			'common.semDeleteAllNotifications' => 'Delete all notifications',
+			'common.semEditAvatar' => 'Edit avatar',
+			'common.semDayExpense' => ({required Object date, required Object amount}) => '${date}, expense ${amount}',
+			'common.semMarkAllRead' => 'Mark all as read',
 			'genui.errorBusy' => 'Sorry, the service is temporarily busy, please try again later',
 			'genui.errorTimeout' => 'Request timed out, please check your network and retry',
 			'genui.errorNetwork' => 'Network connection issue, please check and retry',
@@ -3136,6 +3152,8 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.allPeriod' => 'All recurring',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} recurring (${count})',
 			'forecast.recurringTransaction.confirmDelete' => 'Confirm Delete',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirmActivate' => 'Confirm Activate',
 			'forecast.recurringTransaction.confirmPause' => 'Confirm Pause',
 			'forecast.recurringTransaction.dynamicAmount' => 'Est. Avg',
@@ -3144,8 +3162,6 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => 'Confirm Before Generation',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => 'Generates a pending transaction on due date, requires manual confirmation',
 			'forecast.recurringTransaction.pendingTitle' => 'Pending Transactions',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} pending',
 			'forecast.recurringTransaction.confirm' => 'Confirm',
 			'forecast.recurringTransaction.skip' => 'Skip',
@@ -3650,6 +3666,8 @@ extension on TranslationsEn {
 			'account.cash' => 'Cash Wallet',
 			'account.deposit' => 'Bank Deposit',
 			'account.creditCard' => 'Credit Card',
+			_ => null,
+		} ?? switch (path) {
 			'account.investment' => 'Investment',
 			'account.eWallet' => 'E-Wallet',
 			'account.loan' => 'Loan',
@@ -3658,8 +3676,6 @@ extension on TranslationsEn {
 			'account.other' => 'Other',
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.depositTitle' => 'Bank Deposit',
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',

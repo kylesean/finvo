@@ -347,21 +347,29 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                               style: AppTextStyles.statLabelOnDark(theme),
                             ),
                             const SizedBox(width: 8),
-                            FButton.icon(
-                              variant: .ghost,
-                              onPress: () {
-                                setState(() {
-                                  _isAmountVisible = !_isAmountVisible;
-                                });
-                              },
-                              child: Icon(
-                                _isAmountVisible
-                                    ? FLucideIcons.eye
-                                    : FLucideIcons.eyeOff,
-                                color: colors.primaryForeground.withValues(
-                                  alpha: 0.8,
+                            Semantics(
+                              // H7: the eye toggle conveyed state by icon
+                              // only; give screen readers an explicit label.
+                              label: _isAmountVisible
+                                  ? t.common.semHideAmounts
+                                  : t.common.semShowAmounts,
+                              button: true,
+                              child: FButton.icon(
+                                variant: .ghost,
+                                onPress: () {
+                                  setState(() {
+                                    _isAmountVisible = !_isAmountVisible;
+                                  });
+                                },
+                                child: Icon(
+                                  _isAmountVisible
+                                      ? FLucideIcons.eye
+                                      : FLucideIcons.eyeOff,
+                                  color: colors.primaryForeground.withValues(
+                                    alpha: 0.8,
+                                  ),
+                                  size: 16,
                                 ),
-                                size: 16,
                               ),
                             ),
                           ],

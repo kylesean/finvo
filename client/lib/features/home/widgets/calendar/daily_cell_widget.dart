@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:decimal/decimal.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/shared/utils/heat_colors.dart';
+import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/home/models/daily_expense_summary_model.dart';
 
 class DailyCellWidget extends StatelessWidget {
@@ -132,26 +133,39 @@ class DailyCellWidget extends StatelessWidget {
       }
     }
 
+    // H7: the cell visual is just the day number; give screen readers the
+    // full context (date + expense amount).
+    final semanticsValue = summary == null
+        ? '${day.month}/${day.day}'
+        : t.common.semDayExpense(
+            date: '${day.month}/${day.day}',
+            amount: summary!.totalExpense.toString(),
+          );
+
     return AspectRatio(
       aspectRatio: 1.0,
-      child: FButton.raw(
-        variant: .ghost,
-        onPress: (!isOutOfMonth && onTap != null) ? onTap : null,
-        child: Container(
-          decoration: BoxDecoration(
-            color: cellBackgroundColor,
-            border: cellEffectiveBorder,
-            borderRadius: BorderRadius.circular(cellRadius),
-          ),
-          child: Center(
-            child: Text(
-              '${day.day}',
-              style: theme.typography.body.sm.copyWith(
-                color: cellTextColor, // Apply calculated text color
-                fontWeight: cellFontWeight,
-                fontSize: 13,
+      child: Semantics(
+        button: true,
+        value: semanticsValue,
+        child: FButton.raw(
+          variant: .ghost,
+          onPress: (!isOutOfMonth && onTap != null) ? onTap : null,
+          child: Container(
+            decoration: BoxDecoration(
+              color: cellBackgroundColor,
+              border: cellEffectiveBorder,
+              borderRadius: BorderRadius.circular(cellRadius),
+            ),
+            child: Center(
+              child: Text(
+                '${day.day}',
+                style: theme.typography.body.sm.copyWith(
+                  color: cellTextColor, // Apply calculated text color
+                  fontWeight: cellFontWeight,
+                  fontSize: 13,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
         ),

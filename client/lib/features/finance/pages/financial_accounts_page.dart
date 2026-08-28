@@ -360,14 +360,19 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             ),
           ),
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => ref.invalidate(exchangeRateProvider),
-            child: Text(
-              t.common.retry,
-              style: theme.typography.body.xs.copyWith(
-                color: colors.destructive,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.underline,
+          // H7: expose the retry link as a button (and give it a
+          // screen-reader-visible role; the text serves as the label).
+          Semantics(
+            button: true,
+            child: GestureDetector(
+              onTap: () => ref.invalidate(exchangeRateProvider),
+              child: Text(
+                t.common.retry,
+                style: theme.typography.body.xs.copyWith(
+                  color: colors.destructive,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
           ),

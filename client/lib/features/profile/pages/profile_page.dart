@@ -87,88 +87,97 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Profile Header Section (Avatar + Username) -> Tap opens Edit Profile Modal
-        GestureDetector(
-          onTap: () => _openEditProfileSheet(context),
-          behavior: HitTestBehavior.opaque,
-          child: Column(
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Avatar
-                  isUploadingAvatar
-                      ? Container(
-                          width: 88,
-                          height: 88,
-                          decoration: BoxDecoration(
-                            color: colors.muted,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: colors.border, width: 2),
-                          ),
-                          child: ClipOval(
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: colors.primary,
+        // H7: the whole avatar block is a tappable edit affordance but was
+        // invisible to screen readers.
+        Semantics(
+          button: true,
+          label: t.common.semEditAvatar,
+          child: GestureDetector(
+            onTap: () => _openEditProfileSheet(context),
+            behavior: HitTestBehavior.opaque,
+            child: Column(
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Avatar
+                    isUploadingAvatar
+                        ? Container(
+                            width: 88,
+                            height: 88,
+                            decoration: BoxDecoration(
+                              color: colors.muted,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: colors.border,
+                                width: 2,
                               ),
                             ),
+                            child: ClipOval(
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: colors.primary,
+                                ),
+                              ),
+                            ),
+                          )
+                        : UserAvatar(
+                            userId: user?.id ?? 'Finvo',
+                            avatarUrl: user?.avatarUrl,
+                            size: 88,
+                            border: Border.all(color: colors.border, width: 2),
+                            version:
+                                userState.avatarCacheBuster ?? user?.updatedAt,
                           ),
-                        )
-                      : UserAvatar(
-                          userId: user?.id ?? 'Finvo',
-                          avatarUrl: user?.avatarUrl,
-                          size: 88,
-                          border: Border.all(color: colors.border, width: 2),
-                          version:
-                              userState.avatarCacheBuster ?? user?.updatedAt,
+                    // Edit pencil badge icon
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: colors.background,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colors.border, width: 1.5),
                         ),
-                  // Edit pencil badge icon
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: colors.background,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.border, width: 1.5),
-                      ),
-                      child: Icon(
-                        FLucideIcons.pencil,
-                        size: 14,
-                        color: colors.foreground,
+                        child: Icon(
+                          FLucideIcons.pencil,
+                          size: 14,
+                          color: colors.foreground,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              // Username display with subtle pencil
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (userState.isLoading)
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: colors.mutedForeground,
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Username display with subtle pencil
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (userState.isLoading)
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colors.mutedForeground,
+                        ),
+                      )
+                    else
+                      Text(
+                        user?.username ??
+                            ref.watch(currentUserProvider)?.username ??
+                            t.user.username,
+                        style: theme.typography.body.lg.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    )
-                  else
-                    Text(
-                      user?.username ??
-                          ref.watch(currentUserProvider)?.username ??
-                          t.user.username,
-                      style: theme.typography.body.lg.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ],

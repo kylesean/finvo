@@ -119,17 +119,21 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
 
           // total budget card
           if (state.summary!.totalBudgetDetail != null) ...[
-            GestureDetector(
-              onTap: () => context.pushNamed(
-                AppRouteNames.budgetDetail,
-                pathParameters: {
-                  'id': state.summary!.totalBudgetDetail!.budget.id,
-                },
-              ),
-              child: _buildTotalBudgetCard(
-                theme,
-                colors,
-                state.summary!.totalBudgetDetail!,
+            // H7: announce budget cards as tappable.
+            Semantics(
+              button: true,
+              child: GestureDetector(
+                onTap: () => context.pushNamed(
+                  AppRouteNames.budgetDetail,
+                  pathParameters: {
+                    'id': state.summary!.totalBudgetDetail!.budget.id,
+                  },
+                ),
+                child: _buildTotalBudgetCard(
+                  theme,
+                  colors,
+                  state.summary!.totalBudgetDetail!,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -147,12 +151,15 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
             _buildSectionHeader(theme, colors, t.budget.categoryBudget),
             const SizedBox(height: 8),
             ...state.summary!.categoryBudgets.map(
-              (b) => GestureDetector(
-                onTap: () => context.pushNamed(
-                  AppRouteNames.budgetDetail,
-                  pathParameters: {'id': b.budget.id},
+              (b) => Semantics(
+                button: true,
+                child: GestureDetector(
+                  onTap: () => context.pushNamed(
+                    AppRouteNames.budgetDetail,
+                    pathParameters: {'id': b.budget.id},
+                  ),
+                  child: _buildBudgetCard(theme, colors, b),
                 ),
-                child: _buildBudgetCard(theme, colors, b),
               ),
             ),
           ],

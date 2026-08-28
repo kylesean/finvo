@@ -180,88 +180,96 @@ class TransactionCard extends ConsumerWidget {
           ),
         ),
       ),
-      child: GestureDetector(
-        onTap: () {
-          unawaited(
-            context.pushNamed(
-              AppRouteNames.transactionDetail,
-              pathParameters: {'transactionId': transaction.id},
-            ),
-          );
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          color: colors.background,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // --- Left: Category Icon (ThemedIcon) ---
-              ThemedIcon.large(
-                icon: TransactionCategory.fromKey(transaction.categoryKey).icon,
-                backgroundColor: colors.primary.withValues(alpha: 0.1),
-                iconColor: colors.primary,
+      // H7: announce the row as a button so screen readers expose the
+      // tap-to-open-detail action (the row's own text content provides the
+      // accessibility label via merged semantics).
+      child: Semantics(
+        button: true,
+        child: GestureDetector(
+          onTap: () {
+            unawaited(
+              context.pushNamed(
+                AppRouteNames.transactionDetail,
+                pathParameters: {'transactionId': transaction.id},
               ),
-              const SizedBox(width: 14),
+            );
+          },
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            color: colors.background,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // --- Left: Category Icon (ThemedIcon) ---
+                ThemedIcon.large(
+                  icon: TransactionCategory.fromKey(
+                    transaction.categoryKey,
+                  ).icon,
+                  backgroundColor: colors.primary.withValues(alpha: 0.1),
+                  iconColor: colors.primary,
+                ),
+                const SizedBox(width: 14),
 
-              // --- Right: Content ---
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Row 1: Category Name + Amount
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _getPrimaryTitle(transaction),
-                            style: AppTextStyles.listTitle(theme),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          _getAmountDisplayText(transaction),
-                          style: theme.typography.body.lg.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AmountFormatter.getAmountColor(
-                              transaction.type,
-                              amountTheme,
+                // --- Right: Content ---
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Row 1: Category Name + Amount
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _getPrimaryTitle(transaction),
+                              style: AppTextStyles.listTitle(theme),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 12),
+                          Text(
+                            _getAmountDisplayText(transaction),
+                            style: theme.typography.body.lg.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AmountFormatter.getAmountColor(
+                                transaction.type,
+                                amountTheme,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
 
-                    const SizedBox(height: 6),
+                      const SizedBox(height: 6),
 
-                    // Row 2: Tags/PaymentMethod + Time
-                    Row(
-                      children: [
-                        // Tags or Payment Method
-                        Expanded(
-                          child: transaction.tags.isNotEmpty
-                              ? _buildTagsRow(theme, colors, transaction.tags)
-                              : Text(
-                                  transaction.paymentMethod ??
-                                      t.transaction.expense,
-                                  style: AppTextStyles.listSubtitle(theme),
-                                ),
-                        ),
-                        // Time display
-                        Text(
-                          _getTimeDisplay(transaction.timestamp),
-                          style: AppTextStyles.detailLabel(theme),
-                        ),
-                      ],
-                    ),
-                  ],
+                      // Row 2: Tags/PaymentMethod + Time
+                      Row(
+                        children: [
+                          // Tags or Payment Method
+                          Expanded(
+                            child: transaction.tags.isNotEmpty
+                                ? _buildTagsRow(theme, colors, transaction.tags)
+                                : Text(
+                                    transaction.paymentMethod ??
+                                        t.transaction.expense,
+                                    style: AppTextStyles.listSubtitle(theme),
+                                  ),
+                          ),
+                          // Time display
+                          Text(
+                            _getTimeDisplay(transaction.timestamp),
+                            style: AppTextStyles.detailLabel(theme),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -170,6 +170,30 @@ class Translations$common$zh {
 
 	/// zh: '保存失败'
 	String get saveFailed => '保存失败';
+
+	/// zh: '隐藏金额'
+	String get semHideAmounts => '隐藏金额';
+
+	/// zh: '显示金额'
+	String get semShowAmounts => '显示金额';
+
+	/// zh: '上个月'
+	String get semPreviousMonth => '上个月';
+
+	/// zh: '下个月'
+	String get semNextMonth => '下个月';
+
+	/// zh: '删除全部通知'
+	String get semDeleteAllNotifications => '删除全部通知';
+
+	/// zh: '编辑头像'
+	String get semEditAvatar => '编辑头像';
+
+	/// zh: '$date支出$amount'
+	String semDayExpense({required Object date, required Object amount}) => '${date}支出${amount}';
+
+	/// zh: '全部标为已读'
+	String get semMarkAllRead => '全部标为已读';
 }
 
 // Path: genui
@@ -5466,6 +5490,14 @@ extension on Translations {
 			'common.cancelled' => '已取消',
 			'common.saving' => '保存中...',
 			'common.saveFailed' => '保存失败',
+			'common.semHideAmounts' => '隐藏金额',
+			'common.semShowAmounts' => '显示金额',
+			'common.semPreviousMonth' => '上个月',
+			'common.semNextMonth' => '下个月',
+			'common.semDeleteAllNotifications' => '删除全部通知',
+			'common.semEditAvatar' => '编辑头像',
+			'common.semDayExpense' => ({required Object date, required Object amount}) => '${date}支出${amount}',
+			'common.semMarkAllRead' => '全部标为已读',
 			'genui.errorBusy' => '抱歉，服务暂时繁忙，请稍后重试',
 			'genui.errorTimeout' => '请求超时，请检查网络后重试',
 			'genui.errorNetwork' => '网络连接异常，请检查后重试',
@@ -5942,6 +5974,8 @@ extension on Translations {
 			'forecast.recurringTransaction.sortByTime' => '按时间排序',
 			'forecast.recurringTransaction.allPeriod' => '全部周期',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}周期 (${count})',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirmDelete' => '确认删除',
 			'forecast.recurringTransaction.confirmActivate' => '确认启用',
 			'forecast.recurringTransaction.confirmPause' => '确认暂停',
@@ -5950,8 +5984,6 @@ extension on Translations {
 			'forecast.recurringTransaction.dynamicAmountDescription' => '系统将在账单日发送提醒，需要您手动确认具体金额后才会记账。',
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前需确认',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '到期时生成待确认交易，需手动确认后记账',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.pendingTitle' => '待确认交易',
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 笔待确认',
 			'forecast.recurringTransaction.confirm' => '确认',
@@ -6456,6 +6488,8 @@ extension on Translations {
 			'account.liabilitiesCategory' => '负债/信用类',
 			'account.cash' => '现金钱包',
 			'account.deposit' => '银行存款',
+			_ => null,
+		} ?? switch (path) {
 			'account.creditCard' => '信用卡',
 			'account.investment' => '投资理财',
 			'account.eWallet' => '电子钱包',
@@ -6464,8 +6498,6 @@ extension on Translations {
 			'account.payable' => '应付款项',
 			'account.other' => '其他账户',
 			'account.types.cashTitle' => '现金',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.cashSubtitle' => '纸币、硬币等实体货币',
 			'account.types.depositTitle' => '银行存款',
 			'account.types.depositSubtitle' => '储蓄卡、活期/定期存款',

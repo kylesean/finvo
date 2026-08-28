@@ -113,6 +113,14 @@ class _Translations$common$ja extends Translations$common$zh {
 	@override String get cancelled => 'キャンセル済み';
 	@override String get saving => '保存中...';
 	@override String get saveFailed => '保存に失敗しました';
+	@override String get semHideAmounts => '金額を隠す';
+	@override String get semShowAmounts => '金額を表示';
+	@override String get semPreviousMonth => '前の月';
+	@override String get semNextMonth => '次の月';
+	@override String get semDeleteAllNotifications => '通知をすべて削除';
+	@override String get semEditAvatar => 'アイコンを編集';
+	@override String semDayExpense({required Object date, required Object amount}) => '${date}、支出${amount}';
+	@override String get semMarkAllRead => 'すべて既読にする';
 }
 
 // Path: genui
@@ -2660,6 +2668,14 @@ extension on TranslationsJa {
 			'common.cancelled' => 'キャンセル済み',
 			'common.saving' => '保存中...',
 			'common.saveFailed' => '保存に失敗しました',
+			'common.semHideAmounts' => '金額を隠す',
+			'common.semShowAmounts' => '金額を表示',
+			'common.semPreviousMonth' => '前の月',
+			'common.semNextMonth' => '次の月',
+			'common.semDeleteAllNotifications' => '通知をすべて削除',
+			'common.semEditAvatar' => 'アイコンを編集',
+			'common.semDayExpense' => ({required Object date, required Object amount}) => '${date}、支出${amount}',
+			'common.semMarkAllRead' => 'すべて既読にする',
 			'genui.errorBusy' => '申し訳ございません。サービスが一時的に混雑しています。後ほどお試しください',
 			'genui.errorTimeout' => 'リクエストがタイムアウトしました。ネットワークを確認して再試行してください',
 			'genui.errorNetwork' => 'ネットワーク接続に問題があります。確認して再試行してください',
@@ -3136,6 +3152,8 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.allPeriod' => 'すべての周期',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} (${count} 件)',
 			'forecast.recurringTransaction.confirmDelete' => '削除確認',
+			_ => null,
+		} ?? switch (path) {
 			'forecast.recurringTransaction.confirmActivate' => '有効化確認',
 			'forecast.recurringTransaction.confirmPause' => '停止確認',
 			'forecast.recurringTransaction.dynamicAmount' => '動態平均',
@@ -3144,8 +3162,6 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.confirmBeforeGeneration' => '生成前に確認',
 			'forecast.recurringTransaction.confirmBeforeGenerationDesc' => '期限日に確認待ち取引を生成、手動確認後に記帳',
 			'forecast.recurringTransaction.pendingTitle' => '確認待ち取引',
-			_ => null,
-		} ?? switch (path) {
 			'forecast.recurringTransaction.pendingCount' => ({required Object count}) => '${count} 件確認待ち',
 			'forecast.recurringTransaction.confirm' => '確認',
 			'forecast.recurringTransaction.skip' => 'スキップ',
@@ -3650,6 +3666,8 @@ extension on TranslationsJa {
 			'account.cash' => '現金・財布',
 			'account.deposit' => '銀行預金',
 			'account.creditCard' => 'クレジットカード',
+			_ => null,
+		} ?? switch (path) {
 			'account.investment' => '投資・資産運用',
 			'account.eWallet' => '電子マネー',
 			'account.loan' => 'ローン',
@@ -3658,8 +3676,6 @@ extension on TranslationsJa {
 			'account.other' => 'その他',
 			'account.types.cashTitle' => 'Cash',
 			'account.types.cashSubtitle' => 'Physical currency and coins',
-			_ => null,
-		} ?? switch (path) {
 			'account.types.depositTitle' => 'Bank Deposit',
 			'account.types.depositSubtitle' => 'Savings, checking accounts',
 			'account.types.eMoneyTitle' => 'E-Wallet',

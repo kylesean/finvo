@@ -27,7 +27,15 @@
     "reset": "重置",
     "cancelled": "已取消",
     "saving": "保存中...",
-    "saveFailed": "保存失败"
+    "saveFailed": "保存失败",
+    "semHideAmounts": "隐藏金额",
+    "semShowAmounts": "显示金额",
+    "semPreviousMonth": "上个月",
+    "semNextMonth": "下个月",
+    "semDeleteAllNotifications": "删除全部通知",
+    "semEditAvatar": "编辑头像",
+    "semDayExpense": "$date支出$amount",
+    "semMarkAllRead": "全部标为已读"
   },
   "genui": {
     "errorBusy": "抱歉，服务暂时繁忙，请稍后重试",

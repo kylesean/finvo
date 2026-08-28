@@ -27,7 +27,15 @@
     "reset": "Reset",
     "cancelled": "Cancelled",
     "saving": "Saving...",
-    "saveFailed": "Save failed"
+    "saveFailed": "Save failed",
+    "semHideAmounts": "Hide amounts",
+    "semShowAmounts": "Show amounts",
+    "semPreviousMonth": "Previous month",
+    "semNextMonth": "Next month",
+    "semDeleteAllNotifications": "Delete all notifications",
+    "semEditAvatar": "Edit avatar",
+    "semDayExpense": "$date, expense $amount",
+    "semMarkAllRead": "Mark all as read"
   },
   "genui": {
     "errorBusy": "Sorry, the service is temporarily busy, please try again later",
