@@ -3,6 +3,7 @@ import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/shared/models/financial_account.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 import 'package:finvo/features/profile/services/profile_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:logging/logging.dart';
@@ -60,7 +61,7 @@ abstract class FinancialAccountState with _$FinancialAccountState {
 class FinancialAccountNotifier extends _$FinancialAccountNotifier {
   /// Monotonic generation: a stale in-flight response is discarded when a
   /// newer load has superseded it (and writes after dispose are skipped).
-  int _loadGeneration = 0;
+  final GenerationGuard _loadGeneration = GenerationGuard();
 
   @override
   FinancialAccountState build() {
@@ -73,7 +74,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
   /// Load account data
   Future<void> loadFinancialAccounts() async {
-    final generation = ++_loadGeneration;
+    final generation = _loadGeneration.bump();
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -96,7 +97,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
         }
       }
 
-      if (!ref.mounted || generation != _loadGeneration) return;
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       state = state.copyWith(
         accounts: response.accounts,
         totalBalance: response.totalBalance,
@@ -110,7 +111,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
         errorMessage = e.message;
       }
 
-      if (!ref.mounted || generation != _loadGeneration) return;
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       state = state.copyWith(isLoading: false, error: errorMessage);
     }
   }

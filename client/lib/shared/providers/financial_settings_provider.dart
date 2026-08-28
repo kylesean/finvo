@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/shared/models/financial_settings.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 
 part 'financial_settings_provider.g.dart';
 
@@ -44,7 +45,7 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
   /// response for account A can settle AFTER A logged out and B logged in —
   /// without a generation check it would write A's currency/thresholds into
   /// the shared state B is now reading. Mirrors financial_account_provider.
-  int _loadGeneration = 0;
+  final GenerationGuard _loadGeneration = GenerationGuard();
 
   @override
   FinancialSettingsState build() {
@@ -61,7 +62,7 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
   Future<void> loadFinancialSettings() async {
     // Bump the generation: any in-flight request from a previous session is
     // now stale and will be discarded when it settles.
-    final generation = ++_loadGeneration;
+    final generation = _loadGeneration.bump();
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -72,7 +73,7 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
         fromJsonT: (json) =>
             _parseSettingsResponse(json, 'API /financial-settings'),
       );
-      if (!ref.mounted || generation != _loadGeneration) return;
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       _originalSettings = response;
 
       _logger.info('Loaded primaryCurrency: ${response.primaryCurrency}');
@@ -89,7 +90,7 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
         error: null,
       );
     } catch (e) {
-      if (!ref.mounted || generation != _loadGeneration) return;
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       String errorMessage = 'Failed to load financial settings';
       if (e is AppException) {
         errorMessage = e.message;

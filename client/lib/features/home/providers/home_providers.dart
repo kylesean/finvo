@@ -18,6 +18,7 @@ import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 
 part 'home_providers.g.dart';
 
@@ -105,7 +106,7 @@ class TransactionFeed extends _$TransactionFeed {
   /// Monotonic request generation. Incremented on every refresh so that a
   /// slower in-flight [fetchMoreTransactions] response is discarded if a newer
   /// refresh has already replaced the feed (prevents stale page-merge).
-  int _generation = 0;
+  final GenerationGuard _generation = GenerationGuard();
 
   @override
   TransactionFeedState build() {
@@ -185,7 +186,7 @@ class TransactionFeed extends _$TransactionFeed {
     }
 
     // Bump the generation: any in-flight fetchMore starts a new epoch.
-    final generation = ++_generation;
+    final generation = _generation.bump();
 
     final currentFeedType = ref.read(currentTransactionFeedTypeProvider);
     final selectedDate = ref.read(selectedDateProvider);
@@ -221,7 +222,7 @@ class TransactionFeed extends _$TransactionFeed {
       );
 
       // Riverpod 3.0: use ref.mounted to check if provider is still valid
-      if (!ref.mounted || generation != _generation) {
+      if (!ref.mounted || !_generation.isCurrent(generation)) {
         _logger.info(
           'Provider disposed or superseded during fetch, discarding',
         );
@@ -239,7 +240,7 @@ class TransactionFeed extends _$TransactionFeed {
       _logger.severe('Error fetching initial transaction feed', e);
 
       // Check if provider is still valid
-      if (!ref.mounted || generation != _generation) return;
+      if (!ref.mounted || !_generation.isCurrent(generation)) return;
 
       state = state.copyWith(
         isLoading: false,
@@ -272,7 +273,7 @@ class TransactionFeed extends _$TransactionFeed {
     if (!ref.mounted) return;
 
     // Capture the current generation; discard the response if a refresh bumps it.
-    final generation = _generation;
+    final generation = _generation.current;
 
     final currentFeedType = ref.read(currentTransactionFeedTypeProvider);
     final selectedDate = ref.read(selectedDateProvider);
@@ -292,7 +293,7 @@ class TransactionFeed extends _$TransactionFeed {
       );
 
       // Check again after async operation
-      if (!ref.mounted || generation != _generation) return;
+      if (!ref.mounted || !_generation.isCurrent(generation)) return;
 
       if (newTransactions.isEmpty) {
         state = state.copyWith(
@@ -315,7 +316,7 @@ class TransactionFeed extends _$TransactionFeed {
       // BRH-07: a refresh that ran while this fetchMore was in flight has
       // already bumped the generation — a stale failure must not stamp error
       // flags onto the new list's state.
-      if (!ref.mounted || generation != _generation) return;
+      if (!ref.mounted || !_generation.isCurrent(generation)) return;
 
       // Never mark hasReachedMax on an error: a transient network failure is
       // not "end of data". Surface the failure via hasLoadMoreError so the

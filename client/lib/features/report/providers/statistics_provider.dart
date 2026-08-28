@@ -5,6 +5,7 @@ import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/features/report/services/statistics_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -48,7 +49,7 @@ class Statistics extends _$Statistics {
   /// bumps it; responses whose generation no longer matches the latest one are
   /// stale and must be discarded so a fast filter switch can't be overwritten
   /// by an older, slower response.
-  int _loadGeneration = 0;
+  final GenerationGuard _loadGeneration = GenerationGuard();
 
   @override
   StatisticsState build() {
@@ -63,14 +64,14 @@ class Statistics extends _$Statistics {
   /// report would get stuck in a permanent loading state. Returns the new
   /// generation to compare against after the awaited fetch.
   int _orphanInFlight() {
-    final generation = ++_loadGeneration;
+    final generation = _loadGeneration.bump();
     state = state.copyWith(isLoading: false);
     return generation;
   }
 
   /// Load all statistics data
   Future<void> loadStatistics() async {
-    final generation = ++_loadGeneration;
+    final generation = _loadGeneration.bump();
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -131,7 +132,7 @@ class Statistics extends _$Statistics {
 
       // Discard stale responses from superseded filter/sort/range changes,
       // or if the provider was disposed while fetching.
-      if (!ref.mounted || generation != _loadGeneration) {
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) {
         _logger.fine(
           'Statistics: discarding stale response (generation $generation)',
         );
@@ -149,10 +150,10 @@ class Statistics extends _$Statistics {
       // Only surface errors for the latest generation; older failures belong
       // to superseded requests. Both guards must pass: an unmounted provider
       // (disposed while the fetch was in flight) must never be written to.
-      // H2 regression note: this condition was previously inverted
-      // (`!ref.mounted || generation == _loadGeneration`), which is always
-      // true on the dispose path and threw "used after dispose".
-      if (ref.mounted && generation == _loadGeneration) {
+      // H2 regression note: the mounted check here was previously inverted,
+      // which made the condition always true on the dispose path and threw
+      // "used after dispose".
+      if (ref.mounted && _loadGeneration.isCurrent(generation)) {
         state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
       }
     }
@@ -225,7 +226,7 @@ class Statistics extends _$Statistics {
           pageSize: 15,
         ),
       ).wait;
-      if (generation != _loadGeneration) return;
+      if (!_loadGeneration.isCurrent(generation)) return;
       state = state.copyWith(
         trendData: trendData,
         categoryBreakdown: categoryBreakdown,
@@ -236,7 +237,7 @@ class Statistics extends _$Statistics {
       // BRH-02: a sub-task failure must not flip the whole report page into
       // the error state — keep showing the already loaded data and surface
       // the failure as a transient toast instead.
-      if (generation == _loadGeneration) {
+      if (_loadGeneration.isCurrent(generation)) {
         ToastService.showDestructive(
           description: Text('${t.common.loadFailed}: ${safeErrorMessage(e)}'),
         );
@@ -264,13 +265,13 @@ class Statistics extends _$Statistics {
         page: 1,
         pageSize: 15,
       );
-      if (generation != _loadGeneration) return;
+      if (!_loadGeneration.isCurrent(generation)) return;
       state = state.copyWith(topTransactions: topTransactions);
     } catch (e) {
       _logger.warning('Report top-transactions reload failed', e);
       // BRH-02: same degradation as setChartType — never flip the page into
       // the full error state for a sub-task failure.
-      if (generation == _loadGeneration) {
+      if (_loadGeneration.isCurrent(generation)) {
         ToastService.showDestructive(
           description: Text('${t.common.loadFailed}: ${safeErrorMessage(e)}'),
         );
@@ -295,7 +296,7 @@ class Statistics extends _$Statistics {
     // Capture the generation: a filter/range/sort switch invalidates this
     // request. Without this guard, a stale page-2 response from the old filter
     // would be appended to the new filter's list, producing a mixed view.
-    final generation = _loadGeneration;
+    final generation = _loadGeneration.current;
 
     state = state.copyWith(isLoadingMoreTopTransactions: true);
 
@@ -318,7 +319,7 @@ class Statistics extends _$Statistics {
       // Drop stale responses from superseded filters/sorts. The whole list is
       // about to be replaced by the newer loadStatistics, so also clear the
       // in-flight flag to avoid a stuck "loading more" spinner.
-      if (generation != _loadGeneration) {
+      if (!_loadGeneration.isCurrent(generation)) {
         state = state.copyWith(isLoadingMoreTopTransactions: false);
         return;
       }
@@ -338,7 +339,7 @@ class Statistics extends _$Statistics {
       // (pagination is permanently dead until a full reload).
       if (!ref.mounted) return;
       state = state.copyWith(isLoadingMoreTopTransactions: false);
-      if (generation == _loadGeneration) {
+      if (_loadGeneration.isCurrent(generation)) {
         // Keep the already-loaded data visible; log the failure for diagnostics.
         _logger.warning('Failed to load more top transactions: $e');
       }

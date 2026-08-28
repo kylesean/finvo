@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/features/finance/models/recurring_transaction.dart';
 import 'package:finvo/features/finance/services/recurring_transaction_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 
 part 'recurring_transaction_provider.g.dart';
 
@@ -43,7 +44,7 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
   /// slower in-flight response is discarded when a newer load (e.g. a quick
   /// filter switch) has already replaced the list, preventing a stale response
   /// from overwriting the newer data.
-  int _generation = 0;
+  final GenerationGuard _generation = GenerationGuard();
 
   @override
   RecurringTransactionState build() {
@@ -53,14 +54,14 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
   /// Load the list of recurring transactions.
   Future<void> loadList({RecurringTransactionType? type}) async {
     // Bump the generation: any in-flight load starts a new epoch.
-    final generation = ++_generation;
+    final generation = _generation.bump();
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final service = ref.read(recurringTransactionServiceProvider);
       final items = await service.getList(type: type);
 
       // Discard stale responses (provider disposed or superseded by a newer load).
-      if (!ref.mounted || generation != _generation) return;
+      if (!ref.mounted || !_generation.isCurrent(generation)) return;
 
       state = state.copyWith(
         items: items,
@@ -69,7 +70,7 @@ class RecurringTransactionNotifier extends _$RecurringTransactionNotifier {
         clearFilterType: type == null,
       );
     } catch (e) {
-      if (!ref.mounted || generation != _generation) return;
+      if (!ref.mounted || !_generation.isCurrent(generation)) return;
       state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
   }

@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/features/home/models/comment_model.dart';
 import 'package:finvo/features/home/services/comment_service.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 
 part 'comment_providers.g.dart';
 
@@ -15,7 +16,7 @@ class TransactionComments extends _$TransactionComments {
   /// in-flight response that returns after a newer mutation has already applied
   /// is discarded so stale orderings can't clobber newer ones. This mirrors the
   /// generation-token pattern used elsewhere in the codebase.
-  int _generation = 0;
+  final GenerationGuard _generation = GenerationGuard();
 
   @override
   FutureOr<List<CommentModel>> build(String transactionId) async {
@@ -32,7 +33,7 @@ class TransactionComments extends _$TransactionComments {
     String? repliedToUserId,
   }) async {
     final service = ref.read(commentServiceProvider);
-    final generation = ++_generation;
+    final generation = _generation.bump();
 
     try {
       final created = await service.addComment(
@@ -45,7 +46,7 @@ class TransactionComments extends _$TransactionComments {
 
       // A newer mutation (delete/add) landed while this request was in flight:
       // reconcile from the server instead of clobbering the newer state.
-      if (generation != _generation) {
+      if (!_generation.isCurrent(generation)) {
         await _reload(service);
         return;
       }
@@ -72,7 +73,7 @@ class TransactionComments extends _$TransactionComments {
 
   Future<void> deleteComment(String commentId) async {
     final service = ref.read(commentServiceProvider);
-    final generation = ++_generation;
+    final generation = _generation.bump();
 
     final current = state.value;
     if (current != null) {
@@ -83,7 +84,7 @@ class TransactionComments extends _$TransactionComments {
     try {
       await service.deleteComment(commentId);
       // If a newer mutation intervened, reconcile with server truth.
-      if (generation != _generation) {
+      if (!_generation.isCurrent(generation)) {
         await _reload(service);
       }
     } catch (e) {
@@ -91,7 +92,7 @@ class TransactionComments extends _$TransactionComments {
       // state; only reconcile if this delete is still the latest mutation.
       // A reload failure must not mask the original delete error, so it is
       // swallowed here — the delete error itself is rethrown below.
-      if (generation == _generation) {
+      if (_generation.isCurrent(generation)) {
         try {
           await _reload(service);
         } catch (_) {

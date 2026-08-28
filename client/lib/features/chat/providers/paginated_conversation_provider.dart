@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/features/chat/models/conversation_info.dart';
 import 'package:finvo/features/chat/services/conversation_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 
 part 'paginated_conversation_provider.freezed.dart';
 part 'paginated_conversation_provider.g.dart';
@@ -33,7 +34,7 @@ class PaginatedConversation extends _$PaginatedConversation {
   /// Monotonic request generation. Incremented on every [loadFirstPage] so a
   /// slower in-flight [loadNextPage] response is discarded when a refresh has
   /// already replaced the list (prevents stale page-merge after refresh).
-  int _generation = 0;
+  final GenerationGuard _generation = GenerationGuard();
 
   @override
   PaginatedConversationState build() {
@@ -45,7 +46,7 @@ class PaginatedConversation extends _$PaginatedConversation {
     if (state.isLoading) return;
 
     // Bump the generation: any in-flight loadNextPage starts a new epoch.
-    final generation = ++_generation;
+    final generation = _generation.bump();
 
     state = state.copyWith(
       isLoading: true,
@@ -63,7 +64,7 @@ class PaginatedConversation extends _$PaginatedConversation {
 
       // Discard the response if the provider was disposed or a newer refresh
       // has already superseded this request.
-      if (!ref.mounted || generation != _generation) return;
+      if (!ref.mounted || !_generation.isCurrent(generation)) return;
 
       state = state.copyWith(
         conversations: result.data,
@@ -79,7 +80,7 @@ class PaginatedConversation extends _$PaginatedConversation {
       );
     } catch (e) {
       _logger.warning('PaginatedConversation: Error loading first page: $e');
-      if (!ref.mounted || generation != _generation) return;
+      if (!ref.mounted || !_generation.isCurrent(generation)) return;
       state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
   }
@@ -89,7 +90,7 @@ class PaginatedConversation extends _$PaginatedConversation {
     if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
 
     // Capture the current generation; discard the response if a refresh bumps it.
-    final generation = _generation;
+    final generation = _generation.current;
 
     state = state.copyWith(isLoadingMore: true, error: null);
 
@@ -105,7 +106,7 @@ class PaginatedConversation extends _$PaginatedConversation {
       // isLoadingMore first: loadFirstPage never touches it, so without this
       // reset the flag would stay true forever and permanently block
       // subsequent loadNextPage calls.
-      if (generation != _generation) {
+      if (!_generation.isCurrent(generation)) {
         if (ref.mounted) {
           state = state.copyWith(isLoadingMore: false);
         }
@@ -126,7 +127,7 @@ class PaginatedConversation extends _$PaginatedConversation {
       );
     } catch (e) {
       _logger.warning('PaginatedConversation: Error loading next page: $e');
-      if (!ref.mounted || generation != _generation) return;
+      if (!ref.mounted || !_generation.isCurrent(generation)) return;
       state = state.copyWith(isLoadingMore: false, error: safeErrorMessage(e));
     }
   }

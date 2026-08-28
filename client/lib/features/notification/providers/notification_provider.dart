@@ -13,6 +13,7 @@ import 'package:finvo/features/notification/repositories/notification_repository
 import 'package:finvo/features/notification/utils/notification_crud_mixin.dart';
 import 'package:finvo/features/shared_space/providers/shared_space_provider.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 
 part 'notification_provider.freezed.dart';
 part 'notification_provider.g.dart';
@@ -61,7 +62,7 @@ class NotificationNotifier extends _$NotificationNotifier
   /// account never sees the previous one's notifications or unread badge.
   /// The keepAlive provider would otherwise hold the stale list forever.
   void resetState() {
-    _loadGeneration++;
+    _loadGeneration.bump();
     state = const NotificationState();
   }
 
@@ -69,11 +70,11 @@ class NotificationNotifier extends _$NotificationNotifier
   /// Monotonic epoch guarding refresh vs loadMore races: a loadMore response
   /// that returns after a refresh must not append its stale page onto the
   /// freshly reset list.
-  int _loadGeneration = 0;
+  final GenerationGuard _loadGeneration = GenerationGuard();
 
   Future<void> refresh() async {
     // Invalidate any in-flight loadMore so its response is discarded.
-    final generation = ++_loadGeneration;
+    final generation = _loadGeneration.bump();
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repository = ref.read(notificationRepositoryProvider);
@@ -84,7 +85,7 @@ class NotificationNotifier extends _$NotificationNotifier
             onTimeout: () =>
                 throw TimeoutException('Notification request timed out'),
           );
-      if (!ref.mounted || generation != _loadGeneration) return;
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       state = state.copyWith(
         items: res.items,
         total: res.total,
@@ -96,7 +97,7 @@ class NotificationNotifier extends _$NotificationNotifier
     } catch (e) {
       // M9: the provider is keepAlive and invalidated on logout — a response
       // settling after disposal must not write state.
-      if (!ref.mounted || generation != _loadGeneration) return;
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       _logger.severe('Failed to refresh notifications', e);
       state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
@@ -106,7 +107,7 @@ class NotificationNotifier extends _$NotificationNotifier
   Future<void> loadMore() async {
     if (state.isLoadingMore || state.hasReachedMax || state.isLoading) return;
 
-    final generation = _loadGeneration;
+    final generation = _loadGeneration.current;
     state = state.copyWith(isLoadingMore: true);
     try {
       final repository = ref.read(notificationRepositoryProvider);
@@ -121,7 +122,7 @@ class NotificationNotifier extends _$NotificationNotifier
       // touch isLoadingMore, so without this the infinite scroll would stay
       // disabled forever. (M9: never write state after disposal.)
       if (!ref.mounted) return;
-      if (generation != _loadGeneration) {
+      if (!_loadGeneration.isCurrent(generation)) {
         state = state.copyWith(isLoadingMore: false);
         return;
       }
@@ -135,7 +136,7 @@ class NotificationNotifier extends _$NotificationNotifier
       );
     } catch (e) {
       if (!ref.mounted) return;
-      if (generation != _loadGeneration) {
+      if (!_loadGeneration.isCurrent(generation)) {
         state = state.copyWith(isLoadingMore: false);
         return;
       }

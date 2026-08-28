@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/features/budget/models/budget_models.dart';
 import 'package:finvo/features/budget/services/budget_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/providers/generation_guard.dart';
 
 part 'budget_provider.g.dart';
 
@@ -55,7 +56,7 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
   /// load/refresh; a response is discarded if its captured generation no
   /// longer matches, so a fast filter switch can't have an old request
   /// overwrite the newer selection's data.
-  int _loadGeneration = 0;
+  final GenerationGuard _loadGeneration = GenerationGuard();
 
   @override
   BudgetSummaryState build() {
@@ -67,7 +68,7 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
     // must not cause the new filter's request to be silently dropped (which
     // previously left the label showing "All" while the list still showed
     // "Active" data).
-    final generation = ++_loadGeneration;
+    final generation = _loadGeneration.bump();
 
     state = state.copyWith(isLoading: true, error: null);
 
@@ -79,11 +80,11 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
       );
       // Discard a stale response if the user switched filters while this
       // request was in flight, or if the provider was disposed meanwhile.
-      if (!ref.mounted || generation != _loadGeneration) return;
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       state = state.copyWith(summary: summary, isLoading: false);
     } catch (e) {
       // Preserve the typed exception (AppException) instead of flattening it.
-      if (!ref.mounted || generation != _loadGeneration) return;
+      if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       state = state.copyWith(isLoading: false, error: e);
     }
   }
