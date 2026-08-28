@@ -6,11 +6,8 @@
 /// switch, or provider invalidation lets a slow older response overwrite
 /// newer state.
 ///
-/// Extracted from ~10 hand-rolled copies of the same epoch counter (M11).
-/// The copy-paste drift was real: one copy had an inverted dispose guard
-/// (H2) that wrote state after the notifier was disposed. Route new code
-/// through this class — or [PaginatedListMixin] for full pagination state
-/// machines — instead of re-rolling the pattern.
+/// Route new code through this class — or [PaginatedListMixin] for full
+/// pagination state machines — instead of re-rolling the pattern by hand.
 class GenerationGuard {
   int _generation = 0;
 

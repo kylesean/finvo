@@ -66,11 +66,11 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
   @override
   ChatInputState build() {
-    // M5: parameterless build — the send callback is bound by the
-    // ChatInputField via [updateOnSendMessage]. The previous closure-keyed
-    // family made provider identity follow closure identity: a rebuilt
-    // widget State silently created a fresh notifier, losing the draft text
-    // and in-flight upload bookkeeping.
+    // Parameterless build: the send callback is bound by the ChatInputField
+    // via [updateOnSendMessage]. Keying the provider by the callback closure
+    // would make provider identity follow closure identity — a rebuilt
+    // widget State would silently create a fresh notifier, losing the draft
+    // text and in-flight upload bookkeeping.
     // Service initialization
     _fileUploadService = ref.watch(fileUploadServiceProvider);
 
@@ -491,7 +491,7 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       );
     }
 
-    // CHAT-8: the server returns uploads in the SAME ORDER the files were
+    // the server returns uploads in the SAME ORDER the files were
     // sent (the service uploads sequentially), so align by index. Matching by
     // `originalName` misattributes results when two selected files share a
     // name — the wrong attachmentId/uri would be attached to the wrong file.

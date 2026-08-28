@@ -50,7 +50,7 @@ class NotificationNotifier extends _$NotificationNotifier
 
   @override
   NotificationState build() {
-    // M9: pure build — no network side-effects here (matches the pure-build
+    // Pure build — no network side-effects here (matches the pure-build
     // discipline of FinancialSettings/UserProfile/FinancialAccount). The
     // initial load fires from the auth-transition listener in app.dart, which
     // also guarantees it only runs for an authenticated session; a build-time
@@ -95,7 +95,7 @@ class NotificationNotifier extends _$NotificationNotifier
         hasReachedMax: res.items.length < _pageSize,
       );
     } catch (e) {
-      // M9: the provider is keepAlive and invalidated on logout — a response
+      // The provider is keepAlive and invalidated on logout — a response
       // settling after disposal must not write state.
       if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
       _logger.severe('Failed to refresh notifications', e);
@@ -120,7 +120,7 @@ class NotificationNotifier extends _$NotificationNotifier
       // A refresh started while this request was in flight supersedes it.
       // Reset the loading flag first: the superseding refresh() does not
       // touch isLoadingMore, so without this the infinite scroll would stay
-      // disabled forever. (M9: never write state after disposal.)
+      // Disabled forever. (never write state after disposal.)
       if (!ref.mounted) return;
       if (!_loadGeneration.isCurrent(generation)) {
         state = state.copyWith(isLoadingMore: false);
@@ -219,7 +219,7 @@ class NotificationNotifier extends _$NotificationNotifier
       final items = [...state.items];
       final wasRead = items[existingIndex].isRead;
       items[existingIndex] = item;
-      // NTF-5: keep the badge in sync — a late unread push replacing a READ
+      // Keep the badge in sync — a late unread push replacing a READ
       // entry is a newly-unread notification and must bump the count; the
       // old code replaced the row but left unreadCount stale.
       if (wasRead && !item.isRead) {
@@ -304,7 +304,7 @@ NotificationWsService notificationWs(Ref ref) {
   // flips to/from authenticated, tearing down the old service (onDispose) and
   // re-running `connect()` with the freshly stored token.
   //
-  // NOTE: we deliberately watch STATUS and not the token value (NTF-3): the
+  // NOTE: we deliberately watch STATUS and not the token value : the
   // auth interceptor rotates the access token on every 401 refresh, and a
   // token watch would rebuild (tear down + reconnect) a perfectly healthy WS
   // connection each time — losing notifications in the reconnect window. The
@@ -329,7 +329,7 @@ NotificationWsService notificationWs(Ref ref) {
 
     // A member left / was removed from a space: refresh the space detail (its
     // member list) and the space list so open UIs drop the member immediately
-    // instead of showing a stale member (M-23).
+    // Instead of showing a stale member .
     if (type == 'member_left') {
       final dataMap = payload['data'] is Map<String, dynamic>
           ? payload['data'] as Map<String, dynamic>

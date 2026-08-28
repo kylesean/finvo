@@ -17,7 +17,7 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 /// Linked account & shared-space actions shown inside the transaction detail
 /// card.
 ///
-/// M-28: extracted from `TransactionDetailPage` so the page stays focused on
+/// Extracted from `TransactionDetailPage` so the page stays focused on
 /// reading the transaction while this widget owns the account/space linking UI
 /// and its mutation flows (picker sheets, update/link calls).
 class TransactionLinkSection extends ConsumerWidget {

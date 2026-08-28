@@ -372,7 +372,7 @@ void main() {
       expect(AmountFormatter.parseDecimal('abc'), Decimal.zero);
     });
 
-    // Regression guard for H-1: summing many backend amount strings through
+    // Regression guard for summing many backend amount strings through
     // Decimal (instead of double.tryParse) must not accumulate the classic
     // 0.1 + 0.2 floating-point error.
     test('summation stays exact (no float drift)', () {

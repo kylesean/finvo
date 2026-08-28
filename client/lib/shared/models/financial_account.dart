@@ -73,14 +73,14 @@ abstract class FinancialAccount with _$FinancialAccount {
 
     /// Account nature: ASSET or LIABILITY
     ///
-    /// H5: an unknown wire value degrades to [FinancialNature.asset] (with a
+    /// An unknown wire value degrades to [FinancialNature.asset] (with a
     /// warning) instead of crashing the whole account-list parse.
     @JsonKey(fromJson: _financialNatureFromJson)
     required FinancialNature nature,
 
     /// Account type: CASH, DEPOSIT, E_MONEY etc.
     ///
-    /// H5: an unknown wire value degrades to null (same as an absent type)
+    /// An unknown wire value degrades to null (same as an absent type)
     /// instead of crashing the parse.
     @JsonKey(fromJson: _financialAccountTypeFromJson)
     FinancialAccountType? type,
@@ -107,7 +107,7 @@ abstract class FinancialAccount with _$FinancialAccount {
 
     /// Account status
     ///
-    /// H5: unknown status degrades to [AccountStatus.inactive] (conservative
+    /// Unknown status degrades to [AccountStatus.inactive] (conservative
     /// non-active) instead of crashing the parse.
     @JsonKey(unknownEnumValue: AccountStatus.inactive)
     @Default(AccountStatus.active)
@@ -163,7 +163,7 @@ abstract class FinancialAccountRequest with _$FinancialAccountRequest {
       _$FinancialAccountRequestFromJson(json);
 }
 
-/// H5: tolerant decoder for [FinancialNature] — unknown wire values degrade
+/// Tolerant decoder for [FinancialNature] — unknown wire values degrade
 /// to [FinancialNature.asset] (the majority case) with a warning instead of
 /// crashing the whole account-list parse.
 FinancialNature _financialNatureFromJson(dynamic value) {
@@ -174,7 +174,7 @@ FinancialNature _financialNatureFromJson(dynamic value) {
   return FinancialNature.asset;
 }
 
-/// H5: tolerant decoder for [FinancialAccountType] — unknown wire values
+/// Tolerant decoder for [FinancialAccountType] — unknown wire values
 /// degrade to null (same as an absent type) with a warning instead of
 /// crashing the parse.
 FinancialAccountType? _financialAccountTypeFromJson(dynamic value) {

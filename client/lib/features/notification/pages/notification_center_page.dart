@@ -76,7 +76,7 @@ class _NotificationCenterPageState
         actions: [
           if (state.unreadCount > 0)
             Semantics(
-              // H7: icon-only action needs an explicit label.
+              // Icon-only action needs an explicit label.
               label: t.common.semMarkAllRead,
               button: true,
               child: FButton.icon(
@@ -203,7 +203,7 @@ class _NotificationCenterPageState
   }
 
   void _handleNavigation(BuildContext context, NotificationItem item) {
-    // H8: the server-supplied target_path is untrusted input — only paths on
+    // The server-supplied target_path is untrusted input — only paths on
     // the whitelist may drive navigation; anything else is ignored and we
     // fall back to the locally-constructed transaction route.
     var targetPath = resolveNotificationTarget(

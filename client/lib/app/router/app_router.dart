@@ -84,7 +84,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   // background refreshUser) would otherwise rebuild the entire GoRouter and
   // reset the navigation stack back to '/home'.
   final authStatus = ref.watch(authStatusProvider);
-  // CORE-09: single "configured" source of truth — the network layer and the
+  // single "configured" source of truth — the network layer and the
   // router must agree (env base URL OR dynamic config), or an env-configured
   // build would be trapped on the server-setup page.
   final isServerConfigured = ref.watch(apiConfiguredProvider);

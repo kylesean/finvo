@@ -30,7 +30,7 @@ class CommentInputBar extends ConsumerStatefulWidget {
 class _CommentInputBarState extends ConsumerState<CommentInputBar> {
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
-  // BRH-01: keep the listenManual subscription and close it in dispose so a
+  // Keep the listenManual subscription and close it in dispose so a
   // late provider update can never touch a disposed controller/focus node
   // after the widget is unmounted (use-after-dispose crash path).
   ProviderSubscription<String?>? _replySubscription;

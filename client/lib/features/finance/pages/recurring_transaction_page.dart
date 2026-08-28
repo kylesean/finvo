@@ -333,7 +333,7 @@ class _RecurringTransactionPageState
       if (!mounted) return;
       setState(() {
         _startDate = picked;
-        // Update the date part of the recurrence rule (M-8: delegates to the
+        // Update the date part of the recurrence rule (delegates to the
         // single shared updateRuleAndDescribe).
         final result = updateRuleAndDescribe(_recurrenceRule, picked);
         _recurrenceRule = result.rule;

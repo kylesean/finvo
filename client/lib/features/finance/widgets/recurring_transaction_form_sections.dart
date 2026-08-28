@@ -9,7 +9,7 @@ import 'package:finvo/shared/widgets/app_filter_chip.dart';
 
 /// Human-readable label for a recurring transaction type.
 ///
-/// M-28: extracted from `RecurringTransactionPage._getTypeLabel` so both the
+/// Extracted from `RecurringTransactionPage._getTypeLabel` so both the
 /// page State and the presentational sections share one implementation.
 String recurringTransactionTypeLabel(RecurringTransactionType type) {
   final rt = t.forecast.recurringTransaction;

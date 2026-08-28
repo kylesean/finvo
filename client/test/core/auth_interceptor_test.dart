@@ -242,7 +242,7 @@ void main() {
     test(
       'concurrent 401s across TWO Dio instances share ONE refresh (H-1)',
       () async {
-        // H-1 regression: the REST and SSE DIOs each install their own
+        // Regression: the REST and SSE DIOs each install their own
         // AuthInterceptor, but they MUST share a single TokenRefreshCoordinator.
         // Per-instance locks would fire two concurrent /auth/refresh calls
         // against the same refresh token, racing the server-side rotation;
@@ -299,7 +299,7 @@ void main() {
     );
 
     test(
-      'H1: refresh transport failure does NOT sign out and surfaces a network error',
+      'refresh transport failure does NOT sign out and surfaces a network error',
       () async {
         // /auth/refresh dies mid-flight with no HTTP response at all (timeout,
         // dead connection): the session must survive and the caller must see
@@ -324,7 +324,7 @@ void main() {
     );
 
     test(
-      'H1: refresh 5xx does NOT sign out (server trouble is not an invalid token)',
+      'refresh 5xx does NOT sign out (server trouble is not an invalid token)',
       () async {
         refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
         refreshDio.httpClientAdapter = _ServerErrorRefreshAdapter();
@@ -346,7 +346,7 @@ void main() {
     );
 
     test(
-      'H1: refresh 2xx with a non-JSON body (captive portal) does NOT sign out',
+      'refresh 2xx with a non-JSON body (captive portal) does NOT sign out',
       () async {
         // A captive portal answers 200 with an HTML login page — treating
         // that as a refresh rejection would wrongly log the user out.
@@ -390,7 +390,7 @@ void main() {
     test(
       'concurrent 401s across two DIOs sign out exactly ONCE on rejection (M-3)',
       () async {
-        // M-3: when the refresh is rejected, every concurrent waiter must not
+        // When the refresh is rejected, every concurrent waiter must not
         // run the full local sign-out — the coordinator latch makes the first
         // waiter perform it and the rest propagate silently.
         refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
@@ -614,7 +614,7 @@ class _RejectingRefreshAdapter implements HttpClientAdapter {
 }
 
 /// Refresh adapter whose round-trip dies with NO HTTP response at all —
-/// the H1 transport-failure signature (timeout / dead connection).
+/// The transport-failure signature (timeout / dead connection).
 class _TransportFailureRefreshAdapter implements HttpClientAdapter {
   @override
   Future<ResponseBody> fetch(

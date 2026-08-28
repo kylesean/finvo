@@ -249,7 +249,7 @@ class ServerConfigService {
         );
       }
     } on DioException catch (e) {
-      // M14: user-facing health-check messages route through i18n.
+      // User-facing health-check messages route through i18n.
       String errorMessage;
       switch (e.type) {
         case DioExceptionType.connectionTimeout:

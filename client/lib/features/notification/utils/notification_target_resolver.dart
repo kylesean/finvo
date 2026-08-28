@@ -1,4 +1,4 @@
-/// Whitelist resolver for server-supplied notification deep links (H8).
+/// Whitelist resolver for server-supplied notification deep links .
 ///
 /// Notification payloads carry a `target_path` written by the backend. The
 /// tap handler used to `context.push` that raw string, so a malicious or

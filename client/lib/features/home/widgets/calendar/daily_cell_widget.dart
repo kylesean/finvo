@@ -133,7 +133,7 @@ class DailyCellWidget extends StatelessWidget {
       }
     }
 
-    // H7: the cell visual is just the day number; give screen readers the
+    // The cell visual is just the day number; give screen readers the
     // full context (date + expense amount).
     final semanticsValue = summary == null
         ? '${day.month}/${day.day}'

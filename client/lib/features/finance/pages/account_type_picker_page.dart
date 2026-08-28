@@ -188,7 +188,7 @@ class _AccountTypeCard extends StatelessWidget {
     );
   }
 
-  /// M14: localized strings now live on the definition itself.
+  /// Localized strings now live on the definition itself.
   (String title, String subtitle) _getLocalizedText(
     AccountTypeDefinition definition,
   ) => (definition.localizedTitle, definition.localizedSubtitle);

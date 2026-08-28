@@ -172,7 +172,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         break;
       case RecurrenceFrequency.yearly:
         // Persist the concrete month/day so the rule round-trips the same
-        // specific date the preview shows (M-8: previously only FREQ=YEARLY
+        // Specific date the preview shows (previously only FREQ=YEARLY
         // was stored while the preview displayed a concrete date).
         parts.add('BYMONTH=${_startDate.month}');
         parts.add('BYMONTHDAY=${_startDate.day}');
@@ -196,7 +196,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   }
 
   String _buildDescription() {
-    // M-8: delegate to the single shared formatter so the interactive preview
+    // Delegate to the single shared formatter so the interactive preview
     // and the read-only page description can never diverge again.
     return describeRecurrenceRule(_buildRruleString());
   }
@@ -703,7 +703,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
         // PREVIOUS month (DateTime(2026, 8, -1) == 2026-07-30), which would
         // shift the first execution date into the wrong month.
         //
-        // FIN-H1: search from TODAY's month, not _startDate's month. Editing
+        // Search from TODAY's month, not _startDate's month. Editing
         // a rule created months ago must produce a first-execution date in
         // the future — previously only +1 month was tried, so a stale rule
         // was silently saved with a start date still in the past (the rule

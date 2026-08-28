@@ -17,7 +17,7 @@ mixin _$SpeechSettings {
 
 /// Speech recognition service type
 ///
-/// H5: unknown service type degrades to system (the same neutral default
+/// Unknown service type degrades to system (the same neutral default
 /// as an absent field) instead of crashing the settings parse.
 @JsonKey(unknownEnumValue: SpeechServiceType.system) SpeechServiceType get serviceType;/// WebSocket server host (Only used for websocket type)
  String? get websocketHost;/// WebSocket server port (Only used for websocket type)
@@ -226,7 +226,7 @@ class _SpeechSettings implements SpeechSettings {
 
 /// Speech recognition service type
 ///
-/// H5: unknown service type degrades to system (the same neutral default
+/// Unknown service type degrades to system (the same neutral default
 /// as an absent field) instead of crashing the settings parse.
 @override@JsonKey(unknownEnumValue: SpeechServiceType.system) final  SpeechServiceType serviceType;
 /// WebSocket server host (Only used for websocket type)

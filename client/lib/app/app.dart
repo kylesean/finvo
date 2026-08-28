@@ -42,14 +42,14 @@ class MyApp extends ConsumerWidget {
           ref.read(financialSettingsProvider.notifier).loadFinancialSettings(),
         );
         unawaited(ref.read(userProfileProvider.notifier).loadUser());
-        // L-2: match the comment in FinancialAccountNotifier.build — the
+        // Match the comment in FinancialAccountNotifier.build — the
         // login listener preloads accounts so the net-worth page (and any
         // future "watch-only" consumer) never sits in a permanent loading
         // state waiting for an external trigger.
         unawaited(
           ref.read(financialAccountProvider.notifier).loadFinancialAccounts(),
         );
-        // M9: notifications follow the same login-warmup pattern — the
+        // Notifications follow the same login-warmup pattern — the
         // provider build stays pure and the first load fires on the auth
         // transition, guaranteed to run for an authenticated session only.
         unawaited(ref.read(notificationProvider.notifier).refresh());

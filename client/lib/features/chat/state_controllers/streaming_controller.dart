@@ -33,7 +33,7 @@ typedef UpdateMessageStateCallback =
     });
 typedef GetCurrentMessageContentCallback = String Function(String messageId);
 
-/// Groups every streaming-event callback into one cohesive object (L5), so the
+/// Groups every streaming-event callback into one cohesive object , so the
 /// controller's constructor takes a single [callbacks] argument instead of six
 /// positional-by-name callbacks. Internal call sites access the same fields,
 /// so behavior is unchanged.
@@ -316,7 +316,7 @@ class StreamingController {
 
       // Fire-and-forget checkpoint cleanup. Extract the chain into a local
       // async closure so the completion bookkeeping lives in `finally` and
-      // every error is funneled through a single try/catch (M13).
+      // Every error is funneled through a single try/catch .
       Future<void> cleanCheckpoint() async {
         try {
           final success = await cancelLastTurn(sessionId);

@@ -7,7 +7,7 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Bottom-sheet period-type picker for the budget form.
 ///
-/// M-28: extracted from `_PeriodTypePicker` inside `budget_form_page` so the
+/// Extracted from `_PeriodTypePicker` inside `budget_form_page` so the
 /// page stays focused on form state while this helper owns the selection UI.
 class BudgetPeriodTypePicker extends StatelessWidget {
   final BudgetPeriodType selectedType;

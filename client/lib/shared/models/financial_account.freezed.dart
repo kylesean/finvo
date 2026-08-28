@@ -294,11 +294,11 @@ mixin _$FinancialAccount {
  String? get id;/// Account name
  String get name;/// Account nature: ASSET or LIABILITY
 ///
-/// H5: an unknown wire value degrades to [FinancialNature.asset] (with a
+/// An unknown wire value degrades to [FinancialNature.asset] (with a
 /// warning) instead of crashing the whole account-list parse.
 @JsonKey(fromJson: _financialNatureFromJson) FinancialNature get nature;/// Account type: CASH, DEPOSIT, E_MONEY etc.
 ///
-/// H5: an unknown wire value degrades to null (same as an absent type)
+/// An unknown wire value degrades to null (same as an absent type)
 /// instead of crashing the parse.
 @JsonKey(fromJson: _financialAccountTypeFromJson) FinancialAccountType? get type;/// Currency code (Default: CNY)
  String get currencyCode;/// Initial balance
@@ -308,7 +308,7 @@ mixin _$FinancialAccount {
  bool get includeInCashFlow;/// Display info (optional, used for cross-currency summary display)
  AccountDisplay? get display;/// Account status
 ///
-/// H5: unknown status degrades to [AccountStatus.inactive] (conservative
+/// Unknown status degrades to [AccountStatus.inactive] (conservative
 /// non-active) instead of crashing the parse.
 @JsonKey(unknownEnumValue: AccountStatus.inactive) AccountStatus get status;/// Creation time (ISO 8601 string)
  String? get createdAt;/// Update time (ISO 8601 string)
@@ -539,12 +539,12 @@ class _FinancialAccount implements FinancialAccount {
 @override final  String name;
 /// Account nature: ASSET or LIABILITY
 ///
-/// H5: an unknown wire value degrades to [FinancialNature.asset] (with a
+/// An unknown wire value degrades to [FinancialNature.asset] (with a
 /// warning) instead of crashing the whole account-list parse.
 @override@JsonKey(fromJson: _financialNatureFromJson) final  FinancialNature nature;
 /// Account type: CASH, DEPOSIT, E_MONEY etc.
 ///
-/// H5: an unknown wire value degrades to null (same as an absent type)
+/// An unknown wire value degrades to null (same as an absent type)
 /// instead of crashing the parse.
 @override@JsonKey(fromJson: _financialAccountTypeFromJson) final  FinancialAccountType? type;
 /// Currency code (Default: CNY)
@@ -561,7 +561,7 @@ class _FinancialAccount implements FinancialAccount {
 @override final  AccountDisplay? display;
 /// Account status
 ///
-/// H5: unknown status degrades to [AccountStatus.inactive] (conservative
+/// Unknown status degrades to [AccountStatus.inactive] (conservative
 /// non-active) instead of crashing the parse.
 @override@JsonKey(unknownEnumValue: AccountStatus.inactive) final  AccountStatus status;
 /// Creation time (ISO 8601 string)

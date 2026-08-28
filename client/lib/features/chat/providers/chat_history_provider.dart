@@ -301,7 +301,7 @@ class ChatHistory extends _$ChatHistory {
   /// Adopt the server-assigned AI message id, replacing the optimistic
   /// temporary UUID.
   ///
-  /// Used by both the `session_init` metadata (S-H legacy path) and the
+  /// Used by both the `session_init` metadata (legacy path) and the
   /// streamed `message_id` event (authoritative path, arrives before the
   /// message's first text delta).
   void _applyServerMessageId(String serverId) {
@@ -315,7 +315,7 @@ class ChatHistory extends _$ChatHistory {
     _streamingController.updateCurrentMessageId(serverId);
   }
 
-  /// Handle the streamed `message_id` event (S-H).
+  /// Handle the streamed `message_id` event .
   void _handleServerMessageId(String serverId) {
     _applyServerMessageId(serverId);
   }
@@ -422,7 +422,7 @@ class ChatHistory extends _$ChatHistory {
     if (text.isEmpty) return;
     if (_currentStreamingAiMessageId.isEmpty) return;
 
-    // CHAT-01: drop deltas that arrive after the stream reached a terminal
+    // Drop deltas that arrive after the stream reached a terminal
     // state. The repository releases the incremental buffer on completion, so
     // a late delta would rebuild an empty buffer via putIfAbsent and truncate
     // (content) or duplicate (fullContent) the already-preserved body.
@@ -445,7 +445,7 @@ class ChatHistory extends _$ChatHistory {
 
   // Load first page of history messages
   Future<void> loadConversation(String conversationId) async {
-    // H3: a failed load must stay re-triggerable. When a previous load of
+    // A failed load must stay re-triggerable. When a previous load of
     // this conversation failed (historyError != null), falling through lets
     // the user re-tap it — or hit the retry button — instead of the guard
     // silently swallowing every subsequent attempt.
@@ -455,7 +455,7 @@ class ChatHistory extends _$ChatHistory {
       return;
     }
     await _streamingController.cancelStreamAndTimers();
-    // H-4: clear the GenUI surface registry (and its message→surface index)
+    // Clear the GenUI surface registry (and its message→surface index)
     // when switching sessions. The lifecycle manager is keepAlive for the
     // whole app lifetime, so without this every session switch leaks surface
     // entries — unbounded growth plus stale getSurfaceInfo() results.
@@ -499,7 +499,7 @@ class ChatHistory extends _$ChatHistory {
       },
     );
 
-    // L-1: probing resume state for a conversation that failed to load (or
+    // Probing resume state for a conversation that failed to load (or
     // was switched away) is a pointless network call — skip it unless the
     // detail actually loaded and is still current.
     if (loaded) {
@@ -507,7 +507,7 @@ class ChatHistory extends _$ChatHistory {
     }
   }
 
-  /// H3: retry the failed history load for the current conversation.
+  /// Retry the failed history load for the current conversation.
   ///
   /// Backed by the [loadConversation] guard, which now falls through when
   /// [ChatHistoryState.historyError] is set, so re-invoking it with the same
@@ -520,7 +520,7 @@ class ChatHistory extends _$ChatHistory {
 
   Future<void> createNewConversation() async {
     await _streamingController.cancelStreamAndTimers();
-    // H-4: same as loadConversation — reset the keepAlive surface registry so
+    // Same as loadConversation — reset the keepAlive surface registry so
     // the new conversation starts with a clean surface state.
     _genUiLifecycleManager.clearSession();
     _messageRepository.clearAllContentBuffers();
@@ -594,7 +594,7 @@ class ChatHistory extends _$ChatHistory {
     // MessageRepository), so a second pass would read an empty buffer and
     // inadvertently blank the message content. Keeping the terminal bookkeeping
     // on a single guarded path also avoids redundant message-list rebuilds and
-    // tool-call sweeps. CHAT-1: a terminal error state must never be
+    // Tool-call sweeps. : a terminal error state must never be
     // overwritten with `completed` — the user must see the error state, not a
     // "completed" message with an error footnote.
     final messageIndex = state.messages.indexWhere(

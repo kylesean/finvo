@@ -104,7 +104,7 @@ class _CommentSectionWidgetState extends ConsumerState<CommentSectionWidget> {
 
             _scrollToTargetIfNeeded(allComments);
 
-            // M20: grouping/sorting lives in the derived
+            // Grouping/sorting lives in the derived
             // threadedCommentsProvider — rebuilding for expansion/highlight
             // no longer re-sorts the whole list.
             final threaded = ref.watch(

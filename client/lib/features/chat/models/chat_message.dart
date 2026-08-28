@@ -40,7 +40,7 @@ abstract class ChatMessage with _$ChatMessage {
     DateTime? timestamp,
     @Default('') String content,
 
-    // H5: unknown server-side enum values degrade to the same neutral
+    // Unknown server-side enum values degrade to the same neutral
     // defaults as absent fields instead of crashing the conversation parse.
     @JsonKey(name: 'messageType', unknownEnumValue: MessageType.text)
     @Default(MessageType.text)
@@ -153,7 +153,7 @@ String _senderToJson(MessageSender sender) {
 }
 
 // Custom serializers for nullable DateTime
-// M24: tolerant parse — a single malformed timestamp must not kill the
+// Tolerant parse — a single malformed timestamp must not kill the
 // whole conversation-history payload (same policy as NotificationItem).
 DateTime? _dateTimeNullableFromJson(dynamic json) => tryParseDateTime(json);
 
@@ -167,7 +167,7 @@ Object? _readSenderValue(Map<dynamic, dynamic> json, String key) {
 }
 
 List<ChatMessageAttachment> _attachmentsFromJson(dynamic json) {
-  // M24: skip-and-log instead of throwing — one malformed attachment entry
+  // Skip-and-log instead of throwing — one malformed attachment entry
   // in a server-persisted history must not crash the whole conversation
   // load (same discipline as _toolCallsFromJson / Budget list parsing).
   if (json == null) return [];

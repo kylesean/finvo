@@ -48,7 +48,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
-  // --- Item-level memo (M-5) ---
+  // --- Item-level memo  ---
   // Cache the built content subtree keyed by widget identity. When the message
   // does not change (identical or value-equal via freezed), we skip re-building
   // the whole content on the next frame. This avoids re-running rebuild (and
@@ -107,7 +107,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   Widget build(BuildContext context) {
     final theme = context.theme;
 
-    // Item-level memo (M-5): reuse the cached content subtree when the message
+    // Item-level memo : reuse the cached content subtree when the message
     // is unchanged and the theme is the same, so that only the streaming
     // message rebuilds on each chunk.
     if (_reuseCache &&
@@ -204,7 +204,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     UIComponentInfo component,
   ) {
     final cacheKey = '${component.mode.name}_${component.surfaceId}';
-    // M15: the cache used to grow unbounded for the lifetime of the list
+    // The cache used to grow unbounded for the lifetime of the list
     // item — a long conversation with many surfaces kept every subtree
     // alive. Prune entries that are no longer part of the current message.
     _genUiCache.removeWhere((key, entry) {
@@ -294,7 +294,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
                 ? '$targetName ($targetId)'
                 : targetName as String;
 
-            // M14: localize the legacy-convention display copy (the
+            // Localize the legacy-convention display copy (the
             // {"userAction":...} text convention is deprecated — see
             // InteractionRouter — this shim only exists to render
             // already-persisted history messages readably).
@@ -537,7 +537,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     const family = AppFontConfig.primaryFontFamily;
     // MiSansVF is a variable font; the wght axis faithfully applies font weight.
     // Headings already differentiate hierarchy via font size + color; weight stays
-    // lightweight to match the harmonious feel of MiSans-L3 (static light).
+    // Lightweight to match the harmonious feel of MiSans-L3 (static light).
     return GptMarkdownThemeData(
       brightness: theme.colors.brightness,
       h1: TextStyle(
@@ -676,7 +676,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   }
 }
 
-/// Throttled Markdown renderer (M-5).
+/// Throttled Markdown renderer .
 ///
 /// During streaming the full text grows on every chunk, and re-parsing the
 /// whole string with [GptMarkdown] on each chunk is O(n^2). This widget only

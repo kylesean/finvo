@@ -119,7 +119,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
 
           // total budget card
           if (state.summary!.totalBudgetDetail != null) ...[
-            // H7: announce budget cards as tappable.
+            // Announce budget cards as tappable.
             Semantics(
               button: true,
               child: GestureDetector(

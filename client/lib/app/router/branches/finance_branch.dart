@@ -36,7 +36,7 @@ StatefulShellBranch buildFinanceBranch() {
             // Reuse FinancialAccountsPage: the previous AccountSourcesPage was
             // a second, duplicated implementation that hard-coded English
             // strings. Converging on the maintained page keeps one source of
-            // truth for account management (H4 fix).
+            // Truth for account management .
             builder: (context, state) => const FinancialAccountsPage(),
             routes: [
               GoRoute(

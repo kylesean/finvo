@@ -298,7 +298,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 12),
-                                // H3: a failed history load must offer a way
+                                // A failed history load must offer a way
                                 // back — without this the error state was
                                 // terminal until another conversation opened.
                                 FButton(

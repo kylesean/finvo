@@ -57,7 +57,7 @@ class ConversationSessionManager {
   /// Returns `true` when the detail was loaded AND is still current;
   /// `false` when the load failed or the session was switched meanwhile.
   /// Callers use this to skip follow-up probes (e.g. resume-status) after a
-  /// failed or superseded load (L-1).
+  /// Failed or superseded load .
   Future<bool> loadConversationDetail(
     String conversationId, {
     required bool Function() isCurrent,

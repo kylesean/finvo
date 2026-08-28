@@ -6,7 +6,7 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// Bottom-sheet anchor-day picker for the budget form.
 ///
-/// M-28: extracted from `_AnchorDayPicker` inside `budget_form_page` so the
+/// Extracted from `_AnchorDayPicker` inside `budget_form_page` so the
 /// page stays focused on form state while this helper owns the day-wheel UI.
 class BudgetAnchorDayPicker extends StatefulWidget {
   final int selectedDay;

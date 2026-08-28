@@ -313,7 +313,7 @@ class TransactionFeed extends _$TransactionFeed {
     } catch (e) {
       _logger.severe('Error fetching more transactions', e);
 
-      // BRH-07: a refresh that ran while this fetchMore was in flight has
+      // A refresh that ran while this fetchMore was in flight has
       // already bumped the generation — a stale failure must not stamp error
       // flags onto the new list's state.
       if (!ref.mounted || !_generation.isCurrent(generation)) return;

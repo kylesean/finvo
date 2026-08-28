@@ -331,7 +331,7 @@ class _AmountTextFromDisplay extends ConsumerWidget {
     this.compact = false,
   });
 
-  /// Coerce an untrusted display-map value to String (CORE-H1): values from
+  /// Coerce an untrusted display-map value to String : values from
   /// backend/GenUI payloads may be numbers, booleans, or nulls — casting
   /// (`as String?`) would TypeError in build and crash the whole list.
   static String? _coerceString(Object? value) {
@@ -354,7 +354,7 @@ class _AmountTextFromDisplay extends ConsumerWidget {
     final defaultSymbol = AmountFormatter.getCurrencySymbol(primaryCurrency);
     String text;
     if (compact) {
-      // CORE-H1: the display map comes from backend/GenUI data — never trust
+      // The display map comes from backend/GenUI data — never trust
       // the field types. Coerce instead of casting (a numeric 'sign' or a
       // malformed 'value' would otherwise TypeError inside build and take
       // down the whole list render).

@@ -87,7 +87,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Profile Header Section (Avatar + Username) -> Tap opens Edit Profile Modal
-        // H7: the whole avatar block is a tappable edit affordance but was
+        // The whole avatar block is a tappable edit affordance but was
         // invisible to screen readers.
         Semantics(
           button: true,

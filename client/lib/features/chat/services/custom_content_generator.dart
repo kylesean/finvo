@@ -114,10 +114,10 @@ class CustomContentGenerator implements genui.Transport {
 
   /// Set when the stream reaches logical completion (the `done` event or a
   /// terminal error path). The consumption loop breaks on it so events
-  /// arriving after the turn has ended are never dispatched (S-1/CHAT-01).
+  /// Arriving after the turn has ended are never dispatched .
   bool _streamEnded = false;
 
-  /// M12: set by [dispose]. After disposal, no new request may start, no
+  /// Set by [dispose]. After disposal, no new request may start, no
   /// still-draining SSE event may be dispatched into the closing stream
   /// controllers, and no terminal callback (onError/onStreamComplete) may
   /// fire — keeping the "no late events" invariant the rest of the stack
@@ -377,7 +377,7 @@ class CustomContentGenerator implements genui.Transport {
       // multi-line data field is joined with '\n'). Trailing events without
       // a final blank line are flushed after the stream ends.
       //
-      // Idle watchdog (CHAT-2): the 1h receiveTimeout only fires on TCP-level
+      // Idle watchdog : the 1h receiveTimeout only fires on TCP-level
       // failures. A silently dead stream (network switch, server hang) delivers
       // no events AND no timeout, leaving the chat UI locked in the streaming
       // state forever. If no SSE line arrives for [_idleWatchdogTimeout],
@@ -385,7 +385,7 @@ class CustomContentGenerator implements genui.Transport {
       _idleTimedOut = false;
       _streamEnded = false;
       final accumulator = SseEventAccumulator();
-      // S-1: the watchdog must remain cancellable on EVERY exit path (incl.
+      // The watchdog must remain cancellable on EVERY exit path (incl.
       // exceptions) and its callback must be generation-guarded. A stale
       // watchdog firing after this request finished would otherwise cancel
       // the *next* request's CancelToken (an instance field reused per
@@ -455,7 +455,7 @@ class CustomContentGenerator implements genui.Transport {
         watchdog = null;
       }
     } catch (e, stackTrace) {
-      // M12: dispose() cancels the in-flight request; the resulting error
+      // Dispose() cancels the in-flight request; the resulting error
       // must not fire terminal callbacks after disposal.
       if (_isDisposed ||
           _isCancelled ||
@@ -493,7 +493,7 @@ class CustomContentGenerator implements genui.Transport {
 
   /// Parse and dispatch one accumulated SSE `data` event payload.
   Future<void> _dispatchSseEventData(String jsonStr) async {
-    // M12: events still draining from a disposed request must never reach
+    // Events still draining from a disposed request must never reach
     // the closing stream controllers or the forwarded callbacks.
     if (_isDisposed || jsonStr.isEmpty) return;
     try {
@@ -586,7 +586,7 @@ class CustomContentGenerator implements genui.Transport {
         break;
 
       case 'message_id':
-        // S-H: the server streams the authoritative AI message id before the
+        // The server streams the authoritative AI message id before the
         // message's first text delta. The provider renames its optimistic
         // placeholder (the transport does not know the local id; the provider
         // reads it from the streaming controller).
@@ -598,7 +598,7 @@ class CustomContentGenerator implements genui.Transport {
         break;
 
       case 'error':
-        // S-I: mid-stream failures (e.g. a rejected transfer) arrive as
+        // Mid-stream failures (e.g. a rejected transfer) arrive as
         // `error` events with a user-safe message. Route them through onError
         // so the turn surfaces the failure instead of silently ending.
         final errorContent = data['content'] as String?;
@@ -762,7 +762,7 @@ class CustomContentGenerator implements genui.Transport {
 
   @override
   void dispose() {
-    // M12: flip the flag FIRST so callbacks/stream-adds racing the teardown
+    // Flip the flag FIRST so callbacks/stream-adds racing the teardown
     // are dropped before the controllers below are closed.
     _isDisposed = true;
     unawaited(_a2uiMessageController.close());

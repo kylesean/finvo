@@ -1,4 +1,4 @@
-// Router redirect matrix (H13). The redirect logic is unit tested via the
+// Router redirect matrix . The redirect logic is unit tested via the
 // pure `appRedirect` function (extracted from appRouterProvider) using
 // lightweight GoRouterState instances — no widget tree or network needed.
 

@@ -16,7 +16,7 @@ enum AccountNature {
 }
 
 extension AccountNatureX on AccountNature {
-  /// Display name header (M14: resolved from the slang registry).
+  /// Display name header (resolved from the slang registry).
   String get displayName {
     switch (this) {
       case AccountNature.liquidAssets:
@@ -57,7 +57,7 @@ extension AccountNatureX on AccountNature {
   }
 }
 
-/// M14: localized display strings for the hardcoded English defaults.
+/// Localized display strings for the hardcoded English defaults.
 ///
 /// The raw [AccountTypeDefinition.title]/[subtitle]/[helper] fields remain
 /// as the (English) search/keyword corpus used by [AccountTypeDefinition.matches];

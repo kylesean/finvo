@@ -6,7 +6,7 @@ part 'exchange_rate.g.dart';
 
 final _logger = Logger('ExchangeRateModel');
 
-/// Tolerant rate coercion (CORE-H2): the provider's `convert()` is designed
+/// Tolerant rate coercion : the provider's `convert()` is designed
 /// to degrade a single bad rate to "missing" (tryParse), but the generated
 /// `(e as num).toDouble()` parsing was strict — one string rate in the JSON
 /// crashed the ENTIRE exchange-rate response, putting every currency screen

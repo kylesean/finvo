@@ -51,14 +51,14 @@ abstract class SharedSpaceMember with _$SharedSpaceMember {
     required String userId,
     required String username,
     String? avatarUrl,
-    // H5: an unknown server-side role must degrade to the least-privileged
+    // An unknown server-side role must degrade to the least-privileged
     // value instead of crashing the whole space/member payload parse.
     @JsonKey(unknownEnumValue: MemberRole.member)
     @Default(MemberRole.member)
     MemberRole role,
     DateTime? createdAt,
     String? email,
-    // H5: an unknown invite status is an *unresolved* state, not an accepted
+    // An unknown invite status is an *unresolved* state, not an accepted
     // membership — degrade to pending instead of crashing the parse.
     @JsonKey(unknownEnumValue: InviteStatus.pending)
     @Default(InviteStatus.accepted)
@@ -89,7 +89,7 @@ abstract class SharedSpace with _$SharedSpace {
     required String name,
     String? description,
     required SpaceCreator creator,
-    // H5: unknown role degrades to least-privileged member (see
+    // Unknown role degrades to least-privileged member (see
     // SharedSpaceMember.role).
     @JsonKey(unknownEnumValue: MemberRole.member)
     @Default(MemberRole.member)
@@ -139,7 +139,7 @@ abstract class SettlementItem with _$SettlementItem {
     required String fromUsername,
     required String toUserId,
     required String toUsername,
-    // M24: tolerant converter — strict Decimal.parse crashed the whole
+    // Tolerant converter — strict Decimal.parse crashed the whole
     // settlement parse on a malformed/empty string.
     @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)
     required Decimal amount,
@@ -154,7 +154,7 @@ abstract class Settlement with _$Settlement {
   const factory Settlement({
     required String spaceId,
     required List<SettlementItem> items,
-    // M24: tolerant converter — strict Decimal.parse crashed the whole
+    // Tolerant converter — strict Decimal.parse crashed the whole
     // settlement parse on a malformed/empty string.
     @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)
     required Decimal totalAmount,
@@ -172,7 +172,7 @@ abstract class SharedSpaceNotificationModel
   const factory SharedSpaceNotificationModel({
     required String id,
     required String userId,
-    // H5: `other` is the designed neutral fallback for unknown notification
+    // `other` is the designed neutral fallback for unknown notification
     // types (see the enum's doc) — wire it so server-side additions render a
     // neutral card instead of crashing the whole list parse.
     @JsonKey(unknownEnumValue: NotificationType.other)

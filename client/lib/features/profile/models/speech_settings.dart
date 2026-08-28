@@ -10,7 +10,7 @@ abstract class SpeechSettings with _$SpeechSettings {
   const factory SpeechSettings({
     /// Speech recognition service type
     ///
-    /// H5: unknown service type degrades to system (the same neutral default
+    /// Unknown service type degrades to system (the same neutral default
     /// as an absent field) instead of crashing the settings parse.
     @JsonKey(unknownEnumValue: SpeechServiceType.system)
     @Default(SpeechServiceType.system)

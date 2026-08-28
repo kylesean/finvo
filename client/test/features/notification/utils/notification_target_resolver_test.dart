@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:finvo/features/notification/utils/notification_target_resolver.dart';
 
 void main() {
-  group('resolveNotificationTarget (H8 whitelist)', () {
+  group('resolveNotificationTarget whitelist', () {
     test('accepts the transaction-detail paths the backend emits', () {
       expect(
         resolveNotificationTarget('/home/transaction/abc-123'),

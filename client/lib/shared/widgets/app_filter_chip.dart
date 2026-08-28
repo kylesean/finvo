@@ -28,9 +28,7 @@ class AppFilterChip extends StatelessWidget {
     const double height = 40;
     const double borderRadius = 10;
 
-    // H7/M27: keep the 40dp minimum but drop the hard cap so large system
-    // text scales don't clip the label; and expose the selected state to
-    // screen readers instead of conveying it by color alone.
+    // No hard maxHeight cap: large text scales would clip the label.
     return Semantics(
       button: true,
       selected: isSelected,

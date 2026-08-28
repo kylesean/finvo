@@ -348,7 +348,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                             ),
                             const SizedBox(width: 8),
                             Semantics(
-                              // H7: the eye toggle conveyed state by icon
+                              // The eye toggle conveyed state by icon
                               // only; give screen readers an explicit label.
                               label: _isAmountVisible
                                   ? t.common.semHideAmounts

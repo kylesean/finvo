@@ -51,7 +51,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     );
     _textController = TextEditingController();
 
-    // M5: bind the send callback now that the provider is parameterless
+    // Bind the send callback now that the provider is parameterless
     // (didUpdateWidget keeps refreshing it when the parent rebuilds with a
     // new closure).
     ref
@@ -294,7 +294,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
   @override
   Widget build(BuildContext context) {
     ref.watch(localeProvider);
-    // M6: the text lives in the notifier state and changes on every
+    // The text lives in the notifier state and changes on every
     // keystroke — watching the whole state rebuilt this entire subtree
     // (media preview, animated containers, icon button) per character even
     // though the TextField itself is controller-driven. Watch only the

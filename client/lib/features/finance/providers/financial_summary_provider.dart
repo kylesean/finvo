@@ -54,7 +54,7 @@ class FinancialSummaryNotifier extends _$FinancialSummaryNotifier {
       );
     }
 
-    // M-10: the rate fetch failed. Do NOT fall through to the conversion loop:
+    // The rate fetch failed. Do NOT fall through to the conversion loop:
     // every convert() would return null and every currency would land in
     // missingRateCurrencies, silently zeroing the net worth under the guise
     // of "no rates available". Surface the failure instead so the UI can

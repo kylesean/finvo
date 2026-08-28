@@ -37,7 +37,7 @@ Decimal _amountToDecimal(Object? raw) {
   return Decimal.tryParse(raw.toString()) ?? Decimal.zero;
 }
 
-/// Decode an untrusted AI/backend-supplied context value as a String (CHAT-H2).
+/// Decode an untrusted AI/backend-supplied context value as a String .
 ///
 /// The context map is produced by the LLM and must never be trusted: a bare
 /// `as String?` cast would TypeError on a numeric/boolean value and blow

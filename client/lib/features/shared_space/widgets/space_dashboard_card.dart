@@ -140,7 +140,7 @@ class SpaceDashboardCard extends ConsumerWidget {
   Widget _buildDistributionBar(BuildContext context) {
     final colors = context.theme.colors;
     final members = space.members ?? [];
-    // H6: aggregate contributions in Decimal — folding double.tryParse
+    // Aggregate contributions in Decimal — folding double.tryParse
     // results accumulates floating-point error.
     final total = members.fold(
       Decimal.zero,
@@ -251,7 +251,7 @@ class SpaceDashboardCard extends ConsumerWidget {
   }
 
   String _calculateAverage(String currency) {
-    // H6: average computed in Decimal, converted to string for the formatter.
+    // Average computed in Decimal, converted to string for the formatter.
     final total = Decimal.tryParse(space.totalExpense) ?? Decimal.zero;
     final memberCount = space.members?.length ?? 1;
     final avg = memberCount > 0 ? total / Decimal.fromInt(memberCount) : total;

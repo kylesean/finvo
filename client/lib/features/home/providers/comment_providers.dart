@@ -10,7 +10,7 @@ int _compareByCreatedAt(CommentModel a, CommentModel b) {
   return a.createdAt.compareTo(b.createdAt);
 }
 
-/// M20: grouping/sorting result for a comment thread, computed once per
+/// Grouping/sorting result for a comment thread, computed once per
 /// source-list change in a derived provider instead of on every widget
 /// rebuild (expansion/highlight/keyboard dismissal used to re-sort the
 /// whole list per rebuild).

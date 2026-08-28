@@ -28,8 +28,7 @@ class NotificationRepository {
       );
 
       // API response structure: {code, message, data: {notifications, total, unreadCount}}
-      // M22: envelope extraction routes through the shared ResponseParser;
-      // a missing `data` field falls back to the root object (legacy shape).
+      // A missing `data` field falls back to the root object (legacy shape).
       final data = ResponseParser.parseData<Map<String, dynamic>>(
         response,
         whenNull: () => response,

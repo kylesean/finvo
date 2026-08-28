@@ -264,10 +264,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
       onRefresh: () async {
         await ref.read(statisticsProvider.notifier).loadStatistics();
       },
-      // M19: a CustomScrollView + SliverList keeps the transaction list
-      // lazy. The previous shrinkWrap ListView built and laid out every
-      // card on each build — the builder laziness was defeated exactly when
-      // the (paginated, growing) list is largest.
+      // CustomScrollView + SliverList keep the transaction list lazy.
       child: CustomScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -387,7 +384,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     );
   }
 
-  /// M19: box wrapper preserving the page's horizontal padding for
+  /// Box wrapper preserving the page's horizontal padding for
   /// non-scrolling slivers.
   SliverToBoxAdapter _box(Widget child) => SliverToBoxAdapter(
     child: Padding(
@@ -396,8 +393,8 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     ),
   );
 
-  /// M19: top-transactions section restructured into slivers so the card
-  /// list stays lazy inside the page-level CustomScrollView.
+  /// Top-transactions section, as slivers so the card list stays lazy
+  /// inside the page-level CustomScrollView.
   List<Widget> _buildTopTransactionsSlivers(
     BuildContext context,
     FThemeData theme,

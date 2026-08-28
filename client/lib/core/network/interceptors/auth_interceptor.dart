@@ -115,7 +115,7 @@ class TokenRefreshCoordinator {
     if (outcome is! RefreshSuccess) {
       return outcome;
     }
-    // H-3: the refresh round-trip is slow; the user may have logged out (or
+    // The refresh round-trip is slow; the user may have logged out (or
     // the session may have expired) while it was in flight. Persisting the
     // rotated tokens after a logout would resurrect credentials the logout
     // explicitly removed. Consult the composition-root session check and drop
@@ -145,7 +145,7 @@ class TokenRefreshCoordinator {
   /// Exchange a refresh token for a fresh access token + rotated refresh token
   /// via the backend refresh endpoint.
   ///
-  /// H1: a *transport* failure (timeout, connection error, 5xx, or an
+  /// A *transport* failure (timeout, connection error, 5xx, or an
   /// unparseable 2xx body from a captive portal/proxy) must never be
   /// conflated with the server rejecting the refresh token — a momentary
   /// network drop used to log perfectly valid users out. Only an explicit
@@ -209,7 +209,7 @@ class TokenRefreshCoordinator {
         return const RefreshRejected();
       }
       // No response / timeout / 5xx: transport or server-side trouble. The
-      // session itself may still be perfectly valid — never sign out (H1).
+      // Session itself may still be perfectly valid — never sign out.
       return const RefreshTransportFailure();
     } catch (e, stackTrace) {
       _logger.warning('Token refresh failed', e, stackTrace);
@@ -414,7 +414,7 @@ class AuthInterceptor extends Interceptor {
               // exactly once per refresh round.
               break;
             case RefreshTransportFailure():
-              // H1: a network blip during the refresh round-trip must NOT
+              // A network blip during the refresh round-trip must NOT
               // sign out an otherwise valid user. Replace the misleading 401
               // with a connection error so the normalization chain surfaces a
               // retryable network failure instead of "session expired".
@@ -461,7 +461,7 @@ class TokenRefreshResult {
 ///
 /// Deliberately distinguishes "the refresh token was explicitly rejected"
 /// (the session is unrecoverable → sign out) from "the refresh round-trip
-/// failed for transport reasons" (H1: a momentary network drop must never
+/// Failed for transport reasons" (a momentary network drop must never
 /// log a valid user out — the session is preserved and the original request
 /// surfaces a retryable network error instead).
 sealed class RefreshOutcome {

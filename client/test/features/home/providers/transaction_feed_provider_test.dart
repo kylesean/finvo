@@ -1,6 +1,6 @@
 // HomeFeed 分页/刷新语义单元测试。
 //
-// 覆盖 H9 回归点：refresh 保留旧数据（Pull-to-refresh 不得闪全屏骨架），
+// refresh 保留旧数据（Pull-to-refresh 不得闪全屏骨架），
 // 语义性过滤切换（feed 类型/日期）才清空列表；刷新失败保留旧数据并暴露错误。
 
 import 'dart:async';
@@ -76,31 +76,25 @@ void main() {
     expect(state.errorMessage, isNull);
   });
 
-  test(
-    'refresh keeps the visible list while loading (H9 regression)',
-    () async {
-      buildContainer();
-      final notifier = container.read(transactionFeedProvider.notifier);
-      await notifier.refreshFeed();
-      expect(
-        container.read(transactionFeedProvider).transactions,
-        hasLength(1),
-      );
+  test('refresh keeps the visible list while loading', () async {
+    buildContainer();
+    final notifier = container.read(transactionFeedProvider.notifier);
+    await notifier.refreshFeed();
+    expect(container.read(transactionFeedProvider).transactions, hasLength(1));
 
-      // Block the refresh mid-flight and observe the intermediate state:
-      // previously loaded transactions must stay visible (no skeleton wipe).
-      service.gate = Completer<void>();
-      final refreshFuture = notifier.refreshFeed();
+    // Block the refresh mid-flight and observe the intermediate state:
+    // previously loaded transactions must stay visible (no skeleton wipe).
+    service.gate = Completer<void>();
+    final refreshFuture = notifier.refreshFeed();
 
-      final during = container.read(transactionFeedProvider);
-      expect(during.isLoading, isTrue);
-      expect(during.transactions, hasLength(1));
+    final during = container.read(transactionFeedProvider);
+    expect(during.isLoading, isTrue);
+    expect(during.transactions, hasLength(1));
 
-      service.gate!.complete();
-      await refreshFuture;
-      expect(container.read(transactionFeedProvider).isLoading, isFalse);
-    },
-  );
+    service.gate!.complete();
+    await refreshFuture;
+    expect(container.read(transactionFeedProvider).isLoading, isFalse);
+  });
 
   test(
     'refresh failure keeps the last-good list and surfaces the error',

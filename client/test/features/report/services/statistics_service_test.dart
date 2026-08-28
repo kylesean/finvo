@@ -149,7 +149,7 @@ void main() {
       );
 
       expect(lastQueryParams!['time_range'], 'custom');
-      // F3: dates are sent as plain `yyyy-MM-dd` (the server's "calendar day"
+      // dates are sent as plain `yyyy-MM-dd` (the server's "calendar day"
       // contract, same as the feed) — NOT ISO-8601 with a UTC offset, which
       // drifted boundary days for non-UTC users.
       expect(lastQueryParams!['start_date'], '2026-01-01');

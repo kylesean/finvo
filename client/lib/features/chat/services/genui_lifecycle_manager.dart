@@ -106,7 +106,7 @@ class GenUiLifecycleManager {
     };
   }
 
-  /// S-H: the server streams the authoritative AI message id via a
+  /// The server streams the authoritative AI message id via a
   /// `message_id` SSE event once the model node emits its first chunk; the
   /// provider renames its optimistic placeholder to that id.
   void Function(String messageId) get _onMessageId {
@@ -215,7 +215,7 @@ class GenUiLifecycleManager {
       final CustomContentGenerator contentGenerator =
           _genUiService!.conversation.contentGenerator;
 
-      // S-H: authoritative message-id streaming (see _onMessageId).
+      // Authoritative message-id streaming (see _onMessageId).
       contentGenerator.onMessageIdUpdate = (_, serverId) {
         _onMessageId(serverId);
       };
@@ -440,7 +440,7 @@ class GenUiLifecycleManager {
 
     final currentId = _getCurrentStreamingMessageId();
     if (currentId.isNotEmpty) {
-      // M-7: a late error (e.g. an A2UI payload parsed after the `done` event)
+      // A late error (e.g. an A2UI payload parsed after the `done` event)
       // must not rewrite a message already in a terminal state — appending an
       // error footnote and flipping a completed message back to `error` would
       // misrepresent a finished turn as failed.
@@ -472,7 +472,7 @@ class GenUiLifecycleManager {
       );
     }
 
-    // H-1: Guarantee the streaming state is reset on every error path.
+    // Guarantee the streaming state is reset on every error path.
     //
     // CustomContentGenerator pairs onError with onStreamComplete, but the
     // genui.ConversationError event (routed through ExtendedGenUiConversation)

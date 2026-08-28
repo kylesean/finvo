@@ -22,7 +22,7 @@ abstract class ConversationDetail with _$ConversationDetail {
 }
 
 // Custom deserializer for DateTime
-// M24: tolerant parse — malformed timestamps fall back to now instead of
+// Tolerant parse — malformed timestamps fall back to now instead of
 // crashing the conversation-list parse.
 DateTime _dateTimeFromJson(dynamic json) =>
     tryParseDateTime(json) ?? DateTime.now();

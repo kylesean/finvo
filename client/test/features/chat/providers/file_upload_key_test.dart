@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:finvo/features/chat/providers/chat_input_state.dart';
 
 void main() {
-  group('fileUploadKey (CHAT-02)', () {
+  group('fileUploadKey', () {
     test('uses the real path when present (native platforms)', () {
       const path = '/tmp/a.png';
       final file = XFile(path);

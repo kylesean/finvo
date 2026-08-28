@@ -180,7 +180,7 @@ class TransactionCard extends ConsumerWidget {
           ),
         ),
       ),
-      // H7: announce the row as a button so screen readers expose the
+      // Announce the row as a button so screen readers expose the
       // tap-to-open-detail action (the row's own text content provides the
       // accessibility label via merged semantics).
       child: Semantics(

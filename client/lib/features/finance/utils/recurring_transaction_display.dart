@@ -9,7 +9,7 @@ import 'package:finvo/i18n/strings.g.dart';
 /// Uses the description if present, otherwise falls back to the localized
 /// category name, then to a type-based default label.
 ///
-/// M-28: extracted from `RecurringTransactionListPage._getDisplayName` so both
+/// Extracted from `RecurringTransactionListPage._getDisplayName` so both
 /// the list card and its confirm dialogs share one implementation.
 String recurringTransactionDisplayName(RecurringTransaction transaction) {
   if (transaction.description != null && transaction.description!.isNotEmpty) {
@@ -34,7 +34,7 @@ String recurringTransactionDisplayName(RecurringTransaction transaction) {
 ///
 /// Uses a switch expression for easy addition of more language support.
 ///
-/// M-28: extracted from `RecurringTransactionListPage._formatShortDate`.
+/// Extracted from `RecurringTransactionListPage._formatShortDate`.
 String formatShortDate(DateTime date) {
   final locale = LocaleSettings.currentLocale;
   final (dateFormatLocale, pattern) = switch (locale) {

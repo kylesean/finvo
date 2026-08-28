@@ -1,6 +1,6 @@
 // ErrorTranslator 单元测试。
 //
-// 覆盖 H6 回归：翻译必须在"翻译时"按当前 locale 惰性解析——运行时切换语言后
+// 翻译必须在"翻译时"按当前 locale 惰性解析——运行时切换语言后
 // 不得继续返回启动语言的文案。
 
 import 'package:flutter_test/flutter_test.dart';
@@ -30,7 +30,7 @@ void main() {
     expect(message, 'fallback-message');
   });
 
-  test('translations follow a runtime locale switch (H6 regression)', () async {
+  test('translations follow a runtime locale switch', () async {
     final zhMessage = ErrorTranslator.translate(
       ErrorCodes.userNotMatchPassword,
       '',

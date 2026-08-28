@@ -17,7 +17,7 @@ import 'package:finvo/features/profile/providers/financial_settings_provider.dar
 class MonthlyCalendarView extends ConsumerWidget {
   const MonthlyCalendarView({super.key});
 
-  /// M20: index summaries by date once (O(n)) for O(1) cell lookups.
+  /// Index summaries by date once (O(n)) for O(1) cell lookups.
   Map<DateTime, DailyExpenseSummaryModel> _summaryByDate(
     CalendarMonthData data,
   ) => {
@@ -124,7 +124,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                 Row(
                   children: [
                     Semantics(
-                      // H7: icon-only month navigation needs explicit labels.
+                      // Icon-only month navigation needs explicit labels.
                       label: t.common.semPreviousMonth,
                       button: true,
                       child: FButton.icon(
@@ -229,7 +229,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                   1; // Assume Monday (1) corresponds to index 0, Sunday (7) to index 6
               final List<Widget> dayWidgets = [];
 
-              // M20: index summaries by date once (O(n)) instead of running
+              // Index summaries by date once (O(n)) instead of running
               // a firstWhere scan per cell (O(n^2) over the month grid).
               final summaryByDate = _summaryByDate(calendarData);
 
@@ -337,7 +337,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                   child: calendarDataAsyncValue.when(
                     data: (calendarData) {
                       final locale = LocaleSettings.currentLocale;
-                      // M20: O(1) lookup for the selected-day summary.
+                      // O(1) lookup for the selected-day summary.
                       final summaryByDate = _summaryByDate(calendarData);
 
                       // Use user preferred currency, instead of inferring from language
@@ -365,7 +365,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                       // Get selected date (default today)
                       final targetDate = selectedDateState ?? now;
 
-                      // Find expense for selected date (M20: O(1) lookup)
+                      // Find expense for selected date (O(1) lookup)
                       final selectedSummary =
                           summaryByDate[DateTime(
                             targetDate.year,
@@ -398,7 +398,7 @@ class MonthlyCalendarView extends ConsumerWidget {
                       }();
 
                       return Text(
-                        // H6: double conversion only at the display boundary.
+                        // Double conversion only at the display boundary.
                         '$dateLabel: ${currencyFormat.format(selectedSummary.totalExpense.toDouble())}',
                         style: AppTextStyles.calendarFooter(theme),
                         overflow: TextOverflow.ellipsis,

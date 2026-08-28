@@ -128,7 +128,7 @@ class NotificationWsService {
 
     // A fresh external connect is a new connection session: give it a full
     // reconnect budget instead of inheriting a possibly-exhausted counter from
-    // a previous session (H3 fix).
+    // A previous session .
     if (resetBudget) {
       _reconnectAttempts = 0;
     }

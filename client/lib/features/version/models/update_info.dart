@@ -61,7 +61,7 @@ class UpdateInfo {
       latestVersion: data['latestVersion'] as String? ?? currentVersion,
       minSupportedVersion: data['minSupportedVersion'] as String? ?? '0.0.0',
       hasUpdate: hasUpdate,
-      // AUTH-V1: the service may force the update (e.g. when the local
+      // The service may force the update (e.g. when the local
       // version is below minSupportedVersion) without the server flagging it.
       forceUpdate:
           forceUpdateOverride ?? (data['forceUpdate'] as bool? ?? false),

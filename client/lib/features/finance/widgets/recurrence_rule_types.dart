@@ -11,7 +11,7 @@ import 'package:finvo/i18n/strings.g.dart';
 /// which silently produced wrong first-execution dates for "last day of
 /// month" rules.
 ///
-/// M-28: moved here from `RecurrenceRuleSheet`.
+/// Moved here from `RecurrenceRuleSheet`.
 DateTime recurrenceDateForMonthDay(int year, int month, int monthDay) {
   if (monthDay == -1) {
     return DateTime(year, month + 1, 0);

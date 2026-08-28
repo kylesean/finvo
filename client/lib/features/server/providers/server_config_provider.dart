@@ -69,7 +69,7 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     ref.invalidate(apiBaseUrlProvider);
     ref.invalidate(serverUrlProvider);
 
-    // CORE-M7: a server switch is effectively a new account context (local
+    // A server switch is effectively a new account context (local
     // auth data was cleared above) — invalidate every provider holding data
     // fetched from the OLD server, not just the URL providers. Without this,
     // the previous server's PII/currency settings keep rendering until the
@@ -98,7 +98,7 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     ref.invalidate(apiConfiguredProvider);
     ref.invalidate(apiBaseUrlProvider);
     ref.invalidate(serverUrlProvider);
-    // Same account-scoped invalidation as saveServerUrl (CORE-M7).
+    // Same account-scoped invalidation as saveServerUrl .
     ref.invalidate(financialSettingsProvider);
     ref.invalidate(userProfileProvider);
     ref.invalidate(financialAccountProvider);

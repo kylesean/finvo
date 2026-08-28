@@ -35,7 +35,7 @@ String _dateTimeToIso8601String(DateTime dt) {
   return dt.toIso8601String().substring(0, 10); // YYYY-MM-DD
 }
 
-// M24: tolerant date parse — a malformed per-day timestamp must not kill
+// Tolerant date parse — a malformed per-day timestamp must not kill
 // the whole calendar-month payload; fall back to the epoch "same-day"
 // placeholder semantics of DateTime.now() as the rest of the codebase does.
 DateTime _dateFromJson(Object? value) => tryDate(value) ?? DateTime.now();
@@ -53,7 +53,7 @@ abstract class DailyExpenseSummaryModel with _$DailyExpenseSummaryModel {
       toJson: _dateTimeToIso8601String,
     ) // Handle date serialization
     required DateTime date,
-    // H6: money stays in Decimal through the model layer (matching the
+    // Money stays in Decimal through the model layer (matching the
     // codebase-wide policy — the calendar heat map sums must not drift from
     // the exact Decimal sums in the transaction feed); double only at the
     // display boundary.
@@ -76,7 +76,7 @@ abstract class CalendarMonthData with _$CalendarMonthData {
   const factory CalendarMonthData({
     required int year,
     required int month,
-    // H6: see DailyExpenseSummaryModel.totalExpense.
+    // See DailyExpenseSummaryModel.totalExpense.
     @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)
     required Decimal totalExpenseForMonth,
     required List<DailyExpenseSummaryModel> dailySummaries,

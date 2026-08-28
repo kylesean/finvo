@@ -71,9 +71,9 @@ class FileUploadService {
 
       // BusinessInterceptor has already processed API response format; the
       // upload response is the standard {code, message, data} envelope.
-      // M22: envelope extraction routes through the shared ResponseParser
-      // (and no longer interpolates the raw parse error into the message —
-      // F2: it can embed response fragments).
+      // Envelope extraction via the shared ResponseParser; the raw parse
+      // error is never interpolated into the user-visible message (it can
+      // embed response fragments).
       if (response.data is Map<String, dynamic>) {
         final dataField = ResponseParser.parseData<Map<String, dynamic>>(
           response.data,
@@ -99,7 +99,7 @@ class FileUploadService {
           return result;
         } catch (e, stackTrace) {
           _logger.severe('Failed to parse upload result', e, stackTrace);
-          // F2: keep the detail in the log; never interpolate the raw parse
+          // Keep the detail in the log; never interpolate the raw parse
           // error into the user-visible message.
           throw DataParsingException('Failed to parse file upload result');
         }

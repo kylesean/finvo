@@ -3,7 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 
-/// Chart card Widget implementation (CHAT-M9).
+/// Chart card Widget implementation .
 ///
 /// Renders the `ChartCard` GenUI component with fl_chart. Previously this was
 /// a placeholder stub that displayed "Requires full fl_chart library

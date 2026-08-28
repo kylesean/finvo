@@ -92,7 +92,7 @@ const List<String> publicRoutePrefixes = ['/login', '/register'];
 /// Safely cast a go_router `extra` payload to [T], returning null for
 /// wrong-typed values.
 ///
-/// M28: `state.extra` is typed Object; a direct `as T?` cast throws a
+/// `state.extra` is typed Object; a direct `as T?` cast throws a
 /// TypeError when a caller navigates with a mis-typed payload. The is-check
 /// makes a mis-navigation degrade to the route's missing-info fallback
 /// screen instead of crashing (mirrors the guard in app_router.dart).

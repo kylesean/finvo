@@ -49,7 +49,7 @@ class NetworkClient {
     try {
       return fromJson(data);
     } catch (e) {
-      // F2: keep the parser's detail for the log, but never surface the raw
+      // Keep the parser's detail for the log, but never surface the raw
       // exception text to the user: it can embed response bodies with other
       // users' PII, and this message flows straight into toasts via
       // safeErrorMessage.

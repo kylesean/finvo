@@ -43,7 +43,7 @@ abstract final class ResponseParser {
       try {
         return fromJson(json);
       } catch (e) {
-        // F2: never embed the raw response body in the message — it may
+        // Never embed the raw response body in the message — it may
         // contain other users' PII and is surfaced verbatim to the UI via
         // safeErrorMessage/toast. Keep the exception detail for the log; the
         // message stays generic.
@@ -69,8 +69,7 @@ abstract final class ResponseParser {
     dynamic json,
     T Function(Map<String, dynamic>) fromJson,
   ) {
-    // Legacy root-level list shape (M22: previously hand-rolled inline in
-    // comment_service and others).
+    // Legacy root-level list shape.
     if (json is List) {
       return _mapItems(json, fromJson);
     }

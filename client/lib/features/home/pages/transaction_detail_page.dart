@@ -99,7 +99,7 @@ class TransactionDetailPage extends ConsumerWidget {
     // delete, link (account/space) and AI-thread entrypoint rights do not
     // apply and the corresponding UI is hidden.
     final currentUser = ref.watch(currentUserProvider);
-    // HOME-6/M-13: `sharedWith` carries the RECORDER's identity (the backend
+    // `sharedWith` carries the RECORDER's identity (the backend
     // overloads it with the transaction's userUuid/userId). When the backend
     // omits that field (e.g. older endpoints), assume the current user is the
     // owner instead of hiding every edit/delete entry point for their own
@@ -417,7 +417,7 @@ class TransactionDetailPage extends ConsumerWidget {
     if (error is UnexpectedHttpException && error.statusCode == 404) {
       return true;
     }
-    // BRH-13: only typed errors decide the "not found" state. Raw "404"
+    // Only typed errors decide the "not found" state. Raw "404"
     // substring matching is dropped — a numeric amount such as "404.50" in a
     // generic message is not an HTTP status. Meaningful resource-missing text
     // from business errors is still honoured.
@@ -599,7 +599,7 @@ class TransactionDetailPage extends ConsumerWidget {
 
   /// Build linked account and space actions section
   ///
-  /// M-28: the account/space linking UI (pills, pickers, update/link calls)
+  /// The account/space linking UI (pills, pickers, update/link calls)
   /// moved to `TransactionLinkSection`; only the inline call site remains.
 
   void _showTransactionActions(

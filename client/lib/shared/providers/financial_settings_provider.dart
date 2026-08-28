@@ -17,8 +17,7 @@ final _logger = Logger('FinancialSettingsNotifier');
 
 /// Parse the `{code, message, data}` envelope and return the settings payload.
 ///
-/// M22: previously a private re-implementation of the envelope unwrap; now a
-/// thin wrapper over the shared [ResponseParser].
+/// Thin wrapper over the shared [ResponseParser].
 FinancialSettingsResponse _parseSettingsResponse(Object? json, String context) {
   final data = ResponseParser.parseData<Map<String, dynamic>>(
     json,
@@ -37,7 +36,7 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
   FinancialSettingsResponse? _originalSettings;
 
   /// Monotonic epoch guarding loadFinancialSettings against cross-account
-  /// in-flight writes (AUTH-P1): this provider is keepAlive, so a slow
+  /// In-flight writes : this provider is keepAlive, so a slow
   /// response for account A can settle AFTER A logged out and B logged in —
   /// without a generation check it would write A's currency/thresholds into
   /// the shared state B is now reading. Mirrors financial_account_provider.
@@ -160,9 +159,9 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
         fromJsonT: (json) =>
             _parseSettingsResponse(json, 'API /financial-settings'),
       );
-      // M1: this provider is keepAlive but disposed on logout — a PATCH that
-      // settles after logout must not write state (nor resurrect
-      // _originalSettings). Mirror the load path's mounted guard.
+      // keepAlive but disposed on logout: a PATCH settling after logout
+      // must not write state (nor resurrect _originalSettings). Mirror the
+      // load path's mounted guard.
       if (!ref.mounted) return false;
       _originalSettings = response;
 
@@ -187,8 +186,8 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
 
       _logger.warning('Failed to save financial settings', e);
 
-      // M1: the catch block itself must not write state after dispose —
-      // that would throw out of the method on top of losing the result.
+      // The catch block itself must not write state after dispose — that
+      // would throw out of the method on top of losing the result.
       if (!ref.mounted) return false;
       state = state.copyWith(isLoading: false, error: errorMessage);
 

@@ -54,7 +54,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   @override
   void initState() {
     super.initState();
-    // AUTH-P3: the provider build() is now side-effect free; load the account
+    // The provider build() is now side-effect free; load the account
     // list explicitly after the first frame (matching the project-wide
     // "explicit startup triggers, pure build" convention).
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -228,7 +228,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             if (missingRateCurrencies.isNotEmpty)
               _buildMissingRateHint(theme, colors, missingRateCurrencies),
 
-            // FIN-01: the whole exchange-rate fetch failed, so the net worth
+            // The whole exchange-rate fetch failed, so the net worth
             // totals were never computed (ratesFailed deliberately leaves
             // missingRateCurrencies empty). Surface an explicit error + retry
             // instead of silently showing a zero net worth.
@@ -336,7 +336,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     );
   }
 
-  /// Whole-fetch failure banner (FIN-01): unlike [_buildMissingRateHint],
+  /// Whole-fetch failure banner: unlike [_buildMissingRateHint],
   /// no totals were computed at all, so offer a direct retry that re-fetches
   /// the exchange-rate data (invalidating the provider rebuilds the summary).
   Widget _buildRatesFailedBanner(FThemeData theme, FColors colors) {
@@ -360,7 +360,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             ),
           ),
           const SizedBox(width: 8),
-          // H7: expose the retry link as a button (and give it a
+          // Expose the retry link as a button (and give it a
           // screen-reader-visible role; the text serves as the label).
           Semantics(
             button: true,

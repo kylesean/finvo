@@ -76,7 +76,7 @@ class Statistics extends _$Statistics {
 
     try {
       final service = ref.read(statisticsServiceProvider);
-      // BRH-04: the cash-flow and health-score endpoints were fetched on every
+      // The cash-flow and health-score endpoints were fetched on every
       // report load but NO UI ever renders them (dead data) — two wasted
       // network round-trips per visit. They are removed from the load path;
       // the service methods and state fields stay for when a real report
@@ -150,9 +150,6 @@ class Statistics extends _$Statistics {
       // Only surface errors for the latest generation; older failures belong
       // to superseded requests. Both guards must pass: an unmounted provider
       // (disposed while the fetch was in flight) must never be written to.
-      // H2 regression note: the mounted check here was previously inverted,
-      // which made the condition always true on the dispose path and threw
-      // "used after dispose".
       if (ref.mounted && _loadGeneration.isCurrent(generation)) {
         state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
       }
@@ -234,7 +231,7 @@ class Statistics extends _$Statistics {
       );
     } catch (e) {
       _logger.warning('Report chart-type reload failed', e);
-      // BRH-02: a sub-task failure must not flip the whole report page into
+      // A sub-task failure must not flip the whole report page into
       // the error state — keep showing the already loaded data and surface
       // the failure as a transient toast instead.
       if (_loadGeneration.isCurrent(generation)) {
@@ -269,7 +266,7 @@ class Statistics extends _$Statistics {
       state = state.copyWith(topTransactions: topTransactions);
     } catch (e) {
       _logger.warning('Report top-transactions reload failed', e);
-      // BRH-02: same degradation as setChartType — never flip the page into
+      // Same degradation as setChartType — never flip the page into
       // the full error state for a sub-task failure.
       if (_loadGeneration.isCurrent(generation)) {
         ToastService.showDestructive(
@@ -331,7 +328,7 @@ class Statistics extends _$Statistics {
         isLoadingMoreTopTransactions: false,
       );
     } catch (e) {
-      // F1: reset the flag UNCONDITIONALLY. The success path already handles
+      // Reset the flag UNCONDITIONALLY. The success path already handles
       // the stale-generation case, but when the request FAILS after a filter/
       // sort switch bumped the generation, neither branch would reset it —
       // leaving isLoadingMoreTopTransactions true forever: the footer spins

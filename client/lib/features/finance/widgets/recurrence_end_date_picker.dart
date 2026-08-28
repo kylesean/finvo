@@ -6,7 +6,7 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 
 /// End-date picker bottom sheet for the recurrence rule editor.
 ///
-/// M-28: extracted from `RecurrenceRuleSheet` so the sheet stays focused on
+/// Extracted from `RecurrenceRuleSheet` so the sheet stays focused on
 /// building the rule while this helper owns the calendar row.
 class RecurrenceEndDatePicker {
   RecurrenceEndDatePicker._();

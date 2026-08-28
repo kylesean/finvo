@@ -40,7 +40,7 @@ abstract class CommentModel with _$CommentModel {
 }
 
 // Helper functions for date serialization/deserialization
-// M24: tolerant parse — a malformed timestamp must not kill the comment
+// Tolerant parse — a malformed timestamp must not kill the comment
 // list parse.
 DateTime? _dateTimeNullableParse(String? dateString) =>
     tryParseDateTime(dateString);

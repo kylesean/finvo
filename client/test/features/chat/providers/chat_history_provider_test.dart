@@ -227,61 +227,58 @@ void main() {
       },
     );
 
-    test(
-      'H3 regression: a failed load is retryable (guard falls through on error)',
-      () async {
-        var failDetail = true;
-        // The resume-status endpoint is only consulted after a successful
-        // detail load, so the failing phase never reaches it.
-        adapter = _FakeDioAdapter((options) async {
-          final path = options.path;
-          if (path == '/chatbot/sessions/conv-1/messages') {
-            if (failDetail) {
-              return _jsonResponse({
-                'code': 400,
-                'message': 'boom',
-                'data': null,
-              }, 400);
-            }
-            return _jsonResponse(
-              detailPayload(
-                id: 'conv-1',
-                title: 'Recovered',
-                messages: [
-                  <String, Object?>{
-                    'id': 'm1',
-                    'content': 'back online',
-                    'role': 'user',
-                  },
-                ],
-              ),
-            );
-          }
-          if (path == '/chatbot/sessions/conv-1/resume-status') {
+    test('a failed load is retryable (guard falls through on error)', () async {
+      var failDetail = true;
+      // The resume-status endpoint is only consulted after a successful
+      // detail load, so the failing phase never reaches it.
+      adapter = _FakeDioAdapter((options) async {
+        final path = options.path;
+        if (path == '/chatbot/sessions/conv-1/messages') {
+          if (failDetail) {
             return _jsonResponse({
-              'data': {'canResume': false, 'nextNodes': <String>[]},
-            });
+              'code': 400,
+              'message': 'boom',
+              'data': null,
+            }, 400);
           }
-          fail('Unexpected request: $path');
-        });
-        dio.httpClientAdapter = adapter;
+          return _jsonResponse(
+            detailPayload(
+              id: 'conv-1',
+              title: 'Recovered',
+              messages: [
+                <String, Object?>{
+                  'id': 'm1',
+                  'content': 'back online',
+                  'role': 'user',
+                },
+              ],
+            ),
+          );
+        }
+        if (path == '/chatbot/sessions/conv-1/resume-status') {
+          return _jsonResponse({
+            'data': {'canResume': false, 'nextNodes': <String>[]},
+          });
+        }
+        fail('Unexpected request: $path');
+      });
+      dio.httpClientAdapter = adapter;
 
-        await settle();
-        final n = notifier();
-        await n.loadConversation('conv-1');
-        expect(container.read(chatHistoryProvider).historyError, isNotNull);
+      await settle();
+      final n = notifier();
+      await n.loadConversation('conv-1');
+      expect(container.read(chatHistoryProvider).historyError, isNotNull);
 
-        // Same conversation, same entry point: the retry must actually
-        // re-run the fetch instead of being swallowed by the early-return
-        // guard (the H3 bug made the error state terminal).
-        failDetail = false;
-        await n.retryLoadHistory();
+      // Same conversation, same entry point: the retry must actually
+      // re-run the fetch instead of being swallowed by the early-return
+      // Guard.
+      failDetail = false;
+      await n.retryLoadHistory();
 
-        final state = container.read(chatHistoryProvider);
-        expect(state.historyError, isNull);
-        expect(state.currentConversationId, 'conv-1');
-        expect(state.currentConversationTitle, 'Recovered');
-      },
-    );
+      final state = container.read(chatHistoryProvider);
+      expect(state.historyError, isNull);
+      expect(state.currentConversationId, 'conv-1');
+      expect(state.currentConversationTitle, 'Recovered');
+    });
   });
 }

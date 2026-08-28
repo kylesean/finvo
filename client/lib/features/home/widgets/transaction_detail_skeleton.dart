@@ -12,8 +12,7 @@ class TransactionDetailSkeleton extends StatelessWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // M18: use the theme's semantic shimmer tokens (dark-mode aware) — the
-    // previous hardcoded greys rendered bright blocks on dark backgrounds.
+    // Theme semantic shimmer tokens are dark-mode aware.
     final semantic = context.theme.semantic;
     final Color shimmerBaseColor = semantic.shimmerBase;
     final Color shimmerHighlightColor = semantic.shimmerHighlight;

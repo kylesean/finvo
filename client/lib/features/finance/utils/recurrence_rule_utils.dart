@@ -4,7 +4,7 @@ import 'package:finvo/i18n/strings.g.dart';
 ///
 /// Previously duplicated as `_getDaySuffix(String)` in
 /// [recurring_transaction_page] and `_getDaySuffix(int)` in
-/// [recurrence_rule_sheet]. Converged here (M-8) so RRULE formatting stays in
+/// [recurrence_rule_sheet]. Converged here  so RRULE formatting stays in
 /// one place.
 String monthDayOrdinalSuffix(int day) {
   if (day >= 11 && day <= 13) return 'th';
@@ -35,7 +35,7 @@ String monthDaySuffix(int day) => LocaleSettings.currentLocale == AppLocale.en
 /// day they originally picked (previously the T...Z offset was dropped,
 /// shifting +08:00 users one day earlier).
 ///
-/// M-8: extracted from `RecurringTransactionPage._loadEditData`.
+/// Extracted from `RecurringTransactionPage._loadEditData`.
 DateTime? parseUntilFromRule(String rule) {
   final match = RegExp(
     r'UNTIL=(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})Z)?',
@@ -55,7 +55,7 @@ DateTime? parseUntilFromRule(String rule) {
 
 /// Short frequency label for list rows.
 ///
-/// M-8: extracted from `RecurringTransactionListPage._getShortFrequencyLabel`.
+/// Extracted from `RecurringTransactionListPage._getShortFrequencyLabel`.
 String shortFrequencyLabel(String rule) {
   final rt = t.forecast.recurringTransaction;
   if (rule.contains('FREQ=DAILY')) return rt.daily;
@@ -67,7 +67,7 @@ String shortFrequencyLabel(String rule) {
 
 /// Human-readable description of an RRULE string.
 ///
-/// M-8: extracted from `RecurringTransactionPage._parseRecurrenceDescription`.
+/// Extracted from `RecurringTransactionPage._parseRecurrenceDescription`.
 String describeRecurrenceRule(String rule) {
   final rt = t.forecast.recurringTransaction;
   final interval = _intervalOf(rule);
@@ -77,7 +77,7 @@ String describeRecurrenceRule(String rule) {
   } else if (rule.contains('FREQ=WEEKLY')) {
     final base = interval == 1 ? rt.weekly : rt.everyWeeks(count: interval);
     // Enumerate the selected weekdays (BYDAY) so the read-only description
-    // matches the interactive sheet preview. M-8: converged from the sheet's
+    // Matches the interactive sheet preview. converged from the sheet's
     // enum-based `_buildDescription`.
     final byDay = _byDayOf(rule);
     if (byDay.isEmpty) {
@@ -127,7 +127,7 @@ String describeRecurrenceRule(String rule) {
 /// rewritten (preserving the -1 "last day of month" sentinel); for a weekly
 /// rule BYDAY follows the picked weekday.
 ///
-/// M-8: extracted from `RecurringTransactionPage._updateRecurrenceRuleWithNewDate`.
+/// Extracted from `RecurringTransactionPage._updateRecurrenceRuleWithNewDate`.
 ({String rule, String description}) updateRuleAndDescribe(
   String rule,
   DateTime newDate,

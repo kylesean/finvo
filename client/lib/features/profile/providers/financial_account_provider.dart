@@ -65,7 +65,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
   @override
   FinancialAccountState build() {
-    // AUTH-P3: no network side-effect in build — the caller (app.dart login
+    // No network side-effect in build — the caller (app.dart login
     // listener, account page init) triggers loadFinancialAccounts explicitly.
     // Previously a build() microtask fired a network request on EVERY read
     // of this provider, and keepAlive rebuilds duplicated it.
@@ -191,7 +191,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
       return true;
     } catch (e) {
-      // AUTH-P2: the success branch checks ref.mounted; the failure branch
+      // The success branch checks ref.mounted; the failure branch
       // must too, or a write-back after the autoDispose provider was
       // disposed triggers a Riverpod assertion.
       if (!ref.mounted) return false;

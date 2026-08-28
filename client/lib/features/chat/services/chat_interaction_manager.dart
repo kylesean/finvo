@@ -55,7 +55,7 @@ class ChatInteractionManager {
       'ChatInteractionManager: Cancelling previous stream and timers...',
     );
     await _streamingController.cancelStreamAndTimers();
-    // H-3/CHAT-7: if a stop was requested right before this send, the
+    // If a stop was requested right before this send, the
     // checkpoint-cleanup HTTP request may still be in flight against the same
     // session. Sending the new turn immediately would let the late cleanup
     // delete the new turn's server-side checkpoint. Wait for it to settle

@@ -90,7 +90,7 @@ class AuthService {
   /// Update stored username in shared preferences
   Future<void> updateStoredUsername(String newUsername) async {
     await _prefs.setString(_userNameKey, newUsername);
-    // AUTH-4: do not log the username — it is PII and the log may be
+    // Do not log the username — it is PII and the log may be
     // shipped to crash/error reporting pipelines.
     _logger.info('Updated stored username in shared preferences.');
   }
@@ -163,9 +163,8 @@ class AuthService {
       },
       fromJsonT: (json) => json as Map<String, dynamic>,
     );
-    // M22: extract the envelope's data field through the shared parser
-    // (strict: missing data throws a typed DataParsingException); leaf
-    // fields keep using MapRequire for typed required-field extraction.
+    // Extract the envelope's data field (strict: missing data throws a
+    // typed DataParsingException); leaf fields keep using MapRequire.
     final data = ResponseParser.parseData<Map<String, dynamic>>(
       response,
       whenNull: () => throw DataParsingException('data field is null'),
@@ -190,7 +189,7 @@ class AuthService {
       method: HttpMethod.post,
       data: {'account': account, 'type': _accountType(account)},
     );
-    // AUTH-4: the account is a phone number or email — PII. Log only the
+    // The account is a phone number or email — PII. Log only the
     // account type so logs remain useful without leaking identity.
     _logger.info(
       'Verification code sent (${_accountType(account)} API call successful)',
@@ -222,9 +221,8 @@ class AuthService {
       },
       fromJsonT: (json) => json as Map<String, dynamic>,
     );
-    // M22: extract the envelope's data field through the shared parser
-    // (strict: missing data throws a typed DataParsingException); leaf
-    // fields keep using MapRequire for typed required-field extraction.
+    // Extract the envelope's data field (strict: missing data throws a
+    // typed DataParsingException); leaf fields keep using MapRequire.
     final data = ResponseParser.parseData<Map<String, dynamic>>(
       response,
       whenNull: () => throw DataParsingException('data field is null'),

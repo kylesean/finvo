@@ -30,7 +30,7 @@ abstract class ToolCallInfo with _$ToolCallInfo {
 
     /// Execution status (pending -> running -> success/error)
     ///
-    /// H5: unknown server-side status degrades to pending (the same neutral
+    /// Unknown server-side status degrades to pending (the same neutral
     /// default as an absent field) instead of crashing the message parse.
     @JsonKey(unknownEnumValue: ToolExecutionStatus.pending)
     @Default(ToolExecutionStatus.pending)
@@ -73,7 +73,7 @@ abstract class UIComponentInfo with _$UIComponentInfo {
 
     /// Rendering mode: live (interactive), historical (read-only)
     ///
-    /// H5: unknown mode degrades to historical (read-only, the safe default).
+    /// Unknown mode degrades to historical (read-only, the safe default).
     @JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical)
     @Default(UIComponentMode.historical)
     UIComponentMode mode,

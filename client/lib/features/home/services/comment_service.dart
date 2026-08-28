@@ -13,10 +13,8 @@ class CommentService {
     return await _networkClient.request<List<CommentModel>>(
       '/transactions/$transactionId/comments', // API endpoint
       method: HttpMethod.get,
-      // M22: the hand-rolled envelope/root-List unwrap (including the
-      // "backward compat" root-list branch) is now covered by parseList,
-      // which tolerates `{data: [...]}`, `{data: {items: [...]}}`, root
-      // lists, and `data: null` as empty.
+      // parseList tolerates `{data: [...]}`, `{data: {items: [...]}}`,
+      // root-level lists, and `data: null` as empty.
       fromJsonT: (json) =>
           ResponseParser.parseList(json, CommentModel.fromJson),
     );
@@ -44,7 +42,7 @@ class CommentService {
       '/transactions/$transactionId/comments',
       method: HttpMethod.post,
       data: requestData,
-      // M22: parseItem implements the same "envelope-or-legacy-root" contract.
+      // parseItem implements the same "envelope-or-legacy-root" contract.
       fromJsonT: (json) =>
           ResponseParser.parseItem(json, CommentModel.fromJson),
     );

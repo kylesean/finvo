@@ -286,7 +286,7 @@ class ProfileSettingsSections extends ConsumerWidget {
     unawaited(
       showFDialog<void>(
         context: context,
-        // AUTH-V2: a forced update must not be dismissible — tapping the
+        // A forced update must not be dismissible — tapping the
         // barrier or pressing back would close the dialog and leave the user
         // running a version the server no longer supports.
         barrierDismissible: !updateInfo.forceUpdate,

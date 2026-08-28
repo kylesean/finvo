@@ -1,7 +1,7 @@
 // Pure decision logic for stream-completion callbacks.
 //
 // Extracted from ChatHistory._handleStreamComplete so the subtle
-// double-completion guard and the error-state preservation rule (CHAT-1) are
+// double-completion guard and the error-state preservation rule  are
 // unit-testable without spinning up the whole provider: both the SSE layer and
 // the GenUI layer can fire onStreamComplete for the same message, and an error
 // path may pair onError with onStreamComplete — the ordering rules below keep
@@ -28,7 +28,7 @@ enum StreamCompletionAction {
 
 /// Resolve which [StreamCompletionAction] applies.
 ///
-/// Order matters (CHAT-1): the double-completion guard wins over the
+/// Order matters : the double-completion guard wins over the
 /// error-preservation rule, mirroring ChatHistory._handleStreamComplete.
 StreamCompletionAction resolveStreamCompletionAction({
   required bool isMessageCompleted,

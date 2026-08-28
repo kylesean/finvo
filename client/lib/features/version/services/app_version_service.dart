@@ -29,9 +29,8 @@ class AppVersionService {
         '/version/check',
         method: HttpMethod.get,
         fromJsonT: (json) {
-          // M22: envelope extraction routes through the shared ResponseParser;
-          // a missing `data` field falls back to the root (legacy shape).
-          // A non-object envelope throws DataParsingException from the parser.
+          // A missing `data` field falls back to the root (legacy shape);
+          // a non-object envelope throws DataParsingException from the parser.
           final data = ResponseParser.parseData<Map<String, dynamic>>(
             json,
             // parseData only reaches whenNull when the root IS a Map.
@@ -42,7 +41,7 @@ class AppVersionService {
               data['latestVersion'] as String? ?? currentVersion;
           final hasUpdate = _isVersionHigher(latestVersion, currentVersion);
 
-          // AUTH-V1: the server may raise the minimum supported version
+          // The server may raise the minimum supported version
           // WITHOUT bumping latestVersion — a hard gate that must force an
           // update regardless of hasUpdate. Previously minSupportedVersion
           // was parsed into the model but never compared anywhere, so the

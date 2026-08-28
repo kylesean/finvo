@@ -17,7 +17,7 @@ mixin _$ToolCallInfo {
 
  String get id; String get name; Map<String, dynamic> get args;/// Execution status (pending -> running -> success/error)
 ///
-/// H5: unknown server-side status degrades to pending (the same neutral
+/// Unknown server-side status degrades to pending (the same neutral
 /// default as an absent field) instead of crashing the message parse.
 @JsonKey(unknownEnumValue: ToolExecutionStatus.pending) ToolExecutionStatus get status;/// Execution duration in milliseconds
 @JsonKey(name: 'duration_ms') int? get durationMs;/// Truncated result preview (max 200 chars)
@@ -238,7 +238,7 @@ class _ToolCallInfo implements ToolCallInfo {
 
 /// Execution status (pending -> running -> success/error)
 ///
-/// H5: unknown server-side status degrades to pending (the same neutral
+/// Unknown server-side status degrades to pending (the same neutral
 /// default as an absent field) instead of crashing the message parse.
 @override@JsonKey(unknownEnumValue: ToolExecutionStatus.pending) final  ToolExecutionStatus status;
 /// Execution duration in milliseconds
@@ -323,7 +323,7 @@ mixin _$UIComponentInfo {
 
 @JsonKey(name: 'surfaceId') String get surfaceId;@JsonKey(name: 'componentType') String get componentType; Map<String, dynamic> get data;/// Rendering mode: live (interactive), historical (read-only)
 ///
-/// H5: unknown mode degrades to historical (read-only, the safe default).
+/// Unknown mode degrades to historical (read-only, the safe default).
 @JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical) UIComponentMode get mode;/// User's selection (for showing what user chose in historical mode)
 @JsonKey(name: 'userSelection') Map<String, dynamic>? get userSelection;/// Tool call context
 @JsonKey(name: 'toolCallId') String? get toolCallId;@JsonKey(name: 'toolName') String? get toolName;
@@ -540,7 +540,7 @@ class _UIComponentInfo implements UIComponentInfo {
 
 /// Rendering mode: live (interactive), historical (read-only)
 ///
-/// H5: unknown mode degrades to historical (read-only, the safe default).
+/// Unknown mode degrades to historical (read-only, the safe default).
 @override@JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical) final  UIComponentMode mode;
 /// User's selection (for showing what user chose in historical mode)
  final  Map<String, dynamic>? _userSelection;

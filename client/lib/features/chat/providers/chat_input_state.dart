@@ -32,7 +32,7 @@ abstract class ChatInputState with _$ChatInputState {
 /// On native platforms [XFile.path] is a unique filesystem path and makes a
 /// perfect map key. On web, `XFile.fromData` (the picker's byte fallback)
 /// leaves `path` empty for EVERY file, so path alone would collapse all
-/// selected files into one bucket (CHAT-02). For pathless files, fall back to
+/// Selected files into one bucket . For pathless files, fall back to
 /// an identity-derived key that stays stable for the file's whole lifetime.
 ///
 /// The tiny registration store is deliberately global: both the provider and

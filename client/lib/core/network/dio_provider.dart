@@ -31,7 +31,7 @@ abstract interface class DioAuthCallbacks {
   ///
   /// Consulted by [TokenRefreshCoordinator] before persisting rotated tokens:
   /// an in-flight refresh that settles after a logout must not resurrect
-  /// credentials in secure storage (H-3).
+  /// Credentials in secure storage .
   bool get isSessionActive;
 }
 
@@ -45,7 +45,7 @@ final dioAuthCallbacksProvider = Provider<DioAuthCallbacks?>((ref) => null);
 /// the refresh lock — a 401 storm spanning both pipelines (a long-lived SSE
 /// stream plus parallel REST calls) would otherwise fire two concurrent
 /// `/auth/refresh` calls against the same refresh token, racing the server-
-/// side rotation and cascading into an unnecessary sign-out (H-1).
+/// Side rotation and cascading into an unnecessary sign-out .
 final tokenRefreshCoordinatorProvider = Provider<TokenRefreshCoordinator>((
   ref,
 ) {
@@ -159,7 +159,7 @@ Dio _buildDio(Ref ref, {required bool forSse}) {
     AuthInterceptor(
       storageService,
       // Every Dio instance shares the same single-flight refresh lock so a
-      // 401 storm spanning the REST and SSE pipelines is serialized (H-1).
+      // 401 storm spanning the REST and SSE pipelines is serialized .
       refreshCoordinator: refreshCoordinator,
       dio: dio,
     ),

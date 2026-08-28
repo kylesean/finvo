@@ -20,7 +20,7 @@ import 'package:finvo/shared/widgets/themed_icon.dart';
 
 /// Swipeable recurring-transaction row for the list page.
 ///
-/// M-28: extracted from `RecurringTransactionListPage._buildTransactionCard` so
+/// Extracted from `RecurringTransactionListPage._buildTransactionCard` so
 /// the page stays focused on list state while this widget owns the card UI
 /// (type icon/colour, rule + dynamic-amount tags, amount and next-date).
 class RecurringTransactionCard extends ConsumerWidget {

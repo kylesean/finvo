@@ -192,7 +192,7 @@ void main() {
       expect(service.status, NotificationWsConnectionStatus.connected);
       expect(created, hasLength(1));
 
-      // H12: the token must never travel in the URL — it is handed to the
+      // The token must never travel in the URL — it is handed to the
       // platform factory separately (Authorization header on IO, query
       // parameter only in the browser fallback), so the ws URL stays clean.
       expect(seenUrls.single, isNot(contains('jwt-token')));
@@ -260,7 +260,7 @@ void main() {
         storageService: storageWithToken('jwt-token'),
       );
 
-      // M-20: generous margins for CI timer drift. Heartbeat ticks are
+      // Generous margins for CI timer drift. Heartbeat ticks are
       // scheduled at 20/40ms; by 50ms at least one ping must have been sent.
       // The half-open window (60ms of silence) cannot have been hit yet: the
       // earliest tick that could close the socket fires at 60ms elapsed —

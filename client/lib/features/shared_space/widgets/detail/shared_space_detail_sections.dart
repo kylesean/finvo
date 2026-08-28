@@ -1,4 +1,4 @@
-// M-28: presentational widgets extracted from `SharedSpaceDetailPage` so the
+// Presentational widgets extracted from `SharedSpaceDetailPage` so the
 // page State keeps only state + interaction + navigation logic.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

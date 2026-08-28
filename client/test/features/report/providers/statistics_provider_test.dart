@@ -77,7 +77,7 @@ void main() {
       expect(state.trendData, isNotNull);
       expect(state.categoryBreakdown, isNotNull);
       expect(state.topTransactions, isNotNull);
-      // BRH-04: cash-flow/health-score are no longer fetched (dead data) —
+      // Cash-flow/health-score are no longer fetched (dead data) —
       // state fields stay null until a real report surface consumes them.
       expect(state.cashFlow, isNull);
       expect(state.healthScore, isNull);
@@ -97,7 +97,7 @@ void main() {
       expect(state.overview, isNull);
     });
 
-    test('H2 regression: failure after dispose must not write state', () async {
+    test('failure after dispose must not write state', () async {
       // Pin the provider with a listener so it stays alive until we
       // deliberately unsubscribe (simulates the user leaving the report
       // page while a fetch is still in flight).
@@ -120,7 +120,7 @@ void main() {
     });
 
     test(
-      'BRH-04: load never calls the supplementary cash-flow/health endpoints',
+      'load never calls the supplementary cash-flow/health endpoints',
       () async {
         service.overview = _overview();
         service.trendData = _trend();
@@ -363,7 +363,7 @@ class _FakeStatisticsService implements StatisticsService {
     }
   }
 
-  // BRH-04: the provider must never call the supplementary endpoints during a
+  // The provider must never call the supplementary endpoints during a
   // plain load — count their invocations so the regression is testable.
   int cashFlowCalls = 0;
   int healthScoreCalls = 0;

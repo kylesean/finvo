@@ -30,9 +30,8 @@ class BudgetService {
     return await _networkClient.request<List<Budget>>(
       '/budgets',
       method: HttpMethod.get,
-      // M22: the inline envelope+list unwrap previously bypassed the shared
-      // parser; parseList covers `{data: [...]}` (and tolerates `data: null`
-      // as an empty result per its documented contract).
+      // parseList covers `{data: [...]}` and tolerates `data: null` as an
+      // empty result per its documented contract.
       fromJsonT: (json) => ResponseParser.parseList(json, Budget.fromJson),
     );
   }
