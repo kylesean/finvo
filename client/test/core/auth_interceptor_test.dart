@@ -299,6 +299,95 @@ void main() {
     );
 
     test(
+      'H1: refresh transport failure does NOT sign out and surfaces a network error',
+      () async {
+        // /auth/refresh dies mid-flight with no HTTP response at all (timeout,
+        // dead connection): the session must survive and the caller must see
+        // a retryable network error instead of a "session expired" 401.
+        refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
+        refreshDio.httpClientAdapter = _TransportFailureRefreshAdapter();
+
+        final d = makeInterceptorDio(_MockAdapter(401));
+
+        await expectLater(
+          d.get<dynamic>('https://example.com/api'),
+          throwsA(
+            isA<DioException>().having(
+              (e) => e.type,
+              'type',
+              DioExceptionType.connectionError,
+            ),
+          ),
+        );
+        expect(unauthorizedCalls, isEmpty);
+      },
+    );
+
+    test(
+      'H1: refresh 5xx does NOT sign out (server trouble is not an invalid token)',
+      () async {
+        refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
+        refreshDio.httpClientAdapter = _ServerErrorRefreshAdapter();
+
+        final d = makeInterceptorDio(_MockAdapter(401));
+
+        await expectLater(
+          d.get<dynamic>('https://example.com/api'),
+          throwsA(
+            isA<DioException>().having(
+              (e) => e.type,
+              'type',
+              DioExceptionType.connectionError,
+            ),
+          ),
+        );
+        expect(unauthorizedCalls, isEmpty);
+      },
+    );
+
+    test(
+      'H1: refresh 2xx with a non-JSON body (captive portal) does NOT sign out',
+      () async {
+        // A captive portal answers 200 with an HTML login page — treating
+        // that as a refresh rejection would wrongly log the user out.
+        refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
+        refreshDio.httpClientAdapter = _GarbageRefreshAdapter();
+
+        final d = makeInterceptorDio(_MockAdapter(401));
+
+        await expectLater(
+          d.get<dynamic>('https://example.com/api'),
+          throwsA(
+            isA<DioException>().having(
+              (e) => e.type,
+              'type',
+              DioExceptionType.connectionError,
+            ),
+          ),
+        );
+        expect(unauthorizedCalls, isEmpty);
+      },
+    );
+
+    test(
+      'refresh business-envelope rejection (code != 0) DOES sign out',
+      () async {
+        // A well-formed {code != 0} envelope is an explicit, unambiguous
+        // rejection — the sign-out must still run.
+        refreshDio = Dio(BaseOptions(baseUrl: 'https://placeholder.test/'));
+        refreshDio.httpClientAdapter = _BusinessRejectionRefreshAdapter();
+
+        final d = makeInterceptorDio(_MockAdapter(401));
+
+        await expectLater(
+          d.get<dynamic>('https://example.com/api'),
+          throwsA(isA<DioException>()),
+        );
+        expect(unauthorizedCalls, ['triggered']);
+      },
+    );
+
+    test(
       'concurrent 401s across two DIOs sign out exactly ONCE on rejection (M-3)',
       () async {
         // M-3: when the refresh is rejected, every concurrent waiter must not
@@ -517,6 +606,93 @@ class _RejectingRefreshAdapter implements HttpClientAdapter {
         data: '{"code":1}',
       ),
       type: DioExceptionType.badResponse,
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Refresh adapter whose round-trip dies with NO HTTP response at all —
+/// the H1 transport-failure signature (timeout / dead connection).
+class _TransportFailureRefreshAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    throw DioException(
+      requestOptions: options,
+      type: DioExceptionType.connectionTimeout,
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Refresh adapter whose endpoint is reachable but erroring server-side (5xx).
+class _ServerErrorRefreshAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    throw DioException(
+      requestOptions: options,
+      response: Response<dynamic>(
+        requestOptions: options,
+        statusCode: 503,
+        statusMessage: 'service unavailable',
+        data: '{"code":1}',
+      ),
+      type: DioExceptionType.badResponse,
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Refresh adapter that "succeeds" with a non-JSON body — the classic
+/// captive-portal / transparent-proxy signature.
+class _GarbageRefreshAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString(
+      '<html>Sign in to Wi-Fi</html>',
+      200,
+      headers: {
+        Headers.contentTypeHeader: ['text/html'],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Refresh adapter returning a well-formed business-error envelope with a
+/// non-zero code — an explicit, unambiguous rejection.
+class _BusinessRejectionRefreshAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString(
+      '{"code":40102,"message":"refresh token revoked"}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
     );
   }
 

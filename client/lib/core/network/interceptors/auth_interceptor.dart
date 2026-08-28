@@ -45,7 +45,7 @@ class TokenRefreshCoordinator {
   /// Shared in-flight refresh so that concurrent 401 responses await a single
   /// token refresh instead of each triggering their own (which could race
   /// refresh-token rotation on the server).
-  Future<TokenRefreshResult?>? _refreshing;
+  Future<RefreshOutcome>? _refreshing;
 
   /// Latch so that a failed refresh round runs the local sign-out exactly
   /// once: the first waiter that observes the rejection performs it, the rest
@@ -61,7 +61,7 @@ class TokenRefreshCoordinator {
   /// round-trip but before the rotated token is stored would otherwise read
   /// the stale refresh token and trigger a second refresh against an already-
   /// rotated token, which can cascade into an unnecessary sign-out.
-  Future<TokenRefreshResult?> refresh(String refreshToken, String baseUrl) {
+  Future<RefreshOutcome> refresh(String refreshToken, String baseUrl) {
     final inFlight = _refreshing;
     if (inFlight != null) {
       return inFlight;
@@ -73,8 +73,8 @@ class TokenRefreshCoordinator {
     // Clear the shared future when the pipeline settles, on success AND on
     // failure. Handle the error explicitly: an unhandled completion here would
     // surface as an uncaught async error in the zone handler. The derived
-    // future can only error if the refresh pipeline itself throws (it does
-    // not), so discarding it is safe.
+    // future can only error if the refresh pipeline itself throws (storage
+    // write failures), so discarding it is safe.
     unawaited(
       future.then<void>(
         (_) {
@@ -89,10 +89,11 @@ class TokenRefreshCoordinator {
     return future;
   }
 
-  /// Called by a waiter when [refresh] completed with `null` (the server
-  /// rejected the refresh token). Only the first waiter performs the local
-  /// sign-out; the remaining N-1 waiters no-op so the cleanup (storage
-  /// deletes, prefs removes, state resets) does not fan out N times.
+  /// Called by a waiter when [refresh] completed with [RefreshRejected] (the
+  /// server explicitly rejected the refresh token). Only the first waiter
+  /// performs the local sign-out; the remaining N-1 waiters no-op so the
+  /// cleanup (storage deletes, prefs removes, state resets) does not fan out
+  /// N times.
   Future<void> handleRefreshRejected() async {
     if (_signOutPending) return;
     _signOutPending = true;
@@ -106,28 +107,29 @@ class TokenRefreshCoordinator {
   /// Refresh then persist the rotated tokens and sync the in-memory AuthState
   /// as one unit, so the memory/storage copies never diverge and derived
   /// long-lived connections (WS/SSE) rebuild with the new token.
-  Future<TokenRefreshResult?> _refreshAndPersist(
+  Future<RefreshOutcome> _refreshAndPersist(
     String refreshToken,
     String baseUrl,
   ) async {
-    final result = await _refreshTokens(refreshToken, baseUrl);
-    if (result == null) {
-      return null;
+    final outcome = await _refreshTokens(refreshToken, baseUrl);
+    if (outcome is! RefreshSuccess) {
+      return outcome;
     }
     // H-3: the refresh round-trip is slow; the user may have logged out (or
     // the session may have expired) while it was in flight. Persisting the
     // rotated tokens after a logout would resurrect credentials the logout
     // explicitly removed. Consult the composition-root session check and drop
-    // the result instead. Returning null routes the waiters through the
-    // rejected path (handleRefreshRejected), which is a no-op when the
-    // session is already gone.
+    // the result instead. Returning [RefreshRejected] routes the waiters
+    // through handleRefreshRejected, which is a no-op when the session is
+    // already gone.
     final sessionActive = isSessionValid?.call() ?? true;
     if (!sessionActive) {
       _logger.info(
         'Session is no longer active; discarding in-flight refresh result',
       );
-      return null;
+      return const RefreshRejected();
     }
+    final result = outcome.result;
     await storageService.saveToken(result.accessToken);
     await storageService.saveRefreshToken(result.refreshToken);
     // Best-effort sync of the in-memory AuthState: a failure here must not
@@ -137,12 +139,21 @@ class TokenRefreshCoordinator {
     } catch (e, stackTrace) {
       _logger.warning('onTokenRefreshed callback failed', e, stackTrace);
     }
-    return result;
+    return outcome;
   }
 
   /// Exchange a refresh token for a fresh access token + rotated refresh token
-  /// via the backend refresh endpoint. Returns null if refresh fails.
-  Future<TokenRefreshResult?> _refreshTokens(
+  /// via the backend refresh endpoint.
+  ///
+  /// H1: a *transport* failure (timeout, connection error, 5xx, or an
+  /// unparseable 2xx body from a captive portal/proxy) must never be
+  /// conflated with the server rejecting the refresh token — a momentary
+  /// network drop used to log perfectly valid users out. Only an explicit
+  /// 4xx response or a well-formed business-error envelope maps to
+  /// [RefreshRejected]; everything ambiguous degrades to
+  /// [RefreshTransportFailure] so the session is preserved and the caller
+  /// surfaces a retryable network error instead.
+  Future<RefreshOutcome> _refreshTokens(
     String refreshToken,
     String baseUrl,
   ) async {
@@ -163,22 +174,46 @@ class TokenRefreshCoordinator {
       );
 
       final dynamic data = response.data;
-      if (data is Map<String, dynamic> &&
-          data['code'] == 0 &&
-          data['data'] is Map<String, dynamic>) {
-        final access = (data['data'] as Map<String, dynamic>)['token'];
-        final refresh = (data['data'] as Map<String, dynamic>)['refresh_token'];
-        if (access is String &&
-            access.isNotEmpty &&
-            refresh is String &&
-            refresh.isNotEmpty) {
-          return TokenRefreshResult(accessToken: access, refreshToken: refresh);
+      if (data is Map<String, dynamic>) {
+        final payload = data['data'];
+        final code = data['code'];
+        if (code == 0 && payload is Map<String, dynamic>) {
+          final access = payload['token'];
+          final refresh = payload['refresh_token'];
+          if (access is String &&
+              access.isNotEmpty &&
+              refresh is String &&
+              refresh.isNotEmpty) {
+            return RefreshSuccess(
+              TokenRefreshResult(accessToken: access, refreshToken: refresh),
+            );
+          }
+          // Success envelope but malformed payload: a server-side glitch.
+          // Ambiguous — do not treat as an auth rejection.
+          return const RefreshTransportFailure();
         }
+        if (code is int && code != 0) {
+          // Well-formed business-error envelope: explicit rejection.
+          return const RefreshRejected();
+        }
+        // Envelope shape we don't recognize — ambiguous.
+        return const RefreshTransportFailure();
       }
-      return null;
+      // 2xx but not our JSON envelope (captive portal, proxy garbage page).
+      return const RefreshTransportFailure();
+    } on DioException catch (e, stackTrace) {
+      _logger.warning('Token refresh failed', e, stackTrace);
+      final status = e.response?.statusCode;
+      if (status != null && status >= 400 && status < 500) {
+        // The refresh endpoint explicitly rejected the token.
+        return const RefreshRejected();
+      }
+      // No response / timeout / 5xx: transport or server-side trouble. The
+      // session itself may still be perfectly valid — never sign out (H1).
+      return const RefreshTransportFailure();
     } catch (e, stackTrace) {
       _logger.warning('Token refresh failed', e, stackTrace);
-      return null;
+      return const RefreshTransportFailure();
     }
   }
 }
@@ -315,9 +350,9 @@ class AuthInterceptor extends Interceptor {
           // refresh + persist + notify span, so a 401 arriving during the
           // narrow window between refresh completion and persistence can't
           // kick off a second refresh with the already-rotated refresh token.
-          final TokenRefreshResult? result;
+          final RefreshOutcome outcome;
           try {
-            result = await _refreshCoordinator.refresh(
+            outcome = await _refreshCoordinator.refresh(
               refreshToken,
               err.requestOptions.baseUrl,
             );
@@ -330,56 +365,81 @@ class AuthInterceptor extends Interceptor {
             return;
           }
 
-          if (result != null) {
-            _logger.info('Token refreshed, replaying original request');
+          switch (outcome) {
+            case RefreshSuccess(:final result):
+              _logger.info('Token refreshed, replaying original request');
 
-            final opts = err.requestOptions;
-            // Mark this request as already refreshed so a second 401 on the
-            // retry skips the refresh flow and goes straight to sign-out.
-            opts.extra[_refreshedKey] = true;
-            opts.headers[ApiConstants.authorizationHeader] =
-                'Bearer ${result.accessToken}';
-            try {
-              final Response<dynamic> response = await _dio.fetch<dynamic>(
-                opts,
-              );
-              handler.resolve(response);
-              return;
-            } on DioException catch (retryErr) {
-              // Only sign out when the replay is still a 401 (token genuinely
-              // invalid). Network/timeout errors must NOT log out an otherwise
-              // valid session — propagate them through the normalization chain.
-              if (retryErr.response?.statusCode == 401) {
-                _logger.warning(
-                  'Replay still 401 after refresh for '
-                  '${err.requestOptions.path}, signing out',
+              final opts = err.requestOptions;
+              // Mark this request as already refreshed so a second 401 on the
+              // retry skips the refresh flow and goes straight to sign-out.
+              opts.extra[_refreshedKey] = true;
+              opts.headers[ApiConstants.authorizationHeader] =
+                  'Bearer ${result.accessToken}';
+              try {
+                final Response<dynamic> response = await _dio.fetch<dynamic>(
+                  opts,
                 );
-                await _refreshCoordinator.handleRefreshRejected();
-              } else {
-                _logger.warning('Retry after refresh failed: $retryErr');
+                handler.resolve(response);
+                return;
+              } on DioException catch (retryErr) {
+                // Only sign out when the replay is still a 401 (token genuinely
+                // invalid). Network/timeout errors must NOT log out an otherwise
+                // valid session — propagate them through the normalization chain.
+                if (retryErr.response?.statusCode == 401) {
+                  _logger.warning(
+                    'Replay still 401 after refresh for '
+                    '${err.requestOptions.path}, signing out',
+                  );
+                  await _refreshCoordinator.handleRefreshRejected();
+                } else {
+                  _logger.warning('Retry after refresh failed: $retryErr');
+                }
+                handler.next(retryErr);
+                return;
+              } catch (retryErr, stackTrace) {
+                _logger.warning(
+                  'Retry after refresh failed',
+                  retryErr,
+                  stackTrace,
+                );
+                // A non-DioException here is unexpected; propagate the ORIGINAL
+                // DioException so the normalization chain still sees a valid type.
+                handler.next(err);
+                return;
               }
-              handler.next(retryErr);
-              return;
-            } catch (retryErr, stackTrace) {
+            case RefreshRejected():
+              _logger.warning('Token refresh rejected, signing out');
+              // Fall through to the shared sign-out below: the latch inside
+              // the coordinator ensures concurrent 401 waiters perform it
+              // exactly once per refresh round.
+              break;
+            case RefreshTransportFailure():
+              // H1: a network blip during the refresh round-trip must NOT
+              // sign out an otherwise valid user. Replace the misleading 401
+              // with a connection error so the normalization chain surfaces a
+              // retryable network failure instead of "session expired".
               _logger.warning(
-                'Retry after refresh failed',
-                retryErr,
-                stackTrace,
+                'Token refresh interrupted by a transport failure for '
+                '${err.requestOptions.path}; keeping session',
               );
-              // A non-DioException here is unexpected; propagate the ORIGINAL
-              // DioException so the normalization chain still sees a valid type.
-              handler.next(err);
+              handler.next(
+                DioException(
+                  requestOptions: err.requestOptions,
+                  type: DioExceptionType.connectionError,
+                  error: err,
+                  message: 'Token refresh failed due to a network error',
+                ),
+              );
               return;
-            }
-          } else {
-            _logger.warning('Token refresh rejected, signing out');
           }
         }
       }
 
-      // Refresh not possible (or already tried) — sign out locally; the
-      // router redirects to login. The latch inside the coordinator ensures
-      // concurrent 401 waiters perform this exactly once per refresh round.
+      // No refresh token was available (or the refresh was explicitly
+      // rejected — [RefreshRejected] falls through from the switch above):
+      // sign out locally; the router redirects to login. The latch inside
+      // the coordinator ensures concurrent 401 waiters perform this exactly
+      // once per refresh round.
       await _refreshCoordinator.handleRefreshRejected();
     }
     super.onError(err, handler);
@@ -395,4 +455,37 @@ class TokenRefreshResult {
     required this.accessToken,
     required this.refreshToken,
   });
+}
+
+/// Outcome of a token refresh round-trip.
+///
+/// Deliberately distinguishes "the refresh token was explicitly rejected"
+/// (the session is unrecoverable → sign out) from "the refresh round-trip
+/// failed for transport reasons" (H1: a momentary network drop must never
+/// log a valid user out — the session is preserved and the original request
+/// surfaces a retryable network error instead).
+sealed class RefreshOutcome {
+  const RefreshOutcome();
+}
+
+/// Refresh succeeded and the rotated tokens were persisted.
+final class RefreshSuccess extends RefreshOutcome {
+  final TokenRefreshResult result;
+
+  const RefreshSuccess(this.result);
+}
+
+/// The refresh endpoint explicitly rejected the refresh token (a 4xx
+/// response or a well-formed business-error envelope): the session is
+/// genuinely unrecoverable and the local sign-out must run.
+final class RefreshRejected extends RefreshOutcome {
+  const RefreshRejected();
+}
+
+/// The refresh round-trip failed for transport reasons (no HTTP response,
+/// timeout, 5xx, or an unparseable 2xx body from a proxy/captive portal).
+/// The session itself may still be perfectly valid — waiters must NOT sign
+/// out and should surface a retryable network error instead.
+final class RefreshTransportFailure extends RefreshOutcome {
+  const RefreshTransportFailure();
 }
