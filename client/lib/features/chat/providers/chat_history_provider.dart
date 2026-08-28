@@ -445,8 +445,13 @@ class ChatHistory extends _$ChatHistory {
 
   // Load first page of history messages
   Future<void> loadConversation(String conversationId) async {
+    // H3: a failed load must stay re-triggerable. When a previous load of
+    // this conversation failed (historyError != null), falling through lets
+    // the user re-tap it — or hit the retry button — instead of the guard
+    // silently swallowing every subsequent attempt.
     if (conversationId == state.currentConversationId &&
-        !state.isLoadingHistory) {
+        !state.isLoadingHistory &&
+        state.historyError == null) {
       return;
     }
     await _streamingController.cancelStreamAndTimers();
@@ -500,6 +505,17 @@ class ChatHistory extends _$ChatHistory {
     if (loaded) {
       await _conversationSessionManager.checkAndResumeIfNeeded(conversationId);
     }
+  }
+
+  /// H3: retry the failed history load for the current conversation.
+  ///
+  /// Backed by the [loadConversation] guard, which now falls through when
+  /// [ChatHistoryState.historyError] is set, so re-invoking it with the same
+  /// id actually re-runs the fetch.
+  Future<void> retryLoadHistory() async {
+    final id = state.currentConversationId;
+    if (id == null || id.isEmpty) return;
+    await loadConversation(id);
   }
 
   Future<void> createNewConversation() async {

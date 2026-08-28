@@ -287,9 +287,28 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
             child: messages.isEmpty && !isLoadingHistory
                 ? historyError != null
                       ? Center(
-                          child: Text(
-                            '${t.chat.loadingFailed}: $historyError',
-                            style: theme.typography.body.md,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${t.chat.loadingFailed}: $historyError',
+                                  style: theme.typography.body.md,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 12),
+                                // H3: a failed history load must offer a way
+                                // back — without this the error state was
+                                // terminal until another conversation opened.
+                                FButton(
+                                  onPress: () => unawaited(
+                                    chatHistoryNotifier.retryLoadHistory(),
+                                  ),
+                                  child: Text(t.common.retry),
+                                ),
+                              ],
+                            ),
                           ),
                         )
                       : WelcomeGuideWidget(
