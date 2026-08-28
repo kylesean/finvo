@@ -97,6 +97,28 @@ void main() {
       expect(state.overview, isNull);
     });
 
+    test('H2 regression: failure after dispose must not write state', () async {
+      // Pin the provider with a listener so it stays alive until we
+      // deliberately unsubscribe (simulates the user leaving the report
+      // page while a fetch is still in flight).
+      final sub = container.listen(statisticsProvider, (_, _) {});
+      service.failCore = true;
+      service.coreDelay = const Duration(milliseconds: 20);
+
+      final notifier = container.read(statisticsProvider.notifier);
+      final loading = notifier.loadStatistics();
+
+      // Closing the last listener disposes the autoDispose notifier before
+      // the fetch settles.
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      sub.close();
+
+      // The inverted-guard bug wrote state after dispose, rethrowing
+      // StateError out of loadStatistics; the fixed path swallows the
+      // stale failure instead.
+      await expectLater(loading, completes);
+    });
+
     test(
       'BRH-04: load never calls the supplementary cash-flow/health endpoints',
       () async {
@@ -328,6 +350,19 @@ class _FakeStatisticsService implements StatisticsService {
   bool failSupplementary = false;
   List<String>? lastAccountTypes;
 
+  /// When set, core endpoints resolve after this delay so tests can dispose
+  /// the provider while a fetch is still in flight (dispose-race regression).
+  /// When null, no await happens at all, preserving the original synchronous
+  /// timing the other tests rely on.
+  Duration? coreDelay;
+
+  Future<void> _coreGate() async {
+    final delay = coreDelay;
+    if (delay != null) {
+      await Future<void>.delayed(delay);
+    }
+  }
+
   // BRH-04: the provider must never call the supplementary endpoints during a
   // plain load — count their invocations so the regression is testable.
   int cashFlowCalls = 0;
@@ -343,6 +378,7 @@ class _FakeStatisticsService implements StatisticsService {
     List<String>? accountTypes,
   }) async {
     lastAccountTypes = accountTypes;
+    await _coreGate();
     if (failCore) throw Exception('core failed');
     return overview ?? _overview();
   }
@@ -356,6 +392,7 @@ class _FakeStatisticsService implements StatisticsService {
     List<String>? accountTypes,
   }) async {
     lastAccountTypes = accountTypes;
+    await _coreGate();
     if (failCore) throw Exception('core failed');
     return trendData ?? _trend();
   }
@@ -370,6 +407,7 @@ class _FakeStatisticsService implements StatisticsService {
     int limit = 10,
   }) async {
     lastAccountTypes = accountTypes;
+    await _coreGate();
     if (failCore) throw Exception('core failed');
     return categoryBreakdown ?? _category();
   }
@@ -386,6 +424,7 @@ class _FakeStatisticsService implements StatisticsService {
     int pageSize = 10,
   }) async {
     lastAccountTypes = accountTypes;
+    await _coreGate();
     if (failCore) throw Exception('core failed');
     final base = topTransactions ?? _topTransactions();
     // Simulate paging: a next-page response carries only the newly fetched

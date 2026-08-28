@@ -147,8 +147,12 @@ class Statistics extends _$Statistics {
       );
     } catch (e) {
       // Only surface errors for the latest generation; older failures belong
-      // to superseded requests.
-      if (!ref.mounted || generation == _loadGeneration) {
+      // to superseded requests. Both guards must pass: an unmounted provider
+      // (disposed while the fetch was in flight) must never be written to.
+      // H2 regression note: this condition was previously inverted
+      // (`!ref.mounted || generation == _loadGeneration`), which is always
+      // true on the dispose path and threw "used after dispose".
+      if (ref.mounted && generation == _loadGeneration) {
         state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
       }
     }
