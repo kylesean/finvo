@@ -141,10 +141,11 @@ class NetworkClient {
             return fromJsonT(response.data);
           } catch (e, stackTrace) {
             _logger.severe('fromJsonT parsing failed', e, stackTrace);
-            // Throw specific data parsing exception
-            throw DataParsingException(
-              'Client data parsing failed: ${e.toString()}',
-            );
+            // F2 policy (see unwrapData): the raw parse error may embed
+            // response-body fragments (other users' PII), so it must NOT
+            // flow into user-facing messages via safeErrorMessage. Log the
+            // details above and throw a sanitized exception.
+            throw DataParsingException('Client data parsing failed');
           }
         } else {
           // If no parser provided, assume caller expects raw data

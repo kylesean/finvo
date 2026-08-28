@@ -49,9 +49,12 @@ class NotificationNotifier extends _$NotificationNotifier
 
   @override
   NotificationState build() {
-    // Automatically trigger initial load on provider creation
-    unawaited(Future.microtask(() => refresh()));
-    return const NotificationState(isLoading: true);
+    // M9: pure build — no network side-effects here (matches the pure-build
+    // discipline of FinancialSettings/UserProfile/FinancialAccount). The
+    // initial load fires from the auth-transition listener in app.dart, which
+    // also guarantees it only runs for an authenticated session; a build-time
+    // microtask would kick off a doomed request before login/server setup.
+    return const NotificationState();
   }
 
   /// Reset to the pristine state on logout / session expiry so the next
@@ -81,7 +84,7 @@ class NotificationNotifier extends _$NotificationNotifier
             onTimeout: () =>
                 throw TimeoutException('Notification request timed out'),
           );
-      if (generation != _loadGeneration) return;
+      if (!ref.mounted || generation != _loadGeneration) return;
       state = state.copyWith(
         items: res.items,
         total: res.total,
@@ -91,7 +94,9 @@ class NotificationNotifier extends _$NotificationNotifier
         hasReachedMax: res.items.length < _pageSize,
       );
     } catch (e) {
-      if (generation != _loadGeneration) return;
+      // M9: the provider is keepAlive and invalidated on logout — a response
+      // settling after disposal must not write state.
+      if (!ref.mounted || generation != _loadGeneration) return;
       _logger.severe('Failed to refresh notifications', e);
       state = state.copyWith(isLoading: false, error: safeErrorMessage(e));
     }
@@ -114,7 +119,8 @@ class NotificationNotifier extends _$NotificationNotifier
       // A refresh started while this request was in flight supersedes it.
       // Reset the loading flag first: the superseding refresh() does not
       // touch isLoadingMore, so without this the infinite scroll would stay
-      // disabled forever.
+      // disabled forever. (M9: never write state after disposal.)
+      if (!ref.mounted) return;
       if (generation != _loadGeneration) {
         state = state.copyWith(isLoadingMore: false);
         return;
@@ -128,6 +134,7 @@ class NotificationNotifier extends _$NotificationNotifier
         hasReachedMax: res.items.length < _pageSize,
       );
     } catch (e) {
+      if (!ref.mounted) return;
       if (generation != _loadGeneration) {
         state = state.copyWith(isLoadingMore: false);
         return;

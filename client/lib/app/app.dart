@@ -49,6 +49,10 @@ class MyApp extends ConsumerWidget {
         unawaited(
           ref.read(financialAccountProvider.notifier).loadFinancialAccounts(),
         );
+        // M9: notifications follow the same login-warmup pattern — the
+        // provider build stays pure and the first load fires on the auth
+        // transition, guaranteed to run for an authenticated session only.
+        unawaited(ref.read(notificationProvider.notifier).refresh());
       } else if (prev?.status == AuthStatus.authenticated &&
           next.status != AuthStatus.authenticated) {
         // Logout / session expiry: tear down the login-scoped state so the

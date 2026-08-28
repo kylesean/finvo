@@ -163,6 +163,10 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
         fromJsonT: (json) =>
             _parseSettingsResponse(json, 'API /financial-settings'),
       );
+      // M1: this provider is keepAlive but disposed on logout — a PATCH that
+      // settles after logout must not write state (nor resurrect
+      // _originalSettings). Mirror the load path's mounted guard.
+      if (!ref.mounted) return false;
       _originalSettings = response;
 
       state = state.copyWith(
@@ -184,6 +188,11 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
         errorMessage = e.message;
       }
 
+      _logger.warning('Failed to save financial settings', e);
+
+      // M1: the catch block itself must not write state after dispose —
+      // that would throw out of the method on top of losing the result.
+      if (!ref.mounted) return false;
       state = state.copyWith(isLoading: false, error: errorMessage);
 
       return false;

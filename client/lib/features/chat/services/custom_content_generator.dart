@@ -117,6 +117,13 @@ class CustomContentGenerator implements genui.Transport {
   /// arriving after the turn has ended are never dispatched (S-1/CHAT-01).
   bool _streamEnded = false;
 
+  /// M12: set by [dispose]. After disposal, no new request may start, no
+  /// still-draining SSE event may be dispatched into the closing stream
+  /// controllers, and no terminal callback (onError/onStreamComplete) may
+  /// fire — keeping the "no late events" invariant the rest of the stack
+  /// relies on.
+  bool _isDisposed = false;
+
   /// Monotonic counter distinguishing successive requests. Every SSE event
   /// dispatch and terminal callback (onError/onStreamComplete) is guarded by
   /// the generation captured when the request started, so buffered lines from
@@ -193,6 +200,7 @@ class CustomContentGenerator implements genui.Transport {
 
   @override
   Future<void> sendRequest(genui.ChatMessage message) async {
+    if (_isDisposed) return;
     // Route the outgoing message: classify it, parse any UI interaction and
     // dispatch business events via GenUiEventRegistry (see InteractionRouter).
     // Error-feedback messages and empty content are skipped here, protecting
@@ -228,6 +236,7 @@ class CustomContentGenerator implements genui.Transport {
     List<Map<String, dynamic>>? attachments,
     Map<String, dynamic>? stateUpdates,
   }) async {
+    if (_isDisposed) return;
     // Build simple message body
     final messagePayload = <String, dynamic>{
       'role': 'user',
@@ -257,6 +266,7 @@ class CustomContentGenerator implements genui.Transport {
     String? sessionId,
     Map<String, dynamic>? clientState,
   }) async {
+    if (_isDisposed) return;
     // Defense in depth: never send empty/skipped messages to the backend.
     // A message is valid if it has non-empty content OR has attachments
     // (image-only messages are legitimate for multimodal LLMs).
@@ -434,7 +444,9 @@ class CustomContentGenerator implements genui.Transport {
         }
 
         // Stream processing ended normally
-        if (!_isCancelled && requestGeneration == _requestGeneration) {
+        if (!_isDisposed &&
+            !_isCancelled &&
+            requestGeneration == _requestGeneration) {
           _logger.info('CustomContentGenerator: Stream succeeded');
           onStreamComplete?.call();
         }
@@ -443,7 +455,11 @@ class CustomContentGenerator implements genui.Transport {
         watchdog = null;
       }
     } catch (e, stackTrace) {
-      if (_isCancelled || requestGeneration != _requestGeneration) {
+      // M12: dispose() cancels the in-flight request; the resulting error
+      // must not fire terminal callbacks after disposal.
+      if (_isDisposed ||
+          _isCancelled ||
+          requestGeneration != _requestGeneration) {
         _logger.info('CustomContentGenerator: Request cancelled by user');
         return;
       }
@@ -477,7 +493,9 @@ class CustomContentGenerator implements genui.Transport {
 
   /// Parse and dispatch one accumulated SSE `data` event payload.
   Future<void> _dispatchSseEventData(String jsonStr) async {
-    if (jsonStr.isEmpty) return;
+    // M12: events still draining from a disposed request must never reach
+    // the closing stream controllers or the forwarded callbacks.
+    if (_isDisposed || jsonStr.isEmpty) return;
     try {
       final data = jsonDecode(jsonStr) as Map<String, dynamic>;
       final eventType = data['type'] as String?;
@@ -744,6 +762,9 @@ class CustomContentGenerator implements genui.Transport {
 
   @override
   void dispose() {
+    // M12: flip the flag FIRST so callbacks/stream-adds racing the teardown
+    // are dropped before the controllers below are closed.
+    _isDisposed = true;
     unawaited(_a2uiMessageController.close());
     unawaited(_textResponseController.close());
     _cancelToken?.cancel('Disposed');
