@@ -29,7 +29,12 @@ abstract class ToolCallInfo with _$ToolCallInfo {
     @Default({}) Map<String, dynamic> args,
 
     /// Execution status (pending -> running -> success/error)
-    @Default(ToolExecutionStatus.pending) ToolExecutionStatus status,
+    ///
+    /// H5: unknown server-side status degrades to pending (the same neutral
+    /// default as an absent field) instead of crashing the message parse.
+    @JsonKey(unknownEnumValue: ToolExecutionStatus.pending)
+    @Default(ToolExecutionStatus.pending)
+    ToolExecutionStatus status,
 
     /// Execution duration in milliseconds
     @JsonKey(name: 'duration_ms') int? durationMs,
@@ -67,7 +72,9 @@ abstract class UIComponentInfo with _$UIComponentInfo {
     @Default({}) Map<String, dynamic> data,
 
     /// Rendering mode: live (interactive), historical (read-only)
-    @JsonKey(name: 'mode')
+    ///
+    /// H5: unknown mode degrades to historical (read-only, the safe default).
+    @JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical)
     @Default(UIComponentMode.historical)
     UIComponentMode mode,
 

@@ -41,7 +41,7 @@ final class VersionNotifierProvider
   }
 }
 
-String _$versionNotifierHash() => r'f8c2d335138be4e88f4c3b385aff2413964c305a';
+String _$versionNotifierHash() => r'8c133dd4bc76f5e7171bcaf573f689d201c7db0d';
 
 abstract class _$VersionNotifier extends $Notifier<VersionCheckState> {
   VersionCheckState build();

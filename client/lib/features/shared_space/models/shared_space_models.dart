@@ -50,10 +50,18 @@ abstract class SharedSpaceMember with _$SharedSpaceMember {
     required String userId,
     required String username,
     String? avatarUrl,
-    @Default(MemberRole.member) MemberRole role,
+    // H5: an unknown server-side role must degrade to the least-privileged
+    // value instead of crashing the whole space/member payload parse.
+    @JsonKey(unknownEnumValue: MemberRole.member)
+    @Default(MemberRole.member)
+    MemberRole role,
     DateTime? createdAt,
     String? email,
-    @Default(InviteStatus.accepted) InviteStatus status,
+    // H5: an unknown invite status is an *unresolved* state, not an accepted
+    // membership — degrade to pending instead of crashing the parse.
+    @JsonKey(unknownEnumValue: InviteStatus.pending)
+    @Default(InviteStatus.accepted)
+    InviteStatus status,
     @Default('0.00') String contributionAmount,
   }) = _SharedSpaceMember;
 
@@ -80,7 +88,11 @@ abstract class SharedSpace with _$SharedSpace {
     required String name,
     String? description,
     required SpaceCreator creator,
-    @Default(MemberRole.member) MemberRole role,
+    // H5: unknown role degrades to least-privileged member (see
+    // SharedSpaceMember.role).
+    @JsonKey(unknownEnumValue: MemberRole.member)
+    @Default(MemberRole.member)
+    MemberRole role,
     DateTime? createdAt,
     DateTime? updatedAt,
     List<SharedSpaceMember>? members,
@@ -154,6 +166,10 @@ abstract class NotificationModel with _$NotificationModel {
   const factory NotificationModel({
     required String id,
     required String userId,
+    // H5: `other` is the designed neutral fallback for unknown notification
+    // types (see the enum's doc) — wire it so server-side additions render a
+    // neutral card instead of crashing the whole list parse.
+    @JsonKey(unknownEnumValue: NotificationType.other)
     required NotificationType type,
     required String title,
     required String message,

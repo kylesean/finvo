@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SharedSpaceMember {
 
- String get userId; String get username; String? get avatarUrl; MemberRole get role; DateTime? get createdAt; String? get email; InviteStatus get status; String get contributionAmount;
+ String get userId; String get username; String? get avatarUrl;@JsonKey(unknownEnumValue: MemberRole.member) MemberRole get role; DateTime? get createdAt; String? get email;@JsonKey(unknownEnumValue: InviteStatus.pending) InviteStatus get status; String get contributionAmount;
 /// Create a copy of SharedSpaceMember
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $SharedSpaceMemberCopyWith<$Res>  {
   factory $SharedSpaceMemberCopyWith(SharedSpaceMember value, $Res Function(SharedSpaceMember) _then) = _$SharedSpaceMemberCopyWithImpl;
 @useResult
 $Res call({
- String userId, String username, String? avatarUrl, MemberRole role, DateTime? createdAt, String? email, InviteStatus status, String contributionAmount
+ String userId, String username, String? avatarUrl,@JsonKey(unknownEnumValue: MemberRole.member) MemberRole role, DateTime? createdAt, String? email,@JsonKey(unknownEnumValue: InviteStatus.pending) InviteStatus status, String contributionAmount
 });
 
 
@@ -160,7 +160,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String username,  String? avatarUrl,  MemberRole role,  DateTime? createdAt,  String? email,  InviteStatus status,  String contributionAmount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String username,  String? avatarUrl, @JsonKey(unknownEnumValue: MemberRole.member)  MemberRole role,  DateTime? createdAt,  String? email, @JsonKey(unknownEnumValue: InviteStatus.pending)  InviteStatus status,  String contributionAmount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SharedSpaceMember() when $default != null:
 return $default(_that.userId,_that.username,_that.avatarUrl,_that.role,_that.createdAt,_that.email,_that.status,_that.contributionAmount);case _:
@@ -181,7 +181,7 @@ return $default(_that.userId,_that.username,_that.avatarUrl,_that.role,_that.cre
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String username,  String? avatarUrl,  MemberRole role,  DateTime? createdAt,  String? email,  InviteStatus status,  String contributionAmount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String username,  String? avatarUrl, @JsonKey(unknownEnumValue: MemberRole.member)  MemberRole role,  DateTime? createdAt,  String? email, @JsonKey(unknownEnumValue: InviteStatus.pending)  InviteStatus status,  String contributionAmount)  $default,) {final _that = this;
 switch (_that) {
 case _SharedSpaceMember():
 return $default(_that.userId,_that.username,_that.avatarUrl,_that.role,_that.createdAt,_that.email,_that.status,_that.contributionAmount);case _:
@@ -201,7 +201,7 @@ return $default(_that.userId,_that.username,_that.avatarUrl,_that.role,_that.cre
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String username,  String? avatarUrl,  MemberRole role,  DateTime? createdAt,  String? email,  InviteStatus status,  String contributionAmount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String username,  String? avatarUrl, @JsonKey(unknownEnumValue: MemberRole.member)  MemberRole role,  DateTime? createdAt,  String? email, @JsonKey(unknownEnumValue: InviteStatus.pending)  InviteStatus status,  String contributionAmount)?  $default,) {final _that = this;
 switch (_that) {
 case _SharedSpaceMember() when $default != null:
 return $default(_that.userId,_that.username,_that.avatarUrl,_that.role,_that.createdAt,_that.email,_that.status,_that.contributionAmount);case _:
@@ -216,16 +216,16 @@ return $default(_that.userId,_that.username,_that.avatarUrl,_that.role,_that.cre
 @JsonSerializable()
 
 class _SharedSpaceMember implements SharedSpaceMember {
-  const _SharedSpaceMember({required this.userId, required this.username, this.avatarUrl, this.role = MemberRole.member, this.createdAt, this.email, this.status = InviteStatus.accepted, this.contributionAmount = '0.00'});
+  const _SharedSpaceMember({required this.userId, required this.username, this.avatarUrl, @JsonKey(unknownEnumValue: MemberRole.member) this.role = MemberRole.member, this.createdAt, this.email, @JsonKey(unknownEnumValue: InviteStatus.pending) this.status = InviteStatus.accepted, this.contributionAmount = '0.00'});
   factory _SharedSpaceMember.fromJson(Map<String, dynamic> json) => _$SharedSpaceMemberFromJson(json);
 
 @override final  String userId;
 @override final  String username;
 @override final  String? avatarUrl;
-@override@JsonKey() final  MemberRole role;
+@override@JsonKey(unknownEnumValue: MemberRole.member) final  MemberRole role;
 @override final  DateTime? createdAt;
 @override final  String? email;
-@override@JsonKey() final  InviteStatus status;
+@override@JsonKey(unknownEnumValue: InviteStatus.pending) final  InviteStatus status;
 @override@JsonKey() final  String contributionAmount;
 
 /// Create a copy of SharedSpaceMember
@@ -261,7 +261,7 @@ abstract mixin class _$SharedSpaceMemberCopyWith<$Res> implements $SharedSpaceMe
   factory _$SharedSpaceMemberCopyWith(_SharedSpaceMember value, $Res Function(_SharedSpaceMember) _then) = __$SharedSpaceMemberCopyWithImpl;
 @override @useResult
 $Res call({
- String userId, String username, String? avatarUrl, MemberRole role, DateTime? createdAt, String? email, InviteStatus status, String contributionAmount
+ String userId, String username, String? avatarUrl,@JsonKey(unknownEnumValue: MemberRole.member) MemberRole role, DateTime? createdAt, String? email,@JsonKey(unknownEnumValue: InviteStatus.pending) InviteStatus status, String contributionAmount
 });
 
 
@@ -568,7 +568,7 @@ as String?,
 /// @nodoc
 mixin _$SharedSpace {
 
- String get id; String get name; String? get description; SpaceCreator get creator; MemberRole get role; DateTime? get createdAt; DateTime? get updatedAt; List<SharedSpaceMember>? get members; int get transactionCount; String? get currentInviteCode; DateTime? get inviteCodeExpiresAt; String get totalExpense;
+ String get id; String get name; String? get description; SpaceCreator get creator;@JsonKey(unknownEnumValue: MemberRole.member) MemberRole get role; DateTime? get createdAt; DateTime? get updatedAt; List<SharedSpaceMember>? get members; int get transactionCount; String? get currentInviteCode; DateTime? get inviteCodeExpiresAt; String get totalExpense;
 /// Create a copy of SharedSpace
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -601,7 +601,7 @@ abstract mixin class $SharedSpaceCopyWith<$Res>  {
   factory $SharedSpaceCopyWith(SharedSpace value, $Res Function(SharedSpace) _then) = _$SharedSpaceCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String? description, SpaceCreator creator, MemberRole role, DateTime? createdAt, DateTime? updatedAt, List<SharedSpaceMember>? members, int transactionCount, String? currentInviteCode, DateTime? inviteCodeExpiresAt, String totalExpense
+ String id, String name, String? description, SpaceCreator creator,@JsonKey(unknownEnumValue: MemberRole.member) MemberRole role, DateTime? createdAt, DateTime? updatedAt, List<SharedSpaceMember>? members, int transactionCount, String? currentInviteCode, DateTime? inviteCodeExpiresAt, String totalExpense
 });
 
 
@@ -726,7 +726,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  SpaceCreator creator,  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  SpaceCreator creator, @JsonKey(unknownEnumValue: MemberRole.member)  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SharedSpace() when $default != null:
 return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
@@ -747,7 +747,7 @@ return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  SpaceCreator creator,  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  SpaceCreator creator, @JsonKey(unknownEnumValue: MemberRole.member)  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)  $default,) {final _that = this;
 switch (_that) {
 case _SharedSpace():
 return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
@@ -767,7 +767,7 @@ return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? description,  SpaceCreator creator,  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? description,  SpaceCreator creator, @JsonKey(unknownEnumValue: MemberRole.member)  MemberRole role,  DateTime? createdAt,  DateTime? updatedAt,  List<SharedSpaceMember>? members,  int transactionCount,  String? currentInviteCode,  DateTime? inviteCodeExpiresAt,  String totalExpense)?  $default,) {final _that = this;
 switch (_that) {
 case _SharedSpace() when $default != null:
 return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_that.createdAt,_that.updatedAt,_that.members,_that.transactionCount,_that.currentInviteCode,_that.inviteCodeExpiresAt,_that.totalExpense);case _:
@@ -782,14 +782,14 @@ return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_
 @JsonSerializable()
 
 class _SharedSpace implements SharedSpace {
-  const _SharedSpace({required this.id, required this.name, this.description, required this.creator, this.role = MemberRole.member, this.createdAt, this.updatedAt, final  List<SharedSpaceMember>? members, this.transactionCount = 0, this.currentInviteCode, this.inviteCodeExpiresAt, this.totalExpense = '0.00'}): _members = members;
+  const _SharedSpace({required this.id, required this.name, this.description, required this.creator, @JsonKey(unknownEnumValue: MemberRole.member) this.role = MemberRole.member, this.createdAt, this.updatedAt, final  List<SharedSpaceMember>? members, this.transactionCount = 0, this.currentInviteCode, this.inviteCodeExpiresAt, this.totalExpense = '0.00'}): _members = members;
   factory _SharedSpace.fromJson(Map<String, dynamic> json) => _$SharedSpaceFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override final  String? description;
 @override final  SpaceCreator creator;
-@override@JsonKey() final  MemberRole role;
+@override@JsonKey(unknownEnumValue: MemberRole.member) final  MemberRole role;
 @override final  DateTime? createdAt;
 @override final  DateTime? updatedAt;
  final  List<SharedSpaceMember>? _members;
@@ -839,7 +839,7 @@ abstract mixin class _$SharedSpaceCopyWith<$Res> implements $SharedSpaceCopyWith
   factory _$SharedSpaceCopyWith(_SharedSpace value, $Res Function(_SharedSpace) _then) = __$SharedSpaceCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String? description, SpaceCreator creator, MemberRole role, DateTime? createdAt, DateTime? updatedAt, List<SharedSpaceMember>? members, int transactionCount, String? currentInviteCode, DateTime? inviteCodeExpiresAt, String totalExpense
+ String id, String name, String? description, SpaceCreator creator,@JsonKey(unknownEnumValue: MemberRole.member) MemberRole role, DateTime? createdAt, DateTime? updatedAt, List<SharedSpaceMember>? members, int transactionCount, String? currentInviteCode, DateTime? inviteCodeExpiresAt, String totalExpense
 });
 
 
@@ -1718,7 +1718,7 @@ as bool,
 /// @nodoc
 mixin _$NotificationModel {
 
- String get id; String get userId; NotificationType get type; String get title; String get message; Map<String, dynamic>? get data; bool get isRead; DateTime? get createdAt; DateTime? get readAt;
+ String get id; String get userId;@JsonKey(unknownEnumValue: NotificationType.other) NotificationType get type; String get title; String get message; Map<String, dynamic>? get data; bool get isRead; DateTime? get createdAt; DateTime? get readAt;
 /// Create a copy of NotificationModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1751,7 +1751,7 @@ abstract mixin class $NotificationModelCopyWith<$Res>  {
   factory $NotificationModelCopyWith(NotificationModel value, $Res Function(NotificationModel) _then) = _$NotificationModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId, NotificationType type, String title, String message, Map<String, dynamic>? data, bool isRead, DateTime? createdAt, DateTime? readAt
+ String id, String userId,@JsonKey(unknownEnumValue: NotificationType.other) NotificationType type, String title, String message, Map<String, dynamic>? data, bool isRead, DateTime? createdAt, DateTime? readAt
 });
 
 
@@ -1864,7 +1864,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @JsonKey(unknownEnumValue: NotificationType.other)  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NotificationModel() when $default != null:
 return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that.data,_that.isRead,_that.createdAt,_that.readAt);case _:
@@ -1885,7 +1885,7 @@ return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @JsonKey(unknownEnumValue: NotificationType.other)  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)  $default,) {final _that = this;
 switch (_that) {
 case _NotificationModel():
 return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that.data,_that.isRead,_that.createdAt,_that.readAt);case _:
@@ -1905,7 +1905,7 @@ return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @JsonKey(unknownEnumValue: NotificationType.other)  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)?  $default,) {final _that = this;
 switch (_that) {
 case _NotificationModel() when $default != null:
 return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that.data,_that.isRead,_that.createdAt,_that.readAt);case _:
@@ -1920,12 +1920,12 @@ return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that
 @JsonSerializable()
 
 class _NotificationModel implements NotificationModel {
-  const _NotificationModel({required this.id, required this.userId, required this.type, required this.title, required this.message, final  Map<String, dynamic>? data, this.isRead = false, this.createdAt, this.readAt}): _data = data;
+  const _NotificationModel({required this.id, required this.userId, @JsonKey(unknownEnumValue: NotificationType.other) required this.type, required this.title, required this.message, final  Map<String, dynamic>? data, this.isRead = false, this.createdAt, this.readAt}): _data = data;
   factory _NotificationModel.fromJson(Map<String, dynamic> json) => _$NotificationModelFromJson(json);
 
 @override final  String id;
 @override final  String userId;
-@override final  NotificationType type;
+@override@JsonKey(unknownEnumValue: NotificationType.other) final  NotificationType type;
 @override final  String title;
 @override final  String message;
  final  Map<String, dynamic>? _data;
@@ -1974,7 +1974,7 @@ abstract mixin class _$NotificationModelCopyWith<$Res> implements $NotificationM
   factory _$NotificationModelCopyWith(_NotificationModel value, $Res Function(_NotificationModel) _then) = __$NotificationModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId, NotificationType type, String title, String message, Map<String, dynamic>? data, bool isRead, DateTime? createdAt, DateTime? readAt
+ String id, String userId,@JsonKey(unknownEnumValue: NotificationType.other) NotificationType type, String title, String message, Map<String, dynamic>? data, bool isRead, DateTime? createdAt, DateTime? readAt
 });
 
 

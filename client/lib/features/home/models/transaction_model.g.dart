@@ -120,7 +120,11 @@ Map<String, dynamic> _$TransactionCommentModelToJson(
 _TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
     _TransactionModel(
       id: json['id'] as String,
-      type: $enumDecode(_$TransactionTypeEnumMap, json['type']),
+      type: $enumDecode(
+        _$TransactionTypeEnumMap,
+        json['type'],
+        unknownValue: TransactionType.other,
+      ),
       category: json['category'] as String,
       categoryKey: json['categoryKey'] as String?,
       categoryText: json['categoryText'] as String?,

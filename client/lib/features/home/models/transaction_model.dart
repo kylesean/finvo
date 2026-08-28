@@ -125,6 +125,9 @@ abstract class TransactionCommentModel with _$TransactionCommentModel {
 abstract class TransactionModel with _$TransactionModel {
   const factory TransactionModel({
     required String id, // Unique ID
+    // H5: `other` is the designed neutral fallback for unknown transaction
+    // types (the hand-written fromApiJson path already degrades to it).
+    @JsonKey(unknownEnumValue: TransactionType.other)
     required TransactionType type, // Transaction type (expense/income/transfer)
     required String category, // Category (e.g., Dining, Transport, Salary)
     String? categoryKey, // Category ID

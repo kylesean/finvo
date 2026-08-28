@@ -36,13 +36,15 @@ abstract class ChatMessage with _$ChatMessage {
     DateTime? timestamp,
     @Default('') String content,
 
-    @JsonKey(name: 'messageType')
+    // H5: unknown server-side enum values degrade to the same neutral
+    // defaults as absent fields instead of crashing the conversation parse.
+    @JsonKey(name: 'messageType', unknownEnumValue: MessageType.text)
     @Default(MessageType.text)
     MessageType messageType,
-    @JsonKey(name: 'feedbackStatus')
+    @JsonKey(name: 'feedbackStatus', unknownEnumValue: AIFeedbackStatus.none)
     @Default(AIFeedbackStatus.none)
     AIFeedbackStatus feedbackStatus,
-    @JsonKey(name: 'streamingStatus')
+    @JsonKey(name: 'streamingStatus', unknownEnumValue: StreamingStatus.none)
     @Default(StreamingStatus.none)
     StreamingStatus streamingStatus,
     @JsonKey(name: 'isTyping') @Default(false) bool isTyping,

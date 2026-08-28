@@ -1,9 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/utils/tolerant_json.dart';
+import 'package:logging/logging.dart';
 
 part 'financial_account.freezed.dart';
 part 'financial_account.g.dart';
+
+final _logger = Logger('financial_account');
 
 /// Account display info for cross-currency views
 @freezed
@@ -69,9 +72,17 @@ abstract class FinancialAccount with _$FinancialAccount {
     required String name,
 
     /// Account nature: ASSET or LIABILITY
+    ///
+    /// H5: an unknown wire value degrades to [FinancialNature.asset] (with a
+    /// warning) instead of crashing the whole account-list parse.
+    @JsonKey(fromJson: _financialNatureFromJson)
     required FinancialNature nature,
 
     /// Account type: CASH, DEPOSIT, E_MONEY etc.
+    ///
+    /// H5: an unknown wire value degrades to null (same as an absent type)
+    /// instead of crashing the parse.
+    @JsonKey(fromJson: _financialAccountTypeFromJson)
     FinancialAccountType? type,
 
     /// Currency code (Default: CNY)
@@ -95,7 +106,12 @@ abstract class FinancialAccount with _$FinancialAccount {
     AccountDisplay? display,
 
     /// Account status
-    @Default(AccountStatus.active) AccountStatus status,
+    ///
+    /// H5: unknown status degrades to [AccountStatus.inactive] (conservative
+    /// non-active) instead of crashing the parse.
+    @JsonKey(unknownEnumValue: AccountStatus.inactive)
+    @Default(AccountStatus.active)
+    AccountStatus status,
 
     /// Creation time (ISO 8601 string)
     String? createdAt,
@@ -145,4 +161,37 @@ abstract class FinancialAccountRequest with _$FinancialAccountRequest {
 
   factory FinancialAccountRequest.fromJson(Map<String, dynamic> json) =>
       _$FinancialAccountRequestFromJson(json);
+}
+
+/// H5: tolerant decoder for [FinancialNature] — unknown wire values degrade
+/// to [FinancialNature.asset] (the majority case) with a warning instead of
+/// crashing the whole account-list parse.
+FinancialNature _financialNatureFromJson(dynamic value) {
+  final wire = value?.toString().toUpperCase();
+  if (wire == 'LIABILITY') return FinancialNature.liability;
+  if (wire == 'ASSET') return FinancialNature.asset;
+  _logger.warning('Unknown FinancialNature "$value"; degrading to asset');
+  return FinancialNature.asset;
+}
+
+/// H5: tolerant decoder for [FinancialAccountType] — unknown wire values
+/// degrade to null (same as an absent type) with a warning instead of
+/// crashing the parse.
+FinancialAccountType? _financialAccountTypeFromJson(dynamic value) {
+  if (value == null) return null;
+  final type = switch (value.toString().toUpperCase()) {
+    'CASH' => FinancialAccountType.cash,
+    'DEPOSIT' => FinancialAccountType.deposit,
+    'E_MONEY' => FinancialAccountType.eMoney,
+    'INVESTMENT' => FinancialAccountType.investment,
+    'RECEIVABLE' => FinancialAccountType.receivable,
+    'CREDIT_CARD' => FinancialAccountType.creditCard,
+    'LOAN' => FinancialAccountType.loan,
+    'PAYABLE' => FinancialAccountType.payable,
+    _ => null,
+  };
+  if (type == null) {
+    _logger.warning('Unknown FinancialAccountType "$value"; degrading to null');
+  }
+  return type;
 }

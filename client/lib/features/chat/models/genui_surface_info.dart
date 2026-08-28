@@ -32,7 +32,11 @@ abstract class GenUiSurfaceInfo with _$GenUiSurfaceInfo {
     required String messageId,
     DateTime? createdAt,
     DateTime? updatedAt,
-    @Default(SurfaceStatus.loading) SurfaceStatus status,
+    // H5: unknown status degrades to loading (the same neutral default as an
+    // absent field) instead of crashing the history parse.
+    @JsonKey(unknownEnumValue: SurfaceStatus.loading)
+    @Default(SurfaceStatus.loading)
+    SurfaceStatus status,
   }) = _GenUiSurfaceInfo;
 
   factory GenUiSurfaceInfo.fromJson(Map<String, dynamic> json) =>

@@ -12,7 +12,11 @@ _ToolCallInfo _$ToolCallInfoFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       args: json['args'] as Map<String, dynamic>? ?? const {},
       status:
-          $enumDecodeNullable(_$ToolExecutionStatusEnumMap, json['status']) ??
+          $enumDecodeNullable(
+            _$ToolExecutionStatusEnumMap,
+            json['status'],
+            unknownValue: ToolExecutionStatus.pending,
+          ) ??
           ToolExecutionStatus.pending,
       durationMs: (json['duration_ms'] as num?)?.toInt(),
       resultPreview: json['result'] as String?,
@@ -46,7 +50,11 @@ _UIComponentInfo _$UIComponentInfoFromJson(Map<String, dynamic> json) =>
       componentType: json['componentType'] as String,
       data: json['data'] as Map<String, dynamic>? ?? const {},
       mode:
-          $enumDecodeNullable(_$UIComponentModeEnumMap, json['mode']) ??
+          $enumDecodeNullable(
+            _$UIComponentModeEnumMap,
+            json['mode'],
+            unknownValue: UIComponentMode.historical,
+          ) ??
           UIComponentMode.historical,
       userSelection: json['userSelection'] as Map<String, dynamic>?,
       toolCallId: json['toolCallId'] as String?,

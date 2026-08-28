@@ -293,15 +293,24 @@ mixin _$FinancialAccount {
 /// Account ID (UUID from backend)
  String? get id;/// Account name
  String get name;/// Account nature: ASSET or LIABILITY
- FinancialNature get nature;/// Account type: CASH, DEPOSIT, E_MONEY etc.
- FinancialAccountType? get type;/// Currency code (Default: CNY)
+///
+/// H5: an unknown wire value degrades to [FinancialNature.asset] (with a
+/// warning) instead of crashing the whole account-list parse.
+@JsonKey(fromJson: _financialNatureFromJson) FinancialNature get nature;/// Account type: CASH, DEPOSIT, E_MONEY etc.
+///
+/// H5: an unknown wire value degrades to null (same as an absent type)
+/// instead of crashing the parse.
+@JsonKey(fromJson: _financialAccountTypeFromJson) FinancialAccountType? get type;/// Currency code (Default: CNY)
  String get currencyCode;/// Initial balance
 @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal get initialBalance;/// Current balance
 @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) Decimal? get currentBalance;/// Whether to include in net worth
  bool get includeInNetWorth;/// Whether to include in daily cash flow forecast (Liquidity tag)
  bool get includeInCashFlow;/// Display info (optional, used for cross-currency summary display)
  AccountDisplay? get display;/// Account status
- AccountStatus get status;/// Creation time (ISO 8601 string)
+///
+/// H5: unknown status degrades to [AccountStatus.inactive] (conservative
+/// non-active) instead of crashing the parse.
+@JsonKey(unknownEnumValue: AccountStatus.inactive) AccountStatus get status;/// Creation time (ISO 8601 string)
  String? get createdAt;/// Update time (ISO 8601 string)
  String? get updatedAt;
 /// Create a copy of FinancialAccount
@@ -336,7 +345,7 @@ abstract mixin class $FinancialAccountCopyWith<$Res>  {
   factory $FinancialAccountCopyWith(FinancialAccount value, $Res Function(FinancialAccount) _then) = _$FinancialAccountCopyWithImpl;
 @useResult
 $Res call({
- String? id, String name, FinancialNature nature, FinancialAccountType? type, String currencyCode,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal initialBalance,@JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) Decimal? currentBalance, bool includeInNetWorth, bool includeInCashFlow, AccountDisplay? display, AccountStatus status, String? createdAt, String? updatedAt
+ String? id, String name,@JsonKey(fromJson: _financialNatureFromJson) FinancialNature nature,@JsonKey(fromJson: _financialAccountTypeFromJson) FinancialAccountType? type, String currencyCode,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal initialBalance,@JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) Decimal? currentBalance, bool includeInNetWorth, bool includeInCashFlow, AccountDisplay? display,@JsonKey(unknownEnumValue: AccountStatus.inactive) AccountStatus status, String? createdAt, String? updatedAt
 });
 
 
@@ -465,7 +474,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String name, @JsonKey(fromJson: _financialNatureFromJson)  FinancialNature nature, @JsonKey(fromJson: _financialAccountTypeFromJson)  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display, @JsonKey(unknownEnumValue: AccountStatus.inactive)  AccountStatus status,  String? createdAt,  String? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FinancialAccount() when $default != null:
 return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_that.initialBalance,_that.currentBalance,_that.includeInNetWorth,_that.includeInCashFlow,_that.display,_that.status,_that.createdAt,_that.updatedAt);case _:
@@ -486,7 +495,7 @@ return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String name, @JsonKey(fromJson: _financialNatureFromJson)  FinancialNature nature, @JsonKey(fromJson: _financialAccountTypeFromJson)  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display, @JsonKey(unknownEnumValue: AccountStatus.inactive)  AccountStatus status,  String? createdAt,  String? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _FinancialAccount():
 return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_that.initialBalance,_that.currentBalance,_that.includeInNetWorth,_that.includeInCashFlow,_that.display,_that.status,_that.createdAt,_that.updatedAt);case _:
@@ -506,7 +515,7 @@ return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String name,  FinancialNature nature,  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display,  AccountStatus status,  String? createdAt,  String? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String name, @JsonKey(fromJson: _financialNatureFromJson)  FinancialNature nature, @JsonKey(fromJson: _financialAccountTypeFromJson)  FinancialAccountType? type,  String currencyCode, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero)  Decimal? currentBalance,  bool includeInNetWorth,  bool includeInCashFlow,  AccountDisplay? display, @JsonKey(unknownEnumValue: AccountStatus.inactive)  AccountStatus status,  String? createdAt,  String? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _FinancialAccount() when $default != null:
 return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_that.initialBalance,_that.currentBalance,_that.includeInNetWorth,_that.includeInCashFlow,_that.display,_that.status,_that.createdAt,_that.updatedAt);case _:
@@ -521,7 +530,7 @@ return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_
 @JsonSerializable()
 
 class _FinancialAccount implements FinancialAccount {
-  const _FinancialAccount({this.id, required this.name, required this.nature, this.type, this.currencyCode = 'CNY', @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) this.currentBalance, this.includeInNetWorth = true, this.includeInCashFlow = false, this.display, this.status = AccountStatus.active, this.createdAt, this.updatedAt});
+  const _FinancialAccount({this.id, required this.name, @JsonKey(fromJson: _financialNatureFromJson) required this.nature, @JsonKey(fromJson: _financialAccountTypeFromJson) this.type, this.currencyCode = 'CNY', @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) this.currentBalance, this.includeInNetWorth = true, this.includeInCashFlow = false, this.display, @JsonKey(unknownEnumValue: AccountStatus.inactive) this.status = AccountStatus.active, this.createdAt, this.updatedAt});
   factory _FinancialAccount.fromJson(Map<String, dynamic> json) => _$FinancialAccountFromJson(json);
 
 /// Account ID (UUID from backend)
@@ -529,9 +538,15 @@ class _FinancialAccount implements FinancialAccount {
 /// Account name
 @override final  String name;
 /// Account nature: ASSET or LIABILITY
-@override final  FinancialNature nature;
+///
+/// H5: an unknown wire value degrades to [FinancialNature.asset] (with a
+/// warning) instead of crashing the whole account-list parse.
+@override@JsonKey(fromJson: _financialNatureFromJson) final  FinancialNature nature;
 /// Account type: CASH, DEPOSIT, E_MONEY etc.
-@override final  FinancialAccountType? type;
+///
+/// H5: an unknown wire value degrades to null (same as an absent type)
+/// instead of crashing the parse.
+@override@JsonKey(fromJson: _financialAccountTypeFromJson) final  FinancialAccountType? type;
 /// Currency code (Default: CNY)
 @override@JsonKey() final  String currencyCode;
 /// Initial balance
@@ -545,7 +560,10 @@ class _FinancialAccount implements FinancialAccount {
 /// Display info (optional, used for cross-currency summary display)
 @override final  AccountDisplay? display;
 /// Account status
-@override@JsonKey() final  AccountStatus status;
+///
+/// H5: unknown status degrades to [AccountStatus.inactive] (conservative
+/// non-active) instead of crashing the parse.
+@override@JsonKey(unknownEnumValue: AccountStatus.inactive) final  AccountStatus status;
 /// Creation time (ISO 8601 string)
 @override final  String? createdAt;
 /// Update time (ISO 8601 string)
@@ -584,7 +602,7 @@ abstract mixin class _$FinancialAccountCopyWith<$Res> implements $FinancialAccou
   factory _$FinancialAccountCopyWith(_FinancialAccount value, $Res Function(_FinancialAccount) _then) = __$FinancialAccountCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String name, FinancialNature nature, FinancialAccountType? type, String currencyCode,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal initialBalance,@JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) Decimal? currentBalance, bool includeInNetWorth, bool includeInCashFlow, AccountDisplay? display, AccountStatus status, String? createdAt, String? updatedAt
+ String? id, String name,@JsonKey(fromJson: _financialNatureFromJson) FinancialNature nature,@JsonKey(fromJson: _financialAccountTypeFromJson) FinancialAccountType? type, String currencyCode,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal initialBalance,@JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) Decimal? currentBalance, bool includeInNetWorth, bool includeInCashFlow, AccountDisplay? display,@JsonKey(unknownEnumValue: AccountStatus.inactive) AccountStatus status, String? createdAt, String? updatedAt
 });
 
 

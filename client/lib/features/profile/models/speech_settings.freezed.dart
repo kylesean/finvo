@@ -16,7 +16,10 @@ T _$identity<T>(T value) => value;
 mixin _$SpeechSettings {
 
 /// Speech recognition service type
- SpeechServiceType get serviceType;/// WebSocket server host (Only used for websocket type)
+///
+/// H5: unknown service type degrades to system (the same neutral default
+/// as an absent field) instead of crashing the settings parse.
+@JsonKey(unknownEnumValue: SpeechServiceType.system) SpeechServiceType get serviceType;/// WebSocket server host (Only used for websocket type)
  String? get websocketHost;/// WebSocket server port (Only used for websocket type)
  int? get websocketPort;/// WebSocket path (Only used for websocket type)
  String? get websocketPath;/// Speech recognition language (Only valid for system type)
@@ -53,7 +56,7 @@ abstract mixin class $SpeechSettingsCopyWith<$Res>  {
   factory $SpeechSettingsCopyWith(SpeechSettings value, $Res Function(SpeechSettings) _then) = _$SpeechSettingsCopyWithImpl;
 @useResult
 $Res call({
- SpeechServiceType serviceType, String? websocketHost, int? websocketPort, String? websocketPath, String localeId
+@JsonKey(unknownEnumValue: SpeechServiceType.system) SpeechServiceType serviceType, String? websocketHost, int? websocketPort, String? websocketPath, String localeId
 });
 
 
@@ -162,7 +165,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SpeechServiceType serviceType,  String? websocketHost,  int? websocketPort,  String? websocketPath,  String localeId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(unknownEnumValue: SpeechServiceType.system)  SpeechServiceType serviceType,  String? websocketHost,  int? websocketPort,  String? websocketPath,  String localeId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SpeechSettings() when $default != null:
 return $default(_that.serviceType,_that.websocketHost,_that.websocketPort,_that.websocketPath,_that.localeId);case _:
@@ -183,7 +186,7 @@ return $default(_that.serviceType,_that.websocketHost,_that.websocketPort,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SpeechServiceType serviceType,  String? websocketHost,  int? websocketPort,  String? websocketPath,  String localeId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(unknownEnumValue: SpeechServiceType.system)  SpeechServiceType serviceType,  String? websocketHost,  int? websocketPort,  String? websocketPath,  String localeId)  $default,) {final _that = this;
 switch (_that) {
 case _SpeechSettings():
 return $default(_that.serviceType,_that.websocketHost,_that.websocketPort,_that.websocketPath,_that.localeId);case _:
@@ -203,7 +206,7 @@ return $default(_that.serviceType,_that.websocketHost,_that.websocketPort,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SpeechServiceType serviceType,  String? websocketHost,  int? websocketPort,  String? websocketPath,  String localeId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(unknownEnumValue: SpeechServiceType.system)  SpeechServiceType serviceType,  String? websocketHost,  int? websocketPort,  String? websocketPath,  String localeId)?  $default,) {final _that = this;
 switch (_that) {
 case _SpeechSettings() when $default != null:
 return $default(_that.serviceType,_that.websocketHost,_that.websocketPort,_that.websocketPath,_that.localeId);case _:
@@ -218,11 +221,14 @@ return $default(_that.serviceType,_that.websocketHost,_that.websocketPort,_that.
 @JsonSerializable()
 
 class _SpeechSettings implements SpeechSettings {
-  const _SpeechSettings({this.serviceType = SpeechServiceType.system, this.websocketHost, this.websocketPort, this.websocketPath, this.localeId = 'zh_CN'});
+  const _SpeechSettings({@JsonKey(unknownEnumValue: SpeechServiceType.system) this.serviceType = SpeechServiceType.system, this.websocketHost, this.websocketPort, this.websocketPath, this.localeId = 'zh_CN'});
   factory _SpeechSettings.fromJson(Map<String, dynamic> json) => _$SpeechSettingsFromJson(json);
 
 /// Speech recognition service type
-@override@JsonKey() final  SpeechServiceType serviceType;
+///
+/// H5: unknown service type degrades to system (the same neutral default
+/// as an absent field) instead of crashing the settings parse.
+@override@JsonKey(unknownEnumValue: SpeechServiceType.system) final  SpeechServiceType serviceType;
 /// WebSocket server host (Only used for websocket type)
 @override final  String? websocketHost;
 /// WebSocket server port (Only used for websocket type)
@@ -265,7 +271,7 @@ abstract mixin class _$SpeechSettingsCopyWith<$Res> implements $SpeechSettingsCo
   factory _$SpeechSettingsCopyWith(_SpeechSettings value, $Res Function(_SpeechSettings) _then) = __$SpeechSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- SpeechServiceType serviceType, String? websocketHost, int? websocketPort, String? websocketPath, String localeId
+@JsonKey(unknownEnumValue: SpeechServiceType.system) SpeechServiceType serviceType, String? websocketHost, int? websocketPort, String? websocketPath, String localeId
 });
 
 

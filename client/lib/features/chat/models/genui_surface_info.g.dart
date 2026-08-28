@@ -17,7 +17,11 @@ _GenUiSurfaceInfo _$GenUiSurfaceInfoFromJson(Map<String, dynamic> json) =>
           ? null
           : DateTime.parse(json['updatedAt'] as String),
       status:
-          $enumDecodeNullable(_$SurfaceStatusEnumMap, json['status']) ??
+          $enumDecodeNullable(
+            _$SurfaceStatusEnumMap,
+            json['status'],
+            unknownValue: SurfaceStatus.loading,
+          ) ??
           SurfaceStatus.loading,
     );
 

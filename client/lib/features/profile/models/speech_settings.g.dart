@@ -12,6 +12,7 @@ _SpeechSettings _$SpeechSettingsFromJson(Map<String, dynamic> json) =>
           $enumDecodeNullable(
             _$SpeechServiceTypeEnumMap,
             json['serviceType'],
+            unknownValue: SpeechServiceType.system,
           ) ??
           SpeechServiceType.system,
       websocketHost: json['websocketHost'] as String?,

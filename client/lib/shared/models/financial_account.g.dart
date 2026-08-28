@@ -28,8 +28,8 @@ _FinancialAccount _$FinancialAccountFromJson(Map<String, dynamic> json) =>
     _FinancialAccount(
       id: json['id'] as String?,
       name: json['name'] as String,
-      nature: $enumDecode(_$FinancialNatureEnumMap, json['nature']),
-      type: $enumDecodeNullable(_$FinancialAccountTypeEnumMap, json['type']),
+      nature: _financialNatureFromJson(json['nature']),
+      type: _financialAccountTypeFromJson(json['type']),
       currencyCode: json['currencyCode'] as String? ?? 'CNY',
       initialBalance: decimalFromJson(json['initialBalance']),
       currentBalance: decimalOrNullFromJson(json['currentBalance']),
@@ -39,7 +39,11 @@ _FinancialAccount _$FinancialAccountFromJson(Map<String, dynamic> json) =>
           ? null
           : AccountDisplay.fromJson(json['display'] as Map<String, dynamic>),
       status:
-          $enumDecodeNullable(_$AccountStatusEnumMap, json['status']) ??
+          $enumDecodeNullable(
+            _$AccountStatusEnumMap,
+            json['status'],
+            unknownValue: AccountStatus.inactive,
+          ) ??
           AccountStatus.active,
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
@@ -62,6 +66,12 @@ Map<String, dynamic> _$FinancialAccountToJson(_FinancialAccount instance) =>
       'updatedAt': instance.updatedAt,
     };
 
+const _$AccountStatusEnumMap = {
+  AccountStatus.active: 'ACTIVE',
+  AccountStatus.inactive: 'INACTIVE',
+  AccountStatus.closed: 'CLOSED',
+};
+
 const _$FinancialNatureEnumMap = {
   FinancialNature.asset: 'ASSET',
   FinancialNature.liability: 'LIABILITY',
@@ -76,12 +86,6 @@ const _$FinancialAccountTypeEnumMap = {
   FinancialAccountType.creditCard: 'CREDIT_CARD',
   FinancialAccountType.loan: 'LOAN',
   FinancialAccountType.payable: 'PAYABLE',
-};
-
-const _$AccountStatusEnumMap = {
-  AccountStatus.active: 'ACTIVE',
-  AccountStatus.inactive: 'INACTIVE',
-  AccountStatus.closed: 'CLOSED',
 };
 
 _FinancialAccountSummary _$FinancialAccountSummaryFromJson(

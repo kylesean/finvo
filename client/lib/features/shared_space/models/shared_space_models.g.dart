@@ -12,14 +12,22 @@ _SharedSpaceMember _$SharedSpaceMemberFromJson(Map<String, dynamic> json) =>
       username: json['username'] as String,
       avatarUrl: json['avatarUrl'] as String?,
       role:
-          $enumDecodeNullable(_$MemberRoleEnumMap, json['role']) ??
+          $enumDecodeNullable(
+            _$MemberRoleEnumMap,
+            json['role'],
+            unknownValue: MemberRole.member,
+          ) ??
           MemberRole.member,
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
       email: json['email'] as String?,
       status:
-          $enumDecodeNullable(_$InviteStatusEnumMap, json['status']) ??
+          $enumDecodeNullable(
+            _$InviteStatusEnumMap,
+            json['status'],
+            unknownValue: InviteStatus.pending,
+          ) ??
           InviteStatus.accepted,
       contributionAmount: json['contributionAmount'] as String? ?? '0.00',
     );
@@ -68,7 +76,11 @@ _SharedSpace _$SharedSpaceFromJson(Map<String, dynamic> json) => _SharedSpace(
   description: json['description'] as String?,
   creator: SpaceCreator.fromJson(json['creator'] as Map<String, dynamic>),
   role:
-      $enumDecodeNullable(_$MemberRoleEnumMap, json['role']) ??
+      $enumDecodeNullable(
+        _$MemberRoleEnumMap,
+        json['role'],
+        unknownValue: MemberRole.member,
+      ) ??
       MemberRole.member,
   createdAt: json['createdAt'] == null
       ? null
@@ -161,7 +173,11 @@ _NotificationModel _$NotificationModelFromJson(Map<String, dynamic> json) =>
     _NotificationModel(
       id: json['id'] as String,
       userId: json['userId'] as String,
-      type: $enumDecode(_$NotificationTypeEnumMap, json['type']),
+      type: $enumDecode(
+        _$NotificationTypeEnumMap,
+        json['type'],
+        unknownValue: NotificationType.other,
+      ),
       title: json['title'] as String,
       message: json['message'] as String,
       data: json['data'] as Map<String, dynamic>?,

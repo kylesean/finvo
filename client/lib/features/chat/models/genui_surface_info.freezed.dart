@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GenUiSurfaceInfo {
 
- String get surfaceId; String get messageId; DateTime? get createdAt; DateTime? get updatedAt; SurfaceStatus get status;
+ String get surfaceId; String get messageId; DateTime? get createdAt; DateTime? get updatedAt;@JsonKey(unknownEnumValue: SurfaceStatus.loading) SurfaceStatus get status;
 /// Create a copy of GenUiSurfaceInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $GenUiSurfaceInfoCopyWith<$Res>  {
   factory $GenUiSurfaceInfoCopyWith(GenUiSurfaceInfo value, $Res Function(GenUiSurfaceInfo) _then) = _$GenUiSurfaceInfoCopyWithImpl;
 @useResult
 $Res call({
- String surfaceId, String messageId, DateTime? createdAt, DateTime? updatedAt, SurfaceStatus status
+ String surfaceId, String messageId, DateTime? createdAt, DateTime? updatedAt,@JsonKey(unknownEnumValue: SurfaceStatus.loading) SurfaceStatus status
 });
 
 
@@ -157,7 +157,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String surfaceId,  String messageId,  DateTime? createdAt,  DateTime? updatedAt,  SurfaceStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String surfaceId,  String messageId,  DateTime? createdAt,  DateTime? updatedAt, @JsonKey(unknownEnumValue: SurfaceStatus.loading)  SurfaceStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GenUiSurfaceInfo() when $default != null:
 return $default(_that.surfaceId,_that.messageId,_that.createdAt,_that.updatedAt,_that.status);case _:
@@ -178,7 +178,7 @@ return $default(_that.surfaceId,_that.messageId,_that.createdAt,_that.updatedAt,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String surfaceId,  String messageId,  DateTime? createdAt,  DateTime? updatedAt,  SurfaceStatus status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String surfaceId,  String messageId,  DateTime? createdAt,  DateTime? updatedAt, @JsonKey(unknownEnumValue: SurfaceStatus.loading)  SurfaceStatus status)  $default,) {final _that = this;
 switch (_that) {
 case _GenUiSurfaceInfo():
 return $default(_that.surfaceId,_that.messageId,_that.createdAt,_that.updatedAt,_that.status);case _:
@@ -198,7 +198,7 @@ return $default(_that.surfaceId,_that.messageId,_that.createdAt,_that.updatedAt,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String surfaceId,  String messageId,  DateTime? createdAt,  DateTime? updatedAt,  SurfaceStatus status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String surfaceId,  String messageId,  DateTime? createdAt,  DateTime? updatedAt, @JsonKey(unknownEnumValue: SurfaceStatus.loading)  SurfaceStatus status)?  $default,) {final _that = this;
 switch (_that) {
 case _GenUiSurfaceInfo() when $default != null:
 return $default(_that.surfaceId,_that.messageId,_that.createdAt,_that.updatedAt,_that.status);case _:
@@ -213,14 +213,14 @@ return $default(_that.surfaceId,_that.messageId,_that.createdAt,_that.updatedAt,
 @JsonSerializable()
 
 class _GenUiSurfaceInfo implements GenUiSurfaceInfo {
-  const _GenUiSurfaceInfo({required this.surfaceId, required this.messageId, this.createdAt, this.updatedAt, this.status = SurfaceStatus.loading});
+  const _GenUiSurfaceInfo({required this.surfaceId, required this.messageId, this.createdAt, this.updatedAt, @JsonKey(unknownEnumValue: SurfaceStatus.loading) this.status = SurfaceStatus.loading});
   factory _GenUiSurfaceInfo.fromJson(Map<String, dynamic> json) => _$GenUiSurfaceInfoFromJson(json);
 
 @override final  String surfaceId;
 @override final  String messageId;
 @override final  DateTime? createdAt;
 @override final  DateTime? updatedAt;
-@override@JsonKey() final  SurfaceStatus status;
+@override@JsonKey(unknownEnumValue: SurfaceStatus.loading) final  SurfaceStatus status;
 
 /// Create a copy of GenUiSurfaceInfo
 /// with the given fields replaced by the non-null parameter values.
@@ -255,7 +255,7 @@ abstract mixin class _$GenUiSurfaceInfoCopyWith<$Res> implements $GenUiSurfaceIn
   factory _$GenUiSurfaceInfoCopyWith(_GenUiSurfaceInfo value, $Res Function(_GenUiSurfaceInfo) _then) = __$GenUiSurfaceInfoCopyWithImpl;
 @override @useResult
 $Res call({
- String surfaceId, String messageId, DateTime? createdAt, DateTime? updatedAt, SurfaceStatus status
+ String surfaceId, String messageId, DateTime? createdAt, DateTime? updatedAt,@JsonKey(unknownEnumValue: SurfaceStatus.loading) SurfaceStatus status
 });
 
 

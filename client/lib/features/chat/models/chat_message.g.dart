@@ -12,13 +12,25 @@ _ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) => _ChatMessage(
   timestamp: _dateTimeNullableFromJson(json['timestamp']),
   content: json['content'] as String? ?? '',
   messageType:
-      $enumDecodeNullable(_$MessageTypeEnumMap, json['messageType']) ??
+      $enumDecodeNullable(
+        _$MessageTypeEnumMap,
+        json['messageType'],
+        unknownValue: MessageType.text,
+      ) ??
       MessageType.text,
   feedbackStatus:
-      $enumDecodeNullable(_$AIFeedbackStatusEnumMap, json['feedbackStatus']) ??
+      $enumDecodeNullable(
+        _$AIFeedbackStatusEnumMap,
+        json['feedbackStatus'],
+        unknownValue: AIFeedbackStatus.none,
+      ) ??
       AIFeedbackStatus.none,
   streamingStatus:
-      $enumDecodeNullable(_$StreamingStatusEnumMap, json['streamingStatus']) ??
+      $enumDecodeNullable(
+        _$StreamingStatusEnumMap,
+        json['streamingStatus'],
+        unknownValue: StreamingStatus.none,
+      ) ??
       StreamingStatus.none,
   isTyping: json['isTyping'] as bool? ?? false,
   conversationId: json['conversationId'] as String?,

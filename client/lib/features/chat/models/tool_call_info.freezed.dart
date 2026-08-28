@@ -16,7 +16,10 @@ T _$identity<T>(T value) => value;
 mixin _$ToolCallInfo {
 
  String get id; String get name; Map<String, dynamic> get args;/// Execution status (pending -> running -> success/error)
- ToolExecutionStatus get status;/// Execution duration in milliseconds
+///
+/// H5: unknown server-side status degrades to pending (the same neutral
+/// default as an absent field) instead of crashing the message parse.
+@JsonKey(unknownEnumValue: ToolExecutionStatus.pending) ToolExecutionStatus get status;/// Execution duration in milliseconds
 @JsonKey(name: 'duration_ms') int? get durationMs;/// Truncated result preview (max 200 chars)
 @JsonKey(name: 'result') String? get resultPreview;/// Error message if status is error
  String? get error;/// Timestamp when tool started
@@ -53,7 +56,7 @@ abstract mixin class $ToolCallInfoCopyWith<$Res>  {
   factory $ToolCallInfoCopyWith(ToolCallInfo value, $Res Function(ToolCallInfo) _then) = _$ToolCallInfoCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, Map<String, dynamic> args, ToolExecutionStatus status,@JsonKey(name: 'duration_ms') int? durationMs,@JsonKey(name: 'result') String? resultPreview, String? error, String? timestamp
+ String id, String name, Map<String, dynamic> args,@JsonKey(unknownEnumValue: ToolExecutionStatus.pending) ToolExecutionStatus status,@JsonKey(name: 'duration_ms') int? durationMs,@JsonKey(name: 'result') String? resultPreview, String? error, String? timestamp
 });
 
 
@@ -165,7 +168,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  Map<String, dynamic> args,  ToolExecutionStatus status, @JsonKey(name: 'duration_ms')  int? durationMs, @JsonKey(name: 'result')  String? resultPreview,  String? error,  String? timestamp)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  Map<String, dynamic> args, @JsonKey(unknownEnumValue: ToolExecutionStatus.pending)  ToolExecutionStatus status, @JsonKey(name: 'duration_ms')  int? durationMs, @JsonKey(name: 'result')  String? resultPreview,  String? error,  String? timestamp)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ToolCallInfo() when $default != null:
 return $default(_that.id,_that.name,_that.args,_that.status,_that.durationMs,_that.resultPreview,_that.error,_that.timestamp);case _:
@@ -186,7 +189,7 @@ return $default(_that.id,_that.name,_that.args,_that.status,_that.durationMs,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  Map<String, dynamic> args,  ToolExecutionStatus status, @JsonKey(name: 'duration_ms')  int? durationMs, @JsonKey(name: 'result')  String? resultPreview,  String? error,  String? timestamp)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  Map<String, dynamic> args, @JsonKey(unknownEnumValue: ToolExecutionStatus.pending)  ToolExecutionStatus status, @JsonKey(name: 'duration_ms')  int? durationMs, @JsonKey(name: 'result')  String? resultPreview,  String? error,  String? timestamp)  $default,) {final _that = this;
 switch (_that) {
 case _ToolCallInfo():
 return $default(_that.id,_that.name,_that.args,_that.status,_that.durationMs,_that.resultPreview,_that.error,_that.timestamp);case _:
@@ -206,7 +209,7 @@ return $default(_that.id,_that.name,_that.args,_that.status,_that.durationMs,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  Map<String, dynamic> args,  ToolExecutionStatus status, @JsonKey(name: 'duration_ms')  int? durationMs, @JsonKey(name: 'result')  String? resultPreview,  String? error,  String? timestamp)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  Map<String, dynamic> args, @JsonKey(unknownEnumValue: ToolExecutionStatus.pending)  ToolExecutionStatus status, @JsonKey(name: 'duration_ms')  int? durationMs, @JsonKey(name: 'result')  String? resultPreview,  String? error,  String? timestamp)?  $default,) {final _that = this;
 switch (_that) {
 case _ToolCallInfo() when $default != null:
 return $default(_that.id,_that.name,_that.args,_that.status,_that.durationMs,_that.resultPreview,_that.error,_that.timestamp);case _:
@@ -221,7 +224,7 @@ return $default(_that.id,_that.name,_that.args,_that.status,_that.durationMs,_th
 @JsonSerializable()
 
 class _ToolCallInfo implements ToolCallInfo {
-  const _ToolCallInfo({required this.id, required this.name, final  Map<String, dynamic> args = const {}, this.status = ToolExecutionStatus.pending, @JsonKey(name: 'duration_ms') this.durationMs, @JsonKey(name: 'result') this.resultPreview, this.error, this.timestamp}): _args = args;
+  const _ToolCallInfo({required this.id, required this.name, final  Map<String, dynamic> args = const {}, @JsonKey(unknownEnumValue: ToolExecutionStatus.pending) this.status = ToolExecutionStatus.pending, @JsonKey(name: 'duration_ms') this.durationMs, @JsonKey(name: 'result') this.resultPreview, this.error, this.timestamp}): _args = args;
   factory _ToolCallInfo.fromJson(Map<String, dynamic> json) => _$ToolCallInfoFromJson(json);
 
 @override final  String id;
@@ -234,7 +237,10 @@ class _ToolCallInfo implements ToolCallInfo {
 }
 
 /// Execution status (pending -> running -> success/error)
-@override@JsonKey() final  ToolExecutionStatus status;
+///
+/// H5: unknown server-side status degrades to pending (the same neutral
+/// default as an absent field) instead of crashing the message parse.
+@override@JsonKey(unknownEnumValue: ToolExecutionStatus.pending) final  ToolExecutionStatus status;
 /// Execution duration in milliseconds
 @override@JsonKey(name: 'duration_ms') final  int? durationMs;
 /// Truncated result preview (max 200 chars)
@@ -277,7 +283,7 @@ abstract mixin class _$ToolCallInfoCopyWith<$Res> implements $ToolCallInfoCopyWi
   factory _$ToolCallInfoCopyWith(_ToolCallInfo value, $Res Function(_ToolCallInfo) _then) = __$ToolCallInfoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, Map<String, dynamic> args, ToolExecutionStatus status,@JsonKey(name: 'duration_ms') int? durationMs,@JsonKey(name: 'result') String? resultPreview, String? error, String? timestamp
+ String id, String name, Map<String, dynamic> args,@JsonKey(unknownEnumValue: ToolExecutionStatus.pending) ToolExecutionStatus status,@JsonKey(name: 'duration_ms') int? durationMs,@JsonKey(name: 'result') String? resultPreview, String? error, String? timestamp
 });
 
 
@@ -316,7 +322,9 @@ as String?,
 mixin _$UIComponentInfo {
 
 @JsonKey(name: 'surfaceId') String get surfaceId;@JsonKey(name: 'componentType') String get componentType; Map<String, dynamic> get data;/// Rendering mode: live (interactive), historical (read-only)
-@JsonKey(name: 'mode') UIComponentMode get mode;/// User's selection (for showing what user chose in historical mode)
+///
+/// H5: unknown mode degrades to historical (read-only, the safe default).
+@JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical) UIComponentMode get mode;/// User's selection (for showing what user chose in historical mode)
 @JsonKey(name: 'userSelection') Map<String, dynamic>? get userSelection;/// Tool call context
 @JsonKey(name: 'toolCallId') String? get toolCallId;@JsonKey(name: 'toolName') String? get toolName;
 /// Create a copy of UIComponentInfo
@@ -351,7 +359,7 @@ abstract mixin class $UIComponentInfoCopyWith<$Res>  {
   factory $UIComponentInfoCopyWith(UIComponentInfo value, $Res Function(UIComponentInfo) _then) = _$UIComponentInfoCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'surfaceId') String surfaceId,@JsonKey(name: 'componentType') String componentType, Map<String, dynamic> data,@JsonKey(name: 'mode') UIComponentMode mode,@JsonKey(name: 'userSelection') Map<String, dynamic>? userSelection,@JsonKey(name: 'toolCallId') String? toolCallId,@JsonKey(name: 'toolName') String? toolName
+@JsonKey(name: 'surfaceId') String surfaceId,@JsonKey(name: 'componentType') String componentType, Map<String, dynamic> data,@JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical) UIComponentMode mode,@JsonKey(name: 'userSelection') Map<String, dynamic>? userSelection,@JsonKey(name: 'toolCallId') String? toolCallId,@JsonKey(name: 'toolName') String? toolName
 });
 
 
@@ -462,7 +470,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'surfaceId')  String surfaceId, @JsonKey(name: 'componentType')  String componentType,  Map<String, dynamic> data, @JsonKey(name: 'mode')  UIComponentMode mode, @JsonKey(name: 'userSelection')  Map<String, dynamic>? userSelection, @JsonKey(name: 'toolCallId')  String? toolCallId, @JsonKey(name: 'toolName')  String? toolName)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'surfaceId')  String surfaceId, @JsonKey(name: 'componentType')  String componentType,  Map<String, dynamic> data, @JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical)  UIComponentMode mode, @JsonKey(name: 'userSelection')  Map<String, dynamic>? userSelection, @JsonKey(name: 'toolCallId')  String? toolCallId, @JsonKey(name: 'toolName')  String? toolName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UIComponentInfo() when $default != null:
 return $default(_that.surfaceId,_that.componentType,_that.data,_that.mode,_that.userSelection,_that.toolCallId,_that.toolName);case _:
@@ -483,7 +491,7 @@ return $default(_that.surfaceId,_that.componentType,_that.data,_that.mode,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'surfaceId')  String surfaceId, @JsonKey(name: 'componentType')  String componentType,  Map<String, dynamic> data, @JsonKey(name: 'mode')  UIComponentMode mode, @JsonKey(name: 'userSelection')  Map<String, dynamic>? userSelection, @JsonKey(name: 'toolCallId')  String? toolCallId, @JsonKey(name: 'toolName')  String? toolName)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'surfaceId')  String surfaceId, @JsonKey(name: 'componentType')  String componentType,  Map<String, dynamic> data, @JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical)  UIComponentMode mode, @JsonKey(name: 'userSelection')  Map<String, dynamic>? userSelection, @JsonKey(name: 'toolCallId')  String? toolCallId, @JsonKey(name: 'toolName')  String? toolName)  $default,) {final _that = this;
 switch (_that) {
 case _UIComponentInfo():
 return $default(_that.surfaceId,_that.componentType,_that.data,_that.mode,_that.userSelection,_that.toolCallId,_that.toolName);case _:
@@ -503,7 +511,7 @@ return $default(_that.surfaceId,_that.componentType,_that.data,_that.mode,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'surfaceId')  String surfaceId, @JsonKey(name: 'componentType')  String componentType,  Map<String, dynamic> data, @JsonKey(name: 'mode')  UIComponentMode mode, @JsonKey(name: 'userSelection')  Map<String, dynamic>? userSelection, @JsonKey(name: 'toolCallId')  String? toolCallId, @JsonKey(name: 'toolName')  String? toolName)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'surfaceId')  String surfaceId, @JsonKey(name: 'componentType')  String componentType,  Map<String, dynamic> data, @JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical)  UIComponentMode mode, @JsonKey(name: 'userSelection')  Map<String, dynamic>? userSelection, @JsonKey(name: 'toolCallId')  String? toolCallId, @JsonKey(name: 'toolName')  String? toolName)?  $default,) {final _that = this;
 switch (_that) {
 case _UIComponentInfo() when $default != null:
 return $default(_that.surfaceId,_that.componentType,_that.data,_that.mode,_that.userSelection,_that.toolCallId,_that.toolName);case _:
@@ -518,7 +526,7 @@ return $default(_that.surfaceId,_that.componentType,_that.data,_that.mode,_that.
 @JsonSerializable()
 
 class _UIComponentInfo implements UIComponentInfo {
-  const _UIComponentInfo({@JsonKey(name: 'surfaceId') required this.surfaceId, @JsonKey(name: 'componentType') required this.componentType, final  Map<String, dynamic> data = const {}, @JsonKey(name: 'mode') this.mode = UIComponentMode.historical, @JsonKey(name: 'userSelection') final  Map<String, dynamic>? userSelection, @JsonKey(name: 'toolCallId') this.toolCallId, @JsonKey(name: 'toolName') this.toolName}): _data = data,_userSelection = userSelection;
+  const _UIComponentInfo({@JsonKey(name: 'surfaceId') required this.surfaceId, @JsonKey(name: 'componentType') required this.componentType, final  Map<String, dynamic> data = const {}, @JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical) this.mode = UIComponentMode.historical, @JsonKey(name: 'userSelection') final  Map<String, dynamic>? userSelection, @JsonKey(name: 'toolCallId') this.toolCallId, @JsonKey(name: 'toolName') this.toolName}): _data = data,_userSelection = userSelection;
   factory _UIComponentInfo.fromJson(Map<String, dynamic> json) => _$UIComponentInfoFromJson(json);
 
 @override@JsonKey(name: 'surfaceId') final  String surfaceId;
@@ -531,7 +539,9 @@ class _UIComponentInfo implements UIComponentInfo {
 }
 
 /// Rendering mode: live (interactive), historical (read-only)
-@override@JsonKey(name: 'mode') final  UIComponentMode mode;
+///
+/// H5: unknown mode degrades to historical (read-only, the safe default).
+@override@JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical) final  UIComponentMode mode;
 /// User's selection (for showing what user chose in historical mode)
  final  Map<String, dynamic>? _userSelection;
 /// User's selection (for showing what user chose in historical mode)
@@ -580,7 +590,7 @@ abstract mixin class _$UIComponentInfoCopyWith<$Res> implements $UIComponentInfo
   factory _$UIComponentInfoCopyWith(_UIComponentInfo value, $Res Function(_UIComponentInfo) _then) = __$UIComponentInfoCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'surfaceId') String surfaceId,@JsonKey(name: 'componentType') String componentType, Map<String, dynamic> data,@JsonKey(name: 'mode') UIComponentMode mode,@JsonKey(name: 'userSelection') Map<String, dynamic>? userSelection,@JsonKey(name: 'toolCallId') String? toolCallId,@JsonKey(name: 'toolName') String? toolName
+@JsonKey(name: 'surfaceId') String surfaceId,@JsonKey(name: 'componentType') String componentType, Map<String, dynamic> data,@JsonKey(name: 'mode', unknownEnumValue: UIComponentMode.historical) UIComponentMode mode,@JsonKey(name: 'userSelection') Map<String, dynamic>? userSelection,@JsonKey(name: 'toolCallId') String? toolCallId,@JsonKey(name: 'toolName') String? toolName
 });
 
 
