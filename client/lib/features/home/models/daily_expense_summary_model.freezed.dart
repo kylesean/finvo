@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DailyExpenseSummaryModel {
 
-@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime get date;@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal get totalExpense;@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel get heatLevel;
+@JsonKey(fromJson: _dateFromJson, toJson: _dateTimeToIso8601String) DateTime get date;@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal get totalExpense;@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel get heatLevel;
 /// Create a copy of DailyExpenseSummaryModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $DailyExpenseSummaryModelCopyWith<$Res>  {
   factory $DailyExpenseSummaryModelCopyWith(DailyExpenseSummaryModel value, $Res Function(DailyExpenseSummaryModel) _then) = _$DailyExpenseSummaryModelCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime date,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal totalExpense,@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel heatLevel
+@JsonKey(fromJson: _dateFromJson, toJson: _dateTimeToIso8601String) DateTime date,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal totalExpense,@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel heatLevel
 });
 
 
@@ -155,7 +155,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _dateFromJson, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DailyExpenseSummaryModel() when $default != null:
 return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
@@ -176,7 +176,7 @@ return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _dateFromJson, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)  $default,) {final _that = this;
 switch (_that) {
 case _DailyExpenseSummaryModel():
 return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
@@ -196,7 +196,7 @@ return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _dateFromJson, toJson: _dateTimeToIso8601String)  DateTime date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)  Decimal totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString)  ExpenseHeatLevel heatLevel)?  $default,) {final _that = this;
 switch (_that) {
 case _DailyExpenseSummaryModel() when $default != null:
 return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
@@ -211,10 +211,10 @@ return $default(_that.date,_that.totalExpense,_that.heatLevel);case _:
 
 @JsonSerializable(explicitToJson: true)
 class _DailyExpenseSummaryModel extends DailyExpenseSummaryModel {
-  const _DailyExpenseSummaryModel({@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) required this.date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) required this.heatLevel}): super._();
+  const _DailyExpenseSummaryModel({@JsonKey(fromJson: _dateFromJson, toJson: _dateTimeToIso8601String) required this.date, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.totalExpense, @JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) required this.heatLevel}): super._();
   factory _DailyExpenseSummaryModel.fromJson(Map<String, dynamic> json) => _$DailyExpenseSummaryModelFromJson(json);
 
-@override@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) final  DateTime date;
+@override@JsonKey(fromJson: _dateFromJson, toJson: _dateTimeToIso8601String) final  DateTime date;
 @override@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) final  Decimal totalExpense;
 @override@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) final  ExpenseHeatLevel heatLevel;
 
@@ -251,7 +251,7 @@ abstract mixin class _$DailyExpenseSummaryModelCopyWith<$Res> implements $DailyE
   factory _$DailyExpenseSummaryModelCopyWith(_DailyExpenseSummaryModel value, $Res Function(_DailyExpenseSummaryModel) _then) = __$DailyExpenseSummaryModelCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: DateTime.parse, toJson: _dateTimeToIso8601String) DateTime date,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal totalExpense,@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel heatLevel
+@JsonKey(fromJson: _dateFromJson, toJson: _dateTimeToIso8601String) DateTime date,@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) Decimal totalExpense,@JsonKey(fromJson: _heatLevelFromString, toJson: _heatLevelToString) ExpenseHeatLevel heatLevel
 });
 
 

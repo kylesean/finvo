@@ -12,9 +12,9 @@ part 'shared_space_notification_provider.g.dart';
 
 final _logger = Logger('SharedSpaceNotification');
 
-/// Shared-space notification state (uses NotificationModel for space-specific UI)
+/// Shared-space notification state (uses SharedSpaceNotificationModel for space-specific UI)
 class SharedSpaceNotificationState {
-  final List<NotificationModel> notifications;
+  final List<SharedSpaceNotificationModel> notifications;
   final bool isLoading;
   final String? error;
   final int unreadCount;
@@ -31,7 +31,7 @@ class SharedSpaceNotificationState {
   });
 
   SharedSpaceNotificationState copyWith({
-    List<NotificationModel>? notifications,
+    List<SharedSpaceNotificationModel>? notifications,
     bool? isLoading,
     String? error,
     int? unreadCount,
@@ -56,7 +56,10 @@ class SharedSpaceNotificationState {
 @riverpod
 class SharedSpaceNotification extends _$SharedSpaceNotification
     with
-        NotificationCrudMixin<NotificationModel, SharedSpaceNotificationState> {
+        NotificationCrudMixin<
+          SharedSpaceNotificationModel,
+          SharedSpaceNotificationState
+        > {
   static const _pageSize = 20;
 
   /// Monotonic pagination generation: a refresh supersedes any in-flight
@@ -74,7 +77,8 @@ class SharedSpaceNotification extends _$SharedSpaceNotification
   set notificationState(SharedSpaceNotificationState value) => state = value;
 
   @override
-  List<NotificationModel> get notificationItems => state.notifications;
+  List<SharedSpaceNotificationModel> get notificationItems =>
+      state.notifications;
 
   @override
   int get notificationUnreadCount => state.unreadCount;
@@ -84,20 +88,20 @@ class SharedSpaceNotification extends _$SharedSpaceNotification
 
   @override
   SharedSpaceNotificationState updateNotificationState(
-    List<NotificationModel> items, {
+    List<SharedSpaceNotificationModel> items, {
     int? unreadCount,
     int? total,
   }) => state.copyWith(notifications: items, unreadCount: unreadCount);
 
   @override
-  String notificationIdOf(NotificationModel item) => item.id;
+  String notificationIdOf(SharedSpaceNotificationModel item) => item.id;
 
   @override
-  bool notificationIsReadOf(NotificationModel item) => item.isRead;
+  bool notificationIsReadOf(SharedSpaceNotificationModel item) => item.isRead;
 
   @override
-  NotificationModel notificationMarkRead(
-    NotificationModel item, {
+  SharedSpaceNotificationModel notificationMarkRead(
+    SharedSpaceNotificationModel item, {
     required DateTime readAt,
   }) => item.isRead ? item : item.copyWith(isRead: true, readAt: readAt);
 
@@ -146,10 +150,10 @@ class SharedSpaceNotification extends _$SharedSpaceNotification
 
       if (!ref.mounted || generation != _generation) return;
 
-      // Map central NotificationItem -> shared_space NotificationModel
+      // Map central NotificationItem -> shared_space SharedSpaceNotificationModel
       final mapped = res.items
           .map(
-            (item) => NotificationModel(
+            (item) => SharedSpaceNotificationModel(
               id: item.id,
               userId: item.userId,
               type: _mapNotificationType(item.type),

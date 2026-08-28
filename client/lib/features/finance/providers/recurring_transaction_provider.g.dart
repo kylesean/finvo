@@ -49,7 +49,7 @@ final class RecurringTransactionNotifierProvider
 }
 
 String _$recurringTransactionNotifierHash() =>
-    r'db82eac79c8d32e58be2371415911f04e5ca1373';
+    r'd8e4d366882e70158d653fb07d1712fcb69daaf2';
 
 /// The recurring transaction list state manager.
 

@@ -7,7 +7,7 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
 
 class NotificationCard extends StatelessWidget {
-  final NotificationModel notification;
+  final SharedSpaceNotificationModel notification;
   final VoidCallback? onTap;
   final VoidCallback? onAccept;
   final VoidCallback? onReject;

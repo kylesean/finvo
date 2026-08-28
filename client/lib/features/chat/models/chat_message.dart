@@ -1,13 +1,17 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:logging/logging.dart';
 
 // ignore_for_file: invalid_annotation_target
 import 'package:finvo/features/chat/models/chat_message_attachment.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:finvo/features/chat/services/data_uri_service.dart';
 import 'package:finvo/features/chat/models/tool_call_info.dart';
 import 'package:finvo/features/chat/models/message_content_part.dart';
 
 part 'chat_message.freezed.dart';
 part 'chat_message.g.dart';
+
+final _logger = Logger('ChatMessage');
 
 @JsonEnum()
 enum MessageSender { user, ai, system, tool, assistant }
@@ -149,13 +153,9 @@ String _senderToJson(MessageSender sender) {
 }
 
 // Custom serializers for nullable DateTime
-DateTime? _dateTimeNullableFromJson(dynamic json) {
-  if (json == null) return null;
-  if (json is String) {
-    return DateTime.parse(json);
-  }
-  throw FormatException('Invalid DateTime format: $json');
-}
+// M24: tolerant parse — a single malformed timestamp must not kill the
+// whole conversation-history payload (same policy as NotificationItem).
+DateTime? _dateTimeNullableFromJson(dynamic json) => tryParseDateTime(json);
 
 String? _dateTimeNullableToJson(DateTime? dateTime) =>
     dateTime?.toIso8601String();
@@ -167,18 +167,29 @@ Object? _readSenderValue(Map<dynamic, dynamic> json, String key) {
 }
 
 List<ChatMessageAttachment> _attachmentsFromJson(dynamic json) {
+  // M24: skip-and-log instead of throwing — one malformed attachment entry
+  // in a server-persisted history must not crash the whole conversation
+  // load (same discipline as _toolCallsFromJson / Budget list parsing).
   if (json == null) return [];
-  if (json is List) {
-    return json.map((item) {
-      if (item is Map<String, dynamic>) {
-        return chatMessageAttachmentFromJson(item);
-      } else if (item is Map) {
-        return chatMessageAttachmentFromJson(Map<String, dynamic>.from(item));
-      }
-      throw FormatException('Invalid ChatMessageAttachment format: $item');
-    }).toList();
+  if (json is! List) {
+    _logger.warning('Invalid attachments list format: ${json.runtimeType}');
+    return [];
   }
-  throw FormatException('Invalid attachments list format: $json');
+  final attachments = <ChatMessageAttachment>[];
+  for (final item in json) {
+    if (item is Map<String, dynamic>) {
+      attachments.add(chatMessageAttachmentFromJson(item));
+    } else if (item is Map) {
+      attachments.add(
+        chatMessageAttachmentFromJson(Map<String, dynamic>.from(item)),
+      );
+    } else {
+      _logger.warning(
+        'Skipping malformed ChatMessageAttachment: ${item.runtimeType}',
+      );
+    }
+  }
+  return attachments;
 }
 
 List<Map<String, dynamic>> _attachmentsToJson(

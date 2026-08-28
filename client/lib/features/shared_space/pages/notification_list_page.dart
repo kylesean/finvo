@@ -178,7 +178,7 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
     );
   }
 
-  void _handleNotificationTap(NotificationModel notification) {
+  void _handleNotificationTap(SharedSpaceNotificationModel notification) {
     // Mark as read
     if (!notification.isRead) {
       unawaited(
@@ -254,7 +254,7 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage> {
   }
 
   Future<void> _handleInviteResponse(
-    NotificationModel notification,
+    SharedSpaceNotificationModel notification,
     String action,
   ) async {
     final spaceId = notification.data?['spaceId']?.toString();

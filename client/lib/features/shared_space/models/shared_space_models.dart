@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/utils/tolerant_json.dart';
 
 part 'shared_space_models.freezed.dart';
 part 'shared_space_models.g.dart';
@@ -138,7 +139,9 @@ abstract class SettlementItem with _$SettlementItem {
     required String fromUsername,
     required String toUserId,
     required String toUsername,
-    @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString)
+    // M24: tolerant converter — strict Decimal.parse crashed the whole
+    // settlement parse on a malformed/empty string.
+    @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)
     required Decimal amount,
   }) = _SettlementItem;
 
@@ -151,7 +154,9 @@ abstract class Settlement with _$Settlement {
   const factory Settlement({
     required String spaceId,
     required List<SettlementItem> items,
-    @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString)
+    // M24: tolerant converter — strict Decimal.parse crashed the whole
+    // settlement parse on a malformed/empty string.
+    @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)
     required Decimal totalAmount,
     required DateTime calculatedAt,
     @Default(false) bool isSettled,
@@ -162,8 +167,9 @@ abstract class Settlement with _$Settlement {
 }
 
 @freezed
-abstract class NotificationModel with _$NotificationModel {
-  const factory NotificationModel({
+abstract class SharedSpaceNotificationModel
+    with _$SharedSpaceNotificationModel {
+  const factory SharedSpaceNotificationModel({
     required String id,
     required String userId,
     // H5: `other` is the designed neutral fallback for unknown notification
@@ -177,10 +183,10 @@ abstract class NotificationModel with _$NotificationModel {
     @Default(false) bool isRead,
     DateTime? createdAt,
     DateTime? readAt,
-  }) = _NotificationModel;
+  }) = _SharedSpaceNotificationModel;
 
-  factory NotificationModel.fromJson(Map<String, dynamic> json) =>
-      _$NotificationModelFromJson(json);
+  factory SharedSpaceNotificationModel.fromJson(Map<String, dynamic> json) =>
+      _$SharedSpaceNotificationModelFromJson(json);
 }
 
 @freezed
@@ -233,7 +239,7 @@ abstract class SharedSpaceListResponse with _$SharedSpaceListResponse {
 @freezed
 abstract class NotificationListResponse with _$NotificationListResponse {
   const factory NotificationListResponse({
-    required List<NotificationModel> notifications,
+    required List<SharedSpaceNotificationModel> notifications,
     required int total,
     required int unreadCount,
     required int page,

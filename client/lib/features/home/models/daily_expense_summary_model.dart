@@ -35,6 +35,11 @@ String _dateTimeToIso8601String(DateTime dt) {
   return dt.toIso8601String().substring(0, 10); // YYYY-MM-DD
 }
 
+// M24: tolerant date parse — a malformed per-day timestamp must not kill
+// the whole calendar-month payload; fall back to the epoch "same-day"
+// placeholder semantics of DateTime.now() as the rest of the codebase does.
+DateTime _dateFromJson(Object? value) => tryDate(value) ?? DateTime.now();
+
 @freezed
 abstract class DailyExpenseSummaryModel with _$DailyExpenseSummaryModel {
   const DailyExpenseSummaryModel._();
@@ -44,7 +49,7 @@ abstract class DailyExpenseSummaryModel with _$DailyExpenseSummaryModel {
   ) // Ensure toJson methods are also correctly generated
   const factory DailyExpenseSummaryModel({
     @JsonKey(
-      fromJson: DateTime.parse,
+      fromJson: _dateFromJson,
       toJson: _dateTimeToIso8601String,
     ) // Handle date serialization
     required DateTime date,

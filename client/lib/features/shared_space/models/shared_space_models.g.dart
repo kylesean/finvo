@@ -138,7 +138,7 @@ _SettlementItem _$SettlementItemFromJson(Map<String, dynamic> json) =>
       fromUsername: json['fromUsername'] as String,
       toUserId: json['toUserId'] as String,
       toUsername: json['toUsername'] as String,
-      amount: Decimal.parse(json['amount'] as String),
+      amount: decimalFromJson(json['amount']),
     );
 
 Map<String, dynamic> _$SettlementItemToJson(_SettlementItem instance) =>
@@ -155,7 +155,7 @@ _Settlement _$SettlementFromJson(Map<String, dynamic> json) => _Settlement(
   items: (json['items'] as List<dynamic>)
       .map((e) => SettlementItem.fromJson(e as Map<String, dynamic>))
       .toList(),
-  totalAmount: Decimal.parse(json['totalAmount'] as String),
+  totalAmount: decimalFromJson(json['totalAmount']),
   calculatedAt: DateTime.parse(json['calculatedAt'] as String),
   isSettled: json['isSettled'] as bool? ?? false,
 );
@@ -169,39 +169,41 @@ Map<String, dynamic> _$SettlementToJson(_Settlement instance) =>
       'isSettled': instance.isSettled,
     };
 
-_NotificationModel _$NotificationModelFromJson(Map<String, dynamic> json) =>
-    _NotificationModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      type: $enumDecode(
-        _$NotificationTypeEnumMap,
-        json['type'],
-        unknownValue: NotificationType.other,
-      ),
-      title: json['title'] as String,
-      message: json['message'] as String,
-      data: json['data'] as Map<String, dynamic>?,
-      isRead: json['isRead'] as bool? ?? false,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-      readAt: json['readAt'] == null
-          ? null
-          : DateTime.parse(json['readAt'] as String),
-    );
+_SharedSpaceNotificationModel _$SharedSpaceNotificationModelFromJson(
+  Map<String, dynamic> json,
+) => _SharedSpaceNotificationModel(
+  id: json['id'] as String,
+  userId: json['userId'] as String,
+  type: $enumDecode(
+    _$NotificationTypeEnumMap,
+    json['type'],
+    unknownValue: NotificationType.other,
+  ),
+  title: json['title'] as String,
+  message: json['message'] as String,
+  data: json['data'] as Map<String, dynamic>?,
+  isRead: json['isRead'] as bool? ?? false,
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  readAt: json['readAt'] == null
+      ? null
+      : DateTime.parse(json['readAt'] as String),
+);
 
-Map<String, dynamic> _$NotificationModelToJson(_NotificationModel instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'userId': instance.userId,
-      'type': _$NotificationTypeEnumMap[instance.type]!,
-      'title': instance.title,
-      'message': instance.message,
-      'data': instance.data,
-      'isRead': instance.isRead,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'readAt': instance.readAt?.toIso8601String(),
-    };
+Map<String, dynamic> _$SharedSpaceNotificationModelToJson(
+  _SharedSpaceNotificationModel instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'userId': instance.userId,
+  'type': _$NotificationTypeEnumMap[instance.type]!,
+  'title': instance.title,
+  'message': instance.message,
+  'data': instance.data,
+  'isRead': instance.isRead,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'readAt': instance.readAt?.toIso8601String(),
+};
 
 const _$NotificationTypeEnumMap = {
   NotificationType.spaceInvite: 'space_invite',
@@ -289,7 +291,9 @@ _NotificationListResponse _$NotificationListResponseFromJson(
   Map<String, dynamic> json,
 ) => _NotificationListResponse(
   notifications: (json['notifications'] as List<dynamic>)
-      .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
+      .map(
+        (e) => SharedSpaceNotificationModel.fromJson(e as Map<String, dynamic>),
+      )
       .toList(),
   total: (json['total'] as num).toInt(),
   unreadCount: (json['unreadCount'] as num).toInt(),

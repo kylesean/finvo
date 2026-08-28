@@ -1162,7 +1162,7 @@ as DateTime?,
 /// @nodoc
 mixin _$SettlementItem {
 
- String get fromUserId; String get fromUsername; String get toUserId; String get toUsername;@JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) Decimal get amount;
+ String get fromUserId; String get fromUsername; String get toUserId; String get toUsername;@JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) Decimal get amount;
 /// Create a copy of SettlementItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1195,7 +1195,7 @@ abstract mixin class $SettlementItemCopyWith<$Res>  {
   factory $SettlementItemCopyWith(SettlementItem value, $Res Function(SettlementItem) _then) = _$SettlementItemCopyWithImpl;
 @useResult
 $Res call({
- String fromUserId, String fromUsername, String toUserId, String toUsername,@JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) Decimal amount
+ String fromUserId, String fromUsername, String toUserId, String toUsername,@JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) Decimal amount
 });
 
 
@@ -1304,7 +1304,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String fromUserId,  String fromUsername,  String toUserId,  String toUsername, @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString)  Decimal amount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String fromUserId,  String fromUsername,  String toUserId,  String toUsername, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)  Decimal amount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettlementItem() when $default != null:
 return $default(_that.fromUserId,_that.fromUsername,_that.toUserId,_that.toUsername,_that.amount);case _:
@@ -1325,7 +1325,7 @@ return $default(_that.fromUserId,_that.fromUsername,_that.toUserId,_that.toUsern
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String fromUserId,  String fromUsername,  String toUserId,  String toUsername, @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString)  Decimal amount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String fromUserId,  String fromUsername,  String toUserId,  String toUsername, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)  Decimal amount)  $default,) {final _that = this;
 switch (_that) {
 case _SettlementItem():
 return $default(_that.fromUserId,_that.fromUsername,_that.toUserId,_that.toUsername,_that.amount);case _:
@@ -1345,7 +1345,7 @@ return $default(_that.fromUserId,_that.fromUsername,_that.toUserId,_that.toUsern
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String fromUserId,  String fromUsername,  String toUserId,  String toUsername, @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString)  Decimal amount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String fromUserId,  String fromUsername,  String toUserId,  String toUsername, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)  Decimal amount)?  $default,) {final _that = this;
 switch (_that) {
 case _SettlementItem() when $default != null:
 return $default(_that.fromUserId,_that.fromUsername,_that.toUserId,_that.toUsername,_that.amount);case _:
@@ -1360,14 +1360,14 @@ return $default(_that.fromUserId,_that.fromUsername,_that.toUserId,_that.toUsern
 @JsonSerializable()
 
 class _SettlementItem implements SettlementItem {
-  const _SettlementItem({required this.fromUserId, required this.fromUsername, required this.toUserId, required this.toUsername, @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) required this.amount});
+  const _SettlementItem({required this.fromUserId, required this.fromUsername, required this.toUserId, required this.toUsername, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) required this.amount});
   factory _SettlementItem.fromJson(Map<String, dynamic> json) => _$SettlementItemFromJson(json);
 
 @override final  String fromUserId;
 @override final  String fromUsername;
 @override final  String toUserId;
 @override final  String toUsername;
-@override@JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) final  Decimal amount;
+@override@JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) final  Decimal amount;
 
 /// Create a copy of SettlementItem
 /// with the given fields replaced by the non-null parameter values.
@@ -1402,7 +1402,7 @@ abstract mixin class _$SettlementItemCopyWith<$Res> implements $SettlementItemCo
   factory _$SettlementItemCopyWith(_SettlementItem value, $Res Function(_SettlementItem) _then) = __$SettlementItemCopyWithImpl;
 @override @useResult
 $Res call({
- String fromUserId, String fromUsername, String toUserId, String toUsername,@JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) Decimal amount
+ String fromUserId, String fromUsername, String toUserId, String toUsername,@JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) Decimal amount
 });
 
 
@@ -1437,7 +1437,7 @@ as Decimal,
 /// @nodoc
 mixin _$Settlement {
 
- String get spaceId; List<SettlementItem> get items;@JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) Decimal get totalAmount; DateTime get calculatedAt; bool get isSettled;
+ String get spaceId; List<SettlementItem> get items;@JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) Decimal get totalAmount; DateTime get calculatedAt; bool get isSettled;
 /// Create a copy of Settlement
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1470,7 +1470,7 @@ abstract mixin class $SettlementCopyWith<$Res>  {
   factory $SettlementCopyWith(Settlement value, $Res Function(Settlement) _then) = _$SettlementCopyWithImpl;
 @useResult
 $Res call({
- String spaceId, List<SettlementItem> items,@JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) Decimal totalAmount, DateTime calculatedAt, bool isSettled
+ String spaceId, List<SettlementItem> items,@JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) Decimal totalAmount, DateTime calculatedAt, bool isSettled
 });
 
 
@@ -1579,7 +1579,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String spaceId,  List<SettlementItem> items, @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString)  Decimal totalAmount,  DateTime calculatedAt,  bool isSettled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String spaceId,  List<SettlementItem> items, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)  Decimal totalAmount,  DateTime calculatedAt,  bool isSettled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Settlement() when $default != null:
 return $default(_that.spaceId,_that.items,_that.totalAmount,_that.calculatedAt,_that.isSettled);case _:
@@ -1600,7 +1600,7 @@ return $default(_that.spaceId,_that.items,_that.totalAmount,_that.calculatedAt,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String spaceId,  List<SettlementItem> items, @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString)  Decimal totalAmount,  DateTime calculatedAt,  bool isSettled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String spaceId,  List<SettlementItem> items, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)  Decimal totalAmount,  DateTime calculatedAt,  bool isSettled)  $default,) {final _that = this;
 switch (_that) {
 case _Settlement():
 return $default(_that.spaceId,_that.items,_that.totalAmount,_that.calculatedAt,_that.isSettled);case _:
@@ -1620,7 +1620,7 @@ return $default(_that.spaceId,_that.items,_that.totalAmount,_that.calculatedAt,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String spaceId,  List<SettlementItem> items, @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString)  Decimal totalAmount,  DateTime calculatedAt,  bool isSettled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String spaceId,  List<SettlementItem> items, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString)  Decimal totalAmount,  DateTime calculatedAt,  bool isSettled)?  $default,) {final _that = this;
 switch (_that) {
 case _Settlement() when $default != null:
 return $default(_that.spaceId,_that.items,_that.totalAmount,_that.calculatedAt,_that.isSettled);case _:
@@ -1635,7 +1635,7 @@ return $default(_that.spaceId,_that.items,_that.totalAmount,_that.calculatedAt,_
 @JsonSerializable()
 
 class _Settlement implements Settlement {
-  const _Settlement({required this.spaceId, required final  List<SettlementItem> items, @JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) required this.totalAmount, required this.calculatedAt, this.isSettled = false}): _items = items;
+  const _Settlement({required this.spaceId, required final  List<SettlementItem> items, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) required this.totalAmount, required this.calculatedAt, this.isSettled = false}): _items = items;
   factory _Settlement.fromJson(Map<String, dynamic> json) => _$SettlementFromJson(json);
 
 @override final  String spaceId;
@@ -1646,7 +1646,7 @@ class _Settlement implements Settlement {
   return EqualUnmodifiableListView(_items);
 }
 
-@override@JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) final  Decimal totalAmount;
+@override@JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) final  Decimal totalAmount;
 @override final  DateTime calculatedAt;
 @override@JsonKey() final  bool isSettled;
 
@@ -1683,7 +1683,7 @@ abstract mixin class _$SettlementCopyWith<$Res> implements $SettlementCopyWith<$
   factory _$SettlementCopyWith(_Settlement value, $Res Function(_Settlement) _then) = __$SettlementCopyWithImpl;
 @override @useResult
 $Res call({
- String spaceId, List<SettlementItem> items,@JsonKey(fromJson: Decimal.parse, toJson: _decimalToString) Decimal totalAmount, DateTime calculatedAt, bool isSettled
+ String spaceId, List<SettlementItem> items,@JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) Decimal totalAmount, DateTime calculatedAt, bool isSettled
 });
 
 
@@ -1716,22 +1716,22 @@ as bool,
 
 
 /// @nodoc
-mixin _$NotificationModel {
+mixin _$SharedSpaceNotificationModel {
 
  String get id; String get userId;@JsonKey(unknownEnumValue: NotificationType.other) NotificationType get type; String get title; String get message; Map<String, dynamic>? get data; bool get isRead; DateTime? get createdAt; DateTime? get readAt;
-/// Create a copy of NotificationModel
+/// Create a copy of SharedSpaceNotificationModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$NotificationModelCopyWith<NotificationModel> get copyWith => _$NotificationModelCopyWithImpl<NotificationModel>(this as NotificationModel, _$identity);
+$SharedSpaceNotificationModelCopyWith<SharedSpaceNotificationModel> get copyWith => _$SharedSpaceNotificationModelCopyWithImpl<SharedSpaceNotificationModel>(this as SharedSpaceNotificationModel, _$identity);
 
-  /// Serializes this NotificationModel to a JSON map.
+  /// Serializes this SharedSpaceNotificationModel to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationModel&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.data, data)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedSpaceNotificationModel&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.data, data)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1740,15 +1740,15 @@ int get hashCode => Object.hash(runtimeType,id,userId,type,title,message,const D
 
 @override
 String toString() {
-  return 'NotificationModel(id: $id, userId: $userId, type: $type, title: $title, message: $message, data: $data, isRead: $isRead, createdAt: $createdAt, readAt: $readAt)';
+  return 'SharedSpaceNotificationModel(id: $id, userId: $userId, type: $type, title: $title, message: $message, data: $data, isRead: $isRead, createdAt: $createdAt, readAt: $readAt)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $NotificationModelCopyWith<$Res>  {
-  factory $NotificationModelCopyWith(NotificationModel value, $Res Function(NotificationModel) _then) = _$NotificationModelCopyWithImpl;
+abstract mixin class $SharedSpaceNotificationModelCopyWith<$Res>  {
+  factory $SharedSpaceNotificationModelCopyWith(SharedSpaceNotificationModel value, $Res Function(SharedSpaceNotificationModel) _then) = _$SharedSpaceNotificationModelCopyWithImpl;
 @useResult
 $Res call({
  String id, String userId,@JsonKey(unknownEnumValue: NotificationType.other) NotificationType type, String title, String message, Map<String, dynamic>? data, bool isRead, DateTime? createdAt, DateTime? readAt
@@ -1759,14 +1759,14 @@ $Res call({
 
 }
 /// @nodoc
-class _$NotificationModelCopyWithImpl<$Res>
-    implements $NotificationModelCopyWith<$Res> {
-  _$NotificationModelCopyWithImpl(this._self, this._then);
+class _$SharedSpaceNotificationModelCopyWithImpl<$Res>
+    implements $SharedSpaceNotificationModelCopyWith<$Res> {
+  _$SharedSpaceNotificationModelCopyWithImpl(this._self, this._then);
 
-  final NotificationModel _self;
-  final $Res Function(NotificationModel) _then;
+  final SharedSpaceNotificationModel _self;
+  final $Res Function(SharedSpaceNotificationModel) _then;
 
-/// Create a copy of NotificationModel
+/// Create a copy of SharedSpaceNotificationModel
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? type = null,Object? title = null,Object? message = null,Object? data = freezed,Object? isRead = null,Object? createdAt = freezed,Object? readAt = freezed,}) {
   return _then(_self.copyWith(
@@ -1786,8 +1786,8 @@ as DateTime?,
 }
 
 
-/// Adds pattern-matching-related methods to [NotificationModel].
-extension NotificationModelPatterns on NotificationModel {
+/// Adds pattern-matching-related methods to [SharedSpaceNotificationModel].
+extension SharedSpaceNotificationModelPatterns on SharedSpaceNotificationModel {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -1800,10 +1800,10 @@ extension NotificationModelPatterns on NotificationModel {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _NotificationModel value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SharedSpaceNotificationModel value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _NotificationModel() when $default != null:
+case _SharedSpaceNotificationModel() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -1822,10 +1822,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _NotificationModel value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SharedSpaceNotificationModel value)  $default,){
 final _that = this;
 switch (_that) {
-case _NotificationModel():
+case _SharedSpaceNotificationModel():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -1843,10 +1843,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _NotificationModel value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SharedSpaceNotificationModel value)?  $default,){
 final _that = this;
 switch (_that) {
-case _NotificationModel() when $default != null:
+case _SharedSpaceNotificationModel() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -1866,7 +1866,7 @@ return $default(_that);case _:
 
 @optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @JsonKey(unknownEnumValue: NotificationType.other)  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _NotificationModel() when $default != null:
+case _SharedSpaceNotificationModel() when $default != null:
 return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that.data,_that.isRead,_that.createdAt,_that.readAt);case _:
   return orElse();
 
@@ -1887,7 +1887,7 @@ return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that
 
 @optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @JsonKey(unknownEnumValue: NotificationType.other)  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)  $default,) {final _that = this;
 switch (_that) {
-case _NotificationModel():
+case _SharedSpaceNotificationModel():
 return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that.data,_that.isRead,_that.createdAt,_that.readAt);case _:
   throw StateError('Unexpected subclass');
 
@@ -1907,7 +1907,7 @@ return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that
 
 @optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @JsonKey(unknownEnumValue: NotificationType.other)  NotificationType type,  String title,  String message,  Map<String, dynamic>? data,  bool isRead,  DateTime? createdAt,  DateTime? readAt)?  $default,) {final _that = this;
 switch (_that) {
-case _NotificationModel() when $default != null:
+case _SharedSpaceNotificationModel() when $default != null:
 return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that.data,_that.isRead,_that.createdAt,_that.readAt);case _:
   return null;
 
@@ -1919,9 +1919,9 @@ return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that
 /// @nodoc
 @JsonSerializable()
 
-class _NotificationModel implements NotificationModel {
-  const _NotificationModel({required this.id, required this.userId, @JsonKey(unknownEnumValue: NotificationType.other) required this.type, required this.title, required this.message, final  Map<String, dynamic>? data, this.isRead = false, this.createdAt, this.readAt}): _data = data;
-  factory _NotificationModel.fromJson(Map<String, dynamic> json) => _$NotificationModelFromJson(json);
+class _SharedSpaceNotificationModel implements SharedSpaceNotificationModel {
+  const _SharedSpaceNotificationModel({required this.id, required this.userId, @JsonKey(unknownEnumValue: NotificationType.other) required this.type, required this.title, required this.message, final  Map<String, dynamic>? data, this.isRead = false, this.createdAt, this.readAt}): _data = data;
+  factory _SharedSpaceNotificationModel.fromJson(Map<String, dynamic> json) => _$SharedSpaceNotificationModelFromJson(json);
 
 @override final  String id;
 @override final  String userId;
@@ -1941,20 +1941,20 @@ class _NotificationModel implements NotificationModel {
 @override final  DateTime? createdAt;
 @override final  DateTime? readAt;
 
-/// Create a copy of NotificationModel
+/// Create a copy of SharedSpaceNotificationModel
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$NotificationModelCopyWith<_NotificationModel> get copyWith => __$NotificationModelCopyWithImpl<_NotificationModel>(this, _$identity);
+_$SharedSpaceNotificationModelCopyWith<_SharedSpaceNotificationModel> get copyWith => __$SharedSpaceNotificationModelCopyWithImpl<_SharedSpaceNotificationModel>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$NotificationModelToJson(this, );
+  return _$SharedSpaceNotificationModelToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationModel&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._data, _data)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedSpaceNotificationModel&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._data, _data)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1963,15 +1963,15 @@ int get hashCode => Object.hash(runtimeType,id,userId,type,title,message,const D
 
 @override
 String toString() {
-  return 'NotificationModel(id: $id, userId: $userId, type: $type, title: $title, message: $message, data: $data, isRead: $isRead, createdAt: $createdAt, readAt: $readAt)';
+  return 'SharedSpaceNotificationModel(id: $id, userId: $userId, type: $type, title: $title, message: $message, data: $data, isRead: $isRead, createdAt: $createdAt, readAt: $readAt)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$NotificationModelCopyWith<$Res> implements $NotificationModelCopyWith<$Res> {
-  factory _$NotificationModelCopyWith(_NotificationModel value, $Res Function(_NotificationModel) _then) = __$NotificationModelCopyWithImpl;
+abstract mixin class _$SharedSpaceNotificationModelCopyWith<$Res> implements $SharedSpaceNotificationModelCopyWith<$Res> {
+  factory _$SharedSpaceNotificationModelCopyWith(_SharedSpaceNotificationModel value, $Res Function(_SharedSpaceNotificationModel) _then) = __$SharedSpaceNotificationModelCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String userId,@JsonKey(unknownEnumValue: NotificationType.other) NotificationType type, String title, String message, Map<String, dynamic>? data, bool isRead, DateTime? createdAt, DateTime? readAt
@@ -1982,17 +1982,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$NotificationModelCopyWithImpl<$Res>
-    implements _$NotificationModelCopyWith<$Res> {
-  __$NotificationModelCopyWithImpl(this._self, this._then);
+class __$SharedSpaceNotificationModelCopyWithImpl<$Res>
+    implements _$SharedSpaceNotificationModelCopyWith<$Res> {
+  __$SharedSpaceNotificationModelCopyWithImpl(this._self, this._then);
 
-  final _NotificationModel _self;
-  final $Res Function(_NotificationModel) _then;
+  final _SharedSpaceNotificationModel _self;
+  final $Res Function(_SharedSpaceNotificationModel) _then;
 
-/// Create a copy of NotificationModel
+/// Create a copy of SharedSpaceNotificationModel
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? type = null,Object? title = null,Object? message = null,Object? data = freezed,Object? isRead = null,Object? createdAt = freezed,Object? readAt = freezed,}) {
-  return _then(_NotificationModel(
+  return _then(_SharedSpaceNotificationModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -2867,7 +2867,7 @@ as int,
 /// @nodoc
 mixin _$NotificationListResponse {
 
- List<NotificationModel> get notifications; int get total; int get unreadCount; int get page; int get limit;
+ List<SharedSpaceNotificationModel> get notifications; int get total; int get unreadCount; int get page; int get limit;
 /// Create a copy of NotificationListResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2900,7 +2900,7 @@ abstract mixin class $NotificationListResponseCopyWith<$Res>  {
   factory $NotificationListResponseCopyWith(NotificationListResponse value, $Res Function(NotificationListResponse) _then) = _$NotificationListResponseCopyWithImpl;
 @useResult
 $Res call({
- List<NotificationModel> notifications, int total, int unreadCount, int page, int limit
+ List<SharedSpaceNotificationModel> notifications, int total, int unreadCount, int page, int limit
 });
 
 
@@ -2920,7 +2920,7 @@ class _$NotificationListResponseCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? notifications = null,Object? total = null,Object? unreadCount = null,Object? page = null,Object? limit = null,}) {
   return _then(_self.copyWith(
 notifications: null == notifications ? _self.notifications : notifications // ignore: cast_nullable_to_non_nullable
-as List<NotificationModel>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as List<SharedSpaceNotificationModel>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
 as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
@@ -3009,7 +3009,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<NotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<SharedSpaceNotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NotificationListResponse() when $default != null:
 return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_that.limit);case _:
@@ -3030,7 +3030,7 @@ return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<NotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<SharedSpaceNotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)  $default,) {final _that = this;
 switch (_that) {
 case _NotificationListResponse():
 return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_that.limit);case _:
@@ -3050,7 +3050,7 @@ return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<NotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<SharedSpaceNotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)?  $default,) {final _that = this;
 switch (_that) {
 case _NotificationListResponse() when $default != null:
 return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_that.limit);case _:
@@ -3065,11 +3065,11 @@ return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_th
 @JsonSerializable()
 
 class _NotificationListResponse implements NotificationListResponse {
-  const _NotificationListResponse({required final  List<NotificationModel> notifications, required this.total, required this.unreadCount, required this.page, required this.limit}): _notifications = notifications;
+  const _NotificationListResponse({required final  List<SharedSpaceNotificationModel> notifications, required this.total, required this.unreadCount, required this.page, required this.limit}): _notifications = notifications;
   factory _NotificationListResponse.fromJson(Map<String, dynamic> json) => _$NotificationListResponseFromJson(json);
 
- final  List<NotificationModel> _notifications;
-@override List<NotificationModel> get notifications {
+ final  List<SharedSpaceNotificationModel> _notifications;
+@override List<SharedSpaceNotificationModel> get notifications {
   if (_notifications is EqualUnmodifiableListView) return _notifications;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_notifications);
@@ -3113,7 +3113,7 @@ abstract mixin class _$NotificationListResponseCopyWith<$Res> implements $Notifi
   factory _$NotificationListResponseCopyWith(_NotificationListResponse value, $Res Function(_NotificationListResponse) _then) = __$NotificationListResponseCopyWithImpl;
 @override @useResult
 $Res call({
- List<NotificationModel> notifications, int total, int unreadCount, int page, int limit
+ List<SharedSpaceNotificationModel> notifications, int total, int unreadCount, int page, int limit
 });
 
 
@@ -3133,7 +3133,7 @@ class __$NotificationListResponseCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? notifications = null,Object? total = null,Object? unreadCount = null,Object? page = null,Object? limit = null,}) {
   return _then(_NotificationListResponse(
 notifications: null == notifications ? _self._notifications : notifications // ignore: cast_nullable_to_non_nullable
-as List<NotificationModel>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as List<SharedSpaceNotificationModel>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
 as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable

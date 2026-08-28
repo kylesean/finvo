@@ -8,7 +8,7 @@ import 'package:finvo/shared/models/financial_account.dart';
 void main() {
   group('H5: unknown enum wire values degrade instead of crashing', () {
     test('NotificationType falls back to `other`', () {
-      final model = NotificationModel.fromJson({
+      final model = SharedSpaceNotificationModel.fromJson({
         'id': 'n1',
         'userId': 'u1',
         'type': 'brand_new_server_type',

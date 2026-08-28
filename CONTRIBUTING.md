@@ -92,6 +92,13 @@ onboarding Google Play so a lost upload key stays recoverable.
 - Use Riverpod for state management.
 - Ensure UI components align with the Forui design system.
 - All code comments must be in English.
+- **Data models must use `freezed` + `json_serializable`.** Hand-written
+  models are tolerated only where they carry custom tolerant parsing
+  (e.g. `budget_models.dart`) — do not add new ones. Enum fields parsed
+  from wire data must declare an `unknownEnumValue` fallback (H5 policy);
+  money fields must be `Decimal` with the `tolerant_json` converters, and
+  wire envelope unwrapping must go through `ResponseParser` /
+  `NetworkClient.unwrapData` (M22 policy).
 
 ## Changelog Policy
 

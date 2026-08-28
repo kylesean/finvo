@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:finvo/features/chat/models/chat_message.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 
 part 'conversation_detail.freezed.dart';
 
@@ -21,15 +22,10 @@ abstract class ConversationDetail with _$ConversationDetail {
 }
 
 // Custom deserializer for DateTime
-DateTime _dateTimeFromJson(dynamic json) {
-  if (json == null) {
-    return DateTime.now(); // Provide a default if null
-  }
-  if (json is String) {
-    return DateTime.parse(json);
-  }
-  throw FormatException('Invalid DateTime format: $json');
-}
+// M24: tolerant parse — malformed timestamps fall back to now instead of
+// crashing the conversation-list parse.
+DateTime _dateTimeFromJson(dynamic json) =>
+    tryParseDateTime(json) ?? DateTime.now();
 
 // Custom serializer for DateTime
 String _dateTimeToJson(DateTime dateTime) => dateTime.toIso8601String();

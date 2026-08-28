@@ -9,7 +9,7 @@ part of 'daily_expense_summary_model.dart';
 _DailyExpenseSummaryModel _$DailyExpenseSummaryModelFromJson(
   Map<String, dynamic> json,
 ) => _DailyExpenseSummaryModel(
-  date: DateTime.parse(json['date'] as String),
+  date: _dateFromJson(json['date']),
   totalExpense: decimalFromJson(json['totalExpense']),
   heatLevel: _heatLevelFromString(json['heatLevel'] as String?),
 );

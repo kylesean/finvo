@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 
 part 'comment_model.freezed.dart';
 part 'comment_model.g.dart';
@@ -39,6 +40,8 @@ abstract class CommentModel with _$CommentModel {
 }
 
 // Helper functions for date serialization/deserialization
+// M24: tolerant parse — a malformed timestamp must not kill the comment
+// list parse.
 DateTime? _dateTimeNullableParse(String? dateString) =>
-    dateString != null ? DateTime.parse(dateString) : null;
+    tryParseDateTime(dateString);
 String? _dateTimeNullableToIso8601String(DateTime? dt) => dt?.toIso8601String();
