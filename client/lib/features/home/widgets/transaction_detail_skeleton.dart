@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
 
 class TransactionDetailSkeleton extends StatelessWidget {
@@ -11,10 +12,12 @@ class TransactionDetailSkeleton extends StatelessWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // Shimmer effect colors (refer to transaction card skeleton design)
-    final Color shimmerBaseColor = Colors.grey[200]!;
-    final Color shimmerHighlightColor = Colors.grey[50]!;
-    final Color placeholderShapeColor = Colors.grey[200]!;
+    // M18: use the theme's semantic shimmer tokens (dark-mode aware) — the
+    // previous hardcoded greys rendered bright blocks on dark backgrounds.
+    final semantic = context.theme.semantic;
+    final Color shimmerBaseColor = semantic.shimmerBase;
+    final Color shimmerHighlightColor = semantic.shimmerHighlight;
+    final Color placeholderShapeColor = semantic.shimmerBase;
 
     return Scaffold(
       backgroundColor: colors.background,

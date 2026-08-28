@@ -286,7 +286,19 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
   @override
   Widget build(BuildContext context) {
     ref.watch(localeProvider);
-    final chatInputState = ref.watch(provider);
+    // M6: the text lives in the notifier state and changes on every
+    // keystroke — watching the whole state rebuilt this entire subtree
+    // (media preview, animated containers, icon button) per character even
+    // though the TextField itself is controller-driven. Watch only the
+    // slices this build actually consumes.
+    final hasText = ref.watch(provider.select((s) => s.text.trim().isNotEmpty));
+    final isListening = ref.watch(provider.select((s) => s.isListening));
+    final isSpeechAvailable = ref.watch(
+      provider.select((s) => s.isSpeechAvailable),
+    );
+    final hintType = ref.watch(provider.select((s) => s.hintType));
+    final selectedFiles = ref.watch(provider.select((s) => s.selectedFiles));
+    final uploadingFiles = ref.watch(provider.select((s) => s.uploadingFiles));
     final chatInputNotifier = ref.read(provider.notifier);
 
     final isStreamingResponse = ref.watch(
@@ -299,11 +311,10 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
     Color iconColor;
     VoidCallback? currentAction = chatInputNotifier.onMainButtonPressed;
 
-    final canInteractWithTextField =
-        !chatInputState.isListening && !isStreamingResponse;
-    final canUseAddButton = !chatInputState.isListening && !isStreamingResponse;
+    final canInteractWithTextField = !isListening && !isStreamingResponse;
+    final canUseAddButton = !isListening && !isStreamingResponse;
 
-    final isWaitingState = isStreamingResponse || chatInputState.isListening;
+    final isWaitingState = isStreamingResponse || isListening;
 
     final theme = context.theme;
 
@@ -312,20 +323,18 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
       buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
       currentAction = () => chatHistoryNotifier.cancelPendingOperation();
-    } else if (chatInputState.isListening) {
+    } else if (isListening) {
       currentIcon = FLucideIcons.square;
       buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
-    } else if (chatInputState.text.trim().isNotEmpty) {
+    } else if (hasText) {
       currentIcon = FLucideIcons.arrowUp;
       buttonBackgroundColor = theme.colors.primary;
       iconColor = theme.colors.primaryForeground;
     } else {
-      currentIcon = chatInputState.isSpeechAvailable
-          ? FLucideIcons.mic
-          : FLucideIcons.micOff;
+      currentIcon = isSpeechAvailable ? FLucideIcons.mic : FLucideIcons.micOff;
       buttonBackgroundColor = theme.colors.muted;
-      iconColor = chatInputState.isSpeechAvailable
+      iconColor = isSpeechAvailable
           ? theme.colors.foreground
           : theme.colors.mutedForeground;
     }
@@ -346,8 +355,8 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
           mainAxisSize: MainAxisSize.min,
           children: [
             MediaPreviewWidget(
-              selectedFiles: chatInputState.selectedFiles,
-              uploadingFiles: chatInputState.uploadingFiles,
+              selectedFiles: selectedFiles,
+              uploadingFiles: uploadingFiles,
               onRemove: (index) => chatInputNotifier.removeSelectedFile(index),
             ),
             Container(
@@ -377,8 +386,8 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                       onChanged: chatInputNotifier.onTextChanged,
                       decoration: InputDecoration(
                         hintText: _getHintText(
-                          chatInputState.hintType,
-                          chatInputState.isListening,
+                          hintType,
+                          isListening,
                           isStreamingResponse: isStreamingResponse,
                         ),
                         hintStyle: theme.typography.body.md.copyWith(
@@ -395,8 +404,7 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                       ),
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) {
-                        if (chatInputState.text.trim().isNotEmpty &&
-                            canInteractWithTextField) {
+                        if (hasText && canInteractWithTextField) {
                           unawaited(chatInputNotifier.onMainButtonPressed());
                         }
                       },

@@ -88,3 +88,12 @@ abstract class AppRoutePaths {
 /// Consumed by the router's redirect guard so that public routes are defined
 /// in a single place instead of being inlined in the router.
 const List<String> publicRoutePrefixes = ['/login', '/register'];
+
+/// Safely cast a go_router `extra` payload to [T], returning null for
+/// wrong-typed values.
+///
+/// M28: `state.extra` is typed Object; a direct `as T?` cast throws a
+/// TypeError when a caller navigates with a mis-typed payload. The is-check
+/// makes a mis-navigation degrade to the route's missing-info fallback
+/// screen instead of crashing (mirrors the guard in app_router.dart).
+T? extraAs<T>(Object? extra) => extra is T ? extra : null;

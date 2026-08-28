@@ -48,7 +48,7 @@ StatefulShellBranch buildFinanceBranch() {
                 path: 'add',
                 name: AppRouteNames.financialAccountAdd,
                 builder: (context, state) {
-                  final args = state.extra as FinancialAccountAddArgs?;
+                  final args = extraAs<FinancialAccountAddArgs>(state.extra);
                   if (args == null) {
                     return Scaffold(
                       body: Center(child: Text(t.error.accountInfoMissing)),
@@ -61,7 +61,7 @@ StatefulShellBranch buildFinanceBranch() {
                 path: 'edit',
                 name: AppRouteNames.financialAccountEdit,
                 builder: (context, state) {
-                  final args = state.extra as FinancialAccountEditArgs?;
+                  final args = extraAs<FinancialAccountEditArgs>(state.extra);
                   if (args == null) {
                     return Scaffold(
                       body: Center(child: Text(t.error.accountInfoMissing)),
@@ -75,7 +75,7 @@ StatefulShellBranch buildFinanceBranch() {
                 path: 'detail',
                 name: AppRouteNames.financialAccountDetail,
                 builder: (context, state) {
-                  final args = state.extra as FinancialAccountDetailArgs?;
+                  final args = extraAs<FinancialAccountDetailArgs>(state.extra);
                   if (args == null) {
                     return Scaffold(
                       body: Center(child: Text(t.error.accountInfoMissing)),

@@ -62,7 +62,7 @@ StatefulShellBranch buildProfileBranch() {
                 path: 'invite-success',
                 name: AppRouteNames.inviteSuccess,
                 builder: (context, state) {
-                  final space = state.extra as SharedSpace?;
+                  final space = extraAs<SharedSpace>(state.extra);
                   if (space == null) {
                     // Guard against deep links / invalid navigation that omit
                     // the required SharedSpace payload.
