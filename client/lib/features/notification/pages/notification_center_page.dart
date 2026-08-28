@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/core/constants/category_constants.dart';
+import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
 import 'package:finvo/features/notification/models/notification_item.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/features/notification/utils/notification_target_resolver.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 
@@ -196,8 +198,13 @@ class _NotificationCenterPageState
   }
 
   void _handleNavigation(BuildContext context, NotificationItem item) {
-    var targetPath = item.data?['target_path'] as String?;
-    if (targetPath == null || targetPath.isEmpty) {
+    // H8: the server-supplied target_path is untrusted input — only paths on
+    // the whitelist may drive navigation; anything else is ignored and we
+    // fall back to the locally-constructed transaction route.
+    var targetPath = resolveNotificationTarget(
+      item.data?['target_path'] as String?,
+    );
+    if (targetPath == null) {
       // The id may arrive as a String or an int depending on the FE, so
       // normalise with toString() instead of a strict `as String?` cast,
       // which would throw a TypeError and crash the tap when the id is an int.
@@ -207,11 +214,12 @@ class _NotificationCenterPageState
       final rawCommentId = item.data?['commentId'] ?? item.data?['comment_id'];
       final commentId = rawCommentId?.toString();
       if (transactionId != null && transactionId.isNotEmpty) {
-        if (commentId != null && commentId.isNotEmpty) {
-          targetPath = '/home/transaction/$transactionId?commentId=$commentId';
-        } else {
-          targetPath = '/home/transaction/$transactionId';
-        }
+        targetPath = Uri(
+          path: AppRoutePaths.transactionDetail(transactionId),
+          queryParameters: (commentId != null && commentId.isNotEmpty)
+              ? {'commentId': commentId}
+              : null,
+        ).toString();
       }
     }
     if (targetPath != null && targetPath.isNotEmpty) {
