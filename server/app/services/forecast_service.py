@@ -272,18 +272,24 @@ class ForecastService:
         )
 
     async def _get_total_balance(self, user_uuid: UUID) -> Decimal:
-        """Get total balance across all ASSET accounts."""
+        """Total net worth (ASSET +, LIABILITY -) in the user's base currency.
+
+        ``FinancialAccount.current_balance`` is stored per-account currency,
+        so converting each account before summing is required — direct SUM
+        would silently mix currencies for multi-currency users (the same
+        policy as ``cash_flow_service._to_user_base``). Accounts whose rate
+        is unavailable are skipped with a warning instead of polluting the
+        forecast starting balance.
+        """
+        from app.utils.currency_utils import convert_to_user_base, get_user_base_currency
+
+        user_base_currency = await get_user_base_currency(self.db, user_uuid)
+
         query = select(
-            func.coalesce(
-                func.sum(
-                    case(
-                        (FinancialAccount.nature == "ASSET", FinancialAccount.current_balance),
-                        (FinancialAccount.nature == "LIABILITY", -FinancialAccount.current_balance),
-                        else_=Decimal("0"),
-                    )
-                ),
-                Decimal("0"),
-            )
+            FinancialAccount.uuid,
+            FinancialAccount.nature,
+            FinancialAccount.current_balance,
+            FinancialAccount.currency_code,
         ).where(
             cast(
                 Any,
@@ -296,7 +302,26 @@ class ForecastService:
         )
 
         result = await self.db.execute(query)
-        return result.scalar() or Decimal("0")
+        total = Decimal("0.00")
+        for account_id, nature, balance, currency_code in result.all():
+            balance = balance or Decimal("0.00")
+            currency = (currency_code or user_base_currency).upper()
+            if currency == user_base_currency.upper():
+                converted = balance
+            else:
+                try:
+                    converted, _ = await convert_to_user_base(balance, currency, user_base_currency)
+                except Exception as e:  # noqa: BLE001 - same degradation as cash_flow_service
+                    logger.warning(
+                        "forecast_balance_conversion_failed",
+                        user_uuid=str(user_uuid),
+                        account_id=str(account_id),
+                        currency=currency,
+                        error=str(e),
+                    )
+                    continue
+            total += converted if nature == "ASSET" else -converted
+        return total
 
     async def _get_deterministic_events(
         self,

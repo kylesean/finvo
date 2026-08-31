@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import and_, case, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.logging import logger
 from app.models.financial_account import FinancialAccount
 from app.models.transaction import SYSTEM_TRANSACTION_SOURCE, Transaction
 from app.schemas.statistics import (
@@ -21,7 +22,7 @@ from app.schemas.statistics import (
     TrendDataPoint,
     TrendDataResponse,
 )
-from app.utils.currency_utils import get_currency_symbol, get_user_display_currency
+from app.utils.currency_utils import get_currency_symbol, get_user_base_currency, get_user_display_currency
 
 
 class StatisticsService:
@@ -29,6 +30,60 @@ class StatisticsService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+
+    async def _balance_in_user_base(
+        self,
+        user_uuid: UUID,
+        account_types: list[str] | None = None,
+    ) -> Decimal:
+        """Net worth (ASSET +, LIABILITY -) in the user's base currency.
+
+        ``FinancialAccount.current_balance`` is stored per-account currency,
+        so summing it directly across accounts would silently mix currencies
+        for multi-currency users. Each account is converted to the user's
+        base currency before summing (same policy as
+        ``cash_flow_service._to_user_base``); accounts whose rate is
+        unavailable are skipped with a warning instead of polluting the
+        total.
+        """
+        user_base_currency = await get_user_base_currency(self.db, user_uuid)
+
+        conditions: list[Any] = [
+            FinancialAccount.user_uuid == user_uuid,
+            FinancialAccount.status == "ACTIVE",
+            FinancialAccount.include_in_net_worth == True,  # noqa: E712
+        ]
+        if account_types:
+            conditions.append(FinancialAccount.type.in_(account_types))
+
+        query = select(
+            FinancialAccount.nature,
+            FinancialAccount.current_balance,
+            FinancialAccount.currency_code,
+        ).where(and_(*conditions))
+        result = await self.db.execute(query)
+
+        total = Decimal("0.00")
+        for nature, balance, currency_code in result.all():
+            balance = balance or Decimal("0.00")
+            currency = (currency_code or user_base_currency).upper()
+            if currency == user_base_currency.upper():
+                converted = balance
+            else:
+                try:
+                    from app.utils.currency_utils import convert_to_user_base
+
+                    converted, _ = await convert_to_user_base(balance, currency, user_base_currency)
+                except Exception as e:  # noqa: BLE001 - same degradation as cash_flow_service
+                    logger.warning(
+                        "statistics_balance_conversion_failed",
+                        user_uuid=str(user_uuid),
+                        currency=currency,
+                        error=str(e),
+                    )
+                    continue
+            total += converted if nature == "ASSET" else -converted
+        return total
 
     def _build_account_filter(
         self,
@@ -165,29 +220,10 @@ class StatisticsService:
         total_income = Decimal(str(totals_row.income or 0))
         total_expense = Decimal(str(totals_row.expense or 0))
 
-        # Get total balance from financial accounts
-        balance_conditions: list[Any] = [
-            FinancialAccount.user_uuid == user_uuid,
-            FinancialAccount.status == "ACTIVE",
-            FinancialAccount.include_in_net_worth == True,  # noqa: E712
-        ]
-        # Also filter balance by account types if specified
-        if account_types:
-            balance_conditions.append(FinancialAccount.type.in_(account_types))
-
-        balance_query = select(
-            func.coalesce(
-                func.sum(
-                    case(
-                        (FinancialAccount.nature == "ASSET", FinancialAccount.current_balance),
-                        else_=-FinancialAccount.current_balance,
-                    )
-                ),
-                0,
-            )
-        ).where(and_(*[cond for cond in balance_conditions]))
-        balance_result = await self.db.execute(balance_query)
-        total_balance = Decimal(str(balance_result.scalar() or 0))
+        # Get total balance from financial accounts, converted to the user's
+        # base currency (account balances are stored per-account currency —
+        # see _balance_in_user_base).
+        total_balance = await self._balance_in_user_base(user_uuid, account_types)
 
         # Calculate previous period for comparison with single-query conditional aggregation
         prev_conditions: list[Any] = [
