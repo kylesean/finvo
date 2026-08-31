@@ -108,16 +108,21 @@ class SecurityHeadersMiddleware:
                 headers["X-Frame-Options"] = "SAMEORIGIN"
 
                 # Content Security Policy - restrict resource loading sources
-                # This is a basic policy; adjust based on your frontend requirements
-                headers["Content-Security-Policy"] = (
-                    "default-src 'self'; "
-                    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-                    "style-src 'self' 'unsafe-inline'; "
-                    "img-src 'self' data: https:; "
-                    "font-src 'self' data:; "
-                    "connect-src 'self' https:; "
-                    "frame-ancestors 'self';"
-                )
+                # This is a basic policy; adjust based on your frontend requirements.
+                # Endpoints that need a stricter policy (e.g. /artifacts, which
+                # serves potentially attacker-influenced HTML and applies a
+                # sandbox CSP) set their own header — the middleware only
+                # provides the global default for responses without one.
+                if "Content-Security-Policy" not in headers:
+                    headers["Content-Security-Policy"] = (
+                        "default-src 'self'; "
+                        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                        "style-src 'self' 'unsafe-inline'; "
+                        "img-src 'self' data: https:; "
+                        "font-src 'self' data:; "
+                        "connect-src 'self' https:; "
+                        "frame-ancestors 'self';"
+                    )
 
                 # Referrer Policy - controls information sent in Referer header
                 headers["Referrer-Policy"] = "strict-origin-when-cross-origin"

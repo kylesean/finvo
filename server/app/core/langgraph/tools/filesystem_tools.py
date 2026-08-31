@@ -153,14 +153,21 @@ def write_file_tool(path: str, content: str) -> Any:
         fs_backend.write(str(sandbox_path.relative_to(project_root)), content)
 
         relative_path = str(sandbox_path.relative_to(project_root))
-        access_url = f"/artifacts/{user_id}/{path}"
+        # Signed capability URL: the /artifacts endpoint rejects anonymous
+        # access, so the URL carries a short-lived token bound to this user
+        # and path (see app/utils/artifact_signing.py). The client displays
+        # this URL; browsers can open it while the token is fresh.
+        from app.utils.artifact_signing import sign_artifact_url
+
+        posix_path = Path(path).as_posix()
+        artifact_url = f"/artifacts/{user_id}/{posix_path}?token={sign_artifact_url(user_id, posix_path)}"
         return {
             "success": True,
             "message": f"Successfully wrote {len(content)} bytes",
             "path": relative_path,
-            "url": access_url,
+            "url": f"/artifacts/{user_id}/{posix_path}",
             "componentType": "artifact_link",
-            "artifactUrl": access_url,
+            "artifactUrl": artifact_url,
             "artifactName": Path(path).name,
         }
     except Exception as e:

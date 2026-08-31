@@ -7,20 +7,22 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import (
+    Annotated,
     Any,
     cast,
 )
 
 from dotenv import load_dotenv
 from fastapi import (
+    Depends,
     FastAPI,
     Request,
     status,
 )
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi_pagination import add_pagination
 from langfuse import Langfuse
 from slowapi.errors import RateLimitExceeded
@@ -41,6 +43,7 @@ from app.core.middlewares import (
     SecurityHeadersMiddleware,
 )
 from app.core.responses import error_response, get_error_code_int, success_response
+from app.utils.artifact_signing import verify_artifact_token
 
 load_dotenv()
 
@@ -385,13 +388,65 @@ app.add_middleware(SecurityHeadersMiddleware)
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-# Mount static files for user-generated artifacts (e.g., frontend-design skill outputs)
-# Files are stored in: server/artifacts/{user_id}/...
-# Accessible via: /artifacts/{user_id}/...
+# Artifact files (skill write_file output) are served ONLY through the
+# authenticated endpoint below — never via an anonymous StaticFiles mount:
+# artifacts can contain attacker-influenced HTML, and an anonymous mount
+# would (a) expose any known URL to the whole network and (b) let that HTML
+# execute scripts in the app's origin (stored XSS). The endpoint accepts
+# either a signed capability URL (short-lived JWT from write_file) or the
+# owner's Bearer access token.
 _artifacts_dir = Path(__file__).parent.parent / "artifacts"
 _artifacts_dir.mkdir(parents=True, exist_ok=True)
-app.mount("/artifacts", StaticFiles(directory=str(_artifacts_dir), html=True), name="artifacts")
-logger.info("artifacts_static_mount", path=str(_artifacts_dir))
+_artifact_security = HTTPBearer(auto_error=False)
+_ARTIFACT_SANDBOX_CSP = "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data: https:; media-src data:"
+
+
+@app.get("/artifacts/{user_id}/{artifact_path:path}")
+async def get_artifact(
+    user_id: str,
+    artifact_path: str,
+    token: str = "",
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_artifact_security)] = None,
+) -> FileResponse:
+    """Serve an artifact file to its owner only.
+
+    Two access channels (either is sufficient):
+    1. ``?token=`` — short-lived capability JWT issued by write_file, bound
+       to user_id + path (see utils/artifact_signing.py).
+    2. Bearer access token of the artifact owner.
+    """
+    from app.core.exceptions import AuthenticationError, NotFoundError
+    from app.utils.auth_utils import verify_token
+
+    access_ok = False
+    if token:
+        verified = verify_artifact_token(token)
+        if verified is not None and verified[0] == user_id and verified[1] == artifact_path:
+            access_ok = True
+    elif credentials:
+        try:
+            access_ok = verify_token(credentials.credentials) == user_id
+        except ValueError:
+            access_ok = False
+
+    if not access_ok:
+        raise AuthenticationError("Not authorized to access this artifact")
+
+    # Path traversal guard: resolve within the user's artifact sandbox.
+    user_artifacts = (_artifacts_dir / user_id).resolve()
+    target = (user_artifacts / artifact_path).resolve()
+    if not target.is_relative_to(user_artifacts) or not target.is_file():
+        raise NotFoundError("Artifact not found")
+
+    # sandbox CSP: even if the artifact HTML contains injected scripts, they
+    # cannot execute nor reach the app's origin (no same-origin, no scripts).
+    return FileResponse(
+        target,
+        headers={
+            "Content-Security-Policy": _ARTIFACT_SANDBOX_CSP,
+            "Cache-Control": "private, max-age=300",
+        },
+    )
 
 
 @app.get("/")
