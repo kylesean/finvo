@@ -46,7 +46,9 @@ class TestMemoryServiceFilters:
         call_kwargs = mock_memory.search.call_args[1]
         assert call_kwargs["filters"] == {"user_id": "user-123"}
         assert call_kwargs["query"] == "test query"
-        assert call_kwargs["threshold"] == 0.0
+        # Relevance cutoff is Mem0's native mechanism — we pass its documented
+        # default (0.1); 0.0 would disable relevance filtering entirely.
+        assert call_kwargs["threshold"] == 0.1
 
     @pytest.mark.asyncio
     async def test_search_respects_limit(self, mock_memory):

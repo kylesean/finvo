@@ -331,11 +331,15 @@ class MemoryService:
         try:
             filters: dict[str, Any] = {"user_id": user_id}
 
+            # threshold is Mem0's native relevance cutoff (documented default
+            # 0.1; 0.0 disables filtering entirely). We previously passed 0.0,
+            # flooding prompts with low-relevance memories — use the library's
+            # default unless a specific precision/recall trade-off is needed.
             result = await self.memory.search(
                 query=query,
                 top_k=limit,
                 filters=filters,
-                threshold=0.0,
+                threshold=0.1,
             )
 
             memories = []
