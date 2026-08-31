@@ -7,6 +7,8 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from app.core.aliases import CurrentUser
+from app.core.config import settings
+from app.core.limiter import limiter
 from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_shared_space_service
 from app.schemas.shared_space import (
@@ -127,6 +129,7 @@ async def generate_invite_code(
     return success_response(data=invite)
 
 
+@limiter.limit(settings.RATE_LIMIT_ENDPOINTS["join_space"][0])
 @router.post("/join-with-code", response_model=ResponseEnvelope[dict[str, Any]])
 async def join_space_with_code(
     request: JoinWithCodeRequest,

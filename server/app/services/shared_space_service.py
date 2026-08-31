@@ -36,6 +36,12 @@ from app.services.shared_space_transaction_service import SharedSpaceTransaction
 
 logger = structlog.get_logger(__name__)
 
+# Invite code alphabet: uppercase alphanumerics minus visually confusable
+# characters (0/O, 1/I/L). 32 symbols x 8 positions ~= 1.1e12 combinations.
+# Not a secret — flagged by detect-secrets as high-entropy; allowlisted.
+_INVITE_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # pragma: allowlist secret
+_INVITE_CODE_LENGTH = 8
+
 
 class SharedSpaceService:
     """Service for managing shared spaces and their transactions."""
@@ -313,10 +319,11 @@ class SharedSpaceService:
         if not space:
             raise NotFoundError("shared space not found")
 
-        # Generate 6-digit numeric invite code. A short numeric code keeps the
-        # join flow simple and copy-friendly; brute-force risk is bounded by the
-        # 1-day expiration window below.
-        code = "".join(secrets.choice("0123456789") for _ in range(6))
+        # Generate an 8-char invite code from a confusion-free alphabet
+        # (no 0/O, 1/I/L). 32^8 ~= 1.1e12 combinations — brute-forcing a code
+        # within its expiration window is infeasible even without rate
+        # limiting, unlike the old 6-digit numeric code (10^6).
+        code = "".join(secrets.choice(_INVITE_CODE_ALPHABET) for _ in range(_INVITE_CODE_LENGTH))
         expires_at = datetime.now(UTC) + timedelta(days=expires_days)
 
         # Update space with new invite code
@@ -346,21 +353,25 @@ class SharedSpaceService:
             NotFoundError: Invalid code
             BusinessError: Code expired or already a member
         """
+        # Normalize user input: codes are generated uppercase from a
+        # confusion-free alphabet; accept lowercase/whitespace from manual entry.
+        code = code.strip().upper()
+
         # Find space by invite code
         query = select(SharedSpace).where(SharedSpace.invite_code == code)
         result = await self.db.execute(query)
         space = result.scalar_one_or_none()
 
-        if not space:
-            raise NotFoundError("invalid invitation code")
-
-        # Reject joining deactivated spaces
-        if space.status != "active":
-            raise BusinessError("space is not active", error_code=CommonErrorCode.VALIDATION_ERROR)
-
-        # Check expiration
-        if space.invite_code_expires_at and space.invite_code_expires_at < datetime.now(UTC):
-            raise BusinessError("invitation code expired", error_code=CommonErrorCode.VALIDATION_ERROR)
+        if (
+            not space
+            or space.status != "active"
+            or (space.invite_code_expires_at and space.invite_code_expires_at < datetime.now(UTC))
+        ):
+            # Fold "not found", "space inactive", and "expired" into a single
+            # error: distinguishable responses would let an attacker probe
+            # which codes are valid and merely expired. Legitimate users get
+            # the same actionable outcome (request a new code from an admin).
+            raise NotFoundError("invalid or expired invitation code")
 
         # Check if already a member
         member_query = select(SpaceMember).where(

@@ -326,6 +326,9 @@ class Settings(BaseSettings):
     RATE_LIMIT_REGISTER: str = "10 per hour"
     RATE_LIMIT_SEND_CODE: str = "10 per minute"
     RATE_LIMIT_SESSION: str = "30 per minute"
+    # Joining a shared space is low-frequency; the per-minute cap alone would
+    # let an attacker probe ~600 codes/hour, so pair it with a per-hour cap.
+    RATE_LIMIT_JOIN_SPACE: str = "10 per minute,30 per hour"
 
     # Set to True only when running behind a trusted reverse proxy that strips
     # untrusted X-Forwarded-For headers. Enables rate limiting / IP logging to
@@ -346,6 +349,7 @@ class Settings(BaseSettings):
             "chat_stream": [self.RATE_LIMIT_CHAT_STREAM],
             "messages": [self.RATE_LIMIT_MESSAGES],
             "session": [self.RATE_LIMIT_SESSION],
+            "join_space": [self.RATE_LIMIT_JOIN_SPACE],
         }
 
     # Verification Code Settings
