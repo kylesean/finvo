@@ -22,6 +22,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 _logger = logging.getLogger("config")
 
 
+# Insecure placeholder shipped as the JWT default. Kept as a module constant so
+# the field default and the fail-fast guard share a single source of truth.
+_JWT_INSECURE_DEFAULT = "change-this-secret-key-in-production"
+
+# Minimum JWT secret length for HS256. RFC 7518 recommends a key at least as
+# long as the hash output (32 bytes for SHA-256); shorter secrets are
+# brute-forceable and must never be accepted in production/staging.
+_JWT_MIN_SECRET_LENGTH = 32
+
+
 # Define environment types
 class Environment(str, Enum):
     """Application environment types.
@@ -229,8 +239,8 @@ class Settings(BaseSettings):
 
     # JWT Configuration
     # NOTE: default is an insecure placeholder; production must override via env var
-    # (enforced in model_post_init — see fail-fast check below)
-    JWT_SECRET_KEY: str = Field(default="change-this-secret-key-in-production")
+    # (enforced in model_post_init — see _validate_jwt_secret below)
+    JWT_SECRET_KEY: str = Field(default=_JWT_INSECURE_DEFAULT)
     JWT_ALGORITHM: str = "HS256"
     # 7-day lifetime limits the damage window of a leaked token.
     JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 7
@@ -492,6 +502,53 @@ class Settings(BaseSettings):
         self.LOG_DIR.mkdir(parents=True, exist_ok=True)
         self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+        # Fail-fast security guards — must run for every Settings() construction
+        # (including at import time), not merely when an environment property
+        # happens to be read.
+        self._validate_jwt_secret()
+        self._sanitize_proxy_env()
+
+    def _validate_jwt_secret(self) -> None:
+        """Fail-fast guard against an insecure JWT secret.
+
+        Production/staging must never start with the shipped placeholder or a
+        secret too short to resist HS256 brute force. Mirrors the
+        ENCRYPTION_KEY guard in app/utils/encryption.py:_initialize().
+        """
+        insecure = self.JWT_SECRET_KEY == _JWT_INSECURE_DEFAULT
+        too_weak = len(self.JWT_SECRET_KEY) < _JWT_MIN_SECRET_LENGTH
+        if self.ENVIRONMENT in (Environment.PRODUCTION, Environment.STAGING):
+            if insecure or too_weak:
+                reason = (
+                    "the insecure default"
+                    if insecure
+                    else f"only {len(self.JWT_SECRET_KEY)} chars (min {_JWT_MIN_SECRET_LENGTH})"
+                )
+                raise RuntimeError(
+                    "CRITICAL: JWT_SECRET_KEY must be set to a strong, unique value in "
+                    f"{self.ENVIRONMENT.value}! Current value is {reason}. Generate one using: "
+                    'python -c "import secrets; print(secrets.token_urlsafe(32))"'
+                )
+        else:
+            if insecure or too_weak:
+                _logger.warning(
+                    "JWT_SECRET_KEY is insecure (%s). Set a strong value via env var — "
+                    "NEVER use the default in production!",
+                    "insecure default" if insecure else f"shorter than {_JWT_MIN_SECRET_LENGTH} chars",
+                )
+
+    @staticmethod
+    def _sanitize_proxy_env() -> None:
+        """Normalize socks:// proxy variables to socks5:// at startup.
+
+        "socks" is not a recognized scheme by httpx/pydantic; rewriting the
+        environment up front prevents downstream Pydantic validation errors.
+        """
+        for proxy_var in ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"]:
+            val = os.environ.get(proxy_var)
+            if val and val.startswith("socks://"):
+                os.environ[proxy_var] = val.replace("socks://", "socks5://", 1)
+
     @property
     def is_development(self) -> bool:
         """Check if running in development environment."""
@@ -501,31 +558,6 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         """Check if running in production environment."""
         return self.ENVIRONMENT == Environment.PRODUCTION
-
-        # JWT secret fail-fast: production must not use the insecure default placeholder.
-        # Mirrors the ENCRYPTION_KEY guard in app/utils/encryption.py:_initialize().
-        _JWT_INSECURE_DEFAULT = "change-this-secret-key-in-production"
-        if self.ENVIRONMENT in (Environment.PRODUCTION, Environment.STAGING):
-            if self.JWT_SECRET_KEY == _JWT_INSECURE_DEFAULT:
-                raise RuntimeError(
-                    "CRITICAL: JWT_SECRET_KEY must be set to a strong, unique value in "
-                    f"{self.ENVIRONMENT.value}! Generate one using: "
-                    'python -c "import secrets; print(secrets.token_urlsafe(32))"'
-                )
-        else:
-            if self.JWT_SECRET_KEY == _JWT_INSECURE_DEFAULT:
-                _logger.warning(
-                    "JWT_SECRET_KEY is using insecure default. "
-                    "Set a strong value via env var — NEVER use the default in production!"
-                )
-
-        # Sanitize proxy environment variables to prevent Pydantic validation errors
-        # Change socks:// to socks5:// as "socks" is not a recognized scheme by httpx/pydantic
-        for proxy_var in ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"]:
-            val = os.environ.get(proxy_var)
-            if val and val.startswith("socks://"):
-                new_val = val.replace("socks://", "socks5://", 1)
-                os.environ[proxy_var] = new_val
 
 
 # Create settings instance
