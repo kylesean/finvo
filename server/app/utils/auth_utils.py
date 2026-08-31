@@ -200,13 +200,17 @@ def refresh_token(old_token: str) -> Token | None:
     return new_token
 
 
-def verify_token_allow_expired(token: str) -> str | None:
-    """Verify a JWT token's signature while ignoring the ``exp`` claim.
+def verify_refresh_token(token: str) -> str | None:
+    """Verify a refresh token and return its subject (user UUID).
 
-    Used only by the refresh endpoint to authenticate the bearer of an expired
-    access token so a fresh token can be issued. The signature is still fully
-    validated; only expiry is waived. The caller is responsible for checking
-    revocation (jti blacklist) before issuing a new token.
+    Stricter than plain signature verification: the ``exp`` claim is
+    ENFORCED (an expired refresh token is rejected), the token must be of
+    ``type: refresh`` (access tokens are rejected), and the signature must
+    validate. The caller is responsible for checking revocation (jti
+    blacklist) before issuing a new token.
+
+    Raises:
+        ValueError: If the token format is invalid
     """
     if not token or not isinstance(token, str):
         logger.warning("token_invalid_format")
@@ -221,8 +225,11 @@ def verify_token_allow_expired(token: str) -> str | None:
             token,
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
-            options={"verify_exp": False},
+            options={"verify_exp": True},  # expired refresh tokens must NOT refresh
         )
+        if str(payload.get("type")) != "refresh":
+            logger.warning("token_not_refresh_type")
+            return None
         subject_id = payload.get("sub")
         if not isinstance(subject_id, str):
             logger.warning("token_missing_subject")

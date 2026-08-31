@@ -224,3 +224,19 @@ class UpdateSessionNameRequest(BaseModel):
     model_config = ConfigDict(json_schema_extra={"examples": [{"name": "Trip to Tokyo"}]})
 
     name: str = Field(..., min_length=1, max_length=100, description="The new session name")
+
+
+class LogoutRequest(BaseModel):
+    """Request model for logout.
+
+    Attributes:
+        refresh_token: The client's current refresh token, revoked server-side
+            so a stolen token cannot survive logout. Optional: clients that
+            never received one (or already rotated past it) may omit it.
+    """
+
+    refresh_token: str | None = Field(
+        default=None,
+        max_length=4096,
+        description="Current refresh token to revoke server-side",
+    )

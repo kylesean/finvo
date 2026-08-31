@@ -280,6 +280,28 @@ class AuthService {
   }
 
   Future<void> logout() async {
+    // Revoke the refresh token server-side BEFORE deleting it locally: a
+    // stolen refresh token must not survive logout. Best-effort — network
+    // failures never block the local logout (the user is still signed out on
+    // this device; revocation failure is logged for observability).
+    final refreshToken = await _storageService.getRefreshToken();
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      try {
+        await _networkClient.request<void>(
+          ApiConstants.authLogoutPath,
+          method: HttpMethod.post,
+          data: {'refresh_token': refreshToken},
+          enableRetry: false, // Non-idempotent: revocation must not double-fire
+        );
+        _logger.info('Refresh token revoked server-side on logout.');
+      } catch (e, stackTrace) {
+        _logger.warning(
+          'Failed to revoke refresh token server-side on logout.',
+          e,
+          stackTrace,
+        );
+      }
+    }
     await _deleteAuthData(); // Clear token and user data from secure storage and shared preferences
     _logger.info('User logged out and data cleared.');
   }

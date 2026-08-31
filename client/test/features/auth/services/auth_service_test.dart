@@ -215,5 +215,51 @@ void main() {
       expect(prefs.getString('user_email'), isNull);
       expect(await service.getStoredAuthData(), isNull);
     });
+
+    test(
+      'revokes the refresh token server-side before local deletion',
+      () async {
+        mockResponses({
+          '/auth/login': _loginData,
+          '/auth/logout': {
+            'code': 0,
+            'message': 'Logged out successfully',
+            'data': {'revoked': true, 'refresh_revoked': true},
+          },
+        });
+        await service.login('13812345678', 'secret123');
+
+        await service.logout();
+
+        expect(lastRequest.path, '/auth/logout');
+        expect(lastRequest.data, {'refresh_token': 'refresh-token'});
+        expect(await storage.getRefreshToken(), isNull);
+      },
+    );
+
+    test('logout still succeeds when server revocation fails', () async {
+      mockResponses({'/auth/login': _loginData});
+      await service.login('13812345678', 'secret123');
+
+      // Replace the mock with a network failure for the logout call.
+      dio.interceptors.clear();
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                type: DioExceptionType.connectionError,
+              ),
+            );
+          },
+        ),
+      );
+
+      await service.logout();
+
+      expect(await storage.getToken(), isNull);
+      expect(await storage.getRefreshToken(), isNull);
+    });
   });
 }

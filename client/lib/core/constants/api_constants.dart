@@ -30,6 +30,7 @@ class ApiConstants {
   static const String authRegisterPath = '/auth/register';
   static const String authSendCodePath = '/auth/send-code';
   static const String authRefreshPath = '/auth/refresh';
+  static const String authLogoutPath = '/auth/logout';
 
   /// Paths that do not require an access token. Includes the refresh path
   /// so the refresh flow never re-enters the interceptor's 401 handling.

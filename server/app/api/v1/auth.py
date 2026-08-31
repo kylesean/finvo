@@ -9,6 +9,7 @@ This module provides endpoints for user authentication including:
 
 from __future__ import annotations
 
+import hashlib
 import uuid
 from typing import Annotated, Any
 from uuid import UUID
@@ -38,6 +39,7 @@ from app.repositories.session_repository import SessionRepository
 from app.schemas.auth import (
     AuthResponse,
     LoginRequest,
+    LogoutRequest,
     RegisterRequest,
     SendCodeRequest,
     UpdateSessionNameRequest,
@@ -48,7 +50,7 @@ from app.utils.auth_utils import (
     create_access_token,
     create_refresh_token,
     is_refresh_token,
-    verify_token_allow_expired,
+    verify_refresh_token,
 )
 from app.utils.sanitization import sanitize_string
 
@@ -428,16 +430,34 @@ async def logout(
     request: Request,
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     redis_client: Annotated[Any, Depends(get_redis_client)],
+    body: LogoutRequest | None = None,
 ) -> JSONResponse:
-    """Revoke the current access token (jti blacklist).
+    """Revoke the current access token and (optionally) the refresh token.
 
-    The token stays blocked until it would have expired anyway, so no explicit
-    cleanup job is needed. Requires a valid bearer token.
+    The access token is blacklisted by jti until it would have expired, so no
+    explicit cleanup job is needed. When the client supplies its current
+    refresh token in the body, that token is revoked as well — otherwise a
+    stolen refresh token would stay valid for its full lifetime after logout.
+    Both blacklists degrade gracefully when Redis is unavailable.
     """
     revoked = await revoke_token(redis_client, credentials.credentials)
+
+    refresh_revoked = False
+    if body and body.refresh_token:
+        refresh_revoked = await revoke_token(redis_client, body.refresh_token)
+
+    # Log a non-reversible fingerprint only (see dependencies.py: invalid_token
+    # logging) — never raw token fragments.
+    token_fingerprint = hashlib.sha256(credentials.credentials.encode()).hexdigest()[:12]
+    logger.info(
+        "user_logged_out",
+        token_fingerprint=token_fingerprint,
+        refresh_revoked=refresh_revoked,
+    )
+
     return success_response(
         message="Logged out successfully" if revoked else "Logged out",
-        data={"revoked": revoked},
+        data={"revoked": revoked, "refresh_revoked": refresh_revoked},
     )
 
 
@@ -451,8 +471,12 @@ async def refresh_access_token_endpoint(
     """Refresh tokens using a dedicated refresh token.
 
     Only refresh-type tokens are accepted (access tokens are rejected), so a
-    leaked access token cannot be used to mint new ones. Revoked refresh tokens
-    are rejected. Returns a new access token and a rotated refresh token.
+    leaked access token cannot be used to mint new ones. Expired refresh
+    tokens are rejected (``exp`` is enforced — see ``verify_refresh_token``).
+    Every successful refresh rotates the token: the OLD refresh token is
+    blacklisted server-side before a new one is issued, so a stolen refresh
+    token cannot be reused once the legitimate client has rotated past it.
+    Returns a new access token and a rotated refresh token.
     """
     old_token = credentials.credentials
 
@@ -463,12 +487,19 @@ async def refresh_access_token_endpoint(
     if await is_token_revoked(redis_client, old_token):
         raise AuthorizationError("Token has been revoked")
 
-    subject = verify_token_allow_expired(old_token)
+    # Enforce signature + exp + refresh type. An expired refresh token must
+    # NOT be able to mint new tokens.
+    subject = verify_refresh_token(old_token)
     if subject is None:
         raise AuthorizationError("Invalid or expired refresh token")
 
-    # Rotate: issue a fresh access token and a new refresh token (the old one
-    # is implicitly invalidated by rotation on the client side).
+    # Server-side rotation: consume the old refresh token. Its jti stays
+    # blacklisted until its original expiry, so replays of the old token are
+    # rejected (and "refresh forever from one stolen token" is impossible).
+    # Degrades gracefully when Redis is unavailable (tokens stay valid).
+    await revoke_token(redis_client, old_token)
+
+    # Rotate: issue a fresh access token and a new refresh token.
     new_access = create_access_token(subject)
     new_refresh = create_refresh_token(subject)
 

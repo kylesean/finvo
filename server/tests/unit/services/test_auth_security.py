@@ -7,11 +7,11 @@ verification codes, code TTL expiry, account-enumeration leakage).
 
 Scope note: Finvo is a self-hosted personal finance app with negligible
 concurrency and no multi-instance deployment. Features that only make sense
-for high-concurrency/public-facing systems — login rate limiting, verification
-code brute-force throttling, JWT token blacklisting/replay prevention, and a
-password-reset endpoint — are intentionally not implemented. Their placeholder
-tests are kept as ``pytest.skip`` with an explicit "self-hosted, out of scope"
-reason, rather than being deleted, so the security checklist stays visible.
+for high-concurrency/public-facing systems — login rate limiting and
+verification code brute-force throttling — are intentionally not implemented
+beyond the deployed slowapi limits. JWT refresh-token replay prevention IS
+implemented (server-side rotation + logout revocation, see
+test_refresh_token_lifecycle.py); the test below pins the rotation invariant.
 """
 
 from datetime import UTC, datetime, timedelta
@@ -26,6 +26,19 @@ from app.core.exceptions import AuthenticationError, AuthErrorCode, BusinessErro
 from app.models.user import User
 from app.services.auth_service import AuthService
 from app.utils.auth_utils import create_access_token, verify_token
+
+
+class _FakeRedis:
+    """Minimal in-memory stand-in for the Redis client used by token revoke."""
+
+    def __init__(self) -> None:
+        self._store: dict[str, tuple[int, str]] = {}
+
+    async def setex(self, key: str, ttl: int, value: str) -> None:
+        self._store[key] = (ttl, value)
+
+    async def exists(self, key: str) -> int:
+        return 1 if key in self._store else 0
 
 
 class TestTokenSecurity:
@@ -71,17 +84,27 @@ class TestTokenSecurity:
         )
         assert verify_token(wrong_alg_token) is None
 
-    @pytest.mark.skip(
-        reason=(
-            "Self-hosted app: token replay prevention (logout blacklist) is out "
-            "of scope. Requires a Redis-backed jti blacklist + logout endpoint; "
-            "not justified for a single-user personal finance deployment."
-        )
-    )
     @pytest.mark.asyncio
     async def test_token_replay_prevention(self) -> None:
-        """Old tokens cannot be reused after logout (requires blacklist)."""
-        pass
+        """A consumed refresh token cannot be replayed.
+
+        Implemented via server-side rotation (old refresh token blacklisted
+        before a new one is issued) + logout revocation of the refresh token.
+        Full lifecycle coverage lives in test_refresh_token_lifecycle.py;
+        this test pins the rotation invariant at the token level.
+        """
+        from app.core.dependencies import is_token_revoked
+        from app.utils.auth_utils import create_refresh_token
+
+        fake_redis = _FakeRedis()
+        old_token = create_refresh_token("user-1").access_token
+
+        # Simulate what the refresh endpoint does: revoke the old token, then
+        # the legitimate client holds the new one.
+        from app.core.dependencies import revoke_token
+
+        await revoke_token(fake_redis, old_token)
+        assert await is_token_revoked(fake_redis, old_token)
 
 
 class TestPasswordSecurity:
