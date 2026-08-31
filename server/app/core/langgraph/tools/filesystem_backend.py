@@ -16,6 +16,32 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# Environment allowlist for skill script execution.
+#
+# Trust model: skills are installed by the deployer and their scripts are
+# treated as trusted code — no OS-level sandbox (container/seccomp) is an
+# intentional trade-off for the self-hosted home-deployment scenario, where
+# sandbox complexity would outweigh the threat it mitigates (see the
+# SimpleFilesystemBackend docstring). But scripts do NOT inherit the full
+# server environment: a bare `os.environ.copy()` would hand every API key,
+# JWT secret and DB password to any script that runs. Exposing only what a
+# script plausibly needs implements least privilege without a sandbox.
+_EXEC_ENV_ALLOWLIST: tuple[str, ...] = ("PATH", "HOME", "LANG", "LC_ALL", "TZ", "USER_ID")
+
+# Content-level redaction for execute() output. Path-based guards (SENSITIVE_FILE_PATTERN)
+# cannot help here: scripts print VALUES, not paths. The pattern targets
+# high-entropy credential shapes and key=value assignments with long values;
+# it is deliberately conservative to avoid mangling legitimate financial text.
+_SENSITIVE_OUTPUT_PATTERN: re.Pattern[str] = re.compile(
+    r"sk-[A-Za-z0-9_-]{20,}"  # OpenAI-compatible API keys
+    r"|AKIA[0-9A-Z]{16}"  # AWS access key IDs
+    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"  # JWTs
+    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----"  # PEM private key blocks
+    r"|(password|passwd|secret|api[_-]?key|access[_-]?key|token)\s*[=:]\s*[\"']?[A-Za-z0-9+/=_-]{16,}",
+    re.IGNORECASE,
+)
+_SENSITIVE_REDACTION = "[redacted]"
+
 
 @dataclass
 class FileInfo:
@@ -305,6 +331,22 @@ class SimpleFilesystemBackend:
     - write(): Write file content
     - ls_info(): List directory contents
     - execute(): Execute validated shell commands
+
+    Security model for ``execute``: skill scripts are trusted code installed
+    by the deployer (the self-hosted home scenario does not warrant an
+    OS-level sandbox — see the module-level env allowlist comment). The
+    mitigations in place are therefore least-privilege, not isolation:
+    1. Commands must match a strict allowlist (only ``uv run python
+       app/skills/<name>/scripts/<script>.py``).
+    2. Child processes get a whitelisted env, never the server's full
+       environment.
+    3. Execution cwd is the skill's own directory, not the project root.
+    4. Output is redacted for credential-shaped content before it can reach
+       the LLM/UI.
+
+    If community-skill one-click installation is ever introduced (i.e. skills
+    no longer personally installed/reviewed by the deployer), an actual
+    sandbox (container/WASI) MUST be added before that ships.
     """
 
     def __init__(self, root_dir: Path | str):
@@ -449,7 +491,11 @@ class SimpleFilesystemBackend:
         try:
             from app.core.langgraph.tools import current_session_language, current_user_id
 
-            env = os.environ.copy()
+            # Least privilege: only whitelisted vars reach the child process.
+            # Anything the script truly needs must be passed explicitly (e.g.
+            # USER_ID below); the server's API keys / JWT / DB credentials are
+            # never inherited. See _EXEC_ENV_ALLOWLIST for the rationale.
+            env = {name: os.environ[name] for name in _EXEC_ENV_ALLOWLIST if name in os.environ}
             user_id = current_user_id.get()
             if user_id:
                 env["USER_ID"] = user_id
@@ -458,19 +504,25 @@ class SimpleFilesystemBackend:
             if session_lang:
                 env["LANG"] = session_lang
 
+            # Run from the skill's own directory so relative paths in scripts
+            # resolve inside the skill, not the project root (where .env and
+            # server sources live). The command allowlist keeps the script
+            # path anchored to app/skills/, so this is not attacker-influenced.
+            exec_cwd = self._skill_dir_for_command(command) or self.cwd
+
             result = subprocess.run(  # nosec B602 B607
                 command,
                 shell=True,
-                cwd=self.cwd,
+                cwd=exec_cwd,
                 env=env,
                 capture_output=True,
                 text=True,
                 timeout=30,
             )
 
-            output = result.stdout
+            output = _redact_sensitive_output(result.stdout)
             if result.stderr:
-                output += f"\nstderr:\n{result.stderr}"
+                output += f"\nstderr:\n{_redact_sensitive_output(result.stderr)}"
 
             return ExecuteResponse(output=output, exit_code=result.returncode)
 
@@ -479,3 +531,31 @@ class SimpleFilesystemBackend:
         except Exception as e:
             logger.warning("command_execution_error: %s", e)
             return ExecuteResponse(output="Error executing command", exit_code=1)
+
+    def _skill_dir_for_command(self, command: str) -> Path | None:
+        """Extract the skill directory from a validated command, if any.
+
+        Returns the resolved ``app/skills/<name>`` directory for the script
+        referenced by ``command``, or None when the command does not target a
+        skill script. The command has already passed the allowlist at this
+        point, so the extracted path is trusted to live under the project
+        root; the containment check below is a belt-and-suspenders guard
+        against future allowlist drift.
+        """
+        match = re.search(r"app/skills/([\w-]+)/scripts/", command)
+        if not match:
+            return None
+        skill_dir = (self.root_dir / "app" / "skills" / match.group(1)).resolve()
+        if not skill_dir.is_relative_to(self.root_dir):
+            return None
+        return skill_dir
+
+
+def _redact_sensitive_output(text: str) -> str:
+    """Redact credential-shaped content from script output.
+
+    Guards the LLM/UI from absorbing secrets a script might print (e.g. a
+    debug print of an environment variable). Path-level guards do not apply
+    here because scripts emit values, not paths.
+    """
+    return _SENSITIVE_OUTPUT_PATTERN.sub(_SENSITIVE_REDACTION, text)

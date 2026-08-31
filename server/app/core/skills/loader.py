@@ -1,9 +1,38 @@
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass
 
 import yaml
+
+logger = logging.getLogger(__name__)
+
+# Module-level cache so the audit log fires once per distinct skill set
+# (SkillLoader instances are created per-request/agent-turn).
+_logged_skills_signature: tuple[tuple[str, str], ...] | None = None
+
+
+def _log_skill_audit(skills: list[SkillMetadata]) -> None:
+    """Log the loaded skill set once per distinct signature.
+
+    The audit trail answers "what skills are running on this server and
+    where did they come from" — the deployment-level trust record for the
+    skills-as-trusted-code model (see filesystem_backend.py). Fires only
+    when the set changes so per-request loader instances do not spam logs.
+    """
+    global _logged_skills_signature
+    signature = tuple(sorted((skill.name, skill.location) for skill in skills))
+    if signature == _logged_skills_signature:
+        return
+    _logged_skills_signature = signature
+    logger.info(
+        "skills_loaded",
+        extra={
+            "count": len(skills),
+            "skills": [f"{name}@{location}" for name, location in signature],
+        },
+    )
 
 
 @dataclass
@@ -37,6 +66,7 @@ class SkillLoader:
         """
         skills = []
         if not os.path.exists(self.skills_dir):
+            _log_skill_audit([])
             return []
 
         def scan_directory(directory: str, depth: int = 0) -> None:
@@ -62,6 +92,7 @@ class SkillLoader:
                 pass  # Skip directories we can't read
 
         scan_directory(self.skills_dir)
+        _log_skill_audit(skills)
         return sorted(skills, key=lambda x: x.name)
 
     def _parse_skill_md(self, file_path: str) -> SkillMetadata | None:
