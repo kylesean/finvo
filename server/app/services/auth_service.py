@@ -209,7 +209,7 @@ class AuthService:
         await self._create_default_financial_settings(user.uuid, locale=locale, timezone=timezone)
 
         # Single commit point: user + financial settings are atomic.
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info("user_registered", user_uuid=user.uuid, account_type=account_type)
 
@@ -294,7 +294,7 @@ class AuthService:
         # Always update last login time
         user.last_login_at = utc_now()
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(user)
 
         # Generate JWT token using user UUID

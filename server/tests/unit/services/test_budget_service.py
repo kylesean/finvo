@@ -368,10 +368,22 @@ async def test_rebalance_concurrent_no_overdraw(async_db_engine):
             user_uuid,
             BudgetCreateRequest(name="Sink", amount=1.0, scope="CATEGORY", category_key="TRANSPORT"),
         )
+        await session.commit()
 
     async def attempt(_i: int) -> str:
+        # Each task is a request-bound transaction (Unit of Work): commit at
+        # the boundary so concurrent sessions see each other's writes
+        # (mirrors the get_session_context auto-commit contract).
         async with session_factory() as session:
-            return await BudgetService(session).rebalance_with_status(source.id, sink.id, Decimal("100.0"), user_uuid)
+            try:
+                result = await BudgetService(session).rebalance_with_status(
+                    source.id, sink.id, Decimal("100.0"), user_uuid
+                )
+                await session.commit()
+                return result
+            except Exception:
+                await session.rollback()
+                raise
 
     statuses = await asyncio.gather(*(attempt(i) for i in range(12)))
 

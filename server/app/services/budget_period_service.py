@@ -142,7 +142,7 @@ class BudgetPeriodService:
                     async with self.session.begin_nested():
                         self.session.add(new_period)
                         await self.session.flush()
-                    await self.session.commit()
+                    await self.session.flush()
                     prev_period = new_period
                 except IntegrityError:
                     ex_res = await self.session.execute(
@@ -178,7 +178,7 @@ class BudgetPeriodService:
             async with self.session.begin_nested():
                 self.session.add(initial_period)
                 await self.session.flush()
-            await self.session.commit()
+            await self.session.flush()
             return initial_period
         except IntegrityError:
             existing = await self._get_current_period(budget)
@@ -347,7 +347,7 @@ class BudgetPeriodService:
             period.status = BudgetPeriodStatus.ON_TRACK.value
 
         if auto_commit:
-            await self.session.commit()
+            await self.session.flush()
         return period
 
     # ========================================================================

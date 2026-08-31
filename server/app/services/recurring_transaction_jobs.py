@@ -32,7 +32,9 @@ async def process_due_transactions() -> None:
     """
     logger.info("processing_due_recurring_transactions_started")
 
-    async with get_session_context() as db:
+    # This job manages its own transaction explicitly (per-item SAVEPOINTs and
+    # a single commit after the loop) — opt out of the default context commit.
+    async with get_session_context(auto_commit=False) as db:
         try:
             now = datetime.now(UTC)
 

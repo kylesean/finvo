@@ -81,7 +81,7 @@ class SharedSpaceTransactionService:
         )
         self.db.add(space_tx)
         try:
-            await self.db.commit()
+            await self.db.flush()
         except IntegrityError:
             # Lost the race against a concurrent duplicate insert; the (space_id,
             # transaction_id) unique constraint fired. Treat as idempotent success.
@@ -89,7 +89,7 @@ class SharedSpaceTransactionService:
             return {"message": "Transaction already in this space", "already_exists": True}
 
         # Emit domain event (async, fire-and-forget)
-        from app.core.events import event_bus
+        from app.core.events import collect_event
         from app.services.notification_handlers import TransactionAddedEvent
 
         # Get space name for notification content
@@ -97,7 +97,8 @@ class SharedSpaceTransactionService:
         space_name_result = await self.db.execute(space_name_query)
         space_name = space_name_result.scalar_one_or_none() or "Shared Space"
 
-        event_bus.emit(
+        collect_event(
+            self.db,
             TransactionAddedEvent(
                 space_id=space_id,
                 space_name=space_name,
@@ -107,7 +108,7 @@ class SharedSpaceTransactionService:
                 currency=(transaction.currency or "CNY").upper(),
                 tx_type=transaction.type.lower() if transaction.type else "expense",
                 description=transaction.description or transaction.category_key or "",
-            )
+            ),
         )
 
         return {"message": "transaction added to space"}

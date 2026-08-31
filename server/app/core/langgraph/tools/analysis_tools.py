@@ -16,7 +16,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.langgraph.tools._helpers import get_user_uuid
 from app.services.statistics_service import StatisticsService
 from app.services.transaction_query_service import (
@@ -189,7 +189,7 @@ async def analyze_spending(
             end = datetime.now().date()
             start = end - timedelta(days=days)
 
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = TransactionQueryService(session)
             params = TransactionQueryParams(
                 start_date=start.isoformat(),
@@ -273,7 +273,7 @@ async def analyze_cashflow(
 
         time_range = _days_to_time_range(effective_days)
 
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = StatisticsService(session)
             cash_flow = (await service.get_cash_flow(user_uuid=user_uuid, time_range=time_range)).model_dump()
             health_score = (await service.get_health_score(user_uuid=user_uuid, time_range=time_range)).model_dump()

@@ -194,7 +194,7 @@ class UploadService:
 
         self.db.add_all(attachments)
         try:
-            await self.db.commit()
+            await self.db.flush()
         except Exception:
             await self.db.rollback()
             # DB records failed to persist, so the physical files already written
@@ -307,7 +307,7 @@ class UploadService:
             )
 
         self.db.add(new_config)
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(new_config)
 
         logger.info(
@@ -501,7 +501,7 @@ class UploadService:
                 await aiofiles.os.remove(file_path)
 
         await self.db.delete(attachment)
-        await self.db.commit()
+        await self.db.flush()
         return True
 
     # =========================================================================

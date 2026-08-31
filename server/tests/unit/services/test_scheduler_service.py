@@ -44,9 +44,10 @@ async def test_process_due_transactions(db_session: AsyncSession) -> None:
     db_session.add(rt)
     await db_session.commit()
 
-    # 3. Patch get_session_context
+    # 3. Patch get_session_context (the job requests auto_commit=False and
+    # manages its own transaction; the mock absorbs that flag)
     @asynccontextmanager
-    async def mock_ctx() -> AsyncGenerator[AsyncSession]:
+    async def mock_ctx(auto_commit: bool = True) -> AsyncGenerator[AsyncSession]:
         # Prevent actual commit from closing the session/transaction
         # We mock commit to do flush instead
         with patch.object(db_session, "commit", side_effect=db_session.flush):

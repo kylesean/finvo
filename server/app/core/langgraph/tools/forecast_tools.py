@@ -15,7 +15,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.langgraph.tools._helpers import get_user_uuid
 from app.core.langgraph.tools.context import current_session_language
 from app.services.forecast_service import ForecastService
@@ -62,7 +62,7 @@ async def forecast_balance(
     title = _FORECAST_TITLE.get(language, _FORECAST_TITLE["en"])
 
     try:
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = ForecastService(session)
 
             if simulate_purchase and amount > 0:

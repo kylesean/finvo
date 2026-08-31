@@ -15,7 +15,7 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.langgraph.tools._helpers import get_user_uuid
 from app.services.shared_space_service import SharedSpaceService
 
@@ -32,7 +32,7 @@ async def list_spaces(*, config: RunnableConfig) -> dict[str, Any]:
         return {"success": False, "error": "User not authenticated"}
 
     try:
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = SharedSpaceService(session)
             result = await service.get_user_spaces(user_uuid)
             spaces = result.get("spaces", []) if result else []
@@ -65,7 +65,7 @@ async def query_space_summary(
         return {"success": False, "error": "User not authenticated"}
 
     try:
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = SharedSpaceService(session)
             spaces_result = await service.get_user_spaces(user_uuid)
             spaces = spaces_result.get("spaces", []) if spaces_result else []

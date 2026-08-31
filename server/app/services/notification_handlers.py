@@ -14,7 +14,7 @@ from uuid import UUID
 
 from sqlalchemy import and_, select
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.events import DomainEvent, event_bus
 from app.core.logging import logger
 
@@ -40,7 +40,7 @@ async def _notify_recipients(
     from app.services.push_service import PushService
 
     async def send_one(user_uuid: UUID) -> None:
-        async with db_manager.session_factory() as s:
+        async with get_session_context() as s:
             await PushService.send_notification(
                 db=s, user_uuid=user_uuid, type_=type_, title=title, content=content, data=data
             )
@@ -94,12 +94,11 @@ class MemberLeftEvent(DomainEvent):
 
 async def handle_member_joined(event: MemberJoinedEvent) -> None:
     """Notify existing members about new join + send welcome to joiner."""
-    from app.core.database import db_manager
     from app.models.shared_space import SpaceMember
     from app.models.user import User
     from app.services.push_service import PushService
 
-    async with db_manager.session_factory() as db:
+    async with get_session_context() as db:
         # Get joining user's display name
         user_query = select(User.username).where(User.uuid == event.joined_user_uuid)
         user_result = await db.execute(user_query)
@@ -150,11 +149,10 @@ async def handle_member_joined(event: MemberJoinedEvent) -> None:
 
 async def handle_transaction_added(event: TransactionAddedEvent) -> None:
     """Notify other space members about a new transaction."""
-    from app.core.database import db_manager
     from app.models.shared_space import SpaceMember
     from app.models.user import User
 
-    async with db_manager.session_factory() as db:
+    async with get_session_context() as db:
         # Get recording user's display name
         user_query = select(User.username).where(User.uuid == event.added_by_user_uuid)
         user_result = await db.execute(user_query)
@@ -202,12 +200,11 @@ async def handle_transaction_added(event: TransactionAddedEvent) -> None:
 
 async def handle_member_left(event: MemberLeftEvent) -> None:
     """Notify remaining members when someone leaves / is removed, in realtime."""
-    from app.core.database import db_manager
     from app.core.ws_manager import ws_manager
     from app.models.shared_space import SpaceMember
     from app.models.user import User
 
-    async with db_manager.session_factory() as db:
+    async with get_session_context() as db:
         # Get leaving user's display name
         user_query = select(User.username).where(User.uuid == event.left_user_uuid)
         user_result = await db.execute(user_query)

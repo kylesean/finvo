@@ -183,7 +183,7 @@ class TransactionCRUDService:
             for_update=True,
         )
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(transaction)
 
         # Assemble typed result (for GenUI rendering / LangGraph tools)
@@ -485,7 +485,7 @@ class TransactionCRUDService:
         # Update timestamp
         transaction.updated_at = utc_now()
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(transaction)
 
         logger.info(
@@ -570,7 +570,7 @@ class TransactionCRUDService:
 
         # Delete transaction record (associated comments and shares will be automatically deleted through ORM cascade)
         await self.db.delete(transaction)
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info(
             "transaction_deleted",
@@ -650,7 +650,7 @@ class TransactionCRUDService:
         )
 
         await NotificationRepository(self.db).mark_recurring_pending_read(user_uuid, transaction_id)
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info(
             "transaction_confirmed",
@@ -686,7 +686,7 @@ class TransactionCRUDService:
 
         await NotificationRepository(self.db).mark_recurring_pending_read(user_uuid, transaction_id)
         await self.db.delete(transaction)
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info(
             "transaction_skipped",
@@ -833,7 +833,7 @@ class TransactionCRUDService:
                 logger.warning("batch_create_item_invalid", index=index, error=str(e))
                 failed.append({"index": str(index), "error": "Invalid amount or currency"})
 
-        await self.db.commit()
+        await self.db.flush()
 
         # Refresh all records to get IDs
         for tx in created_transactions:
@@ -978,7 +978,7 @@ class TransactionCRUDService:
 
         self._update_account_association(transaction, new_account_id, is_income)
 
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info(
             "transaction_account_updated",

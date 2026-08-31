@@ -223,14 +223,21 @@ async def get_session() -> AsyncGenerator[AsyncSession]:
 
 
 @asynccontextmanager
-async def get_session_context(auto_commit: bool = False) -> AsyncGenerator[AsyncSession]:
+async def get_session_context(auto_commit: bool = True) -> AsyncGenerator[AsyncSession]:
     """Context manager for getting async database sessions.
 
-    Unit-of-Work contract: by default the session is NOT auto-committed on
-    exit — service methods own their transaction boundary and must commit
-    explicitly, so a mid-request failure never leaves a partially-written DB
-    state. Pass ``auto_commit=True`` only for legacy call sites that perform a
-    single statement and previously relied on the implicit commit.
+    Unit-of-Work contract: the context is a transaction boundary — on normal
+    exit the session is COMMITTED (auto_commit=True, the default), on
+    exception it is ROLLED BACK. Service methods therefore never commit;
+    they flush to push pending changes into the transaction and let the
+    enclosing context (FastAPI request, job, task) own the commit. This
+    makes composed service calls atomic: a failure anywhere in the request
+    rolls back everything, never a partial state.
+
+    Pass ``auto_commit=False`` only for code that manages its own
+    transaction explicitly (background jobs that commit per-batch, tools
+    that span multiple statements, read-only lookups where committing is
+    harmless but pointless).
 
     Yields:
         AsyncSession: Async database session
@@ -240,6 +247,7 @@ async def get_session_context(auto_commit: bool = False) -> AsyncGenerator[Async
         async with get_session_context() as session:
             result = await session.execute(select(User))
             users = result.scalars().all()
+        # session committed here
         ```
     """
     async with db_manager.session_factory() as session:
@@ -247,6 +255,13 @@ async def get_session_context(auto_commit: bool = False) -> AsyncGenerator[Async
             yield session
             if auto_commit:
                 await session.commit()
+                # Dispatch domain events only AFTER the commit succeeded:
+                # handlers run in separate sessions and must observe the
+                # committed state. Events from a rolled-back transaction are
+                # dropped with the session.
+                from app.core.events import dispatch_pending_events
+
+                dispatch_pending_events(session)
         except Exception:
             await session.rollback()
             raise

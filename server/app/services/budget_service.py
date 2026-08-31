@@ -139,7 +139,7 @@ class BudgetService:
         # settings-creation failure leaves no orphaned budget behind.
         await self._ensure_settings_exists(user_uuid)
 
-        await self.session.commit()
+        await self.session.flush()
         await self.session.refresh(budget)
 
         logger.info(
@@ -218,7 +218,7 @@ class BudgetService:
             period = await self.periods.get_or_create_current_period(budget)
             period = await self.periods.update_period_spent_amount(budget, period, auto_commit=False)
             responses.append(await self.build_budget_response(budget, period))
-        await self.session.commit()
+        await self.session.flush()
         return responses
 
     async def update_budget(
@@ -257,7 +257,7 @@ class BudgetService:
         if request.period_anchor_day is not None:
             budget.period_anchor_day = request.period_anchor_day
 
-        await self.session.commit()
+        await self.session.flush()
         await self.session.refresh(budget)
 
         logger.info(
@@ -283,7 +283,7 @@ class BudgetService:
             return False
 
         await self.session.delete(budget)
-        await self.session.commit()
+        await self.session.flush()
 
         logger.info(
             "budget_deleted",
@@ -363,7 +363,7 @@ class BudgetService:
             )
             await self.update_period_spent_amount(to_budget, to_period, auto_commit=False)
 
-        await self.session.commit()
+        await self.session.flush()
 
         logger.info(
             "budget_rebalanced",
@@ -548,7 +548,7 @@ class BudgetService:
             overall_pct = float(category_spent / category_target * 100) if category_target > 0 else 0.0
 
         # Batch commit all period updates at once
-        await self.session.commit()
+        await self.session.flush()
 
         return BudgetSummaryResponse(
             total_budget=total_budget_response,
@@ -792,7 +792,7 @@ class BudgetService:
             if value is not None:
                 setattr(settings, field, value)
 
-        await self.session.commit()
+        await self.session.flush()
         await self.session.refresh(settings)
 
         return settings

@@ -22,7 +22,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field, field_validator
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.exceptions import to_client_error
 from app.core.langgraph.tools._helpers import get_thread_id, get_user_uuid, parse_time
 from app.core.logging import logger
@@ -164,7 +164,7 @@ async def execute_transfer(
     # only when the LLM extracted nothing. Never hardcode an English tag.
     final_tags = tags or ([memo] if memo else [])
 
-    async with db_manager.session_factory() as session:
+    async with get_session_context() as session:
         service = TransactionService(session)
 
         try:

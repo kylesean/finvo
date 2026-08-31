@@ -179,7 +179,7 @@ class UserService:
 
         user.updated_at = now
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(user)
 
         logger.info(
@@ -263,7 +263,7 @@ class UserService:
                     )
                 )
 
-        await self.db.commit()
+        await self.db.flush()
 
         # Net worth in display currency (ACTIVE accounts included in net worth)
         display_currency = await get_user_display_currency(self.db, user_uuid)
@@ -390,7 +390,7 @@ class UserService:
             updated_at=now,
         )
         self.db.add(financial_account)
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(financial_account)
 
         logger.info(
@@ -479,7 +479,7 @@ class UserService:
 
         account.updated_at = utc_now()
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(account)
 
         logger.info("financial_account_updated", user_uuid=str(user_uuid), account_id=account.id)
@@ -577,7 +577,7 @@ class UserService:
             )
 
         await self.db.delete(account)
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info("financial_account_deleted", user_uuid=str(user_uuid), account_id=account_id)
         return True
@@ -683,7 +683,7 @@ class UserService:
         target.updated_at = now
 
         await self.db.delete(source)
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info(
             "financial_account_merged",
@@ -886,7 +886,7 @@ class UserService:
 
         account.status = "CLOSED"
         account.updated_at = utc_now()
-        await self.db.commit()
+        await self.db.flush()
 
         final_balance = Decimal(
             account.current_balance if account.current_balance is not None else account.initial_balance or 0
@@ -977,7 +977,7 @@ class UserService:
             settings.safety_balance_threshold = safety_balance_threshold
             settings.updated_at = now
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(settings)
 
         logger.info("financial_safety_line_updated", user_uuid=str(user_uuid), threshold=safety_balance_threshold)
@@ -1079,7 +1079,7 @@ class UserService:
                 settings.avg_daily_spending = estimated_avg_daily_spending
             settings.updated_at = now
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(settings)
 
         logger.info(
@@ -1155,7 +1155,7 @@ class UserService:
         )
         self.db.add(settings)
         if commit:
-            await self.db.commit()
+            await self.db.flush()
             await self.db.refresh(settings)
         else:
             # Send INSERT within the caller's transaction without committing,
@@ -1233,7 +1233,7 @@ class UserService:
                 settings.month_start_day = month_start_day
             settings.updated_at = now
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(settings)
 
         # Trigger recalculation if base currency actually changed
@@ -1293,7 +1293,7 @@ class UserService:
             tx.exchange_rate = new_rate.quantize(Decimal("0.00000001"))
             recalculated += 1
 
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info(
             "base_currency_change_recalculation_complete",

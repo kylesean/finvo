@@ -12,7 +12,7 @@ from uuid import UUID
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.langgraph.tools._helpers import get_user_uuid
 from app.core.logging import logger
 
@@ -55,7 +55,7 @@ async def associate_transactions_to_space(
     try:
         from app.services.shared_space_service import SharedSpaceService
 
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = SharedSpaceService(session)
 
             # Get space details first

@@ -83,7 +83,7 @@ class SharedSpaceService:
             status="ACCEPTED",
         )
         self.db.add(member)
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(space)
 
         logger.info("shared_space_created", space_id=space.id, creator=str(user_uuid))
@@ -245,7 +245,7 @@ class SharedSpaceService:
         if status is not None:
             space.status = status
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(space)
 
         # Load creator separately to avoid lazy-load in async context
@@ -285,7 +285,7 @@ class SharedSpaceService:
             raise NotFoundError("shared space not found")
 
         await self.db.delete(space)
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info("shared_space_deleted", space_id=space_id, by_user=str(user_uuid))
         return True
@@ -329,7 +329,7 @@ class SharedSpaceService:
         # Update space with new invite code
         space.invite_code = code
         space.invite_code_expires_at = expires_at
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(space)
 
         return {
@@ -398,21 +398,22 @@ class SharedSpaceService:
             )
             self.db.add(member)
 
-        await self.db.commit()
+        await self.db.flush()
 
         # Get space detail FIRST (ensures response is ready before any side-effects)
         space_detail = await self.get_space_detail(space.id, user_uuid)
 
         # Emit domain event (async, fire-and-forget, never blocks response)
-        from app.core.events import event_bus
+        from app.core.events import collect_event
         from app.services.notification_handlers import MemberJoinedEvent
 
-        event_bus.emit(
+        collect_event(
+            self.db,
             MemberJoinedEvent(
                 space_id=space.id,
                 space_name=space.name,
                 joined_user_uuid=user_uuid,
-            )
+            ),
         )
 
         return space_detail
@@ -449,25 +450,26 @@ class SharedSpaceService:
             )
 
         await self.db.delete(member)
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info("member_left_space", space_id=space_id, user=str(user_uuid))
 
         # Emit domain event so remaining members are notified in realtime
-        from app.core.events import event_bus
+        from app.core.events import collect_event
         from app.services.notification_handlers import MemberLeftEvent
 
         space_name = (
             await self.db.execute(select(SharedSpace.name).where(SharedSpace.id == space_id))
         ).scalar_one_or_none()
 
-        event_bus.emit(
+        collect_event(
+            self.db,
             MemberLeftEvent(
                 space_id=space_id,
                 space_name=space_name or "",
                 left_user_uuid=user_uuid,
                 reason="left",
-            )
+            ),
         )
 
         return True
@@ -510,26 +512,27 @@ class SharedSpaceService:
             raise BusinessError("cannot remove space owner", error_code=CommonErrorCode.PERMISSION_DENIED)
 
         await self.db.delete(member)
-        await self.db.commit()
+        await self.db.flush()
 
         logger.info("member_removed", space_id=space_id, removed=str(target_user_uuid), by=str(user_uuid))
 
         # Emit domain event so remaining members (and the removed user) are
         # notified in realtime
-        from app.core.events import event_bus
+        from app.core.events import collect_event
         from app.services.notification_handlers import MemberLeftEvent
 
         space_name = (
             await self.db.execute(select(SharedSpace.name).where(SharedSpace.id == space_id))
         ).scalar_one_or_none()
 
-        event_bus.emit(
+        collect_event(
+            self.db,
             MemberLeftEvent(
                 space_id=space_id,
                 space_name=space_name or "",
                 left_user_uuid=target_user_uuid,
                 reason="removed",
-            )
+            ),
         )
 
         return True
@@ -580,7 +583,7 @@ class SharedSpaceService:
             raise BusinessError("cannot change owner role", error_code=CommonErrorCode.PERMISSION_DENIED)
 
         member.role = new_role
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(member)
 
         logger.info(

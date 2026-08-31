@@ -161,7 +161,7 @@ class RecurringTransactionService:
         )
 
         self.db.add(recurring_tx)
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(recurring_tx)
 
         return self._recurring_tx_to_dict(recurring_tx)
@@ -439,7 +439,7 @@ class RecurringTransactionService:
 
         recurring_tx.updated_at = utc_now()
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(recurring_tx)
 
         return self._recurring_tx_to_dict(recurring_tx)
@@ -459,7 +459,7 @@ class RecurringTransactionService:
             return False
 
         await self.db.delete(recurring_tx)
-        await self.db.commit()
+        await self.db.flush()
 
         return True
 

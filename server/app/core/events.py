@@ -32,6 +32,30 @@ logger = structlog.get_logger(__name__)
 # Type alias for async event handlers
 EventHandler = Callable[..., Coroutine[Any, Any, None]]
 
+# Key under which collected domain events are parked on the SQLAlchemy
+# session (session.info) until the surrounding Unit of Work commits.
+PENDING_EVENTS_KEY = "_pending_domain_events"
+
+
+def collect_event(session: Any, event: DomainEvent) -> None:
+    """Park an event on the session for dispatch AFTER the transaction commits.
+
+    Services must NOT emit directly: handlers run in separate sessions and
+    read the database, so an event emitted before commit would observe the
+    un-committed state. The Unit of Work (get_session_context) dispatches
+    parked events once the commit succeeded; on rollback they are dropped —
+    a failed operation never fires its events.
+    """
+    pending = session.info.setdefault(PENDING_EVENTS_KEY, [])
+    pending.append(event)
+
+
+def dispatch_pending_events(session: Any) -> None:
+    """Emit all events parked on the session (call after a successful commit)."""
+    pending = session.info.pop(PENDING_EVENTS_KEY, [])
+    for event in pending:
+        event_bus.emit(event)
+
 
 @dataclass(frozen=True, kw_only=True)
 class DomainEvent:

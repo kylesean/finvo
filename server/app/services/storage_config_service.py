@@ -81,7 +81,7 @@ class StorageConfigService:
         )
 
         self.db.add(config)
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(config)
 
         logger.info(
@@ -219,7 +219,7 @@ class StorageConfigService:
         if is_readonly is not None:
             config.is_readonly = is_readonly
 
-        await self.db.commit()
+        await self.db.flush()
         await self.db.refresh(config)
 
         logger.info("storage_config_updated", config_id=config_id, user_uuid=user_uuid)
@@ -247,7 +247,7 @@ class StorageConfigService:
 
         try:
             await self.db.delete(config)
-            await self.db.commit()
+            await self.db.flush()
         except IntegrityError:
             # FK constraint from attachments: roll back and translate into a
             # business error (keeps session handling inside the service layer).

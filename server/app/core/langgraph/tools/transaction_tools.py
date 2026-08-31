@@ -22,7 +22,7 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.constants.transaction_constants import TransactionCategory
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.exceptions import AppException
 from app.core.langgraph.tools._helpers import get_thread_id, get_user_uuid, get_user_uuid_str, money_str, parse_time
 from app.core.logging import logger
@@ -154,7 +154,7 @@ async def record_transactions(
     if not transactions:
         return {"success": False, "message": "Please provide at least one transaction"}
 
-    async with db_manager.session_factory() as session:
+    async with get_session_context() as session:
         service = TransactionService(session)
 
         try:
@@ -340,7 +340,7 @@ async def search_transactions(
             per_page=per_page,
         )
 
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = TransactionQueryService(session)
             result = await service.search(user_uuid_str, params)
 

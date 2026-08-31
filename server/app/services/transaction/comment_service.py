@@ -274,7 +274,7 @@ class TransactionCommentService:
             )
 
         # Single commit point: comment + notifications are persisted together.
-        await self.db.commit()
+        await self.db.flush()
 
         # Broadcast real-time comment created event (best-effort, after commit)
         await self._broadcast_comment_event(
@@ -482,7 +482,7 @@ class TransactionCommentService:
 
         # Delete comment (if foreign key cascade delete, child comments will be automatically deleted)
         await self.db.delete(comment)
-        await self.db.commit()
+        await self.db.flush()
 
         # Broadcast real-time comment deleted event
         await self._broadcast_comment_event(

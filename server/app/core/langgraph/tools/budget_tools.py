@@ -17,7 +17,7 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from app.core.constants.transaction_constants import EXPENSE_CATEGORIES
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.logging import logger
 from app.services.budget_service import BudgetService
 
@@ -81,7 +81,7 @@ async def query_budget_status(
         }
 
     try:
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = BudgetService(session)
 
             if category_key:

@@ -62,7 +62,7 @@ class MessageIndexService:
             # Write to database
             async with get_session_context() as db:
                 db.add(message)
-                await db.commit()
+                await db.flush()
                 await db.refresh(message)
 
             logger.debug(
@@ -154,7 +154,7 @@ class MessageIndexService:
             async with get_session_context() as db:
                 stmt = delete(SearchableMessage).where(SearchableMessage.thread_id == thread_id)
                 result = await db.execute(stmt)
-                await db.commit()
+                await db.flush()
                 deleted_count = getattr(result, "rowcount", 0) or 0
 
             logger.info(

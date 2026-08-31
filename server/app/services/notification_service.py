@@ -97,7 +97,7 @@ class NotificationService:
         """Mark a single owned notification as read."""
         notification = await self._get_owned(notification_id, user_uuid)
         notification.mark_as_read()
-        await self.db.commit()
+        await self.db.flush()
 
     async def mark_all_read(self, user_uuid: UUID) -> None:
         """Mark all of the user's notifications as read."""
@@ -106,10 +106,10 @@ class NotificationService:
             .where(and_(Notification.user_uuid == user_uuid, Notification.is_read.is_(False)))
             .values(is_read=True, read_at=func.now())
         )
-        await self.db.commit()
+        await self.db.flush()
 
     async def delete(self, notification_id: UUID, user_uuid: UUID) -> None:
         """Delete a single owned notification."""
         notification = await self._get_owned(notification_id, user_uuid)
         await self.db.delete(notification)
-        await self.db.commit()
+        await self.db.flush()

@@ -90,7 +90,7 @@ class PushService:
             )
             db.add(device)
 
-        await db.commit()
+        await db.flush()
         await db.refresh(device)
         return device
 
@@ -113,7 +113,7 @@ class PushService:
         if user_uuid is not None:
             stmt = stmt.where(UserDevice.user_uuid == user_uuid)
         result = await db.execute(stmt)
-        await db.commit()
+        await db.flush()
         return (getattr(result, "rowcount", 0) or 0) > 0
 
     @classmethod
@@ -150,7 +150,7 @@ class PushService:
         )
         try:
             db.add(notification)
-            await db.commit()
+            await db.flush()
             await db.refresh(notification)
         except Exception as exc:
             await db.rollback()
@@ -210,7 +210,7 @@ class PushService:
                             .where(UserDevice.device_token.in_(invalid_tokens))
                             .values(is_active=False)
                         )
-                        await db.commit()
+                        await db.flush()
             except Exception as exc:
                 logger.error("fcm_push_failed", error=str(exc))
         else:
