@@ -198,9 +198,12 @@ class TransactionService:
         start_date: date,
         end_date: date | None = None,
         exception_dates: list[str] | None = None,
+        timezone: str = "UTC",
     ) -> datetime | None:
         """Calculate the next execution date for a recurring transaction."""
-        return self._recurring.calculate_next_execution(rrule_str, start_date, end_date, exception_dates)
+        return self._recurring.calculate_next_execution(
+            rrule_str, start_date, end_date, exception_dates, timezone=timezone
+        )
 
     # ===== Cash Flow Operations (delegated to CashFlowService) =====
 

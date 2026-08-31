@@ -1,4 +1,4 @@
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, time
 from decimal import Decimal
 from uuid import uuid4
 
@@ -243,6 +243,10 @@ async def test_update_period_status(db_session):
     period = budget.periods[0]
 
     # 2. Add transaction that exceeds budget
+    # transaction_at must share the period's calendar: periods are anchored
+    # on local date.today(), while datetime.now(UTC) lags 8h behind in this
+    # timezone — during the UTC/local midnight gap a "now" transaction lands
+    # OUTSIDE today's period and the test goes red. Use local-noon-as-UTC.
     tx = Transaction(
         uuid=uuid4(),
         user_uuid=user_uuid,
@@ -250,7 +254,7 @@ async def test_update_period_status(db_session):
         amount=Decimal("150.0"),
         amount_original=Decimal("150.0"),
         currency="CNY",
-        transaction_at=datetime.now(UTC),
+        transaction_at=datetime.combine(date.today(), time(12, 0), tzinfo=UTC),
         category_key="TEST",
         status="CLEARED",
         raw_input="big expense",

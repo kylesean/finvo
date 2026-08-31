@@ -131,12 +131,17 @@ class RecurringTransactionService:
 
         exception_dates = data.get("exception_dates", [])
 
+        # Resolve the rule's local timezone: explicit rule timezone first,
+        # then the user's, then UTC (resolve_timezone degrades gracefully).
+        rule_timezone = data.get("timezone") or await self._get_user_timezone(user_uuid) or "UTC"
+
         # Calculate next execution date
         next_execution = self.calculate_next_execution(
             data["recurrence_rule"],
             start_date,
             end_date,
             exception_dates,
+            timezone=rule_timezone,
         )
 
         recurring_tx = RecurringTransaction(
@@ -172,19 +177,30 @@ class RecurringTransactionService:
         start_date: date,
         end_date: date | None = None,
         exception_dates: list[str] | None = None,
+        timezone: str = "UTC",
         _depth: int = 0,
     ) -> datetime | None:
         """Calculate next execution date.
+
+        Timezone semantics: an RRULE like "the 1st of each month" is a
+        CALENDAR rule — "the 1st" must be anchored in the rule's timezone,
+        not UTC's (a UTC-5 user's "Sep 1" starts at Sep 1 05:00Z; anchoring
+        at UTC midnight would fire a day early). All day math (dtstart,
+        comparison clock, month-end alignment) happens in the rule
+        timezone; the returned instant is converted to UTC for storage
+        (the column is timestamptz — an absolute instant, timezone-free).
 
         Args:
             rrule_str: RRULE string (UNTIL must include UTC timezone marker Z)
             start_date: Rule start date
             end_date: Optional rule end date
             exception_dates: List of excluded date strings
+            timezone: IANA name of the rule's local timezone (falls back
+                gracefully when invalid — see utils.timezone_utils)
             _depth: Internal recursion depth guard when skipping exception dates
 
         Returns:
-            Next execution datetime (UTC), or None if unavailable
+            Next execution datetime (UTC, absolute instant), or None if unavailable
         """
         # Guard against unbounded recursion when every candidate date is an
         # exception (or the rule yields an endless chain of skipped dates).
@@ -192,12 +208,15 @@ class RecurringTransactionService:
             logger.warning("next_execution_exception_recursion_limit", rrule=rrule_str, start=start_date)
             return None
         try:
-            # Use UTC timezone to match UNTIL in RRULE
-            dtstart = datetime.combine(start_date, datetime.min.time(), tzinfo=UTC)
+            from app.utils.timezone_utils import resolve_timezone
+
+            tz = resolve_timezone(timezone)
+            # Anchor the rule's "day" semantics in the rule's local calendar.
+            dtstart = datetime.combine(start_date, datetime.min.time(), tzinfo=tz)
             rule_formatted = rrule_str if rrule_str.startswith("RRULE:") else f"RRULE:{rrule_str}"
             rrule = rrulestr(rule_formatted, dtstart=dtstart)
 
-            now = datetime.now(UTC)
+            now = datetime.now(tz)
             exception_set = set(exception_dates or [])
 
             # Index forward from current time to prevent infinite loop over historical starting points
@@ -218,7 +237,7 @@ class RecurringTransactionService:
                             max_days = calendar.monthrange(cur_year, cur_month)[1]
                             clamped_day = min(target_day, max_days)
                             cand_date = date(cur_year, cur_month, clamped_day)
-                            cand_dt = datetime.combine(cand_date, datetime.min.time(), tzinfo=UTC)
+                            cand_dt = datetime.combine(cand_date, datetime.min.time(), tzinfo=tz)
 
                             if cand_dt > now and cand_date >= start_date:
                                 if end_date and cand_date > end_date:
@@ -247,12 +266,24 @@ class RecurringTransactionService:
                     next_occ.date(),
                     end_date,
                     exception_dates,
+                    timezone=timezone,
                     _depth=_depth + 1,
                 )
 
-            return next_occ
+            return next_occ.astimezone(UTC)
         except Exception as e:
             logger.warning("next_execution_calculation_failed", error=str(e))
+            return None
+
+    async def _get_user_timezone(self, user_uuid: UUID) -> str | None:
+        """Return the user's IANA timezone, or None when unknown/unavailable."""
+        from app.models.user import User
+
+        try:
+            result = await self.db.execute(select(User.timezone).where(User.uuid == user_uuid))
+            return result.scalar_one_or_none()
+        except Exception as e:  # noqa: BLE001 - never block rule creation on a lookup
+            logger.warning("user_timezone_lookup_failed", user_uuid=str(user_uuid), error=str(e))
             return None
 
     def _recurring_tx_to_dict(self, recurring_tx: RecurringTransaction) -> dict[str, Any]:
@@ -432,6 +463,7 @@ class RecurringTransactionService:
                 recurring_tx.start_date,
                 recurring_tx.end_date,
                 recurring_tx.exception_dates,
+                timezone=recurring_tx.timezone,
             )
         elif not recurring_tx.is_active:
             # Clear next execution date when disabled

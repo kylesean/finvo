@@ -299,6 +299,7 @@ async def _update_next_execution(
         recurring_tx.start_date,
         recurring_tx.end_date,
         recurring_tx.exception_dates,
+        timezone=recurring_tx.timezone,
     )
 
     recurring_tx.next_execution_at = next_execution

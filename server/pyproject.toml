@@ -30,6 +30,9 @@ dependencies = [
     "python-jose[cryptography]>=3.4.0",
     "bcrypt>=4.3.0",
     "cryptography>=48.0.1",
+    # IANA timezone database for zoneinfo (recurring rule local-time math);
+    # slim containers ship no /usr/share/zoneinfo, so ship it as a Python pkg
+    "tzdata>=2024.1",
     # LLM / agent framework
     "langchain>=0.3.0",
     "langchain-core>=1.2.5",
