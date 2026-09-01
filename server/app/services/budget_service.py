@@ -20,6 +20,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.exceptions import BusinessError, CommonErrorCode
 from app.core.logging import logger
 from app.models.budget import (
     Budget,
@@ -95,14 +96,24 @@ class BudgetService:
                 # Use category key as the default name
                 name = request.category_key or "CATEGORY"
 
+        # Currency normalization: a budget is a SPENDING LIMIT, and spent
+        # amounts are aggregated in the user's base currency
+        # (calculate_spent_amount sums Transaction.amount, which is base
+        # currency). A budget denominated in any other currency would compare
+        # apples to oranges — e.g. a CNY user with a USD 1000 budget would
+        # see CNY spending compared against a USD target. Convert the limit
+        # to the base currency at creation (one-time snapshot); a
+        # unavailable rate is an explicit error, never a silent 1:1.
+        amount, currency_code = await self._normalize_budget_currency(user_uuid, request.amount, request.currency_code)
+
         budget = Budget(
             owner_uuid=user_uuid,
             name=name,
             type=BudgetType.EXPENSE_LIMIT.value,
             scope=request.scope.value if isinstance(request.scope, BudgetScope) else request.scope,
             category_key=request.category_key,
-            amount=request.amount,
-            currency_code=request.currency_code,
+            amount=amount,
+            currency_code=currency_code,
             period_type=request.period_type.value
             if isinstance(request.period_type, BudgetPeriodType)
             else request.period_type,
@@ -245,11 +256,17 @@ class BudgetService:
         if request.name is not None:
             budget.name = request.name
         if request.amount is not None:
-            budget.amount = request.amount
+            # Normalize currency the same way as create: the stored limit is
+            # always the user's base currency (one-time conversion snapshot).
+            amount, currency_code = await self._normalize_budget_currency(
+                user_uuid, request.amount, budget.currency_code
+            )
+            budget.amount = amount
+            budget.currency_code = currency_code
             # Also update current period's adjusted target
             current_period = await self._get_current_period(budget)
             if current_period:
-                current_period.adjusted_target = request.amount + current_period.rollover_in
+                current_period.adjusted_target = amount + current_period.rollover_in
         if request.rollover_enabled is not None:
             budget.rollover_enabled = request.rollover_enabled
         if request.status is not None:
@@ -267,6 +284,39 @@ class BudgetService:
         )
 
         return budget
+
+    async def _normalize_budget_currency(
+        self, user_uuid: UUID, amount: Decimal, currency_code: str
+    ) -> tuple[Decimal, str]:
+        """Normalize a budget limit to the user's base currency.
+
+        Returns ``(amount, currency_code)`` with ``currency_code`` always
+        equal to the user's base currency: when the requested currency
+        differs, the limit is converted via the live rate as a one-time
+        snapshot. An unavailable rate raises (never a silent 1:1).
+        """
+        from app.utils.currency_utils import convert_to_user_base, get_user_base_currency
+
+        base_currency = await get_user_base_currency(self.session, user_uuid)
+        if (currency_code or base_currency).upper() == base_currency.upper():
+            return amount, base_currency
+
+        try:
+            base_amount, _ = await convert_to_user_base(amount, currency_code, base_currency)
+        except Exception as e:  # noqa: BLE001 - surface the conversion failure
+            raise BusinessError(
+                f"cannot create budget in {currency_code}: exchange rate unavailable",
+                error_code=CommonErrorCode.VALIDATION_ERROR,
+            ) from e
+        logger.info(
+            "budget_currency_normalized",
+            user_uuid=str(user_uuid),
+            from_currency=currency_code,
+            to_currency=base_currency,
+            amount=str(amount),
+            converted=str(base_amount),
+        )
+        return base_amount, base_currency
 
     async def delete_budget(self, budget_id: UUID, user_uuid: UUID) -> bool:
         """Delete a budget.
