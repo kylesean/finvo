@@ -16,6 +16,10 @@ from pydantic import SecretStr
 from app.core.config import settings
 from app.core.logging import logger
 
+# Placeholder used when no provider key is configured (ChatOpenAI
+# requires a non-empty key); startup warns about it (see D6).
+_PLACEHOLDER_API_KEY = "sk-dummy-key-for-init"  # pragma: allowlist secret
+
 
 class LLMRegistry:
     """Registry of available LLM models with lazily-initialized instances.
@@ -34,16 +38,13 @@ class LLMRegistry:
     _registry_lock = threading.Lock()
     _initialized = False
 
-    # Declarative registry: entries carry ``llm_kwargs``; the live
-    # ``ChatOpenAI`` instance is materialized into ``entry["llm"]`` by
-    # :meth:`_ensure_initialized` on first access.
     _MODELS: list[dict[str, Any]] = [
         {
             "name": "gpt-5.6-sol",
             "capabilities": {"vision": True},
             "llm_kwargs": {
                 "model": "gpt-5.6-sol",
-                "api_key": SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "api_key": SecretStr(settings.OPENAI_API_KEY or _PLACEHOLDER_API_KEY),
                 "base_url": settings.OPENAI_BASE_URL,
                 "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
                 "max_completion_tokens": settings.MAX_TOKENS,
@@ -56,7 +57,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm_kwargs": {
                 "model": "gpt-5.6-terra",
-                "api_key": SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "api_key": SecretStr(settings.OPENAI_API_KEY or _PLACEHOLDER_API_KEY),
                 "base_url": settings.OPENAI_BASE_URL,
                 "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
                 "max_completion_tokens": settings.MAX_TOKENS,
@@ -69,7 +70,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm_kwargs": {
                 "model": "gpt-5.6-luna",
-                "api_key": SecretStr(settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "api_key": SecretStr(settings.OPENAI_API_KEY or _PLACEHOLDER_API_KEY),
                 "base_url": settings.OPENAI_BASE_URL,
                 "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
                 "max_completion_tokens": settings.MAX_TOKENS,
@@ -82,7 +83,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm_kwargs": {
                 "model": "qwen3.8-max-preview",
-                "api_key": SecretStr(settings.QWEN_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "api_key": SecretStr(settings.QWEN_API_KEY or settings.OPENAI_API_KEY or _PLACEHOLDER_API_KEY),
                 "base_url": settings.QWEN_BASE_URL or settings.OPENAI_BASE_URL,
                 "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
                 "max_completion_tokens": settings.MAX_TOKENS,
@@ -95,7 +96,7 @@ class LLMRegistry:
             "capabilities": {"vision": True},
             "llm_kwargs": {
                 "model": "doubao-seed-1-6-251015",
-                "api_key": SecretStr(settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "api_key": SecretStr(settings.DOUBAO_API_KEY or settings.OPENAI_API_KEY or _PLACEHOLDER_API_KEY),
                 "base_url": settings.DOUBAO_BASE_URL or settings.OPENAI_BASE_URL,
                 "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
                 "max_completion_tokens": settings.MAX_TOKENS,
@@ -108,7 +109,7 @@ class LLMRegistry:
             "capabilities": {"vision": False},
             "llm_kwargs": {
                 "model": "deepseek-v4-flash",
-                "api_key": SecretStr(settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY or "sk-dummy-key-for-init"),
+                "api_key": SecretStr(settings.DEEPSEEK_API_KEY or settings.OPENAI_API_KEY or _PLACEHOLDER_API_KEY),
                 "base_url": settings.DEEPSEEK_BASE_URL or settings.OPENAI_BASE_URL,
                 "timeout": settings.LLM_REQUEST_TIMEOUT_SECONDS,
                 "max_completion_tokens": settings.MAX_TOKENS,
@@ -130,7 +131,26 @@ class LLMRegistry:
                 if not cls._initialized:
                     for entry in cls._MODELS:
                         entry["llm"] = cls._build_llm(entry)
+                        cls._warn_on_placeholder_key(entry)
                     cls._initialized = True
+
+    @classmethod
+    def _warn_on_placeholder_key(cls, entry: dict[str, Any]) -> None:
+        """Log a clear startup warning when a model runs with no real key.
+
+        The ChatOpenAI constructor requires a non-empty api_key, so missing
+        provider credentials fall back to a placeholder (D6); failing loudly
+        at startup beats surfacing as a confusing auth error on the first
+        request. Ollama models never have an API key — silence them.
+        """
+        key = entry["llm_kwargs"].get("api_key")
+        key_value = key.get_secret_value() if isinstance(key, SecretStr) else str(key or "")
+        if key_value == _PLACEHOLDER_API_KEY and not cls._is_ollama_model(entry["name"])[0]:
+            logger.warning(
+                "llm_model_has_no_api_key",
+                model=entry["name"],
+                hint="no provider API key is configured; requests to this model will fail until a key is set",
+            )
 
     @classmethod
     def _llms(cls) -> list[dict[str, Any]]:
@@ -188,9 +208,7 @@ class LLMRegistry:
                 "model_not_found_in_registry_creating_dynamic", model_name=model_name, clean_name=clean_model_name
             )
             api_key_val = (
-                settings.OLLAMA_API_KEY or "ollama"
-                if is_ollama
-                else settings.OPENAI_API_KEY or "sk-dummy-key-for-init"
+                settings.OLLAMA_API_KEY or "ollama" if is_ollama else settings.OPENAI_API_KEY or _PLACEHOLDER_API_KEY
             )
             base_url = settings.OLLAMA_BASE_URL if is_ollama else settings.OPENAI_BASE_URL
 

@@ -884,6 +884,15 @@ class TransactionCRUDService:
             except Exception as e:
                 logger.error("batch_update_tx_failed", tx_id=str(tx_id), error=str(e))
                 failed.append({"transaction_id": str(tx_id), "error": str(e)})
+                # A database-level failure (e.g. a failed flush) leaves the
+                # session needing rollback; continuing would fail every
+                # remaining item with the same stale-session error (D7).
+                # Business errors (not found / permission) do not poison the
+                # session, so only roll back when the session actually broke.
+                if not self.db.is_active:
+                    await self.db.rollback()
+                    logger.error("batch_update_aborted_after_db_error", failed_tx_id=str(tx_id))
+                    break
 
         return {
             "success": len(failed) == 0,

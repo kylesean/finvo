@@ -61,6 +61,10 @@ class MemoryService:
 
     _instance: MemoryService | None = None
     _memory: AsyncMemory | None = None
+    # Guards singleton construction: concurrent awaiters (e.g. two startup
+    # tasks racing) would otherwise build two AsyncMemory instances and two
+    # vector-store connection pools (D5).
+    _init_lock: asyncio.Lock | None = None
 
     def __init__(self) -> None:
         """Private constructor. Use get_instance() instead."""
@@ -80,9 +84,16 @@ class MemoryService:
         Returns:
             MemoryService instance with initialized AsyncMemory
         """
-        if cls._instance is None:
-            cls._instance = cls()
-            await cls._instance._initialize()
+        if cls._instance is not None:
+            return cls._instance
+        if cls._init_lock is None:
+            cls._init_lock = asyncio.Lock()
+        async with cls._init_lock:
+            # Re-check inside the lock: the first awaiter initialized while
+            # we were waiting.
+            if cls._instance is None:
+                cls._instance = cls()
+                await cls._instance._initialize()
         return cls._instance
 
     @classmethod
