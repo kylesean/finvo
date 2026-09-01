@@ -214,7 +214,7 @@ class TransactionCRUDService:
         return TransactionCreateResult(
             success=True,
             transaction_id=str(transaction.uuid),
-            amount=float(amount),
+            amount=amount,
             currency=currency,
             type=tx_type.upper(),
             category_key=transaction.category_key,
@@ -314,7 +314,6 @@ class TransactionCRUDService:
                 )
 
         # Display: show original currency amount for individual transaction
-        amount_val = float(transaction.amount_original)
         original_currency = (transaction.currency or display_currency).upper()
 
         # Query attachments linked via source_thread_id
@@ -343,12 +342,12 @@ class TransactionCRUDService:
             id=str(transaction.uuid),
             user_uuid=str(transaction.user_uuid),
             type=transaction.type,
-            amount=round(amount_val, 2),
-            # Numeric (float) — must stay consistent with TransactionUpdateResult
-            # and TransactionResponse (list endpoints); a string here breaks the
-            # shared client contract for amountOriginal.
-            amount_original=float(transaction.amount_original) if transaction.amount_original else None,
-            amount_base=float(transaction.amount),
+            # Decimal — serialized as string, matching TransactionResponse (list
+            # endpoints) and TransactionUpdateResult; floats would smuggle
+            # 0.1+0.2-class drift into the UI.
+            amount=transaction.amount_original,
+            amount_original=transaction.amount_original if transaction.amount_original else None,
+            amount_base=transaction.amount,
             currency=original_currency,
             base_currency=display_currency,
             exchange_rate=str(transaction.exchange_rate) if transaction.exchange_rate else None,
@@ -497,16 +496,15 @@ class TransactionCRUDService:
         # Get display values - show original currency amount
         display_currency = await get_user_display_currency(self.db, user_uuid)
         original_currency = (transaction.currency or display_currency).upper()
-        display_amount = float(transaction.amount_original)
         tx_at = transaction.transaction_at
         updated_at = transaction.updated_at
 
         return TransactionUpdateResult(
             success=True,
             transaction_id=str(transaction.uuid),
-            amount=round(display_amount, 2),
-            amount_original=float(transaction.amount_original) if transaction.amount_original else display_amount,
-            amount_base=float(transaction.amount),
+            amount=transaction.amount_original,
+            amount_original=transaction.amount_original if transaction.amount_original else transaction.amount,
+            amount_base=transaction.amount,
             currency=original_currency,
             base_currency=display_currency,
             type=transaction.type,

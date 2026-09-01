@@ -401,9 +401,9 @@ class TransactionDetailResponse(BaseModel):
     id: str  # UUID as string
     user_uuid: str = Field(..., serialization_alias="userUuid")
     type: str
-    amount: float
-    amount_original: float | None = Field(None, serialization_alias="amountOriginal")
-    amount_base: float = Field(..., serialization_alias="amountBase")
+    amount: Decimal
+    amount_original: Decimal | None = Field(None, serialization_alias="amountOriginal")
+    amount_base: Decimal = Field(..., serialization_alias="amountBase")
     currency: str
     base_currency: str = Field(..., serialization_alias="baseCurrency")
     exchange_rate: str | None = Field(None, serialization_alias="exchangeRate")
@@ -456,7 +456,7 @@ class TransactionCreateResult(BaseModel):
 
     success: bool
     transaction_id: str
-    amount: float
+    amount: Decimal
     currency: str
     type: str
     category_key: str
@@ -483,9 +483,9 @@ class TransactionUpdateResult(BaseModel):
 
     success: bool
     transaction_id: str
-    amount: float
-    amount_original: float
-    amount_base: float
+    amount: Decimal
+    amount_original: Decimal
+    amount_base: Decimal
     currency: str
     base_currency: str = Field(..., serialization_alias="baseCurrency")
     type: str

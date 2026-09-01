@@ -141,11 +141,12 @@ async def test_delete_transaction(db_session):
 
 @pytest.mark.asyncio
 async def test_update_transaction_amount_original_is_float(db_session):
-    """Regression: update result must serialize amountOriginal as a JSON number.
+    """Contract: amount fields serialize as strings (Decimal) everywhere.
 
-    TransactionDetailResponse (detail endpoint) once emitted amount_original as
-    a str (crud_service str() of the Decimal) while the update result emitted
-    float — the same field, two contracts. Lock the update path to float.
+    Amounts must never round-trip through float on the wire: 0.1+0.2-class
+    drift would leak into the UI. The detail, update and list endpoints all
+    emit the same string shape; floats are reserved for chart-only fields
+    (ratios/percentages), never money.
     """
     # 1. Setup User + Transaction (CNY base == fallback, no rate network call)
     user_uuid = uuid4()
@@ -178,11 +179,13 @@ async def test_update_transaction_amount_original_is_float(db_session):
 
     # 3. Assert
     # Note: TransactionUpdateResult keeps the snake_case key `amount_original`
-    # (deliberate GenUI DataModelUpdate contract); the wire TYPE must still be
-    # a JSON number, matching the detail/list endpoints.
-    assert result["amount_original"] == 200.0
-    assert isinstance(result["amount_original"], float), f"got {result['amount_original']!r}"
-    assert result["amount"] == 200.0
+    # (deliberate GenUI DataModelUpdate contract); the value must stay a
+    # Decimal so the wire serializes losslessly as a string (never a float,
+    # which would smuggle 0.1+0.2-class drift into the UI).
+    assert result["amount_original"] == Decimal("200.00000000")
+    assert isinstance(result["amount_original"], Decimal), f"got {result['amount_original']!r}"
+    assert str(result["amount_original"]) == "200.00000000"
+    assert str(result["amount"]) == "200.00000000"
 
 
 @pytest.mark.asyncio
