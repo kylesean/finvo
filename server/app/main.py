@@ -55,6 +55,52 @@ langfuse = Langfuse(
 )
 
 
+def _detect_cmdline_workers() -> int:
+    """Best-effort detection of ``uvicorn --workers N`` from /proc cmdline.
+
+    Every uvicorn worker process carries the master's arguments, so reading
+    our own cmdline is sufficient. Returns 1 when unknown (non-Linux,
+    non-uvicorn launch) so the default topology stays silent.
+    """
+    try:
+        with open("/proc/self/cmdline", "rb") as f:
+            args = f.read().split(b"\x00")
+    except OSError:
+        return 1
+    for i, arg in enumerate(args):
+        if arg in (b"--workers", b"-w"):
+            try:
+                return max(1, int(args[i + 1]))
+            except (IndexError, ValueError):
+                return 1
+    return 1
+
+
+def _check_worker_topology() -> None:
+    """Fail loudly when the single-process assumption is violated.
+
+    The in-process scheduler (recurring transactions), WebSocket push,
+    domain event bus, rate limiter and metrics all assume one worker.
+    ``settings.UVICORN_WORKERS`` is the declared contract; the cmdline
+    detection catches direct ``uvicorn --workers N`` launches that bypass
+    the .env. ``FINVO_MULTI_WORKER=1`` acknowledges a topology where the
+    in-process pieces have been replaced (e.g. Redis-backed), suppressing
+    the warning.
+    """
+    workers = max(settings.UVICORN_WORKERS, _detect_cmdline_workers())
+    if workers > 1 and not settings.FINVO_MULTI_WORKER:
+        logger.warning(
+            "single_process_assumption_violated",
+            workers=workers,
+            hint=(
+                "in-process scheduler, WebSocket push, event bus, rate limiter and "
+                "metrics assume a single worker; recurring transactions may run "
+                "twice and realtime notifications may be silently lost. Set "
+                "FINVO_MULTI_WORKER=1 only if the in-process pieces were replaced."
+            ),
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Handle application startup and shutdown events."""
@@ -64,6 +110,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         version=settings.VERSION,
         api_prefix=settings.API_V1_STR,
     )
+
+    _check_worker_topology()
 
     # Initialize database
     from app.core.database import close_db, init_db

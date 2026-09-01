@@ -158,6 +158,16 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = False
 
+    # Deployment topology. The in-process scheduler (recurring transactions),
+    # WebSocket push (ws_manager), domain event bus, rate limiter and metrics
+    # all assume a single worker; multi-worker deployments need Redis-backed
+    # replacements. This is the declared contract, checked at startup
+    # (see main.py). FINVO_MULTI_WORKER acknowledges the topology and
+    # suppresses the warning for deployments that replace the in-process
+    # pieces.
+    UVICORN_WORKERS: int = 1
+    FINVO_MULTI_WORKER: bool = False
+
     # CORS Settings
     ALLOWED_ORIGINS: str = "*"
 
