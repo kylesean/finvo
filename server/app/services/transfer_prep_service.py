@@ -15,7 +15,7 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.services.account_service import AccountService
 
 
@@ -55,7 +55,7 @@ async def build_transfer_wizard_data(
       ``guidance`` code (``NO_ACCOUNTS`` / ``SINGLE_ACCOUNT``) so the UI renders
       a friendly guidance state instead of a failed tool call.
     """
-    async with db_manager.session_factory() as session:
+    async with get_session_context() as session:
         account_service = AccountService(session)
         # Fetch ALL accounts (assets filtered here for more control)
         all_accounts = await account_service.list_user_accounts(user_uuid)

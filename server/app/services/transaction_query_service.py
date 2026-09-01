@@ -27,7 +27,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.logging import logger
 from app.models.transaction import Transaction
 from app.repositories.transaction_repository import TransactionRepository
@@ -207,7 +207,7 @@ class TransactionQueryService:
         result = await service.search(user_uuid, params)
 
         # In LangGraph tools:
-        async with db_manager.session_factory() as session:
+        async with get_session_context() as session:
             service = TransactionQueryService(session)
             result = await service.search(user_uuid, params)
     """
@@ -343,6 +343,6 @@ async def query_transactions(user_uuid: str, params: TransactionQueryParams) -> 
     Returns:
         TransactionQueryResult
     """
-    async with db_manager.session_factory() as session:
+    async with get_session_context() as session:
         service = TransactionQueryService(session)
         return await service.search(user_uuid, params)

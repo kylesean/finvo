@@ -11,7 +11,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.core.database import db_manager
+from app.core.database import get_session_context
 from app.core.genui.enricher import ComponentEnricher
 from app.core.logging import logger
 from app.models.transaction import Transaction
@@ -43,7 +43,7 @@ class TransactionReceiptEnricher(ComponentEnricher):
             return data
 
         try:
-            async with db_manager.session_factory() as session:
+            async with get_session_context() as session:
                 # Query transaction with account relations
                 # Note: Transaction model has relationships source_account and target_account
                 stmt = (
