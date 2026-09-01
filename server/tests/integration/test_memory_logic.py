@@ -49,7 +49,7 @@ async def test_memory_extraction_boundary():
 async def test_agent_proactive_memory_tool_call():
     """Verify Agent memory middleware behavior (currently configured as passive)."""
     # Fully mock LLM calls to avoid network latency and hangs
-    with patch("app.services.llm.llm_service.call", new_callable=AsyncMock) as _:
+    with patch("app.services.llm.llm_service.get_llm", new_callable=AsyncMock) as _:
         from langchain_core.messages import HumanMessage
 
         from app.core.langgraph.middleware.memory import LongTermMemoryMiddleware

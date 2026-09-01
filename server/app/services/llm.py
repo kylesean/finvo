@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import threading
 from typing import (
     Any,
@@ -12,20 +11,7 @@ from typing import (
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
-from openai import (
-    APIError,
-    APITimeoutError,
-    OpenAIError,
-    RateLimitError,
-)
 from pydantic import SecretStr
-from tenacity import (
-    before_sleep_log,
-    retry,
-    retry_if_exception_type,
-    stop_after_attempt,
-    wait_exponential,
-)
 
 from app.core.config import settings
 from app.core.logging import logger
@@ -339,17 +325,17 @@ class LLMRegistry:
 
 
 class LLMService:
-    """Service for managing LLM calls with retries and circular fallback.
+    """Registry-backed LLM accessor.
 
-    This service handles all LLM interactions with automatic retry logic,
-    rate limit handling, and circular fallback through all available models.
-    Execution is request-scoped and thread-safe without mutating shared service state.
+    Resolves model instances (with per-model custom args, Ollama dynamic
+    registration) and exposes the default instance via ``get_llm``. Retry
+    and circular model fallback live in the LangGraph agent nodes
+    (app.core.langgraph.agent.nodes), which consume this service.
     """
 
     def __init__(self) -> None:
         """Initialize the LLM service."""
         self._default_model_index: int = 0
-        self._bound_tools: list[Any] = []
         self._llm: BaseChatModel | None = None
 
         # Find index of default model in registry
@@ -375,148 +361,6 @@ class LLMService:
                 error=str(e),
             )
 
-    @retry(
-        stop=stop_after_attempt(settings.MAX_LLM_CALL_RETRIES),
-        wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type((RateLimitError, APITimeoutError, APIError)),
-        before_sleep=before_sleep_log(logger, logging.WARNING),
-        reraise=True,
-    )
-    async def _call_llm_with_retry(
-        self,
-        llm: BaseChatModel,
-        messages: list[BaseMessage],
-    ) -> BaseMessage:
-        """Call a specific LLM instance with automatic retry logic.
-
-        Args:
-            llm: The LLM model instance for this attempt
-            messages: List of messages to send to the LLM
-
-        Returns:
-            BaseMessage response from the LLM
-
-        Raises:
-            OpenAIError: If all retries for this model fail
-        """
-        try:
-            response = await llm.ainvoke(messages)
-            logger.debug("llm_call_successful", message_count=len(messages))
-            return response
-        except (RateLimitError, APITimeoutError, APIError) as e:
-            logger.warning(
-                "llm_call_failed_retrying",
-                error_type=type(e).__name__,
-                error=str(e),
-                exc_info=True,
-            )
-            raise
-        except OpenAIError as e:
-            logger.error(
-                "llm_call_failed",
-                error_type=type(e).__name__,
-                error=str(e),
-            )
-            raise
-
-    async def call(
-        self,
-        messages: list[BaseMessage],
-        model_name: str | None = None,
-        **model_kwargs: Any,
-    ) -> BaseMessage:
-        """Call the LLM with the specified messages and circular fallback.
-
-        Execution is request-scoped and thread-safe without mutating shared service state.
-
-        Args:
-            messages: List of messages to send to the LLM
-            model_name: Optional specific model to use. If None, uses default model.
-            **model_kwargs: Optional kwargs to override default model configuration
-
-        Returns:
-            BaseMessage response from the LLM
-
-        Raises:
-            RuntimeError: If all models fail after retries
-        """
-        all_names = LLMRegistry.get_all_names()
-        total_models = len(all_names)
-
-        # Determine initial model index
-        starting_index = self._default_model_index
-        if model_name:
-            try:
-                starting_index = all_names.index(model_name)
-            except ValueError:
-                starting_index = self._default_model_index
-
-        models_tried = 0
-        last_error: Exception | None = None
-
-        while models_tried < total_models:
-            current_index = (starting_index + models_tried) % total_models
-            current_model_entry = LLMRegistry.get_model_at_index(current_index)
-            current_model_name = current_model_entry["name"]
-
-            try:
-                if models_tried == 0 and model_name:
-                    target_llm = LLMRegistry.get(model_name, **model_kwargs)
-                else:
-                    target_llm = LLMRegistry.get(current_model_name)
-
-                if self._bound_tools:
-                    target_llm = cast(BaseChatModel, target_llm.bind_tools(self._bound_tools))
-            except Exception as e:
-                logger.error("failed_to_resolve_model_instance", model=current_model_name, error=str(e))
-                models_tried += 1
-                last_error = e
-                continue
-
-            # Log attempt details
-            model_id = getattr(target_llm, "model_name", None) or getattr(target_llm, "model", current_model_name)
-            base_url = getattr(target_llm, "base_url", "default")
-            api_key = getattr(target_llm, "api_key", "")
-            # Never log any portion of the credential; expose only whether it is configured.
-            api_key_configured = isinstance(api_key, str) and bool(api_key)
-
-            logger.info(
-                "attempting_llm_call",
-                model=model_id,
-                base_url=str(base_url),
-                api_key_configured=api_key_configured,
-                attempt=models_tried + 1,
-            )
-
-            try:
-                response = await self._call_llm_with_retry(target_llm, messages)
-                return response
-            except Exception as e:
-                # Any failure of this model is grounds to try the next one in the
-                # fallback ring (retries already happened inside the tenacity call).
-                last_error = e
-                models_tried += 1
-
-                logger.error(
-                    "llm_call_failed_after_retries",
-                    model=current_model_name,
-                    models_tried=models_tried,
-                    total_models=total_models,
-                    error=str(e),
-                )
-
-                if models_tried >= total_models:
-                    logger.error(
-                        "all_models_failed",
-                        models_tried=models_tried,
-                        starting_model=all_names[starting_index],
-                    )
-                    break
-
-        raise RuntimeError(
-            f"failed to get response from llm after trying {models_tried} models. last error: {str(last_error)}"
-        )
-
     def get_llm(self, model_name: str | None = None) -> BaseChatModel | None:
         """Get an LLM instance.
 
@@ -527,43 +371,16 @@ class LLMService:
             BaseChatModel instance or None if default is not initialized
         """
         if model_name:
-            target = LLMRegistry.get(model_name)
-            if self._bound_tools:
-                return cast(BaseChatModel, target.bind_tools(self._bound_tools))
-            return target
+            return LLMRegistry.get(model_name)
 
-        if self._llm:
-            if self._bound_tools:
-                return cast(BaseChatModel, self._llm.bind_tools(self._bound_tools))
-            return self._llm
-
-        return None
-
-    def bind_tools(self, tools: list[Any]) -> LLMService:
-        """Bind tools to the LLM service in a thread and task-safe, immutable manner.
-
-        Args:
-            tools: List of tools to bind
-
-        Returns:
-            A new LLMService instance with tools bound without mutating self.
-        """
-        new_service = LLMService.__new__(LLMService)
-        new_service._default_model_index = self._default_model_index
-        new_service._bound_tools = list(tools)
-        if self._llm:
-            new_service._llm = cast(BaseChatModel, self._llm.bind_tools(tools))
-        else:
-            new_service._llm = None
-        return new_service
+        return self._llm
 
 
 # Lazy global LLM service singleton.
 #
 # The underlying LLMService (and with it the registry's ChatOpenAI instances)
 # is constructed on first attribute access instead of at import time, so
-# importing this module has no side effects. `patch("app.services.llm.llm_service.call", ...)`
-# still works: setattr lands on the proxy and shadows the forwarded attribute.
+# importing this module has no side effects.
 class _LazyLLMService:
     """Thread-safe lazy singleton proxy for :class:`LLMService`."""
 
@@ -574,11 +391,11 @@ class _LazyLLMService:
         return getattr(self._get_instance(), name)
 
     def _get_instance(self) -> LLMService:
-        if _LazyLLMService._instance is None:
-            with _LazyLLMService._lock:
-                if _LazyLLMService._instance is None:
-                    _LazyLLMService._instance = LLMService()
-        return _LazyLLMService._instance
+        with self._lock:
+            if self._instance is None:
+                self._instance = LLMService()
+            return self._instance
 
 
+# Global singleton used across the application
 llm_service = _LazyLLMService()
