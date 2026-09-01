@@ -33,6 +33,7 @@ class SharedSpace(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     invite_code: Mapped[str | None] = mapped_column(String(20), nullable=True)
     invite_code_expires_at: Mapped[datetime | None] = col.datetime_tz(nullable=True)
+    version: Mapped[int] = mapped_column(sa.Integer, default=0, server_default=sa.text("0"))
     created_at: Mapped[datetime] = col.timestamptz()
     updated_at: Mapped[datetime] = col.timestamptz(nullable=False, onupdate=utc_now)
 

@@ -9,7 +9,7 @@ from typing import Any, cast
 from uuid import UUID
 
 import structlog
-from sqlalchemy import and_, desc, func, select
+from sqlalchemy import and_, delete, desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -19,6 +19,7 @@ from app.core.exceptions import (
     AuthorizationError,
     BusinessError,
     CommonErrorCode,
+    ConflictError,
     NotFoundError,
     SpaceErrorCode,
     TransactionErrorCode,
@@ -212,6 +213,7 @@ class SharedSpaceService:
         name: str | None = None,
         description: str | None = None,
         status: str | None = None,
+        expected_version: int | None = None,
     ) -> dict[str, Any]:
         """Update space info (owner/admin only).
 
@@ -221,6 +223,9 @@ class SharedSpaceService:
             name: New name
             description: New description
             status: New status
+            expected_version: Optional optimistic-lock check; when provided and
+                the space's version differs, the update is rejected with 409
+                instead of silently overwriting a concurrent change.
 
         Returns:
             Updated space dictionary
@@ -238,12 +243,15 @@ class SharedSpaceService:
         if not space:
             raise NotFoundError("shared space not found")
 
+        self._check_version(space, expected_version)
+
         if name is not None:
             space.name = name
         if description is not None:
             space.description = description
         if status is not None:
             space.status = status
+        space.version += 1
 
         await self.db.flush()
         await self.db.refresh(space)
@@ -450,6 +458,7 @@ class SharedSpaceService:
             )
 
         await self.db.delete(member)
+        await self._bump_space_version(space_id)
         await self.db.flush()
 
         logger.info("member_left_space", space_id=space_id, user=str(user_uuid))
@@ -474,13 +483,24 @@ class SharedSpaceService:
 
         return True
 
-    async def remove_member(self, space_id: UUID, user_uuid: UUID, target_user_uuid: UUID) -> bool:
+    async def remove_member(
+        self,
+        space_id: UUID,
+        user_uuid: UUID,
+        target_user_uuid: UUID,
+        purge_transactions: bool = False,
+    ) -> bool:
         """Remove a member from space (owner/admin only).
 
         Args:
             space_id: Space ID
             user_uuid: Requesting user's UUID
             target_user_uuid: User to remove
+            purge_transactions: When True, also delete the removed member's
+                SpaceTransaction associations (their expense records vanish
+                from the space for remaining members). Default False keeps
+                them (settlement already excludes non-members; the detail
+                rows stay visible as historical record).
 
         Returns:
             True if removed
@@ -511,7 +531,27 @@ class SharedSpaceService:
         if member.role == "OWNER":
             raise BusinessError("cannot remove space owner", error_code=CommonErrorCode.PERMISSION_DENIED)
 
+        # C2: optional data-ownership purge. The removed member's expense
+        # records in this space either stay (historical record; settlement
+        # already excludes non-members) or are removed entirely so remaining
+        # members no longer see their spending detail.
+        if purge_transactions:
+            purge_query = delete(SpaceTransaction).where(
+                and_(
+                    SpaceTransaction.space_id == space_id,
+                    SpaceTransaction.added_by_user_uuid == target_user_uuid,
+                )
+            )
+            await self.db.execute(purge_query)
+            logger.info(
+                "member_transactions_purged",
+                space_id=space_id,
+                removed=str(target_user_uuid),
+                by=str(user_uuid),
+            )
+
         await self.db.delete(member)
+        await self._bump_space_version(space_id)
         await self.db.flush()
 
         logger.info("member_removed", space_id=space_id, removed=str(target_user_uuid), by=str(user_uuid))
@@ -583,6 +623,7 @@ class SharedSpaceService:
             raise BusinessError("cannot change owner role", error_code=CommonErrorCode.PERMISSION_DENIED)
 
         member.role = new_role
+        await self._bump_space_version(space_id)
         await self.db.flush()
         await self.db.refresh(member)
 
@@ -599,6 +640,141 @@ class SharedSpaceService:
             "role": member.role,
             "status": member.status,
         }
+
+    async def transfer_ownership(
+        self,
+        space_id: UUID,
+        user_uuid: UUID,
+        target_user_uuid: UUID,
+        expected_version: int | None = None,
+    ) -> dict[str, Any]:
+        """Transfer space ownership to another member.
+
+        The current owner hands the space over: the target becomes OWNER and
+        the former owner drops to MEMBER (they keep access, no longer the
+        keys). This is the exit path leave_space hints at for owners —
+        previously the only option was delete-and-recreate.
+
+        Args:
+            space_id: Space ID
+            user_uuid: Requesting user's UUID (must be owner)
+            target_user_uuid: The new owner (an accepted member)
+            expected_version: Optional optimistic-lock check
+
+        Returns:
+            Space dict (with members, new owner reflected)
+
+        Raises:
+            AuthorizationError: Not owner
+            BusinessError: Target must be a non-owner accepted member
+            ConflictError: expected_version mismatch
+        """
+        await verify_owner(self.db, space_id, user_uuid)
+
+        if user_uuid == target_user_uuid:
+            raise BusinessError("cannot transfer ownership to yourself", error_code=SpaceErrorCode.INVALID_ACTION)
+
+        query = select(SpaceMember).where(
+            cast(
+                Any,
+                and_(SpaceMember.space_id == space_id, SpaceMember.user_uuid == target_user_uuid),
+            )
+        )
+        result = await self.db.execute(query)
+        target = result.scalar_one_or_none()
+
+        if not target:
+            raise NotFoundError("user is not a member of this space")
+        if target.role == "OWNER":
+            raise BusinessError("target is already the owner", error_code=SpaceErrorCode.INVALID_ACTION)
+        if target.status != "ACCEPTED":
+            raise BusinessError("target has not accepted the invitation", error_code=SpaceErrorCode.INVALID_ACTION)
+
+        space = await self._load_space(space_id, with_members=True)
+        self._check_version(space, expected_version)
+
+        # Former owner -> MEMBER (keeps access, loses admin powers), target
+        # -> OWNER. creator_uuid stays untouched: it records who founded the
+        # space, ownership is the current role.
+        former_query = select(SpaceMember).where(
+            cast(
+                Any,
+                and_(SpaceMember.space_id == space_id, SpaceMember.user_uuid == user_uuid),
+            )
+        )
+        former_result = await self.db.execute(former_query)
+        former = former_result.scalar_one()
+        former.role = "MEMBER"
+        target.role = "OWNER"
+        space.version += 1
+
+        await self.db.flush()
+        # No refresh: version was incremented locally and refresh() would
+        # expire the preloaded members relationship, breaking the
+        # include_members rendering below.
+
+        logger.info(
+            "space_ownership_transferred",
+            space_id=space_id,
+            from_user=str(user_uuid),
+            to_user=str(target_user_uuid),
+        )
+
+        from app.core.events import collect_event
+        from app.services.notification_handlers import MemberLeftEvent
+
+        space_name = space.name
+        collect_event(
+            self.db,
+            MemberLeftEvent(
+                space_id=space_id,
+                space_name=space_name or "",
+                left_user_uuid=user_uuid,
+                reason="ownership_transferred",
+            ),
+        )
+
+        stats = await self._get_space_financial_stats(space_id)
+        creator = (await self.db.execute(select(User).where(User.uuid == space.creator_uuid))).scalar_one_or_none()
+        return self._space_to_dict_with_creator(
+            space,
+            creator,
+            tx_count=stats["transaction_count"],
+            total_expense=stats["total_expense"],
+            member_contributions=stats["member_contributions"],
+            include_members=True,
+            role="MEMBER",
+        )
+
+    def _check_version(self, space: SharedSpace, expected_version: int | None) -> None:
+        """Reject a stale write when the caller pinned a version (C3).
+
+        ``expected_version=None`` keeps the previous overwrite semantics for
+        clients that do not participate in optimistic locking.
+        """
+        if expected_version is not None and space.version != expected_version:
+            raise ConflictError(
+                "shared space was modified by someone else, please refresh and retry",
+                error_code=SpaceErrorCode.INVALID_ACTION,
+            )
+
+    async def _bump_space_version(self, space_id: UUID) -> SharedSpace:
+        """Load a space and bump its version (metadata write)."""
+        space = await self._load_space(space_id)
+        space.version += 1
+        return space
+
+    async def _load_space(self, space_id: UUID, with_members: bool = False) -> SharedSpace:
+        query = select(SharedSpace).where(SharedSpace.id == space_id)
+        if with_members:
+            query = query.options(
+                selectinload(SharedSpace.members).selectinload(SpaceMember.user),
+            )
+        result = await self.db.execute(query)
+        space = result.scalar_one_or_none()
+        if not space:
+            raise NotFoundError("shared space not found")
+        return space
 
     # =========================================================================
     # Settlement Calculation

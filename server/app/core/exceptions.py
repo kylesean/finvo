@@ -318,6 +318,18 @@ class BusinessError(AppException):
         super().__init__(message, status_code=status_code, error_code=error_code, details=details)
 
 
+class ConflictError(AppException):
+    """Optimistic-lock / concurrent-modification conflict (409)."""
+
+    def __init__(
+        self,
+        message: str,
+        error_code: ErrorCodeType | str = CommonErrorCode.CONFLICT,
+        details: dict[str, Any] | None = None,
+    ):
+        super().__init__(message, status_code=409, error_code=error_code, details=details)
+
+
 class FileUploadError(AppException):
     """File upload error (400)."""
 

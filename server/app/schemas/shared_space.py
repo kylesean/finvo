@@ -25,6 +25,18 @@ class UpdateSpaceRequest(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255, description="Space name")
     description: str | None = Field(None, max_length=255, description="Space description")
     status: str | None = Field(None, pattern="^(active|archived)$", description="Space status")
+    expectedVersion: int | None = Field(
+        None, ge=0, description="Optimistic-lock check: reject if the space version differs"
+    )
+
+
+class TransferOwnershipRequest(BaseModel):
+    """Request schema for transferring space ownership."""
+
+    userId: UUID = Field(..., description="The member who becomes the new owner")
+    expectedVersion: int | None = Field(
+        None, ge=0, description="Optimistic-lock check: reject if the space version differs"
+    )
 
 
 class GenerateInviteCodeRequest(BaseModel):

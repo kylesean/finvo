@@ -16,6 +16,7 @@ from app.schemas.shared_space import (
     CreateSpaceRequest,
     GenerateInviteCodeRequest,
     JoinWithCodeRequest,
+    TransferOwnershipRequest,
     UpdateMemberRoleRequest,
     UpdateSpaceRequest,
 )
@@ -91,6 +92,7 @@ async def update_shared_space(
         name=request.name,
         description=request.description,
         status=request.status,
+        expected_version=request.expectedVersion,
     )
     return success_response(data=space_dict)
 
@@ -158,10 +160,40 @@ async def remove_member(
     user_id: UUID,
     current_user: CurrentUser,
     service: SharedSpaceService = Depends(get_shared_space_service),
+    purge_transactions: bool = Query(
+        default=False,
+        description="Also delete the removed member's transaction associations in this space",
+    ),
 ) -> JSONResponse:
-    """Remove a member from the space (only for administrators/creators)."""
-    await service.remove_member(space_id, current_user.uuid, user_id)
+    """Remove a member from the space (only for administrators/creators).
+
+    By default the removed member's historical expense records stay visible to
+    remaining members (settlement already excludes non-members). Pass
+    ``purge_transactions=true`` to erase their spending detail entirely.
+    """
+    await service.remove_member(space_id, current_user.uuid, user_id, purge_transactions=purge_transactions)
     return success_response(data={"message": "Remove member successfully"})
+
+
+@router.post("/{space_id}/transfer-ownership", response_model=ResponseEnvelope[dict[str, Any]])
+async def transfer_ownership(
+    space_id: UUID,
+    request: TransferOwnershipRequest,
+    current_user: CurrentUser,
+    service: SharedSpaceService = Depends(get_shared_space_service),
+) -> JSONResponse:
+    """Transfer space ownership to another member (owner only).
+
+    The former owner drops to MEMBER; this is the supported exit path for
+    owners (the alternative was delete-and-recreate).
+    """
+    result = await service.transfer_ownership(
+        space_id=space_id,
+        user_uuid=current_user.uuid,
+        target_user_uuid=request.userId,
+        expected_version=request.expectedVersion,
+    )
+    return success_response(data=result)
 
 
 @router.put("/{space_id}/members/{user_id}/role", response_model=ResponseEnvelope[dict[str, Any]])
