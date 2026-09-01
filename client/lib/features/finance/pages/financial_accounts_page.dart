@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:async';
 
 import 'package:finvo/shared/models/financial_account.dart';
-import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/features/finance/pages/account_edit_navigation.dart';
 import 'package:finvo/app/router/app_routes.dart';

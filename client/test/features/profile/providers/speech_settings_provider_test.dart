@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finvo/core/services/server_config_service.dart';
-import 'package:finvo/features/chat/services/speech_recognition_service.dart';
-import 'package:finvo/features/profile/models/speech_settings.dart';
-import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
+import 'package:finvo/shared/services/speech_recognition_service.dart';
+import 'package:finvo/shared/models/speech_settings.dart';
+import 'package:finvo/shared/providers/speech_settings_provider.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

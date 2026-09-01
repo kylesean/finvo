@@ -5,8 +5,8 @@ import 'package:forui/forui.dart';
 import 'package:finvo/features/chat/genui/templates/transaction_card.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/core/services/server_config_service.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
-import 'package:finvo/features/profile/models/financial_settings.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/models/financial_settings.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

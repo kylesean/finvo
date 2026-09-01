@@ -10,7 +10,7 @@ import 'package:finvo/features/report/widgets/trend_chart.dart';
 import 'package:finvo/features/report/widgets/category_analysis_section.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/models/financial_settings.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 

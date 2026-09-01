@@ -12,7 +12,7 @@ import 'package:finvo/shared/providers/locale_provider.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/utils/heat_colors.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 
 class MonthlyCalendarView extends ConsumerWidget {
   const MonthlyCalendarView({super.key});

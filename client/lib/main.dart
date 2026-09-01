@@ -19,7 +19,7 @@ import 'package:finvo/shared/services/locale_service.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/features/home/providers/home_providers.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
-import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
+import 'package:finvo/shared/providers/speech_settings_provider.dart';
 
 final _logger = Logger('Main');
 

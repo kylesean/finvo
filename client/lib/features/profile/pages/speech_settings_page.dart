@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/shared/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/config/speech_config.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import 'package:finvo/features/profile/models/speech_settings.dart';
-import 'package:finvo/features/profile/providers/speech_settings_provider.dart';
+import 'package:finvo/shared/models/speech_settings.dart';
+import 'package:finvo/shared/providers/speech_settings_provider.dart';
 
 /// Speech recognition settings page
 class SpeechSettingsPage extends ConsumerStatefulWidget {

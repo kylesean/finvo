@@ -18,8 +18,8 @@ import 'package:finvo/features/finance/widgets/category_selection_sheet.dart';
 import 'package:finvo/features/finance/widgets/date_picker_sheet.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/i18n/strings.g.dart';
-import 'package:finvo/features/profile/providers/financial_account_provider.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/financial_account_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/services/timezone_service.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 

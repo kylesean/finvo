@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/shared/models/financial_account.dart';
 import 'package:finvo/shared/providers/generation_guard.dart';
-import 'package:finvo/features/profile/services/profile_service.dart';
+import 'package:finvo/shared/services/financial_account_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:logging/logging.dart';
 
@@ -78,8 +78,8 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final profileService = ref.read(profileServiceProvider);
-      final response = await profileService.getFinancialAccounts();
+      final service = ref.read(financialAccountServiceProvider);
+      final response = await service.getFinancialAccounts();
 
       // Safely parse lastUpdatedAt, handle empty string
       DateTime? parsedDate;
@@ -121,8 +121,8 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final profileService = ref.read(profileServiceProvider);
-      final summary = await profileService.saveFinancialAccounts(accounts);
+      final service = ref.read(financialAccountServiceProvider);
+      final summary = await service.saveFinancialAccounts(accounts);
 
       // After successful save, use local source list + server returned balance/time
       if (!ref.mounted) return false;
@@ -170,8 +170,8 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final profileService = ref.read(profileServiceProvider);
-      final updatedAccount = await profileService.updateFinancialAccount(
+      final service = ref.read(financialAccountServiceProvider);
+      final updatedAccount = await service.updateFinancialAccount(
         accountId,
         account,
       );
@@ -210,8 +210,8 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final profileService = ref.read(profileServiceProvider);
-      await profileService.deleteFinancialAccount(accountId);
+      final service = ref.read(financialAccountServiceProvider);
+      await service.deleteFinancialAccount(accountId);
 
       // Remove from local list
       if (!ref.mounted) return false;
@@ -245,8 +245,8 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final profileService = ref.read(profileServiceProvider);
-      await profileService.mergeFinancialAccounts(sourceId, targetId);
+      final service = ref.read(financialAccountServiceProvider);
+      await service.mergeFinancialAccounts(sourceId, targetId);
 
       await loadFinancialAccounts();
       return true;
@@ -271,8 +271,8 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final profileService = ref.read(profileServiceProvider);
-      await profileService.closeFinancialAccount(
+      final service = ref.read(financialAccountServiceProvider);
+      await service.closeFinancialAccount(
         accountId,
         disposal: disposal,
         targetAccountId: targetAccountId,

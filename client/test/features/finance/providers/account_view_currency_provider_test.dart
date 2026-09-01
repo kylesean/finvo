@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:finvo/features/finance/providers/account_view_currency_provider.dart';
-import 'package:finvo/features/profile/models/financial_settings.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/models/financial_settings.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 
 void main() {
   group('AccountViewCurrencyState', () {

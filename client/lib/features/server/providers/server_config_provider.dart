@@ -5,7 +5,7 @@ import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
-import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';

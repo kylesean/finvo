@@ -10,7 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/features/version/providers/version_provider.dart';
 import 'package:finvo/features/version/services/app_version_service.dart';

@@ -9,7 +9,7 @@ import 'package:forui/forui.dart';
 import 'dart:async';
 
 import 'package:finvo/shared/models/financial_account.dart';
-import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/features/finance/widgets/account_selection_sheet.dart';
 import 'package:finvo/shared/models/currency.dart';

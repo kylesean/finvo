@@ -7,7 +7,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:finvo/features/chat/config/speech_config.dart';
 import 'package:finvo/features/chat/services/audio_recorder_service.dart';
-import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/shared/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 // ignore_for_file: prefer_initializing_formals - private fields with public named ctor params

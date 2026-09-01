@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import 'package:finvo/features/chat/models/speech_error_type.dart';
-import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/shared/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/speech_service_factory.dart';
 import 'package:finvo/features/chat/services/system_speech_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';

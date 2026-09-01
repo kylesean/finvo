@@ -12,7 +12,7 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/features/finance/utils/recurrence_rule_utils.dart';
 import 'package:finvo/features/finance/utils/recurring_transaction_display.dart'
     show formatShortDate, recurringTransactionDisplayName;
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';

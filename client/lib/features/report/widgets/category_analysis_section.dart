@@ -6,7 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/features/report/models/statistics_models.dart';
 import 'package:finvo/core/constants/category_constants.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/app/theme/app_font_config.dart';

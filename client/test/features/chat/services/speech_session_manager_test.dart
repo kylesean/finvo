@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:finvo/features/chat/models/speech_error_type.dart';
 import 'package:finvo/features/chat/services/speech_session_manager.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
-import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/shared/services/speech_recognition_service.dart';
 
 class DummySpeechRecognitionService implements SpeechRecognitionService {
   final StreamController<String> _resultController =

@@ -9,7 +9,7 @@ import 'dart:async';
 
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/shared/models/currency.dart';
-import 'package:finvo/features/profile/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/features/budget/models/budget_models.dart';
 import 'package:finvo/features/budget/providers/budget_provider.dart';
 import 'package:finvo/features/budget/services/budget_service.dart';

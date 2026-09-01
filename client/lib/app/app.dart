@@ -15,7 +15,7 @@ import 'package:finvo/app/theme/theme_notifier.dart';
 import 'package:finvo/app/theme/app_theme_pair_provider.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
-import 'package:finvo/features/profile/providers/financial_account_provider.dart';
+import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';

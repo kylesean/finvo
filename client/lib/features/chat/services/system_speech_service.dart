@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:finvo/features/chat/services/speech_recognition_service.dart';
+import 'package:finvo/shared/services/speech_recognition_service.dart';
 
 final _logger = Logger('SystemSpeechService');
 
