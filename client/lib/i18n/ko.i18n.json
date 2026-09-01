@@ -1058,7 +1058,12 @@
     "fileUploadFailed": "파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요",
     "transferPathConfirmedLegacy": "이체 경로 확인됨: $source에서 $target으로, 금액 $currency $amount. 이 이체를 실행해 주세요.",
     "attachmentLoadFailedTapRetry": "첨부파일 로드 실패, 탭하여 재시도",
-    "mediaFilesCount": "파일 $count개"
+    "mediaFilesCount": "파일 $count개",
+    "copyButton": "메시지 복사",
+    "likeButton": "도움이 됨",
+    "dislikeButton": "도움이 안 됨",
+    "shareButton": "메시지 공유",
+    "voiceInputButton": "음성 입력"
   },
   "image": {
     "deleteTitle": "이미지 삭제",

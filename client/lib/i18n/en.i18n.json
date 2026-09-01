@@ -1058,7 +1058,12 @@
     "fileUploadFailed": "File upload failed, please try again later",
     "transferPathConfirmedLegacy": "Confirmed transfer path: from $source to $target, amount $currency $amount. Please execute this transfer operation.",
     "attachmentLoadFailedTapRetry": "Failed to load attachment, tap to retry",
-    "mediaFilesCount": "$count files"
+    "mediaFilesCount": "$count files",
+    "copyButton": "Copy message",
+    "likeButton": "Mark as helpful",
+    "dislikeButton": "Mark as not helpful",
+    "shareButton": "Share message",
+    "voiceInputButton": "Voice input"
   },
   "image": {
     "deleteTitle": "Delete Image",

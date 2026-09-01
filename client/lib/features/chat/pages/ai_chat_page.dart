@@ -151,6 +151,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         // Copy button - first, no left padding
         ChatActionButton(
           icon: FLucideIcons.copy,
+          semanticLabel: t.chat.copyButton,
           isFirst: true,
           onTap: () async {
             // Smart copy logic:
@@ -187,6 +188,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         // Like button
         ChatActionButton(
           icon: FLucideIcons.thumbsUp,
+          semanticLabel: t.chat.likeButton,
           onTap: () =>
               notifier.updateAIFeedback(message.id, app.AIFeedbackStatus.liked),
           color: message.feedbackStatus == app.AIFeedbackStatus.liked
@@ -196,6 +198,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         // Dislike button
         ChatActionButton(
           icon: FLucideIcons.thumbsDown,
+          semanticLabel: t.chat.dislikeButton,
           onTap: () => notifier.updateAIFeedback(
             message.id,
             app.AIFeedbackStatus.disliked,
@@ -207,6 +210,7 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
         // Share button
         ChatActionButton(
           icon: FLucideIcons.share2,
+          semanticLabel: t.chat.shareButton,
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

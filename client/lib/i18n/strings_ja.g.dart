@@ -760,6 +760,11 @@ class _Translations$chat$ja extends Translations$chat$zh {
 	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '振込経路を確認しました：${source} から ${target}、金額 ${currency} ${amount}。この振込を実行してください。';
 	@override String get attachmentLoadFailedTapRetry => '添付ファイルの読み込みに失敗しました。タップして再試行';
 	@override String mediaFilesCount({required Object count}) => '${count} 件のファイル';
+	@override String get copyButton => 'メッセージをコピー';
+	@override String get likeButton => '役に立った';
+	@override String get dislikeButton => '役に立たなかった';
+	@override String get shareButton => 'メッセージを共有';
+	@override String get voiceInputButton => '音声入力';
 }
 
 // Path: image
@@ -3582,6 +3587,11 @@ extension on TranslationsJa {
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '振込経路を確認しました：${source} から ${target}、金額 ${currency} ${amount}。この振込を実行してください。',
 			'chat.attachmentLoadFailedTapRetry' => '添付ファイルの読み込みに失敗しました。タップして再試行',
 			'chat.mediaFilesCount' => ({required Object count}) => '${count} 件のファイル',
+			'chat.copyButton' => 'メッセージをコピー',
+			'chat.likeButton' => '役に立った',
+			'chat.dislikeButton' => '役に立たなかった',
+			'chat.shareButton' => 'メッセージを共有',
+			'chat.voiceInputButton' => '音声入力',
 			'image.deleteTitle' => '画像を削除',
 			'image.deleteConfirm' => 'この画像を削除してもよろしいですか？この操作は元に戻せません。',
 			'footprint.searchIn' => '検索',
@@ -3690,13 +3700,13 @@ extension on TranslationsJa {
 			'account.reopenSuccess' => '口座を再有効化しました',
 			'account.closeDisposalTitle' => '停止前の残高の処理',
 			'account.disposalKeepDesc' => '残高を現在のまま固定してアーカイブします。新しい明細は作成されません。',
+			_ => null,
+		} ?? switch (path) {
 			'account.disposalTransferDesc' => '実際の振替明細を作成し、残高を別の口座へ移動してから停止します。',
 			'account.disposalWriteoffDesc' => '支出（または収入）明細を作成して残高を消し込み、それから停止します。',
 			'account.save' => '変更を保存',
 			'account.assetsCategory' => '資産',
 			'account.liabilitiesCategory' => '負債/クレジット',
-			_ => null,
-		} ?? switch (path) {
 			'account.cash' => '現金・財布',
 			'account.deposit' => '銀行預金',
 			'account.creditCard' => 'クレジットカード',

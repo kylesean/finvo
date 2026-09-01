@@ -1059,7 +1059,12 @@
     "fileUploadFailed": "文件上传失败，请稍后再试",
     "transferPathConfirmedLegacy": "已确认转账路径：从 $source 到 $target，金额 $currency $amount。请执行该转账操作。",
     "attachmentLoadFailedTapRetry": "附件加载失败，点击重试",
-    "mediaFilesCount": "$count 个文件"
+    "mediaFilesCount": "$count 个文件",
+    "copyButton": "复制消息",
+    "likeButton": "标记为有帮助",
+    "dislikeButton": "标记为无帮助",
+    "shareButton": "分享消息",
+    "voiceInputButton": "语音输入"
   },
   "image": {
     "deleteTitle": "删除图片",

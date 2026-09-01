@@ -429,41 +429,50 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  InkWell(
-                    onTap: currentAction,
-                    borderRadius: BorderRadius.circular(22),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                        color: buttonBackgroundColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: AnimatedSwitcher(
+                  Semantics(
+                    // Voice input is icon-only; announce its state changes
+                    // (idle / listening / stopping) to screen readers.
+                    label: isListening
+                        ? t.chat.listening
+                        : t.chat.voiceInputButton,
+                    button: true,
+                    liveRegion: isListening,
+                    child: InkWell(
+                      onTap: currentAction,
+                      borderRadius: BorderRadius.circular(22),
+                      child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        transitionBuilder:
-                            (Widget child, Animation<double> animation) {
-                              return ScaleTransition(
-                                scale: animation,
-                                child: child,
+                        padding: const EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: buttonBackgroundColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          transitionBuilder:
+                              (Widget child, Animation<double> animation) {
+                                return ScaleTransition(
+                                  scale: animation,
+                                  child: child,
+                                );
+                              },
+                          child: AnimatedBuilder(
+                            animation: _breathingAnimation,
+                            builder: (context, child) {
+                              final scale = isWaitingState
+                                  ? _breathingAnimation.value
+                                  : 1.0;
+                              return Transform.scale(
+                                scale: scale,
+                                child: Icon(
+                                  currentIcon,
+                                  key: ValueKey<IconData>(currentIcon),
+                                  color: iconColor,
+                                  size: 20,
+                                ),
                               );
                             },
-                        child: AnimatedBuilder(
-                          animation: _breathingAnimation,
-                          builder: (context, child) {
-                            final scale = isWaitingState
-                                ? _breathingAnimation.value
-                                : 1.0;
-                            return Transform.scale(
-                              scale: scale,
-                              child: Icon(
-                                currentIcon,
-                                key: ValueKey<IconData>(currentIcon),
-                                color: iconColor,
-                                size: 20,
-                              ),
-                            );
-                          },
+                          ),
                         ),
                       ),
                     ),

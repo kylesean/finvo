@@ -147,29 +147,34 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
     return Container(
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Render all content parts (Text, ToolCall, GenUI UIComponent) in true chronological stream order:
-          // Text -> ToolCall -> GenUI Component -> Text -> GenUI Component
-          ...message.fullContent.map(
-            (part) => _buildContentPart(context, theme, part),
-          ),
-
-          // If no tools are running and message is typing, show streaming indicator at the end
-          if (_shouldShowStreamingIndicator())
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-              child: _buildStreamingIndicator(context, theme),
+      child: MergeSemantics(
+        // Treat the whole message (text parts, tool calls, components,
+        // streaming indicator) as one screen-reader unit instead of a wall
+        // of fragmented nodes that re-announce on every streamed chunk.
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Render all content parts (Text, ToolCall, GenUI UIComponent) in true chronological stream order:
+            // Text -> ToolCall -> GenUI Component -> Text -> GenUI Component
+            ...message.fullContent.map(
+              (part) => _buildContentPart(context, theme, part),
             ),
 
-          // 4. User message attachments
-          if (message.attachments.isNotEmpty) ...[
-            const SizedBox(height: 12.0),
-            _buildAttachments(context, theme, message),
+            // If no tools are running and message is typing, show streaming indicator at the end
+            if (_shouldShowStreamingIndicator())
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                child: _buildStreamingIndicator(context, theme),
+              ),
+
+            // 4. User message attachments
+            if (message.attachments.isNotEmpty) ...[
+              const SizedBox(height: 12.0),
+              _buildAttachments(context, theme, message),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

@@ -760,6 +760,11 @@ class _Translations$chat$ko extends Translations$chat$zh {
 	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '이체 경로 확인됨: ${source}에서 ${target}으로, 금액 ${currency} ${amount}. 이 이체를 실행해 주세요.';
 	@override String get attachmentLoadFailedTapRetry => '첨부파일 로드 실패, 탭하여 재시도';
 	@override String mediaFilesCount({required Object count}) => '파일 ${count}개';
+	@override String get copyButton => '메시지 복사';
+	@override String get likeButton => '도움이 됨';
+	@override String get dislikeButton => '도움이 안 됨';
+	@override String get shareButton => '메시지 공유';
+	@override String get voiceInputButton => '음성 입력';
 }
 
 // Path: image
@@ -3582,6 +3587,11 @@ extension on TranslationsKo {
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '이체 경로 확인됨: ${source}에서 ${target}으로, 금액 ${currency} ${amount}. 이 이체를 실행해 주세요.',
 			'chat.attachmentLoadFailedTapRetry' => '첨부파일 로드 실패, 탭하여 재시도',
 			'chat.mediaFilesCount' => ({required Object count}) => '파일 ${count}개',
+			'chat.copyButton' => '메시지 복사',
+			'chat.likeButton' => '도움이 됨',
+			'chat.dislikeButton' => '도움이 안 됨',
+			'chat.shareButton' => '메시지 공유',
+			'chat.voiceInputButton' => '음성 입력',
 			'image.deleteTitle' => '이미지 삭제',
 			'image.deleteConfirm' => '이 이미지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
 			'footprint.searchIn' => '검색',
@@ -3690,13 +3700,13 @@ extension on TranslationsKo {
 			'account.reopenSuccess' => '계좌가 재활성화되었습니다',
 			'account.closeDisposalTitle' => '정지 전 잔액 처리',
 			'account.disposalKeepDesc' => '잔액을 현재 그대로 고정하고 보관합니다. 새 내역은 생성되지 않습니다.',
+			_ => null,
+		} ?? switch (path) {
 			'account.disposalTransferDesc' => '실제 이체 내역을 만들어 잔액을 다른 계좌로 이동한 후 정지합니다.',
 			'account.disposalWriteoffDesc' => '지출(또는 수입) 내역을 만들어 잔액을 정리한 후 정지합니다.',
 			'account.save' => '수정사항 저장',
 			'account.assetsCategory' => '자산',
 			'account.liabilitiesCategory' => '부채/신용',
-			_ => null,
-		} ?? switch (path) {
 			'account.cash' => '현금/지갑',
 			'account.deposit' => '예금',
 			'account.creditCard' => '신용카드',

@@ -760,6 +760,11 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '已確認轉帳路徑：從 ${source} 到 ${target}，金額 ${currency} ${amount}。請執行該轉帳操作。';
 	@override String get attachmentLoadFailedTapRetry => '附件載入失敗，點擊重試';
 	@override String mediaFilesCount({required Object count}) => '${count} 個檔案';
+	@override String get copyButton => '複製訊息';
+	@override String get likeButton => '標記為有幫助';
+	@override String get dislikeButton => '標記為無幫助';
+	@override String get shareButton => '分享訊息';
+	@override String get voiceInputButton => '語音輸入';
 }
 
 // Path: image
@@ -3582,6 +3587,11 @@ extension on TranslationsZhHant {
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '已確認轉帳路徑：從 ${source} 到 ${target}，金額 ${currency} ${amount}。請執行該轉帳操作。',
 			'chat.attachmentLoadFailedTapRetry' => '附件載入失敗，點擊重試',
 			'chat.mediaFilesCount' => ({required Object count}) => '${count} 個檔案',
+			'chat.copyButton' => '複製訊息',
+			'chat.likeButton' => '標記為有幫助',
+			'chat.dislikeButton' => '標記為無幫助',
+			'chat.shareButton' => '分享訊息',
+			'chat.voiceInputButton' => '語音輸入',
 			'image.deleteTitle' => '刪除圖片',
 			'image.deleteConfirm' => '確定要刪除這張圖片嗎？此操作無法撤銷。',
 			'footprint.searchIn' => '搜尋',
@@ -3690,13 +3700,13 @@ extension on TranslationsZhHant {
 			'account.reopenSuccess' => '帳戶已重新啟用',
 			'account.closeDisposalTitle' => '處理停用前餘額',
 			'account.disposalKeepDesc' => '直接歸檔，餘額保持當前數值不再變動；不產生任何流水。',
+			_ => null,
+		} ?? switch (path) {
 			'account.disposalTransferDesc' => '產生一筆真實的轉帳流水，把餘額轉入指定帳戶後再停用。',
 			'account.disposalWriteoffDesc' => '產生一筆支出（或收入）流水核銷餘額，視為已消耗/免除後再停用。',
 			'account.save' => '保存修改',
 			'account.assetsCategory' => '資產類',
 			'account.liabilitiesCategory' => '負債/信用類',
-			_ => null,
-		} ?? switch (path) {
 			'account.cash' => '現金錢包',
 			'account.deposit' => '銀行存款',
 			'account.creditCard' => '信用卡',

@@ -1058,7 +1058,12 @@
     "fileUploadFailed": "檔案上傳失敗，請稍後再試",
     "transferPathConfirmedLegacy": "已確認轉帳路徑：從 $source 到 $target，金額 $currency $amount。請執行該轉帳操作。",
     "attachmentLoadFailedTapRetry": "附件載入失敗，點擊重試",
-    "mediaFilesCount": "$count 個檔案"
+    "mediaFilesCount": "$count 個檔案",
+    "copyButton": "複製訊息",
+    "likeButton": "標記為有幫助",
+    "dislikeButton": "標記為無幫助",
+    "shareButton": "分享訊息",
+    "voiceInputButton": "語音輸入"
   },
   "image": {
     "deleteTitle": "刪除圖片",

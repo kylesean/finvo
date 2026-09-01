@@ -760,6 +760,11 @@ class _Translations$chat$en extends Translations$chat$zh {
 	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => 'Confirmed transfer path: from ${source} to ${target}, amount ${currency} ${amount}. Please execute this transfer operation.';
 	@override String get attachmentLoadFailedTapRetry => 'Failed to load attachment, tap to retry';
 	@override String mediaFilesCount({required Object count}) => '${count} files';
+	@override String get copyButton => 'Copy message';
+	@override String get likeButton => 'Mark as helpful';
+	@override String get dislikeButton => 'Mark as not helpful';
+	@override String get shareButton => 'Share message';
+	@override String get voiceInputButton => 'Voice input';
 }
 
 // Path: image
@@ -3582,6 +3587,11 @@ extension on TranslationsEn {
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => 'Confirmed transfer path: from ${source} to ${target}, amount ${currency} ${amount}. Please execute this transfer operation.',
 			'chat.attachmentLoadFailedTapRetry' => 'Failed to load attachment, tap to retry',
 			'chat.mediaFilesCount' => ({required Object count}) => '${count} files',
+			'chat.copyButton' => 'Copy message',
+			'chat.likeButton' => 'Mark as helpful',
+			'chat.dislikeButton' => 'Mark as not helpful',
+			'chat.shareButton' => 'Share message',
+			'chat.voiceInputButton' => 'Voice input',
 			'image.deleteTitle' => 'Delete Image',
 			'image.deleteConfirm' => 'Are you sure you want to delete this image? This action cannot be undone.',
 			'footprint.searchIn' => 'Search',
@@ -3690,13 +3700,13 @@ extension on TranslationsEn {
 			'account.reopenSuccess' => 'Account reopened',
 			'account.closeDisposalTitle' => 'Handle remaining balance',
 			'account.disposalKeepDesc' => 'Freeze the balance as-is and archive the account. No new record is created.',
+			_ => null,
+		} ?? switch (path) {
 			'account.disposalTransferDesc' => 'Creates a real transfer record moving the balance to another account, then closes.',
 			'account.disposalWriteoffDesc' => 'Creates an expense (or income) record that writes the balance off, then closes.',
 			'account.save' => 'Save Changes',
 			'account.assetsCategory' => 'Assets',
 			'account.liabilitiesCategory' => 'Liabilities/Credit',
-			_ => null,
-		} ?? switch (path) {
 			'account.cash' => 'Cash Wallet',
 			'account.deposit' => 'Bank Deposit',
 			'account.creditCard' => 'Credit Card',

@@ -1758,6 +1758,21 @@ class Translations$chat$zh {
 
 	/// zh: '$count 个文件'
 	String mediaFilesCount({required Object count}) => '${count} 个文件';
+
+	/// zh: '复制消息'
+	String get copyButton => '复制消息';
+
+	/// zh: '标记为有帮助'
+	String get likeButton => '标记为有帮助';
+
+	/// zh: '标记为无帮助'
+	String get dislikeButton => '标记为无帮助';
+
+	/// zh: '分享消息'
+	String get shareButton => '分享消息';
+
+	/// zh: '语音输入'
+	String get voiceInputButton => '语音输入';
 }
 
 // Path: image
@@ -6443,6 +6458,11 @@ extension on Translations {
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '已确认转账路径：从 ${source} 到 ${target}，金额 ${currency} ${amount}。请执行该转账操作。',
 			'chat.attachmentLoadFailedTapRetry' => '附件加载失败，点击重试',
 			'chat.mediaFilesCount' => ({required Object count}) => '${count} 个文件',
+			'chat.copyButton' => '复制消息',
+			'chat.likeButton' => '标记为有帮助',
+			'chat.dislikeButton' => '标记为无帮助',
+			'chat.shareButton' => '分享消息',
+			'chat.voiceInputButton' => '语音输入',
 			'image.deleteTitle' => '删除图片',
 			'image.deleteConfirm' => '确定要删除这张图片吗？此操作无法撤销。',
 			'footprint.searchIn' => '搜索',
@@ -6550,13 +6570,13 @@ extension on Translations {
 			'account.reopenConfirm' => '该账户将被重新启用（ACTIVE），重新计入净值并可用于新交易。',
 			'account.reopenSuccess' => '账户已重新启用',
 			'account.closeDisposalTitle' => '处理停用前余额',
+			_ => null,
+		} ?? switch (path) {
 			'account.disposalKeepDesc' => '直接归档，余额保持当前数值不再变动；不生成任何流水。',
 			'account.disposalTransferDesc' => '生成一笔真实的转账流水，把余额转入指定账户后再停用。',
 			'account.disposalWriteoffDesc' => '生成一笔支出（或收入）流水核销余额，视为已消耗/免除后再停用。',
 			'account.save' => '保存修改',
 			'account.assetsCategory' => '资产类',
-			_ => null,
-		} ?? switch (path) {
 			'account.liabilitiesCategory' => '负债/信用类',
 			'account.cash' => '现金钱包',
 			'account.deposit' => '银行存款',

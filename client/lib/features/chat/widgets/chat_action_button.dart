@@ -11,10 +11,14 @@ class ChatActionButton extends StatelessWidget {
   final Color? color;
   final bool isFirst;
 
+  /// Accessibility label for screen readers (icon-only button has no text).
+  final String semanticLabel;
+
   const ChatActionButton({
     super.key,
     required this.icon,
     required this.onTap,
+    required this.semanticLabel,
     this.color,
     this.isFirst = false,
   });
@@ -22,17 +26,22 @@ class ChatActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: isFirst ? 0 : 20,
-          right: 0,
-          top: 4,
-          bottom: 4,
+    return Semantics(
+      label: semanticLabel,
+      button: true,
+      enabled: onTap != null,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: isFirst ? 0 : 20,
+            right: 0,
+            top: 4,
+            bottom: 4,
+          ),
+          child: Icon(icon, color: color ?? colors.mutedForeground, size: 16),
         ),
-        child: Icon(icon, color: color ?? colors.mutedForeground, size: 16),
       ),
     );
   }

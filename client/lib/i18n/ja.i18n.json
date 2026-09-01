@@ -1058,7 +1058,12 @@
     "fileUploadFailed": "ファイルのアップロードに失敗しました。後でもう一度お試しください",
     "transferPathConfirmedLegacy": "振込経路を確認しました：$source から $target、金額 $currency $amount。この振込を実行してください。",
     "attachmentLoadFailedTapRetry": "添付ファイルの読み込みに失敗しました。タップして再試行",
-    "mediaFilesCount": "$count 件のファイル"
+    "mediaFilesCount": "$count 件のファイル",
+    "copyButton": "メッセージをコピー",
+    "likeButton": "役に立った",
+    "dislikeButton": "役に立たなかった",
+    "shareButton": "メッセージを共有",
+    "voiceInputButton": "音声入力"
   },
   "image": {
     "deleteTitle": "画像を削除",
