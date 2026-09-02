@@ -45,6 +45,13 @@ analyzer:
     - '**/*.freezed.dart'     # freezed
     - '**/*.gen.dart'         # other generators
     - 'lib/i18n/strings*.dart' # slang i18n generated files
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
   # Error severity configuration
   # Only ignore errors that are unavoidable due to code generation patterns
