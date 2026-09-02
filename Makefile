@@ -139,12 +139,12 @@ docker-build:
 # ============================================================
 
 client-run:
-	cd client && flutter run
+	cd client && flutter run --android-skip-build-dependency-validation
 
 # Debug APK: what contributors and casual users build. Requires NO signing
 # key, so building from source is friction-free.
 client-build:
-	cd client && flutter build apk --debug
+	cd client && flutter build apk --debug --android-skip-build-dependency-validation
 
 # Release APK: requires the release keystore credentials. The keystore is the
 # app's permanent identity — it is intentionally NOT in the repository.
@@ -156,7 +156,7 @@ client-build:
 #   export ANDROID_KEY_PASSWORD=...
 # Without them Gradle fails the build on purpose (no debug-key fallback).
 client-release:
-	cd client && flutter build apk --release
+	cd client && flutter build apk --release --android-skip-build-dependency-validation
 
 client-test:
 	cd client && flutter test
