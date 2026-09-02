@@ -553,15 +553,20 @@ class Settings(BaseSettings):
 
     @staticmethod
     def _sanitize_proxy_env() -> None:
-        """Normalize socks:// proxy variables to socks5:// at startup.
-
-        "socks" is not a recognized scheme by httpx/pydantic; rewriting the
-        environment up front prevents downstream Pydantic validation errors.
-        """
+        """Normalize socks:// proxy variables to socks5:// and bypass proxy for domestic AI providers."""
         for proxy_var in ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"]:
             val = os.environ.get(proxy_var)
             if val and val.startswith("socks://"):
                 os.environ[proxy_var] = val.replace("socks://", "socks5://", 1)
+
+        # Bypass proxy for domestic Chinese LLM / embedding providers
+        domestic_hosts = ["api.deepseek.com", "deepseek.com", "api.siliconflow.cn", "siliconflow.cn", "aliyuncs.com"]
+        no_proxy_val = os.environ.get("NO_PROXY") or os.environ.get("no_proxy") or ""
+        missing_hosts = [h for h in domestic_hosts if h not in no_proxy_val]
+        if missing_hosts:
+            updated_no_proxy = f"{no_proxy_val},{','.join(missing_hosts)}" if no_proxy_val else ",".join(missing_hosts)
+            os.environ["NO_PROXY"] = updated_no_proxy
+            os.environ["no_proxy"] = updated_no_proxy
 
     @property
     def is_development(self) -> bool:

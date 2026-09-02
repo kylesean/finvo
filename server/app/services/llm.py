@@ -35,7 +35,7 @@ class LLMRegistry:
     :meth:`supports_vision` to query the current default model's capability.
     """
 
-    _registry_lock = threading.Lock()
+    _registry_lock = threading.RLock()
     _initialized = False
 
     _MODELS: list[dict[str, Any]] = [
@@ -173,7 +173,7 @@ class LLMRegistry:
         if model_name.startswith("ollama/"):
             return True, model_name[7:]
 
-        for entry in cls._llms():
+        for entry in cls._MODELS:
             if entry["name"] == model_name and entry.get("provider") == "ollama":
                 return True, model_name
 
