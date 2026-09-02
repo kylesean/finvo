@@ -3,6 +3,8 @@ import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/shared/models/financial_account.dart';
+import 'package:finvo/shared/providers/exchange_rate_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/providers/generation_guard.dart';
 import 'package:finvo/shared/services/financial_account_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
@@ -15,19 +17,56 @@ final _logger = Logger('FinancialAccountProvider');
 
 /// Calculate net worth as (assets - liabilities) over active, included accounts.
 ///
+/// Converts foreign currency balances to [targetCurrency] via [exchangeRateNotifier]
+/// when provided, preventing multi-currency accounts from being summed 1:1.
+///
 /// Balance source is kept consistent with [FinancialSummaryNotifier]: prefer the
 /// server-provided [FinancialAccount.currentBalance] and only fall back to
 /// [FinancialAccount.initialBalance] when the current balance is unknown, so the
 /// two net-worth views never diverge.
-Decimal _netWorthOf(List<FinancialAccount> accounts) {
+Decimal _netWorthOf(
+  List<FinancialAccount> accounts, {
+  ExchangeRate? exchangeRateNotifier,
+  String? targetCurrency,
+}) {
   return accounts.fold(Decimal.zero, (sum, account) {
     // Only count active accounts included in net worth
     if (account.status == AccountStatus.active && account.includeInNetWorth) {
       final balance = account.currentBalance ?? account.initialBalance;
+      final accountCurrency = account.currencyCode.toUpperCase();
+      final normalizedTarget = targetCurrency?.toUpperCase();
+
+      Decimal converted = balance;
+
+      if (normalizedTarget != null && accountCurrency != normalizedTarget) {
+        if (exchangeRateNotifier != null) {
+          final rateConverted = exchangeRateNotifier.convert(
+            balance,
+            accountCurrency,
+            normalizedTarget,
+          );
+          if (rateConverted != null) {
+            converted = rateConverted;
+          } else {
+            _logger.warning(
+              'Missing exchange rate to convert $accountCurrency to $normalizedTarget '
+              'for account "${account.name}". Skipping account from net worth to prevent multi-currency pollution.',
+            );
+            return sum;
+          }
+        } else {
+          _logger.warning(
+            'Exchange rates unavailable to convert $accountCurrency to $normalizedTarget '
+            'for account "${account.name}". Skipping account from net worth to prevent multi-currency pollution.',
+          );
+          return sum;
+        }
+      }
+
       if (account.nature == FinancialNature.asset) {
-        return sum + balance;
+        return sum + converted;
       } else {
-        return sum - balance.abs();
+        return sum - converted.abs();
       }
     }
     return sum;
@@ -50,6 +89,18 @@ abstract class FinancialAccountState with _$FinancialAccountState {
   // Calculate account net worth (Assets - Liabilities)
   Decimal get calculatedNetWorth => _netWorthOf(accounts);
 
+  /// Calculate account net worth in [targetCurrency] using [exchangeRateNotifier].
+  Decimal calculateNetWorth({
+    ExchangeRate? exchangeRateNotifier,
+    String? targetCurrency,
+  }) {
+    return _netWorthOf(
+      accounts,
+      exchangeRateNotifier: exchangeRateNotifier,
+      targetCurrency: targetCurrency,
+    );
+  }
+
   // Get actual total balance (priority to server-returned value)
   Decimal get effectiveTotalBalance {
     return totalBalance ?? calculatedNetWorth;
@@ -63,12 +114,56 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
   /// newer load has superseded it (and writes after dispose are skipped).
   final GenerationGuard _loadGeneration = GenerationGuard();
 
+  /// Compute net worth in user's primary currency using exchange rates.
+  Decimal _computeNetWorth(List<FinancialAccount> accounts) {
+    try {
+      final targetCurrency = ref
+          .read(financialSettingsProvider)
+          .primaryCurrency;
+      final ratesAsync = ref.read(exchangeRateProvider);
+      final exchangeRateNotifier = ref.read(exchangeRateProvider.notifier);
+
+      return _netWorthOf(
+        accounts,
+        exchangeRateNotifier: ratesAsync.hasValue ? exchangeRateNotifier : null,
+        targetCurrency: targetCurrency,
+      );
+    } catch (e) {
+      _logger.warning('Failed to compute multi-currency net worth: $e');
+      return _netWorthOf(accounts);
+    }
+  }
+
   @override
   FinancialAccountState build() {
-    // No network side-effect in build — the caller (app.dart login
-    // listener, account page init) triggers loadFinancialAccounts explicitly.
-    // Previously a build() microtask fired a network request on EVERY read
-    // of this provider, and keepAlive rebuilds duplicated it.
+    // Recompute totalBalance when exchange rates are loaded or updated
+    ref.listen(exchangeRateProvider, (prev, next) {
+      if (next.hasValue && state.accounts.isNotEmpty) {
+        final primaryCurrency = ref
+            .read(financialSettingsProvider)
+            .primaryCurrency;
+        final hasForeignCurrency = state.accounts.any(
+          (a) =>
+              a.status == AccountStatus.active &&
+              a.includeInNetWorth &&
+              a.currencyCode.toUpperCase() != primaryCurrency.toUpperCase(),
+        );
+        if (hasForeignCurrency) {
+          state = state.copyWith(
+            totalBalance: _computeNetWorth(state.accounts),
+          );
+        }
+      }
+    });
+
+    // Recompute totalBalance when user changes primary currency in settings
+    ref.listen(financialSettingsProvider, (prev, next) {
+      if (prev?.primaryCurrency != next.primaryCurrency &&
+          state.accounts.isNotEmpty) {
+        state = state.copyWith(totalBalance: _computeNetWorth(state.accounts));
+      }
+    });
+
     return const FinancialAccountState(isLoading: true);
   }
 
@@ -98,9 +193,25 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
       }
 
       if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
+
+      final primaryCurrency = ref
+          .read(financialSettingsProvider)
+          .primaryCurrency;
+      final hasForeignCurrency = response.accounts.any(
+        (a) =>
+            a.status == AccountStatus.active &&
+            a.includeInNetWorth &&
+            a.currencyCode.toUpperCase() != primaryCurrency.toUpperCase(),
+      );
+
+      final effectiveBalance =
+          (hasForeignCurrency && ref.read(exchangeRateProvider).hasValue)
+          ? _computeNetWorth(response.accounts)
+          : response.totalBalance;
+
       state = state.copyWith(
         accounts: response.accounts,
-        totalBalance: response.totalBalance,
+        totalBalance: effectiveBalance,
         lastUpdatedAt: parsedDate,
         isLoading: false,
         error: null,
@@ -126,9 +237,25 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
       // After successful save, use local source list + server returned balance/time
       if (!ref.mounted) return false;
+
+      final primaryCurrency = ref
+          .read(financialSettingsProvider)
+          .primaryCurrency;
+      final hasForeignCurrency = accounts.any(
+        (a) =>
+            a.status == AccountStatus.active &&
+            a.includeInNetWorth &&
+            a.currencyCode.toUpperCase() != primaryCurrency.toUpperCase(),
+      );
+
+      final effectiveBalance =
+          (hasForeignCurrency && ref.read(exchangeRateProvider).hasValue)
+          ? _computeNetWorth(accounts)
+          : summary.totalBalance;
+
       state = state.copyWith(
         accounts: accounts,
-        totalBalance: summary.totalBalance,
+        totalBalance: effectiveBalance,
         lastUpdatedAt: summary.lastUpdatedAt,
         isLoading: false,
         error: null,
@@ -153,7 +280,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
     final updatedAccounts = [...state.accounts, account];
     state = state.copyWith(
       accounts: updatedAccounts,
-      totalBalance: _netWorthOf(updatedAccounts),
+      totalBalance: _computeNetWorth(updatedAccounts),
     );
   }
 
@@ -184,7 +311,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
       state = state.copyWith(
         accounts: updatedAccounts,
-        totalBalance: _netWorthOf(updatedAccounts),
+        totalBalance: _computeNetWorth(updatedAccounts),
         isLoading: false,
         error: null,
       );
@@ -221,7 +348,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
 
       state = state.copyWith(
         accounts: updatedAccounts,
-        totalBalance: _netWorthOf(updatedAccounts),
+        totalBalance: _computeNetWorth(updatedAccounts),
         isLoading: false,
         error: null,
       );
