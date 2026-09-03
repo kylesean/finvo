@@ -10,7 +10,7 @@ alongside `server/.env.example` — every item below maps to a setting there.
 | `JWT_SECRET_KEY` | Long random value (`python -c "import secrets; print(secrets.token_urlsafe(32))"`). Never the shipped placeholder. |
 | `ENCRYPTION_KEY` | Same treatment (own guard in `app/utils/encryption.py`). |
 | `POSTGRES_PASSWORD` | Explicit value; `postgres/postgres` is rejected at boot. |
-| `REGISTRATION_OPEN` | Set `false` for public deployments unless you want open signup. |
+| `REGISTRATION_OPEN` | Defaults to `false` (sign-ups rejected). Set `true` only if you want open signup. |
 | `SMS_PROVIDER` / `EMAIL_PROVIDER` | Real providers (`aliyun`/`twilio`, `smtp`). `mock` is refused at boot. |
 | `METRICS_TOKEN` | Required when `ENABLE_METRICS=true`. |
 | `GRAFANA_ADMIN_PASSWORD` | No server-side guard — set it in compose env. |
@@ -36,10 +36,12 @@ alongside `server/.env.example` — every item below maps to a setting there.
 
 - Images are gated: `deploy.yml` refuses to build/push when Backend CI
   failed on that commit. Pull, `docker compose up -d`, then check
-  `/health` (expects 200; 503 names the sick component).
-- Migrations run via `alembic upgrade head` in CI; the app itself does not
-  auto-migrate on boot. Apply the same command against the production DB
-  before starting the new image.
+  `/health` (expects 200; 503 names the sick component). The compose file
+  does NOT bind-mount the source tree, so the pulled image is what actually
+  runs (dev hot-reload mounts live in `docker-compose.debug.yml`).
+- **Back up before upgrading**: the container entrypoint auto-runs
+  `alembic upgrade head` on every boot, so starting the new image also
+  migrates the schema. Test your restore path first (section 3).
 
 ## 5. Monitoring
 

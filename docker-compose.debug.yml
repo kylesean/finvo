@@ -1,14 +1,22 @@
-# Local debugging override: loopback-only host bindings.
+# Local development / debugging override.
 #
-# The base compose file publishes NO database ports (containers talk over the
-# compose network). When you need a local psql/redis-cli, run:
+# Adds on top of the base compose file:
+# - the server source bind mount (hot reload for the development APP_ENV,
+#   which runs uvicorn with --reload) — kept OUT of the base file on purpose:
+#   a host bind would override the image contents and silently defeat
+#   `docker compose pull` upgrades for production users;
+# - loopback-only host bindings for db/redis, so a local psql/redis-cli works
+#   without exposing the ports on any external interface (the base file
+#   publishes NO database ports; containers talk over the compose network).
+#
+# Run with:
 #
 #   docker compose -f docker-compose.yml -f docker-compose.debug.yml up -d
-#
-# 127.0.0.1 binding keeps the ports off every external interface even when
-# the host firewall/security group is loose.
 
 services:
+  app:
+    volumes:
+      - ./server/app:/app/app
   db:
     ports:
       - "127.0.0.1:5433:5432"

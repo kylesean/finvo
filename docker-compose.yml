@@ -62,7 +62,10 @@ services:
                uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers \"$${UVICORN_WORKERS:-1}\";
              fi"
     volumes:
-      - ./server/app:/app/app
+      # NOTE: the source-code mount lives in docker-compose.debug.yml. A host
+      # bind on ./server/app here would override the image contents and
+      # silently defeat `docker compose pull` upgrades — the container keeps
+      # running the old host checkout instead of the pulled image.
       - ./server/logs:/app/logs
       - ./server/storage:/app/storage
       - ./server/artifacts:/app/artifacts
