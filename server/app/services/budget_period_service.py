@@ -24,7 +24,8 @@ from app.models.budget import (
     BudgetPeriodType,
     BudgetSettings,
 )
-from app.models.transaction import SYSTEM_TRANSACTION_SOURCE, Transaction
+from app.models.transaction import Transaction
+from app.services.statistics_scope import settled_spending_conditions
 
 # Default threshold values used when no BudgetSettings row exists yet.
 # These match the DB column defaults and avoid a write on the read path.
@@ -286,14 +287,13 @@ class BudgetPeriodService:
             Total spent amount
         """
         start_dt, end_dt = _date_range_to_dt(period_start, period_end)
+        # Spending scope is shared with space monthly stats (statistics_scope):
+        # CLEARED + non-SYSTEM. Keep the comment here so the rule reads the
+        # same at both call sites.
         query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
             Transaction.user_uuid == user_uuid,
             Transaction.type == "EXPENSE",
-            Transaction.status == "CLEARED",
-            # Lifecycle audit entries (close disposal) are balance bookkeeping,
-            # not user spending — exclude them so a writeoff never drains the
-            # budget's remaining amount.
-            Transaction.source != SYSTEM_TRANSACTION_SOURCE,
+            *settled_spending_conditions(),
             Transaction.transaction_at >= start_dt,
             Transaction.transaction_at < end_dt,
         )

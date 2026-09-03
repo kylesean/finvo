@@ -67,11 +67,24 @@ class SharedSpaceService:
         Returns:
             Created SharedSpace instance
         """
+        from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
+        from app.models.financial_settings import FinancialSettings
+
+        base_currency: str | None = None
+        try:
+            result = await self.db.execute(
+                select(FinancialSettings.primary_currency).where(FinancialSettings.user_uuid == user_uuid)
+            )
+            base_currency = result.scalar_one_or_none() or PROJECT_DEFAULT_CURRENCY
+        except Exception:  # noqa: BLE001 - settings lookup must not block space creation
+            base_currency = PROJECT_DEFAULT_CURRENCY
+
         space = SharedSpace(
             name=name,
             description=description,
             creator_uuid=user_uuid,
             status="active",
+            base_currency=(base_currency or PROJECT_DEFAULT_CURRENCY).upper(),
         )
         self.db.add(space)
         await self.db.flush()
@@ -137,7 +150,12 @@ class SharedSpaceService:
         for space, role in rows:
             stats = stats_map.get(
                 space.id,
-                {"transaction_count": 0, "total_expense": Decimal("0"), "member_contributions": {}},
+                {
+                    "transaction_count": 0,
+                    "total_expense": Decimal("0"),
+                    "member_contributions": {},
+                    "base_currency": getattr(space, "base_currency", None) or "CNY",
+                },
             )
             items.append(
                 self._space_to_dict(
@@ -146,6 +164,7 @@ class SharedSpaceService:
                     total_expense=stats["total_expense"],
                     member_contributions=stats["member_contributions"],
                     role=role,
+                    base_currency=stats.get("base_currency"),
                 )
             )
 
@@ -204,6 +223,7 @@ class SharedSpaceService:
             member_contributions=stats["member_contributions"],
             include_members=True,
             role=member.role,
+            base_currency=stats.get("base_currency"),
         )
 
     async def update_space(
@@ -267,6 +287,7 @@ class SharedSpaceService:
             creator,
             tx_count=stats["transaction_count"],
             total_expense=stats["total_expense"],
+            base_currency=stats.get("base_currency"),
         )
 
     async def delete_space(self, space_id: UUID, user_uuid: UUID) -> bool:
@@ -744,6 +765,7 @@ class SharedSpaceService:
             member_contributions=stats["member_contributions"],
             include_members=True,
             role="MEMBER",
+            base_currency=stats.get("base_currency"),
         )
 
     def _check_version(self, space: SharedSpace, expected_version: int | None) -> None:
@@ -823,45 +845,91 @@ class SharedSpaceService:
     # =========================================================================
 
     async def _get_space_financial_stats(self, space_id: UUID) -> dict[str, Any]:
-        """Retrieve aggregated financial statistics data across spatial dimensions."""
+        """Retrieve aggregated financial statistics data across spatial dimensions.
+
+        BF-P1-6: totals are converted into the space base currency (never mixed
+        across member bases). BF-P1-8: expense scope is CLEARED + non-SYSTEM.
+        Unconvertible rows are skipped with a warning (display path must not
+        fail the whole list); settlement remains strict and raises instead.
+        """
+        from app.models.transaction import SYSTEM_TRANSACTION_SOURCE
+        from app.services.shared_space_settlement_service import resolve_space_base_currency
+
         # 1. Total count (including all types)
         count_query = select(func.count()).where(SpaceTransaction.space_id == space_id)
         count_result = await self.db.execute(count_query)
         tx_count = count_result.scalar() or 0
 
-        # 2. Total expense (only EXPENSE type)
-        expense_query = (
-            select(func.sum(Transaction.amount))
-            .join(SpaceTransaction, Transaction.uuid == SpaceTransaction.transaction_id)
-            .where(
-                cast(
-                    Any,
-                    and_(SpaceTransaction.space_id == space_id, Transaction.type == "EXPENSE"),
-                )
-            )
-        )
-        expense_result = await self.db.execute(expense_query)
-        total_expense = expense_result.scalar() or Decimal("0")
+        space_row = await self.db.execute(select(SharedSpace).where(SharedSpace.id == space_id))
+        space = space_row.scalar_one_or_none()
+        base_currency = await resolve_space_base_currency(self.db, space) if space else "CNY"
 
-        # 3. Total contributions by each member (only EXPENSE type)
-        contribution_query = (
-            select(SpaceTransaction.added_by_user_uuid, func.sum(Transaction.amount))
+        # 2/3. Fetch in-scope expense rows and convert in Python so mixed bases
+        # never reach the SUM.
+        rows_query = (
+            select(
+                SpaceTransaction.added_by_user_uuid,
+                Transaction.amount,
+                Transaction.amount_original,
+                Transaction.currency,
+            )
             .join(Transaction, Transaction.uuid == SpaceTransaction.transaction_id)
             .where(
                 cast(
                     Any,
-                    and_(SpaceTransaction.space_id == space_id, Transaction.type == "EXPENSE"),
+                    and_(
+                        SpaceTransaction.space_id == space_id,
+                        Transaction.type == "EXPENSE",
+                        Transaction.status == "CLEARED",
+                        Transaction.source != SYSTEM_TRANSACTION_SOURCE,
+                    ),
                 )
             )
-            .group_by(SpaceTransaction.added_by_user_uuid)
         )
-        contribution_result = await self.db.execute(contribution_query)
-        contributions = {row[0]: row[1] for row in contribution_result.all()}
+        rows_result = await self.db.execute(rows_query)
+        rows = rows_result.all()
 
-        return {"transaction_count": tx_count, "total_expense": total_expense, "member_contributions": contributions}
+        from app.services.exchange_rate_service import exchange_rate_service
+
+        total_expense = Decimal("0")
+        contributions: dict[UUID, Decimal] = {}
+        for added_by, amount_base, amount_original, currency in rows:
+            original = Decimal(str(amount_original if amount_original is not None else amount_base))
+            tx_currency = (currency or base_currency).upper()
+            if tx_currency == base_currency:
+                converted = original
+            else:
+                try:
+                    cv = await exchange_rate_service.convert(
+                        amount=original, from_currency=tx_currency, to_currency=base_currency
+                    )
+                except Exception as e:  # noqa: BLE001 - skip, do not poison totals
+                    logger.warning(
+                        "space_stats_conversion_failed",
+                        space_id=str(space_id),
+                        currency=tx_currency,
+                        error=str(e),
+                    )
+                    continue
+                if cv is None:
+                    logger.warning("space_stats_conversion_missing", space_id=str(space_id), currency=tx_currency)
+                    continue
+                converted = Decimal(str(cv))
+            total_expense += converted
+            contributions[added_by] = contributions.get(added_by, Decimal("0")) + converted
+
+        return {
+            "transaction_count": tx_count,
+            "total_expense": total_expense,
+            "member_contributions": contributions,
+            "base_currency": base_currency,
+        }
 
     async def _batch_get_space_financial_stats(self, space_ids: list[UUID]) -> dict[UUID, dict[str, Any]]:
         """Retrieve aggregated financial statistics across multiple spaces in batch queries.
+
+        BF-P1-6: per-space totals are converted into that space's base currency.
+        BF-P1-8: expense scope is CLEARED + non-SYSTEM.
 
         Args:
             space_ids: List of space IDs
@@ -869,13 +937,29 @@ class SharedSpaceService:
         Returns:
             Dictionary mapping space_id to stats dict (transaction_count, total_expense, member_contributions)
         """
+        from app.models.transaction import SYSTEM_TRANSACTION_SOURCE
+        from app.services.shared_space_settlement_service import resolve_space_base_currency
+
         if not space_ids:
             return {}
 
         stats_by_space: dict[UUID, dict[str, Any]] = {
-            sid: {"transaction_count": 0, "total_expense": Decimal("0"), "member_contributions": {}}
+            sid: {
+                "transaction_count": 0,
+                "total_expense": Decimal("0"),
+                "member_contributions": {},
+                "base_currency": "CNY",
+            }
             for sid in space_ids
         }
+
+        # Resolve each space's base currency (batch load, fallback per space).
+        spaces_result = await self.db.execute(select(SharedSpace).where(SharedSpace.id.in_(space_ids)))
+        base_by_space: dict[UUID, str] = {}
+        for space in spaces_result.scalars().all():
+            base_by_space[space.id] = await resolve_space_base_currency(self.db, space)
+        for sid in stats_by_space:
+            stats_by_space[sid]["base_currency"] = base_by_space.get(sid, "CNY")
 
         # 1. Batch total transaction counts
         count_query = (
@@ -888,39 +972,60 @@ class SharedSpaceService:
             if space_id in stats_by_space:
                 stats_by_space[space_id]["transaction_count"] = count or 0
 
-        # 2. Batch total expenses
-        expense_query = (
-            select(SpaceTransaction.space_id, func.sum(Transaction.amount))
+        # 2/3. Fetch in-scope rows once, convert per space in Python.
+        rows_query = (
+            select(
+                SpaceTransaction.space_id,
+                SpaceTransaction.added_by_user_uuid,
+                Transaction.amount,
+                Transaction.amount_original,
+                Transaction.currency,
+            )
             .join(Transaction, Transaction.uuid == SpaceTransaction.transaction_id)
             .where(
                 cast(
                     Any,
-                    and_(SpaceTransaction.space_id.in_(space_ids), Transaction.type == "EXPENSE"),
+                    and_(
+                        SpaceTransaction.space_id.in_(space_ids),
+                        Transaction.type == "EXPENSE",
+                        Transaction.status == "CLEARED",
+                        Transaction.source != SYSTEM_TRANSACTION_SOURCE,
+                    ),
                 )
             )
-            .group_by(SpaceTransaction.space_id)
         )
-        expense_result = await self.db.execute(expense_query)
-        for space_id, total_exp in expense_result.all():
-            if space_id in stats_by_space:
-                stats_by_space[space_id]["total_expense"] = total_exp or Decimal("0")
+        rows_result = await self.db.execute(rows_query)
 
-        # 3. Batch member contributions
-        contribution_query = (
-            select(SpaceTransaction.space_id, SpaceTransaction.added_by_user_uuid, func.sum(Transaction.amount))
-            .join(Transaction, Transaction.uuid == SpaceTransaction.transaction_id)
-            .where(
-                cast(
-                    Any,
-                    and_(SpaceTransaction.space_id.in_(space_ids), Transaction.type == "EXPENSE"),
-                )
-            )
-            .group_by(SpaceTransaction.space_id, SpaceTransaction.added_by_user_uuid)
-        )
-        contribution_result = await self.db.execute(contribution_query)
-        for space_id, user_uuid, contrib in contribution_result.all():
-            if space_id in stats_by_space:
-                stats_by_space[space_id]["member_contributions"][user_uuid] = contrib or Decimal("0")
+        from app.services.exchange_rate_service import exchange_rate_service
+
+        for space_id, added_by, amount_base, amount_original, currency in rows_result.all():
+            if space_id not in stats_by_space:
+                continue
+            base_currency = stats_by_space[space_id]["base_currency"]
+            original = Decimal(str(amount_original if amount_original is not None else amount_base))
+            tx_currency = (currency or base_currency).upper()
+            if tx_currency == base_currency:
+                converted = original
+            else:
+                try:
+                    cv = await exchange_rate_service.convert(
+                        amount=original, from_currency=tx_currency, to_currency=base_currency
+                    )
+                except Exception as e:  # noqa: BLE001 - skip, do not poison totals
+                    logger.warning(
+                        "space_stats_conversion_failed",
+                        space_id=str(space_id),
+                        currency=tx_currency,
+                        error=str(e),
+                    )
+                    continue
+                if cv is None:
+                    logger.warning("space_stats_conversion_missing", space_id=str(space_id), currency=tx_currency)
+                    continue
+                converted = Decimal(str(cv))
+            stats_by_space[space_id]["total_expense"] += converted
+            contribs = stats_by_space[space_id]["member_contributions"]
+            contribs[added_by] = contribs.get(added_by, Decimal("0")) + converted
 
         return stats_by_space
 
@@ -932,6 +1037,7 @@ class SharedSpaceService:
         member_contributions: dict[UUID, Decimal] | None = None,
         include_members: bool = False,
         role: str | None = None,
+        base_currency: str | None = None,
     ) -> dict[str, Any]:
         """Convert space to dictionary (creator resolved from the relationship)."""
         return self._space_to_dict_with_creator(
@@ -942,6 +1048,7 @@ class SharedSpaceService:
             member_contributions=member_contributions,
             include_members=include_members,
             role=role,
+            base_currency=base_currency or getattr(space, "base_currency", None),
         )
 
     def _space_to_dict_with_creator(
@@ -953,6 +1060,7 @@ class SharedSpaceService:
         member_contributions: dict[UUID, Decimal] | None = None,
         include_members: bool = False,
         role: str | None = None,
+        base_currency: str | None = None,
     ) -> dict[str, Any]:
         """Convert space to dictionary with externally loaded creator."""
         data: dict[str, Any] = {
@@ -960,6 +1068,7 @@ class SharedSpaceService:
             "name": space.name,
             "role": role,
             "description": space.description,
+            "baseCurrency": (base_currency or getattr(space, "base_currency", None) or "CNY"),
             "creator": {
                 "id": str(creator.uuid) if creator else str(space.creator_uuid),
                 "username": creator.username if creator else "Unknown",

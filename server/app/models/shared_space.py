@@ -31,6 +31,13 @@ class SharedSpace(Base):
     creator_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="id", index=True)
     status: Mapped[str] = mapped_column(String(50), default="ACTIVE", server_default=sa.text("'ACTIVE'"))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Settlement base currency (ISO 4217). All settlement math converts each
+    # member transaction (amount_original + currency) into this currency before
+    # splitting — without it, members on different bases (CNY payer + USD
+    # member) produce meaningless mixed-currency balances (BF-P1-6).
+    # Nullable for pre-migration rows; resolved with fallback to the creator's
+    # primary_currency, then PROJECT_DEFAULT_CURRENCY.
+    base_currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
     invite_code: Mapped[str | None] = mapped_column(String(20), nullable=True)
     invite_code_expires_at: Mapped[datetime | None] = col.datetime_tz(nullable=True)
     version: Mapped[int] = mapped_column(sa.Integer, default=0, server_default=sa.text("0"))

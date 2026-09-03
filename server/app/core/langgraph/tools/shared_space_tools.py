@@ -66,6 +66,8 @@ async def query_space_summary(
 
     try:
         async with get_session_context() as session:
+            from app.models.user import User
+
             service = SharedSpaceService(session)
             spaces_result = await service.get_user_spaces(user_uuid)
             spaces = spaces_result.get("spaces", []) if spaces_result else []
@@ -85,9 +87,21 @@ async def query_space_summary(
 
             from app.models.shared_space import SpaceTransaction
             from app.models.transaction import Transaction
+            from app.services.statistics_scope import settled_spending_conditions, user_month_start_utc
 
+            # BF-P1-8: month boundary in the USER's timezone (not UTC), and the
+            # same CLEARED + non-SYSTEM scope the budget engine uses. A UTC
+            # boundary shifts UTC+8 users' month-end spending into the wrong
+            # month; PENDING/SYSTEM rows inflate the "spent this month" answer.
+            user_tz: str | None = None
+            try:
+                user_row = await session.execute(select(User.timezone).where(User.uuid == user_uuid))
+                user_tz = user_row.scalar_one_or_none()
+            except Exception:  # noqa: BLE001 - fall back to UTC boundary
+                user_tz = None
             now = datetime.now(UTC)
-            month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            month_start = user_month_start_utc(now, user_tz)
+            scope_conditions = settled_spending_conditions()
 
             summaries = []
             for space in spaces:
@@ -103,6 +117,7 @@ async def query_space_summary(
                         SpaceTransaction.space_id == sid,
                         Transaction.transaction_at >= month_start,
                         Transaction.type == "EXPENSE",
+                        *scope_conditions,
                     )
                 )
                 result = await session.execute(stmt)

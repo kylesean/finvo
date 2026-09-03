@@ -8,15 +8,44 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
+import structlog
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
+from app.core.exceptions import BusinessError
 from app.models.shared_space import (
+    SharedSpace,
     SpaceMember,
     SpaceTransaction,
 )
+from app.models.transaction import SYSTEM_TRANSACTION_SOURCE
 from app.services.shared_space_access import verify_membership
+
+logger = structlog.get_logger(__name__)
+
+
+async def resolve_space_base_currency(db: AsyncSession, space: SharedSpace) -> str:
+    """Resolve the settlement base currency for a space.
+
+    Priority: space.base_currency -> creator's primary_currency -> project default.
+    Never returns empty; always upper-cased ISO code.
+    """
+    if space.base_currency:
+        return space.base_currency.upper()
+    try:
+        from app.models.financial_settings import FinancialSettings
+
+        result = await db.execute(
+            select(FinancialSettings.primary_currency).where(FinancialSettings.user_uuid == space.creator_uuid)
+        )
+        currency = result.scalar_one_or_none()
+        if currency:
+            return currency.upper()
+    except Exception:  # noqa: BLE001 - fallback must not break settlement
+        logger.warning("space_base_currency_fallback", space_id=str(space.id))
+    return PROJECT_DEFAULT_CURRENCY
 
 
 class SharedSpaceSettlementService:
@@ -38,6 +67,13 @@ class SharedSpaceSettlementService:
             Settlement dictionary
         """
         await verify_membership(self.db, space_id, user_uuid)
+
+        # Resolve the settlement base currency first: every member transaction
+        # is converted into it before splitting (BF-P1-6). Without this, a CNY
+        # payer + USD member space adds snapshot values from different bases.
+        space_row = await self.db.execute(select(SharedSpace).where(SharedSpace.id == space_id))
+        space = space_row.scalar_one_or_none()
+        base_currency = await resolve_space_base_currency(self.db, space) if space else PROJECT_DEFAULT_CURRENCY
 
         # Get all transactions in space
         query = (
@@ -64,6 +100,7 @@ class SharedSpaceSettlementService:
         if member_count == 0:
             return {
                 "spaceId": str(space_id),
+                "baseCurrency": base_currency,
                 "items": [],
                 "totalAmount": "0.00",
                 "excludedTransactions": 0,
@@ -89,6 +126,11 @@ class SharedSpaceSettlementService:
             tx = st.transaction
             if not (tx and tx.type == "EXPENSE"):
                 continue
+            # Spending scope (BF-P1-8): only settled, non-lifecycle rows count.
+            # PENDING periodic rows and SYSTEM disposal entries must not move
+            # settlement balances.
+            if tx.status != "CLEARED" or tx.source == SYSTEM_TRANSACTION_SOURCE:
+                continue
 
             payer_uuid = st.added_by_user_uuid
             if payer_uuid not in active_members:
@@ -96,7 +138,36 @@ class SharedSpaceSettlementService:
                 excluded_amount += Decimal(str(tx.amount))
                 continue
 
-            amount = Decimal(str(tx.amount))
+            # Convert the ORIGINAL amount into the space base before splitting.
+            # tx.amount is denominated in the payer's own base currency, so
+            # summing it directly mixes bases (BF-P1-6). amount_original +
+            # currency is the canonical original spend.
+            original = Decimal(str(tx.amount_original if tx.amount_original is not None else tx.amount))
+            tx_currency = (tx.currency or base_currency).upper()
+            if tx_currency == base_currency:
+                amount = original
+            else:
+                from app.services.exchange_rate_service import exchange_rate_service
+
+                try:
+                    converted = await exchange_rate_service.convert(
+                        amount=original,
+                        from_currency=tx_currency,
+                        to_currency=base_currency,
+                    )
+                except Exception as e:  # noqa: BLE001 - re-raised as domain error below
+                    raise BusinessError(
+                        f"Exchange rate unavailable for {tx_currency}→{base_currency}, "
+                        f"settlement cannot mix currencies",
+                        "EXCHANGE_RATE_UNAVAILABLE",
+                    ) from e
+                if converted is None:
+                    raise BusinessError(
+                        f"Exchange rate unavailable for {tx_currency}→{base_currency}, "
+                        f"settlement cannot mix currencies",
+                        "EXCHANGE_RATE_UNAVAILABLE",
+                    )
+                amount = Decimal(str(converted))
             share = amount / member_count
 
             # Payer's balance increases (others owe them)
@@ -147,6 +218,7 @@ class SharedSpaceSettlementService:
 
         return {
             "spaceId": str(space_id),
+            "baseCurrency": base_currency,
             "items": items,
             "totalAmount": f"{total_amount:.2f}",
             "excludedTransactions": excluded_count,

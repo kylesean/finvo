@@ -74,18 +74,25 @@ class SharedSpaceTransactionService:
         if existing_result.scalar_one_or_none():
             return {"message": "Transaction already in this space", "already_exists": True}
 
-        space_tx = SpaceTransaction(
-            space_id=space_id,
-            transaction_id=transaction_id,
-            added_by_user_uuid=user_uuid,
-        )
-        self.db.add(space_tx)
         try:
-            await self.db.flush()
+            # The add must happen INSIDE the savepoint: begin_nested's rollback
+            # then discards both the failed INSERT and the pending object,
+            # leaving the outer transaction (and every other uncommitted
+            # change in the caller's UoW) clean and usable. The budget period
+            # engine uses the same pattern (budget_period_service.py).
+            async with self.db.begin_nested():
+                self.db.add(
+                    SpaceTransaction(
+                        space_id=space_id,
+                        transaction_id=transaction_id,
+                        added_by_user_uuid=user_uuid,
+                    )
+                )
+                await self.db.flush()
         except IntegrityError:
-            # Lost the race against a concurrent duplicate insert; the (space_id,
-            # transaction_id) unique constraint fired. Treat as idempotent success.
-            await self.db.rollback()
+            # Lost the race against a concurrent duplicate insert; the
+            # constraint firing proves the association exists — idempotent
+            # success, and the savepoint has already isolated the failure.
             return {"message": "Transaction already in this space", "already_exists": True}
 
         # Emit domain event (async, fire-and-forget)
@@ -104,7 +111,9 @@ class SharedSpaceTransactionService:
                 space_name=space_name,
                 transaction_id=transaction.uuid,
                 added_by_user_uuid=user_uuid,
-                amount=transaction.amount,
+                # BF-P1-6: notify the ORIGINAL amount + currency pair. amount is
+                # in the owner's base currency and mislabels cross-currency rows.
+                amount=transaction.amount_original if transaction.amount_original is not None else transaction.amount,
                 currency=(transaction.currency or "CNY").upper(),
                 tx_type=transaction.type.lower() if transaction.type else "expense",
                 description=transaction.description or transaction.category_key or "",
@@ -252,17 +261,28 @@ class SharedSpaceTransactionService:
         from app.schemas.transaction import TransactionDisplayValue
 
         tx = st.transaction
-        amount = tx.amount if tx else Decimal("0")
+        # BF-P1-6: tx.amount is denominated in the owner's base currency while
+        # tx.currency is the ORIGINAL currency — pairing them mislabels the
+        # amount for any cross-currency row. Display the original pair, and
+        # expose the base equivalent alongside for aggregations.
+        if tx:
+            amount_original = tx.amount_original if tx.amount_original is not None else tx.amount
+            amount_base = tx.amount
+        else:
+            amount_original = Decimal("0")
+            amount_base = Decimal("0")
         tx_type = tx.type if tx else "EXPENSE"
         currency = tx.currency if tx else "CNY"
 
         # Use unified transaction display value formatting
-        display = TransactionDisplayValue.from_params(amount=amount, tx_type=tx_type, currency=currency)
+        display = TransactionDisplayValue.from_params(amount=amount_original, tx_type=tx_type, currency=currency)
 
         return {
             "id": str(tx.uuid) if tx else "",
             "type": tx_type,
-            "amount": str(tx.amount) if tx else "0",
+            "amount": str(amount_original) if tx else "0",
+            "amountOriginal": str(amount_original) if tx else "0",
+            "amountBase": str(amount_base) if tx else "0",
             "currency": currency,
             "description": tx.description if tx else None,
             "categoryKey": tx.category_key if tx else "",
