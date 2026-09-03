@@ -174,6 +174,42 @@ void main() {
     });
   });
 
+  group('_baseQuery contract (tz_offset + yyyy-MM-dd)', () {
+    test('always sends tz_offset as local minutes', () async {
+      stubRequest<StatisticsOverview>('/statistics/overview', result: overview);
+
+      await service.getOverview();
+
+      expect(lastQueryParams!.containsKey('tz_offset'), isTrue);
+      final tzOffset = lastQueryParams!['tz_offset'];
+      expect(tzOffset, isA<String>());
+      // Must be parseable as int minutes (e.g. "-480", "0", "540").
+      expect(int.tryParse(tzOffset as String), isNotNull);
+      expect(
+        tzOffset,
+        DateTime.now().timeZoneOffset.inMinutes.toString(),
+      );
+    });
+
+    test('custom range keeps tz_offset alongside yyyy-MM-dd dates', () async {
+      stubRequest<StatisticsOverview>('/statistics/overview', result: overview);
+
+      await service.getOverview(
+        timeRange: TimeRange.custom,
+        startDate: DateTime.utc(2026, 1, 1),
+        endDate: DateTime.utc(2026, 1, 31),
+      );
+
+      expect(lastQueryParams!['start_date'], '2026-01-01');
+      expect(lastQueryParams!['end_date'], '2026-01-31');
+      expect(lastQueryParams!.containsKey('tz_offset'), isTrue);
+      expect(
+        int.tryParse(lastQueryParams!['tz_offset'] as String),
+        isNotNull,
+      );
+    });
+  });
+
   group('getTrendData', () {
     test('sends time_range and transaction_type', () async {
       stubRequest<TrendDataResponse>('/statistics/trends', result: trend);
@@ -280,7 +316,7 @@ void main() {
 
       expect(lastQueryParams!['sort_by'], 'amount');
       expect(lastQueryParams!['page'], '2');
-      expect(lastQueryParams!['size'], '5');
+      expect(lastQueryParams!['page_size'], '5');
       expect(result.items, hasLength(1));
       expect(result.hasMore, isFalse);
     });
@@ -294,7 +330,7 @@ void main() {
       await service.getTopTransactions();
 
       expect(lastQueryParams!['page'], '1');
-      expect(lastQueryParams!['size'], '10');
+      expect(lastQueryParams!['page_size'], '10');
     });
 
     test('propagates network exception on failure', () async {

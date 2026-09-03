@@ -8,6 +8,66 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  group('CashFlowForecastViewModel.fromRawMap', () {
+    test('parses normal payload', () {
+      final vm = CashFlowForecastViewModel.fromRawMap({
+        'title': 'Next 30 days',
+        'data_points': [
+          {
+            'date': '2026-08-01',
+            'predicted_balance': 100,
+            'lower_bound': 90,
+            'upper_bound': 110,
+            'events': <dynamic>[],
+          },
+        ],
+        'warnings': [
+          {'date': '2026-08-02', 'type': 'low', 'message': 'tight'},
+        ],
+        'summary': {'net': 10},
+        'forecast_period': {'days': 30},
+        'current_balance': 100,
+      });
+
+      expect(vm.title, 'Next 30 days');
+      expect(vm.dataPoints, hasLength(1));
+      expect(vm.warnings, hasLength(1));
+      expect(vm.summary, isNotNull);
+      expect(vm.forecastPeriod, isNotNull);
+      expect(vm.currentBalance, 100);
+    });
+
+    test('tolerates missing fields without crashing', () {
+      final vm = CashFlowForecastViewModel.fromRawMap({});
+
+      expect(vm.title, '');
+      expect(vm.dataPoints, isEmpty);
+      expect(vm.warnings, isEmpty);
+      expect(vm.summary, isNull);
+      expect(vm.forecastPeriod, isNull);
+      expect(vm.currentBalance, 0.0);
+    });
+
+    test('tolerates malformed types without crashing', () {
+      final vm = CashFlowForecastViewModel.fromRawMap({
+        'title': 123,
+        'data_points': 'not-a-list',
+        'warnings': [42, 'oops'],
+        'summary': 'not-a-map',
+        'forecast_period': [1, 2],
+        'current_balance': 'abc',
+      });
+
+      // getString coerces, getList/getMap drop non-maps, getDouble falls back.
+      expect(vm.title, '123');
+      expect(vm.dataPoints, isEmpty);
+      expect(vm.warnings, isEmpty);
+      expect(vm.summary, isNull);
+      expect(vm.forecastPeriod, isNull);
+      expect(vm.currentBalance, 0.0);
+    });
+  });
+
   group('CashFlowForecastChart', () {
     Widget createWidgetUnderTests(
       Map<String, dynamic> data, {

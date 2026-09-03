@@ -52,21 +52,21 @@ void main() {
           'spaces': [spaceJson],
           'total': 1,
           'page': 1,
-          'limit': 20,
+          'page_size': 20,
         },
       });
 
-      final result = await service.getSharedSpaces(page: 2, limit: 50);
+      final result = await service.getSharedSpaces(page: 2, pageSize: 50);
 
       expect(lastRequest.path, '/shared-spaces');
       expect(lastRequest.queryParameters['page'], 2);
-      expect(lastRequest.queryParameters['limit'], 50);
+      expect(lastRequest.queryParameters['page_size'], 50);
       expect(result.spaces, hasLength(1));
       expect(result.spaces.first.id, 's1');
       expect(result.spaces.first.canManage, isTrue);
       expect(result.total, 1);
       expect(result.page, 1);
-      expect(result.limit, 20);
+      expect(result.pageSize, 20);
     });
   });
 
@@ -112,14 +112,14 @@ void main() {
           'transactions': [txJson],
           'total': 7,
           'page': 3,
-          'limit': 2,
+          'page_size': 2,
         },
       });
 
       final result = await service.getSpaceTransactions(
         's1',
         page: 3,
-        limit: 2,
+        pageSize: 2,
       );
 
       expect(lastRequest.path, '/shared-spaces/s1/transactions');
@@ -127,7 +127,7 @@ void main() {
       expect(result.transactions.first.id, 't1');
       expect(result.total, 7);
       expect(result.page, 3);
-      expect(result.limit, 2);
+      expect(result.pageSize, 2);
     });
 
     test('parses plain list shape with fallback counts', () async {
@@ -140,7 +140,7 @@ void main() {
       expect(result.transactions, hasLength(2));
       expect(result.total, 2);
       expect(result.page, 1);
-      expect(result.limit, 20);
+      expect(result.pageSize, 20);
     });
 
     test('throws DataParsingException on malformed payload', () async {

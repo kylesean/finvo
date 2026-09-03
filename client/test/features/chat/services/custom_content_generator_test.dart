@@ -1,6 +1,6 @@
 // CustomContentGenerator 回归测试：传输层是 GenUI 交互请求的唯一发送者。
 //
-// 覆盖 C1 回归：onUserMessageSent 必须始终携带 [GENUI_INTERNAL] 前缀（上层
+// onUserMessageSent 必须始终携带 [GENUI_INTERNAL] 前缀（上层
 // 只能展示、不得二次发送），且每个交互恰好发起一个 HTTP 请求，payload 完整
 // （含 metadata/client_state，不得在二次发送中被丢弃）。
 
@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:genui/genui.dart' as genui;
 
 import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/chat/constants/genui_markers.dart';
 import 'package:finvo/features/chat/services/custom_content_generator.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -111,8 +112,8 @@ void main() {
       'request carrying the full metadata payload', () async {
     setAdapter(doneSseBody);
 
-    // account_selected 没有 atomic mutation（clientState == null），正是 C1 的
-    // 触发路径：内容只走展示通知，请求由本传输层唯一发出。
+    // account_selected 没有 atomic mutation（clientState == null）：内容只走
+    // 展示通知，请求由本传输层唯一发出。
     await generator.sendRequest(
       interactionMessage({
         'version': 'v0.9',
@@ -228,5 +229,122 @@ void main() {
     await generator.sendRequest(genui.ChatMessage.user('第二条'));
 
     expect(adapter.requests.single.url, startsWith('http://new-server:9090'));
+  });
+
+  group('streamErrorOf', () {
+    DioException dioError(
+      DioExceptionType type, {
+      int? statusCode,
+      String message = 'boom',
+    }) {
+      return DioException(
+        requestOptions: RequestOptions(path: '/chat/stream'),
+        type: type,
+        message: message,
+        response: statusCode == null
+            ? null
+            : Response(
+                requestOptions: RequestOptions(path: '/chat/stream'),
+                statusCode: statusCode,
+              ),
+      );
+    }
+
+    test('non-2xx status keeps its code for upstream branching', () {
+      for (final status in [401, 429, 500]) {
+        final err = streamErrorOf(
+          dioError(DioExceptionType.badResponse, statusCode: status),
+          idleTimedOut: false,
+        );
+        expect(err, isA<UnexpectedHttpException>());
+        expect((err as UnexpectedHttpException).statusCode, status);
+        expect(err.message, contains('$status'));
+      }
+    });
+
+    test('idle watchdog timeout reports timeout, not cancellation', () {
+      final err = streamErrorOf(
+        dioError(DioExceptionType.cancel),
+        idleTimedOut: true,
+      );
+      expect(err, isA<TimeoutException>());
+      expect(err.message, contains('timeout'));
+    });
+
+    test('plain cancellation stays a cancellation', () {
+      expect(
+        streamErrorOf(dioError(DioExceptionType.cancel), idleTimedOut: false),
+        isA<RequestCancelledException>(),
+      );
+    });
+
+    test('transport timeouts and connection failures map by kind', () {
+      expect(
+        streamErrorOf(
+          dioError(DioExceptionType.connectionTimeout),
+          idleTimedOut: false,
+        ),
+        isA<TimeoutException>(),
+      );
+      expect(
+        streamErrorOf(
+          dioError(DioExceptionType.connectionError),
+          idleTimedOut: false,
+        ),
+        isA<NetworkException>(),
+      );
+    });
+
+    test('non-Dio failures stay generic without leaking internals', () {
+      final err = streamErrorOf(StateError('bad state'), idleTimedOut: false);
+      expect(err, isA<GeneralException>());
+    });
+  });
+
+  group('A2UI protocol boundaries', () {
+    test(
+      'unknown payload shape is ignored and the turn still completes',
+      () async {
+        setAdapter('data: {"type":"a2ui_message","data":{"foo":1}}\n\n');
+        final errors = <Object>[];
+        generator.onError = errors.add;
+
+        await generator.sendRequest(genui.ChatMessage.user('hi'));
+
+        expect(errors, isEmpty);
+        expect(streamCompleteCount, 1);
+      },
+    );
+
+    test(
+      'malformed createSurface surfaces a typed error and completes',
+      () async {
+        setAdapter(
+          'data: {"type":"a2ui_message","data":{"createSurface":"nope"}}\n\n',
+        );
+        final errors = <Object>[];
+        generator.onError = errors.add;
+
+        await generator.sendRequest(genui.ChatMessage.user('hi'));
+
+        expect(errors, hasLength(1));
+        expect(errors.single, isA<DataParsingException>());
+        // Terminal error path and normal stream end both complete (idempotent).
+        expect(streamCompleteCount, greaterThanOrEqualTo(1));
+      },
+    );
+
+    test('server error event keeps its user-safe text', () async {
+      setAdapter('data: {"type":"error","content":"Over budget"}\n\n');
+      final errors = <Object>[];
+      generator.onError = errors.add;
+
+      await generator.sendRequest(genui.ChatMessage.user('hi'));
+
+      expect(errors, hasLength(1));
+      expect(errors.single, isA<BusinessException>());
+      expect((errors.single as BusinessException).message, 'Over budget');
+      expect(streamCompleteCount, 1);
+    });
   });
 }

@@ -27,12 +27,12 @@ void main() {
       expect(service.serverUrl, 'http://localhost:8000');
     });
 
-    test('bare IPv6 loopback defaults to http (C1 regression)', () async {
+    test('bare IPv6 loopback defaults to http', () async {
       await service.saveServerUrl('[::1]:8000');
       expect(service.serverUrl, 'http://[::1]:8000');
     });
 
-    test('bare IPv6 link-local defaults to http (C1 regression)', () async {
+    test('bare IPv6 link-local defaults to http', () async {
       await service.saveServerUrl('[fe80::1]:8000');
       expect(service.serverUrl, 'http://[fe80::1]:8000');
     });

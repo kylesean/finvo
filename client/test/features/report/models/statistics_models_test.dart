@@ -165,7 +165,7 @@ void main() {
         'sortBy': 'date',
         'total': 0,
         'page': 2,
-        'pageSize': 5,
+        'page_size': 5,
         'hasMore': true,
       };
 

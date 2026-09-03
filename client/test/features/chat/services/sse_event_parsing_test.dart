@@ -70,77 +70,56 @@ void main() {
     });
   });
 
-  group('deriveReceiptCurrency', () {
-    test('prefers explicit summary currency', () {
+  group('receiptBucketEvents', () {
+    test('emits one event per non-zero bucket with its own currency', () {
+      final events = receiptBucketEvents({
+        'by_currency': {
+          'USD': {'expense': '100.00', 'income': '0.00'},
+          'CNY': {'expense': '0.00', 'income': '720.00'},
+        },
+        'mixed_currencies': true,
+      });
+
+      expect(events, [
+        (amount: 100.0, type: 'expense', currency: 'USD'),
+        (amount: 720.0, type: 'income', currency: 'CNY'),
+      ]);
+    });
+
+    test('zero buckets emit nothing', () {
       expect(
-        deriveReceiptCurrency(
-          {'currency': 'USD'},
-          {
-            'transactions': [
-              {'originalCurrency': 'JPY'},
-            ],
+        receiptBucketEvents({
+          'by_currency': {
+            'CNY': {'expense': '0.00', 'income': '0.00'},
           },
-        ),
-        'USD',
-      );
-    });
-
-    test('falls back to first transaction originalCurrency', () {
-      expect(
-        deriveReceiptCurrency(<String, dynamic>{}, {
-          'transactions': [
-            {'originalCurrency': 'JPY'},
-            {'originalCurrency': 'EUR'},
-          ],
         }),
-        'JPY',
+        isEmpty,
       );
     });
 
-    test('falls back to first transaction currency field', () {
+    test('missing or malformed summaries emit nothing', () {
+      expect(receiptBucketEvents(null), isEmpty);
+      expect(receiptBucketEvents({}), isEmpty);
+      expect(receiptBucketEvents({'by_currency': 'garbage'}), isEmpty);
       expect(
-        deriveReceiptCurrency(<String, dynamic>{}, {
-          'transactions': [
-            {'currency': 'EUR'},
-          ],
-        }),
-        'EUR',
-      );
-    });
-
-    test('skips malformed transaction entries', () {
-      expect(
-        deriveReceiptCurrency(<String, dynamic>{}, {
-          'transactions': [
-            'not-a-map',
-            {'originalCurrency': 123},
-            {'currency': ''},
-            {'originalCurrency': 'GBP'},
-          ],
-        }),
-        'GBP',
-      );
-    });
-
-    test('defaults to CNY when no currency is present', () {
-      expect(
-        deriveReceiptCurrency(<String, dynamic>{}, <String, dynamic>{}),
-        'CNY',
-      );
-    });
-
-    test('rejects non-string summary currency', () {
-      expect(
-        deriveReceiptCurrency(
-          {'currency': 42},
-          {
-            'transactions': [
-              {'currency': 'KRW'},
-            ],
+        receiptBucketEvents({
+          'by_currency': {
+            'CNY': 'garbage',
+            'USD': {'expense': 'n/a', 'income': null},
           },
-        ),
-        'KRW',
+        }),
+        isEmpty,
       );
+    });
+
+    test('currency codes are uppercased', () {
+      final events = receiptBucketEvents({
+        'by_currency': {
+          'usd': {'expense': '10.00', 'income': '0.00'},
+        },
+      });
+
+      expect(events.single.currency, 'USD');
     });
   });
 }

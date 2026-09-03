@@ -148,4 +148,63 @@ void main() {
       expect(scanMessageExpense(message()), Decimal.zero);
     });
   });
+
+  group('record_transactions summary buckets', () {
+    ChatMessage receipt(Map<String, dynamic> summary) {
+      return ChatMessage(
+        id: 'm1',
+        sender: MessageSender.ai,
+        uiComponents: [
+          UIComponentInfo(
+            surfaceId: 's1',
+            componentType: 'TransactionGroupReceipt',
+            data: {'summary': summary},
+            toolName: 'record_transactions',
+          ),
+        ],
+      );
+    }
+
+    test('single-currency buckets sum exactly', () {
+      final msg = receipt({
+        'expense_count': 2,
+        'income_count': 0,
+        'by_currency': {
+          'CNY': {'expense': '30.10', 'income': '0.00'},
+        },
+        'mixed_currencies': false,
+      });
+
+      expect(scanMessageExpense(msg), Decimal.parse('30.10'));
+    });
+
+    test('legacy float totals are ignored', () {
+      final msg = receipt({
+        'expense_total': 9999.0,
+        'income_total': 1.0,
+        'by_currency': {
+          'CNY': {'expense': '30.10', 'income': '0.00'},
+        },
+        'mixed_currencies': false,
+      });
+
+      expect(scanMessageExpense(msg), Decimal.parse('30.10'));
+    });
+
+    test('missing buckets yield zero', () {
+      expect(scanMessageExpense(receipt({})), Decimal.zero);
+    });
+
+    test('malformed buckets are skipped', () {
+      final msg = receipt({
+        'by_currency': {
+          'CNY': 'garbage',
+          'USD': {'expense': 'n/a', 'income': '5.00'},
+        },
+        'mixed_currencies': true,
+      });
+
+      expect(scanMessageExpense(msg), Decimal.zero);
+    });
+  });
 }

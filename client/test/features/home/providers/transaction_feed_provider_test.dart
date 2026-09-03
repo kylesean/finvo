@@ -27,7 +27,7 @@ class _FakeHomeService extends HomeService {
   @override
   Future<List<TransactionModel>> getTransactionFeed({
     int page = 1,
-    int size = 20,
+    int pageSize = 20,
     String? type,
     String? date,
     CancelToken? cancelToken,
