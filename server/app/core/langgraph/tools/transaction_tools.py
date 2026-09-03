@@ -18,6 +18,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any, Literal
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
@@ -236,6 +237,17 @@ async def record_transactions(
 
     if not transactions:
         return {"success": False, "message": "Please provide at least one transaction"}
+
+    # A bare (naive) model-provided time like "T23:00" used to be stored as
+    # UTC — an UTC+8 user saying "昨晚 11 点" got next morning 07:00 and the
+    # day grouping/period attribution shifted. Interpret missing offsets in
+    # the user's timezone; explicit offsets are respected as-is.
+    if tx_time.tzinfo is None:
+        user_tz = config.get("configurable", {}).get("user_timezone") or "UTC"
+        try:
+            tx_time = tx_time.replace(tzinfo=ZoneInfo(user_tz))
+        except (ZoneInfoNotFoundError, ValueError):
+            tx_time = tx_time.replace(tzinfo=UTC)
 
     async with get_session_context() as session:
         service = TransactionService(session)

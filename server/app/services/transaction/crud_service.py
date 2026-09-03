@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 from uuid import UUID, uuid4
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import structlog
 from sqlalchemy import String, and_, cast as sa_cast, select
@@ -155,6 +156,10 @@ class TransactionCRUDService:
                 )
 
         tx_currency = currency.upper()
+        # Same guard as the batch path: a malformed code must be a 400, not a
+        # String(3) DataError surfacing as a 500.
+        if len(tx_currency) != 3 or not tx_currency.isalpha():
+            raise BusinessError(f"Invalid currency code: {tx_currency}", CommonErrorCode.VALIDATION_ERROR)
         amount_original = transfer_amount
 
         # Convert to user's base currency (primary_currency) with rate snapshot
@@ -856,7 +861,18 @@ class TransactionCRUDService:
                 raise BusinessError(
                     message="Invalid transaction_at, expected ISO 8601", error_code=CommonErrorCode.VALIDATION_ERROR
                 ) from None
-            booking_time = parsed_at if parsed_at.tzinfo else parsed_at.replace(tzinfo=UTC)
+            if parsed_at.tzinfo:
+                booking_time = parsed_at
+            else:
+                # Bare timestamps mean the user's wall clock, not UTC (same
+                # rule as the AI tool's naive-time handling).
+                from app.services.statistics_scope import get_user_timezone
+
+                user_tz = await get_user_timezone(self.db, user_uuid)
+                try:
+                    booking_time = parsed_at.replace(tzinfo=ZoneInfo(user_tz))
+                except (ZoneInfoNotFoundError, ValueError):
+                    booking_time = parsed_at.replace(tzinfo=UTC)
         booking_timezone = str(booking_time.tzinfo or "UTC")
 
         # Get user's default currency (primaryCurrency) as the default value when currency is not specified
@@ -894,6 +910,11 @@ class TransactionCRUDService:
 
                 # Use user's primaryCurrency as default value, instead of hardcoding CNY
                 currency = (item.get("currency") or user_default_currency).upper()
+                # Reject implausible codes here: LLM items are free strings and
+                # a >3-char value only fails at flush (String(3) DataError),
+                # which poisoned the whole batch instead of the single item.
+                if len(currency) != 3 or not currency.isalpha():
+                    raise BusinessError(f"Invalid currency code: {currency}", CommonErrorCode.VALIDATION_ERROR)
 
                 # Convert to user's base currency with rate snapshot
                 base_amount, exchange_rate_val = await convert_to_user_base(
