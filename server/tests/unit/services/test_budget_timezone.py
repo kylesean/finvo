@@ -2,8 +2,9 @@
 
 Server-local ``date.today()`` put UTC+8 users' pre-16:00 spending into
 "yesterday's" budget period. Period lookup/creation now uses the owner's
-local date. Historical periods are intentionally NOT rewritten: old rows
-keep server-local boundaries, new rows use user time.
+local date, and spent-amount aggregation windows are the owner's local
+midnights (not UTC midnights). Historical periods are intentionally NOT
+rewritten: old rows keep server-local boundaries, new rows use user time.
 """
 
 from datetime import UTC, date, datetime
@@ -14,9 +15,10 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.budget import Budget, BudgetPeriod
+from app.models.transaction import Transaction
 from app.models.user import User
 from app.services.budget_period_service import BudgetPeriodService
-from app.services.statistics_scope import user_local_today
+from app.services.statistics_scope import user_date_range_utc, user_local_today
 
 
 class TestUserLocalToday:
@@ -90,3 +92,72 @@ class TestBudgetPeriodUsesOwnerTimezone:
         monkeypatch.setattr(scope, "user_local_today", lambda *a, **k: date(2026, 8, 31))
         found = await BudgetPeriodService(db_session)._get_current_period(budget)
         assert found is not None and found.period_start == date(2026, 8, 1)
+
+
+class TestUserDateRangeUtc:
+    def test_shanghai_period_window(self) -> None:
+        # July (local) in Shanghai spans [Jun 30 16:00 UTC, Jul 31 16:00 UTC):
+        # the owner's local midnights delimit the window, not UTC midnights.
+        start, end = user_date_range_utc(date(2026, 7, 1), date(2026, 7, 31), "Asia/Shanghai")
+        assert start == datetime(2026, 6, 30, 16, 0, tzinfo=UTC)
+        assert end == datetime(2026, 7, 31, 16, 0, tzinfo=UTC)
+
+    def test_utc_timezone_keeps_midnight_boundaries(self) -> None:
+        start, end = user_date_range_utc(date(2026, 7, 1), date(2026, 7, 31), None)
+        assert start == datetime(2026, 7, 1, 0, 0, tzinfo=UTC)
+        assert end == datetime(2026, 8, 1, 0, 0, tzinfo=UTC)
+
+    def test_bad_timezone_falls_back_to_utc(self) -> None:
+        start, end = user_date_range_utc(date(2026, 7, 1), date(2026, 7, 31), "Not/AZone")
+        assert start == datetime(2026, 7, 1, 0, 0, tzinfo=UTC)
+        assert end == datetime(2026, 8, 1, 0, 0, tzinfo=UTC)
+
+
+class TestCalculateSpentUsesOwnerTimezone:
+    @pytest.mark.asyncio
+    async def test_day_boundary_transactions_follow_owner_clock(self, db_session: AsyncSession) -> None:
+        """Aggregation follows the owner's clock at both window edges.
+
+        For a Shanghai owner, Jul 1 04:00 local (= Jun 30 20:00 UTC) belongs
+        to the July period, and Aug 1 00:00 local (= Jul 31 16:00 UTC) does
+        not. UTC-midnight windows attributed both the wrong way.
+        """
+        user = User(
+            uuid=uuid4(),
+            username=f"tz-{uuid4().hex[:8]}",
+            email=f"tz-{uuid4().hex[:8]}@example.com",
+            password="hash",
+            registration_type="email",
+            timezone="Asia/Shanghai",
+        )
+        db_session.add(user)
+        await db_session.commit()
+
+        def _expense(at: datetime) -> Transaction:
+            return Transaction(
+                uuid=uuid4(),
+                user_uuid=user.uuid,
+                type="EXPENSE",
+                amount=Decimal("10"),
+                amount_original=Decimal("10"),
+                currency="CNY",
+                transaction_at=at,
+                category_key="FOOD",
+                status="CLEARED",
+                raw_input="tz-window",
+            )
+
+        # Jun 30 20:00 UTC = Jul 1 04:00 local → inside July.
+        # Jul 31 16:00 UTC = Aug 1 00:00 local → outside July.
+        db_session.add_all(
+            [
+                _expense(datetime(2026, 6, 30, 20, 0, tzinfo=UTC)),
+                _expense(datetime(2026, 7, 31, 16, 0, tzinfo=UTC)),
+            ]
+        )
+        await db_session.commit()
+
+        spent = await BudgetPeriodService(db_session).calculate_spent_amount(
+            user.uuid, date(2026, 7, 1), date(2026, 7, 31)
+        )
+        assert spent == Decimal("10")

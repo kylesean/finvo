@@ -4,10 +4,7 @@ from __future__ import annotations
 
 from calendar import monthrange
 from datetime import (
-    UTC,
     date,
-    datetime as dt_datetime,
-    time as dt_time,
     timedelta,
 )
 from decimal import Decimal
@@ -25,23 +22,12 @@ from app.models.budget import (
     BudgetSettings,
 )
 from app.models.transaction import Transaction
-from app.services.statistics_scope import settled_spending_conditions
+from app.services.statistics_scope import get_user_timezone, settled_spending_conditions, user_date_range_utc
 
 # Default threshold values used when no BudgetSettings row exists yet.
 # These match the DB column defaults and avoid a write on the read path.
 _DEFAULT_WARNING_THRESHOLD = 70
 _DEFAULT_ALERT_THRESHOLD = 90
-
-
-def _date_range_to_dt(period_start: date, period_end: date) -> tuple[dt_datetime, dt_datetime]:
-    """Convert an inclusive date range to a half-open [start, end) datetime range.
-
-    Using direct column comparisons (no func.date() wrapping) allows the
-    B-tree index on transaction_at to be used efficiently.
-    """
-    start_dt = dt_datetime.combine(period_start, dt_time.min, tzinfo=UTC)
-    end_dt = dt_datetime.combine(period_end + timedelta(days=1), dt_time.min, tzinfo=UTC)
-    return start_dt, end_dt
 
 
 class BudgetPeriodService:
@@ -307,7 +293,12 @@ class BudgetPeriodService:
         Returns:
             Total spent amount
         """
-        start_dt, end_dt = _date_range_to_dt(period_start, period_end)
+        # Aggregate in the owner's local calendar: the period dates are
+        # owner-local (see _get_current_period), so UTC-midnight boundaries
+        # attributed a UTC+8 user's first-of-day 00:00-08:00 spending to the
+        # previous period — and disagreed with the statistics scope.
+        tz = await get_user_timezone(self.session, user_uuid)
+        start_dt, end_dt = user_date_range_utc(period_start, period_end, tz)
         # Spending scope is shared with space monthly stats (statistics_scope):
         # CLEARED + non-SYSTEM. Keep the comment here so the rule reads the
         # same at both call sites.

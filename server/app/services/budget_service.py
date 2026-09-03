@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 from datetime import (
-    UTC,
     date,
     datetime as dt_datetime,
-    time as dt_time,
     timedelta,
 )
 from decimal import Decimal
@@ -43,17 +41,7 @@ from app.schemas.budget import (
     BudgetUpdateRequest,
 )
 from app.services.budget_period_service import BudgetPeriodService
-
-
-def _date_range_to_dt(period_start: date, period_end: date) -> tuple[dt_datetime, dt_datetime]:
-    """Convert an inclusive date range to a half-open [start, end) datetime range.
-
-    Using direct column comparisons (no func.date() wrapping) allows the
-    B-tree index on transaction_at to be used efficiently.
-    """
-    start_dt = dt_datetime.combine(period_start, dt_time.min, tzinfo=UTC)
-    end_dt = dt_datetime.combine(period_end + timedelta(days=1), dt_time.min, tzinfo=UTC)
-    return start_dt, end_dt
+from app.services.statistics_scope import get_user_timezone, user_date_range_utc, user_local_today
 
 
 class BudgetService:
@@ -126,9 +114,12 @@ class BudgetService:
         self.session.add(budget)
         await self.session.flush()
 
-        # Create initial period
+        # Create initial period from the owner's local date: the period engine
+        # (_get_current_period) evaluates "today" in the owner's timezone, so
+        # a server-local date could create a period the owner isn't "in" yet.
+        owner_today = user_local_today(await get_user_timezone(self.session, user_uuid))
         period_start, period_end = self._calculate_period_range(
-            budget.period_type, budget.period_anchor_day, date.today()
+            budget.period_type, budget.period_anchor_day, owner_today
         )
 
         initial_period = BudgetPeriod(
@@ -664,10 +655,12 @@ class BudgetService:
         Returns:
             Budget suggestion
         """
-        # Calculate date range
-        end_date = date.today()
+        # Calculate date range in the owner's local calendar (see
+        # user_date_range_utc — same convention as the budget period engine).
+        tz = await get_user_timezone(self.session, user_uuid)
+        end_date = user_local_today(tz)
         start_date = end_date - timedelta(days=months * 30)
-        start_dt, end_dt = _date_range_to_dt(start_date, end_date)
+        start_dt, end_dt = user_date_range_utc(start_date, end_date, tz)
 
         # Get historical spending
         query = select(
@@ -745,9 +738,10 @@ class BudgetService:
         Returns:
             List of category keys with high variance
         """
-        end_date = date.today()
+        tz = await get_user_timezone(self.session, user_uuid)
+        end_date = user_local_today(tz)
         start_date = end_date - timedelta(days=months * 30)
-        start_dt, end_dt = _date_range_to_dt(start_date, end_date)
+        start_dt, end_dt = user_date_range_utc(start_date, end_date, tz)
 
         # Get spending by category and month
         query = (

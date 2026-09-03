@@ -12,7 +12,7 @@ REST statistics endpoint, so "how much did we spend" always agrees):
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, time as dt_time, timedelta
 from typing import Any
 from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -28,6 +28,7 @@ __all__ = [
     "settled_spending_conditions",
     "user_month_start_utc",
     "user_local_today",
+    "user_date_range_utc",
     "get_user_timezone",
 ]
 
@@ -80,6 +81,29 @@ def user_local_today(user_timezone: str | None, *, now_utc: datetime | None = No
     except (ZoneInfoNotFoundError, ValueError):
         tz = ZoneInfo("UTC")
     return now.astimezone(tz).date()
+
+
+def user_date_range_utc(
+    period_start: date,
+    period_end: date,
+    user_timezone: str | None,
+) -> tuple[datetime, datetime]:
+    """Convert an inclusive local date range to a half-open [start, end) UTC range.
+
+    Period dates are calendar dates in the user's timezone, so aggregating
+    them against UTC midnights shifted every non-UTC user's window (a UTC+8
+    user's first-of-month 00:00-08:00 spending landed in the previous period).
+    Local midnights keep the aggregate window aligned with the period dates.
+    Falls back to UTC midnights on a missing/invalid timezone — never raises
+    for a bad profile value.
+    """
+    try:
+        tz = ZoneInfo(user_timezone) if user_timezone else ZoneInfo("UTC")
+    except (ZoneInfoNotFoundError, ValueError):
+        tz = ZoneInfo("UTC")
+    start_dt = datetime.combine(period_start, dt_time.min, tzinfo=tz).astimezone(UTC)
+    end_dt = datetime.combine(period_end + timedelta(days=1), dt_time.min, tzinfo=tz).astimezone(UTC)
+    return start_dt, end_dt
 
 
 async def get_user_timezone(db: AsyncSession, user_uuid: UUID) -> str:
