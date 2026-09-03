@@ -103,6 +103,28 @@ services:
       - monitoring
 
   # =============================================================================
+  # Optional Self-Hosted ASR (voice bookkeeping without commercial STT APIs)
+  # Enable with: docker compose --profile voice up -d
+  # The Flutter client talks to it directly over WebSocket (/ws): point the
+  # in-app speech settings (Settings -> Speech recognition -> Self-hosted ASR)
+  # or the SPEECH_WS_HOST/PORT build flags at this host. Host port 8081 is
+  # deliberate — cadvisor (monitoring profile) already occupies 8080.
+  # Companion repo: https://github.com/kylesean/asr_server
+  # =============================================================================
+  asr:
+    profiles: [voice]
+    image: kylesean/asr_server:latest
+    container_name: Finvo-asr
+    ports:
+      - "8081:8080"
+    restart: on-failure
+    networks:
+      - monitoring
+    labels:
+      - "project=Finvo"
+      - "component=asr"
+
+  # =============================================================================
   # Optional Monitoring Stack (Enterprise-grade observability)
   # Enable with: docker compose --profile monitoring up -d
   # =============================================================================

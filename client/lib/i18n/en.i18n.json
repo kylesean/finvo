@@ -366,7 +366,8 @@
     "serviceNotConfigured": "Speech service is not configured. Please set the server address in Speech Settings.",
     "connectionFailedTitle": "Speech Service Connection Failed",
     "connectionFailed": "Cannot connect to WebSocket speech recognition service. Please check your server address, port, or network connectivity.",
-    "noSpeechRecognized": "No speech input detected, please try again."
+    "noSpeechRecognized": "No speech input detected, please try again.",
+    "selfHostedAsrFallback": "Self-hosted ASR is unreachable. Temporarily using on-device speech recognition — your ASR settings are unchanged."
   },
   "amountTheme": {
     "chinaMarket": "China Market Style",

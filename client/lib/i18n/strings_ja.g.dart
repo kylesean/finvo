@@ -35,7 +35,7 @@ class TranslationsJa extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsJa _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsJa $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsJa(meta: meta ?? this.$meta);
 
 	// Translations
@@ -503,6 +503,7 @@ class _Translations$speech$ja extends Translations$speech$zh {
 	@override String get connectionFailedTitle => '音声サービス接続失敗';
 	@override String get connectionFailed => 'WebSocket音声認識サービスに接続できません。サーバーアドレス、ポート、またはネットワーク接続を確認してください。';
 	@override String get noSpeechRecognized => '音声入力が検出されませんでした。もう一度お試しください。';
+	@override String get selfHostedAsrFallback => '自前のASRに接続できません。一時的にデバイスの音声認識に切り替えました。ASR設定は変更されていません。';
 }
 
 // Path: amountTheme
@@ -3005,6 +3006,7 @@ extension on TranslationsJa {
 			'speech.connectionFailedTitle' => '音声サービス接続失敗',
 			'speech.connectionFailed' => 'WebSocket音声認識サービスに接続できません。サーバーアドレス、ポート、またはネットワーク接続を確認してください。',
 			'speech.noSpeechRecognized' => '音声入力が検出されませんでした。もう一度お試しください。',
+			'speech.selfHostedAsrFallback' => '自前のASRに接続できません。一時的にデバイスの音声認識に切り替えました。ASR設定は変更されていません。',
 			'amountTheme.chinaMarket' => '中国市場慣習',
 			'amountTheme.chinaMarketDesc' => '赤上昇/緑下落（推奨）',
 			'amountTheme.international' => '国際標準',
@@ -3185,9 +3187,9 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.sortByTime' => '時間順',
 			'forecast.recurringTransaction.allPeriod' => 'すべての周期',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} (${count} 件)',
-			'forecast.recurringTransaction.confirmDelete' => '削除確認',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.confirmDelete' => '削除確認',
 			'forecast.recurringTransaction.confirmActivate' => '有効化確認',
 			'forecast.recurringTransaction.confirmPause' => '停止確認',
 			'forecast.recurringTransaction.dynamicAmount' => '動態平均',
@@ -3266,10 +3268,10 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.goToFinanceToAddAccounts' => '財務ページで口座を追加してください',
 			'forecast.recurringTransaction.selectAccount' => '口座を選択',
 			'forecast.recurringTransaction.autoGenerateByRule' => '有効にするとルールに従って取引を自動生成',
-			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '日', other: '日', ),
-			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '週間', other: '週間', ),
-			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: 'か月', other: 'か月', ),
-			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '年', other: '年', ),
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '日', other: '日', ), 
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '週間', other: '週間', ), 
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: 'か月', other: 'か月', ), 
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(count, one: '年', other: '年', ), 
 			'chat.newChat' => '新しいチャット',
 			'chat.noMessages' => 'メッセージがありません。',
 			'chat.loadingFailed' => '読み込み失敗',
@@ -3699,9 +3701,9 @@ extension on TranslationsJa {
 			'account.reopenConfirm' => 'この口座は再有効化（ACTIVE）され、純資産と新しい取引に再度含まれます。',
 			'account.reopenSuccess' => '口座を再有効化しました',
 			'account.closeDisposalTitle' => '停止前の残高の処理',
-			'account.disposalKeepDesc' => '残高を現在のまま固定してアーカイブします。新しい明細は作成されません。',
 			_ => null,
 		} ?? switch (path) {
+			'account.disposalKeepDesc' => '残高を現在のまま固定してアーカイブします。新しい明細は作成されません。',
 			'account.disposalTransferDesc' => '実際の振替明細を作成し、残高を別の口座へ移動してから停止します。',
 			'account.disposalWriteoffDesc' => '支出（または収入）明細を作成して残高を消し込み、それから停止します。',
 			'account.save' => '変更を保存',

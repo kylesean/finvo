@@ -110,6 +110,37 @@ class ChatInputNotifier extends _$ChatInputNotifier {
     );
   }
 
+  /// Session-local fallback from self-hosted ASR to on-device system speech.
+  ///
+  /// The saved preference is deliberately untouched: a transient network
+  /// failure must not nuke deliberate config. The next mic tap retries the
+  /// saved service only if settings change re-applies it; until then the
+  /// session keeps working on system STT. Returns true when applied, in
+  /// which case callers must not also surface the raw connection error.
+  bool _fallbackToSystemSpeech(SpeechErrorType errorType) {
+    final usingSelfHosted =
+        _speechSession.serviceType == SpeechServiceType.websocket;
+    final unreachable =
+        errorType == SpeechErrorType.connectionFailed ||
+        errorType == SpeechErrorType.notConfigured;
+    if (!usingSelfHosted || !unreachable) return false;
+    _logger.warning(
+      'Self-hosted ASR unavailable ($errorType); falling back to system speech for this session',
+    );
+    _speechSession.setServiceType(
+      type: SpeechServiceType.system,
+      previousType: SpeechServiceType.websocket,
+    );
+    state = state.copyWith(
+      isListening: false,
+      showError: true,
+      speechErrorType: SpeechErrorType.asrFallbackToSystem,
+      errorMessage: SpeechErrorType.asrFallbackToSystem.name,
+      hintType: HintType.normal,
+    );
+    return true;
+  }
+
   /// Update the send-message callback in place. Called from the widget's
   /// `didUpdateWidget` when the parent supplies a new callback, so a reused
   /// State never submits through a stale closure captured at init time.
@@ -205,6 +236,10 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       return;
     }
 
+    // Self-hosted ASR dropped mid-session: same session-local fallback as at
+    // session start (saved preference untouched).
+    if (_fallbackToSystemSpeech(errorType)) return;
+
     if (errorType == SpeechErrorType.noSpeechRecognized) {
       _textBeforeSpeechSession = '';
       state = state.copyWith(text: '');
@@ -261,6 +296,9 @@ class ChatInputNotifier extends _$ChatInputNotifier {
 
       if (errorType != null) {
         _logger.warning('Speech service not ready: $errorType');
+        // Self-hosted ASR unreachable/misconfigured: fall back for this
+        // session (saved preference untouched) instead of dead-ending.
+        if (_fallbackToSystemSpeech(errorType)) return;
         if (errorType == SpeechErrorType.noSpeechRecognized) {
           _textBeforeSpeechSession = '';
           state = state.copyWith(text: '');

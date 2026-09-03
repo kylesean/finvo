@@ -18,6 +18,11 @@ enum SpeechErrorType {
   /// Failed to establish a WebSocket or network connection to the speech server
   connectionFailed,
 
+  /// Self-hosted ASR was unreachable so the session fell back to on-device
+  /// system speech (set programmatically by the input provider — never
+  /// produced by [classify], since no raw service string means "we switched").
+  asrFallbackToSystem,
+
   /// Listening timed out with no speech recognized
   noSpeechRecognized,
 

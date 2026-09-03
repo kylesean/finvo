@@ -367,7 +367,8 @@
     "serviceNotConfigured": "语音服务未配置，请在【设置 -> 语音识别】中配置服务器地址",
     "connectionFailedTitle": "语音服务连接失败",
     "connectionFailed": "无法连接到 WebSocket 语音识别服务，请检查服务器地址、端口或网络连通性。",
-    "noSpeechRecognized": "未检测到语音输入，请重试"
+    "noSpeechRecognized": "未检测到语音输入，请重试",
+    "selfHostedAsrFallback": "自托管 ASR 不可用，已临时回退到系统语音识别，ASR 配置保持不变。"
   },
   "amountTheme": {
     "chinaMarket": "中国市场",

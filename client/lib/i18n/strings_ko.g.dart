@@ -35,7 +35,7 @@ class TranslationsKo extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsKo _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsKo $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsKo(meta: meta ?? this.$meta);
 
 	// Translations
@@ -503,6 +503,7 @@ class _Translations$speech$ko extends Translations$speech$zh {
 	@override String get connectionFailedTitle => '음성 서비스 연결 실패';
 	@override String get connectionFailed => 'WebSocket 음성 인식 서비스에 연결할 수 없습니다. 서버 주소, 포트 또는 네트워크 연결을 확인하세요.';
 	@override String get noSpeechRecognized => '음성 입력이 감지되지 않았습니다. 다시 시도해 주세요.';
+	@override String get selfHostedAsrFallback => '셀프호스팅 ASR에 연결할 수 없습니다. 기기 내 음성 인식으로 임시 전환했습니다. ASR 설정은 그대로 유지됩니다.';
 }
 
 // Path: amountTheme
@@ -3005,6 +3006,7 @@ extension on TranslationsKo {
 			'speech.connectionFailedTitle' => '음성 서비스 연결 실패',
 			'speech.connectionFailed' => 'WebSocket 음성 인식 서비스에 연결할 수 없습니다. 서버 주소, 포트 또는 네트워크 연결을 확인하세요.',
 			'speech.noSpeechRecognized' => '음성 입력이 감지되지 않았습니다. 다시 시도해 주세요.',
+			'speech.selfHostedAsrFallback' => '셀프호스팅 ASR에 연결할 수 없습니다. 기기 내 음성 인식으로 임시 전환했습니다. ASR 설정은 그대로 유지됩니다.',
 			'amountTheme.chinaMarket' => '중국 시장 관습',
 			'amountTheme.chinaMarketDesc' => '빨강 상승/초록 하락 (권장)',
 			'amountTheme.international' => '국제 표준',
@@ -3185,9 +3187,9 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.sortByTime' => '시간순 정렬',
 			'forecast.recurringTransaction.allPeriod' => '모든 주기',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}주기 (${count})',
-			'forecast.recurringTransaction.confirmDelete' => '삭제 확인',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.confirmDelete' => '삭제 확인',
 			'forecast.recurringTransaction.confirmActivate' => '활성화 확인',
 			'forecast.recurringTransaction.confirmPause' => '정지 확인',
 			'forecast.recurringTransaction.dynamicAmount' => '동적 평균',
@@ -3266,10 +3268,10 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.goToFinanceToAddAccounts' => '재무 페이지에서 계좌를 추가하세요',
 			'forecast.recurringTransaction.selectAccount' => '계좌 선택',
 			'forecast.recurringTransaction.autoGenerateByRule' => '활성화하면 규칙에 따라 거래가 자동 생성됩니다',
-			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '일', other: '일', ),
-			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '주', other: '주', ),
-			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '개월', other: '개월', ),
-			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '년', other: '년', ),
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '일', other: '일', ), 
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '주', other: '주', ), 
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '개월', other: '개월', ), 
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ko'))(count, one: '년', other: '년', ), 
 			'chat.newChat' => '새 대화',
 			'chat.noMessages' => '표시할 메시지가 없습니다.',
 			'chat.loadingFailed' => '로딩 실패',
@@ -3699,9 +3701,9 @@ extension on TranslationsKo {
 			'account.reopenConfirm' => '이 계좌는 재활성화(ACTIVE)되어 순자산과 새 거래에 다시 포함됩니다.',
 			'account.reopenSuccess' => '계좌가 재활성화되었습니다',
 			'account.closeDisposalTitle' => '정지 전 잔액 처리',
-			'account.disposalKeepDesc' => '잔액을 현재 그대로 고정하고 보관합니다. 새 내역은 생성되지 않습니다.',
 			_ => null,
 		} ?? switch (path) {
+			'account.disposalKeepDesc' => '잔액을 현재 그대로 고정하고 보관합니다. 새 내역은 생성되지 않습니다.',
 			'account.disposalTransferDesc' => '실제 이체 내역을 만들어 잔액을 다른 계좌로 이동한 후 정지합니다.',
 			'account.disposalWriteoffDesc' => '지출(또는 수입) 내역을 만들어 잔액을 정리한 후 정지합니다.',
 			'account.save' => '수정사항 저장',

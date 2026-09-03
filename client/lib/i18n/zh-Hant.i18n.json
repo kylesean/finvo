@@ -366,7 +366,8 @@
     "serviceNotConfigured": "語音服務未配置，請在【設定 -> 語音識別】中配置服務器地址",
     "connectionFailedTitle": "語音服務連接失敗",
     "connectionFailed": "無法連接到 WebSocket 語音識別服務，請檢查服務器地址、端口或網絡連通性。",
-    "noSpeechRecognized": "未檢測到語音輸入，請重試"
+    "noSpeechRecognized": "未檢測到語音輸入，請重試",
+    "selfHostedAsrFallback": "自託管 ASR 不可用，已暫時回退到系統語音識別，ASR 配置保持不變。"
   },
   "amountTheme": {
     "chinaMarket": "中國市場習慣",

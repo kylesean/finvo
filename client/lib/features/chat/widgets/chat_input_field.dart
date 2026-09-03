@@ -148,6 +148,11 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
       case SpeechErrorType.noSpeechRecognized:
         _showSnackBarError(t.speech.noSpeechRecognized);
         break;
+      case SpeechErrorType.asrFallbackToSystem:
+        // Informational, not an error dialog: recognition keeps working on
+        // the on-device engine, the user just needs to know the switch.
+        _showSnackBarError(t.speech.selfHostedAsrFallback);
+        break;
       case SpeechErrorType.unknown:
         // Never surface raw exception text or enum names: collapse to the
         // generic error label (details are in the service logs).

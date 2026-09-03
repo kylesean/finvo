@@ -1102,6 +1102,9 @@ class Translations$speech$zh {
 
 	/// zh: '未检测到语音输入，请重试'
 	String get noSpeechRecognized => '未检测到语音输入，请重试';
+
+	/// zh: '自托管 ASR 不可用，已临时回退到系统语音识别，ASR 配置保持不变。'
+	String get selfHostedAsrFallback => '自托管 ASR 不可用，已临时回退到系统语音识别，ASR 配置保持不变。';
 }
 
 // Path: amountTheme
@@ -5876,6 +5879,7 @@ extension on Translations {
 			'speech.connectionFailedTitle' => '语音服务连接失败',
 			'speech.connectionFailed' => '无法连接到 WebSocket 语音识别服务，请检查服务器地址、端口或网络连通性。',
 			'speech.noSpeechRecognized' => '未检测到语音输入，请重试',
+			'speech.selfHostedAsrFallback' => '自托管 ASR 不可用，已临时回退到系统语音识别，ASR 配置保持不变。',
 			'amountTheme.chinaMarket' => '中国市场',
 			'amountTheme.chinaMarketDesc' => '红涨绿跌/黑跌',
 			'amountTheme.international' => '国际标准',
@@ -6055,9 +6059,9 @@ extension on Translations {
 			'forecast.recurringTransaction.nextTime' => '下次',
 			'forecast.recurringTransaction.sortByTime' => '按时间排序',
 			'forecast.recurringTransaction.allPeriod' => '全部周期',
-			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}周期 (${count})',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}周期 (${count})',
 			'forecast.recurringTransaction.confirmDelete' => '确认删除',
 			'forecast.recurringTransaction.confirmActivate' => '确认启用',
 			'forecast.recurringTransaction.confirmPause' => '确认暂停',
@@ -6137,10 +6141,10 @@ extension on Translations {
 			'forecast.recurringTransaction.goToFinanceToAddAccounts' => '请前往财务页面添加账户',
 			'forecast.recurringTransaction.selectAccount' => '选择账户',
 			'forecast.recurringTransaction.autoGenerateByRule' => '开启后按规则自动生成交易',
-			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '天', other: '天', ),
-			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '周', other: '周', ),
-			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '个月', other: '个月', ),
-			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '年', other: '年', ),
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '天', other: '天', ), 
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '周', other: '周', ), 
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '个月', other: '个月', ), 
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '年', other: '年', ), 
 			'chat.newChat' => '新聊天',
 			'chat.noMessages' => '没有消息可显示。',
 			'chat.loadingFailed' => '加载失败',
@@ -6569,9 +6573,9 @@ extension on Translations {
 			'account.reopenAccount' => '重新启用账户',
 			'account.reopenConfirm' => '该账户将被重新启用（ACTIVE），重新计入净值并可用于新交易。',
 			'account.reopenSuccess' => '账户已重新启用',
-			'account.closeDisposalTitle' => '处理停用前余额',
 			_ => null,
 		} ?? switch (path) {
+			'account.closeDisposalTitle' => '处理停用前余额',
 			'account.disposalKeepDesc' => '直接归档，余额保持当前数值不再变动；不生成任何流水。',
 			'account.disposalTransferDesc' => '生成一笔真实的转账流水，把余额转入指定账户后再停用。',
 			'account.disposalWriteoffDesc' => '生成一笔支出（或收入）流水核销余额，视为已消耗/免除后再停用。',

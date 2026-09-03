@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -503,6 +503,7 @@ class _Translations$speech$en extends Translations$speech$zh {
 	@override String get connectionFailedTitle => 'Speech Service Connection Failed';
 	@override String get connectionFailed => 'Cannot connect to WebSocket speech recognition service. Please check your server address, port, or network connectivity.';
 	@override String get noSpeechRecognized => 'No speech input detected, please try again.';
+	@override String get selfHostedAsrFallback => 'Self-hosted ASR is unreachable. Temporarily using on-device speech recognition — your ASR settings are unchanged.';
 }
 
 // Path: amountTheme
@@ -3005,6 +3006,7 @@ extension on TranslationsEn {
 			'speech.connectionFailedTitle' => 'Speech Service Connection Failed',
 			'speech.connectionFailed' => 'Cannot connect to WebSocket speech recognition service. Please check your server address, port, or network connectivity.',
 			'speech.noSpeechRecognized' => 'No speech input detected, please try again.',
+			'speech.selfHostedAsrFallback' => 'Self-hosted ASR is unreachable. Temporarily using on-device speech recognition — your ASR settings are unchanged.',
 			'amountTheme.chinaMarket' => 'China Market Style',
 			'amountTheme.chinaMarketDesc' => 'Red up, Green/Black down (Recommended)',
 			'amountTheme.international' => 'International Standard',
@@ -3185,9 +3187,9 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.sortByTime' => 'Sort by time',
 			'forecast.recurringTransaction.allPeriod' => 'All recurring',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} recurring (${count})',
-			'forecast.recurringTransaction.confirmDelete' => 'Confirm Delete',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.confirmDelete' => 'Confirm Delete',
 			'forecast.recurringTransaction.confirmActivate' => 'Confirm Activate',
 			'forecast.recurringTransaction.confirmPause' => 'Confirm Pause',
 			'forecast.recurringTransaction.dynamicAmount' => 'Est. Avg',
@@ -3266,10 +3268,10 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.goToFinanceToAddAccounts' => 'Please go to the financial page to add accounts',
 			'forecast.recurringTransaction.selectAccount' => 'Select Account',
 			'forecast.recurringTransaction.autoGenerateByRule' => 'Automatically generate transactions by rule',
-			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Day', other: 'Days', ),
-			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Week', other: 'Weeks', ),
-			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Month', other: 'Months', ),
-			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Year', other: 'Years', ),
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Day', other: 'Days', ), 
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Week', other: 'Weeks', ), 
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Month', other: 'Months', ), 
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(count, one: 'Year', other: 'Years', ), 
 			'chat.newChat' => 'New Chat',
 			'chat.noMessages' => 'No messages to display.',
 			'chat.loadingFailed' => 'Loading failed',
@@ -3699,9 +3701,9 @@ extension on TranslationsEn {
 			'account.reopenConfirm' => 'This account will be reopened (ACTIVE): it will count toward net worth and be available for new transactions again.',
 			'account.reopenSuccess' => 'Account reopened',
 			'account.closeDisposalTitle' => 'Handle remaining balance',
-			'account.disposalKeepDesc' => 'Freeze the balance as-is and archive the account. No new record is created.',
 			_ => null,
 		} ?? switch (path) {
+			'account.disposalKeepDesc' => 'Freeze the balance as-is and archive the account. No new record is created.',
 			'account.disposalTransferDesc' => 'Creates a real transfer record moving the balance to another account, then closes.',
 			'account.disposalWriteoffDesc' => 'Creates an expense (or income) record that writes the balance off, then closes.',
 			'account.save' => 'Save Changes',

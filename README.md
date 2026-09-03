@@ -120,6 +120,16 @@ flowchart TD
    make docker-up
    ```
 
+4. **(Optional) Private Voice Input**: for fully self-hosted speech-to-text
+   (no audio to commercial APIs), start the companion
+   [asr_server](https://github.com/kylesean/asr_server) alongside the stack:
+   ```bash
+   docker compose --profile voice up -d
+   ```
+   Then point the Flutter app at it via **Settings → Speech recognition →
+   Self-hosted ASR** (default `host:8081`). Without the profile the app
+   falls back to on-device system speech and says so explicitly.
+
 > [!TIP]
 > Once started, scan the QR code displayed in the terminal using the Flutter Mobile App to pair immediately.
 

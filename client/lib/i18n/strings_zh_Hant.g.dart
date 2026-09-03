@@ -35,7 +35,7 @@ class TranslationsZhHant extends Translations with BaseTranslations<AppLocale, T
 
 	late final TranslationsZhHant _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsZhHant $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsZhHant(meta: meta ?? this.$meta);
 
 	// Translations
@@ -503,6 +503,7 @@ class _Translations$speech$zh_Hant extends Translations$speech$zh {
 	@override String get connectionFailedTitle => '語音服務連接失敗';
 	@override String get connectionFailed => '無法連接到 WebSocket 語音識別服務，請檢查服務器地址、端口或網絡連通性。';
 	@override String get noSpeechRecognized => '未檢測到語音輸入，請重試';
+	@override String get selfHostedAsrFallback => '自託管 ASR 不可用，已暫時回退到系統語音識別，ASR 配置保持不變。';
 }
 
 // Path: amountTheme
@@ -3005,6 +3006,7 @@ extension on TranslationsZhHant {
 			'speech.connectionFailedTitle' => '語音服務連接失敗',
 			'speech.connectionFailed' => '無法連接到 WebSocket 語音識別服務，請檢查服務器地址、端口或網絡連通性。',
 			'speech.noSpeechRecognized' => '未檢測到語音輸入，請重試',
+			'speech.selfHostedAsrFallback' => '自託管 ASR 不可用，已暫時回退到系統語音識別，ASR 配置保持不變。',
 			'amountTheme.chinaMarket' => '中國市場習慣',
 			'amountTheme.chinaMarketDesc' => '紅漲綠跌/黑跌 (推薦)',
 			'amountTheme.international' => '國際標準',
@@ -3185,9 +3187,9 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.sortByTime' => '按時間排序',
 			'forecast.recurringTransaction.allPeriod' => '全部週期',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}週期 (${count})',
-			'forecast.recurringTransaction.confirmDelete' => '確認刪除',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.confirmDelete' => '確認刪除',
 			'forecast.recurringTransaction.confirmActivate' => '確認啟用',
 			'forecast.recurringTransaction.confirmPause' => '確認暫停',
 			'forecast.recurringTransaction.dynamicAmount' => '動態均值',
@@ -3266,10 +3268,10 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.goToFinanceToAddAccounts' => '請前往財務頁面新增帳戶',
 			'forecast.recurringTransaction.selectAccount' => '選擇帳戶',
 			'forecast.recurringTransaction.autoGenerateByRule' => '開啟後按規則自動生成交易',
-			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '天', other: '天', ),
-			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '週', other: '週', ),
-			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '個月', other: '個月', ),
-			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '年', other: '年', ),
+			'forecast.recurringTransaction.dayUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '天', other: '天', ), 
+			'forecast.recurringTransaction.weekUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '週', other: '週', ), 
+			'forecast.recurringTransaction.monthUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '個月', other: '個月', ), 
+			'forecast.recurringTransaction.yearUnit' => ({required num count}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(count, one: '年', other: '年', ), 
 			'chat.newChat' => '新聊天',
 			'chat.noMessages' => '沒有消息可顯示。',
 			'chat.loadingFailed' => '載入失敗',
@@ -3699,9 +3701,9 @@ extension on TranslationsZhHant {
 			'account.reopenConfirm' => '該帳戶將被重新啟用（ACTIVE），重新計入淨值並可用於新交易。',
 			'account.reopenSuccess' => '帳戶已重新啟用',
 			'account.closeDisposalTitle' => '處理停用前餘額',
-			'account.disposalKeepDesc' => '直接歸檔，餘額保持當前數值不再變動；不產生任何流水。',
 			_ => null,
 		} ?? switch (path) {
+			'account.disposalKeepDesc' => '直接歸檔，餘額保持當前數值不再變動；不產生任何流水。',
 			'account.disposalTransferDesc' => '產生一筆真實的轉帳流水，把餘額轉入指定帳戶後再停用。',
 			'account.disposalWriteoffDesc' => '產生一筆支出（或收入）流水核銷餘額，視為已消耗/免除後再停用。',
 			'account.save' => '保存修改',

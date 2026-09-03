@@ -366,7 +366,8 @@
     "serviceNotConfigured": "音声サービスが設定されていません。音声設定でサーバーアドレスを設定してください。",
     "connectionFailedTitle": "音声サービス接続失敗",
     "connectionFailed": "WebSocket音声認識サービスに接続できません。サーバーアドレス、ポート、またはネットワーク接続を確認してください。",
-    "noSpeechRecognized": "音声入力が検出されませんでした。もう一度お試しください。"
+    "noSpeechRecognized": "音声入力が検出されませんでした。もう一度お試しください。",
+    "selfHostedAsrFallback": "自前のASRに接続できません。一時的にデバイスの音声認識に切り替えました。ASR設定は変更されていません。"
   },
   "amountTheme": {
     "chinaMarket": "中国市場慣習",
