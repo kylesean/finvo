@@ -11,6 +11,7 @@ import asyncio
 import json
 from collections import OrderedDict
 from collections.abc import AsyncGenerator
+from contextlib import suppress
 from functools import lru_cache
 from typing import Any
 from uuid import UUID, uuid4
@@ -378,16 +379,56 @@ async def chat_stream(
             lang_token = current_session_language.set(app_language)
             user_token = current_user_id.set(str(session.user_uuid)) if session.user_uuid else None
 
+            # True only when the stream ran to completion: memory extraction in
+            # the finally below must not learn from half-answered turns (client
+            # disconnect / cancellation / mid-stream error).
+            stream_completed = False
+
             try:
-                # 3. Stream agent events
-                async for event in agent.get_genui_stream(
-                    chat_request.messages,
-                    session.id,
-                    user_uuid=session.user_uuid,
-                    attachment_ids=attachment_ids,
-                    client_state=client_state,
-                ):
-                    yield f"data: {json.dumps(event.model_dump(mode='json', exclude_none=True), ensure_ascii=False)}\n\n"
+                # 3. Stream agent events, with SSE keepalive comments so
+                # reverse proxies with idle read timeouts (nginx defaults to
+                # 60s) don't reap the stream during long LLM/tool stretches.
+                # The pump moves events through a bounded queue; the consumer
+                # yields a keepalive whenever no event arrives in time.
+                # Clients ignore comment lines per the SSE spec.
+                events_queue: asyncio.Queue[Any] = asyncio.Queue()
+
+                async def _produce_events() -> None:
+                    try:
+                        async for agent_event in agent.get_genui_stream(
+                            chat_request.messages,
+                            session.id,
+                            user_uuid=session.user_uuid,
+                            attachment_ids=attachment_ids,
+                            client_state=client_state,
+                        ):
+                            await events_queue.put(agent_event)
+                    except BaseException as exc:  # noqa: BLE001 - transported to the consumer below
+                        await events_queue.put(exc)
+                    finally:
+                        await events_queue.put(None)
+
+                producer_task = asyncio.create_task(_produce_events())
+                try:
+                    while True:
+                        try:
+                            item = await asyncio.wait_for(
+                                events_queue.get(),
+                                timeout=settings.SSE_KEEPALIVE_INTERVAL_SECONDS,
+                            )
+                        except TimeoutError:
+                            yield ": keepalive\n\n"
+                            continue
+                        if item is None:
+                            break
+                        if isinstance(item, BaseException):
+                            raise item
+                        yield f"data: {json.dumps(item.model_dump(mode='json', exclude_none=True), ensure_ascii=False)}\n\n"
+                    stream_completed = True
+                finally:
+                    producer_task.cancel()
+                    with suppress(asyncio.CancelledError, Exception):
+                        await producer_task
 
             finally:
                 # Reset ContextVar
@@ -413,7 +454,10 @@ async def chat_stream(
                 # The task is tracked by background_task_manager (strong ref +
                 # awaited on shutdown), so it can never be GC'd mid-flight or
                 # leak past application shutdown.
-                if user_message and session.user_uuid:
+                # Only completed turns: a half-answered exchange (disconnect,
+                # cancel, error) would otherwise fixate its fragments as
+                # long-term "preferences".
+                if stream_completed and user_message and session.user_uuid:
                     ai_response = agent.get_last_response()
                     memory_messages = [
                         {"role": "user", "content": user_message},

@@ -194,6 +194,12 @@ class Settings(BaseSettings):
     # JSON) alone can exceed it, which previously caused `trim_messages` to
     # return an empty list and strip ALL context from the model's turn.
     MAX_HISTORY_TOKENS: int = 24000
+
+    # SSE keepalive cadence for chat streams: a comment frame is emitted when
+    # no agent event arrives for this long, so reverse proxies with idle read
+    # timeouts (nginx: proxy_read_timeout 60s) don't reap a stream that is
+    # merely waiting on a slow LLM or tool.
+    SSE_KEEPALIVE_INTERVAL_SECONDS: float = 15.0
     MAX_LLM_CALL_RETRIES: int = 3
     # Per-request timeout for LLM upstream HTTP calls (connect+read). Prevents a
     # dead upstream from hanging requests for minutes. Each model call within a

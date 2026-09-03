@@ -54,7 +54,8 @@ class StreamProcessor:
         except Exception as e:
             logger.error("stream_processor_error", error=str(e), exc_info=True)
             yield GenUIEvent(type="error", content=f"Stream processing error: {to_client_error(e)}")
-            return
+            # Fall through to done: it is the single terminal marker of the
+            # stream protocol — clients must not depend on error implying close.
         finally:
             if user_uuid:
                 from app.core.background_tasks import spawn_background_task
