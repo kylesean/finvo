@@ -10,7 +10,7 @@ class ErrorCodes {
   static const int permissionDenied = 403;
   static const int authFailed = 401;
 
-  // Authentication errors (1000-1012)
+  // Authentication errors (1000-1013)
   static const int authenticateFailed = 1000;
   static const int emailWrong = 1001;
   static const int phoneNumberWrong = 1002;
@@ -24,6 +24,7 @@ class ErrorCodes {
   static const int userNotExist = 1010;
   static const int noPreferencesParams = 1011;
   static const int invalidClientTimezone = 1012;
+  static const int registrationClosed = 1013;
 
   // Transaction errors (3000-3008)
   static const int transactionCommentNull = 3000;

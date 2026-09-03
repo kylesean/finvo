@@ -216,3 +216,99 @@ class TestMemoryServiceCleanup:
 
         # Should not attempt any deletions
         mock_memory.delete.assert_not_called()
+
+
+class TestExtractionGuard:
+    """AG-P1-4: a misconfigured extraction LLM must disable extraction LOUDLY.
+
+    The default model (deepseek-v4-flash) is not hosted on api.openai.com; with
+    no base_url every extraction call failed there and the per-turn warning
+    swallowed it — memory looked enabled while never working.
+    """
+
+    @pytest.mark.asyncio
+    async def test_initialize_flags_non_openai_model_without_base_url(self, monkeypatch):
+        from unittest.mock import AsyncMock, patch
+
+        from app.core.config import settings
+        from app.services.memory.memory_service import MemoryService
+
+        monkeypatch.setattr(settings, "LONG_TERM_MEMORY_MODEL", "deepseek-v4-flash")
+        monkeypatch.setattr(settings, "LONG_TERM_MEMORY_MODEL_BASE_URL", None)
+
+        service = MemoryService()
+        with patch("app.services.memory.memory_service.AsyncMemory") as mock_am:
+            mock_am.from_config = AsyncMock(return_value=AsyncMock())
+            await service._initialize()
+
+        assert service._extraction_available is False
+
+    @pytest.mark.asyncio
+    async def test_initialize_openai_hosted_model_stays_available(self, monkeypatch):
+        from unittest.mock import AsyncMock, patch
+
+        from app.core.config import settings
+        from app.services.memory.memory_service import MemoryService
+
+        monkeypatch.setattr(settings, "LONG_TERM_MEMORY_MODEL", "gpt-4o-mini")
+        monkeypatch.setattr(settings, "LONG_TERM_MEMORY_MODEL_BASE_URL", None)
+
+        service = MemoryService()
+        with patch("app.services.memory.memory_service.AsyncMemory") as mock_am:
+            mock_am.from_config = AsyncMock(return_value=AsyncMock())
+            await service._initialize()
+
+        assert service._extraction_available is True
+
+    @pytest.mark.asyncio
+    async def test_initialize_explicit_base_url_stays_available(self, monkeypatch):
+        from unittest.mock import AsyncMock, patch
+
+        from app.core.config import settings
+        from app.services.memory.memory_service import MemoryService
+
+        monkeypatch.setattr(settings, "LONG_TERM_MEMORY_MODEL", "deepseek-v4-flash")
+        monkeypatch.setattr(settings, "LONG_TERM_MEMORY_MODEL_BASE_URL", "https://api.siliconflow.cn/v1")
+
+        service = MemoryService()
+        with patch("app.services.memory.memory_service.AsyncMemory") as mock_am:
+            mock_am.from_config = AsyncMock(return_value=AsyncMock())
+            await service._initialize()
+
+        assert service._extraction_available is True
+
+    @pytest.mark.asyncio
+    async def test_add_disabled_returns_structured_error_without_mem0_call(self):
+        from uuid import uuid4
+
+        from app.services.memory.memory_service import MemoryService
+
+        service = MemoryService()
+        service._extraction_available = False
+        service._memory = AsyncMock()  # must never be touched
+
+        result = await service.add_conversation_memory(
+            user_uuid=uuid4(), messages=[{"role": "user", "content": "hi"}]
+        )
+        assert result["success"] is False
+        assert "disabled" in result["error"]
+        service._memory.add.assert_not_called()
+
+
+class TestMemoryExtractionThrottle:
+    """AG-P1-4: extraction runs on the 1st and every Nth turn, not every turn."""
+
+    @pytest.mark.asyncio
+    async def test_throttle_schedule(self, monkeypatch):
+        from uuid import uuid4
+
+        from app.api.v1.chatbot import _MEMORY_TURN_COUNTERS, _should_extract_memory
+        from app.core.config import settings
+
+        monkeypatch.setattr(settings, "MEMORY_EXTRACTION_EVERY_N_TURNS", 3)
+        session_id = uuid4()
+        _MEMORY_TURN_COUNTERS.pop(session_id, None)
+
+        results = [await _should_extract_memory(session_id) for _ in range(7)]
+        # counts 1, 3, 6 → True (first turn + every Nth)
+        assert results == [True, False, True, False, False, True, False]

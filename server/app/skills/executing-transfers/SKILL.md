@@ -5,7 +5,7 @@ description: >
   USE WHEN: transfer money, move funds between accounts, account-to-account transfer.
   NOT FOR: spending analysis (→ reviewing-finances), recording transactions (→ record_transactions tool), shared ledger queries (→ managing-shared-ledgers).
 
-allowed-tools: "prepare_transfer record_transactions read_file"
+allowed-tools: "prepare_transfer record_transactions"
 ---
 
 # Executing Transfers

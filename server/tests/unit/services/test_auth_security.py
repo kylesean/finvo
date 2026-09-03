@@ -56,6 +56,45 @@ class TestTokenSecurity:
         assert verify_token(token_obj.access_token) is None
 
     @pytest.mark.asyncio
+    async def test_refresh_token_rejected_for_api_access(self) -> None:
+        """SEC-P1-2 regression: a refresh token must not authenticate API calls.
+
+        verify_token (the auth path for every REST/WS route) has to reject
+        ``type: refresh`` tokens — otherwise a leaked 30-day refresh token is
+        directly usable as a bearer credential and the access/refresh type
+        isolation is one-directional.
+        """
+        from app.utils.auth_utils import create_refresh_token
+
+        refresh_token = create_refresh_token(subject=str(uuid4())).access_token
+        assert verify_token(refresh_token) is None
+
+    @pytest.mark.asyncio
+    async def test_access_token_type_claim_present(self) -> None:
+        """Access tokens carry ``type: access`` so the auth path can pin on it."""
+        from jose import jwt as jose_jwt
+
+        token_obj = create_access_token(subject=str(uuid4()))
+        claims = jose_jwt.get_unverified_claims(token_obj.access_token)
+        assert claims.get("type") == "access"
+
+    @pytest.mark.asyncio
+    async def test_legacy_token_without_type_claim_still_accepted(self) -> None:
+        """Tokens issued before the ``type`` claim stay valid (grace period).
+
+        Backward compatibility: no forced global logout when this ships.
+        """
+        from jose import jwt as jose_jwt
+
+        subject = str(uuid4())
+        legacy_token = jose_jwt.encode(
+            {"sub": subject, "exp": datetime.now(UTC) + timedelta(hours=1), "jti": "legacy-jti"},
+            settings.JWT_SECRET_KEY,
+            algorithm=settings.JWT_ALGORITHM,
+        )
+        assert verify_token(legacy_token) == subject
+
+    @pytest.mark.asyncio
     async def test_tampered_token_rejected(self) -> None:
         """A token with a modified payload fails signature verification."""
         token_obj = create_access_token(subject=str(uuid4()))
@@ -343,3 +382,23 @@ __all__ = [
     "TestAccountEnumeration",
     "TestRateLimiting",
 ]
+
+
+class TestRegistrationKillSwitch:
+    """SEC-P1-3: REGISTRATION_OPEN=false must reject sign-ups before any work."""
+
+    @pytest.mark.asyncio
+    async def test_registration_closed_rejects_before_db_or_verification(self, monkeypatch) -> None:
+        from unittest.mock import AsyncMock
+
+        from app.core.config import settings
+        from app.services.auth_service import AuthService
+
+        monkeypatch.setattr(settings, "REGISTRATION_OPEN", False)
+        # A bare mock session: if the service touched the DB before the switch
+        # check, this test would fail on unexpected calls / missing awaitables.
+        service = AuthService(AsyncMock())
+
+        with pytest.raises(BusinessError) as exc:
+            await service.register("email", "closed@example.com", "password1", "123456")
+        assert exc.value.error_code == AuthErrorCode.REGISTRATION_CLOSED

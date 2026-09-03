@@ -7,7 +7,9 @@ Authentication: All endpoints use access token (user authentication).
 Authorization: Session ownership is verified via get_authorized_session.
 """
 
+import asyncio
 import json
+from collections import OrderedDict
 from collections.abc import AsyncGenerator
 from functools import lru_cache
 from typing import Any
@@ -58,6 +60,30 @@ def get_agent() -> LangGraphAgent:
     chatbot.get_agent to inject a mock.
     """
     return LangGraphAgent()
+
+
+# Per-session turn counter for the memory-extraction throttle (AG-P1-4).
+# In-process only: it is a cost throttle, not a correctness mechanism, and
+# resets on restart — extraction just happens a turn later.
+_MEMORY_TURN_COUNTERS: OrderedDict[UUID, int] = OrderedDict()
+_MEMORY_TURN_COUNTERS_LOCK = asyncio.Lock()
+
+
+async def _should_extract_memory(session_id: UUID) -> bool:
+    """Extract long-term memory only on the 1st and every Nth turn of a session.
+
+    Mem0's infer=True spends one LLM call per extraction, so extracting on
+    every turn multiplied provider cost by the conversation length. N comes
+    from ``MEMORY_EXTRACTION_EVERY_N_TURNS``.
+    """
+    every_n = max(1, settings.MEMORY_EXTRACTION_EVERY_N_TURNS)
+    async with _MEMORY_TURN_COUNTERS_LOCK:
+        count = _MEMORY_TURN_COUNTERS.get(session_id, 0) + 1
+        _MEMORY_TURN_COUNTERS[session_id] = count
+        _MEMORY_TURN_COUNTERS.move_to_end(session_id)
+        while len(_MEMORY_TURN_COUNTERS) > 512:  # bound: drop least-recently-seen sessions
+            _MEMORY_TURN_COUNTERS.popitem(last=False)
+        return count == 1 or count % every_n == 0
 
 
 async def _update_memory_background(
@@ -393,14 +419,15 @@ async def chat_stream(
                     if ai_response:
                         memory_messages.append({"role": "assistant", "content": ai_response})
 
-                    background_task_manager.spawn(
-                        _update_memory_background(
-                            agent=agent,
-                            user_uuid=session.user_uuid,
-                            messages=memory_messages,
-                            session_id=session.id,
+                    if await _should_extract_memory(session.id):
+                        background_task_manager.spawn(
+                            _update_memory_background(
+                                agent=agent,
+                                user_uuid=session.user_uuid,
+                                messages=memory_messages,
+                                session_id=session.id,
+                            )
                         )
-                    )
 
                 # Release the request-scoped stream processor now that the
                 # collected response has been read; without this the ContextVar

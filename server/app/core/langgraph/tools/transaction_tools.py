@@ -149,7 +149,17 @@ async def record_transactions(
     if not user_uuid:
         return {"success": False, "message": "User not authenticated"}
 
-    tx_time = parse_time(transaction_at)
+    try:
+        tx_time = parse_time(transaction_at)
+    except ValueError as e:
+        # Structured, model-readable error: the LLM sees it and can re-extract
+        # the date (or ask the user) instead of the entry silently booking now.
+        return {
+            "success": False,
+            "error": "unparseable_time",
+            "message": str(e),
+            "raw": transaction_at,
+        }
 
     if not transactions:
         return {"success": False, "message": "Please provide at least one transaction"}

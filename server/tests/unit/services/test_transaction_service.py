@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 import pytest
 from sqlalchemy import select
 
-from app.core.exceptions import BusinessError, TransactionErrorCode
+from app.core.exceptions import BusinessError, CommonErrorCode, TransactionErrorCode
 from app.models.financial_account import FinancialAccount
 from app.models.transaction import Transaction
 from app.models.user import User
@@ -315,3 +315,255 @@ async def test_account_relink_rejects_closed_account(db_session):
         await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == active.uuid))
     ).scalar_one()
     assert active_row.current_balance == Decimal("-50.0"), "EXPENSE debits the source account"
+
+
+# ---------------------------------------------------------------------------
+# Regression: INCOME account re-association direction (BF-P0-1)
+#
+# _rollback_old_account_balance / _apply_new_account_balance book on the
+# source side for EXPENSE/TRANSFER but on the TARGET side for INCOME
+# (direction=+1). Omitting direction defaulted to -1 and inverted both legs:
+# the old account was credited again and the new one debited (2x misbooking).
+# ---------------------------------------------------------------------------
+
+
+async def _seed_income_relink_fixture(db_session):
+    """User + two ACTIVE CNY accounts + a CLEARED income tx linked to account A."""
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid,
+        username="test_user_income_relink",
+        email="income_relink@example.com",
+        password="hash",
+        registration_type="email",
+    )
+    db_session.add(user)
+
+    account_a = FinancialAccount(
+        user_uuid=user_uuid,
+        name="Old Target",
+        nature="ASSET",
+        type="BANK",
+        currency_code="CNY",
+        initial_balance=Decimal("0"),
+        current_balance=Decimal("500"),
+        status="ACTIVE",
+    )
+    account_b = FinancialAccount(
+        user_uuid=user_uuid,
+        name="New Target",
+        nature="ASSET",
+        type="BANK",
+        currency_code="CNY",
+        initial_balance=Decimal("0"),
+        current_balance=Decimal("300"),
+        status="ACTIVE",
+    )
+    db_session.add_all([account_a, account_b])
+    # Flush first: ids are assigned at insert time, and the transaction below
+    # must capture the real account uuid (not None) as its target link.
+    await db_session.flush()
+
+    tx_id = uuid4()
+    tx = Transaction(
+        uuid=tx_id,
+        user_uuid=user_uuid,
+        type="INCOME",
+        amount=Decimal("100.0"),
+        amount_original=Decimal("100.0"),
+        currency="CNY",
+        transaction_at=datetime.now(UTC),
+        status="CLEARED",
+        source="AI",
+        target_account_id=account_a.uuid,
+    )
+    db_session.add(tx)
+    await db_session.commit()
+    return user_uuid, tx_id, account_a, account_b
+
+
+@pytest.mark.asyncio
+async def test_income_relink_debits_old_and_credits_new(db_session):
+    """INCOME relink A→B: A loses the 100 it was credited, B gains exactly 100."""
+    user_uuid, tx_id, account_a, account_b = await _seed_income_relink_fixture(db_session)
+
+    service = TransactionService(db_session)
+    result = await service.update_transaction_account(tx_id, user_uuid, account_b.uuid)
+
+    assert result["targetAccountId"] == str(account_b.uuid)
+    a_row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == account_a.uuid))
+    ).scalar_one()
+    b_row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == account_b.uuid))
+    ).scalar_one()
+    assert a_row.current_balance == Decimal("400.0"), "old target must be debited once (-100)"
+    assert b_row.current_balance == Decimal("400.0"), "new target must be credited once (+100)"
+
+
+@pytest.mark.asyncio
+async def test_income_relink_unlink_credits_reversed(db_session):
+    """INCOME unlink (account_id=None): only the old target is debited."""
+    user_uuid, tx_id, account_a, _account_b = await _seed_income_relink_fixture(db_session)
+
+    service = TransactionService(db_session)
+    await service.update_transaction_account(tx_id, user_uuid, None)
+
+    a_row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == account_a.uuid))
+    ).scalar_one()
+    assert a_row.current_balance == Decimal("400.0"), "unlink must remove exactly the original +100"
+
+
+@pytest.mark.asyncio
+async def test_expense_relink_still_debits_new_and_credits_old(db_session):
+    """EXPENSE relink keeps the historical convention: old credited back, new debited."""
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid,
+        username="test_user_expense_relink",
+        email="expense_relink@example.com",
+        password="hash",
+        registration_type="email",
+    )
+    db_session.add(user)
+    account_a = FinancialAccount(
+        user_uuid=user_uuid,
+        name="Old Source",
+        nature="ASSET",
+        type="CASH",
+        currency_code="CNY",
+        initial_balance=Decimal("0"),
+        current_balance=Decimal("200"),
+        status="ACTIVE",
+    )
+    account_b = FinancialAccount(
+        user_uuid=user_uuid,
+        name="New Source",
+        nature="ASSET",
+        type="CASH",
+        currency_code="CNY",
+        initial_balance=Decimal("0"),
+        current_balance=Decimal("1000"),
+        status="ACTIVE",
+    )
+    db_session.add_all([account_a, account_b])
+    await db_session.flush()  # assign ids before referencing account_b.uuid
+
+    tx_id = uuid4()
+    tx = Transaction(
+        uuid=tx_id,
+        user_uuid=user_uuid,
+        type="EXPENSE",
+        amount=Decimal("50.0"),
+        amount_original=Decimal("50.0"),
+        currency="CNY",
+        transaction_at=datetime.now(UTC),
+        status="CLEARED",
+        source="AI",
+        source_account_id=account_a.uuid,
+    )
+    db_session.add(tx)
+    await db_session.commit()
+
+    service = TransactionService(db_session)
+    await service.update_transaction_account(tx_id, user_uuid, account_b.uuid)
+
+    a_row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == account_a.uuid))
+    ).scalar_one()
+    b_row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == account_b.uuid))
+    ).scalar_one()
+    assert a_row.current_balance == Decimal("250.0"), "old source must be credited back (+50)"
+    assert b_row.current_balance == Decimal("950.0"), "new source must be debited (-50)"
+
+
+# ---------------------------------------------------------------------------
+# Regression: batch creation drops target_account_id / transaction_at (BF-P1-3)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_batch_income_books_target_account_and_stated_time(db_session):
+    """AI batch path must honor target_account_id and transaction_at.
+
+    "昨天工资 5000 到招行卡" used to lose the receipt account (no balance effect)
+    and rewrite the date to now().
+    """
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid,
+        username="test_user_batch_income",
+        email="batch_income@example.com",
+        password="hash",
+        registration_type="email",
+    )
+    db_session.add(user)
+    target = FinancialAccount(
+        user_uuid=user_uuid,
+        name="Bank",
+        nature="ASSET",
+        type="BANK",
+        currency_code="CNY",
+        initial_balance=Decimal("0"),
+        current_balance=Decimal("1000"),
+        status="ACTIVE",
+    )
+    db_session.add(target)
+    await db_session.commit()
+
+    stated_time = datetime.now(UTC).replace(microsecond=0)
+    service = TransactionService(db_session)
+    result = await service.create_batch_transactions(
+        user_uuid=user_uuid,
+        data={
+            "transactions": [
+                {"amount": "5000", "transaction_type": "income", "currency": "CNY", "raw_input": "工资"},
+            ],
+            "target_account_id": str(target.uuid),
+            "transaction_at": stated_time.isoformat(),
+        },
+    )
+
+    assert result["success"] is True
+    assert result["count"] == 1
+
+    tx = (
+        await db_session.execute(select(Transaction).where(Transaction.uuid == UUID(result["transactions"][0]["id"])))
+    ).scalar_one()
+    assert tx.type == "INCOME"
+    assert tx.target_account_id == target.uuid, "income must link the receipt account"
+    assert tx.transaction_at == stated_time, "stated booking time must be preserved"
+    assert tx.status == "CLEARED"
+
+    target_row = (
+        await db_session.execute(select(FinancialAccount).where(FinancialAccount.uuid == target.uuid))
+    ).scalar_one()
+    assert target_row.current_balance == Decimal("6000"), "INCOME books +5000 on the target account"
+
+
+@pytest.mark.asyncio
+async def test_batch_invalid_transaction_at_rejected(db_session):
+    """A malformed transaction_at fails loud instead of silently booking today."""
+    user_uuid = uuid4()
+    user = User(
+        uuid=user_uuid,
+        username="test_user_batch_badtime",
+        email="batch_badtime@example.com",
+        password="hash",
+        registration_type="email",
+    )
+    db_session.add(user)
+    await db_session.commit()
+
+    service = TransactionService(db_session)
+    with pytest.raises(BusinessError) as exc:
+        await service.create_batch_transactions(
+            user_uuid=user_uuid,
+            data={
+                "transactions": [{"amount": "10", "transaction_type": "expense"}],
+                "transaction_at": "not-a-date",
+            },
+        )
+    assert exc.value.error_code == CommonErrorCode.VALIDATION_ERROR

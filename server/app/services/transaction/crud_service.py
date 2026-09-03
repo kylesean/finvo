@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 
 import structlog
 from sqlalchemy import String, and_, cast as sa_cast, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -103,10 +104,16 @@ class TransactionCRUDService:
         intent: str = "SURVIVAL",
         tags: list[str] | None = None,
         source_thread_id: UUID | None = None,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
         """Create a single transaction record
 
         Follow the principle of "record first, then link" and defaults to not linking balance.
+
+        When ``idempotency_key`` is supplied (e.g. ``transfer:{surface_id}``), a
+        retried/double-tapped submission replays the already-booked result
+        instead of creating a second money movement. NULL keys (AI rows) never
+        dedupe: PostgreSQL unique semantics treat NULLs as distinct.
         """
         tx_type = transaction_type.lower()
         transfer_amount = amount
@@ -117,6 +124,15 @@ class TransactionCRUDService:
         # otherwise the two paths disagree on what a negative amount means).
         if amount <= 0:
             raise BusinessError("Amount must be positive", CommonErrorCode.VALIDATION_ERROR)
+
+        # Idempotent replay: a submission whose key already booked a row
+        # returns that row instead of creating a duplicate.
+        if idempotency_key:
+            existing = await self._get_by_idempotency_key(user_uuid, idempotency_key)
+            if existing is not None:
+                return await self._assemble_create_result(
+                    existing, amount=abs(existing.amount_original), currency=existing.currency, replayed=True
+                )
 
         # Validation logic has been handled by the utility layer, Service layer mainly responsible for persistence
         source_acc = None
@@ -166,29 +182,81 @@ class TransactionCRUDService:
             source_account_id=source_account_id,
             target_account_id=target_account_id,
             source_thread_id=source_thread_id,
+            idempotency_key=idempotency_key,
         )
 
-        self.db.add(transaction)
+        if idempotency_key:
+            # Keyed inserts get a savepoint: if a truly concurrent duplicate
+            # lands between the pre-check above and this flush, the constraint
+            # firing rolls back ONLY this insert (and its balance effect),
+            # leaving the outer UoW usable — then we replay the winner.
+            # add() must sit INSIDE the savepoint so the rollback also discards
+            # the pending object (see shared_space_transaction_service).
+            try:
+                async with self.db.begin_nested():
+                    self.db.add(transaction)
+                    await self.ledger.apply_transaction_balance_effect(
+                        transaction,
+                        user_uuid,
+                        sign=1,
+                        source_account_id=source_account_id,
+                        target_account_id=target_account_id,
+                        for_update=True,
+                    )
+                    await self.db.flush()
+            except IntegrityError:
+                existing = await self._get_by_idempotency_key(user_uuid, idempotency_key)
+                if existing is None:
+                    raise
+                return await self._assemble_create_result(
+                    existing, amount=abs(existing.amount_original), currency=existing.currency, replayed=True
+                )
+        else:
+            self.db.add(transaction)
 
-        # Apply the transaction's balance effect on linked accounts, converted
-        # to each account's own currency (snapshot conversion + row locks).
-        # EXPENSE/INCOME/TRANSFER all follow the same rule so create/update/
-        # delete share one ledger convention.
-        await self.ledger.apply_transaction_balance_effect(
-            transaction,
-            user_uuid,
-            sign=1,
-            source_account_id=source_account_id,
-            target_account_id=target_account_id,
-            for_update=True,
-        )
-
-        await self.db.flush()
+            # Apply the transaction's balance effect on linked accounts, converted
+            # to each account's own currency (snapshot conversion + row locks).
+            # EXPENSE/INCOME/TRANSFER all follow the same rule so create/update/
+            # delete share one ledger convention.
+            await self.ledger.apply_transaction_balance_effect(
+                transaction,
+                user_uuid,
+                sign=1,
+                source_account_id=source_account_id,
+                target_account_id=target_account_id,
+                for_update=True,
+            )
+            await self.db.flush()
         await self.db.refresh(transaction)
+
+        return await self._assemble_create_result(
+            transaction, amount=amount, currency=currency, source_acc=source_acc, target_acc=target_acc
+        )
+
+    async def _assemble_create_result(
+        self,
+        transaction: Transaction,
+        *,
+        amount: Decimal,
+        currency: str,
+        source_acc: FinancialAccount | None = None,
+        target_acc: FinancialAccount | None = None,
+        replayed: bool = False,
+    ) -> dict[str, Any]:
+        """Build the typed GenUI/tool result for a created (or replayed) row.
+
+        Shared by the fresh-create path and the idempotent-replay path, so a
+        replayed submission renders exactly the same receipt shape.
+        """
+        if source_acc is None and transaction.source_account_id:
+            source_acc = await self.get_financial_account(transaction.source_account_id, transaction.user_uuid)
+        if target_acc is None and transaction.target_account_id:
+            target_acc = await self.get_financial_account(transaction.target_account_id, transaction.user_uuid)
 
         # Assemble typed result (for GenUI rendering / LangGraph tools)
         linked_account: LinkedAccountInfo | None = None
         transfer_info: TransferInfo | None = None
+        tx_type = (transaction.type or "").lower()
         if tx_type != "transfer":
             linked_acc = source_acc or target_acc
             if linked_acc:
@@ -213,10 +281,11 @@ class TransactionCRUDService:
 
         return TransactionCreateResult(
             success=True,
+            idempotent_replay=replayed,
             transaction_id=str(transaction.uuid),
             amount=amount,
             currency=currency,
-            type=tx_type.upper(),
+            type=transaction.type,
             category_key=transaction.category_key,
             subject=transaction.subject,
             intent=transaction.intent,
@@ -228,6 +297,15 @@ class TransactionCRUDService:
             linked_account=linked_account,
             transfer_info=transfer_info,
         ).model_dump()
+
+    async def _get_by_idempotency_key(self, user_uuid: UUID, idempotency_key: str) -> Transaction | None:
+        """Fetch the row a keyed submission already booked, if any."""
+        result = await self.db.execute(
+            select(Transaction).where(
+                and_(Transaction.user_uuid == user_uuid, Transaction.idempotency_key == idempotency_key)
+            )
+        )
+        return result.scalar_one_or_none()
 
     async def get_transaction_detail(self, transaction_id: UUID, user_uuid: UUID) -> dict[str, Any] | None:
         """Get transaction details (including comments)
@@ -738,6 +816,8 @@ class TransactionCRUDService:
         """
         transactions_data = data.get("transactions", [])
         source_account_id = data.get("source_account_id")
+        target_account_id = data.get("target_account_id")
+        transaction_at_raw = data.get("transaction_at")
 
         # Validate/normalize the shared source account once, before the loop, instead of
         # parsing an unvalidated raw value per item where a bad UUID would surface as a 500.
@@ -750,17 +830,37 @@ class TransactionCRUDService:
                     message="Invalid source_account_id", error_code=TransactionErrorCode.INVALID_ACCOUNT_ID
                 ) from None
 
+        # Batch-level target account (receipt side for INCOME items). Silently
+        # dropping it left income items unbooked: no account link, no balance
+        # effect — the transaction row claimed CLEARED without moving money.
+        target_account_uuid: UUID | None = None
+        if target_account_id:
+            try:
+                target_account_uuid = UUID(str(target_account_id))
+            except (ValueError, AttributeError):
+                raise BusinessError(
+                    message="Invalid target_account_id", error_code=TransactionErrorCode.INVALID_ACCOUNT_ID
+                ) from None
+
+        # Batch-level booking time ("昨天工资到账" must land on the stated day,
+        # not the processing date). Fail loud on a malformed value — silently
+        # rewriting the user's stated date is a correctness bug, not a default.
+        booking_time = utc_now()
+        if transaction_at_raw:
+            try:
+                parsed_at = datetime.fromisoformat(str(transaction_at_raw))
+            except ValueError:
+                raise BusinessError(
+                    message="Invalid transaction_at, expected ISO 8601", error_code=CommonErrorCode.VALIDATION_ERROR
+                ) from None
+            booking_time = parsed_at if parsed_at.tzinfo else parsed_at.replace(tzinfo=UTC)
+        booking_timezone = str(booking_time.tzinfo or "UTC")
+
         # Get user's default currency (primaryCurrency) as the default value when currency is not specified
         user_default_currency = await get_user_display_currency(self.db, user_uuid)
         logger.debug(
             "batch_create_using_default_currency", user_uuid=str(user_uuid), default_currency=user_default_currency
         )
-
-        # Capture once for consistency across all items in the batch.
-        # Use the tzinfo of `now` for transaction_timezone, matching create_transaction()
-        # — never hardcode a region-specific zone for a globally usable product.
-        now = utc_now()
-        tx_timezone = str(now.tzinfo or "UTC")
 
         # Per-item validation with partial-failure semantics: this service is
         # also fed raw LLM-generated dicts (LangGraph tools), where a missing
@@ -800,8 +900,9 @@ class TransactionCRUDService:
                     tags=item.get("tags", []),
                     raw_input=item.get("raw_input"),
                     source_account_id=source_account_uuid,
-                    transaction_at=now,
-                    transaction_timezone=tx_timezone,
+                    target_account_id=target_account_uuid,
+                    transaction_at=booking_time,
+                    transaction_timezone=booking_timezone,
                     source="AI",
                     status="CLEARED",
                     source_thread_id=source_thread_id,
@@ -811,17 +912,17 @@ class TransactionCRUDService:
 
                 # S-A: keep the batch path consistent with the single-transaction
                 # path — the ledger balance effect must be applied for items that
-                # carry the shared source account, otherwise account balances
-                # silently drift from the transaction ledger. The ledger converts
-                # via the transaction's own snapshot and skips accounts that no
-                # longer exist, mirroring create_transaction() exactly.
-                if source_account_uuid:
+                # carry a linked account, otherwise account balances silently
+                # drift from the transaction ledger. The ledger routes by item
+                # type (EXPENSE→source, INCOME→target, mirroring
+                # create_transaction()) and skips accounts that no longer exist.
+                if source_account_uuid or target_account_uuid:
                     await self.ledger.apply_transaction_balance_effect(
                         tx,
                         user_uuid,
                         sign=1,
                         source_account_id=source_account_uuid,
-                        target_account_id=None,
+                        target_account_id=target_account_uuid,
                         for_update=True,
                     )
             except BusinessError as e:
@@ -1010,6 +1111,12 @@ class TransactionCRUDService:
             user_uuid=user_uuid,
             user_base_currency=user_base_currency,
             sign=-1,
+            # direction must mirror the original booking: INCOME credits its
+            # target account (+1); the source side re-associated here (EXPENSE,
+            # TRANSFER) debits (-1). Omitting it would default to -1 and invert
+            # both legs for INCOME rows (double-credit the old account and
+            # debit the new one).
+            direction=1 if transaction.type == "INCOME" else -1,
             for_update=True,
         )
 
@@ -1027,6 +1134,7 @@ class TransactionCRUDService:
             user_uuid=user_uuid,
             user_base_currency=user_base_currency,
             sign=1,
+            direction=1 if transaction.type == "INCOME" else -1,
             for_update=True,
         )
 

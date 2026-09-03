@@ -32,6 +32,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Wait for Backend CI to pass on this commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # ENG-P1-3 gate: never ship an image for a commit whose Backend CI
+          # (lint/mypy/tests/migrations) failed or never ran. Branch pushes
+          # wait until the run for this exact commit completes; tag pushes of
+          # commits outside the CI path filters are allowed after a grace
+          # period, with an explicit warning.
+          deadline=$(( $(date +%s) + 2400 ))   # 40 min: CI runs ~5-10 min normally
+          grace_deadline=$(( $(date +%s) + 600 ))  # 10 min for a run to even appear
+          is_tag=false
+          case "${GITHUB_REF}" in refs/tags/*) is_tag=true ;; esac
+          while true; do
+            read -r s_count b_count < <(
+              gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/backend-ci.yml/runs?head_sha=${SHA}&per_page=20" \
+                --jq '{s: ([.workflow_runs[] | select(.conclusion == "success")] | length),
+                       b: ([.workflow_runs[] | select(.conclusion == "failure" or .conclusion == "cancelled" or .conclusion == "timed_out")] | length)}
+                      | "\(.s) \(.b)"' \
+                2>/dev/null || echo "0 0"
+            )
+            if [ "${s_count:-0}" -gt 0 ]; then
+              echo "Backend CI passed for ${SHA} — proceeding with the image build."
+              exit 0
+            fi
+            if [ "${b_count:-0}" -gt 0 ]; then
+              echo "::error::Backend CI did not pass for ${SHA} — refusing to build/push an image."
+              exit 1
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error::Timed out waiting for Backend CI on ${SHA}."
+              exit 1
+            fi
+            if [ "${is_tag}" = "true" ] && [ "$(date +%s)" -ge "$grace_deadline" ]; then
+              echo "::warning::No Backend CI run found for ${SHA} after 10 minutes (tag of a commit outside CI path filters?) — proceeding WITHOUT a CI gate."
+              exit 0
+            fi
+            echo "Backend CI for ${SHA} is queued/running… waiting 30s."
+            sleep 30
+          done
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

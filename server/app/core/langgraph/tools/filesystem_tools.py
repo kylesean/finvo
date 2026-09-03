@@ -1,10 +1,11 @@
 """Filesystem Tools Module
 
-Providing system tools via SimpleFilesystemBackend:
-- ls: List directory contents
-- read_file: Read file content
-- write_file: Write to user artifact directory
-- execute: Execute shell commands
+Providing system tools via SimpleFilesystemBackend, sandboxed to the
+requesting user's ``artifacts/{user_id}`` directory:
+- ls: List sandbox directory contents
+- read_file: Read a file from the sandbox
+- write_file: Write a file into the sandbox
+- execute: Execute allow-listed shell commands (skill scripts)
 """
 
 from __future__ import annotations
@@ -46,21 +47,63 @@ def _is_sensitive_path(path: str) -> bool:
     return bool(SENSITIVE_FILE_PATTERN.search(path.replace("\\", "/")))
 
 
+def _resolve_in_user_sandbox(path: str) -> Path | str:
+    """Resolve [path] inside the requesting user's artifacts sandbox.
+
+    Every filesystem tool (read/ls/write) is scoped to
+    ``artifacts/{user_id}`` of the user driving the request: a shared
+    multi-user deployment must not let one user's agent enumerate or read
+    another user's artifacts or uploads through these tools (the project root
+    used to be readable here, which was exactly that leak).
+
+    Returns:
+        The sandbox path relative to the project root on success, or an
+        error-message string the tool can return verbatim.
+    """
+    from app.core.langgraph.tools import current_user_id
+
+    user_id = current_user_id.get()
+    if not user_id:
+        return "Error: User ID not available"
+    if not path or Path(path).is_absolute():
+        return "Error: path must be a relative path"
+
+    project_root = PROJECT_ROOT.resolve()
+    user_artifact_dir = (project_root / "artifacts" / user_id).resolve()
+    sandbox_path = (user_artifact_dir / path).resolve()
+
+    # resolve() collapses ".." and symlinks, so a traversal attempt (e.g.
+    # "../user-2/notes.txt" or "../../.env") ends up outside the sandbox
+    # and is rejected here.
+    if not sandbox_path.is_relative_to(user_artifact_dir):
+        logger.warning(
+            "filesystem_path_escape_blocked",
+            user_id=user_id,
+            path=path[:200],
+        )
+        return "Error: path escapes the artifact sandbox"
+
+    return sandbox_path.relative_to(project_root)
+
+
 # --- read_file ---
 class ReadFileInput(BaseModel):
     """Input for reading a file."""
 
-    path: str = Field(..., description="Path of the file to read")
+    path: str = Field(..., description="Relative path inside your artifact sandbox (e.g. 'report.md')")
 
 
 @tool("read_file", args_schema=ReadFileInput)
 def read_file_tool(path: str) -> str:
-    """Read the content of a file (large files are truncated)."""
+    """Read a file from your artifact sandbox (large files are truncated)."""
+    resolved = _resolve_in_user_sandbox(path)
+    if isinstance(resolved, str):
+        return resolved
     if _is_sensitive_path(path):
         logger.warning("read_file_sensitive_blocked", path=path[:200])
         return "Error: reading this file is not allowed"
     try:
-        content = fs_backend.read(path)
+        content = fs_backend.read(str(resolved))
         if len(content) > MAX_READ_CHARS:
             omitted = len(content) - MAX_READ_CHARS
             return f"{content[:MAX_READ_CHARS]}\n\n... (truncated, {omitted} more chars)"
@@ -74,17 +117,20 @@ def read_file_tool(path: str) -> str:
 class LsInput(BaseModel):
     """Input for listing directory contents."""
 
-    path: str = Field(".", description="Directory path to list (defaults to current directory)")
+    path: str = Field(".", description="Directory path relative to your artifact sandbox (defaults to '.')")
 
 
 @tool("ls", args_schema=LsInput)
 def ls_tool(path: str = ".") -> str:
-    """List directory contents (capped at a bounded number of entries)."""
+    """List your artifact sandbox directory contents (capped at a bounded number of entries)."""
+    resolved = _resolve_in_user_sandbox(path)
+    if isinstance(resolved, str):
+        return resolved
     if _is_sensitive_path(path):
         logger.warning("ls_sensitive_blocked", path=path[:200])
         return "Error: listing this path is not allowed"
     try:
-        items = fs_backend.ls_info(path)
+        items = fs_backend.ls_info(str(resolved))
         output = []
         for item in items:
             if _is_sensitive_path(f"{path}/{item.name}"):
@@ -116,47 +162,34 @@ def write_file_tool(path: str, content: str) -> Any:
     Files are automatically saved to: artifacts/{user_id}/{path}
     The URL to access the file will be returned.
     """
-    from app.core.langgraph.tools import current_user_id
-
     try:
-        user_id = current_user_id.get()
-        if not user_id:
-            return "Error: User ID not available"
-
         # Security: writes are sandboxed to artifacts/{user_id}. Reject absolute
         # paths, sensitive targets, and any path that resolves outside the
         # sandbox (e.g. "../../.env").
-        if not path or Path(path).is_absolute():
-            return "Error: path must be a relative path"
         if _is_sensitive_path(path):
             logger.warning("write_file_sensitive_blocked", path=path[:200])
             return "Error: writing this file is not allowed"
         if len(content) > MAX_WRITE_CHARS:
             return "Error: content too large to write"
 
-        project_root = PROJECT_ROOT.resolve()
-        user_artifact_dir = (project_root / "artifacts" / user_id).resolve()
-        sandbox_path = (user_artifact_dir / path).resolve()
+        resolved = _resolve_in_user_sandbox(path)
+        if isinstance(resolved, str):
+            return resolved
+        rel_path = resolved
 
-        # resolve() collapses ".." and symlinks, so a traversal attempt ends
-        # up outside the sandbox and is rejected here.
-        if not sandbox_path.is_relative_to(user_artifact_dir):
-            logger.warning(
-                "write_file_path_escape_blocked",
-                user_id=user_id,
-                path=path[:200],
-            )
-            return "Error: path escapes the artifact sandbox"
-
+        sandbox_path = PROJECT_ROOT.resolve() / rel_path
         sandbox_path.parent.mkdir(parents=True, exist_ok=True)
         # fs_backend.write re-resolves against project_root as a second barrier.
-        fs_backend.write(str(sandbox_path.relative_to(project_root)), content)
+        fs_backend.write(str(rel_path), content)
 
-        relative_path = str(sandbox_path.relative_to(project_root))
+        relative_path = str(rel_path)
         # Signed capability URL: the /artifacts endpoint rejects anonymous
         # access, so the URL carries a short-lived token bound to this user
         # and path (see app/utils/artifact_signing.py). The client displays
         # this URL; browsers can open it while the token is fresh.
+        from app.core.langgraph.tools import current_user_id
+
+        user_id = current_user_id.get()
         from app.utils.artifact_signing import sign_artifact_url
 
         posix_path = Path(path).as_posix()

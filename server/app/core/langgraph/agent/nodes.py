@@ -14,10 +14,10 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
-from openai import APIError, APITimeoutError, RateLimitError
+from openai import APIConnectionError, APITimeoutError, RateLimitError
 from tenacity import (
     AsyncRetrying,
-    retry_if_exception_type,
+    retry_if_exception,
     stop_after_attempt,
     wait_exponential,
 )
@@ -38,9 +38,21 @@ _DDG_TOOL_NAME = "duckduckgo_results_json"
 # Responses API built-in web search tool declaration
 _BUILTIN_WEB_SEARCH: dict[str, str] = {"type": "web_search"}
 
-# Exceptions that indicate a transient LLM upstream failure and are worth
-# retrying (mirrors the retry policy in app.services.llm.LLMService).
-_AGENT_RETRYABLE = (RateLimitError, APITimeoutError, APIError, asyncio.TimeoutError)
+# Transient LLM upstream failures worth retrying (one request-level policy).
+# Deliberately NOT the bare APIError type: RateLimit/Timeout/Connection are all
+# APIError subclasses, so a type check on APIError would also retry EVERY
+# deterministic 4xx — 400 bad request, 401 bad key, 422 context overflow —
+# three exponential backoff rounds before surfacing. 5xx status errors ARE
+# transient, so they are recovered via the status_code predicate below.
+_AGENT_RETRYABLE_TYPES = (APIConnectionError, APITimeoutError, RateLimitError, asyncio.TimeoutError)
+
+
+def _is_retryable_llm_error(e: BaseException) -> bool:
+    """True when an LLM call failure is transient and the call may be retried."""
+    if isinstance(e, _AGENT_RETRYABLE_TYPES):
+        return True
+    status_code = getattr(e, "status_code", None)
+    return isinstance(status_code, int) and status_code >= 500
 
 
 def _resolve_search_tools(
@@ -242,7 +254,7 @@ def create_agent_node(
             async for attempt in AsyncRetrying(
                 stop=stop_after_attempt(settings.MAX_LLM_CALL_RETRIES),
                 wait=wait_exponential(multiplier=1, min=2, max=10),
-                retry=retry_if_exception_type(_AGENT_RETRYABLE),
+                retry=retry_if_exception(_is_retryable_llm_error),
                 reraise=True,
             ):
                 with attempt:

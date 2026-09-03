@@ -127,3 +127,43 @@ class TestForecastStartingBalance:
             total = await ForecastService(db_session)._get_total_balance(user.uuid)
 
         assert total == Decimal("300.00")  # 1000 - 100*7.0
+
+
+class TestUserServiceTotalBalance:
+    """BF-P1-4 regression: the accounts-list endpoint must match the fixed
+    statistics/forecast convention — convert per account before summing,
+    skip-and-report instead of silently mixing currencies."""
+
+    @pytest.mark.asyncio
+    async def test_get_financial_accounts_converts_to_base(self, db_session: AsyncSession) -> None:
+        user = await _seed_user(db_session, base_currency="CNY")
+        await _seed_account(db_session, user, currency="CNY", balance="1000.00")
+        await _seed_account(db_session, user, currency="USD", balance="200.00")
+
+        from unittest.mock import AsyncMock, patch
+
+        from app.services.user_service import UserService
+
+        with patch.object(exchange_rate_service, "convert", AsyncMock(return_value=7.2)):
+            result = await UserService(db_session).get_user_financial_accounts(user.uuid)
+
+        # 1000 CNY + 200 USD * 7.2 = 2440 — previously a raw sum returned 1200.
+        assert Decimal(result["totalBalance"]) == Decimal("2440.00")
+        assert result["unconvertedAccountIds"] == []
+
+    @pytest.mark.asyncio
+    async def test_get_financial_accounts_reports_unconvertible(self, db_session: AsyncSession) -> None:
+        user = await _seed_user(db_session, base_currency="CNY")
+        usd = await _seed_account(db_session, user, currency="USD", balance="200.00")
+        await _seed_account(db_session, user, currency="CNY", balance="1000.00")
+
+        from unittest.mock import AsyncMock, patch
+
+        from app.services.user_service import UserService
+
+        with patch.object(exchange_rate_service, "convert", AsyncMock(return_value=None)):
+            result = await UserService(db_session).get_user_financial_accounts(user.uuid)
+
+        # USD account skipped (rate unavailable), NOT mixed in as raw 200 CNY.
+        assert Decimal(result["totalBalance"]) == Decimal("1000.00")
+        assert result["unconvertedAccountIds"] == [str(usd.id)]

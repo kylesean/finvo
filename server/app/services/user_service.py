@@ -21,7 +21,6 @@ from app.models.user import User
 from app.models.user_settings import UserSettings
 from app.services.account_balance import count_account_references, recompute_account_balance
 from app.utils.currency_utils import (
-    convert_to_display_currency,
     convert_to_user_base,
     get_user_display_currency,
 )
@@ -111,6 +110,41 @@ def _format_iso_datetime(dt: datetime | None) -> str | None:
     if dt.tzinfo is not None:
         dt = dt.astimezone(UTC)
     return dt.isoformat().replace("+00:00", "Z")
+
+
+async def _convert_balance_or_none(
+    amount: Decimal,
+    from_currency: str,
+    user_base_currency: str,
+    account_id: str,
+    unconverted_account_ids: list[str],
+) -> Decimal | None:
+    """Convert a balance to the user's base currency, or report the account as unconverted.
+
+    Unlike ``convert_to_display_currency`` (which silently falls back to the
+    raw amount on a failed lookup — the exact 1:1 mixing this module's
+    totalBalance was criticized for), a failed conversion here returns None so
+    the caller can skip the account and surface its id in
+    ``unconvertedAccountIds`` instead of polluting the total. Uses
+    ``convert_to_user_base`` so the aggregation follows the same
+    rate-per-unit-snapshot convention as statistics/forecast.
+    """
+    if from_currency.upper() == user_base_currency.upper():
+        return amount
+
+    try:
+        converted, _rate = await convert_to_user_base(amount, from_currency, user_base_currency)
+        return converted
+    except Exception as e:  # noqa: BLE001 - skip-and-report is the aggregation contract here
+        logger.warning(
+            "total_balance_conversion_failed",
+            account_id=account_id,
+            from_currency=from_currency,
+            user_base_currency=user_base_currency,
+            error=str(e),
+        )
+        unconverted_account_ids.append(account_id)
+        return None
 
 
 class UserService:
@@ -276,9 +310,14 @@ class UserService:
         active_accounts = result.scalars().all()
 
         total_display_balance = Decimal("0.00")
+        unconverted_account_ids: list[str] = []
         for acc in active_accounts:
             val = acc.current_balance if acc.current_balance is not None else acc.initial_balance
-            conv_val = await convert_to_display_currency(val, acc.currency_code or "CNY", display_currency)
+            conv_val = await _convert_balance_or_none(
+                val, acc.currency_code or "CNY", display_currency, str(acc.id), unconverted_account_ids
+            )
+            if conv_val is None:
+                continue
             if acc.nature == "ASSET":
                 total_display_balance += conv_val
             else:
@@ -291,7 +330,11 @@ class UserService:
             total_balance=str(total_display_balance),
         )
 
-        return {"totalBalance": f"{total_display_balance:.2f}", "lastUpdatedAt": _format_iso_datetime(now)}
+        return {
+            "totalBalance": f"{total_display_balance:.2f}",
+            "lastUpdatedAt": _format_iso_datetime(now),
+            "unconvertedAccountIds": unconverted_account_ids,
+        }
 
     async def get_user_financial_accounts(self, user_uuid: UUID) -> dict[str, Any]:
         """Get user's financial accounts.
@@ -312,22 +355,35 @@ class UserService:
         )
         accounts = result.scalars().all()
 
-        # 1. Base aggregation logic
+        # 1. Base aggregation logic (converted to the user's display currency)
+        display_currency = await get_user_display_currency(self.db, user_uuid)
         total_balance = Decimal("0.00")
+        unconverted_account_ids: list[str] = []
         max_updated_at = None
 
-        # Accumulate raw account balances for total balance overview
+        # Accumulate account balances for total balance overview
         account_list = []
         for account in accounts:
             # 1. Calculate raw balance for output
             orig_balance = account.current_balance if account.current_balance is not None else account.initial_balance
 
-            # 2. Net worth calculation using raw balance values
+            # 2. Net worth calculation: convert each account to the user's
+            # display currency before summing — raw balances across currencies
+            # are not additive (a $10,000 account is not ¥10,000). Accounts
+            # whose rate is unavailable are skipped and reported instead.
             if account.include_in_net_worth and account.status == "ACTIVE":
-                if account.nature == "ASSET":
-                    total_balance += orig_balance
-                else:
-                    total_balance -= abs(orig_balance)
+                conv_balance = await _convert_balance_or_none(
+                    orig_balance,
+                    account.currency_code or "CNY",
+                    display_currency,
+                    str(account.id),
+                    unconverted_account_ids,
+                )
+                if conv_balance is not None:
+                    if account.nature == "ASSET":
+                        total_balance += conv_balance
+                    else:
+                        total_balance -= abs(conv_balance)
 
             # Track most recent update
             if max_updated_at is None or account.updated_at > max_updated_at:
@@ -358,6 +414,7 @@ class UserService:
             "accounts": account_list,
             "totalBalance": f"{total_balance:.2f}",
             "lastUpdatedAt": _format_iso_datetime(max_updated_at),
+            "unconvertedAccountIds": unconverted_account_ids,
         }
 
     async def create_financial_account(self, user_uuid: UUID, account_data: dict[str, Any]) -> dict[str, Any]:

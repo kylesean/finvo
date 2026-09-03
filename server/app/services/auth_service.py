@@ -48,29 +48,34 @@ class AuthService:
     async def send_verification_code(self, account_type: str, account: str) -> bool:
         """Send verification code to the specified account.
 
-        1. Check if the account already exists.
-        2. Send the verification code asynchronously via a background task.
+        1. If the account already exists, return success WITHOUT sending
+           anything or revealing the fact (anti-enumeration, SEC-P2-6).
+        2. Otherwise send the verification code asynchronously via a
+           background task.
 
         Args:
             account_type: Type of account ('email' or 'mobile')
             account: Email address or mobile number
 
         Returns:
-            bool: True (returns immediately; the code is sent in the background)
-
-        Raises:
-            BusinessError: If account already exists
+            bool: Always True — callers must not distinguish "sent" from
+            "already registered" or the endpoint becomes an account oracle.
         """
         from app.core.background_tasks import background_task_manager
         from app.services.code_manager import code_manager
 
         if await self.is_account_exists(account_type, account):
-            if account_type == "email":
-                raise BusinessError(message="Email already registered", error_code=AuthErrorCode.EMAIL_REGISTERED)
-            else:
-                raise BusinessError(
-                    message="Mobile number already registered", error_code=AuthErrorCode.PHONE_NUMBER_REGISTERED
-                )
+            # Anti-enumeration: same success response as a real send. No code
+            # is dispatched, so a registered address receives nothing — but an
+            # attacker probing the endpoint cannot tell the difference.
+            # (register's EMAIL_REGISTERED signal is intentionally kept: the
+            # user learns the outcome of their own registration either way.)
+            logger.info(
+                "verification_code_skipped_existing_account",
+                account_type=account_type,
+                account=account[:3] + "***",  # Mask account for privacy
+            )
+            return True
 
         await background_task_manager.run_in_background(code_manager.send_code, account_type, account)
 
@@ -123,6 +128,14 @@ class AuthService:
         Raises:
             ValueError: If verification code is invalid or account already exists
         """
+        # Kill switch first: a closed deployment must reject sign-ups before
+        # any DB/verification work (REGISTRATION_OPEN=false in .env).
+        if not settings.REGISTRATION_OPEN:
+            raise BusinessError(
+                message="Registration is closed on this server",
+                error_code=AuthErrorCode.REGISTRATION_CLOSED,
+            )
+
         # Normalize the account once, up front: emails are case-insensitive, so
         # strip + lowercase before the existence check and before storage. The
         # old Pydantic model validators are gone (models are plain SQLAlchemy),

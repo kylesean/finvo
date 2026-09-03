@@ -74,7 +74,7 @@ async def build_transfer_wizard_data(
 
         # 3. Format accounts for UI (empty when accounts are insufficient,
         # since the wizard then shows guidance instead of selectable lists).
-        formatted_accounts = []
+        formatted_accounts: list[dict[str, Any]] = []
         if not guidance:
             for acc in asset_accounts:
                 formatted_accounts.append(
@@ -102,6 +102,17 @@ async def build_transfer_wizard_data(
                 if len(matches) == 1:
                     suggested_target_id = matches[0]
 
+        # Wizard currency: the LLM-extracted one wins; otherwise follow the
+        # preselected (or first) source account so the displayed amount is
+        # denominated in a currency the transfer can actually book in — a
+        # hardcoded default (previously CNY) made the user confirm "$100"
+        # while the server booked ¥100.
+        default_currency = "CNY"
+        if formatted_accounts:
+            accounts_by_id = {acc["id"]: acc for acc in formatted_accounts}
+            preselected = accounts_by_id.get(suggested_source_id) or accounts_by_id.get(suggested_target_id)
+            default_currency = (preselected or formatted_accounts[0])["currency"]
+
         return {
             "success": True,
             "componentType": "TransferWizard",
@@ -112,7 +123,7 @@ async def build_transfer_wizard_data(
             "amount": max(0.0, float(amount or 0.0)),
             "memo": memo or "",
             "tags": tags or [],
-            "currency": currency or "CNY",
+            "currency": currency or default_currency,
             # Guidance code for the UI empty state: "NO_ACCOUNTS" |
             # "SINGLE_ACCOUNT", null when the wizard is fully usable.
             "guidance": guidance,

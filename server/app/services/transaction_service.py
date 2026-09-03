@@ -57,6 +57,7 @@ class TransactionService:
         intent: str = "SURVIVAL",
         tags: list[str] | None = None,
         source_thread_id: UUID | None = None,
+        idempotency_key: str | None = None,
     ) -> dict[str, Any]:
         """Create a single transaction record."""
         return await self._crud.create_transaction(
@@ -73,6 +74,7 @@ class TransactionService:
             intent=intent,
             tags=tags,
             source_thread_id=source_thread_id,
+            idempotency_key=idempotency_key,
         )
 
     async def get_transaction_detail(self, transaction_id: UUID, user_uuid: UUID) -> dict[str, Any] | None:

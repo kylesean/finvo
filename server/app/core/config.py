@@ -246,6 +246,10 @@ class Settings(BaseSettings):
     LONG_TERM_MEMORY_EMBEDDER_API_KEY: str | None = None  # For openai/huggingface
     LONG_TERM_MEMORY_EMBEDDER_BASE_URL: str | None = None  # For openai-compatible APIs
     LONG_TERM_MEMORY_OLLAMA_BASE_URL: str | None = None  # For ollama: http://localhost:11434
+    # Extract salient facts only every Nth turn of a session — Mem0's infer=True
+    # spends one LLM call per extraction, so per-turn extraction multiplies
+    # provider cost by the conversation length.
+    MEMORY_EXTRACTION_EVERY_N_TURNS: int = 5
 
     # JWT Configuration
     # NOTE: default is an insecure placeholder; production must override via env var
@@ -366,6 +370,9 @@ class Settings(BaseSettings):
     CODE_EXPIRY_SECONDS: int = 300  # 5 minutes
     SMS_PROVIDER: str = "mock"  # mock, aliyun, twilio
     EMAIL_PROVIDER: str = "mock"  # mock, smtp
+    # Kill switch for new sign-ups (e.g. a private deployment that only wants
+    # pre-existing accounts). Does not affect login or existing users.
+    REGISTRATION_OPEN: bool = True
 
     # SMTP Settings
     SMTP_HOST: str = "localhost"
@@ -520,7 +527,29 @@ class Settings(BaseSettings):
         # (including at import time), not merely when an environment property
         # happens to be read.
         self._validate_jwt_secret()
+        self._validate_verification_providers()
         self._sanitize_proxy_env()
+
+    def _validate_verification_providers(self) -> None:
+        """Fail-fast guard against mock verification providers outside development.
+
+        The shipped defaults (``SMS_PROVIDER``/``EMAIL_PROVIDER`` = "mock") skip
+        code verification entirely, so a public deployment that forgets to
+        configure a real provider would let anyone register without owning the
+        email address/phone — and then burn the operator's paid LLM quota via
+        the chat endpoints. Same philosophy as ``_validate_jwt_secret``: refuse
+        to boot a misconfigured production/staging instance.
+        """
+        if self.ENVIRONMENT == Environment.DEVELOPMENT:
+            return
+        mock_providers = [name for name in ("SMS_PROVIDER", "EMAIL_PROVIDER") if getattr(self, name) == "mock"]
+        if mock_providers:
+            raise RuntimeError(
+                "CRITICAL: verification provider(s) " + ", ".join(mock_providers) + ' are set to "mock" '
+                "(code verification is skipped) — not allowed in "
+                f"{self.ENVIRONMENT.value}. Configure a real provider "
+                "(SMS_PROVIDER: aliyun/twilio, EMAIL_PROVIDER: smtp) or run with ENVIRONMENT=development."
+            )
 
     def _validate_jwt_secret(self) -> None:
         """Fail-fast guard against an insecure JWT secret.

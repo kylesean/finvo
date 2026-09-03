@@ -68,7 +68,10 @@ class MemoryService:
 
     def __init__(self) -> None:
         """Private constructor. Use get_instance() instead."""
-        pass
+        # False when the extraction LLM is detected to be misconfigured at
+        # init time (see _initialize): the add path then no-ops instead of
+        # firing a doomed provider call on every turn.
+        self._extraction_available = True
 
     @property
     def memory(self) -> AsyncMemory:
@@ -132,6 +135,27 @@ class MemoryService:
             }
             if settings.LONG_TERM_MEMORY_MODEL_BASE_URL:
                 llm_config["openai_base_url"] = settings.LONG_TERM_MEMORY_MODEL_BASE_URL
+
+            # AG-P1-4 guard: the default extraction model is NOT hosted on
+            # api.openai.com. Without an explicit base_url every extraction
+            # call would fail there, and the per-turn warning would swallow it
+            # — memory would look enabled while never actually working.
+            # Detect it once, loudly, and disable extraction instead.
+            _model = settings.LONG_TERM_MEMORY_MODEL.lower()
+            if settings.LONG_TERM_MEMORY_MODEL_BASE_URL is None and not _model.startswith(
+                ("gpt", "o1", "o3", "o4", "chatgpt")
+            ):
+                self._extraction_available = False
+                logger.error(
+                    "memory_extraction_misconfigured",
+                    model=settings.LONG_TERM_MEMORY_MODEL,
+                    hint=(
+                        "LONG_TERM_MEMORY_MODEL_BASE_URL is not set, so extraction calls would hit "
+                        "api.openai.com, which cannot serve this model. Set LONG_TERM_MEMORY_MODEL_BASE_URL "
+                        "(and LONG_TERM_MEMORY_MODEL_API_KEY) to the provider hosting it — memory "
+                        "extraction stays DISABLED until then."
+                    ),
+                )
 
             self._memory = AsyncMemory.from_config(
                 config_dict={
@@ -264,6 +288,18 @@ class MemoryService:
         if not messages:
             return {"success": False, "message": "No messages provided"}
 
+        if not self._extraction_available:
+            from app.core.metrics import memory_extractions_total
+
+            memory_extractions_total.labels(result="disabled").inc()
+            return {
+                "success": False,
+                "error": (
+                    "memory extraction is disabled: the extraction LLM is misconfigured "
+                    "(see memory_extraction_misconfigured in the server logs)"
+                ),
+            }
+
         user_id = str(user_uuid)
 
         metadata: dict[str, Any] = {
@@ -284,12 +320,15 @@ class MemoryService:
             # extraction using its built-in FACT_RETRIEVAL_PROMPT.
             # This is the canonical Mem0 usage pattern and avoids any issues
             # with our main llm_service's reasoning model output format.
+            from app.core.metrics import memory_extractions_total
+
             result = await self.memory.add(
                 messages,
                 user_id=user_id,
                 metadata=metadata,
                 infer=True,
             )
+            memory_extractions_total.labels(result="ok").inc()
 
             fact_count = len(result.get("results", [])) if isinstance(result, dict) else 0
             if fact_count > 0:
@@ -309,6 +348,9 @@ class MemoryService:
             return {"success": True, "extracted": fact_count > 0, "fact_count": fact_count, "result": result}
 
         except Exception as e:
+            from app.core.metrics import memory_extractions_total
+
+            memory_extractions_total.labels(result="failed").inc()
             logger.warning(
                 "memory_add_failed",
                 user_uuid=user_id,

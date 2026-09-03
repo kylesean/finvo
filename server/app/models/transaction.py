@@ -77,6 +77,11 @@ class Transaction(Base):
             "transaction_at",
             name="uq_transactions_recurring_timestamp",
         ),
+        UniqueConstraint(
+            "user_uuid",
+            "idempotency_key",
+            name="uq_transactions_user_idempotency",
+        ),
         Index("ix_transactions_category", "category_key"),
         Index("ix_transactions_status", "status"),
         Index("ix_transactions_transaction_at", "transaction_at"),
@@ -112,6 +117,11 @@ class Transaction(Base):
     subject: Mapped[str] = mapped_column(String(20), default="SELF", server_default=text("'SELF'"))
     intent: Mapped[str] = mapped_column(String(20), default="SURVIVAL", server_default=text("'SURVIVAL'"))
     source_thread_id: Mapped[UUID | None] = col.uuid_column(index=True, nullable=True)
+    # Client-supplied dedup key for money-moving submissions (e.g.
+    # "transfer:{surface_id}"): a double-tapped/retried submission replays the
+    # first booking instead of creating a second one. NULL = unkeyed (AI rows).
+    # PG unique semantics treat NULLs as distinct, so unkeyed rows never clash.
+    idempotency_key: Mapped[str | None] = mapped_column(String(120), nullable=True)
     recurring_transaction_id: Mapped[UUID | None] = col.uuid_fk(
         "recurring_transactions",
         ondelete="SET NULL",

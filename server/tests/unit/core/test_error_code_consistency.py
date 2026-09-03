@@ -80,7 +80,7 @@ class TestErrorCodeConsistency:
             (400, 429, "http-aligned generic"),
             (500, 599, "server"),
             (999, 999, "validation"),
-            (1000, 1012, "auth"),
+            (1000, 1013, "auth"),
             (3000, 3018, "transaction"),
             (3100, 3118, "shared space"),
             (3200, 3218, "recurring"),

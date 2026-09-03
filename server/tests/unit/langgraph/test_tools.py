@@ -5,6 +5,7 @@ LangGraph agent, including transaction, budget, and transfer tools.
 """
 
 import importlib
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -71,6 +72,41 @@ class TestTransferTools:
     async def test_prepare_transfer(self):
         """Test transfer preparation with account matching."""
         pass
+
+    def test_execute_transfer_input_accepts_currency(self):
+        """BF-P0-2 regression: the wizard-confirmed currency must survive validation.
+
+        The client sends ``currency`` in toolParams; before the fix the schema
+        had no such field and Pydantic silently dropped it, so every transfer
+        was booked as CNY regardless of what the user confirmed.
+        """
+        from decimal import Decimal
+
+        from app.core.langgraph.tools.transfer_tools import ExecuteTransferInput
+
+        params = {
+            "source_account_id": "0b8f9d1e-1111-4a2a-9c9c-000000000001",
+            "target_account_id": "0b8f9d1e-1111-4a2a-9c9c-000000000002",
+            "amount": "100.00",
+            "currency": "USD",
+            # The full client payload also carries extra keys — must stay tolerated.
+            "surface_id": "surface_1",
+        }
+        parsed = ExecuteTransferInput.model_validate(params)
+        assert parsed.currency == "USD"
+        assert parsed.amount == "100.00000000"
+
+    def test_execute_transfer_input_currency_optional(self):
+        from app.core.langgraph.tools.transfer_tools import ExecuteTransferInput
+
+        parsed = ExecuteTransferInput.model_validate(
+            {
+                "source_account_id": "0b8f9d1e-1111-4a2a-9c9c-000000000001",
+                "target_account_id": "0b8f9d1e-1111-4a2a-9c9c-000000000002",
+                "amount": "12.5",
+            }
+        )
+        assert parsed.currency is None
 
     @pytest.mark.skip(reason="Skeleton - implement in future iteration")
     async def test_execute_transfer_success(self):
@@ -226,3 +262,154 @@ class TestCommandValidatorSecurity:
         ]
         for cmd in attack_cmds:
             assert not validator.validate(cmd).allowed, f"attack slipped through: {cmd}"
+
+
+class TestParseTime:
+    """AG-P1-3 regression: an unparseable timestamp must fail loud.
+
+    parse_time used to silently fall back to "now" for garbage input, so
+    "yestday" booked entries on the wrong day with no error anywhere.
+    """
+
+    def test_none_and_empty_fall_back_to_now(self) -> None:
+        from app.core.langgraph.tools._helpers import parse_time
+
+        parsed_none = parse_time(None)
+        parsed_empty = parse_time("")
+        now = datetime.now(UTC)
+        # both calls must return an aware datetime near "now"
+        assert parsed_none.tzinfo is not None and parsed_empty.tzinfo is not None
+        assert abs((parsed_none - now).total_seconds()) < 5
+        assert abs((parsed_empty - now).total_seconds()) < 5
+
+    def test_valid_iso8601_parses(self) -> None:
+        from app.core.langgraph.tools._helpers import parse_time
+
+        assert parse_time("2026-09-01T10:00:00+00:00") == datetime(2026, 9, 1, 10, 0, 0, tzinfo=UTC)
+        assert parse_time("2026-09-01T10:00:00Z") == datetime(2026, 9, 1, 10, 0, 0, tzinfo=UTC)
+
+    def test_unparseable_raises_value_error(self) -> None:
+        from app.core.langgraph.tools._helpers import parse_time
+
+        with pytest.raises(ValueError, match="Unparseable transaction time"):
+            parse_time("yestday")
+        with pytest.raises(ValueError, match="Unparseable transaction time"):
+            parse_time("2026-13-40")
+
+    @pytest.mark.asyncio
+    async def test_record_transactions_returns_structured_error(self) -> None:
+        """The tool surfaces a model-readable error instead of booking "now"."""
+        from uuid import uuid4
+
+        from app.core.langgraph.tools.transaction_tools import record_transactions
+
+        result = await record_transactions.ainvoke(
+            {
+                "transactions": [
+                    {"amount": "10", "type": "expense", "tags": ["lunch"], "category_key": "OTHERS"}
+                ],
+                "transaction_at": "yestday",
+            },
+            config={"configurable": {"user_uuid": str(uuid4())}},
+        )
+        assert result["success"] is False
+        assert result["error"] == "unparseable_time"
+        assert result["raw"] == "yestday"
+
+    @pytest.mark.asyncio
+    async def test_execute_transfer_returns_structured_error(self) -> None:
+        from uuid import uuid4
+
+        from app.core.langgraph.tools.transfer_tools import execute_transfer
+
+        result = await execute_transfer.ainvoke(
+            {
+                "source_account_id": "0b8f9d1e-1111-4a2a-9c9c-000000000001",
+                "target_account_id": "0b8f9d1e-1111-4a2a-9c9c-000000000002",
+                "amount": "10.00",
+                "transaction_at": "not-a-date",
+            },
+            config={"configurable": {"user_uuid": str(uuid4())}},
+        )
+        assert result["success"] is False
+        assert result["error"] == "unparseable_time"
+
+
+class TestReadLsUserSandbox:
+    """Security tests: read_file/ls are scoped to artifacts/{user_id} (SEC-P0-1).
+
+    Previously they could read the ENTIRE project root (guarded only by a
+    sensitive-filename blacklist), letting a user's agent enumerate and read
+    other users' artifacts/uploads on a shared deployment.
+    """
+
+    def _patch_fs(self, tmp_path: Path, user: str | None = "user-1") -> list:
+        backend = SimpleFilesystemBackend(tmp_path)
+        original_root = ft.PROJECT_ROOT
+        original_backend = ft.fs_backend
+        ft.PROJECT_ROOT = tmp_path
+        ft.fs_backend = backend
+        token = current_user_id.set(user) if user else None
+        return [original_root, original_backend, token]
+
+    def _restore_fs(self, saved: list) -> None:
+        ft.PROJECT_ROOT = saved[0]
+        ft.fs_backend = saved[1]
+        if saved[2] is not None:
+            current_user_id.reset(saved[2])
+
+    def test_read_requires_user_context(self, tmp_path: Path) -> None:
+        saved = self._patch_fs(tmp_path, user=None)
+        try:
+            assert ft.read_file_tool.invoke({"path": "hello.txt"}) == "Error: User ID not available"
+        finally:
+            self._restore_fs(saved)
+
+    def test_read_rejects_absolute_and_traversal(self, tmp_path: Path) -> None:
+        (tmp_path / "outside.txt").write_text("top secret project file")
+        saved = self._patch_fs(tmp_path)
+        try:
+            assert "Error" in ft.read_file_tool.invoke({"path": str(tmp_path / "outside.txt")})
+            assert "Error" in ft.read_file_tool.invoke({"path": "../../outside.txt"})
+            assert "top secret project file" not in ft.read_file_tool.invoke({"path": "../../outside.txt"})
+        finally:
+            self._restore_fs(saved)
+
+    def test_read_own_artifact_succeeds(self, tmp_path: Path) -> None:
+        sandbox_file = tmp_path / "artifacts" / "user-1" / "hello.txt"
+        sandbox_file.parent.mkdir(parents=True)
+        sandbox_file.write_text("hello artifact")
+
+        saved = self._patch_fs(tmp_path)
+        try:
+            assert ft.read_file_tool.invoke({"path": "hello.txt"}) == "hello artifact"
+        finally:
+            self._restore_fs(saved)
+
+    def test_read_cannot_reach_other_user_artifacts(self, tmp_path: Path) -> None:
+        other = tmp_path / "artifacts" / "user-2"
+        other.mkdir(parents=True)
+        (other / "notes.txt").write_text("user-2 private notes")
+
+        saved = self._patch_fs(tmp_path)  # current user is user-1
+        try:
+            result = ft.read_file_tool.invoke({"path": "../user-2/notes.txt"})
+            assert "user-2 private notes" not in result
+        finally:
+            self._restore_fs(saved)
+
+    def test_ls_scoped_to_sandbox(self, tmp_path: Path) -> None:
+        sandbox = tmp_path / "artifacts" / "user-1"
+        sandbox.mkdir(parents=True)
+        (sandbox / "report.md").write_text("# report")
+        (tmp_path / "artifacts" / "user-2").mkdir()
+        (tmp_path / "artifacts" / "user-2" / "leak.txt").write_text("should not appear")
+
+        saved = self._patch_fs(tmp_path)
+        try:
+            listing = ft.ls_tool.invoke({"path": "."})
+            assert "report.md" in listing
+            assert "leak.txt" not in listing
+            assert "Error" not in listing
+        finally:
+            self._restore_fs(saved)

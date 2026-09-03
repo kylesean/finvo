@@ -90,6 +90,14 @@ class ExecuteTransferInput(BaseModel):
     source_account_id: str = Field(..., description="ID of the source account (provided by UI)")
     target_account_id: str = Field(..., description="ID of the target account (provided by UI)")
     amount: str = Field(..., description="Transfer amount as a string, e.g. '100.00'")
+    currency: str | None = Field(
+        default=None,
+        description=(
+            "ISO 4217 currency the amount is denominated in, exactly as shown in the "
+            "TransferWizard the user confirmed. The booking MUST match the displayed "
+            "amount/currency pair — never substitute a different currency."
+        ),
+    )
 
     @field_validator("amount", mode="before")
     @classmethod
@@ -140,6 +148,7 @@ async def execute_transfer(
     tags: list[str] | None = None,
     transaction_at: str | None = None,
     surface_id: str | None = None,
+    currency: str | None = None,
     *,
     config: RunnableConfig,
 ) -> dict[str, Any]:
@@ -157,7 +166,17 @@ async def execute_transfer(
     if source_account_id == target_account_id:
         return {"success": False, "message": "Source and target accounts cannot be the same"}
 
-    tx_time = parse_time(transaction_at)
+    try:
+        tx_time = parse_time(transaction_at)
+    except ValueError as e:
+        # Structured, model-readable error (see record_transactions): a broken
+        # timestamp must never silently book the transfer as "now".
+        return {
+            "success": False,
+            "error": "unparseable_time",
+            "message": str(e),
+            "raw": transaction_at,
+        }
 
     # Tags are LLM-generated from the user's message (like record_transactions),
     # carried through the TransferWizard. Fall back to the memo as a single tag
@@ -168,20 +187,56 @@ async def execute_transfer(
         service = TransactionService(session)
 
         try:
-            result = await service.create_transaction(
-                user_uuid=user_uuid,  # Already UUID object
-                amount=Decimal(amount),
-                transaction_type="transfer",
-                transaction_at=tx_time,
-                category_key="GENERAL_TRANSFER",
+            source_uuid = uuid.UUID(source_account_id)
+            target_uuid = uuid.UUID(target_account_id)
+
+            # The wizard's displayed currency is authoritative for the amount
+            # the user confirmed. Dropping it here used to book every transfer
+            # as CNY (the service default) while the UI showed e.g. $100 — a
+            # silent misbooking. Fall back to the source account's own currency
+            # when absent, and refuse a currency that matches neither account.
+            source_acc = await service.get_financial_account(source_uuid, user_uuid)
+            target_acc = await service.get_financial_account(target_uuid, user_uuid)
+            tx_currency = (currency or "").strip().upper() or None
+            if tx_currency is None:
+                tx_currency = source_acc.currency_code if source_acc else None
+            elif source_acc is not None and target_acc is not None:
+                account_currencies = {
+                    (source_acc.currency_code or "").upper(),
+                    (target_acc.currency_code or "").upper(),
+                }
+                if tx_currency not in account_currencies:
+                    return {
+                        "success": False,
+                        "message": (
+                            f"Transfer currency {tx_currency} matches neither the source "
+                            f"({source_acc.currency_code}) nor the target ({target_acc.currency_code}) account"
+                        ),
+                    }
+
+            create_kwargs: dict[str, Any] = {
+                "user_uuid": user_uuid,  # Already UUID object
+                "amount": Decimal(amount),
+                "transaction_type": "transfer",
+                "transaction_at": tx_time,
+                "category_key": "GENERAL_TRANSFER",
                 # Preserve the user's original input (e.g. "转账"); fall back to
                 # the memo. Never hardcode an English fallback here.
-                raw_input=raw_input or memo,
-                source_account_id=uuid.UUID(source_account_id),
-                target_account_id=uuid.UUID(target_account_id),
-                tags=final_tags,
-                source_thread_id=uuid.UUID(tid) if (tid := get_thread_id(config)) else None,
-            )
+                "raw_input": raw_input or memo,
+                "source_account_id": source_uuid,
+                "target_account_id": target_uuid,
+                "tags": final_tags,
+                "source_thread_id": uuid.UUID(tid) if (tid := get_thread_id(config)) else None,
+                # Idempotency: one wizard confirmation = one transfer. A
+                # double-tapped confirm or client retry re-sends the same
+                # surface_id and replays the first booking instead of moving
+                # money twice.
+                "idempotency_key": f"transfer:{surface_id}" if surface_id else None,
+            }
+            if tx_currency:
+                create_kwargs["currency"] = tx_currency
+
+            result = await service.create_transaction(**create_kwargs)
 
             result["componentType"] = "TransferReceipt"
             return result

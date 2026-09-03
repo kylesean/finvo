@@ -455,6 +455,9 @@ class TransactionCreateResult(BaseModel):
     """
 
     success: bool
+    # True when this response replays an already-booked submission that carried
+    # the same idempotency_key (double-tap / client retry), not a fresh booking.
+    idempotent_replay: bool = False
     transaction_id: str
     amount: Decimal
     currency: str

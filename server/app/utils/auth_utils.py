@@ -54,6 +54,10 @@ def create_access_token(
             "iat": datetime.now(UTC),
             # Unique random token identifier — enables future revocation by jti
             "jti": secrets.token_urlsafe(16),
+            # Type claim so the API auth path can reject refresh tokens: without
+            # it, a leaked 30-day refresh token works directly as a bearer
+            # credential and the access/refresh isolation is one-directional.
+            "type": "access",
         }
     )
 
@@ -128,6 +132,13 @@ def verify_token(token: str) -> str | None:
 
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+
+        # Refresh tokens must never authenticate API calls. Tokens issued
+        # before the ``type`` claim existed carry no ``type`` and stay valid
+        # for one access-TTL cycle (legacy grace), so no forced global logout.
+        if str(payload.get("type")) == "refresh":
+            logger.warning("token_refresh_type_rejected_for_api_access")
+            return None
 
         subject_id: str | None = payload.get("sub")
         if subject_id is None:
