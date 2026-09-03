@@ -9,9 +9,9 @@ sandbox CSP so injected HTML cannot execute scripts in the app's origin.
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import jwt
 import pytest
 from fastapi.testclient import TestClient
-from jose import jwt
 
 from app.core.config import settings
 from app.main import app

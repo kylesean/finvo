@@ -13,9 +13,10 @@ from typing import Annotated, Any
 from urllib.parse import quote
 from uuid import UUID
 
+import jwt
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
-from jose import JWTError, jwt
+from jwt import PyJWTError as JWTError
 from pydantic import BaseModel
 
 from app.core.aliases import CurrentUser, DbSession

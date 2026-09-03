@@ -12,10 +12,8 @@ from datetime import (
 from typing import Any
 from uuid import UUID
 
-from jose import (
-    JWTError,
-    jwt,
-)
+import jwt
+from jwt import PyJWTError as JWTError
 
 from app.core.config import settings
 from app.core.logging import logger
@@ -136,7 +134,7 @@ def get_token_claims(token: str) -> dict[str, Any]:
     tokens — never for authentication decisions.
     """
     try:
-        claims = jwt.get_unverified_claims(token)
+        claims = jwt.decode(token, options={"verify_signature": False})
         return claims if isinstance(claims, dict) else {}
     except JWTError:
         return {}

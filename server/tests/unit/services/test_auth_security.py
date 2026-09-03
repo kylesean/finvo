@@ -36,7 +36,7 @@ class _FakeRedis:
 class TestTokenSecurity:
     """Tests for JWT token security.
 
-    These exercise the real ``verify_token`` (jose) behavior: signature
+    These exercise the real ``verify_token`` (PyJWT) behavior: signature
     verification, expiry rejection, and algorithm pinning.
     """
 
@@ -64,19 +64,19 @@ class TestTokenSecurity:
     @pytest.mark.asyncio
     async def test_access_token_type_claim_present(self) -> None:
         """Access tokens carry ``type: access`` so the auth path can pin on it."""
-        from jose import jwt as jose_jwt
+        import jwt as pyjwt_jwt
 
         token_obj = create_access_token(subject=str(uuid4()))
-        claims = jose_jwt.get_unverified_claims(token_obj.access_token)
+        claims = pyjwt_jwt.decode(token_obj.access_token, options={"verify_signature": False})
         assert claims.get("type") == "access"
 
     @pytest.mark.asyncio
     async def test_token_without_type_claim_rejected(self) -> None:
         """Typeless tokens are rejected: every token must declare its type."""
-        from jose import jwt as jose_jwt
+        import jwt as pyjwt_jwt
 
         subject = str(uuid4())
-        typeless = jose_jwt.encode(
+        typeless = pyjwt_jwt.encode(
             {"sub": subject, "exp": datetime.now(UTC) + timedelta(hours=1), "jti": "typeless-jti"},
             settings.JWT_SECRET_KEY,
             algorithm=settings.JWT_ALGORITHM,
@@ -101,11 +101,11 @@ class TestTokenSecurity:
         verify_token decodes with algorithms=[settings.JWT_ALGORITHM]; a token
         signed with a different algorithm must be rejected.
         """
-        from jose import jwt as jose_jwt
+        import jwt as pyjwt_jwt
 
         subject = str(uuid4())
         # Sign with HS512 while the app expects HS256 (the configured algorithm).
-        wrong_alg_token = jose_jwt.encode(
+        wrong_alg_token = pyjwt_jwt.encode(
             {"sub": subject, "exp": datetime.now(UTC) + timedelta(hours=1)},
             settings.JWT_SECRET_KEY,
             algorithm="HS512",

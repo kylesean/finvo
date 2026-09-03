@@ -27,7 +27,7 @@ dependencies = [
     "psycopg[binary]>=3.2.0",
     "alembic>=1.13.0",
     # Auth & security
-    "python-jose[cryptography]>=3.4.0",
+    "PyJWT[crypto]>=2.10.0",
     "bcrypt>=4.3.0",
     "cryptography>=48.0.1",
     # IANA timezone database for zoneinfo (recurring rule local-time math);
