@@ -54,7 +54,7 @@ final class SpeechSettingsNotifierProvider
 }
 
 String _$speechSettingsNotifierHash() =>
-    r'66febaba058c75686e2ac211376b960592fc5376';
+    r'acc1c0b7c8b7e90eab45024855110a2583f39fa6';
 
 /// Speech settings Notifier
 ///

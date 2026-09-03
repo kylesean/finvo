@@ -2,6 +2,7 @@
 library;
 
 import 'package:finvo/core/network/exceptions/app_exception.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 /// Result of a single page fetch.
 class PageResult<TItem> {
@@ -67,7 +68,7 @@ mixin PaginatedListMixin<TItem, TState> {
   /// Map a fetch error to a user-facing message (defaults to the raw message
   /// of [AppException]s; override for host-specific labels).
   String pageErrorMessage(Object error) =>
-      error is AppException ? error.message : 'Failed to load';
+      error is AppException ? error.message : t.common.loadFailed;
 
   /// Combine the existing list with an incoming page for load-more.
   /// Override to deduplicate overlapping ids.

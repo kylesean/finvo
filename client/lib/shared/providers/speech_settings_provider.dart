@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/shared/services/speech_recognition_service.dart';
 import 'package:finvo/shared/models/speech_settings.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'speech_settings_provider.g.dart';
 
@@ -53,7 +54,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
       state = state.copyWith(
         isLoading: false,
         settings: const SpeechSettings(), // Use default settings
-        errorMessage: 'Failed to load settings',
+        errorMessage: t.common.loadFailed,
       );
     }
   }
@@ -86,7 +87,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
     } else {
       state = state.copyWith(
         isSaving: false,
-        errorMessage: 'Failed to save settings',
+        errorMessage: t.common.saveFailed,
       );
     }
   }
@@ -116,7 +117,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
     } else {
       state = state.copyWith(
         isSaving: false,
-        errorMessage: 'Failed to save settings',
+        errorMessage: t.common.saveFailed,
       );
     }
     return success;
@@ -136,7 +137,7 @@ class SpeechSettingsNotifier extends _$SpeechSettingsNotifier {
     } else {
       state = state.copyWith(
         isSaving: false,
-        errorMessage: 'Failed to save settings',
+        errorMessage: t.common.saveFailed,
       );
     }
   }

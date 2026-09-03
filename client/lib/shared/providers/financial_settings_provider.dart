@@ -10,6 +10,7 @@ import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/shared/models/financial_settings.dart';
 import 'package:finvo/shared/services/response_parser.dart';
 import 'package:finvo/shared/providers/generation_guard.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'financial_settings_provider.g.dart';
 
@@ -86,7 +87,7 @@ class FinancialSettingsNotifier extends _$FinancialSettingsNotifier {
       );
     } catch (e) {
       if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
-      String errorMessage = 'Failed to load financial settings';
+      String errorMessage = t.common.loadFailed;
       if (e is AppException) {
         errorMessage = e.message;
       }

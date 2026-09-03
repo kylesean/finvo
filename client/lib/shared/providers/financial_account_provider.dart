@@ -9,6 +9,7 @@ import 'package:finvo/shared/providers/generation_guard.dart';
 import 'package:finvo/shared/services/financial_account_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:logging/logging.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 part 'financial_account_provider.freezed.dart';
 part 'financial_account_provider.g.dart';
@@ -217,7 +218,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
         error: null,
       );
     } catch (e) {
-      String errorMessage = 'Failed to load cash sources';
+      String errorMessage = t.common.loadFailed;
       if (e is AppException) {
         errorMessage = e.message;
       }
