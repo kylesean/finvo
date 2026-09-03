@@ -89,10 +89,10 @@ async def query_space_summary(
             from app.models.transaction import Transaction
             from app.services.statistics_scope import settled_spending_conditions, user_month_start_utc
 
-            # BF-P1-8: month boundary in the USER's timezone (not UTC), and the
-            # same CLEARED + non-SYSTEM scope the budget engine uses. A UTC
-            # boundary shifts UTC+8 users' month-end spending into the wrong
-            # month; PENDING/SYSTEM rows inflate the "spent this month" answer.
+            # Month boundary in the USER's timezone (not UTC), and the same
+            # CLEARED + non-SYSTEM scope the budget engine uses. A UTC boundary
+            # shifts UTC+8 users' month-end spending into the wrong month;
+            # PENDING/SYSTEM rows inflate the "spent this month" answer.
             user_tz: str | None = None
             try:
                 user_row = await session.execute(select(User.timezone).where(User.uuid == user_uuid))
