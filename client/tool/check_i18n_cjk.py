@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """Verify localized i18n files contain no untranslated CJK strings.
 
-Policy per file:
+Two scopes:
+1. JSON: per-file policy below.
+2. Dart (lib/): user-visible string literals must not contain CJK — copy
+   belongs in slang files. Line comments (//, ///) and /* */ blocks are
+   skipped (developer notes, not UI). A trailing `// cjk-allow: <reason>`
+   pragma exempts legit locale data (e.g. Intl date skeletons like
+   'yyyy年M月', which are per-locale format patterns, not copy).
+
+Policy per JSON file:
 - en.i18n.json: no CJK characters anywhere (English has no kanji usage).
 - ko.i18n.json: no CJK outside the `locale` section, where native language
   names (e.g. "简体中文") are intentionally kept for the language picker.
@@ -94,7 +102,64 @@ def main() -> int:
     for f in files:
         if check_file(f, args.fix) != 0:
             failed = True
+    if check_dart_lib() != 0:
+        failed = True
     return 1 if failed else 0
+
+
+def check_dart_lib() -> int:
+    """Scan lib/**/*.dart for CJK in code (comments stripped).
+
+    Full-line (//, ///) and /* */ block comments are developer notes, not
+    UI copy. A `cjk-allow` pragma on the raw line exempts legit locale data.
+    Returns 0 when clean.
+    """
+    findings: list[str] = []
+    in_block = False
+    for path in sorted((ROOT / "lib").rglob("*.dart")):
+        # Generated code mirrors slang output — the JSON gate is authoritative.
+        if ".g.dart" in path.name or ".freezed.dart" in path.name:
+            continue
+        # GenUI catalog descriptions feed the MODEL (tool/component schemas),
+        # never the screen — translating them has zero user impact.
+        if path.name.startswith("catalog_"):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        for lineno, raw in enumerate(text.split("\n"), 1):
+            if "cjk-allow" in raw:
+                continue
+            line = raw
+            if in_block:
+                if "*/" in line:
+                    line = line.split("*/", 1)[1]
+                    in_block = False
+                else:
+                    continue
+            while "/*" in line:
+                before, _, rest = line.partition("/*")
+                if "*/" in rest:
+                    after = rest.split("*/", 1)[1]
+                    line = before + after
+                else:
+                    line = before
+                    in_block = True
+                    break
+            stripped = line.strip()
+            if stripped.startswith("//"):
+                continue
+            code = line.split("//", 1)[0]
+            if CJK.search(code):
+                findings.append(f"{path.relative_to(ROOT)}:{lineno}: {stripped[:100]}")
+    if findings:
+        print(f"[FAIL] lib/: {len(findings)} CJK hits in Dart code:")
+        for finding in findings:
+            print(f"  - {finding}")
+        return 1
+    print("[OK] lib/: no CJK in Dart code")
+    return 0
 
 
 if __name__ == "__main__":

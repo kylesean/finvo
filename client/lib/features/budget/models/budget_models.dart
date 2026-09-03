@@ -2,6 +2,7 @@ import 'package:decimal/decimal.dart';
 import 'package:finvo/core/constants/category_constants.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Parses a date value into a [DateTime], tolerating null/empty/missing values
 /// (falling back to the epoch) so a single malformed date can't crash parsing.
@@ -147,7 +148,7 @@ class Budget {
       scope: BudgetScope.fromString(json['scope'] as String),
       categoryKey: json['category_key'] as String?,
       amount: AmountFormatter.parseDecimalFromJson(json['amount']),
-      currencyCode: json['currency_code'] as String? ?? 'CNY',
+      currencyCode: json['currency_code'] as String? ?? Currency.defaultCode,
       periodType: BudgetPeriodType.fromString(json['period_type'] as String),
       periodAnchorDay: json['period_anchor_day'] as int? ?? 1,
       status: BudgetStatus.fromString(json['status'] as String),
@@ -177,7 +178,7 @@ class Budget {
     name: '',
     scope: BudgetScope.total,
     amount: Decimal.zero,
-    currencyCode: 'CNY',
+    currencyCode: Currency.defaultCode,
     periodType: BudgetPeriodType.monthly,
     status: BudgetStatus.active,
     rolloverEnabled: false,
@@ -406,7 +407,7 @@ class BudgetCreateRequest {
     this.periodType = BudgetPeriodType.monthly,
     this.periodAnchorDay = 1,
     this.rolloverEnabled = true,
-    this.currencyCode = 'CNY',
+    this.currencyCode = Currency.defaultCode,
     this.name,
   });
 

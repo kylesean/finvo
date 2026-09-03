@@ -251,6 +251,7 @@ class _Translations$transaction$ko extends Translations$transaction$zh {
 	@override String get account => '계좌';
 	@override String get time => '시간';
 	@override String get location => '장소';
+	@override String get recorder => '기록자';
 	@override String get transactionDetail => '거래 상세';
 	@override String get favorite => '즐겨찾기';
 	@override String get confirmDelete => '삭제 확인';
@@ -756,6 +757,7 @@ class _Translations$chat$ko extends Translations$chat$zh {
 	@override String aiCommunicationError({required Object error}) => '죄송합니다. AI 어시스턴트 통신 오류: ${error}';
 	@override String get uploadStillInProgress => '첨부 파일이 아직 업로드 중입니다. 잠시 후 다시 시도해 주세요';
 	@override String get sendFailed => '메시지 전송에 실패했습니다. 잠시 후 다시 시도해 주세요';
+	@override String get sendInterrupted => '응답이 중단되었습니다. 기록된 내용은 홈에서 확인할 수 있습니다.';
 	@override String attachmentUploadFailed({required Object files}) => '첨부 파일 업로드에 실패했습니다: ${files}';
 	@override String get fileUploadFailed => '파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요';
 	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '이체 경로 확인됨: ${source}에서 ${target}으로, 금액 ${currency} ${amount}. 이 이체를 실행해 주세요.';
@@ -1186,7 +1188,7 @@ class _Translations$auth$password$ko extends Translations$auth$password$zh {
 	@override String get label => '비밀번호';
 	@override String get placeholder => '비밀번호를 입력하세요';
 	@override String get required => '비밀번호는 필수입니다';
-	@override String get tooShort => '비밀번호는 6자 이상이어야 합니다';
+	@override String get tooShort => '비밀번호는 8자 이상이어야 합니다';
 	@override String get mustContainNumbersAndLetters => '비밀번호는 숫자와 영문자를 포함해야 합니다';
 	@override String get confirm => '비밀번호 확인';
 	@override String get confirmPlaceholder => '비밀번호를 다시 입력하세요';
@@ -2765,7 +2767,7 @@ extension on TranslationsKo {
 			'auth.password.label' => '비밀번호',
 			'auth.password.placeholder' => '비밀번호를 입력하세요',
 			'auth.password.required' => '비밀번호는 필수입니다',
-			'auth.password.tooShort' => '비밀번호는 6자 이상이어야 합니다',
+			'auth.password.tooShort' => '비밀번호는 8자 이상이어야 합니다',
 			'auth.password.mustContainNumbersAndLetters' => '비밀번호는 숫자와 영문자를 포함해야 합니다',
 			'auth.password.confirm' => '비밀번호 확인',
 			'auth.password.confirmPlaceholder' => '비밀번호를 다시 입력하세요',
@@ -2803,6 +2805,7 @@ extension on TranslationsKo {
 			'transaction.account' => '계좌',
 			'transaction.time' => '시간',
 			'transaction.location' => '장소',
+			'transaction.recorder' => '기록자',
 			'transaction.transactionDetail' => '거래 상세',
 			'transaction.favorite' => '즐겨찾기',
 			'transaction.confirmDelete' => '삭제 확인',
@@ -3186,9 +3189,9 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.nextTime' => '다음',
 			'forecast.recurringTransaction.sortByTime' => '시간순 정렬',
 			'forecast.recurringTransaction.allPeriod' => '모든 주기',
-			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}주기 (${count})',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}주기 (${count})',
 			'forecast.recurringTransaction.confirmDelete' => '삭제 확인',
 			'forecast.recurringTransaction.confirmActivate' => '활성화 확인',
 			'forecast.recurringTransaction.confirmPause' => '정지 확인',
@@ -3584,6 +3587,7 @@ extension on TranslationsKo {
 			'chat.aiCommunicationError' => ({required Object error}) => '죄송합니다. AI 어시스턴트 통신 오류: ${error}',
 			'chat.uploadStillInProgress' => '첨부 파일이 아직 업로드 중입니다. 잠시 후 다시 시도해 주세요',
 			'chat.sendFailed' => '메시지 전송에 실패했습니다. 잠시 후 다시 시도해 주세요',
+			'chat.sendInterrupted' => '응답이 중단되었습니다. 기록된 내용은 홈에서 확인할 수 있습니다.',
 			'chat.attachmentUploadFailed' => ({required Object files}) => '첨부 파일 업로드에 실패했습니다: ${files}',
 			'chat.fileUploadFailed' => '파일 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요',
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '이체 경로 확인됨: ${source}에서 ${target}으로, 금액 ${currency} ${amount}. 이 이체를 실행해 주세요.',
@@ -3699,10 +3703,10 @@ extension on TranslationsKo {
 			'account.closedBadge' => '정지됨',
 			'account.reopenAccount' => '계좌 재활성화',
 			'account.reopenConfirm' => '이 계좌는 재활성화(ACTIVE)되어 순자산과 새 거래에 다시 포함됩니다.',
-			'account.reopenSuccess' => '계좌가 재활성화되었습니다',
-			'account.closeDisposalTitle' => '정지 전 잔액 처리',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenSuccess' => '계좌가 재활성화되었습니다',
+			'account.closeDisposalTitle' => '정지 전 잔액 처리',
 			'account.disposalKeepDesc' => '잔액을 현재 그대로 고정하고 보관합니다. 새 내역은 생성되지 않습니다.',
 			'account.disposalTransferDesc' => '실제 이체 내역을 만들어 잔액을 다른 계좌로 이동한 후 정지합니다.',
 			'account.disposalWriteoffDesc' => '지출(또는 수입) 내역을 만들어 잔액을 정리한 후 정지합니다.',

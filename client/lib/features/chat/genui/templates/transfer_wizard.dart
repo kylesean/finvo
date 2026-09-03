@@ -17,6 +17,7 @@ import 'package:finvo/features/chat/providers/chat_history_provider.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Transfer wizard data model (Data Layer)
 class TransferWizardData {
@@ -73,7 +74,7 @@ class TransferWizardData {
 
     return TransferWizardData(
       amount: amount,
-      currency: json['currency']?.toString() ?? 'CNY',
+      currency: json['currency']?.toString() ?? Currency.defaultCode,
       sourceAccounts: coerceAccounts(json['sourceAccounts']),
       targetAccounts: coerceAccounts(json['targetAccounts']),
       preselectedSourceId: json['preselectedSourceId']?.toString(),

@@ -251,6 +251,7 @@ class _Translations$transaction$zh_Hant extends Translations$transaction$zh {
 	@override String get account => '帳戶';
 	@override String get time => '時間';
 	@override String get location => '地點';
+	@override String get recorder => '記錄人';
 	@override String get transactionDetail => '交易詳情';
 	@override String get favorite => '收藏';
 	@override String get confirmDelete => '確認刪除';
@@ -756,6 +757,7 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override String aiCommunicationError({required Object error}) => '抱歉，AI 助手通訊錯誤：${error}';
 	@override String get uploadStillInProgress => '附件仍在傳輸中，請稍後再試';
 	@override String get sendFailed => '傳送訊息失敗，請稍後再試';
+	@override String get sendInterrupted => '本次回覆中斷，已記錄的內容可在首頁確認。';
 	@override String attachmentUploadFailed({required Object files}) => '附件上傳失敗：${files}';
 	@override String get fileUploadFailed => '檔案上傳失敗，請稍後再試';
 	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '已確認轉帳路徑：從 ${source} 到 ${target}，金額 ${currency} ${amount}。請執行該轉帳操作。';
@@ -1186,7 +1188,7 @@ class _Translations$auth$password$zh_Hant extends Translations$auth$password$zh 
 	@override String get label => '密碼';
 	@override String get placeholder => '請輸入您的密碼';
 	@override String get required => '密碼不能為空';
-	@override String get tooShort => '密碼長度不能少於 6 位';
+	@override String get tooShort => '密碼長度不能少於 8 位';
 	@override String get mustContainNumbersAndLetters => '密碼必須包含數字和字母';
 	@override String get confirm => '確認密碼';
 	@override String get confirmPlaceholder => '請再次輸入您的密碼';
@@ -2765,7 +2767,7 @@ extension on TranslationsZhHant {
 			'auth.password.label' => '密碼',
 			'auth.password.placeholder' => '請輸入您的密碼',
 			'auth.password.required' => '密碼不能為空',
-			'auth.password.tooShort' => '密碼長度不能少於 6 位',
+			'auth.password.tooShort' => '密碼長度不能少於 8 位',
 			'auth.password.mustContainNumbersAndLetters' => '密碼必須包含數字和字母',
 			'auth.password.confirm' => '確認密碼',
 			'auth.password.confirmPlaceholder' => '請再次輸入您的密碼',
@@ -2803,6 +2805,7 @@ extension on TranslationsZhHant {
 			'transaction.account' => '帳戶',
 			'transaction.time' => '時間',
 			'transaction.location' => '地點',
+			'transaction.recorder' => '記錄人',
 			'transaction.transactionDetail' => '交易詳情',
 			'transaction.favorite' => '收藏',
 			'transaction.confirmDelete' => '確認刪除',
@@ -3186,9 +3189,9 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.nextTime' => '下次',
 			'forecast.recurringTransaction.sortByTime' => '按時間排序',
 			'forecast.recurringTransaction.allPeriod' => '全部週期',
-			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}週期 (${count})',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}週期 (${count})',
 			'forecast.recurringTransaction.confirmDelete' => '確認刪除',
 			'forecast.recurringTransaction.confirmActivate' => '確認啟用',
 			'forecast.recurringTransaction.confirmPause' => '確認暫停',
@@ -3584,6 +3587,7 @@ extension on TranslationsZhHant {
 			'chat.aiCommunicationError' => ({required Object error}) => '抱歉，AI 助手通訊錯誤：${error}',
 			'chat.uploadStillInProgress' => '附件仍在傳輸中，請稍後再試',
 			'chat.sendFailed' => '傳送訊息失敗，請稍後再試',
+			'chat.sendInterrupted' => '本次回覆中斷，已記錄的內容可在首頁確認。',
 			'chat.attachmentUploadFailed' => ({required Object files}) => '附件上傳失敗：${files}',
 			'chat.fileUploadFailed' => '檔案上傳失敗，請稍後再試',
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '已確認轉帳路徑：從 ${source} 到 ${target}，金額 ${currency} ${amount}。請執行該轉帳操作。',
@@ -3699,10 +3703,10 @@ extension on TranslationsZhHant {
 			'account.closedBadge' => '已停用',
 			'account.reopenAccount' => '重新啟用帳戶',
 			'account.reopenConfirm' => '該帳戶將被重新啟用（ACTIVE），重新計入淨值並可用於新交易。',
-			'account.reopenSuccess' => '帳戶已重新啟用',
-			'account.closeDisposalTitle' => '處理停用前餘額',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenSuccess' => '帳戶已重新啟用',
+			'account.closeDisposalTitle' => '處理停用前餘額',
 			'account.disposalKeepDesc' => '直接歸檔，餘額保持當前數值不再變動；不產生任何流水。',
 			'account.disposalTransferDesc' => '產生一筆真實的轉帳流水，把餘額轉入指定帳戶後再停用。',
 			'account.disposalWriteoffDesc' => '產生一筆支出（或收入）流水核銷餘額，視為已消耗/免除後再停用。',

@@ -1,4 +1,3 @@
-import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/widgets/amount_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +17,7 @@ import 'package:finvo/shared/widgets/app_filter_chip.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/features/budget/widgets/budget_period_type_picker.dart';
 import 'package:finvo/features/budget/widgets/budget_anchor_day_picker.dart';
+import 'package:finvo/features/budget/utils/budget_form_validation.dart';
 
 class BudgetFormPage extends ConsumerStatefulWidget {
   final String? editId;
@@ -587,8 +587,8 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
       return;
     }
 
-    final amount = Decimal.tryParse(amountText);
-    if (amount == null || amount <= Decimal.zero) {
+    final amount = parseBudgetAmount(amountText);
+    if (amount == null) {
       TopToast.error(context, t.budget.invalidAmount);
       return;
     }

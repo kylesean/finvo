@@ -251,6 +251,7 @@ class _Translations$transaction$ja extends Translations$transaction$zh {
 	@override String get account => '口座';
 	@override String get time => '時間';
 	@override String get location => '場所';
+	@override String get recorder => '記録者';
 	@override String get transactionDetail => '取引詳細';
 	@override String get favorite => 'お気に入り';
 	@override String get confirmDelete => '削除の確認';
@@ -756,6 +757,7 @@ class _Translations$chat$ja extends Translations$chat$zh {
 	@override String aiCommunicationError({required Object error}) => '申し訳ありません、AIアシスタントとの通信エラーが発生しました：${error}';
 	@override String get uploadStillInProgress => '添付ファイルはまだアップロード中です。後でもう一度お試しください';
 	@override String get sendFailed => 'メッセージの送信に失敗しました。後でもう一度お試しください';
+	@override String get sendInterrupted => '返信が中断されました。記録済みの内容はホームで確認できます。';
 	@override String attachmentUploadFailed({required Object files}) => '添付ファイルのアップロードに失敗しました: ${files}';
 	@override String get fileUploadFailed => 'ファイルのアップロードに失敗しました。後でもう一度お試しください';
 	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => '振込経路を確認しました：${source} から ${target}、金額 ${currency} ${amount}。この振込を実行してください。';
@@ -1186,7 +1188,7 @@ class _Translations$auth$password$ja extends Translations$auth$password$zh {
 	@override String get label => 'パスワード';
 	@override String get placeholder => 'パスワードを入力してください';
 	@override String get required => 'パスワードは必須です';
-	@override String get tooShort => 'パスワードは6文字以上で入力してください';
+	@override String get tooShort => 'パスワードは8文字以上で入力してください';
 	@override String get mustContainNumbersAndLetters => 'パスワードは英数字を含める必要があります';
 	@override String get confirm => 'パスワード確認';
 	@override String get confirmPlaceholder => 'もう一度パスワードを入力してください';
@@ -2765,7 +2767,7 @@ extension on TranslationsJa {
 			'auth.password.label' => 'パスワード',
 			'auth.password.placeholder' => 'パスワードを入力してください',
 			'auth.password.required' => 'パスワードは必須です',
-			'auth.password.tooShort' => 'パスワードは6文字以上で入力してください',
+			'auth.password.tooShort' => 'パスワードは8文字以上で入力してください',
 			'auth.password.mustContainNumbersAndLetters' => 'パスワードは英数字を含める必要があります',
 			'auth.password.confirm' => 'パスワード確認',
 			'auth.password.confirmPlaceholder' => 'もう一度パスワードを入力してください',
@@ -2803,6 +2805,7 @@ extension on TranslationsJa {
 			'transaction.account' => '口座',
 			'transaction.time' => '時間',
 			'transaction.location' => '場所',
+			'transaction.recorder' => '記録者',
 			'transaction.transactionDetail' => '取引詳細',
 			'transaction.favorite' => 'お気に入り',
 			'transaction.confirmDelete' => '削除の確認',
@@ -3186,9 +3189,9 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.nextTime' => '次回',
 			'forecast.recurringTransaction.sortByTime' => '時間順',
 			'forecast.recurringTransaction.allPeriod' => 'すべての周期',
-			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} (${count} 件)',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} (${count} 件)',
 			'forecast.recurringTransaction.confirmDelete' => '削除確認',
 			'forecast.recurringTransaction.confirmActivate' => '有効化確認',
 			'forecast.recurringTransaction.confirmPause' => '停止確認',
@@ -3584,6 +3587,7 @@ extension on TranslationsJa {
 			'chat.aiCommunicationError' => ({required Object error}) => '申し訳ありません、AIアシスタントとの通信エラーが発生しました：${error}',
 			'chat.uploadStillInProgress' => '添付ファイルはまだアップロード中です。後でもう一度お試しください',
 			'chat.sendFailed' => 'メッセージの送信に失敗しました。後でもう一度お試しください',
+			'chat.sendInterrupted' => '返信が中断されました。記録済みの内容はホームで確認できます。',
 			'chat.attachmentUploadFailed' => ({required Object files}) => '添付ファイルのアップロードに失敗しました: ${files}',
 			'chat.fileUploadFailed' => 'ファイルのアップロードに失敗しました。後でもう一度お試しください',
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '振込経路を確認しました：${source} から ${target}、金額 ${currency} ${amount}。この振込を実行してください。',
@@ -3699,10 +3703,10 @@ extension on TranslationsJa {
 			'account.closedBadge' => '停止中',
 			'account.reopenAccount' => '口座を再有効化',
 			'account.reopenConfirm' => 'この口座は再有効化（ACTIVE）され、純資産と新しい取引に再度含まれます。',
-			'account.reopenSuccess' => '口座を再有効化しました',
-			'account.closeDisposalTitle' => '停止前の残高の処理',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenSuccess' => '口座を再有効化しました',
+			'account.closeDisposalTitle' => '停止前の残高の処理',
 			'account.disposalKeepDesc' => '残高を現在のまま固定してアーカイブします。新しい明細は作成されません。',
 			'account.disposalTransferDesc' => '実際の振替明細を作成し、残高を別の口座へ移動してから停止します。',
 			'account.disposalWriteoffDesc' => '支出（または収入）明細を作成して残高を消し込み、それから停止します。',

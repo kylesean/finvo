@@ -1747,6 +1747,9 @@ class Translations$chat$zh {
 	/// zh: '发送消息失败，请稍后再试'
 	String get sendFailed => '发送消息失败，请稍后再试';
 
+	/// zh: '本次回复中断，已记录的内容可在首页确认。'
+	String get sendInterrupted => '本次回复中断，已记录的内容可在首页确认。';
+
 	/// zh: '附件上传失败：$files'
 	String attachmentUploadFailed({required Object files}) => '附件上传失败：${files}';
 
@@ -2636,8 +2639,8 @@ class Translations$auth$password$zh {
 	/// zh: '密码不能为空'
 	String get required => '密码不能为空';
 
-	/// zh: '密码长度不能少于6位'
-	String get tooShort => '密码长度不能少于6位';
+	/// zh: '密码长度不能少于8位'
+	String get tooShort => '密码长度不能少于8位';
 
 	/// zh: '密码必须包含数字和字母'
 	String get mustContainNumbersAndLetters => '密码必须包含数字和字母';
@@ -5640,7 +5643,7 @@ extension on Translations {
 			'auth.password.label' => '密码',
 			'auth.password.placeholder' => '请输入您的密码',
 			'auth.password.required' => '密码不能为空',
-			'auth.password.tooShort' => '密码长度不能少于6位',
+			'auth.password.tooShort' => '密码长度不能少于8位',
 			'auth.password.mustContainNumbersAndLetters' => '密码必须包含数字和字母',
 			'auth.password.confirm' => '确认密码',
 			'auth.password.confirmPlaceholder' => '请再次输入您的密码',
@@ -6457,6 +6460,7 @@ extension on Translations {
 			'chat.aiCommunicationError' => ({required Object error}) => '抱歉，AI 助手通信错误：${error}',
 			'chat.uploadStillInProgress' => '附件仍在上传中，请稍后再试',
 			'chat.sendFailed' => '发送消息失败，请稍后再试',
+			'chat.sendInterrupted' => '本次回复中断，已记录的内容可在首页确认。',
 			'chat.attachmentUploadFailed' => ({required Object files}) => '附件上传失败：${files}',
 			'chat.fileUploadFailed' => '文件上传失败，请稍后再试',
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => '已确认转账路径：从 ${source} 到 ${target}，金额 ${currency} ${amount}。请执行该转账操作。',
@@ -6572,9 +6576,9 @@ extension on Translations {
 			'account.closedBadge' => '已停用',
 			'account.reopenAccount' => '重新启用账户',
 			'account.reopenConfirm' => '该账户将被重新启用（ACTIVE），重新计入净值并可用于新交易。',
-			'account.reopenSuccess' => '账户已重新启用',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenSuccess' => '账户已重新启用',
 			'account.closeDisposalTitle' => '处理停用前余额',
 			'account.disposalKeepDesc' => '直接归档，余额保持当前数值不再变动；不生成任何流水。',
 			'account.disposalTransferDesc' => '生成一笔真实的转账流水，把余额转入指定账户后再停用。',

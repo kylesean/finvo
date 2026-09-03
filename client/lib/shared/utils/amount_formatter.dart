@@ -99,7 +99,7 @@ class AmountFormatter {
   static String formatTransaction({
     required TransactionType type,
     required double amount,
-    String currency = 'CNY',
+    String currency = Currency.defaultCode,
     bool showSign = true,
     bool compact = false,
   }) {
@@ -133,7 +133,7 @@ class AmountFormatter {
   ///
   /// [amount] - Amount
   /// [currencyCode] - Currency code
-  static String formatCommon(double amount, {String currencyCode = 'CNY'}) {
+  static String formatCommon(double amount, {String currencyCode = Currency.defaultCode}) {
     final symbol = getCurrencySymbol(currencyCode);
     final absAmount = amount.abs();
     final formattedValue = getNumberFormat(currencyCode).format(absAmount);
@@ -148,12 +148,12 @@ class AmountFormatter {
   /// symbol follows [currencyCode] instead of a constant.
   ///
   /// [amount] - Backend amount string (parsed defensively, falls back to 0)
-  /// [currencyCode] - Currency code, default 'CNY'
+  /// [currencyCode] - Currency code, default CNY
   ///
   /// Returns e.g. `"¥1,234.56"`.
   static String formatWithCurrency(
     String amount, {
-    String currencyCode = 'CNY',
+    String currencyCode = Currency.defaultCode,
   }) {
     final symbol = getCurrencySymbol(currencyCode);
     final value = double.tryParse(amount) ?? 0.0;
@@ -180,8 +180,8 @@ class AmountFormatter {
         effectiveLocale.contains('hk');
 
     if (isChineseLocale) {
-      final wan = isTraditionalChinese ? '萬' : '万';
-      final yi = isTraditionalChinese ? '億' : '亿';
+      final wan = isTraditionalChinese ? '萬' : '万'; // cjk-allow: CJK numeral units (locale data, not UI copy)
+      final yi = isTraditionalChinese ? '億' : '亿'; // cjk-allow: CJK numeral units (locale data, not UI copy)
       // Chinese units: 10k, 100M
       if (amount >= 100000000) {
         return '${(amount / 100000000).toStringAsFixed(1)}$yi';

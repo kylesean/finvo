@@ -297,12 +297,40 @@ void main() {
       expect(AmountFormatter.getCurrencySymbol('KRW'), '₩');
     });
 
+    test('non-enum fallbacks in switch (RMB/MXN/TRY)', () {
+      expect(AmountFormatter.getCurrencySymbol('RMB'), '¥');
+      expect(AmountFormatter.getCurrencySymbol('MXN'), '\$');
+      expect(AmountFormatter.getCurrencySymbol('TRY'), '₺');
+    });
+
     test('unknown currency returns code as fallback', () {
       expect(AmountFormatter.getCurrencySymbol('XYZ'), 'XYZ');
     });
 
     test('case insensitive lookup', () {
       expect(AmountFormatter.getCurrencySymbol('cny'), '¥');
+    });
+  });
+
+  group('AmountFormatter locale guard (zh_CN + en_US)', () {
+    test('compact never leaks 万 into en_US', () {
+      final result = AmountFormatter.formatCompact(50000.0, locale: 'en_US');
+      expect(result, contains('K'));
+      expect(result, isNot(contains('万')));
+    });
+
+    test('default-locale formatTransaction stays stable under en_US', () {
+      final previous = Intl.defaultLocale;
+      Intl.defaultLocale = 'en_US';
+      try {
+        final result = AmountFormatter.formatTransaction(
+          type: TransactionType.income,
+          amount: 123.45,
+        );
+        expect(result, contains('123.45'));
+      } finally {
+        Intl.defaultLocale = previous;
+      }
     });
   });
 

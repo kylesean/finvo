@@ -251,6 +251,7 @@ class _Translations$transaction$en extends Translations$transaction$zh {
 	@override String get account => 'Account';
 	@override String get time => 'Time';
 	@override String get location => 'Location';
+	@override String get recorder => 'Recorder';
 	@override String get transactionDetail => 'Transaction Details';
 	@override String get favorite => 'Favorite';
 	@override String get confirmDelete => 'Confirm Delete';
@@ -756,6 +757,7 @@ class _Translations$chat$en extends Translations$chat$zh {
 	@override String aiCommunicationError({required Object error}) => 'Sorry, AI assistant communication error: ${error}';
 	@override String get uploadStillInProgress => 'Attachment still uploading, please try again later';
 	@override String get sendFailed => 'Failed to send message, please try again later';
+	@override String get sendInterrupted => 'This reply was interrupted. Anything already recorded can be confirmed on the Home feed.';
 	@override String attachmentUploadFailed({required Object files}) => 'Attachment upload failed: ${files}';
 	@override String get fileUploadFailed => 'File upload failed, please try again later';
 	@override String transferPathConfirmedLegacy({required Object source, required Object target, required Object currency, required Object amount}) => 'Confirmed transfer path: from ${source} to ${target}, amount ${currency} ${amount}. Please execute this transfer operation.';
@@ -1186,7 +1188,7 @@ class _Translations$auth$password$en extends Translations$auth$password$zh {
 	@override String get label => 'Password';
 	@override String get placeholder => 'Enter your password';
 	@override String get required => 'Password is required';
-	@override String get tooShort => 'Password must be at least 6 characters';
+	@override String get tooShort => 'Password must be at least 8 characters';
 	@override String get mustContainNumbersAndLetters => 'Password must contain both numbers and letters';
 	@override String get confirm => 'Confirm Password';
 	@override String get confirmPlaceholder => 'Re-enter your password';
@@ -2768,7 +2770,7 @@ extension on TranslationsEn {
 			'auth.password.label' => 'Password',
 			'auth.password.placeholder' => 'Enter your password',
 			'auth.password.required' => 'Password is required',
-			'auth.password.tooShort' => 'Password must be at least 6 characters',
+			'auth.password.tooShort' => 'Password must be at least 8 characters',
 			'auth.password.mustContainNumbersAndLetters' => 'Password must contain both numbers and letters',
 			'auth.password.confirm' => 'Confirm Password',
 			'auth.password.confirmPlaceholder' => 'Re-enter your password',
@@ -2803,6 +2805,7 @@ extension on TranslationsEn {
 			'transaction.account' => 'Account',
 			'transaction.time' => 'Time',
 			'transaction.location' => 'Location',
+			'transaction.recorder' => 'Recorder',
 			'transaction.transactionDetail' => 'Transaction Details',
 			'transaction.favorite' => 'Favorite',
 			'transaction.confirmDelete' => 'Confirm Delete',
@@ -3186,9 +3189,9 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.nextTime' => 'Next',
 			'forecast.recurringTransaction.sortByTime' => 'Sort by time',
 			'forecast.recurringTransaction.allPeriod' => 'All recurring',
-			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} recurring (${count})',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} recurring (${count})',
 			'forecast.recurringTransaction.confirmDelete' => 'Confirm Delete',
 			'forecast.recurringTransaction.confirmActivate' => 'Confirm Activate',
 			'forecast.recurringTransaction.confirmPause' => 'Confirm Pause',
@@ -3584,6 +3587,7 @@ extension on TranslationsEn {
 			'chat.aiCommunicationError' => ({required Object error}) => 'Sorry, AI assistant communication error: ${error}',
 			'chat.uploadStillInProgress' => 'Attachment still uploading, please try again later',
 			'chat.sendFailed' => 'Failed to send message, please try again later',
+			'chat.sendInterrupted' => 'This reply was interrupted. Anything already recorded can be confirmed on the Home feed.',
 			'chat.attachmentUploadFailed' => ({required Object files}) => 'Attachment upload failed: ${files}',
 			'chat.fileUploadFailed' => 'File upload failed, please try again later',
 			'chat.transferPathConfirmedLegacy' => ({required Object source, required Object target, required Object currency, required Object amount}) => 'Confirmed transfer path: from ${source} to ${target}, amount ${currency} ${amount}. Please execute this transfer operation.',
@@ -3699,10 +3703,10 @@ extension on TranslationsEn {
 			'account.closedBadge' => 'Closed',
 			'account.reopenAccount' => 'Reopen Account',
 			'account.reopenConfirm' => 'This account will be reopened (ACTIVE): it will count toward net worth and be available for new transactions again.',
-			'account.reopenSuccess' => 'Account reopened',
-			'account.closeDisposalTitle' => 'Handle remaining balance',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenSuccess' => 'Account reopened',
+			'account.closeDisposalTitle' => 'Handle remaining balance',
 			'account.disposalKeepDesc' => 'Freeze the balance as-is and archive the account. No new record is created.',
 			'account.disposalTransferDesc' => 'Creates a real transfer record moving the balance to another account, then closes.',
 			'account.disposalWriteoffDesc' => 'Creates an expense (or income) record that writes the balance off, then closes.',

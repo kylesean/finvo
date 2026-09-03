@@ -16,7 +16,7 @@ import 'package:finvo/shared/utils/time_utils.dart';
 /// [compact] - Whether to use compact notation (1.2M, 3.5K)
 String formatAmount(
   dynamic amount, {
-  String currency = 'CNY',
+  String currency = Currency.defaultCode,
   bool showSign = false,
   bool compact = false,
 }) {
@@ -45,7 +45,7 @@ String getCurrencySymbol(String currency) {
   }
 
   switch (currency.toUpperCase()) {
-    case 'CNY':
+    case Currency.defaultCode:
     case 'RMB':
       return '¥';
     case 'USD':
