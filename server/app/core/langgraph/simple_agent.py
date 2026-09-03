@@ -66,8 +66,8 @@ class SimpleLangChainAgent:
                 on first use (the pool is eagerly warmed up in the app lifespan).
 
         Note:
-            Construction is side-effect free. The LLM tool binding happens inside
-            create_agent_node at graph-build time (see get_agent), and the
+            Construction is side-effect free. Skill-specific tool binding happens
+            per agent_node call (see nodes._skill_tools), and the
             "simple_agent_initialized" log is emitted on the first get_agent()
             call — so importing this module never triggers I/O or log noise.
         """
@@ -103,9 +103,13 @@ class SimpleLangChainAgent:
             from app.core.langgraph.middleware import SkillMiddleware
 
             self._middlewares = [
-                DynamicContextMiddleware(),
                 AttachmentMiddleware(get_session_context),
                 SkillMiddleware(),
+                # Dynamic context runs LAST and appends at the tail of the
+                # system message, so the volatile date sits after the static
+                # sections (system.md, skills) and never busts the provider's
+                # prompt-cache prefix.
+                DynamicContextMiddleware(),
             ]
 
             logger.info(
