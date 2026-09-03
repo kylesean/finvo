@@ -22,13 +22,13 @@ from uuid import UUID
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.errors import GraphRecursionError
+from sqlalchemy import select
 
 from app.core.config import settings
 from app.core.langgraph.agent import build_agent_graph
 from app.core.langgraph.middleware import (
     AttachmentMiddleware,
     DynamicContextMiddleware,
-    LongTermMemoryMiddleware,
     MiddlewareAgent,
 )
 from app.core.langgraph.middleware.state_validator import state_validator
@@ -42,14 +42,7 @@ from app.schemas.genui import GenUIEvent
 from app.services.llm import llm_service
 from app.services.memory import MemoryService, get_memory_service
 
-# Holds the StreamProcessor for the *current request*. ``SimpleLangChainAgent``
-# is a module-level singleton, but each asyncio task receives its own
-# ContextVar context, so concurrent requests using this context get their own
-# processor and never share mutable stream state (M17).
-#
-# There is deliberately NO shared fallback instance: reading the collected
-# response without an active stream in this context returns "" instead of
-# leaking another request's data.
+# One processor per request via ContextVar; no shared fallback.
 _current_stream_processor: ContextVar[StreamProcessor | None] = ContextVar("current_stream_processor", default=None)
 
 
@@ -109,17 +102,9 @@ class SimpleLangChainAgent:
             from app.core.database import get_session_context
             from app.core.langgraph.middleware import SkillMiddleware
 
-            # LongTermMemoryMiddleware now uses MemoryService internally
-            # No need to pass memory instance directly
             self._middlewares = [
                 DynamicContextMiddleware(),
-                LongTermMemoryMiddleware(
-                    max_memories=5,
-                    min_relevance_score=0.3,  # Only include relevant memories
-                ),
                 AttachmentMiddleware(get_session_context),
-                # SkillMiddleware: Official LangChain Skills pattern
-                # Injects skill catalog into system prompt (progressive disclosure)
                 SkillMiddleware(),
             ]
 
@@ -131,39 +116,18 @@ class SimpleLangChainAgent:
         return self._middlewares
 
     def get_last_response(self) -> str:
-        """Get the AI response text from the last stream in the current request.
-
-        Resolves the per-request ``StreamProcessor`` bound to this task's
-        context, so concurrent requests never read each other's collected
-        response. Returns ``""`` when no stream has run in this context
-        (e.g. a non-streaming call or an early failure) instead of falling
-        back to shared state.
-
-        Returns:
-            str: The collected AI response text from the most recent stream
-        """
+        """Text collected by this request's stream processor, else empty."""
         processor = _current_stream_processor.get()
         if processor is None:
             return ""
-        return processor.get_last_response()
+        return processor.last_response()
 
     def reset_stream_context(self) -> None:
-        """Release the request-scoped stream processor bound to this context.
-
-        Call after reading ``get_last_response()`` (or when the stream ends
-        without a reader) so the ContextVar does not leak into a reused task
-        context (e.g. pytest worker tasks or pooled executors).
-        """
+        """Drop this request's stream processor."""
         _current_stream_processor.set(None)
 
     def _new_stream_processor(self) -> StreamProcessor:
-        """Create a request-scoped StreamProcessor bound to this task's context.
-
-        Each streaming call gets a fresh processor so mutable stream state
-        (tool timing, deduplication sets, collected response) never leaks
-        across concurrent requests. The per-request ContextVar is what
-        ``get_last_response`` reads after the stream finishes.
-        """
+        """Fresh processor per request; no cross-request state sharing."""
         processor = StreamProcessor()
         _current_stream_processor.set(processor)
         return processor
@@ -485,20 +449,7 @@ class SimpleLangChainAgent:
         return []
 
     async def get_detailed_history(self, session_id: UUID, user_uuid: UUID | None = None) -> list[dict[str, Any]]:
-        """Retrieve detailed chat history including UI components and attachment details.
-
-        Reads messages from LangGraph checkpoint and parses:
-        - AI message tool_calls
-        - UI component data from ToolMessages
-        - Attachment details referenced via additional_kwargs
-
-        Args:
-            session_id: Session ID
-            user_uuid: User UUID (for data enrichment backfill)
-
-        Returns:
-            List of message dictionaries formatted for client response (using camelCase keys)
-        """
+        """Checkpoint messages plus UI components and attachment URLs."""
         from langchain_core.messages import ToolMessage
 
         agent = await self.get_agent()
@@ -513,6 +464,7 @@ class SimpleLangChainAgent:
 
         # Step 1: Preprocess - Collect UI component mappings from ToolMessages
         tool_call_ui_map: dict[str, dict[str, Any]] = {}
+        tool_call_status: dict[str, str] = {}
 
         from app.core.genui.enricher import EnricherRegistry
         from app.core.langgraph.stream import ComponentDetector
@@ -527,6 +479,8 @@ class SimpleLangChainAgent:
                 tool_call_id = getattr(msg, "tool_call_id", None)
                 if not tool_call_id:
                     continue
+
+                tool_call_status[tool_call_id] = str(getattr(msg, "status", "success") or "success")
 
                 # Extract tool execution result (from artifact first, or parse content string)
                 tool_result = getattr(msg, "artifact", None)
@@ -544,13 +498,13 @@ class SimpleLangChainAgent:
                     continue
 
                 # Detect component type using ComponentDetector
-                component_type = ComponentDetector.detect_with_overrides(tool_result, tool_name)
+                component_type = ComponentDetector.detect(tool_result)
 
                 if not component_type:
                     continue
 
                 # Filter out unsuccessful execution results
-                if not ComponentDetector.is_successful_result(tool_result):
+                if not ComponentDetector.is_success(tool_result):
                     continue
 
                 msg_id = getattr(msg, "id", None) or str(uuid.uuid4())
@@ -591,12 +545,9 @@ class SimpleLangChainAgent:
             tool_result = de_result.get("data", {})
             if not isinstance(tool_result, dict):
                 continue
-            component_type = ComponentDetector.detect_with_overrides(tool_result, tool_name)
-            if not component_type or not ComponentDetector.is_successful_result(tool_result):
+            component_type = ComponentDetector.detect(tool_result)
+            if not component_type or not ComponentDetector.is_success(tool_result):
                 continue
-            # Key by the live surface id the wizard sent to direct_execute, so the
-            # result can be linked back to the wizard that triggered it. surfaceId
-            # must stay unique per execution (the client memoizes UI by surfaceId).
             de_surface_id = de_result.get("surface_id") or f"history_de_{session_id}_{uuid.uuid4().hex[:8]}"
             tool_call_ui_map[de_surface_id] = {
                 "surfaceId": f"history_de_{de_surface_id}",
@@ -664,6 +615,31 @@ class SimpleLangChainAgent:
 
         logger.debug("tool_call_ui_map_built", count=len(tool_call_ui_map))
 
+        attachment_names: dict[str, str] = {}
+        if user_uuid is not None:
+            try:
+                from app.core.database import get_session_context
+                from app.models.attachment import Attachment
+
+                wanted: set[str] = set()
+                for msg in messages:
+                    kwargs = getattr(msg, "additional_kwargs", {}) or {}
+                    for att_id in kwargs.get("attachment_ids", []) or []:
+                        wanted.add(str(att_id))
+                if wanted:
+                    async with get_session_context() as _db:
+                        rows = (
+                            await _db.execute(
+                                select(Attachment.id, Attachment.filename).where(
+                                    Attachment.id.in_([UUID(str(x)) for x in wanted]),
+                                    Attachment.user_uuid == user_uuid,
+                                )
+                            )
+                        ).all()
+                        attachment_names = {str(i): (fn or "") for i, fn in rows if fn}
+            except Exception as e:
+                logger.warning("history_attachment_names_unresolved", error=str(e))
+
         # Step 2: Build and optimize message structure
         raw_result: list[dict[str, Any]] = []
         for msg in messages:
@@ -694,10 +670,11 @@ class SimpleLangChainAgent:
                     attachments_data = [
                         {
                             "id": att_id,
-                            "filename": f"image_{i}.jpg",
+                            "filename": attachment_names.get(str(att_id), ""),
                             "signedUrl": f"/api/v1/files/view/{att_id}",
                         }
-                        for i, att_id in enumerate(attachment_ids)
+                        for att_id in attachment_ids
+                        if attachment_names.get(str(att_id))
                     ]
                 else:
                     attachments_data = self._extract_attachment_ids(msg.content)
@@ -736,7 +713,7 @@ class SimpleLangChainAgent:
                                 "id": tc_id,
                                 "name": tc_name,
                                 "args": tc.get("args", {}),
-                                "status": "success",
+                                "status": tool_call_status.get(tc_id, "success"),
                             }
                         )
                         if tc_id in tool_call_ui_map:
@@ -941,15 +918,7 @@ class SimpleLangChainAgent:
             return str(content)
 
     def _extract_attachment_ids(self, content: Any) -> list[dict[str, Any]]:
-        """Extract attachment data from message content.
-
-        Supports formats:
-        1. Base64 data URI: {type: "image_url", image_url: {url: "data:..."}}
-        2. External URL: {type: "image_url", image_url: {url: "http://..."}}
-        3. attachment_id format: {type: "image_url", attachment_id: "xxx", image_url: {...}}
-
-        Returns list of attachment dicts matching client ChatMessageAttachment model.
-        """
+        """Inline content attachments (no DB row): derive a name from mime or URL."""
         attachments = []
         if isinstance(content, list):
             for idx, item in enumerate(content):
@@ -964,30 +933,30 @@ class SimpleLangChainAgent:
                             attachments.append(
                                 {
                                     "id": attachment_id,
-                                    "filename": f"image_{idx}.jpg",
+                                    "filename": str(attachment_id),
                                     "signedUrl": f"/api/v1/files/view/{attachment_id}",
                                 }
                             )
                         elif url.startswith("data:"):
                             mime_match = url.split(";")[0].replace("data:", "")
-                            ext = mime_match.split("/")[1] if "/" in mime_match else "jpg"
+                            ext = mime_match.split("/")[1] if "/" in mime_match else "bin"
 
                             attachments.append(
                                 {
                                     "id": f"inline_{idx}_{str(uuid.uuid4())[:8]}",
-                                    "filename": f"image_{idx}.{ext}",
+                                    "filename": f"inline_{idx}.{ext}",
                                     "signedUrl": url,
                                 }
                             )
                         elif url.startswith(("http://", "https://", "/")):
-                            ext = "jpg"
+                            ext = "bin"
                             if "." in url.split("/")[-1]:
                                 ext = url.split(".")[-1].split("?")[0][:4]
 
                             attachments.append(
                                 {
                                     "id": f"url_{idx}_{str(uuid.uuid4())[:8]}",
-                                    "filename": f"image_{idx}.{ext}",
+                                    "filename": f"remote_{idx}.{ext}",
                                     "signedUrl": url,
                                 }
                             )

@@ -15,7 +15,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
@@ -38,6 +38,36 @@ def _get_default_category(tx_type: str) -> str:
     if tx_type == "income":
         return TransactionCategory.SALARY_WAGE.value
     return TransactionCategory.OTHERS.value
+
+
+def summarize_by_currency(
+    expense_items: list[dict[str, Any]],
+    income_items: list[dict[str, Any]],
+    default_currency: str,
+) -> dict[str, Any]:
+    """Group batch totals per currency.
+
+    Cross-currency amounts are never summed into one number; each bucket
+    carries Decimal-exact string totals. Counts are currency-independent.
+    """
+    by_currency: dict[str, dict[str, Decimal]] = {}
+
+    def _add(bucket_list: list[dict[str, Any]], key: str) -> None:
+        for item in bucket_list:
+            code = str(item.get("currency") or default_currency).upper()
+            bucket = by_currency.setdefault(code, {"expense": Decimal("0"), "income": Decimal("0")})
+            bucket[key] += Decimal(item["amount"])
+
+    _add(expense_items, "expense")
+    _add(income_items, "income")
+    return {
+        "expense_count": len(expense_items),
+        "income_count": len(income_items),
+        "by_currency": {
+            code: {"expense": f"{v['expense']:.2f}", "income": f"{v['income']:.2f}"} for code, v in by_currency.items()
+        },
+        "mixed_currencies": len(by_currency) > 1,
+    }
 
 
 def _to_transaction_dict(tx: Any) -> dict[str, Any]:
@@ -209,24 +239,16 @@ async def record_transactions(
             )
 
             if isinstance(result, dict) and result.get("success"):
-                expense_count = len(expense_items)
-                income_count = len(income_items)
-                expense_total = sum((Decimal(item["amount"]) for item in expense_items), Decimal("0"))
-                income_total = sum((Decimal(item["amount"]) for item in income_items), Decimal("0"))
+                from app.utils.currency_utils import get_user_display_currency
 
+                default_currency = (await get_user_display_currency(session, user_uuid)).upper()
                 result["componentType"] = "TransactionGroupReceipt"
-                result["summary"] = {
-                    "expense_count": expense_count,
-                    "income_count": income_count,
-                    "expense_total": float(expense_total),
-                    "income_total": float(income_total),
-                    "net": float(income_total - expense_total),
-                }
+                result["summary"] = summarize_by_currency(expense_items, income_items, default_currency)
 
                 logger.info(
                     "record_transactions_success",
-                    expense_count=expense_count,
-                    income_count=income_count,
+                    expense_count=len(expense_items),
+                    income_count=len(income_items),
                     total_count=len(all_items),
                 )
 

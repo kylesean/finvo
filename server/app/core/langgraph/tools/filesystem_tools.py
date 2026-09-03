@@ -34,8 +34,7 @@ SENSITIVE_FILE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-# Tool output guards: keep what reaches the LLM context bounded regardless of
-# what the filesystem contains.
+# Tool output guards: bound what reaches the LLM context.
 MAX_READ_CHARS = 50_000
 MAX_LS_ENTRIES = 200
 MAX_EXEC_OUTPUT_CHARS = 30_000
@@ -48,18 +47,7 @@ def _is_sensitive_path(path: str) -> bool:
 
 
 def _resolve_in_user_sandbox(path: str) -> Path | str:
-    """Resolve [path] inside the requesting user's artifacts sandbox.
-
-    Every filesystem tool (read/ls/write) is scoped to
-    ``artifacts/{user_id}`` of the user driving the request: a shared
-    multi-user deployment must not let one user's agent enumerate or read
-    another user's artifacts or uploads through these tools (the project root
-    used to be readable here, which was exactly that leak).
-
-    Returns:
-        The sandbox path relative to the project root on success, or an
-        error-message string the tool can return verbatim.
-    """
+    """Resolve path inside artifacts/{user_id}. Returns error string on rejection."""
     from app.core.langgraph.tools import current_user_id
 
     user_id = current_user_id.get()
@@ -72,9 +60,6 @@ def _resolve_in_user_sandbox(path: str) -> Path | str:
     user_artifact_dir = (project_root / "artifacts" / user_id).resolve()
     sandbox_path = (user_artifact_dir / path).resolve()
 
-    # resolve() collapses ".." and symlinks, so a traversal attempt (e.g.
-    # "../user-2/notes.txt" or "../../.env") ends up outside the sandbox
-    # and is rejected here.
     if not sandbox_path.is_relative_to(user_artifact_dir):
         logger.warning(
             "filesystem_path_escape_blocked",
@@ -163,9 +148,8 @@ def write_file_tool(path: str, content: str) -> Any:
     The URL to access the file will be returned.
     """
     try:
-        # Security: writes are sandboxed to artifacts/{user_id}. Reject absolute
-        # paths, sensitive targets, and any path that resolves outside the
-        # sandbox (e.g. "../../.env").
+        # Writes stay in artifacts/{user_id}; reject absolute paths, sensitive
+        # targets, and sandbox escapes.
         if _is_sensitive_path(path):
             logger.warning("write_file_sensitive_blocked", path=path[:200])
             return "Error: writing this file is not allowed"
@@ -183,10 +167,6 @@ def write_file_tool(path: str, content: str) -> Any:
         fs_backend.write(str(rel_path), content)
 
         relative_path = str(rel_path)
-        # Signed capability URL: the /artifacts endpoint rejects anonymous
-        # access, so the URL carries a short-lived token bound to this user
-        # and path (see app/utils/artifact_signing.py). The client displays
-        # this URL; browsers can open it while the token is fresh.
         from app.core.langgraph.tools import current_user_id
 
         user_id = current_user_id.get()
@@ -254,15 +234,11 @@ def execute_tool(command: str) -> Any:
             has_last_brace=last_brace != -1,
         )
 
-    # Bound the output that reaches the LLM context: scripts may print
-    # arbitrarily much, and the model only needs the tail of a long output.
-    # When a JSON payload was parsed, result_data["output"] is a short marker,
-    # so only the raw (unparsed) output needs truncating.
+    # Bound LLM-bound output; keep the tail of long script output.
     if result_data.get("output") == output and len(output) > MAX_EXEC_OUTPUT_CHARS:
         omitted = len(output) - MAX_EXEC_OUTPUT_CHARS
         result_data["output"] = f"... (truncated, {omitted} chars omitted)\n{output[-MAX_EXEC_OUTPUT_CHARS:]}"
 
-    # Log script failures for observability (LLM decides retry based on error content)
     if response.exit_code != 0:
         logger.warning(
             "execute_tool_script_failed",

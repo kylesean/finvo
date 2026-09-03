@@ -1,175 +1,71 @@
-"""LangGraph node functions.
-
-Each node focuses on a single responsibility.
-"""
+"""Agent and direct-execute nodes."""
 
 from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
-from functools import lru_cache
-from typing import Any, cast
+from typing import Any
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, RemoveMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
 from openai import APIConnectionError, APITimeoutError, RateLimitError
-from tenacity import (
-    AsyncRetrying,
-    retry_if_exception,
-    stop_after_attempt,
-    wait_exponential,
-)
+from tenacity import AsyncRetrying, retry_if_exception, stop_after_attempt, wait_exponential
 
 from app.core.config import settings
 from app.core.exceptions import to_client_error
-from app.core.langgraph.agent.multimodal import (
-    build_multimodal_content,
-    load_image_parts,
-    vision_unsupported_message,
-)
+from app.core.langgraph.agent.multimodal import build_multimodal_content, load_image_parts, vision_unsupported_message
 from app.core.langgraph.agent.state import AgentState
 from app.core.logging import logger
 
-# DuckDuckGo tool name constant (used for search strategy routing)
-_DDG_TOOL_NAME = "duckduckgo_results_json"
-
-# Responses API built-in web search tool declaration
+_DDG_TOOL = "duckduckgo_results_json"
 _BUILTIN_WEB_SEARCH: dict[str, str] = {"type": "web_search"}
-
-# Transient LLM upstream failures worth retrying (one request-level policy).
-# Deliberately NOT the bare APIError type: RateLimit/Timeout/Connection are all
-# APIError subclasses, so a type check on APIError would also retry EVERY
-# deterministic 4xx — 400 bad request, 401 bad key, 422 context overflow —
-# three exponential backoff rounds before surfacing. 5xx status errors ARE
-# transient, so they are recovered via the status_code predicate below.
-_AGENT_RETRYABLE_TYPES = (APIConnectionError, APITimeoutError, RateLimitError, asyncio.TimeoutError)
+_RETRYABLE = (APIConnectionError, APITimeoutError, RateLimitError, asyncio.TimeoutError)
 
 
-def _is_retryable_llm_error(e: BaseException) -> bool:
-    """True when an LLM call failure is transient and the call may be retried."""
-    if isinstance(e, _AGENT_RETRYABLE_TYPES):
+def is_retryable(e: BaseException) -> bool:
+    if isinstance(e, _RETRYABLE):
         return True
-    status_code = getattr(e, "status_code", None)
-    return isinstance(status_code, int) and status_code >= 500
+    status = getattr(e, "status_code", None)
+    return isinstance(status, int) and status >= 500
 
 
-def _resolve_search_tools(
-    llm: BaseChatModel,
-    tools: list[BaseTool],
-) -> list[BaseTool | dict[str, Any]]:
-    """Dynamically select search tools based on the model's API protocol.
-
-    Strategy:
-    - Responses API models: use the vendor built-in web_search (server-side, no ToolNode needed)
-    - Chat Completions models (e.g. DeepSeek): keep the DuckDuckGo tool (ToolNode execution)
-    """
-    uses_responses_api = getattr(llm, "use_responses_api", False)
-
-    if uses_responses_api:
-        # Remove ddg, replace with built-in web_search
-        resolved: list[BaseTool | dict[str, Any]] = [t for t in tools if getattr(t, "name", None) != _DDG_TOOL_NAME]
-        resolved.append(_BUILTIN_WEB_SEARCH)
-        return resolved
-
-    # Chat Completions models keep ddg unchanged
+def _search_tools(llm: BaseChatModel, tools: list[BaseTool]) -> list[BaseTool | dict[str, Any]]:
+    if getattr(llm, "use_responses_api", False):
+        return [t for t in tools if getattr(t, "name", None) != _DDG_TOOL] + [_BUILTIN_WEB_SEARCH]
     return list(tools)
 
 
-# Whenever a skill grants its allowed tools, the agent must keep orchestrating.
-# load_skill / unload_skill are always preserved so the model can still switch
-# or disengage a skill.
-_LOAD_SKILL_NAME = "load_skill"
-_UNLOAD_SKILL_NAME = "unload_skill"
-
-
-@lru_cache(maxsize=1)
-def _skill_allowed_tools_index() -> dict[str, set[str]]:
-    """Build a static skill name -> allowed-tools index from installed skills.
-
-    Skills are static files (SKILL.md frontmatter); caching keeps the per-turn
-    skill scoping cheap while still reflecting the manifests on disk.
-    """
+def _skill_tools(state: AgentState, base: list[BaseTool]) -> list[BaseTool]:
+    active = state.get("active_skill")
+    if not active:
+        return list(base)
     from app.core.skills.loader import SkillLoader
 
-    index: dict[str, set[str]] = {}
+    allowed: set[str] | None = None
     for skill in SkillLoader().load_skills():
-        if skill.allowed_tools:
-            index[skill.name] = set(skill.allowed_tools)
-    return index
-
-
-def _resolve_skill_tools(state: AgentState, base_tools: list[BaseTool]) -> list[BaseTool]:
-    """Return the current turn's toolset based on the active skill.
-
-    - No active skill (or a skill without an allowed-tools constraint): full base
-      toolset is used, matching the default behavior.
-    - Active skill with allowed-tools: narrow the base toolset to that whitelist
-      and inject any privileged tools the skill declares (e.g. `execute`,
-      `read_file`), so the skill can actually run its scripts.
-    - `load_skill` is always retained so the model can switch/disengage skills.
-    """
-    active_skill = state.get("active_skill")
-    if not active_skill:
-        return list(base_tools)
-
-    allowed = _skill_allowed_tools_index().get(active_skill)
+        if skill.name == active and skill.allowed_tools:
+            allowed = set(skill.allowed_tools)
+            break
     if not allowed:
-        return list(base_tools)
-
-    narrowed = [t for t in base_tools if t.name in allowed]
-    injected = [t for t in _privileged_filesystem_tools() if t.name in allowed]
-
-    # Keep the skill-orchestration tools available so the model can switch or
-    # unload the active skill (without them, the whitelist would lock the model
-    # into the skill forever).
-    _orchestration_names = {_LOAD_SKILL_NAME, _UNLOAD_SKILL_NAME}
-    for t in base_tools:
-        if t.name in _orchestration_names and not any(x.name == t.name for x in narrowed):
-            narrowed.append(t)
-
-    resolved = narrowed + injected
-    logger.debug(
-        "agent_skill_tools_scoped",
-        skill=active_skill,
-        narrowed_count=len(narrowed),
-        injected_count=len(injected),
-        allowed=sorted(allowed),
-    )
-    return resolved
-
-
-def _privileged_filesystem_tools() -> list[BaseTool]:
-    """Lazily load the privileged filesystem tools (kept off the default toolset)."""
+        return list(base)
     from app.core.langgraph.tools.filesystem_tools import filesystem_tools
 
-    return filesystem_tools
+    privileged = {t.name: t for t in filesystem_tools}
+    names = set(allowed) | {"load_skill", "unload_skill"}
+    picked = [t for t in base if t.name in names]
+    picked += [privileged[n] for n in allowed if n in privileged and n not in {t.name for t in picked}]
+    return picked
 
 
 def create_agent_node(
-    llm: BaseChatModel,
-    tools: list[BaseTool],
-    system_prompt: str,
+    llm: BaseChatModel, tools: list[BaseTool], system_prompt: str
 ) -> Callable[[AgentState, RunnableConfig], Any]:
-    """Create the Agent node.
-
-    The agent node invokes the LLM to generate a response, supporting
-    dynamic tool filtering and search strategy routing.
-    """
-
     async def agent_node(state: AgentState, config: RunnableConfig) -> dict[str, list[BaseMessage]]:
         messages = state["messages"]
         cfg = config.get("configurable", {})
 
-        # Vision guard: a non-vision model must not receive images. Short-circuit here
-        # (before any LLM call) with a localized assistant message; having no
-        # tool_calls, route_after_agent sends us straight to END. Mirrors the official
-        # `before_agent` + jump_to:"end" pattern and yields a turn identical in the
-        # live stream and in history. On resume the middleware is bypassed, so
-        # `_has_images` is absent and the guard is skipped — which is fine: a
-        # non-vision+image turn is refused on its first (fresh) iteration and never
-        # reaches a resumable interrupted state.
         if cfg.get("_has_images"):
             from app.services.llm import LLMRegistry
 
@@ -178,209 +74,114 @@ def create_agent_node(
 
                 return {"messages": [AIMessage(content=vision_unsupported_message(current_session_language.get()))]}
 
-        # Extract and consolidate system messages into a single leading SystemMessage.
-        # The middleware injects a fresh SystemMessage (dynamic context + skill catalog)
-        # on EVERY turn, and every turn's copy is persisted into the checkpoint — so
-        # only the most recent one is meaningful. Merging all of them would grow the
-        # prompt linearly with turn count (N copies of the date/skill catalog).
-        system_contents: list[str] = [system_prompt]
-        non_system_messages: list[BaseMessage] = []
-        latest_system_content: str | None = None
-
-        for m in messages:
-            if isinstance(m, SystemMessage) and m.content:
-                latest_system_content = str(m.content)
-            else:
-                non_system_messages.append(m)
-
-        if latest_system_content:
-            system_contents.append(latest_system_content)
-
-        # Ephemeral multimodal enrichment: build what the MODEL sees without touching
-        # state["messages"] (so the checkpoint keeps the compact plain-text user
-        # message). Image parts come from the middleware's config cache on the fresh
-        # path; on resume (middleware bypassed) we rebuild them from the stored
-        # attachment id references. Only the local prompt copy is enriched.
-        image_parts = cfg.get("_image_multimodal_parts")
-        if image_parts is None:
-            for m in reversed(non_system_messages):
-                if isinstance(m, HumanMessage) and (getattr(m, "additional_kwargs", {}) or {}).get("attachment_ids"):
-                    ref_ids = (getattr(m, "additional_kwargs", {}) or {})["attachment_ids"]
-                    image_parts = await load_image_parts(ref_ids, cfg.get("user_uuid"))
-                    break
-
-        # Token budget: trim the non-system history to fit the model context
-        # window; the consolidated system prompt is preserved for prompt cache.
-        from app.utils.graph import prepare_messages
-
-        prompt_messages = prepare_messages(
-            list(non_system_messages),
-            llm,
-            system_prompt="\n\n".join(system_contents),
-        )
-
-        # Re-attach image parts to the multimodal HumanMessage after trimming
-        # (locate by attachment_ids, not positional index — trimming may drop
-        # older turns).
-        if image_parts:
-            for i, msg in enumerate(prompt_messages):
-                if isinstance(msg, HumanMessage) and (getattr(msg, "additional_kwargs", {}) or {}).get(
-                    "attachment_ids"
-                ):
-                    user_text = msg.content if isinstance(msg.content, str) else ""
-                    prompt_messages[i] = HumanMessage(
-                        content=build_multimodal_content(user_text, image_parts),
-                        additional_kwargs=getattr(msg, "additional_kwargs", {}),
-                    )
-                    break
-
-        # Tool scoping: an explicit `filtered_tools` in config overrides everything;
-        # otherwise derive the toolset from the active skill (if any).
-        configured_filtered = cfg.get("filtered_tools")
-        if configured_filtered is not None:
-            current_tools = list(cast(list[BaseTool], configured_filtered))
-            logger.debug("agent_using_configured_filtered_tools", count=len(current_tools))
-        else:
-            current_tools = _resolve_skill_tools(state, tools)
-
-        # Search strategy routing: Responses API → built-in web_search, Chat Completions → ddg
-        resolved_tools = _resolve_search_tools(llm, current_tools)
-
-        bound_llm = llm.bind_tools(resolved_tools)
-        try:
-            # Retry transient upstream failures (rate-limit/timeout/API error)
-            # instead of failing the turn on a single blip. Non-recoverable errors
-            # are not retried and propagate immediately.
-            async for attempt in AsyncRetrying(
-                stop=stop_after_attempt(settings.MAX_LLM_CALL_RETRIES),
-                wait=wait_exponential(multiplier=1, min=2, max=10),
-                retry=retry_if_exception(_is_retryable_llm_error),
-                reraise=True,
-            ):
-                with attempt:
-                    response = await bound_llm.ainvoke(prompt_messages, config)
-        except Exception as e:
-            # Do NOT write a fabricated "service unavailable" AIMessage into
-            # state here: it would be persisted to the checkpoint and pollute
-            # conversation history/search. Instead propagate so the stream layer
-            # emits an error event (processor.py) and no fake turn is recorded.
-            logger.error("agent_node_llm_failed", error=str(e), exc_info=True)
-            raise
-
-        logger.debug(
-            "agent_node_response",
-            has_tool_calls=bool(getattr(response, "tool_calls", None)),
-            content_length=len(response.content) if response.content else 0,
-            tools_count=len(current_tools),
-        )
-
-        # Per-turn cleanup of injected SystemMessages: the middleware injects a
-        # fresh SystemMessage (dynamic context + skill catalog) into every turn's
-        # input, so the checkpoint would otherwise accumulate one copy per turn.
-        # Only the most recent is meaningful (the prompt is consolidated above) —
-        # emit RemoveMessage for stale copies so the checkpoint stays bounded and
-        # resume/history reads never traverse N system messages.
-        from langchain_core.messages import RemoveMessage
-
-        system_ids = []
-        for m in messages:
-            msg_id = getattr(m, "id", None)
-            if isinstance(m, SystemMessage) and msg_id is not None:
-                system_ids.append(msg_id)
-        updates: list[BaseMessage] = [response]
-        if len(system_ids) > 1:
-            updates.extend(RemoveMessage(id=sid) for sid in system_ids[:-1])
-
-        return {"messages": updates}
+        system_text, history = _split_system(messages, system_prompt)
+        history = await _attach_images(history, cfg)
+        prompt = _trim_history(history, llm, system_text)
+        current_tools = _search_tools(llm, _skill_tools(state, tools))
+        response = await _invoke_llm(llm.bind_tools(current_tools), prompt, config)
+        return {"messages": [response, *_stale_system_removals(messages)]}
 
     return agent_node
 
 
-# === Internal tool registry ===
-# Tools executed directly by GenUI, not exposed to the LLM.
-# Add new tools here.
-def _get_internal_tools() -> dict[str, BaseTool]:
-    """Lazily load internal tools to avoid circular imports."""
+def _split_system(messages: list[BaseMessage], base_prompt: str) -> tuple[str, list[BaseMessage]]:
+    latest: str | None = None
+    rest: list[BaseMessage] = []
+    for m in messages:
+        if isinstance(m, SystemMessage) and m.content:
+            latest = str(m.content)
+        else:
+            rest.append(m)
+    text = base_prompt if latest is None else f"{base_prompt}\n\n{latest}"
+    return text, rest
+
+
+async def _attach_images(history: list[BaseMessage], cfg: dict[str, Any]) -> list[BaseMessage]:
+    parts = cfg.get("_image_multimodal_parts")
+    if parts is None:
+        for m in reversed(history):
+            ids = (getattr(m, "additional_kwargs", {}) or {}).get("attachment_ids")
+            if isinstance(m, HumanMessage) and ids:
+                parts = await load_image_parts(ids, cfg.get("user_uuid"))
+                break
+    if not parts:
+        return history
+    out = list(history)
+    for i, m in enumerate(out):
+        ids = (getattr(m, "additional_kwargs", {}) or {}).get("attachment_ids")
+        if isinstance(m, HumanMessage) and ids:
+            text = m.content if isinstance(m.content, str) else ""
+            out[i] = HumanMessage(
+                content=build_multimodal_content(text, parts),
+                additional_kwargs=getattr(m, "additional_kwargs", {}),
+            )
+            break
+    return out
+
+
+def _trim_history(history: list[BaseMessage], llm: BaseChatModel, system_text: str) -> list[BaseMessage]:
+    from app.utils.graph import prepare_messages
+
+    return prepare_messages(list(history), llm, system_prompt=system_text)
+
+
+async def _invoke_llm(bound_llm: Any, prompt: list[BaseMessage], config: RunnableConfig) -> AIMessage:
+    try:
+        async for attempt in AsyncRetrying(
+            stop=stop_after_attempt(settings.MAX_LLM_CALL_RETRIES),
+            wait=wait_exponential(multiplier=1, min=2, max=10),
+            retry=retry_if_exception(is_retryable),
+            reraise=True,
+        ):
+            with attempt:
+                return await bound_llm.ainvoke(prompt, config)
+    except Exception as e:
+        logger.error("agent_node_llm_failed", error=str(e), exc_info=True)
+        raise
+    raise AssertionError("unreachable")
+
+
+def _stale_system_removals(messages: list[BaseMessage]) -> list[RemoveMessage]:
+    ids = [m.id for m in messages if isinstance(m, SystemMessage) and getattr(m, "id", None)]
+    return [RemoveMessage(id=sid) for sid in ids[:-1]] if len(ids) > 1 else []
+
+
+def _internal_tools() -> dict[str, BaseTool]:
     from app.core.langgraph.tools.space_association_tools import associate_transactions_to_space
     from app.core.langgraph.tools.transfer_tools import execute_transfer
 
-    return {
-        "execute_transfer": execute_transfer,
-        "associate_transactions_to_space": associate_transactions_to_space,
-    }
+    return {"execute_transfer": execute_transfer, "associate_transactions_to_space": associate_transactions_to_space}
 
 
 def create_direct_execute_node() -> Callable[[AgentState, RunnableConfig], Any]:
-    """Create the direct-execute node.
-
-    Used in GenUI scenarios: after the user completes a UI action, skip the
-    LLM and execute the tool directly.
-
-    Protocol:
-        - state.tool_name: name of the tool to execute (must be registered in internal_tools)
-        - state.tool_params: tool parameters
-    """
-    internal_tools = _get_internal_tools()
+    tools = _internal_tools()
 
     async def direct_execute_node(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
-        tool_name = state.get("tool_name")
-        tool_params = state.get("tool_params")
-
-        if not tool_name or not tool_params:
-            logger.warning("direct_execute_missing_params", tool_name=tool_name, has_params=bool(tool_params))
-            return {
-                "messages": [AIMessage(content="Error: no action specified.")],
-                "ui_mode": "idle",
-            }
-
-        tool = internal_tools.get(tool_name)
-        if not tool:
-            logger.error("direct_execute_tool_not_found", tool_name=tool_name, available=list(internal_tools.keys()))
-            return {
-                # Generic, user-safe copy: never surface internal tool-registration
-                # details to the client or persist them into the checkpoint.
-                "messages": [AIMessage(content="This action is not available right now.")],
-                "ui_mode": "idle",
-            }
-
-        logger.debug(
-            "direct_execute_invoking",
-            tool_name=tool_name,
-            params_keys=list(tool_params.keys()),
-        )
-
+        name = state.get("tool_name")
+        params = state.get("tool_params")
+        if not name or not params:
+            return {"messages": [AIMessage(content="Error: no action specified.")], "ui_mode": "idle"}
+        tool = tools.get(name)
+        if tool is None:
+            return {"messages": [AIMessage(content="This action is not available right now.")], "ui_mode": "idle"}
         try:
-            result = await tool.ainvoke(tool_params, config=config)
-
-            logger.info("direct_execute_success", tool_name=tool_name)
-
-            # S-I: propagate the tool's OWN success flag honestly. Some tools
-            # (e.g. execute_transfer) catch their failures and return
-            # {"success": False, "message": ...} instead of raising — wrapping
-            # that as success=True would make the event generator emit nothing
-            # (silent failure) because its component emission is gated on
-            # `success`. Carry the error text for the client-facing error event.
-            inner_success = True
-            error_message: str | None = None
-            if isinstance(result, dict) and result.get("success") is False:
-                inner_success = False
-                error_message = result.get("message") or "Action failed"
-
+            result = await tool.ainvoke(params, config=config)
+            ok = not (isinstance(result, dict) and result.get("success") is False)
             return {
-                "messages": [AIMessage(content="")],  # Silent — let the UI component show the result
+                "messages": [AIMessage(content="")],
                 "ui_mode": "idle",
                 "tool_name": None,
                 "tool_params": None,
                 "direct_execute_result": {
-                    "tool_name": tool_name,
-                    "success": inner_success,
+                    "tool_name": name,
+                    "success": ok,
                     "data": result if isinstance(result, dict) else {"result": result},
-                    "surface_id": tool_params.get("surface_id"),
-                    "error": error_message,
+                    "surface_id": params.get("surface_id"),
+                    "error": result.get("message") if isinstance(result, dict) and not ok else None,
                 },
             }
         except Exception as e:
-            logger.error("direct_execute_error", tool_name=tool_name, error=str(e), exc_info=True)
+            logger.error("direct_execute_error", tool=name, error=str(e), exc_info=True)
             return {
                 "messages": [AIMessage(content=f"Action failed: {to_client_error(e)}")],
                 "ui_mode": "idle",

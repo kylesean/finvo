@@ -1,9 +1,4 @@
-"""Tests for LangGraph Agent Architecture
-
-Verifies tool loading and system prompts.
-"""
-
-import asyncio
+"""Agent wiring: tools, prompt, retry policy."""
 
 import httpx
 import openai
@@ -12,53 +7,45 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, HumanMessage
 from tenacity import AsyncRetrying, retry_if_exception, stop_after_attempt
 
-from app.core.langgraph.agent.nodes import _AGENT_RETRYABLE_TYPES, _is_retryable_llm_error
+from app.core.langgraph.agent.nodes import _RETRYABLE, is_retryable
 
 
 def test_tools_module_imports():
-    """Test that tool modules are imported correctly."""
-    from app.core.langgraph.tools import skill_exclusive_tools, tools
+    # Arrange + Act
+    from app.core.langgraph.tools import tools
 
-    assert tools is not None
-    assert skill_exclusive_tools is not None
-    # skill_exclusive_tools is now empty since skills moved to script-based execution
-    assert isinstance(skill_exclusive_tools, dict)
+    # Assert
+    assert len(tools) > 0
+    names = [t.name for t in tools]
+    assert len(names) == len(set(names))
 
 
 def test_system_prompt_loading():
-    """Test that the system prompt loads correctly."""
+    # Arrange + Act
     from app.core.prompts import get_stable_system_prompt
 
     prompt = get_stable_system_prompt()
-    assert prompt is not None
-    assert "You are Finvo" in prompt or "Finvo" in prompt
+
+    # Assert
+    assert "Finvo" in prompt
 
 
 class _TokenizerlessModel(BaseChatModel):
-    """Stand-in for providers (e.g. DeepSeek) that expose no tokenizer to LangChain."""
-
     model_name: str = "deepseek-v4-flash"
 
     @property
-    def _llm_type(self) -> str:  # pragma: no cover - unused by the test path
+    def _llm_type(self) -> str:
         return "tokenizerless"
 
-    def _generate(self, messages, stop=None, run_manager=None, **kwargs):  # pragma: no cover
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
         raise NotImplementedError
 
     def get_num_tokens_from_messages(self, messages):  # type: ignore[override]
-        raise NotImplementedError(
-            f"get_num_tokens_from_messages() is not presently implemented for model {self.model_name}"
-        )
+        raise NotImplementedError(f"no tokenizer for {self.model_name}")
 
 
 def test_prepare_messages_falls_back_when_tokenizer_unavailable():
-    """prepare_messages must not crash when the model raises NotImplementedError.
-
-    Regression for the stream_processor_error caused by DeepSeek
-    (deepseek-v4-flash) lacking get_num_tokens_from_messages — trimming falls
-    back to a cl100k_base approximation instead of propagating the error.
-    """
+    # Arrange
     from app.utils.graph import prepare_messages
 
     llm = _TokenizerlessModel()
@@ -68,23 +55,14 @@ def test_prepare_messages_falls_back_when_tokenizer_unavailable():
         HumanMessage(content="how are you?"),
     ]
 
+    # Act
     result = prepare_messages(history, llm, system_prompt="You are Finvo")
 
-    # System prompt is always prepended, untouched.
+    # Assert
     assert result[0].content == "You are Finvo"
-    # History is preserved (fallback counter keeps trimming functional, not destructive).
     assert len(result) == 1 + len(history)
     assert result[-1].content == "how are you?"
 
-
-# ---------------------------------------------------------------------------
-# Regression: LLM retry policy must not retry deterministic 4xx errors (AG-P1-1)
-#
-# _AGENT_RETRYABLE previously contained the openai.APIError base class; since
-# RateLimit/Timeout/Connection errors are all APIError subclasses, 400 bad
-# request / 401 bad key / 422 context overflow were retried three exponential
-# backoff rounds before surfacing. The tuple now pins the transient subset.
-# ---------------------------------------------------------------------------
 
 def _api_error(status: int) -> openai.APIStatusError:
     request = httpx.Request("POST", "https://llm.example/v1/chat/completions")
@@ -95,35 +73,35 @@ def _api_error(status: int) -> openai.APIStatusError:
         422: openai.UnprocessableEntityError,
         429: openai.RateLimitError,
         500: openai.InternalServerError,
-        # the openai client maps every >= 500 without a dedicated class to
-        # InternalServerError (there is no separate 503 type)
         503: openai.InternalServerError,
     }[status]
     return cls("upstream", response=response, body=None)
 
 
-def test_retryable_policy_excludes_api_error_base():
-    assert openai.APIError not in _AGENT_RETRYABLE_TYPES
-    assert openai.APIStatusError not in _AGENT_RETRYABLE_TYPES
+def test_retryable_excludes_api_error_base():
+    assert openai.APIError not in _RETRYABLE
+    assert openai.APIStatusError not in _RETRYABLE
 
 
-def test_deterministic_4xx_errors_are_not_retryable():
-    for status in (400, 401, 422):
-        assert not _is_retryable_llm_error(_api_error(status)), f"HTTP {status} must not be retried"
+@pytest.mark.parametrize("status", [400, 401, 422])
+def test_deterministic_4xx_not_retryable(status: int):
+    assert not is_retryable(_api_error(status))
 
 
-def test_transient_errors_are_retryable():
-    assert _is_retryable_llm_error(_api_error(429))
-    assert _is_retryable_llm_error(_api_error(500))
-    assert _is_retryable_llm_error(_api_error(503))
-    assert _is_retryable_llm_error(openai.APIConnectionError(request=httpx.Request("POST", "https://llm.example")))
-    assert _is_retryable_llm_error(TimeoutError())
-    assert not _is_retryable_llm_error(ValueError("unrelated"))
+@pytest.mark.parametrize("status", [429, 500, 503])
+def test_transient_status_retryable(status: int):
+    assert is_retryable(_api_error(status))
+
+
+def test_connection_and_timeout_retryable():
+    assert is_retryable(openai.APIConnectionError(request=httpx.Request("POST", "https://llm.example")))
+    assert is_retryable(TimeoutError())
+    assert not is_retryable(ValueError("unrelated"))
 
 
 @pytest.mark.asyncio
-async def test_bad_request_propagates_on_first_attempt():
-    """A deterministic 4xx fails the turn immediately (no backoff rounds)."""
+async def test_bad_request_fails_on_first_attempt():
+    # Arrange
     attempts = 0
 
     async def fail_400() -> None:
@@ -131,21 +109,24 @@ async def test_bad_request_propagates_on_first_attempt():
         attempts += 1
         raise _api_error(400)
 
+    # Act
     with pytest.raises(openai.BadRequestError):
         async for attempt in AsyncRetrying(
             stop=stop_after_attempt(3),
-            wait=lambda _: 0,  # no sleeping in tests
-            retry=retry_if_exception(_is_retryable_llm_error),
+            wait=lambda _: 0,
+            retry=retry_if_exception(is_retryable),
             reraise=True,
         ):
             with attempt:
                 await fail_400()
+
+    # Assert
     assert attempts == 1
 
 
 @pytest.mark.asyncio
-async def test_rate_limit_error_is_retried():
-    """A transient 429 is retried up to the attempt budget."""
+async def test_rate_limit_retried_to_budget():
+    # Arrange
     attempts = 0
 
     async def fail_429() -> None:
@@ -153,13 +134,16 @@ async def test_rate_limit_error_is_retried():
         attempts += 1
         raise _api_error(429)
 
+    # Act
     with pytest.raises(openai.RateLimitError):
         async for attempt in AsyncRetrying(
             stop=stop_after_attempt(3),
             wait=lambda _: 0,
-            retry=retry_if_exception(_is_retryable_llm_error),
+            retry=retry_if_exception(is_retryable),
             reraise=True,
         ):
             with attempt:
                 await fail_429()
+
+    # Assert
     assert attempts == 3

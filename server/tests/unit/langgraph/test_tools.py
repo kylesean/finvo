@@ -18,69 +18,57 @@ from app.core.langgraph.tools.filesystem_backend import CommandValidator, Simple
 ft = importlib.import_module("app.core.langgraph.tools.filesystem_tools")
 
 
-class TestTransactionTools:
-    """Tests for transaction-related tools."""
+class TestSummarizeByCurrency:
+    """Per-currency batch totals: never sum across currencies."""
 
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_create_transaction_success(self):
-        """Test successful transaction creation via tool."""
-        # TODO: Implement test
-        # 1. Mock database session
-        # 2. Call create_transaction tool
-        # 3. Verify transaction is created with correct fields
-        pass
+    @pytest.mark.parametrize(
+        ("expense", "income", "default", "expected"),
+        [
+            (
+                [{"amount": "10.10", "currency": "CNY"}, {"amount": "20", "currency": None}],
+                [{"amount": "5", "currency": "cny"}],
+                "CNY",
+                {"CNY": {"expense": "30.10", "income": "5.00"}},
+            ),
+            (
+                [{"amount": "100", "currency": "USD"}],
+                [{"amount": "720", "currency": "CNY"}],
+                "CNY",
+                {"USD": {"expense": "100.00", "income": "0.00"}, "CNY": {"expense": "0.00", "income": "720.00"}},
+            ),
+            ([], [], "CNY", {}),
+        ],
+    )
+    def test_buckets_are_exact_per_currency(self, expense, income, default, expected) -> None:
+        from app.core.langgraph.tools.transaction_tools import summarize_by_currency
 
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_create_transaction_invalid_amount(self):
-        """Test transaction creation with invalid amount."""
-        pass
+        summary = summarize_by_currency(expense, income, default)
 
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_query_transactions_with_filters(self):
-        """Test querying transactions with various filters."""
-        pass
+        assert summary["by_currency"] == expected
+        assert summary["expense_count"] == len(expense)
+        assert summary["income_count"] == len(income)
+        assert summary["mixed_currencies"] == (len(expected) > 1)
 
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_delete_transaction_authorization(self):
-        """Test that users can only delete their own transactions."""
-        pass
+    def test_no_cross_currency_totals_on_wire(self) -> None:
+        from app.core.langgraph.tools.transaction_tools import summarize_by_currency
 
+        summary = summarize_by_currency(
+            [{"amount": "100", "currency": "USD"}],
+            [{"amount": "720", "currency": "CNY"}],
+            "CNY",
+        )
 
-class TestBudgetTools:
-    """Tests for budget-related tools."""
-
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_create_budget_success(self):
-        """Test successful budget creation via tool."""
-        pass
-
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_get_budget_summary(self):
-        """Test retrieving budget summary with spending calculations."""
-        pass
-
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_budget_alert_generation(self):
-        """Test that alerts are generated when budget thresholds are exceeded."""
-        pass
+        assert "expense_total" not in summary
+        assert "income_total" not in summary
+        assert "net" not in summary
+        assert summary["mixed_currencies"] is True
 
 
 class TestTransferTools:
     """Tests for account transfer tools."""
 
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_prepare_transfer(self):
-        """Test transfer preparation with account matching."""
-        pass
-
     def test_execute_transfer_input_accepts_currency(self):
-        """BF-P0-2 regression: the wizard-confirmed currency must survive validation.
-
-        The client sends ``currency`` in toolParams; before the fix the schema
-        had no such field and Pydantic silently dropped it, so every transfer
-        was booked as CNY regardless of what the user confirmed.
-        """
-        from decimal import Decimal
+        """The wizard-confirmed currency must survive validation."""
 
         from app.core.langgraph.tools.transfer_tools import ExecuteTransferInput
 
@@ -107,16 +95,6 @@ class TestTransferTools:
             }
         )
         assert parsed.currency is None
-
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_execute_transfer_success(self):
-        """Test successful transfer execution between accounts."""
-        pass
-
-    @pytest.mark.skip(reason="Skeleton - implement in future iteration")
-    async def test_transfer_insufficient_balance(self):
-        """Test transfer rejection when source account has insufficient balance."""
-        pass
 
 
 class TestToolMetadata:
@@ -158,7 +136,7 @@ class TestToolMetadata:
 
 
 class TestWriteFileSandbox:
-    """Security tests for the write_file tool sandbox (C1)."""
+    """Security tests for the write_file tool sandbox."""
 
     def _call_write(self, path: str, tmp_path: Path) -> object:
         """Invoke write_file_tool with PROJECT_ROOT/fs_backend pointed at tmp_path."""
@@ -203,7 +181,7 @@ class TestWriteFileSandbox:
 
 
 class TestCommandValidatorSecurity:
-    """Security tests for the shell command validator (C2)."""
+    """Security tests for the shell command validator."""
 
     _ATTACKS = [
         "echo ''$(whoami)'' | uv run python app/skills/x/scripts/y.py",
@@ -265,7 +243,7 @@ class TestCommandValidatorSecurity:
 
 
 class TestParseTime:
-    """AG-P1-3 regression: an unparseable timestamp must fail loud.
+    """An unparseable timestamp must fail loud.
 
     parse_time used to silently fall back to "now" for garbage input, so
     "yestday" booked entries on the wrong day with no error anywhere.
@@ -336,7 +314,7 @@ class TestParseTime:
 
 
 class TestReadLsUserSandbox:
-    """Security tests: read_file/ls are scoped to artifacts/{user_id} (SEC-P0-1).
+    """Security tests: read_file/ls are scoped to artifacts/{user_id}.
 
     Previously they could read the ENTIRE project root (guarded only by a
     sensitive-filename blacklist), letting a user's agent enumerate and read
