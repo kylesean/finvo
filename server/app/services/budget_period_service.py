@@ -55,8 +55,15 @@ class BudgetPeriodService:
     # ========================================================================
 
     async def _get_current_period(self, budget: Budget) -> BudgetPeriod | None:
-        """Get current active period for a budget."""
-        today = date.today()
+        """Get current active period for a budget.
+
+        P2-10: "today" is the budget owner's local date (from their IANA
+        profile timezone), not the server's — otherwise UTC+8 users book
+        pre-16:00 spending into "yesterday's" period.
+        """
+        from app.services.statistics_scope import get_user_timezone, user_local_today
+
+        today = user_local_today(await get_user_timezone(self.session, budget.owner_uuid))
 
         result = await self.session.execute(
             select(BudgetPeriod).where(
@@ -79,7 +86,9 @@ class BudgetPeriodService:
         if current_period:
             return current_period
 
-        today = date.today()
+        from app.services.statistics_scope import get_user_timezone, user_local_today
+
+        today = user_local_today(await get_user_timezone(self.session, budget.owner_uuid))
 
         # Get latest existing period for rollover
         result = await self.session.execute(

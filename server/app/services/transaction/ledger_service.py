@@ -56,44 +56,38 @@ class TransactionLedgerService:
         tx_currency: str | None,
         target_currency: str,
         user_base_currency: str,
+        allow_live_rate: bool = True,
     ) -> Decimal:
         """Convert a transaction snapshot amount to an account's currency.
 
-        Balance apply/rollback must use the transaction's recorded snapshot so
-        it matches what was originally booked, instead of re-converting at the
-        *live* rate:
-        - same currency as the transaction -> ``amount_original`` (exact)
-        - the user's real base currency     -> ``amount`` (snapshot-based, stable)
-        - any other currency               -> live conversion; raises if the rate
-          is unavailable (never silently mislabels a currency)
-
-        ``amount_base`` is denominated in the user's base currency, so comparing
-        against the hardcoded USD hub constant would mislabel currencies for
-        non-USD users — the user's real base currency is always used here.
+        Delegates to the canonical P2-9 core
+        (:func:`app.services.account_balance.convert_snapshot_to_currency`) so
+        the live ledger, lifecycle recompute and reconcile script share one
+        conversion rule. ``allow_live_rate=False`` is the rollback mode: live
+        rates are skipped and only snapshot-derived values are used, so a
+        rate outage can never block a delete (callers catch ``ValueError`` to
+        skip-with-warning when even the snapshot cannot express the hop).
 
         Raises:
-            BusinessError: If a required cross-currency conversion is unavailable.
+            BusinessError: If a required cross-currency conversion is unavailable
+                (wraps the core's ``ValueError`` to preserve this method's contract).
         """
-        tx_currency = (tx_currency or target_currency).upper()
-        target = target_currency.upper()
-        if target == tx_currency:
-            return abs(amount_original)
-        if target == user_base_currency.upper():
-            return abs(amount_base)
+        from app.services.account_balance import convert_snapshot_to_currency
 
-        from app.services.exchange_rate_service import exchange_rate_service
-
-        converted = await exchange_rate_service.convert(
-            amount=abs(amount_original),
-            from_currency=tx_currency,
-            to_currency=target,
-        )
-        if converted is None:
-            raise BusinessError(
-                f"Unable to get exchange rate from {tx_currency} to {target}, please try again later",
-                TransactionErrorCode.EXCHANGE_RATE_UNAVAILABLE,
+        try:
+            return await convert_snapshot_to_currency(
+                amount_original=amount_original,
+                amount_base=amount_base,
+                tx_currency=tx_currency,
+                target_currency=target_currency,
+                user_base_currency=user_base_currency,
+                allow_live_rate=allow_live_rate,
             )
-        return abs(converted)
+        except ValueError as e:
+            raise BusinessError(
+                f"Unable to get exchange rate from {tx_currency} to {target_currency}, please try again later",
+                TransactionErrorCode.EXCHANGE_RATE_UNAVAILABLE,
+            ) from e
 
     async def apply_account_balance_effect(
         self,
@@ -105,12 +99,18 @@ class TransactionLedgerService:
         sign: int,
         direction: int = -1,
         for_update: bool = False,
+        allow_live_rate: bool = True,
     ) -> None:
         """Apply (sign=1) or rollback (sign=-1) a balance delta on a single account.
 
         ``direction`` controls whether the transaction increases (+1, e.g. INCOME,
         target account in TRANSFER) or decreases (-1, e.g. EXPENSE, source account
         in TRANSFER) the balance.
+
+        ``allow_live_rate=False`` is the rollback mode (P2-9): when even the
+        snapshot cannot express the hop, the account adjustment is SKIPPED
+        with an error log instead of raising — a rate outage must never block
+        a delete. The drift is left for the reconcile script to flag and fix.
         """
         if account_id is None:
             return
@@ -119,13 +119,25 @@ class TransactionLedgerService:
             return
 
         acc_currency = account.currency_code or user_base_currency
-        effect = await self.convert_snapshot_amount(
-            amount_original=transaction.amount_original,
-            amount_base=transaction.amount,
-            tx_currency=transaction.currency,
-            target_currency=acc_currency,
-            user_base_currency=user_base_currency,
-        )
+        try:
+            effect = await self.convert_snapshot_amount(
+                amount_original=transaction.amount_original,
+                amount_base=transaction.amount,
+                tx_currency=transaction.currency,
+                target_currency=acc_currency,
+                user_base_currency=user_base_currency,
+                allow_live_rate=allow_live_rate,
+            )
+        except BusinessError:
+            if allow_live_rate:
+                raise
+            logger.error(
+                "rollback_effect_unresolvable_skipped",
+                transaction_id=str(transaction.uuid),
+                account_id=str(account_id),
+                account_currency=acc_currency,
+            )
+            return
         account.current_balance = (account.current_balance or Decimal("0")) + sign * direction * effect
         account.updated_at = utc_now()
 
@@ -147,6 +159,7 @@ class TransactionLedgerService:
         source_account_id: UUID | None,
         target_account_id: UUID | None,
         for_update: bool = False,
+        allow_live_rate: bool = True,
     ) -> None:
         """Apply (sign=1) or reverse (sign=-1) a transaction's balance effect.
 
@@ -156,6 +169,9 @@ class TransactionLedgerService:
         currency (see ``convert_snapshot_amount``) so apply and rollback are
         symmetric and never silently mislabel a currency. Accounts that no
         longer exist are skipped.
+
+        Delete callers pass ``allow_live_rate=False`` (P2-9): unresolvable
+        hops are skipped with a log instead of failing the delete.
         """
         user_base_currency = await get_user_base_currency(self.db, user_uuid)
         tx_type = transaction.type
@@ -169,6 +185,7 @@ class TransactionLedgerService:
                 sign=sign,
                 direction=-1,
                 for_update=for_update,
+                allow_live_rate=allow_live_rate,
             )
         elif tx_type == "INCOME":
             await self.apply_account_balance_effect(
@@ -179,6 +196,7 @@ class TransactionLedgerService:
                 sign=sign,
                 direction=1,
                 for_update=for_update,
+                allow_live_rate=allow_live_rate,
             )
         elif tx_type == "TRANSFER":
             # Source account is debited (-1)
@@ -190,6 +208,7 @@ class TransactionLedgerService:
                 sign=sign,
                 direction=-1,
                 for_update=for_update,
+                allow_live_rate=allow_live_rate,
             )
             # Target account is credited (+1)
             await self.apply_account_balance_effect(
@@ -200,6 +219,7 @@ class TransactionLedgerService:
                 sign=sign,
                 direction=1,
                 for_update=for_update,
+                allow_live_rate=allow_live_rate,
             )
 
     async def apply_balance_diff(

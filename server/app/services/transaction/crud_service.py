@@ -634,7 +634,9 @@ class TransactionCRUDService:
         if transaction.status != "PENDING":
             # Reverse the transaction's balance effect before deletion (EXPENSE
             # adds back, INCOME subtracts, TRANSFER reverses both ends), using the
-            # same snapshot conversion applied at creation.
+            # same snapshot conversion applied at creation. P2-9: no live rates
+            # on this path — a rate outage must not block deletes; hops the
+            # snapshot cannot express are skipped with a log (reconcile later).
             await self.ledger.apply_transaction_balance_effect(
                 transaction,
                 user_uuid,
@@ -642,6 +644,7 @@ class TransactionCRUDService:
                 source_account_id=transaction.source_account_id,
                 target_account_id=transaction.target_account_id,
                 for_update=True,
+                allow_live_rate=False,
             )
 
         # Delete transaction record (associated comments and shares will be automatically deleted through ORM cascade)

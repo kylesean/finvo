@@ -18,8 +18,9 @@ These helpers are the single source of truth for balance derivation so
 account lifecycle operations (save / merge / close) never drift from the
 transaction ledger.
 
-This module deliberately reuses the exact conversion semantics of
-``scripts/reconcile_balances.py`` — keep the two in sync.
+P2-9: the live ledger (``TransactionLedgerService``) and
+``scripts/reconcile_balances.py`` both delegate to the conversion core and
+sign helper here instead of reimplementing them — there is only one rule.
 """
 
 from __future__ import annotations
@@ -38,68 +39,133 @@ from app.services.exchange_rate_service import exchange_rate_service
 from app.utils.currency_utils import get_user_base_currency
 
 
+async def convert_snapshot_to_currency(
+    *,
+    amount_original: Decimal | None,
+    amount_base: Decimal | None,
+    tx_currency: str | None,
+    target_currency: str,
+    user_base_currency: str,
+    exchange_rate: Decimal | None = None,
+    tx_id: object = None,
+    allow_live_rate: bool = True,
+) -> Decimal:
+    """Pure canonical conversion core (P2-9 single source of truth).
+
+    Same priority as documented on :func:`_convert_snapshot_amount`; takes
+    plain values so non-ORM callers (live ledger, scripts) share it without
+    fabricating model instances. Raises ``ValueError`` when unresolvable.
+    """
+    base = user_base_currency.upper()
+    tx_cur = (tx_currency or base).upper()
+    target = target_currency.upper()
+    if target == tx_cur:
+        return abs(Decimal(str(amount_original)))
+    if target == base:
+        return abs(Decimal(str(amount_base)))
+
+    if allow_live_rate:
+        try:
+            converted = await exchange_rate_service.convert(
+                amount=abs(Decimal(str(amount_original))),
+                from_currency=tx_cur,
+                to_currency=target,
+            )
+            if converted is not None:
+                return Decimal(str(converted))
+        except Exception:  # noqa: BLE001 - fall through to stored fallbacks
+            pass
+
+    orig = Decimal(str(amount_original or 0))
+    base_amt = Decimal(str(amount_base or 0))
+
+    if exchange_rate and Decimal(str(exchange_rate)) > 0:
+        rate = Decimal(str(exchange_rate))
+        if tx_cur == base:
+            return orig / rate
+        if target == base:
+            return orig * rate
+
+    if base_amt and orig and base_amt != 0:
+        implicit_rate = base_amt / orig
+        if implicit_rate > 0:
+            if tx_cur == base:
+                return orig / implicit_rate
+            if target == base:
+                return orig * implicit_rate
+
+    raise ValueError(f"no exchange rate available to convert {tx_cur} -> {target} (tx {tx_id})")
+
+
+async def _convert_snapshot_amount(
+    tx: Transaction,
+    target_currency: str,
+    user_base_currency: str,
+    *,
+    allow_live_rate: bool = True,
+) -> Decimal:
+    """Canonical single-tx→currency conversion (P2-9 single source of truth).
+
+    Priority (fixed for every caller — ledger apply/rollback, lifecycle
+    recompute, reconcile script):
+    1. snapshot exact/stable branches (no rate needed):
+       target == tx currency -> ``amount_original``; target == user base -> ``amount``.
+    2. live conversion (only when ``allow_live_rate``) — preserves the exact
+       amounts the apply path books today.
+    3. stored-rate back-derive (``exchange_rate``, then implicit
+       ``amount/amount_original``) — degraded but bounded; used when live is
+       unavailable or forbidden.
+    4. raise ``ValueError``. Rollback callers pass ``allow_live_rate=False``
+       and MUST catch this to skip-with-warning instead of blocking deletes.
+
+    NOTE on ordering vs live-first: stored rates are deliberately NOT
+    preferred over live rates. The stored back-derive only expresses
+    tx↔base hops; preferring it on the happy path would change booked
+    third-currency amounts (and the tx==base sub-branch cannot express
+    third-currency units at all). Live stays authoritative; stored is the
+    outage fallback.
+    """
+    return await convert_snapshot_to_currency(
+        amount_original=tx.amount_original,
+        amount_base=tx.amount,
+        tx_currency=tx.currency,
+        target_currency=target_currency,
+        user_base_currency=user_base_currency,
+        exchange_rate=tx.exchange_rate,
+        tx_id=tx.id,
+        allow_live_rate=allow_live_rate,
+    )
+
+
 async def tx_effect_amount(tx: Transaction, account_currency: str, user_base_currency: str) -> Decimal:
     """Convert a transaction's absolute amount into the account currency.
 
-    Snapshot-based conversion mirroring ``scripts/reconcile_balances.py``:
-
-    - account currency == tx currency -> ``amount_original`` (exact)
-    - account currency == user base   -> ``amount`` (snapshot, stable)
-    - any other currency             -> live conversion; falls back to the
-      snapshot rate when conversion is unavailable and raises only if no
-      usable rate exists at all, so the ledger is never silently mislabeled.
-
-    ``user_base_currency`` is the user's *actual* primary currency (resolved
-    from their financial settings) — hardcoding a global constant here would
-    mislabel balances for any user whose base differs from it (S-B).
+    Thin wrapper over :func:`_convert_snapshot_amount` (live rates allowed);
+    kept for backward compatibility — new code should prefer
+    :func:`ledger_effect_for_account`.
     """
-    tx_currency = (tx.currency or user_base_currency).upper()
-    target = account_currency.upper()
-    if target == tx_currency:
-        return abs(Decimal(str(tx.amount_original)))
-    if target == user_base_currency.upper():
-        return abs(Decimal(str(tx.amount)))
-
-    try:
-        converted = await exchange_rate_service.convert(
-            amount=abs(Decimal(str(tx.amount_original))),
-            from_currency=tx_currency,
-            to_currency=target,
-        )
-        if converted is not None:
-            return Decimal(str(converted))
-    except Exception:  # noqa: BLE001 - fall through to snapshot fallbacks
-        pass
-
-    tx_amount = Decimal(str(tx.amount_original or 0))
-    base_amount = Decimal(str(tx.amount or 0))
-
-    if tx.exchange_rate and Decimal(str(tx.exchange_rate)) > 0:
-        rate = Decimal(str(tx.exchange_rate))
-        if tx_currency == user_base_currency.upper():
-            return tx_amount / rate
-        if target == user_base_currency.upper():
-            return tx_amount * rate
-
-    if base_amount and tx_amount and base_amount != 0:
-        implicit_rate = base_amount / tx_amount
-        if implicit_rate > 0:
-            if tx_currency == user_base_currency.upper():
-                return tx_amount / implicit_rate
-            if target == user_base_currency.upper():
-                return tx_amount * implicit_rate
-
-    raise ValueError(f"no exchange rate available to convert {tx_currency} -> {target} (tx {tx.id})")
+    return await _convert_snapshot_amount(tx, account_currency, user_base_currency, allow_live_rate=True)
 
 
-async def tx_ledger_effect(tx: Transaction, account: FinancialAccount, user_base_currency: str) -> Decimal:
-    """Signed balance effect of a single transaction on an account (0 if not linked)."""
+async def ledger_effect_for_account(
+    tx: Transaction,
+    account: FinancialAccount,
+    user_base_currency: str,
+    *,
+    allow_live_rate: bool = True,
+) -> Decimal:
+    """Signed balance effect of a single transaction on an account (0 if not linked).
+
+    The canonical P2-9 helper: every balance derivation in the codebase
+    (live ledger, lifecycle recompute, reconcile script) shares this sign
+    convention and conversion core, so the three can never drift apart.
+    """
     tx_type = (tx.type or "").upper()
     if tx.source_account_id != account.id and tx.target_account_id != account.id:
         return Decimal("0")
 
     acc_currency = (account.currency_code or PROJECT_DEFAULT_CURRENCY).upper()
-    amount = await tx_effect_amount(tx, acc_currency, user_base_currency)
+    amount = await _convert_snapshot_amount(tx, acc_currency, user_base_currency, allow_live_rate=allow_live_rate)
 
     if tx_type == "EXPENSE":
         return -amount if tx.source_account_id == account.id else Decimal("0")
@@ -113,6 +179,15 @@ async def tx_ledger_effect(tx: Transaction, account: FinancialAccount, user_base
             effect += amount
         return effect
     return Decimal("0")
+
+
+async def tx_ledger_effect(tx: Transaction, account: FinancialAccount, user_base_currency: str) -> Decimal:
+    """Signed balance effect of a single transaction on an account (0 if not linked).
+
+    Thin wrapper over :func:`ledger_effect_for_account` (live rates allowed);
+    kept for backward compatibility.
+    """
+    return await ledger_effect_for_account(tx, account, user_base_currency, allow_live_rate=True)
 
 
 async def compute_expected_balance(
