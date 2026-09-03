@@ -107,9 +107,13 @@ class RecurringTransactionService:
         if "recurrence_rule" in data:
             validate_recurrence_rule(data["recurrence_rule"])
 
-        # Validate type
+        # Validate type and store the normalized (uppercase) value: the
+        # execution job copies the rule's type verbatim into Transaction,
+        # where chk_transactions_type enforces uppercase — a lowercase rule
+        # type would fail every execution and roll back its
+        # next_execution_at update with it.
         if "type" in data:
-            validate_transaction_type(data["type"])
+            data["type"] = validate_transaction_type(data["type"])
 
         # Validate/parse the date/account/amount inputs defensively: this
         # service receives raw dicts from the API schema and LLM tools alike,
