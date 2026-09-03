@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import (
     Annotated,
     Any,
-    cast,
 )
 
 from dotenv import load_dotenv
@@ -22,7 +21,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi_pagination import add_pagination
 from langfuse import Langfuse
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -172,9 +170,6 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     lifespan=lifespan,
 )
-
-# Add fastapi-pagination support
-add_pagination(app)
 
 # Set up Prometheus metrics
 setup_metrics(app)

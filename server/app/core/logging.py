@@ -7,7 +7,6 @@ console-friendly development logging and JSON-formatted production logging.
 
 from __future__ import annotations
 
-import json
 import logging
 import re
 import sys

@@ -8,6 +8,42 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
+# Module-level scan cache: {skills_dir: (signature, skills)}. The signature
+# is the sorted (path, mtime_ns) of every SKILL.md under the dir, so edits/
+# additions invalidate automatically while repeated per-request loads (the
+# loader is instantiated per agent turn) skip the walk + YAML parse.
+_scan_cache: dict[str, tuple[tuple[tuple[str, int], ...], list[SkillMetadata]]] = {}
+
+
+def _scan_signature(skills_dir: str, max_depth: int) -> tuple[tuple[str, int], ...] | None:
+    """Collect (path, mtime) for every SKILL.md; None when the dir is missing."""
+    if not os.path.exists(skills_dir):
+        return None
+    found: list[tuple[str, int]] = []
+
+    def _walk(directory: str, depth: int) -> None:
+        if depth > max_depth:
+            return
+        try:
+            entries = os.listdir(directory)
+        except PermissionError:
+            return
+        for item in entries:
+            item_path = os.path.join(directory, item)
+            if os.path.isdir(item_path):
+                skill_md = os.path.join(item_path, "SKILL.md")
+                if os.path.exists(skill_md):
+                    try:
+                        found.append((skill_md, os.stat(skill_md).st_mtime_ns))
+                    except OSError:
+                        pass
+                else:
+                    _walk(item_path, depth + 1)
+
+    _walk(skills_dir, 0)
+    return tuple(sorted(found))
+
+
 # Module-level cache so the audit log fires once per distinct skill set
 # (SkillLoader instances are created per-request/agent-turn).
 _logged_skills_signature: tuple[tuple[str, str], ...] | None = None
@@ -61,39 +97,30 @@ class SkillLoader:
         - app/skills/finance-analyst/SKILL.md  (local skill)
         - app/skills/community/frontend-design/SKILL.md  (community skill)
 
+        Results are cached on the directory's (path, mtime) signature, so
+        per-request loader instances skip the walk + YAML parse until a
+        SKILL.md is added, removed, or edited.
+
         Args:
             max_depth: Maximum depth to search for SKILL.md files (default: 2)
         """
-        skills = []
-        if not os.path.exists(self.skills_dir):
+        signature = _scan_signature(self.skills_dir, max_depth)
+        if signature is None:
             _log_skill_audit([])
             return []
+        cached = _scan_cache.get(self.skills_dir)
+        if cached is not None and cached[0] == signature:
+            return cached[1]
 
-        def scan_directory(directory: str, depth: int = 0) -> None:
-            if depth > max_depth:
-                return
-
-            try:
-                for item in os.listdir(directory):
-                    item_path = os.path.join(directory, item)
-
-                    if os.path.isdir(item_path):
-                        skill_md = os.path.join(item_path, "SKILL.md")
-
-                        if os.path.exists(skill_md):
-                            # Found a skill directory
-                            metadata = self._parse_skill_md(skill_md)
-                            if metadata:
-                                skills.append(metadata)
-                        else:
-                            # Recurse into subdirectory (e.g., 'community/')
-                            scan_directory(item_path, depth + 1)
-            except PermissionError:
-                pass  # Skip directories we can't read
-
-        scan_directory(self.skills_dir)
+        skills: list[SkillMetadata] = []
+        for skill_md, _mtime in signature:
+            metadata = self._parse_skill_md(skill_md)
+            if metadata:
+                skills.append(metadata)
+        skills = sorted(skills, key=lambda x: x.name)
+        _scan_cache[self.skills_dir] = (signature, skills)
         _log_skill_audit(skills)
-        return sorted(skills, key=lambda x: x.name)
+        return skills
 
     def _parse_skill_md(self, file_path: str) -> SkillMetadata | None:
         try:
@@ -131,8 +158,11 @@ class SkillLoader:
                         content=markdown_content,
                     )
             return None
-        except Exception:
-            # Silently fail for malformed skills to avoid crashing
+        except Exception as e:
+            # Loud failure: a malformed SKILL.md previously vanished without a
+            # trace, leaving operators wondering why a skill never loads.
+            # Still returns None (one bad skill must not crash the catalog).
+            logger.error("skill_parse_failed", extra={"path": file_path, "error": str(e)})
             return None
 
     def get_catalog_xml(self) -> str:

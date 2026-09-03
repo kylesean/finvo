@@ -22,8 +22,7 @@ http_request_duration_seconds = Histogram(
 # Database metrics
 db_connections = Gauge("db_connections", "Number of active database connections")
 
-# Long-term memory extraction attempts (AG-P1-4: make silent misconfiguration
-# and per-turn cost visible). result: ok | failed | disabled
+# Long-term memory extraction attempts. result: ok | failed | disabled
 memory_extractions_total = Counter(
     "memory_extractions_total",
     "Long-term memory extraction attempts",

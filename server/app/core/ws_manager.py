@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
-from uuid import UUID
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState

@@ -256,8 +256,10 @@ class Settings(BaseSettings):
     # (enforced in model_post_init — see _validate_jwt_secret below)
     JWT_SECRET_KEY: str = Field(default=_JWT_INSECURE_DEFAULT)
     JWT_ALGORITHM: str = "HS256"
-    # 7-day lifetime limits the damage window of a leaked token.
-    JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 7
+    # 24h lifetime limits the damage window of a leaked token (was 7 days;
+    # the refresh/rotation flow plus the client's single-flight coordinator
+    # make rotation invisible to users).
+    JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 1
     # Longer-lived refresh token used to obtain new access tokens without
     # re-authentication. Store it securely and rotate on each refresh.
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 30
@@ -529,18 +531,11 @@ class Settings(BaseSettings):
         self._validate_jwt_secret()
         self._validate_verification_providers()
         self._validate_metrics_token()
+        self._validate_deployment_secrets()
         self._sanitize_proxy_env()
 
     def _validate_verification_providers(self) -> None:
-        """Fail-fast guard against mock verification providers outside development.
-
-        The shipped defaults (``SMS_PROVIDER``/``EMAIL_PROVIDER`` = "mock") skip
-        code verification entirely, so a public deployment that forgets to
-        configure a real provider would let anyone register without owning the
-        email address/phone — and then burn the operator's paid LLM quota via
-        the chat endpoints. Same philosophy as ``_validate_jwt_secret``: refuse
-        to boot a misconfigured production/staging instance.
-        """
+        """Refuse non-development boot with mock verification providers."""
         if self.ENVIRONMENT == Environment.DEVELOPMENT:
             return
         mock_providers = [name for name in ("SMS_PROVIDER", "EMAIL_PROVIDER") if getattr(self, name) == "mock"]
@@ -553,12 +548,7 @@ class Settings(BaseSettings):
             )
 
     def _validate_metrics_token(self) -> None:
-        """Fail-fast guard against an open /metrics endpoint outside development.
-
-        Prometheus metrics can leak operational detail (paths, counts); an
-        unauthenticated /metrics in production/staging is only acceptable as
-        an explicit choice. Same philosophy as the guards above.
-        """
+        """Refuse non-development boot with an open /metrics endpoint."""
         if self.ENVIRONMENT == Environment.DEVELOPMENT:
             return
         if self.ENABLE_METRICS and not self.METRICS_TOKEN:
@@ -566,6 +556,19 @@ class Settings(BaseSettings):
                 "CRITICAL: ENABLE_METRICS is true with an empty METRICS_TOKEN — not allowed in "
                 f"{self.ENVIRONMENT.value}. Set METRICS_TOKEN to a long random value "
                 "or disable metrics (ENABLE_METRICS=false)."
+            )
+
+    def _validate_deployment_secrets(self) -> None:
+        """Refuse non-development boot with shipped database credentials."""
+        if self.ENVIRONMENT == Environment.DEVELOPMENT:
+            return
+        weak = []
+        if self.POSTGRES_PASSWORD == "postgres":
+            weak.append("POSTGRES_PASSWORD")
+        if weak:
+            raise RuntimeError(
+                "CRITICAL: " + ", ".join(weak) + " still set to shipped default(s) — not allowed in "
+                f"{self.ENVIRONMENT.value}. Set explicit values in server/.env."
             )
 
     def _validate_jwt_secret(self) -> None:

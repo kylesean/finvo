@@ -1,245 +1,116 @@
-"""Service dependencies for FastAPI endpoints.
-
-This module provides factory functions for creating service instances
-as FastAPI dependencies. Following FastAPI best practices:
-
-1. Services are request-scoped (created per request)
-2. Database session is injected via Depends()
-3. Services can be easily mocked in tests
-4. Centralized service instantiation
-
-Usage:
-    @router.get("/transactions")
-    async def get_transactions(
-        service: TransactionService = Depends(get_transaction_service),
-    ):
-        return await service.get_transaction_feed(...)
-"""
+"""Request-scoped service factories (FastAPI Depends). [P1-3]"""
 
 from typing import TYPE_CHECKING
 
 from app.core.aliases import DbSession
 
-# Re-export DbSession so existing ``from app.core.service_deps import DbSession``
-# imports keep working; the canonical definition lives in app.core.aliases.
-__all__ = ["DbSession"]
+__all__ = [
+    "DbSession",
+    "get_auth_service",
+    "get_budget_service",
+    "get_exchange_rate_service",
+    "get_forecast_service",
+    "get_notification_service",
+    "get_shared_space_service",
+    "get_statistics_service",
+    "get_storage_config_service",
+    "get_transaction_query_service",
+    "get_transaction_service",
+    "get_upload_service",
+    "get_user_service",
+]
 
 
-# ============================================================================
-# Transaction Services
-# ============================================================================
-
-
-async def get_transaction_service(
-    db: DbSession,
-) -> "TransactionService":
-    """Get TransactionService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        TransactionService instance
-    """
+def get_transaction_service(db: DbSession) -> "TransactionService":
+    """[P1-3] Build TransactionService for the request session."""
     from app.services.transaction_service import TransactionService
 
     return TransactionService(db)
 
 
-async def get_transaction_query_service(
-    db: DbSession,
-) -> "TransactionQueryService":
-    """Get TransactionQueryService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        TransactionQueryService instance
-    """
+def get_transaction_query_service(db: DbSession) -> "TransactionQueryService":
+    """[P1-3] Build TransactionQueryService for the request session."""
     from app.services.transaction_query_service import TransactionQueryService
 
     return TransactionQueryService(db)
 
 
-# ============================================================================
-# User & Auth Services
-# ============================================================================
-
-
-async def get_user_service(
-    db: DbSession,
-) -> "UserService":
-    """Get UserService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        UserService instance
-    """
+def get_user_service(db: DbSession) -> "UserService":
+    """[P1-3] Build UserService for the request session."""
     from app.services.user_service import UserService
 
     return UserService(db)  # type: ignore[arg-type]  # sqlmodel vs sqlalchemy AsyncSession stubs
 
 
-async def get_auth_service(
-    db: DbSession,
-) -> "AuthService":
-    """Get AuthService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        AuthService instance
-    """
+def get_auth_service(db: DbSession) -> "AuthService":
+    """[P1-3] Build AuthService for the request session."""
     from app.services.auth_service import AuthService
 
     return AuthService(db)
 
 
-# ============================================================================
-# Budget & Statistics Services
-# ============================================================================
-
-
-async def get_budget_service(
-    db: DbSession,
-) -> "BudgetService":
-    """Get BudgetService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        BudgetService instance
-    """
+def get_budget_service(db: DbSession) -> "BudgetService":
+    """[P1-3] Build BudgetService for the request session."""
     from app.services.budget_service import BudgetService
 
     return BudgetService(db)
 
 
-async def get_statistics_service(
-    db: DbSession,
-) -> "StatisticsService":
-    """Get StatisticsService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        StatisticsService instance
-    """
+def get_statistics_service(db: DbSession) -> "StatisticsService":
+    """[P1-3] Build StatisticsService for the request session."""
     from app.services.statistics_service import StatisticsService
 
     return StatisticsService(db)
 
 
-async def get_forecast_service(
-    db: DbSession,
-) -> "ForecastService":
-    """Get ForecastService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        ForecastService instance
-    """
+def get_forecast_service(db: DbSession) -> "ForecastService":
+    """[P1-3] Build ForecastService for the request session."""
     from app.services.forecast_service import ForecastService
 
     return ForecastService(db)
 
 
-# ============================================================================
-# Shared Space Services
-# ============================================================================
-
-
-async def get_shared_space_service(
-    db: DbSession,
-) -> "SharedSpaceService":
-    """Get SharedSpaceService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        SharedSpaceService instance
-    """
+def get_shared_space_service(db: DbSession) -> "SharedSpaceService":
+    """[P1-3] Build SharedSpaceService for the request session."""
     from app.services.shared_space_service import SharedSpaceService
 
     return SharedSpaceService(db)
 
 
-# ============================================================================
-# Storage & Upload Services
-# ============================================================================
-
-
-async def get_storage_config_service(
-    db: DbSession,
-) -> "StorageConfigService":
-    """Get StorageConfigService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        StorageConfigService instance
-    """
+def get_storage_config_service(db: DbSession) -> "StorageConfigService":
+    """[P1-3] Build StorageConfigService for the request session."""
     from app.services.storage_config_service import StorageConfigService
 
     return StorageConfigService(db)
 
 
-async def get_upload_service(
-    db: DbSession,
-) -> "UploadService":
-    """Get UploadService instance.
-
-    Args:
-        db: Database session (injected)
-
-    Returns:
-        UploadService instance
-    """
+def get_upload_service(db: DbSession) -> "UploadService":
+    """[P1-3] Build UploadService for the request session."""
     from app.services.upload_service import UploadService
 
     return UploadService(db)
 
 
-# ============================================================================
-# Stateless Services (singleton-like, no db dependency)
-# ============================================================================
+def get_notification_service(db: DbSession) -> "NotificationService":
+    """[P1-3] Build NotificationService for the request session."""
+    from app.services.notification_service import NotificationService
+
+    return NotificationService(db)
 
 
 def get_exchange_rate_service() -> "ExchangeRateService":
-    """Get ExchangeRateService instance.
-
-    This service is stateless and doesn't require a database session.
-    It can be treated as a singleton.
-
-    Returns:
-        ExchangeRateService instance
-    """
+    """[P1-3] Return the stateless exchange-rate singleton."""
     from app.services.exchange_rate_service import exchange_rate_service
 
     return exchange_rate_service
 
 
-# ============================================================================
-# Type annotations for forward references
-# ============================================================================
-
-# These are imported at the end to avoid circular imports
-# and are only used for type hints
 if TYPE_CHECKING:
     from app.services.auth_service import AuthService
     from app.services.budget_service import BudgetService
     from app.services.exchange_rate_service import ExchangeRateService
     from app.services.forecast_service import ForecastService
+    from app.services.notification_service import NotificationService
     from app.services.shared_space_service import SharedSpaceService
     from app.services.statistics_service import StatisticsService
     from app.services.storage_config_service import StorageConfigService

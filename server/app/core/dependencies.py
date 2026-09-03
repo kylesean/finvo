@@ -40,15 +40,20 @@ security = HTTPBearer()
 _TOKEN_BLACKLIST_PREFIX = "auth:blacklist:"
 
 
-async def revoke_token(redis_client: Any, token: str) -> bool:
-    """Add a token's ``jti`` to the revocation blacklist until it expires.
+def _strict_revocation() -> bool:
+    """True outside development: an undecidable revocation check must fail closed."""
+    from app.core.config import Environment, settings
 
-    Returns True when the token was blacklisted (or Redis is unavailable and
-    revocation cannot be recorded). Callers should treat an unavailable Redis
-    conservatively: the token stays valid (graceful degradation).
-    """
+    return settings.ENVIRONMENT in (Environment.PRODUCTION, Environment.STAGING)
+
+
+async def revoke_token(redis_client: Any, token: str) -> bool:
+    """Blacklist a token's jti until it expires."""
     if redis_client is None:
-        logger.warning("token_revocation_redis_unavailable")
+        if _strict_revocation():
+            logger.error("token_revocation_redis_unavailable", revocation="unrecorded")
+        else:
+            logger.warning("token_revocation_redis_unavailable")
         return False
     jti = get_token_jti(token)
     if not jti:
@@ -65,12 +70,15 @@ async def revoke_token(redis_client: Any, token: str) -> bool:
 
 
 async def is_token_revoked(redis_client: Any, token: str) -> bool:
-    """Return True if the token's jti is on the revocation blacklist.
+    """True if the token's jti is blacklisted.
 
-    Redis unavailability degrades to "not revoked" (tokens stay valid), which
-    matches the project's optional-Redis posture.
+    Redis down means undecidable: fail closed outside development.
     """
     if redis_client is None:
+        if _strict_revocation():
+            logger.error("token_blacklist_undecidable", decision="revoked")
+            return True
+        logger.warning("token_blacklist_check_redis_unavailable")
         return False
     jti = get_token_jti(token)
     if not jti:

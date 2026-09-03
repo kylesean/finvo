@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import time
 import uuid
-from typing import Any
 
 from starlette.datastructures import MutableHeaders
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
