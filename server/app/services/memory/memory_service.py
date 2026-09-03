@@ -493,17 +493,29 @@ class MemoryService:
         self,
         memory_id: str,
         data: str,
+        user_uuid: UUID,
     ) -> bool:
-        """Update an existing memory.
+        """Update an existing memory, verifying ownership.
 
         Args:
             memory_id: Memory identifier
             data: New memory content
+            user_uuid: UUID of the requesting user; memories not owned by
+                this user are not updated (no existence leak)
 
         Returns:
             True if successful, False otherwise
         """
         try:
+            result = await self.memory.get(memory_id)
+            if not result or not self._memory_belongs_to(result, user_uuid):
+                logger.warning(
+                    "memory_update_denied",
+                    memory_id=memory_id,
+                    user_uuid=str(user_uuid),
+                )
+                return False
+
             await self.memory.update(memory_id, data=data)
             logger.info("memory_updated", memory_id=memory_id)
             return True

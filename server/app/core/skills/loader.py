@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import logging
 import os
 from dataclasses import dataclass
 
 import yaml
 
-logger = logging.getLogger(__name__)
+from app.core.logging import logger
 
 # Module-level scan cache: {skills_dir: (signature, skills)}. The signature
 # is the sorted (path, mtime_ns) of every SKILL.md under the dir, so edits/
@@ -139,14 +138,24 @@ class SkillLoader:
                     rel_path = os.path.relpath(file_path)
 
                     # Parse allowed-tools (AgentSkills.io specification)
-                    # Format: space-delimited string of tool names (e.g. bash or search)
+                    # Official format: space-delimited string (e.g. "bash search").
+                    # A YAML block list is equally common in hand-written skills;
+                    # silently ignoring it used to leave the skill loaded but
+                    # with NO privileged tools bound, with no hint anywhere.
                     # Reference: https://agentskills.io/specification#allowed-tools-field
                     allowed_tools_raw = data.get("allowed-tools")
-                    allowed_tools = None
+                    allowed_tools: list[str] | None = None
 
-                    if allowed_tools_raw and isinstance(allowed_tools_raw, str):
-                        # Official format: space-delimited string
+                    if isinstance(allowed_tools_raw, str) and allowed_tools_raw.strip():
                         allowed_tools = allowed_tools_raw.split()
+                    elif isinstance(allowed_tools_raw, list):
+                        allowed_tools = [str(item).strip() for item in allowed_tools_raw if str(item).strip()]
+                    elif allowed_tools_raw is not None:
+                        logger.warning(
+                            "skill_allowed_tools_unparsable",
+                            location=rel_path,
+                            type=type(allowed_tools_raw).__name__,
+                        )
 
                     return SkillMetadata(
                         name=data.get("name", "unknown"),

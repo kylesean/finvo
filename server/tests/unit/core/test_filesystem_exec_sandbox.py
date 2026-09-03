@@ -131,12 +131,19 @@ def test_skill_audit_log_fires_once_per_skill_set(caplog):
     global _logged_skills_signature
     _logged_skills_signature = None
 
-    with caplog.at_level(logging.INFO, logger="app.core.skills.loader"):
+    with caplog.at_level(logging.INFO, logger="app.core.logging"):
         loader = SkillLoader(skills_dir="app/skills")
         loader.load_skills()
         loader.load_skills()
 
-    skill_records = [r for r in caplog.records if r.getMessage().startswith("skills_loaded")]
+    # Structured records funnel through the app.core.logging logger with the
+    # event name and kwargs inside the msg dict (see app.core.logging).
+    skill_records = [
+        r
+        for r in caplog.records
+        if isinstance(r.msg, dict) and r.msg.get("event") == "skills_loaded"
+    ]
     assert len(skill_records) == 1
-    assert skill_records[0].count == 4
-    assert any("reviewing-finances" in s for s in skill_records[0].skills)
+    extras = skill_records[0].msg["extra"]
+    assert extras["count"] == 4
+    assert any("reviewing-finances" in s for s in extras["skills"])
