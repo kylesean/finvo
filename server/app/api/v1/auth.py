@@ -10,6 +10,7 @@ This module provides endpoints for user authentication including:
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import uuid
 from typing import Annotated, Any
 from uuid import UUID
@@ -104,6 +105,24 @@ async def get_authorized_session(
     return session
 
 
+def _client_ip(request: Request) -> str | None:
+    """Return the peer IP for audit columns, or None when it is not an IP.
+
+    ``User.last_login_ip`` is a Postgres ``inet`` column: storing a non-IP
+    peer name (TestClient's "testclient", unix-socket labels, junk forwarded
+    values) raises at flush time and turns register/login into a 500. Audit
+    metadata must never fail authentication — keep only valid IPs.
+    """
+    host = request.client.host if request.client else None
+    if not host:
+        return None
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        return None
+    return host
+
+
 def _build_user_info(user: User) -> UserInfo:
     """Build the auth response ``UserInfo`` from a user model (shared by register/login)."""
     return UserInfo(
@@ -178,7 +197,7 @@ async def register(
     auth_service = AuthService(db)
 
     # Get client IP
-    client_ip = request.client.host if request.client else None
+    client_ip = _client_ip(request)
 
     # Register user
     user = await auth_service.register(
@@ -238,7 +257,7 @@ async def login(
     auth_service = AuthService(db)
 
     # Get client IP
-    client_ip = request.client.host if request.client else None
+    client_ip = _client_ip(request)
 
     # Login user (returns tuple of user and token)
     user, token = await auth_service.login(
