@@ -247,13 +247,6 @@ class AppException(Exception):
         """Return a string representation of the exception."""
         return f"<{self.__class__.__name__}(message={self.message!r}, code={self.error_code!r})>"
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert exception to dictionary for JSON response."""
-        result: dict[str, Any] = {"code": self.error_code, "message": self.message}
-        if self.details:
-            result["details"] = self.details
-        return result
-
 
 class AuthenticationError(AppException):
     """Authentication error (401)."""

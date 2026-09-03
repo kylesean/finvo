@@ -8,9 +8,8 @@ This module provides reusable dependency functions for:
 """
 
 import hashlib
-import json
 from collections.abc import AsyncGenerator
-from typing import Annotated, Any, cast
+from typing import Annotated, Any
 
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -267,70 +266,3 @@ class OptionalAuth:
 
 # Create instance for use as dependency
 optional_auth = OptionalAuth()
-
-
-async def get_user_session_data(
-    user: Annotated[User, Depends(get_current_user)],
-    redis_client: Annotated[Any, Depends(get_redis_client)],
-) -> dict[str, Any]:
-    """Get user session data from Redis.
-
-    Args:
-        user: The authenticated user
-        redis_client: Redis client
-
-    Returns:
-        dict: Session data or empty dict if not found
-    """
-    if redis_client is None:
-        return {}
-
-    try:
-        session_key = f"user_session:{user.uuid}"
-        session_data = await redis_client.get(session_key)
-
-        if session_data:
-            return cast(dict[str, Any], json.loads(session_data.decode()))
-
-        return {}
-
-    except Exception as e:
-        logger.warning("get_session_data_failed", user_uuid=user.uuid, error=str(e))
-        return {}
-
-
-async def save_user_session_data(
-    session_data: dict[str, Any],
-    user: Annotated[User, Depends(get_current_user)],
-    redis_client: Annotated[Any, Depends(get_redis_client)],
-) -> bool:
-    """Save user session data to Redis.
-
-    Args:
-        session_data: Data to save in session
-        user: The authenticated user
-        redis_client: Redis client
-
-    Returns:
-        bool: True if saved successfully
-    """
-    if redis_client is None:
-        logger.warning("redis_not_available", message="Session data not saved")
-        return False
-
-    try:
-        session_key = f"user_session:{user.uuid}"
-
-        # Store session data with 30-day expiration
-        await redis_client.setex(
-            session_key,
-            30 * 24 * 60 * 60,  # 30 days
-            json.dumps(session_data),
-        )
-
-        logger.info("session_data_saved", user_uuid=user.uuid)
-        return True
-
-    except Exception as e:
-        logger.error("save_session_data_failed", user_uuid=user.uuid, error=str(e))
-        return False

@@ -483,6 +483,19 @@ class UpdateUserProfileRequest(BaseModel):
     username: str | None = Field(None, min_length=1, max_length=50, description="User's display name")
     avatarUrl: str | None = Field(None, max_length=500, description="Avatar image URL")
 
+    @field_validator("avatarUrl")
+    @classmethod
+    def validate_avatar_url_scheme(cls, v: str | None) -> str | None:
+        """Restrict external avatar URLs to http(s).
+
+        The public avatar endpoint 302-redirects to this value; without a
+        scheme allowlist it doubles as an open redirect to arbitrary
+        protocols (javascript:, data:, ftp:, ...).
+        """
+        if v is not None and not v.startswith(("http://", "https://")):
+            raise ValueError("avatarUrl must be an http(s) URL")
+        return v
+
     @model_validator(mode="after")
     def validate_at_least_one_field(self) -> UpdateUserProfileRequest:
         """Validate that at least one field is provided."""
