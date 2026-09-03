@@ -872,9 +872,19 @@ class TransactionCRUDService:
         # Bad items are now rejected individually and reported in `failed`.
         created_transactions: list[Transaction] = []
         failed: list[dict[str, str]] = []
+        replayed_count = 0
 
         for index, item in enumerate(transactions_data):
             try:
+                # Keyed items replay instead of re-booking: the caller's retry
+                # (double-tap, network timeout re-send, graph resume) carries
+                # the same idempotency_key, so the row booked by the first
+                # attempt wins and this pass is a no-op.
+                item_key = item.get("idempotency_key") or None
+                if item_key and await self._get_by_idempotency_key(user_uuid, item_key) is not None:
+                    replayed_count += 1
+                    continue
+
                 raw_amount = item.get("amount")
                 if raw_amount is None or raw_amount == "":
                     raise BusinessError("Amount is required", CommonErrorCode.VALIDATION_ERROR)
@@ -909,7 +919,34 @@ class TransactionCRUDService:
                     source="AI",
                     status="CLEARED",
                     source_thread_id=source_thread_id,
+                    idempotency_key=item_key,
                 )
+                if item_key:
+                    # Keyed items book inside a savepoint (mirrors
+                    # create_transaction's keyed path): a concurrent duplicate
+                    # firing the unique constraint rolls back ONLY this item,
+                    # and the pre-flush race replays the winner.
+                    try:
+                        async with self.db.begin_nested():
+                            self.db.add(tx)
+                            if source_account_uuid or target_account_uuid:
+                                await self.ledger.apply_transaction_balance_effect(
+                                    tx,
+                                    user_uuid,
+                                    sign=1,
+                                    source_account_id=source_account_uuid,
+                                    target_account_id=target_account_uuid,
+                                    for_update=True,
+                                )
+                            await self.db.flush()
+                    except IntegrityError:
+                        if await self._get_by_idempotency_key(user_uuid, item_key) is None:
+                            raise
+                        replayed_count += 1
+                        continue
+                    created_transactions.append(tx)
+                    continue
+
                 self.db.add(tx)
                 created_transactions.append(tx)
 
@@ -946,6 +983,7 @@ class TransactionCRUDService:
             "count": len(created_transactions),
             "failed_count": len(failed),
             "failed": failed,
+            "replayed_count": replayed_count,
             "account_id": str(source_account_id) if source_account_id else None,
             "transactions": [
                 {

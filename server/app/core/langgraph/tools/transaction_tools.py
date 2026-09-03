@@ -12,6 +12,8 @@ Design Principles:
 
 from __future__ import annotations
 
+import hashlib
+import json
 import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -68,6 +70,47 @@ def summarize_by_currency(
         },
         "mixed_currencies": len(by_currency) > 1,
     }
+
+
+def _derive_item_keys(
+    thread_uuid: uuid.UUID | None,
+    items: list[dict[str, Any]],
+    tx_time: datetime,
+    source_account_id: str | None,
+    target_account_id: str | None,
+) -> list[str] | None:
+    """Stable per-item idempotency keys for AI bookings, or None when unscoped.
+
+    The key must be identical across replays of the same run (graph resume
+    after a dropped stream or crash re-executes the persisted tool call) yet
+    distinct for genuinely new bookings. ``thread_id`` + a digest of the full
+    booking payload achieves both: a replayed run hashes to the same keys, a
+    model correction or a later identical phrase books under a fresh digest
+    (different stated time / raw input / amount). An identical repeat inside
+    one conversation therefore dedupes — the safe direction for money
+    movement.
+    """
+    if thread_uuid is None:
+        return None
+    normalized = [
+        {**item, "tags": sorted(item.get("tags") or []) if isinstance(item.get("tags"), list) else item.get("tags")}
+        for item in items
+    ]
+    digest = hashlib.sha256(
+        json.dumps(
+            {
+                "thread": str(thread_uuid),
+                "transaction_at": tx_time.isoformat(),
+                "source_account_id": source_account_id,
+                "target_account_id": target_account_id,
+                "items": normalized,
+            },
+            sort_keys=True,
+            ensure_ascii=False,
+            default=str,
+        ).encode()
+    ).hexdigest()[:32]
+    return [f"ai:{thread_uuid}:{digest}:{i}" for i in range(len(items))]
 
 
 def _to_transaction_dict(tx: Any) -> dict[str, Any]:
@@ -226,6 +269,11 @@ async def record_transactions(
                     expense_items.append(item)
 
             all_items = expense_items + income_items
+            thread_uuid = uuid.UUID(tid) if (tid := get_thread_id(config)) else None
+            item_keys = _derive_item_keys(thread_uuid, all_items, tx_time, source_account_id, target_account_id)
+            if item_keys is not None:
+                for item, key in zip(all_items, item_keys, strict=True):
+                    item["idempotency_key"] = key
 
             result = await service.create_batch_transactions(
                 user_uuid=user_uuid,
@@ -235,7 +283,7 @@ async def record_transactions(
                     "target_account_id": target_account_id,
                     "transaction_at": tx_time.isoformat(),
                 },
-                source_thread_id=uuid.UUID(tid) if (tid := get_thread_id(config)) else None,
+                source_thread_id=thread_uuid,
             )
 
             if isinstance(result, dict) and result.get("success"):

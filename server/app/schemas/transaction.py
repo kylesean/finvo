@@ -111,6 +111,15 @@ Examples:
     transaction_type: Literal["expense", "income", "transfer"] = Field(default="expense")
     category_key: str = Field(default="OTHERS")
     raw_input: str | None = Field(None, description="Raw input text snippet corresponding to this transaction")
+    idempotency_key: str | None = Field(
+        None,
+        max_length=128,
+        description=(
+            "Client-supplied key (e.g. a UUID per logical booking) that makes this item "
+            "idempotent: resubmitting it with the same key replays the already-booked row "
+            "instead of creating a duplicate money movement"
+        ),
+    )
 
     @field_validator("amount")
     @classmethod
@@ -680,6 +689,8 @@ class TransactionBatchResult(BaseModel):
     failed_count: int
     failed: list[dict[str, Any]]
     account_id: str | None = None
+    # Items whose idempotency_key already booked a row: replayed, not re-created.
+    replayed_count: int = 0
     transactions: list[TransactionBatchItem]
 
 
