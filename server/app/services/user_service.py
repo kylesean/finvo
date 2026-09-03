@@ -876,6 +876,9 @@ class UserService:
                 from app.services.transaction.crud_service import TransactionCRUDService
 
                 crud = TransactionCRUDService(self.db)
+                # The disposal amount is in the closing account's own currency.
+                # create_transaction defaults to CNY, which would silently
+                # misbook non-CNY closures (same bug transfer_tools.py fixed).
                 created = await crud.create_transaction(
                     user_uuid=user_uuid,
                     amount=abs(balance),
@@ -883,6 +886,7 @@ class UserService:
                     source_account_id=(account_id if balance > 0 else target_account_id),
                     target_account_id=(target_account_id if balance > 0 else account_id),
                     category_key="OTHERS",
+                    currency=(account.currency_code or "CNY").upper(),
                     raw_input=_close_system_message(locale, "transfer"),
                 )
                 transaction_id = created["transaction_id"]
@@ -915,6 +919,8 @@ class UserService:
                 from app.services.transaction.crud_service import TransactionCRUDService
 
                 crud = TransactionCRUDService(self.db)
+                # Same currency constraint as the transfer branch: the amount
+                # is the closing account's own balance, never CNY by default.
                 created = await crud.create_transaction(
                     user_uuid=user_uuid,
                     amount=abs(balance),
@@ -922,6 +928,7 @@ class UserService:
                     source_account_id=source_acc_id,
                     target_account_id=target_acc_id,
                     category_key="OTHERS",
+                    currency=(account.currency_code or "CNY").upper(),
                     raw_input=_close_system_message(locale, "writeoff"),
                 )
                 transaction_id = created["transaction_id"]
