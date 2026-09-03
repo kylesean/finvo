@@ -1,5 +1,7 @@
 """Routing and tool specs: one behavior per test."""
 
+import json
+
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
@@ -8,8 +10,13 @@ from app.core.langgraph.stream.policies import SILENT_TOOLS, suppress_text
 from app.core.langgraph.tools.tool_metadata import cancel_warning, is_cancellable, is_silent, should_end_turn
 
 
-def _tool_msg(name: str) -> ToolMessage:
-    return ToolMessage(content="{}", name=name, tool_call_id="c1")
+def _tool_msg(name: str, result: object = None) -> ToolMessage:
+    content = "{}" if result is None else json.dumps(result)
+    return ToolMessage(content=content, name=name, tool_call_id="c1")
+
+
+def _failed_msg(name: str) -> ToolMessage:
+    return _tool_msg(name, {"success": False, "message": "account not found"})
 
 
 class TestRouteEntry:
@@ -31,8 +38,36 @@ class TestRouteAfterAgent:
 
 class TestRouteAfterTools:
     @pytest.mark.parametrize("tool", ["record_transactions", "execute_transfer", "create_budget", "write_file"])
-    def test_write_tools_end_turn(self, tool: str):
-        assert route_after_tools({"messages": [_tool_msg(tool)], "ui_mode": "idle"}) == "__end__"
+    def test_successful_write_tools_end_turn(self, tool: str):
+        assert route_after_tools({"messages": [_tool_msg(tool, {"success": True})], "ui_mode": "idle"}) == "__end__"
+
+    @pytest.mark.parametrize("tool", ["record_transactions", "execute_transfer", "create_budget"])
+    def test_failed_write_tool_loops_back_for_self_correction(self, tool: str):
+        """The structured error must reach the model so it can retry or ask
+        the user — not end the turn silently on the first failure."""
+        assert route_after_tools({"messages": [_failed_msg(tool)], "ui_mode": "idle"}) == "agent"
+
+    def test_failed_write_file_error_string_loops_back(self):
+        assert route_after_tools({"messages": [_tool_msg("write_file", "Error: not allowed")], "ui_mode": "idle"}) == (
+            "agent"
+        )
+
+    def test_self_correction_is_bounded(self):
+        """After 4 consecutive write failures the turn ends (streak > 3)."""
+        messages = [_failed_msg("record_transactions")] * 4
+        assert route_after_tools({"messages": messages, "ui_mode": "idle"}) == "__end__"
+        three = [_failed_msg("record_transactions")] * 3
+        assert route_after_tools({"messages": three, "ui_mode": "idle"}) == "agent"
+
+    def test_streak_resets_after_successful_write(self):
+        """Two old failures followed by a success: the next failure retries."""
+        messages = [
+            _failed_msg("record_transactions"),
+            _failed_msg("record_transactions"),
+            _tool_msg("record_transactions", {"success": True}),
+            _failed_msg("record_transactions"),
+        ]
+        assert route_after_tools({"messages": messages, "ui_mode": "idle"}) == "agent"
 
     @pytest.mark.parametrize("tool", ["search_transactions", "read_file", "unknown_tool"])
     def test_read_and_unknown_tools_return_to_agent(self, tool: str):
