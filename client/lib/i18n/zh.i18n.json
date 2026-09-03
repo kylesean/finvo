@@ -1647,6 +1647,7 @@
     "empty": "暂无通知消息",
     "loadFailed": "加载失败",
     "retry": "重试",
+    "connectionLost": "通知推送连接已断开，点击重试",
     "justNow": "刚刚",
     "minutesAgo": "${minutes}分钟前",
     "hoursAgo": "${hours}小时前",

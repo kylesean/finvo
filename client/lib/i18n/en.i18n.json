@@ -1647,6 +1647,7 @@
     "empty": "No notifications yet",
     "loadFailed": "Failed to load",
     "retry": "Retry",
+    "connectionLost": "Notification connection lost — tap to retry",
     "justNow": "Just now",
     "minutesAgo": "${minutes}m ago",
     "hoursAgo": "${hours}h ago",

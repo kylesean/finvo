@@ -1156,6 +1156,7 @@ class _Translations$notification$ko extends Translations$notification$zh {
 	@override String get empty => '알림이 없습니다';
 	@override String get loadFailed => '로드 실패';
 	@override String get retry => '재시도';
+	@override String get connectionLost => '알림 연결이 끊겼습니다 — 탭하여 재시도';
 	@override String get justNow => '방금';
 	@override String minutesAgo({required Object minutes}) => '${minutes}분 전';
 	@override String hoursAgo({required Object hours}) => '${hours}시간 전';
@@ -4084,6 +4085,7 @@ extension on TranslationsKo {
 			'notification.empty' => '알림이 없습니다',
 			'notification.loadFailed' => '로드 실패',
 			'notification.retry' => '재시도',
+			'notification.connectionLost' => '알림 연결이 끊겼습니다 — 탭하여 재시도',
 			'notification.justNow' => '방금',
 			'notification.minutesAgo' => ({required Object minutes}) => '${minutes}분 전',
 			'notification.hoursAgo' => ({required Object hours}) => '${hours}시간 전',

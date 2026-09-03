@@ -1647,6 +1647,7 @@
     "empty": "暫無通知訊息",
     "loadFailed": "載入失敗",
     "retry": "重試",
+    "connectionLost": "通知推送連線已斷開，點擊重試",
     "justNow": "剛剛",
     "minutesAgo": "${minutes}分鐘前",
     "hoursAgo": "${hours}小時前",

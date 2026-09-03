@@ -1156,6 +1156,7 @@ class _Translations$notification$en extends Translations$notification$zh {
 	@override String get empty => 'No notifications yet';
 	@override String get loadFailed => 'Failed to load';
 	@override String get retry => 'Retry';
+	@override String get connectionLost => 'Notification connection lost — tap to retry';
 	@override String get justNow => 'Just now';
 	@override String minutesAgo({required Object minutes}) => '${minutes}m ago';
 	@override String hoursAgo({required Object hours}) => '${hours}h ago';
@@ -4084,6 +4085,7 @@ extension on TranslationsEn {
 			'notification.empty' => 'No notifications yet',
 			'notification.loadFailed' => 'Failed to load',
 			'notification.retry' => 'Retry',
+			'notification.connectionLost' => 'Notification connection lost — tap to retry',
 			'notification.justNow' => 'Just now',
 			'notification.minutesAgo' => ({required Object minutes}) => '${minutes}m ago',
 			'notification.hoursAgo' => ({required Object hours}) => '${hours}h ago',

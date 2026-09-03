@@ -70,6 +70,12 @@ def check_file(path: Path, fix: bool) -> int:
                 text = text.replace(literal, '""', 1)
         path.write_text(text, encoding="utf-8")
         print(f"[FIXED] {path}: {len(findings)} untranslated entries blanked")
+        # Blanking removes the CJK but the entry now renders as EMPTY text in
+        # the UI — keep the defect visible instead of silently green.
+        print("[WARN] Blanked entries render as empty strings until a real")
+        print("[WARN] translation is filled in. Fix these before release:")
+        for dotted, _value in findings:
+            print(f"[WARN]   {path.name}: {dotted}")
         return 0
 
     print(f"[FAIL] {path}: {len(findings)} untranslated entries:")

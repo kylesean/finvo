@@ -1647,6 +1647,7 @@
     "empty": "お知らせはありません",
     "loadFailed": "読み込みに失敗しました",
     "retry": "再試行",
+    "connectionLost": "通知の接続が切断されました — タップして再試行",
     "justNow": "たった今",
     "minutesAgo": "${minutes}分前",
     "hoursAgo": "${hours}時間前",

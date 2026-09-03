@@ -1156,6 +1156,7 @@ class _Translations$notification$ja extends Translations$notification$zh {
 	@override String get empty => 'お知らせはありません';
 	@override String get loadFailed => '読み込みに失敗しました';
 	@override String get retry => '再試行';
+	@override String get connectionLost => '通知の接続が切断されました — タップして再試行';
 	@override String get justNow => 'たった今';
 	@override String minutesAgo({required Object minutes}) => '${minutes}分前';
 	@override String hoursAgo({required Object hours}) => '${hours}時間前';
@@ -4084,6 +4085,7 @@ extension on TranslationsJa {
 			'notification.empty' => 'お知らせはありません',
 			'notification.loadFailed' => '読み込みに失敗しました',
 			'notification.retry' => '再試行',
+			'notification.connectionLost' => '通知の接続が切断されました — タップして再試行',
 			'notification.justNow' => 'たった今',
 			'notification.minutesAgo' => ({required Object minutes}) => '${minutes}分前',
 			'notification.hoursAgo' => ({required Object hours}) => '${hours}時間前',

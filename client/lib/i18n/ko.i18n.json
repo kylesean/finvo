@@ -1647,6 +1647,7 @@
     "empty": "알림이 없습니다",
     "loadFailed": "로드 실패",
     "retry": "재시도",
+    "connectionLost": "알림 연결이 끊겼습니다 — 탭하여 재시도",
     "justNow": "방금",
     "minutesAgo": "${minutes}분 전",
     "hoursAgo": "${hours}시간 전",

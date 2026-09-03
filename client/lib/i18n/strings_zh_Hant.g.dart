@@ -1156,6 +1156,7 @@ class _Translations$notification$zh_Hant extends Translations$notification$zh {
 	@override String get empty => '暫無通知訊息';
 	@override String get loadFailed => '載入失敗';
 	@override String get retry => '重試';
+	@override String get connectionLost => '通知推送連線已斷開，點擊重試';
 	@override String get justNow => '剛剛';
 	@override String minutesAgo({required Object minutes}) => '${minutes}分鐘前';
 	@override String hoursAgo({required Object hours}) => '${hours}小時前';
@@ -4084,6 +4085,7 @@ extension on TranslationsZhHant {
 			'notification.empty' => '暫無通知訊息',
 			'notification.loadFailed' => '載入失敗',
 			'notification.retry' => '重試',
+			'notification.connectionLost' => '通知推送連線已斷開，點擊重試',
 			'notification.justNow' => '剛剛',
 			'notification.minutesAgo' => ({required Object minutes}) => '${minutes}分鐘前',
 			'notification.hoursAgo' => ({required Object hours}) => '${hours}小時前',

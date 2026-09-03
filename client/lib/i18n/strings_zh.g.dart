@@ -2582,6 +2582,9 @@ class Translations$notification$zh {
 	/// zh: '重试'
 	String get retry => '重试';
 
+	/// zh: '通知推送连接已断开，点击重试'
+	String get connectionLost => '通知推送连接已断开，点击重试';
+
 	/// zh: '刚刚'
 	String get justNow => '刚刚';
 
@@ -6957,6 +6960,7 @@ extension on Translations {
 			'notification.empty' => '暂无通知消息',
 			'notification.loadFailed' => '加载失败',
 			'notification.retry' => '重试',
+			'notification.connectionLost' => '通知推送连接已断开，点击重试',
 			'notification.justNow' => '刚刚',
 			'notification.minutesAgo' => ({required Object minutes}) => '${minutes}分钟前',
 			'notification.hoursAgo' => ({required Object hours}) => '${hours}小时前',
