@@ -1,4 +1,4 @@
-"""Add optimistic-lock version column to shared_spaces (C3).
+"""Add optimistic-lock version column to shared_spaces.
 
 Revision ID: 0013
 Revises: 0012

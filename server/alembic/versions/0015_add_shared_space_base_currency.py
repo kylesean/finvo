@@ -4,7 +4,7 @@ Revision ID: 0015
 Revises: 0014
 Create Date: 2026-09-03
 
-BF-P1-6: members on different base currencies (CNY payer + USD member) made
+Members on different base currencies (CNY payer + USD member) made
 settlement math meaningless — per-member snapshot values were added directly.
 The space now carries a settlement base currency; settlement converts each
 transaction (amount_original + currency) into it before splitting.

@@ -9,7 +9,6 @@ from typing import (
 )
 
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
@@ -139,7 +138,7 @@ class LLMRegistry:
         """Log a clear startup warning when a model runs with no real key.
 
         The ChatOpenAI constructor requires a non-empty api_key, so missing
-        provider credentials fall back to a placeholder (D6); failing loudly
+        provider credentials fall back to a placeholder; failing loudly
         at startup beats surfacing as a confusing auth error on the first
         request. Ollama models never have an API key — silence them.
         """
@@ -244,19 +243,17 @@ class LLMRegistry:
                 if not any(e["name"] in (model_name, clean_model_name) for e in cls._llms()):
                     cls._llms().append(model_entry)
 
-        # If user provides kwargs, create a new instance with those args
         if kwargs:
             logger.debug("creating_llm_with_custom_args", model_name=model_name, custom_args=list(kwargs.keys()))
-            default_api_key = (
-                settings.OLLAMA_API_KEY
-                if (is_ollama or model_entry.get("provider") == "ollama")
-                else settings.OPENAI_API_KEY
-            )
-            default_base_url = (
-                settings.OLLAMA_BASE_URL
-                if (is_ollama or model_entry.get("provider") == "ollama")
-                else settings.OPENAI_BASE_URL
-            )
+            # Credentials come from this entry, not global OPENAI_*.
+            entry_kwargs = model_entry.get("llm_kwargs", {}) or {}
+            if "api_key" in entry_kwargs or "base_url" in entry_kwargs:
+                default_api_key = entry_kwargs.get("api_key", settings.OPENAI_API_KEY)
+                default_base_url = entry_kwargs.get("base_url", settings.OPENAI_BASE_URL)
+            else:
+                is_ollama_provider = is_ollama or model_entry.get("provider") == "ollama"
+                default_api_key = settings.OLLAMA_API_KEY if is_ollama_provider else settings.OPENAI_API_KEY
+                default_base_url = settings.OLLAMA_BASE_URL if is_ollama_provider else settings.OPENAI_BASE_URL
 
             merged_kwargs = {
                 "api_key": default_api_key,

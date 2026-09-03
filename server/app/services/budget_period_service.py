@@ -57,9 +57,9 @@ class BudgetPeriodService:
     async def _get_current_period(self, budget: Budget) -> BudgetPeriod | None:
         """Get current active period for a budget.
 
-        P2-10: "today" is the budget owner's local date (from their IANA
-        profile timezone), not the server's — otherwise UTC+8 users book
-        pre-16:00 spending into "yesterday's" period.
+        "Today" is the budget owner's local date (from their IANA profile
+        timezone), not the server's — otherwise UTC+8 users book pre-16:00
+        spending into "yesterday's" period.
         """
         from app.services.statistics_scope import get_user_timezone, user_local_today
 
@@ -122,17 +122,20 @@ class BudgetPeriodService:
 
                 rollover_in = Decimal("0")
                 if budget.rollover_enabled and prev_period:
-                    # S-D: refresh the previous period's spent amount from the
+                    # Refresh the previous period's spent amount from the
                     # ledger before computing the rollover surplus. The
                     # persisted value can be stale — transactions booked after
                     # the user's last budget-page visit — which would inflate
                     # the surplus and carry it into the new period's target.
+                    # Only the idempotent spent-amount refresh may persist
+                    # before the insert. The surplus movement itself is booked
+                    # AFTER the insert below succeeds — mutating before the
+                    # savepoint would leave phantom additions pending when a
+                    # concurrent worker wins the insert (refresh() cannot undo
+                    # them: it sees the session's own flushed writes).
                     await self.update_period_spent_amount(budget, prev_period, auto_commit=False)
                     unused = prev_period.adjusted_target - prev_period.spent_amount
-                    surplus = max(unused, Decimal("0"))
-                    rollover_in = surplus
-                    prev_period.rollover_out = surplus
-                    budget.rollover_balance = budget.rollover_balance + surplus
+                    rollover_in = max(unused, Decimal("0"))
 
                 new_period = BudgetPeriod(
                     budget_id=budget.id,
@@ -152,9 +155,18 @@ class BudgetPeriodService:
                     async with self.session.begin_nested():
                         self.session.add(new_period)
                         await self.session.flush()
+                    # Insert won: book the rollover movement now. (On the lost
+                    # race below, nothing was mutated, so there is nothing to
+                    # unwind — the period the winner created carries its own
+                    # accounting.)
+                    if rollover_in and prev_period is not None:
+                        prev_period.rollover_out = rollover_in
+                        budget.rollover_balance = budget.rollover_balance + rollover_in
                     await self.session.flush()
                     prev_period = new_period
                 except IntegrityError:
+                    # Lost the race: the winner's row stands; re-read it and
+                    # continue. No in-memory rollover state exists to unwind.
                     ex_res = await self.session.execute(
                         select(BudgetPeriod).where(
                             BudgetPeriod.budget_id == budget.id,

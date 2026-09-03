@@ -105,14 +105,14 @@ async def test_join_with_expired_code_folds_into_same_error(db_session: AsyncSes
 
 
 @pytest.mark.asyncio
-async def test_join_with_inactive_space_folds_into_same_error(db_session: AsyncSession):
+async def test_join_with_archived_space_folds_into_same_error(db_session: AsyncSession):
     user = await _seed_user(db_session, "user", "user@example.com")
     await _seed_space(
         db_session,
         creator=user,
         invite_code="ABCD2345",
         invite_code_expires_at=datetime.now(UTC) + timedelta(days=1),
-        status="inactive",
+        status="archived",
     )
     service = SharedSpaceService(db_session)
 

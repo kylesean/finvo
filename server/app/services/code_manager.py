@@ -90,12 +90,13 @@ class CodeManager:
     """
 
     def __init__(self) -> None:
-        # Configuration
         self.code_length = 6
-        self.expire_seconds = 300  # 5 minutes
-        self.rate_limit_seconds = 60  # Only one send per 60 seconds
+        self.expire_seconds = 300
+        self.rate_limit_seconds = 60
+        self.max_attempts = 5
         self.redis_code_key_prefix = "verification_code:"
         self.redis_rate_limit_key_prefix = "code_rate_limit:"
+        self.redis_attempts_key_prefix = "code_attempts:"
 
         # Register senders
         self.senders = [
@@ -175,52 +176,43 @@ class CodeManager:
             )
 
     async def verify_code(self, account: str, code: str) -> bool:
-        """Verify a verification code.
-
-        Args:
-            account: Account identifier
-            code: Verification code to check
-
-        Returns:
-            Whether verification succeeded
-        """
+        """Verify a code. Wrong attempts count; the code dies after max_attempts."""
         key = self._get_code_key(account)
 
-        # Fetch the stored code from Redis (no deserialization — stored as raw string)
         stored_code = await cache_manager.get(key, deserialize=False)
 
-        # Convert bytes to str if needed
         if isinstance(stored_code, bytes):
             stored_code = stored_code.decode("utf-8")
 
-        logger.debug(
-            "verifying_code",
-            account=account,
-            key=key,
-            has_stored_code=stored_code is not None,
-            stored_code=stored_code if settings.DEBUG else "***",
-            provided_code=code if settings.DEBUG else "***",
-        )
-
-        # Constant-time comparison via hmac.compare_digest to mitigate timing attacks
         if not stored_code or not hmac.compare_digest(stored_code, code):
-            logger.warning(
-                "verification_code_invalid",
-                account=account,
-                provided_code=code if settings.DEBUG else "***",
-                stored_code=stored_code if settings.DEBUG else "***",
-            )
+            logger.warning("verification_code_invalid", account=account)
+            await self._record_failed_attempt(account)
             return False
 
-        # Delete the code immediately after successful verification to prevent reuse
         await cache_manager.delete(key)
+        await cache_manager.delete(self._get_attempts_key(account))
 
-        logger.info(
-            "verification_code_verified",
-            account=account,
-        )
+        logger.info("verification_code_verified", account=account)
 
         return True
+
+    def _get_attempts_key(self, account: str) -> str:
+        return f"{self.redis_attempts_key_prefix}{account}"
+
+    async def _record_failed_attempt(self, account: str) -> None:
+        """Count a wrong guess; void the code once the budget is spent."""
+        try:
+            count = await cache_manager.increment(self._get_attempts_key(account))
+            if count is None:
+                return
+            if count == 1:
+                await cache_manager.expire(self._get_attempts_key(account), self.expire_seconds)
+            if count >= self.max_attempts:
+                await cache_manager.delete(self._get_code_key(account))
+                await cache_manager.delete(self._get_attempts_key(account))
+                logger.warning("verification_code_voided_after_attempts", account=account)
+        except Exception as e:
+            logger.warning("code_attempt_track_failed", error=str(e))
 
     def _generate_code(self) -> str:
         """Generate a cryptographically secure random code (CSPRNG)."""

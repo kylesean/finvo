@@ -60,13 +60,11 @@ class TransactionLedgerService:
     ) -> Decimal:
         """Convert a transaction snapshot amount to an account's currency.
 
-        Delegates to the canonical P2-9 core
-        (:func:`app.services.account_balance.convert_snapshot_to_currency`) so
-        the live ledger, lifecycle recompute and reconcile script share one
-        conversion rule. ``allow_live_rate=False`` is the rollback mode: live
-        rates are skipped and only snapshot-derived values are used, so a
-        rate outage can never block a delete (callers catch ``ValueError`` to
-        skip-with-warning when even the snapshot cannot express the hop).
+        Shares one conversion rule with lifecycle recompute and the reconcile
+        script. ``allow_live_rate=False`` is rollback mode: live rates are
+        skipped so a rate outage can never block a delete (callers catch
+        ``ValueError`` to skip-with-warning when even the snapshot cannot
+        express the hop).
 
         Raises:
             BusinessError: If a required cross-currency conversion is unavailable
@@ -107,10 +105,10 @@ class TransactionLedgerService:
         target account in TRANSFER) or decreases (-1, e.g. EXPENSE, source account
         in TRANSFER) the balance.
 
-        ``allow_live_rate=False`` is the rollback mode (P2-9): when even the
-        snapshot cannot express the hop, the account adjustment is SKIPPED
-        with an error log instead of raising — a rate outage must never block
-        a delete. The drift is left for the reconcile script to flag and fix.
+        ``allow_live_rate=False`` is rollback mode: when even the snapshot
+        cannot express the hop, the adjustment is SKIPPED with an error log
+        instead of raising — a rate outage must never block a delete. The
+        drift is left for the reconcile script to flag and fix.
         """
         if account_id is None:
             return
@@ -170,8 +168,8 @@ class TransactionLedgerService:
         symmetric and never silently mislabel a currency. Accounts that no
         longer exist are skipped.
 
-        Delete callers pass ``allow_live_rate=False`` (P2-9): unresolvable
-        hops are skipped with a log instead of failing the delete.
+        Delete callers pass ``allow_live_rate=False``: unresolvable hops are
+        skipped with a log instead of failing the delete.
         """
         user_base_currency = await get_user_base_currency(self.db, user_uuid)
         tx_type = transaction.type

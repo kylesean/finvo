@@ -1,4 +1,4 @@
-"""Auth API end-to-end integration tests (ENG-P1-2).
+"""Auth API end-to-end integration tests.
 
 Covers the HTTP boundary the service-layer tests never touch: dependency
 injection, rate limiting, cookie/header handling, and error-code folding —
@@ -179,7 +179,7 @@ class TestTokenLifecycleHttp:
 
     @pytest.mark.asyncio
     async def test_refresh_token_cannot_access_api(self, client: TestClient) -> None:
-        """SEC-P1-2 at the HTTP layer: a refresh token is not an access token."""
+        """A refresh token is not an access token at the HTTP layer."""
         email = _unique_email("typeconf")
         data = _register(client, email)
         response = client.get(
@@ -220,7 +220,7 @@ class TestTokenLifecycleHttp:
 class TestAntiEnumerationAndLimits:
     @pytest.mark.asyncio
     async def test_send_code_does_not_enumerate_accounts(self, client: TestClient) -> None:
-        """SEC-P2-6: send-code returns success for registered AND new accounts alike."""
+        """Send-code returns success for registered AND new accounts alike."""
         email = _unique_email("enum")
         _register(client, email)
 

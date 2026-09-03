@@ -1,11 +1,7 @@
 """Single source of truth for user-facing spending statistics scope.
 
-BF-P1-8: the space monthly summary (agent tool) counted PENDING and SYSTEM
-lifecycle rows and used a UTC month boundary, while the budget engine filters
-to CLEARED + non-SYSTEM. Both paths must share one scope definition so the
-agent's "how much did we spend" answer matches the REST statistics endpoint.
-
-Scope rules (aligned with budget_period_service + statistics_service):
+Scope rules (shared by the agent space summary, the budget engine and the
+REST statistics endpoint, so "how much did we spend" always agrees):
 - Only ``status == "CLEARED"`` counts as spending (PENDING periodic rows are
   not yet real money).
 - Exclude ``source == SYSTEM`` lifecycle audit entries (account-close disposal
@@ -69,7 +65,7 @@ def user_month_start_utc(
 
 
 def user_local_today(user_timezone: str | None, *, now_utc: datetime | None = None) -> date:
-    """Return "today" as a calendar date in the user's timezone (P2-10).
+    """Return "today" as a calendar date in the user's timezone.
 
     Budget period boundaries are date-based; using the server's local date
     puts UTC+8 users' pre-16:00 spending into "yesterday's" budget period.
