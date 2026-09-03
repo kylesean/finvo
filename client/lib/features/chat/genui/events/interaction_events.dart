@@ -27,6 +27,7 @@ import 'package:decimal/decimal.dart';
 
 import 'package:finvo/features/chat/genui/events/event_names.dart';
 import 'package:finvo/features/chat/genui/events/space_events.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Safely convert wire amount field (num or String) to Decimal.
 ///
@@ -128,7 +129,7 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
     required this.sourceAccountName,
     required this.targetAccountName,
     required this.amount,
-    this.currency = 'CNY',
+    this.currency = Currency.defaultCode,
     this.memo,
     this.tags = const [],
     this.rawInput,
@@ -145,7 +146,7 @@ final class TransferPathConfirmedEvent extends GenUiInteractionEvent {
       targetAccountName:
           _asString(context['target_account_name']) ?? 'Target Account',
       amount: _amountToDecimal(context['amount']),
-      currency: _asString(context['currency']) ?? 'CNY',
+      currency: _asString(context['currency']) ?? Currency.defaultCode,
       memo: _asString(context['memo']),
       tags: rawTags is List
           ? rawTags.map((e) => e.toString()).where((t) => t.isNotEmpty).toList()

@@ -14,6 +14,7 @@ import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/features/chat/genui/atoms/atoms.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/utils/date_time_utils.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Transfer success receipt card widget - concise three-section design
 ///
@@ -33,7 +34,7 @@ class TransferReceipt extends StatelessWidget {
 
     // Extract data (AI-provided payloads are untrusted; coerce types)
     final amount = AmountFormatter.parseDecimal(data['amount']?.toString());
-    final currency = data['currency']?.toString() ?? 'CNY';
+    final currency = data['currency']?.toString() ?? Currency.defaultCode;
     final time = data['transaction_at']?.toString() ?? '';
     final tagsRaw = data['tags'];
     final tags = tagsRaw is List

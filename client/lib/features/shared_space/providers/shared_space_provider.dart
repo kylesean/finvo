@@ -338,7 +338,7 @@ class SpaceTransactionNotifier extends _$SpaceTransactionNotifier
     final res = await _service.getSpaceTransactions(
       _spaceId,
       page: page,
-      limit: _pageSize,
+      pageSize: _pageSize,
     );
     return PageResult(items: res.transactions, total: res.total);
   }

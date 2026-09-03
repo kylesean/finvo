@@ -35,7 +35,7 @@ class StatisticsService {
   }) {
     final queryParams = <String, String>{
       'time_range': timeRange.name,
-      // S-E: tell the server the client's local offset so trends/categories/
+      // Tell the server the client's local offset so trends/categories/
       // top-transactions/cash-flow/health-score group by LOCAL calendar days
       // (a UTC+8 transaction at local 00:30 must land on today's bucket, not
       // yesterday's).
@@ -157,7 +157,7 @@ class StatisticsService {
     queryParams
       ..['sort_by'] = sortBy.name
       ..['page'] = page.toString()
-      ..['size'] = pageSize.toString();
+      ..['page_size'] = pageSize.toString();
 
     return await _networkClient.request<TopTransactionsResponse>(
       '/statistics/top-transactions',

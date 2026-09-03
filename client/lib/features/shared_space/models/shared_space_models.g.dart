@@ -220,7 +220,7 @@ _SpaceTransaction _$SpaceTransactionFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       type: json['type'] as String,
       amount: json['amount'] as String,
-      currency: json['currency'] as String? ?? 'CNY',
+      currency: json['currency'] as String? ?? Currency.defaultCode,
       description: json['description'] as String?,
       categoryKey: json['categoryKey'] as String?,
       transactionAt: json['transactionAt'] == null
@@ -255,7 +255,7 @@ _SpaceTransactionListResponse _$SpaceTransactionListResponseFromJson(
       .toList(),
   total: (json['total'] as num).toInt(),
   page: (json['page'] as num).toInt(),
-  limit: (json['limit'] as num).toInt(),
+  pageSize: (json['page_size'] as num).toInt(),
 );
 
 Map<String, dynamic> _$SpaceTransactionListResponseToJson(
@@ -264,7 +264,7 @@ Map<String, dynamic> _$SpaceTransactionListResponseToJson(
   'transactions': instance.transactions,
   'total': instance.total,
   'page': instance.page,
-  'limit': instance.limit,
+  'page_size': instance.pageSize,
 };
 
 _SharedSpaceListResponse _$SharedSpaceListResponseFromJson(
@@ -275,7 +275,7 @@ _SharedSpaceListResponse _$SharedSpaceListResponseFromJson(
       .toList(),
   total: (json['total'] as num).toInt(),
   page: (json['page'] as num).toInt(),
-  limit: (json['limit'] as num).toInt(),
+  pageSize: (json['page_size'] as num).toInt(),
 );
 
 Map<String, dynamic> _$SharedSpaceListResponseToJson(
@@ -284,29 +284,5 @@ Map<String, dynamic> _$SharedSpaceListResponseToJson(
   'spaces': instance.spaces,
   'total': instance.total,
   'page': instance.page,
-  'limit': instance.limit,
-};
-
-_NotificationListResponse _$NotificationListResponseFromJson(
-  Map<String, dynamic> json,
-) => _NotificationListResponse(
-  notifications: (json['notifications'] as List<dynamic>)
-      .map(
-        (e) => SharedSpaceNotificationModel.fromJson(e as Map<String, dynamic>),
-      )
-      .toList(),
-  total: (json['total'] as num).toInt(),
-  unreadCount: (json['unreadCount'] as num).toInt(),
-  page: (json['page'] as num).toInt(),
-  limit: (json['limit'] as num).toInt(),
-);
-
-Map<String, dynamic> _$NotificationListResponseToJson(
-  _NotificationListResponse instance,
-) => <String, dynamic>{
-  'notifications': instance.notifications,
-  'total': instance.total,
-  'unreadCount': instance.unreadCount,
-  'page': instance.page,
-  'limit': instance.limit,
+  'page_size': instance.pageSize,
 };

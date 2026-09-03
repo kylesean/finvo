@@ -23,6 +23,7 @@ import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Batch transaction receipt component
 ///
@@ -662,12 +663,12 @@ class _TransactionGroupReceiptState
     final colors = theme.colors;
 
     // Get transaction currency. Fallback must match the app-wide default
-    // ('CNY', used by every other fallback site): 'USD' here made the
+    // (CNY, used by every other fallback site): 'USD' here made the
     // currency-mismatch confirmation dialog fire incorrectly.
     final txCurrency =
         (tx['originalCurrency']?.toString()) ??
         (tx['currency']?.toString()) ??
-        'CNY';
+        Currency.defaultCode;
 
     // Get transaction amount
     final txAmount = tx['originalAmount'] != null

@@ -29,6 +29,7 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 class TransactionDetailPage extends ConsumerWidget {
   final String transactionId;
@@ -212,7 +213,7 @@ class TransactionDetailPage extends ConsumerWidget {
                                   child: AmountText.large(
                                     amount: transaction.amount,
                                     type: transaction.type,
-                                    currency: transaction.currency ?? 'CNY',
+                                    currency: transaction.currency ?? Currency.defaultCode,
                                   ),
                                 ),
                               ),
@@ -423,8 +424,8 @@ class TransactionDetailPage extends ConsumerWidget {
     // from business errors is still honoured.
     if (error is AppException &&
         (error.message.contains('Not Found') ||
-            error.message.contains('不存在') ||
-            error.message.contains('未找到'))) {
+            error.message.contains('不存在') || // cjk-allow: matches server error-message contract
+            error.message.contains('未找到'))) { // cjk-allow: matches server error-message contract
       return true;
     }
     return false;

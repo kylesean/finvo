@@ -52,7 +52,7 @@ class ConversationService {
   ///
   /// Accepts both an empty/null payload (yielding an empty page) and the
   /// unified pagination envelope produced by the backend
-  /// (`items` / `page` / `size` / `total` / `pages` / `hasMore`).
+  /// (`items` / `page` / `page_size` / `total` / `pages` / `hasMore`).
   PaginatedConversations _parseConversationsData(
     Map<String, dynamic> data, {
     required int page,
@@ -137,7 +137,7 @@ class ConversationService {
     final envelope = await _networkClient.requestMap(
       '/auth/sessions',
       method: HttpMethod.get,
-      queryParameters: {'page': page, 'size': perPage},
+      queryParameters: {'page': page, 'page_size': perPage},
     );
     final data = ResponseParser.parseData<Map<String, dynamic>>(
       envelope,

@@ -7,6 +7,7 @@ import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Cash Flow Analysis Card - GenUI Template
 ///
@@ -27,7 +28,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
   bool _isExpanded = false;
 
   String _formatAmount(dynamic amount) {
-    final numberFormat = AmountFormatter.getNumberFormat('CNY');
+    final numberFormat = AmountFormatter.getNumberFormat(Currency.defaultCode);
     if (amount is String) {
       return numberFormat.format(double.tryParse(amount) ?? 0);
     }

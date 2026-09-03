@@ -530,7 +530,7 @@ return $default(_that.id,_that.name,_that.nature,_that.type,_that.currencyCode,_
 @JsonSerializable()
 
 class _FinancialAccount implements FinancialAccount {
-  const _FinancialAccount({this.id, required this.name, @JsonKey(fromJson: _financialNatureFromJson) required this.nature, @JsonKey(fromJson: _financialAccountTypeFromJson) this.type, this.currencyCode = 'CNY', @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) this.currentBalance, this.includeInNetWorth = true, this.includeInCashFlow = false, this.display, @JsonKey(unknownEnumValue: AccountStatus.inactive) this.status = AccountStatus.active, this.createdAt, this.updatedAt});
+  const _FinancialAccount({this.id, required this.name, @JsonKey(fromJson: _financialNatureFromJson) required this.nature, @JsonKey(fromJson: _financialAccountTypeFromJson) this.type, this.currencyCode = Currency.defaultCode, @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.initialBalance, @JsonKey(fromJson: decimalOrNullFromJson, toJson: decimalToJsonOrZero) this.currentBalance, this.includeInNetWorth = true, this.includeInCashFlow = false, this.display, @JsonKey(unknownEnumValue: AccountStatus.inactive) this.status = AccountStatus.active, this.createdAt, this.updatedAt});
   factory _FinancialAccount.fromJson(Map<String, dynamic> json) => _$FinancialAccountFromJson(json);
 
 /// Account ID (UUID from backend)

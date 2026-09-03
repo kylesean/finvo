@@ -20,6 +20,7 @@ import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// TransactionCard
 class TransactionCard extends ConsumerWidget {
@@ -66,7 +67,7 @@ class TransactionCard extends ConsumerWidget {
     return AmountFormatter.formatTransaction(
       type: transaction.type,
       amount: transaction.amount.toDouble(),
-      currency: transaction.currency ?? 'CNY',
+      currency: transaction.currency ?? Currency.defaultCode,
       showSign: true,
     );
   }

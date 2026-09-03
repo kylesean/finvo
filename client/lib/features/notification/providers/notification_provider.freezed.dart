@@ -214,7 +214,7 @@ return $default(_that.items,_that.total,_that.unreadCount,_that.currentPage,_tha
 
 class _NotificationState implements NotificationState {
   const _NotificationState({final  List<NotificationItem> items = const [], this.total = 0, this.unreadCount = 0, this.currentPage = 1, this.isLoading = false, this.isLoadingMore = false, this.hasReachedMax = false, this.error}): _items = items;
-
+  
 
  final  List<NotificationItem> _items;
 @override@JsonKey() List<NotificationItem> get items {

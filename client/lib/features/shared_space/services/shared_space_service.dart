@@ -14,12 +14,12 @@ class SharedSpaceService {
   /// Get the list of shared spaces for the user
   Future<SharedSpaceListResponse> getSharedSpaces({
     int page = 1,
-    int limit = 20,
+    int pageSize = 20,
   }) async {
     return await _networkClient.request<SharedSpaceListResponse>(
       '/shared-spaces',
       method: HttpMethod.get,
-      queryParameters: {'page': page, 'limit': limit},
+      queryParameters: {'page': page, 'page_size': pageSize},
       fromJsonT: (json) =>
           _parseItemResponse(json, SharedSpaceListResponse.fromJson),
     );
@@ -118,26 +118,26 @@ class SharedSpaceService {
   Future<SpaceTransactionListResponse> getSpaceTransactions(
     String spaceId, {
     int page = 1,
-    int limit = 20,
+    int pageSize = 20,
   }) async {
     return await _networkClient.request<SpaceTransactionListResponse>(
       '/shared-spaces/$spaceId/transactions',
       method: HttpMethod.get,
-      queryParameters: {'page': page, 'limit': limit},
+      queryParameters: {'page': page, 'page_size': pageSize},
       fromJsonT: (json) =>
-          _parseTransactionListResponse(json, page: page, limit: limit),
+          _parseTransactionListResponse(json, page: page, pageSize: pageSize),
     );
   }
 
   SpaceTransactionListResponse _parseTransactionListResponse(
     dynamic json, {
     required int page,
-    required int limit,
+    required int pageSize,
   }) {
     if (json is Map<String, dynamic>) {
       final dataField = json['data'];
 
-      // Backend paginated shape: {"transactions": [...], "total": n, "page": p, "limit": l}
+      // Backend paginated shape: {"transactions": [...], "total": n, "page": p, "page_size": s}
       if (dataField is Map<String, dynamic>) {
         final transactionsField = dataField['transactions'];
         if (transactionsField is List) {
@@ -153,9 +153,9 @@ class SharedSpaceService {
                 ? dataField['total'] as int
                 : transactions.length,
             page: dataField['page'] is int ? dataField['page'] as int : page,
-            limit: dataField['limit'] is int
-                ? dataField['limit'] as int
-                : limit,
+            pageSize: dataField['page_size'] is int
+                ? dataField['page_size'] as int
+                : pageSize,
           );
         }
       }
@@ -171,7 +171,7 @@ class SharedSpaceService {
           transactions: transactions,
           total: transactions.length,
           page: page,
-          limit: limit,
+          pageSize: pageSize,
         );
       }
     }

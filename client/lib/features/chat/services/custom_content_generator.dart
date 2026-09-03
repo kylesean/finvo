@@ -6,12 +6,14 @@ import 'package:a2ui_core/a2ui_core.dart' as a2ui;
 import 'package:dio/dio.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/features/chat/constants/a2ui_component_types.dart';
 import 'package:finvo/features/chat/constants/genui_markers.dart';
 import 'package:finvo/features/chat/models/sse_event_models.dart';
 import 'package:finvo/features/chat/services/interaction_router.dart';
 import 'package:finvo/features/chat/services/sse_event_parsing.dart';
 import 'package:finvo/features/chat/genui/utils/genui_num_utils.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 // ignore_for_file: prefer_initializing_formals - public ctor params assigned
 // to private fields (named parameters cannot be private, so initializing
@@ -39,7 +41,34 @@ typedef OnStreamComplete = void Function();
 typedef OnTitleUpdate = void Function(String title);
 
 /// Error callback - called when an error occurs
-typedef OnErrorCallback = void Function(String error);
+typedef OnErrorCallback = void Function(AppException error);
+
+/// Maps a transport failure to a typed [AppException], keeping the legacy
+/// message text so substring-based downstream handling is unaffected.
+AppException streamErrorOf(Object error, {required bool idleTimedOut}) {
+  if (error is DioException) {
+    switch (error.type) {
+      case DioExceptionType.cancel:
+        if (idleTimedOut) {
+          return TimeoutException('Stream idle timeout: no data received');
+        }
+        return RequestCancelledException();
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.transformTimeout:
+        return TimeoutException(error.message);
+      case DioExceptionType.badResponse:
+        final status = error.response?.statusCode;
+        return UnexpectedHttpException('HTTP error: $status', status);
+      case DioExceptionType.connectionError:
+      case DioExceptionType.badCertificate:
+      case DioExceptionType.unknown:
+        return NetworkException(error.message);
+    }
+  }
+  return GeneralException(error.toString());
+}
 
 /// Message ID update callback - called when backend message ID is received
 typedef OnMessageIdUpdate = void Function(String localId, String serverId);
@@ -303,7 +332,7 @@ class CustomContentGenerator implements genui.Transport {
       if (token == null || token.isEmpty) {
         const error = 'Authentication token is missing';
         _logger.info('CustomContentGenerator: $error');
-        onError?.call(error);
+        onError?.call(UnauthorizedException(error));
         // The stream never started, but the caller still expects a terminal
         // signal: without onStreamComplete the upper layer's isStreamingResponse
         // stays true forever and the chat UI locks up (stop button stuck, new
@@ -469,21 +498,9 @@ class CustomContentGenerator implements genui.Transport {
         e,
         stackTrace,
       );
-      // Map non-2xx responses (now raised as DioException since the
-      // validateStatus bypass was removed) back to a readable error message.
-      final String errorMessage;
-      if (_idleTimedOut) {
-        // The watchdog cancelled the request: report the real cause instead
-        // of a confusing "request cancelled".
-        errorMessage =
-            'Stream idle timeout: no data received for '
-            '${_idleWatchdogTimeout.inSeconds}s';
-      } else if (e is DioException && e.response != null) {
-        errorMessage = 'HTTP error: ${e.response!.statusCode}';
-      } else {
-        errorMessage = e.toString();
-      }
-      onError?.call(errorMessage);
+      // Map transport failures to typed AppExceptions (status codes
+      // preserved for 401/429 branching upstream).
+      onError?.call(streamErrorOf(e, idleTimedOut: _idleTimedOut));
       // Always terminate the stream on the error path so the upper layer can
       // clear isStreamingResponse. Without this a mid-stream failure leaves
       // the chat permanently in a streaming state.
@@ -606,7 +623,7 @@ class CustomContentGenerator implements genui.Transport {
           _logger.warning(
             'CustomContentGenerator: Stream error event: $errorContent',
           );
-          onError?.call(errorContent);
+          onError?.call(BusinessException(errorContent));
         }
         break;
 
@@ -658,7 +675,7 @@ class CustomContentGenerator implements genui.Transport {
       await Future<void>.delayed(Duration.zero);
     } catch (e, stackTrace) {
       _logger.severe('[A2UI] ERROR parsing message', e, stackTrace);
-      onError?.call(e.toString());
+      onError?.call(DataParsingException(e.toString()));
       // A malformed A2UI message is a terminal failure for this stream turn;
       // notify completion so isStreamingResponse is not left stuck.
       _streamEnded = true;
@@ -718,7 +735,7 @@ class CustomContentGenerator implements genui.Transport {
           // silently dropped the transaction event (home feed never updated).
           final amount = GenUiNumUtils.toDouble(props['amount']);
           final type = props['transaction_type'] as String? ?? 'expense';
-          final currency = props['currency'] as String? ?? 'CNY';
+          final currency = props['currency'] as String? ?? Currency.defaultCode;
 
           _logger.info(
             'CustomContentGenerator: Detected transaction success: $amount $currency ($type)',
@@ -727,30 +744,16 @@ class CustomContentGenerator implements genui.Transport {
           onTransactionCreated?.call(amount, type, currency);
         } else if (componentType ==
             A2uiComponentTypes.transactionGroupReceipt) {
-          final summary = props['summary'];
-          if (summary is Map<String, dynamic>) {
-            final expenseTotal = GenUiNumUtils.toDouble(
-              summary['expense_total'],
-            );
-            final incomeTotal = GenUiNumUtils.toDouble(summary['income_total']);
-
-            // Derive currency instead of hardcoding: prefer an explicit
-            // summary currency, otherwise fall back to the first entry's
-            // currency (backend attaches currency per transaction entry).
-            // 'CNY' stays only as the app-wide last-resort default.
-            final currency = deriveReceiptCurrency(summary, props);
-
-            if (expenseTotal > 0) {
-              onTransactionCreated?.call(expenseTotal, 'expense', currency);
-            }
-            if (incomeTotal > 0) {
-              onTransactionCreated?.call(incomeTotal, 'income', currency);
-            }
-
-            _logger.info(
-              'CustomContentGenerator: Detected TransactionGroupReceipt: expense=$expenseTotal, income=$incomeTotal, currency=$currency',
+          for (final event in receiptBucketEvents(props['summary'])) {
+            onTransactionCreated?.call(
+              event.amount,
+              event.type,
+              event.currency,
             );
           }
+          _logger.info(
+            'CustomContentGenerator: TransactionGroupReceipt summary=${props['summary']}',
+          );
         }
       }
     } catch (e) {

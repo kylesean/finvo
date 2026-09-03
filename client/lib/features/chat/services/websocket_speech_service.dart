@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:finvo/core/services/reconnect_policy.dart';
 import 'package:finvo/features/chat/config/speech_config.dart';
 import 'package:finvo/features/chat/services/audio_recorder_service.dart';
 import 'package:finvo/shared/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
+
 // ignore_for_file: prefer_initializing_formals - private fields with public named ctor params
 
 final _logger = Logger('WebSocketSpeechService');
@@ -37,15 +38,15 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   final StreamController<String> _errorController =
       StreamController<String>.broadcast();
 
-  // Idle reconnect bookkeeping. Mirrors NotificationWsService: bounded
-  // exponential backoff so a dead ASR server is not polled forever, and no
-  // reconnect is ever attempted mid-session (a dropped socket during an
-  // active recording surfaces as an error to the user instead).
-  Timer? _reconnectTimer;
-  int _reconnectAttempts = 0;
+  // Idle reconnect budget. A drop outside an active session is repaired in
+  // the background; mid-session drops surface an error instead (see
+  // _onError/_onDisconnected). No jitter: exact delays keep voice UX snappy.
+  final ReconnectPolicy reconnects = ReconnectPolicy(
+    maxAttempts: 3,
+    maxDelay: const Duration(seconds: 8),
+    jitterFraction: 0,
+  );
   bool _isDisposed = false;
-  static const _maxReconnectAttempts = 3;
-  static const _maxReconnectDelaySeconds = 8;
 
   /// In-flight [initialize] future; deduplicates concurrent connect attempts
   /// (reconnect timer vs. ensureReady racing each other).
@@ -176,7 +177,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
         },
       );
       _isConnected = true;
-      _reconnectAttempts = 0;
+      reconnects.markSucceeded();
       if (!_statusController.isClosed) _statusController.add('connected');
       _logger.info('WebSocket connected successfully');
 
@@ -558,35 +559,18 @@ class WebSocketSpeechService implements SpeechRecognitionService {
     }
   }
 
-  /// Schedule a bounded, backoff-throttled reconnect for the idle state.
-  ///
-  /// Never reconnects mid-session ([_isListening]), after disposal, or after
-  /// [_maxReconnectAttempts] consecutive failures (a later user-initiated
-  /// [ensureReady]/[initialize] resets the counter on success).
+  /// Bounded idle-state reconnect. Never fires mid-session, after disposal,
+  /// after a manual stop, or once the budget is spent.
   void _maybeScheduleReconnect() {
     if (_isDisposed || _isListening || _isManualStop) return;
-    if (_reconnectAttempts >= _maxReconnectAttempts) {
-      _logger.warning(
-        'Speech WS: giving up after $_maxReconnectAttempts reconnect '
-        'attempts; next session will retry from scratch',
-      );
-      return;
-    }
-
-    _reconnectTimer?.cancel();
-    final delaySeconds = min(
-      pow(2, _reconnectAttempts).toInt(),
-      _maxReconnectDelaySeconds,
-    );
-    _reconnectAttempts++;
-    _logger.info(
-      'Speech WS: reconnecting in ${delaySeconds}s '
-      '(attempt $_reconnectAttempts)',
-    );
-    _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
+    if (!reconnects.schedule(() {
       if (_isDisposed || _isListening || _isConnected) return;
       unawaited(initialize());
-    });
+    })) {
+      _logger.warning(
+        'Speech WS: reconnect budget spent; next session retries from scratch',
+      );
+    }
   }
 
   /// Release resources
@@ -594,8 +578,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   Future<void> dispose() async {
     _logger.info('Releasing WebSocketSpeechService resources');
     _isDisposed = true;
-    _reconnectTimer?.cancel();
-    _reconnectTimer = null;
+    reconnects.dispose();
 
     // Use unified cleanup method
     await _cleanup();

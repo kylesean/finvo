@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'dart:math' as math;
 import 'package:finvo/shared/utils/amount_formatter.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Safety line preview chart component
 class SafetyLinePreviewChart extends StatefulWidget {
@@ -174,7 +175,7 @@ class SafetyLineChartPainter extends CustomPainter {
     );
 
     // Draw safety line label background
-    final symbol = AmountFormatter.getCurrencySymbol('CNY');
+    final symbol = AmountFormatter.getCurrencySymbol(Currency.defaultCode);
     final labelText = 'Safety Line $symbol${safetyLineValue.toInt()}';
     final textPainter = TextPainter(
       text: TextSpan(

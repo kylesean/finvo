@@ -3,6 +3,7 @@
 // feature module. Features re-export this file for source compatibility.
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 part 'financial_settings.freezed.dart';
 part 'financial_settings.g.dart';
@@ -51,7 +52,7 @@ abstract class FinancialSettingsState with _$FinancialSettingsState {
     @JsonKey(fromJson: _decimalFromJsonNullable, toJson: _decimalToJsonNullable)
     Decimal? dailyBurnRate,
     @Default('AI_AUTO') String burnRateMode,
-    @Default('CNY') String primaryCurrency,
+    @Default(Currency.defaultCode) String primaryCurrency,
     @Default(1) int monthStartDay,
     String? lastUpdatedAt,
     @Default(false) bool isLoading,

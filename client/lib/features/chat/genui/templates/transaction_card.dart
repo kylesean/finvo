@@ -23,6 +23,7 @@ import 'package:finvo/features/home/models/transaction_model.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/utils/error_message.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 class TransactionCard extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
@@ -71,7 +72,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final amount = AmountFormatter.parseDecimal(
       widget.data['amount']?.toString(),
     );
-    final currency = widget.data['currency']?.toString() ?? 'CNY';
+    final currency = widget.data['currency']?.toString() ?? Currency.defaultCode;
     final categoryKey = widget.data['categoryKey']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
     final category = categoryEnum.displayText;

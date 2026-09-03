@@ -295,7 +295,7 @@ return $default(_that.timeRange,_that.chartType,_that.sortType,_that.selectedAcc
 
 class _StatisticsState implements StatisticsState {
   const _StatisticsState({this.timeRange = TimeRange.month, this.chartType = ChartType.expense, this.sortType = SortType.amount, final  List<String> selectedAccountTypes = const <String>[], this.customStartDate, this.customEndDate, this.isLoading = false, this.isLoadingMoreTopTransactions = false, this.error, this.dateRangeDisplayText, this.overview, this.trendData, this.categoryBreakdown, this.topTransactions, this.cashFlow, this.healthScore}): _selectedAccountTypes = selectedAccountTypes;
-
+  
 
 @override@JsonKey() final  TimeRange timeRange;
 @override@JsonKey() final  ChartType chartType;

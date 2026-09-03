@@ -13,7 +13,7 @@
 ///
 /// // Use atoms
 /// IconBadge(icon: FLucideIcons.wallet, ...);
-/// AmountDisplay(amount: 1234.56, currency: 'CNY');
+/// AmountDisplay(amount: 1234.56, currency: CNY);
 ///
 /// // Use molecules
 /// AccountCard(data: accountData, selected: true);

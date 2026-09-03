@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/utils/tolerant_json.dart';
 import 'package:logging/logging.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 part 'financial_account.freezed.dart';
 part 'financial_account.g.dart';
@@ -86,7 +87,7 @@ abstract class FinancialAccount with _$FinancialAccount {
     FinancialAccountType? type,
 
     /// Currency code (Default: CNY)
-    @Default('CNY') String currencyCode,
+    @Default(Currency.defaultCode) String currencyCode,
 
     /// Initial balance
     @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)

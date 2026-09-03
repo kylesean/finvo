@@ -215,7 +215,7 @@ return $default(_that.user,_that.isLoading,_that.isSaving,_that.isUploadingAvata
 
 class _UserProfileState implements UserProfileState {
   const _UserProfileState({this.user, this.isLoading = false, this.isSaving = false, this.isUploadingAvatar = false, this.error, this.avatarCacheBuster});
-
+  
 
 @override final  UserInfo? user;
 @override@JsonKey() final  bool isLoading;

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/utils/tolerant_json.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 part 'shared_space_models.freezed.dart';
 part 'shared_space_models.g.dart';
@@ -195,7 +196,7 @@ abstract class SpaceTransaction with _$SpaceTransaction {
     required String id,
     required String type, // EXPENSE, INCOME, TRANSFER
     required String amount,
-    @Default('CNY') String currency,
+    @Default(Currency.defaultCode) String currency,
     String? description,
     String? categoryKey,
     @JsonKey(name: 'transactionAt') DateTime? transactionAt,
@@ -216,7 +217,7 @@ abstract class SpaceTransactionListResponse
     required List<SpaceTransaction> transactions,
     required int total,
     required int page,
-    required int limit,
+    @JsonKey(name: 'page_size') required int pageSize,
   }) = _SpaceTransactionListResponse;
 
   factory SpaceTransactionListResponse.fromJson(Map<String, dynamic> json) =>
@@ -229,25 +230,11 @@ abstract class SharedSpaceListResponse with _$SharedSpaceListResponse {
     required List<SharedSpace> spaces,
     required int total,
     required int page,
-    required int limit,
+    @JsonKey(name: 'page_size') required int pageSize,
   }) = _SharedSpaceListResponse;
 
   factory SharedSpaceListResponse.fromJson(Map<String, dynamic> json) =>
       _$SharedSpaceListResponseFromJson(json);
-}
-
-@freezed
-abstract class NotificationListResponse with _$NotificationListResponse {
-  const factory NotificationListResponse({
-    required List<SharedSpaceNotificationModel> notifications,
-    required int total,
-    required int unreadCount,
-    required int page,
-    required int limit,
-  }) = _NotificationListResponse;
-
-  factory NotificationListResponse.fromJson(Map<String, dynamic> json) =>
-      _$NotificationListResponseFromJson(json);
 }
 
 String _decimalToString(Decimal decimal) => decimal.toString();

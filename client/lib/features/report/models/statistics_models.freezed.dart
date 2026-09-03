@@ -1677,7 +1677,7 @@ as String,
 /// @nodoc
 mixin _$TopTransactionsResponse {
 
- List<TopTransactionItem> get items; String get sortBy; int get total; int get page; int get pageSize; bool get hasMore;
+ List<TopTransactionItem> get items; String get sortBy; int get total; int get page;@JsonKey(name: 'page_size') int get pageSize; bool get hasMore;
 /// Create a copy of TopTransactionsResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1710,7 +1710,7 @@ abstract mixin class $TopTransactionsResponseCopyWith<$Res>  {
   factory $TopTransactionsResponseCopyWith(TopTransactionsResponse value, $Res Function(TopTransactionsResponse) _then) = _$TopTransactionsResponseCopyWithImpl;
 @useResult
 $Res call({
- List<TopTransactionItem> items, String sortBy, int total, int page, int pageSize, bool hasMore
+ List<TopTransactionItem> items, String sortBy, int total, int page,@JsonKey(name: 'page_size') int pageSize, bool hasMore
 });
 
 
@@ -1820,7 +1820,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TopTransactionItem> items,  String sortBy,  int total,  int page,  int pageSize,  bool hasMore)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TopTransactionItem> items,  String sortBy,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize,  bool hasMore)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TopTransactionsResponse() when $default != null:
 return $default(_that.items,_that.sortBy,_that.total,_that.page,_that.pageSize,_that.hasMore);case _:
@@ -1841,7 +1841,7 @@ return $default(_that.items,_that.sortBy,_that.total,_that.page,_that.pageSize,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TopTransactionItem> items,  String sortBy,  int total,  int page,  int pageSize,  bool hasMore)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TopTransactionItem> items,  String sortBy,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize,  bool hasMore)  $default,) {final _that = this;
 switch (_that) {
 case _TopTransactionsResponse():
 return $default(_that.items,_that.sortBy,_that.total,_that.page,_that.pageSize,_that.hasMore);case _:
@@ -1861,7 +1861,7 @@ return $default(_that.items,_that.sortBy,_that.total,_that.page,_that.pageSize,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TopTransactionItem> items,  String sortBy,  int total,  int page,  int pageSize,  bool hasMore)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TopTransactionItem> items,  String sortBy,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize,  bool hasMore)?  $default,) {final _that = this;
 switch (_that) {
 case _TopTransactionsResponse() when $default != null:
 return $default(_that.items,_that.sortBy,_that.total,_that.page,_that.pageSize,_that.hasMore);case _:
@@ -1876,7 +1876,7 @@ return $default(_that.items,_that.sortBy,_that.total,_that.page,_that.pageSize,_
 @JsonSerializable()
 
 class _TopTransactionsResponse implements TopTransactionsResponse {
-  const _TopTransactionsResponse({required final  List<TopTransactionItem> items, required this.sortBy, required this.total, this.page = 1, this.pageSize = 10, this.hasMore = false}): _items = items;
+  const _TopTransactionsResponse({required final  List<TopTransactionItem> items, required this.sortBy, required this.total, this.page = 1, @JsonKey(name: 'page_size') this.pageSize = 10, this.hasMore = false}): _items = items;
   factory _TopTransactionsResponse.fromJson(Map<String, dynamic> json) => _$TopTransactionsResponseFromJson(json);
 
  final  List<TopTransactionItem> _items;
@@ -1889,7 +1889,7 @@ class _TopTransactionsResponse implements TopTransactionsResponse {
 @override final  String sortBy;
 @override final  int total;
 @override@JsonKey() final  int page;
-@override@JsonKey() final  int pageSize;
+@override@JsonKey(name: 'page_size') final  int pageSize;
 @override@JsonKey() final  bool hasMore;
 
 /// Create a copy of TopTransactionsResponse
@@ -1925,7 +1925,7 @@ abstract mixin class _$TopTransactionsResponseCopyWith<$Res> implements $TopTran
   factory _$TopTransactionsResponseCopyWith(_TopTransactionsResponse value, $Res Function(_TopTransactionsResponse) _then) = __$TopTransactionsResponseCopyWithImpl;
 @override @useResult
 $Res call({
- List<TopTransactionItem> items, String sortBy, int total, int page, int pageSize, bool hasMore
+ List<TopTransactionItem> items, String sortBy, int total, int page,@JsonKey(name: 'page_size') int pageSize, bool hasMore
 });
 
 

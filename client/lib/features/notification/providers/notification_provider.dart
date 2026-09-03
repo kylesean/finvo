@@ -79,7 +79,7 @@ class NotificationNotifier extends _$NotificationNotifier
     try {
       final repository = ref.read(notificationRepositoryProvider);
       final res = await repository
-          .getNotifications(page: 1, limit: _pageSize)
+          .getNotifications(page: 1, pageSize: _pageSize)
           .timeout(
             const Duration(seconds: 10),
             onTimeout: () =>
@@ -114,7 +114,7 @@ class NotificationNotifier extends _$NotificationNotifier
       final nextPage = state.currentPage + 1;
       final res = await repository.getNotifications(
         page: nextPage,
-        limit: _pageSize,
+        pageSize: _pageSize,
       );
 
       // A refresh started while this request was in flight supersedes it.

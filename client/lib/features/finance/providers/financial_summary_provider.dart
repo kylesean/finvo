@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/shared/models/financial_account.dart';
 import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 part 'financial_summary_provider.freezed.dart';
 part 'financial_summary_provider.g.dart';
@@ -32,7 +33,7 @@ abstract class FinancialSummary with _$FinancialSummary {
     totalNetWorth: Decimal.zero,
     totalAssets: Decimal.zero,
     totalLiabilities: Decimal.zero,
-    currencyCode: 'CNY',
+    currencyCode: Currency.defaultCode,
   );
 }
 

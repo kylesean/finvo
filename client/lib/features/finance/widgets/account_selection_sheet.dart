@@ -12,6 +12,7 @@ import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/features/finance/models/account_type_definition.dart';
 import 'package:finvo/shared/widgets/app_card.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Account selection result
 class AccountSelectionResult {
@@ -366,7 +367,7 @@ class _AccountSelectionSheetState extends ConsumerState<AccountSelectionSheet> {
 
   String _formatAmount(Decimal amount) {
     final value = double.tryParse(amount.toString()) ?? 0.0;
-    return AmountFormatter.getNumberFormat('CNY').format(value);
+    return AmountFormatter.getNumberFormat(Currency.defaultCode).format(value);
   }
 
   String _getTypeDisplayName(AccountTypeDefinition definition) {

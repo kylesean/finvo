@@ -8,12 +8,17 @@ import 'package:finvo/features/chat/genui/templates/widgets/forecast_header_widg
 import 'package:finvo/features/chat/genui/templates/widgets/forecast_chart_widget.dart';
 import 'package:finvo/features/chat/genui/templates/widgets/forecast_warnings_widget.dart';
 import 'package:finvo/features/chat/genui/templates/widgets/forecast_details_widget.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Cash flow forecast chart - GenUI Template
 ///
 /// Displays user's future cash flow forecast in AI chat.
+///
+/// Public (instead of private `_...`) so `fromRawMap` dirt-tolerance can be
+/// unit-tested directly per the unit-testing guide: every GenUI template
+/// ViewModel needs normal / missing-fields / malformed-data cases.
 @immutable
-class _CashFlowForecastViewModel {
+class CashFlowForecastViewModel {
   final String title;
   final List<ForecastDataPoint> dataPoints;
   final List<ForecastWarning> warnings;
@@ -21,7 +26,7 @@ class _CashFlowForecastViewModel {
   final Map<String, dynamic>? forecastPeriod;
   final double currentBalance;
 
-  const _CashFlowForecastViewModel({
+  const CashFlowForecastViewModel({
     required this.title,
     required this.dataPoints,
     required this.warnings,
@@ -30,8 +35,8 @@ class _CashFlowForecastViewModel {
     required this.currentBalance,
   });
 
-  factory _CashFlowForecastViewModel.fromRawMap(Map<String, dynamic> data) {
-    return _CashFlowForecastViewModel(
+  factory CashFlowForecastViewModel.fromRawMap(Map<String, dynamic> data) {
+    return CashFlowForecastViewModel(
       title: data.getString('title'),
       dataPoints: data.getList('data_points', ForecastDataPoint.fromJson),
       warnings: data.getList('warnings', ForecastWarning.fromJson),
@@ -52,7 +57,7 @@ class CashFlowForecastChart extends StatefulWidget {
 }
 
 class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
-  late _CashFlowForecastViewModel _viewModel;
+  late CashFlowForecastViewModel _viewModel;
   bool _isExpanded = false;
 
   @override
@@ -70,12 +75,12 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
   }
 
   void _parseViewModel() {
-    _viewModel = _CashFlowForecastViewModel.fromRawMap(widget.data);
+    _viewModel = CashFlowForecastViewModel.fromRawMap(widget.data);
   }
 
   String _formatAmount(dynamic amount) {
     final numberFormat = AmountFormatter.getNumberFormat(
-      'CNY',
+      Currency.defaultCode,
       decimalDigits: 0,
     );
     if (amount is String) {

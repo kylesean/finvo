@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 part 'client_state_mutation.freezed.dart';
 
@@ -31,7 +32,7 @@ abstract class ClientStateMutation with _$ClientStateMutation {
     required String sourceAccountName,
     required String targetAccountName,
     required Decimal amount,
-    String currency = 'CNY',
+    String currency = Currency.defaultCode,
     String? rawInput,
     List<String> tags = const [],
   }) {

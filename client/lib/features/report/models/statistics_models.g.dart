@@ -128,7 +128,7 @@ _TopTransactionsResponse _$TopTransactionsResponseFromJson(
   sortBy: json['sortBy'] as String,
   total: (json['total'] as num).toInt(),
   page: (json['page'] as num?)?.toInt() ?? 1,
-  pageSize: (json['pageSize'] as num?)?.toInt() ?? 10,
+  pageSize: (json['page_size'] as num?)?.toInt() ?? 10,
   hasMore: json['hasMore'] as bool? ?? false,
 );
 
@@ -139,7 +139,7 @@ Map<String, dynamic> _$TopTransactionsResponseToJson(
   'sortBy': instance.sortBy,
   'total': instance.total,
   'page': instance.page,
-  'pageSize': instance.pageSize,
+  'page_size': instance.pageSize,
   'hasMore': instance.hasMore,
 };
 

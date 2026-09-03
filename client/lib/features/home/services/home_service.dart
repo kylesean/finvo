@@ -24,7 +24,7 @@ class HomeService {
       queryParameters: {
         'year': year,
         'month': month,
-        // S-E: local-day grouping (the server slices the month and groups
+        // Local-day grouping (the server slices the month and groups
         // daily totals by the client's local offset).
         'tz_offset': DateTime.now().timeZoneOffset.inMinutes.toString(),
       },
@@ -47,13 +47,13 @@ class HomeService {
   // New endpoint: GET /api/v1/transactions
   Future<List<TransactionModel>> getTransactionFeed({
     int page = 1,
-    int size = 20,
+    int pageSize = 20,
     String? type, // EXPENSE, INCOME, TRANSFER
     String? date, // (YYYY-MM-DD)
     CancelToken? cancelToken,
   }) async {
     // Build query parameters
-    final Map<String, dynamic> queryParameters = {'page': page, 'size': size};
+    final Map<String, dynamic> queryParameters = {'page': page, 'page_size': pageSize};
     if (type != null && type.isNotEmpty) {
       queryParameters['transaction_type'] = type.toUpperCase();
     }
@@ -141,7 +141,7 @@ class HomeService {
   // Search transactions - for infinite scroll pagination
   Future<Map<String, dynamic>> searchTransactions({
     int page = 1,
-    int size = 20,
+    int pageSize = 20,
     String? keyword,
     String? startDate,
     String? endDate,
@@ -150,7 +150,7 @@ class HomeService {
     String? tags,
     CancelToken? cancelToken,
   }) async {
-    final Map<String, dynamic> queryParameters = {'page': page, 'size': size};
+    final Map<String, dynamic> queryParameters = {'page': page, 'page_size': pageSize};
     if (keyword != null) queryParameters['keyword'] = keyword;
     if (startDate != null) queryParameters['start_date'] = startDate;
     if (endDate != null) queryParameters['end_date'] = endDate;

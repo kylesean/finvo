@@ -13,6 +13,7 @@ import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/features/chat/genui/utils/genui_error_boundary.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Transaction list view component
 ///
@@ -78,7 +79,7 @@ class _TransactionListViewState extends ConsumerState<TransactionListView> {
 
       final result = await homeService.searchTransactions(
         page: _currentPage + 1,
-        size: widget.pageSize,
+        pageSize: widget.pageSize,
         keyword: _searchMetadata?['keyword'] as String?,
         startDate: _searchMetadata?['start_date'] as String?,
         endDate: _searchMetadata?['end_date'] as String?,
@@ -255,7 +256,7 @@ class _TransactionListItem extends StatelessWidget {
     final colors = theme.colors;
 
     final amount = AmountFormatter.parseDecimal(data['amount']?.toString());
-    final currency = data['currency']?.toString() ?? 'CNY';
+    final currency = data['currency']?.toString() ?? Currency.defaultCode;
     final categoryKey = data['categoryKey']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
     final tags =

@@ -65,8 +65,8 @@ class ExtendedGenUiConversation {
     _customGenerator.onTextChunk = _onTextResponse;
 
     // Listen to errors (Requirement 2.1)
-    _customGenerator.onError = (String error) {
-      _onError(error, error);
+    _customGenerator.onError = (error) {
+      _onError(error.message, error);
     };
   }
 

@@ -98,7 +98,7 @@ final class NotificationNotifierProvider
 }
 
 String _$notificationNotifierHash() =>
-    r'89fd24b11197440a6e16959ddab1c5b39b7fd98d';
+    r'e38bc43e120693129700eb4f7126ca15e5d9f1de';
 
 /// Notification State Notifier Provider
 

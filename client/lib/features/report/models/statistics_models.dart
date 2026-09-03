@@ -184,7 +184,7 @@ abstract class TopTransactionsResponse with _$TopTransactionsResponse {
     required String sortBy,
     required int total,
     @Default(1) int page,
-    @Default(10) int pageSize,
+    @JsonKey(name: 'page_size') @Default(10) int pageSize,
     @Default(false) bool hasMore,
   }) = _TopTransactionsResponse;
 

@@ -13,6 +13,7 @@ import 'package:finvo/features/chat/services/genui_logger.dart';
 import 'package:finvo/features/chat/services/genui_service.dart';
 import 'package:finvo/features/chat/services/custom_content_generator.dart';
 import 'package:finvo/features/chat/services/genui_error_translator.dart';
+import 'package:finvo/shared/models/currency.dart';
 // ignore_for_file: prefer_initializing_formals - private fields with public named ctor params
 
 final _logger = Logger('GenUiLifecycleManager');
@@ -206,7 +207,7 @@ class GenUiLifecycleManager {
           onTransactionCreated: (data) => _onTransactionCreated(
             (data['amount'] as num?)?.toDouble() ?? 0.0,
             data['transactionType'] as String? ?? 'expense',
-            data['currency'] as String? ?? 'CNY',
+            data['currency'] as String? ?? Currency.defaultCode,
           ),
         ),
       );

@@ -148,11 +148,11 @@ class MonthlyCalendarView extends ConsumerWidget {
                     Text(() {
                       final locale = LocaleSettings.currentLocale;
                       final (dateFormatLocale, pattern) = switch (locale) {
-                        AppLocale.zh => ('zh_CN', 'yyyy年M月'),
+                        AppLocale.zh => ('zh_CN', 'yyyy年M月'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                         AppLocale.en => ('en', 'yyyy MMM'),
-                        AppLocale.ja => ('ja', 'yyyy年M月'),
+                        AppLocale.ja => ('ja', 'yyyy年M月'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                         AppLocale.ko => ('ko', 'yyyy년 M월'),
-                        AppLocale.zhHant => ('zh_TW', 'yyyy年M月'),
+                        AppLocale.zhHant => ('zh_TW', 'yyyy年M月'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                       };
                       return DateFormat(
                         pattern,
@@ -385,11 +385,11 @@ class MonthlyCalendarView extends ConsumerWidget {
                         }
                         // Format date based on language
                         final (dateFormatLocale, pattern) = switch (locale) {
-                          AppLocale.zh => ('zh_CN', 'M月d日'),
+                          AppLocale.zh => ('zh_CN', 'M月d日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                           AppLocale.en => ('en', 'MMM d'),
-                          AppLocale.ja => ('ja', 'M月d日'),
+                          AppLocale.ja => ('ja', 'M月d日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                           AppLocale.ko => ('ko', 'M월 d일'),
-                          AppLocale.zhHant => ('zh_TW', 'M月d日'),
+                          AppLocale.zhHant => ('zh_TW', 'M月d日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                         };
                         return DateFormat(
                           pattern,

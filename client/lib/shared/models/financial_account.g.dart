@@ -30,7 +30,7 @@ _FinancialAccount _$FinancialAccountFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       nature: _financialNatureFromJson(json['nature']),
       type: _financialAccountTypeFromJson(json['type']),
-      currencyCode: json['currencyCode'] as String? ?? 'CNY',
+      currencyCode: json['currencyCode'] as String? ?? Currency.defaultCode,
       initialBalance: decimalFromJson(json['initialBalance']),
       currentBalance: decimalOrNullFromJson(json['currentBalance']),
       includeInNetWorth: json['includeInNetWorth'] as bool? ?? true,

@@ -1,4 +1,5 @@
 import 'package:decimal/decimal.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Parses a JSON value into a [Decimal], tolerating null/empty/missing values
 /// (treated as zero) and non-numeric strings (fall back to zero) so a single
@@ -382,7 +383,7 @@ class PendingTransaction {
       id: json['id'] as String,
       type: json['type'] as String,
       amount: _parseDecimal(json['amount']),
-      currency: json['currency'] as String? ?? 'CNY',
+      currency: json['currency'] as String? ?? Currency.defaultCode,
       categoryKey: json['category_key'] as String?,
       description: json['description'] as String?,
       transactionAt: json['transaction_at'] != null

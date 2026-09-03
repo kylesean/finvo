@@ -54,7 +54,7 @@ class GenUiService {
       _contentGenerator!.onTitleUpdate = callbacks.onTitleUpdate;
       _contentGenerator!.onError = (err) {
         _logger.warning('GenUiService: ContentGenerator error - $err');
-        callbacks.onError?.call(err.toString(), err);
+        callbacks.onError?.call(err.message, err);
       };
       _contentGenerator!.onTransactionCreated = (amount, type, currency) {
         callbacks.onTransactionCreated?.call({

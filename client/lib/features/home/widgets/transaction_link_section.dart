@@ -13,6 +13,7 @@ import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Linked account & shared-space actions shown inside the transaction detail
 /// card.
@@ -242,7 +243,7 @@ class TransactionLinkSection extends ConsumerWidget {
           accounts: accounts,
           selectedId: currentAccountId,
           title: t.transaction.selectLinkedAccount,
-          transactionCurrency: transaction.currency ?? 'CNY',
+          transactionCurrency: transaction.currency ?? Currency.defaultCode,
           onSelect: (id) => Navigator.pop(context, id),
           onConfirm: () {},
         ),

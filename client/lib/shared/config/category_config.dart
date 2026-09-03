@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/i18n/strings.g.dart';
 
-/// Category configuration management class
-/// Responsible for managing the mapping relationship between category IDs, names, and icons, using slang multi-language support
+/// Legacy numeric category ids ('1'-'8'). New code uses [TransactionCategory]
+/// (backend keys); this stays only as the unknown-key fallback.
 class CategoryConfig {
   // Direct mapping from category ID to icon
   static const Map<String, IconData> _categoryIdToIcon = {
@@ -47,81 +47,4 @@ class CategoryConfig {
     if (categoryId == null) return FLucideIcons.shoppingBag;
     return _categoryIdToIcon[categoryId] ?? FLucideIcons.shoppingBag;
   }
-
-  /// Get all categories list
-  static List<CategoryItem> getAllCategories() {
-    return [
-      CategoryItem(
-        id: '1',
-        name: t.category.dailyConsumption,
-        icon: _categoryIdToIcon['1']!,
-      ),
-      CategoryItem(
-        id: '2',
-        name: t.category.transportation,
-        icon: _categoryIdToIcon['2']!,
-      ),
-      CategoryItem(
-        id: '3',
-        name: t.category.healthcare,
-        icon: _categoryIdToIcon['3']!,
-      ),
-      CategoryItem(
-        id: '4',
-        name: t.category.housing,
-        icon: _categoryIdToIcon['4']!,
-      ),
-      CategoryItem(
-        id: '5',
-        name: t.category.education,
-        icon: _categoryIdToIcon['5']!,
-      ),
-      CategoryItem(
-        id: '6',
-        name: t.category.incomeCategory,
-        icon: _categoryIdToIcon['6']!,
-      ),
-      CategoryItem(
-        id: '7',
-        name: t.category.socialGifts,
-        icon: _categoryIdToIcon['7']!,
-      ),
-      CategoryItem(
-        id: '8',
-        name: t.category.moneyTransfer,
-        icon: _categoryIdToIcon['8']!,
-      ),
-    ];
-  }
-
-  /// Check if category ID is valid
-  static bool isValidCategoryId(String? categoryId) {
-    return categoryId != null && _categoryIdToIcon.containsKey(categoryId);
-  }
-}
-
-/// Category item data class
-class CategoryItem {
-  final String id;
-  final String name;
-  final IconData icon;
-
-  const CategoryItem({
-    required this.id,
-    required this.name,
-    required this.icon,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CategoryItem &&
-          runtimeType == other.runtimeType &&
-          id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
-
-  @override
-  String toString() => 'CategoryItem(id: $id, name: $name)';
 }

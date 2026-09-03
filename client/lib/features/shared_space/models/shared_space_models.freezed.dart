@@ -640,7 +640,7 @@ as String,
 @override
 @pragma('vm:prefer-inline')
 $SpaceCreatorCopyWith<$Res> get creator {
-
+  
   return $SpaceCreatorCopyWith<$Res>(_self.creator, (value) {
     return _then(_self.copyWith(creator: value));
   });
@@ -879,7 +879,7 @@ as String,
 @override
 @pragma('vm:prefer-inline')
 $SpaceCreatorCopyWith<$Res> get creator {
-
+  
   return $SpaceCreatorCopyWith<$Res>(_self.creator, (value) {
     return _then(_self.copyWith(creator: value));
   });
@@ -2216,7 +2216,7 @@ return $default(_that.id,_that.type,_that.amount,_that.currency,_that.descriptio
 @JsonSerializable()
 
 class _SpaceTransaction implements SpaceTransaction {
-  const _SpaceTransaction({required this.id, required this.type, required this.amount, this.currency = 'CNY', this.description, this.categoryKey, @JsonKey(name: 'transactionAt') this.transactionAt, @JsonKey(name: 'addedByUsername') this.addedByUsername, @JsonKey(name: 'addedAt') this.addedAt, final  Map<String, dynamic>? display}): _display = display;
+  const _SpaceTransaction({required this.id, required this.type, required this.amount, this.currency = Currency.defaultCode, this.description, this.categoryKey, @JsonKey(name: 'transactionAt') this.transactionAt, @JsonKey(name: 'addedByUsername') this.addedByUsername, @JsonKey(name: 'addedAt') this.addedAt, final  Map<String, dynamic>? display}): _display = display;
   factory _SpaceTransaction.fromJson(Map<String, dynamic> json) => _$SpaceTransactionFromJson(json);
 
 @override final  String id;
@@ -2311,7 +2311,7 @@ as Map<String, dynamic>?,
 /// @nodoc
 mixin _$SpaceTransactionListResponse {
 
- List<SpaceTransaction> get transactions; int get total; int get page; int get limit;
+ List<SpaceTransaction> get transactions; int get total; int get page;@JsonKey(name: 'page_size') int get pageSize;
 /// Create a copy of SpaceTransactionListResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2324,16 +2324,16 @@ $SpaceTransactionListResponseCopyWith<SpaceTransactionListResponse> get copyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SpaceTransactionListResponse&&const DeepCollectionEquality().equals(other.transactions, transactions)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SpaceTransactionListResponse&&const DeepCollectionEquality().equals(other.transactions, transactions)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.pageSize, pageSize) || other.pageSize == pageSize));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(transactions),total,page,limit);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(transactions),total,page,pageSize);
 
 @override
 String toString() {
-  return 'SpaceTransactionListResponse(transactions: $transactions, total: $total, page: $page, limit: $limit)';
+  return 'SpaceTransactionListResponse(transactions: $transactions, total: $total, page: $page, pageSize: $pageSize)';
 }
 
 
@@ -2344,7 +2344,7 @@ abstract mixin class $SpaceTransactionListResponseCopyWith<$Res>  {
   factory $SpaceTransactionListResponseCopyWith(SpaceTransactionListResponse value, $Res Function(SpaceTransactionListResponse) _then) = _$SpaceTransactionListResponseCopyWithImpl;
 @useResult
 $Res call({
- List<SpaceTransaction> transactions, int total, int page, int limit
+ List<SpaceTransaction> transactions, int total, int page,@JsonKey(name: 'page_size') int pageSize
 });
 
 
@@ -2361,12 +2361,12 @@ class _$SpaceTransactionListResponseCopyWithImpl<$Res>
 
 /// Create a copy of SpaceTransactionListResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? transactions = null,Object? total = null,Object? page = null,Object? limit = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? transactions = null,Object? total = null,Object? page = null,Object? pageSize = null,}) {
   return _then(_self.copyWith(
 transactions: null == transactions ? _self.transactions : transactions // ignore: cast_nullable_to_non_nullable
 as List<SpaceTransaction>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
-as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
+as int,pageSize: null == pageSize ? _self.pageSize : pageSize // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -2452,10 +2452,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<SpaceTransaction> transactions,  int total,  int page,  int limit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<SpaceTransaction> transactions,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SpaceTransactionListResponse() when $default != null:
-return $default(_that.transactions,_that.total,_that.page,_that.limit);case _:
+return $default(_that.transactions,_that.total,_that.page,_that.pageSize);case _:
   return orElse();
 
 }
@@ -2473,10 +2473,10 @@ return $default(_that.transactions,_that.total,_that.page,_that.limit);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<SpaceTransaction> transactions,  int total,  int page,  int limit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<SpaceTransaction> transactions,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize)  $default,) {final _that = this;
 switch (_that) {
 case _SpaceTransactionListResponse():
-return $default(_that.transactions,_that.total,_that.page,_that.limit);case _:
+return $default(_that.transactions,_that.total,_that.page,_that.pageSize);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2493,10 +2493,10 @@ return $default(_that.transactions,_that.total,_that.page,_that.limit);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<SpaceTransaction> transactions,  int total,  int page,  int limit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<SpaceTransaction> transactions,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize)?  $default,) {final _that = this;
 switch (_that) {
 case _SpaceTransactionListResponse() when $default != null:
-return $default(_that.transactions,_that.total,_that.page,_that.limit);case _:
+return $default(_that.transactions,_that.total,_that.page,_that.pageSize);case _:
   return null;
 
 }
@@ -2508,7 +2508,7 @@ return $default(_that.transactions,_that.total,_that.page,_that.limit);case _:
 @JsonSerializable()
 
 class _SpaceTransactionListResponse implements SpaceTransactionListResponse {
-  const _SpaceTransactionListResponse({required final  List<SpaceTransaction> transactions, required this.total, required this.page, required this.limit}): _transactions = transactions;
+  const _SpaceTransactionListResponse({required final  List<SpaceTransaction> transactions, required this.total, required this.page, @JsonKey(name: 'page_size') required this.pageSize}): _transactions = transactions;
   factory _SpaceTransactionListResponse.fromJson(Map<String, dynamic> json) => _$SpaceTransactionListResponseFromJson(json);
 
  final  List<SpaceTransaction> _transactions;
@@ -2520,7 +2520,7 @@ class _SpaceTransactionListResponse implements SpaceTransactionListResponse {
 
 @override final  int total;
 @override final  int page;
-@override final  int limit;
+@override@JsonKey(name: 'page_size') final  int pageSize;
 
 /// Create a copy of SpaceTransactionListResponse
 /// with the given fields replaced by the non-null parameter values.
@@ -2535,16 +2535,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SpaceTransactionListResponse&&const DeepCollectionEquality().equals(other._transactions, _transactions)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SpaceTransactionListResponse&&const DeepCollectionEquality().equals(other._transactions, _transactions)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.pageSize, pageSize) || other.pageSize == pageSize));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_transactions),total,page,limit);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_transactions),total,page,pageSize);
 
 @override
 String toString() {
-  return 'SpaceTransactionListResponse(transactions: $transactions, total: $total, page: $page, limit: $limit)';
+  return 'SpaceTransactionListResponse(transactions: $transactions, total: $total, page: $page, pageSize: $pageSize)';
 }
 
 
@@ -2555,7 +2555,7 @@ abstract mixin class _$SpaceTransactionListResponseCopyWith<$Res> implements $Sp
   factory _$SpaceTransactionListResponseCopyWith(_SpaceTransactionListResponse value, $Res Function(_SpaceTransactionListResponse) _then) = __$SpaceTransactionListResponseCopyWithImpl;
 @override @useResult
 $Res call({
- List<SpaceTransaction> transactions, int total, int page, int limit
+ List<SpaceTransaction> transactions, int total, int page,@JsonKey(name: 'page_size') int pageSize
 });
 
 
@@ -2572,12 +2572,12 @@ class __$SpaceTransactionListResponseCopyWithImpl<$Res>
 
 /// Create a copy of SpaceTransactionListResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? transactions = null,Object? total = null,Object? page = null,Object? limit = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? transactions = null,Object? total = null,Object? page = null,Object? pageSize = null,}) {
   return _then(_SpaceTransactionListResponse(
 transactions: null == transactions ? _self._transactions : transactions // ignore: cast_nullable_to_non_nullable
 as List<SpaceTransaction>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
-as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
+as int,pageSize: null == pageSize ? _self.pageSize : pageSize // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -2589,7 +2589,7 @@ as int,
 /// @nodoc
 mixin _$SharedSpaceListResponse {
 
- List<SharedSpace> get spaces; int get total; int get page; int get limit;
+ List<SharedSpace> get spaces; int get total; int get page;@JsonKey(name: 'page_size') int get pageSize;
 /// Create a copy of SharedSpaceListResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2602,16 +2602,16 @@ $SharedSpaceListResponseCopyWith<SharedSpaceListResponse> get copyWith => _$Shar
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedSpaceListResponse&&const DeepCollectionEquality().equals(other.spaces, spaces)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SharedSpaceListResponse&&const DeepCollectionEquality().equals(other.spaces, spaces)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.pageSize, pageSize) || other.pageSize == pageSize));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(spaces),total,page,limit);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(spaces),total,page,pageSize);
 
 @override
 String toString() {
-  return 'SharedSpaceListResponse(spaces: $spaces, total: $total, page: $page, limit: $limit)';
+  return 'SharedSpaceListResponse(spaces: $spaces, total: $total, page: $page, pageSize: $pageSize)';
 }
 
 
@@ -2622,7 +2622,7 @@ abstract mixin class $SharedSpaceListResponseCopyWith<$Res>  {
   factory $SharedSpaceListResponseCopyWith(SharedSpaceListResponse value, $Res Function(SharedSpaceListResponse) _then) = _$SharedSpaceListResponseCopyWithImpl;
 @useResult
 $Res call({
- List<SharedSpace> spaces, int total, int page, int limit
+ List<SharedSpace> spaces, int total, int page,@JsonKey(name: 'page_size') int pageSize
 });
 
 
@@ -2639,12 +2639,12 @@ class _$SharedSpaceListResponseCopyWithImpl<$Res>
 
 /// Create a copy of SharedSpaceListResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? spaces = null,Object? total = null,Object? page = null,Object? limit = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? spaces = null,Object? total = null,Object? page = null,Object? pageSize = null,}) {
   return _then(_self.copyWith(
 spaces: null == spaces ? _self.spaces : spaces // ignore: cast_nullable_to_non_nullable
 as List<SharedSpace>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
-as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
+as int,pageSize: null == pageSize ? _self.pageSize : pageSize // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -2730,10 +2730,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<SharedSpace> spaces,  int total,  int page,  int limit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<SharedSpace> spaces,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SharedSpaceListResponse() when $default != null:
-return $default(_that.spaces,_that.total,_that.page,_that.limit);case _:
+return $default(_that.spaces,_that.total,_that.page,_that.pageSize);case _:
   return orElse();
 
 }
@@ -2751,10 +2751,10 @@ return $default(_that.spaces,_that.total,_that.page,_that.limit);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<SharedSpace> spaces,  int total,  int page,  int limit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<SharedSpace> spaces,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize)  $default,) {final _that = this;
 switch (_that) {
 case _SharedSpaceListResponse():
-return $default(_that.spaces,_that.total,_that.page,_that.limit);case _:
+return $default(_that.spaces,_that.total,_that.page,_that.pageSize);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2771,10 +2771,10 @@ return $default(_that.spaces,_that.total,_that.page,_that.limit);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<SharedSpace> spaces,  int total,  int page,  int limit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<SharedSpace> spaces,  int total,  int page, @JsonKey(name: 'page_size')  int pageSize)?  $default,) {final _that = this;
 switch (_that) {
 case _SharedSpaceListResponse() when $default != null:
-return $default(_that.spaces,_that.total,_that.page,_that.limit);case _:
+return $default(_that.spaces,_that.total,_that.page,_that.pageSize);case _:
   return null;
 
 }
@@ -2786,7 +2786,7 @@ return $default(_that.spaces,_that.total,_that.page,_that.limit);case _:
 @JsonSerializable()
 
 class _SharedSpaceListResponse implements SharedSpaceListResponse {
-  const _SharedSpaceListResponse({required final  List<SharedSpace> spaces, required this.total, required this.page, required this.limit}): _spaces = spaces;
+  const _SharedSpaceListResponse({required final  List<SharedSpace> spaces, required this.total, required this.page, @JsonKey(name: 'page_size') required this.pageSize}): _spaces = spaces;
   factory _SharedSpaceListResponse.fromJson(Map<String, dynamic> json) => _$SharedSpaceListResponseFromJson(json);
 
  final  List<SharedSpace> _spaces;
@@ -2798,7 +2798,7 @@ class _SharedSpaceListResponse implements SharedSpaceListResponse {
 
 @override final  int total;
 @override final  int page;
-@override final  int limit;
+@override@JsonKey(name: 'page_size') final  int pageSize;
 
 /// Create a copy of SharedSpaceListResponse
 /// with the given fields replaced by the non-null parameter values.
@@ -2813,16 +2813,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedSpaceListResponse&&const DeepCollectionEquality().equals(other._spaces, _spaces)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SharedSpaceListResponse&&const DeepCollectionEquality().equals(other._spaces, _spaces)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.pageSize, pageSize) || other.pageSize == pageSize));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_spaces),total,page,limit);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_spaces),total,page,pageSize);
 
 @override
 String toString() {
-  return 'SharedSpaceListResponse(spaces: $spaces, total: $total, page: $page, limit: $limit)';
+  return 'SharedSpaceListResponse(spaces: $spaces, total: $total, page: $page, pageSize: $pageSize)';
 }
 
 
@@ -2833,7 +2833,7 @@ abstract mixin class _$SharedSpaceListResponseCopyWith<$Res> implements $SharedS
   factory _$SharedSpaceListResponseCopyWith(_SharedSpaceListResponse value, $Res Function(_SharedSpaceListResponse) _then) = __$SharedSpaceListResponseCopyWithImpl;
 @override @useResult
 $Res call({
- List<SharedSpace> spaces, int total, int page, int limit
+ List<SharedSpace> spaces, int total, int page,@JsonKey(name: 'page_size') int pageSize
 });
 
 
@@ -2850,293 +2850,12 @@ class __$SharedSpaceListResponseCopyWithImpl<$Res>
 
 /// Create a copy of SharedSpaceListResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? spaces = null,Object? total = null,Object? page = null,Object? limit = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? spaces = null,Object? total = null,Object? page = null,Object? pageSize = null,}) {
   return _then(_SharedSpaceListResponse(
 spaces: null == spaces ? _self._spaces : spaces // ignore: cast_nullable_to_non_nullable
 as List<SharedSpace>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
-as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
-}
-
-
-}
-
-
-/// @nodoc
-mixin _$NotificationListResponse {
-
- List<SharedSpaceNotificationModel> get notifications; int get total; int get unreadCount; int get page; int get limit;
-/// Create a copy of NotificationListResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$NotificationListResponseCopyWith<NotificationListResponse> get copyWith => _$NotificationListResponseCopyWithImpl<NotificationListResponse>(this as NotificationListResponse, _$identity);
-
-  /// Serializes this NotificationListResponse to a JSON map.
-  Map<String, dynamic> toJson();
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationListResponse&&const DeepCollectionEquality().equals(other.notifications, notifications)&&(identical(other.total, total) || other.total == total)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit));
-}
-
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(notifications),total,unreadCount,page,limit);
-
-@override
-String toString() {
-  return 'NotificationListResponse(notifications: $notifications, total: $total, unreadCount: $unreadCount, page: $page, limit: $limit)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $NotificationListResponseCopyWith<$Res>  {
-  factory $NotificationListResponseCopyWith(NotificationListResponse value, $Res Function(NotificationListResponse) _then) = _$NotificationListResponseCopyWithImpl;
-@useResult
-$Res call({
- List<SharedSpaceNotificationModel> notifications, int total, int unreadCount, int page, int limit
-});
-
-
-
-
-}
-/// @nodoc
-class _$NotificationListResponseCopyWithImpl<$Res>
-    implements $NotificationListResponseCopyWith<$Res> {
-  _$NotificationListResponseCopyWithImpl(this._self, this._then);
-
-  final NotificationListResponse _self;
-  final $Res Function(NotificationListResponse) _then;
-
-/// Create a copy of NotificationListResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? notifications = null,Object? total = null,Object? unreadCount = null,Object? page = null,Object? limit = null,}) {
-  return _then(_self.copyWith(
-notifications: null == notifications ? _self.notifications : notifications // ignore: cast_nullable_to_non_nullable
-as List<SharedSpaceNotificationModel>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as int,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
-as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
-as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
-}
-
-}
-
-
-/// Adds pattern-matching-related methods to [NotificationListResponse].
-extension NotificationListResponsePatterns on NotificationListResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _NotificationListResponse value)?  $default,{required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _NotificationListResponse() when $default != null:
-return $default(_that);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _NotificationListResponse value)  $default,){
-final _that = this;
-switch (_that) {
-case _NotificationListResponse():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _NotificationListResponse value)?  $default,){
-final _that = this;
-switch (_that) {
-case _NotificationListResponse() when $default != null:
-return $default(_that);case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<SharedSpaceNotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)?  $default,{required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _NotificationListResponse() when $default != null:
-return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_that.limit);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<SharedSpaceNotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)  $default,) {final _that = this;
-switch (_that) {
-case _NotificationListResponse():
-return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_that.limit);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<SharedSpaceNotificationModel> notifications,  int total,  int unreadCount,  int page,  int limit)?  $default,) {final _that = this;
-switch (_that) {
-case _NotificationListResponse() when $default != null:
-return $default(_that.notifications,_that.total,_that.unreadCount,_that.page,_that.limit);case _:
-  return null;
-
-}
-}
-
-}
-
-/// @nodoc
-@JsonSerializable()
-
-class _NotificationListResponse implements NotificationListResponse {
-  const _NotificationListResponse({required final  List<SharedSpaceNotificationModel> notifications, required this.total, required this.unreadCount, required this.page, required this.limit}): _notifications = notifications;
-  factory _NotificationListResponse.fromJson(Map<String, dynamic> json) => _$NotificationListResponseFromJson(json);
-
- final  List<SharedSpaceNotificationModel> _notifications;
-@override List<SharedSpaceNotificationModel> get notifications {
-  if (_notifications is EqualUnmodifiableListView) return _notifications;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_notifications);
-}
-
-@override final  int total;
-@override final  int unreadCount;
-@override final  int page;
-@override final  int limit;
-
-/// Create a copy of NotificationListResponse
-/// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$NotificationListResponseCopyWith<_NotificationListResponse> get copyWith => __$NotificationListResponseCopyWithImpl<_NotificationListResponse>(this, _$identity);
-
-@override
-Map<String, dynamic> toJson() {
-  return _$NotificationListResponseToJson(this, );
-}
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationListResponse&&const DeepCollectionEquality().equals(other._notifications, _notifications)&&(identical(other.total, total) || other.total == total)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit));
-}
-
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_notifications),total,unreadCount,page,limit);
-
-@override
-String toString() {
-  return 'NotificationListResponse(notifications: $notifications, total: $total, unreadCount: $unreadCount, page: $page, limit: $limit)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$NotificationListResponseCopyWith<$Res> implements $NotificationListResponseCopyWith<$Res> {
-  factory _$NotificationListResponseCopyWith(_NotificationListResponse value, $Res Function(_NotificationListResponse) _then) = __$NotificationListResponseCopyWithImpl;
-@override @useResult
-$Res call({
- List<SharedSpaceNotificationModel> notifications, int total, int unreadCount, int page, int limit
-});
-
-
-
-
-}
-/// @nodoc
-class __$NotificationListResponseCopyWithImpl<$Res>
-    implements _$NotificationListResponseCopyWith<$Res> {
-  __$NotificationListResponseCopyWithImpl(this._self, this._then);
-
-  final _NotificationListResponse _self;
-  final $Res Function(_NotificationListResponse) _then;
-
-/// Create a copy of NotificationListResponse
-/// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? notifications = null,Object? total = null,Object? unreadCount = null,Object? page = null,Object? limit = null,}) {
-  return _then(_NotificationListResponse(
-notifications: null == notifications ? _self._notifications : notifications // ignore: cast_nullable_to_non_nullable
-as List<SharedSpaceNotificationModel>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as int,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
-as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
-as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
+as int,pageSize: null == pageSize ? _self.pageSize : pageSize // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

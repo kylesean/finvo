@@ -25,6 +25,9 @@ enum Currency {
 
   const Currency(this.code, this.name, this.symbol, this.flag);
 
+  /// Default code, as a const for default parameter values and @Default.
+  static const String defaultCode = 'CNY';
+
   /// Get currency by code
   static Currency? fromCode(String code) {
     final upperCode = code.toUpperCase();

@@ -13,6 +13,7 @@ import 'package:finvo/features/finance/services/recurring_transaction_service.da
 import 'package:finvo/features/finance/widgets/recurrence_rule_sheet.dart';
 import 'package:finvo/features/finance/widgets/recurring_transaction_form_sections.dart';
 import 'package:finvo/features/finance/utils/recurrence_rule_utils.dart';
+import 'package:finvo/features/finance/utils/recurring_form_validation.dart';
 import 'package:finvo/features/finance/widgets/account_selection_sheet.dart';
 import 'package:finvo/features/finance/widgets/category_selection_sheet.dart';
 import 'package:finvo/features/finance/widgets/date_picker_sheet.dart';
@@ -386,46 +387,37 @@ class _RecurringTransactionPageState
     }
   }
 
+  String _validationMessage(RecurringFormError error) {
+    switch (error) {
+      case RecurringFormError.invalidAmount:
+        return t.transaction.pleaseEnterAmount;
+      case RecurringFormError.missingAccount:
+        return _selectedType == RecurringTransactionType.transfer
+            ? t.forecast.recurringTransaction.selectBothAccounts
+            : t.forecast.recurringTransaction.selectAccountForType(
+                type: recurringTransactionTypeLabel(_selectedType),
+              );
+      case RecurringFormError.sameAccount:
+        return t.forecast.recurringTransaction.sameAccount;
+      case RecurringFormError.endBeforeStart:
+        return t.forecast.recurringTransaction.endBeforeStart;
+    }
+  }
+
   Future<void> _handleSave() async {
-    // Validate required fields
-    final amount = Decimal.tryParse(_amountController.text);
-    if (amount == null || amount <= Decimal.zero) {
-      TopToast.warning(context, t.transaction.pleaseEnterAmount);
+    final validationError = validateRecurringForm(
+      amountText: _amountController.text,
+      isTransfer: _selectedType == RecurringTransactionType.transfer,
+      sourceAccountId: _sourceAccountId,
+      targetAccountId: _targetAccountId,
+      startDate: _startDate,
+      endDate: _endDate,
+    );
+    if (validationError != null) {
+      TopToast.warning(context, _validationMessage(validationError));
       return;
     }
-
-    // Validate account selection
-    if (_selectedType == RecurringTransactionType.transfer) {
-      if (_sourceAccountId == null || _targetAccountId == null) {
-        TopToast.warning(
-          context,
-          t.forecast.recurringTransaction.selectBothAccounts,
-        );
-        return;
-      }
-      // A transfer between the same account is meaningless; the backend would
-      // reject it, so surface a clear message instead of a confusing error.
-      if (_sourceAccountId == _targetAccountId) {
-        TopToast.warning(context, t.forecast.recurringTransaction.sameAccount);
-        return;
-      }
-    } else {
-      if (_sourceAccountId == null) {
-        TopToast.warning(
-          context,
-          t.forecast.recurringTransaction.selectAccountForType(
-            type: recurringTransactionTypeLabel(_selectedType),
-          ),
-        );
-        return;
-      }
-    }
-
-    // Validate the optional end date is not before the start date.
-    if (_endDate != null && _endDate!.isBefore(_startDate)) {
-      TopToast.warning(context, t.forecast.recurringTransaction.endBeforeStart);
-      return;
-    }
+    final amount = Decimal.parse(_amountController.text);
 
     setState(() => _isSaving = true);
 
@@ -435,7 +427,7 @@ class _RecurringTransactionPageState
       // Resolve the user's real currency/timezone instead of the model
       // defaults (which were previously hardcoded to CNY/Asia-Shanghai and
       // silently persisted for every recurring transaction).
-      // FinancialSettingsState.primaryCurrency defaults to 'CNY' while
+      // FinancialSettingsState.primaryCurrency defaults to CNY while
       // settings are still loading, so this is safe on first frame.
       final currency = ref.read(financialSettingsProvider).primaryCurrency;
       final timezone = await ref

@@ -213,7 +213,7 @@ return $default(_that.totalNetWorth,_that.totalAssets,_that.totalLiabilities,_th
 
 class _FinancialSummary implements FinancialSummary {
   const _FinancialSummary({required this.totalNetWorth, required this.totalAssets, required this.totalLiabilities, required this.currencyCode, this.isLoading = false, this.ratesFailed = false, final  Set<String> missingRateCurrencies = const <String>{}}): _missingRateCurrencies = missingRateCurrencies;
-
+  
 
 @override final  Decimal totalNetWorth;
 @override final  Decimal totalAssets;

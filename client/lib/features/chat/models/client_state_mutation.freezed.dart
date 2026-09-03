@@ -214,7 +214,7 @@ return $default(_that.uiMode,_that.toolName,_that.toolParams);case _:
 
 class _ClientStateMutation implements ClientStateMutation {
   const _ClientStateMutation({this.uiMode, this.toolName, final  Map<String, dynamic>? toolParams}): _toolParams = toolParams;
-
+  
 
 /// UI mode: Controls graph entry routing
 /// - 'idle': Goes through agent node

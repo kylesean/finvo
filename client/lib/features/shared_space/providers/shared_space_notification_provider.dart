@@ -145,7 +145,7 @@ class SharedSpaceNotification extends _$SharedSpaceNotification
       final page = refresh ? 1 : state.currentPage;
       final res = await _repository.getNotifications(
         page: page,
-        limit: _pageSize,
+        pageSize: _pageSize,
       );
 
       if (!ref.mounted || generation != _generation) return;

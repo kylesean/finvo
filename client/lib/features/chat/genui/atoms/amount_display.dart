@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:finvo/features/chat/genui/utils/formatters.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// A formatted currency amount display
 ///
@@ -12,7 +13,7 @@ import 'package:finvo/shared/theme/form_text_styles.dart';
 /// ```dart
 /// AmountDisplay(
 ///   amount: 1234.56,
-///   currency: 'CNY',
+///   currency: CNY,
 ///   style: theme.typography.body.lg,
 /// )
 /// ```
@@ -20,7 +21,7 @@ class AmountDisplay extends StatelessWidget {
   /// The numeric amount to display
   final num amount;
 
-  /// Currency code (CNY, USD, EUR, etc.). Defaults to 'CNY'.
+  /// Currency code (CNY, USD, EUR, etc.). Defaults to CNY.
   final String currency;
 
   /// Custom text style. Uses theme typography if not provided.
@@ -38,7 +39,7 @@ class AmountDisplay extends StatelessWidget {
   const AmountDisplay({
     super.key,
     required this.amount,
-    this.currency = 'CNY',
+    this.currency = Currency.defaultCode,
     this.style,
     this.showSign = false,
     this.compact = false,
@@ -76,7 +77,7 @@ class LargeAmountDisplay extends StatelessWidget {
   const LargeAmountDisplay({
     super.key,
     required this.amount,
-    this.currency = 'CNY',
+    this.currency = Currency.defaultCode,
     this.color,
     this.showSign = false,
   });

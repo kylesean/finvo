@@ -130,9 +130,16 @@ Decimal _expenseFromUiComponent(UIComponentInfo component) {
     // shape promised by the tool contract.
     final summary = data['summary'];
     if (summary is Map<String, dynamic>) {
-      final expenseTotal = _parseAmount(summary['expense_total']);
-      if (expenseTotal > Decimal.zero) {
-        return expenseTotal;
+      // Per-currency buckets; single-currency conversations sum exactly.
+      final byCurrency = summary['by_currency'];
+      if (byCurrency is Map) {
+        Decimal total = Decimal.zero;
+        for (final totals in byCurrency.values) {
+          if (totals is! Map) continue;
+          final expense = _parseAmount(totals['expense']);
+          if (expense > Decimal.zero) total += expense;
+        }
+        return total;
       }
     }
     return Decimal.zero;

@@ -13,7 +13,7 @@ class NotificationRepository {
   Future<({List<NotificationItem> items, int total, int unreadCount})>
   getNotifications({
     int page = 1,
-    int limit = 20,
+    int pageSize = 20,
     bool unreadOnly = false,
   }) async {
     try {
@@ -22,7 +22,7 @@ class NotificationRepository {
         method: HttpMethod.get,
         queryParameters: {
           'page': page,
-          'limit': limit,
+          'page_size': pageSize,
           'unread_only': unreadOnly,
         },
       );

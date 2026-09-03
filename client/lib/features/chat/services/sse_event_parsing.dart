@@ -53,28 +53,30 @@ class SseEventAccumulator {
   }
 }
 
-/// Resolve the currency of a TransactionGroupReceipt payload.
+/// Receipt event extracted from one currency bucket.
+typedef ReceiptBucketEvent = ({double amount, String type, String currency});
+
+/// Per-currency events from a TransactionGroupReceipt summary.
 ///
-/// Priority: `summary['currency']` > first transaction entry's
-/// `originalCurrency`/`currency` > app-wide default 'CNY'. AI-generated
-/// payloads are untrusted, so every read is type-guarded.
-String deriveReceiptCurrency(
-  Map<String, dynamic> summary,
-  Map<String, dynamic> props,
-) {
-  final summaryCurrency = summary['currency'];
-  if (summaryCurrency is String && summaryCurrency.isNotEmpty) {
-    return summaryCurrency;
-  }
-
-  final transactions = props['transactions'];
-  if (transactions is List) {
-    for (final entry in transactions) {
-      if (entry is! Map) continue;
-      final raw = entry['originalCurrency'] ?? entry['currency'];
-      if (raw is String && raw.isNotEmpty) return raw;
-    }
-  }
-
-  return 'CNY';
+/// Buckets are never summed across currencies; each emits its own event with
+/// its own currency. Malformed buckets are skipped.
+List<ReceiptBucketEvent> receiptBucketEvents(Object? summary) {
+  final events = <ReceiptBucketEvent>[];
+  if (summary is! Map<String, dynamic>) return events;
+  final byCurrency = summary['by_currency'];
+  if (byCurrency is! Map) return events;
+  double asDouble(Object? value) => switch (value) {
+    final num n => n.toDouble(),
+    final String s => double.tryParse(s) ?? 0,
+    _ => 0,
+  };
+  byCurrency.forEach((code, totals) {
+    if (totals is! Map) return;
+    final currency = code.toString().toUpperCase();
+    final expense = asDouble(totals['expense']);
+    final income = asDouble(totals['income']);
+    if (expense > 0) events.add((amount: expense, type: 'expense', currency: currency));
+    if (income > 0) events.add((amount: income, type: 'income', currency: currency));
+  });
+  return events;
 }

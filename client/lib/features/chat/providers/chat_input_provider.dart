@@ -403,10 +403,14 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       } catch (e, s) {
         if (_disposed) return;
         _logger.severe('Message send failed: $e\n$s');
+        // Honest copy: _onSendMessage awaits the whole stream, so a
+        // mid-stream break lands here with money possibly already booked.
+        // The conditional phrasing stays true when nothing was recorded
+        // (e.g. offline at tap time).
         state = state.copyWith(
-          isLoadingResponse: false,
+          isListening: false,
           showError: true,
-          errorMessage: t.chat.sendFailed,
+          errorMessage: t.chat.sendInterrupted,
           hintType: HintType.normal,
         );
       }

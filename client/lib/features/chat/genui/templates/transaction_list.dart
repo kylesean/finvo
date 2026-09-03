@@ -12,6 +12,7 @@ import 'package:finvo/features/home/models/transaction_model.dart';
 import 'dart:async';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/app/router/app_routes.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 /// Transaction list component - supports waterfall pagination
 class TransactionList extends ConsumerStatefulWidget {
@@ -72,7 +73,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
 
       final result = await homeService.searchTransactions(
         page: _currentPage + 1,
-        size: widget.data['per_page'] is num
+        pageSize: widget.data['per_page'] is num
             ? (widget.data['per_page'] as num).toInt()
             : 10,
         keyword: _searchMetadata?['keyword']?.toString(),
@@ -238,7 +239,7 @@ class _TransactionListState extends ConsumerState<TransactionList> {
     Map<String, dynamic> item,
   ) {
     final amount = AmountFormatter.parseDecimal(item['amount']?.toString());
-    final currency = item['currency']?.toString() ?? 'CNY';
+    final currency = item['currency']?.toString() ?? Currency.defaultCode;
     final categoryKey = item['category']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
     final tagsRaw = item['tags'];

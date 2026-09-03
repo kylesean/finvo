@@ -17,6 +17,7 @@ import 'package:finvo/features/chat/models/tool_call_info.dart';
 import 'package:finvo/features/chat/models/message_content_part.dart';
 import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/i18n/strings.g.dart';
+import 'package:finvo/shared/models/currency.dart';
 
 final _logger = Logger('ChatMessageWidget');
 
@@ -290,7 +291,7 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
             final sourceId = context['source_account_id'] ?? '';
             final targetId = context['target_account_id'] ?? '';
             final amount = context['amount'];
-            final currency = context['currency'] ?? 'CNY';
+            final currency = context['currency'] ?? Currency.defaultCode;
 
             final sourceDisplay = (sourceId as String).isNotEmpty
                 ? '$sourceName ($sourceId)'

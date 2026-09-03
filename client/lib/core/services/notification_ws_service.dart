@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'package:meta/meta.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
 import 'package:finvo/core/services/ws_channel/ws_channel.dart';
+import 'package:finvo/core/services/reconnect_policy.dart';
 
 final _logger = Logger('NotificationWsService');
 
@@ -37,12 +37,16 @@ enum NotificationWsConnectionStatus {
 /// Connects to: ws(s)://host/api/ws/notifications?token=jwt
 /// Implements automatic reconnection with exponential backoff.
 class NotificationWsService {
+  NotificationWsService({ReconnectPolicy? reconnects})
+    : reconnects = reconnects ?? ReconnectPolicy(maxAttempts: 5);
+
+  /// Reconnect budget/backoff. Public so tests can disable jitter.
+  final ReconnectPolicy reconnects;
+
   WebSocketChannel? _channel;
   Timer? _heartbeatTimer;
-  Timer? _reconnectTimer;
   StreamSubscription<dynamic>? _subscription;
   bool _isDisposed = false;
-  int _reconnectAttempts = 0;
 
   /// Monotonic token that invalidates stale async connect() callbacks. Each
   /// call to [connect] bumps it; any awaited continuation that observes a
@@ -50,10 +54,6 @@ class NotificationWsService {
   /// concurrent connect() calls can tear each other down via [_cleanup] and
   /// race to reinstate a half-open socket.
   int _connectGeneration = 0;
-
-  /// Shared RNG for reconnect-backoff jitter (deterministic seeding is not
-  /// needed; the service is not created in tests unless jitter is asserted).
-  final _random = Random();
 
   /// Broadcast stream of connection state transitions, and the current value.
   final _statusController =
@@ -83,12 +83,6 @@ class NotificationWsService {
   SecureStorageService? _storageService;
 
   static const _heartbeatIntervalProduction = Duration(seconds: 30);
-  static const _maxReconnectDelay = Duration(seconds: 30);
-  // Bounded reconnect attempts: once exceeded, automatic reconnection stops so
-  // a permanently unreachable server doesn't keep waking the device every
-  // backoff interval forever. connect() is still re-invoked externally when
-  // the auth token changes (provider rebuild) or the server config is edited.
-  static const _maxReconnectAttempts = 5;
 
   /// Heartbeat cadence. Declared as an instance field (not a const) so tests
   /// can shrink it to make the half-open connection detection observable;
@@ -101,19 +95,12 @@ class NotificationWsService {
   WebSocketChannel Function(String wsUrl, {required String token})?
   connectChannelFactory;
 
-  /// Test seam: disables reconnect-delay jitter so tests can elapse exact
-  /// exponential-backoff durations. Production never sets this.
-  @visibleForTesting
-  bool enableReconnectJitter = true;
-
   NotificationCallback? onNotification;
 
   /// Connect to the notification WebSocket.
   ///
-  /// [resetBudget] resets the reconnect attempt counter. External callers
-  /// (auth change, server edit) should pass the default `true` so a fresh user
-  /// action starts with a full reconnect budget; internal automatic reconnects
-  /// pass `false` so the budget accumulates toward [_maxReconnectAttempts].
+  /// [resetBudget] gives a fresh user action a full reconnect budget;
+  /// internal automatic reconnects pass `false` so failures accumulate.
   Future<void> connect({
     required String baseUrl,
     required SecureStorageService storageService,
@@ -126,11 +113,8 @@ class NotificationWsService {
     // instead of stepping on the socket we are about to establish.
     final generation = ++_connectGeneration;
 
-    // A fresh external connect is a new connection session: give it a full
-    // reconnect budget instead of inheriting a possibly-exhausted counter from
-    // A previous session .
     if (resetBudget) {
-      _reconnectAttempts = 0;
+      reconnects.markSucceeded();
     }
 
     // Reconnect path (or server switch) may arrive while a previous channel
@@ -199,7 +183,7 @@ class NotificationWsService {
         _cleanup();
         return;
       }
-      _reconnectAttempts = 0;
+      reconnects.markSucceeded();
       _sinceLastServerMessage.reset();
       _logger.info('WebSocket connected');
       _setStatus(NotificationWsConnectionStatus.connected);
@@ -310,8 +294,7 @@ class NotificationWsService {
     _heartbeatTimer = null;
     // Cancel any pending reconnect so a torn-down connection doesn't schedule
     // a fresh one from a stale timer while a newer connect() is in flight.
-    _reconnectTimer?.cancel();
-    _reconnectTimer = null;
+    reconnects.cancel();
     unawaited(_subscription?.cancel());
     _subscription = null;
     unawaited(_channel?.sink.close());
@@ -329,42 +312,19 @@ class NotificationWsService {
       return;
     }
 
-    // Give up once the attempt budget is exhausted rather than reconnecting
-    // forever. A later connect() (e.g. after login or a server edit) restarts
-    // the counter because _reconnectAttempts is reset to 0 on success.
-    if (_reconnectAttempts >= _maxReconnectAttempts) {
+    // Give up once the attempt budget is exhausted. A later connect() (after
+    // login or a server edit) re-arms the budget via resetBudget.
+    if (reconnects.exhausted) {
       _logger.severe(
-        'NotificationWsService: giving up after $_maxReconnectAttempts '
-        'reconnect attempts; call connect() again to retry',
+        'NotificationWsService: reconnect budget spent; '
+        'call connect() again to retry',
       );
       _setStatus(NotificationWsConnectionStatus.failed);
       return;
     }
 
-    _reconnectTimer?.cancel();
-
-    // Exponential backoff: 1s, 2s, 4s, 8s, ... max 30s, with a small random
-    // jitter (±25%) so many clients reconnecting at once (e.g. after a server
-    // restart) do not synchronize into a thundering herd on the same cadence.
-    final baseDelay = Duration(
-      seconds: min(
-        pow(2, _reconnectAttempts).toInt(),
-        _maxReconnectDelay.inSeconds,
-      ),
-    );
-    final jitterMs = (baseDelay.inMilliseconds * 0.25).round();
-    final delay = enableReconnectJitter
-        ? baseDelay +
-              Duration(
-                milliseconds: _random.nextInt(jitterMs * 2 + 1) - jitterMs,
-              )
-        : baseDelay;
-    _reconnectAttempts++;
-
-    _logger.info(
-      'Reconnecting in ${delay.inSeconds}s (attempt $_reconnectAttempts)',
-    );
-    _reconnectTimer = Timer(delay, () {
+    _logger.info('Reconnecting (attempt ${reconnects.attempts + 1})');
+    reconnects.schedule(() {
       unawaited(
         connect(
           baseUrl: baseUrl,
@@ -377,12 +337,8 @@ class NotificationWsService {
 
   /// Restart the connection when the app returns to the foreground.
   ///
-  /// The reconnect budget is bounded ([_maxReconnectAttempts]) so a
-  /// permanently unreachable server never keeps waking the device; once
-  /// exhausted the service parks at `failed` with no automatic retry. Coming
-  /// back to the foreground is the natural recovery point (the network may
-  /// have returned meanwhile), so this method re-arms the budget and retries
-  /// instead of silently staying dead until login or a server edit.
+  /// Coming back to the foreground is the natural recovery point, so this
+  /// re-arms the budget and retries instead of staying dead until login.
   void onAppResumed() {
     if (_isDisposed) return;
     if (_status != NotificationWsConnectionStatus.failed &&
@@ -405,7 +361,7 @@ class NotificationWsService {
   void dispose() {
     _isDisposed = true;
     _heartbeatTimer?.cancel();
-    _reconnectTimer?.cancel();
+    reconnects.dispose();
     unawaited(_subscription?.cancel());
     _subscription = null;
     unawaited(_channel?.sink.close());
