@@ -55,3 +55,6 @@ evals/reports/
 # 6. CodeGraph
 .codegraph/
 .reasonix/
+
+# 7. Local working docs (never commit: personal audit notes, agent scratchpads)
+docs/code-review-2026-09/
