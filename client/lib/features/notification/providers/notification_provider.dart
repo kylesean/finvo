@@ -289,6 +289,17 @@ class NotificationNotifier extends _$NotificationNotifier
 /// when the widget that reads it (MyApp) stops listening. A plain auto-dispose
 /// provider would dispose the connection (and trigger `onDispose`) as soon as
 /// the build frame that read it completes.
+/// Exposes the notification WebSocket connection state to the UI.
+///
+/// Without a consumer, a `failed` status (reconnect budget exhausted after a
+/// server outage) meant push notifications silently died until the app
+/// happened to resume. Surfaces it so the app shell can warn + offer retry.
+@riverpod
+Stream<NotificationWsConnectionStatus> notificationWsStatus(Ref ref) {
+  final service = ref.watch(notificationWsProvider);
+  return service.statusStream;
+}
+
 @Riverpod(keepAlive: true)
 NotificationWsService notificationWs(Ref ref) {
   final wsService = NotificationWsService();

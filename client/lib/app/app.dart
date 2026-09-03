@@ -15,6 +15,7 @@ import 'package:finvo/app/theme/theme_notifier.dart';
 import 'package:finvo/app/theme/app_theme_pair_provider.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
+import 'package:finvo/core/services/notification_ws_service.dart';
 import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
@@ -93,14 +94,41 @@ class MyApp extends ConsumerWidget {
 
         return FTheme(
           data: activeForuiTheme,
-          child: _buildAppContent(ref, navigator!),
+          child: _buildAppContent(ref, navigator!, materialContext),
         );
       },
     );
   }
 
-  Widget _buildAppContent(WidgetRef ref, Widget navigator) {
+  Widget _buildAppContent(
+    WidgetRef ref,
+    Widget navigator,
+    BuildContext snackbarContext,
+  ) {
     final authState = ref.watch(authProvider);
+
+    // Surface a dead push channel: when the reconnect budget is exhausted
+    // (server down for a while), notifications silently stop otherwise. The
+    // snackbar action re-arms the budget immediately via onAppResumed().
+    ref.listen<AsyncValue<NotificationWsConnectionStatus>>(
+      notificationWsStatusProvider,
+      (previous, next) {
+        final wasFailed =
+            previous?.value == NotificationWsConnectionStatus.failed;
+        if (next.value == NotificationWsConnectionStatus.failed && !wasFailed) {
+          ScaffoldMessenger.of(snackbarContext).showSnackBar(
+            SnackBar(
+              content: Text(t.notification.connectionLost),
+              action: SnackBarAction(
+                label: t.common.retry,
+                onPressed: () =>
+                    ref.read(notificationWsProvider).onAppResumed(),
+              ),
+            ),
+          );
+        }
+      },
+    );
 
     if (authState.status == AuthStatus.loading ||
         authState.status == AuthStatus.initial) {

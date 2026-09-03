@@ -129,9 +129,14 @@ abstract class _$NotificationNotifier extends $Notifier<NotificationState> {
 /// when the widget that reads it (MyApp) stops listening. A plain auto-dispose
 /// provider would dispose the connection (and trigger `onDispose`) as soon as
 /// the build frame that read it completes.
+/// Exposes the notification WebSocket connection state to the UI.
+///
+/// Without a consumer, a `failed` status (reconnect budget exhausted after a
+/// server outage) meant push notifications silently died until the app
+/// happened to resume. Surfaces it so the app shell can warn + offer retry.
 
-@ProviderFor(notificationWs)
-final notificationWsProvider = NotificationWsProvider._();
+@ProviderFor(notificationWsStatus)
+final notificationWsStatusProvider = NotificationWsStatusProvider._();
 
 /// WebSocket service provider for real-time notifications.
 ///
@@ -142,15 +147,22 @@ final notificationWsProvider = NotificationWsProvider._();
 /// when the widget that reads it (MyApp) stops listening. A plain auto-dispose
 /// provider would dispose the connection (and trigger `onDispose`) as soon as
 /// the build frame that read it completes.
+/// Exposes the notification WebSocket connection state to the UI.
+///
+/// Without a consumer, a `failed` status (reconnect budget exhausted after a
+/// server outage) meant push notifications silently died until the app
+/// happened to resume. Surfaces it so the app shell can warn + offer retry.
 
-final class NotificationWsProvider
+final class NotificationWsStatusProvider
     extends
         $FunctionalProvider<
-          NotificationWsService,
-          NotificationWsService,
-          NotificationWsService
+          AsyncValue<NotificationWsConnectionStatus>,
+          NotificationWsConnectionStatus,
+          Stream<NotificationWsConnectionStatus>
         >
-    with $Provider<NotificationWsService> {
+    with
+        $FutureModifier<NotificationWsConnectionStatus>,
+        $StreamProvider<NotificationWsConnectionStatus> {
   /// WebSocket service provider for real-time notifications.
   ///
   /// Initializes connection on first read and wires incoming
@@ -160,6 +172,51 @@ final class NotificationWsProvider
   /// when the widget that reads it (MyApp) stops listening. A plain auto-dispose
   /// provider would dispose the connection (and trigger `onDispose`) as soon as
   /// the build frame that read it completes.
+  /// Exposes the notification WebSocket connection state to the UI.
+  ///
+  /// Without a consumer, a `failed` status (reconnect budget exhausted after a
+  /// server outage) meant push notifications silently died until the app
+  /// happened to resume. Surfaces it so the app shell can warn + offer retry.
+  NotificationWsStatusProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'notificationWsStatusProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$notificationWsStatusHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<NotificationWsConnectionStatus> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<NotificationWsConnectionStatus> create(Ref ref) {
+    return notificationWsStatus(ref);
+  }
+}
+
+String _$notificationWsStatusHash() =>
+    r'53bd2604ff602a98d4188db80193e902da1f4551';
+
+@ProviderFor(notificationWs)
+final notificationWsProvider = NotificationWsProvider._();
+
+final class NotificationWsProvider
+    extends
+        $FunctionalProvider<
+          NotificationWsService,
+          NotificationWsService,
+          NotificationWsService
+        >
+    with $Provider<NotificationWsService> {
   NotificationWsProvider._()
     : super(
         from: null,
