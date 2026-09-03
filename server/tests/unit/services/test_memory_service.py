@@ -219,7 +219,7 @@ class TestMemoryServiceCleanup:
 
 
 class TestExtractionGuard:
-    """AG-P1-4: a misconfigured extraction LLM must disable extraction LOUDLY.
+    """A misconfigured extraction LLM must disable extraction LOUDLY.
 
     The default model (deepseek-v4-flash) is not hosted on api.openai.com; with
     no base_url every extraction call failed there and the per-turn warning
@@ -296,7 +296,7 @@ class TestExtractionGuard:
 
 
 class TestMemoryExtractionThrottle:
-    """AG-P1-4: extraction runs on the 1st and every Nth turn, not every turn."""
+    """Extraction runs on the 1st and every Nth turn, not every turn."""
 
     @pytest.mark.asyncio
     async def test_throttle_schedule(self, monkeypatch):

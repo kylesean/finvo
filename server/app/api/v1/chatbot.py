@@ -62,20 +62,13 @@ def get_agent() -> LangGraphAgent:
     return LangGraphAgent()
 
 
-# Per-session turn counter for the memory-extraction throttle (AG-P1-4).
-# In-process only: it is a cost throttle, not a correctness mechanism, and
-# resets on restart — extraction just happens a turn later.
+# Memory extraction throttle: 1st turn and every Nth turn per session.
 _MEMORY_TURN_COUNTERS: OrderedDict[UUID, int] = OrderedDict()
 _MEMORY_TURN_COUNTERS_LOCK = asyncio.Lock()
 
 
 async def _should_extract_memory(session_id: UUID) -> bool:
-    """Extract long-term memory only on the 1st and every Nth turn of a session.
-
-    Mem0's infer=True spends one LLM call per extraction, so extracting on
-    every turn multiplied provider cost by the conversation length. N comes
-    from ``MEMORY_EXTRACTION_EVERY_N_TURNS``.
-    """
+    """True on the 1st and every Nth turn; N from settings."""
     every_n = max(1, settings.MEMORY_EXTRACTION_EVERY_N_TURNS)
     async with _MEMORY_TURN_COUNTERS_LOCK:
         count = _MEMORY_TURN_COUNTERS.get(session_id, 0) + 1
@@ -313,6 +306,10 @@ async def chat_stream(
     try:
         session, is_new = await resolve_chat_session(session_id, current_user)
 
+        # Title for a fresh session, emitted as a title_update event at
+        # stream start (the client already handles the event).
+        title: str | None = None
+
         # For new sessions, generate and save title synchronously (fast, no LLM)
         if is_new:
             if user_message:
@@ -359,6 +356,11 @@ async def chat_stream(
                     },
                 )
                 yield f"data: {json.dumps(init_event.model_dump(mode='json', exclude_none=True), ensure_ascii=False)}\n\n"
+
+                # 1b. Title update (only when a title was just generated).
+                if title:
+                    title_event = GenUIEvent(type="title_update", title=title)
+                    yield f"data: {json.dumps(title_event.model_dump(mode='json', exclude_none=True), ensure_ascii=False)}\n\n"
 
             # 2. GenUI atomic mode: pass client_state to get_genui_stream
             client_state = chat_request.client_state

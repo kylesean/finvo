@@ -634,8 +634,8 @@ class TransactionCRUDService:
         if transaction.status != "PENDING":
             # Reverse the transaction's balance effect before deletion (EXPENSE
             # adds back, INCOME subtracts, TRANSFER reverses both ends), using the
-            # same snapshot conversion applied at creation. P2-9: no live rates
-            # on this path — a rate outage must not block deletes; hops the
+            # same snapshot conversion applied at creation. No live rates on
+            # this path — a rate outage must not block deletes; hops the
             # snapshot cannot express are skipped with a log (reconcile later).
             await self.ledger.apply_transaction_balance_effect(
                 transaction,
@@ -899,7 +899,7 @@ class TransactionCRUDService:
                     amount_original=amount_original,
                     currency=currency,
                     exchange_rate=exchange_rate_val.quantize(Decimal("0.00000001")),
-                    category_key=item.get("category_key", "OTHERS"),
+                    category_key=(item.get("category_key") or "OTHERS").upper(),
                     tags=item.get("tags", []),
                     raw_input=item.get("raw_input"),
                     source_account_id=source_account_uuid,
@@ -913,7 +913,7 @@ class TransactionCRUDService:
                 self.db.add(tx)
                 created_transactions.append(tx)
 
-                # S-A: keep the batch path consistent with the single-transaction
+                # Keep the batch path consistent with the single-transaction
                 # path — the ledger balance effect must be applied for items that
                 # carry a linked account, otherwise account balances silently
                 # drift from the transaction ledger. The ledger routes by item
@@ -990,7 +990,7 @@ class TransactionCRUDService:
                 failed.append({"transaction_id": str(tx_id), "error": str(e)})
                 # A database-level failure (e.g. a failed flush) leaves the
                 # session needing rollback; continuing would fail every
-                # remaining item with the same stale-session error (D7).
+                # remaining item with the same stale-session error.
                 # Business errors (not found / permission) do not poison the
                 # session, so only roll back when the session actually broke.
                 if not self.db.is_active:

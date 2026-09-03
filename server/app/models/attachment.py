@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import BigInteger, ForeignKey, Integer, String, Text, text
+from sqlalchemy import BigInteger, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 

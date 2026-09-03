@@ -9,7 +9,7 @@ Exposes RESTful file upload APIs:
 from __future__ import annotations
 
 import mimetypes
-from typing import Any
+from typing import Annotated, Any
 from urllib.parse import quote
 from uuid import UUID
 
@@ -17,15 +17,13 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from jose import JWTError, jwt
 from pydantic import BaseModel
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
-from app.core.database import get_session
 from app.core.exceptions import AuthErrorCode, BusinessError, FileErrorCode
 from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, success_response
+from app.core.service_deps import get_upload_service
 from app.models.storage_config import StorageConfig
 from app.services.storage.adapters.factory import StorageAdapterFactory
 from app.services.upload_service import (
@@ -36,6 +34,8 @@ from app.services.upload_service import (
 )
 
 router = APIRouter(prefix="/files", tags=["files"])
+
+UploadSvc = Annotated[UploadService, Depends(get_upload_service)]
 
 
 # =============================================================================
@@ -91,7 +91,7 @@ class UploadResponse(BaseModel):
 @router.post("/upload", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[UploadResponse])
 async def upload_files(
     current_user: CurrentUser,
-    db: DbSession,
+    upload_service: UploadSvc,
     files: list[UploadFile] = File(
         ...,
         alias="files[]",
@@ -153,7 +153,7 @@ async def upload_files(
         compress: Whether to compress images
         thread_id: Optional session thread ID
         current_user: Currently authenticated user
-        db: Database session
+        upload_service: Upload service (injected) [P1-3]
 
     Returns:
         JSONResponse containing upload results
@@ -179,7 +179,6 @@ async def upload_files(
         )
 
     # Batch upload: process files first, then write DB records
-    upload_service = UploadService(db)
     successful, failed = await upload_service.upload_files(
         files=files,
         user_uuid=current_user.uuid,
@@ -289,18 +288,17 @@ async def stream_file(
 async def view_attachment(
     attachment_id: UUID,
     current_user: CurrentUser,
-    db: DbSession,
+    upload_service: UploadSvc,
 ) -> Response:
     """View or download attachment file.
 
     Returns file according to MIME type:
     - Image/PDF: Inline display in browser
     - Other files: Download as attachment
-
     Args:
         attachment_id: Attachment ID
         current_user: Currently authenticated user
-        db: Database session
+        upload_service: Upload service (injected) [P1-3]
 
     Returns:
         FileResponse content stream
@@ -308,8 +306,6 @@ async def view_attachment(
     Raises:
         404: File not found or access denied
     """
-    upload_service = UploadService(db)
-
     # Resolve attachment + storage backend. Remote (S3/WebDAV) files are
     # served through the adapter-issued signed URL (redirect); local files are
     # streamed from disk via FileResponse.
@@ -366,7 +362,7 @@ async def view_attachment(
 async def delete_file(
     attachment_id: UUID,
     current_user: CurrentUser,
-    db: DbSession,
+    upload_service: UploadSvc,
 ) -> JSONResponse:
     """Delete file.
 
@@ -375,7 +371,7 @@ async def delete_file(
     Args:
         attachment_id: Attachment ID
         current_user: Currently authenticated user
-        db: Database session
+        upload_service: Upload service (injected) [P1-3]
 
     Returns:
         JSONResponse success response
@@ -383,8 +379,6 @@ async def delete_file(
     Raises:
         404: File not found or access denied
     """
-    upload_service = UploadService(db)
-
     try:
         await upload_service.delete_file(
             attachment_id=attachment_id,

@@ -221,7 +221,7 @@ class S3Adapter(StorageAdapter):
         Raises:
             StorageNotFoundError: If object doesn't exist
         """
-        # S-F: resolve the client OUTSIDE the try so a client-creation failure
+        # Resolve the client OUTSIDE the try so a client-creation failure
         # can never hit the `except client.exceptions.NoSuchKey` branch with
         # `client` unbound (a NameError masking the real error).
         try:

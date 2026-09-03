@@ -44,7 +44,7 @@ class NotificationListResponse(BaseModel):
     total: int
     unreadCount: int
     page: int
-    limit: int
+    page_size: int
 
 
 class RegisterDeviceTokenRequest(BaseModel):

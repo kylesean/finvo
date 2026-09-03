@@ -13,7 +13,6 @@ from uuid import UUID, uuid4 as uuid4_factory
 
 import sqlalchemy as sa
 from sqlalchemy import Boolean, CheckConstraint, String
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from app.models.base import Base, col, utc_now

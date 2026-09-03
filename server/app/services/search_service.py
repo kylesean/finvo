@@ -3,7 +3,6 @@
 Provides session title search with Chinese tokenization support using jieba.
 """
 
-from typing import Any
 from uuid import UUID
 
 import jieba

@@ -5,7 +5,6 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.base import Base
 from app.models.budget import Budget, BudgetPeriodStatus
 from app.models.transaction import Transaction
 from app.models.user import User

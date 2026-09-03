@@ -2,22 +2,17 @@
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated, Any
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
-from fastapi_pagination import Params
-from fastapi_pagination.ext.sqlalchemy import apaginate
-from sqlalchemy import and_, desc, func, or_, select
 
 from app.core.aliases import CurrentUser, DbSession
-from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.core.exceptions import NotFoundError
-from app.core.responses import ResponseEnvelope, pagination_payload, success_response
+from app.core.pagination import Paging, paginate, payload
+from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_transaction_query_service, get_transaction_service
-from app.models.notification import Notification
-from app.models.transaction import Transaction
 from app.repositories.transaction_repository import TransactionRepository
 from app.schemas.transaction import (
     BatchAccountUpdateResult,
@@ -58,51 +53,41 @@ async def get_transactions(
     current_user: CurrentUser,
     db: DbSession,
     query_service: TxQueryService,
-    page: int = Query(default=1, ge=1),
-    size: int = Query(default=20, ge=1, le=100),
+    paging: Paging,
     date: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),  # YYYY-MM-DD format
     transaction_type: str | None = Query(
         default=None, pattern="(?i)^(EXPENSE|INCOME|TRANSFER)$"
     ),  # EXPENSE, INCOME, TRANSFER
 ) -> JSONResponse:
-    """Retrieve Transaction List (Feed Stream)
-       Supports filtering by date and transaction type, returns a list of transactions with display calculated fields.
+    """Retrieve Transaction List (Feed Stream).
 
     Args:
         current_user: Current user
         db: Database session
         query_service: Transaction query service
-        page: Page number, default is 1
-        size: Number of items per page, default is 20
+        paging: Pagination params (page/page_size)
         date: Optional, date in YYYY-MM-DD format for filtering
         transaction_type: Optional, transaction type (EXPENSE, INCOME, TRANSFER)
 
     Returns:
         Unified format pagination response, containing display fields
     """
-    # Build query parameters
     params = TransactionQueryParams(
         date=date,
         transaction_types=[TransactionType(transaction_type.upper())] if transaction_type else None,
-        page=page,
-        per_page=size,
+        page=paging.page,
+        per_page=paging.page_size,
     )
 
-    # Execute search via shared query service
     result = await query_service.search(str(current_user.uuid), params)
-
-    # Obtain user's primary display currency
     display_currency = await get_user_display_currency(db, current_user.uuid)
 
-    # Map response items (displaying original currency amounts)
     return success_response(
-        data=pagination_payload(
+        data=payload(
             items=[transaction_to_dict(item, display_currency) for item in result.items],
             page=result.page,
-            size=result.per_page,
+            page_size=result.per_page,
             total=result.total,
-            pages=result.pages,
-            has_more=result.has_more,
         ),
         message="Transactions retrieved successfully",
     )
@@ -112,7 +97,7 @@ async def get_transactions(
 async def search_transactions(
     current_user: CurrentUser,
     db: DbSession,
-    params: Annotated[Params, Depends()],
+    paging: Paging,
     keyword: str | None = None,
     min_amount: Decimal | None = None,
     max_amount: Decimal | None = None,
@@ -124,10 +109,8 @@ async def search_transactions(
 ) -> JSONResponse:
     """Search transaction records.
 
-    Uses fastapi-pagination for standard pagination, supporting various filter criteria.
-
     Args:
-        params: Pagination parameters
+        paging: Pagination params (page/page_size)
         keyword: Keyword search (description, location)
         min_amount: Minimum amount
         max_amount: Maximum amount
@@ -142,8 +125,7 @@ async def search_transactions(
     Returns:
         Unified JSON pagination response
     """
-    # Build the filtered query via the repository (keeps ORM construction out
-    # of the route layer and escapes LIKE metacharacters consistently).
+    # [P1-1] Filtered query built by the repository; the route owns no ORM.
     query = TransactionRepository(db).search_query(
         current_user.uuid,
         keyword=keyword,
@@ -156,25 +138,14 @@ async def search_transactions(
         transaction_types=[transaction_type.upper()] if transaction_type else None,
     )
 
-    # Obtain user's primary display currency
     display_currency = await get_user_display_currency(db, current_user.uuid)
 
-    # Paginate using fastapi-pagination
-    page_result = await apaginate(
-        db,
-        query,
-        params=params,
-        transformer=lambda items: [transaction_to_dict(t, display_currency) for t in items],
-    )
-
-    # Return unified format response
     return success_response(
-        data=pagination_payload(
-            items=page_result.items,
-            page=page_result.page,
-            size=page_result.size,
-            total=page_result.total,
-            pages=page_result.pages,
+        data=await paginate(
+            db,
+            query,
+            paging,
+            transformer=lambda items: [transaction_to_dict(t, display_currency) for t in items],
         ),
         message="Transactions searched successfully",
     )

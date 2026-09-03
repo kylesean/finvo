@@ -63,7 +63,7 @@ class MemoryService:
     _memory: AsyncMemory | None = None
     # Guards singleton construction: concurrent awaiters (e.g. two startup
     # tasks racing) would otherwise build two AsyncMemory instances and two
-    # vector-store connection pools (D5).
+    # vector-store connection pools.
     _init_lock: asyncio.Lock | None = None
 
     def __init__(self) -> None:
@@ -136,11 +136,7 @@ class MemoryService:
             if settings.LONG_TERM_MEMORY_MODEL_BASE_URL:
                 llm_config["openai_base_url"] = settings.LONG_TERM_MEMORY_MODEL_BASE_URL
 
-            # AG-P1-4 guard: the default extraction model is NOT hosted on
-            # api.openai.com. Without an explicit base_url every extraction
-            # call would fail there, and the per-turn warning would swallow it
-            # — memory would look enabled while never actually working.
-            # Detect it once, loudly, and disable extraction instead.
+            # Non-OpenAI model without base_url would fail at api.openai.com; disable loudly.
             _model = settings.LONG_TERM_MEMORY_MODEL.lower()
             if settings.LONG_TERM_MEMORY_MODEL_BASE_URL is None and not _model.startswith(
                 ("gpt", "o1", "o3", "o4", "chatgpt")
@@ -617,7 +613,11 @@ class MemoryService:
                 else:
                     lines.append(f"* {memory_text}")
 
-        return "\n".join(lines)
+        # Recalled memories are untrusted data (a stored injection must not
+        # become an instruction on recall).
+        from app.core.prompts.untrusted import wrap_untrusted
+
+        return wrap_untrusted("\n".join(lines), source="memory")
 
     # =========================================================================
     # Memory Analytics

@@ -12,6 +12,7 @@ LLM-composed shell command.
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
@@ -82,7 +83,9 @@ async def build_transfer_wizard_data(
                         "id": str(acc.uuid),
                         "name": acc.name,
                         "type": acc.type or "UNKNOWN",
-                        "balance": float(acc.current_balance),
+                        # String amounts ("money travels as strings"): float()
+                        # loses cents on large values.
+                        "balance": str(acc.current_balance or 0),
                         "currency": acc.currency_code or "CNY",
                     }
                 )
@@ -120,7 +123,7 @@ async def build_transfer_wizard_data(
             "targetAccounts": formatted_accounts,
             "preselectedSourceId": suggested_source_id,
             "preselectedTargetId": suggested_target_id,
-            "amount": max(0.0, float(amount or 0.0)),
+            "amount": str(max(Decimal("0"), Decimal(str(amount or 0)))),
             "memo": memo or "",
             "tags": tags or [],
             "currency": currency or default_currency,

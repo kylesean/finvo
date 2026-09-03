@@ -8,7 +8,6 @@ Locks the fix for silently summing account balances across currencies:
   polluting the total.
 """
 
-from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -130,9 +129,9 @@ class TestForecastStartingBalance:
 
 
 class TestUserServiceTotalBalance:
-    """BF-P1-4 regression: the accounts-list endpoint must match the fixed
-    statistics/forecast convention — convert per account before summing,
-    skip-and-report instead of silently mixing currencies."""
+    """The accounts-list endpoint must match the statistics/forecast
+    convention — convert per account before summing, skip-and-report instead
+    of silently mixing currencies."""
 
     @pytest.mark.asyncio
     async def test_get_financial_accounts_converts_to_base(self, db_session: AsyncSession) -> None:

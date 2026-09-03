@@ -46,26 +46,20 @@ async def test_memory_extraction_boundary():
 
 
 @pytest.mark.asyncio
-async def test_agent_proactive_memory_tool_call():
-    """Verify Agent memory middleware behavior (currently configured as passive)."""
-    # Fully mock LLM calls to avoid network latency and hangs
-    with patch("app.services.llm.llm_service.get_llm", new_callable=AsyncMock) as _:
-        from langchain_core.messages import HumanMessage
+async def test_agent_memory_via_search_tool():
+    """Memory reads go through search_personal_context, not middleware injection."""
+    from app.core.langgraph.tools.memory_tools import search_personal_context
 
-        from app.core.langgraph.middleware.memory import LongTermMemoryMiddleware
+    user_id = str(uuid4())
+    from app.core.langgraph.tools.context import current_user_id
 
-        middleware = LongTermMemoryMiddleware()
-
-        # Verify before_invoke no longer executes retrieval
-        messages = [HumanMessage(content="Give me suggestions based on my budget goals")]
-        config = {"configurable": {"user_uuid": str(uuid4())}}
-
-        # Middleware should return directly without performing active retrieval
-        processed_msgs, _ = await middleware.before_invoke(messages, config)
-
-        # Verify message was not mutated (i.e., no "# User Memories" injected)
-        assert len(processed_msgs) == 1
-        assert "User Memories" not in processed_msgs[0].content
+    current_user_id.set(user_id)
+    with patch(
+        "app.services.memory.memory_service.MemoryService.search_memories", new_callable=AsyncMock
+    ) as mock_search:
+        mock_search.return_value = [{"memory": "User wants to save 5000 per month", "score": 0.9}]
+        result = await search_personal_context.ainvoke({"query": "budget goals"})
+        assert "save 5000 per month" in result
 
 
 @pytest.mark.asyncio

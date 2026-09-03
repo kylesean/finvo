@@ -598,13 +598,12 @@ class CashFlowForecastResponse(BaseModel):
 class TransactionFeedResponse(BaseModel):
     """Paginated transaction feed returned by ``GET /transactions``.
 
-    Matches the existing on-wire shape (``items`` + pagination fields) so the
-    response_model can be typed without a client-breaking change.
+    Matches the canonical pagination envelope (``items`` + page/page_size).
     """
 
     items: list[TransactionResponse]
     page: int
-    size: int
+    page_size: int
     total: int
     pages: int
     has_more: bool = Field(serialization_alias="hasMore")

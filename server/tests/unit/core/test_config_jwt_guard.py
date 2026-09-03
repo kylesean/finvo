@@ -61,7 +61,7 @@ def test_socks_proxy_variable_normalized(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Verification provider fail-fast guard (SEC-P1-3, config.py:_validate_verification_providers)
+# Verification provider fail-fast guard
 #
 # The shipped defaults skip code verification entirely ("mock"); a public
 # deployment that forgets to configure a real provider must refuse to boot
@@ -104,7 +104,7 @@ def test_registration_open_by_default(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Metrics token fail-fast guard (04-P2-10, config.py:_validate_metrics_token)
+# Metrics token fail-fast guard
 #
 # An unauthenticated /metrics endpoint leaks operational detail; enabling
 # metrics in production/staging without a token must refuse to boot.
@@ -135,3 +135,15 @@ def test_production_metrics_with_token_passes(monkeypatch):
 def test_development_metrics_without_token_allowed(monkeypatch):
     settings = _make_settings(monkeypatch, "development", _STRONG)
     assert settings.METRICS_TOKEN == ""
+
+
+def test_access_token_ttl_is_24h():
+    """Leaked-token window is 1 day, not 7 (rotation is invisible).
+
+    Pins the CODE default (Settings.model_fields), not the live value: a
+    local server/.env may legitimately override it for dev comfort, and
+    pydantic reads that file directly.
+    """
+    from app.core.config import Settings
+
+    assert Settings.model_fields["JWT_ACCESS_TOKEN_EXPIRE_DAYS"].default == 1

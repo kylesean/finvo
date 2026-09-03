@@ -30,10 +30,10 @@ class NotificationService:
         self,
         user_uuid: UUID,
         page: int = 1,
-        limit: int = 20,
+        page_size: int = 20,
         unread_only: bool = False,
     ) -> tuple[list[NotificationResponse], int, int]:
-        """Return (items, total, unread_count) for the user's notifications."""
+        """Return (items, total, unread_count). [P1-4]"""
         filters = [Notification.user_uuid == user_uuid]
         if unread_only:
             filters.append(Notification.is_read.is_(False))
@@ -52,8 +52,8 @@ class NotificationService:
             select(Notification)
             .where(and_(*filters))
             .order_by(Notification.created_at.desc())
-            .offset((page - 1) * limit)
-            .limit(limit)
+            .offset((page - 1) * page_size)
+            .limit(page_size)
         )
         result = await self.db.execute(query)
         notifications = result.scalars().all()

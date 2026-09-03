@@ -18,9 +18,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi_pagination import Params
-from fastapi_pagination.ext.sqlalchemy import apaginate
-from sqlalchemy import desc, select
 
 from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
@@ -33,7 +30,9 @@ from app.core.dependencies import (
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.limiter import limiter
 from app.core.logging import bind_context, logger
-from app.core.responses import ResponseEnvelope, pagination_payload, success_response
+from app.core.pagination import Paging, paginate
+from app.core.responses import ResponseEnvelope, success_response
+from app.core.service_deps import get_auth_service
 from app.models.session import Session
 from app.models.user import User
 from app.repositories.session_repository import SessionRepository
@@ -143,13 +142,15 @@ async def send_code(
     request: Request,
     data: SendCodeRequest,
     db: DbSession,
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> JSONResponse:
-    """Send verification code to email or mobile.
+    """Send verification code to email or mobile. [P1-3]
 
     Args:
         request: FastAPI request object
         data: Send code request data
         db: Database session
+        auth_service: Auth service (injected)
 
     Returns:
         JSONResponse: Unified response format with code=0 on success
@@ -157,9 +158,6 @@ async def send_code(
     Raises:
         BusinessError: If account already exists (handled by exception handler)
     """
-    auth_service = AuthService(db)
-
-    # Send verification code
     await auth_service.send_verification_code(
         account_type=data.type,
         account=data.account,
@@ -180,13 +178,15 @@ async def register(
     request: Request,
     data: RegisterRequest,
     db: DbSession,
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> JSONResponse:
-    """Register a new user.
+    """Register a new user. [P1-3]
 
     Args:
         request: FastAPI request object
         data: Registration request data
         db: Database session
+        auth_service: Auth service (injected)
 
     Returns:
         JSONResponse: Unified response with token and user info (code=0 on success)
@@ -194,8 +194,6 @@ async def register(
     Raises:
         AppException: propagated to the global app_exception_handler in main.py.
     """
-    auth_service = AuthService(db)
-
     # Get client IP
     client_ip = _client_ip(request)
 
@@ -240,13 +238,15 @@ async def login(
     request: Request,
     data: LoginRequest,
     db: DbSession,
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> JSONResponse:
-    """User login.
+    """User login. [P1-3]
 
     Args:
         request: FastAPI request object
         data: Login request data
         db: Database session
+        auth_service: Auth service (injected)
 
     Returns:
         JSONResponse: Unified response with token and user info (code=0 on success)
@@ -254,8 +254,6 @@ async def login(
     Raises:
         AppException: propagated to the global app_exception_handler in main.py.
     """
-    auth_service = AuthService(db)
-
     # Get client IP
     client_ip = _client_ip(request)
 
@@ -542,49 +540,33 @@ async def refresh_access_token_endpoint(
 async def get_user_sessions(
     user: CurrentUser,
     db: DbSession,
-    params: Annotated[Params, Depends()],
+    paging: Paging,
 ) -> JSONResponse:
-    """Get paginated session list for the authenticated user.
-
-    This endpoint returns sessions with pagination support in unified response format.
-    Use query parameters `page` (default: 1) and `size` (default: 50) to control pagination.
+    """Get paginated session list for the authenticated user. [P1-4]
 
     Args:
         user: The authenticated user
         db: Database session
-        params: Pagination parameters (injected by fastapi-pagination)
+        paging: Pagination params (page/page_size)
 
     Returns:
         JSONResponse: Unified response with paginated sessions
     """
-    # Build query for user's sessions, ordered by most recent first
     query = SessionRepository(db).query_for_user(user.uuid)
 
-    # Use fastapi-pagination to paginate the query
-    page_result = await apaginate(
-        db,
-        query,
-        params=params,
-        transformer=lambda items: [
+    def _to_item(sessions: list[Any]) -> list[dict[str, Any]]:
+        return [
             {
                 "session_id": session.id,
                 "name": session.name or "",
-                # Use standard ISO 8601 format: replace +00:00 with Z for UTC
+                # Standard ISO 8601: replace +00:00 with Z for UTC.
                 "created_at": (session.created_at.isoformat().replace("+00:00", "Z") if session.created_at else ""),
                 "updated_at": (session.updated_at.isoformat().replace("+00:00", "Z") if session.updated_at else ""),
             }
-            for session in items
-        ],
-    )
+            for session in sessions
+        ]
 
-    # Wrap fastapi-pagination result in unified response format
     return success_response(
-        data=pagination_payload(
-            items=page_result.items,
-            page=page_result.page,
-            size=page_result.size,
-            total=page_result.total,
-            pages=page_result.pages,
-        ),
+        data=await paginate(db, query, paging, transformer=_to_item),
         message="Sessions retrieved successfully",
     )

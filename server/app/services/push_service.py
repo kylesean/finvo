@@ -7,7 +7,6 @@ Gracefully falls back to mock/logging mode if Firebase credentials are not confi
 from __future__ import annotations
 
 import asyncio
-import logging
 from typing import Any
 from uuid import UUID
 

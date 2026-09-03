@@ -1,17 +1,9 @@
 """Security-focused tests for AuthService.
 
-This module contains security boundary tests for the authentication service.
-Tests are grounded in the application's actual security-relevant behavior
-(JWT signature/expiry/algorithm checks, bcrypt password hashing, single-use
-verification codes, code TTL expiry, account-enumeration leakage).
-
-Scope note: Finvo is a self-hosted personal finance app with negligible
-concurrency and no multi-instance deployment. Features that only make sense
-for high-concurrency/public-facing systems — login rate limiting and
-verification code brute-force throttling — are intentionally not implemented
-beyond the deployed slowapi limits. JWT refresh-token replay prevention IS
-implemented (server-side rotation + logout revocation, see
-test_refresh_token_lifecycle.py); the test below pins the rotation invariant.
+Covers the real security-relevant behavior: JWT signature/expiry/algorithm
+checks, strict access/refresh type isolation, bcrypt hashing, single-use
+expiring verification codes with guess budgets, per-account login lockout,
+fail-closed revocation, and account-enumeration folding.
 """
 
 from datetime import UTC, datetime, timedelta
@@ -57,7 +49,7 @@ class TestTokenSecurity:
 
     @pytest.mark.asyncio
     async def test_refresh_token_rejected_for_api_access(self) -> None:
-        """SEC-P1-2 regression: a refresh token must not authenticate API calls.
+        """A refresh token must not authenticate API calls.
 
         verify_token (the auth path for every REST/WS route) has to reject
         ``type: refresh`` tokens — otherwise a leaked 30-day refresh token is
@@ -79,20 +71,17 @@ class TestTokenSecurity:
         assert claims.get("type") == "access"
 
     @pytest.mark.asyncio
-    async def test_legacy_token_without_type_claim_still_accepted(self) -> None:
-        """Tokens issued before the ``type`` claim stay valid (grace period).
-
-        Backward compatibility: no forced global logout when this ships.
-        """
+    async def test_token_without_type_claim_rejected(self) -> None:
+        """Typeless tokens are rejected: every token must declare its type."""
         from jose import jwt as jose_jwt
 
         subject = str(uuid4())
-        legacy_token = jose_jwt.encode(
-            {"sub": subject, "exp": datetime.now(UTC) + timedelta(hours=1), "jti": "legacy-jti"},
+        typeless = jose_jwt.encode(
+            {"sub": subject, "exp": datetime.now(UTC) + timedelta(hours=1), "jti": "typeless-jti"},
             settings.JWT_SECRET_KEY,
             algorithm=settings.JWT_ALGORITHM,
         )
-        assert verify_token(legacy_token) == subject
+        assert verify_token(typeless) is None
 
     @pytest.mark.asyncio
     async def test_tampered_token_rejected(self) -> None:
@@ -122,6 +111,22 @@ class TestTokenSecurity:
             algorithm="HS512",
         )
         assert verify_token(wrong_alg_token) is None
+
+    @pytest.mark.asyncio
+    async def test_revocation_undecidable_fails_closed_outside_dev(self, monkeypatch) -> None:
+        """Redis down means fail closed in production, fail open in dev."""
+        from app.core.config import Environment
+        from app.core.dependencies import is_token_revoked
+
+        token = create_access_token(subject=str(uuid4())).access_token
+        assert await is_token_revoked(None, token) is False
+
+        original = settings.ENVIRONMENT
+        monkeypatch.setattr(settings, "ENVIRONMENT", Environment.PRODUCTION)
+        try:
+            assert await is_token_revoked(None, token) is True
+        finally:
+            monkeypatch.setattr(settings, "ENVIRONMENT", original)
 
     @pytest.mark.asyncio
     async def test_token_replay_prevention(self) -> None:
@@ -171,6 +176,28 @@ class TestPasswordSecurity:
         assert hashed.startswith(("$2a$", "$2b$", "$2y$"))
         # Two hashes of the same password differ (salt is random).
         assert User.hash_password("same") != User.hash_password("same")
+
+
+class TestPasswordPolicy:
+    """Registration passwords: min 8 chars, letters + digits, not common."""
+
+    def _check(self, password: str):
+        from pydantic import ValidationError
+
+        from app.schemas.auth import RegisterRequest
+
+        try:
+            RegisterRequest(type="email", account="u@example.com", password=password)
+            return None
+        except ValidationError as e:
+            return str(e)
+
+    @pytest.mark.parametrize("bad", ["short1", "1234567", "abcdefg", "Password123", "qwerty123", "abcdefgh"])
+    def test_weak_passwords_rejected(self, bad: str) -> None:
+        assert self._check(bad) is not None
+
+    def test_strong_password_accepted(self) -> None:
+        assert self._check("Str0ngPass!9") is None
 
     @pytest.mark.skip(
         reason=(
@@ -236,24 +263,50 @@ class TestVerificationCodeSecurity:
             first = await code_manager.verify_code(account, stored_code)
             assert first is True
             # Successful verify MUST delete the code (single-use guarantee).
-            mock_cache.delete.assert_called_once()
+            deleted_keys = [c.args[0] for c in mock_cache.delete.call_args_list]
+            assert any(k.startswith("verification_code:") for k in deleted_keys)
 
             # Second attempt: code already deleted → cache miss → fail.
             mock_cache.get = AsyncMock(return_value=None)
             second = await code_manager.verify_code(account, stored_code)
             assert second is False
 
-    @pytest.mark.skip(
-        reason=(
-            "Self-hosted app: verification-code brute-force throttling (attempt "
-            "counter + lockout) is out of scope. The 6-digit code already has a "
-            "short TTL; single-user deployment doesn't justify lockout infra."
-        )
-    )
     @pytest.mark.asyncio
-    async def test_code_brute_force_resistance(self) -> None:
-        """Brute-force guessing is prevented (requires attempt lockout)."""
-        pass
+    async def test_wrong_guesses_void_code_after_budget(self) -> None:
+        """Five wrong guesses void the code; even the right code then fails."""
+        from app.services.code_manager import code_manager
+
+        account = f"bf_{uuid4().hex}@example.com"
+        stored_code = "123456"
+        state: dict[str, str] = {"code": stored_code}
+        attempts = {"count": 0}
+
+        async def fake_get(key: str, deserialize: bool = True):
+            if key.startswith("verification_code:"):
+                return state.get("code")
+            return None
+
+        async def fake_increment(key: str, amount: int = 1):
+            attempts["count"] += amount
+            return attempts["count"]
+
+        async def fake_expire(key: str, ttl: int) -> bool:
+            return True
+
+        async def fake_delete(key: str) -> bool:
+            if key.startswith("verification_code:"):
+                state.pop("code", None)
+            return True
+
+        with patch("app.services.code_manager.cache_manager") as mock_cache:
+            mock_cache.get = AsyncMock(side_effect=fake_get)
+            mock_cache.increment = AsyncMock(side_effect=fake_increment)
+            mock_cache.expire = AsyncMock(side_effect=fake_expire)
+            mock_cache.delete = AsyncMock(side_effect=fake_delete)
+
+            for _ in range(5):
+                assert await code_manager.verify_code(account, "000000") is False
+            assert await code_manager.verify_code(account, stored_code) is False
 
 
 class TestAccountEnumeration:
@@ -299,24 +352,47 @@ class TestAccountEnumeration:
         """
         service = AuthService(db_session)
 
-        # Nonexistent user → AUTHENTICATE_FAILED (same as wrong password).
-        with pytest.raises(AuthenticationError) as exc:
-            await service.login("email", "nobody@example.com", "whatever", "Asia/Shanghai")
-        assert exc.value.error_code == AuthErrorCode.AUTHENTICATE_FAILED
-        assert exc.value.message == "Invalid credentials"
+        # Fake the login-failure counter: the real cache_manager opens
+        # loop-bound Redis connections. Used raw here, they outlive the
+        # pytest session loop and poison later TestClient lifespans with
+        # cross-loop Future errors. Enumeration-folding needs no real
+        # counting, so fake it like TestLoginLockout does.
+        store: dict[str, int] = {}
 
-        # Create a user, then wrong password → also AUTHENTICATE_FAILED.
-        email = f"login_{uuid4().hex[:8]}@example.com"
-        with (
-            patch("app.services.auth_service.settings.EMAIL_PROVIDER", "smtp"),
-            patch("app.services.code_manager.code_manager.verify_code", new=AsyncMock(return_value=True)),
-        ):
-            await service.register("email", email, "CorrectPass1!", code="123456")
+        async def fake_get(key: str, deserialize: bool = True):
+            value = store.get(key)
+            return str(value) if value is not None else None
 
-        with pytest.raises(AuthenticationError) as exc:
-            await service.login("email", email, "WrongPass1!", "Asia/Shanghai")
-        assert exc.value.error_code == AuthErrorCode.AUTHENTICATE_FAILED
-        assert exc.value.message == "Invalid credentials"
+        async def fake_increment(key: str, amount: int = 1):
+            store[key] = store.get(key, 0) + amount
+            return store[key]
+
+        async def fake_expire(key: str, ttl: int) -> bool:
+            return True
+
+        with patch("app.services.auth_service.cache_manager") as mock_cache:
+            mock_cache.get = AsyncMock(side_effect=fake_get)
+            mock_cache.increment = AsyncMock(side_effect=fake_increment)
+            mock_cache.expire = AsyncMock(side_effect=fake_expire)
+
+            # Nonexistent user → AUTHENTICATE_FAILED (same as wrong password).
+            with pytest.raises(AuthenticationError) as exc:
+                await service.login("email", "nobody@example.com", "whatever", "Asia/Shanghai")
+            assert exc.value.error_code == AuthErrorCode.AUTHENTICATE_FAILED
+            assert exc.value.message == "Invalid credentials"
+
+            # Create a user, then wrong password → also AUTHENTICATE_FAILED.
+            email = f"login_{uuid4().hex[:8]}@example.com"
+            with (
+                patch("app.services.auth_service.settings.EMAIL_PROVIDER", "smtp"),
+                patch("app.services.code_manager.code_manager.verify_code", new=AsyncMock(return_value=True)),
+            ):
+                await service.register("email", email, "CorrectPass1!", code="123456")
+
+            with pytest.raises(AuthenticationError) as exc:
+                await service.login("email", email, "WrongPass1!", "Asia/Shanghai")
+            assert exc.value.error_code == AuthErrorCode.AUTHENTICATE_FAILED
+            assert exc.value.message == "Invalid credentials"
 
         # Both failure modes produce the same code+message — no enumeration leak.
         assert AuthErrorCode.AUTHENTICATE_FAILED == AuthErrorCode.AUTHENTICATE_FAILED
@@ -333,59 +409,88 @@ class TestAccountEnumeration:
         pass
 
 
-class TestRateLimiting:
-    """Tests for authentication rate limiting.
+class TestLoginLockout:
+    """Per-account lockout: 5 wrong passwords in 15 minutes locks the account."""
 
-    Rate limiting is intentionally not implemented: Finvo is a self-hosted,
-    single-user personal finance app with negligible concurrency. Adding
-    slowapi/Redis-backed login throttling would be over-engineering for this
-    deployment model. Tests are kept as skipped placeholders to make the
-    deliberate omission visible on the security checklist.
-    """
+    def _service_with_fake_cache(self):
+        from unittest.mock import AsyncMock
 
-    @pytest.mark.skip(
-        reason=(
-            "Self-hosted app: login rate limiting is out of scope. The app is "
-            "single-user and not exposed to public traffic; throttling adds "
-            "operational complexity (Redis/slowapi) without benefit."
-        )
-    )
+        from app.services.auth_service import AuthService
+
+        store: dict[str, int] = {}
+
+        async def fake_get(key: str, deserialize: bool = True):
+            value = store.get(key)
+            return str(value) if value is not None else None
+
+        async def fake_increment(key: str, amount: int = 1):
+            store[key] = store.get(key, 0) + amount
+            return store[key]
+
+        async def fake_expire(key: str, ttl: int) -> bool:
+            return True
+
+        async def fake_delete(key: str) -> bool:
+            store.pop(key, None)
+            return True
+
+        service = AuthService(AsyncMock())
+        return service, store, fake_get, fake_increment, fake_expire, fake_delete
+
     @pytest.mark.asyncio
-    async def test_login_rate_limit_triggered(self) -> None:
-        """Login rate limit is triggered after too many attempts."""
-        pass
+    async def test_five_failures_lock_account(self) -> None:
+        service, _store, fake_get, fake_increment, fake_expire, fake_delete = self._service_with_fake_cache()
+        with patch("app.services.auth_service.cache_manager") as mock_cache:
+            mock_cache.get = AsyncMock(side_effect=fake_get)
+            mock_cache.increment = AsyncMock(side_effect=fake_increment)
+            mock_cache.expire = AsyncMock(side_effect=fake_expire)
+            mock_cache.delete = AsyncMock(side_effect=fake_delete)
 
-    @pytest.mark.skip(
-        reason=(
-            "Self-hosted app: verification-code request rate limiting is out of "
-            "scope. Code sending is already infrequent; the existing 60s "
-            "code_manager._acquire_rate_limit_lock is sufficient."
-        )
-    )
-    @pytest.mark.asyncio
-    async def test_verification_code_rate_limit(self) -> None:
-        """Rate limiting for verification code requests."""
-        pass
+            for _ in range(5):
+                await service._record_login_failure("email", "a@example.com", user_exists=True)
+            assert await service._login_locked("email", "a@example.com") is True
 
-    @pytest.mark.skip(reason="Self-hosted app: rate-limit recovery test is out of scope (no rate limiter).")
     @pytest.mark.asyncio
-    async def test_rate_limit_recovery(self) -> None:
-        """Rate limit is lifted after cooldown period."""
-        pass
+    async def test_unknown_accounts_not_counted(self) -> None:
+        service, store, fake_get, fake_increment, fake_expire, fake_delete = self._service_with_fake_cache()
+        with patch("app.services.auth_service.cache_manager") as mock_cache:
+            mock_cache.get = AsyncMock(side_effect=fake_get)
+            mock_cache.increment = AsyncMock(side_effect=fake_increment)
+            mock_cache.expire = AsyncMock(side_effect=fake_expire)
+            mock_cache.delete = AsyncMock(side_effect=fake_delete)
+
+            for _ in range(10):
+                await service._record_login_failure("email", "ghost@example.com", user_exists=False)
+            assert await service._login_locked("email", "ghost@example.com") is False
+            assert store == {}
+
+    @pytest.mark.asyncio
+    async def test_success_clears_failures(self) -> None:
+        service, _store, fake_get, fake_increment, fake_expire, fake_delete = self._service_with_fake_cache()
+        with patch("app.services.auth_service.cache_manager") as mock_cache:
+            mock_cache.get = AsyncMock(side_effect=fake_get)
+            mock_cache.increment = AsyncMock(side_effect=fake_increment)
+            mock_cache.expire = AsyncMock(side_effect=fake_expire)
+            mock_cache.delete = AsyncMock(side_effect=fake_delete)
+
+            await service._record_login_failure("email", "a@example.com", user_exists=True)
+            await service._clear_login_failures("email", "a@example.com")
+            assert await service._login_locked("email", "a@example.com") is False
 
 
 # Re-exported for any external consumers; keeps the historical import surface.
 __all__ = [
     "TestTokenSecurity",
     "TestPasswordSecurity",
+    "TestPasswordPolicy",
     "TestVerificationCodeSecurity",
     "TestAccountEnumeration",
-    "TestRateLimiting",
+    "TestLoginLockout",
 ]
 
 
 class TestRegistrationKillSwitch:
-    """SEC-P1-3: REGISTRATION_OPEN=false must reject sign-ups before any work."""
+    """REGISTRATION_OPEN=false must reject sign-ups before any work."""
 
     @pytest.mark.asyncio
     async def test_registration_closed_rejects_before_db_or_verification(self, monkeypatch) -> None:

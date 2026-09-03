@@ -1,5 +1,5 @@
 import calendar
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import UTC, date, datetime, time
 from zoneinfo import ZoneInfo
 
 import pytest

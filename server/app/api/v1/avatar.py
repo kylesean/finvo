@@ -20,7 +20,7 @@ through this route — they remain behind the authenticated ``/files/view``.
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,6 +29,7 @@ from app.core.config import settings
 from app.core.exceptions import NotFoundError
 from app.core.limiter import limiter
 from app.core.logging import logger
+from app.core.service_deps import get_upload_service
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.services.upload_service import UploadService
@@ -69,9 +70,10 @@ async def get_avatar(
     request: Request,
     user_uuid: UUID,
     db: DbSession,
+    upload_service: Annotated[UploadService, Depends(get_upload_service)],
     size: Annotated[int, Query(ge=_MIN_SIZE, le=_MAX_SIZE, description="Identicon size in pixels")] = _DEFAULT_SIZE,
 ) -> Response:
-    """Return the user's avatar (uploaded image, redirect, or identicon)."""
+    """Return the user's avatar (uploaded image, redirect, or identicon). [P1-3]"""
     user = await _resolve_user(db, user_uuid)
     avatar_url = user.avatar_url
 
@@ -83,7 +85,6 @@ async def get_avatar(
         attachment_id = _attachment_id_from_url(avatar_url)
         if attachment_id is not None:
             try:
-                upload_service = UploadService(db)
                 file_path, attachment = await upload_service.get_file_path(
                     attachment_id=attachment_id,
                     user_uuid=user.uuid,

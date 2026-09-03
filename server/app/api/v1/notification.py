@@ -1,12 +1,13 @@
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.aliases import CurrentUser, DbSession
+from app.core.pagination import Paging
 from app.core.responses import ResponseEnvelope, success_response
+from app.core.service_deps import get_notification_service
 from app.schemas.notification import (
     NotificationListResponse,
     RegisterDeviceTokenRequest,
@@ -17,34 +18,30 @@ from app.services.push_service import PushService
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
-
-def _service(db: AsyncSession) -> NotificationService:
-    """Build a NotificationService bound to the request session."""
-    return NotificationService(db)
+NotifService = Annotated[NotificationService, Depends(get_notification_service)]
 
 
 @router.get("", response_model=ResponseEnvelope[NotificationListResponse])
 async def get_notifications(
     current_user: CurrentUser,
     db: DbSession,
-    page: int = Query(default=1, ge=1),
-    limit: int = Query(default=20, ge=1, le=100),
+    service: NotifService,
+    paging: Paging,
     unread_only: bool = False,
 ) -> JSONResponse:
-    """Get user notifications with pagination."""
-    service = _service(db)
+    """Get user notifications with pagination. [P1-3] [P1-4]"""
     items, total, unread_count = await service.list_notifications(
         user_uuid=current_user.uuid,
-        page=page,
-        limit=limit,
+        page=paging.page,
+        page_size=paging.page_size,
         unread_only=unread_only,
     )
     response = NotificationListResponse(
         notifications=items,
         total=total,
         unreadCount=unread_count,
-        page=page,
-        limit=limit,
+        page=paging.page,
+        page_size=paging.page_size,
     )
     return success_response(data=response.model_dump(mode="json"))
 
@@ -53,9 +50,10 @@ async def get_notifications(
 async def get_unread_count(
     current_user: CurrentUser,
     db: DbSession,
+    service: NotifService,
 ) -> JSONResponse:
-    """Get unread notifications count."""
-    count = await _service(db).get_unread_count(current_user.uuid)
+    """Get unread notifications count. [P1-3]"""
+    count = await service.get_unread_count(current_user.uuid)
     return success_response(data={"count": count})
 
 
@@ -64,9 +62,10 @@ async def mark_as_read(
     notification_id: UUID,
     current_user: CurrentUser,
     db: DbSession,
+    service: NotifService,
 ) -> JSONResponse:
-    """Mark notification as read."""
-    await _service(db).mark_as_read(notification_id, current_user.uuid)
+    """Mark notification as read. [P1-3]"""
+    await service.mark_as_read(notification_id, current_user.uuid)
     return success_response(data={"message": "Marked as read"})
 
 
@@ -74,9 +73,10 @@ async def mark_as_read(
 async def mark_all_read(
     current_user: CurrentUser,
     db: DbSession,
+    service: NotifService,
 ) -> JSONResponse:
-    """Mark all notifications as read."""
-    await _service(db).mark_all_read(current_user.uuid)
+    """Mark all notifications as read. [P1-3]"""
+    await service.mark_all_read(current_user.uuid)
     return success_response(data={"message": "All marked as read"})
 
 
@@ -85,9 +85,10 @@ async def delete_notification(
     notification_id: UUID,
     current_user: CurrentUser,
     db: DbSession,
+    service: NotifService,
 ) -> JSONResponse:
-    """Delete a notification."""
-    await _service(db).delete(notification_id, current_user.uuid)
+    """Delete a notification. [P1-3]"""
+    await service.delete(notification_id, current_user.uuid)
     return success_response(data={"message": "Notification deleted"})
 
 

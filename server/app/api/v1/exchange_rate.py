@@ -13,7 +13,6 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from app.core.aliases import CurrentUser
-from app.core.config import settings
 from app.core.limiter import limiter
 from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, error_response, get_error_code_int, success_response
@@ -110,7 +109,7 @@ async def get_single_rate(
 
     return success_response(
         data={
-            # S-G: report the ACTUAL base of the cached payload, not a
+            # Report the ACTUAL base of the cached payload, not a
             # hardcoded "USD" (the API URL may be configured with any base).
             "base": base_code or "USD",
             "target": currency,

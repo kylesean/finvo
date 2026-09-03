@@ -10,7 +10,17 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4 as uuid4_factory
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, text
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Text,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
@@ -82,6 +92,11 @@ class Transaction(Base):
             "idempotency_key",
             name="uq_transactions_user_idempotency",
         ),
+        # Keep free-text status/type typos out of the ledger at the DB layer.
+        # `source` stays unconstrained — it is an intentionally open set
+        # (MANUAL, AI, IMPORT, ...).
+        CheckConstraint("type IN ('EXPENSE', 'INCOME', 'TRANSFER')", name="chk_transactions_type"),
+        CheckConstraint("status IN ('CLEARED', 'PENDING', 'CONFIRMED')", name="chk_transactions_status"),
         Index("ix_transactions_category", "category_key"),
         Index("ix_transactions_status", "status"),
         Index("ix_transactions_transaction_at", "transaction_at"),

@@ -15,6 +15,9 @@ domain range.
 
 from __future__ import annotations
 
+import re
+from pathlib import Path
+
 from app.core import exceptions
 from app.core.exceptions import ERROR_CODE_MAP
 
@@ -95,3 +98,33 @@ class TestErrorCodeConsistency:
                 f"Error code '{member_name}'={int_value} falls outside all documented "
                 "domain ranges; update the range table or remap the code."
             )
+
+    def test_frontend_int_codes_are_backend_subset(self) -> None:
+        """Every int in Flutter `error_codes.dart` must exist in the backend map.
+
+        Dart and Python cannot share a source file, so this file-system
+        contract test is the drift guard: a frontend int with no backend
+        producer means a renamed/remapped code that the client still switches
+        on (silent mis-translation). Backend MAY own more codes than the
+        frontend (new codes roll out backend-first).
+        """
+        dart_path = (
+            Path(__file__).resolve().parents[4]
+            / "client"
+            / "lib"
+            / "core"
+            / "constants"
+            / "error_codes.dart"
+        )
+        assert dart_path.is_file(), f"frontend contract file missing: {dart_path}"
+        dart_ints = {
+            int(m.group(1))
+            for m in re.finditer(r"static const int \w+ = (\d+);", dart_path.read_text())
+        }
+        assert dart_ints, f"no error codes parsed from {dart_path}"
+        backend_ints = set(ERROR_CODE_MAP.values())
+        unknown = sorted(dart_ints - backend_ints)
+        assert not unknown, (
+            f"frontend error ints with no backend producer: {unknown}. "
+            "Add the enum member in app/core/exceptions.py or remove the stale Dart const."
+        )

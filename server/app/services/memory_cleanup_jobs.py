@@ -32,7 +32,7 @@ async def cleanup_all_user_memories() -> None:
         memory_service = await get_memory_service()
 
         # Keyset pagination: fetch users in bounded batches instead of
-        # materializing the whole users table at once (D3).
+        # materializing the whole users table at once.
         _BATCH = 1000
         last_uuid = None
         while True:

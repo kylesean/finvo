@@ -14,6 +14,7 @@ from sqlalchemy import String, Text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.constants.space_constants import SpaceStatus
 from app.models.base import Base, col, utc_now
 
 if TYPE_CHECKING:
@@ -25,17 +26,19 @@ class SharedSpace(Base):
     """Shared space model for collaborative financial tracking."""
 
     __tablename__ = "shared_spaces"
+    __table_args__ = (sa.CheckConstraint("status IN ('active', 'archived')", name="ck_shared_spaces_status"),)
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     name: Mapped[str] = mapped_column(String(50))
     creator_uuid: Mapped[UUID] = col.uuid_fk("users", ondelete="CASCADE", column="id", index=True)
-    status: Mapped[str] = mapped_column(String(50), default="ACTIVE", server_default=sa.text("'ACTIVE'"))
+    status: Mapped[str] = mapped_column(
+        String(50), default=SpaceStatus.ACTIVE.value, server_default=sa.text("'active'")
+    )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    # Settlement base currency (ISO 4217). All settlement math converts each
-    # member transaction (amount_original + currency) into this currency before
-    # splitting — without it, members on different bases (CNY payer + USD
-    # member) produce meaningless mixed-currency balances (BF-P1-6).
-    # Nullable for pre-migration rows; resolved with fallback to the creator's
+    # Settlement base currency (ISO 4217). Settlement converts each member
+    # transaction into it before splitting; without it, members on different
+    # bases produce meaningless mixed-currency balances.
+    # Nullable for pre-migration rows; falls back to the creator's
     # primary_currency, then PROJECT_DEFAULT_CURRENCY.
     base_currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
     invite_code: Mapped[str | None] = mapped_column(String(20), nullable=True)

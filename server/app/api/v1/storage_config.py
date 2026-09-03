@@ -9,19 +9,22 @@ Provides REST API for managing user storage configurations:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.aliases import CurrentUser, DbSession
 from app.core.exceptions import BusinessError, StorageErrorCode
 from app.core.responses import ResponseEnvelope, success_response
+from app.core.service_deps import get_storage_config_service
 from app.models.storage_config import ProviderType
 from app.services.storage_config_service import StorageConfigService
 
 router = APIRouter(prefix="/storage-configs", tags=["storage-configs"])
+
+StorageService = Annotated[StorageConfigService, Depends(get_storage_config_service)]
 
 
 # --- Pydantic Schemas ---
@@ -85,22 +88,9 @@ async def create_storage_config(
     data: StorageConfigCreate,
     current_user: CurrentUser,
     db: DbSession,
+    service: StorageService,
 ) -> JSONResponse:
-    """Create a new storage configuration.
-
-    Creates a storage config for the authenticated user.
-    Credentials are encrypted before storage.
-
-    Args:
-        data: Storage config details
-        current_user: Authenticated user
-        db: Database session
-
-    Returns:
-        Created storage config (credentials masked)
-    """
-    service = StorageConfigService(db)
-
+    """Create a storage config (credentials encrypted). [P1-3]"""
     try:
         config = await service.create(
             user_uuid=current_user.uuid,
@@ -123,19 +113,10 @@ async def create_storage_config(
 async def list_storage_configs(
     current_user: CurrentUser,
     db: DbSession,
+    service: StorageService,
     provider_type: str | None = None,
 ) -> JSONResponse:
-    """List all storage configurations for the user.
-
-    Args:
-        provider_type: Optional filter by provider type
-        current_user: Authenticated user
-        db: Database session
-
-    Returns:
-        List of storage configs (credentials masked)
-    """
-    service = StorageConfigService(db)
+    """List storage configs (credentials masked). [P1-3]"""
     configs = await service.get_user_configs(user_uuid=current_user.uuid, provider_type=provider_type)
 
     return success_response(data=[_config_to_dict(c, service) for c in configs])
@@ -146,18 +127,9 @@ async def get_storage_config(
     config_id: int,
     current_user: CurrentUser,
     db: DbSession,
+    service: StorageService,
 ) -> JSONResponse:
-    """Get a specific storage configuration.
-
-    Args:
-        config_id: Storage config ID
-        current_user: Authenticated user
-        db: Database session
-
-    Returns:
-        Storage config (credentials masked)
-    """
-    service = StorageConfigService(db)
+    """Get a storage config (credentials masked). [P1-3]"""
     config = await service.get_by_id(config_id, current_user.uuid)
 
     if not config:
@@ -176,19 +148,9 @@ async def update_storage_config(
     data: StorageConfigUpdate,
     current_user: CurrentUser,
     db: DbSession,
+    service: StorageService,
 ) -> JSONResponse:
-    """Update a storage configuration.
-
-    Args:
-        config_id: Storage config ID
-        data: Fields to update
-        current_user: Authenticated user
-        db: Database session
-
-    Returns:
-        Updated storage config (credentials masked)
-    """
-    service = StorageConfigService(db)
+    """Update a storage config. [P1-3]"""
     config = await service.update(
         config_id=config_id,
         user_uuid=current_user.uuid,
@@ -216,21 +178,9 @@ async def delete_storage_config(
     config_id: int,
     current_user: CurrentUser,
     db: DbSession,
+    service: StorageService,
 ) -> JSONResponse:
-    """Delete a storage configuration.
-
-    Note: Cannot delete if attachments still reference this config.
-
-    Args:
-        config_id: Storage config ID
-        current_user: Authenticated user
-        db: Database session
-
-    Returns:
-        Success message
-    """
-    service = StorageConfigService(db)
-
+    """Delete a storage config (refused while attachments reference it). [P1-3]"""
     # In-use (FK) violations are translated into a BusinessError inside the service.
     deleted = await service.delete(config_id, current_user.uuid)
 

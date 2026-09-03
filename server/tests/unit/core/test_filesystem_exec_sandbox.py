@@ -7,7 +7,6 @@ the server's full environment), execution cwd is the skill's own directory
 
 import logging
 import os
-import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,7 +16,7 @@ from app.core.langgraph.tools.filesystem_backend import (
     SimpleFilesystemBackend,
     _redact_sensitive_output,
 )
-from app.core.skills.loader import SkillLoader, _logged_skills_signature
+from app.core.skills.loader import SkillLoader
 
 _VALID_CMD = "uv run python app/skills/reviewing-finances/scripts/report.py --month 2026-08"
 _SKILL_NAME = "reviewing-finances"

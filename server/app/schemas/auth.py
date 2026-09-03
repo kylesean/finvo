@@ -38,6 +38,17 @@ def _validate_mobile(mobile: str) -> bool:
     return bool(re.match(r"^1[3-9]\d{9}$", mobile))
 
 
+_WEAK_PASSWORDS = frozenset(
+    {
+        "password", "password1", "password12", "password123", "password1234",
+        "12345678", "123456789", "1234567890", "qwerty123", "1q2w3e4r",
+        "1qaz2wsx", "abc12345", "abcd1234", "letmein1", "welcome1",
+        "admin123", "root1234", "test1234", "demo1234", "changeme1",
+        "finvo123", "money123", "caifu123",
+    }
+)
+
+
 class SendCodeRequest(BaseModel):
     """Request model for sending verification code.
 
@@ -70,15 +81,7 @@ class SendCodeRequest(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    """Request model for user registration.
-
-    Attributes:
-        type: Account type ('email' or 'mobile')
-        account: Email address or mobile number
-        password: User's password (6-20 characters, must contain letters and digits)
-        code: 6-digit verification code
-        timezone: User's timezone (default: Asia/Shanghai)
-    """
+    """Request model for user registration."""
 
     model_config = ConfigDict(
         validate_default=True,
@@ -99,9 +102,9 @@ class RegisterRequest(BaseModel):
     account: str = Field(..., description="Email address or mobile number", examples=["user@example.com"])
     password: str = Field(
         ...,
-        min_length=6,
-        max_length=20,
-        description="User's password (6-20 chars, letters + digits)",
+        min_length=8,
+        max_length=64,
+        description="User's password (8-64 chars, letters + digits, not a common password)",
         examples=["password123"],
     )
     code: str = Field(default="", description="Verification code (Optional in current dev mode)", examples=["123456"])
@@ -123,11 +126,16 @@ class RegisterRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, v: str) -> str:
-        """Validate password composition (letters + digits), matching the client rule."""
+        """Letters + digits, not a common/pattern password."""
         if not re.search(r"[a-zA-Z]", v):
             raise ValueError("Password must contain at least one letter")
         if not re.search(r"[0-9]", v):
             raise ValueError("Password must contain at least one number")
+        lowered = v.lower()
+        if lowered in _WEAK_PASSWORDS or lowered in {p + "123" for p in ("password", "qwerty")}:
+            raise ValueError("Password is too common")
+        if len(set(lowered)) == 1 or lowered in ("abcdefgh", "12345678", "87654321"):
+            raise ValueError("Password is too common")
         return v
 
     @model_validator(mode="after")

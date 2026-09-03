@@ -1,9 +1,9 @@
-"""BF-P1-6 (space settlement base currency) + BF-P1-8 (monthly scope) regressions.
+"""Space settlement base currency + monthly scope regressions.
 
-P1-6: members on different bases mixed snapshot values directly. Settlement now
-converts each transaction (amount_original + currency) into the space's
+Members on different bases used to mix snapshot values directly. Settlement
+now converts each transaction (amount_original + currency) into the space's
 base_currency before splitting; missing rates raise instead of mixing.
-P1-8: space monthly summary counted PENDING/SYSTEM rows on a UTC boundary;
+Space monthly summary counted PENDING/SYSTEM rows on a UTC boundary;
 it now shares the CLEARED + non-SYSTEM scope with the budget engine and uses
 the user's timezone month start.
 """

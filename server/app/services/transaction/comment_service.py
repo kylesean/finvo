@@ -7,7 +7,7 @@ from typing import Any
 from uuid import UUID
 
 import structlog
-from sqlalchemy import Select, and_, select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import BusinessError, CommonErrorCode, NotFoundError, TransactionErrorCode

@@ -106,7 +106,7 @@ class TopTransactionsResponse(BaseModel):
     sortBy: str = Field(..., description="Sort method: amount or date")
     total: int = Field(..., description="Total count of transactions matching filters")
     page: int = Field(default=1, description="Current page number")
-    pageSize: int = Field(default=10, description="Items per page")
+    page_size: int = Field(default=10, description="Items per page")
     hasMore: bool = Field(default=False, description="Whether there are more items to load")
 
 

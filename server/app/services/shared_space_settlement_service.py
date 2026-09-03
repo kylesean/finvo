@@ -69,8 +69,8 @@ class SharedSpaceSettlementService:
         await verify_membership(self.db, space_id, user_uuid)
 
         # Resolve the settlement base currency first: every member transaction
-        # is converted into it before splitting (BF-P1-6). Without this, a CNY
-        # payer + USD member space adds snapshot values from different bases.
+        # is converted into it before splitting. Without this, a CNY payer +
+        # USD member space adds snapshot values from different bases.
         space_row = await self.db.execute(select(SharedSpace).where(SharedSpace.id == space_id))
         space = space_row.scalar_one_or_none()
         base_currency = await resolve_space_base_currency(self.db, space) if space else PROJECT_DEFAULT_CURRENCY
@@ -126,7 +126,7 @@ class SharedSpaceSettlementService:
             tx = st.transaction
             if not (tx and tx.type == "EXPENSE"):
                 continue
-            # Spending scope (BF-P1-8): only settled, non-lifecycle rows count.
+            # Spending scope: only settled, non-lifecycle rows count.
             # PENDING periodic rows and SYSTEM disposal entries must not move
             # settlement balances.
             if tx.status != "CLEARED" or tx.source == SYSTEM_TRANSACTION_SOURCE:
@@ -140,8 +140,8 @@ class SharedSpaceSettlementService:
 
             # Convert the ORIGINAL amount into the space base before splitting.
             # tx.amount is denominated in the payer's own base currency, so
-            # summing it directly mixes bases (BF-P1-6). amount_original +
-            # currency is the canonical original spend.
+            # summing it directly mixes bases. amount_original + currency is
+            # the canonical original spend.
             original = Decimal(str(tx.amount_original if tx.amount_original is not None else tx.amount))
             tx_currency = (tx.currency or base_currency).upper()
             if tx_currency == base_currency:

@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 
 from app.core.aliases import CurrentUser
+from app.core.pagination import Paging
 from app.core.responses import ResponseEnvelope
 from app.core.service_deps import get_statistics_service
 from app.schemas.statistics import (
@@ -96,15 +97,14 @@ async def get_category_breakdown(
 async def get_top_transactions(
     params: StatsParams,
     current_user: CurrentUser,
+    paging: Paging,
     service: StatsService,
     transaction_type: str = Query(
         default="expense", pattern="^(expense|income)$", description="Transaction type: expense or income"
     ),
     sort_by: str = Query(default="amount", pattern="^(amount|date)$", description="Sort by: amount or date"),
-    page: int = Query(default=1, ge=1),
-    size: int = Query(default=10, ge=1, le=50),
 ) -> ResponseEnvelope[TopTransactionsResponse]:
-    """Get top transactions for the period."""
+    """List top transactions. [P1-4]"""
     result = await service.get_top_transactions(
         user_uuid=current_user.uuid,
         time_range=params.time_range,
@@ -114,8 +114,8 @@ async def get_top_transactions(
         tz_offset_minutes=params.tz_offset,
         transaction_type=transaction_type,
         sort_by=sort_by,
-        page=page,
-        size=size,
+        page=paging.page,
+        page_size=paging.page_size,
     )
 
     return ResponseEnvelope(code=0, message="Top transactions retrieved successfully", data=result)

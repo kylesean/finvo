@@ -27,13 +27,7 @@ def create_access_token(
     expires_delta: timedelta | None = None,
     data: dict[str, Any] | None = None,
 ) -> Token:
-    """Create a new access token.
-
-    Args:
-        subject: The subject (user UUID). Can be str or UUID.
-        expires_delta: Optional expiration time delta.
-        data: Optional additional data to include in the token.
-    """
+    """Create a new access token."""
     to_encode = data.copy() if data else {}
 
     if subject:
@@ -52,11 +46,7 @@ def create_access_token(
         {
             "exp": expire,
             "iat": datetime.now(UTC),
-            # Unique random token identifier — enables future revocation by jti
             "jti": secrets.token_urlsafe(16),
-            # Type claim so the API auth path can reject refresh tokens: without
-            # it, a leaked 30-day refresh token works directly as a bearer
-            # credential and the access/refresh isolation is one-directional.
             "type": "access",
         }
     )
@@ -110,22 +100,11 @@ def is_refresh_token(token: str) -> bool:
 
 
 def verify_token(token: str) -> str | None:
-    """Verify a JWT token and return the subject (user UUID).
-
-    Args:
-        token: The JWT token to verify.
-
-    Returns:
-        str | None: The subject ID if token is valid, None otherwise.
-
-    Raises:
-        ValueError: If the token format is invalid
-    """
+    """Verify an access token, return subject UUID. Rejects refresh tokens."""
     if not token or not isinstance(token, str):
         logger.warning("token_invalid_format")
         raise ValueError("Token must be a non-empty string")
 
-    # Basic format validation before attempting decode
     if not re.match(r"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$", token):
         logger.warning("token_suspicious_format")
         raise ValueError("Token format is invalid - expected JWT format")
@@ -133,11 +112,8 @@ def verify_token(token: str) -> str | None:
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
 
-        # Refresh tokens must never authenticate API calls. Tokens issued
-        # before the ``type`` claim existed carry no ``type`` and stay valid
-        # for one access-TTL cycle (legacy grace), so no forced global logout.
-        if str(payload.get("type")) == "refresh":
-            logger.warning("token_refresh_type_rejected_for_api_access")
+        if payload.get("type") != "access":
+            logger.warning("token_not_access_type_rejected")
             return None
 
         subject_id: str | None = payload.get("sub")
@@ -185,44 +161,11 @@ def get_token_remaining_seconds(token: str) -> int | None:
     return max(remaining, 0)
 
 
-def refresh_token(old_token: str) -> Token | None:
-    """Refresh an existing JWT token.
-
-    Args:
-        old_token: The existing JWT token to refresh.
-
-    Returns:
-        Token | None: A new token if the old token is valid, None otherwise.
-
-    Raises:
-        ValueError: If the token format is invalid
-    """
-    # Verify the old token first
-    user_uuid = verify_token(old_token)
-    if user_uuid is None:
-        logger.warning("token_refresh_failed_invalid_token")
-        return None
-
-    # Create a new token with the same user UUID as subject
-    new_token = create_access_token(user_uuid)
-
-    logger.info("token_refreshed", user_uuid=user_uuid, expires_at=new_token.expires_at.isoformat())
-
-    return new_token
+# NOTE: no unsafe decode helper — use verify_token; debug via jose directly in a REPL.
 
 
 def verify_refresh_token(token: str) -> str | None:
-    """Verify a refresh token and return its subject (user UUID).
-
-    Stricter than plain signature verification: the ``exp`` claim is
-    ENFORCED (an expired refresh token is rejected), the token must be of
-    ``type: refresh`` (access tokens are rejected), and the signature must
-    validate. The caller is responsible for checking revocation (jti
-    blacklist) before issuing a new token.
-
-    Raises:
-        ValueError: If the token format is invalid
-    """
+    """Verify a refresh token, return subject UUID. Rejects access tokens."""
     if not token or not isinstance(token, str):
         logger.warning("token_invalid_format")
         raise ValueError("Token must be a non-empty string")
@@ -249,8 +192,3 @@ def verify_refresh_token(token: str) -> str | None:
     except JWTError as e:
         logger.error("token_refresh_verification_failed", error=str(e))
         return None
-
-
-# NOTE: The unsafe `decode_token_payload` (signature verification bypass) was
-# removed — it had zero call sites and invited misuse. Use `verify_token` for
-# all authentication paths; for debugging, decode with jose directly in a REPL.

@@ -1,4 +1,4 @@
-"""P2-9 regression: single conversion core + outage-proof rollback.
+"""Ledger regression: single conversion core + outage-proof rollback.
 
 - Live ledger, lifecycle recompute and the reconcile script share one
   conversion rule (no more three-way drift).
@@ -21,8 +21,9 @@ from app.models.financial_settings import FinancialSettings
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.services.account_balance import (
+    compute_expected_balance,
+    convert_snapshot_to_currency,
     ledger_effect_for_account,
-    tx_effect_amount,
 )
 from app.services.exchange_rate_service import exchange_rate_service
 from app.services.transaction.crud_service import TransactionCRUDService
@@ -151,8 +152,20 @@ class TestCanonicalCore:
         account = await _seed_account(db_session, user, "USD", "0")
         tx = _tx(user, account, original="100", currency="USD", base="720")
         with patch.object(exchange_rate_service, "convert", AsyncMock(side_effect=_boom)):
-            assert await tx_effect_amount(tx, "USD", "CNY") == Decimal("100")
-            assert await tx_effect_amount(tx, "CNY", "CNY") == Decimal("720")
+            assert await convert_snapshot_to_currency(
+                amount_original=tx.amount_original,
+                amount_base=tx.amount,
+                tx_currency=tx.currency,
+                target_currency="USD",
+                user_base_currency="CNY",
+            ) == Decimal("100")
+            assert await convert_snapshot_to_currency(
+                amount_original=tx.amount_original,
+                amount_base=tx.amount,
+                tx_currency=tx.currency,
+                target_currency="CNY",
+                user_base_currency="CNY",
+            ) == Decimal("720")
             assert await ledger_effect_for_account(tx, account, "CNY") == Decimal("-100")
 
     @pytest.mark.asyncio
@@ -183,19 +196,40 @@ class TestCanonicalCore:
                 await _forbidden(tx)
 
     @pytest.mark.asyncio
-    async def test_reconcile_aliases_match_canonical(self, db_session: AsyncSession) -> None:
-        """The script's thin aliases must equal the canonical helpers."""
-        from scripts.reconcile_balances import effect_amount as script_effect, ledger_effect as script_ledger
+    async def test_ledger_lifecycle_and_reconcile_agree(self, db_session: AsyncSession) -> None:
+        """Live apply, lifecycle recompute and the reconcile math agree on one tx."""
+        from scripts.reconcile_balances import FALLBACK_BASE_CURRENCY
 
+        assert FALLBACK_BASE_CURRENCY  # script resolves per-user base with this fallback
         user = await _seed_user(db_session, "CNY")
-        account = await _seed_account(db_session, user, "USD", "0")
+        account = await _seed_account(db_session, user, "USD", "1000.00")
+        crud = TransactionCRUDService(db_session)
         tx = _tx(user, account, original="100", currency="USD", base="720")
+        db_session.add(tx)
+        await db_session.commit()
+
         with patch.object(exchange_rate_service, "convert", AsyncMock(side_effect=_boom)):
-            assert await script_effect(tx, "USD", "CNY") == await tx_effect_amount(tx, "USD", "CNY")
-            assert await script_ledger(tx, account, "CNY") == await ledger_effect_for_account(tx, account, "CNY")
+            await crud.ledger.apply_transaction_balance_effect(
+                tx, user.uuid, sign=1, source_account_id=account.uuid, target_account_id=None, for_update=True
+            )
+            await db_session.flush()
+            await db_session.refresh(account)
+            assert Decimal(account.current_balance) == Decimal("900.00")
+
+            expected, known = await compute_expected_balance(db_session, account)
+            assert known is True
+            assert expected == Decimal(account.current_balance)
+            assert await ledger_effect_for_account(tx, account, "CNY") == Decimal("-100")
 
 
 async def _forbidden(tx: Transaction) -> Decimal:
-    from app.services.account_balance import _convert_snapshot_amount
+    from app.services.account_balance import convert_snapshot_to_currency
 
-    return await _convert_snapshot_amount(tx, "EUR", "CNY", allow_live_rate=False)
+    return await convert_snapshot_to_currency(
+        amount_original=tx.amount_original,
+        amount_base=tx.amount,
+        tx_currency=tx.currency,
+        target_currency="EUR",
+        user_base_currency="CNY",
+        allow_live_rate=False,
+    )

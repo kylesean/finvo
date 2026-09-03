@@ -6,7 +6,6 @@ sensitive credentials (S3 access keys, WebDAV passwords, etc.) in the database.
 
 from __future__ import annotations
 
-import base64
 import json
 import os
 from typing import Any, cast

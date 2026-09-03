@@ -318,7 +318,7 @@ async def test_account_relink_rejects_closed_account(db_session):
 
 
 # ---------------------------------------------------------------------------
-# Regression: INCOME account re-association direction (BF-P0-1)
+# INCOME account re-association direction
 #
 # _rollback_old_account_balance / _apply_new_account_balance book on the
 # source side for EXPENSE/TRANSFER but on the TARGET side for INCOME
@@ -480,7 +480,7 @@ async def test_expense_relink_still_debits_new_and_credits_old(db_session):
 
 
 # ---------------------------------------------------------------------------
-# Regression: batch creation drops target_account_id / transaction_at (BF-P1-3)
+# Batch creation must honor target_account_id / transaction_at
 # ---------------------------------------------------------------------------
 
 

@@ -1,11 +1,4 @@
-"""Authentication service for user registration, login, and verification code management.
-
-This module provides the core authentication business logic including:
-- User registration with verification code validation
-- User login with password verification and JWT generation
-- Verification code sending and validation
-- Account existence checking
-"""
+"""Authentication service: registration, login, verification codes."""
 
 from __future__ import annotations
 
@@ -19,12 +12,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from uuid_utils import uuid7
 
+from app.core.cache import cache_manager
 from app.core.config import settings
-from app.core.exceptions import AuthenticationError, AuthErrorCode, BusinessError
+from app.core.exceptions import AuthenticationError, AuthErrorCode, BusinessError, CommonErrorCode
 from app.core.logging import logger
 from app.models.base import utc_now
 from app.models.user import User
 from app.utils.auth_utils import create_access_token
+
+_LOGIN_FAILURES_PREFIX = "login_failures:"
+_MAX_LOGIN_FAILURES = 5
+_LOGIN_LOCK_SECONDS = 15 * 60
 
 
 class AuthService:
@@ -46,34 +44,15 @@ class AuthService:
         self.db = db_session
 
     async def send_verification_code(self, account_type: str, account: str) -> bool:
-        """Send verification code to the specified account.
-
-        1. If the account already exists, return success WITHOUT sending
-           anything or revealing the fact (anti-enumeration, SEC-P2-6).
-        2. Otherwise send the verification code asynchronously via a
-           background task.
-
-        Args:
-            account_type: Type of account ('email' or 'mobile')
-            account: Email address or mobile number
-
-        Returns:
-            bool: Always True — callers must not distinguish "sent" from
-            "already registered" or the endpoint becomes an account oracle.
-        """
+        """Send a code. Existing accounts get the same success response (no oracle)."""
         from app.core.background_tasks import background_task_manager
         from app.services.code_manager import code_manager
 
         if await self.is_account_exists(account_type, account):
-            # Anti-enumeration: same success response as a real send. No code
-            # is dispatched, so a registered address receives nothing — but an
-            # attacker probing the endpoint cannot tell the difference.
-            # (register's EMAIL_REGISTERED signal is intentionally kept: the
-            # user learns the outcome of their own registration either way.)
             logger.info(
                 "verification_code_skipped_existing_account",
                 account_type=account_type,
-                account=account[:3] + "***",  # Mask account for privacy
+                account=account[:3] + "***",
             )
             return True
 
@@ -128,18 +107,13 @@ class AuthService:
         Raises:
             ValueError: If verification code is invalid or account already exists
         """
-        # Kill switch first: a closed deployment must reject sign-ups before
-        # any DB/verification work (REGISTRATION_OPEN=false in .env).
+        # Kill switch first: reject sign-ups before any DB/verification work.
         if not settings.REGISTRATION_OPEN:
             raise BusinessError(
                 message="Registration is closed on this server",
                 error_code=AuthErrorCode.REGISTRATION_CLOSED,
             )
 
-        # Normalize the account once, up front: emails are case-insensitive, so
-        # strip + lowercase before the existence check and before storage. The
-        # old Pydantic model validators are gone (models are plain SQLAlchemy),
-        # so this normalization is now the single source of truth.
         if account_type == "email":
             account = account.strip().lower()
         else:
@@ -157,8 +131,6 @@ class AuthService:
         # Verify the code (skip when provider is mock — no real code is sent)
         provider = settings.EMAIL_PROVIDER if account_type == "email" else settings.SMS_PROVIDER
         if provider == "mock":
-            # Mock mode bypasses real code verification; log it for auditability so
-            # a misconfigured env doesn't silently allow unverified registrations.
             logger.warning("registration_code_verification_skipped_mock_provider", account_type=account_type)
         elif not await self.verify_code(account, code):
             raise BusinessError("Verification code is invalid or expired", error_code=AuthErrorCode.CODE_EXPIRED)
@@ -193,18 +165,14 @@ class AuthService:
             user_data["mobile"] = account
 
         # Create user.
-        # Flush (not commit) so the INSERT is sent within the current transaction
-        # and `user.uuid` is populated, but nothing is persisted yet. The financial
-        # settings creation below runs in the SAME transaction; if it raises, both
-        # inserts roll back together — no half-registered user. The single commit
-        # point is after settings creation.
+        # Flush (not commit) so settings creation below joins the same
+        # transaction; a failure rolls both back. Single commit point after.
         user = User(**user_data)
         self.db.add(user)
         try:
             await self.db.flush()
         except IntegrityError:
-            # Race: another request created the same email/mobile between the
-            # is_account_exists check above and this INSERT (unique constraint).
+            # Race: same email/mobile created between the check and this INSERT.
             await self.db.rollback()
             if account_type == "email":
                 raise BusinessError(message="Email already registered", error_code=AuthErrorCode.EMAIL_REGISTERED)
@@ -261,22 +229,13 @@ class AuthService:
     async def login(
         self, account_type: str, account: str, password: str, timezone: str, client_ip: str | None = None
     ) -> tuple[User, str]:
-        """Authenticate user and generate JWT token.
+        """Authenticate and return (user, access token)."""
+        if await self._login_locked(account_type, account):
+            raise AuthenticationError(
+                message="Too many failed attempts, try again later",
+                error_code=CommonErrorCode.RATE_LIMITED,
+            )
 
-        Args:
-            account_type: Type of account ('email' or 'mobile')
-            account: Email address or mobile number
-            password: Plain text password
-            timezone: User's timezone
-            client_ip: Client IP address
-
-        Returns:
-            Tuple[User, str]: User object and JWT token
-
-        Raises:
-            ValueError: If credentials are invalid
-        """
-        # Find user by account
         query = select(User)
         if account_type == "email":
             query = query.where(User.email == account)
@@ -286,16 +245,14 @@ class AuthService:
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
 
-        # Verify password.
-        # Security: use a single generic message + error code for both "user not found"
-        # and "wrong password" branches to prevent account enumeration via distinguishable
-        # error responses. The original USER_NOT_EXIST / USER_NOT_MATCH_PASSWORD codes are
-        # intentionally collapsed into AUTHENTICATE_FAILED here.
+        # Single generic error for unknown account and wrong password alike.
         if not user or not user.verify_password(password):
+            await self._record_login_failure(account_type, account, user_exists=user is not None)
             raise AuthenticationError(
                 message="Invalid credentials",
                 error_code=AuthErrorCode.AUTHENTICATE_FAILED,
             )
+        await self._clear_login_failures(account_type, account)
 
         # Update user login information
         if user.timezone != timezone:
@@ -319,15 +276,7 @@ class AuthService:
         return user, token
 
     async def is_account_exists(self, account_type: str, account: str) -> bool:
-        """Check if an account already exists.
-
-        Args:
-            account_type: Type of account ('email' or 'mobile')
-            account: Email address or mobile number
-
-        Returns:
-            bool: True if account exists, False otherwise
-        """
+        """Check if an account already exists."""
         query = select(User)
         if account_type == "email":
             query = query.where(User.email == account)
@@ -338,6 +287,43 @@ class AuthService:
         user = result.scalar_one_or_none()
 
         return user is not None
+
+    @staticmethod
+    def _login_failures_key(account_type: str, account: str) -> str:
+        return f"{_LOGIN_FAILURES_PREFIX}{account_type}:{account.strip().lower()}"
+
+    async def _login_locked(self, account_type: str, account: str) -> bool:
+        try:
+            raw = await cache_manager.get(self._login_failures_key(account_type, account), deserialize=False)
+            if raw is None:
+                return False
+            return int(raw) >= _MAX_LOGIN_FAILURES
+        except Exception as e:
+            logger.warning("login_lock_check_failed", error=str(e))
+            return False
+
+    async def _record_login_failure(self, account_type: str, account: str, *, user_exists: bool) -> None:
+        # Unknown accounts are not counted: counting them would let anyone lock
+        # arbitrary identifiers and turn the lockout into a DoS oracle.
+        if not user_exists:
+            return
+        try:
+            key = self._login_failures_key(account_type, account)
+            count = await cache_manager.increment(key)
+            if count is None:
+                return
+            if count == 1:
+                await cache_manager.expire(key, _LOGIN_LOCK_SECONDS)
+            if count >= _MAX_LOGIN_FAILURES:
+                logger.warning("account_locked_after_failures", account_type=account_type)
+        except Exception as e:
+            logger.warning("login_failure_track_failed", error=str(e))
+
+    async def _clear_login_failures(self, account_type: str, account: str) -> None:
+        try:
+            await cache_manager.delete(self._login_failures_key(account_type, account))
+        except Exception as e:
+            logger.warning("login_failure_clear_failed", error=str(e))
 
     # Private helper methods
 

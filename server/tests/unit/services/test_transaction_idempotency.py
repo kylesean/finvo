@@ -1,4 +1,4 @@
-"""Idempotent money-moving submissions (BF-P0-2 leftover #3, promoted).
+"""Idempotent money-moving submissions.
 
 A keyed submission (e.g. ``transfer:{surface_id}`` from the wizard) must book
 EXACTLY once: a double-tapped confirm or client retry replays the first
@@ -6,7 +6,6 @@ result instead of moving money twice. Unkeyed rows (AI bookkeeping) never
 dedupe — PostgreSQL unique semantics treat NULLs as distinct.
 """
 
-from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 

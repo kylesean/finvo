@@ -10,19 +10,16 @@ from uuid import UUID
 
 import structlog
 from sqlalchemy import and_, delete, desc, func, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.constants.space_constants import SpaceStatus
 from app.core.exceptions import (
-    AppException,
-    AuthorizationError,
     BusinessError,
     CommonErrorCode,
     ConflictError,
     NotFoundError,
     SpaceErrorCode,
-    TransactionErrorCode,
 )
 from app.models.shared_space import (
     SharedSpace,
@@ -83,7 +80,7 @@ class SharedSpaceService:
             name=name,
             description=description,
             creator_uuid=user_uuid,
-            status="active",
+            status=SpaceStatus.ACTIVE.value,
             base_currency=(base_currency or PROJECT_DEFAULT_CURRENCY).upper(),
         )
         self.db.add(space)
@@ -103,24 +100,15 @@ class SharedSpaceService:
         logger.info("shared_space_created", space_id=space.id, creator=str(user_uuid))
         return space
 
-    async def get_user_spaces(self, user_uuid: UUID, page: int = 1, limit: int = 20) -> dict[str, Any]:
-        """Get all spaces the user is a member of with pagination.
-
-        Args:
-            user_uuid: User's UUID
-            page: Page number
-            limit: Items per page
-
-        Returns:
-            Dictionary with 'items' (list of spaces) and 'total' count
-        """
-        offset = (page - 1) * limit
+    async def get_user_spaces(self, user_uuid: UUID, page: int = 1, page_size: int = 20) -> dict[str, Any]:
+        """List spaces the user joined. [P1-4]"""
+        offset = (page - 1) * page_size
 
         # Base query for filtering
         base_filter: Any = and_(
             SpaceMember.user_uuid == user_uuid,
             SpaceMember.status == "ACCEPTED",
-            SharedSpace.status == "active",
+            SharedSpace.status == SpaceStatus.ACTIVE.value,
         )
 
         # Count total
@@ -136,7 +124,7 @@ class SharedSpaceService:
             .options(selectinload(SharedSpace.creator))
             .order_by(desc(SharedSpace.created_at))
             .offset(offset)
-            .limit(limit)
+            .limit(page_size)
         )
 
         result = await self.db.execute(query)
@@ -168,7 +156,7 @@ class SharedSpaceService:
                 )
             )
 
-        return {"spaces": items, "total": total, "page": page, "limit": limit}
+        return {"spaces": items, "total": total, "page": page, "page_size": page_size}
 
     async def get_space_detail(self, space_id: UUID, user_uuid: UUID) -> dict[str, Any]:
         """Get detailed space info including members.
@@ -232,7 +220,7 @@ class SharedSpaceService:
         user_uuid: UUID,
         name: str | None = None,
         description: str | None = None,
-        status: str | None = None,
+        status: SpaceStatus | str | None = None,
         expected_version: int | None = None,
     ) -> dict[str, Any]:
         """Update space info (owner/admin only).
@@ -270,7 +258,7 @@ class SharedSpaceService:
         if description is not None:
             space.description = description
         if status is not None:
-            space.status = status
+            space.status = status.value if isinstance(status, SpaceStatus) else SpaceStatus(status).value
         space.version += 1
 
         await self.db.flush()
@@ -393,7 +381,7 @@ class SharedSpaceService:
 
         if (
             not space
-            or space.status != "active"
+            or space.status != SpaceStatus.ACTIVE.value
             or (space.invite_code_expires_at and space.invite_code_expires_at < datetime.now(UTC))
         ):
             # Fold "not found", "space inactive", and "expired" into a single
@@ -552,7 +540,7 @@ class SharedSpaceService:
         if member.role == "OWNER":
             raise BusinessError("cannot remove space owner", error_code=CommonErrorCode.PERMISSION_DENIED)
 
-        # C2: optional data-ownership purge. The removed member's expense
+        # Optional data-ownership purge. The removed member's expense
         # records in this space either stay (historical record; settlement
         # already excludes non-members) or are removed entirely so remaining
         # members no longer see their spending detail.
@@ -769,7 +757,7 @@ class SharedSpaceService:
         )
 
     def _check_version(self, space: SharedSpace, expected_version: int | None) -> None:
-        """Reject a stale write when the caller pinned a version (C3).
+        """Reject a stale write when the caller pinned a version.
 
         ``expected_version=None`` keeps the previous overwrite semantics for
         clients that do not participate in optimistic locking.
@@ -835,10 +823,10 @@ class SharedSpaceService:
         return await self.space_transactions.record_shared_transactions(user_uuid, space_id, data)
 
     async def get_space_transactions(
-        self, space_id: UUID, user_uuid: UUID, page: int = 1, limit: int = 20
+        self, space_id: UUID, user_uuid: UUID, page: int = 1, page_size: int = 20
     ) -> dict[str, Any]:
         """Get transactions in a space (see :class:`SharedSpaceTransactionService`)."""
-        return await self.space_transactions.get_space_transactions(space_id, user_uuid, page, limit)
+        return await self.space_transactions.get_space_transactions(space_id, user_uuid, page, page_size)
 
     # =========================================================================
     # Helper Methods
@@ -847,10 +835,10 @@ class SharedSpaceService:
     async def _get_space_financial_stats(self, space_id: UUID) -> dict[str, Any]:
         """Retrieve aggregated financial statistics data across spatial dimensions.
 
-        BF-P1-6: totals are converted into the space base currency (never mixed
-        across member bases). BF-P1-8: expense scope is CLEARED + non-SYSTEM.
-        Unconvertible rows are skipped with a warning (display path must not
-        fail the whole list); settlement remains strict and raises instead.
+        Totals are converted into the space base currency (never mixed across
+        member bases). Expense scope is CLEARED + non-SYSTEM. Unconvertible
+        rows are skipped with a warning (display path must not fail the whole
+        list); settlement remains strict and raises instead.
         """
         from app.models.transaction import SYSTEM_TRANSACTION_SOURCE
         from app.services.shared_space_settlement_service import resolve_space_base_currency
@@ -928,8 +916,8 @@ class SharedSpaceService:
     async def _batch_get_space_financial_stats(self, space_ids: list[UUID]) -> dict[UUID, dict[str, Any]]:
         """Retrieve aggregated financial statistics across multiple spaces in batch queries.
 
-        BF-P1-6: per-space totals are converted into that space's base currency.
-        BF-P1-8: expense scope is CLEARED + non-SYSTEM.
+        Per-space totals are converted into that space's base currency.
+        Expense scope is CLEARED + non-SYSTEM.
 
         Args:
             space_ids: List of space IDs

@@ -1,12 +1,11 @@
 """Shared-space transaction association tests.
 
-BF-P1-5 regression: a lost race in ``add_transaction_to_space`` used to call
-``db.rollback()`` — the FULL session rollback — so when the
-``(space_id, transaction_id)`` unique constraint fired mid-UoW, every other
-uncommitted change in the caller's Unit of Work was silently discarded (e.g.
-the transaction the user just created in the same chat turn vanished while the
-API reported success). The ``begin_nested`` savepoint confines the rollback to
-the failed insert alone.
+A lost race in ``add_transaction_to_space`` used to call ``db.rollback()`` —
+the FULL session rollback — so when the ``(space_id, transaction_id)`` unique
+constraint fired mid-UoW, every other uncommitted change in the caller's Unit
+of Work was silently discarded (e.g. the transaction the user just created in
+the same chat turn vanished while the API reported success). The
+``begin_nested`` savepoint confines the rollback to the failed insert alone.
 """
 
 import asyncio

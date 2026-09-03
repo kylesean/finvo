@@ -1,4 +1,4 @@
-"""Shared space ownership transfer + optimistic locking tests (C1, C3).
+"""Shared space ownership transfer + optimistic locking tests.
 
 Locks:
 - transfer_ownership: the owner can hand the space to an accepted member;
@@ -8,12 +8,12 @@ Locks:
 - Optimistic locking: name/role writes accept an expectedVersion and reject
   stale writes with ConflictError (409) instead of silently overwriting;
   omitting it keeps the previous overwrite semantics for old clients.
-- remove_member purge_transactions (C2): optionally deletes the removed
+- remove_member purge_transactions: optionally deletes the removed
   member's SpaceTransaction associations so remaining members lose sight of
   their spending detail.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 

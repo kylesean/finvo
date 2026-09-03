@@ -7,6 +7,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.constants.space_constants import SpaceStatus
+
 # ============================================================================
 # Request Schemas
 # ============================================================================
@@ -24,7 +26,7 @@ class UpdateSpaceRequest(BaseModel):
 
     name: str | None = Field(None, min_length=1, max_length=255, description="Space name")
     description: str | None = Field(None, max_length=255, description="Space description")
-    status: str | None = Field(None, pattern="^(active|archived)$", description="Space status")
+    status: SpaceStatus | None = Field(None, description="Space status")
     expectedVersion: int | None = Field(
         None, ge=0, description="Optimistic-lock check: reject if the space version differs"
     )

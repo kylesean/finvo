@@ -293,8 +293,8 @@ class StatisticsService:
 
         tx_type = transaction_type.upper()
 
-        # S-E: group by the CLIENT-LOCAL day/month, not raw UTC. The bucket
-        # labels below are generated from the local (tz-shifted) period range;
+        # Group by the CLIENT-LOCAL day/month, not raw UTC. The bucket labels
+        # below are generated from the local (tz-shifted) period range;
         # truncating the raw UTC timestamp would put a transaction booked at
         # local 00:30 into the previous day's bucket (and then into the wrong
         # label or none at all).
@@ -471,10 +471,10 @@ class StatisticsService:
         transaction_type: str = "expense",
         sort_by: str = "amount",
         page: int = 1,
-        size: int = 10,
+        page_size: int = 10,
         tz_offset_minutes: int | None = None,
     ) -> TopTransactionsResponse:
-        """Get top transactions for the period."""
+        """List top transactions. [P1-4]"""
         period_start, period_end = self._get_date_range(time_range, start_date, end_date, tz_offset_minutes)
 
         tx_type = transaction_type.upper()
@@ -511,7 +511,7 @@ class StatisticsService:
         total_count = total_count_result.scalar() or 0
 
         # Apply pagination
-        query = query.offset((page - 1) * size).limit(size)
+        query = query.offset((page - 1) * page_size).limit(page_size)
 
         result = await self.db.execute(query)
         transactions = result.scalars().all()
@@ -537,8 +537,8 @@ class StatisticsService:
             sortBy=sort_by,
             total=total_count,
             page=page,
-            pageSize=size,
-            hasMore=total_count > (page * size),
+            page_size=page_size,
+            hasMore=total_count > (page * page_size),
         )
 
     # Essential expense categories (housing, food, transport, medical)
@@ -919,9 +919,9 @@ class StatisticsService:
         currency_symbol = get_currency_symbol(display_currency)
         _, days_in_month = monthrange(year, month)
 
-        # S-E: the client displays LOCAL calendar days, so both the range and
-        # the grouping must be shifted by the client's tz offset — a raw-UTC
-        # month range would drop local-midnight transactions at month edges and
+        # The client displays LOCAL calendar days, so both the range and the
+        # grouping must be shifted by the client's tz offset — a raw-UTC month
+        # range would drop local-midnight transactions at month edges and
         # attribute local-00:30 bookings to the previous day.
         if tz_offset_minutes:
             local_start = datetime(year, month, 1, tzinfo=UTC) - timedelta(minutes=tz_offset_minutes)

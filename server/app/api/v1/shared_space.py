@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from app.core.aliases import CurrentUser
 from app.core.config import settings
 from app.core.limiter import limiter
+from app.core.pagination import Paging
 from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_shared_space_service
 from app.schemas.shared_space import (
@@ -28,15 +29,11 @@ router = APIRouter(prefix="/shared-spaces", tags=["shared-spaces"])
 @router.get("", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_shared_spaces(
     current_user: CurrentUser,
+    paging: Paging,
     service: SharedSpaceService = Depends(get_shared_space_service),
-    page: int = Query(default=1, ge=1),
-    limit: int = Query(default=20, ge=1, le=100),
 ) -> JSONResponse:
-    """Get user's shared spaces.
-
-    Returns a list of shared spaces that the current user is a member of.
-    """
-    spaces = await service.get_user_spaces(current_user.uuid, page, limit)
+    """List the current user's spaces. [P1-4]"""
+    spaces = await service.get_user_spaces(current_user.uuid, paging.page, paging.page_size)
     return success_response(data=spaces)
 
 
@@ -229,16 +226,15 @@ async def get_space_settlement(
 async def get_space_transactions(
     space_id: UUID,
     current_user: CurrentUser,
+    paging: Paging,
     service: SharedSpaceService = Depends(get_shared_space_service),
-    page: int = Query(default=1, ge=1),
-    limit: int = Query(default=20, ge=1, le=100),
 ) -> JSONResponse:
-    """Get transactions in the space."""
+    """List a space's transactions. [P1-4]"""
     transactions = await service.get_space_transactions(
         space_id=space_id,
         user_uuid=current_user.uuid,
-        page=page,
-        limit=limit,
+        page=paging.page,
+        page_size=paging.page_size,
     )
     return success_response(data=transactions)
 

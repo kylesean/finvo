@@ -1,10 +1,9 @@
-"""P2-10 regression: budget period boundaries follow the owner's timezone.
+"""Budget period boundaries follow the owner's timezone.
 
 Server-local ``date.today()`` put UTC+8 users' pre-16:00 spending into
 "yesterday's" budget period. Period lookup/creation now uses the owner's
-local date. Historical periods are intentionally NOT rewritten (documented
-in 01-business-flows P2-10): old rows keep server-local boundaries, new
-rows use user time.
+local date. Historical periods are intentionally NOT rewritten: old rows
+keep server-local boundaries, new rows use user time.
 """
 
 from datetime import UTC, date, datetime

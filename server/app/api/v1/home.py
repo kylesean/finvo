@@ -52,7 +52,7 @@ async def get_calendar_month_details(
         service: Injected StatisticsService instance
         year: Year
         month: Month
-        tz_offset: Client timezone offset in minutes (S-E: local-day grouping)
+        tz_offset: Client timezone offset in minutes (local-day grouping)
 
     Returns:
         Unified response format, containing daily expense summary and heat level

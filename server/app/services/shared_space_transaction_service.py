@@ -111,8 +111,8 @@ class SharedSpaceTransactionService:
                 space_name=space_name,
                 transaction_id=transaction.uuid,
                 added_by_user_uuid=user_uuid,
-                # BF-P1-6: notify the ORIGINAL amount + currency pair. amount is
-                # in the owner's base currency and mislabels cross-currency rows.
+                # Notify the ORIGINAL amount + currency pair. amount is in the
+                # owner's base currency and mislabels cross-currency rows.
                 amount=transaction.amount_original if transaction.amount_original is not None else transaction.amount,
                 currency=(transaction.currency or "CNY").upper(),
                 tx_type=transaction.type.lower() if transaction.type else "expense",
@@ -214,21 +214,11 @@ class SharedSpaceTransactionService:
         return result
 
     async def get_space_transactions(
-        self, space_id: UUID, user_uuid: UUID, page: int = 1, limit: int = 20
+        self, space_id: UUID, user_uuid: UUID, page: int = 1, page_size: int = 20
     ) -> dict[str, Any]:
-        """Get transactions in a space with pagination metadata.
-
-        Args:
-            space_id: Space ID
-            user_uuid: Requesting user's UUID
-            page: Page number
-            limit: Items per page
-
-        Returns:
-            Dictionary with 'transactions' (list), 'total' count, 'page' and 'limit'
-        """
+        """List a space's transactions. [P1-4]"""
         await verify_membership(self.db, space_id, user_uuid)
-        offset = (page - 1) * limit
+        offset = (page - 1) * page_size
 
         count_query = select(func.count(SpaceTransaction.id)).where(SpaceTransaction.space_id == space_id)
         count_result = await self.db.execute(count_query)
@@ -243,7 +233,7 @@ class SharedSpaceTransactionService:
             )
             .order_by(desc(SpaceTransaction.created_at))
             .offset(offset)
-            .limit(limit)
+            .limit(page_size)
         )
 
         result = await self.db.execute(query)
@@ -253,7 +243,7 @@ class SharedSpaceTransactionService:
             "transactions": [self._space_transaction_to_dict(st) for st in space_txs],
             "total": total,
             "page": page,
-            "limit": limit,
+            "page_size": page_size,
         }
 
     def _space_transaction_to_dict(self, st: SpaceTransaction) -> dict[str, Any]:
@@ -261,16 +251,13 @@ class SharedSpaceTransactionService:
         from app.schemas.transaction import TransactionDisplayValue
 
         tx = st.transaction
-        # BF-P1-6: tx.amount is denominated in the owner's base currency while
+        # tx.amount is denominated in the owner's base currency while
         # tx.currency is the ORIGINAL currency — pairing them mislabels the
-        # amount for any cross-currency row. Display the original pair, and
-        # expose the base equivalent alongside for aggregations.
+        # amount for any cross-currency row, so amount carries the original.
         if tx:
             amount_original = tx.amount_original if tx.amount_original is not None else tx.amount
-            amount_base = tx.amount
         else:
             amount_original = Decimal("0")
-            amount_base = Decimal("0")
         tx_type = tx.type if tx else "EXPENSE"
         currency = tx.currency if tx else "CNY"
 
@@ -281,8 +268,6 @@ class SharedSpaceTransactionService:
             "id": str(tx.uuid) if tx else "",
             "type": tx_type,
             "amount": str(amount_original) if tx else "0",
-            "amountOriginal": str(amount_original) if tx else "0",
-            "amountBase": str(amount_base) if tx else "0",
             "currency": currency,
             "description": tx.description if tx else None,
             "categoryKey": tx.category_key if tx else "",

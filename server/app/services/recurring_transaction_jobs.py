@@ -62,7 +62,7 @@ async def process_due_transactions() -> None:
 
             for recurring_tx in due_transactions:
                 try:
-                    # S-C: per-item savepoint. The ledger balance effect raises
+                    # Per-item savepoint. The ledger balance effect raises
                     # when a cross-currency rate is unavailable (never silently
                     # mislabels) — without a savepoint that failure would still
                     # commit the transaction insert at the end of the loop,
@@ -141,11 +141,10 @@ async def _apply_recurring_balance_effect(
 ) -> None:
     """Apply the ledger balance effect for an auto-confirmed recurring transaction.
 
-    S-C: replaces the previous manual balance adjustment. The ledger service is
-    the single source of truth — it converts via the transaction's snapshot
-    with the user's REAL base currency (never silently books ``amount_base`` as
-    the account currency) and takes a row lock (``for_update``) so a concurrent
-    balance edit cannot lose an update.
+    The ledger service is the single source of truth — it converts via the
+    transaction's snapshot with the user's REAL base currency (never silently
+    books ``amount_base`` as the account currency) and takes a row lock
+    (``for_update``) so a concurrent balance edit cannot lose an update.
     """
     from app.services.transaction.ledger_service import TransactionLedgerService
 
