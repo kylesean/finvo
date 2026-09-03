@@ -50,14 +50,14 @@ AppException streamErrorOf(Object error, {required bool idleTimedOut}) {
     switch (error.type) {
       case DioExceptionType.cancel:
         if (idleTimedOut) {
-          return TimeoutException('Stream idle timeout: no data received');
+          return AppTimeoutException('Stream idle timeout: no data received');
         }
         return RequestCancelledException();
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.transformTimeout:
-        return TimeoutException(error.message);
+        return AppTimeoutException(error.message);
       case DioExceptionType.badResponse:
         final status = error.response?.statusCode;
         return UnexpectedHttpException('HTTP error: $status', status);

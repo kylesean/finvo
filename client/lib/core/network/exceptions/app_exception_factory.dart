@@ -30,7 +30,7 @@ class AppExceptionFactory {
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.transformTimeout:
-        return TimeoutException(t.server.error.connectionTimeout);
+        return AppTimeoutException(t.server.error.connectionTimeout);
       case DioExceptionType.connectionError:
       case DioExceptionType.unknown:
         return NetworkException(t.server.error.connectionRefused);

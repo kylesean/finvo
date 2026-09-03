@@ -24,7 +24,7 @@ void main() {
   }
 
   group('AppExceptionFactory.fromDio', () {
-    test('timeout types map to TimeoutException', () {
+    test('timeout types map to AppTimeoutException', () {
       for (final type in [
         DioExceptionType.connectionTimeout,
         DioExceptionType.sendTimeout,
@@ -33,7 +33,7 @@ void main() {
       ]) {
         expect(
           AppExceptionFactory.fromDio(dioException(type: type)),
-          isA<TimeoutException>(),
+          isA<AppTimeoutException>(),
         );
       }
     });

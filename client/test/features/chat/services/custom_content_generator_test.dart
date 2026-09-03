@@ -267,7 +267,7 @@ void main() {
         dioError(DioExceptionType.cancel),
         idleTimedOut: true,
       );
-      expect(err, isA<TimeoutException>());
+      expect(err, isA<AppTimeoutException>());
       expect(err.message, contains('timeout'));
     });
 
@@ -284,7 +284,7 @@ void main() {
           dioError(DioExceptionType.connectionTimeout),
           idleTimedOut: false,
         ),
-        isA<TimeoutException>(),
+        isA<AppTimeoutException>(),
       );
       expect(
         streamErrorOf(

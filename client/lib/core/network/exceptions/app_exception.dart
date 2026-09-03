@@ -20,9 +20,13 @@ class NetworkException extends AppException {
   NetworkException([String? message]) : super(message, 'Network Error: ');
 }
 
-/// Request timeout exception
-class TimeoutException extends AppException {
-  TimeoutException([String? message]) : super(message, 'Timeout: ');
+/// Request timeout exception.
+///
+/// Named AppTimeoutException to never shadow dart:async.TimeoutException —
+/// the two have different semantics and which one a `TimeoutException(...)`
+/// call resolved to used to depend on the import list.
+class AppTimeoutException extends AppException {
+  AppTimeoutException([String? message]) : super(message, 'Timeout: ');
 }
 
 /// General exception (other unknown exceptions)
