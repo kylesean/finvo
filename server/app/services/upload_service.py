@@ -22,7 +22,7 @@ import aiofiles
 import aiofiles.os
 from fastapi import UploadFile
 from PIL import Image, ImageOps
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
@@ -30,7 +30,6 @@ from app.core.config import settings
 from app.core.exceptions import BusinessError, FileErrorCode
 from app.core.logging import logger
 from app.models.attachment import Attachment
-from app.models.shared_space import SpaceMember
 from app.models.storage_config import ProviderType, StorageConfig
 from app.services.storage.adapters.base import StorageAdapter
 from app.services.storage.adapters.factory import StorageAdapterFactory
@@ -398,8 +397,18 @@ class UploadService:
     # =========================================================================
 
     async def resolve_attachment(self, attachment_id: UUID, user_uuid: UUID) -> Attachment:
-        """Load an attachment and enforce owner / shared-space access."""
-        stmt = select(Attachment).where(Attachment.id == attachment_id)
+        """Load an attachment and enforce owner-only access.
+
+        Access used to be granted to co-members of ANY shared space, for ALL
+        of the owner's attachments — the ACL ignored what the attachment was.
+        No feature consumes that privilege (chat images, transaction receipts
+        and avatars all resolve for the owner; space views never embed
+        cross-user file URLs), so it was pure attack surface: one leaked
+        attachment UUID let a co-member read private files. Space-scoped
+        sharing should arrive as an explicit per-attachment association, not
+        as "same space ⇒ read everything".
+        """
+        stmt = select(Attachment).where(Attachment.id == attachment_id, Attachment.user_uuid == user_uuid)
         result = await self.db.execute(stmt)
         attachment = result.scalar_one_or_none()
 
@@ -409,33 +418,6 @@ class UploadService:
                 status_code=404,
                 error_code=FileErrorCode.FILE_NOT_FOUND,
             )
-
-        # Validate access permission: owner or shared space co-member
-        if attachment.user_uuid != user_uuid:
-            shared_space_stmt = (
-                select(SpaceMember.space_id)
-                .where(
-                    and_(
-                        SpaceMember.user_uuid == user_uuid,
-                        SpaceMember.status == "ACCEPTED",
-                    )
-                )
-                .intersect(
-                    select(SpaceMember.space_id).where(
-                        and_(
-                            SpaceMember.user_uuid == attachment.user_uuid,
-                            SpaceMember.status == "ACCEPTED",
-                        )
-                    )
-                )
-            )
-            shared_space_res = await self.db.execute(shared_space_stmt)
-            if not shared_space_res.first():
-                raise BusinessError(
-                    message="Attachment not found or access denied",
-                    status_code=404,
-                    error_code=FileErrorCode.FILE_NOT_FOUND,
-                )
 
         return attachment
 
