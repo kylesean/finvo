@@ -71,16 +71,16 @@ jobs:
       - name: Run tests
         run: flutter test --coverage
 
-      # Coverage gate: fail the build if line coverage drops below the
-      # threshold. Measured baseline is ~15.2%; the threshold is set to 13%
-      # to avoid flaky reds from small fluctuations. Raise it (5% at a time)
-      # as page/widget tests are added. The comparison is done in pure awk so
-      # the gate works on any runner (no `bc` dependency).
+      # Coverage ratchet (ENG-P1-1): the gate is client/.coverage-baseline,
+      # not a hardcoded number. PRs below it fail here; main pushes above it
+      # get a bump PR from the coverage-ratchet workflow. The comparison is
+      # done in pure awk so the gate works on any runner (no `bc` dependency).
       - name: Enforce coverage threshold
         run: |
+          BASELINE=$(grep -v '^#' .coverage-baseline | tr -d '[:space:]')
           COVERAGE=$(awk -F: '/^LF:/{lf+=$2}/^LH:/{lh+=$2}END{printf "%.1f", lh*100/lf}' coverage/lcov.info)
-          echo "Line coverage: ${COVERAGE}% (threshold: 13%)"
-          awk -v c="$COVERAGE" 'BEGIN { if (c < 13) { print "::error::Line coverage " c "% is below the 13% threshold"; exit 1 } }'
+          echo "Line coverage: ${COVERAGE}% (baseline: ${BASELINE}%)"
+          awk -v c="$COVERAGE" -v b="$BASELINE" 'BEGIN { if (c < b) { print "::error::Line coverage " c "% is below the " b "% baseline"; exit 1 } }'
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

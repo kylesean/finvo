@@ -274,12 +274,17 @@ jobs:
           OPENAI_API_KEY: sk-test-key-for-ci # pragma: allowlist secret
           ENVIRONMENT: test
         run: |
+          # Coverage ratchet (ENG-P1-1): the gate is server/.coverage-baseline,
+          # not a hardcoded number. PRs below it fail here; main pushes above
+          # it get a bump PR from the coverage-ratchet workflow.
+          BASELINE=$(grep -v '^#' .coverage-baseline | tr -d '[:space:]')
+          echo "Coverage baseline: ${BASELINE}%"
           uv run pytest tests/ \
             --cov=app \
             --cov-report=xml \
             --cov-report=html \
             --cov-report=term-missing \
-            --cov-fail-under=50 \
+            --cov-fail-under="$BASELINE" \
             -v \
             --tb=short \
             -x

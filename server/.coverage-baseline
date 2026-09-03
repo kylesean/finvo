@@ -1,0 +1,5 @@
+# Coverage ratchet baseline (line %, integer floor of `pytest --cov=app` TOTAL).
+# CI fails any PR below this number; the coverage-ratchet workflow opens a
+# bump PR whenever main measures higher. Only ever raised, never lowered.
+# History: 50 (initial honest gate) -> 59 (2026-09, +audit test batches).
+59
