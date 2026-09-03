@@ -251,6 +251,8 @@ class AttachmentMiddleware(BaseMiddleware):
         """
         doc_contexts = []
 
+        from app.core.prompts.untrusted import wrap_untrusted
+
         for doc in documents:
             try:
                 # Phase 2: Simple text extraction
@@ -260,7 +262,9 @@ class AttachmentMiddleware(BaseMiddleware):
                         "id": str(doc.id),
                         "filename": doc.filename,
                         "mime_type": doc.mime_type,
-                        "text": text[:4000],  # Limit context length
+                        # Document bytes are untrusted data — delimit AFTER
+                        # truncation so the tags themselves survive.
+                        "text": wrap_untrusted(text[:4000], source="document"),
                     }
                 )
             except Exception as e:
