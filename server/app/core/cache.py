@@ -89,7 +89,10 @@ class CacheManager:
             client = self.get_client()
             await client.ping()
             return True
-        except (RedisError, OSError) as e:
+        except Exception as e:
+            # Broad by design: a health check must report False, never crash
+            # startup (e.g. loop-bound pool reuse raises RuntimeError, which is
+            # neither RedisError nor OSError).
             logger.error("redis_health_check_failed", error=str(e))
             return False
 
