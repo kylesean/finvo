@@ -1,6 +1,6 @@
 """WebSocket endpoint for real-time notification push.
 
-Clients connect via: ws://host/api/ws/notifications?token=<jwt_token>
+Clients connect via: ws://host/api/v1/ws/notifications?token=<jwt_token>
 
 Protocol:
 - Server -> Client: {"type": "notification", "payload": {...}}

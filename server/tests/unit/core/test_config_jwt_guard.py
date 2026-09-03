@@ -101,3 +101,37 @@ def test_development_with_mock_providers_allowed(monkeypatch):
 def test_registration_open_by_default(monkeypatch):
     settings = _make_settings(monkeypatch, "development", _STRONG)
     assert settings.REGISTRATION_OPEN is True
+
+
+# ---------------------------------------------------------------------------
+# Metrics token fail-fast guard (04-P2-10, config.py:_validate_metrics_token)
+#
+# An unauthenticated /metrics endpoint leaks operational detail; enabling
+# metrics in production/staging without a token must refuse to boot.
+# ---------------------------------------------------------------------------
+
+
+def test_production_metrics_without_token_raises(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("JWT_SECRET_KEY", _STRONG)
+    monkeypatch.setenv("SMS_PROVIDER", "aliyun")
+    monkeypatch.setenv("EMAIL_PROVIDER", "smtp")
+    monkeypatch.setenv("ENABLE_METRICS", "true")
+    monkeypatch.delenv("METRICS_TOKEN", raising=False)
+    with pytest.raises(RuntimeError, match="METRICS_TOKEN"):
+        Settings()
+
+
+def test_production_metrics_with_token_passes(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("JWT_SECRET_KEY", _STRONG)
+    monkeypatch.setenv("SMS_PROVIDER", "aliyun")
+    monkeypatch.setenv("EMAIL_PROVIDER", "smtp")
+    monkeypatch.setenv("ENABLE_METRICS", "true")
+    monkeypatch.setenv("METRICS_TOKEN", "a" * 32)
+    assert Settings().METRICS_TOKEN == "a" * 32
+
+
+def test_development_metrics_without_token_allowed(monkeypatch):
+    settings = _make_settings(monkeypatch, "development", _STRONG)
+    assert settings.METRICS_TOKEN == ""

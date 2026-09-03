@@ -120,12 +120,3 @@ class FinancialAccount(Base):
     def is_active(self) -> bool:
         """Check if account is active."""
         return self.status == AccountStatus.ACTIVE.value
-
-    @property
-    def net_worth_contribution(self) -> Decimal:
-        """Calculate this account's contribution to net worth."""
-        if not self.include_in_net_worth or not self.is_active:
-            return Decimal("0")
-        if self.is_liability:
-            return -abs(self.initial_balance)
-        return self.initial_balance

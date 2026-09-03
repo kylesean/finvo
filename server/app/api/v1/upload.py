@@ -328,31 +328,11 @@ async def view_attachment(
             user_uuid=current_user.uuid,
         )
 
-        # Determine Content-Disposition header
+        # Single construction point (RFC 5987 + SVG force-download live in
+        # _content_disposition above; do not re-inline the rules here).
         mime_type = attachment.mime_type or "application/octet-stream"
-        if mime_type == "image/svg+xml":
-            # Security: SVG can embed <script> tags -> store-and-reflect XSS when served inline.
-            # Force download; never render SVG inline in browser.
-            disposition = "attachment"
-        elif mime_type.startswith("image/") or mime_type == "application/pdf":
-            disposition = "inline"
-        else:
-            disposition = "attachment"
-
-        # Encode non-ASCII filenames per RFC 5987
-        from urllib.parse import quote
-
         filename = attachment.filename
-
-        # Create ASCII-safe filename for compatibility
-        try:
-            filename.encode("ascii")
-            # Pure ASCII filename, use directly
-            content_disposition = f'{disposition}; filename="{filename}"'
-        except UnicodeEncodeError:
-            # Filename contains non-ASCII characters, use RFC 5987 encoding
-            encoded_filename = quote(filename)
-            content_disposition = f"{disposition}; filename*=UTF-8''{encoded_filename}"
+        content_disposition = _content_disposition(filename, mime_type)
 
         return FileResponse(
             path=file_path,

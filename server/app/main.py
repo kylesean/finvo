@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import datetime
 from pathlib import Path
 from typing import (
     Annotated,
@@ -43,6 +42,7 @@ from app.core.middlewares import (
     SecurityHeadersMiddleware,
 )
 from app.core.responses import error_response, get_error_code_int, success_response
+from app.models.base import utc_now
 from app.utils.artifact_signing import verify_artifact_token
 
 load_dotenv()
@@ -555,7 +555,7 @@ async def health_check(request: Request) -> JSONResponse:
             "cache": "healthy" if redis_healthy else "unhealthy",
             "scheduler": "running" if scheduler_running else "stopped",
         },
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": utc_now().isoformat(),
     }
 
     # If any component is unhealthy, set the appropriate status code

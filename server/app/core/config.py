@@ -528,6 +528,7 @@ class Settings(BaseSettings):
         # happens to be read.
         self._validate_jwt_secret()
         self._validate_verification_providers()
+        self._validate_metrics_token()
         self._sanitize_proxy_env()
 
     def _validate_verification_providers(self) -> None:
@@ -549,6 +550,22 @@ class Settings(BaseSettings):
                 "(code verification is skipped) — not allowed in "
                 f"{self.ENVIRONMENT.value}. Configure a real provider "
                 "(SMS_PROVIDER: aliyun/twilio, EMAIL_PROVIDER: smtp) or run with ENVIRONMENT=development."
+            )
+
+    def _validate_metrics_token(self) -> None:
+        """Fail-fast guard against an open /metrics endpoint outside development.
+
+        Prometheus metrics can leak operational detail (paths, counts); an
+        unauthenticated /metrics in production/staging is only acceptable as
+        an explicit choice. Same philosophy as the guards above.
+        """
+        if self.ENVIRONMENT == Environment.DEVELOPMENT:
+            return
+        if self.ENABLE_METRICS and not self.METRICS_TOKEN:
+            raise RuntimeError(
+                "CRITICAL: ENABLE_METRICS is true with an empty METRICS_TOKEN — not allowed in "
+                f"{self.ENVIRONMENT.value}. Set METRICS_TOKEN to a long random value "
+                "or disable metrics (ENABLE_METRICS=false)."
             )
 
     def _validate_jwt_secret(self) -> None:
