@@ -40,11 +40,29 @@ def _validate_mobile(mobile: str) -> bool:
 
 _WEAK_PASSWORDS = frozenset(
     {
-        "password", "password1", "password12", "password123", "password1234",
-        "12345678", "123456789", "1234567890", "qwerty123", "1q2w3e4r",
-        "1qaz2wsx", "abc12345", "abcd1234", "letmein1", "welcome1",
-        "admin123", "root1234", "test1234", "demo1234", "changeme1",
-        "finvo123", "money123", "caifu123",
+        "password",
+        "password1",
+        "password12",
+        "password123",
+        "password1234",
+        "12345678",
+        "123456789",
+        "1234567890",
+        "qwerty123",
+        "1q2w3e4r",
+        "1qaz2wsx",
+        "abc12345",
+        "abcd1234",
+        "letmein1",
+        "welcome1",
+        "admin123",
+        "root1234",
+        "test1234",
+        "demo1234",
+        "changeme1",
+        "finvo123",
+        "money123",
+        "caifu123",
     }
 )
 

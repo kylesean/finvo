@@ -18,9 +18,24 @@ from app.schemas.genui import GenUIEvent
 
 _REDACTED_KEYS = frozenset(
     {
-        "account_number", "account_no", "address", "card", "card_number",
-        "comment", "description", "email", "iban", "memo", "mobile",
-        "name", "note", "notes", "pan", "phone", "raw_input", "remark",
+        "account_number",
+        "account_no",
+        "address",
+        "card",
+        "card_number",
+        "comment",
+        "description",
+        "email",
+        "iban",
+        "memo",
+        "mobile",
+        "name",
+        "note",
+        "notes",
+        "pan",
+        "phone",
+        "raw_input",
+        "remark",
     }
 )
 _PREVIEW_LIMIT = 2000
@@ -30,10 +45,7 @@ def _redact(value: Any, depth: int = 0) -> Any:
     if depth > 4:
         return "<truncated>"
     if isinstance(value, dict):
-        return {
-            k: "<redacted>" if k.lower() in _REDACTED_KEYS else _redact(v, depth + 1)
-            for k, v in value.items()
-        }
+        return {k: "<redacted>" if k.lower() in _REDACTED_KEYS else _redact(v, depth + 1) for k, v in value.items()}
     if isinstance(value, list):
         return [_redact(v, depth + 1) for v in value[:20]]
     if isinstance(value, str) and len(value) > 200:
@@ -110,9 +122,7 @@ class EventGenerator:
                     data={"id": tool_id, "name": tool_name, "timestamp": datetime.now(UTC).isoformat()},
                 )
 
-    async def process_updates_chunk(
-        self, chunk: dict[str, Any], session_id: UUID
-    ) -> AsyncGenerator[GenUIEvent]:
+    async def process_updates_chunk(self, chunk: dict[str, Any], session_id: UUID) -> AsyncGenerator[GenUIEvent]:
         for node_name, output in chunk.items():
             if node_name.startswith("__"):
                 continue
@@ -123,9 +133,7 @@ class EventGenerator:
                 async for event in self._tools_events(output, session_id):
                     yield event
 
-    async def _direct_execute_events(
-        self, output: Any, session_id: UUID
-    ) -> AsyncGenerator[GenUIEvent]:
+    async def _direct_execute_events(self, output: Any, session_id: UUID) -> AsyncGenerator[GenUIEvent]:
         result = output.get("direct_execute_result") if isinstance(output, dict) else None
         if not result:
             return
@@ -221,7 +229,9 @@ class EventGenerator:
                 type="a2ui_message",
                 data=CreateSurface(createSurface=CreateSurfacePayload(surfaceId=surface_id)).model_dump(),
             )
-        props = {k: v for k, v in tool_result.items() if not k.startswith("_")} if isinstance(tool_result, dict) else {}
+        props = (
+            {k: v for k, v in tool_result.items() if not k.startswith("_")} if isinstance(tool_result, dict) else {}
+        )
         flat = {**props, "id": "root", "component": component}
         yield GenUIEvent(
             type="a2ui_message",
