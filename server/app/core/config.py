@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import os
+import secrets
 from enum import Enum
 from pathlib import Path
 from typing import Any, Literal
@@ -25,6 +26,13 @@ _logger = logging.getLogger("config")
 # Insecure placeholder shipped as the JWT default. Kept as a module constant so
 # the field default and the fail-fast guard share a single source of truth.
 _JWT_INSECURE_DEFAULT = "change-this-secret-key-in-production"
+
+# Every JWT secret value shipped in the repo: the field default above plus the
+# server/.env.example placeholder. Both are public knowledge (the source is
+# AGPL), so either value lets anyone forge tokens. Production/staging refuse
+# to boot on them; development/test get a random ephemeral secret instead
+# (see _validate_jwt_secret).
+_JWT_SHIPPED_SECRETS = frozenset({_JWT_INSECURE_DEFAULT, "yoursecretkeyhere"})
 
 # Minimum JWT secret length for HS256. RFC 7518 recommends a key at least as
 # long as the hash output (32 bytes for SHA-256); shorter secrets are
@@ -252,7 +260,8 @@ class Settings(BaseSettings):
     MEMORY_EXTRACTION_EVERY_N_TURNS: int = 5
 
     # JWT Configuration
-    # NOTE: default is an insecure placeholder; production must override via env var
+    # NOTE: the default is an insecure placeholder — production/staging refuse
+    # to boot on it, dev/test swap in a random ephemeral secret
     # (enforced in model_post_init — see _validate_jwt_secret below)
     JWT_SECRET_KEY: str = Field(default=_JWT_INSECURE_DEFAULT)
     JWT_ALGORITHM: str = "HS256"
@@ -374,7 +383,9 @@ class Settings(BaseSettings):
     EMAIL_PROVIDER: str = "mock"  # mock, smtp
     # Kill switch for new sign-ups (e.g. a private deployment that only wants
     # pre-existing accounts). Does not affect login or existing users.
-    REGISTRATION_OPEN: bool = True
+    # Default closed: on a public VPS an open registration lets strangers sign
+    # up and spend the operator's LLM budget. Flip to true when wanted.
+    REGISTRATION_OPEN: bool = False
 
     # SMTP Settings
     SMTP_HOST: str = "localhost"
@@ -574,31 +585,50 @@ class Settings(BaseSettings):
     def _validate_jwt_secret(self) -> None:
         """Fail-fast guard against an insecure JWT secret.
 
-        Production/staging must never start with the shipped placeholder or a
-        secret too short to resist HS256 brute force. Mirrors the
+        A secret shipped with the source (field default or .env.example
+        placeholder) is public knowledge — anyone can forge tokens with it —
+        so production/staging refuse to boot and development/test get a random
+        ephemeral secret instead (zero-config dev keeps working, tokens just
+        don't survive a restart). A merely short custom secret stays a
+        dev/test warning and a prod/staging refusal. Mirrors the
         ENCRYPTION_KEY guard in app/utils/encryption.py:_initialize().
         """
-        insecure = self.JWT_SECRET_KEY == _JWT_INSECURE_DEFAULT
+        generate_hint = 'Generate one using: python -c "import secrets; print(secrets.token_urlsafe(32))"'
+        if self.JWT_SECRET_KEY in _JWT_SHIPPED_SECRETS:
+            if self.ENVIRONMENT in (Environment.PRODUCTION, Environment.STAGING):
+                raise RuntimeError(
+                    "CRITICAL: JWT_SECRET_KEY is still a value shipped with the source "
+                    f"in {self.ENVIRONMENT.value}! It is public knowledge and lets anyone "
+                    f"forge tokens. {generate_hint}"
+                )
+            # Zero-config dev/test: never sign with a publicly-known key, but
+            # don't force a secret just to boot locally. Ephemeral per-process
+            # key means sessions don't survive restarts — set JWT_SECRET_KEY
+            # explicitly to keep them.
+            self.JWT_SECRET_KEY = secrets.token_urlsafe(32)
+            _logger.warning(
+                "JWT_SECRET_KEY is a value shipped with the source; generated a random "
+                "ephemeral secret for this %s run — tokens will not survive a restart. "
+                "Set JWT_SECRET_KEY to keep them. %s",
+                self.ENVIRONMENT.value,
+                generate_hint,
+            )
+            return
+
         too_weak = len(self.JWT_SECRET_KEY) < _JWT_MIN_SECRET_LENGTH
         if self.ENVIRONMENT in (Environment.PRODUCTION, Environment.STAGING):
-            if insecure or too_weak:
-                reason = (
-                    "the insecure default"
-                    if insecure
-                    else f"only {len(self.JWT_SECRET_KEY)} chars (min {_JWT_MIN_SECRET_LENGTH})"
-                )
+            if too_weak:
                 raise RuntimeError(
                     "CRITICAL: JWT_SECRET_KEY must be set to a strong, unique value in "
-                    f"{self.ENVIRONMENT.value}! Current value is {reason}. Generate one using: "
-                    'python -c "import secrets; print(secrets.token_urlsafe(32))"'
+                    f"{self.ENVIRONMENT.value}! Current value is only "
+                    f"{len(self.JWT_SECRET_KEY)} chars (min {_JWT_MIN_SECRET_LENGTH}). " + generate_hint
                 )
-        else:
-            if insecure or too_weak:
-                _logger.warning(
-                    "JWT_SECRET_KEY is insecure (%s). Set a strong value via env var — "
-                    "NEVER use the default in production!",
-                    "insecure default" if insecure else f"shorter than {_JWT_MIN_SECRET_LENGTH} chars",
-                )
+        elif too_weak:
+            _logger.warning(
+                "JWT_SECRET_KEY is shorter than %s chars — acceptable for local dev only. "
+                "NEVER use a short secret in production!",
+                _JWT_MIN_SECRET_LENGTH,
+            )
 
     @staticmethod
     def _sanitize_proxy_env() -> None:

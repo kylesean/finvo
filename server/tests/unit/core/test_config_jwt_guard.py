@@ -14,6 +14,8 @@ import pytest
 from app.core.config import Environment, Settings
 
 _WEAK_DEFAULT = "change-this-secret-key-in-production"
+_ENV_EXAMPLE_DEFAULT = "yoursecretkeyhere"
+_MIN_SECRET_LENGTH = 32
 _STRONG = "a" * 64
 
 
@@ -47,10 +49,28 @@ def test_production_with_strong_secret_passes(monkeypatch):
     assert settings.ENVIRONMENT == Environment.PRODUCTION
 
 
-def test_development_with_default_secret_warns_not_raises(monkeypatch, caplog):
+def test_development_with_default_secret_swaps_in_ephemeral(monkeypatch, caplog):
+    """Zero-config dev keeps booting, but never signs with a public key."""
     with caplog.at_level(logging.WARNING, logger="config"):
         settings = _make_settings(monkeypatch, "development", _WEAK_DEFAULT)
     assert settings.ENVIRONMENT == Environment.DEVELOPMENT
+    assert settings.JWT_SECRET_KEY != _WEAK_DEFAULT
+    assert len(settings.JWT_SECRET_KEY) >= _MIN_SECRET_LENGTH
+    assert any("JWT_SECRET_KEY" in record.message for record in caplog.records)
+
+
+def test_development_with_env_example_secret_swaps_in_ephemeral(monkeypatch):
+    """The .env.example placeholder is equally public knowledge — same swap."""
+    settings = _make_settings(monkeypatch, "development", _ENV_EXAMPLE_DEFAULT)
+    assert settings.JWT_SECRET_KEY not in (_ENV_EXAMPLE_DEFAULT, _WEAK_DEFAULT)
+    assert len(settings.JWT_SECRET_KEY) >= _MIN_SECRET_LENGTH
+
+
+def test_development_with_short_custom_secret_warns_not_raises(monkeypatch, caplog):
+    """A custom (non-shipped) short secret stays a dev-only warning."""
+    with caplog.at_level(logging.WARNING, logger="config"):
+        settings = _make_settings(monkeypatch, "development", "short-secret")
+    assert settings.JWT_SECRET_KEY == "short-secret"
     assert any("JWT_SECRET_KEY" in record.message for record in caplog.records)
 
 
@@ -98,9 +118,10 @@ def test_development_with_mock_providers_allowed(monkeypatch):
     assert settings.EMAIL_PROVIDER == "mock"
 
 
-def test_registration_open_by_default(monkeypatch):
+def test_registration_closed_by_default(monkeypatch):
+    """Default-closed: open sign-ups on a public VPS burn the operator's LLM budget."""
     settings = _make_settings(monkeypatch, "development", _STRONG)
-    assert settings.REGISTRATION_OPEN is True
+    assert settings.REGISTRATION_OPEN is False
 
 
 # ---------------------------------------------------------------------------

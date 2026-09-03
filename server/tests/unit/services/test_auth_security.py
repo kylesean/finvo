@@ -332,6 +332,7 @@ class TestAccountEnumeration:
         email = f"leak_{uuid4().hex[:8]}@example.com"
         with (
             patch("app.services.auth_service.settings.EMAIL_PROVIDER", "smtp"),
+            patch("app.services.auth_service.settings.REGISTRATION_OPEN", True),
             patch("app.services.code_manager.code_manager.verify_code", new=AsyncMock(return_value=True)),
         ):
             await service.register("email", email, "Password123!", code="123456")
@@ -385,6 +386,7 @@ class TestAccountEnumeration:
             email = f"login_{uuid4().hex[:8]}@example.com"
             with (
                 patch("app.services.auth_service.settings.EMAIL_PROVIDER", "smtp"),
+                patch("app.services.auth_service.settings.REGISTRATION_OPEN", True),
                 patch("app.services.code_manager.code_manager.verify_code", new=AsyncMock(return_value=True)),
             ):
                 await service.register("email", email, "CorrectPass1!", code="123456")

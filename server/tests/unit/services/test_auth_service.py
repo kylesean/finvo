@@ -54,7 +54,10 @@ async def test_register_success(db_session):
 
     # Mock verify_code to return True
     # We patch the verify_code method of the global code_manager instance
-    with patch("app.services.code_manager.code_manager.verify_code", new_callable=AsyncMock) as mock_verify:
+    with (
+        patch("app.services.auth_service.settings.REGISTRATION_OPEN", True),
+        patch("app.services.code_manager.code_manager.verify_code", new_callable=AsyncMock) as mock_verify,
+    ):
         mock_verify.return_value = True
 
         # Action
@@ -83,6 +86,7 @@ async def test_register_invalid_code(db_session):
     # branch is actually exercised.
     with (
         patch("app.services.auth_service.settings.EMAIL_PROVIDER", "smtp"),
+        patch("app.services.auth_service.settings.REGISTRATION_OPEN", True),
         patch("app.services.code_manager.code_manager.verify_code", new_callable=AsyncMock) as mock_verify,
     ):
         mock_verify.return_value = False

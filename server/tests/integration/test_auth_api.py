@@ -22,6 +22,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
 from app.core.dependencies import get_redis_client
 from app.core.limiter import limiter
 from app.main import app
@@ -49,6 +50,17 @@ def _reset_rate_limiter() -> Generator[None]:
     limiter._storage.reset()
     yield
     limiter._storage.reset()
+
+
+@pytest.fixture(autouse=True)
+def _open_registration(monkeypatch: pytest.MonkeyPatch) -> None:
+    """These tests exercise the register API end-to-end.
+
+    REGISTRATION_OPEN now defaults to false (closed kill switch), so the
+    module flips it on per test; the dedicated closed-mode test overrides it
+    to False inside its own body.
+    """
+    monkeypatch.setattr(settings, "REGISTRATION_OPEN", True)
 
 
 @pytest.fixture()
