@@ -1,0 +1,17 @@
+# Local debugging override: loopback-only host bindings.
+#
+# The base compose file publishes NO database ports (containers talk over the
+# compose network). When you need a local psql/redis-cli, run:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.debug.yml up -d
+#
+# 127.0.0.1 binding keeps the ports off every external interface even when
+# the host firewall/security group is loose.
+
+services:
+  db:
+    ports:
+      - "127.0.0.1:5433:5432"
+  redis:
+    ports:
+      - "127.0.0.1:6380:6379"
