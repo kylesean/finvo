@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
-from typing import Any
+from typing import Any, cast
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, RemoveMessage, SystemMessage
@@ -134,7 +134,7 @@ async def _invoke_llm(bound_llm: Any, prompt: list[BaseMessage], config: Runnabl
             reraise=True,
         ):
             with attempt:
-                return await bound_llm.ainvoke(prompt, config)
+                return cast(AIMessage, await bound_llm.ainvoke(prompt, config))
     except Exception as e:
         logger.error("agent_node_llm_failed", error=str(e), exc_info=True)
         raise
@@ -143,7 +143,8 @@ async def _invoke_llm(bound_llm: Any, prompt: list[BaseMessage], config: Runnabl
 
 def _stale_system_removals(messages: list[BaseMessage]) -> list[RemoveMessage]:
     ids = [m.id for m in messages if isinstance(m, SystemMessage) and getattr(m, "id", None)]
-    return [RemoveMessage(id=sid) for sid in ids[:-1]] if len(ids) > 1 else []
+    stale = [sid for sid in ids[:-1] if sid is not None]
+    return [RemoveMessage(id=sid) for sid in stale] if len(ids) > 1 else []
 
 
 def _internal_tools() -> dict[str, BaseTool]:

@@ -113,6 +113,9 @@ flowchart TD
    ```bash
    cp server/.env.example server/.env
    # Edit server/.env with your LLM provider credentials or Ollama URL
+   # Public deployment? Three must-dos: real SMS/EMAIL providers (mock is
+   # refused at boot outside development), strong POSTGRES_PASSWORD +
+   # JWT_SECRET_KEY, and REGISTRATION_OPEN=false unless you want open signup.
    ```
 
 3. **Launch Docker Services**:

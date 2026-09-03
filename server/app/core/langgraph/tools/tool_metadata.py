@@ -71,7 +71,7 @@ def is_silent(tool_name: str) -> bool:
 
 def is_cancellable(tool_name: str) -> bool:
     spec = get_spec(tool_name)
-    return spec.cancellable if spec is None else spec.cancellable
+    return spec.cancellable if spec else False
 
 
 def cancel_warning(tool_name: str) -> str | None:

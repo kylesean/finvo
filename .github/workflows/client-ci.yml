@@ -48,6 +48,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      # Visibility for pinned/dev releases (freezed dev, riverpod override):
+      # report only, never fails the build.
+      - name: Report outdated dependencies
+        run: dart pub outdated || true
+
       # Generated code (.g.dart / .freezed.dart / slang) is committed to the
       # repo. Regenerating it in CI and failing on any diff catches drift
       # (a source edit that forgot to run build_runner), which analyze/test
@@ -71,13 +76,12 @@ jobs:
       - name: Run tests
         run: flutter test --coverage
 
-      # Coverage ratchet (ENG-P1-1): the gate is client/.coverage-baseline,
-      # not a hardcoded number. PRs below it fail here; main pushes above it
-      # get a bump PR from the coverage-ratchet workflow. The comparison is
-      # done in pure awk so the gate works on any runner (no `bc` dependency).
+      # Coverage gate: client/.coverage-baseline holds one number (the
+      # floor %). Raise it by hand when main measures higher; never lower.
+      # The comparison is pure awk so the gate works on any runner.
       - name: Enforce coverage threshold
         run: |
-          BASELINE=$(grep -v '^#' .coverage-baseline | tr -d '[:space:]')
+          BASELINE=$(cat .coverage-baseline)
           COVERAGE=$(awk -F: '/^LF:/{lf+=$2}/^LH:/{lh+=$2}END{printf "%.1f", lh*100/lf}' coverage/lcov.info)
           echo "Line coverage: ${COVERAGE}% (baseline: ${BASELINE}%)"
           awk -v c="$COVERAGE" -v b="$BASELINE" 'BEGIN { if (c < b) { print "::error::Line coverage " c "% is below the " b "% baseline"; exit 1 } }'

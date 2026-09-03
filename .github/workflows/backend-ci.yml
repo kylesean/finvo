@@ -61,6 +61,13 @@ jobs:
       - name: Run Ruff formatter check
         run: uv run ruff format app/ --check
 
+      - name: Forbid skeleton placeholder tests
+        run: |
+          if rg -n "mark\.skip.*[Ss]keleton|reason=\"Skeleton\"|reason='Skeleton'" tests/; then
+            echo "::error::Skeleton skipped tests found. Implement or delete them (see docs/unit-testing-guide.md)."
+            exit 1
+          fi
+
   # ============================================================================
   # Type Checking
   # ============================================================================
@@ -164,34 +171,6 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev
 
-      - name: Check Cyclomatic Complexity (CC)
-        run: |
-          echo "## Cyclomatic Complexity Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Functions with CC > 10 (high complexity):" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          uv run radon cc app/ -a -s --min C || echo "No high complexity functions found"
-          uv run radon cc app/ -a -s --min C >> $GITHUB_STEP_SUMMARY 2>&1 || echo "No high complexity functions found" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: Check Maintainability Index (MI)
-        run: |
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Maintainability Index Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Files with MI < 20 (low maintainability):" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          uv run radon mi app/ -s --min B || echo "All files have good maintainability"
-          uv run radon mi app/ -s --min B >> $GITHUB_STEP_SUMMARY 2>&1 || echo "All files have good maintainability" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: Fail on very high complexity (CC > 15)
-        run: |
-          HIGH_CC=$(uv run radon cc app/ -a -s --min D --json | python -c "import json,sys; data=json.load(sys.stdin); print(len([f for blocks in data.values() for f in blocks if f.get('complexity', 0) > 15]))" 2>/dev/null || echo "0")
-          if [ "$HIGH_CC" != "0" ]; then
-            echo "::warning::Found $HIGH_CC functions with cyclomatic complexity > 15"
-          fi
-
   # ============================================================================
   # Unit Tests
   # ============================================================================
@@ -274,10 +253,9 @@ jobs:
           OPENAI_API_KEY: sk-test-key-for-ci # pragma: allowlist secret
           ENVIRONMENT: test
         run: |
-          # Coverage ratchet (ENG-P1-1): the gate is server/.coverage-baseline,
-          # not a hardcoded number. PRs below it fail here; main pushes above
-          # it get a bump PR from the coverage-ratchet workflow.
-          BASELINE=$(grep -v '^#' .coverage-baseline | tr -d '[:space:]')
+          # Coverage gate: server/.coverage-baseline holds one number (the
+          # floor %). Raise it by hand when main measures higher; never lower.
+          BASELINE=$(cat .coverage-baseline)
           echo "Coverage baseline: ${BASELINE}%"
           uv run pytest tests/ \
             --cov=app \

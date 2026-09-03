@@ -235,7 +235,8 @@ class EventGenerator:
 
 def _tool_messages(output: Any) -> list[Any]:
     if isinstance(output, dict):
-        return output.get("messages", [])
+        messages = output.get("messages", [])
+        return list(messages) if isinstance(messages, list) else []
     items: list[Any] = []
     for item in output if isinstance(output, list) else []:
         if isinstance(item, ToolMessage) or (isinstance(item, dict) and item.get("role") == "tool"):

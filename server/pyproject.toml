@@ -57,7 +57,6 @@ dependencies = [
     "aiofiles>=23.2.1",
     "pillow>=12.3.0",
     # Misc utilities
-    "fastapi-pagination>=0.15.1",
     "uuid-utils>=0.12.0",
     "python-dateutil>=2.8.2",
     "jieba>=0.42.1",
@@ -142,7 +141,6 @@ warn_return_any = false
 # Other third-party libraries - Partial type support
 [[tool.mypy.overrides]]
 module = [
-    "fastapi_pagination.*",
     "mem0.*",
     "slowapi.*",
     "structlog.*",
@@ -187,7 +185,6 @@ exclude = ["migrations", "*.ipynb", "venv", ".venv", "alembic"]
 select = ["E", "W", "F", "B", "I", "ERA", "D", "UP"]
 ignore = [
     "E501",
-    "F401",
     "D100",
     "D104",
     "D107",

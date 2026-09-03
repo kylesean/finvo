@@ -933,20 +933,6 @@ wheels = [
 ]
 
 [[package]]
-name = "fastapi-pagination"
-version = "0.15.16"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "fastapi" },
-    { name = "pydantic" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/42/65/9c2f1c324fa7a83b328b024c45e70471007b165a1d56ab237fe0e574e36f/fastapi_pagination-0.15.16.tar.gz", hash = "sha256:739a4e904729dc01e03ce95e260ed9be050d48a3659be8463e5c4fcdd0cf25b0", size = 614997, upload-time = "2026-07-28T18:41:07.421Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a4/d1/9725ec62421dcfe430d874cba9f82c0288baee0c4b7dd8aa8dcca2b0394e/fastapi_pagination-0.15.16-py3-none-any.whl", hash = "sha256:86dc73620812d47c297a7b8baca4eba2bac5d3f1d73aa75dc6e3bb12c0b803f7", size = 65991, upload-time = "2026-07-28T18:41:06.076Z" },
-]
-
-[[package]]
 name = "filelock"
 version = "3.32.2"
 source = { registry = "https://pypi.org/simple" }
@@ -969,7 +955,6 @@ dependencies = [
     { name = "cryptography" },
     { name = "ddgs" },
     { name = "fastapi" },
-    { name = "fastapi-pagination" },
     { name = "firebase-admin" },
     { name = "jieba" },
     { name = "langchain" },
@@ -1040,7 +1025,6 @@ requires-dist = [
     { name = "cryptography", specifier = ">=48.0.1" },
     { name = "ddgs", specifier = ">=9.6.0" },
     { name = "fastapi", specifier = ">=0.121.0" },
-    { name = "fastapi-pagination", specifier = ">=0.15.1" },
     { name = "firebase-admin", specifier = ">=7.5.0" },
     { name = "jieba", specifier = ">=0.42.1" },
     { name = "langchain", specifier = ">=0.3.0" },

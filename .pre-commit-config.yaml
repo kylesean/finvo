@@ -71,7 +71,13 @@ repos:
         entry: python3 client/tool/check_i18n_cjk.py
         language: system
         pass_filenames: false
-        files: ^client/lib/i18n/
+        files: ^client/
+      - id: no-cny-literal
+        name: No hardcoded CNY literals (use Currency.defaultCode)
+        entry: bash -c "! grep -rn \"'CNY'\" client/lib --include='*.dart' | grep -v 'shared/models/currency.dart'"
+        language: system
+        pass_filenames: false
+        files: ^client/lib/
 
   # ============================================================================
   # General File Checks

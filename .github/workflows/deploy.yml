@@ -1,12 +1,21 @@
 # Build and Push Docker Image to GitHub Container Registry (GHCR)
-# Triggers on push to main branch, semantic version tags (e.g., v1.0.0, v0.2.1-alpha), and manual dispatch.
+#
+# main branch images are built only after Backend CI passes on the same
+# commit (workflow_run gate) — a red main never ships. Tags and manual
+# dispatches build directly: cutting a tag is the maintainer's explicit
+# release decision.
+#
+# Triggers: Backend CI completion on main, semantic version tags
+# (e.g., v1.0.0, v0.2.1-alpha), and manual dispatch.
 
 name: Deploy Docker Image to GHCR
 
 on:
+  workflow_run:
+    workflows: ["Backend CI"]
+    types: [completed]
+    branches: [main]
   push:
-    branches:
-      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -27,53 +36,16 @@ jobs:
   build-and-push:
     name: Build and Push Docker Image to GHCR
     runs-on: ubuntu-latest
+    # workflow_run has no usable conclusion filter in `on:` — gate here.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Wait for Backend CI to pass on this commit
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          # ENG-P1-3 gate: never ship an image for a commit whose Backend CI
-          # (lint/mypy/tests/migrations) failed or never ran. Branch pushes
-          # wait until the run for this exact commit completes; tag pushes of
-          # commits outside the CI path filters are allowed after a grace
-          # period, with an explicit warning.
-          deadline=$(( $(date +%s) + 2400 ))   # 40 min: CI runs ~5-10 min normally
-          grace_deadline=$(( $(date +%s) + 600 ))  # 10 min for a run to even appear
-          is_tag=false
-          case "${GITHUB_REF}" in refs/tags/*) is_tag=true ;; esac
-          while true; do
-            read -r s_count b_count < <(
-              gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/backend-ci.yml/runs?head_sha=${SHA}&per_page=20" \
-                --jq '{s: ([.workflow_runs[] | select(.conclusion == "success")] | length),
-                       b: ([.workflow_runs[] | select(.conclusion == "failure" or .conclusion == "cancelled" or .conclusion == "timed_out")] | length)}
-                      | "\(.s) \(.b)"' \
-                2>/dev/null || echo "0 0"
-            )
-            if [ "${s_count:-0}" -gt 0 ]; then
-              echo "Backend CI passed for ${SHA} — proceeding with the image build."
-              exit 0
-            fi
-            if [ "${b_count:-0}" -gt 0 ]; then
-              echo "::error::Backend CI did not pass for ${SHA} — refusing to build/push an image."
-              exit 1
-            fi
-            if [ "$(date +%s)" -ge "$deadline" ]; then
-              echo "::error::Timed out waiting for Backend CI on ${SHA}."
-              exit 1
-            fi
-            if [ "${is_tag}" = "true" ] && [ "$(date +%s)" -ge "$grace_deadline" ]; then
-              echo "::warning::No Backend CI run found for ${SHA} after 10 minutes (tag of a commit outside CI path filters?) — proceeding WITHOUT a CI gate."
-              exit 0
-            fi
-            echo "Backend CI for ${SHA} is queued/running… waiting 30s."
-            sleep 30
-          done
+        with:
+          # Build the exact commit CI just tested, not whatever main
+          # points at by the time this job starts.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
