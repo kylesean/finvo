@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-"""One-off reconciliation of account balances against the transaction ledger.
+"""Reconcile account balances against the transaction ledger.
 
-Legacy behavior (before the Phase 1 fix) only adjusted balances for TRANSFER
-transactions; EXPENSE/INCOME transactions never touched their linked accounts,
-so existing balances drifted from the ledger. This script recomputes each
-account's expected balance as:
+Recomputes each account's expected balance as:
 
     expected = initial_balance + sum(effect(tx) for tx on this account)
 
-using the same snapshot-based conversion rule as TransactionCRUDService
+using the same snapshot-based conversion rule as the live ledger
 (EXPENSE deducts source, INCOME credits target, TRANSFER moves source->target,
 amounts converted from the transaction snapshot). Only CLEARED transactions
 count, matching the ledger convention. Default is dry-run; pass ``--apply``
@@ -35,28 +32,10 @@ from app.models.base import utc_now
 from app.models.financial_account import FinancialAccount
 from app.models.financial_settings import FinancialSettings
 from app.models.transaction import Transaction
-from app.services.account_balance import ledger_effect_for_account, tx_effect_amount
+from app.services.account_balance import ledger_effect_for_account
 from app.utils.currency_inference import FALLBACK_CURRENCY
 
 FALLBACK_BASE_CURRENCY = FALLBACK_CURRENCY
-
-
-async def effect_amount(tx: Transaction, account_currency: str, user_base_currency: str) -> Decimal:
-    """Snapshot-based conversion (P2-9: delegates to the canonical core).
-
-    Kept under this name for backward compatibility; new code should import
-    from :mod:`app.services.account_balance` directly.
-    """
-    return await tx_effect_amount(tx, account_currency, user_base_currency)
-
-
-async def ledger_effect(tx: Transaction, account: FinancialAccount, user_base_currency: str) -> Decimal:
-    """Signed balance effect of ``tx`` on ``account`` (0 if not linked).
-
-    P2-9: delegates to the canonical helper; kept under this name for
-    backward compatibility.
-    """
-    return await ledger_effect_for_account(tx, account, user_base_currency, allow_live_rate=True)
 
 
 async def reconcile(session: AsyncSession, apply: bool) -> tuple[int, int, Decimal]:
@@ -108,7 +87,7 @@ async def reconcile(session: AsyncSession, apply: bool) -> tuple[int, int, Decim
         effects_ok = True
         for tx in by_account.get(account.id, []):
             try:
-                expected += await ledger_effect(tx, account, user_base)
+                expected += await ledger_effect_for_account(tx, account, user_base)
             except Exception as e:  # noqa: BLE001 - script-level guard
                 print(f"  [skip] account={account.id} tx={tx.id} effect unknown: {e}")
                 skipped += 1

@@ -7,8 +7,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - "5433:5432" # Use 5433 externally to avoid conflict with local Postgres
+    # No host port mapping — containers reach the DB over the compose
+    # network. For local debugging use docker-compose.debug.yml.
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -26,8 +26,7 @@ services:
   redis:
     image: redis:alpine
     container_name: Finvo-redis
-    ports:
-      - "6380:6379" # Use 6380 externally to avoid conflict with local Redis
+    # No host publication: an open Redis lets anyone flush the token blacklist.
     volumes:
       - redis-data:/data
     networks:
@@ -113,6 +112,8 @@ services:
   # =============================================================================
   asr:
     profiles: [voice]
+    # :latest tracks the companion repo until it cuts versioned tags;
+    # pin to a tag then (unpinned voice images are not reproducible).
     image: kylesean/asr_server:latest
     container_name: Finvo-asr
     ports:
@@ -159,7 +160,8 @@ services:
       - ./server/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./server/grafana/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      # No default: fail visibly instead of booting a guessable admin login.
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
     networks:
       - monitoring
