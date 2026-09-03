@@ -171,6 +171,12 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev
 
+      - name: Cyclomatic complexity (grade C and worse)
+        run: uv run radon cc app/ -a -s --min C
+
+      - name: Maintainability index (grade C and worse)
+        run: uv run radon mi app/ -s --min C
+
   # ============================================================================
   # Unit Tests
   # ============================================================================

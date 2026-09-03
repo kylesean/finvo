@@ -12,9 +12,10 @@ def test_health_check_strict(client):
     assert data["code"] == 0
     assert data["data"]["status"] == "healthy"
 
-    # Verify DB component is specifically mentioned as up/healthy if available
-    components = data["data"].get("components", {})
-    if "db" in components:
-        # Implementation detail: check if db status is reported as true/up/healthy
-        # Adjust based on actul health check implementation
-        assert components["db"].get("status") == "up" or components["db"] is True
+    # Strict component contract (see main.py health_check): required
+    # components must report healthy — a conditional check here used to test
+    # a phantom "db" key and silently assert nothing.
+    components = data["data"]["components"]
+    assert components["database"] == "healthy"
+    assert components["checkpointer"] == "healthy"
+    assert components["scheduler"] == "running"

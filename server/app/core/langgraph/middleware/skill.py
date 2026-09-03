@@ -8,7 +8,7 @@ Key responsibilities:
 2. Register the load_skill tool for on-demand skill loading
 
 Note: tool scoping when a skill is active is resolved by the agent node
-(see app.core.langgraph.agent.nodes._resolve_skill_tools), not here.
+(see app.core.langgraph.agent.nodes._skill_tools), not here.
 """
 
 from __future__ import annotations

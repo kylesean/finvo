@@ -10,7 +10,7 @@
 
 ## 1. 核心原则（业内最佳实践子集，强制）
 
-1. **测试金字塔**：目标分布单测（70%）> 集成/API 测试（20%）> E2E（10%）。本仓现状是 unit 25 + integration 7（`server/tests/`）与 72 Dart 单测，无独立 E2E 目录——保持现有比例，暂不补 E2E。
+1. **测试金字塔**：目标分布单测（70%）> 集成/API 测试（20%）> E2E（10%）。本仓现状是 unit 45 + integration 9（`server/tests/`）与 76 个 Dart 测试文件（0.3.x 实测；数字随开发漂移，以 `tests/`、`test/` 目录为准），无独立 E2E 目录——保持现有比例，暂不补 E2E。
 2. **单一真相源（SSOT）**：金额、账本、预算、权限、汇率、时区归因只在 `server/app/services/` 算。`client/` 不得重实现，只做格式化/展示/校验。
 3. **单测定义**：FIRST（Fast / Isolated / Repeatable / Self-validating / Timely）+ AAA（Arrange-Act-Assert）+ 一个 `test_` 只断言一个行为。
 4. **隔离性**：单测不碰真实网络、真实 LLM、真实时钟/随机数（注入或冻结）、不跨用例共享可变状态。

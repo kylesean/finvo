@@ -3,10 +3,11 @@
 This module provides async SQLAlchemy engine, session management, and database utilities
 for ORM operations (User, Transaction, Session, etc.).
 
-Note: This is SEPARATE from pg_pool.py which uses psycopg3 for LangGraph checkpointer.
-The two pools connect to the same database but use different drivers:
+Note: This is SEPARATE from checkpointer.py which uses psycopg3 for the
+LangGraph checkpointer. The two pools connect to the same database but use
+different drivers:
 - database.py: SQLAlchemy + asyncpg (for ORM)
-- pg_pool.py: psycopg3 (for LangGraph, required by AsyncPostgresSaver)
+- checkpointer.py: psycopg3 (for LangGraph, required by AsyncPostgresSaver)
 """
 
 from __future__ import annotations
