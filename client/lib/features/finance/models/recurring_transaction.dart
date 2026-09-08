@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/models/currency.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 
 /// Parses a JSON value into a [Decimal], tolerating null/empty/missing values
 /// (treated as zero) and non-numeric strings (fall back to zero) so a single
@@ -386,9 +387,7 @@ class PendingTransaction {
       currency: json['currency'] as String? ?? Currency.defaultCode,
       categoryKey: json['category_key'] as String?,
       description: json['description'] as String?,
-      transactionAt: json['transaction_at'] != null
-          ? DateTime.parse(json['transaction_at'] as String)
-          : null,
+      transactionAt: tryParseDateTime(json['transaction_at']),
       recurringTransactionId: json['recurring_transaction_id'] as String?,
     );
   }

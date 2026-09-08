@@ -46,9 +46,10 @@ _TransactionAttachment _$TransactionAttachmentFromJson(
   size: (json['size'] as num?)?.toInt(),
   url: json['url'] as String,
   isImage: json['isImage'] as bool? ?? false,
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
+  createdAt: _$JsonConverterFromJson<String, DateTime>(
+    json['createdAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$TransactionAttachmentToJson(
@@ -60,8 +61,21 @@ Map<String, dynamic> _$TransactionAttachmentToJson(
   'size': instance.size,
   'url': instance.url,
   'isImage': instance.isImage,
-  'createdAt': instance.createdAt?.toIso8601String(),
+  'createdAt': _$JsonConverterToJson<String, DateTime>(
+    instance.createdAt,
+    const LocalDateTimeConverter().toJson,
+  ),
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);
 
 _AmountDisplay _$AmountDisplayFromJson(Map<String, dynamic> json) =>
     _AmountDisplay(
@@ -94,12 +108,14 @@ _TransactionCommentModel _$TransactionCommentModelFromJson(
           ?.map((e) => e as String)
           .toList() ??
       const [],
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
-      ? null
-      : DateTime.parse(json['updatedAt'] as String),
+  createdAt: _$JsonConverterFromJson<String, DateTime>(
+    json['createdAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
+  updatedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['updatedAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$TransactionCommentModelToJson(
@@ -113,8 +129,14 @@ Map<String, dynamic> _$TransactionCommentModelToJson(
   'parentCommentId': instance.parentCommentId,
   'commentText': instance.commentText,
   'mentionedUserIds': instance.mentionedUserIds,
-  'createdAt': instance.createdAt?.toIso8601String(),
-  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'createdAt': _$JsonConverterToJson<String, DateTime>(
+    instance.createdAt,
+    const LocalDateTimeConverter().toJson,
+  ),
+  'updatedAt': _$JsonConverterToJson<String, DateTime>(
+    instance.updatedAt,
+    const LocalDateTimeConverter().toJson,
+  ),
 };
 
 _TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
@@ -130,7 +152,9 @@ _TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
       categoryText: json['categoryText'] as String?,
       iconUrl: json['iconUrl'] as String,
       amount: Decimal.fromJson(json['amount'] as String),
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      timestamp: const LocalDateTimeConverter().fromJson(
+        json['timestamp'] as String,
+      ),
       amountOriginal: json['amountOriginal'] == null
           ? null
           : Decimal.fromJson(json['amountOriginal'] as String),
@@ -160,12 +184,14 @@ _TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
       display: json['display'] == null
           ? null
           : AmountDisplay.fromJson(json['display'] as Map<String, dynamic>),
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
+      createdAt: _$JsonConverterFromJson<String, DateTime>(
+        json['createdAt'],
+        const LocalDateTimeConverter().fromJson,
+      ),
+      updatedAt: _$JsonConverterFromJson<String, DateTime>(
+        json['updatedAt'],
+        const LocalDateTimeConverter().fromJson,
+      ),
       photoPath: json['photoPath'] as String?,
       geoLocation: json['geoLocation'] as String?,
       comments:
@@ -203,7 +229,7 @@ Map<String, dynamic> _$TransactionModelToJson(_TransactionModel instance) =>
       'categoryText': instance.categoryText,
       'iconUrl': instance.iconUrl,
       'amount': instance.amount,
-      'timestamp': instance.timestamp.toIso8601String(),
+      'timestamp': const LocalDateTimeConverter().toJson(instance.timestamp),
       'amountOriginal': instance.amountOriginal,
       'originalCurrency': instance.originalCurrency,
       'exchangeRate': instance.exchangeRate,
@@ -219,8 +245,14 @@ Map<String, dynamic> _$TransactionModelToJson(_TransactionModel instance) =>
       'source': instance.source,
       'financialAccount': instance.financialAccount,
       'display': instance.display,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'createdAt': _$JsonConverterToJson<String, DateTime>(
+        instance.createdAt,
+        const LocalDateTimeConverter().toJson,
+      ),
+      'updatedAt': _$JsonConverterToJson<String, DateTime>(
+        instance.updatedAt,
+        const LocalDateTimeConverter().toJson,
+      ),
       'photoPath': instance.photoPath,
       'geoLocation': instance.geoLocation,
       'comments': instance.comments,

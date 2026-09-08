@@ -1,11 +1,15 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 
 part 'conversation_info.freezed.dart';
 part 'conversation_info.g.dart';
 
 @freezed
 abstract class ConversationInfo with _$ConversationInfo {
-  @JsonSerializable(explicitToJson: true)
+  @JsonSerializable(
+    explicitToJson: true,
+    converters: [LocalDateTimeConverter()],
+  )
   const factory ConversationInfo({
     required String id,
     required String title,

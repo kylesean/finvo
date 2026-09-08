@@ -92,14 +92,18 @@ _FinancialAccountSummary _$FinancialAccountSummaryFromJson(
   Map<String, dynamic> json,
 ) => _FinancialAccountSummary(
   totalBalance: decimalFromJson(json['totalBalance']),
-  lastUpdatedAt: DateTime.parse(json['lastUpdatedAt'] as String),
+  lastUpdatedAt: const LocalDateTimeConverter().fromJson(
+    json['lastUpdatedAt'] as String,
+  ),
 );
 
 Map<String, dynamic> _$FinancialAccountSummaryToJson(
   _FinancialAccountSummary instance,
 ) => <String, dynamic>{
   'totalBalance': decimalToJson(instance.totalBalance),
-  'lastUpdatedAt': instance.lastUpdatedAt.toIso8601String(),
+  'lastUpdatedAt': const LocalDateTimeConverter().toJson(
+    instance.lastUpdatedAt,
+  ),
 };
 
 _FinancialAccountResponse _$FinancialAccountResponseFromJson(

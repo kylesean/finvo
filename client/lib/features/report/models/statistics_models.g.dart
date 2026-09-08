@@ -15,22 +15,27 @@ _StatisticsOverview _$StatisticsOverviewFromJson(Map<String, dynamic> json) =>
       expenseChangePercent: tryDouble(json['expenseChangePercent']),
       netChangePercent: tryDouble(json['netChangePercent']),
       balanceNote: json['balanceNote'] as String? ?? '',
-      periodStart: DateTime.parse(json['periodStart'] as String),
-      periodEnd: DateTime.parse(json['periodEnd'] as String),
+      periodStart: const LocalDateTimeConverter().fromJson(
+        json['periodStart'] as String,
+      ),
+      periodEnd: const LocalDateTimeConverter().fromJson(
+        json['periodEnd'] as String,
+      ),
     );
 
-Map<String, dynamic> _$StatisticsOverviewToJson(_StatisticsOverview instance) =>
-    <String, dynamic>{
-      'totalBalance': instance.totalBalance,
-      'totalIncome': instance.totalIncome,
-      'totalExpense': instance.totalExpense,
-      'incomeChangePercent': instance.incomeChangePercent,
-      'expenseChangePercent': instance.expenseChangePercent,
-      'netChangePercent': instance.netChangePercent,
-      'balanceNote': instance.balanceNote,
-      'periodStart': instance.periodStart.toIso8601String(),
-      'periodEnd': instance.periodEnd.toIso8601String(),
-    };
+Map<String, dynamic> _$StatisticsOverviewToJson(
+  _StatisticsOverview instance,
+) => <String, dynamic>{
+  'totalBalance': instance.totalBalance,
+  'totalIncome': instance.totalIncome,
+  'totalExpense': instance.totalExpense,
+  'incomeChangePercent': instance.incomeChangePercent,
+  'expenseChangePercent': instance.expenseChangePercent,
+  'netChangePercent': instance.netChangePercent,
+  'balanceNote': instance.balanceNote,
+  'periodStart': const LocalDateTimeConverter().toJson(instance.periodStart),
+  'periodEnd': const LocalDateTimeConverter().toJson(instance.periodEnd),
+};
 
 _TrendDataPoint _$TrendDataPointFromJson(Map<String, dynamic> json) =>
     _TrendDataPoint(
@@ -104,7 +109,9 @@ _TopTransactionItem _$TopTransactionItemFromJson(Map<String, dynamic> json) =>
       amount: json['amount'] as String,
       categoryKey: json['categoryKey'] as String,
       categoryName: json['categoryName'] as String,
-      transactionAt: DateTime.parse(json['transactionAt'] as String),
+      transactionAt: const LocalDateTimeConverter().fromJson(
+        json['transactionAt'] as String,
+      ),
       icon: json['icon'] as String,
     );
 
@@ -115,7 +122,9 @@ Map<String, dynamic> _$TopTransactionItemToJson(_TopTransactionItem instance) =>
       'amount': instance.amount,
       'categoryKey': instance.categoryKey,
       'categoryName': instance.categoryName,
-      'transactionAt': instance.transactionAt.toIso8601String(),
+      'transactionAt': const LocalDateTimeConverter().toJson(
+        instance.transactionAt,
+      ),
       'icon': instance.icon,
     };
 
@@ -157,25 +166,30 @@ _CashFlowAnalysis _$CashFlowAnalysisFromJson(Map<String, dynamic> json) =>
       incomeChangePercent: (json['incomeChangePercent'] as num).toDouble(),
       expenseChangePercent: (json['expenseChangePercent'] as num).toDouble(),
       savingsRateChange: (json['savingsRateChange'] as num).toDouble(),
-      periodStart: DateTime.parse(json['periodStart'] as String),
-      periodEnd: DateTime.parse(json['periodEnd'] as String),
+      periodStart: const LocalDateTimeConverter().fromJson(
+        json['periodStart'] as String,
+      ),
+      periodEnd: const LocalDateTimeConverter().fromJson(
+        json['periodEnd'] as String,
+      ),
     );
 
-Map<String, dynamic> _$CashFlowAnalysisToJson(_CashFlowAnalysis instance) =>
-    <String, dynamic>{
-      'totalIncome': instance.totalIncome,
-      'totalExpense': instance.totalExpense,
-      'netCashFlow': instance.netCashFlow,
-      'savingsRate': instance.savingsRate,
-      'expenseToIncomeRatio': instance.expenseToIncomeRatio,
-      'essentialExpenseRatio': instance.essentialExpenseRatio,
-      'discretionaryExpenseRatio': instance.discretionaryExpenseRatio,
-      'incomeChangePercent': instance.incomeChangePercent,
-      'expenseChangePercent': instance.expenseChangePercent,
-      'savingsRateChange': instance.savingsRateChange,
-      'periodStart': instance.periodStart.toIso8601String(),
-      'periodEnd': instance.periodEnd.toIso8601String(),
-    };
+Map<String, dynamic> _$CashFlowAnalysisToJson(
+  _CashFlowAnalysis instance,
+) => <String, dynamic>{
+  'totalIncome': instance.totalIncome,
+  'totalExpense': instance.totalExpense,
+  'netCashFlow': instance.netCashFlow,
+  'savingsRate': instance.savingsRate,
+  'expenseToIncomeRatio': instance.expenseToIncomeRatio,
+  'essentialExpenseRatio': instance.essentialExpenseRatio,
+  'discretionaryExpenseRatio': instance.discretionaryExpenseRatio,
+  'incomeChangePercent': instance.incomeChangePercent,
+  'expenseChangePercent': instance.expenseChangePercent,
+  'savingsRateChange': instance.savingsRateChange,
+  'periodStart': const LocalDateTimeConverter().toJson(instance.periodStart),
+  'periodEnd': const LocalDateTimeConverter().toJson(instance.periodEnd),
+};
 
 _HealthScoreDimension _$HealthScoreDimensionFromJson(
   Map<String, dynamic> json,
@@ -208,16 +222,21 @@ _HealthScore _$HealthScoreFromJson(Map<String, dynamic> json) => _HealthScore(
           ?.map((e) => e as String)
           .toList() ??
       const [],
-  periodStart: DateTime.parse(json['periodStart'] as String),
-  periodEnd: DateTime.parse(json['periodEnd'] as String),
+  periodStart: const LocalDateTimeConverter().fromJson(
+    json['periodStart'] as String,
+  ),
+  periodEnd: const LocalDateTimeConverter().fromJson(
+    json['periodEnd'] as String,
+  ),
 );
 
-Map<String, dynamic> _$HealthScoreToJson(_HealthScore instance) =>
-    <String, dynamic>{
-      'totalScore': instance.totalScore,
-      'grade': instance.grade,
-      'dimensions': instance.dimensions,
-      'suggestions': instance.suggestions,
-      'periodStart': instance.periodStart.toIso8601String(),
-      'periodEnd': instance.periodEnd.toIso8601String(),
-    };
+Map<String, dynamic> _$HealthScoreToJson(
+  _HealthScore instance,
+) => <String, dynamic>{
+  'totalScore': instance.totalScore,
+  'grade': instance.grade,
+  'dimensions': instance.dimensions,
+  'suggestions': instance.suggestions,
+  'periodStart': const LocalDateTimeConverter().toJson(instance.periodStart),
+  'periodEnd': const LocalDateTimeConverter().toJson(instance.periodEnd),
+};

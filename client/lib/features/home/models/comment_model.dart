@@ -6,7 +6,10 @@ part 'comment_model.g.dart';
 
 @freezed
 abstract class CommentModel with _$CommentModel {
-  @JsonSerializable(explicitToJson: true)
+  @JsonSerializable(
+    explicitToJson: true,
+    converters: [LocalDateTimeConverter()],
+  )
   const factory CommentModel({
     required String id,
     required String transactionId, // Ensure API returns or can set

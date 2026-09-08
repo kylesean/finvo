@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 
 part 'genui_surface_info.freezed.dart';
 part 'genui_surface_info.g.dart';
@@ -27,6 +28,7 @@ enum SurfaceStatus {
 /// GenUI Surface info
 @freezed
 abstract class GenUiSurfaceInfo with _$GenUiSurfaceInfo {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory GenUiSurfaceInfo({
     required String surfaceId,
     required String messageId,

@@ -213,8 +213,8 @@ return $default(_that.userId,_that.username,_that.avatarUrl,_that.role,_that.cre
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _SharedSpaceMember implements SharedSpaceMember {
   const _SharedSpaceMember({required this.userId, required this.username, this.avatarUrl, @JsonKey(unknownEnumValue: MemberRole.member) this.role = MemberRole.member, this.createdAt, this.email, @JsonKey(unknownEnumValue: InviteStatus.pending) this.status = InviteStatus.accepted, this.contributionAmount = '0.00'});
   factory _SharedSpaceMember.fromJson(Map<String, dynamic> json) => _$SharedSpaceMemberFromJson(json);
@@ -779,8 +779,8 @@ return $default(_that.id,_that.name,_that.description,_that.creator,_that.role,_
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _SharedSpace implements SharedSpace {
   const _SharedSpace({required this.id, required this.name, this.description, required this.creator, @JsonKey(unknownEnumValue: MemberRole.member) this.role = MemberRole.member, this.createdAt, this.updatedAt, final  List<SharedSpaceMember>? members, this.transactionCount = 0, this.currentInviteCode, this.inviteCodeExpiresAt, this.totalExpense = '0.00'}): _members = members;
   factory _SharedSpace.fromJson(Map<String, dynamic> json) => _$SharedSpaceFromJson(json);
@@ -1084,8 +1084,8 @@ return $default(_that.code,_that.spaceId,_that.spaceName,_that.expiresAt);case _
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _InviteCode implements InviteCode {
   const _InviteCode({required this.code, required this.spaceId, required this.spaceName, this.expiresAt});
   factory _InviteCode.fromJson(Map<String, dynamic> json) => _$InviteCodeFromJson(json);
@@ -1632,8 +1632,8 @@ return $default(_that.spaceId,_that.items,_that.totalAmount,_that.calculatedAt,_
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _Settlement implements Settlement {
   const _Settlement({required this.spaceId, required final  List<SettlementItem> items, @JsonKey(fromJson: decimalFromJson, toJson: _decimalToString) required this.totalAmount, required this.calculatedAt, this.isSettled = false}): _items = items;
   factory _Settlement.fromJson(Map<String, dynamic> json) => _$SettlementFromJson(json);
@@ -1917,8 +1917,8 @@ return $default(_that.id,_that.userId,_that.type,_that.title,_that.message,_that
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _SharedSpaceNotificationModel implements SharedSpaceNotificationModel {
   const _SharedSpaceNotificationModel({required this.id, required this.userId, @JsonKey(unknownEnumValue: NotificationType.other) required this.type, required this.title, required this.message, final  Map<String, dynamic>? data, this.isRead = false, this.createdAt, this.readAt}): _data = data;
   factory _SharedSpaceNotificationModel.fromJson(Map<String, dynamic> json) => _$SharedSpaceNotificationModelFromJson(json);
@@ -2213,8 +2213,8 @@ return $default(_that.id,_that.type,_that.amount,_that.currency,_that.descriptio
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _SpaceTransaction implements SpaceTransaction {
   const _SpaceTransaction({required this.id, required this.type, required this.amount, this.currency = Currency.defaultCode, this.description, this.categoryKey, @JsonKey(name: 'transactionAt') this.transactionAt, @JsonKey(name: 'addedByUsername') this.addedByUsername, @JsonKey(name: 'addedAt') this.addedAt, final  Map<String, dynamic>? display}): _display = display;
   factory _SpaceTransaction.fromJson(Map<String, dynamic> json) => _$SpaceTransactionFromJson(json);

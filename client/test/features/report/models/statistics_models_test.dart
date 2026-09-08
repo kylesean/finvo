@@ -39,7 +39,12 @@ void main() {
       expect(overview.totalBalance, '10000.00');
       expect(overview.incomeChangePercent, 5.5);
       expect(overview.balanceNote, 'Healthy');
-      expect(overview.periodStart, DateTime.utc(2026, 1, 1));
+      // Timestamps parse to LOCAL time (LocalDateTimeConverter): the UTC
+      // input must land on the same wall-clock instant, not stay in UTC.
+      expect(
+        overview.periodStart,
+        DateTime.parse('2026-01-01T00:00:00Z').toLocal(),
+      );
     });
 
     test('balanceNote defaults to empty string when omitted', () {
@@ -156,7 +161,11 @@ void main() {
       expect(result.page, 1);
       expect(result.pageSize, 10);
       expect(result.hasMore, isFalse);
-      expect(result.items.first.transactionAt, DateTime.utc(2026, 1, 1, 12));
+      // Parsed to LOCAL time by LocalDateTimeConverter.
+      expect(
+        result.items.first.transactionAt,
+        DateTime.parse('2026-01-01T12:00:00Z').toLocal(),
+      );
     });
 
     test('parses explicit page flags', () {

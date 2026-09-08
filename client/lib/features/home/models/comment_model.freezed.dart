@@ -220,7 +220,7 @@ return $default(_that.id,_that.transactionId,_that.userId,_that.userName,_that.u
 
 /// @nodoc
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, converters: [LocalDateTimeConverter()])
 class _CommentModel implements CommentModel {
   const _CommentModel({required this.id, required this.transactionId, required this.userId, required this.userName, required this.userAvatarUrl, this.parentCommentId, required this.commentText, this.repliedToUserId, this.repliedToUserName, required this.createdAt, @JsonKey(fromJson: _dateTimeNullableParse, toJson: _dateTimeNullableToIso8601String) this.updatedAt, final  List<CommentModel> replies = const [], this.likeCount = 0, this.likedByCurrentUser = false}): _replies = replies;
   factory _CommentModel.fromJson(Map<String, dynamic> json) => _$CommentModelFromJson(json);

@@ -210,8 +210,8 @@ return $default(_that.surfaceId,_that.messageId,_that.createdAt,_that.updatedAt,
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _GenUiSurfaceInfo implements GenUiSurfaceInfo {
   const _GenUiSurfaceInfo({required this.surfaceId, required this.messageId, this.createdAt, this.updatedAt, @JsonKey(unknownEnumValue: SurfaceStatus.loading) this.status = SurfaceStatus.loading});
   factory _GenUiSurfaceInfo.fromJson(Map<String, dynamic> json) => _$GenUiSurfaceInfoFromJson(json);

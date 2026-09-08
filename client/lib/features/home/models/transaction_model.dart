@@ -1,6 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:forui/forui.dart';
 import 'package:logging/logging.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -52,6 +53,7 @@ abstract class SpaceInfo with _$SpaceInfo {
 // Transaction attachment (linked via AI conversation thread)
 @freezed
 abstract class TransactionAttachment with _$TransactionAttachment {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory TransactionAttachment({
     required String id,
     required String filename,
@@ -83,6 +85,7 @@ abstract class AmountDisplay with _$AmountDisplay {
 // Transaction comment model
 @freezed
 abstract class TransactionCommentModel with _$TransactionCommentModel {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory TransactionCommentModel({
     required String id,
     required String transactionId,
@@ -123,6 +126,7 @@ abstract class TransactionCommentModel with _$TransactionCommentModel {
 
 @freezed
 abstract class TransactionModel with _$TransactionModel {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory TransactionModel({
     required String id, // Unique ID
     // `other` is the designed neutral fallback for unknown transaction
@@ -196,17 +200,12 @@ abstract class TransactionModel with _$TransactionModel {
         break;
     }
 
-    // Parse timestamp (field name changed to transactionAt)
-    final transactionAtStr = json['transactionAt'] as String?;
-    final timestamp = transactionAtStr != null
-        ? DateTime.tryParse(transactionAtStr) ?? DateTime.now()
-        : DateTime.now();
+    // Parse timestamp (field name changed to transactionAt). Server sends
+    // UTC; tryParseDateTime converts to the device's local wall clock.
+    final timestamp = tryParseDateTime(json['transactionAt']) ?? DateTime.now();
 
     // Parse creation time
-    final createdAtStr = json['createdAt'] as String?;
-    final createdAt = createdAtStr != null
-        ? DateTime.tryParse(createdAtStr)
-        : null;
+    final createdAt = tryParseDateTime(json['createdAt']);
 
     final rawInput = json['rawInput'] as String?;
 

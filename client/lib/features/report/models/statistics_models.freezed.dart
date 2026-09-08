@@ -214,8 +214,8 @@ return $default(_that.totalBalance,_that.totalIncome,_that.totalExpense,_that.in
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _StatisticsOverview implements StatisticsOverview {
   const _StatisticsOverview({required this.totalBalance, required this.totalIncome, required this.totalExpense, @JsonKey(fromJson: tryDouble) required this.incomeChangePercent, @JsonKey(fromJson: tryDouble) required this.expenseChangePercent, @JsonKey(fromJson: tryDouble) required this.netChangePercent, this.balanceNote = '', required this.periodStart, required this.periodEnd});
   factory _StatisticsOverview.fromJson(Map<String, dynamic> json) => _$StatisticsOverviewFromJson(json);
@@ -1593,8 +1593,8 @@ return $default(_that.id,_that.description,_that.amount,_that.categoryKey,_that.
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _TopTransactionItem implements TopTransactionItem {
   const _TopTransactionItem({required this.id, required this.description, required this.amount, required this.categoryKey, required this.categoryName, required this.transactionAt, required this.icon});
   factory _TopTransactionItem.fromJson(Map<String, dynamic> json) => _$TopTransactionItemFromJson(json);
@@ -2163,8 +2163,8 @@ return $default(_that.totalIncome,_that.totalExpense,_that.netCashFlow,_that.sav
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _CashFlowAnalysis implements CashFlowAnalysis {
   const _CashFlowAnalysis({required this.totalIncome, required this.totalExpense, required this.netCashFlow, required this.savingsRate, required this.expenseToIncomeRatio, this.essentialExpenseRatio = 0.0, this.discretionaryExpenseRatio = 0.0, required this.incomeChangePercent, required this.expenseChangePercent, required this.savingsRateChange, required this.periodStart, required this.periodEnd});
   factory _CashFlowAnalysis.fromJson(Map<String, dynamic> json) => _$CashFlowAnalysisFromJson(json);
@@ -2728,8 +2728,8 @@ return $default(_that.totalScore,_that.grade,_that.dimensions,_that.suggestions,
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _HealthScore implements HealthScore {
   const _HealthScore({required this.totalScore, required this.grade, required final  List<HealthScoreDimension> dimensions, final  List<String> suggestions = const [], required this.periodStart, required this.periodEnd}): _dimensions = dimensions,_suggestions = suggestions;
   factory _HealthScore.fromJson(Map<String, dynamic> json) => _$HealthScoreFromJson(json);

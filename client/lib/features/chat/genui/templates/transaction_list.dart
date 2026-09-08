@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/widgets/themed_icon.dart';
 import 'package:finvo/features/home/services/home_service.dart';
@@ -345,7 +346,8 @@ class _TransactionListState extends ConsumerState<TransactionList> {
   String _formatDate(String isoTime) {
     if (isoTime.isEmpty) return '';
     try {
-      final dateTime = DateTime.parse(isoTime);
+      final dateTime = tryParseDateTime(isoTime);
+      if (dateTime == null) return '';
       return '${dateTime.month}/${dateTime.day}';
     } catch (e) {
       return '';

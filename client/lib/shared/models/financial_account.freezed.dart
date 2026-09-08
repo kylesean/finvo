@@ -849,8 +849,8 @@ return $default(_that.totalBalance,_that.lastUpdatedAt);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _FinancialAccountSummary implements FinancialAccountSummary {
   const _FinancialAccountSummary({@JsonKey(fromJson: decimalFromJson, toJson: decimalToJson) required this.totalBalance, required this.lastUpdatedAt});
   factory _FinancialAccountSummary.fromJson(Map<String, dynamic> json) => _$FinancialAccountSummaryFromJson(json);

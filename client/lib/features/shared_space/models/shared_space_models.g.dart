@@ -18,9 +18,10 @@ _SharedSpaceMember _$SharedSpaceMemberFromJson(Map<String, dynamic> json) =>
             unknownValue: MemberRole.member,
           ) ??
           MemberRole.member,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
+      createdAt: _$JsonConverterFromJson<String, DateTime>(
+        json['createdAt'],
+        const LocalDateTimeConverter().fromJson,
+      ),
       email: json['email'] as String?,
       status:
           $enumDecodeNullable(
@@ -38,7 +39,10 @@ Map<String, dynamic> _$SharedSpaceMemberToJson(_SharedSpaceMember instance) =>
       'username': instance.username,
       'avatarUrl': instance.avatarUrl,
       'role': _$MemberRoleEnumMap[instance.role]!,
-      'createdAt': instance.createdAt?.toIso8601String(),
+      'createdAt': _$JsonConverterToJson<String, DateTime>(
+        instance.createdAt,
+        const LocalDateTimeConverter().toJson,
+      ),
       'email': instance.email,
       'status': _$InviteStatusEnumMap[instance.status]!,
       'contributionAmount': instance.contributionAmount,
@@ -50,11 +54,21 @@ const _$MemberRoleEnumMap = {
   MemberRole.member: 'MEMBER',
 };
 
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
 const _$InviteStatusEnumMap = {
   InviteStatus.pending: 'PENDING',
   InviteStatus.accepted: 'ACCEPTED',
   InviteStatus.declined: 'DECLINED',
 };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);
 
 _SpaceCreator _$SpaceCreatorFromJson(Map<String, dynamic> json) =>
     _SpaceCreator(
@@ -82,20 +96,23 @@ _SharedSpace _$SharedSpaceFromJson(Map<String, dynamic> json) => _SharedSpace(
         unknownValue: MemberRole.member,
       ) ??
       MemberRole.member,
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
-      ? null
-      : DateTime.parse(json['updatedAt'] as String),
+  createdAt: _$JsonConverterFromJson<String, DateTime>(
+    json['createdAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
+  updatedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['updatedAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
   members: (json['members'] as List<dynamic>?)
       ?.map((e) => SharedSpaceMember.fromJson(e as Map<String, dynamic>))
       .toList(),
   transactionCount: (json['transactionCount'] as num?)?.toInt() ?? 0,
   currentInviteCode: json['currentInviteCode'] as String?,
-  inviteCodeExpiresAt: json['inviteCodeExpiresAt'] == null
-      ? null
-      : DateTime.parse(json['inviteCodeExpiresAt'] as String),
+  inviteCodeExpiresAt: _$JsonConverterFromJson<String, DateTime>(
+    json['inviteCodeExpiresAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
   totalExpense: json['totalExpense'] as String? ?? '0.00',
 );
 
@@ -106,12 +123,21 @@ Map<String, dynamic> _$SharedSpaceToJson(_SharedSpace instance) =>
       'description': instance.description,
       'creator': instance.creator,
       'role': _$MemberRoleEnumMap[instance.role]!,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'createdAt': _$JsonConverterToJson<String, DateTime>(
+        instance.createdAt,
+        const LocalDateTimeConverter().toJson,
+      ),
+      'updatedAt': _$JsonConverterToJson<String, DateTime>(
+        instance.updatedAt,
+        const LocalDateTimeConverter().toJson,
+      ),
       'members': instance.members,
       'transactionCount': instance.transactionCount,
       'currentInviteCode': instance.currentInviteCode,
-      'inviteCodeExpiresAt': instance.inviteCodeExpiresAt?.toIso8601String(),
+      'inviteCodeExpiresAt': _$JsonConverterToJson<String, DateTime>(
+        instance.inviteCodeExpiresAt,
+        const LocalDateTimeConverter().toJson,
+      ),
       'totalExpense': instance.totalExpense,
     };
 
@@ -119,9 +145,10 @@ _InviteCode _$InviteCodeFromJson(Map<String, dynamic> json) => _InviteCode(
   code: json['code'] as String,
   spaceId: json['spaceId'] as String,
   spaceName: json['spaceName'] as String,
-  expiresAt: json['expiresAt'] == null
-      ? null
-      : DateTime.parse(json['expiresAt'] as String),
+  expiresAt: _$JsonConverterFromJson<String, DateTime>(
+    json['expiresAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$InviteCodeToJson(_InviteCode instance) =>
@@ -129,7 +156,10 @@ Map<String, dynamic> _$InviteCodeToJson(_InviteCode instance) =>
       'code': instance.code,
       'spaceId': instance.spaceId,
       'spaceName': instance.spaceName,
-      'expiresAt': instance.expiresAt?.toIso8601String(),
+      'expiresAt': _$JsonConverterToJson<String, DateTime>(
+        instance.expiresAt,
+        const LocalDateTimeConverter().toJson,
+      ),
     };
 
 _SettlementItem _$SettlementItemFromJson(Map<String, dynamic> json) =>
@@ -156,18 +186,21 @@ _Settlement _$SettlementFromJson(Map<String, dynamic> json) => _Settlement(
       .map((e) => SettlementItem.fromJson(e as Map<String, dynamic>))
       .toList(),
   totalAmount: decimalFromJson(json['totalAmount']),
-  calculatedAt: DateTime.parse(json['calculatedAt'] as String),
+  calculatedAt: const LocalDateTimeConverter().fromJson(
+    json['calculatedAt'] as String,
+  ),
   isSettled: json['isSettled'] as bool? ?? false,
 );
 
-Map<String, dynamic> _$SettlementToJson(_Settlement instance) =>
-    <String, dynamic>{
-      'spaceId': instance.spaceId,
-      'items': instance.items,
-      'totalAmount': _decimalToString(instance.totalAmount),
-      'calculatedAt': instance.calculatedAt.toIso8601String(),
-      'isSettled': instance.isSettled,
-    };
+Map<String, dynamic> _$SettlementToJson(
+  _Settlement instance,
+) => <String, dynamic>{
+  'spaceId': instance.spaceId,
+  'items': instance.items,
+  'totalAmount': _decimalToString(instance.totalAmount),
+  'calculatedAt': const LocalDateTimeConverter().toJson(instance.calculatedAt),
+  'isSettled': instance.isSettled,
+};
 
 _SharedSpaceNotificationModel _$SharedSpaceNotificationModelFromJson(
   Map<String, dynamic> json,
@@ -183,12 +216,14 @@ _SharedSpaceNotificationModel _$SharedSpaceNotificationModelFromJson(
   message: json['message'] as String,
   data: json['data'] as Map<String, dynamic>?,
   isRead: json['isRead'] as bool? ?? false,
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
-  readAt: json['readAt'] == null
-      ? null
-      : DateTime.parse(json['readAt'] as String),
+  createdAt: _$JsonConverterFromJson<String, DateTime>(
+    json['createdAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
+  readAt: _$JsonConverterFromJson<String, DateTime>(
+    json['readAt'],
+    const LocalDateTimeConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$SharedSpaceNotificationModelToJson(
@@ -201,8 +236,14 @@ Map<String, dynamic> _$SharedSpaceNotificationModelToJson(
   'message': instance.message,
   'data': instance.data,
   'isRead': instance.isRead,
-  'createdAt': instance.createdAt?.toIso8601String(),
-  'readAt': instance.readAt?.toIso8601String(),
+  'createdAt': _$JsonConverterToJson<String, DateTime>(
+    instance.createdAt,
+    const LocalDateTimeConverter().toJson,
+  ),
+  'readAt': _$JsonConverterToJson<String, DateTime>(
+    instance.readAt,
+    const LocalDateTimeConverter().toJson,
+  ),
 };
 
 const _$NotificationTypeEnumMap = {
@@ -223,13 +264,15 @@ _SpaceTransaction _$SpaceTransactionFromJson(Map<String, dynamic> json) =>
       currency: json['currency'] as String? ?? Currency.defaultCode,
       description: json['description'] as String?,
       categoryKey: json['categoryKey'] as String?,
-      transactionAt: json['transactionAt'] == null
-          ? null
-          : DateTime.parse(json['transactionAt'] as String),
+      transactionAt: _$JsonConverterFromJson<String, DateTime>(
+        json['transactionAt'],
+        const LocalDateTimeConverter().fromJson,
+      ),
       addedByUsername: json['addedByUsername'] as String?,
-      addedAt: json['addedAt'] == null
-          ? null
-          : DateTime.parse(json['addedAt'] as String),
+      addedAt: _$JsonConverterFromJson<String, DateTime>(
+        json['addedAt'],
+        const LocalDateTimeConverter().fromJson,
+      ),
       display: json['display'] as Map<String, dynamic>?,
     );
 
@@ -241,9 +284,15 @@ Map<String, dynamic> _$SpaceTransactionToJson(_SpaceTransaction instance) =>
       'currency': instance.currency,
       'description': instance.description,
       'categoryKey': instance.categoryKey,
-      'transactionAt': instance.transactionAt?.toIso8601String(),
+      'transactionAt': _$JsonConverterToJson<String, DateTime>(
+        instance.transactionAt,
+        const LocalDateTimeConverter().toJson,
+      ),
       'addedByUsername': instance.addedByUsername,
-      'addedAt': instance.addedAt?.toIso8601String(),
+      'addedAt': _$JsonConverterToJson<String, DateTime>(
+        instance.addedAt,
+        const LocalDateTimeConverter().toJson,
+      ),
       'display': instance.display,
     };
 

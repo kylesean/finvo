@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/utils/tolerant_json.dart';
 import 'package:finvo/shared/models/currency.dart';
@@ -48,6 +49,7 @@ enum NotificationType {
 
 @freezed
 abstract class SharedSpaceMember with _$SharedSpaceMember {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory SharedSpaceMember({
     required String userId,
     required String username,
@@ -85,6 +87,7 @@ abstract class SpaceCreator with _$SpaceCreator {
 
 @freezed
 abstract class SharedSpace with _$SharedSpace {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory SharedSpace({
     required String id,
     required String name,
@@ -122,6 +125,7 @@ extension SharedSpacePermissions on SharedSpace {
 
 @freezed
 abstract class InviteCode with _$InviteCode {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory InviteCode({
     required String code,
     required String spaceId,
@@ -152,6 +156,7 @@ abstract class SettlementItem with _$SettlementItem {
 
 @freezed
 abstract class Settlement with _$Settlement {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory Settlement({
     required String spaceId,
     required List<SettlementItem> items,
@@ -170,6 +175,7 @@ abstract class Settlement with _$Settlement {
 @freezed
 abstract class SharedSpaceNotificationModel
     with _$SharedSpaceNotificationModel {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory SharedSpaceNotificationModel({
     required String id,
     required String userId,
@@ -192,6 +198,7 @@ abstract class SharedSpaceNotificationModel
 
 @freezed
 abstract class SpaceTransaction with _$SpaceTransaction {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory SpaceTransaction({
     required String id,
     required String type, // EXPENSE, INCOME, TRANSFER

@@ -1013,8 +1013,8 @@ return $default(_that.id,_that.filename,_that.mimeType,_that.size,_that.url,_tha
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _TransactionAttachment implements TransactionAttachment {
   const _TransactionAttachment({required this.id, required this.filename, this.mimeType, this.size, required this.url, this.isImage = false, this.createdAt});
   factory _TransactionAttachment.fromJson(Map<String, dynamic> json) => _$TransactionAttachmentFromJson(json);
@@ -1569,8 +1569,8 @@ return $default(_that.id,_that.transactionId,_that.userUuid,_that.userName,_that
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _TransactionCommentModel implements TransactionCommentModel {
   const _TransactionCommentModel({required this.id, required this.transactionId, required this.userUuid, this.userName, this.userAvatarUrl, this.parentCommentId, required this.commentText, final  List<String> mentionedUserIds = const [], this.createdAt, this.updatedAt}): _mentionedUserIds = mentionedUserIds;
   factory _TransactionCommentModel.fromJson(Map<String, dynamic> json) => _$TransactionCommentModelFromJson(json);
@@ -1912,8 +1912,8 @@ return $default(_that.id,_that.type,_that.category,_that.categoryKey,_that.categ
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(converters: [LocalDateTimeConverter()])
 class _TransactionModel implements TransactionModel {
   const _TransactionModel({required this.id, @JsonKey(unknownEnumValue: TransactionType.other) required this.type, required this.category, this.categoryKey, this.categoryText, required this.iconUrl, required this.amount, required this.timestamp, this.amountOriginal, this.originalCurrency, this.exchangeRate, this.description, this.isShared = false, final  List<SharedUserInfo> sharedWith = const [], this.paymentMethod, this.paymentMethodText, this.location, final  List<String> tags = const [], this.rawInput, this.status = 'CLEARED', this.source = 'MANUAL', this.financialAccount, this.display, this.createdAt, this.updatedAt, this.photoPath, this.geoLocation, final  List<TransactionCommentModel> comments = const [], this.sourceAccountId, this.targetAccountId, final  List<SpaceInfo> spaces = const [], this.sourceThreadId, final  List<TransactionAttachment> attachments = const []}): _sharedWith = sharedWith,_tags = tags,_comments = comments,_spaces = spaces,_attachments = attachments;
   factory _TransactionModel.fromJson(Map<String, dynamic> json) => _$TransactionModelFromJson(json);

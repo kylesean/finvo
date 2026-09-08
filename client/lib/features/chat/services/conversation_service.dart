@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/core/network/network_client.dart';
 import 'package:finvo/core/network/exceptions/app_exception.dart';
 import 'package:finvo/shared/services/response_parser.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:finvo/features/chat/models/conversation_info.dart';
 import 'package:finvo/features/chat/models/paginated_conversations.dart';
 import 'package:finvo/features/chat/models/conversation_detail.dart';
@@ -17,18 +18,13 @@ final _logger = Logger('ConversationService');
 /// Handles formats like "2025-12-27T07:07:20.586784+00:00Z" where both offset
 /// and Z are present.
 ///
-/// Prefer parsing directly; only fall back to stripping a redundant trailing
-/// 'Z' when the standard parser rejects the input. This avoids the previous
-/// heuristic string scanning, which could misfire on unrelated characters.
+/// Delegates to [tryParseDateTime], which also converts UTC timestamps to the
+/// device's local time so conversation lists show the user's wall clock.
+/// Malformed input keeps the original behavior of surfacing a FormatException.
 DateTime _parseDateTime(String dateStr) {
-  try {
-    return DateTime.parse(dateStr);
-  } on FormatException {
-    if (dateStr.endsWith('Z')) {
-      return DateTime.parse(dateStr.substring(0, dateStr.length - 1));
-    }
-    rethrow;
-  }
+  final local = tryParseDateTime(dateStr);
+  if (local != null) return local;
+  throw FormatException('Invalid ISO-8601 timestamp: $dateStr');
 }
 
 class ConversationService {
@@ -198,25 +194,6 @@ class ConversationService {
     );
   }
 
-  Future<ResumeStatus> getResumeStatus(String sessionId) async {
-    final envelope = await _networkClient.requestMap(
-      '/chatbot/sessions/$sessionId/resume-status',
-      method: HttpMethod.get,
-    );
-    final data = ResponseParser.parseData<Map<String, dynamic>>(
-      envelope,
-      whenNull: () => {},
-    );
-    return ResumeStatus(
-      canResume: data['canResume'] as bool? ?? false,
-      nextNodes:
-          (data['nextNodes'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-    );
-  }
-
   /// Delete a conversation/session by ID
   /// This performs cascade deletion on the server:
   /// - Session metadata
@@ -232,13 +209,6 @@ class ConversationService {
     );
     _logger.info('Conversation deleted: $sessionId');
   }
-}
-
-class ResumeStatus {
-  final bool canResume;
-  final List<String> nextNodes;
-
-  const ResumeStatus({required this.canResume, required this.nextNodes});
 }
 
 @riverpod

@@ -211,7 +211,7 @@ return $default(_that.id,_that.title,_that.createdAt,_that.updatedAt,_that.token
 
 /// @nodoc
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, converters: [LocalDateTimeConverter()])
 class _ConversationInfo implements ConversationInfo {
   const _ConversationInfo({required this.id, required this.title, required this.createdAt, required this.updatedAt, this.token});
   factory _ConversationInfo.fromJson(Map<String, dynamic> json) => _$ConversationInfoFromJson(json);

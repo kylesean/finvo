@@ -17,7 +17,9 @@ _CommentModel _$CommentModelFromJson(Map<String, dynamic> json) =>
       commentText: json['commentText'] as String,
       repliedToUserId: json['repliedToUserId'] as String?,
       repliedToUserName: json['repliedToUserName'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: const LocalDateTimeConverter().fromJson(
+        json['createdAt'] as String,
+      ),
       updatedAt: _dateTimeNullableParse(json['updatedAt'] as String?),
       replies:
           (json['replies'] as List<dynamic>?)
@@ -39,7 +41,7 @@ Map<String, dynamic> _$CommentModelToJson(_CommentModel instance) =>
       'commentText': instance.commentText,
       'repliedToUserId': instance.repliedToUserId,
       'repliedToUserName': instance.repliedToUserName,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'createdAt': const LocalDateTimeConverter().toJson(instance.createdAt),
       'updatedAt': _dateTimeNullableToIso8601String(instance.updatedAt),
       'replies': instance.replies.map((e) => e.toJson()).toList(),
       'likeCount': instance.likeCount,

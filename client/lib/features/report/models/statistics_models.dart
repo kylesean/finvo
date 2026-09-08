@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/utils/tolerant_json.dart';
@@ -68,6 +69,7 @@ enum SortType {
 /// Statistics overview response
 @freezed
 abstract class StatisticsOverview with _$StatisticsOverview {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory StatisticsOverview({
     required String totalBalance,
     required String totalIncome,
@@ -162,6 +164,7 @@ abstract class CategoryBreakdownResponse with _$CategoryBreakdownResponse {
 /// Top transaction item
 @freezed
 abstract class TopTransactionItem with _$TopTransactionItem {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory TopTransactionItem({
     required String id,
     required String description,
@@ -195,6 +198,7 @@ abstract class TopTransactionsResponse with _$TopTransactionsResponse {
 /// Cash flow analysis response
 @freezed
 abstract class CashFlowAnalysis with _$CashFlowAnalysis {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory CashFlowAnalysis({
     required String totalIncome,
     required String totalExpense,
@@ -232,6 +236,7 @@ abstract class HealthScoreDimension with _$HealthScoreDimension {
 /// Financial health score response
 @freezed
 abstract class HealthScore with _$HealthScore {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory HealthScore({
     required int totalScore,
     required String grade,

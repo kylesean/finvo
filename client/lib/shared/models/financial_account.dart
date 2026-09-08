@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:decimal/decimal.dart';
 import 'package:finvo/shared/utils/tolerant_json.dart';
 import 'package:logging/logging.dart';
@@ -128,6 +129,7 @@ abstract class FinancialAccount with _$FinancialAccount {
 /// Financial account summary response model
 @freezed
 abstract class FinancialAccountSummary with _$FinancialAccountSummary {
+  @JsonSerializable(converters: [LocalDateTimeConverter()])
   const factory FinancialAccountSummary({
     @JsonKey(fromJson: decimalFromJson, toJson: decimalToJson)
     required Decimal totalBalance,
