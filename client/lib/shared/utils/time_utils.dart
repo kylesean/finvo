@@ -43,7 +43,10 @@ DateFormat appDateTimeFormat() {
   switch (LocaleSettings.currentLocale) {
     case AppLocale.zh:
     case AppLocale.zhHant:
-      return DateFormat('yyyy年M月d日 HH:mm:ss', 'zh_CN'); // cjk-allow: Intl date skeleton (locale data, not UI copy)
+      return DateFormat(
+        'yyyy年M月d日 HH:mm:ss',
+        'zh_CN',
+      ); // cjk-allow: Intl date skeleton (locale data, not UI copy)
     case AppLocale.ja:
       return DateFormat('yyyy/MM/dd HH:mm:ss', 'ja');
     case AppLocale.ko:

@@ -38,11 +38,20 @@ String recurringTransactionDisplayName(RecurringTransaction transaction) {
 String formatShortDate(DateTime date) {
   final locale = LocaleSettings.currentLocale;
   final (dateFormatLocale, pattern) = switch (locale) {
-    AppLocale.zh => ('zh_CN', 'M 月 d 日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+    AppLocale.zh => (
+      'zh_CN',
+      'M 月 d 日',
+    ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
     AppLocale.en => ('en', 'MMM d'),
-    AppLocale.ja => ('ja', 'M月d日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+    AppLocale.ja => (
+      'ja',
+      'M月d日',
+    ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
     AppLocale.ko => ('ko', 'M월 d일'),
-    AppLocale.zhHant => ('zh_TW', 'M 月 d 日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+    AppLocale.zhHant => (
+      'zh_TW',
+      'M 月 d 日',
+    ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
   };
   return DateFormat(pattern, dateFormatLocale).format(date);
 }

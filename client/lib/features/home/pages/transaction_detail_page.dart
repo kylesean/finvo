@@ -213,7 +213,9 @@ class TransactionDetailPage extends ConsumerWidget {
                                   child: AmountText.large(
                                     amount: transaction.amount,
                                     type: transaction.type,
-                                    currency: transaction.currency ?? Currency.defaultCode,
+                                    currency:
+                                        transaction.currency ??
+                                        Currency.defaultCode,
                                   ),
                                 ),
                               ),
@@ -424,8 +426,11 @@ class TransactionDetailPage extends ConsumerWidget {
     // from business errors is still honoured.
     if (error is AppException &&
         (error.message.contains('Not Found') ||
-            error.message.contains('不存在') || // cjk-allow: matches server error-message contract
-            error.message.contains('未找到'))) { // cjk-allow: matches server error-message contract
+            error.message.contains(
+              '不存在',
+            ) || // cjk-allow: matches server error-message contract
+            error.message.contains('未找到'))) {
+      // cjk-allow: matches server error-message contract
       return true;
     }
     return false;

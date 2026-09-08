@@ -75,8 +75,12 @@ List<ReceiptBucketEvent> receiptBucketEvents(Object? summary) {
     final currency = code.toString().toUpperCase();
     final expense = asDouble(totals['expense']);
     final income = asDouble(totals['income']);
-    if (expense > 0) events.add((amount: expense, type: 'expense', currency: currency));
-    if (income > 0) events.add((amount: income, type: 'income', currency: currency));
+    if (expense > 0) {
+      events.add((amount: expense, type: 'expense', currency: currency));
+    }
+    if (income > 0) {
+      events.add((amount: income, type: 'income', currency: currency));
+    }
   });
   return events;
 }

@@ -213,7 +213,7 @@ return $default(_that.transactions,_that.isLoading,_that.isLoadingMore,_that.has
 
 class _TransactionFeedState implements TransactionFeedState {
   const _TransactionFeedState({final  List<TransactionModel> transactions = const [], this.isLoading = false, this.isLoadingMore = false, this.hasReachedMax = false, this.currentPage = 1, this.errorMessage, this.hasLoadMoreError = false}): _transactions = transactions;
-
+  
 
  final  List<TransactionModel> _transactions;
 @override@JsonKey() List<TransactionModel> get transactions {

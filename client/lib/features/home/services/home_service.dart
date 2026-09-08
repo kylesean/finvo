@@ -53,7 +53,10 @@ class HomeService {
     CancelToken? cancelToken,
   }) async {
     // Build query parameters
-    final Map<String, dynamic> queryParameters = {'page': page, 'page_size': pageSize};
+    final Map<String, dynamic> queryParameters = {
+      'page': page,
+      'page_size': pageSize,
+    };
     if (type != null && type.isNotEmpty) {
       queryParameters['transaction_type'] = type.toUpperCase();
     }
@@ -150,7 +153,10 @@ class HomeService {
     String? tags,
     CancelToken? cancelToken,
   }) async {
-    final Map<String, dynamic> queryParameters = {'page': page, 'page_size': pageSize};
+    final Map<String, dynamic> queryParameters = {
+      'page': page,
+      'page_size': pageSize,
+    };
     if (keyword != null) queryParameters['keyword'] = keyword;
     if (startDate != null) queryParameters['start_date'] = startDate;
     if (endDate != null) queryParameters['end_date'] = endDate;

@@ -185,10 +185,7 @@ void main() {
       expect(tzOffset, isA<String>());
       // Must be parseable as int minutes (e.g. "-480", "0", "540").
       expect(int.tryParse(tzOffset as String), isNotNull);
-      expect(
-        tzOffset,
-        DateTime.now().timeZoneOffset.inMinutes.toString(),
-      );
+      expect(tzOffset, DateTime.now().timeZoneOffset.inMinutes.toString());
     });
 
     test('custom range keeps tz_offset alongside yyyy-MM-dd dates', () async {
@@ -203,10 +200,7 @@ void main() {
       expect(lastQueryParams!['start_date'], '2026-01-01');
       expect(lastQueryParams!['end_date'], '2026-01-31');
       expect(lastQueryParams!.containsKey('tz_offset'), isTrue);
-      expect(
-        int.tryParse(lastQueryParams!['tz_offset'] as String),
-        isNotNull,
-      );
+      expect(int.tryParse(lastQueryParams!['tz_offset'] as String), isNotNull);
     });
   });
 

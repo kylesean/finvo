@@ -72,7 +72,8 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final amount = AmountFormatter.parseDecimal(
       widget.data['amount']?.toString(),
     );
-    final currency = widget.data['currency']?.toString() ?? Currency.defaultCode;
+    final currency =
+        widget.data['currency']?.toString() ?? Currency.defaultCode;
     final categoryKey = widget.data['categoryKey']?.toString();
     final categoryEnum = TransactionCategory.fromKey(categoryKey);
     final category = categoryEnum.displayText;
