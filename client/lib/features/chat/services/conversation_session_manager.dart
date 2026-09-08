@@ -56,8 +56,8 @@ class ConversationSessionManager {
   /// so a superseded failure never marks the newer session as failed.
   /// Returns `true` when the detail was loaded AND is still current;
   /// `false` when the load failed or the session was switched meanwhile.
-  /// Callers use this to skip follow-up probes (e.g. resume-status) after a
-  /// Failed or superseded load .
+  /// Callers use this to skip follow-up work after a failed or superseded
+  /// load.
   Future<bool> loadConversationDetail(
     String conversationId, {
     required bool Function() isCurrent,
@@ -96,30 +96,6 @@ class ConversationSessionManager {
       );
       onError(e);
       return false;
-    }
-  }
-
-  /// Probe whether the server can resume this session's graph state.
-  ///
-  /// Detection only for now — the resumable signal is observed but not yet
-  /// acted upon. A failed probe is non-critical and must never break the
-  /// conversation load, so it is swallowed at info level.
-  Future<void> checkAndResumeIfNeeded(String conversationId) async {
-    try {
-      final resumeStatus = await _conversationService().getResumeStatus(
-        conversationId,
-      );
-      if (resumeStatus.canResume) {
-        _logger.info(
-          'ConversationSessionManager: Detected resumable state for '
-          '$conversationId, nextNodes: ${resumeStatus.nextNodes}',
-        );
-      }
-    } catch (e) {
-      _logger.info(
-        'ConversationSessionManager: Resume status check failed '
-        '(non-critical): $e',
-      );
     }
   }
 }

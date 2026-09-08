@@ -232,7 +232,8 @@
     "unableToCount": "集計不可",
     "trend": "傾向: ",
     "noTransactionsTitle": "この日の取引はありません",
-    "loadTransactionFailed": "取引の読み込みに失敗しました"
+    "loadTransactionFailed": "取引の読み込みに失敗しました",
+    "selectedDayExpense": "$date：支出 $amount"
   },
   "category": {
     "dailyConsumption": "生活費",
@@ -316,7 +317,7 @@
     "usernameRequired": "Username is required",
     "usernameUpdated": "Username updated",
     "avatarUpdated": "Avatar updated",
-    "appearanceUpdated": "外观设置已更新"
+    "appearanceUpdated": "外観設定を更新しました"
   },
   "appearance": {
     "title": "外観設定",
@@ -767,7 +768,7 @@
       "confirmTransfer": "振替を確認",
       "confirmed": "確認済み",
       "transferSuccess": "振替が完了しました",
-      "selectReceiveAccount": "选择收款账户",
+      "selectReceiveAccount": "受取口座を選択",
       "noAssetAccounts": "資産口座がありません",
       "goToFinanceToAddAccounts": "財務ページで口座を追加してください",
       "needTwoAssetAccounts": "振替には資産口座が2つ以上必要です",
@@ -938,16 +939,16 @@
         "executeAction": "選択に従って振替を実行"
       },
       "transactionConfirmation": {
-        "multipleAccounts": "检测到多个关联账户",
-        "confirmed": "已确认"
+        "multipleAccounts": "複数の関連口座が検出されました",
+        "confirmed": "確認済み"
       },
       "budgetAnalysis": {
-        "title": "预算分析报告",
-        "periodDays": "过去 $days 天",
-        "totalExpense": "总支出",
-        "momChange": "环比 $change%",
-        "categoryDistribution": "分类占比",
-        "topSpenders": "大额支出",
+        "title": "予算分析レポート",
+        "periodDays": "過去 $days 日間",
+        "totalExpense": "総支出",
+        "momChange": "前期比 $change%",
+        "categoryDistribution": "カテゴリー別割合",
+        "topSpenders": "高額支出",
         "amountWan": "$amount万"
       },
       "error": {

@@ -117,12 +117,6 @@ class MessageRepository {
   }) {
     if (id.isEmpty) return;
 
-    final String effectiveContent = _computeEffectiveContent(
-      id,
-      content,
-      contentDelta,
-    );
-
     // Release the incremental buffer when streaming reaches a terminal state.
     if (streamingStatus == StreamingStatus.completed ||
         streamingStatus == StreamingStatus.error) {
@@ -138,6 +132,18 @@ class MessageRepository {
     if (index == -1) return;
 
     final msg = messages[index];
+    // A no-content update (isTyping/streamingStatus only) must never clobber
+    // existing text with the aggregated buffer: after a terminal state the
+    // buffer is cleared, so an empty aggregate here means "no new text",
+    // not "the message is empty" (e.g. a late thinking-indicator callback).
+    var effectiveContent = _computeEffectiveContent(id, content, contentDelta);
+    if (content == null &&
+        contentDelta == null &&
+        effectiveContent.isEmpty &&
+        msg.content.isNotEmpty) {
+      effectiveContent = msg.content;
+    }
+
     final updatedFullContent = _updateFullContentWithDelta(
       msg.fullContent,
       msg.content,

@@ -207,7 +207,11 @@ class ChatInputNotifier extends _$ChatInputNotifier {
       if (state.hintType == HintType.speechNotRecognized) {
         unawaited(
           Future<void>.delayed(const Duration(seconds: 2), () {
-            if (!ref.mounted) return;
+            // _disposed, not ref.mounted: this provider keeps its own flag in
+            // sync inside ref.onDispose, and every other async callback here
+            // checks _disposed — a dispose landing between the mounted check
+            // and the state write would still throw UnmountedRefException.
+            if (_disposed) return;
             if (state.hintType == HintType.speechNotRecognized &&
                 !state.isListening &&
                 !state.isLoadingResponse) {

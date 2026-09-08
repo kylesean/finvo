@@ -232,7 +232,8 @@
     "unableToCount": "无法统计",
     "trend": "趋势: ",
     "noTransactionsTitle": "当日无交易记录",
-    "loadTransactionFailed": "加载交易失败"
+    "loadTransactionFailed": "加载交易失败",
+    "selectedDayExpense": "$date：消费 $amount"
   },
   "category": {
     "dailyConsumption": "日常消费",

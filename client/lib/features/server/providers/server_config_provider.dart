@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/core/constants/api_constants.dart';
 import 'package:finvo/core/storage/secure_storage_service.dart';
+import 'package:finvo/features/chat/providers/chat_history_provider.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/features/profile/providers/user_profile_provider.dart';
@@ -57,6 +58,9 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
       );
       final storageService = ref.read(secureStorageServiceProvider);
       await storageService.clearAllData();
+      // Await gap: this provider is auto-dispose, and the setup page may
+      // have gone away mid-clear.
+      if (!ref.mounted) return;
     }
 
     await configService.saveServerUrl(url);
@@ -79,6 +83,9 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     ref.invalidate(financialAccountProvider);
     ref.invalidate(exchangeRateProvider);
     ref.invalidate(notificationProvider);
+    // Same reason as app.dart's logout path: chatHistory is keepAlive and
+    // holds the old server's conversation bodies (PII).
+    ref.invalidate(chatHistoryProvider);
 
     // Rebuild the notification WebSocket: it captures the baseUrl once at
     // build time, so without this invalidation it would keep connecting to
@@ -104,6 +111,7 @@ class ServerConfigNotifier extends Notifier<ServerConfigState> {
     ref.invalidate(financialAccountProvider);
     ref.invalidate(exchangeRateProvider);
     ref.invalidate(notificationProvider);
+    ref.invalidate(chatHistoryProvider);
     ref.invalidate(notificationWsProvider);
   }
 

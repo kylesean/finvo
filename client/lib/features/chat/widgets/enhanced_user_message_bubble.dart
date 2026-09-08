@@ -43,6 +43,22 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
 
   bool _hasRequestedSignedUrls = false;
 
+  // --- Item-level memo ---
+  // The message list rebuilds on every streamed chunk (the repository copies
+  // the message list per chunk). AI messages are memoized in
+  // ChatMessageWidget; without the same treatment here, every visible user
+  // bubble re-runs its whole build (attachments loop, visibility key, media
+  // previews) per chunk — the main jank source in long conversations.
+  Widget? _cachedContent;
+  FThemeData? _cachedTheme;
+  bool _reuseCache = false;
+
+  /// Hero tag scoped to THIS message: the same attachment id can appear in
+  /// more than one message; a bare attachment-id tag then produces "multiple
+  /// heroes share the same tag" during transitions.
+  String _attachmentHeroTag(ChatMessageAttachment attachment) =>
+      'history_attachment_${widget.message.id}_${attachment.id}';
+
   String _mediaCacheKey(DataUriFile file) {
     return '${widget.message.id}_${file.originalName}_${file.size}_${file.dataUri.hashCode}';
   }
@@ -74,14 +90,47 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
   @override
   void didUpdateWidget(covariant UserMessageBubble oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Item-level memo: reuse the cached content when the message is
+    // unchanged (identical covers the common case: the repository returns
+    // the same ChatMessage instance for untouched messages; == covers
+    // recreated-but-equal freezed instances).
+    _reuseCache =
+        identical(oldWidget.message, widget.message) ||
+        oldWidget.message == widget.message;
     if (_hasAttachmentsNeedingFetch) {
       _hasRequestedSignedUrls = false;
     }
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Theme / MediaQuery changes (dark-mode flip, keyboard, rotation) must
+    // not serve a subtree built for the old metrics — the bubble constrains
+    // its width via MediaQuery.
+    _reuseCache = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = context.theme;
+
+    // Item-level memo: reuse the cached subtree when the message and theme
+    // are unchanged, so streamed chunks rebuild only the active AI message.
+    if (_reuseCache &&
+        _cachedContent != null &&
+        identical(_cachedTheme, theme)) {
+      return _cachedContent!;
+    }
+
+    final built = _buildContent(context, theme);
+    _cachedContent = built;
+    _cachedTheme = theme;
+    _reuseCache = true;
+    return built;
+  }
+
+  Widget _buildContent(BuildContext context, FThemeData theme) {
     final attachments = widget.message.attachments;
     final hasMediaFiles = widget.message.mediaFiles.isNotEmpty;
     final hasText = widget.message.content.isNotEmpty;
@@ -229,10 +278,9 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
         return _buildAttachmentError(theme, attachment);
       }
       return Hero(
-        tag: 'history_attachment_${attachment.id}',
+        tag: _attachmentHeroTag(attachment),
         child: GestureDetector(
-          onTap: () =>
-              _showImagePreview(bytes, 'history_attachment_${attachment.id}'),
+          onTap: () => _showImagePreview(bytes, _attachmentHeroTag(attachment)),
           child: Image.memory(
             bytes,
             fit: BoxFit.cover,
@@ -253,7 +301,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
     FThemeData theme,
   ) {
     return Hero(
-      tag: 'history_attachment_${attachment.id}',
+      tag: _attachmentHeroTag(attachment),
       child: GestureDetector(
         onTap: () => _handleRemoteImageTap(attachment),
         child: AuthenticatedImage(
@@ -612,7 +660,7 @@ class _UserMessageBubbleState extends ConsumerState<UserMessageBubble> {
       MaterialPageRoute<void>(
         builder: (context) => ImagePreviewPage(
           itemCount: 1,
-          heroTag: (_) => 'history_attachment_${attachment.id}',
+          heroTag: (_) => _attachmentHeroTag(attachment),
           imageProvider: (_) => NetworkImage(
             '$baseUrl/files/view/${attachment.id}',
             headers: {'Authorization': 'Bearer $token'},

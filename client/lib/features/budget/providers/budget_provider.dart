@@ -90,6 +90,9 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
   }
 
   Future<void> refresh() async {
+    // Callers may invoke this after an await gap (deleteBudget); writing to a
+    // disposed auto-dispose notifier throws UnmountedRefException.
+    if (!ref.mounted) return;
     state = state.copyWith(error: null);
     await load();
   }
@@ -104,6 +107,8 @@ class BudgetSummaryNotifier extends _$BudgetSummaryNotifier {
     try {
       await service.delete(id);
     } catch (e) {
+      // Await gap: the page may have been disposed mid-request.
+      if (!ref.mounted) rethrow;
       state = state.copyWith(error: e);
       rethrow;
     }

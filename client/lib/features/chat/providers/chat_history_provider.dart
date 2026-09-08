@@ -476,7 +476,7 @@ class ChatHistory extends _$ChatHistory {
         .switchConversation(conversationId);
     // Fetch + process + apply through the session manager, which owns the
     // network call and the switch-race guard; state application stays here.
-    final loaded = await _conversationSessionManager.loadConversationDetail(
+    await _conversationSessionManager.loadConversationDetail(
       conversationId,
       isCurrent: () => conversationId == state.currentConversationId,
       onLoaded: (result) {
@@ -498,13 +498,6 @@ class ChatHistory extends _$ChatHistory {
         );
       },
     );
-
-    // Probing resume state for a conversation that failed to load (or
-    // was switched away) is a pointless network call — skip it unless the
-    // detail actually loaded and is still current.
-    if (loaded) {
-      await _conversationSessionManager.checkAndResumeIfNeeded(conversationId);
-    }
   }
 
   /// Retry the failed history load for the current conversation.

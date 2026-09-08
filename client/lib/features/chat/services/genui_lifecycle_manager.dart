@@ -14,6 +14,7 @@ import 'package:finvo/features/chat/services/genui_service.dart';
 import 'package:finvo/features/chat/services/custom_content_generator.dart';
 import 'package:finvo/features/chat/services/genui_error_translator.dart';
 import 'package:finvo/shared/models/currency.dart';
+
 // ignore_for_file: prefer_initializing_formals - private fields with public named ctor params
 
 final _logger = Logger('GenUiLifecycleManager');
@@ -402,6 +403,15 @@ class GenUiLifecycleManager {
   }
 
   void _registerSurface(String surfaceId, String messageId) {
+    // Idempotent: CreateSurface plus every UpdateComponents/UpdateDataModel
+    // for the same surfaceId funnels through here (custom_content_generator
+    // fires onSurfaceCreated for all of them). Re-registering would duplicate
+    // the message's surface-id list entry and reset the status to loading.
+    final knownIds = _messageSurfaceIds[messageId];
+    if (knownIds != null && knownIds.contains(surfaceId)) {
+      return;
+    }
+
     // Create surface info
     final surfaceInfo = GenUiSurfaceInfo(
       surfaceId: surfaceId,

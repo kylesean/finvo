@@ -14,6 +14,7 @@ import 'package:finvo/app/theme/app_font_config.dart';
 import 'package:finvo/app/theme/theme_notifier.dart';
 import 'package:finvo/app/theme/app_theme_pair_provider.dart';
 import 'package:finvo/features/auth/providers/auth_provider.dart';
+import 'package:finvo/features/chat/providers/chat_history_provider.dart';
 import 'package:finvo/features/notification/providers/notification_provider.dart';
 import 'package:finvo/core/services/notification_ws_service.dart';
 import 'package:finvo/shared/providers/financial_account_provider.dart';
@@ -68,6 +69,10 @@ class MyApp extends ConsumerWidget {
         ref.invalidate(financialSettingsProvider);
         ref.invalidate(financialAccountProvider);
         ref.invalidate(exchangeRateProvider);
+        // chatHistory is keepAlive and holds full message bodies + titles
+        // (PII). Without this the next account's first paint renders the
+        // previous user's conversation.
+        ref.invalidate(chatHistoryProvider);
       }
     });
 

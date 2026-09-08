@@ -101,6 +101,15 @@ class CurrencySettingsPage extends ConsumerWidget {
                               ),
                             );
                             context.pop();
+                          } else if (context.mounted) {
+                            // The optimistic switch already flipped the
+                            // whole app's currency display; without a
+                            // rollback a failed save left the UI showing a
+                            // currency the server never stored.
+                            notifier.resetToOriginal();
+                            ToastService.showDestructive(
+                              description: Text(t.common.saveFailed),
+                            );
                           }
                         },
                 );

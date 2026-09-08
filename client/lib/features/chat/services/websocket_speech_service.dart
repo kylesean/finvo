@@ -60,6 +60,26 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   @override
   Stream<String> get onError => _errorController.stream;
 
+  /// Guarded event emitters. dispose() closes the controllers; late callbacks
+  /// (in-flight socket messages, recorder errors, status transitions) arrive
+  /// after that, and a bare add() on a closed controller throws
+  /// StateError: Cannot add new events after calling close — as an
+  /// uncaught async error.
+  void _emitResult(String event) {
+    if (_isDisposed || _resultController.isClosed) return;
+    _resultController.add(event);
+  }
+
+  void _emitStatus(String event) {
+    if (_isDisposed || _statusController.isClosed) return;
+    _statusController.add(event);
+  }
+
+  void _emitError(String event) {
+    if (_isDisposed || _errorController.isClosed) return;
+    _errorController.add(event);
+  }
+
   @override
   bool get isInitialized => _isConnected;
 
@@ -161,7 +181,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
     try {
       final wsUrl = _buildWsUrl();
       _logger.info('Connecting to WebSocket server: $wsUrl');
-      if (!_statusController.isClosed) _statusController.add('connecting');
+      if (!_statusController.isClosed) _emitStatus('connecting');
 
       // WebSocketChannel.connect is cross-platform (IO + web) and supports
       // both ws:// and wss://, unlike the previous IOWebSocketChannel.
@@ -178,7 +198,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       );
       _isConnected = true;
       reconnects.markSucceeded();
-      if (!_statusController.isClosed) _statusController.add('connected');
+      if (!_statusController.isClosed) _emitStatus('connected');
       _logger.info('WebSocket connected successfully');
 
       // Listen to messages
@@ -204,10 +224,10 @@ class WebSocketSpeechService implements SpeechRecognitionService {
         stackTrace,
       );
       if (!_errorController.isClosed) {
-        _errorController.add('speech_connection_failed');
+        _emitError('speech_connection_failed');
       }
       if (!_statusController.isClosed) {
-        _statusController.add('disconnected');
+        _emitStatus('disconnected');
       }
       _isConnected = false;
       return false;
@@ -254,6 +274,11 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   /// Start speech recognition
   @override
   Future<void> startListening() async {
+    if (_isDisposed) {
+      _logger.warning('WebSocket already disposed, cannot start listening');
+      return;
+    }
+
     // Defensive reset: a stale manual-stop flag from a previous session (whose
     // connection stayed open and never hit _onError/_onDisconnected) would
     // otherwise swallow the real errors of this new session.
@@ -263,7 +288,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _logger.warning('WebSocket not connected, cannot start listening');
       // Stable token (see SpeechErrorClassifier / chat_input_field dialog
       // mapping) instead of a raw English sentence.
-      _errorController.add('speech_connection_failed');
+      _emitError('speech_connection_failed');
       return;
     }
 
@@ -286,7 +311,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       if (!hasPermission) {
         _logger.severe('Microphone permission denied');
         // Stable token mapped to a localized dialog by the chat input UI.
-        _errorController.add('permission_denied');
+        _emitError('permission_denied');
         return;
       }
 
@@ -295,7 +320,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       final recordingStarted = await _audioRecorder.startRecording();
       if (!recordingStarted) {
         _logger.severe('Failed to start recording');
-        _errorController.add('speech_start_failed');
+        _emitError('speech_start_failed');
         return;
       }
 
@@ -318,7 +343,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
               return;
             }
             _logger.severe('Audio stream error: $error');
-            _errorController.add('speech_recording_error');
+            _emitError('speech_recording_error');
           },
           onDone: () {
             _logger.info('Audio stream ended');
@@ -330,13 +355,13 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       // Do not send JSON control messages as they will be misinterpreted as audio data
 
       _isListening = true;
-      _statusController.add('listening');
+      _emitStatus('listening');
       _logger.info('Speech recognition started');
     } catch (e) {
       _logger.severe('Failed to start listening: $e');
-      _errorController.add('speech_start_failed');
+      _emitError('speech_start_failed');
       _isListening = false;
-      _statusController.add('error');
+      _emitStatus('error');
 
       // Clean up resources
       await _audioRecorder.stopRecording();
@@ -348,7 +373,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
   /// Stop speech recognition
   @override
   Future<void> stopListening() async {
-    if (!_isListening) {
+    if (_isDisposed || !_isListening) {
       return;
     }
 
@@ -372,7 +397,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       // may never fire to clear it — leaving it set would swallow the real
       // errors of the next listening session.
       _isManualStop = false;
-      _statusController.add('stopped');
+      _emitStatus('stopped');
       _logger.info('Speech recognition stopped');
 
       // Play stop recording sound (don't await to avoid blocking)
@@ -380,9 +405,9 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       unawaited(_soundFeedback.playStopSound());
     } catch (e) {
       _logger.severe('Failed to stop listening: $e');
-      _errorController.add('speech_stop_failed');
+      _emitError('speech_stop_failed');
       _isListening = false;
-      _statusController.add('error');
+      _emitStatus('error');
     }
   }
 
@@ -397,7 +422,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _channel!.sink.add(audioData);
     } catch (e) {
       _logger.severe('Failed to send audio data: $e');
-      _errorController.add('Failed to send audio data: $e');
+      _emitError('Failed to send audio data: $e');
     }
   }
 
@@ -419,19 +444,19 @@ class WebSocketSpeechService implements SpeechRecognitionService {
             _handleJsonMessage(jsonData);
           } else {
             // Use directly as recognition result
-            _resultController.add(message);
+            _emitResult(message);
           }
         } catch (e) {
           // Not JSON format, use directly as recognition result
-          _resultController.add(message);
+          _emitResult(message);
         }
       } else {
         // Other format messages
-        _resultController.add(message.toString());
+        _emitResult(message.toString());
       }
     } catch (e) {
       _logger.severe('Failed to process message: $e');
-      _errorController.add('Failed to process message: $e');
+      _emitError('Failed to process message: $e');
     }
   }
 
@@ -448,13 +473,13 @@ class WebSocketSpeechService implements SpeechRecognitionService {
             (jsonData['result'] as String?) ??
             '';
         if (text.isNotEmpty) {
-          _resultController.add(text);
+          _emitResult(text);
         }
         break;
       case 'status':
         final status = (jsonData['status'] as String?) ?? '';
         if (status.isNotEmpty) {
-          _statusController.add(status);
+          _emitStatus(status);
         }
         break;
       case 'error':
@@ -469,13 +494,13 @@ class WebSocketSpeechService implements SpeechRecognitionService {
           );
           break;
         }
-        _errorController.add(error);
+        _emitError(error);
         break;
       default:
         // If there is a text field, use as recognition result
         final text = jsonData['text'] ?? jsonData['result'];
         if (text != null && text.toString().isNotEmpty) {
-          _resultController.add(text.toString());
+          _emitResult(text.toString());
         }
     }
   }
@@ -490,7 +515,7 @@ class WebSocketSpeechService implements SpeechRecognitionService {
         'WebSocket error caused by user manual stop, ignoring: $error',
       );
       _isManualStop = false; // Reset flag
-      _statusController.add('disconnected');
+      _emitStatus('disconnected');
       _isConnected = false;
       _isListening = false;
       return;
@@ -508,8 +533,8 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _isListening = false;
     }
 
-    _errorController.add('speech_connection_failed');
-    _statusController.add('error');
+    _emitError('speech_connection_failed');
+    _emitStatus('error');
     _isConnected = false;
 
     // A drop outside an active session is transparently repaired in the
@@ -529,12 +554,12 @@ class WebSocketSpeechService implements SpeechRecognitionService {
       _isManualStop = false; // Reset flag
     } else if (_isListening && !_errorController.isClosed) {
       // Only dispatch error if abnormal disconnect and currently listening
-      _errorController.add('speech_connection_failed');
+      _emitError('speech_connection_failed');
     }
 
     // Only add status if controller is not closed (could be called after dispose)
     if (!_statusController.isClosed) {
-      _statusController.add('disconnected');
+      _emitStatus('disconnected');
     }
     _isConnected = false;
     final wasListening = _isListening;

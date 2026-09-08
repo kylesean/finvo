@@ -232,7 +232,8 @@
     "unableToCount": "통계 불가",
     "trend": "추세: ",
     "noTransactionsTitle": "해당 날짜에 거래 내역 없음",
-    "loadTransactionFailed": "거래 로드 실패"
+    "loadTransactionFailed": "거래 로드 실패",
+    "selectedDayExpense": "$date: 지출 $amount"
   },
   "category": {
     "dailyConsumption": "일상 소비",

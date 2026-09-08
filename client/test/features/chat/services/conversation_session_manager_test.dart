@@ -14,8 +14,6 @@ class _FakeConversationService extends ConversationService {
   _FakeConversationService() : super(NetworkClient(Dio()));
 
   Object? detailError;
-  Object? resumeError;
-  bool canResume = false;
 
   @override
   Future<ConversationDetail> getConversationDetail(
@@ -40,13 +38,6 @@ class _FakeConversationService extends ConversationService {
         ),
       ],
     );
-  }
-
-  @override
-  Future<ResumeStatus> getResumeStatus(String sessionId) async {
-    final err = resumeError;
-    if (err != null) throw err;
-    return ResumeStatus(canResume: canResume, nextNodes: const []);
   }
 }
 
@@ -125,18 +116,6 @@ void main() {
       );
 
       expect(onErrorCalls, 0);
-    });
-  });
-
-  group('ConversationSessionManager.checkAndResumeIfNeeded', () {
-    test('does not throw when the probe fails (non-critical)', () async {
-      service.resumeError = Exception('resume unavailable');
-      await manager.checkAndResumeIfNeeded('c1'); // must complete cleanly
-    });
-
-    test('does not throw on a resumable probe', () async {
-      service.canResume = true;
-      await manager.checkAndResumeIfNeeded('c1'); // must complete cleanly
     });
   });
 }

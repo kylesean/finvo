@@ -351,6 +351,7 @@ class _Translations$calendar$zh_Hant extends Translations$calendar$zh {
 	@override String get trend => '趨勢: ';
 	@override String get noTransactionsTitle => '當日無交易記錄';
 	@override String get loadTransactionFailed => '載入交易失敗';
+	@override String selectedDayExpense({required Object date, required Object amount}) => '${date}：消費 ${amount}';
 }
 
 // Path: category
@@ -448,7 +449,7 @@ class _Translations$settings$zh_Hant extends Translations$settings$zh {
 	@override String get usernameRequired => 'Username is required';
 	@override String get usernameUpdated => 'Username updated';
 	@override String get avatarUpdated => 'Avatar updated';
-	@override String get appearanceUpdated => '外观设置已更新';
+	@override String get appearanceUpdated => '外觀設定已更新';
 }
 
 // Path: appearance
@@ -732,7 +733,7 @@ class _Translations$chat$zh_Hant extends Translations$chat$zh {
 	@override String get noContentToCopy => '沒有可複製的內容';
 	@override late final _Translations$chat$tools$zh_Hant tools = _Translations$chat$tools$zh_Hant._(_root);
 	@override String get speechNotRecognized => '未識別到語音，請重試';
-	@override String get currentExpense => '当前支出';
+	@override String get currentExpense => '當前支出';
 	@override String get loadingComponent => '正在載入組件...';
 	@override String get noHistory => '暫無歷史會話';
 	@override String get startNewChat => '開啟一段新對話吧！';
@@ -1431,7 +1432,7 @@ class _Translations$chat$transferWizard$zh_Hant extends Translations$chat$transf
 	@override String get confirmTransfer => '確認轉帳';
 	@override String get confirmed => '已確認';
 	@override String get transferSuccess => '轉帳成功';
-	@override String get selectReceiveAccount => '选择收款账户';
+	@override String get selectReceiveAccount => '選擇收款帳戶';
 	@override String get noAssetAccounts => '暫無資產帳戶';
 	@override String get goToFinanceToAddAccounts => '請前往財務頁面新增帳戶';
 	@override String get needTwoAssetAccounts => '轉帳需要至少兩個資產帳戶';
@@ -2377,8 +2378,8 @@ class _Translations$chat$genui$transactionConfirmation$zh_Hant extends Translati
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get multipleAccounts => '检测到多个关联账户';
-	@override String get confirmed => '已确认';
+	@override String get multipleAccounts => '偵測到多個關聯帳戶';
+	@override String get confirmed => '已確認';
 }
 
 // Path: chat.genui.budgetAnalysis
@@ -2388,13 +2389,13 @@ class _Translations$chat$genui$budgetAnalysis$zh_Hant extends Translations$chat$
 	final TranslationsZhHant _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '预算分析报告';
-	@override String periodDays({required Object days}) => '过去 ${days} 天';
-	@override String get totalExpense => '总支出';
-	@override String momChange({required Object change}) => '环比 ${change}%';
-	@override String get categoryDistribution => '分类占比';
-	@override String get topSpenders => '大额支出';
-	@override String amountWan({required Object amount}) => '${amount}万';
+	@override String get title => '預算分析報告';
+	@override String periodDays({required Object days}) => '過去 ${days} 天';
+	@override String get totalExpense => '總支出';
+	@override String momChange({required Object change}) => '較上期 ${change}%';
+	@override String get categoryDistribution => '分類占比';
+	@override String get topSpenders => '大額支出';
+	@override String amountWan({required Object amount}) => '${amount}萬';
 }
 
 // Path: chat.genui.error
@@ -2885,6 +2886,7 @@ extension on TranslationsZhHant {
 			'calendar.trend' => '趨勢: ',
 			'calendar.noTransactionsTitle' => '當日無交易記錄',
 			'calendar.loadTransactionFailed' => '載入交易失敗',
+			'calendar.selectedDayExpense' => ({required Object date, required Object amount}) => '${date}：消費 ${amount}',
 			'category.dailyConsumption' => '日常消費',
 			'category.transportation' => '交通出行',
 			'category.healthcare' => '醫療健康',
@@ -2964,7 +2966,7 @@ extension on TranslationsZhHant {
 			'settings.usernameRequired' => 'Username is required',
 			'settings.usernameUpdated' => 'Username updated',
 			'settings.avatarUpdated' => 'Avatar updated',
-			'settings.appearanceUpdated' => '外观设置已更新',
+			'settings.appearanceUpdated' => '外觀設定已更新',
 			'appearance.title' => '外觀設置',
 			'appearance.themeMode' => '主題模式',
 			'appearance.light' => '淺色',
@@ -3189,9 +3191,9 @@ extension on TranslationsZhHant {
 			'forecast.recurringTransaction.paused' => '已暫停',
 			'forecast.recurringTransaction.nextTime' => '下次',
 			'forecast.recurringTransaction.sortByTime' => '按時間排序',
-			'forecast.recurringTransaction.allPeriod' => '全部週期',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.allPeriod' => '全部週期',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}週期 (${count})',
 			'forecast.recurringTransaction.confirmDelete' => '確認刪除',
 			'forecast.recurringTransaction.confirmActivate' => '確認啟用',
@@ -3353,7 +3355,7 @@ extension on TranslationsZhHant {
 			'chat.tools.prepareBudgetSimulation' => '正在準備預算模擬',
 			'chat.tools.simulateBudget' => '正在模擬預算',
 			'chat.speechNotRecognized' => '未識別到語音，請重試',
-			'chat.currentExpense' => '当前支出',
+			'chat.currentExpense' => '當前支出',
 			'chat.loadingComponent' => '正在載入組件...',
 			'chat.noHistory' => '暫無歷史會話',
 			'chat.startNewChat' => '開啟一段新對話吧！',
@@ -3378,7 +3380,7 @@ extension on TranslationsZhHant {
 			'chat.transferWizard.confirmTransfer' => '確認轉帳',
 			'chat.transferWizard.confirmed' => '已確認',
 			'chat.transferWizard.transferSuccess' => '轉帳成功',
-			'chat.transferWizard.selectReceiveAccount' => '选择收款账户',
+			'chat.transferWizard.selectReceiveAccount' => '選擇收款帳戶',
 			'chat.transferWizard.noAssetAccounts' => '暫無資產帳戶',
 			'chat.transferWizard.goToFinanceToAddAccounts' => '請前往財務頁面新增帳戶',
 			'chat.transferWizard.needTwoAssetAccounts' => '轉帳需要至少兩個資產帳戶',
@@ -3518,15 +3520,15 @@ extension on TranslationsZhHant {
 			'chat.genui.transferPath.unknownAccount' => 'Unknown Account',
 			'chat.genui.transferPath.confirmed' => 'Confirmed',
 			'chat.genui.transferPath.executeAction' => '按我的選擇執行轉帳',
-			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
-			'chat.genui.transactionConfirmation.confirmed' => '已确认',
-			'chat.genui.budgetAnalysis.title' => '预算分析报告',
-			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => '过去 ${days} 天',
-			'chat.genui.budgetAnalysis.totalExpense' => '总支出',
-			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => '环比 ${change}%',
-			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
-			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
-			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
+			'chat.genui.transactionConfirmation.multipleAccounts' => '偵測到多個關聯帳戶',
+			'chat.genui.transactionConfirmation.confirmed' => '已確認',
+			'chat.genui.budgetAnalysis.title' => '預算分析報告',
+			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => '過去 ${days} 天',
+			'chat.genui.budgetAnalysis.totalExpense' => '總支出',
+			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => '較上期 ${change}%',
+			'chat.genui.budgetAnalysis.categoryDistribution' => '分類占比',
+			'chat.genui.budgetAnalysis.topSpenders' => '大額支出',
+			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}萬',
 			'chat.genui.error.title' => '元件渲染失敗',
 			'chat.genui.error.fetchFailed' => '讀取失敗，請稍後再試。',
 			'chat.genui.error.dataIncomplete' => '資料不完整',
@@ -3703,9 +3705,9 @@ extension on TranslationsZhHant {
 			'account.transferTargetTitle' => '選擇轉入帳戶',
 			'account.closedBadge' => '已停用',
 			'account.reopenAccount' => '重新啟用帳戶',
-			'account.reopenConfirm' => '該帳戶將被重新啟用（ACTIVE），重新計入淨值並可用於新交易。',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenConfirm' => '該帳戶將被重新啟用（ACTIVE），重新計入淨值並可用於新交易。',
 			'account.reopenSuccess' => '帳戶已重新啟用',
 			'account.closeDisposalTitle' => '處理停用前餘額',
 			'account.disposalKeepDesc' => '直接歸檔，餘額保持當前數值不再變動；不產生任何流水。',

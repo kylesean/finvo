@@ -47,15 +47,9 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
 
   bool _isLoadingEdit = false;
 
-  late FPickerController _periodPickerController;
-  late FPickerController _anchorDayPickerController;
-
   @override
   void initState() {
     super.initState();
-    _periodPickerController = FPickerController(indexes: [2]);
-    _anchorDayPickerController = FPickerController(indexes: [0]);
-
     if (widget.editId != null) {
       unawaited(_loadEditData());
     }
@@ -86,16 +80,6 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
           if (budget.categoryKey != null) {
             _category = TransactionCategory.fromKey(budget.categoryKey!);
           }
-          final periodIndex = BudgetPeriodType.values.indexOf(_periodType);
-          _periodPickerController.dispose();
-          _periodPickerController = FPickerController(
-            indexes: [periodIndex >= 0 ? periodIndex : 2],
-          );
-          _anchorDayPickerController.dispose();
-          _anchorDayPickerController = FPickerController(
-            indexes: [(_periodAnchorDay - 1).clamp(0, 30)],
-          );
-
           _isLoadingEdit = false;
         });
       }
@@ -111,8 +95,6 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
   void dispose() {
     _amountController.dispose();
     _nameController.dispose();
-    _periodPickerController.dispose();
-    _anchorDayPickerController.dispose();
     super.dispose();
   }
 

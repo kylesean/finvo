@@ -116,7 +116,12 @@ class TransactionFeed extends _$TransactionFeed {
       next,
     ) {
       if (previous != next) {
-        ref.read(selectedDateProvider.notifier).set(null);
+        // Only reset the date when one is actually selected: set(null)
+        // notifies the date listener below synchronously, which would fire a
+        // duplicate refreshFeed against the identical (null) filter.
+        if (ref.read(selectedDateProvider) != null) {
+          ref.read(selectedDateProvider.notifier).set(null);
+        }
         // Semantic change: clear the old list so the skeleton marks the switch.
         unawaited(refreshFeed(clearList: true));
       }
@@ -302,8 +307,14 @@ class TransactionFeed extends _$TransactionFeed {
           hasLoadMoreError: false,
         );
       } else {
+        // De-duplicate by id: optimistic updates / rollback inserts between
+        // page fetches can make the next page re-deliver a known transaction.
+        final existingIds = state.transactions.map((t) => t.id).toSet();
+        final freshPage = newTransactions
+            .where((t) => !existingIds.contains(t.id))
+            .toList();
         state = state.copyWith(
-          transactions: [...state.transactions, ...newTransactions],
+          transactions: [...state.transactions, ...freshPage],
           isLoadingMore: false,
           currentPage: nextPage,
           hasReachedMax: newTransactions.length < _pageSize,

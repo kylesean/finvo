@@ -51,9 +51,15 @@ class _SharedSpaceDetailPageState extends ConsumerState<SharedSpaceDetailPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Layer 3: Auto-refresh when app returns to foreground
+    // Layer 3: Auto-refresh when app returns to foreground.
+    // Only when this page is the current (top-most) route: several detail
+    // pages can stay alive in the navigation stack, and each one would
+    // otherwise fire a full refetch on every single resume.
     if (state == AppLifecycleState.resumed) {
-      unawaited(_refreshAll());
+      final route = ModalRoute.of(context);
+      if (route != null && route.isCurrent) {
+        unawaited(_refreshAll());
+      }
     }
   }
 

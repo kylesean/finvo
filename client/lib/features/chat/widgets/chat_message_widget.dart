@@ -98,6 +98,15 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The content subtree reads MediaQuery width; a keyboard open/close or
+    // rotation must invalidate the memo or visible bubbles keep the old
+    // width's layout until the message object itself changes.
+    _reuseCache = false;
+  }
+
+  @override
   void dispose() {
     _controller.stop();
     _controller.dispose();
@@ -257,7 +266,12 @@ class _ChatMessageWidgetState extends ConsumerState<ChatMessageWidget>
         child: GenUiErrorBoundary(
           componentName: component.componentType,
           data: component.data,
-          child: HistoricalComponentRenderer(
+          // builder: the boundary can only catch construction errors that
+          // happen inside its own build. Passing a `child:` constructs the
+          // renderer HERE (outside the boundary), so a malformed historical
+          // payload would escape protection entirely — the live branch above
+          // uses builder for the same reason.
+          builder: (context) => HistoricalComponentRenderer(
             componentType: component.componentType,
             data: component.data,
           ),

@@ -655,12 +655,12 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     if (!mounted || typeResult == null) return;
 
     if (typeResult is FinancialAccount) {
-      // Add the new account to the provider
-      final currentAccounts = ref.read(financialAccountProvider).accounts;
-      final updatedList = [...currentAccounts, typeResult];
+      // Create through the single-account endpoint instead of submitting the
+      // whole local list: a bulk overwrite from a stale snapshot would revert
+      // concurrent server-side changes to other accounts.
       final success = await ref
           .read(financialAccountProvider.notifier)
-          .saveFinancialAccounts(updatedList);
+          .createFinancialAccount(typeResult);
 
       // Refresh account list after successful save
       if (success && mounted) {

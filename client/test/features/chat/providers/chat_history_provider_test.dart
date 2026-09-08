@@ -114,11 +114,6 @@ void main() {
             ),
           );
         }
-        if (path == '/chatbot/sessions/conv-1/resume-status') {
-          return _jsonResponse({
-            'data': {'canResume': false, 'nextNodes': <String>[]},
-          });
-        }
         fail('Unexpected request: $path');
       });
       dio.httpClientAdapter = adapter;
@@ -136,8 +131,9 @@ void main() {
       );
       expect(state.isLoadingHistory, isFalse);
       expect(state.historyError, isNull);
-      // detail + resume-status were both fetched through the real service.
-      expect(adapter.requestCount, 2);
+      // Only the conversation detail is fetched; the dead resume-status
+      // probe was removed.
+      expect(adapter.requestCount, 1);
     });
 
     test(
@@ -176,11 +172,6 @@ void main() {
                 ],
               ),
             );
-          }
-          if (path == '/chatbot/sessions/conv-b/resume-status') {
-            return _jsonResponse({
-              'data': {'canResume': false, 'nextNodes': <String>[]},
-            });
           }
           fail('Unexpected request: $path');
         });
@@ -229,8 +220,6 @@ void main() {
 
     test('a failed load is retryable (guard falls through on error)', () async {
       var failDetail = true;
-      // The resume-status endpoint is only consulted after a successful
-      // detail load, so the failing phase never reaches it.
       adapter = _FakeDioAdapter((options) async {
         final path = options.path;
         if (path == '/chatbot/sessions/conv-1/messages') {
@@ -254,11 +243,6 @@ void main() {
               ],
             ),
           );
-        }
-        if (path == '/chatbot/sessions/conv-1/resume-status') {
-          return _jsonResponse({
-            'data': {'canResume': false, 'nextNodes': <String>[]},
-          });
         }
         fail('Unexpected request: $path');
       });

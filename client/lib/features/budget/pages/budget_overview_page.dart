@@ -34,12 +34,19 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
     });
   }
 
-  /// Get currency symbol from global settings
+  /// Get currency symbol from global settings (used for cross-budget totals,
+  /// which the backend reports in the account's primary currency)
   String get _currencySymbol =>
       Currency.fromCode(
         ref.watch(financialSettingsProvider).primaryCurrency,
       )?.symbol ??
       '¥';
+
+  /// Symbol for a specific budget: a budget's amounts are stored in the
+  /// currency it was created with, NOT the current primary currency — using
+  /// the global symbol mislabeled e.g. a USD budget as ¥.
+  String _budgetSymbol(String currencyCode) =>
+      Currency.fromCode(currencyCode)?.symbol ?? '¥';
 
   @override
   Widget build(BuildContext context) {
@@ -340,7 +347,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
+                      '${_budgetSymbol(budget.currencyCode)}${_formatAmount(budgetWithUsage.spentAmount)}',
                       style: AppTextStyles.statValueOnDark(theme),
                     ),
                   ],
@@ -357,7 +364,7 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount)}',
+                    '${_budgetSymbol(budget.currencyCode)}${_formatAmount(budgetWithUsage.remainingAmount)}',
                     style: AppTextStyles.statValueOnDark(theme),
                   ),
                 ],
@@ -394,7 +401,8 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
               ),
               Text(
                 t.budget.budgetAmount(
-                  amount: '$_currencySymbol${_formatAmount(budget.amount)}',
+                  amount:
+                      '${_budgetSymbol(budget.currencyCode)}${_formatAmount(budget.amount)}',
                 ),
                 style: theme.typography.body.sm.copyWith(
                   color: colors.primaryForeground.withValues(alpha: 0.8),
@@ -605,13 +613,13 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '$_currencySymbol${_formatAmount(budgetWithUsage.spentAmount)}',
+                      '${_budgetSymbol(budget.currencyCode)}${_formatAmount(budgetWithUsage.spentAmount)}',
                       style: AppTextStyles.listTitle(
                         theme,
                       ).copyWith(color: statusColor),
                     ),
                     Text(
-                      '$_currencySymbol${_formatAmount(budget.amount)}',
+                      '${_budgetSymbol(budget.currencyCode)}${_formatAmount(budget.amount)}',
                       style: AppTextStyles.detailLabel(theme),
                     ),
                   ],
@@ -648,11 +656,11 @@ class _BudgetOverviewPageState extends ConsumerState<BudgetOverviewPage> {
                   budgetWithUsage.remainingAmount >= Decimal.zero
                       ? t.budget.remainingAmount(
                           amount:
-                              '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount)}',
+                              '${_budgetSymbol(budget.currencyCode)}${_formatAmount(budgetWithUsage.remainingAmount)}',
                         )
                       : t.budget.overspentAmount(
                           amount:
-                              '$_currencySymbol${_formatAmount(budgetWithUsage.remainingAmount.abs())}',
+                              '${_budgetSymbol(budget.currencyCode)}${_formatAmount(budgetWithUsage.remainingAmount.abs())}',
                         ),
                   style: AppTextStyles.statLabel(
                     theme,

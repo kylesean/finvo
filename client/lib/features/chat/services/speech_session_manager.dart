@@ -7,6 +7,7 @@ import 'package:finvo/shared/services/speech_recognition_service.dart';
 import 'package:finvo/features/chat/services/speech_service_factory.dart';
 import 'package:finvo/features/chat/services/system_speech_service.dart';
 import 'package:finvo/features/chat/services/sound_feedback_service.dart';
+
 // ignore_for_file: prefer_initializing_formals - private fields with public named ctor params
 
 final _logger = Logger('SpeechSessionManager');
@@ -214,7 +215,17 @@ class SpeechSessionManager {
   }
 
   void _handleStatus(String status) {
-    _noSpeechInputTimer?.cancel();
+    // The watchdog must survive status events: both services re-emit
+    // 'listening' mid-session (system: plugin statusListener after each
+    // partial; websocket: server status frames), and an unconditional cancel
+    // here disarmed the no-input timer right after startSession armed it —
+    // a user who never spoke would hold the session (and the audio stream)
+    // open forever. 'listening' re-arms; any other status is a session end.
+    if (status == 'listening') {
+      _armNoInputTimer();
+    } else {
+      _noSpeechInputTimer?.cancel();
+    }
     _isListening = status == 'listening';
     onStatus?.call(status);
   }

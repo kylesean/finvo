@@ -351,6 +351,7 @@ class _Translations$calendar$ko extends Translations$calendar$zh {
 	@override String get trend => '추세: ';
 	@override String get noTransactionsTitle => '해당 날짜에 거래 내역 없음';
 	@override String get loadTransactionFailed => '거래 로드 실패';
+	@override String selectedDayExpense({required Object date, required Object amount}) => '${date}: 지출 ${amount}';
 }
 
 // Path: category
@@ -2885,6 +2886,7 @@ extension on TranslationsKo {
 			'calendar.trend' => '추세: ',
 			'calendar.noTransactionsTitle' => '해당 날짜에 거래 내역 없음',
 			'calendar.loadTransactionFailed' => '거래 로드 실패',
+			'calendar.selectedDayExpense' => ({required Object date, required Object amount}) => '${date}: 지출 ${amount}',
 			'category.dailyConsumption' => '일상 소비',
 			'category.transportation' => '교통',
 			'category.healthcare' => '의료/건강',
@@ -3189,9 +3191,9 @@ extension on TranslationsKo {
 			'forecast.recurringTransaction.paused' => '일시 정지됨',
 			'forecast.recurringTransaction.nextTime' => '다음',
 			'forecast.recurringTransaction.sortByTime' => '시간순 정렬',
-			'forecast.recurringTransaction.allPeriod' => '모든 주기',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.allPeriod' => '모든 주기',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}주기 (${count})',
 			'forecast.recurringTransaction.confirmDelete' => '삭제 확인',
 			'forecast.recurringTransaction.confirmActivate' => '활성화 확인',
@@ -3703,9 +3705,9 @@ extension on TranslationsKo {
 			'account.transferTargetTitle' => '이체 대상 계좌 선택',
 			'account.closedBadge' => '정지됨',
 			'account.reopenAccount' => '계좌 재활성화',
-			'account.reopenConfirm' => '이 계좌는 재활성화(ACTIVE)되어 순자산과 새 거래에 다시 포함됩니다.',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenConfirm' => '이 계좌는 재활성화(ACTIVE)되어 순자산과 새 거래에 다시 포함됩니다.',
 			'account.reopenSuccess' => '계좌가 재활성화되었습니다',
 			'account.closeDisposalTitle' => '정지 전 잔액 처리',
 			'account.disposalKeepDesc' => '잔액을 현재 그대로 고정하고 보관합니다. 새 내역은 생성되지 않습니다.',

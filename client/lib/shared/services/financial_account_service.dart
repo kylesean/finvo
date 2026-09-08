@@ -44,6 +44,27 @@ class FinancialAccountService {
     );
   }
 
+  /// Create a single account server-side.
+  ///
+  /// The bulk [saveFinancialAccounts] endpoint replaces the user's whole
+  /// account list; creating through it from a stale client snapshot would
+  /// clobber concurrent server-side changes. This dedicated endpoint touches
+  /// exactly one row.
+  Future<FinancialAccount> createFinancialAccount(
+    FinancialAccount account,
+  ) async {
+    return await _networkClient.request<FinancialAccount>(
+      '/user/financial-accounts/create',
+      method: HttpMethod.post,
+      data: account.toJson(),
+      fromJsonT: (json) => _networkClient.unwrapData(
+        json,
+        FinancialAccount.fromJson,
+        endpoint: '/user/financial-accounts/create',
+      ),
+    );
+  }
+
   /// Update a single account
   Future<FinancialAccount> updateFinancialAccount(
     String accountId,

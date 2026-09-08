@@ -232,7 +232,8 @@
     "unableToCount": "Unable to count",
     "trend": "Trend: ",
     "noTransactionsTitle": "No transactions on this day",
-    "loadTransactionFailed": "Failed to load transactions"
+    "loadTransactionFailed": "Failed to load transactions",
+    "selectedDayExpense": "$date - spent $amount"
   },
   "category": {
     "dailyConsumption": "Daily Expenses",

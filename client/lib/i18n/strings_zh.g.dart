@@ -716,6 +716,9 @@ class Translations$calendar$zh {
 
 	/// zh: '加载交易失败'
 	String get loadTransactionFailed => '加载交易失败';
+
+	/// zh: '$date：消费 $amount'
+	String selectedDayExpense({required Object date, required Object amount}) => '${date}：消费 ${amount}';
 }
 
 // Path: category
@@ -5760,6 +5763,7 @@ extension on Translations {
 			'calendar.trend' => '趋势: ',
 			'calendar.noTransactionsTitle' => '当日无交易记录',
 			'calendar.loadTransactionFailed' => '加载交易失败',
+			'calendar.selectedDayExpense' => ({required Object date, required Object amount}) => '${date}：消费 ${amount}',
 			'category.dailyConsumption' => '日常消费',
 			'category.transportation' => '交通出行',
 			'category.healthcare' => '医疗健康',
@@ -6064,9 +6068,9 @@ extension on Translations {
 			'forecast.recurringTransaction.paused' => '已暂停',
 			'forecast.recurringTransaction.nextTime' => '下次',
 			'forecast.recurringTransaction.sortByTime' => '按时间排序',
-			'forecast.recurringTransaction.allPeriod' => '全部周期',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.allPeriod' => '全部周期',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type}周期 (${count})',
 			'forecast.recurringTransaction.confirmDelete' => '确认删除',
 			'forecast.recurringTransaction.confirmActivate' => '确认启用',
@@ -6578,9 +6582,9 @@ extension on Translations {
 			'account.transferTargetTitle' => '选择转入账户',
 			'account.closedBadge' => '已停用',
 			'account.reopenAccount' => '重新启用账户',
-			'account.reopenConfirm' => '该账户将被重新启用（ACTIVE），重新计入净值并可用于新交易。',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenConfirm' => '该账户将被重新启用（ACTIVE），重新计入净值并可用于新交易。',
 			'account.reopenSuccess' => '账户已重新启用',
 			'account.closeDisposalTitle' => '处理停用前余额',
 			'account.disposalKeepDesc' => '直接归档，余额保持当前数值不再变动；不生成任何流水。',

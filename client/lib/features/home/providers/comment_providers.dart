@@ -84,6 +84,7 @@ class TransactionComments extends _$TransactionComments {
 
       // A newer mutation (delete/add) landed while this request was in flight:
       // reconcile from the server instead of clobbering the newer state.
+      if (!ref.mounted) return;
       if (!_generation.isCurrent(generation)) {
         await _reload(service);
         return;
@@ -102,7 +103,7 @@ class TransactionComments extends _$TransactionComments {
       // Keep the already-loaded list visible: replacing it with AsyncError
       // would blank out existing comments just because one send failed.
       // The error is rethrown so the caller can surface a toast.
-      if (state.value == null) {
+      if (ref.mounted && state.value == null) {
         state = AsyncError(e, st);
       }
       rethrow;
@@ -148,6 +149,10 @@ class TransactionComments extends _$TransactionComments {
   Future<void> _reload(CommentService service) async {
     final comments = await service.getComments(transactionId);
     comments.sort(_compareByCreatedAt);
+    // This is an auto-dispose family provider: the user may have navigated
+    // away (or the transaction list unmounted) while the request was in
+    // flight. Writing state after disposal throws UnmountedRefException.
+    if (!ref.mounted) return;
     state = AsyncData(comments);
   }
 }

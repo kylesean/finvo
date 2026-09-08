@@ -126,8 +126,15 @@ class NotificationNotifier extends _$NotificationNotifier
         state = state.copyWith(isLoadingMore: false);
         return;
       }
+      // De-duplicate by id: realtime notifications are prepended between
+      // page fetches, which shifts the server's offset — without this the
+      // next page re-delivers an item already in the list.
+      final existingIds = state.items.map((i) => i.id).toSet();
+      final freshItems = res.items
+          .where((i) => !existingIds.contains(i.id))
+          .toList();
       state = state.copyWith(
-        items: [...state.items, ...res.items],
+        items: [...state.items, ...freshItems],
         total: res.total,
         unreadCount: res.unreadCount,
         currentPage: nextPage,

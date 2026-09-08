@@ -3,6 +3,7 @@ import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/shared/models/financial_account.dart';
+import 'package:finvo/shared/utils/date_time_utils.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/providers/generation_guard.dart';
@@ -181,7 +182,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
       DateTime? parsedDate;
       if (response.lastUpdatedAt.isNotEmpty) {
         try {
-          parsedDate = DateTime.parse(response.lastUpdatedAt);
+          parsedDate = tryParseDateTime(response.lastUpdatedAt);
         } catch (e) {
           // Malformed timestamp from the server: fall back to now but keep
           // the data issue diagnosable.
@@ -258,6 +259,40 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
         accounts: accounts,
         totalBalance: effectiveBalance,
         lastUpdatedAt: summary.lastUpdatedAt,
+        isLoading: false,
+        error: null,
+      );
+
+      return true;
+    } catch (e) {
+      String errorMessage = 'Failed to save cash sources';
+      if (e is AppException) {
+        errorMessage = e.message;
+      }
+
+      if (!ref.mounted) return false;
+      state = state.copyWith(isLoading: false, error: errorMessage);
+
+      return false;
+    }
+  }
+
+  /// Create a single account server-side and append it to local state.
+  ///
+  /// Deliberately avoids routing through the bulk [saveFinancialAccounts]
+  /// overwrite: submitting the whole local list from a minutes-old snapshot
+  /// would clobber concurrent server-side changes.
+  Future<bool> createFinancialAccount(FinancialAccount account) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final service = ref.read(financialAccountServiceProvider);
+      final created = await service.createFinancialAccount(account);
+
+      if (!ref.mounted) return false;
+
+      state = state.copyWith(
+        accounts: [...state.accounts, created],
         isLoading: false,
         error: null,
       );

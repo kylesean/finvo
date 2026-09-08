@@ -251,6 +251,13 @@ class StreamingController {
   /// Manually mark message as completed
   void markMessageCompleted() {
     if (_isDisposed) return;
+    // The initial-delay timer must not survive completion: it fires 700ms
+    // later, sees isFirstChunkReceived == false (never set for a
+    // text-less/surface-less completion or an early user stop), and
+    // re-enables isTyping with no content — which the repository then
+    // resolves against the already-cleared buffer, blanking out the final
+    // message. markStreamEnded/handleStreamError do the same.
+    _initialResponseDelayTimer?.cancel();
     streamState.markCompleted();
   }
 

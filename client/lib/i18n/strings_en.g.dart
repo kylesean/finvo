@@ -351,6 +351,7 @@ class _Translations$calendar$en extends Translations$calendar$zh {
 	@override String get trend => 'Trend: ';
 	@override String get noTransactionsTitle => 'No transactions on this day';
 	@override String get loadTransactionFailed => 'Failed to load transactions';
+	@override String selectedDayExpense({required Object date, required Object amount}) => '${date} - spent ${amount}';
 }
 
 // Path: category
@@ -2885,6 +2886,7 @@ extension on TranslationsEn {
 			'calendar.trend' => 'Trend: ',
 			'calendar.noTransactionsTitle' => 'No transactions on this day',
 			'calendar.loadTransactionFailed' => 'Failed to load transactions',
+			'calendar.selectedDayExpense' => ({required Object date, required Object amount}) => '${date} - spent ${amount}',
 			'category.dailyConsumption' => 'Daily Expenses',
 			'category.transportation' => 'Transportation',
 			'category.healthcare' => 'Healthcare',
@@ -3189,9 +3191,9 @@ extension on TranslationsEn {
 			'forecast.recurringTransaction.paused' => 'Paused',
 			'forecast.recurringTransaction.nextTime' => 'Next',
 			'forecast.recurringTransaction.sortByTime' => 'Sort by time',
-			'forecast.recurringTransaction.allPeriod' => 'All recurring',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.allPeriod' => 'All recurring',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} recurring (${count})',
 			'forecast.recurringTransaction.confirmDelete' => 'Confirm Delete',
 			'forecast.recurringTransaction.confirmActivate' => 'Confirm Activate',
@@ -3703,9 +3705,9 @@ extension on TranslationsEn {
 			'account.transferTargetTitle' => 'Choose transfer target account',
 			'account.closedBadge' => 'Closed',
 			'account.reopenAccount' => 'Reopen Account',
-			'account.reopenConfirm' => 'This account will be reopened (ACTIVE): it will count toward net worth and be available for new transactions again.',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenConfirm' => 'This account will be reopened (ACTIVE): it will count toward net worth and be available for new transactions again.',
 			'account.reopenSuccess' => 'Account reopened',
 			'account.closeDisposalTitle' => 'Handle remaining balance',
 			'account.disposalKeepDesc' => 'Freeze the balance as-is and archive the account. No new record is created.',

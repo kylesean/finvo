@@ -112,6 +112,8 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
         description: description,
       );
 
+      // Await gap: the list page may have been disposed mid-request.
+      if (!ref.mounted) return newSpace;
       state = state.copyWith(spaces: [newSpace, ...state.spaces]);
 
       return newSpace;
@@ -120,6 +122,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
       if (e is AppException) {
         errorMessage = e.message;
       }
+      if (!ref.mounted) return null;
       state = state.copyWith(error: errorMessage);
       return null;
     }
@@ -130,6 +133,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
     try {
       final space = await service.joinSpaceWithCode(inviteCode);
 
+      if (!ref.mounted) return space;
       final existingIndex = state.spaces.indexWhere((s) => s.id == space.id);
       if (existingIndex == -1) {
         state = state.copyWith(spaces: [space, ...state.spaces]);
@@ -145,6 +149,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
       if (e is AppException) {
         errorMessage = e.message;
       }
+      if (!ref.mounted) return null;
       state = state.copyWith(error: errorMessage);
       return null;
     }
@@ -155,6 +160,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
     try {
       await service.leaveSpace(spaceId);
 
+      if (!ref.mounted) return true;
       state = state.copyWith(
         spaces: state.spaces.where((space) => space.id != spaceId).toList(),
       );
@@ -165,6 +171,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
       if (e is AppException) {
         errorMessage = e.message;
       }
+      if (!ref.mounted) return false;
       state = state.copyWith(error: errorMessage);
       return false;
     }
@@ -175,6 +182,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
     try {
       await service.deleteSpace(spaceId);
 
+      if (!ref.mounted) return true;
       state = state.copyWith(
         spaces: state.spaces.where((space) => space.id != spaceId).toList(),
       );
@@ -185,6 +193,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
       if (e is AppException) {
         errorMessage = e.message;
       }
+      if (!ref.mounted) return false;
       state = state.copyWith(error: errorMessage);
       return false;
     }
@@ -203,6 +212,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
         description: description,
       );
 
+      if (!ref.mounted) return true;
       final updatedSpaces = state.spaces.map((space) {
         return space.id == spaceId ? updatedSpace : space;
       }).toList();
@@ -214,6 +224,7 @@ class SharedSpaceNotifier extends _$SharedSpaceNotifier
       if (e is AppException) {
         errorMessage = e.message;
       }
+      if (!ref.mounted) return false;
       state = state.copyWith(error: errorMessage);
       return false;
     }

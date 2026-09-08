@@ -232,7 +232,8 @@
     "unableToCount": "無法統計",
     "trend": "趨勢: ",
     "noTransactionsTitle": "當日無交易記錄",
-    "loadTransactionFailed": "載入交易失敗"
+    "loadTransactionFailed": "載入交易失敗",
+    "selectedDayExpense": "$date：消費 $amount"
   },
   "category": {
     "dailyConsumption": "日常消費",
@@ -316,7 +317,7 @@
     "usernameRequired": "Username is required",
     "usernameUpdated": "Username updated",
     "avatarUpdated": "Avatar updated",
-    "appearanceUpdated": "外观设置已更新"
+    "appearanceUpdated": "外觀設定已更新"
   },
   "appearance": {
     "title": "外觀設置",
@@ -741,7 +742,7 @@
       "simulateBudget": "正在模擬預算"
     },
     "speechNotRecognized": "未識別到語音，請重試",
-    "currentExpense": "当前支出",
+    "currentExpense": "當前支出",
     "loadingComponent": "正在載入組件...",
     "noHistory": "暫無歷史會話",
     "startNewChat": "開啟一段新對話吧！",
@@ -767,7 +768,7 @@
       "confirmTransfer": "確認轉帳",
       "confirmed": "已確認",
       "transferSuccess": "轉帳成功",
-      "selectReceiveAccount": "选择收款账户",
+      "selectReceiveAccount": "選擇收款帳戶",
       "noAssetAccounts": "暫無資產帳戶",
       "goToFinanceToAddAccounts": "請前往財務頁面新增帳戶",
       "needTwoAssetAccounts": "轉帳需要至少兩個資產帳戶",
@@ -938,17 +939,17 @@
         "executeAction": "按我的選擇執行轉帳"
       },
       "transactionConfirmation": {
-        "multipleAccounts": "检测到多个关联账户",
-        "confirmed": "已确认"
+        "multipleAccounts": "偵測到多個關聯帳戶",
+        "confirmed": "已確認"
       },
       "budgetAnalysis": {
-        "title": "预算分析报告",
-        "periodDays": "过去 $days 天",
-        "totalExpense": "总支出",
-        "momChange": "环比 $change%",
-        "categoryDistribution": "分类占比",
-        "topSpenders": "大额支出",
-        "amountWan": "$amount万"
+        "title": "預算分析報告",
+        "periodDays": "過去 $days 天",
+        "totalExpense": "總支出",
+        "momChange": "較上期 $change%",
+        "categoryDistribution": "分類占比",
+        "topSpenders": "大額支出",
+        "amountWan": "$amount萬"
       },
       "error": {
         "title": "元件渲染失敗",

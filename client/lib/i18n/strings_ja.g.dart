@@ -351,6 +351,7 @@ class _Translations$calendar$ja extends Translations$calendar$zh {
 	@override String get trend => '傾向: ';
 	@override String get noTransactionsTitle => 'この日の取引はありません';
 	@override String get loadTransactionFailed => '取引の読み込みに失敗しました';
+	@override String selectedDayExpense({required Object date, required Object amount}) => '${date}：支出 ${amount}';
 }
 
 // Path: category
@@ -448,7 +449,7 @@ class _Translations$settings$ja extends Translations$settings$zh {
 	@override String get usernameRequired => 'Username is required';
 	@override String get usernameUpdated => 'Username updated';
 	@override String get avatarUpdated => 'Avatar updated';
-	@override String get appearanceUpdated => '外观设置已更新';
+	@override String get appearanceUpdated => '外観設定を更新しました';
 }
 
 // Path: appearance
@@ -1431,7 +1432,7 @@ class _Translations$chat$transferWizard$ja extends Translations$chat$transferWiz
 	@override String get confirmTransfer => '振替を確認';
 	@override String get confirmed => '確認済み';
 	@override String get transferSuccess => '振替が完了しました';
-	@override String get selectReceiveAccount => '选择收款账户';
+	@override String get selectReceiveAccount => '受取口座を選択';
 	@override String get noAssetAccounts => '資産口座がありません';
 	@override String get goToFinanceToAddAccounts => '財務ページで口座を追加してください';
 	@override String get needTwoAssetAccounts => '振替には資産口座が2つ以上必要です';
@@ -2377,8 +2378,8 @@ class _Translations$chat$genui$transactionConfirmation$ja extends Translations$c
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get multipleAccounts => '检测到多个关联账户';
-	@override String get confirmed => '已确认';
+	@override String get multipleAccounts => '複数の関連口座が検出されました';
+	@override String get confirmed => '確認済み';
 }
 
 // Path: chat.genui.budgetAnalysis
@@ -2388,12 +2389,12 @@ class _Translations$chat$genui$budgetAnalysis$ja extends Translations$chat$genui
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '预算分析报告';
-	@override String periodDays({required Object days}) => '过去 ${days} 天';
-	@override String get totalExpense => '总支出';
-	@override String momChange({required Object change}) => '环比 ${change}%';
-	@override String get categoryDistribution => '分类占比';
-	@override String get topSpenders => '大额支出';
+	@override String get title => '予算分析レポート';
+	@override String periodDays({required Object days}) => '過去 ${days} 日間';
+	@override String get totalExpense => '総支出';
+	@override String momChange({required Object change}) => '前期比 ${change}%';
+	@override String get categoryDistribution => 'カテゴリー別割合';
+	@override String get topSpenders => '高額支出';
 	@override String amountWan({required Object amount}) => '${amount}万';
 }
 
@@ -2885,6 +2886,7 @@ extension on TranslationsJa {
 			'calendar.trend' => '傾向: ',
 			'calendar.noTransactionsTitle' => 'この日の取引はありません',
 			'calendar.loadTransactionFailed' => '取引の読み込みに失敗しました',
+			'calendar.selectedDayExpense' => ({required Object date, required Object amount}) => '${date}：支出 ${amount}',
 			'category.dailyConsumption' => '生活費',
 			'category.transportation' => '交通費',
 			'category.healthcare' => '医療・健康',
@@ -2964,7 +2966,7 @@ extension on TranslationsJa {
 			'settings.usernameRequired' => 'Username is required',
 			'settings.usernameUpdated' => 'Username updated',
 			'settings.avatarUpdated' => 'Avatar updated',
-			'settings.appearanceUpdated' => '外观设置已更新',
+			'settings.appearanceUpdated' => '外観設定を更新しました',
 			'appearance.title' => '外観設定',
 			'appearance.themeMode' => 'テーマモード',
 			'appearance.light' => 'ライト',
@@ -3189,9 +3191,9 @@ extension on TranslationsJa {
 			'forecast.recurringTransaction.paused' => '停止中',
 			'forecast.recurringTransaction.nextTime' => '次回',
 			'forecast.recurringTransaction.sortByTime' => '時間順',
-			'forecast.recurringTransaction.allPeriod' => 'すべての周期',
 			_ => null,
 		} ?? switch (path) {
+			'forecast.recurringTransaction.allPeriod' => 'すべての周期',
 			'forecast.recurringTransaction.periodCount' => ({required Object type, required Object count}) => '${type} (${count} 件)',
 			'forecast.recurringTransaction.confirmDelete' => '削除確認',
 			'forecast.recurringTransaction.confirmActivate' => '有効化確認',
@@ -3378,7 +3380,7 @@ extension on TranslationsJa {
 			'chat.transferWizard.confirmTransfer' => '振替を確認',
 			'chat.transferWizard.confirmed' => '確認済み',
 			'chat.transferWizard.transferSuccess' => '振替が完了しました',
-			'chat.transferWizard.selectReceiveAccount' => '选择收款账户',
+			'chat.transferWizard.selectReceiveAccount' => '受取口座を選択',
 			'chat.transferWizard.noAssetAccounts' => '資産口座がありません',
 			'chat.transferWizard.goToFinanceToAddAccounts' => '財務ページで口座を追加してください',
 			'chat.transferWizard.needTwoAssetAccounts' => '振替には資産口座が2つ以上必要です',
@@ -3518,14 +3520,14 @@ extension on TranslationsJa {
 			'chat.genui.transferPath.unknownAccount' => 'Unknown Account',
 			'chat.genui.transferPath.confirmed' => 'Confirmed',
 			'chat.genui.transferPath.executeAction' => '選択に従って振替を実行',
-			'chat.genui.transactionConfirmation.multipleAccounts' => '检测到多个关联账户',
-			'chat.genui.transactionConfirmation.confirmed' => '已确认',
-			'chat.genui.budgetAnalysis.title' => '预算分析报告',
-			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => '过去 ${days} 天',
-			'chat.genui.budgetAnalysis.totalExpense' => '总支出',
-			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => '环比 ${change}%',
-			'chat.genui.budgetAnalysis.categoryDistribution' => '分类占比',
-			'chat.genui.budgetAnalysis.topSpenders' => '大额支出',
+			'chat.genui.transactionConfirmation.multipleAccounts' => '複数の関連口座が検出されました',
+			'chat.genui.transactionConfirmation.confirmed' => '確認済み',
+			'chat.genui.budgetAnalysis.title' => '予算分析レポート',
+			'chat.genui.budgetAnalysis.periodDays' => ({required Object days}) => '過去 ${days} 日間',
+			'chat.genui.budgetAnalysis.totalExpense' => '総支出',
+			'chat.genui.budgetAnalysis.momChange' => ({required Object change}) => '前期比 ${change}%',
+			'chat.genui.budgetAnalysis.categoryDistribution' => 'カテゴリー別割合',
+			'chat.genui.budgetAnalysis.topSpenders' => '高額支出',
 			'chat.genui.budgetAnalysis.amountWan' => ({required Object amount}) => '${amount}万',
 			'chat.genui.error.title' => 'レンダリングに失敗しました',
 			'chat.genui.error.fetchFailed' => '読み込みに失敗しました。後でもう一度お試しください。',
@@ -3703,9 +3705,9 @@ extension on TranslationsJa {
 			'account.transferTargetTitle' => '振替先口座を選択',
 			'account.closedBadge' => '停止中',
 			'account.reopenAccount' => '口座を再有効化',
-			'account.reopenConfirm' => 'この口座は再有効化（ACTIVE）され、純資産と新しい取引に再度含まれます。',
 			_ => null,
 		} ?? switch (path) {
+			'account.reopenConfirm' => 'この口座は再有効化（ACTIVE）され、純資産と新しい取引に再度含まれます。',
 			'account.reopenSuccess' => '口座を再有効化しました',
 			'account.closeDisposalTitle' => '停止前の残高の処理',
 			'account.disposalKeepDesc' => '残高を現在のまま固定してアーカイブします。新しい明細は作成されません。',
