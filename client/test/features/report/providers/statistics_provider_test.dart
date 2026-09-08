@@ -185,6 +185,33 @@ void main() {
       expect(state.overview, isNull);
     });
 
+    test('setSortType keeps the current chart type (RPT-1)', () async {
+      service.topTransactions = _topTransactions();
+      final notifier = container.read(statisticsProvider.notifier);
+      await notifier.setChartType(ChartType.income);
+      await notifier.setSortType(SortType.date);
+
+      expect(service.lastTopTransactionsTransactionType, 'income');
+    });
+
+    test(
+      'loadMoreTopTransactions keeps the current chart type (RPT-1)',
+      () async {
+        service.overview = _overview();
+        service.trendData = _trend();
+        service.categoryBreakdown = _category();
+        service.topTransactions = _topTransactions(hasMore: true, page: 1);
+
+        final notifier = container.read(statisticsProvider.notifier);
+        await notifier.setChartType(ChartType.income);
+        await notifier.loadStatistics();
+        await notifier.loadMoreTopTransactions();
+
+        expect(service.lastTopTransactionsTransactionType, 'income');
+        expect(service.lastTopTransactionsPage, 2);
+      },
+    );
+
     test('setAccountTypes updates filter and reloads', () async {
       service.overview = _overview();
       service.trendData = _trend();
@@ -349,6 +376,8 @@ class _FakeStatisticsService implements StatisticsService {
   bool failCore = false;
   bool failSupplementary = false;
   List<String>? lastAccountTypes;
+  String? lastTopTransactionsTransactionType;
+  int? lastTopTransactionsPage;
 
   /// When set, core endpoints resolve after this delay so tests can dispose
   /// the provider while a fetch is still in flight (dispose-race regression).
@@ -424,6 +453,8 @@ class _FakeStatisticsService implements StatisticsService {
     int pageSize = 10,
   }) async {
     lastAccountTypes = accountTypes;
+    lastTopTransactionsTransactionType = transactionType;
+    lastTopTransactionsPage = page;
     await _coreGate();
     if (failCore) throw Exception('core failed');
     final base = topTransactions ?? _topTransactions();

@@ -259,6 +259,10 @@ class Statistics extends _$Statistics {
         accountTypes: state.selectedAccountTypes.isNotEmpty
             ? state.selectedAccountTypes
             : null,
+        // RPT-1: same as loadStatistics — omitting this falls back to the
+        // server default (expense), so sorting on the income tab would
+        // silently mix expense rows into the ranking.
+        transactionType: state.chartType.name,
         page: 1,
         pageSize: 15,
       );
@@ -309,6 +313,10 @@ class Statistics extends _$Statistics {
         accountTypes: state.selectedAccountTypes.isNotEmpty
             ? state.selectedAccountTypes
             : null,
+        // RPT-1: keep pagination consistent with the current tab — without
+        // this, page 2+ would be fetched under the server default (expense)
+        // even when the user is viewing income.
+        transactionType: state.chartType.name,
         page: nextPage,
         pageSize: state.topTransactions?.pageSize ?? 15,
       );
