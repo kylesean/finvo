@@ -23,17 +23,17 @@ from app.core.aliases import CurrentUser, DbSession
 from app.core.config import settings
 from app.core.database import get_session_context
 from app.core.dependencies import (
+    get_authorized_session,
     get_redis_client,
     is_token_revoked,
     revoke_token,
 )
 from app.core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from app.core.limiter import limiter
-from app.core.logging import bind_context, logger
+from app.core.logging import logger
 from app.core.pagination import Paging, paginate
 from app.core.responses import ResponseEnvelope, success_response
 from app.core.service_deps import get_auth_service
-from app.models.session import Session
 from app.models.user import User
 from app.repositories.session_repository import SessionRepository
 from app.schemas.auth import (
@@ -56,52 +56,6 @@ from app.utils.sanitization import sanitize_string
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
-
-
-async def get_authorized_session(
-    session_id: UUID,
-    current_user: CurrentUser,
-    db: DbSession,
-) -> Session:
-    """Get session with ownership verification.
-
-    This function verifies both:
-    1. The session exists in the database
-    2. The current user owns the session
-
-    Args:
-        session_id: The session ID from path/body parameter
-        current_user: The authenticated user from access token
-        db: Database session
-
-    Returns:
-        ChatSession: The verified session
-
-    Raises:
-        NotFoundError: 404 if session not found
-        AuthorizationError: 403 if access denied
-    """
-    # Verify session exists using repository
-    repo = SessionRepository(db)
-    session = await repo.get(session_id)
-    if session is None:
-        logger.error("session_not_found", session_id=session_id)
-        raise NotFoundError("Session")
-
-    # Verify ownership
-    if session.user_uuid != current_user.uuid:
-        logger.warning(
-            "session_access_denied",
-            session_id=session_id,
-            session_owner=session.user_uuid,
-            requesting_user=current_user.uuid,
-        )
-        raise AuthorizationError("Access denied to this session")
-
-    # Bind user_uuid to logging context
-    bind_context(user_uuid=session.user_uuid)
-
-    return session
 
 
 def _client_ip(request: Request) -> str | None:

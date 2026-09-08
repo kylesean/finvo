@@ -10,6 +10,7 @@ This module provides reusable dependency functions for:
 import hashlib
 from collections.abc import AsyncGenerator
 from typing import Annotated, Any
+from uuid import UUID
 
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -21,11 +22,14 @@ from app.core.database import get_session
 from app.core.exceptions import (
     AppException,
     AuthenticationError,
+    AuthorizationError,
     CommonErrorCode,
     NotFoundError,
 )
 from app.core.logging import bind_context, logger
+from app.models.session import Session
 from app.models.user import User
+from app.repositories.session_repository import SessionRepository
 from app.utils.auth_utils import (
     get_token_jti,
     get_token_remaining_seconds,
@@ -266,3 +270,59 @@ class OptionalAuth:
 
 # Create instance for use as dependency
 optional_auth = OptionalAuth()
+
+
+# ---------------------------------------------------------------------------
+# Chat session ownership (moved out of api/v1/auth.py: shared by several
+# chatbot endpoints and session resolution; core is the right home for an
+# authz helper used across routers).
+# ---------------------------------------------------------------------------
+
+
+async def get_authorized_session(
+    session_id: UUID,
+    # Inline Annotated aliases instead of app.core.aliases: that module
+    # imports get_current_user from HERE, so importing its aliases at module
+    # level would be a circular import.
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> Session:
+    """Get session with ownership verification.
+
+    This function verifies both:
+    1. The session exists in the database
+    2. The current user owns the session
+
+    Args:
+        session_id: The session ID from path/body parameter
+        current_user: The authenticated user from access token
+        db: Database session
+
+    Returns:
+        ChatSession: The verified session
+
+    Raises:
+        NotFoundError: 404 if session not found
+        AuthorizationError: 403 if access denied
+    """
+    # Verify session exists using repository
+    repo = SessionRepository(db)
+    session = await repo.get(session_id)
+    if session is None:
+        logger.error("session_not_found", session_id=session_id)
+        raise NotFoundError("Session")
+
+    # Verify ownership
+    if session.user_uuid != current_user.uuid:
+        logger.warning(
+            "session_access_denied",
+            session_id=session_id,
+            session_owner=session.user_uuid,
+            requesting_user=current_user.uuid,
+        )
+        raise AuthorizationError("Access denied to this session")
+
+    # Bind user_uuid to logging context
+    bind_context(user_uuid=session.user_uuid)
+
+    return session

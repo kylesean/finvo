@@ -287,9 +287,7 @@ class TestExtractionGuard:
         service._extraction_available = False
         service._memory = AsyncMock()  # must never be touched
 
-        result = await service.add_conversation_memory(
-            user_uuid=uuid4(), messages=[{"role": "user", "content": "hi"}]
-        )
+        result = await service.add_conversation_memory(user_uuid=uuid4(), messages=[{"role": "user", "content": "hi"}])
         assert result["success"] is False
         assert "disabled" in result["error"]
         service._memory.add.assert_not_called()
@@ -302,13 +300,16 @@ class TestMemoryExtractionThrottle:
     async def test_throttle_schedule(self, monkeypatch):
         from uuid import uuid4
 
-        from app.api.v1.chatbot import _MEMORY_TURN_COUNTERS, _should_extract_memory
+        from app.services.chat_session_service import (
+            _MEMORY_TURN_COUNTERS,
+            should_extract_memory,
+        )
         from app.core.config import settings
 
         monkeypatch.setattr(settings, "MEMORY_EXTRACTION_EVERY_N_TURNS", 3)
         session_id = uuid4()
         _MEMORY_TURN_COUNTERS.pop(session_id, None)
 
-        results = [await _should_extract_memory(session_id) for _ in range(7)]
+        results = [await should_extract_memory(session_id) for _ in range(7)]
         # counts 1, 3, 6 → True (first turn + every Nth)
         assert results == [True, False, True, False, False, True, False]

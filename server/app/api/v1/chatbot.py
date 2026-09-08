@@ -9,12 +9,11 @@ Authorization: Session ownership is verified via get_authorized_session.
 
 import asyncio
 import json
-from collections import OrderedDict
 from collections.abc import AsyncGenerator
 from contextlib import suppress
 from functools import lru_cache
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import (
     APIRouter,
@@ -24,19 +23,17 @@ from fastapi import (
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import ValidationError as PydanticValidationError
 
-from app.api.v1.auth import get_authorized_session
 from app.core.aliases import CurrentUser, DbSession
 from app.core.background_tasks import background_task_manager
 from app.core.config import settings
 from app.core.database import get_session_context
+from app.core.dependencies import get_authorized_session
 from app.core.exceptions import AppException, CommonErrorCode, ValidationError, to_client_error
 from app.core.langgraph.middleware.state_validator import state_validator
 from app.core.langgraph.simple_agent import SimpleLangChainAgent as LangGraphAgent
 from app.core.limiter import limiter
 from app.core.logging import logger
 from app.core.responses import ResponseEnvelope, success_response
-from app.models.session import Session
-from app.models.user import User
 from app.repositories.session_repository import SessionRepository
 from app.schemas.chat import (
     ChatRequest,
@@ -45,6 +42,12 @@ from app.schemas.chat import (
 )
 from app.schemas.client_state import ClientStateMutation
 from app.schemas.genui import GenUIEvent
+from app.services.chat_session_service import (
+    normalize_app_language,
+    resolve_chat_session,
+    should_extract_memory,
+    update_memory_background,
+)
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
@@ -61,106 +64,6 @@ def get_agent() -> LangGraphAgent:
     chatbot.get_agent to inject a mock.
     """
     return LangGraphAgent()
-
-
-# Memory extraction throttle: 1st turn and every Nth turn per session.
-_MEMORY_TURN_COUNTERS: OrderedDict[UUID, int] = OrderedDict()
-_MEMORY_TURN_COUNTERS_LOCK = asyncio.Lock()
-
-
-async def _should_extract_memory(session_id: UUID) -> bool:
-    """True on the 1st and every Nth turn; N from settings."""
-    every_n = max(1, settings.MEMORY_EXTRACTION_EVERY_N_TURNS)
-    async with _MEMORY_TURN_COUNTERS_LOCK:
-        count = _MEMORY_TURN_COUNTERS.get(session_id, 0) + 1
-        _MEMORY_TURN_COUNTERS[session_id] = count
-        _MEMORY_TURN_COUNTERS.move_to_end(session_id)
-        while len(_MEMORY_TURN_COUNTERS) > 512:  # bound: drop least-recently-seen sessions
-            _MEMORY_TURN_COUNTERS.popitem(last=False)
-        return count == 1 or count % every_n == 0
-
-
-async def _update_memory_background(
-    agent: LangGraphAgent,
-    user_uuid: UUID,
-    messages: list[dict[str, Any]],
-    session_id: UUID,
-) -> None:
-    """Update long-term memory in background (fire-and-forget).
-
-    This function runs as a tracked background task (via
-    ``background_task_manager``) to avoid blocking the HTTP response after
-    streaming completes. The manager holds a strong reference until the task
-    finishes and waits for it on application shutdown.
-    """
-    logger.debug(
-        "background_memory_update_started",
-        user_uuid=str(user_uuid),
-        session_id=str(session_id),
-        message_count=len(messages),
-    )
-    try:
-        await agent.update_long_term_memory(
-            user_uuid=user_uuid,
-            messages=messages,
-            session_id=session_id,
-            category="conversation",
-        )
-        logger.debug(
-            "background_memory_update_completed",
-            user_uuid=str(user_uuid),
-            session_id=str(session_id),
-        )
-    except Exception as e:
-        logger.warning(
-            "background_memory_update_failed",
-            session_id=session_id,
-            error=str(e),
-        )
-
-
-async def resolve_chat_session(
-    session_id: UUID | None,
-    current_user: User,
-) -> tuple[Session, bool]:
-    """Resolve session for chat: get existing or create new.
-
-    This function handles session resolution:
-    - If session_id is provided: verify ownership and return existing session
-    - If session_id is None: create a new session for the user
-
-    Args:
-        session_id: Optional session ID (None for new session)
-        current_user: The authenticated user
-
-    Returns:
-        tuple[Session, bool]: (Session object, is_new_session flag)
-
-    Raises:
-        NotFoundError: If session not found
-        AuthorizationError: If access denied
-    """
-    async with get_session_context(auto_commit=True) as db:
-        if session_id:
-            # Existing session - verify ownership
-            session = await get_authorized_session(session_id, current_user, db)
-            logger.info(
-                "using_existing_session",
-                session_id=session.id,
-                user_uuid=current_user.uuid,
-            )
-            return session, False
-        else:
-            # Create new session; the context manager owns the commit
-            new_uuid = uuid4()
-            repo = SessionRepository(db)
-            session = await repo.create(new_uuid, current_user.uuid, name="New Chat")
-            logger.info(
-                "created_new_session",
-                session_id=new_uuid,
-                user_uuid=current_user.uuid,
-            )
-            return session, True
 
 
 def _sse_error_response(exc: Exception) -> StreamingResponse:
@@ -288,21 +191,7 @@ async def chat_stream(
         accept_language = request.headers.get("Accept-Language", "zh")
         app_language = accept_language.split(",")[0].split(";")[0].strip()
 
-    # Normalize language code (preserve original for non-CJK languages)
-    if app_language.startswith("zh-TW") or app_language.startswith("zh-Hant"):
-        app_language = "zh-Hant"
-    elif app_language.startswith("zh"):
-        app_language = "zh"
-    elif app_language.startswith("ja"):
-        app_language = "ja"
-    elif app_language.startswith("ko"):
-        app_language = "ko"
-    elif app_language.startswith("en"):
-        app_language = "en"
-    else:
-        # Preserve original locale code (fr, de, es, pt, etc.)
-        # Only take primary subtag (e.g. "fr-FR" → "fr")
-        app_language = app_language.split("-")[0].split("_")[0].lower()
+    app_language = normalize_app_language(app_language)
 
     try:
         session, is_new = await resolve_chat_session(session_id, current_user)
@@ -465,9 +354,9 @@ async def chat_stream(
                     if ai_response:
                         memory_messages.append({"role": "assistant", "content": ai_response})
 
-                    if await _should_extract_memory(session.id):
+                    if await should_extract_memory(session.id):
                         background_task_manager.spawn(
-                            _update_memory_background(
+                            update_memory_background(
                                 agent=agent,
                                 user_uuid=session.user_uuid,
                                 messages=memory_messages,
