@@ -65,14 +65,21 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
   // Selected weekdays for weekly mode
   final Set<Weekday> _selectedWeekdays = {};
 
-  // Selected day of month for monthly mode
+  // Selected day of month for monthly mode (-1 = last day of month)
   int _monthDay = 1;
+
+  // Last non-last-day value in effect (from the start date or the parsed
+  // rule). Turning the "always last day" switch off restores this instead of
+  // _startDate.day: when editing a rule like BYMONTHDAY=15 whose start date
+  // is the 3rd, resetting to _startDate.day would silently rewrite the rule.
+  int _regularMonthDay = 1;
 
   @override
   void initState() {
     super.initState();
     _startDate = widget.initialStartDate;
     _monthDay = _startDate.day;
+    _regularMonthDay = _monthDay;
 
     // Parse initial rule (if any). The rule string is persisted server-side,
     // so it must never crash this sheet: fall back to defaults on bad input.
@@ -134,6 +141,9 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
     // Parse month day (BYMONTHDAY)
     if (rrule.byMonthDays.isNotEmpty) {
       _monthDay = rrule.byMonthDays.first;
+      if (_monthDay != -1) {
+        _regularMonthDay = _monthDay;
+      }
     }
 
     // Parse end date (UNTIL)
@@ -483,8 +493,11 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                       isLastDaySelected
                           ? t.forecast.recurringTransaction.lastDayExecution
                           : t.forecast.recurringTransaction.dayExecution(
-                              day: '${_startDate.day}',
-                              suffix: _monthDaySuffix(_startDate.day),
+                              // Show the rule's day, not the start date's:
+                              // editing BYMONTHDAY=15 with a start date on the
+                              // 3rd previously displayed "every 3rd".
+                              day: '$_monthDay',
+                              suffix: _monthDaySuffix(_monthDay),
                             ),
                       style: AppTextStyles.listTrailing(theme),
                     ),
@@ -503,7 +516,7 @@ class _RecurrenceRuleSheetState extends State<RecurrenceRuleSheet> {
                     value: isLastDaySelected,
                     onChange: (value) {
                       setState(() {
-                        _monthDay = value ? -1 : _startDate.day;
+                        _monthDay = value ? -1 : _regularMonthDay;
                       });
                     },
                   ),

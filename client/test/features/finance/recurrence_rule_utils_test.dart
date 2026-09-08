@@ -204,13 +204,34 @@ void main() {
       expect(result.rule, 'FREQ=WEEKLY;BYDAY=TH');
     });
 
-    test('non-monthly/weekly rule keeps rule and describes it', () {
+    test('daily rule keeps rule and describes it', () {
+      final result = updateRuleAndDescribe('FREQ=DAILY', DateTime(2026, 8, 20));
+      expect(result.rule, 'FREQ=DAILY');
+    });
+
+    test('yearly rule follows the picked month and day', () {
+      // A yearly rule without BYMONTH fires on the DTSTART anniversary; when
+      // the start date moves, BYMONTH/BYMONTHDAY must move with it —
+      // previously the rule kept the OLD month and the transaction silently
+      // fired on the wrong date.
       final result = updateRuleAndDescribe(
         'FREQ=YEARLY',
         DateTime(2026, 8, 20),
       );
-      expect(result.rule, 'FREQ=YEARLY');
-      expect(result.description, t.forecast.recurringTransaction.yearly);
+      expect(result.rule, 'FREQ=YEARLY;BYMONTH=8;BYMONTHDAY=20');
+      expect(
+        result.description,
+        t.forecast.recurringTransaction.yearlyOn(month: 8, day: 20),
+      );
+    });
+
+    test('yearly rule preserves the last-day sentinel', () {
+      final result = updateRuleAndDescribe(
+        'FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=-1',
+        DateTime(2026, 8, 20),
+      );
+      // Month moves to the picked date; the -1 sentinel stays untouched.
+      expect(result.rule, 'FREQ=YEARLY;BYMONTH=8;BYMONTHDAY=-1');
     });
   });
 }

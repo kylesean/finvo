@@ -125,7 +125,8 @@ String describeRecurrenceRule(String rule) {
 ///
 /// Returns the new rule and description. For a monthly rule BYMONTHDAY is
 /// rewritten (preserving the -1 "last day of month" sentinel); for a weekly
-/// rule BYDAY follows the picked weekday.
+/// rule BYDAY follows the picked weekday; for a yearly rule BYMONTH (and
+/// BYMONTHDAY, unless it is the -1 sentinel) follow the picked date.
 ///
 /// Extracted from `RecurringTransactionPage._updateRecurrenceRuleWithNewDate`.
 ({String rule, String description}) updateRuleAndDescribe(
@@ -158,6 +159,31 @@ String describeRecurrenceRule(String rule) {
       );
     } else {
       updated += ';BYDAY=${weekdays[weekdayIndex]}';
+    }
+    return (rule: updated, description: describeRecurrenceRule(updated));
+  } else if (rule.contains('FREQ=YEARLY')) {
+    // A yearly rule pins the month via BYMONTH (and usually BYMONTHDAY);
+    // leaving them untouched when the user moves the start date would keep
+    // firing the rule in the OLD month while the UI shows the new date.
+    var updated = rule;
+    if (updated.contains('BYMONTH')) {
+      updated = updated.replaceAllMapped(
+        RegExp(r'BYMONTH=(1[0-2]|[1-9])'),
+        (match) => 'BYMONTH=${newDate.month}',
+      );
+    } else {
+      updated += ';BYMONTH=${newDate.month}';
+    }
+    if (updated.contains('BYMONTHDAY')) {
+      // Preserve the -1 "last day of month" sentinel untouched.
+      if (!updated.contains('BYMONTHDAY=-1')) {
+        updated = updated.replaceAllMapped(
+          RegExp(r'BYMONTHDAY=-?\d+'),
+          (match) => 'BYMONTHDAY=${newDate.day}',
+        );
+      }
+    } else {
+      updated += ';BYMONTHDAY=${newDate.day}';
     }
     return (rule: updated, description: describeRecurrenceRule(updated));
   }
