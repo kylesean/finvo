@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/widgets/amount_text.dart';
@@ -31,7 +32,10 @@ class MetricComparisonCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
     final colors = theme.colors;
-    final amountTheme = ref.watch(currentAmountThemeProvider);
+    final amountTheme = AmountTheme.of(
+      context,
+      ref.watch(currentAmountThemeProvider),
+    );
     final isPositive = changePercent >= 0;
     final currencyCode = ref.watch(financialSettingsProvider).primaryCurrency;
     final currencySymbol = AmountFormatter.getCurrencySymbol(currencyCode);

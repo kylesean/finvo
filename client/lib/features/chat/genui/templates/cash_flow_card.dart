@@ -4,10 +4,10 @@ import 'package:forui/forui.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
-import 'package:finvo/shared/models/currency.dart';
 
 /// Cash Flow Analysis Card - GenUI Template
 ///
@@ -15,20 +15,27 @@ import 'package:finvo/shared/models/currency.dart';
 /// Uses a simplified and expandable design for progressive disclosure of detailed information.
 ///
 /// Supports an optional `ai_insight` field to display an AI-generated analysis summary.
-class CashFlowAnalysisCard extends StatefulWidget {
+class CashFlowAnalysisCard extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
 
   const CashFlowAnalysisCard({super.key, required this.data});
 
   @override
-  State<CashFlowAnalysisCard> createState() => _CashFlowAnalysisCardState();
+  ConsumerState<CashFlowAnalysisCard> createState() =>
+      _CashFlowAnalysisCardState();
 }
 
-class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
+class _CashFlowAnalysisCardState extends ConsumerState<CashFlowAnalysisCard> {
   bool _isExpanded = false;
 
+  String get _primarySymbol => AmountFormatter.getCurrencySymbol(
+    ref.watch(financialSettingsProvider).primaryCurrency,
+  );
+
   String _formatAmount(dynamic amount) {
-    final numberFormat = AmountFormatter.getNumberFormat(Currency.defaultCode);
+    final numberFormat = AmountFormatter.getNumberFormat(
+      ref.watch(financialSettingsProvider).primaryCurrency,
+    );
     if (amount is String) {
       return numberFormat.format(double.tryParse(amount) ?? 0);
     }
@@ -54,7 +61,10 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
       builder: (context, ref, child) {
         final theme = context.theme;
         final colors = theme.colors;
-        final amountTheme = ref.watch(currentAmountThemeProvider);
+        final amountTheme = AmountTheme.of(
+          context,
+          ref.watch(currentAmountThemeProvider),
+        );
 
         final netCashFlow = widget.data['netCashFlow'];
         final savingsRate = _asDouble(widget.data['savingsRate']) ?? 0;
@@ -113,7 +123,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               Row(
                                 children: [
                                   Text(
-                                    '¥${_formatAmount(netCashFlow)}',
+                                    '$_primarySymbol${_formatAmount(netCashFlow)}',
                                     style: theme.typography.body.lg.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: isPositive
@@ -178,7 +188,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               amountTheme,
                               label: t.chat.genui.cashFlowCard.totalIncome,
                               value:
-                                  '¥${_formatAmount(widget.data['totalIncome'])}',
+                                  '$_primarySymbol${_formatAmount(widget.data['totalIncome'])}',
                               change: _asDouble(
                                 widget.data['incomeChangePercent'],
                               ),
@@ -192,7 +202,7 @@ class _CashFlowAnalysisCardState extends State<CashFlowAnalysisCard> {
                               amountTheme,
                               label: t.chat.genui.cashFlowCard.totalExpense,
                               value:
-                                  '¥${_formatAmount(widget.data['totalExpense'])}',
+                                  '$_primarySymbol${_formatAmount(widget.data['totalExpense'])}',
                               change: _asDouble(
                                 widget.data['expenseChangePercent'],
                               ),

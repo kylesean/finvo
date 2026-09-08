@@ -16,6 +16,7 @@ import 'package:finvo/shared/widgets/amount_text.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
+import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/app/router/app_routes.dart';
 import 'package:finvo/i18n/strings.g.dart';
@@ -468,7 +469,10 @@ class SpaceTransactionItem extends ConsumerWidget {
     final transactionType = isExpense
         ? TransactionType.expense
         : (isIncome ? TransactionType.income : TransactionType.transfer);
-    final amountTheme = ref.watch(currentAmountThemeProvider);
+    final amountTheme = AmountTheme.of(
+      context,
+      ref.watch(currentAmountThemeProvider),
+    );
     final amountColor = AmountFormatter.getAmountColor(
       transactionType,
       amountTheme,

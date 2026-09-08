@@ -3,12 +3,13 @@ import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/utils/map_extensions.dart';
+import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
+import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/features/chat/genui/templates/widgets/forecast_header_widget.dart';
 import 'package:finvo/features/chat/genui/templates/widgets/forecast_chart_widget.dart';
 import 'package:finvo/features/chat/genui/templates/widgets/forecast_warnings_widget.dart';
 import 'package:finvo/features/chat/genui/templates/widgets/forecast_details_widget.dart';
-import 'package:finvo/shared/models/currency.dart';
 
 /// Cash flow forecast chart - GenUI Template
 ///
@@ -47,16 +48,17 @@ class CashFlowForecastViewModel {
   }
 }
 
-class CashFlowForecastChart extends StatefulWidget {
+class CashFlowForecastChart extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
 
   const CashFlowForecastChart({super.key, required this.data});
 
   @override
-  State<CashFlowForecastChart> createState() => _CashFlowForecastChartState();
+  ConsumerState<CashFlowForecastChart> createState() =>
+      _CashFlowForecastChartState();
 }
 
-class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
+class _CashFlowForecastChartState extends ConsumerState<CashFlowForecastChart> {
   late CashFlowForecastViewModel _viewModel;
   bool _isExpanded = false;
 
@@ -80,7 +82,7 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
 
   String _formatAmount(dynamic amount) {
     final numberFormat = AmountFormatter.getNumberFormat(
-      Currency.defaultCode,
+      ref.watch(financialSettingsProvider).primaryCurrency,
       decimalDigits: 0,
     );
     if (amount is String) {
@@ -98,7 +100,10 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
       builder: (context, ref, child) {
         final theme = context.theme;
         final colors = theme.colors;
-        final amountTheme = ref.watch(currentAmountThemeProvider);
+        final amountTheme = AmountTheme.of(
+          context,
+          ref.watch(currentAmountThemeProvider),
+        );
         final hasWarnings = _viewModel.warnings.isNotEmpty;
 
         return GestureDetector(
@@ -140,6 +145,9 @@ class _CashFlowForecastChartState extends State<CashFlowForecastChart> {
                     child: ForecastChartWidget(
                       dataPoints: _viewModel.dataPoints,
                       formatAmount: _formatAmount,
+                      currencySymbol: AmountFormatter.getCurrencySymbol(
+                        ref.watch(financialSettingsProvider).primaryCurrency,
+                      ),
                     ),
                   ),
                 ),

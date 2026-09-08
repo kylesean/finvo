@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 /// Amount display theme configuration
 ///
@@ -25,12 +26,42 @@ class AmountTheme {
   /// Neutral color (for scenarios that don't distinguish income/expense)
   final Color neutralColor;
 
+  /// Dark-mode variants. `null` falls back to the light value.
+  ///
+  /// The light values above are tuned for white backgrounds (gray-700/800
+  /// body text). On a dark background they collapse to ~1.4–2.0:1 contrast —
+  /// unreadable for the primary datum of a finance app — so every palette
+  /// ships explicit, lighter dark-mode counterparts.
+  final Color? darkExpenseColor;
+  final Color? darkIncomeColor;
+  final Color? darkTransferColor;
+  final Color? darkNeutralColor;
+
   const AmountTheme({
     required this.expenseColor,
     required this.incomeColor,
     required this.transferColor,
     required this.neutralColor,
+    this.darkExpenseColor,
+    this.darkIncomeColor,
+    this.darkTransferColor,
+    this.darkNeutralColor,
   });
+
+  /// Resolve the palette for [brightness].
+  AmountTheme resolve(Brightness brightness) {
+    if (brightness == Brightness.light) return this;
+    return AmountTheme(
+      expenseColor: darkExpenseColor ?? expenseColor,
+      incomeColor: darkIncomeColor ?? incomeColor,
+      transferColor: darkTransferColor ?? transferColor,
+      neutralColor: darkNeutralColor ?? neutralColor,
+    );
+  }
+
+  /// Resolve against the ambient Forui theme.
+  static AmountTheme of(BuildContext context, AmountTheme theme) =>
+      theme.resolve(context.theme.colors.brightness);
 
   /// China market color scheme (default)
   ///
@@ -44,6 +75,10 @@ class AmountTheme {
     incomeColor: Color(0xFFDC2626), // red-600, Chinese red
     transferColor: Color(0xFF6B7280), // gray-500
     neutralColor: Color(0xFF1F2937), // gray-800
+    darkExpenseColor: Color(0xFFD1D5DB), // gray-300
+    darkIncomeColor: Color(0xFFF87171), // red-400
+    darkTransferColor: Color(0xFF9CA3AF), // gray-400
+    darkNeutralColor: Color(0xFFE5E7EB), // gray-200
   );
 
   /// International market color scheme
@@ -58,6 +93,10 @@ class AmountTheme {
     incomeColor: Color(0xFF16A34A), // green-600, growth green
     transferColor: Color(0xFF6B7280), // gray-500
     neutralColor: Color(0xFF1F2937), // gray-800
+    darkExpenseColor: Color(0xFFF87171), // red-400
+    darkIncomeColor: Color(0xFF4ADE80), // green-400
+    darkTransferColor: Color(0xFF9CA3AF), // gray-400
+    darkNeutralColor: Color(0xFFE5E7EB), // gray-200
   );
 
   /// Minimalist color scheme
@@ -71,6 +110,10 @@ class AmountTheme {
     incomeColor: Color(0xFF374151), // gray-700
     transferColor: Color(0xFF6B7280), // gray-500
     neutralColor: Color(0xFF1F2937), // gray-800
+    darkExpenseColor: Color(0xFFD1D5DB), // gray-300
+    darkIncomeColor: Color(0xFFD1D5DB), // gray-300
+    darkTransferColor: Color(0xFF9CA3AF), // gray-400
+    darkNeutralColor: Color(0xFFE5E7EB), // gray-200
   );
 
   /// Color-blind friendly color scheme
@@ -83,6 +126,10 @@ class AmountTheme {
     incomeColor: Color(0xFFEA580C), // orange-600
     transferColor: Color(0xFF6B7280), // gray-500
     neutralColor: Color(0xFF1F2937), // gray-800
+    darkExpenseColor: Color(0xFF60A5FA), // blue-400
+    darkIncomeColor: Color(0xFFFB923C), // orange-400
+    darkTransferColor: Color(0xFF9CA3AF), // gray-400
+    darkNeutralColor: Color(0xFFE5E7EB), // gray-200
   );
 
   /// Get theme by name
@@ -103,44 +150,21 @@ class AmountTheme {
 
   /// List of all available themes (for settings page)
   static const List<AmountThemeOption> availableThemes = [
-    AmountThemeOption(
-      id: 'international',
-      name: 'International',
-      description: 'Green increase, Red decrease',
-      theme: international,
-    ),
-    AmountThemeOption(
-      id: 'chinaMarket',
-      name: 'China Market',
-      description: 'Red increase, Black decrease',
-      theme: chinaMarket,
-    ),
-    AmountThemeOption(
-      id: 'minimalist',
-      name: 'Minimalist',
-      description: 'Distinguish with symbols only',
-      theme: minimalist,
-    ),
-    AmountThemeOption(
-      id: 'colorBlindFriendly',
-      name: 'Color Blind Friendly',
-      description: 'Blue-Orange scheme',
-      theme: colorBlindFriendly,
-    ),
+    AmountThemeOption(id: 'international', theme: international),
+    AmountThemeOption(id: 'chinaMarket', theme: chinaMarket),
+    AmountThemeOption(id: 'minimalist', theme: minimalist),
+    AmountThemeOption(id: 'colorBlindFriendly', theme: colorBlindFriendly),
   ];
 }
 
-/// Theme option (for settings page display)
+/// Theme option (for settings page display).
+///
+/// Deliberately has no name/description: hardcoded English labels leaked
+/// into non-English locales the moment a new palette id was added. The
+/// settings page localizes via `t.amountTheme.*` keyed on [id].
 class AmountThemeOption {
   final String id;
-  final String name;
-  final String description;
   final AmountTheme theme;
 
-  const AmountThemeOption({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.theme,
-  });
+  const AmountThemeOption({required this.id, required this.theme});
 }

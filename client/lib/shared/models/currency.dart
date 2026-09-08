@@ -4,26 +4,36 @@ import 'package:finvo/i18n/strings.g.dart';
 /// G9 countries + TWD + HKD
 enum Currency {
   // G9 Countries & Most Common
-  usd('USD', 'US Dollar', '\$', '🇺🇸'),
-  cny('CNY', 'Chinese Yuan', '¥', '🇨🇳'),
-  eur('EUR', 'Euro', '€', '🇪🇺'),
-  gbp('GBP', 'British Pound', '£', '🇬🇧'),
-  jpy('JPY', 'Japanese Yen', '¥', '🇯🇵'),
-  cad('CAD', 'Canadian Dollar', 'C\$', '🇨🇦'),
-  aud('AUD', 'Australian Dollar', 'A\$', '🇦🇺'),
-  inr('INR', 'Indian Rupee', '₹', '🇮🇳'),
-  rub('RUB', 'Russian Ruble', '₽', '🇷🇺'),
+  usd('USD', 'US Dollar', '\$', '🇺🇸', 2),
+  cny('CNY', 'Chinese Yuan', '¥', '🇨🇳', 2),
+  eur('EUR', 'Euro', '€', '🇪🇺', 2),
+  gbp('GBP', 'British Pound', '£', '🇬🇧', 2),
+  jpy('JPY', 'Japanese Yen', '¥', '🇯🇵', 0),
+  cad('CAD', 'Canadian Dollar', 'C\$', '🇨🇦', 2),
+  aud('AUD', 'Australian Dollar', 'A\$', '🇦🇺', 2),
+  inr('INR', 'Indian Rupee', '₹', '🇮🇳', 2),
+  rub('RUB', 'Russian Ruble', '₽', '🇷🇺', 2),
 
   // Additional currencies
-  hkd('HKD', 'Hong Kong Dollar', 'HK\$', '🇭🇰'),
-  twd('TWD', 'New Taiwan Dollar', 'NT\$', '🇹🇼');
+  hkd('HKD', 'Hong Kong Dollar', 'HK\$', '🇭🇰', 2),
+  twd('TWD', 'New Taiwan Dollar', 'NT\$', '🇹🇼', 2);
 
   final String code;
   final String name;
   final String symbol;
   final String flag;
 
-  const Currency(this.code, this.name, this.symbol, this.flag);
+  /// Fraction digits conventionally displayed for this currency.
+  /// Zero-decimal currencies (e.g. JPY) must not render ".00".
+  final int decimalDigits;
+
+  const Currency(
+    this.code,
+    this.name,
+    this.symbol,
+    this.flag,
+    this.decimalDigits,
+  );
 
   /// Default code, as a const for default parameter values and @Default.
   static const String defaultCode = 'CNY';

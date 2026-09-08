@@ -52,8 +52,14 @@ class ForecastChartWidget extends StatelessWidget {
   final bool showConfidenceInterval;
   final String Function(dynamic amount) formatAmount;
 
+  /// Symbol for the currency the forecast balances are denominated in.
+  /// Required (not defaulted to ¥): the forecast is rendered in the user's
+  /// primary currency, and a hardcoded symbol mislabeled e.g. USD balances.
+  final String currencySymbol;
+
   const ForecastChartWidget({
     super.key,
+    required this.currencySymbol,
     required this.dataPoints,
     this.showConfidenceInterval = true,
     required this.formatAmount,
@@ -206,7 +212,7 @@ class ForecastChartWidget extends StatelessWidget {
                 if (index >= 0 && index < dataPoints.length) {
                   final point = dataPoints[index];
                   return LineTooltipItem(
-                    '${DateFormat('M/d').format(point.date)}\n¥${formatAmount(point.predictedBalance)}',
+                    '${DateFormat('M/d').format(point.date)}\n$currencySymbol${formatAmount(point.predictedBalance)}',
                     const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

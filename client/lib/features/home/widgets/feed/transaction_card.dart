@@ -18,6 +18,7 @@ import 'package:finvo/core/constants/category_constants.dart';
 
 import 'package:finvo/shared/utils/amount_formatter.dart';
 import 'package:finvo/shared/utils/time_utils.dart';
+import 'package:finvo/shared/theme/amount_theme.dart';
 import 'package:finvo/shared/providers/amount_theme_provider.dart';
 import 'package:finvo/shared/theme/form_text_styles.dart';
 import 'package:finvo/shared/models/currency.dart';
@@ -136,7 +137,10 @@ class TransactionCard extends ConsumerWidget {
     ref.watch(localeProvider);
     final theme = context.theme;
     final colors = theme.colors;
-    final amountTheme = ref.watch(currentAmountThemeProvider);
+    final amountTheme = AmountTheme.of(
+      context,
+      ref.watch(currentAmountThemeProvider),
+    );
 
     // System-generated lifecycle audit entries (account-close disposal) are
     // read-only: the server rejects their deletion, so no swipe-to-delete is

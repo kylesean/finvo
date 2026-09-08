@@ -61,10 +61,14 @@ class AmountFormatter {
   static NumberFormat getNumberFormat(
     String currency, {
     String? locale,
-    int decimalDigits = 2,
+    int? decimalDigits,
   }) {
     final effectiveLocale = locale ?? Intl.getCurrentLocale();
-    final cacheKey = '$effectiveLocale:$currency:$decimalDigits';
+    // Default to the currency's own convention: zero-decimal currencies
+    // (JPY) must not render '.00'. Callers may still override explicitly.
+    final digits =
+        decimalDigits ?? Currency.fromCode(currency)?.decimalDigits ?? 2;
+    final cacheKey = '$effectiveLocale:$currency:$digits';
 
     // SHR-05: LinkedHashMap re-insertion implements LRU — a hit is moved to
     // the tail so the bound evicts the least-recently-used key, and eviction
@@ -81,7 +85,7 @@ class AmountFormatter {
     final format = NumberFormat.currency(
       locale: effectiveLocale,
       symbol: '',
-      decimalDigits: decimalDigits,
+      decimalDigits: digits,
     );
     _formatCache[cacheKey] = format;
     return format;
@@ -133,7 +137,10 @@ class AmountFormatter {
   ///
   /// [amount] - Amount
   /// [currencyCode] - Currency code
-  static String formatCommon(double amount, {String currencyCode = Currency.defaultCode}) {
+  static String formatCommon(
+    double amount, {
+    String currencyCode = Currency.defaultCode,
+  }) {
     final symbol = getCurrencySymbol(currencyCode);
     final absAmount = amount.abs();
     final formattedValue = getNumberFormat(currencyCode).format(absAmount);
@@ -156,8 +163,10 @@ class AmountFormatter {
     String currencyCode = Currency.defaultCode,
   }) {
     final symbol = getCurrencySymbol(currencyCode);
-    final value = double.tryParse(amount) ?? 0.0;
-    return '$symbol${getNumberFormat(currencyCode).format(value)}';
+    // Parse through Decimal (same as parseDecimal) so precision survives; the
+    // double conversion happens only inside the intl formatter boundary.
+    final value = parseDecimal(amount);
+    return '$symbol${getNumberFormat(currencyCode).format(value.toDouble())}';
   }
 
   /// Format as compact format based on system Locale
@@ -180,8 +189,12 @@ class AmountFormatter {
         effectiveLocale.contains('hk');
 
     if (isChineseLocale) {
-      final wan = isTraditionalChinese ? '萬' : '万'; // cjk-allow: CJK numeral units (locale data, not UI copy)
-      final yi = isTraditionalChinese ? '億' : '亿'; // cjk-allow: CJK numeral units (locale data, not UI copy)
+      final wan = isTraditionalChinese
+          ? '萬'
+          : '万'; // cjk-allow: CJK numeral units (locale data, not UI copy)
+      final yi = isTraditionalChinese
+          ? '億'
+          : '亿'; // cjk-allow: CJK numeral units (locale data, not UI copy)
       // Chinese units: 10k, 100M
       if (amount >= 100000000) {
         return '${(amount / 100000000).toStringAsFixed(1)}$yi';

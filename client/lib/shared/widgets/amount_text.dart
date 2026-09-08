@@ -180,8 +180,11 @@ class AmountText extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foruiTheme = context.theme;
-    // Inject global amount theme reactively
-    final amountTheme = ref.watch(currentAmountThemeProvider);
+    // Inject global amount theme reactively, resolved for light/dark mode
+    final amountTheme = AmountTheme.of(
+      context,
+      ref.watch(currentAmountThemeProvider),
+    );
 
     // Resolve currency
     final effectiveCurrency =
@@ -344,7 +347,10 @@ class _AmountTextFromDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foruiTheme = context.theme;
-    final amountTheme = ref.watch(currentAmountThemeProvider);
+    final amountTheme = AmountTheme.of(
+      context,
+      ref.watch(currentAmountThemeProvider),
+    );
     final color = AmountFormatter.getAmountColor(type, amountTheme);
 
     // Resolve default currency symbol from global settings if missing
