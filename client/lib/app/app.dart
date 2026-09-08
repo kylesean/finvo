@@ -76,6 +76,38 @@ class MyApp extends ConsumerWidget {
       }
     });
 
+    // Surface a dead push channel: when the reconnect budget is exhausted
+    // (server down for a while), notifications silently stop otherwise. The
+    // snackbar action re-arms the budget immediately via onAppResumed().
+    //
+    // Must live in build() proper, NOT in _buildAppContent: that helper runs
+    // inside MaterialApp.router's builder closure — a nested Builder's build —
+    // where riverpod's debugDoingBuild assert ("ref.listen can only be used
+    // within the build method of a ConsumerWidget") fails and blanks the
+    // whole navigator subtree. The snackbar resolves through the navigator
+    // key because materialContext only exists below MaterialApp.
+    ref.listen<AsyncValue<NotificationWsConnectionStatus>>(
+      notificationWsStatusProvider,
+      (previous, next) {
+        final snackbarContext = navigatorKey.currentContext;
+        if (snackbarContext == null) return;
+        final wasFailed =
+            previous?.value == NotificationWsConnectionStatus.failed;
+        if (next.value == NotificationWsConnectionStatus.failed && !wasFailed) {
+          ScaffoldMessenger.of(snackbarContext).showSnackBar(
+            SnackBar(
+              content: Text(t.notification.connectionLost),
+              action: SnackBarAction(
+                label: t.common.retry,
+                onPressed: () =>
+                    ref.read(notificationWsProvider).onAppResumed(),
+              ),
+            ),
+          );
+        }
+      },
+    );
+
     return MaterialApp.router(
       title: 'Finvo',
       theme: themes.materialLight,
@@ -99,41 +131,14 @@ class MyApp extends ConsumerWidget {
 
         return FTheme(
           data: activeForuiTheme,
-          child: _buildAppContent(ref, navigator!, materialContext),
+          child: _buildAppContent(ref, navigator!),
         );
       },
     );
   }
 
-  Widget _buildAppContent(
-    WidgetRef ref,
-    Widget navigator,
-    BuildContext snackbarContext,
-  ) {
+  Widget _buildAppContent(WidgetRef ref, Widget navigator) {
     final authState = ref.watch(authProvider);
-
-    // Surface a dead push channel: when the reconnect budget is exhausted
-    // (server down for a while), notifications silently stop otherwise. The
-    // snackbar action re-arms the budget immediately via onAppResumed().
-    ref.listen<AsyncValue<NotificationWsConnectionStatus>>(
-      notificationWsStatusProvider,
-      (previous, next) {
-        final wasFailed =
-            previous?.value == NotificationWsConnectionStatus.failed;
-        if (next.value == NotificationWsConnectionStatus.failed && !wasFailed) {
-          ScaffoldMessenger.of(snackbarContext).showSnackBar(
-            SnackBar(
-              content: Text(t.notification.connectionLost),
-              action: SnackBarAction(
-                label: t.common.retry,
-                onPressed: () =>
-                    ref.read(notificationWsProvider).onAppResumed(),
-              ),
-            ),
-          );
-        }
-      },
-    );
 
     if (authState.status == AuthStatus.loading ||
         authState.status == AuthStatus.initial) {
