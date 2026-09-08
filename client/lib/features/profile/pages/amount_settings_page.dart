@@ -64,23 +64,27 @@ class AmountSettingsPage extends ConsumerWidget {
               children: AmountTheme.availableThemes.map((option) {
                 final isSelected = currentThemeId == option.id;
 
-                // Get localized title and subtitle
-                String title = option.name;
-                String subtitle = option.description;
-
-                if (option.id == 'chinaMarket') {
-                  title = t.amountTheme.chinaMarket;
-                  subtitle = t.amountTheme.chinaMarketDesc;
-                } else if (option.id == 'international') {
-                  title = t.amountTheme.international;
-                  subtitle = t.amountTheme.internationalDesc;
-                } else if (option.id == 'minimalist') {
-                  title = t.amountTheme.minimalist;
-                  subtitle = t.amountTheme.minimalistDesc;
-                } else if (option.id == 'colorBlindFriendly') {
-                  title = t.amountTheme.colorBlind;
-                  subtitle = t.amountTheme.colorBlindDesc;
-                }
+                // Localized title/subtitle keyed on id. Unknown ids
+                // degrade to the raw id instead of hardcoded English.
+                final (title, subtitle) = switch (option.id) {
+                  'chinaMarket' => (
+                    t.amountTheme.chinaMarket,
+                    t.amountTheme.chinaMarketDesc,
+                  ),
+                  'international' => (
+                    t.amountTheme.international,
+                    t.amountTheme.internationalDesc,
+                  ),
+                  'minimalist' => (
+                    t.amountTheme.minimalist,
+                    t.amountTheme.minimalistDesc,
+                  ),
+                  'colorBlindFriendly' => (
+                    t.amountTheme.colorBlind,
+                    t.amountTheme.colorBlindDesc,
+                  ),
+                  _ => (option.id, option.id),
+                };
 
                 return FTile(
                   title: Text(

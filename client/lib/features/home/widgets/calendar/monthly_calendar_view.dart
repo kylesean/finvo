@@ -148,11 +148,20 @@ class MonthlyCalendarView extends ConsumerWidget {
                     Text(() {
                       final locale = LocaleSettings.currentLocale;
                       final (dateFormatLocale, pattern) = switch (locale) {
-                        AppLocale.zh => ('zh_CN', 'yyyy年M月'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+                        AppLocale.zh => (
+                          'zh_CN',
+                          'yyyy年M月',
+                        ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                         AppLocale.en => ('en', 'yyyy MMM'),
-                        AppLocale.ja => ('ja', 'yyyy年M月'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+                        AppLocale.ja => (
+                          'ja',
+                          'yyyy年M月',
+                        ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                         AppLocale.ko => ('ko', 'yyyy년 M월'),
-                        AppLocale.zhHant => ('zh_TW', 'yyyy年M月'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+                        AppLocale.zhHant => (
+                          'zh_TW',
+                          'yyyy年M月',
+                        ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                       };
                       return DateFormat(
                         pattern,
@@ -356,10 +365,12 @@ class MonthlyCalendarView extends ConsumerWidget {
                         AppLocale.ko => 'ko_KR',
                         AppLocale.zhHant => 'zh_TW',
                       };
-                      final currencyFormat = NumberFormat.currency(
+                      // Unified formatting path: honors the currency's own
+                      // decimal convention (JPY has none) instead of a
+                      // hardcoded 2 digits.
+                      final currencyFormat = AmountFormatter.getNumberFormat(
+                        currencyCode,
                         locale: numberLocale,
-                        symbol: currencySymbol,
-                        decimalDigits: 2,
                       );
 
                       // Get selected date (default today)
@@ -385,11 +396,20 @@ class MonthlyCalendarView extends ConsumerWidget {
                         }
                         // Format date based on language
                         final (dateFormatLocale, pattern) = switch (locale) {
-                          AppLocale.zh => ('zh_CN', 'M月d日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+                          AppLocale.zh => (
+                            'zh_CN',
+                            'M月d日',
+                          ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                           AppLocale.en => ('en', 'MMM d'),
-                          AppLocale.ja => ('ja', 'M月d日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+                          AppLocale.ja => (
+                            'ja',
+                            'M月d日',
+                          ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                           AppLocale.ko => ('ko', 'M월 d일'),
-                          AppLocale.zhHant => ('zh_TW', 'M月d日'), // cjk-allow: Intl date skeleton (locale data, not UI copy)
+                          AppLocale.zhHant => (
+                            'zh_TW',
+                            'M月d日',
+                          ), // cjk-allow: Intl date skeleton (locale data, not UI copy)
                         };
                         return DateFormat(
                           pattern,
@@ -399,7 +419,15 @@ class MonthlyCalendarView extends ConsumerWidget {
 
                       return Text(
                         // Double conversion only at the display boundary.
-                        '$dateLabel: ${currencyFormat.format(selectedSummary.totalExpense.toDouble())}',
+                        // Locale-aware separator instead of a hardcoded ':'
+                        t.calendar.selectedDayExpense(
+                          date: dateLabel,
+                          amount:
+                              currencySymbol +
+                              currencyFormat.format(
+                                selectedSummary.totalExpense.toDouble(),
+                              ),
+                        ),
                         style: AppTextStyles.calendarFooter(theme),
                         overflow: TextOverflow.ellipsis,
                       );
