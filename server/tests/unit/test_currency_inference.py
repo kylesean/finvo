@@ -6,7 +6,6 @@ These tests guard the "inference runs once at registration" contract:
 - Unsupported currencies gracefully fall through
 """
 
-
 from app.core.constants.currency import PROJECT_DEFAULT_CURRENCY
 from app.utils.currency_inference import (
     FALLBACK_CURRENCY,

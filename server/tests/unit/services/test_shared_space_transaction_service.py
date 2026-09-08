@@ -53,9 +53,7 @@ async def _seed(db: AsyncSession) -> tuple[User, SharedSpace, Transaction]:
     )
     await db.commit()
 
-    tx = (
-        await db.execute(select(Transaction).where(Transaction.user_uuid == user.uuid))
-    ).scalar_one()
+    tx = (await db.execute(select(Transaction).where(Transaction.user_uuid == user.uuid))).scalar_one()
     return user, space, tx
 
 
@@ -91,9 +89,7 @@ async def test_lost_race_keeps_outer_uow_alive(db_session: AsyncSession, async_d
 
     racer = AsyncSession(async_db_engine, expire_on_commit=False)
     try:
-        racer.add(
-            SpaceTransaction(space_id=space.id, transaction_id=tx.uuid, added_by_user_uuid=user.uuid)
-        )
+        racer.add(SpaceTransaction(space_id=space.id, transaction_id=tx.uuid, added_by_user_uuid=user.uuid))
         await racer.flush()  # index entry locked, uncommitted
 
         task = asyncio.create_task(service.add_transaction_to_space(space.id, user.uuid, tx.uuid))
@@ -104,9 +100,7 @@ async def test_lost_race_keeps_outer_uow_alive(db_session: AsyncSession, async_d
         assert result["already_exists"] is True
 
         # THE regression: the outer-UoW change must have survived the race.
-        row = (
-            await db_session.execute(select(Transaction).where(Transaction.uuid == tx.uuid))
-        ).scalar_one()
+        row = (await db_session.execute(select(Transaction).where(Transaction.uuid == tx.uuid))).scalar_one()
         assert row.description == "created just before the race"
     finally:
         await racer.close()

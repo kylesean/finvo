@@ -283,9 +283,7 @@ class TestParseTime:
 
         result = await record_transactions.ainvoke(
             {
-                "transactions": [
-                    {"amount": "10", "type": "expense", "tags": ["lunch"], "category_key": "OTHERS"}
-                ],
+                "transactions": [{"amount": "10", "type": "expense", "tags": ["lunch"], "category_key": "OTHERS"}],
                 "transaction_at": "yestday",
             },
             config={"configurable": {"user_uuid": str(uuid4())}},

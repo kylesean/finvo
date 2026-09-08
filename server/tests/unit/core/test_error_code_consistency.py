@@ -108,19 +108,9 @@ class TestErrorCodeConsistency:
         on (silent mis-translation). Backend MAY own more codes than the
         frontend (new codes roll out backend-first).
         """
-        dart_path = (
-            Path(__file__).resolve().parents[4]
-            / "client"
-            / "lib"
-            / "core"
-            / "constants"
-            / "error_codes.dart"
-        )
+        dart_path = Path(__file__).resolve().parents[4] / "client" / "lib" / "core" / "constants" / "error_codes.dart"
         assert dart_path.is_file(), f"frontend contract file missing: {dart_path}"
-        dart_ints = {
-            int(m.group(1))
-            for m in re.finditer(r"static const int \w+ = (\d+);", dart_path.read_text())
-        }
+        dart_ints = {int(m.group(1)) for m in re.finditer(r"static const int \w+ = (\d+);", dart_path.read_text())}
         assert dart_ints, f"no error codes parsed from {dart_path}"
         backend_ints = set(ERROR_CODE_MAP.values())
         unknown = sorted(dart_ints - backend_ints)

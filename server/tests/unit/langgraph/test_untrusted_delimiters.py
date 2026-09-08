@@ -1,8 +1,6 @@
 """Untrusted-content delimiters on every model-facing surface."""
 
 
-
-
 class TestWrapUntrusted:
     def test_block_shape(self) -> None:
         from app.core.prompts.untrusted import UNTRUSTED_TAG, wrap_untrusted

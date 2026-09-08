@@ -1,6 +1,5 @@
 """Tests for LLMRegistry and Ollama model adaptation."""
 
-
 from app.core.config import settings
 from app.services.llm import LLMRegistry
 

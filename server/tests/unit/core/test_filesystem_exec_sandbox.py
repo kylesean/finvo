@@ -138,11 +138,7 @@ def test_skill_audit_log_fires_once_per_skill_set(caplog):
 
     # Structured records funnel through the app.core.logging logger with the
     # event name and kwargs inside the msg dict (see app.core.logging).
-    skill_records = [
-        r
-        for r in caplog.records
-        if isinstance(r.msg, dict) and r.msg.get("event") == "skills_loaded"
-    ]
+    skill_records = [r for r in caplog.records if isinstance(r.msg, dict) and r.msg.get("event") == "skills_loaded"]
     assert len(skill_records) == 1
     extras = skill_records[0].msg["extra"]
     assert extras["count"] == 4

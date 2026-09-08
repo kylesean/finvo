@@ -75,8 +75,7 @@ class TestRouteAfterTools:
 
     def test_direct_execute_always_returns_to_agent(self):
         assert (
-            route_after_tools({"messages": [_tool_msg("record_transactions")], "ui_mode": "direct_execute"})
-            == "agent"
+            route_after_tools({"messages": [_tool_msg("record_transactions")], "ui_mode": "direct_execute"}) == "agent"
         )
 
 
