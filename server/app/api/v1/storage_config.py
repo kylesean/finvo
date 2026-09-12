@@ -10,6 +10,7 @@ Provides REST API for managing user storage configurations:
 from __future__ import annotations
 
 from typing import Annotated, Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
@@ -54,7 +55,7 @@ class StorageConfigUpdate(BaseModel):
 class StorageConfigResponse(BaseModel):
     """Response schema for storage config (matches the on-wire camelCase keys)."""
 
-    id: int
+    id: UUID
     providerType: str
     name: str
     basePath: str
@@ -72,7 +73,7 @@ def _config_to_dict(config: Any, service: StorageConfigService) -> dict[str, Any
     Single construction site — the shape used to be copy-pasted in 4 routes.
     """
     return {
-        "id": config.id,
+        "id": str(config.id),
         "providerType": config.provider_type,
         "name": config.name,
         "basePath": config.base_path,
@@ -124,7 +125,7 @@ async def list_storage_configs(
 
 @router.get("/{config_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def get_storage_config(
-    config_id: int,
+    config_id: UUID,
     current_user: CurrentUser,
     db: DbSession,
     service: StorageService,
@@ -144,7 +145,7 @@ async def get_storage_config(
 
 @router.patch("/{config_id}", response_model=ResponseEnvelope[dict[str, Any]])
 async def update_storage_config(
-    config_id: int,
+    config_id: UUID,
     data: StorageConfigUpdate,
     current_user: CurrentUser,
     db: DbSession,
@@ -175,7 +176,7 @@ async def update_storage_config(
 
 @router.delete("/{config_id}", status_code=status.HTTP_200_OK, response_model=ResponseEnvelope[dict[str, Any]])
 async def delete_storage_config(
-    config_id: int,
+    config_id: UUID,
     current_user: CurrentUser,
     db: DbSession,
     service: StorageService,

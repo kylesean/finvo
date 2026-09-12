@@ -1,5 +1,7 @@
 """This file contains the authentication schema for the application."""
 
+from __future__ import annotations
+
 import re
 from datetime import datetime
 from typing import Literal
@@ -89,7 +91,7 @@ class SendCodeRequest(BaseModel):
         return v.strip()
 
     @model_validator(mode="after")
-    def validate_account_format(self) -> "SendCodeRequest":
+    def validate_account_format(self) -> SendCodeRequest:
         """Validate account format based on type."""
         if self.type == "email" and not _validate_email(self.account):
             raise ValueError("account: Invalid email format")
@@ -157,7 +159,7 @@ class RegisterRequest(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def validate_account_format(self) -> "RegisterRequest":
+    def validate_account_format(self) -> RegisterRequest:
         """Validate account format based on type."""
         if self.type == "email" and not _validate_email(self.account):
             raise ValueError("account: Invalid email format")
@@ -188,7 +190,7 @@ class LoginRequest(BaseModel):
     timezone: str = Field(..., description="User's timezone", examples=["Asia/Shanghai"])
 
     @model_validator(mode="after")
-    def validate_account_format(self) -> "LoginRequest":
+    def validate_account_format(self) -> LoginRequest:
         """Validate account format based on type (reuses the shared helpers)."""
         if self.type == "email" and not _validate_email(self.account):
             raise ValueError("Invalid email format")
@@ -204,8 +206,10 @@ class UserInfo(BaseModel):
         id: User's UUID
         email: User's email
         mobile: User's mobile number
+        phone: User's phone number (alias for mobile, compatible with Flutter UserModel)
         username: User's username
         avatarUrl: User's avatar URL
+        timezone: User's timezone
         createdAt: Account creation timestamp
         updatedAt: Last update timestamp
         clientLastLoginAt: Last login timestamp
@@ -214,11 +218,21 @@ class UserInfo(BaseModel):
     id: UUID = Field(..., description="User's UUID")
     email: str | None = Field(None, description="User's email")
     mobile: str | None = Field(None, description="User's mobile number")
+    phone: str | None = Field(None, description="User's phone number")
     username: str = Field(..., description="User's username")
     avatarUrl: str | None = Field(None, description="User's avatar URL")
+    timezone: str | None = Field("Asia/Shanghai", description="User's timezone")
     createdAt: str = Field(..., description="Account creation timestamp (ISO 8601)")
     updatedAt: str | None = Field(None, description="Last update timestamp (ISO 8601)")
     clientLastLoginAt: str | None = Field(None, description="Last login timestamp (ISO 8601)")
+
+    @model_validator(mode="after")
+    def sync_phone_mobile(self) -> UserInfo:
+        if self.phone is None and self.mobile is not None:
+            self.phone = self.mobile
+        elif self.mobile is None and self.phone is not None:
+            self.mobile = self.phone
+        return self
 
 
 class AuthResponse(BaseModel):

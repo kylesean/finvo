@@ -298,6 +298,7 @@ async def chat_stream(
                         await events_queue.put(None)
 
                 producer_task = asyncio.create_task(_produce_events())
+                ai_chunks: list[str] = []
                 try:
                     while True:
                         try:
@@ -312,6 +313,8 @@ async def chat_stream(
                             break
                         if isinstance(item, BaseException):
                             raise item
+                        if getattr(item, "type", None) == "text_delta" and getattr(item, "content", None):
+                            ai_chunks.append(item.content)
                         yield f"data: {json.dumps(item.model_dump(mode='json', exclude_none=True), ensure_ascii=False)}\n\n"
                     stream_completed = True
                 finally:
@@ -347,7 +350,7 @@ async def chat_stream(
                 # cancel, error) would otherwise fixate its fragments as
                 # long-term "preferences".
                 if stream_completed and user_message and session.user_uuid:
-                    ai_response = agent.get_last_response()
+                    ai_response = "".join(ai_chunks).strip() or agent.get_last_response()
                     memory_messages = [
                         {"role": "user", "content": user_message},
                     ]

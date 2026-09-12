@@ -73,3 +73,9 @@ class SurfaceTracker:
     def get_data(self, surface_id: str) -> dict[str, Any] | None:
         info = self._by_id.get(surface_id)
         return info.data if info else None
+
+    # Backward-compatible aliases
+    register_surface = register
+    find_reusable_surface = find_reusable
+    get_surface_data = get_data
+    update_surface_data = update

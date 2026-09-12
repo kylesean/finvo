@@ -29,6 +29,7 @@ class ExchangeRateService:
         """Initialize the exchange rate service."""
         self._api_url = settings.EXCHANGE_RATE_API_URL
         self._cache_key = settings.EXCHANGE_RATE_CACHE_KEY
+        self._persistent_cache_key = f"{settings.EXCHANGE_RATE_CACHE_KEY}:last_known_good"
         self._cache_ttl = settings.EXCHANGE_RATE_CACHE_TTL
         self._client: httpx.AsyncClient | None = None
         # Cache-refresh lock guards update_cache against thundering herd.
@@ -145,10 +146,19 @@ class ExchangeRateService:
                 "cached_at": datetime.now(UTC).isoformat(),
             }
 
+            # 1. Update short-term TTL cache
             success = await cache_manager.set(
                 key=self._cache_key,
                 value=cache_data,
                 ttl=self._cache_ttl,
+            )
+
+            # 2. Persist to long-term Last-Known-Good cache (no TTL expiration)
+            # Ensures that during offline or API outages, real historical market rates are used
+            await cache_manager.set(
+                key=self._persistent_cache_key,
+                value=cache_data,
+                ttl=None,
             )
 
             if success:
@@ -166,26 +176,42 @@ class ExchangeRateService:
 
             return success
 
-    async def get_cached_rates(self) -> dict[str, Any] | None:
+    async def get_cached_rates(self, *, allow_stale: bool = False) -> dict[str, Any] | None:
         """Get cached exchange rates from Redis.
+
+        Args:
+            allow_stale: When True, falls back to persistent last-known-good rates
+                if the active TTL cache has expired and network fetch failed.
 
         Returns:
             Dict[str, Any | None]: Cached exchange rate data, or None if not available
         """
         data = await cache_manager.get(self._cache_key)
 
-        if data is None:
-            logger.debug("exchange_rate_cache_miss", cache_key=self._cache_key)
-            return None
+        if data is not None:
+            logger.debug(
+                "exchange_rate_cache_hit",
+                cache_key=self._cache_key,
+                base_code=data.get("base_code"),
+                cached_at=data.get("cached_at"),
+            )
+            return cast(dict[str, Any] | None, data)
 
-        logger.debug(
-            "exchange_rate_cache_hit",
-            cache_key=self._cache_key,
-            base_code=data.get("base_code"),
-            cached_at=data.get("cached_at"),
-        )
+        logger.debug("exchange_rate_cache_miss", cache_key=self._cache_key)
 
-        return cast(dict[str, Any] | None, data)
+        if allow_stale:
+            stale_data = await cache_manager.get(self._persistent_cache_key)
+            if stale_data is not None:
+                logger.warning(
+                    "exchange_rate_using_last_known_good",
+                    cache_key=self._persistent_cache_key,
+                    base_code=stale_data.get("base_code"),
+                    last_update=stale_data.get("last_update_utc"),
+                    cached_at=stale_data.get("cached_at"),
+                )
+                return cast(dict[str, Any] | None, stale_data)
+
+        return None
 
     async def get_rate(self, target_currency: str) -> float | None:
         """Get exchange rate for a specific currency.
@@ -214,6 +240,10 @@ class ExchangeRateService:
             logger.info("exchange_rate_cache_empty_fetching_fresh")
             await self.update_cache()
             data = await self.get_cached_rates()
+
+        if data is None:
+            # Fallback to persistent Last-Known-Good real market rates if offline
+            data = await self.get_cached_rates(allow_stale=True)
 
         if data is None:
             return None, None
@@ -259,6 +289,10 @@ class ExchangeRateService:
         if data is None:
             await self.update_cache()
             data = await self.get_cached_rates()
+
+        if data is None:
+            # Fallback to persistent Last-Known-Good real market rates if offline
+            data = await self.get_cached_rates(allow_stale=True)
 
         if data is None:
             return None

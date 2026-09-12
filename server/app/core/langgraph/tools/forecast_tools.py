@@ -101,6 +101,7 @@ async def forecast_balance(
                 "success": True,
                 # GenUI signal - CamelCase naming
                 "type": "CashFlowForecastChart",
+                "componentType": "CashFlowForecastChart",
                 "title": title,
                 **result_dict,
             }

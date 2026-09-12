@@ -227,10 +227,14 @@ class UserService:
             "id": str(user.uuid),
             "email": user.email,
             "mobile": user.mobile,
+            "phone": user.mobile,
             "username": user.username,
             "avatarUrl": user.avatar_url,
             "createdAt": _format_iso_datetime(type_cast(datetime | None, user.created_at)),
-            "updatedAt": _format_iso_datetime(type_cast(datetime | None, user.updated_at)),
+            "updatedAt": (
+                _format_iso_datetime(type_cast(datetime | None, user.updated_at))
+                or _format_iso_datetime(type_cast(datetime | None, user.created_at))
+            ),
             "clientLastLoginAt": _format_iso_datetime(type_cast(datetime | None, user.last_login_at)),
         }
 

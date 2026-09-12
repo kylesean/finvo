@@ -942,50 +942,29 @@ class TransactionCRUDService:
                     source_thread_id=source_thread_id,
                     idempotency_key=item_key,
                 )
-                if item_key:
-                    # Keyed items book inside a savepoint (mirrors
-                    # create_transaction's keyed path): a concurrent duplicate
-                    # firing the unique constraint rolls back ONLY this item,
-                    # and the pre-flush race replays the winner.
-                    try:
-                        async with self.db.begin_nested():
-                            self.db.add(tx)
-                            if source_account_uuid or target_account_uuid:
-                                await self.ledger.apply_transaction_balance_effect(
-                                    tx,
-                                    user_uuid,
-                                    sign=1,
-                                    source_account_id=source_account_uuid,
-                                    target_account_id=target_account_uuid,
-                                    for_update=True,
-                                )
-                            await self.db.flush()
-                    except IntegrityError:
-                        if await self._get_by_idempotency_key(user_uuid, item_key) is None:
-                            raise
+                # Every item books inside a savepoint (mirrors create_transaction):
+                # if an item fails (e.g. duplicate key, unresolvable cross-currency,
+                # invalid account), ONLY this item rolls back. The session remains
+                # clean and subsequent items proceed.
+                try:
+                    async with self.db.begin_nested():
+                        self.db.add(tx)
+                        if source_account_uuid or target_account_uuid:
+                            await self.ledger.apply_transaction_balance_effect(
+                                tx,
+                                user_uuid,
+                                sign=1,
+                                source_account_id=source_account_uuid,
+                                target_account_id=target_account_uuid,
+                                for_update=True,
+                            )
+                        await self.db.flush()
+                except IntegrityError:
+                    if item_key and await self._get_by_idempotency_key(user_uuid, item_key) is not None:
                         replayed_count += 1
                         continue
-                    created_transactions.append(tx)
-                    continue
-
-                self.db.add(tx)
+                    raise
                 created_transactions.append(tx)
-
-                # Keep the batch path consistent with the single-transaction
-                # path — the ledger balance effect must be applied for items that
-                # carry a linked account, otherwise account balances silently
-                # drift from the transaction ledger. The ledger routes by item
-                # type (EXPENSE→source, INCOME→target, mirroring
-                # create_transaction()) and skips accounts that no longer exist.
-                if source_account_uuid or target_account_uuid:
-                    await self.ledger.apply_transaction_balance_effect(
-                        tx,
-                        user_uuid,
-                        sign=1,
-                        source_account_id=source_account_uuid,
-                        target_account_id=target_account_uuid,
-                        for_update=True,
-                    )
             except BusinessError as e:
                 logger.warning("batch_create_item_rejected", index=index, error=e.message)
                 failed.append({"index": str(index), "error": e.message})

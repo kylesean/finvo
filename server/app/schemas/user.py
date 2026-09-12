@@ -455,8 +455,10 @@ class UserInfoResponse(BaseModel):
         id: User's UUID
         email: User's email
         mobile: User's mobile number
+        phone: Alias for mobile number
         username: User's username
         avatarUrl: User's avatar URL
+        timezone: User's timezone
         createdAt: Account creation timestamp
         updatedAt: Last update timestamp
         clientLastLoginAt: Last login timestamp
@@ -465,11 +467,21 @@ class UserInfoResponse(BaseModel):
     id: str
     email: str | None = None
     mobile: str | None = None
+    phone: str | None = None
     username: str
     avatarUrl: str | None = None
+    timezone: str | None = "Asia/Shanghai"
     createdAt: str
     updatedAt: str | None = None
     clientLastLoginAt: str | None = None
+
+    @model_validator(mode="after")
+    def sync_phone_mobile(self) -> UserInfoResponse:
+        if self.phone is None and self.mobile is not None:
+            self.phone = self.mobile
+        elif self.mobile is None and self.phone is not None:
+            self.mobile = self.phone
+        return self
 
 
 class UpdateUserProfileRequest(BaseModel):

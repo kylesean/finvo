@@ -82,10 +82,12 @@ def _build_user_info(user: User) -> UserInfo:
         id=user.uuid,
         email=user.email,
         mobile=user.mobile,
+        phone=user.mobile,
         username=user.username or user.email or user.mobile or f"user_{str(user.uuid)[:8]}",
         avatarUrl=user.avatar_url,
+        timezone=getattr(user, "timezone", "Asia/Shanghai") or "Asia/Shanghai",
         createdAt=user.created_at.isoformat(),
-        updatedAt=user.updated_at.isoformat() if user.updated_at else None,
+        updatedAt=user.updated_at.isoformat() if user.updated_at else user.created_at.isoformat(),
         clientLastLoginAt=user.last_login_at.isoformat() if user.last_login_at else None,
     )
 

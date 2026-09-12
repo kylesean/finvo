@@ -300,11 +300,11 @@ class TestMemoryExtractionThrottle:
     async def test_throttle_schedule(self, monkeypatch):
         from uuid import uuid4
 
+        from app.core.config import settings
         from app.services.chat_session_service import (
             _MEMORY_TURN_COUNTERS,
             should_extract_memory,
         )
-        from app.core.config import settings
 
         monkeypatch.setattr(settings, "MEMORY_EXTRACTION_EVERY_N_TURNS", 3)
         session_id = uuid4()

@@ -92,7 +92,7 @@ class StorageConfigService:
 
     async def get_by_id(
         self,
-        config_id: int,
+        config_id: UUID,
         user_uuid: UUID | None = None,
     ) -> StorageConfig | None:
         """Get storage config by ID.
@@ -183,7 +183,7 @@ class StorageConfigService:
 
     async def update(
         self,
-        config_id: int,
+        config_id: UUID,
         user_uuid: UUID,
         name: str | None = None,
         base_path: str | None = None,
@@ -226,7 +226,7 @@ class StorageConfigService:
 
         return config
 
-    async def delete(self, config_id: int, user_uuid: UUID) -> bool:
+    async def delete(self, config_id: UUID, user_uuid: UUID) -> bool:
         """Delete a storage configuration.
 
         Note: Will fail if attachments still reference this config.

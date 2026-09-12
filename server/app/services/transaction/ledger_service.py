@@ -197,28 +197,29 @@ class TransactionLedgerService:
                 allow_live_rate=allow_live_rate,
             )
         elif tx_type == "TRANSFER":
-            # Source account is debited (-1)
-            await self.apply_account_balance_effect(
-                transaction,
-                account_id=source_account_id,
-                user_uuid=user_uuid,
-                user_base_currency=user_base_currency,
-                sign=sign,
-                direction=-1,
-                for_update=for_update,
-                allow_live_rate=allow_live_rate,
-            )
-            # Target account is credited (+1)
-            await self.apply_account_balance_effect(
-                transaction,
-                account_id=target_account_id,
-                user_uuid=user_uuid,
-                user_base_currency=user_base_currency,
-                sign=sign,
-                direction=1,
-                for_update=for_update,
-                allow_live_rate=allow_live_rate,
-            )
+            # Transfer involves two accounts (source debited -1, target credited +1).
+            # To prevent PostgreSQL deadlocks (40P01) between concurrent opposite-direction
+            # transfers (e.g. A->B vs B->A), acquire locks in deterministic UUID order.
+            transfer_items: list[tuple[UUID, int]] = []
+            if source_account_id is not None:
+                transfer_items.append((source_account_id, -1))
+            if target_account_id is not None:
+                transfer_items.append((target_account_id, 1))
+
+            if for_update:
+                transfer_items.sort(key=lambda x: x[0])
+
+            for acc_id, direction in transfer_items:
+                await self.apply_account_balance_effect(
+                    transaction,
+                    account_id=acc_id,
+                    user_uuid=user_uuid,
+                    user_base_currency=user_base_currency,
+                    sign=sign,
+                    direction=direction,
+                    for_update=for_update,
+                    allow_live_rate=allow_live_rate,
+                )
 
     async def apply_balance_diff(
         self,
@@ -269,5 +270,11 @@ class TransactionLedgerService:
         elif tx_type == "INCOME":
             await adjust(transaction.target_account_id, +1)
         elif tx_type == "TRANSFER":
-            await adjust(transaction.source_account_id, -1)
-            await adjust(transaction.target_account_id, +1)
+            diff_items: list[tuple[UUID, int]] = []
+            if transaction.source_account_id is not None:
+                diff_items.append((transaction.source_account_id, -1))
+            if transaction.target_account_id is not None:
+                diff_items.append((transaction.target_account_id, +1))
+            diff_items.sort(key=lambda x: x[0])
+            for acc_id, direction in diff_items:
+                await adjust(acc_id, direction)

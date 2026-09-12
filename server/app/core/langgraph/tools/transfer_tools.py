@@ -182,10 +182,10 @@ async def execute_transfer(
     # only when the LLM extracted nothing. Never hardcode an English tag.
     final_tags = tags or ([memo] if memo else [])
 
-    async with get_session_context() as session:
-        service = TransactionService(session)
+    try:
+        async with get_session_context(auto_commit=True) as session:
+            service = TransactionService(session)
 
-        try:
             source_uuid = uuid.UUID(source_account_id)
             target_uuid = uuid.UUID(target_account_id)
 
@@ -240,9 +240,9 @@ async def execute_transfer(
             result["componentType"] = "TransferReceipt"
             return result
 
-        except Exception as e:
-            logger.error("execute_transfer_failed", error=str(e), exc_info=True)
-            return {"success": False, "message": f"Transfer failed: {to_client_error(e)}"}
+    except Exception as e:
+        logger.error("execute_transfer_failed", error=str(e), exc_info=True)
+        return {"success": False, "message": f"Transfer failed: {to_client_error(e)}"}
 
 
 # Export: prepare_transfer is LLM-visible; execute_transfer stays internal

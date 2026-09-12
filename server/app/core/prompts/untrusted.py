@@ -7,4 +7,6 @@ UNTRUSTED_TAG = "untrusted_data"
 
 def wrap_untrusted(text: str, *, source: str) -> str:
     """Wrap third-party text in an untrusted_data block."""
-    return f'<{UNTRUSTED_TAG} source="{source}">\n{text}\n</{UNTRUSTED_TAG}>'
+    safe_text = text.replace(f"</{UNTRUSTED_TAG}>", f"<\\/{UNTRUSTED_TAG}>")
+    clean_source = source.replace('"', "")
+    return f'<{UNTRUSTED_TAG} source="{clean_source}">\n{safe_text}\n</{UNTRUSTED_TAG}>'

@@ -282,6 +282,7 @@ async def analyze_cashflow(
                 "success": True,
                 # GenUI signal - CamelCase naming
                 "type": "CashFlowCard",
+                "componentType": "CashFlowCard",
                 "title": "Cash Flow & Health Report",
                 "netCashFlow": cash_flow.get("netCashFlow", 0),
                 "savingsRate": cash_flow.get("savingsRate", 0),

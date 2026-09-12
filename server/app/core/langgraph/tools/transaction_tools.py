@@ -249,10 +249,9 @@ async def record_transactions(
         except (ZoneInfoNotFoundError, ValueError):
             tx_time = tx_time.replace(tzinfo=UTC)
 
-    async with get_session_context() as session:
-        service = TransactionService(session)
-
-        try:
+    try:
+        async with get_session_context(auto_commit=True) as session:
+            service = TransactionService(session)
             expense_items = []
             income_items = []
 
@@ -314,12 +313,12 @@ async def record_transactions(
 
             return result
 
-        except AppException as ae:
-            logger.warning("record_transactions_business_error", error=ae.message)
-            return {"success": False, "message": ae.message, "code": ae.error_code}
-        except Exception as e:
-            logger.error("record_transactions_failed", error=str(e), exc_info=True)
-            return {"success": False, "message": "Failed to record transactions due to an internal error"}
+    except AppException as ae:
+        logger.warning("record_transactions_business_error", error=ae.message)
+        return {"success": False, "message": ae.message, "code": ae.error_code}
+    except Exception as e:
+        logger.error("record_transactions_failed", error=str(e), exc_info=True)
+        return {"success": False, "message": "Failed to record transactions due to an internal error"}
 
 
 # ============================================================================

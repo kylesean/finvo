@@ -14,6 +14,7 @@ server ever moves to multiple workers — callers stay untouched.
 from __future__ import annotations
 
 import asyncio
+from contextlib import suppress
 from typing import Any
 
 from fastapi import WebSocket
@@ -78,10 +79,15 @@ class ConnectionManager:
                 if websocket.client_state != WebSocketState.CONNECTED:
                     await self.disconnect(user_uuid, websocket)
                     continue
-                await websocket.send_json({"type": "notification", "payload": data})
+                await asyncio.wait_for(
+                    websocket.send_json({"type": "notification", "payload": data}),
+                    timeout=3.0,
+                )
                 delivered = True
             except Exception:  # noqa: BLE001
                 await self.disconnect(user_uuid, websocket)
+                with suppress(Exception):
+                    await websocket.close(code=1001)
         return delivered
 
     async def broadcast(self, user_uuids: list[str], data: dict[str, Any]) -> int:

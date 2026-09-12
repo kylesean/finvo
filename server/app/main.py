@@ -174,9 +174,6 @@ app = FastAPI(
 # Set up Prometheus metrics
 setup_metrics(app)
 
-# Add logging context middleware (must be added before other middleware to capture context)
-app.add_middleware(LoggingContextMiddleware)
-
 # Add custom metrics middleware
 app.add_middleware(MetricsMiddleware)
 
@@ -405,13 +402,15 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 
 
 # Set up CORS middleware
-# Security: never combine `allow_credentials=True` with a wildcard origin.
-# - If origins are restricted to an explicit list → credentials are safe.
-# - If origins contain "*" (e.g. dev default) → credentials must be disabled
-#   (browsers reject the combination anyway, and silently disabling prevents
-#   accidental credential leakage if a wildcard slips into production config).
+# Set up CORS and Security middleware
+# Starlette wraps middlewares in reverse registration order (last added = outermost).
+# Execution order: LoggingContextMiddleware (outermost) -> CORSMiddleware -> SecurityHeadersMiddleware -> MetricsMiddleware
 _allowed_origins = settings.allowed_origins_list
-_allow_credentials = not (len(_allowed_origins) == 1 and _allowed_origins[0] == "*")
+_allow_credentials = "*" not in _allowed_origins
+
+# Add security headers middleware (XSS protection, clickjacking, etc.)
+app.add_middleware(SecurityHeadersMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins,
@@ -425,8 +424,9 @@ logger.info(
     allow_credentials=_allow_credentials,
 )
 
-# Add security headers middleware (XSS protection, clickjacking, etc.)
-app.add_middleware(SecurityHeadersMiddleware)
+# Outermost middleware: LoggingContextMiddleware runs first for every request,
+# binding request_id and logging context before CORS preflights or exceptions occur.
+app.add_middleware(LoggingContextMiddleware)
 
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
