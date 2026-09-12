@@ -43,11 +43,13 @@ def upgrade() -> None:
             sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
-        sa.Column("status", sa.String(50), nullable=False, server_default="ACTIVE"),
+        sa.Column("status", sa.String(50), nullable=False, server_default=sa.text("'active'")),
         sa.Column("description", sa.Text, nullable=True),
+        sa.Column("base_currency", sa.String(length=3), nullable=True),
         # Model uses: invite_code, invite_code_expires_at
         sa.Column("invite_code", sa.String(20), nullable=True),
         sa.Column("invite_code_expires_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("version", sa.Integer(), nullable=False, server_default=sa.text("0")),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -59,6 +61,11 @@ def upgrade() -> None:
             sa.DateTime(timezone=True),
             nullable=False,
             server_default=sa.text("CURRENT_TIMESTAMP"),
+        ),
+        sa.CheckConstraint("status IN ('active', 'archived')", name="ck_shared_spaces_status"),
+        sa.CheckConstraint(
+            "base_currency IS NULL OR char_length(base_currency) = 3",
+            name="ck_shared_spaces_base_currency_len",
         ),
     )
 

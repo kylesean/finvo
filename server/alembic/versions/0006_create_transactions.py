@@ -92,6 +92,7 @@ def upgrade() -> None:
             postgresql.UUID(as_uuid=True),
             nullable=True,
         ),
+        sa.Column("idempotency_key", sa.String(length=120), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -106,6 +107,15 @@ def upgrade() -> None:
         ),
         sa.UniqueConstraint(
             "recurring_transaction_id", "transaction_at", name="uq_transactions_recurring_timestamp"
+        ),
+        sa.UniqueConstraint(
+            "user_uuid", "idempotency_key", name="uq_transactions_user_idempotency"
+        ),
+        sa.CheckConstraint(
+            "type IN ('EXPENSE', 'INCOME', 'TRANSFER')", name="ck_transactions_type"
+        ),
+        sa.CheckConstraint(
+            "status IN ('CLEARED', 'PENDING', 'CONFIRMED')", name="ck_transactions_status"
         ),
     )
 
