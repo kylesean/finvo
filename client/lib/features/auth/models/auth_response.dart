@@ -6,6 +6,7 @@ part 'auth_response.g.dart';
 
 @freezed
 abstract class AuthResponseModel with _$AuthResponseModel {
+  @JsonSerializable(explicitToJson: true)
   const factory AuthResponseModel({
     required UserModel user,
     required String token,

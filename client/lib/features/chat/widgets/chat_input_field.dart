@@ -439,10 +439,10 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                     label: isStreamingResponse
                         ? t.common.cancel
                         : isListening
-                            ? t.chat.listening
-                            : hasText
-                                ? t.common.confirm
-                                : t.chat.voiceInputButton,
+                        ? t.chat.listening
+                        : hasText
+                        ? t.common.confirm
+                        : t.chat.voiceInputButton,
                     button: true,
                     liveRegion: isListening || isStreamingResponse,
                     child: InkWell(

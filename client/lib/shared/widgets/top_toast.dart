@@ -315,83 +315,83 @@ class _TopToastWidgetState extends State<_TopToastWidget>
                     horizontal: 16,
                     vertical: 14,
                   ),
-                decoration: BoxDecoration(
-                  color: colors.background,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: colors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: widget.iconColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                  decoration: BoxDecoration(
+                    color: colors.background,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
                       ),
-                      child: Icon(
-                        widget.iconData,
-                        size: 18,
-                        color: widget.iconColor,
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: widget.iconColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          widget.iconData,
+                          size: 18,
+                          color: widget.iconColor,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.title != null)
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.title != null)
+                              DefaultTextStyle(
+                                style: AppTextStyles.listTrailing(
+                                  widget.theme,
+                                ).copyWith(fontWeight: FontWeight.w600),
+                                child: widget.title!,
+                              ),
                             DefaultTextStyle(
-                              style: AppTextStyles.listTrailing(
-                                widget.theme,
-                              ).copyWith(fontWeight: FontWeight.w600),
-                              child: widget.title!,
+                              style: AppTextStyles.listTrailing(widget.theme),
+                              child: widget.description,
                             ),
-                          DefaultTextStyle(
-                            style: AppTextStyles.listTrailing(widget.theme),
-                            child: widget.description,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    if (widget.action != null)
-                      GestureDetector(
-                        onTap: () {
-                          unawaited(_dismiss());
-                          widget.action!.onPressed();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            widget.action!.label,
-                            style: TextStyle(
-                              color: widget.iconColor,
-                              fontWeight: FontWeight.w600,
+                      if (widget.action != null)
+                        GestureDetector(
+                          onTap: () {
+                            unawaited(_dismiss());
+                            widget.action!.onPressed();
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              widget.action!.label,
+                              style: TextStyle(
+                                color: widget.iconColor,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
+                      Icon(
+                        FLucideIcons.x,
+                        size: 16,
+                        color: colors.mutedForeground,
                       ),
-                    Icon(
-                      FLucideIcons.x,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

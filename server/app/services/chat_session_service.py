@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import OrderedDict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 from app.core.config import settings
@@ -57,7 +57,7 @@ async def should_extract_memory(session_id: UUID) -> bool:
 async def update_memory_background(
     agent: LangGraphAgent,
     user_uuid: UUID,
-    messages: list[dict],
+    messages: list[dict[str, Any]],
     session_id: UUID,
 ) -> None:
     """Update long-term memory in background (fire-and-forget).

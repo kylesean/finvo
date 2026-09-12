@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserModel {
 
- String get id; String? get username; String? get email; String? get phone; String? get avatarUrl; String? get timezone;
+ String get id; String? get username; String? get email;@JsonKey(readValue: _readPhone) String? get phone; String? get avatarUrl; String? get timezone;
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UserModelCopyWith<$Res>  {
   factory $UserModelCopyWith(UserModel value, $Res Function(UserModel) _then) = _$UserModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String? username, String? email, String? phone, String? avatarUrl, String? timezone
+ String id, String? username, String? email,@JsonKey(readValue: _readPhone) String? phone, String? avatarUrl, String? timezone
 });
 
 
@@ -158,7 +158,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? username,  String? email,  String? phone,  String? avatarUrl,  String? timezone)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? username,  String? email, @JsonKey(readValue: _readPhone)  String? phone,  String? avatarUrl,  String? timezone)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
 return $default(_that.id,_that.username,_that.email,_that.phone,_that.avatarUrl,_that.timezone);case _:
@@ -179,7 +179,7 @@ return $default(_that.id,_that.username,_that.email,_that.phone,_that.avatarUrl,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? username,  String? email,  String? phone,  String? avatarUrl,  String? timezone)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? username,  String? email, @JsonKey(readValue: _readPhone)  String? phone,  String? avatarUrl,  String? timezone)  $default,) {final _that = this;
 switch (_that) {
 case _UserModel():
 return $default(_that.id,_that.username,_that.email,_that.phone,_that.avatarUrl,_that.timezone);case _:
@@ -199,7 +199,7 @@ return $default(_that.id,_that.username,_that.email,_that.phone,_that.avatarUrl,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? username,  String? email,  String? phone,  String? avatarUrl,  String? timezone)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? username,  String? email, @JsonKey(readValue: _readPhone)  String? phone,  String? avatarUrl,  String? timezone)?  $default,) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
 return $default(_that.id,_that.username,_that.email,_that.phone,_that.avatarUrl,_that.timezone);case _:
@@ -214,13 +214,13 @@ return $default(_that.id,_that.username,_that.email,_that.phone,_that.avatarUrl,
 @JsonSerializable()
 
 class _UserModel implements UserModel {
-  const _UserModel({required this.id, this.username, this.email, this.phone, this.avatarUrl, this.timezone});
+  const _UserModel({required this.id, this.username, this.email, @JsonKey(readValue: _readPhone) this.phone, this.avatarUrl, this.timezone});
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override final  String id;
 @override final  String? username;
 @override final  String? email;
-@override final  String? phone;
+@override@JsonKey(readValue: _readPhone) final  String? phone;
 @override final  String? avatarUrl;
 @override final  String? timezone;
 
@@ -257,7 +257,7 @@ abstract mixin class _$UserModelCopyWith<$Res> implements $UserModelCopyWith<$Re
   factory _$UserModelCopyWith(_UserModel value, $Res Function(_UserModel) _then) = __$UserModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? username, String? email, String? phone, String? avatarUrl, String? timezone
+ String id, String? username, String? email,@JsonKey(readValue: _readPhone) String? phone, String? avatarUrl, String? timezone
 });
 
 

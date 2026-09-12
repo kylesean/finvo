@@ -216,8 +216,8 @@ return $default(_that.user,_that.token);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(explicitToJson: true)
 class _AuthResponseModel implements AuthResponseModel {
   const _AuthResponseModel({required this.user, required this.token});
   factory _AuthResponseModel.fromJson(Map<String, dynamic> json) => _$AuthResponseModelFromJson(json);

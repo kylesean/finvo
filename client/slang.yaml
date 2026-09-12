@@ -12,3 +12,4 @@ key_case: camel
 param_case: camel
 string_interpolation: dart
 statistics: true
+timestamp: false
