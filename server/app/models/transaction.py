@@ -95,8 +95,8 @@ class Transaction(Base):
         # Keep free-text status/type typos out of the ledger at the DB layer.
         # `source` stays unconstrained — it is an intentionally open set
         # (MANUAL, AI, IMPORT, ...).
-        CheckConstraint("type IN ('EXPENSE', 'INCOME', 'TRANSFER')", name="chk_transactions_type"),
-        CheckConstraint("status IN ('CLEARED', 'PENDING', 'CONFIRMED')", name="chk_transactions_status"),
+        CheckConstraint("type IN ('EXPENSE', 'INCOME', 'TRANSFER')", name="ck_transactions_type"),
+        CheckConstraint("status IN ('CLEARED', 'PENDING', 'CONFIRMED')", name="ck_transactions_status"),
         Index("ix_transactions_category", "category_key"),
         Index("ix_transactions_status", "status"),
         Index("ix_transactions_transaction_at", "transaction_at"),

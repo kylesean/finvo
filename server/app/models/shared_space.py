@@ -26,7 +26,13 @@ class SharedSpace(Base):
     """Shared space model for collaborative financial tracking."""
 
     __tablename__ = "shared_spaces"
-    __table_args__ = (sa.CheckConstraint("status IN ('active', 'archived')", name="ck_shared_spaces_status"),)
+    __table_args__ = (
+        sa.CheckConstraint("status IN ('active', 'archived')", name="ck_shared_spaces_status"),
+        sa.CheckConstraint(
+            "base_currency IS NULL OR char_length(base_currency) = 3",
+            name="ck_shared_spaces_base_currency_len",
+        ),
+    )
 
     id: Mapped[UUID] = col.uuid_pk(uuid4_factory)
     name: Mapped[str] = mapped_column(String(50))
