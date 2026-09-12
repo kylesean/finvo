@@ -214,7 +214,7 @@ return $default(_that.successful,_that.failed);case _:
 
 class _AttachmentSignedUrlResult with DiagnosticableTreeMixin implements AttachmentSignedUrlResult {
   const _AttachmentSignedUrlResult({final  List<AttachmentSignedUrlInfo> successful = const <AttachmentSignedUrlInfo>[], final  List<AttachmentSignedUrlFailure> failed = const <AttachmentSignedUrlFailure>[]}): _successful = successful,_failed = failed;
-
+  
 
  final  List<AttachmentSignedUrlInfo> _successful;
 @override@JsonKey() List<AttachmentSignedUrlInfo> get successful {
@@ -500,7 +500,7 @@ return $default(_that.id,_that.filename,_that.signedUrl,_that.expiresAt);case _:
 
 class _AttachmentSignedUrlInfo with DiagnosticableTreeMixin implements AttachmentSignedUrlInfo {
   const _AttachmentSignedUrlInfo({required this.id, required this.filename, required this.signedUrl, this.expiresAt});
-
+  
 
 @override final  String id;
 @override final  String filename;
@@ -779,7 +779,7 @@ return $default(_that.id,_that.filename,_that.error,_that.errorCode,_that.messag
 
 class _AttachmentSignedUrlFailure with DiagnosticableTreeMixin implements AttachmentSignedUrlFailure {
   const _AttachmentSignedUrlFailure({this.id, this.filename, this.error, this.errorCode, this.message});
-
+  
 
 @override final  String? id;
 @override final  String? filename;

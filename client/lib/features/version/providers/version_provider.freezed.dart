@@ -209,7 +209,7 @@ return $default(_that.isChecking,_that.updateInfo,_that.error);case _:
 
 class _VersionCheckState implements VersionCheckState {
   const _VersionCheckState({this.isChecking = false, this.updateInfo, this.error});
-
+  
 
 @override@JsonKey() final  bool isChecking;
 @override final  UpdateInfo? updateInfo;

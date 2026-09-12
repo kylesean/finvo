@@ -29,9 +29,9 @@ class FinancialAccountDetailPage extends ConsumerWidget {
     final colors = context.theme.colors;
     final theme = context.theme;
 
-    // Use the account's own currency code instead of a hardcoded CNY symbol.
+    // Use current balance if available, falling back to initial balance.
     final formattedAmount = AmountFormatter.formatCommon(
-      args.account.initialBalance.toDouble(),
+      (args.account.currentBalance ?? args.account.initialBalance).toDouble(),
       currencyCode: args.account.currencyCode,
     );
 

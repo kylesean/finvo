@@ -177,10 +177,14 @@ class NotificationWsService {
           throw TimeoutException('WebSocket connection timed out after 15s');
         },
       );
-      // The socket may have been disposed (or superseded by a newer connect)
-      // while `ready` was pending.
-      if (_isDisposed || generation != _connectGeneration) {
+      if (_isDisposed) {
         _cleanup();
+        return;
+      }
+      if (generation != _connectGeneration) {
+        // A newer connect() superseded this session. Close this stale channel
+        // only; never run _cleanup() which would close the NEW session's channel.
+        unawaited(channel.sink.close());
         return;
       }
       reconnects.markSucceeded();

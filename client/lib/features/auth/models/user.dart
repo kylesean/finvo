@@ -14,6 +14,11 @@ abstract class UserModel with _$UserModel {
     String? timezone,
   }) = _UserModel;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) =>
-      _$UserModelFromJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    final map = Map<String, dynamic>.from(json);
+    if (map['phone'] == null && map['mobile'] != null) {
+      map['phone'] = map['mobile'];
+    }
+    return _$UserModelFromJson(map);
+  }
 }

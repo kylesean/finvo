@@ -20,7 +20,7 @@ final class FinancialAccountNotifierProvider
         argument: null,
         retry: null,
         name: r'financialAccountProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,7 +42,7 @@ final class FinancialAccountNotifierProvider
 }
 
 String _$financialAccountNotifierHash() =>
-    r'4c6ee0415e92e3b4f0be39fd458e9dc5312c8b23';
+    r'd926ad653032ba59329c0ab4c82b0f55eb133ff1';
 
 abstract class _$FinancialAccountNotifier
     extends $Notifier<FinancialAccountState> {

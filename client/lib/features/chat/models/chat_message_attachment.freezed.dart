@@ -221,7 +221,7 @@ return $default(_that.id,_that.filename,_that.objectKey,_that.signedUrl,_that.ex
 
 class _ChatMessageAttachment with DiagnosticableTreeMixin implements ChatMessageAttachment {
   const _ChatMessageAttachment({required this.id, required this.filename, this.objectKey, this.signedUrl, this.expiresAt, this.status = AttachmentLoadStatus.initial, this.errorMessage});
-
+  
 
 @override final  String id;
 @override final  String filename;

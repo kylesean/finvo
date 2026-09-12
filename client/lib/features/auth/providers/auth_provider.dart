@@ -81,7 +81,7 @@ class Auth extends _$Auth {
     required UserModel user,
     required String token,
   }) async {
-    await _storageService.saveToken(token);
+    // Note: authService.login/register already persisted credentials via _saveAuthData.
     state = state.copyWith(
       status: AuthStatus.authenticated,
       user: user,

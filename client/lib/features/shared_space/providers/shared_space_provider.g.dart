@@ -42,7 +42,7 @@ final class SharedSpaceNotifierProvider
 }
 
 String _$sharedSpaceNotifierHash() =>
-    r'0971e1d7dba6858ed3a9edd1a30c1bd12619b064';
+    r'4f76063a9368b6fc6dd750a6c6b0616469b8f4f7';
 
 abstract class _$SharedSpaceNotifier extends $Notifier<SharedSpaceState> {
   SharedSpaceState build();

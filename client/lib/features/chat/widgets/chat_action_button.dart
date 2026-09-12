@@ -35,12 +35,17 @@ class ChatActionButton extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Padding(
           padding: EdgeInsets.only(
-            left: isFirst ? 0 : 20,
-            right: 0,
-            top: 4,
-            bottom: 4,
+            left: isFirst ? 0 : 12,
+            right: 4,
           ),
-          child: Icon(icon, color: color ?? colors.mutedForeground, size: 16),
+          child: Container(
+            constraints: const BoxConstraints(
+              minWidth: 32,
+              minHeight: 32,
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: color ?? colors.mutedForeground, size: 16),
+          ),
         ),
       ),
     );

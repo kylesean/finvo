@@ -20,15 +20,19 @@ class UserInfo {
     this.clientLastLoginAt,
   });
 
+  /// Alias for mobile, ensuring compatibility with phone-oriented callers.
+  String? get phone => mobile;
+
   factory UserInfo.fromJson(Map<String, dynamic> json) {
+    final phoneOrMobile = (json['mobile'] ?? json['phone']) as String?;
     return UserInfo(
       id: json['id'] as String,
       email: json['email'] as String?,
-      mobile: json['mobile'] as String?,
+      mobile: phoneOrMobile,
       username: json['username'] as String,
       avatarUrl: json['avatarUrl'] as String?,
       createdAt: json['createdAt'] as String,
-      updatedAt: json['updatedAt'] as String,
+      updatedAt: (json['updatedAt'] ?? json['createdAt']) as String,
       clientLastLoginAt: json['clientLastLoginAt'] as String?,
     );
   }
@@ -38,6 +42,7 @@ class UserInfo {
       'id': id,
       'email': email,
       'mobile': mobile,
+      'phone': mobile,
       'username': username,
       'avatarUrl': avatarUrl,
       'createdAt': createdAt,

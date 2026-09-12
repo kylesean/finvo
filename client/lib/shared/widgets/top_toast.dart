@@ -307,11 +307,14 @@ class _TopToastWidgetState extends State<_TopToastWidget>
                   unawaited(_dismiss());
                 }
               },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
+              child: Semantics(
+                container: true,
+                liveRegion: true,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 decoration: BoxDecoration(
                   color: colors.background,
                   borderRadius: BorderRadius.circular(12),
@@ -388,6 +391,7 @@ class _TopToastWidgetState extends State<_TopToastWidget>
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

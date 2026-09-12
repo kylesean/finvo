@@ -435,13 +435,16 @@ class _ChatInputFieldState extends ConsumerState<ChatInputField>
                   ),
                   const SizedBox(width: 8),
                   Semantics(
-                    // Voice input is icon-only; announce its state changes
-                    // (idle / listening / stopping) to screen readers.
-                    label: isListening
-                        ? t.chat.listening
-                        : t.chat.voiceInputButton,
+                    // Announce accurate action and state to screen readers:
+                    label: isStreamingResponse
+                        ? t.common.cancel
+                        : isListening
+                            ? t.chat.listening
+                            : hasText
+                                ? t.common.confirm
+                                : t.chat.voiceInputButton,
                     button: true,
-                    liveRegion: isListening,
+                    liveRegion: isListening || isStreamingResponse,
                     child: InkWell(
                       onTap: currentAction,
                       borderRadius: BorderRadius.circular(22),

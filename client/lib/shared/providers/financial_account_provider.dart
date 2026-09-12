@@ -110,7 +110,7 @@ abstract class FinancialAccountState with _$FinancialAccountState {
 }
 
 // Account state notifier
-@riverpod
+@Riverpod(keepAlive: true)
 class FinancialAccountNotifier extends _$FinancialAccountNotifier {
   /// Monotonic generation: a stale in-flight response is discarded when a
   /// newer load has superseded it (and writes after dispose are skipped).

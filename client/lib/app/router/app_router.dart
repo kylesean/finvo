@@ -54,6 +54,7 @@ String? appRedirect(
       if (from != null &&
           from.isNotEmpty &&
           from.startsWith('/') &&
+          !from.startsWith('//') &&
           !from.startsWith(AppRoutePaths.login) &&
           !from.startsWith(AppRoutePaths.register)) {
         return from;

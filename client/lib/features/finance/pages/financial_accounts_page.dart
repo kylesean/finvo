@@ -539,10 +539,10 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                       semantic: AmountSemantic.status, // Changed to status
                       currency: viewCurrency,
                       shrinkCurrency: true,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white, // Explicitly force white
+                        color: colors.primaryForeground,
                       ),
                     ),
             ),
@@ -624,7 +624,7 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
                   shrinkCurrency: true,
                   style: theme.typography.body.md.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: Colors.white, // Explicitly force white
+                    color: colors.primaryForeground,
                   ),
                 ),
         ),

@@ -158,7 +158,8 @@ class FinancialAccountCard extends ConsumerWidget {
                               final rawBalance =
                                   account.currentBalance ??
                                   account.initialBalance;
-                              final ratesNotifier = ref.watch(
+                              ref.watch(exchangeRateProvider);
+                              final ratesNotifier = ref.read(
                                 exchangeRateProvider.notifier,
                               );
                               final converted = ratesNotifier.convert(

@@ -222,7 +222,7 @@ final class TransactionEventSubscriberProvider
 }
 
 String _$transactionEventSubscriberHash() =>
-    r'0df6b793a7b7bbf116307171315e7f68acff79b5';
+    r'9176ee5a5d46c2f954b6e93ea2f4739b16c1d628';
 
 @ProviderFor(totalExpense)
 final totalExpenseProvider = TotalExpenseProvider._();
@@ -372,7 +372,7 @@ final class TransactionFeedProvider
   }
 }
 
-String _$transactionFeedHash() => r'89318ea38e24ed312b9d4c4aefb8dde417480c94';
+String _$transactionFeedHash() => r'd8c45b27bf1caee3a0082826b2ff111ab1e3a596';
 
 abstract class _$TransactionFeed extends $Notifier<TransactionFeedState> {
   TransactionFeedState build();

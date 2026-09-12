@@ -210,7 +210,7 @@ return $default(_that.id,_that.name,_that.args,_that.timestamp);case _:
 
 class _ToolCallStartEvent implements ToolCallStartEvent {
   const _ToolCallStartEvent({this.id = '', this.name = 'unknown', final  Map<String, dynamic> args = const <String, dynamic>{}, this.timestamp}): _args = args;
-
+  
 
 @override@JsonKey() final  String id;
 @override@JsonKey() final  String name;
@@ -484,7 +484,7 @@ return $default(_that.id,_that.name,_that.status,_that.durationMs,_that.resultPr
 
 class _ToolCallEndEvent implements ToolCallEndEvent {
   const _ToolCallEndEvent({this.id = '', this.name = 'unknown', this.status = 'success', this.durationMs, this.resultPreview, this.error});
-
+  
 
 @override@JsonKey() final  String id;
 @override@JsonKey() final  String name;
@@ -756,7 +756,7 @@ return $default(_that.name,_that.displayName,_that.toolType,_that.cancellable,_t
 
 class _ToolInfo implements ToolInfo {
   const _ToolInfo({this.name = 'unknown', this.displayName = '', this.toolType = 'readonly', this.cancellable = true, this.warningOnCancel, this.surfaceId});
-
+  
 
 @override@JsonKey() final  String name;
 @override@JsonKey() final  String displayName;
@@ -1032,7 +1032,7 @@ return $default(_that.onSessionInit,_that.onTextChunk,_that.onStreamComplete,_th
 
 class _SseEventCallbacks implements SseEventCallbacks {
   const _SseEventCallbacks({this.onSessionInit, this.onTextChunk, this.onStreamComplete, this.onTitleUpdate, this.onError, this.onMessageIdUpdate, this.onSurfaceCreated, this.onToolCallStart, this.onToolCallEnd, this.onTransactionCreated});
-
+  
 
 @override final  void Function(String sessionId, String? messageId)? onSessionInit;
 @override final  void Function(String text)? onTextChunk;

@@ -19,6 +19,8 @@ import 'package:finvo/i18n/strings.g.dart';
 import 'package:finvo/shared/services/toast_service.dart';
 import 'package:finvo/shared/utils/error_message.dart';
 import 'package:finvo/shared/providers/generation_guard.dart';
+import 'package:finvo/shared/providers/financial_account_provider.dart';
+import 'package:finvo/features/budget/providers/budget_provider.dart';
 
 part 'home_providers.g.dart';
 
@@ -70,6 +72,8 @@ Future<void> transactionEventSubscriber(Ref ref) async {
     ref.invalidate(totalExpenseProvider);
     final currentMonth = ref.read(currentDisplayMonthProvider);
     ref.invalidate(calendarMonthDataProvider(currentMonth));
+    ref.invalidate(financialAccountProvider);
+    ref.invalidate(budgetSummaryProvider);
   }
 }
 

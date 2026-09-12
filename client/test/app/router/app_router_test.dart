@@ -165,6 +165,17 @@ void main() {
       );
     });
 
+    test('from param rejects protocol-relative URLs (//evil.example)', () {
+      const authed = AuthStatus.authenticated;
+      expect(
+        _redirect(
+          '${AppRoutePaths.login}?from=${Uri.encodeComponent('//evil.example/phish')}',
+          authStatus: authed,
+        ),
+        AppRoutePaths.home,
+      );
+    });
+
     test(
       'prefix matching: /register matches /register/step2, not /registrar',
       () {

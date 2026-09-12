@@ -214,7 +214,7 @@ return $default(_that.id,_that.attachmentId,_that.originalName,_that.objectKey,_
 
 class _UploadedAttachmentInfo implements UploadedAttachmentInfo {
   const _UploadedAttachmentInfo({required this.id, required this.attachmentId, required this.originalName, required this.objectKey, required this.uri, required this.mimeType, required this.size, this.hash});
-
+  
 
 @override final  String id;
 @override final  String attachmentId;
@@ -352,7 +352,7 @@ as UploadedAttachmentInfo,
 @override
 @pragma('vm:prefer-inline')
 $UploadedAttachmentInfoCopyWith<$Res> get uploadInfo {
-
+  
   return $UploadedAttachmentInfoCopyWith<$Res>(_self.uploadInfo, (value) {
     return _then(_self.copyWith(uploadInfo: value));
   });
@@ -495,7 +495,7 @@ return $default(_that.file,_that.uploadInfo);case _:
 
 class _PendingMessageAttachment implements PendingMessageAttachment {
   const _PendingMessageAttachment({required this.file, required this.uploadInfo});
-
+  
 
 @override final  XFile file;
 @override final  UploadedAttachmentInfo uploadInfo;
@@ -560,7 +560,7 @@ as UploadedAttachmentInfo,
 @override
 @pragma('vm:prefer-inline')
 $UploadedAttachmentInfoCopyWith<$Res> get uploadInfo {
-
+  
   return $UploadedAttachmentInfoCopyWith<$Res>(_self.uploadInfo, (value) {
     return _then(_self.copyWith(uploadInfo: value));
   });

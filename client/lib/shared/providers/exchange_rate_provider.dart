@@ -1,6 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:finvo/shared/models/exchange_rate.dart';
+import 'package:finvo/shared/models/currency.dart';
 import 'package:finvo/shared/services/exchange_rate_service.dart';
 
 part 'exchange_rate_provider.g.dart';
@@ -74,7 +75,8 @@ class ExchangeRate extends _$ExchangeRate {
     // Convert Base -> To
     // Amount(To) = Amount(Base) * Rate(Base->To)
     final Decimal amountInTarget = amountInBase * toRate;
+    final scale = Currency.fromCode(to)?.decimalDigits ?? 2;
 
-    return amountInTarget.round(scale: 2);
+    return amountInTarget.round(scale: scale);
   }
 }

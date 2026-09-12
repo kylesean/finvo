@@ -208,7 +208,7 @@ return $default(_that.status,_that.errorMessage);case _:
 
 class _VerificationState implements VerificationState {
   const _VerificationState({this.status = VerificationStatus.initial, this.errorMessage});
-
+  
 
 @override@JsonKey() final  VerificationStatus status;
 @override final  String? errorMessage;
