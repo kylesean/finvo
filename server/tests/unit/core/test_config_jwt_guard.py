@@ -26,6 +26,7 @@ def _make_settings(monkeypatch, app_env: str, jwt_secret: str) -> Settings:
     # in JWT-guard tests; the provider guard has its own tests below.
     monkeypatch.setenv("SMS_PROVIDER", "aliyun")
     monkeypatch.setenv("EMAIL_PROVIDER", "smtp")
+    monkeypatch.setenv("POSTGRES_PASSWORD", "strong_test_pw")
     return Settings()
 
 
@@ -118,10 +119,53 @@ def test_development_with_mock_providers_allowed(monkeypatch):
     assert settings.EMAIL_PROVIDER == "mock"
 
 
+def test_test_environment_with_mock_providers_allowed(monkeypatch):
+    """Automated test / CI environment also allows mock providers."""
+    monkeypatch.setenv("APP_ENV", "test")
+    monkeypatch.setenv("JWT_SECRET_KEY", _STRONG)
+    settings = Settings()
+    assert settings.SMS_PROVIDER == "mock"
+    assert settings.EMAIL_PROVIDER == "mock"
+    assert settings.is_test is True
+
+
 def test_registration_closed_by_default(monkeypatch):
     """Default-closed: open sign-ups on a public VPS burn the operator's LLM budget."""
     settings = _make_settings(monkeypatch, "development", _STRONG)
     assert settings.REGISTRATION_OPEN is False
+
+
+# ---------------------------------------------------------------------------
+# Deployment secrets fail-fast guard
+# ---------------------------------------------------------------------------
+
+
+def test_production_with_default_postgres_password_raises(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("JWT_SECRET_KEY", _STRONG)
+    monkeypatch.setenv("SMS_PROVIDER", "aliyun")
+    monkeypatch.setenv("EMAIL_PROVIDER", "smtp")
+    monkeypatch.setenv("POSTGRES_PASSWORD", "postgres")
+    with pytest.raises(RuntimeError, match="POSTGRES_PASSWORD"):
+        Settings()
+
+
+def test_staging_with_default_postgres_password_raises(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "staging")
+    monkeypatch.setenv("JWT_SECRET_KEY", _STRONG)
+    monkeypatch.setenv("SMS_PROVIDER", "aliyun")
+    monkeypatch.setenv("EMAIL_PROVIDER", "smtp")
+    monkeypatch.setenv("POSTGRES_PASSWORD", "postgres")
+    with pytest.raises(RuntimeError, match="POSTGRES_PASSWORD"):
+        Settings()
+
+
+def test_test_environment_with_default_postgres_password_allowed(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "test")
+    monkeypatch.setenv("JWT_SECRET_KEY", _STRONG)
+    monkeypatch.setenv("POSTGRES_PASSWORD", "postgres")
+    settings = Settings()
+    assert settings.POSTGRES_PASSWORD == "postgres"
 
 
 # ---------------------------------------------------------------------------
