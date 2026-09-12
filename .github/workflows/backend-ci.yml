@@ -236,7 +236,7 @@ jobs:
         env:
           DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/Finvo_test # pragma: allowlist secret
           JWT_SECRET_KEY: test-secret-key-for-ci # pragma: allowlist secret
-          ENVIRONMENT: test
+          APP_ENV: test
         run: uv run alembic upgrade head
 
       - name: Check model vs migration drift (alembic check)
@@ -246,7 +246,7 @@ jobs:
         env:
           DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/Finvo_test # pragma: allowlist secret
           JWT_SECRET_KEY: test-secret-key-for-ci # pragma: allowlist secret
-          ENVIRONMENT: test
+          APP_ENV: test
         run: uv run alembic check
 
       - name: Run tests with coverage
@@ -257,7 +257,7 @@ jobs:
           JWT_SECRET_KEY: test-secret-key-for-ci # pragma: allowlist secret
           ENCRYPTION_KEY: v3u8eA7-R5i_oX6DozID8lH_l6ApxfGqI8Xh-8o9mG4= # pragma: allowlist secret
           OPENAI_API_KEY: sk-test-key-for-ci # pragma: allowlist secret
-          ENVIRONMENT: test
+          APP_ENV: test
         run: |
           # Coverage gate: server/.coverage-baseline holds one number (the
           # floor %). Raise it by hand when main measures higher; never lower.

@@ -50,6 +50,7 @@ def setup_test_env(monkeypatch):
     """Setup test environment variables and core mocks."""
     # 1. Inject mandatory keys to prevent init errors
     monkeypatch.setenv("APP_ENV", "test")
+    monkeypatch.delenv("ENVIRONMENT", raising=False)
     if not os.environ.get("DATABASE_URL"):
         # Only a fallback: async_db_engine sets a real Postgres URL when present.
         monkeypatch.setenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")

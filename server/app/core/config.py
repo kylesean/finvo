@@ -16,7 +16,7 @@ from typing import Any, Literal
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Use stdlib logger here to avoid circular import with app.core.logging (which imports settings)
@@ -155,7 +155,10 @@ class Settings(BaseSettings):
     )
 
     # Environment
-    ENVIRONMENT: Environment = Field(default_factory=get_environment)
+    ENVIRONMENT: Environment = Field(
+        default_factory=get_environment,
+        validation_alias=AliasChoices("APP_ENV", "ENVIRONMENT"),
+    )
 
     # Application Settings
     PROJECT_NAME: str = "Finvo"
