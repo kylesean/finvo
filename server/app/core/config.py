@@ -54,14 +54,14 @@ class Environment(str, Enum):
     TEST = "test"
 
 
-# Determine environment
 def get_environment() -> Environment:
     """Get the current environment.
 
     Returns:
         Environment: The current environment (development, staging, production, or test)
     """
-    match os.getenv("APP_ENV", "development").lower():
+    raw_env = os.getenv("APP_ENV") or os.getenv("ENVIRONMENT") or "development"
+    match raw_env.lower():
         case "production" | "prod":
             return Environment.PRODUCTION
         case "staging" | "stage":
@@ -552,8 +552,8 @@ class Settings(BaseSettings):
         self._sanitize_proxy_env()
 
     def _validate_verification_providers(self) -> None:
-        """Refuse non-development boot with mock verification providers."""
-        if self.ENVIRONMENT == Environment.DEVELOPMENT:
+        """Refuse production/staging boot with mock verification providers."""
+        if self.ENVIRONMENT in (Environment.DEVELOPMENT, Environment.TEST):
             return
         mock_providers = [name for name in ("SMS_PROVIDER", "EMAIL_PROVIDER") if getattr(self, name) == "mock"]
         if mock_providers:
@@ -565,8 +565,8 @@ class Settings(BaseSettings):
             )
 
     def _validate_metrics_token(self) -> None:
-        """Refuse non-development boot with an open /metrics endpoint."""
-        if self.ENVIRONMENT == Environment.DEVELOPMENT:
+        """Refuse production/staging boot with an open /metrics endpoint."""
+        if self.ENVIRONMENT in (Environment.DEVELOPMENT, Environment.TEST):
             return
         if self.ENABLE_METRICS and not self.METRICS_TOKEN:
             raise RuntimeError(
@@ -576,8 +576,8 @@ class Settings(BaseSettings):
             )
 
     def _validate_deployment_secrets(self) -> None:
-        """Refuse non-development boot with shipped database credentials."""
-        if self.ENVIRONMENT == Environment.DEVELOPMENT:
+        """Refuse production/staging boot with shipped database credentials."""
+        if self.ENVIRONMENT in (Environment.DEVELOPMENT, Environment.TEST):
             return
         weak = []
         if self.POSTGRES_PASSWORD == "postgres":
@@ -662,6 +662,11 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         """Check if running in production environment."""
         return self.ENVIRONMENT == Environment.PRODUCTION
+
+    @property
+    def is_test(self) -> bool:
+        """Check if running in test environment."""
+        return self.ENVIRONMENT == Environment.TEST
 
 
 # Create settings instance
