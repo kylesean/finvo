@@ -8,6 +8,7 @@ import 'package:finvo/shared/models/financial_settings.dart';
 import 'package:finvo/shared/providers/exchange_rate_provider.dart';
 import 'package:finvo/shared/providers/financial_account_provider.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';
+import 'package:finvo/shared/services/financial_account_service.dart';
 
 void main() {
   group('FinancialAccountState', () {
@@ -256,6 +257,144 @@ void main() {
       },
     );
   });
+
+  group('FinancialAccountNotifier lifecycle and loading state', () {
+    late ProviderContainer container;
+    late _FakeFinancialAccountService fakeService;
+
+    setUp(() {
+      fakeService = _FakeFinancialAccountService();
+      container = ProviderContainer(
+        overrides: [
+          financialAccountServiceProvider.overrideWithValue(fakeService),
+          financialSettingsProvider.overrideWith(
+            () => _MockFinancialSettingsNotifier(
+              const FinancialSettingsState(primaryCurrency: 'CNY'),
+            ),
+          ),
+          exchangeRateProvider.overrideWith(
+            () => _TestExchangeRate(
+              const ExchangeRateResponse(
+                baseCode: 'CNY',
+                conversionRates: {'CNY': 1.0},
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+
+    tearDown(() {
+      container.dispose();
+    });
+
+    test(
+      'initial state is idle (isLoading: false, accounts: empty, lastUpdatedAt: null)',
+      () {
+        final state = container.read(financialAccountProvider);
+        expect(state.isLoading, isFalse);
+        expect(state.accounts, isEmpty);
+        expect(state.lastUpdatedAt, isNull);
+        expect(state.error, isNull);
+      },
+    );
+
+    test(
+      'loadFinancialAccounts sets accounts and lastUpdatedAt on success',
+      () async {
+        fakeService.accountsResponse = FinancialAccountResponse(
+          accounts: [
+            FinancialAccount(
+              id: '1',
+              name: 'Checking',
+              nature: FinancialNature.asset,
+              type: FinancialAccountType.deposit,
+              initialBalance: Decimal.fromInt(500),
+              currencyCode: 'CNY',
+              includeInNetWorth: true,
+            ),
+          ],
+          totalBalance: Decimal.fromInt(500),
+        );
+
+        final notifier = container.read(financialAccountProvider.notifier);
+        final future = notifier.loadFinancialAccounts();
+        expect(container.read(financialAccountProvider).isLoading, isTrue);
+
+        await future;
+
+        final state = container.read(financialAccountProvider);
+        expect(state.isLoading, isFalse);
+        expect(state.accounts.length, 1);
+        expect(state.lastUpdatedAt, isNotNull);
+        expect(state.error, isNull);
+      },
+    );
+
+    test(
+      'loadFinancialAccounts sets error on failure and resets isLoading',
+      () async {
+        fakeService.shouldThrow = true;
+        final notifier = container.read(financialAccountProvider.notifier);
+
+        await notifier.loadFinancialAccounts();
+
+        final state = container.read(financialAccountProvider);
+        expect(state.isLoading, isFalse);
+        expect(state.error, isNotNull);
+        expect(state.accounts, isEmpty);
+      },
+    );
+
+    test('ref.invalidate resets state to idle (not isLoading)', () async {
+      final notifier = container.read(financialAccountProvider.notifier);
+      fakeService.accountsResponse = FinancialAccountResponse(
+        accounts: [
+          FinancialAccount(
+            id: '1',
+            name: 'Checking',
+            nature: FinancialNature.asset,
+            type: FinancialAccountType.deposit,
+            initialBalance: Decimal.fromInt(500),
+            currencyCode: 'CNY',
+            includeInNetWorth: true,
+          ),
+        ],
+        totalBalance: Decimal.fromInt(500),
+      );
+      await notifier.loadFinancialAccounts();
+      expect(container.read(financialAccountProvider).accounts.length, 1);
+
+      // Invalidate provider
+      container.invalidate(financialAccountProvider);
+
+      final state = container.read(financialAccountProvider);
+      expect(state.isLoading, isFalse);
+      expect(state.accounts, isEmpty);
+      expect(state.lastUpdatedAt, isNull);
+      expect(state.error, isNull);
+    });
+  });
+}
+
+class _FakeFinancialAccountService implements FinancialAccountService {
+  FinancialAccountResponse accountsResponse = FinancialAccountResponse(
+    totalBalance: Decimal.zero,
+  );
+  bool shouldThrow = false;
+  int callCount = 0;
+
+  @override
+  Future<FinancialAccountResponse> getFinancialAccounts() async {
+    callCount++;
+    if (shouldThrow) {
+      throw Exception('Network error');
+    }
+    return accountsResponse;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _TestExchangeRate extends ExchangeRate {

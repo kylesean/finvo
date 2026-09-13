@@ -166,7 +166,7 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
       }
     });
 
-    return const FinancialAccountState(isLoading: true);
+    return const FinancialAccountState();
   }
 
   /// Load account data
@@ -192,7 +192,10 @@ class FinancialAccountNotifier extends _$FinancialAccountNotifier {
           );
           parsedDate = DateTime.now();
         }
+      } else {
+        parsedDate = DateTime.now();
       }
+      parsedDate ??= DateTime.now();
 
       if (!ref.mounted || !_loadGeneration.isCurrent(generation)) return;
 

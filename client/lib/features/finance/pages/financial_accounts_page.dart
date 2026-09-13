@@ -52,25 +52,34 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
   bool _hideAmounts = false;
 
   @override
-  void initState() {
-    super.initState();
-    // The provider build() is now side-effect free; load the account
-    // list explicitly after the first frame (matching the project-wide
-    // "explicit startup triggers, pure build" convention).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(
-        ref.read(financialAccountProvider.notifier).loadFinancialAccounts(),
-      );
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     ref.watch(localeProvider);
     final theme = context.theme;
     final colorScheme = theme.colors;
     final state = ref.watch(financialAccountProvider);
     final accounts = state.accounts;
+
+    // If state has never been loaded, is not currently loading, and is not in an
+    // error state, ensure accounts are loaded (e.g. cold start or entering this
+    // tab in IndexedStack after an invalidation).
+    if (state.lastUpdatedAt == null &&
+        !state.isLoading &&
+        state.error == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final current = ref.read(financialAccountProvider);
+          if (current.lastUpdatedAt == null &&
+              !current.isLoading &&
+              current.error == null) {
+            unawaited(
+              ref
+                  .read(financialAccountProvider.notifier)
+                  .loadFinancialAccounts(),
+            );
+          }
+        }
+      });
+    }
 
     // Get view currency from reactive derived provider
     final viewCurrency = ref.watch(effectiveViewCurrencyProvider);
@@ -161,7 +170,9 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
     bool ratesFailed,
   ) {
     // loading state
-    if (state.isLoading && accounts.isEmpty) {
+    if ((state.isLoading ||
+            (state.lastUpdatedAt == null && state.error == null)) &&
+        accounts.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 

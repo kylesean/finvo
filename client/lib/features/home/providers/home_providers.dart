@@ -72,7 +72,9 @@ Future<void> transactionEventSubscriber(Ref ref) async {
     ref.invalidate(totalExpenseProvider);
     final currentMonth = ref.read(currentDisplayMonthProvider);
     ref.invalidate(calendarMonthDataProvider(currentMonth));
-    ref.invalidate(financialAccountProvider);
+    unawaited(
+      ref.read(financialAccountProvider.notifier).loadFinancialAccounts(),
+    );
     ref.invalidate(budgetSummaryProvider);
   }
 }
