@@ -108,8 +108,10 @@ class SimpleLangChainAgent:
                 # Dynamic context runs LAST and appends at the tail of the
                 # system message, so the volatile date sits after the static
                 # sections (system.md, skills) and never busts the provider's
-                # prompt-cache prefix.
-                DynamicContextMiddleware(),
+                # prompt-cache prefix. It shares the timezone source of truth
+                # with analyze_spending (config → users.timezone → Asia/Shanghai)
+                # so the Monday the model computes is the Monday the tool uses.
+                DynamicContextMiddleware(get_session_context),
             ]
 
             logger.info(

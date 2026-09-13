@@ -19,9 +19,18 @@ Analyze past spending patterns and assess financial health.
 Call the typed `analyze_spending` tool (structured arguments — never via shell) to get a past spending breakdown.
 
 **Parameters**:
-- `start_date` / `end_date`: Date range (YYYY-MM-DD). For "current month" queries use the 1st of the month as start and today as end.
-- `days`: Fallback period if dates omitted (default: 90)
+- `start_date` / `end_date`: Date range (YYYY-MM-DD). ALWAYS pass explicit dates for this-week / this-month queries — never rely on the `days` fallback.
+- `days`: Fallback period ONLY when the user says "last N days" without a calendar anchor (default: 90)
 - `category`: Optional category key filter (e.g. "FOOD_DINING")
+
+### This Week — calendar week, NOT rolling 7 days
+
+1. Read `Current date: YYYY-MM-DD (Weekday) [timezone]` from Dynamic Context — it is already in the user's timezone.
+2. `start_date` = Monday of that week (weekday() Monday=0: `monday = today - timedelta(days=today.weekday())`), `end_date` = today. A Monday query is a 1-day window; a Sunday query is 7 days.
+3. Example: today is 2026-09-13 (Sunday) → `start_date="2026-09-07"`, `end_date="2026-09-13"`.
+4. Do NOT use `days=7` as a substitute — it means rolling 7 days and misattributes cross-week spending.
+5. Do NOT use `search_transactions` for week analysis — it returns a raw list (rolling 7-day default, max 50/page, no percentages/trends) and its card cannot render a breakdown.
+6. The tool compares against the previous equal-length period automatically and returns `trends.week_over_week` — surface its direction in your summary.
 
 **Result**: structured category/month/trend breakdown feeding the BudgetAnalysisCard.
 

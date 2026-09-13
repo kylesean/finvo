@@ -184,7 +184,7 @@ class BudgetAnalysisCard extends ConsumerWidget {
     Map<String, dynamic> trends,
     String currency,
   ) {
-    final momRaw = trends['month_over_month'];
+    final momRaw = trends['month_over_month'] ?? trends['week_over_week'];
     final mom = momRaw is Map ? Map<String, dynamic>.from(momRaw) : null;
     final changePercent = GenUiNumUtils.toDouble(mom?['change_percent']);
     final direction = mom?['direction']?.toString() ?? 'flat';

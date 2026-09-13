@@ -377,11 +377,13 @@ async def search_transactions(
     *,
     config: RunnableConfig,
 ) -> dict[str, Any]:
-    """Retrieve a raw list of transaction records. Best for finding specific orders or viewing history.
+    """DO NOT use this tool for analysis. Retrieve a raw list of transaction records. Best for finding specific orders or viewing history.
 
-    IMPORTANT: This tool ONLY lists transactions. For any "analysis", "spending breakdown",
-    "patterns", or "financial health", you MUST use the specialized skills in the catalog
-    (e.g., reviewing-finances for spending analysis and health scoring).
+    FORBIDDEN: any "analysis", "spending breakdown", "本周/本月消费", "patterns",
+    or "financial health" request — load the reviewing-finances skill and call
+    analyze_spending/analyze_cashflow instead. This tool has no category
+    percentages, trends or suggestions, and its output cannot render a
+    breakdown card.
 
     Defaults to last 7 days.
     """
