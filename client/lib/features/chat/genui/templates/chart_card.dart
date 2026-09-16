@@ -173,15 +173,19 @@ class ChartCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: colors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (title.isNotEmpty) ...[
-            Text(title, style: AppTextStyles.listTitle(theme)),
-            const SizedBox(height: 16),
+      child: Semantics(
+        container: true,
+        label: title.isNotEmpty ? '$title chart' : 'chart',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (title.isNotEmpty) ...[
+              Text(title, style: AppTextStyles.listTitle(theme)),
+              const SizedBox(height: 16),
+            ],
+            child,
           ],
-          child,
-        ],
+        ),
       ),
     );
   }

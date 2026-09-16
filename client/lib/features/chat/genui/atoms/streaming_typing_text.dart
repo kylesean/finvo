@@ -135,15 +135,17 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _controller,
-      child: Text(
-        '▌',
-        style: (widget.style ?? const TextStyle()).copyWith(
-          color: (widget.style?.color ?? context.theme.colors.primary)
-              .withValues(alpha: 0.8),
-          fontSize: widget.style?.fontSize,
-          fontWeight: FontWeight.bold,
+    return ExcludeSemantics(
+      child: FadeTransition(
+        opacity: _controller,
+        child: Text(
+          '▌',
+          style: (widget.style ?? const TextStyle()).copyWith(
+            color: (widget.style?.color ?? context.theme.colors.primary)
+                .withValues(alpha: 0.8),
+            fontSize: widget.style?.fontSize,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

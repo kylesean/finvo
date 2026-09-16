@@ -15,13 +15,12 @@ enum AppThemePalette {
   violet,
 }
 
-extension AppThemePaletteX on AppThemePalette {
+extension AppThemePaletteExtension on AppThemePalette {
   /// Machine-friendly identifier.
   String get key => name;
 
-  /// Localized-friendly display label.
+  /// Localized display label for the palette.
   String get label {
-    // Dynamic mapping via slang generated t object
     return switch (this) {
       AppThemePalette.zinc => t.appearance.palettes.zinc,
       AppThemePalette.slate => t.appearance.palettes.slate,
@@ -36,10 +35,11 @@ extension AppThemePaletteX on AppThemePalette {
   }
 
   /// Base Forui theme for the requested brightness.
-  FThemeData resolveBaseTheme(Brightness brightness) {
+  FThemeData resolveBaseTheme(Brightness brightness, {bool? isTouch}) {
     final isDark = brightness == Brightness.dark;
     final colors = _resolveColors(isDark);
-    return FThemeData(colors: colors, touch: false);
+    final touch = isTouch ?? false;
+    return FThemeData(colors: colors, touch: touch);
   }
 
   FColors _resolveColors(bool isDark) {
@@ -86,7 +86,7 @@ extension AppThemePaletteX on AppThemePalette {
         primary: isDark ? const Color(0xFFFEF08A) : const Color(0xFFCA8A04),
         primaryForeground: isDark
             ? const Color(0xFF713F12)
-            : const Color(0xFFFEFCE8),
+            : const Color(0xFF422006),
       ),
       AppThemePalette.violet => base.copyWith(
         primary: isDark ? const Color(0xFFDDD6FE) : const Color(0xFF7C3AED),

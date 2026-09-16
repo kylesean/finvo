@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forui/forui.dart';
+import 'package:finvo/i18n/strings.g.dart';
 
 import 'package:finvo/features/chat/providers/chat_input_provider.dart';
 import 'package:finvo/features/chat/widgets/media_upload_bottom_sheet.dart';
@@ -18,28 +19,36 @@ class MediaUploadButton extends ConsumerWidget {
     final theme = context.theme;
     final colors = theme.colors;
 
-    // Consistent styling with the right-side button
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        // Use same muted background color as right-side button
-        color: colors.muted,
-        shape: BoxShape.circle,
-        // No border
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: enabled
-              ? () => _handleUploadButtonPressed(context, ref)
-              : null,
-          borderRadius: BorderRadius.circular(20),
-          child: Center(
-            child: Icon(
-              FLucideIcons.plus,
-              size: 20,
-              color: enabled ? colors.foreground : colors.mutedForeground,
+    // Accessible touch target (48x48) wrapping the 40x40 circle button
+    return Semantics(
+      button: true,
+      label: t.media.addFiles,
+      enabled: enabled,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+        child: Center(
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colors.muted,
+              shape: BoxShape.circle,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: enabled
+                    ? () => _handleUploadButtonPressed(context, ref)
+                    : null,
+                borderRadius: BorderRadius.circular(20),
+                child: Center(
+                  child: Icon(
+                    FLucideIcons.plus,
+                    size: 20,
+                    color: enabled ? colors.foreground : colors.mutedForeground,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

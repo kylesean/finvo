@@ -58,7 +58,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     sharedSpaceBackground: Color(0xFFF3E8FF), // purple-50
     successAccent: Color(0xFF16A34A), // green-600
     successBackground: Color(0xFFF0FDF4), // green-50
-    warningAccent: Color(0xFFD97706), // amber-600
+    warningAccent: Color(0xFFB45309), // amber-700 (WCAG AA compliant >= 4.5:1)
     warningBackground: Color(0xFFFFFBEB), // amber-50
     shimmerBase: Color(0xFFE0E0E0), // grey[300]
     shimmerHighlight: Color(0xFFF5F5F5), // grey[100]

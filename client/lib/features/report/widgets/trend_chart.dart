@@ -77,90 +77,94 @@ class TrendChart extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          SizedBox(
-            height: 180,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: null,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: colors.border.withValues(alpha: 0.08),
-                    strokeWidth: 1,
-                  ),
-                ),
-                titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 24,
-                      // Calculate interval based on time range and data points
-                      interval: _calculateLabelInterval(
-                        trendData.dataPoints.length,
-                        trendData.timeRange,
-                      ),
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
-                        // Skip if out of bounds or fractional
-                        if (index < 0 ||
-                            index >= trendData.dataPoints.length ||
-                            value != index.toDouble()) {
-                          return const SizedBox();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            _formatLabel(
-                              trendData.dataPoints[index].label,
-                              trendData.timeRange,
-                            ),
-                            style: theme.typography.body.xs.copyWith(
-                              color: colors.mutedForeground,
-                              fontSize: 10,
-                            ),
-                          ),
-                        );
-                      },
+          Semantics(
+            container: true,
+            label:
+                '${chartType == ChartType.expense ? t.statistics.trend.expense : t.statistics.trend.income} ${t.statistics.trend.title}',
+            child: SizedBox(
+              height: 180,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: null,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: colors.border.withValues(alpha: 0.08),
+                      strokeWidth: 1,
                     ),
                   ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 24,
+                        // Calculate interval based on time range and data points
+                        interval: _calculateLabelInterval(
+                          trendData.dataPoints.length,
+                          trendData.timeRange,
+                        ),
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+                          // Skip if out of bounds or fractional
+                          if (index < 0 ||
+                              index >= trendData.dataPoints.length ||
+                              value != index.toDouble()) {
+                            return const SizedBox();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              _formatLabel(
+                                trendData.dataPoints[index].label,
+                                trendData.timeRange,
+                              ),
+                              style: theme.typography.body.xs.copyWith(
+                                color: colors.mutedForeground,
+                                fontSize: 10,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  _buildLineData(trendData.dataPoints, currentColor, colors),
-                ],
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (spot) => colors.primary,
-                    getTooltipItems: (touchedSpots) {
-                      final currencyCode = ref
-                          .read(financialSettingsProvider)
-                          .primaryCurrency;
-                      final currencySymbol = AmountFormatter.getCurrencySymbol(
-                        currencyCode,
-                      );
-                      return touchedSpots.map((spot) {
-                        final label = chartType == ChartType.expense
-                            ? t.statistics.trend.expense
-                            : t.statistics.trend.income;
-                        return LineTooltipItem(
-                          '$label: $currencySymbol${AmountFormatter.getNumberFormat(currencyCode, decimalDigits: 0).format(spot.y)}',
-                          theme.typography.body.xs.copyWith(
-                            color: colors.primaryForeground,
-                            fontWeight: AppFontConfig.headingBold,
-                          ),
-                        );
-                      }).toList();
-                    },
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    _buildLineData(trendData.dataPoints, currentColor, colors),
+                  ],
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipColor: (spot) => colors.primary,
+                      getTooltipItems: (touchedSpots) {
+                        final currencyCode = ref
+                            .read(financialSettingsProvider)
+                            .primaryCurrency;
+                        final currencySymbol =
+                            AmountFormatter.getCurrencySymbol(currencyCode);
+                        return touchedSpots.map((spot) {
+                          final label = chartType == ChartType.expense
+                              ? t.statistics.trend.expense
+                              : t.statistics.trend.income;
+                          return LineTooltipItem(
+                            '$label: $currencySymbol${AmountFormatter.getNumberFormat(currencyCode, decimalDigits: 0).format(spot.y)}',
+                            theme.typography.body.xs.copyWith(
+                              color: colors.primaryForeground,
+                              fontWeight: AppFontConfig.headingBold,
+                            ),
+                          );
+                        }).toList();
+                      },
+                    ),
                   ),
                 ),
               ),

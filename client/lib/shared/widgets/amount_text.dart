@@ -225,27 +225,32 @@ class AmountText extends ConsumerWidget {
       );
     }
 
-    // Build RichText parts
-    return Text.rich(
-      TextSpan(
-        style: effectiveStyle,
-        children: [
-          if (sign.isNotEmpty) TextSpan(text: sign),
-          TextSpan(
-            text: symbol,
-            style: shrinkCurrency
-                ? effectiveStyle.copyWith(
-                    fontSize: (effectiveStyle.fontSize ?? 14) * 0.65,
-                    color: effectiveStyle.color?.withValues(alpha: 0.5),
-                    fontWeight: FontWeight.w400,
-                  )
-                : null,
-          ),
-          if (dimDecimals && !compact)
-            ..._buildDimDecimalsSpans(formattedValue, effectiveStyle)
-          else
-            TextSpan(text: formattedValue),
-        ],
+    // Build RichText parts wrapped in accessible Semantics
+    final semanticLabel = '$sign$symbol$formattedValue';
+    return Semantics(
+      label: semanticLabel,
+      excludeSemantics: true,
+      child: Text.rich(
+        TextSpan(
+          style: effectiveStyle,
+          children: [
+            if (sign.isNotEmpty) TextSpan(text: sign),
+            TextSpan(
+              text: symbol,
+              style: shrinkCurrency
+                  ? effectiveStyle.copyWith(
+                      fontSize: (effectiveStyle.fontSize ?? 14) * 0.65,
+                      color: effectiveStyle.color?.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w400,
+                    )
+                  : null,
+            ),
+            if (dimDecimals && !compact)
+              ..._buildDimDecimalsSpans(formattedValue, effectiveStyle)
+            else
+              TextSpan(text: formattedValue),
+          ],
+        ),
       ),
     );
   }
@@ -266,7 +271,7 @@ class AmountText extends ConsumerWidget {
       TextSpan(
         text: decimalPart,
         style: style.copyWith(
-          color: style.color?.withValues(alpha: 0.5),
+          color: style.color?.withValues(alpha: 0.8),
           fontSize: (style.fontSize ?? 14) * 0.85,
         ),
       ),

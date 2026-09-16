@@ -247,41 +247,54 @@ class _AIChatPageState extends ConsumerState<AIChatPage> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: colors.background,
-        foregroundColor: colors.foreground,
-        leading: FButton.icon(
-          variant: .ghost,
-          onPress: _showSidebar,
-          child: const Icon(FLucideIcons.menu),
+        leading: Semantics(
+          button: true,
+          label: 'Menu',
+          child: FButton.icon(
+            variant: .ghost,
+            onPress: _showSidebar,
+            child: const Icon(FLucideIcons.menu),
+          ),
         ),
         // [REFACTORED] Use today's expense summary instead of dynamic conversation title
         // Finance Agent doesn't need chatbot-style title
-        title: GestureDetector(
-          onTap: _showSidebar,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  ref.watch(conversationExpenseTitleProvider),
-                  style: AppTextStyles.pageTitleLarge(theme),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        title: Semantics(
+          button: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _showSidebar,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    ref.watch(conversationExpenseTitleProvider),
+                    style: AppTextStyles.pageTitleLarge(theme),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         centerTitle: true,
         actions: [
-          FButton.icon(
-            variant: .ghost,
-            onPress: () {
-              unawaited(
-                ref.read(chatHistoryProvider.notifier).createNewConversation(),
-              );
-              context.goNamed(AppRouteNames.ai);
-            },
-            child: const Icon(FLucideIcons.plus),
+          Semantics(
+            button: true,
+            label: t.chat.newChat,
+            child: FButton.icon(
+              variant: .ghost,
+              onPress: () {
+                unawaited(
+                  ref
+                      .read(chatHistoryProvider.notifier)
+                      .createNewConversation(),
+                );
+                context.goNamed(AppRouteNames.ai);
+              },
+              child: const Icon(FLucideIcons.plus),
+            ),
           ),
         ],
       ),

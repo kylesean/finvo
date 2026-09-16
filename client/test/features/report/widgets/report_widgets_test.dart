@@ -13,6 +13,10 @@ import 'package:finvo/shared/models/financial_settings.dart';
 import 'package:finvo/shared/providers/financial_settings_provider.dart';
 import 'package:finvo/core/services/server_config_service.dart';
 import 'package:finvo/app/theme/app_semantic_colors.dart';
+import 'package:finvo/features/report/pages/report_page.dart';
+import 'package:finvo/features/report/providers/statistics_provider.dart';
+import 'package:finvo/features/report/widgets/top_transaction_card.dart';
+import 'package:finvo/features/report/widgets/premium_empty_state.dart';
 
 void main() {
   final periodStart = DateTime.utc(2026, 1, 1);
@@ -204,10 +208,138 @@ void main() {
       expect(find.byKey(const ValueKey('list')), findsOneWidget);
     });
   });
+
+  group('ReportPage layout padding', () {
+    testWidgets('renders cards with standard 16 dp horizontal margins', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final stateWithData = StatisticsState(
+        overview: overview,
+        trendData: trendData,
+        categoryBreakdown: breakdown,
+        topTransactions: TopTransactionsResponse(
+          items: [
+            TopTransactionItem(
+              id: 'tx-1',
+              description: 'Lunch',
+              amount: '100.00',
+              categoryKey: 'food',
+              categoryName: 'Food',
+              transactionAt: DateTime.utc(2026, 1, 1),
+              icon: 'restaurant',
+            ),
+          ],
+          sortBy: 'amount',
+          total: 1,
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(
+              _SharedPrefsHolder.instance,
+            ),
+            financialSettingsProvider.overrideWithValue(
+              const FinancialSettingsState(primaryCurrency: 'CNY'),
+            ),
+            statisticsProvider.overrideWith(
+              () => _FakeStatisticsNotifier(stateWithData),
+            ),
+          ],
+          child: MaterialApp(
+            builder: (context, child) {
+              final theme = FThemeData(
+                colors: FColors.neutralLight,
+                touch: false,
+              );
+              final extendedTheme = FThemeData(
+                colors: theme.colors,
+                touch: false,
+                typography: theme.typography,
+                extensions: [AppSemanticColors.light],
+              );
+              return FTheme(data: extendedTheme, child: child!);
+            },
+            home: const ReportPage(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(tester.getTopLeft(find.byType(OverviewCard)).dx, 16.0);
+      expect(tester.getTopLeft(find.byType(TrendChart)).dx, 16.0);
+      expect(tester.getTopLeft(find.byType(CategoryAnalysisSection)).dx, 16.0);
+      expect(tester.getTopLeft(find.byType(TopTransactionCard)).dx, 16.0);
+    });
+
+    testWidgets('renders empty state with standard 16 dp horizontal margins', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const stateNoData = StatisticsState();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(
+              _SharedPrefsHolder.instance,
+            ),
+            financialSettingsProvider.overrideWithValue(
+              const FinancialSettingsState(primaryCurrency: 'CNY'),
+            ),
+            statisticsProvider.overrideWith(
+              () => _FakeStatisticsNotifier(stateNoData),
+            ),
+          ],
+          child: MaterialApp(
+            builder: (context, child) {
+              final theme = FThemeData(
+                colors: FColors.neutralLight,
+                touch: false,
+              );
+              final extendedTheme = FThemeData(
+                colors: theme.colors,
+                touch: false,
+                typography: theme.typography,
+                extensions: [AppSemanticColors.light],
+              );
+              return FTheme(data: extendedTheme, child: child!);
+            },
+            home: const ReportPage(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(tester.getTopLeft(find.byType(PremiumEmptyState)).dx, 16.0);
+    });
+  });
 }
 
 /// Holds the shared prefs instance so the amount-theme provider (which reads
 /// `sharedPreferencesProvider`) can resolve without hitting real storage.
 class _SharedPrefsHolder {
   static late SharedPreferences instance;
+}
+
+class _FakeStatisticsNotifier extends Statistics {
+  final StatisticsState _initial;
+  _FakeStatisticsNotifier(this._initial);
+
+  @override
+  StatisticsState build() => _initial;
+
+  @override
+  Future<void> loadStatistics() async {}
 }

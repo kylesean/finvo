@@ -10,15 +10,17 @@ class ForuiThemeConfig {
   static FThemeData resolve({
     required AppThemePalette palette,
     required Brightness brightness,
+    bool? isTouch,
   }) {
-    final baseTheme = palette.resolveBaseTheme(brightness);
+    final touch = isTouch ?? false;
+    final baseTheme = palette.resolveBaseTheme(brightness, isTouch: touch);
     final typography = _createGlobalTypography(
       baseTypography: baseTheme.typography,
     );
 
     return FThemeData(
       colors: baseTheme.colors,
-      touch: false,
+      touch: touch,
       typography: typography,
       extensions: [
         brightness == Brightness.dark

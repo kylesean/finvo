@@ -123,7 +123,7 @@ class AmountTheme {
   /// Orange: Income (warm tone)
   static const colorBlindFriendly = AmountTheme(
     expenseColor: Color(0xFF2563EB), // blue-600
-    incomeColor: Color(0xFFEA580C), // orange-600
+    incomeColor: Color(0xFFC2410C), // orange-700 (WCAG AA compliant >= 4.5:1)
     transferColor: Color(0xFF6B7280), // gray-500
     neutralColor: Color(0xFF1F2937), // gray-800
     darkExpenseColor: Color(0xFF60A5FA), // blue-400

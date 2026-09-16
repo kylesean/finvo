@@ -38,6 +38,10 @@ class HomePage extends ConsumerWidget {
     ref.watch(localeProvider);
     final theme = context.theme;
 
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final expandedHeaderHeight =
+        250.0 + (topPadding > 24.0 ? topPadding - 24.0 : 0.0);
+
     // Add scroll listener to trigger load more
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
@@ -79,7 +83,7 @@ class HomePage extends ConsumerWidget {
                 slivers: [
                   // Header - SliverAppBar (black)
                   SliverAppBar(
-                    expandedHeight: 250.0,
+                    expandedHeight: expandedHeaderHeight,
                     floating: false,
                     pinned: false,
                     backgroundColor: theme.colors.primary,
@@ -201,12 +205,16 @@ class _FixedTabBar extends ConsumerWidget {
             return Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: FButton(
-                  mainAxisSize: MainAxisSize.min,
-                  onPress: () {}, // Empty function to keep button enabled
-                  child: Text(
-                    _labelFor(type),
-                    style: AppTextStyles.tabSelected(theme),
+                child: Semantics(
+                  button: true,
+                  selected: true,
+                  child: FButton(
+                    mainAxisSize: MainAxisSize.min,
+                    onPress: () {}, // Empty function to keep button enabled
+                    child: Text(
+                      _labelFor(type),
+                      style: AppTextStyles.tabSelected(theme),
+                    ),
                   ),
                 ),
               ),
@@ -215,17 +223,21 @@ class _FixedTabBar extends ConsumerWidget {
             return Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: FButton(
-                  variant: .outline,
-                  mainAxisSize: MainAxisSize.min,
-                  onPress: () {
-                    ref
-                        .read(currentTransactionFeedTypeProvider.notifier)
-                        .set(type);
-                  },
-                  child: Text(
-                    _labelFor(type),
-                    style: AppTextStyles.tabUnselected(theme),
+                child: Semantics(
+                  button: true,
+                  selected: false,
+                  child: FButton(
+                    variant: .outline,
+                    mainAxisSize: MainAxisSize.min,
+                    onPress: () {
+                      ref
+                          .read(currentTransactionFeedTypeProvider.notifier)
+                          .set(type);
+                    },
+                    child: Text(
+                      _labelFor(type),
+                      style: AppTextStyles.tabUnselected(theme),
+                    ),
                   ),
                 ),
               ),
@@ -356,6 +368,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                               button: true,
                               child: FButton.icon(
                                 variant: .ghost,
+                                size: .sm,
                                 onPress: () {
                                   setState(() {
                                     _isAmountVisible = !_isAmountVisible;
@@ -388,7 +401,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                                     : t.home.amountHidden,
                                 style: AppTextStyles.statValueOnDark(theme),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               Row(
                                 children: [
                                   _QuickStatItem(
@@ -425,7 +438,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                           ),
                         ),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         // Yearly remaining time (Countdown) progress bar with sense of urgency
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -501,7 +514,7 @@ class _WelcomeHeaderState extends ConsumerState<_WelcomeHeader> {
                           ],
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 14),
                       ],
                     ),
                   ),
@@ -537,16 +550,18 @@ class _QuickStatItem extends StatelessWidget {
       currencyCode: currency,
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppTextStyles.statLabelOnDarkSecondary(theme)),
-        const SizedBox(height: 2),
-        Text(
-          isVisible ? displayString : '••••',
-          style: AppTextStyles.statValueOnDarkSecondary(theme),
-        ),
-      ],
+    return MergeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: AppTextStyles.statLabelOnDarkSecondary(theme)),
+          const SizedBox(height: 2),
+          Text(
+            isVisible ? displayString : '••••',
+            style: AppTextStyles.statValueOnDarkSecondary(theme),
+          ),
+        ],
+      ),
     );
   }
 }

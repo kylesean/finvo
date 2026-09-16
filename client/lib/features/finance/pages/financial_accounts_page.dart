@@ -371,18 +371,22 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
             ),
           ),
           const SizedBox(width: 8),
-          // Expose the retry link as a button (and give it a
-          // screen-reader-visible role; the text serves as the label).
           Semantics(
             button: true,
+            label: t.common.retry,
             child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () => ref.invalidate(exchangeRateProvider),
-              child: Text(
-                t.common.retry,
-                style: theme.typography.body.xs.copyWith(
-                  color: colors.destructive,
-                  fontWeight: FontWeight.w600,
-                  decoration: TextDecoration.underline,
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                alignment: Alignment.center,
+                child: Text(
+                  t.common.retry,
+                  style: theme.typography.body.xs.copyWith(
+                    color: colors.destructive,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
             ),
@@ -470,54 +474,85 @@ class _FinancialAccountsPageState extends ConsumerState<FinancialAccountsPage> {
               ),
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => setState(() => _hideAmounts = !_hideAmounts),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: colors.primaryForeground.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        _hideAmounts ? FLucideIcons.eyeOff : FLucideIcons.eye,
-                        size: 16,
-                        color: colors.primaryForeground.withValues(alpha: 0.7),
+                  Semantics(
+                    button: true,
+                    label: _hideAmounts
+                        ? t.common.semShowAmounts
+                        : t.common.semHideAmounts,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => setState(() => _hideAmounts = !_hideAmounts),
+                      child: Container(
+                        constraints: const BoxConstraints(
+                          minWidth: 48,
+                          minHeight: 48,
+                        ),
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: colors.primaryForeground.withValues(
+                              alpha: 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            _hideAmounts
+                                ? FLucideIcons.eyeOff
+                                : FLucideIcons.eye,
+                            size: 16,
+                            color: colors.primaryForeground.withValues(
+                              alpha: 0.7,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: _showCurrencyPicker,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.primaryForeground.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: colors.primaryForeground.withValues(
-                            alpha: 0.2,
+                  Semantics(
+                    button: true,
+                    label: viewCurrency,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _showCurrencyPicker,
+                      child: Container(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
                           ),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            viewCurrency,
-                            style: AppTextStyles.statLabelOnDark(theme),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            FLucideIcons.repeat,
-                            size: 11,
+                          decoration: BoxDecoration(
                             color: colors.primaryForeground.withValues(
-                              alpha: 0.8,
+                              alpha: 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: colors.primaryForeground.withValues(
+                                alpha: 0.2,
+                              ),
                             ),
                           ),
-                        ],
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                viewCurrency,
+                                style: AppTextStyles.statLabelOnDark(theme),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                FLucideIcons.repeat,
+                                size: 11,
+                                color: colors.primaryForeground.withValues(
+                                  alpha: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),

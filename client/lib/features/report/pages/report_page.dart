@@ -177,7 +177,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     StatisticsState state,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: TimeRange.values.map((timeRange) {
           final isSelected = state.timeRange == timeRange;
@@ -269,48 +269,50 @@ class _ReportPageState extends ConsumerState<ReportPage> {
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          _box(const SizedBox(height: 8)),
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
           // Date range display (custom mode only)
           if (state.timeRange == TimeRange.custom &&
               state.dateRangeDisplayText != null) ...[
-            SliverToBoxAdapter(
-              child: FadeInDown(
+            _box(
+              FadeInDown(
                 duration: const Duration(milliseconds: 400),
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        FLucideIcons.calendar,
-                        size: 14,
-                        color: colors.primary,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        state.dateRangeDisplayText!,
-                        style: AppTextStyles.actionText(theme),
-                      ),
-                    ],
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          FLucideIcons.calendar,
+                          size: 14,
+                          color: colors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          state.dateRangeDisplayText!,
+                          style: AppTextStyles.actionText(theme),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-            _box(const SizedBox(height: 16)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
           ],
 
           if (hasNoData) ...[
-            SliverToBoxAdapter(
-              child: FadeInUp(
+            _box(
+              FadeInUp(
                 duration: const Duration(milliseconds: 600),
                 child: PremiumEmptyState(
                   onAddTransaction: () {
@@ -322,20 +324,20 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           ] else ...[
             // Overview card
             if (state.overview != null) ...[
-              SliverToBoxAdapter(
-                child: FadeInUp(
+              _box(
+                FadeInUp(
                   duration: const Duration(milliseconds: 500),
                   delay: const Duration(milliseconds: 200),
                   child: OverviewCard(overview: state.overview!),
                 ),
               ),
-              _box(const SizedBox(height: 24)),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
 
             // Trend chart
             if (state.trendData != null) ...[
-              SliverToBoxAdapter(
-                child: FadeInUp(
+              _box(
+                FadeInUp(
                   duration: const Duration(milliseconds: 500),
                   delay: const Duration(milliseconds: 300),
                   child: TrendChart(
@@ -351,14 +353,14 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                   ),
                 ),
               ),
-              _box(const SizedBox(height: 24)),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
 
             // Category Analysis (unified multi-view section)
             if (state.categoryBreakdown != null &&
                 state.categoryBreakdown!.items.isNotEmpty) ...[
-              SliverToBoxAdapter(
-                child: FadeInUp(
+              _box(
+                FadeInUp(
                   duration: const Duration(milliseconds: 500),
                   delay: const Duration(milliseconds: 400),
                   child: CategoryAnalysisSection(
@@ -367,7 +369,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                   ),
                 ),
               ),
-              _box(const SizedBox(height: 24)),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
 
             // Top transactions: header + lazy SliverList
@@ -378,7 +380,9 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           ],
 
           // Bottom padding
-          _box(SizedBox(height: MediaQuery.of(context).padding.bottom + 32)),
+          SliverToBoxAdapter(
+            child: SizedBox(height: MediaQuery.of(context).padding.bottom + 32),
+          ),
         ],
       ),
     );
@@ -406,8 +410,8 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     final showLoadingRow = hasMore || state.isLoadingMoreTopTransactions;
 
     return [
-      SliverToBoxAdapter(
-        child: Column(
+      _box(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -443,41 +447,44 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           ],
         ),
       ),
-      SliverList.separated(
-        itemBuilder: (context, index) {
-          if (index < transactions.length) {
-            return TopTransactionCard(
-              transaction: transactions[index],
-              onTap: () {
-                unawaited(
-                  context.pushNamed(
-                    AppRouteNames.transactionDetail,
-                    pathParameters: {'transactionId': transactions[index].id},
-                  ),
-                );
-              },
-            );
-          }
-          // Trailing row: load-more spinner (hasMore) or end spacing.
-          if (state.isLoadingMoreTopTransactions) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: colors.primary,
+      SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        sliver: SliverList.separated(
+          itemBuilder: (context, index) {
+            if (index < transactions.length) {
+              return TopTransactionCard(
+                transaction: transactions[index],
+                onTap: () {
+                  unawaited(
+                    context.pushNamed(
+                      AppRouteNames.transactionDetail,
+                      pathParameters: {'transactionId': transactions[index].id},
+                    ),
+                  );
+                },
+              );
+            }
+            // Trailing row: load-more spinner (hasMore) or end spacing.
+            if (state.isLoadingMoreTopTransactions) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.primary,
+                    ),
                   ),
                 ),
-              ),
-            );
-          }
-          return const SizedBox(height: 40);
-        },
-        separatorBuilder: (context, index) => const SizedBox(height: 8),
-        itemCount: transactions.length + (showLoadingRow ? 1 : 0),
+              );
+            }
+            return const SizedBox(height: 40);
+          },
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          itemCount: transactions.length + (showLoadingRow ? 1 : 0),
+        ),
       ),
       if (!hasMore && transactions.isNotEmpty)
         SliverToBoxAdapter(
