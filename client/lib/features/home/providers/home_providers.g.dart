@@ -222,7 +222,7 @@ final class TransactionEventSubscriberProvider
 }
 
 String _$transactionEventSubscriberHash() =>
-    r'9176ee5a5d46c2f954b6e93ea2f4739b16c1d628';
+    r'49eb6c91bf80b406ce810e62fd27b9f310711f19';
 
 @ProviderFor(totalExpense)
 final totalExpenseProvider = TotalExpenseProvider._();
