@@ -30,6 +30,8 @@ Thumbs.db
 .vscode/
 .idea/
 .trae/
+.cursor/
+.mcp.json
 *.swp
 *.swo
 .history
