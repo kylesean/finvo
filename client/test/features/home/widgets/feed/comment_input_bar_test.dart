@@ -95,7 +95,8 @@ void main() {
 
       await tester.enterText(find.byType(FTextField), 'will fail');
       await tester.tap(find.byIcon(FLucideIcons.send));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
 
       // The safe AppException message is shown (never the raw exception text).
       expect(find.text('发送失败'), findsOneWidget);
@@ -109,10 +110,5 @@ void main() {
         'will fail',
       );
     },
-    // Flutter 3.47 enables semantics in widget tests by default and the
-    // toast-overlay + text-field composition trips a framework-internal merge
-    // assertion (node.isMergedIntoParent in SemanticsNode.getSemanticsData)
-    // that cannot be suppressed from test code. Re-enable once fixed upstream.
-    skip: true,
   );
 }

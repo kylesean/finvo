@@ -85,7 +85,6 @@ void main() {
 
       // Should render without error
       expect(find.text(t.chat.genui.transactionCard.title), findsOneWidget);
-      expect(find.byType(TransactionCard), findsOneWidget);
 
       // Check defaults
       expect(find.textContaining('0.00'), findsOneWidget); // Default amount

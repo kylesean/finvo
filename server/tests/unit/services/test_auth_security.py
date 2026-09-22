@@ -199,19 +199,6 @@ class TestPasswordPolicy:
     def test_strong_password_accepted(self) -> None:
         assert self._check("Str0ngPass!9") is None
 
-    @pytest.mark.skip(
-        reason=(
-            "Timing-attack resistance is an implicit property of bcrypt's "
-            "constant-time comparepw; a flaky wall-clock threshold test adds "
-            "little value for a self-hosted app and tends to be CI-noisy. "
-            "bcrypt's design already guarantees this."
-        )
-    )
-    @pytest.mark.asyncio
-    async def test_timing_attack_resistance(self) -> None:
-        """Login timing doesn't reveal user existence (bcrypt constant-time)."""
-        pass
-
 
 class TestVerificationCodeSecurity:
     """Tests for verification code security.
@@ -395,20 +382,6 @@ class TestAccountEnumeration:
                 await service.login("email", email, "WrongPass1!", "Asia/Shanghai")
             assert exc.value.error_code == AuthErrorCode.AUTHENTICATE_FAILED
             assert exc.value.message == "Invalid credentials"
-
-        # Both failure modes produce the same code+message — no enumeration leak.
-        assert AuthErrorCode.AUTHENTICATE_FAILED == AuthErrorCode.AUTHENTICATE_FAILED
-
-    @pytest.mark.skip(
-        reason=(
-            "No password-reset endpoint exists; self-hosted app manages "
-            "credentials directly in the DB. Re-enable if a reset flow is added."
-        )
-    )
-    @pytest.mark.asyncio
-    async def test_password_reset_no_user_leak(self) -> None:
-        """Password reset doesn't reveal user existence (no reset endpoint)."""
-        pass
 
 
 class TestLoginLockout:

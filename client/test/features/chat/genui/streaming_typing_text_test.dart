@@ -11,7 +11,8 @@ void main() {
         ),
       );
 
-      expect(find.byType(StreamingTypingText), findsOneWidget);
+      final richText = tester.widget<RichText>(find.byType(RichText));
+      expect(richText.text.toPlainText(), isEmpty);
     });
 
     testWidgets('types text incrementally over time', (tester) async {

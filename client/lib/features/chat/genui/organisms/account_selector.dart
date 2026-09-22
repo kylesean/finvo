@@ -293,13 +293,15 @@ class _AccountSelectorState extends ConsumerState<AccountSelector> {
       suffixBuilder: (context, style, child) => _searchQuery.isNotEmpty
           ? Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: FButton.icon(
-                variant: .ghost,
-                onPress: () => _searchController.clear(),
-                child: Icon(
-                  FLucideIcons.x,
-                  color: colors.mutedForeground,
-                  size: 18,
+              child: ExcludeSemantics(
+                child: FButton.icon(
+                  variant: .ghost,
+                  onPress: () => _searchController.clear(),
+                  child: Icon(
+                    FLucideIcons.x,
+                    color: colors.mutedForeground,
+                    size: 18,
+                  ),
                 ),
               ),
             )

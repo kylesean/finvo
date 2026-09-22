@@ -112,11 +112,6 @@ void main() {
       await tester.pump();
       expect(find.text(t.common.noData), findsOneWidget);
     },
-    // Flutter 3.47 enables semantics in widget tests by default and the
-    // search-field dropdown trips a framework-internal merge assertion
-    // (node.isMergedIntoParent in SemanticsNode.getSemanticsData) that
-    // survives every test-side opt-out. Skipped until fixed upstream.
-    skip: true,
   );
 
   testWidgets('historical mode hides search and disables selection', (
